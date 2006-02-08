@@ -48,7 +48,7 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.io.IOException;
 import edu.rice.cs.drjava.model.FileMovedException;
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 
 /**
  * This state pattern is used by the global model to store any information 
@@ -91,6 +91,15 @@ public interface FileGroupingState {
   
   /** Sets the current built directory. */
   public void setBuildDirectory(File f);
+  
+  /** Returns the effective working directory. */
+  public File getWorkingDirectory();
+  
+   /** Returns the value of the WORKING_DIRECTORY property (which may be null or FileOption.NULL_FILE). */
+  public File getRawWorkingDirectory();
+  
+  /** Sets the current working directory. */
+  public void setWorkingDirectory(File f);
   
   /** Returns the source file that has the main method of the project
    *  @return null if no build directory is specified
@@ -135,11 +144,11 @@ public interface FileGroupingState {
    * Returns a collection of classpath entries specific to the current project.
    * @return the project's extra classpath
    */
-  public ClasspathVector getExtraClasspath();
+  public ClassPathVector getExtraClassPath();
   
   /**
    * Sets the list of project-specific classpath entries.
    */
-  public void setExtraClasspath(ClasspathVector cp);
+  public void setExtraClassPath(ClassPathVector cp);
   
 }

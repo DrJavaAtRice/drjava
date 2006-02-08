@@ -60,10 +60,10 @@ public class DrJavaTestSuiteLoader implements TestSuiteLoader, OptionConstants {
   
   public DrJavaTestSuiteLoader(JUnitModelCallback jmc) {
     _jmc = jmc;
-    String classpath = _jmc.getClasspath().toString();
-    classpath += System.getProperty("path.separator");
-    classpath += System.getProperty("java.class.path");
-    _loader = new DrJavaTestCaseClassLoader(classpath);
+    String classPath = _jmc.getClassPath().toString();
+    classPath += System.getProperty("path.separator");
+    classPath += System.getProperty("java.class.path");
+    _loader = new DrJavaTestCaseClassLoader(classPath);
   }
 
   public Class<?> load(String className) throws ClassNotFoundException {

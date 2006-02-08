@@ -45,6 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
+import edu.rice.cs.drjava.config.FileOption;
+
 import junit.framework.*;
 import java.io.*;
 
@@ -63,8 +65,7 @@ public class ExecJVMTest extends TestCase {
     // Run new JVM to create the file
     String className = getClass().getName() + "$FileCreator";
     String tempName = tempFile.getAbsolutePath();
-    Process jvm = ExecJVM.runJVMPropagateClassPath(className,
-                                                   new String[] { tempName });
+    Process jvm = ExecJVM.runJVMPropagateClassPath(className, new String[] { tempName }, FileOption.NULL_FILE);
 
     int result = jvm.waitFor();
 

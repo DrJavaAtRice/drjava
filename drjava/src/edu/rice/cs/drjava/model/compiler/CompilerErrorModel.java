@@ -42,8 +42,9 @@ import java.util.LinkedList;
 import java.util.HashMap;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.drjava.model.FileGroupingState;
-import edu.rice.cs.drjava.model.IGetDocuments;
+import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
@@ -95,13 +96,13 @@ public class CompilerErrorModel {
   private final HashMap<File, StartAndEndIndex> _filesToIndexes = new HashMap<File, StartAndEndIndex>();
 
   /** The global model which created/controls this object. */
-  private final IGetDocuments _model;
+  private final GlobalModel _model;
 
   /** Constructs an empty CompilerErrorModel.
    *  @param empty the empty array of T
    */
   public CompilerErrorModel() {
-    _model = new IGetDocuments() {
+    _model = new DummyGlobalModel() {
       public OpenDefinitionsDocument getDocumentForFile(File file) {
         throw new IllegalStateException("No documents to get!");
       }
@@ -111,7 +112,6 @@ public class CompilerErrorModel {
       }
       public boolean hasModifiedDocuments() { return false; }
       public boolean hasUntitledDocuments() { return false; }
-      public FileGroupingState getFileGroupingState() { throw new IllegalStateException("No state to get!"); }
     };
     _errors = new CompilerError[0];
     _numErrors = 0;
@@ -124,7 +124,7 @@ public class CompilerErrorModel {
    *  @param errors the list of CompilerError's (or a subclass).
    *  @param model is the model to find documents from
    */
-  public CompilerErrorModel(CompilerError[] errors, IGetDocuments model) {
+  public CompilerErrorModel(CompilerError[] errors, GlobalModel model) {
     _model = model;
 
     // TODO: If we move to NextGen-style generics, ensure _errors is non-null.

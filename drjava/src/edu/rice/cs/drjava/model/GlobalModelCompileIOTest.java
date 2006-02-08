@@ -133,8 +133,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
 
     // Rename to a different file
     doc.saveFileAs(new FileSelector(file2));
-    assertTrue("should not be in sync after renaming",
-               !doc.checkIfClassFileInSync());
+    assertTrue("should not be in sync after renaming", ! doc.checkIfClassFileInSync());
   }
 
   /** Tests a compile after a file has unexpectedly been moved or delete. */

@@ -49,7 +49,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
-import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
+import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import edu.rice.cs.util.swing.Utilities;
 
 import junit.framework.*;
@@ -66,7 +66,7 @@ public final class JavaInterpreterTest extends TestCase {
    * The setup method run before each test.
    */
   protected void setUp() {
-    _interpreter = new DynamicJavaAdapter(new ClasspathManager());
+    _interpreter = new DynamicJavaAdapter(new ClassPathManager());
     testValue = false;
   }
 

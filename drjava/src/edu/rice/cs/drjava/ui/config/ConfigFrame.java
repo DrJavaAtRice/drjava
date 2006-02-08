@@ -60,14 +60,14 @@ import javax.swing.tree.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
 import edu.rice.cs.util.swing.DirectoryChooser;
 
-/**
- * The frame for setting Configuration options on the fly
- * @version $Id$
+/** The frame for setting Configuration options on the fly
+ *  @version $Id$
  */
 public class ConfigFrame extends JFrame {
 
@@ -102,7 +102,7 @@ public class ConfigFrame extends JFrame {
     _fileOptionChooser.setDialogTitle("Select");
     _fileOptionChooser.setApproveButtonText("Select");
     _fileOptionChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-    _fileOptionChooser.setFileFilter(ClasspathFilter.ONLY);
+    _fileOptionChooser.setFileFilter(ClassPathFilter.ONLY);
 
     _browserChooser = new JFileChooser(workDir);
     _browserChooser.setDialogTitle("Select Web Browser");
@@ -288,21 +288,16 @@ public class ConfigFrame extends JFrame {
     return successful;
   }
 
-  /**
-   * Sets the given ConfigPanel as the visible panel.
-   */
+  /** Sets the given ConfigPanel as the visible panel. */
   private void _displayPanel(ConfigPanel cf) {
 
     _mainPanel.removeAll();
     _mainPanel.add(cf, BorderLayout.CENTER);
     _mainPanel.revalidate();
     _mainPanel.repaint();
-
   }
 
-  /**
-   * Creates the JTree to display preferences categories.
-   */
+  /** Creates the JTree to display preferences categories. */
   private void _createTree() {
 
     _rootNode = new PanelTreeNode("Preferences");
@@ -318,7 +313,6 @@ public class ConfigFrame extends JFrame {
     dtcr.setOpenIcon(null);
     dtcr.setClosedIcon(null);
     _tree.setCellRenderer(dtcr);
-
   }
 
   /**
@@ -432,21 +426,21 @@ public class ConfigFrame extends JFrame {
                               "Tools.jar Location", this,
                               "Optional location of the JDK's tools.jar, which contains the compiler and debugger.",
                               _fileOptionChooser);
-    javacLoc.setFileFilter(ClasspathFilter.ONLY);
+    javacLoc.setFileFilter(ClassPathFilter.ONLY);
     panel.addComponent(javacLoc);
     FileOptionComponent jsr14Loc =
       new FileOptionComponent(OptionConstants.JSR14_LOCATION,
                               "JSR-14 Location", this,
                               "Optional location of the JSR-14 compiler, for compiling with generics.",
                               _fileOptionChooser);
-    jsr14Loc.setFileFilter(ClasspathFilter.ONLY);
+    jsr14Loc.setFileFilter(ClassPathFilter.ONLY);
     panel.addComponent(jsr14Loc);
     FileOptionComponent jsr14Col =
       new FileOptionComponent(OptionConstants.JSR14_COLLECTIONSPATH,
                               "JSR-14 Collections Path", this,
                               "Optional location of the JSR-14 collect.jar file, which contains the collection classes.",
                               _fileOptionChooser);
-    jsr14Col.setFileFilter(ClasspathFilter.ONLY);
+    jsr14Col.setFileFilter(ClassPathFilter.ONLY);
     panel.addComponent(jsr14Col);
 //    VectorClassnameOptionComponent extraCompilers =
 //      new VectorClassnameOptionComponent(OptionConstants.EXTRA_COMPILERS, "Custom Compilers", this,
@@ -750,9 +744,7 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
 
-  /**
-   *  Adds all of the components for the Miscellaneous panel of the preferences window.
-   */
+  /** Adds all of the components for the Miscellaneous panel of the preferences window. */
   private void _setupMiscPanel(ConfigPanel panel) {
     panel.addComponent(new IntegerOptionComponent(OptionConstants.INDENT_LEVEL,
                                                   "Indent Level", this,

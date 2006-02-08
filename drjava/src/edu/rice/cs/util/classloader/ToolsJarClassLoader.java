@@ -109,16 +109,16 @@ public class ToolsJarClassLoader extends URLClassLoader {
    * Returns a string containing all possible tools.jar locations,
    * separated by the system's path separator.
    */
-  public static String getToolsJarClasspath() {
+  public static String getToolsJarClassPath() {
     File[] files = getToolsJarFiles();
-    StringBuffer classpath = new StringBuffer();
+    StringBuffer classPath = new StringBuffer();
     String pathSep = System.getProperty("path.separator");
 
     for (int i=0; i < files.length; i++) {
-      if (i > 0) classpath.append(pathSep);
-      classpath.append(files[i].getAbsolutePath());
+      if (i > 0) classPath.append(pathSep);
+      classPath.append(files[i].getAbsolutePath());
     }
-    return classpath.toString();
+    return classPath.toString();
   }
 
   /** Returns a guess for the location of tools.jar based on the default

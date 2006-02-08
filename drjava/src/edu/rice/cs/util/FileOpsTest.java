@@ -50,6 +50,7 @@ import java.io.*;
 
 import java.util.LinkedList;
 
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.FileOps;
 
@@ -290,7 +291,7 @@ public class FileOpsTest extends TestCase {
     String className = "edu.rice.cs.util.FileOpsTest";
     String[] args = new String[] { dir1.getAbsolutePath() };
 
-    Process process = ExecJVM.runJVMPropagateClassPath(className, args);
+    Process process = ExecJVM.runJVMPropagateClassPath(className, args, FileOption.NULL_FILE);
     int status = process.waitFor();
     assertEquals("Delete on exit test exited with an error!", 0, status);
 

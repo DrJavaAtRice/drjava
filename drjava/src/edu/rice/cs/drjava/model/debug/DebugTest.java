@@ -112,7 +112,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
         // Don't notify: happens in the same thread
         interpreterResettingCount++;
       }
-      public void interpreterReady() {
+      public void interpreterReady(File wd) {
         synchronized(_notifierLock) {
           interpreterReadyCount++;
           if (printEvents) System.out.println("interpreterReady " + interpreterReadyCount);
@@ -126,7 +126,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     };
     _model.addListener(resetListener);
     synchronized(_notifierLock) {
-      _model.resetInteractions();
+      _model.resetInteractions(FileOption.NULL_FILE);
       _setPendingNotifies(2);  // shutdown, interpreterReady
       while (_pendingNotifies > 0) _notifierLock.wait();
     }

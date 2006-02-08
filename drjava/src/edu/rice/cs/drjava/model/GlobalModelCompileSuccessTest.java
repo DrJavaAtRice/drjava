@@ -104,7 +104,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
    * DrJavaTestFoo2 when compiling DrJavaTestFoo.
    * Doesn't reset interactions because no interpretations are performed.
    */
-  public void testCompileClasspathOKDefaultPackage()
+  public void testCompileClassPathOKDefaultPackage()
     throws BadLocationException, IOException, InterruptedException
   {
 //    System.out.println("testCompileClasspathOKDefaultPackage()");
@@ -149,7 +149,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
    * DrJavaTestFoo2 when compiling DrJavaTestFoo.
    * Doesn't reset interactions because no interpretations are performed.
    */
-  public void testCompileClasspathOKDifferentPackages()
+  public void testCompileClassPathOKDifferentPackages()
     throws BadLocationException, IOException, InterruptedException, edu.rice.cs.drjava.model.definitions.InvalidPackageException
   {
 //    System.out.println("testCompileClasspathOKDifferentPackages()");

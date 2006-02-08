@@ -53,49 +53,29 @@ import java.io.*;
  */
 public class FileOption extends Option<File> {
   
-  /**
-   * Special sentinal file indicating that this option is not set.
-   */
+  /** Special sentinal file indicating that this option is not set. */
   public static final File NULL_FILE = new File("") {
-    public String getAbsolutePath() {
-      return "";
-    }
-    public String getName() {
-      return "";
-    }
-    public String toString() {
-      return "";
-    }
-    public boolean exists() {
-      return true;
-    }
+    public String getAbsolutePath() { return ""; }
+    public String getName() { return ""; }
+    public String toString() { return ""; }
+    public boolean exists() { return true; }
   };
   
-  /**
-   * @param key The name of this option.
-   */
+  /** @param key The name of this option. */
   public FileOption(String key, File def) { super(key,def); }
   
-  /**
-   * @param s The String to be parsed, must represent
-   * the absolute path of the File to be created.
-   * @return The File object corresponding to path "p".
+  /** @param s The String to be parsed, must represent the absolute path of the File to be created.
+   *  @return The File object corresponding to path "p".
    */
   public File parse(String s) { 
     if (s.trim().equals("")) return NULL_FILE;
     
-    try {
-      return new File(s).getAbsoluteFile();
-    }
-    catch (NullPointerException e) {
-      throw new OptionParseException(name, s,
-                                     "Must have a legal filename.");
-    }
+    try { return new File(s).getAbsoluteFile(); }
+    catch (NullPointerException e) { throw new OptionParseException(name, s, "Must have a legal filename."); }
   }
 
-  /**
-   * @param f The instance of class File to be formatted.
-   * @return A String representing the absolute path of "f".
+  /** @param f The instance of class File to be formatted.
+   *  @return A String representing the absolute path of "f".
    */
   public String format(File f) { return f.getAbsolutePath(); }
 }

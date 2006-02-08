@@ -50,6 +50,7 @@ import edu.rice.cs.util.text.EditDocumentInterface;
 
 import java.net.URL;
 import java.util.Vector;
+import java.io.File;
 
 /**
  * An InteractionsModel which can serve as the glue between a local
@@ -100,36 +101,24 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 //    _interpreterControl.addClassPath(path);
 //  }
 //  
-  public void addProjectClassPath(URL path) {
-    _interpreterControl.addProjectClassPath(path);
-  }
+  public void addProjectClassPath(URL path) { _interpreterControl.addProjectClassPath(path); }
 
-  public void addBuildDirectoryClassPath(URL path) {
-    _interpreterControl.addBuildDirectoryClassPath(path);
-  }
+  public void addBuildDirectoryClassPath(URL path) { _interpreterControl.addBuildDirectoryClassPath(path); }
   
-  public void addProjectFilesClassPath(URL path) {
-    _interpreterControl.addProjectFilesClassPath(path);
-  }
+  public void addProjectFilesClassPath(URL path) { _interpreterControl.addProjectFilesClassPath(path); }
   
-  public void addExternalFilesClassPath(URL path) {
-    _interpreterControl.addExternalFilesClassPath(path);
-  }
+  public void addExternalFilesClassPath(URL path) { _interpreterControl.addExternalFilesClassPath(path); }
   
-  public void addExtraClassPath(URL path) {
-    _interpreterControl.addExtraClassPath(path);
-  }
+  public void addExtraClassPath(URL path) { _interpreterControl.addExtraClassPath(path); }
   
   /** Resets the Java interpreter. */
-  protected void _resetInterpreter() { _interpreterControl.killInterpreter(true); }
+  protected void _resetInterpreter(File wd) { _interpreterControl.killInterpreter(wd); }
 
   /** Adds a named DynamicJavaAdapter to the list of interpreters.
    *  @param name the unique name for the interpreter
    *  @throws IllegalArgumentException if the name is not unique
    */
-  public void addJavaInterpreter(String name) {
-    _interpreterControl.addJavaInterpreter(name);
-  }
+  public void addJavaInterpreter(String name) { _interpreterControl.addJavaInterpreter(name); }
 
   /** Adds a named JavaDebugInterpreter to the list of interpreters.
    *  @param name the unique name for the debug interpreter
@@ -198,5 +187,5 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Gets the interpreter classpath from the interpreter jvm.
    * @return a vector of classpath elements
    */
-  public Vector<URL> getClasspath() { return _interpreterControl.getClasspath(); }
+  public Vector<URL> getClassPath() { return _interpreterControl.getClassPath(); }
 }

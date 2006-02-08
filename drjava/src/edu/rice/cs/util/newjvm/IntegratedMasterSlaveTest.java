@@ -45,6 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
+import edu.rice.cs.drjava.config.FileOption;
+
 import junit.framework.*;
 import java.rmi.*;
 
@@ -93,7 +95,7 @@ public class IntegratedMasterSlaveTest extends TestCase {
       // this needs to be reset because the slave is going to check it!
       _letter = 'a';
 
-      invokeSlave(new String[]{"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"});
+      invokeSlave(new String[]{"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"}, FileOption.NULL_FILE);
 //      invokeSlave();
       
       // we don't wait for it to start before calling quit.
@@ -118,7 +120,7 @@ public class IntegratedMasterSlaveTest extends TestCase {
 
 //      long start, end;
 //      start = System.currentTimeMillis();
-      invokeSlave(new String[]{"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"});
+      invokeSlave(new String[]{"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"}, FileOption.NULL_FILE);
 //      invokeSlave();
       wait();  // for handleConnected
 //      end = System.currentTimeMillis();

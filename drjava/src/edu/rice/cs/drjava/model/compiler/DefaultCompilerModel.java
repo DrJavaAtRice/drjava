@@ -46,11 +46,11 @@ import java.util.Iterator;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-import edu.rice.cs.drjava.model.IGetDocuments;
+import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.javalanglevels.*;
@@ -73,20 +73,24 @@ public class DefaultCompilerModel implements CompilerModel {
 
   /** Used by CompilerErrorModel to open documents that have errors. 
    *  A reference to the global model. */
-  private final IGetDocuments _model;
+  private final GlobalModel _model;
 
   /** The error model containing all current compiler errors. */
   private CompilerErrorModel _compilerErrorModel;
+  
+  /** The working directory corresponding to the last compilation */
+  private File _workDir;
   
   /** The lock for using the slaveJVM to perform compilation and run unit tests */
   private Object _slaveJVMLock = new Object();
 
   /** Main constructor.  
-   *  @param getter Source of documents for this CompilerModel
+   *  @param getter the GlobalModel that is the source of documents for this CompilerModel
    */
-  public DefaultCompilerModel(IGetDocuments getter) {
-    _model = getter;
+  public DefaultCompilerModel(GlobalModel m) {
+    _model = m;
     _compilerErrorModel = new CompilerErrorModel(new CompilerError[0], _model);
+    _workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
   }
   
   //--------------------------------- Locking -------------------------------//
@@ -129,7 +133,7 @@ public class DefaultCompilerModel implements CompilerModel {
    */
   public void compileAll() throws IOException {
     
-    boolean isProjActive = _model.getFileGroupingState().isProjectActive();
+    boolean isProjActive = _model.isProjectActive();
     
     List<OpenDefinitionsDocument> defDocs = _model.getOpenDefinitionsDocuments();
     
@@ -151,15 +155,12 @@ public class DefaultCompilerModel implements CompilerModel {
   //TODO: compileAll(roots,files), compile(docs), and compile(doc) contain very similar code;
   //  they should be refactored into one core routine and three adaptations (instantiations?)
   
-  /**
-   * Compiles all files with the specified source root set.  
-   * @param sourceRootSet a list of source roots
-   * @param filesToCompile a list of files to compile
+  /** Compiles all files with the specified source root set.  
+   *  @param sourceRootSet a list of source roots
+   *  @param filesToCompile a list of files to compile
    */
   public void compileAll(List<File> sourceRootSet, List<File> filesToCompile) throws IOException {
-    
-    File buildDir = null;
-    if (_model.getFileGroupingState().isProjectActive()) buildDir = _model.getFileGroupingState().getBuildDirectory();
+ 
     List<OpenDefinitionsDocument> defDocs;
     
     defDocs = _model.getOpenDefinitionsDocuments(); 
@@ -174,36 +175,11 @@ public class DefaultCompilerModel implements CompilerModel {
     if (_hasModifiedFiles(defDocs)) return;
     
     // Get sourceroots and all files
-    _rawCompile(sourceRootSet.toArray(new File[0]), filesToCompile.toArray(new File[0]), buildDir);
-  }
-  
-  private void _rawCompile(File[] sourceRoots, File[] files, File buildDir) throws IOException {
-    
-//    System.err.println("sourceRoots are: " + Arrays.toString(sourceRoots));
-//    System.err.println("sourceFiles are: " + Arrays.toString(files));
-//    System.err.println("BuildDir is: " + buildDir);
-    
-    _notifier.compileStarted();
-    try {
-      // Compile the files
-      _compileFiles(sourceRoots, files, buildDir);
-    }
-    catch (Throwable t) {
-      CompilerError err = new CompilerError(t.toString(), false);
-      CompilerError[] errors = new CompilerError[] { err };
-      _distributeErrors(errors);
-    }
-    finally { _notifier.compileEnded(); }
+    _rawCompile(sourceRootSet.toArray(new File[0]), filesToCompile.toArray(new File[0]));
   }
   
   /** Compiles all documents in the specified list of OpenDefinitionsDocuments. */
   public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
-    
-    File buildDir = null;
-    
-    if (_model.getFileGroupingState().isProjectActive()) {
-      buildDir = _model.getFileGroupingState().getBuildDirectory();
-    }
     
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
@@ -227,7 +203,7 @@ public class DefaultCompilerModel implements CompilerModel {
         // No file for this document; skip it
       }
     } 
-    _rawCompile(getSourceRootSet(), filesToCompile.toArray(new File[0]), buildDir);
+    _rawCompile(getSourceRootSet(), filesToCompile.toArray(new File[0]));
   }
   
   
@@ -238,17 +214,12 @@ public class DefaultCompilerModel implements CompilerModel {
    *  If the current package as determined by getSourceRoot(String) and getPackageName() is invalid, 
    *  compileStarted and compileEnded will fire, and an error will be put in compileErrors.
    *
-   *  (Interactions are not reset if the _resetAfterCompile field is set to false, which allows some test cases 
-   *  to run faster.)
+   *  (The Interactions pane is not reset if the _resetAfterCompile field is set to false; this features is used
+   *  in some test cases to make them more efficient.)
    *
    *  @throws IOException if a filesystem-related problem prevents compilation
    */
   public void compile(OpenDefinitionsDocument doc) throws IOException {
-    File buildDir = null;
-    
-    if (doc.isInProjectPath() || doc.isAuxiliaryFile()) {
-      buildDir = _model.getFileGroupingState().getBuildDirectory();
-    }
     
     List<OpenDefinitionsDocument> defDocs;
     defDocs = _model.getOpenDefinitionsDocuments(); 
@@ -267,8 +238,31 @@ public class DefaultCompilerModel implements CompilerModel {
     // throws a FileMovedException if file has moved, which is preferable to the InvalidPackageException produced
     // by getSourceRoot for the same circumstances
      
-    _rawCompile(new File[] { doc.getSourceRoot() }, files, buildDir);
+    _rawCompile(new File[] { doc.getSourceRoot() }, files); 
   }
+  
+  private void _rawCompile(File[] sourceRoots, File[] files) throws IOException {
+    
+    File buildDir = _model.getBuildDirectory();
+    File workDir = _model.getWorkingDirectory();
+     
+//    System.err.println("sourceRoots are: " + Arrays.toString(sourceRoots));
+//    System.err.println("sourceFiles are: " + Arrays.toString(files));
+//    System.err.println("BuildDir is: " + buildDir);
+    
+    _notifier.compileStarted();
+    try {
+      // Compile the files
+      _compileFiles(sourceRoots, files, buildDir);
+    }
+    catch (Throwable t) {
+      CompilerError err = new CompilerError(t.toString(), false);
+      CompilerError[] errors = new CompilerError[] { err };
+      _distributeErrors(errors);
+    }
+    finally { _notifier.compileEnded(workDir); }
+  }
+  
 
   //-------------------------------- Helpers --------------------------------//
 
@@ -333,14 +327,14 @@ public class DefaultCompilerModel implements CompilerModel {
     if (buildDir != null) buildDir = buildDir.getCanonicalFile();
 
     compiler.setBuildDirectory(buildDir);
-    ClasspathVector extraClasspath = new ClasspathVector();
-    if (_model.getFileGroupingState().isProjectActive()) 
-      extraClasspath.addAll(_model.getFileGroupingState().getExtraClasspath());
+    ClassPathVector extraClassPath = new ClassPathVector();
+    if (_model.isProjectActive()) 
+      extraClassPath.addAll(_model.getExtraClassPath());
 //    Utilities.showDebug("extra class path is: " + extraClasspath);
-    for (File f : DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)) extraClasspath.add(f);
+    for (File f : DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)) extraClassPath.add(f);
     
 //    Utilities.showDebug("Extra classpath passed to compiler: " + extraClasspath.toString());
-    compiler.setExtraClassPath(extraClasspath);
+    compiler.setExtraClassPath(extraClassPath);
     if (files.length > 0) {
 //      if (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL) == DrJava.ELEMENTARY_LEVEL) {
       LanguageLevelConverter llc = new LanguageLevelConverter(getActiveCompiler().getName());
@@ -409,11 +403,8 @@ public class DefaultCompilerModel implements CompilerModel {
     _compilerErrorModel = new CompilerErrorModel(errors, _model);
   }
 
-  /**
-   * Gets an array of all sourceRoots for the open definitions
-   * documents, without duplicates. Note that if any of the open
-   * documents has an invalid package statement, it won't be added
-   * to the source root set.
+  /** Gets an array of all sourceRoots for the open definitions documents, without duplicates. Note that if any of the 
+   *  open documents has an invalid package statement, it won't be added to the source root set.
    */
   public File[] getSourceRootSet() {
     List<OpenDefinitionsDocument> defDocs = _model.getOpenDefinitionsDocuments();
@@ -456,7 +447,7 @@ public class DefaultCompilerModel implements CompilerModel {
    *  @return whether any of the given documents are modified
    */
   protected boolean _hasModifiedFiles(List<OpenDefinitionsDocument> defDocs) {
-    boolean isProjActive = _model.getFileGroupingState().isProjectActive();
+    boolean isProjActive = _model.isProjectActive();
     for (OpenDefinitionsDocument doc : defDocs) {
       if (doc.isModifiedSinceSave() && (! isProjActive || ! doc.isUntitled())) return true;
     }

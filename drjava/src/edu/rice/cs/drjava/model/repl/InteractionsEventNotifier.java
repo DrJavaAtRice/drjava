@@ -33,6 +33,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
+import java.io.File;
+
 import edu.rice.cs.drjava.model.EventNotifier;
 
 /** Keeps track of all listeners to an InteractionsModel, and has the ability to notify them of some event. <p>
@@ -99,11 +101,11 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
   }
 
   /** Called when the interactions window is reset. */
-  public void interpreterReady() {
+  public void interpreterReady(File wd) {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) _listeners.get(i).interpreterReady();
+      for (int i = 0; i < size; i++) _listeners.get(i).interpreterReady(wd);
     }
     finally { _lock.endRead(); }
   }

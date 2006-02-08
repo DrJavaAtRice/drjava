@@ -45,6 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
+import java.io.File;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -119,9 +121,9 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
 
   /** Called when the Java interpreter is ready to use. Adds any open documents to the classpath. */
-  public void interpreterReady() {
-    _model.resetInteractionsClasspath();
-    super.interpreterReady();
+  public void interpreterReady(File wd) {
+    _model.resetInteractionsClassPath();
+    super.interpreterReady(wd);
   }
 
   /** Notifies listeners that an interaction has started. */
@@ -152,8 +154,8 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
 
   /** Notifies listeners that the interpreter is ready. */
-  protected void _notifyInterpreterReady() { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(); } });
+  protected void _notifyInterpreterReady(final File wd) { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(wd); } });
   }
 
   /** Notifies listeners that the interpreter has exited unexpectedly.

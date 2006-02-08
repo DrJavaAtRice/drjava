@@ -49,38 +49,38 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.lang.ClassLoader;
-import edu.rice.cs.drjava.model.ClasspathEntry;
+import edu.rice.cs.drjava.model.ClassPathEntry;
 import edu.rice.cs.drjava.model.DeadClassLoader;
 import edu.rice.cs.drjava.model.BrainClassLoader;
 
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 
 
-public class ClasspathManager{
+public class ClassPathManager{
   
   /** The custom project classpath. */
-  List<ClasspathEntry> projectCP;
+  List<ClassPathEntry> projectCP;
   /** The build directory. */
-  List<ClasspathEntry> buildCP;
+  List<ClassPathEntry> buildCP;
   /** The open project files. */
-  List<ClasspathEntry> projectFilesCP;
+  List<ClassPathEntry> projectFilesCP;
   /** The open external files. */
-  List<ClasspathEntry> externalFilesCP;
+  List<ClassPathEntry> externalFilesCP;
   /** The extra preferences classpath. */
-  List<ClasspathEntry> extraCP;
+  List<ClassPathEntry> extraCP;
   /** The system classpath. */
-  List<ClasspathEntry> systemCP;
+  List<ClassPathEntry> systemCP;
   
 //  The open files classpath (for nonproject mode)
 //  List<ClasspathEntry> openFilesCP;
   
-  public ClasspathManager() {
-    projectCP = new LinkedList<ClasspathEntry>();
-    buildCP = new LinkedList<ClasspathEntry>();
-    projectFilesCP = new LinkedList<ClasspathEntry>();
-    externalFilesCP = new LinkedList<ClasspathEntry>();
-    extraCP = new LinkedList<ClasspathEntry>();
-    systemCP = new LinkedList<ClasspathEntry>();
+  public ClassPathManager() {
+    projectCP = new LinkedList<ClassPathEntry>();
+    buildCP = new LinkedList<ClassPathEntry>();
+    projectFilesCP = new LinkedList<ClassPathEntry>();
+    externalFilesCP = new LinkedList<ClassPathEntry>();
+    extraCP = new LinkedList<ClassPathEntry>();
+    systemCP = new LinkedList<ClassPathEntry>();
 //    openFilesCP = new LinkedList<ClasspathEntry>();
   }
   
@@ -89,43 +89,43 @@ public class ClasspathManager{
    */
   public void addProjectCP(URL f) {
     // add new entry to front of classpath
-    projectCP.add(0, new ClasspathEntry(f));
+    projectCP.add(0, new ClassPathEntry(f));
   }
   
-  public List<ClasspathEntry> getProjectCP() { return projectCP; }
+  public List<ClassPathEntry> getProjectCP() { return projectCP; }
   
   /** Adds the entry to the front of the build classpath. */
   public void addBuildDirectoryCP(URL f) {
     // add new entry to front of classpath
-    buildCP.add(0, new ClasspathEntry(f));
+    buildCP.add(0, new ClassPathEntry(f));
   }
 
-  public List<ClasspathEntry> getBuildDirectoryCP() { return buildCP; }
+  public List<ClassPathEntry> getBuildDirectoryCP() { return buildCP; }
   
   /** Adds the entry to the front of the project files classpath
    *  (this is the classpath for all open project files)
    */
   public void addProjectFilesCP(URL f) {
     // add new entry to front of classpath
-    projectFilesCP.add(0, new ClasspathEntry(f));
+    projectFilesCP.add(0, new ClassPathEntry(f));
   }
   
-  public List<ClasspathEntry> getProjectFilesCP() { return projectFilesCP; }
+  public List<ClassPathEntry> getProjectFilesCP() { return projectFilesCP; }
   
   /** Adds new entry containing f to the front of the external classpath. */
-  public void addExternalFilesCP(URL f) { externalFilesCP.add(0, new ClasspathEntry(f)); }
+  public void addExternalFilesCP(URL f) { externalFilesCP.add(0, new ClassPathEntry(f)); }
   
-  public List<ClasspathEntry> getExternalFilesCP() { return externalFilesCP; }
+  public List<ClassPathEntry> getExternalFilesCP() { return externalFilesCP; }
   
   /** Adds the entry to the front of the extra classpath. */
   public void addExtraCP(URL f) {
     // add new entry to front of classpath
-    extraCP.add(0, new ClasspathEntry(f));
+    extraCP.add(0, new ClassPathEntry(f));
   }
   
-  public List<ClasspathEntry> getExtraCP() { return extraCP; }
+  public List<ClassPathEntry> getExtraCP() { return extraCP; }
   
-  public List<ClasspathEntry> getSystemCP() { return systemCP; }
+  public List<ClassPathEntry> getSystemCP() { return systemCP; }
   
   /** Returns a new classloader that represents the custom classpath. */
   public ClassLoader getClassLoader() {
@@ -137,29 +137,29 @@ public class ClasspathManager{
   }
   
   /** Builds a new classloader for the list of classpath entries. */
-  private ClassLoader buildClassLoader(List<ClasspathEntry>locpe) {
+  private ClassLoader buildClassLoader(List<ClassPathEntry>locpe) {
     ClassLoader c = new DeadClassLoader();
-    for(ClasspathEntry cpe: locpe) { c = cpe.getClassLoader(c); }
+    for(ClassPathEntry cpe: locpe) { c = cpe.getClassLoader(c); }
     return c;
   }
 
   /** Returns a copy of the list of unique entries on the classpath. */
-  public ClasspathVector getAugmentedClasspath() {
-    ClasspathVector ret = new ClasspathVector();
-    List<ClasspathEntry> locpe = getProjectCP();
-    for (ClasspathEntry e: locpe) { ret.add(e.getEntry()); }
+  public ClassPathVector getAugmentedClassPath() {
+    ClassPathVector ret = new ClassPathVector();
+    List<ClassPathEntry> locpe = getProjectCP();
+    for (ClassPathEntry e: locpe) { ret.add(e.getEntry()); }
 
     locpe = getBuildDirectoryCP();
-    for (ClasspathEntry e: locpe) { ret.add(e.getEntry()); }
+    for (ClassPathEntry e: locpe) { ret.add(e.getEntry()); }
 
     locpe = getProjectFilesCP();
-    for (ClasspathEntry e: locpe) { ret.add(e.getEntry()); }
+    for (ClassPathEntry e: locpe) { ret.add(e.getEntry()); }
 
     locpe = getExternalFilesCP();
-    for (ClasspathEntry e: locpe) { ret.add(e.getEntry()); }
+    for (ClassPathEntry e: locpe) { ret.add(e.getEntry()); }
 
     locpe = getExtraCP();
-    for (ClasspathEntry e: locpe) { ret.add(e.getEntry()); }
+    for (ClassPathEntry e: locpe) { ret.add(e.getEntry()); }
     return ret;
   }
 

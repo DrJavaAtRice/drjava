@@ -45,9 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 import java.util.Hashtable;
-/**
- * the association of an OptionName with the ability to parse something to type T
- * the special property is that if U extends T, then OptionParser<U> extends OptionParser<T>.
+/** The association of an OptionName with the ability to parse something to type T; the intended type 
+ *  parameterization is covariant: if U extends T, then OptionParser<U> extends OptionParser<T>.
  */
 public abstract class OptionParser<T> implements ParseStrategy<T> {
     

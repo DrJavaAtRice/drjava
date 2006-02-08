@@ -89,7 +89,7 @@ public final class InteractionsModelTest extends TestCase {
     assertTrue(_model instanceof TestInteractionsModel);
     TestInteractionsModel model = (TestInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
-    doc.reset();
+    doc.reset("");
     doc.insertText(doc.getLength(), typed, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     assertEquals("processed output should match expected", expected, model.toEval);
@@ -163,85 +163,65 @@ public final class InteractionsModelTest extends TestCase {
   }
 
 
-  /**
-   * Tests that "java Classname [args]" runs the class's main method, with
-   * simple delimited arguments.
-   */
+  /** Tests that "java Classname [args]" runs the class's main method, with simple delimited arguments. */
   public void testInterpretJavaArguments() {
     // java Foo a b c
     // Foo.main(new String[]{"a", "b", "c"});
-    _assertMainTransformation("java Foo a b c",
-                             "Foo.main(new String[]{\"a\",\"b\",\"c\"});");
+    _assertMainTransformation("java Foo a b c", "Foo.main(new String[]{\"a\",\"b\",\"c\"});");
     // java Foo "a b c"
     // Foo.main(new String[]{"a b c"});
-    _assertMainTransformation("java Foo \"a b c\"",
-                             "Foo.main(new String[]{\"a b c\"});");
+    _assertMainTransformation("java Foo \"a b c\"", "Foo.main(new String[]{\"a b c\"});");
     // java Foo "a b"c d
     // Foo.main(new String[]{"a bc", "d"});
     //  This is different behavior than Unix or DOS, but it's more
     //  intuitive to the user (and easier to implement).
-    _assertMainTransformation("java Foo \"a b\"c d",
-                             "Foo.main(new String[]{\"a bc\",\"d\"});");
+    _assertMainTransformation("java Foo \"a b\"c d", "Foo.main(new String[]{\"a bc\",\"d\"});");
 
     // java Foo c:\\file.txt
     // Foo.main("c:\\file.txt");
-    _assertMainTransformation("java Foo c:\\\\file.txt",
-                             "Foo.main(new String[]{\"c:\\\\file.txt\"});");
+    _assertMainTransformation("java Foo c:\\\\file.txt", "Foo.main(new String[]{\"c:\\\\file.txt\"});");
 
     // java Foo /home/user/file
     // Foo.main("/home/user/file");
-    _assertMainTransformation("java Foo /home/user/file",
-                             "Foo.main(new String[]{\"/home/user/file\"});");
+    _assertMainTransformation("java Foo /home/user/file", "Foo.main(new String[]{\"/home/user/file\"});");
   }
 
-  /**
-   * Tests that escaped characters just return the character itself.
-   * Escaped whitespace is considered a character, not a delimiter.
-   * (This is how Unix behaves.)
+  /** Tests that escaped characters just return the character itself.  Escaped whitespace is considered a character, 
+   *  not a delimiter. (This is how Unix behaves.)
    *
-   * not currently enforcing any behavior for a simple implementation
-   * using a StreamTokenizer
+   *  not currently enforcing any behavior for a simple implementation using a StreamTokenizer
    */
   public void testInterpretJavaEscapedArgs() {
     // java Foo \j
     // Foo.main(new String[]{"j"});
-    _assertMainTransformation("java Foo \\j",
-                             "Foo.main(new String[]{\"j\"});");
+    _assertMainTransformation("java Foo \\j", "Foo.main(new String[]{\"j\"});");
     // java Foo \"
     // Foo.main(new String[]{"\""});
-    _assertMainTransformation("java Foo \\\"",
-                             "Foo.main(new String[]{\"\\\"\"});");
+    _assertMainTransformation("java Foo \\\"", "Foo.main(new String[]{\"\\\"\"});");
     // java Foo \\
     // Foo.main(new String[]{"\\"});
-    _assertMainTransformation("java Foo \\\\",
-                             "Foo.main(new String[]{\"\\\\\"});");
+    _assertMainTransformation("java Foo \\\\", "Foo.main(new String[]{\"\\\\\"});");
     // java Foo a\ b
     // Foo.main(new String[]{"a b"});
-    _assertMainTransformation("java Foo a\\ b",
-                             "Foo.main(new String[]{\"a b\"});");
+    _assertMainTransformation("java Foo a\\ b", "Foo.main(new String[]{\"a b\"});");
   }
 
-  /**
-   * Tests that within a quote, everything is correctly escaped.
-   * (Special characters are passed to the program correctly.)
+  /** Tests that within a quote, everything is correctly escaped.
+   *  (Special characters are passed to the program correctly.)
    */
   public void testInterpretJavaQuotedEscapedArgs() {
     // java Foo "a \" b"
     // Foo.main(new String[]{"a \" b"});
-    _assertMainTransformation("java Foo \"a \\\" b\"",
-                             "Foo.main(new String[]{\"a \\\" b\"});");
+    _assertMainTransformation("java Foo \"a \\\" b\"", "Foo.main(new String[]{\"a \\\" b\"});");
     // java Foo "\'"
     // Foo.main(new String[]{"\\'"});
-    _assertMainTransformation("java Foo \"\\'\"",
-                             "Foo.main(new String[]{\"\\\\'\"});");
+    _assertMainTransformation("java Foo \"\\'\"", "Foo.main(new String[]{\"\\\\'\"});");
     // java Foo "\\"
     // Foo.main(new String[]{"\\"});
-    _assertMainTransformation("java Foo \"\\\\\"",
-                             "Foo.main(new String[]{\"\\\\\"});");
+    _assertMainTransformation("java Foo \"\\\\\"", "Foo.main(new String[]{\"\\\\\"});");
     // java Foo "\" \d"
     // Foo.main(new String[]{"\" \\d"});
-    _assertMainTransformation("java Foo \"\\\" \\d\"",
-                             "Foo.main(new String[]{\"\\\" \\\\d\"});");
+    _assertMainTransformation("java Foo \"\\\" \\d\"", "Foo.main(new String[]{\"\\\" \\\\d\"});");
     // java Foo "\n"
     // Foo.main(new String[]{"\n"});
 /*    _assertMainTransformation("java Foo \"\\n\"",
@@ -264,23 +244,18 @@ public final class InteractionsModelTest extends TestCase {
                              "Foo.main(new String[]{\"\\b\"});"); */
   }
 
-  /**
-   * Tests that single quotes can be used as argument delimiters.
-   */
+  /** Tests that single quotes can be used as argument delimiters. */
   public void testInterpretJavaSingleQuotedArgs() {
+    
     // java Foo 'asdf'
-    _assertMainTransformation("java Foo 'asdf'",
-                             "Foo.main(new String[]{\"asdf\"});");
+    _assertMainTransformation("java Foo 'asdf'", "Foo.main(new String[]{\"asdf\"});");
+    
     // java Foo 'a b c'
-    _assertMainTransformation("java Foo 'a b c'",
-                             "Foo.main(new String[]{\"a b c\"});");
+    _assertMainTransformation("java Foo 'a b c'", "Foo.main(new String[]{\"a b c\"});");
 
     // java Foo 'a b'c
-    _assertMainTransformation("java Foo 'a b'c",
-                             "Foo.main(new String[]{\"a bc\"});");
+    _assertMainTransformation("java Foo 'a b'c", "Foo.main(new String[]{\"a bc\"});");
   }
-
-
 
   //public void testLoadHistory();
   // TO DO: test that the correct history is returned (careful of last newline)
@@ -306,9 +281,7 @@ public final class InteractionsModelTest extends TestCase {
     assertEquals("debug port should be -1", -1, _model.getDebugPort());
   }
 
-  /**
-   * Tests that an interactions history can be loaded in as a script.
-   */
+  /** Tests that an interactions history can be loaded in as a script. */
   public void testScriptLoading() throws IOException, OperationCanceledException {
     assertTrue(_model instanceof TestInteractionsModel);
     TestInteractionsModel model = (TestInteractionsModel)_model;
@@ -351,8 +324,7 @@ public final class InteractionsModelTest extends TestCase {
     // Get the next (first) interaction
     assertTrue("Should have next", ism.hasNextInteraction());
     ism.nextInteraction();
-    assertEquals("Should have put the first line into the document.",
-                 line1, doc.getCurrentInteraction());
+    assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
 
     // Still should not be able to get the previous interaction
     assertTrue("Should have no previous", !ism.hasPrevInteraction());
@@ -367,14 +339,12 @@ public final class InteractionsModelTest extends TestCase {
     // Skip it; get the next (second) interaction
     assertTrue("Should have next", ism.hasNextInteraction());
     ism.nextInteraction();
-    assertEquals("Should have put the second line into the document.",
-                 line2, doc.getCurrentInteraction());
+    assertEquals("Should have put the second line into the document.", line2, doc.getCurrentInteraction());
 
     // Now we should be able to get the previous interaction
     assertTrue("Should have previous", ism.hasPrevInteraction());
     ism.prevInteraction();
-    assertEquals("Should have put the first line into the document.",
-                 line1, doc.getCurrentInteraction());
+    assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
 
     // Go back to the second line and execute it
     ism.nextInteraction();
@@ -396,14 +366,12 @@ public final class InteractionsModelTest extends TestCase {
     // Get Previous should return the most recently executed interaction
     assertTrue("Should have previous", ism.hasPrevInteraction());
     ism.prevInteraction();
-    assertEquals("Should have put the second line into the document.",
-                 line2, doc.getCurrentInteraction());
+    assertEquals("Should have put the second line into the document.", line2, doc.getCurrentInteraction());
 
     // Get Previous should now return the first interaction
     assertTrue("Should have previous", ism.hasPrevInteraction());
     ism.prevInteraction();
-    assertEquals("Should have put the first line into the document.",
-                 line1, doc.getCurrentInteraction());
+    assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
 
     // Should have no more previous
     assertTrue("Should have no previous", !ism.hasPrevInteraction());
@@ -417,8 +385,7 @@ public final class InteractionsModelTest extends TestCase {
     // Get Previous should return the most recent (first) interaction
     assertTrue("Should have previous", ism.hasPrevInteraction());
     ism.prevInteraction();
-    assertEquals("Should have put the first line into the document.",
-                 line1, doc.getCurrentInteraction());
+    assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
 
     // Should not be able to get the previous interaction this time
     assertTrue("Should have no previous", !ism.hasPrevInteraction());
@@ -431,9 +398,7 @@ public final class InteractionsModelTest extends TestCase {
     }
   }
 
-  /**
-   * Tests that setting and changing an input listener works correctly.
-   */
+  /** Tests that setting and changing an input listener works correctly. */
   public void testSetChangeInputListener() {
     InputListener listener1 = new InputListener() {
       public String getConsoleInput() {
@@ -501,17 +466,14 @@ public final class InteractionsModelTest extends TestCase {
     String toEval = null;
     String addedClass = null;
 
-    /**
-     * Constructs a new InteractionsModel.
-     */
+    /** Constructs a new InteractionsModel. */
     public TestInteractionsModel(InteractionsDJDocument adapter) {
       // Adapter, history size, write delay
       super(adapter, 1000, 25);
     }
 
-    protected void _interpret(String toEval) {
-      this.toEval = toEval;
-    }
+    protected void _interpret(String toEval) { this.toEval = toEval; }
+    
     public String getVariableToString(String var) {
       fail("cannot getVariableToString in a test");
       return null;
@@ -520,32 +482,21 @@ public final class InteractionsModelTest extends TestCase {
       fail("cannot getVariableClassName in a test");
       return null;
     }
-    public void addProjectClassPath(URL path) {
-      fail("cannot add to classpath in a test");
-    }
-    public void addBuildDirectoryClassPath(URL path) {
-      fail("cannot add to classpath in a test");
-    }
-    public void addProjectFilesClassPath(URL path) {
-      fail("cannot add to classpath in a test");
-    }
-    public void addExternalFilesClassPath(URL path) {
-      fail("cannot add to classpath in a test");
-    }
-    public void addExtraClassPath(URL path) {
-      fail("cannot add to classpath in a test");
-    }
-
-    protected void _resetInterpreter() {
-      fail("cannot reset interpreter in a test");
-    }
+    
+    public void addProjectClassPath(URL path) { fail("cannot add to classpath in a test"); }
+    public void addBuildDirectoryClassPath(URL path) { fail("cannot add to classpath in a test"); }
+    public void addProjectFilesClassPath(URL path) { fail("cannot add to classpath in a test"); }
+    public void addExternalFilesClassPath(URL path) { fail("cannot add to classpath in a test"); }
+    public void addExtraClassPath(URL path) { fail("cannot add to classpath in a test"); }
+    protected void _resetInterpreter(File wd) { fail("cannot reset interpreter in a test"); }
+    
     protected void _notifyInteractionStarted() { }
     protected void _notifyInteractionEnded() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
     protected void _notifyInterpreterExited(int status) { }
     protected void _notifyInterpreterResetting() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
-    protected void _notifyInterpreterReady() { }
+    protected void _notifyInterpreterReady(File wd) { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _notifyInteractionIncomplete() { }
     public ConsoleDocument getConsoleDocument() { return null; }
@@ -558,7 +509,7 @@ public final class InteractionsModelTest extends TestCase {
     /** Constructs a new IncompleteInputInteractionsModel. */
     public IncompleteInputInteractionsModel(InteractionsDJDocument adapter) {
       // MainJVM, Adapter, history size, write delay
-      super(new MainJVM(), adapter, 1000, 25);
+      super(new MainJVM(null), adapter, 1000, 25);
       _interpreterControl.setInteractionsModel(this);
       _interpreterControl.startInterpreterJVM();
       continuationException = false;
@@ -571,7 +522,7 @@ public final class InteractionsModelTest extends TestCase {
     protected void _notifyInterpreterExited(int status) { }
     protected void _notifyInterpreterResetting() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
-    protected void _notifyInterpreterReady() { }
+    protected void _notifyInterpreterReady(File wd) { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _notifyInteractionIncomplete() { }
     protected void _notifyInterpreterChanged(boolean inProgress) { }
@@ -579,7 +530,7 @@ public final class InteractionsModelTest extends TestCase {
     public ConsoleDocument getConsoleDocument() { return null; }
 
     public void replThrewException(String exceptionClass, String message, String stackTrace, String shortMessage) {
-      if (shortMessage!=null) {
+      if (shortMessage != null) {
         if (shortMessage.endsWith("<EOF>\"")) {
           continuationException = true;
           syntaxException = false;

@@ -40,7 +40,7 @@ import java.awt.Container;
  * <code>IDocumentNavigator</code> provides a framework through which
  * individual <code>IDocuments</code> can be navigated.
  */ 
-public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTContainerNavigatorActor{
+public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTContainerNavigatorActor {
   /** @return an AWT component which interacts with this document navigator */
   public Container asContainer();
   

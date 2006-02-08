@@ -43,15 +43,19 @@ import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.model.FileOpenSelector;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
-/** A model which can serve as the glue between an InteractionsDocument and any JavaInterpreter.  This 
+/** A model which can serve as the glue between an InteractionsDocument and a JavaInterpreter.  This 
  *  abstract class provides common functionality for all such models.
  *  @version $Id$
  */
 public abstract class InteractionsModel implements InteractionsModelCallback {
+  
+  /** Banner prefix. */
+  public static final String BANNER_PREFIX = "Welcome to DrJava.";
 
   /** Keeps track of any listeners to the model. */
   protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
@@ -93,6 +97,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected InputListener _inputListener;
 
   protected EditDocumentInterface _adapter;
+  
+  /** Banner displayed at top of the interactions document */
+  private String _banner;
   
   /** Constructs an InteractionsModel.
    *  @param adapter DocumentAdapter to use in the InteractionsDocument
@@ -169,7 +176,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     //Do not add to history immediately in case the user is not finished typing when they press return
   }
   
-  public void addNewLine() { _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE); }
+  public void addNewLine() { append(_newLine, InteractionsDocument.DEFAULT_STYLE); }
 
   /** Interprets the given command.
    *  @param toEval command to be evaluated. */
@@ -201,19 +208,19 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   public abstract String getVariableClassName(String var);
 
-  /** Resets the Java interpreter, resetting the flag to indicate whether the interpreter has been used 
-   *  since the last reset.
+  /** Resets the Java interpreter with working directry wd, resetting the flag to indicate whether the interpreter has
+   *  been used since the last reset.
    */
-  public final void resetInterpreter() {
+  public final void resetInterpreter(File wd) {
     _interpreterUsed = false;
-    _resetInterpreter();
+    _resetInterpreter(wd);
   }
 
   /** Resets the Java interpreter.  This should only be called from resetInterpreter, never directly. */
-  protected abstract void _resetInterpreter();
+  protected abstract void _resetInterpreter(File wd);
 
-  /** Returns whether the interpreter has been used since the last reset
-   *  operation.  (Set to true in interpret and false in resetInterpreter.)
+  /** Returns whether the interpreter has been used since the last reset operation.  (Set to true in interpret and
+   *  false in resetInterpreter.)
    */
   public boolean interpreterUsed() { return _interpreterUsed; }
 
@@ -341,7 +348,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         buf.append(_newLine);
       }
     }
-    _docAppend(buf.toString().trim(), InteractionsDocument.DEFAULT_STYLE);
+    append(buf.toString().trim(), InteractionsDocument.DEFAULT_STYLE);
     interpretCurrentInteraction();
   }
 
@@ -452,10 +459,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *  @param s String to append to the end of the document
    *  @param styleName Name of the style to use for s
    */
-  protected void _docAppend(String s, String styleName) {
+  public void append(String s, String styleName) {
     synchronized(_writerLock) {
       try {
-        _document.insertText(_document.getLength(), s, styleName);
+        _document.append(s, styleName);
         
         // Wait to prevent being flooded with println's
         _writerLock.wait(_writeDelay);
@@ -478,7 +485,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *         String form because returning the Object directly would require the data type to be serializable.
    */
   public void replReturnedResult(String result, String style) {
-    _docAppend(result + _newLine, style);
+    append(result + _newLine, style);
     _interactionIsOver();
   }
 
@@ -542,9 +549,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting() {
 //    Utilities.showDebug("InteractionsModel: interpreterResetting called.  _waitingForFirstInterpreter = " + _waitingForFirstInterpreter);
-    if (!_waitingForFirstInterpreter) {
+    if (! _waitingForFirstInterpreter) {
+      _document.acquireWriteLock();
+      try {
       _document.insertBeforeLastPrompt("Resetting Interactions..." + _newLine, InteractionsDocument.ERROR_STYLE);
       _document.setInProgress(true);
+      }
+      finally { _document.releaseWriteLock(); }
+//      Utilities.showDebug("interpreter resetting in progress");
 
       // Change to a new debug port to avoid conflicts
       try { _createNewDebugPort(); }
@@ -577,19 +589,30 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *  @param t Throwable explaining why the reset failed.
    */
   protected abstract void _notifyInterpreterResetFailed(Throwable t);
+  
+  public synchronized String getBanner() { return _banner; }
+  
+  public static String getStartUpBanner() { return getBanner(new File(System.getProperty("user.dir"))); }
+  
+  public static String getBanner(File wd) { return BANNER_PREFIX + "  Working directory is " + wd + '\n'; }
+
+  private synchronized String generateBanner(File wd) {
+    _banner = getBanner(wd);
+    return _banner;
+  }
 
   /** Called when a new Java interpreter has registered and is ready for use. */
-  public void interpreterReady() {
+  public void interpreterReady(File wd) {
     if (!_waitingForFirstInterpreter) {
-      _document.reset();
+      _document.reset(generateBanner(wd));
       _document.setInProgress(false);
-      _notifyInterpreterReady();
+      _notifyInterpreterReady(wd);
     }
     _waitingForFirstInterpreter = false;
   }
 
   /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */
-  protected abstract void _notifyInterpreterReady();
+  protected abstract void _notifyInterpreterReady(File wd);
 
   /** Assumes a trimmed String. Returns a string of the main call that the interpretor can use. */
   protected static String _testClassCall(String s) {

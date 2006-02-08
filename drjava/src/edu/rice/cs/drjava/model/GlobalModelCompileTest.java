@@ -51,6 +51,7 @@ import javax.swing.text.BadLocationException;
 
 //import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /**
@@ -78,17 +79,21 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.removeListener(listener);
   }
 
-  /** Tests that the interactions pane is reset after a successful compile if it has been used. */
+  /** Tests that the interactions pane is reset after a successful compile. */
   public void testCompileResetsInteractions() throws BadLocationException, IOException, InterruptedException,
     EditDocumentException {
+    
+//    System.err.println("Starting testCompileResetsInteractions");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = new File(_tempDir, "DrJavaTestFoo.java");
     doc.saveFile(new FileSelector(file));
-
-    // Interpret something to force a reset
-    // Note: the interpreter should reset now without any interactions.
-//    interpret("Object o = new Object();");
+    
+//    /** Temporarily set the WORKING_DIRECTORY option to same file as the System "user.dir" property in the testing
+//     *  JVM.  When the interactions pane is reset, the new slave JVM holds onto the created temp directory as 
+//     * "user.dir". */
+//    File savedWorkDir = _model.getRawWorkingDirectory();
+//    _model.setWorkingDirectory(new File(System.getProperty("user.dir")));
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.setResetAfterCompile(true);
@@ -96,13 +101,21 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     synchronized(listener) {
       _model.getCompilerModel().compileAll();
       if (_model.getCompilerModel().getNumErrors() > 0) {
+//        System.err.println("Compile failed");
         fail("compile failed: " + getCompilerErrorString());
       }
-      listener.wait();
+      while (listener.notDone()) listener.wait();
     }
+//    System.err.println("Reached end of compilation");
     assertCompileErrorsPresent("compile should succeed", false);
     listener.checkCompileOccurred();
+    
+//    /* Restore original WORKING_DIRECTORY property in .drjava */
+//    _model.setWorkingDirectory(savedWorkDir);
+    
+//    System.err.println("Checked that compile occurred");
     _model.removeListener(listener);
+//    System.err.println("Removed compilation listener");
   }
 
   /** If we try to compile an unsaved file, and if we don't save when asked to saveAllBeforeProceeding, it should

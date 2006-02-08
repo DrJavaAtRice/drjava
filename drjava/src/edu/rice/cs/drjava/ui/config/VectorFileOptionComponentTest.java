@@ -53,9 +53,7 @@ import java.awt.*;
 import java.io.File;
 import java.util.Vector;
 
-/**
- * Tests functionality of this OptionComponent
- */
+/** Tests functionality of this OptionComponent */
 public final class VectorFileOptionComponentTest extends TestCase {
   private static VectorFileOptionComponent _option;
 

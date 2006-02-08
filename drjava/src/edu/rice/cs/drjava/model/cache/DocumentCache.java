@@ -202,11 +202,10 @@ public class DocumentCache {
       }
     }
     
-    /** Checks whether the document is ready to be returned.  If false, then the document would have to be 
-     *  loaded from disk. 
-     *  @return if the document is already loaded
+    /** Checks whether the document is in the cache. 
+     *  @return if the document is resident incvcx s  bs ss s zazzszzz the cache.
      */
-    public boolean isReady() { return _doc != null; }
+    public boolean isReady() { synchronized (_cacheLock) { return _doc != null; } }
   
     /** Closes the corresponding document for this adapter.  Done when a document is closed by the navigator. */
     public void close() {

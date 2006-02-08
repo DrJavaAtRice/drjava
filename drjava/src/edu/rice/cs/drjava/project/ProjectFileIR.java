@@ -48,42 +48,32 @@ package edu.rice.cs.drjava.project;
 import java.io.*;
 
 public interface ProjectFileIR {
-  /**
-   * @return an array full of all the source files in this project file
-   */
+  /** @return an array full of all the source files in this project file. */
   public DocFile[] getSourceFiles();
     
-  /**
-   * These files are the external files that are saved in the project
-   * file so that they are opened as well as the project files.
-   * @return an array full of all the aux files in this project file
+  /** These files are the files outside of the project tree that are saved in the project file so that they are opened
+   *  as well as the project files.
+   *  @return an array full of all the aux files in this project file
    */
   public DocFile[] getAuxiliaryFiles();
     
-  /**
-   * @return an array full of all the build directory in this project file
-   */
+  /** @return the build directory stored in this project file */
   public File getBuildDirectory();
   
-  /**
-   * @return an array of path strings correspond to which folders in
-   * the tree should not be shown.  Any paths not in this list will be 
-   * expanded when the project is opened.
+   /** @return the working directory stored in this project file */
+  public File getWorkingDirectory();
+  
+  /** @return an array of path strings correspond to which folders in the tree should not be shown.  Any paths not in 
+   *  this list will be expanded when the project is opened.
    */
   public String[] getCollapsedPaths();
     
-  /**
-   * @return an array full of all the classpath path elements in the classpath for this project file
-   */
-  public File[] getClasspaths();
+  /** @return an array full of all the classpath path elements in the classpath for this project file */
+  public File[] getClassPaths();
   
-  /**
-   * @return the name of the file that holds the Jar main class associated with this project
-   */
+  /** @return the name of the file that holds the Jar main class associated with this project */
   public File getMainClass();
   
-  /**
-   * @return the file pointing to the directory that all source files are relative to
-   */
+  /** @return the directory that is the root of the project source tree. */
   public File getProjectRoot();
 }

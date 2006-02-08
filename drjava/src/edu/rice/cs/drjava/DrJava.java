@@ -62,7 +62,7 @@ import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
-import edu.rice.cs.drjava.ui.ClasspathFilter;
+import edu.rice.cs.drjava.ui.ClassPathFilter;
 import edu.rice.cs.drjava.ui.AWTExceptionHandler;
 import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
 import edu.rice.cs.drjava.model.*;
@@ -92,7 +92,7 @@ public class DrJava implements OptionConstants {
 //  private static PreventExitSecurityManager _manager = null;
   
   private static String[] _filesToOpen = new String[0];
-  private static boolean _attemptingAugmentedClasspath = false;
+  private static boolean _attemptingAugmentedClassPath = false;
   private static boolean _showDrJavaDebugConsole = false;
   private static boolean _usingJSR14v20 = false;
   private static SimpleInteractionsWindow _debugConsole = null;
@@ -205,7 +205,7 @@ public class DrJava implements OptionConstants {
       }
 
       else if (args[i].equals("-attemptingAugmentedClasspath"))
-        _attemptingAugmentedClasspath = true;
+        _attemptingAugmentedClassPath = true;
 
       else if (args[i].equals("-debugConsole")) _showDrJavaDebugConsole = true;
 
@@ -339,7 +339,7 @@ public class DrJava implements OptionConstants {
           if (System.getProperty("java.specification.version").equals("1.3") ||
               System.getProperty("java.runtime.version").startsWith("1.4.0")) {
             // Show a warning message, but only if we haven't restarted
-            if (!_attemptingAugmentedClasspath)
+            if (!_attemptingAugmentedClassPath)
               JOptionPane.showMessageDialog(null, msg, title, JOptionPane.WARNING_MESSAGE);
             return false;
           }
@@ -387,7 +387,7 @@ public class DrJava implements OptionConstants {
    *  @param args Command line argument array, in case we need to restart
    */
   static void checkForCompilersAndDebugger(String[] args) {
-    if (_attemptingAugmentedClasspath) {
+    if (_attemptingAugmentedClassPath) {
       // We're on our second attempt-- just load DrJava
       return;
     }
@@ -489,7 +489,7 @@ public class DrJava implements OptionConstants {
     catch (UnsupportedClassVersionError ucve) { return false; }
   }
 
-  public static boolean bootClasspathHasJSR14v24() {
+  public static boolean bootClassPathHasJSR14v24() {
     try {
       Class.forName("com.sun.javadoc.ParameterizedType");
       return true;
@@ -501,7 +501,7 @@ public class DrJava implements OptionConstants {
    * helper method to determine if jsr14 v2.0 jar is on the boot classpath.
    * @return true iff java.lang.Enum can be loaded successfully.
    */
-  public static boolean bootClasspathHasJSR14v20() {
+  public static boolean bootClassPathHasJSR14v20() {
     try {
       Class.forName("java.lang.Enum");
       return true;
@@ -526,13 +526,13 @@ public class DrJava implements OptionConstants {
    */
   public static void restartIfNecessary(boolean forToolsJar, String[] args) {
     //JOptionPane.showMessageDialog(null, "forToolsJar = " + forToolsJar);
-    if (!forToolsJar && (!_usingJSR14v20 || bootClasspathHasJSR14v20())) return;
+    if (!forToolsJar && (!_usingJSR14v20 || bootClassPathHasJSR14v20())) return;
 
     //System.out.println("restarting with debugger...");
 
     // get the path separator and the class path this instance of Drjava was started with
     String pathSep = System.getProperty("path.separator");
-    String classpath = edu.rice.cs.util.FileOps.convertToAbsolutePathEntries(System.getProperty("java.class.path"));
+    String classPath = edu.rice.cs.util.FileOps.convertToAbsolutePathEntries(System.getProperty("java.class.path"));
 
     // Class arguments
     String[] classArgs = new String[args.length + 1];
@@ -551,22 +551,22 @@ public class DrJava implements OptionConstants {
 
     if (forToolsJar) {
       // Try to restart with tools.jar on the classpath
-      classpath += pathSep;
+      classPath += pathSep;
 
       // Add tools.jar from preferences if specified
       File toolsFromConfig = getConfig().getSetting(JAVAC_LOCATION);
       if (toolsFromConfig != FileOption.NULL_FILE) {
-        classpath += toolsFromConfig.getAbsolutePath() + pathSep;
+        classPath += toolsFromConfig.getAbsolutePath() + pathSep;
       }
 
       // Fall back on guesses from ToolsJarClassLoader
-      classpath += ToolsJarClassLoader.getToolsJarClasspath();
+      classPath += ToolsJarClassLoader.getToolsJarClassPath();
     }
 
     // Run a new copy of DrJava and exit
     try {
       //System.out.println(classpath);
-      ExecJVM.runJVM("edu.rice.cs.drjava.DrJava", classArgs, classpath, jvmArgs);
+      ExecJVM.runJVM("edu.rice.cs.drjava.DrJava", classArgs, classPath, jvmArgs, FileOption.NULL_FILE);
       System.exit(0);
     }
     catch (IOException ioe) {
@@ -629,7 +629,7 @@ public class DrJava implements OptionConstants {
 
     if (result == JOptionPane.YES_OPTION) {
       JFileChooser chooser = new JFileChooser();
-      chooser.setFileFilter(new ClasspathFilter() {
+      chooser.setFileFilter(new ClassPathFilter() {
         public boolean accept(File f) {
           if (f.isDirectory()) {
             return true;

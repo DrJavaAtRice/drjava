@@ -43,29 +43,30 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.compiler;
+package edu.rice.cs.drjava.config;
+import java.io.File;
+import java.util.Vector;
 
 /**
- * A compiler interface to find Javac (1.5.0+) from the classpath,
- * but to do so via a compiler proxy so that the compiler classes can be
- * fully unloaded/reloaded every time it is used.
- *
- * @version $Id$
+ * Generate vector options separately to appease javadoc.
+ * (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
  */
-public class Javac150FromClasspath extends CompilerProxy {
-  public static final CompilerInterface ONLY = new Javac150FromClasspath();
+class ClassPathOption {
+  private String warning =
+    "WARNING: Configurability interface only supports path separators"+
+    " of maximum length 1 character as of this moment.";
 
-  /** Private constructor due to singleton. */
-  private Javac150FromClasspath() {
-    super("edu.rice.cs.drjava.model.compiler.JSR14v20Compiler",
-          Javac150FromClasspath.class.getClassLoader());
-  }
-
-  public boolean isAvailable() {
-    return System.getProperty("java.specification.version").equals("1.5") && super.isAvailable();
-  }
-
-  public String getName() {
-    return "javac 1.5.0";
+  public VectorOption<File> evaluate(String optionName) {
+    // system path separator
+    String ps = System.getProperty("path.separator");
+    if (ps.length() > 1) {
+      // spit out warning if it's more than one character.
+      System.out.println(warning);
+      System.out.println("using '" + ps.charAt(0) + "' for delimiter.");
+    }
+    FileOption fop = new FileOption("",FileOption.NULL_FILE);
+    //String name = "extra.classpath";
+    char delim = ps.charAt(0);
+    return new VectorOption<File>(optionName,fop,"",delim,"",new Vector<File>());
   }
 }

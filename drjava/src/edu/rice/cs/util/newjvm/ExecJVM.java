@@ -56,7 +56,7 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVM(String mainClass, String[] classParams, String[] classPath, String[] jvmParams) 
+  public static Process runJVM(String mainClass, String[] classParams, String[] classPath, String[] jvmParams, File workDir) 
     throws IOException {
     
     StringBuffer buf = new StringBuffer();
@@ -66,7 +66,7 @@ public final class ExecJVM {
       buf.append(classPath[i]);
     }
 
-    return runJVM(mainClass, classParams, buf.toString(), jvmParams);
+    return runJVM(mainClass, classParams, buf.toString(), jvmParams, workDir);
   }
 
   /* REPAIRING working directory behavior for File I/O.
@@ -90,7 +90,7 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVM(String mainClass, String[] classParams, String classPath, String[] jvmParams) 
+  public static Process runJVM(String mainClass, String[] classParams, String classPath, String[] jvmParams, File workDir) 
     throws IOException {
     
     LinkedList<String> args = new LinkedList<String>();
@@ -99,7 +99,7 @@ public final class ExecJVM {
     _addArray(args, jvmParams);
     String[] jvmWithCP = args.toArray(new String[args.size()]);
 
-    return _runJVM(mainClass, classParams, jvmWithCP);
+    return _runJVM(mainClass, classParams, jvmWithCP, workDir);
   }
 
   /**
@@ -112,10 +112,10 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVMPropagateClassPath(String mainClass, String[] classParams, String[] jvmParams)
+  public static Process runJVMPropagateClassPath(String mainClass, String[] classParams, String[] jvmParams, File workDir)
     throws IOException {
     String cp = System.getProperty("java.class.path");
-    return runJVM(mainClass, classParams, cp, jvmParams);
+    return runJVM(mainClass, classParams, cp, jvmParams, workDir);
   }
 
   /** Runs a new JVM, propogating the present classpath.
@@ -124,9 +124,9 @@ public final class ExecJVM {
    *  @param classParams Parameters to pass to the main class
    *  @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVMPropagateClassPath(String mainClass, String[] classParams)
+  public static Process runJVMPropagateClassPath(String mainClass, String[] classParams, File workDir)
     throws IOException {
-    return runJVMPropagateClassPath(mainClass, classParams, new String[0]);
+    return runJVMPropagateClassPath(mainClass, classParams, new String[0], workDir);
   }
 
   /** Creates and runs a new JVM.
@@ -139,7 +139,7 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  private static Process _runJVM(String mainClass, String[] classParams, String[] jvmParams) throws IOException {
+  private static Process _runJVM(String mainClass, String[] classParams, String[] jvmParams, File workDir) throws IOException {
     LinkedList<String> args = new LinkedList<String>();
     args.add(_getExecutable());
     _addArray(args, jvmParams);
@@ -148,8 +148,8 @@ public final class ExecJVM {
 
     String[] argArray = args.toArray(new String[args.size()]);
     
-    // get the working directory setting
-    File workDir = edu.rice.cs.drjava.DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
+    // exec our "java" command in the specified working directory setting
+
     if (workDir != FileOption.NULL_FILE) {
       // execute in the working directory
       return Runtime.getRuntime().exec(argArray, null, workDir);

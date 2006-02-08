@@ -50,7 +50,7 @@ import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.util.ExitingNotAllowedException;
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.swing.Utilities;
@@ -322,6 +322,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         if (listing != null) {
           for (File entry : listing) { /* for each class file in the build directory */        
             
+
 //            System.err.println("Examining file " + entry);
             
             /* ignore non-class files */
@@ -348,6 +349,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               
               /** The absolute pathname for the file (including the file name) */
               File rootDir = classDirsAndRoots.get(dir);
+
               String javaSourceFileName = rootDir.getCanonicalPath() + File.separator + clazz.getSourceFileName();
 //              System.err.println("Full java source fileName = " + javaSourceFileName);
               
@@ -492,7 +494,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   /** Returns the current classpath in use by the JUnit JVM, in the form of a path-separator delimited string. */
-  public ClasspathVector getClasspath() {  return _jvm.getClasspath(); }
+  public ClassPathVector getClassPath() {  return _jvm.getClassPath(); }
   
   /** Called when the JVM used for unit tests has registered. */
   public void junitJVMReady() {

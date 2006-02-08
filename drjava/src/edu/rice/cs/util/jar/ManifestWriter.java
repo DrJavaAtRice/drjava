@@ -61,17 +61,14 @@ public class ManifestWriter {
   private String _mainClass;
   public static final Manifest DEFAULT = new ManifestWriter().getManifest();
 
-  /**
-   * Create a new manifest file
-   */
+  /** Create a new manifest file */
   public ManifestWriter() {
     _classPaths = new LinkedList<String>();
     _mainClass = null;
   }
 
-  /**
-   * Add a class path to the Manifest
-   * @param path the path to be added
+  /** Add a class path to the Manifest
+   *  @param path the path to be added
    */
   public void addClassPath(String path) {
     _classPaths.add(_classPaths.size(), path);

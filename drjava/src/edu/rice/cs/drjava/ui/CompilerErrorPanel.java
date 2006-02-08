@@ -69,10 +69,9 @@ public class CompilerErrorPanel extends ErrorPanel {
   private CompilerErrorListPane _errorListPane;
   private final JComboBox _compilerChoiceBox;
   
-  /**
-   * Constructor.
-   * @param model SingleDisplayModel in which we are running
-   * @param frame MainFrame in which we are displayed
+  /** Constructor.
+   *  @param model SingleDisplayModel in which we are running
+   *  @param frame MainFrame in which we are displayed
    */
   public CompilerErrorPanel(SingleDisplayModel model, MainFrame frame) {
     super(model, frame, "Compiler Output", "Compiler");

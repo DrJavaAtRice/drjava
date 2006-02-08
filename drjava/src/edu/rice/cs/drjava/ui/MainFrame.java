@@ -721,7 +721,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         JavadocModel jm = _model.getJavadocModel();
         File suggestedDir = jm.suggestJavadocDestination(_model.getActiveDocument());
         _javadocSelector.setSuggestedDir(suggestedDir);
-        String cps = _model.getClasspath().toString();
+        String cps = _model.getClassPath().toString();
         jm.javadocAll(_javadocSelector, _saveSelector, cps);
       }
       catch (IOException ioe) { _showIOError(ioe); }
@@ -950,7 +950,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Lots of work, so use another thread
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
-        _model.resetInteractions();
+        _model.resetInteractions(_model.getWorkingDirectory());
         return null;
       }
     };
@@ -958,22 +958,22 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   /** Defines actions that displays the interactions classpath. */
-  private Action _viewInteractionsClasspathAction = new AbstractAction("View Interactions Classpath") {
-    public void actionPerformed(ActionEvent e) { viewInteractionsClasspath(); }
+  private Action _viewInteractionsClassPathAction = new AbstractAction("View Interactions Classpath") {
+    public void actionPerformed(ActionEvent e) { viewInteractionsClassPath(); }
   };
   
   /** Displays the interactions classpath. */  
-  public void viewInteractionsClasspath() {
+  public void viewInteractionsClassPath() {
     StringBuffer cpBuf = new StringBuffer();
-    Vector<URL> classpathElements = _model.getClasspath();
-    for(int i = 0; i < classpathElements.size(); i++) {
-      cpBuf.append(classpathElements.get(i).getPath());
-      if (i + 1 < classpathElements.size()) cpBuf.append("\n");
+    Vector<URL> classPathElements = _model.getClassPath();
+    for(int i = 0; i < classPathElements.size(); i++) {
+      cpBuf.append(classPathElements.get(i).getPath());
+      if (i + 1 < classPathElements.size()) cpBuf.append("\n");
     }
-    String classpath = cpBuf.toString();
+    String classPath = cpBuf.toString();
     
     new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath",
-                               "Current Interpreter Classpath", classpath).show();
+                               "Current Interpreter Classpath", classPath).show();
   }
   
   /** Shows the user documentation. */
@@ -1766,22 +1766,22 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     config.addOptionListener(JSR14_LOCATION, new OptionListener<File>() {
       public void optionChanged(OptionEvent<File> oe) {
-        boolean bootClasspathHasv2 = DrJava.bootClasspathHasJSR14v20();
-        boolean bootClasspathHasv24 = DrJava.bootClasspathHasJSR14v24();
+        boolean bootClassPathHasv2 = DrJava.bootClassPathHasJSR14v20();
+        boolean bootClassPathHasv24 = DrJava.bootClassPathHasJSR14v24();
         if (oe.value != FileOption.NULL_FILE) {
           boolean checkForV20 = DrJava.checkForJSR14v20();
           boolean checkForV24 = DrJava.checkForJSR14v24();
-          if (checkForV24 && !bootClasspathHasv24) {
+          if (checkForV24 && !bootClassPathHasv24) {
             JOptionPane.showMessageDialog(_configFrame,
                                           "You must restart DrJava to use the JSR-14 v2.4 compiler.",
                                           "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
           }
-          else if ((checkForV20 && !checkForV24) && (!bootClasspathHasv2 || bootClasspathHasv24)) {
+          else if ((checkForV20 && !checkForV24) && (!bootClassPathHasv2 || bootClassPathHasv24)) {
             JOptionPane.showMessageDialog(_configFrame,
                                           "You must restart DrJava to use the JSR-14 v2.0/2.2 compiler.",
                                           "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
           }
-          else if (!checkForV20 && bootClasspathHasv2) {
+          else if (!checkForV20 && bootClassPathHasv2) {
             JOptionPane.showMessageDialog(_configFrame,
                                           "You must restart DrJava to switch to 1.x versions of the JSR-14 compiler.",
                                           "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
@@ -2284,7 +2284,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _openProject() { openProject(_openProjectSelector); }
   
   public void openProject(FileOpenSelector projectSelector) {
-    _model.resetInteractions();  // Shuts down debugger as well as resetting interactions pane.
+    
     try {
       hourglassOn();
       final File[] file = projectSelector.getFiles();
@@ -3059,19 +3059,12 @@ public class MainFrame extends JFrame implements OptionConstants {
           "current document, so it could not run the class.  Please\n" +
           "make sure that the class is properly defined first.";
         
-        JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found",
-                                      JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found", JOptionPane.ERROR_MESSAGE);
       }
-      catch (FileMovedException fme) {
-        _showFileMovedError(fme);
-      }
-      catch (IOException ioe) {
-        _showIOError(ioe);
-      }
+      catch (FileMovedException fme) { _showFileMovedError(fme); }
+      catch (IOException ioe) { _showIOError(ioe); }
     }
-    else {
-      _runMain();
-    }
+    else _runMain();
   }
   
   /** Internal helper method to run the main method of the current document in the interactions pane. */
@@ -3659,7 +3652,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     //_setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset the Interactions Pane");
-    _setUpAction(_viewInteractionsClasspathAction, "View Interactions Classpath", 
+    _setUpAction(_viewInteractionsClassPathAction, "View Interactions Classpath", 
                  "Display the classpath in use by the Interactions Pane");
     _setUpAction(_copyInteractionToDefinitionsAction, "Lift Current Interaction", 
                  "Copy the current interaction into the Definitions Pane");
@@ -3893,7 +3886,7 @@ public class MainFrame extends JFrame implements OptionConstants {
      _addMenuItem(toolsMenu, _abortInteractionAction, KEY_ABORT_INTERACTION);
      */
     _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS);
-    _addMenuItem(toolsMenu, _viewInteractionsClasspathAction, KEY_VIEW_INTERACTIONS_CLASSPATH);
+    _addMenuItem(toolsMenu, _viewInteractionsClassPathAction, KEY_VIEW_INTERACTIONS_CLASSPATH);
     _addMenuItem(toolsMenu, _copyInteractionToDefinitionsAction, KEY_LIFT_CURRENT_INTERACTION);
     _addMenuItem(toolsMenu, _printInteractionsAction, KEY_PRINT_INTERACTIONS);
     toolsMenu.addSeparator();
@@ -4586,7 +4579,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsPanePopupMenu.add(_clearHistoryAction);
     _interactionsPanePopupMenu.addSeparator();
     _interactionsPanePopupMenu.add(_resetInteractionsAction);
-    _interactionsPanePopupMenu.add(_viewInteractionsClasspathAction);
+    _interactionsPanePopupMenu.add(_viewInteractionsClassPathAction);
     _interactionsPanePopupMenu.add(_copyInteractionToDefinitionsAction);
     _interactionsPane.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
@@ -5551,7 +5544,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }    
     
-    public void compileEnded() {
+    public void compileEnded(File workDir) {
       // Only change GUI from event-dispatching thread
       Utilities.invokeLater(new Runnable() {
         public void run() {
@@ -5758,16 +5751,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     
-    public void interpreterResetFailed(Throwable t) { interpreterReady(); }
+    public void interpreterResetFailed(Throwable t) { interpreterReady(FileOption.NULL_FILE); }
     
     public void interpreterResetting() {
       // Only change GUI from event-dispatching thread
       Runnable command = new Runnable() {
         public void run() {
           Debugger dm = _model.getDebugger();
-          if (dm.isAvailable() && dm.isReady()) {
-            dm.shutdown();
-          }
+          if (dm.isAvailable() && dm.isReady()) dm.shutdown();
           _resetInteractionsAction.setEnabled(false);
           _junitAction.setEnabled(false);
           _junitAllAction.setEnabled(false);
@@ -5775,15 +5766,13 @@ public class MainFrame extends JFrame implements OptionConstants {
           _closeInteractionsScript();
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-          if (_model.getDebugger().isAvailable()) {
-            _toggleDebuggerAction.setEnabled(false);
-          }
+          if (_model.getDebugger().isAvailable()) _toggleDebuggerAction.setEnabled(false);
         }
       };
       Utilities.invokeLater(command);
     }
     
-    public void interpreterReady() {
+    public void interpreterReady(File wd) {
       // Only change GUI from event-dispatching thread
       Runnable command = new Runnable() {
         public void run() {
@@ -6117,6 +6106,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       else _cleanAction.setEnabled(false);
     }
     
+    public void projectWorkDirChanged() { }
+      
     public void projectModified() {
 //      _saveProjectAction.setEnabled(_model.isProjectChanged());
     }

@@ -95,7 +95,7 @@ public interface OptionConstants {
     new FileOption("jsr14.collectionspath", FileOption.NULL_FILE);
 
   public static final VectorOption<File> EXTRA_CLASSPATH =
-    new ClasspathOption().evaluate("extra.classpath");
+    new ClassPathOption().evaluate("extra.classpath");
 
   public static final VectorOption<String> EXTRA_COMPILERS =
     new VectorOption<String>("extra.compilers", new StringOption("",""), new Vector<String>());
@@ -809,7 +809,7 @@ public interface OptionConstants {
    * while stepping in the debugger.
    */
   public static final VectorOption<File> DEBUG_SOURCEPATH =
-    new ClasspathOption().evaluate("debug.sourcepath");
+    new ClassPathOption().evaluate("debug.sourcepath");
 
   /**
    * Whether stepping should step through Java's source files

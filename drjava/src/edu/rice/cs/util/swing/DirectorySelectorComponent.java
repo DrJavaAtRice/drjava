@@ -63,92 +63,66 @@ import java.io.*;
  * @version $Id$
  */
 public class DirectorySelectorComponent extends JPanel {
-  /**
-   * The default number of columns for the text box.
-   */
+  
+  /** The default number of columns for the text box. */
   public static final int DEFAULT_NUM_COLS = 30;
 
-  /**
-   * The default font size for the text box.
-   */
+  /** The default font size for the text box. */
   public static final float DEFAULT_FONT_SIZE = 10f;
 
 
-  /**
-   * The parent frame of this component.
-   */
+  /** The parent frame of this component. */
   protected final Frame _parent;
 
-  /**
-   * Text field with the name of the selected file.
-   */
+  /** Text field with the name of the selected file. */
   protected final JTextField _fileField;
 
-  /**
-   * "..." button to open the file chooser.
-   */
+  /**  "..." button to open the file chooser. */
   protected final JButton _chooserButton;
 
-  /**
-   * File chooser to open when clicking the "..." button.
-   */
+  /** File chooser to open when clicking the "..." button. */
   protected final DirectoryChooser _chooser;
 
-  /**
-   * The current file
-   */
+  /** The current file */
   protected File _file;
   
-  /**
-   * Creates a new DirectorySelectorComponent with default dimensions.
-   *
-   * @param parent  Parent of this component.
-   * @param chooser File chooser to display from the "..." button.
+  /** Creates a new DirectorySelectorComponent with default dimensions.
+   *  @param parent  Parent of this component.
+   *  @param chooser File chooser to display from the "..." button.
    */
   public DirectorySelectorComponent(Frame parent, DirectoryChooser chooser) {
     this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE);
   }
 
-  /**
-   * Creates a new DirectorySelectorComponent.
-   *
-   * @param parent   Parent of this component.
-   * @param chooser  File chooser to display from the "..." button.
-   * @param numCols  Number of columns to display in the text field
-   * @param fontSize Font size for the text field
+  /** Creates a new DirectorySelectorComponent.
+   *  @param parent   Parent of this component.
+   *  @param chooser  File chooser to display from the "..." button.
+   *  @param numCols  Number of columns to display in the text field
+   *  @param fontSize Font size for the text field
    */
-  public DirectorySelectorComponent(Frame parent, DirectoryChooser chooser,
-                               int numCols, float fontSize) {
+  public DirectorySelectorComponent(Frame parent, DirectoryChooser chooser, int numCols, float fontSize) {
     _parent = parent;
     _chooser = chooser;
     _file = null;
     
     _fileField = new JTextField(numCols) {
-      public Dimension getMaximumSize() {
-        return new Dimension(Short.MAX_VALUE, super.getPreferredSize().height);
-      }
+      public Dimension getMaximumSize() { return new Dimension(Short.MAX_VALUE, super.getPreferredSize().height); }
     };
     _fileField.setFont(_fileField.getFont().deriveFont(fontSize));
     _fileField.setPreferredSize(new Dimension(22,22));
     _fileField.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        validateTextField();
-      }
+      public void actionPerformed(ActionEvent e) { validateTextField(); }
     });
     _fileField.addFocusListener(new FocusListener() {
       public void focusGained(FocusEvent e) { 
 //        validateTextField();
       }
-      public void focusLost(FocusEvent e) {
-        validateTextField();
-      }
+      public void focusLost(FocusEvent e) { validateTextField(); }
     });
     
     _chooserButton = new JButton("...");
     _chooserButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        _chooseFile();
-      }
+      public void actionPerformed(ActionEvent e) { _chooseFile(); }
     });
     _chooserButton.setMaximumSize(new Dimension(22, 22));
     _chooserButton.setMargin(new Insets(0,5,0,5));
@@ -164,37 +138,23 @@ public class DirectorySelectorComponent extends JPanel {
     super.setEnabled(enabled);
   }
   
-  /**
-   * Returns the file text field.
-   */
-  public JTextField getFileField() {
-    return _fileField;
-  }
+  /** Returns the file text field. */
+  public JTextField getFileField() { return _fileField; }
 
-  /**
-   * Returns the file chooser.
-   */
-  public DirectoryChooser getFileChooser() {
-    return _chooser;
-  }
+  /** Returns the file chooser. */
+  public DirectoryChooser getFileChooser() { return _chooser; }
 
-  /**
-   * Returns the file currently typed into the file field.
-   */
+  /** Returns the file currently typed into the file field. THE SIDE EFFECTS OF THIS METHOD ARE OBSCENE!  Corky 2/5/06 */
   public File getFileFromField() {
     String txt = _fileField.getText().trim();
-    if (txt.equals(""))
-      _file = null;
-    else 
-      _file = new File(txt);
+    if (txt.equals("")) _file = null;
+    else _file = new File(txt);
     
     return _file;
   }
 
-  /**
-   * Sets the text of the file field to be the given file.
-   *
-   * @param file File to display in the file field.
+  /** Sets the text of the file field to be the given file.
+   *  @param file File to display in the file field.
    */
   public void setFileField(File file) {
     _file = file;
@@ -210,9 +170,7 @@ public class DirectorySelectorComponent extends JPanel {
   }
 
   public void resetFileField() {
-    if (_file == null) {
-      _fileField.setText("");
-    }
+    if (_file == null) _fileField.setText("");
     else {
       _fileField.setText(_file.toString());
       _fileField.setCaretPosition(_fileField.getText().length());

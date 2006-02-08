@@ -46,18 +46,22 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 /**
- * A compiler interface to find Javac (1.4.1+) from the classpath,
+ * A compiler interface to find Javac from the classpath,
  * but to do so via a compiler proxy so that the compiler classes can be
  * fully unloaded/reloaded every time it is used.
  *
  * @version $Id$
  */
-public class Javac141FromClasspath extends CompilerProxy {
-  public static final CompilerInterface ONLY = new Javac141FromClasspath();
+public class JavacFromClassPath extends CompilerProxy {
+  public static final CompilerInterface ONLY = new JavacFromClassPath();
 
   /** Private constructor due to singleton. */
-  private Javac141FromClasspath() {
-    super("edu.rice.cs.drjava.model.compiler.Javac141Compiler",
-          Javac141FromClasspath.class.getClassLoader());
+  private JavacFromClassPath() {
+    super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
+          JavacFromClassPath.class.getClassLoader());
+  }
+
+  public String getName() {
+    return super.getName();
   }
 }

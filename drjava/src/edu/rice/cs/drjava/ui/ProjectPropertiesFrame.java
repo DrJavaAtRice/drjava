@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.config.*;
 
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
@@ -68,34 +68,21 @@ public class ProjectPropertiesFrame extends JFrame {
   private MainFrame _mainFrame;
   
   private DirectorySelectorComponent _builtDirSelector;
+  private DirectorySelectorComponent _workDirSelector;
   private DirectorySelectorComponent _jarMainClassSelector;
   
   private FileSelectorComponent _jarFileSelector;
   private FileSelectorComponent _manifestFileSelector;
   
-  private VectorFileOptionComponent _extraClasspathList;
+  private VectorFileOptionComponent _extraClassPathList;
   
-  /**
-   * Sets up the frame and displays it.
-   */
+  /** Sets up the frame and displays it. */
   public ProjectPropertiesFrame(MainFrame mf) {
     super("Project Properties");
     
     _mainFrame = mf;
-    
     _mainPanel= new JPanel();
     _setupPanel(_mainPanel);
-    
-    //    JScrollPane scroll = new JScrollPane(_mainPanel,
-    //                                         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-    //                                         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    //    
-    //    // Fix increment on scrollbar
-    //    JScrollBar bar = scroll.getVerticalScrollBar();
-    //    bar.setUnitIncrement(25);
-    //    bar.setBlockIncrement(400);
-    //    
-    
     
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
@@ -107,9 +94,7 @@ public class ProjectPropertiesFrame extends JFrame {
         // Always apply and save settings
         boolean successful = true;
         successful = saveSettings();
-        if (successful) {
-          ProjectPropertiesFrame.this.setVisible(false);
-        }
+        if (successful)  ProjectPropertiesFrame.this.setVisible(false);
       }
     };
     _okButton = new JButton(okAction);
@@ -170,73 +155,67 @@ public class ProjectPropertiesFrame extends JFrame {
     reset();
   }
   
-  /**
-   * Resets the frame and hides it.
-   */
+  /** Resets the frame and hides it. */
   public void cancel() {
     reset();
     ProjectPropertiesFrame.this.setVisible(false);
   }
   
   private void reset() {
-    File f = _mainFrame.getModel().getBuildDirectory();
-    JTextField textField = _builtDirSelector.getFileField();
-    if (f == null)
-      textField.setText("");
-    else
-      _builtDirSelector.setFileField(f);
+    final File bd = _mainFrame.getModel().getBuildDirectory();
+    final JTextField bdTextField = _builtDirSelector.getFileField();
+    if (bd == null) bdTextField.setText("");
+    else _builtDirSelector.setFileField(bd);
     
-    f = _mainFrame.getModel().getMainClass();
+    final File wd = _mainFrame.getModel().getRawWorkingDirectory();
+    final JTextField wdTextField = _workDirSelector.getFileField();
+    if (wd == null) wdTextField.setText("");
+    else _workDirSelector.setFileField(wd);
     
-    textField = _jarMainClassSelector.getFileField();
-    if (f == null)
-      textField.setText("");
-    else
-      _jarMainClassSelector.setFileField(f);
+    final File mc = _mainFrame.getModel().getMainClass();
+    final JTextField mcTextField = _jarMainClassSelector.getFileField();
+    if (mc == null) mcTextField.setText("");
+    else _jarMainClassSelector.setFileField(mc);
     
-    ClasspathVector cp = _mainFrame.getModel().getProjectExtraClasspath();
-    _extraClasspathList.setValue(cp.asFileVector());
+    ClassPathVector cp = _mainFrame.getModel().getExtraClassPath();
+    _extraClassPathList.setValue(cp.asFileVector());
   }
   
-  /**
-   * Write the settings to the project file
-   */
+  /** Write the settings to the project file */
   public boolean saveSettings() {//throws IOException {
-    File f = _builtDirSelector.getFileFromField();
-    if (_builtDirSelector.getFileField().getText().equals("")) 
-      f = null;
-    _mainFrame.getModel().setBuildDirectory(f);
+    File bd = _builtDirSelector.getFileFromField();
+    if (_builtDirSelector.getFileField().getText().equals("")) bd = null;
+    _mainFrame.getModel().setBuildDirectory(bd);
     
-    f = _jarMainClassSelector.getFileFromField();
-    if (_jarMainClassSelector.getFileField().getText().equals(""))
-      f = null;
-    _mainFrame.getModel().setMainClass(f);
+    File wd = _workDirSelector.getFileFromField();
+    if (_workDirSelector.getFileField().getText().equals("")) wd = null;
+    _mainFrame.getModel().setWorkingDirectory(wd);
     
-    Vector<File> extras = _extraClasspathList.getValue();
-    ClasspathVector cpv = new ClasspathVector();
-    for (File cf : extras) {
-      cpv.add(cf);
-    }
-    _mainFrame.getModel().setProjectExtraClasspath(cpv);
+    File mc = _jarMainClassSelector.getFileFromField();
+    if (_jarMainClassSelector.getFileField().getText().equals("")) mc = null;
+    _mainFrame.getModel().setMainClass(mc);
     
+    Vector<File> extras = _extraClassPathList.getValue();
+    ClassPathVector cpv = new ClassPathVector();
+    for (File cf : extras) { cpv.add(cf); }
+    _mainFrame.getModel().setExtraClassPath(cpv);
+ 
     //    _mainFrame.saveProject();
-    
     return true;
   }
   
-  /**
-   * Returns the current working directory, or the user's current directory
-   * if none is set. 20040213 Changed default value to user's current directory.
-   */
+  /** Returns the current build directory in the project profile. */
+  private File _getBuildDir() {
+    File buildDir = _mainFrame.getModel().getBuildDirectory();
+    if (buildDir != null) return buildDir;
+    return FileOption.NULL_FILE;
+  }
+  
+  /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getWorkDir() {
-    File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File(System.getProperty("user.dir"));
-    }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
-    return workDir;
+    File workDir = _mainFrame.getModel().getRawWorkingDirectory();
+    if (workDir != null) return workDir;
+    return FileOption.NULL_FILE;
   }
   
   private void _setupPanel(JPanel panel) {
@@ -246,30 +225,53 @@ public class ProjectPropertiesFrame extends JFrame {
     c.fill = GridBagConstraints.HORIZONTAL;
     Insets labelInsets = new Insets(5, 10, 0, 0);
     Insets compInsets  = new Insets(5, 5, 0, 10);
+    
+    // Build Directory
+    
     c.weightx = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
-    
-    // Build Directory
-    JLabel label = new JLabel("Build Directory");
-    label.setToolTipText("<html>The directory the class files will be compiled into.<br>"+
+
+    JLabel bdLabel = new JLabel("Build Directory");
+    bdLabel.setToolTipText("<html>The directory the class files will be compiled into.<br>"+
                          "If not specified, the class files will be compiled into<br>"+
                          "the same directory as their corresponding source files</html>");
-    gridbag.setConstraints(label, c);
-    panel.add(label);
+    gridbag.setConstraints(bdLabel, c);
+    
+    panel.add(bdLabel);
     c.weightx = 1.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    JPanel dirPanel = _builtDirectoryPanel();
-    gridbag.setConstraints(dirPanel, c);
-    panel.add(dirPanel);
+    JPanel bdPanel = _builtDirectoryPanel();
+    gridbag.setConstraints(bdPanel, c);
+    panel.add(bdPanel);
+    
+    // Working Directory
     
     c.weightx = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
     
+    JLabel wdLabel = new JLabel("Working Directory");
+    wdLabel.setToolTipText("<html>The root directory for relative path names.</html>");
+    gridbag.setConstraints(wdLabel, c);
+    
+    panel.add(wdLabel);
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    
+    JPanel wdPanel = _workDirectoryPanel();
+    gridbag.setConstraints(wdPanel, c);
+    panel.add(wdPanel);
+    
     // Main Document file
+    
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+
     JLabel classLabel = new JLabel("Main Document");
     classLabel.setToolTipText("<html>The project document containing the<br>" + 
                               "<code>main</code>method for the entire project</html>");
@@ -302,7 +304,7 @@ public class ProjectPropertiesFrame extends JFrame {
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    Component extrasComponent = _extraClasspathComponent();
+    Component extrasComponent = _extraClassPathComponent();
     gridbag.setConstraints(extrasComponent, c);
     panel.add(extrasComponent);
     
@@ -345,45 +347,32 @@ public class ProjectPropertiesFrame extends JFrame {
   }
   
   public JPanel _builtDirectoryPanel() {
-    //    JPanel toReturn = new JPanel();
-    //    toReturn.setLayout(new BorderLayout());
-    //   
-    //    toReturn.add(new JLabel("Build Directory"),BorderLayout.WEST);
-    //    
     DirectoryChooser dirChooser = new DirectoryChooser(this);
-    dirChooser.setSelectedDirectory(_getWorkDir());
+    dirChooser.setSelectedDirectory(_getBuildDir());
     dirChooser.setDialogTitle("Select Build Directory");
     dirChooser.setApproveButtonText("Select");
     dirChooser.setEditable(true);
-    _builtDirSelector = new DirectorySelectorComponent(this,dirChooser,20,12f);
+    _builtDirSelector = new DirectorySelectorComponent(this,dirChooser, 20, 12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _builtDirSelector;
   }
   
-  public Component _extraClasspathComponent() {
-    _extraClasspathList = new VectorFileOptionComponent(null, "Extra Project Classpaths", this);
-    return _extraClasspathList.getComponent();
+  public JPanel _workDirectoryPanel() {
+    DirectoryChooser dirChooser = new DirectoryChooser(this);
+    dirChooser.setSelectedDirectory(_getWorkDir());
+    dirChooser.setDialogTitle("Select Working Directory");
+    dirChooser.setApproveButtonText("Select");
+    dirChooser.setEditable(true);
+    _workDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f);
+    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    return _workDirSelector;
   }
   
-  //  public JPanel _jarMainClassSelector() {
-  //    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
-  //    fileChooser.setDialogTitle("Select");
-  //    fileChooser.setApproveButtonText("Select");
-  //    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-  //    fileChooser.setMultiSelectionEnabled(false);
-  //    _jarMainClassSelector = new FileSelectorComponent(this,fileChooser,20,12f);
-  //    _jarMainClassSelector.setFileFilter(new FileFilter() {
-  //      public boolean accept(File f) {
-  //        return f.getName().endsWith(".java") || f.isDirectory();
-  //      }
-  //      public String getDescription() {
-  //        return "Java Files (*.java)";
-  //      }
-  //      
-  //    });
-  //    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
-  //    return _jarMainClassSelector;
-  //  }
+  public Component _extraClassPathComponent() {
+    _extraClassPathList = new VectorFileOptionComponent(null, "Extra Project Classpaths", this);
+    return _extraClassPathList.getComponent();
+  }
+  
   public JPanel _jarMainClassSelector() {
     File rootFile = _mainFrame.getModel().getProjectFile();
     try {
@@ -444,16 +433,11 @@ public class ProjectPropertiesFrame extends JFrame {
     fileChooser.setMultiSelectionEnabled(false);
     _jarFileSelector = new FileSelectorComponent(this,fileChooser,20,12f);
     _jarFileSelector.setFileFilter(new FileFilter() {
-      public boolean accept(File f) {
-        return f.getName().endsWith(".jar") || f.isDirectory();
-      }
-      public String getDescription() {
-        return "Java Archive Files (*.jar)";
-      }
+      public boolean accept(File f) { return f.getName().endsWith(".jar") || f.isDirectory(); }
+      public String getDescription() { return "Java Archive Files (*.jar)"; }
       
     });
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
-    
     return _jarFileSelector;
   }
   

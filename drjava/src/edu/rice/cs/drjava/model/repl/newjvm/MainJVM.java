@@ -46,16 +46,18 @@ import java.util.ArrayList;
 //  (It seems to crash Eclipse...)
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 import edu.rice.cs.util.Log;
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.swing.Utilities;
 import koala.dynamicjava.parser.wrapper.*;
 
 /** Manages a remote JVM.
@@ -68,6 +70,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public static final String DEFAULT_INTERPRETER_NAME = "DEFAULT";
   
   private Log _log = new Log("MainJVMLog", false);
+  
+  /** Working directory for slave JVM */
+  private File _workDir;
   
   /** Listens to interactions-related events. */
   private InteractionsModelCallback _interactionsModel;
@@ -96,10 +101,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private boolean _allowAssertions = false;
   
   /** Classpath to use for starting the interpreter JVM */
-  private String _startupClasspath;
+  private String _startupClassPath;
   
   /** Starting classpath reorganized into a vector. */
-  private ClasspathVector _startupClasspathVector;
+  private ClassPathVector _startupClassPathVector;
   
   /** A list of user-defined arguments to pass to the interpreter. */
   private List<String> _optionArgs;
@@ -107,43 +112,44 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** The name of the current interpreter. */
   private String _currentInterpreterName = DEFAULT_INTERPRETER_NAME;
   
-  /** Creates a new MainJVM to interface to another JVM, but does not
-   *  automatically start the Interpreter JVM.  Callers should set the
-   *  InteractionsModel and JUnitModel, and then call startInterpreterJVM().
+  /** Creates a new MainJVM to interface to another JVM;  the MainJVM has a link to the partially initialized 
+   *  global model.  The MainJVM but does not automatically start the Interpreter JVM.  Callers must set the
+   *  InteractionsModel and JUnitModel and then call startInterpreterJVM().
    */
-  public MainJVM() {
+  public MainJVM(File wd) {
     super(SLAVE_CLASS_NAME);
+    _workDir = wd;
     _waitForQuitThreadName = "Wait for Interactions to Exit Thread";
     _exportMasterThreadName = "Export DrJava to RMI Thread";
     
     _interactionsModel = new DummyInteractionsModel();
     _junitModel = new DummyJUnitModel();
     _debugModel = new DummyDebugModel();
-    _startupClasspath = System.getProperty("java.class.path");
-    _parseStartupClasspath();
+    _startupClassPath = System.getProperty("java.class.path");
+    _parseStartupClassPath();
     _optionArgs = new ArrayList<String>();
     //startInterpreterJVM();
   }
   
-  private void _parseStartupClasspath() {
+  private void _parseStartupClassPath() {
     String separator = System.getProperty("path.separator");
-    int index = _startupClasspath.indexOf(separator);
+    int index = _startupClassPath.indexOf(separator);
     int lastIndex = 0;
-    _startupClasspathVector = new ClasspathVector();
+    _startupClassPathVector = new ClassPathVector();
     while (index != -1) {
       try{
-        _startupClasspathVector.add(new File(_startupClasspath.substring(lastIndex, index)).toURL());
+        _startupClassPathVector.add(new File(_startupClassPath.substring(lastIndex, index)).toURL());
       }
       catch(MalformedURLException murle) {
         // just don't add bad classpath entry
       }
       lastIndex = index + separator.length();
-      index = _startupClasspath.indexOf(separator, lastIndex);
+      index = _startupClassPath.indexOf(separator, lastIndex);
     }
     // Get the last entry
-    index = _startupClasspath.length();
+    index = _startupClassPath.length();
     try{
-      _startupClasspathVector.add(new File(_startupClasspath.substring(lastIndex, index)).toURL());
+      _startupClassPathVector.add(new File(_startupClassPath.substring(lastIndex, index)).toURL());
     }
     catch(MalformedURLException murle) {
       // fail silently if the classpath entry is bad
@@ -153,9 +159,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public boolean isInterpreterRunning() { return _interpreterJVM() != null; }
   
   /** Provides an object to listen to interactions-related events. */
-  public void setInteractionsModel(InteractionsModelCallback model) {
-    _interactionsModel = model;
-  }
+  public void setInteractionsModel(InteractionsModelCallback model) { _interactionsModel = model; }
   
   /** Provides an object to listen to test-related events.*/
   public void setJUnitModel(JUnitModelCallback model) { _junitModel = model; }
@@ -309,21 +313,21 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Returns the current classpath of the interpreter as a list of
    *  unique entries.  The list is empty if a remote exception occurs.
    */
-  public ClasspathVector getClasspath() {
+  public ClassPathVector getClassPath() {
     // silently fail if disabled. see killInterpreter docs for details.
     if (_restart) {
       
       ensureInterpreterConnected();
       
       try {
-        Vector<String> strClasspath = new Vector<String>(_interpreterJVM().getAugmentedClasspath());
-        ClasspathVector classpath = new ClasspathVector(strClasspath.size()+_startupClasspathVector.size());
+        Vector<String> strClassPath = new Vector<String>(_interpreterJVM().getAugmentedClassPath());
+        ClassPathVector classPath = new ClassPathVector(strClassPath.size()+_startupClassPathVector.size());
         
-        for(String s : strClasspath) { 
-          classpath.add(s); // automatically converted to URL
+        for(String s : strClassPath) { 
+          classPath.add(s); // automatically converted to URL
         }
         
-        classpath.addAll(_startupClasspathVector);
+        classPath.addAll(_startupClassPathVector);
         //        for(int i = 0; i < _startupClasspathVector.size(); i++) {
         //          classpath.addElement(_startupClasspathVector.elementAt(i));
         //        }
@@ -331,11 +335,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         //        for(int i = 0; i < augmentedClasspath.size(); i++) {
         //          classpdElement(augmentedClasspath.ementAt(i));
         //        }
-        return classpath;
+        return classPath;
       }
       catch (RemoteException re) { _threwException(re); }
     }
-    return new ClasspathVector();
+    return new ClassPathVector();
   }
   
   
@@ -581,20 +585,22 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Accesses the cached current interpreter name. */
   public String getCurrentInterpreterName() { return _currentInterpreterName; }
   
-  /** Kills the running interpreter JVM, and optionally restarts it.
+  /** Kills the running interpreter JVM, and restarts with working directory wd if wd != null.  If wd == null, the
+   *  interpreter is not restarted.
    *  @param shouldRestart if true, the interpreter will be restarted automatically.
    *  Note: If the interpreter is not restarted, all of the methods that delgate to the interpreter will 
    *  silently fail! Therefore, killing without restarting should be used with extreme care and only in 
    *  carefully controlled test cases or when DrJava is quitting anyway.
    */
 
-  public void killInterpreter(boolean shouldRestart) {
+  public void killInterpreter(File wd) {
     synchronized(_masterJVMLock) {
       try {
-//        Utilities.showDebug("MainJVM: killInterpreter called with shouldRestart = " + shouldRestart);
-        _restart = shouldRestart;
+//        Utilities.showDebug("MainJVM: killInterpreter called with working directory = " + wd);
+        _workDir = wd;
+        _restart = (wd != null);
         _cleanlyRestarting = true;
-        if (shouldRestart) _interactionsModel.interpreterResetting();
+        if (_restart) _interactionsModel.interpreterResetting();
         quitSlave();
       }
       catch (ConnectException ce) {
@@ -607,10 +613,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Sets the classpath to use for starting the interpreter JVM. Must include the classes for the interpreter.
    *  @param classpath Classpath for the interpreter JVM
    */
-  public void setStartupClasspath(String classpath) {
+  public void setStartupClassPath(String classPath) {
     synchronized(_masterJVMLock) {
-      _startupClasspath = classpath;
-      _parseStartupClasspath();
+      _startupClassPath = classPath;
+      _parseStartupClassPath();
     }
   }
   
@@ -655,8 +661,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     try {
       // _startupClasspath is sent in as the interactions classpath
 //      System.out.println("startup: " + _startupClasspath);
-//      Utilities.showDebug("Calling invokeSlave(" + jvmArgs + ", " + _startupClasspath + ")");
-      invokeSlave(jvmArgsArray, _startupClasspath);
+//      Utilities.showDebug("Calling invokeSlave(" + jvmArgs + ", " + _startupClasspath + ", " + _model.getWorkingDirectory() +")");
+      invokeSlave(jvmArgsArray, _startupClassPath, _workDir);
     }
     catch (RemoteException re) { _threwException(re); }
     catch (IOException ioe) { _threwException(ioe); }
@@ -668,7 +674,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   protected void handleSlaveQuit(int status) {
     // Only restart the slave if _restart is true
-//    Utilities.showDebug("MainJVM: slaveJVM has quit with status " + status + " _restart = " + _restart + " _cleanlyRestarting = " + _cleanlyRestarting);
+//    Utilities.showDebug("MainJVM: slaveJVM has quit with status " + status + " _workDir = " + _workDir + 
+//      " _cleanlyRestarting = " + _cleanlyRestarting);
     if (_restart) {
       // We have already fired this event if we are cleanly restarting
       if (!_cleanlyRestarting) _interactionsModel.interpreterResetting();
@@ -729,7 +736,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     Boolean allowAccess = DrJava.getConfig().getSetting(OptionConstants.ALLOW_PRIVATE_ACCESS);
     setPrivateAccessible(allowAccess.booleanValue());
     
-    _interactionsModel.interpreterReady();
+    _interactionsModel.interpreterReady(_workDir);
     _junitModel.junitJVMReady();
     
     _log.logTime("thread in connected: " + Thread.currentThread());
@@ -877,7 +884,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void replCalledSystemExit(int status) { }
     public void interpreterResetting() { }
     public void interpreterResetFailed(Throwable th) { }
-    public void interpreterReady() { }
+    public void interpreterReady(File wd) { }
   }
   
   /** JUnitModel which does not react to events. */
@@ -889,7 +896,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void testEnded(String testName, boolean wasSuccessful, boolean causedError) { }
     public void testSuiteEnded(JUnitError[] errors) { }
     public File getFileForClassName(String className) { return null; }
-    public ClasspathVector getClasspath() { return new ClasspathVector(); }
+    public ClassPathVector getClassPath() { return new ClassPathVector(); }
     public void junitJVMReady() { }
   }
   

@@ -60,7 +60,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 public class DefaultJavadocModel implements JavadocModel {
 
   /** Used by CompilerErrorModel to open documents that have errors. */
-  private IGetDocuments _model;
+  private GlobalModel _model;
 
   /**Manages listeners to this model. */
   private final JavadocEventNotifier _notifier = new JavadocEventNotifier();
@@ -71,7 +71,7 @@ public class DefaultJavadocModel implements JavadocModel {
   /** Main constructor.
    *  @param getter Source of documents for this JavadocModel
    */
-  public DefaultJavadocModel(IGetDocuments model) {
+  public DefaultJavadocModel(GlobalModel model) {
     _model = model;
     _javadocErrorModel = new CompilerErrorModel();
   }
@@ -117,7 +117,7 @@ public class DefaultJavadocModel implements JavadocModel {
    *
    * @throws IOException if there is a problem manipulating files
    */
-  public void javadocAll(DirectorySelector select, final FileSaveSelector saver, final String classpath) 
+  public void javadocAll(DirectorySelector select, final FileSaveSelector saver, final String classPath) 
     throws IOException {
         
     // Only javadoc if all are saved. Removed because it is already done inside suggestJavadocDestination (fixes bug where pop-up is shown twice)
@@ -181,7 +181,7 @@ public class DefaultJavadocModel implements JavadocModel {
     // Start a new thread to do the work.
     final File destDirF = destDir;
     new Thread("DrJava Javadoc Thread") {
-      public void run() { _javadocAllWorker(destDirF, saver, classpath); }
+      public void run() { _javadocAllWorker(destDirF, saver, classPath); }
     }.start();
   }
     
@@ -195,7 +195,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param saver a command object for saving a document (if it moved/changed)
    * @param classpath an array of classpath elements to be used by Javadoc
    */
-  private void _javadocAllWorker(File destDirFile, FileSaveSelector saver, String classpath) {
+  private void _javadocAllWorker(File destDirFile, FileSaveSelector saver, String classPath) {
     
     if (!_ensureValidToolsJar()) return;
 
@@ -300,10 +300,10 @@ public class DefaultJavadocModel implements JavadocModel {
     // Generate all command line arguments
     ArrayList<String> args = _buildCommandLineArgs(docUnits, destDir,
                                                    sourcePath.toString(),
-                                                   classpath);
+                                                   classPath);
 
     // Run the actual Javadoc process
-    _runJavadoc(args, classpath, destDirFile, true);
+    _runJavadoc(args, classPath, destDirFile, true);
   }
 
 
@@ -323,7 +323,7 @@ public class DefaultJavadocModel implements JavadocModel {
    */
   public void javadocDocument(final OpenDefinitionsDocument doc,
                               final FileSaveSelector saver,
-                              final String classpath)           throws IOException {
+                              final String classPath)           throws IOException {
     // Prompt to save if necessary
     //  (TO DO: should only need to save the current document)
     if (doc.isUntitled() || doc.isModifiedSinceSave()) _notifier.saveBeforeJavadoc();
@@ -344,7 +344,7 @@ public class DefaultJavadocModel implements JavadocModel {
     new Thread("DrJava Javadoc Thread") {
       public void run() {
 //        _javadocDocumentWorker(destDir, file, doc, saver, classpathArray);
-        _javadocDocumentWorker(destDir, file, classpath);
+        _javadocDocumentWorker(destDir, file, classPath);
       }
     }.start();
   }
@@ -357,15 +357,15 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param docFile the file of the document
    * @param classpath an array of classpath elements to be used by Javadoc
    */
-  private void _javadocDocumentWorker(File destDirFile, File docFile, String classpath) {
+  private void _javadocDocumentWorker(File destDirFile, File docFile, String classPath) {
     if (!_ensureValidToolsJar()) return;
 
     // Generate all command line arguments
     String destDir = destDirFile.getAbsolutePath();
-    ArrayList<String> args = _buildCommandLineArgs(docFile, destDir, classpath);
+    ArrayList<String> args = _buildCommandLineArgs(docFile, destDir, classPath);
 
     // Run the actual Javadoc process
-    _runJavadoc(args, classpath, destDirFile, false);
+    _runJavadoc(args, classPath, destDirFile, false);
   }
 
 
@@ -454,7 +454,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param destDirFile Directory where the results are being saved
    * @param allDocs Whether we are running over all open documents
    */
-  private void _runJavadoc(ArrayList<String> args, String classpath,
+  private void _runJavadoc(ArrayList<String> args, String classPath,
                            File destDirFile, boolean allDocs) {
     // Start a new process to execute Javadoc and tell listeners it has started
     // And finally, when we're done notify the listeners with a success flag
@@ -463,7 +463,7 @@ public class DefaultJavadocModel implements JavadocModel {
       // Notify all listeners that Javadoc is starting.
       _notifier.javadocStarted();
 
-      result = _javadoc(args.toArray(new String[args.size()]), classpath);
+      result = _javadoc(args.toArray(new String[args.size()]), classPath);
 
       // If success and we're generating current, make sure the temp
       //  directory gets deleted on exit.
@@ -492,7 +492,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param classpath an array of classpath elements to use in the Javadoc JVM
    * @return true if Javadoc succeeded in building the HTML, otherwise false
    */
-  private boolean _javadoc(String[] args, String classpath) throws IOException {
+  private boolean _javadoc(String[] args, String classPath) throws IOException {
     final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main";
     Process javadocProcess;
     
@@ -506,7 +506,7 @@ public class DefaultJavadocModel implements JavadocModel {
     
     // We must use this classpath nonsense to make sure our new Javadoc JVM
     // can see everything the interactions pane can see.
-    javadocProcess =  ExecJVM.runJVM(JAVADOC_CLASS, args, new String[]{classpath}, jvmArgs);
+    javadocProcess =  ExecJVM.runJVM(JAVADOC_CLASS, args, new String[]{classPath}, jvmArgs, FileOption.NULL_FILE);
 
     //System.err.println("javadoc started with args:\n" + Arrays.asList(args));
 
@@ -740,10 +740,10 @@ public class DefaultJavadocModel implements JavadocModel {
   protected ArrayList<String> _buildCommandLineArgs(Collection<String> docUnits,
                                                     String destDir,
                                                     String sourcePath,
-                                                    String classpath)
+                                                    String classPath)
   {
     ArrayList<String> args = new ArrayList<String>();
-    _addBasicArguments(args, destDir, sourcePath, classpath);
+    _addBasicArguments(args, destDir, sourcePath, classPath);
     _addOnlineLinkArguments(args);
     args.addAll(docUnits);
     return args;
@@ -761,10 +761,10 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param classpath All classpath entries to pass
    */
   protected ArrayList<String> _buildCommandLineArgs(File file, String destDir,
-                                                    String classpath)
+                                                    String classPath)
   {
     ArrayList<String> args = new ArrayList<String>();
-    _addBasicArguments(args, destDir, "", classpath);
+    _addBasicArguments(args, destDir, "", classPath);
     _addSingleDocArguments(args);
     args.add(file.getAbsolutePath());
     return args;
@@ -782,7 +782,7 @@ public class DefaultJavadocModel implements JavadocModel {
   private void _addBasicArguments(ArrayList<String> args,
                                   String destDir,
                                   String sourcePath,
-                                  String classpath)
+                                  String classPath)
   {
     // Determine the access level
     Configuration config = DrJava.getConfig();
@@ -802,7 +802,7 @@ public class DefaultJavadocModel implements JavadocModel {
     
     // Add classpath
     args.add("-classpath");
-    args.add(classpath);
+    args.add(classPath);
 
     // Add custom args specified by the user
     String custom = config.getSetting(OptionConstants.JAVADOC_CUSTOM_PARAMS);

@@ -46,14 +46,12 @@ import edu.rice.cs.util.UnexpectedException;
 import static edu.rice.cs.util.StringOps.*;
 import static edu.rice.cs.util.FileOps.*;
 
-/**
- * The project file builder is responsible for
- * encoding the project file based on the information
- * given to it through the public interface offered.
+/** The project file builder is responsible for encoding the project file based on the information given to it through 
+ *  the public interface offered.
  */
 public class ProjectFileBuilder {
   
-  /////////////// Private fields //////////////
+  /* Private fields */
   
   private List<DocFile> _sourceFiles = new Vector<DocFile>();
   
@@ -63,7 +61,9 @@ public class ProjectFileBuilder {
   
   private File _buildDir = null;
   
-  private List<File> _classpathFiles = new Vector<File>();
+  private File _workDir = null;
+  
+  private List<File> _classPathFiles = new Vector<File>();
   
   private File _mainClass = null;
   
@@ -71,12 +71,12 @@ public class ProjectFileBuilder {
  
   private File _projectFile;
   
-  ////////////// Constructors /////////////////
+  /* Constructors */
   
   public ProjectFileBuilder(String filename) { _projectFile = new File(filename); }
   public ProjectFileBuilder(File f) { _projectFile = f; }
   
-  ////////////// Public methods ///////////////
+  /* Public methods */
   
   public void addSourceFile(DocumentInfoGetter getter) {
     if (!getter.isUntitled()) {
@@ -90,15 +90,14 @@ public class ProjectFileBuilder {
       catch(IOException e) { throw new UnexpectedException(e); }
     }
   }
-  public void addClasspathFile(File cp) { if (cp != null) _classpathFiles.add(cp); }
+  public void addClassPathFile(File cp) { if (cp != null) _classPathFiles.add(cp); }
   public void addCollapsedPath(String cp) { if (cp != null) _collapsedPaths.add(cp); }
   public void setBuildDirectory(File dir) { _buildDir = dir; }
+  public void setWorkingDirectory(File dir) { _workDir = dir; }
   public void setMainClass(File main) { _mainClass = main;  }
   public void setProjectRoot(File root) { _projRoot = root; }
-  /**
-   * This method writes what information has been passed
-   * to this builder so far to disk in s-expression format
-   */
+  
+  /** This method writes what information has been passed to this builder so far to disk in s-expression format. */
   public void write() throws IOException {
     FileWriter fw = new FileWriter(_projectFile);
     
@@ -116,26 +115,18 @@ public class ProjectFileBuilder {
     // write source files
     if (!_sourceFiles.isEmpty()) {
       fw.write("\n(source");
-      for(DocFile df: _sourceFiles) {
-        fw.write("\n" + encodeDocFile(df, "  "));
-      }
+      for(DocFile df: _sourceFiles) { fw.write("\n" + encodeDocFile(df, "  ")); }
       fw.write(")"); // close the source expression
     }
-    else {
-      fw.write("\n;; no source files");
-    }
+    else fw.write("\n;; no source files");
     
     // write aux files
     if (!_auxFiles.isEmpty()) {
       fw.write("\n(auxiliary");
-      for(DocFile df: _auxFiles) {
-        fw.write("\n" + encodeDocFile(df, "  ", false));
-      }
+      for(DocFile df: _auxFiles) { fw.write("\n" + encodeDocFile(df, "  ", false)); }
       fw.write(")"); // close the auxiliary expression
     }
-    else {
-      fw.write("\n;; no aux files");
-    }
+    else fw.write("\n;; no aux files");
     
     // write collapsed paths
     if (!_collapsedPaths.isEmpty()) {
@@ -145,21 +136,17 @@ public class ProjectFileBuilder {
       }
       fw.write(")"); // close the collapsed expression
     }
-    else {
-      fw.write("\n;; no collapsed branches");
-    }
+    else fw.write("\n;; no collapsed branches");
     
     // write classpaths
-    if (!_classpathFiles.isEmpty()) {
+    if (!_classPathFiles.isEmpty()) {
       fw.write("\n(classpaths");
-      for(File f: _classpathFiles) {
+      for(File f: _classPathFiles) {
         fw.write("\n" + encodeFile(f, "  ", false));
       }
       fw.write(")"); // close the classpaths expression
     }
-    else {
-      fw.write("\n;; no classpaths files");
-    }
+    else fw.write("\n;; no classpaths files");
     
     // write the build directory
     if (_buildDir != null) {
@@ -167,9 +154,15 @@ public class ProjectFileBuilder {
       fw.write("\n" + encodeFile(_buildDir, "  ", true));
       fw.write(")");
     }
-    else {
-      fw.write("\n;; no build directory");
+    else fw.write("\n;; no build directory");
+    
+     // write the working directory
+    if (_workDir != null) {
+      fw.write("\n(work-dir");
+      fw.write("\n" + encodeFile(_workDir, "  ", true));
+      fw.write(")");
     }
+    else fw.write("\n;; no working directory");
     
     // write the main class
     if (_mainClass != null) {
@@ -177,27 +170,18 @@ public class ProjectFileBuilder {
       fw.write("\n" + encodeFile(_mainClass, "  ", true));
       fw.write(")");
     }
-    else {
-      fw.write("\n;; no main class");
-    }
+    else fw.write("\n;; no main class");
     
     fw.close();
   }
   
-  ////////////// Private Methods //////////////
+  /* Private Methods */
   
-  /**
-   * @param getter The getter that can get all the info needed to
-   * make the document file
-   * @return the document that contains the information retrieved
-   * from the getter
+  /** @param getter The getter that can get all the info needed to make the document file
+   *  @return the document that contains the information retrieved from the getter
    */
-  private DocFile docFileFromGetter(DocumentInfoGetter getter) throws IOException {    
-      return new DocFile(getter.getFile().getCanonicalPath(),
-                         getter.getSelection(),
-                         getter.getScroll(),
-                         getter.isActive(),
-                         getter.getPackage());
+  private DocFile docFileFromGetter(DocumentInfoGetter g) throws IOException {    
+      return new DocFile(g.getFile().getCanonicalPath(), g.getSelection(), g.getScroll(), g.isActive(), g.getPackage());
   }
   
   /** This encodes a normal file.  None of the special tags are added
@@ -215,32 +199,19 @@ public class ProjectFileBuilder {
     return prefix + "(file (name " + convertToLiteral(path) + "))";
   }
   
-//  /** Encodes a file.  The path defaults to relative.
-//   *  @param f the file to encode
-//   *  @param prefix the indent level
-//   */
-//  private String encodeFile(File f, String prefix) throws IOException {
-//    return encodeFile(f, prefix, true);
-//  }
-  
-  /**
-   * This encodes a docfile, adding all the special tags that store
-   * document-specific information.
-   * @param df the doc file to encode
-   * @param prefix the indent level to place the s-expression at
-   * @param relative whether this file should be made relative to the project path
-   * @param hasDate whether to include the modification date
-   * @return the s-expression syntax to describe the given docfile.
+  /** This encodes a docfile, adding all the special tags that store document-specific information.
+   *  @param df the doc file to encode
+   *  @param prefix the indent level to place the s-expression at
+   *  @param relative whether this file should be made relative to the project path
+   *  @param hasDate whether to include the modification date
+   *  @return the s-expression syntax to describe the given docfile.
    */
   private String encodeDocFile(DocFile df, String prefix, boolean relative, boolean hasDate) throws IOException {
     String ret = "";
     String path;
-    if (relative) {
-      path = makeRelative(df);
-    }
-    else {
-      path = df.getCanonicalPath();
-    }
+    if (relative) path = makeRelative(df);
+    else path = df.getCanonicalPath();
+
     path = replace(path,File.separator,"/");
     ret += prefix + "(file (name " + convertToLiteral(path) + ")";
     
@@ -249,23 +220,20 @@ public class ProjectFileBuilder {
     boolean active = df.isActive();
     long modDate = df.lastModified();
     // Add prefix to the next line if any tags exist
-    if (p1 != null || p2 != null || active) {
-      ret += "\n" + prefix + "      ";
-    }
+    if (p1 != null || p2 != null || active)  ret += "\n" + prefix + "      ";
+
     // The next three tags go on the same line (if they exist)
-    if (p1 != null) {
-      ret += "(select " + p1.getFirst() + " " + p1.getSecond() + ")";
-    }
-    if (p2 != null) {
-      ret += "(scroll " + p2.getFirst() + " " + p2.getSecond() + ")";
-    }
+    if (p1 != null) ret += "(select " + p1.getFirst() + " " + p1.getSecond() + ")";
+
+    if (p2 != null) ret += "(scroll " + p2.getFirst() + " " + p2.getSecond() + ")";
+
     if (hasDate && modDate > 0) {
       String s = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date(modDate));
       ret += "(mod-date " + convertToLiteral(s) + ")";
     }
-    if (active) {
-      ret += "(active)";
-    }
+    
+    if (active) ret += "(active)";
+    
     // the next tag goes on the next line if at all
     String pack = df.getPackage();
     if (pack != null) {
@@ -289,48 +257,8 @@ public class ProjectFileBuilder {
     return encodeDocFile(df,prefix,relative,true);
   }
   
-  /**
-   * @param f the file whose path to make relative to the project path
-   * @return the string name of the file's path relative to the project path
+  /** @param f the file whose path to make relative to the project path
+   *  @return the string name of the file's path relative to the project path
    */
-  private String makeRelative(File f) throws IOException {
-    return makeRelativeTo(f, _projectFile).getPath();
-  }
-  
-//  
-//  /**
-//   * Converts the given string to a valid Java string literal.
-//   * All back slashes, quotes, new-lines, and tabs are converted
-//   * to their escap character form, and the sourounding quotes 
-//   * are added.
-//   * @param s the normal string to turn into a string literal
-//   * @return the valid Java string literal
-//   */
-//  public static String convertToLiteral(String s) {
-//    String output = s;
-//    output = replaceAll(output, "\\", "\\\\"); // convert \ to \\
-//    output = replaceAll(output, "\"", "\\\""); // convert " to \"
-//    output = replaceAll(output, "\t", "\\t");  // convert [tab] to \t
-//    output = replaceAll(output, "\n", "\\n");  // convert [newline] to \n
-//    return "\"" + output + "\"";
-//  }
-//  
-//  /**
-//   * replaces all occurrences of the given a string with a new string.
-//   * This method was reproduced here to remove any dependencies on the
-//   * java v1.4 api.
-//   * @param str the string in which the replacements should occur
-//   * @param toReplace the substring to replace
-//   * @param replacement the substring to put in its place
-//   * @return the new changed string
-//   */
-//  private static String replaceAll(String str, String toReplace, String replacement) {
-//    String result = str;
-//    int i = result.indexOf(toReplace); 
-//    while (i >= 0) {
-//      result = result.substring(0,i) + replacement + result.substring(i+1);
-//      i = result.indexOf(toReplace, i + replacement.length());
-//    }
-//    return result;
-//  }
+  private String makeRelative(File f) throws IOException { return makeRelativeTo(f, _projectFile).getPath(); }
 }

@@ -37,7 +37,7 @@ import java.util.List;
 import java.io.StringReader;
 import java.io.Reader;
 import java.net.URL;
-import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
+import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
 import koala.dynamicjava.interpreter.error.*;
@@ -62,10 +62,10 @@ import edu.rice.cs.util.*;
 public class DynamicJavaAdapter implements JavaInterpreter {
   private InterpreterExtension _djInterpreter;
 
-  ClasspathManager cpm;
+  ClassPathManager cpm;
   
    /** Constructor */
-  public DynamicJavaAdapter(ClasspathManager c) {
+  public DynamicJavaAdapter(ClassPathManager c) {
     cpm = c;
     _djInterpreter = new InterpreterExtension(c);
   }
@@ -365,7 +365,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public class InterpreterExtension extends TreeInterpreter {
 
     /** Only constructor. */
-    public InterpreterExtension(ClasspathManager cpm) {
+    public InterpreterExtension(ClassPathManager cpm) {
       super(new JavaCCParserFactory());
 
       classLoader = new ClassLoaderExtension(this, cpm);
@@ -557,12 +557,12 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   private static StickyClassLoader _stickyLoader;
   
   // manages the classpath for the interpreter
-  ClasspathManager cpm;
+  ClassPathManager cpm;
   
   /** Constructor.
    *  @param i the object used to interpret the classes
    */
-  public ClassLoaderExtension(koala.dynamicjava.interpreter.Interpreter i, ClasspathManager c) {
+  public ClassLoaderExtension(koala.dynamicjava.interpreter.Interpreter i, ClassPathManager c) {
     super(i);
     cpm = c;
     // The protected variable classLoader contains the class loader to use

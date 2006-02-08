@@ -216,8 +216,7 @@ public class HighlightManager {
 
     }
 
-    /**
-     * The public inner class defining a "smart" highlight, which can return the value of its start and end
+    /** The public inner class defining a "smart" highlight, which can return the value of its start and end
      *  offsets for comparison with other highlights. Also keeps a tag to its actual highlight in the
      *  component's highlighter for easy removal.
      */
@@ -227,11 +226,10 @@ public class HighlightManager {
       private Position _endPos;
       private Highlighter.HighlightPainter _painter;
 
-      /**
-       * Constructor takes the bounds and the painter for a highlighter
-       * @param from the offset at which the new highlight will start.
-       * @param to the offset at which the new highlight will end.
-       * @param p the Highlighter.HighlightPainter for painting
+      /** Constructor takes the bounds and the painter for a highlighter
+       *  @param from the offset at which the new highlight will start.
+       *  @param to the offset at which the new highlight will end.
+       *  @param p the Highlighter.HighlightPainter for painting
        */
       public HighlightInfo(int from, int to, Highlighter.HighlightPainter p) {
 
@@ -247,17 +245,12 @@ public class HighlightManager {
         _painter = p;
       }
 
-      /**
-       * Set the highlight tag for later access to the highlight as it is stored in the components
-       *  highlighter.
+      /** Set the highlight tag for later access to the highlight as it is stored in the components highlighter.
        * @param highlightTag the Object for keeping track of a stored highlight
        */
-      public void setHighlightTag ( Object highlightTag) {
-        _highlightTag = highlightTag;
-      }
+      public void setHighlightTag ( Object highlightTag) { _highlightTag = highlightTag; }
 
-      /**
-       * Tests equivalency of one HighlightInfo object with this HighlightInfo object. Compares start
+      /** Tests equivalency of one HighlightInfo object with this HighlightInfo object. Compares start
        *  and end offsets, and the Highlighter.HighlightPainter -- returns true, if they are the same in both.
        *  @param o the other HighlightInfo object to compare to this one.
        *  @return boolean true, if equivalent; false otherwise.
@@ -284,13 +277,10 @@ public class HighlightManager {
         else return false;
       }
       
-      /** Overrides hashCode() for consistency with override of equals(...) 
-       */
+      /** Overrides hashCode() for consistency with override of equals(...)  */
       public int hashCode() { return getPainter().hashCode() ^ getStartOffset() ^ getEndOffset(); }
 
-      public void remove() {
-        removeHighlight(this);
-      }
+      public void remove() { removeHighlight(this); }
 
       /** Accessor for the highlight tag
        *  @return the highlight tag which might be null

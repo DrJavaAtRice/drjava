@@ -48,7 +48,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
@@ -87,15 +87,15 @@ import edu.rice.cs.drjava.model.junit.JUnitModel;
 public class DefaultGlobalModel extends AbstractGlobalModel {
   
   
-  // ----- FIELDS -----
+  /* FIELDS */
   
-  // ---- Interpreter fields ----
+  /* Interpreter fields */
   
-  /** The document adapter used in the Interactions model. */
-  protected final InteractionsDJDocument _interactionsDocAdapter;
+  /** The document  used in the Interactions model. */
+  protected final InteractionsDJDocument _interactionsDocument;
   
-  /** RMI interface to the Interactions JVM. Package private so we can access it from test cases. */
-  final MainJVM _interpreterControl = new MainJVM();
+  /** RMI interface to the Interactions JVM. */
+  final MainJVM _interpreterControl = new MainJVM(getWorkingDirectory());
   
   /** Interface between the InteractionsDocument and the JavaInterpreter, which runs in a separate JVM. */
   protected DefaultInteractionsModel _interactionsModel;
@@ -109,7 +109,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     public void interpreterResetting() { }
     
-    public void interpreterReady() {
+    public void interpreterReady(File wd) {
       File buildDir = _state.getBuildDirectory();
       if (buildDir != null) {
         //        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
@@ -135,57 +135,47 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     new CompilerListener() {
     public void compileStarted() { }
     
-    public void compileEnded() {
+    public void compileEnded(File workDir) {
       // Only clear interactions if there were no errors
-      if (((_compilerModel.getNumErrors() == 0) || (_compilerModel.getCompilerErrorModel().hasOnlyWarnings()))
-            // reset even when the interpreter is not used.
-            //&& _interactionsModel.interpreterUsed()
+      if ( ((_compilerModel.getNumErrors() == 0) || (_compilerModel.getCompilerErrorModel().hasOnlyWarnings()))
             && _resetAfterCompile) {
-        resetInteractions();
+        resetInteractions(workDir);  // use same working directory as current interpreter
       }
     }
     public void saveBeforeCompile() { }
     public void saveUntitled() { }
   };
-  
-  
+    
   // ---- Compiler Fields ----
   
   /** CompilerModel manages all compiler functionality. */
   private final CompilerModel _compilerModel = new DefaultCompilerModel(this);
   
-  /**
-   * Whether or not to reset the interactions JVM after compiling.
-   * Should only be false in test cases.
-   */
+  /** Whether or not to reset the interactions JVM after compiling.  Should only be false in test cases. */
   private boolean _resetAfterCompile = true;
   
+  /* JUnit Fields */
   
-  // ---- JUnit Fields ----
-  
-  /** JUnitModel manages all JUnit functionality.
-   *  TODO: remove dependence on GlobalModel
-   */
+  /** JUnitModel manages all JUnit functionality. */
   private final DefaultJUnitModel _junitModel = new DefaultJUnitModel(_interpreterControl, _compilerModel, this);
   
-  
-  // ---- Javadoc Fields ----
+  /* Javadoc Fields */
   
   /** Manages all Javadoc functionality. */
   protected JavadocModel _javadocModel = new DefaultJavadocModel(this);
   
-  // ---- Debugger Fields ----
+  /* Debugger Fields */
   
   /** Interface to the integrated debugger.  If unavailable, set NoDebuggerAvailable.ONLY. */
   private Debugger _debugger = NoDebuggerAvailable.ONLY;
   
-  // ----- CONSTRUCTORS -----
+  /* CONSTRUCTORS */
   
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
     super();
-    _interactionsDocAdapter = new InteractionsDJDocument();
-    _interactionsModel = new DefaultInteractionsModel(this, _interpreterControl,_interactionsDocAdapter);
+    _interactionsDocument = new InteractionsDJDocument();
+    _interactionsModel = new DefaultInteractionsModel(this, _interpreterControl,_interactionsDocument);
     _interactionsModel.addListener(_interactionsListener);
     _interpreterControl.setInteractionsModel(_interactionsModel);
     _interpreterControl.setJUnitModel(_junitModel);
@@ -353,47 +343,25 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         _interpreterControl.addBuildDirectoryClassPath(new File(f.getAbsolutePath()).toURL());
       }
       catch(MalformedURLException murle) {
-        // this is bad! change this! we should handle this exception better!
+        // TODO! change this! we should handle this exception better!
         // show a popup like "invalide build directory" or something
         throw new RuntimeException(murle);
       }
     }
     
-    //        InteractionsDocument iDoc = _interactionsModel.getDocument();
-    //        synchronized(_interpreterControl) {
-    //          iDoc.clearCurrentInput();
-    //          iDoc.insertBeforeLastPrompt(CLASSPATH_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);
-    //        }
-    
     _notifier.projectBuildDirChanged();
     setProjectChanged(true);
   }
   
-//  /**
-//   * @return the class with the project's main method
-//   */
-//  public File getBuildDirectory() { return _state.getBuildDirectory(); }
-//  
-//  public void cleanBuildDirectory() throws FileMovedException, IOException{
-//    _state.cleanBuildDirectory();
-//  }
-//  
-//  /** Helper method used in subsequent anonymous inner class */
-//  private static String getPackageName(String classname) {
-//    int index = classname.lastIndexOf(".");
-//    if (index != -1) return classname.substring(0, index);
-//    else return "";
-//  }
-// 
-  
-  protected FileGroupingState 
-    makeProjectFileGroupingState(File main, File dir, File project, File[] files, ClasspathVector cp) {
-    return new ProjectFileGroupingState(main, dir, project, files, cp);
+  protected FileGroupingState makeProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, 
+                                                           ClassPathVector cp) {
+    return new ProjectFileGroupingState(main, bd, wd, project, files, cp);
   }
+  
   class ProjectFileGroupingState extends AbstractGlobalModel.ProjectFileGroupingState {
       
-    ProjectFileGroupingState(File main, File dir, File project, File[] files, ClasspathVector cp) {
-      super(main, dir, project, files, cp);
+    ProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp) {
+      super(main, bd, wd, project, files, cp);
     }
       
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
@@ -422,7 +390,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         String packagename = getPackageName(classname);
         try {
           File sourceroot = getSourceRoot(packagename, f);
-          if (!los.contains(sourceroot)) los.add(sourceroot);
+          if (! los.contains(sourceroot)) los.add(sourceroot);
           lof.add(f);
         } 
         catch(InvalidPackageException e) { /* do nothing */ }
@@ -568,7 +536,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** @return InteractionsDJDocument in use by the InteractionsDocument. */
   public InteractionsDJDocument getSwingInteractionsDocument() {
-    return _interactionsDocAdapter;
+    return _interactionsDocument;
   }
   
   public InteractionsDocument getInteractionsDocument() { return _interactionsModel.getDocument(); }
@@ -585,47 +553,30 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
     // Kill the interpreter
-    _interpreterControl.killInterpreter(false);
+    _interpreterControl.killInterpreter(null);
     
     super.dispose();
   }
  
-  /** Clears and resets the interactions pane. Also clears the console
-   * if the option is indicated (on by default).
-   * Bug #576179 pointed out that this needs to end any threads that were
-   * running in the interactions JVM, so we completely restart the JVM now.
-   * Ideally, we'd like a way to end any running threads and cleanly reset
-   * the interpreter (to speed up this method), but that might be too complex...
-   * <p>
-   * (Old approach:
-   * First it makes sure it's in the right package given the
-   * package specified by the definitions.  If it can't,
-   * the package for the interactions becomes the defualt
-   * top level. In either case, this method calls a helper
-   * which fires the interactionsReset() event.)
+  /** Clears and resets the interactions pane in working directory wd. Also clears the console if the option is 
+   *  indicated (on by default).  We have to restart the JVM to accomplish the reset.  We previously tried to reset
+   *  interpretation within the exising JVM but bug #576179 pointed out that we must kill all threads that were
+   *  previously running in the interactions JVM, so a restart is essential.
    */
-  public void resetInteractions() {
+  public void resetInteractions(File wd) {
     if (_debugger.inDebugMode()) _debugger.shutdown();
 
-    _interactionsModel.resetInterpreter();
-//    enableSecurityManager();  // already done by slaveJVM on startup
-    if (DrJava.getConfig().getSetting(OptionConstants.RESET_CLEAR_CONSOLE).booleanValue()) {
-      resetConsole();
-    } 
+    _interactionsModel.resetInterpreter(wd);
+    if (DrJava.getConfig().getSetting(OptionConstants.RESET_CLEAR_CONSOLE).booleanValue()) { resetConsole(); } 
   }
 
   /** Interprets the current given text at the prompt in the interactions pane. */
-  public void interpretCurrentInteraction() {
-    _interactionsModel.interpretCurrentInteraction();
-  }
+  public void interpretCurrentInteraction() { _interactionsModel.interpretCurrentInteraction(); }
 
-  /** Interprets the file selected in the FileOpenSelector. Assumes all strings have no trailing whitespace. 
-   *  Interprets the array all at once so if there are any errors, none of the statements after the first erroneous
-   *  one are processed.
+  /** Interprets file selected in the FileOpenSelector. Assumes strings have no trailing whitespace. Interpretation is
+   *  aborted after the first error.
    */
-  public void loadHistory(FileOpenSelector selector) throws IOException {
-    _interactionsModel.loadHistory(selector);
-  }
+  public void loadHistory(FileOpenSelector selector) throws IOException { _interactionsModel.loadHistory(selector); }
 
   /** Loads the history/histories from the given selector. */
   public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
@@ -673,20 +624,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 
 
   /** Returns the current classpath in use by the Interpreter JVM. */
-  public ClasspathVector getClasspath() { return _interpreterControl.getClasspath(); }
-  
-  /** Returns only the project's extra classpaths.
-   *  @return The classpath entries loaded along with the project
-   */
-  public ClasspathVector getProjectExtraClasspath() {
-    return _state.getExtraClasspath();
-  }
+  public ClassPathVector getClassPath() { return _interpreterControl.getClassPath(); }
   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
    *  project preferences..
    */
-  public void setProjectExtraClasspath(ClasspathVector cp) {
-    _state.setExtraClasspath(cp);
+  public void setExtraClassPath(ClassPathVector cp) {
+    _state.setExtraClassPath(cp);
     //System.out.println("Setting project classpath to: " + cp);
   }
 
@@ -783,68 +727,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     return false;
   }
-  
 
-  /**
-   * 
-   * Searches for a file with the given name on the current source roots and the
-   * augmented classpath.
-   * @param filename Name of the source file to look for
-   * @return the file corresponding to the given name, or null if it cannot be found
-   */
-  public File getSourceFile(String filename) {
-    File[] sourceRoots = getSourceRootSet();
-    for (File s: sourceRoots) {
-      File f = _getSourceFileFromPath(filename, s);
-      if (f != null) return f;
-    }
-    Vector<File> sourcepath = DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
-    return getSourceFileFromPaths(filename, sourcepath);
-  }
-
-  /**
-   * Searches for a file with the given name on the provided paths.
-   * Returns null if the file is not found.
-   * @param filename Name of the source file to look for
-   * @param paths An array of directories to search
-   * @return the file if it is found, or null otherwise
-   */
-  public File getSourceFileFromPaths(String filename, Vector<File> paths) {
-    for (File p: paths) {
-      File f = _getSourceFileFromPath(filename, p);
-      if (f != null) return f;
-    }
-    return null;
-  }
-
-  /**
-   * Gets the file named filename from the given path, if it exists.
-   * Returns null if it's not there.
-   * @param filename the file to look for
-   * @param path the path to look for it in
-   * @return the file if it exists
-   */
-  private File _getSourceFileFromPath(String filename, File path) {
-    String root = path.getAbsolutePath();
-    File f = new File(root + System.getProperty("file.separator") + filename);
-    return f.exists() ? f : null;
-  }
-
-  /**
-   * Returns the document currently being tested (with JUnit) if there is
-   * one, otherwise null.
-   *
-  public OpenDefinitionsDocument getDocBeingTested() {
-  return _docBeingTested;
-  }*/
-  
   // TODO: This function should probably be moved to a better location
-  /**
-   * Jar the current documents or the current project
-   */
-  public void jarAll() { getFileGroupingState().jarAll(); }
+  /** Jar the current documents or the current project  */
+  public void jarAll() { _state.jarAll(); }
   
-
   // ---------- ConcreteOpenDefDoc inner class ----------
 
   /** Inner class to handle operations on each of the open DefinitionsDocuments by the GlobalModel. <br><br>
@@ -921,12 +808,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           
           // Make sure this file is on the classpath
           try {
-            File classpath = getSourceRoot();
+            File classPath = getSourceRoot();
             try {
               if (inProject() || isAuxiliaryFile())
-                _interactionsModel.addProjectFilesClassPath(new File(classpath.getAbsolutePath()).toURL());
+                _interactionsModel.addProjectFilesClassPath(new File(classPath.getAbsolutePath()).toURL());
               else
-                _interactionsModel.addExternalFilesClassPath(new File(classpath.getAbsolutePath()).toURL());
+                _interactionsModel.addExternalFilesClassPath(new File(classPath.getAbsolutePath()).toURL());
             }
             catch(MalformedURLException murle) { /* fail silently */ }
           }
@@ -944,7 +831,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         return false;
       }
     }
-
+    
+    /** Starting compiling this document.  Used only for unit testing */
     public void startCompile() throws IOException { _compilerModel.compile(ConcreteOpenDefDoc.this); }
 
     /** Runs the main method in this document in the interactions pane. Demands that the definitions be saved
@@ -997,7 +885,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
      */
     public void generateJavadoc(FileSaveSelector saver) throws IOException {
       // Use the model's classpath, and use the EventNotifier as the listener
-      _javadocModel.javadocDocument(this, saver, getClasspath().toString());
+      _javadocModel.javadocDocument(this, saver, getClassPath().toString());
     }
     
     /** Returns the first Breakpoint in this OpenDefinitionsDocument whose region includes the given offset, or null
@@ -1087,13 +975,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Adds a documents source root to the interactions classpath this function is a helper to open file.
    *  @param doc the document to add to the classpath
    */
-  protected void addDocToClasspath(OpenDefinitionsDocument doc) {
+  protected void addDocToClassPath(OpenDefinitionsDocument doc) {
     try {
-      File classpath = doc.getSourceRoot();
+      File classPath = doc.getSourceRoot();
       try {
         if (doc.inProject() || doc.isAuxiliaryFile())
-          _interactionsModel.addProjectFilesClassPath(classpath.toURI().toURL());
-        else _interactionsModel.addExternalFilesClassPath(classpath.toURI().toURL());
+          _interactionsModel.addProjectFilesClassPath(classPath.toURI().toURL());
+        else _interactionsModel.addExternalFilesClassPath(classPath.toURI().toURL());
       }
       catch(MalformedURLException murle) {  /* fail silently */ }
     }
@@ -1128,8 +1016,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    *  as any project-specific classpaths to the interpreter's classpath. This method is called when the interpreter 
    *  becomes ready
    */
-  public void resetInteractionsClasspath() {
-    ClasspathVector projectExtras = getProjectExtraClasspath();
+  public void resetInteractionsClassPath() {
+    ClassPathVector projectExtras = getExtraClassPath();
     //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
     if (projectExtras != null)  for (URL cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
     

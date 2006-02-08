@@ -43,44 +43,60 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.util;
 
+import java.net.URL;
+import java.net.MalformedURLException;
 import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import java.util.Vector;
 
 /**
- * Concrete implementation of IGetDocuments that always throws exceptions.
- * @version $Id$
+ * A vector of classpath entries. Basically just a Vector<URL>, except
+ * with additional logic to format the toString to be suitable for passing
+ * to invocations of java -classpath ...
  */
-public class DummyGetDocuments implements IGetDocuments {
-  /**
-   * Since this is not supposed to be used, we need to throw an exception OTHER
-   * than the ones it officially supports.
-   * @throws UnsupportedOperationException
-   */
-  public OpenDefinitionsDocument getDocumentForFile(File file) throws IOException {
-    throw new UnsupportedOperationException
-      ("Tried to getDocumentForFile on a Dummy with file: " + file);
-  }
-
-  public boolean isAlreadyOpen(File file) {
-    throw new UnsupportedOperationException("Tried to call isAlreadyOpen on a Dummy with file: " + file);
-  }
-
-  public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments() {
-    throw new UnsupportedOperationException("Tried to getOpenDefinitionsDocuments on a Dummy!");
-  }
-
-  public boolean hasModifiedDocuments() {
-    throw new UnsupportedOperationException("Tried to call hasModifiedDocuments on a Dummy!");
+public class ClassPathVector extends Vector<URL> {
+  
+  public ClassPathVector() { }
+  
+  public ClassPathVector(int capacity) {
+    super(capacity);
   }
   
-  public boolean hasUntitledDocuments() {
-    throw new UnsupportedOperationException("Tried to call hasUntitledDocuments on a Dummy!");
+  public String toString() {
+    StringBuffer cp = new StringBuffer();
+    for(URL u : this) {
+      cp.append(formatURL(u));
+      cp.append(File.pathSeparator);
+    }
+    return cp.toString();
   }
   
-  public FileGroupingState getFileGroupingState() {
-    throw new UnsupportedOperationException("Tried to call getFileGroupingState on a Dummy!");
+  public void add(String entry) {
+    try {
+      this.add(new URL(entry));
+    } catch(MalformedURLException e) {
+      IllegalArgumentException ee = new IllegalArgumentException(e.toString());
+      ee.initCause(e);
+      throw ee;
+    }
   }
+  
+  public void add(File entry) {
+    try {
+      this.add(entry.toURL());
+    } catch(MalformedURLException e) {
+      IllegalArgumentException ee = new IllegalArgumentException(e.toString());
+      ee.initCause(e);
+      throw ee;
+    }
+  }
+  
+  public Vector<File> asFileVector() {
+    Vector<File> v = new Vector<File>();
+    for(URL url : this) { v.add(new File(url.getFile())); }
+    return v;
+  }
+  
+  private String formatURL(URL url) { return new File(url.getFile()).toString(); }
 }

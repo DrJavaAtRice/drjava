@@ -47,13 +47,10 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 
-/**
- * A CompilerInterface implementation for signifying that no compiler is
- * available.
- *
- * @version $Id$
+/** A CompilerInterface implementation for signifying that no compiler is available.
+ *  @version $Id$
  */
 public class NoCompilerAvailable implements CompilerInterface {
   public static final CompilerInterface ONLY = new NoCompilerAvailable();
@@ -67,59 +64,36 @@ public class NoCompilerAvailable implements CompilerInterface {
   }
   
   public CompilerError[] compile(File[] sourceRoots, File[] files) {
-    CompilerError error = new CompilerError(files[0],
-                                            -1,
-                                            -1,
-                                            MESSAGE, false);
-
+    CompilerError error = new CompilerError(files[0], -1, -1, MESSAGE, false);
     return new CompilerError[] { error };
   }
 
   public boolean isAvailable() { return true; }
 
-  public String getName() {
-    return "(no compiler available)";
-  }
+  public String getName() { return "(no compiler available)"; }
 
-  public String toString() {
-    return getName();
-  }
+  public String toString() { return getName(); }
 
-  /**
-   * Allows us to set the extra classpath for the compilers without referencing the
-   * config object in a loaded class file
-   */ 
-  public void setExtraClassPath( String extraClassPath) {
-  }
+  /** Sets the extra classpath for the compilers without referencing the config object in a loaded class file. */ 
+  public void setExtraClassPath(String extraClassPath) { }
   
-  /**
-   * @inheritDoc
-   */
-  public void setExtraClassPath(ClasspathVector extraClassPath) {
-  }
+  /** @inheritDoc */
+  public void setExtraClassPath(ClassPathVector extraClassPath) { }
     
-  /**
-   * Sets whether to allow assertions in Java 1.4.
-   */
-  public void setAllowAssertions(boolean allow) {
-  }
+  /** Sets whether to allow assertions in Java 1.4. */
+  public void setAllowAssertions(boolean allow) { }
   
-   /**
-   * Sets whether or not warnings are allowed
-   */
-  public void setWarningsEnabled(boolean warningsEnabled) {
-  }
+  /** Sets whether or not warnings are allowed */
+  public void setWarningsEnabled(boolean warningsEnabled) { }
   
-  /**
-   * This method allows us to set the JSR14 collections path across a class loader.
-   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
+  /** This method allows us to set the JSR14 collections path across a class loader.
+   *  (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */
   public void addToBootClassPath( File cp) {
     throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
   }
   
-  public void setBuildDirectory(File builddir) {
-  }
+  public void setBuildDirectory(File builddir) { }
 }
 
 

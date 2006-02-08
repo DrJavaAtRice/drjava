@@ -128,7 +128,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //        Utilities.showDebug("GlobalModelOtherTest: interpreterResetting");
       }
 
-      public void interpreterReady() {
+      public void interpreterReady(File wd) {
 //        Utilities.showDebug("GlobalModelOtherTest: interpreterReady");
         synchronized(_resetDoneLock) {
 //          assertInteractionStartCount(1);
@@ -207,7 +207,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
         interpreterResettingCount++;
       }
 
-      public void interpreterReady() {
+      public void interpreterReady(File wd) {
         synchronized(_resetDoneLock) {
 //          assertInteractionStartCount(1);
 //          assertInterpreterExitedCount(0);
@@ -230,7 +230,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
       
       Utilities.clearEventQueue();
       listener.assertInteractionStartCount(1);
-      _model.resetInteractions();
+      _model.resetInteractions(FileOption.NULL_FILE);
       _resetDoneLock.wait();
     }
     listener.assertInterpreterResettingCount(1);
@@ -577,7 +577,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
 
   /** Creates a new class, compiles it and then checks that the REPL can see it. */
-  public void testInteractionsLiveUpdateClasspath() throws BadLocationException, EditDocumentException,
+  public void testInteractionsLiveUpdateClassPath() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
 
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
@@ -605,7 +605,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
     Utilities.clearEventQueue();
-    _model.resetInteractionsClasspath();
+    _model.resetInteractionsClassPath();
 //    System.err.println("Classpath = " + _model.getClasspath());
 
     result = interpret("new DrJavaTestFoo().getClass().getName()");
@@ -659,6 +659,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     Utilities.clearEventQueue();
     assertInteractionsContains(DefaultGlobalModel.DOCUMENT_OUT_OF_SYNC_MSG);
+    Utilities.clearEventQueue();  // Killing time here; Slave JVM may not have released Foo.class so that the file can be deleted on Windows.
     
 //    _log.log("testRunMainMethod() completed");
   }

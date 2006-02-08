@@ -50,6 +50,8 @@ import junit.extensions.*;
 
 import java.rmi.*;
 
+import edu.rice.cs.drjava.config.FileOption;
+
 /** Tests the functionality of the new JVM manager.
  *  @version $Id$
  */
@@ -72,9 +74,7 @@ public final class NewJVMTest extends TestCase {
         _jvm = new TestJVMExtension();
       }
 
-      protected void tearDown() {
-        _jvm.killInterpreter(false);
-      }
+      protected void tearDown() { _jvm.killInterpreter(null); }
     };
 
     return setup;
@@ -131,7 +131,7 @@ public final class NewJVMTest extends TestCase {
 
     // Now restart interpreter
     synchronized(_testLock) {
-      _jvm.killInterpreter(true);  // true: start back up
+      _jvm.killInterpreter(FileOption.NULL_FILE);  // "" is not null: start back up
       _testLock.wait();
     }
 
@@ -283,7 +283,7 @@ public final class NewJVMTest extends TestCase {
     private InterpretResultVisitor<Object> _testHandler;
 
     public TestJVMExtension() {
-      super();
+      super(null);
       _testHandler = new TestResultHandler();
       startInterpreterJVM();
       ensureInterpreterConnected();

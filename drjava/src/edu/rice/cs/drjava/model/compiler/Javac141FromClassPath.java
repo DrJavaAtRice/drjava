@@ -43,30 +43,21 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.config;
-import java.io.File;
-import java.util.Vector;
+package edu.rice.cs.drjava.model.compiler;
 
 /**
- * Generate vector options separately to appease javadoc.
- * (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
+ * A compiler interface to find Javac (1.4.1+) from the classpath,
+ * but to do so via a compiler proxy so that the compiler classes can be
+ * fully unloaded/reloaded every time it is used.
+ *
+ * @version $Id$
  */
-class ClasspathOption {
-  private String warning =
-    "WARNING: Configurability interface only supports path separators"+
-    " of maximum length 1 character as of this moment.";
+public class Javac141FromClassPath extends CompilerProxy {
+  public static final CompilerInterface ONLY = new Javac141FromClassPath();
 
-  public VectorOption<File> evaluate(String optionName) {
-    // system path separator
-    String ps = System.getProperty("path.separator");
-    if (ps.length() > 1) {
-      // spit out warning if it's more than one character.
-      System.out.println(warning);
-      System.out.println("using '" + ps.charAt(0) + "' for delimiter.");
-    }
-    FileOption fop = new FileOption("",FileOption.NULL_FILE);
-    //String name = "extra.classpath";
-    char delim = ps.charAt(0);
-    return new VectorOption<File>(optionName,fop,"",delim,"",new Vector<File>());
+  /** Private constructor due to singleton. */
+  private Javac141FromClassPath() {
+    super("edu.rice.cs.drjava.model.compiler.Javac141Compiler",
+          Javac141FromClassPath.class.getClassLoader());
   }
 }

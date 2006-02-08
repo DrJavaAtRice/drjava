@@ -92,8 +92,12 @@ public interface GlobalModelListener extends InteractionsListener,
   /** Called when the selection in the navigator changes the current directory without changing the active document. */
   public void currentDirectoryChanged(File dir);
     
-  /** Called when the builddirectory is modified in the model. */
+  /** Called when the build directory is modified in the model. */
   public void projectBuildDirChanged();
+  
+  /** Called when the working directory is modified in the model. */
+  public void projectWorkDirChanged();
+  
   
   /** Called while the project is being opened.
    *  @param projectFile the location of the project file

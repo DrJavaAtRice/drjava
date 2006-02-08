@@ -54,14 +54,14 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.ClasspathEntry;
+import edu.rice.cs.drjava.model.ClassPathEntry;
 
 // For Windows focus fix
 import javax.swing.JDialog;
@@ -98,13 +98,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private InterpreterData _activeInterpreter;
   
   /** The currently accumulated classpath for all Java interpreters.  List contains unqiue entries. */
-  private ClasspathVector _classpath;
+  private ClassPathVector _classPath;
   
   /** Responsible for running JUnit tests in this JVM. */
   private JUnitTestManager _junitTestManager;
   
   /** manages the classpath for all of DrJava */
-  ClasspathManager classpathManager;
+  ClassPathManager classPathManager;
   
   /** Interactions processor, currently a pre-processor **/
   //  private InteractionsProcessorI _interactionsProcessor;
@@ -123,11 +123,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   /** Resets this InterpreterJVM to its default state. */
   private void reset() {
-    classpathManager = new ClasspathManager();
-    _defaultInterpreter = new InterpreterData(new DynamicJavaAdapter(classpathManager));
+    classPathManager = new ClassPathManager();
+    _defaultInterpreter = new InterpreterData(new DynamicJavaAdapter(classPathManager));
     _activeInterpreter = _defaultInterpreter;
     _interpreters = new Hashtable<String,InterpreterData>();
-    _classpath = new ClasspathVector();
+    _classPath = new ClassPathVector();
     _junitTestManager = new JUnitTestManager(this);
     
     // do an interpretation to get the interpreter loaded fully
@@ -408,9 +408,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    * @throws IllegalArgumentException if the name is not unique
    */
   public void addJavaInterpreter(String name) {
-    JavaInterpreter interpreter = new DynamicJavaAdapter(classpathManager);
+    JavaInterpreter interpreter = new DynamicJavaAdapter(classPathManager);
     // Add each entry on the accumulated classpath
-    _updateInterpreterClasspath(interpreter);
+    _updateInterpreterClassPath(interpreter);
     addInterpreter(name, interpreter);
   }
   
@@ -425,7 +425,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     JavaDebugInterpreter interpreter = new JavaDebugInterpreter(name, className);
     interpreter.setPrivateAccessible(true);
     // Add each entry on the accumulated classpath
-    _updateInterpreterClasspath(interpreter);
+    _updateInterpreterClassPath(interpreter);
     addInterpreter(name, interpreter);
   }
   
@@ -774,29 +774,29 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    * Adds a classpath to the given interpreter.
    * @param interpreter the interpreter
    */
-  protected void _updateInterpreterClasspath(JavaInterpreter interpreter) {
-    List<ClasspathEntry> locpe = classpathManager.getProjectCP();
-    for (ClasspathEntry e: locpe) {
+  protected void _updateInterpreterClassPath(JavaInterpreter interpreter) {
+    List<ClassPathEntry> locpe = classPathManager.getProjectCP();
+    for (ClassPathEntry e: locpe) {
       interpreter.addProjectClassPath(e.getEntry());
     }
 
-    locpe = classpathManager.getBuildDirectoryCP();
-    for (ClasspathEntry e: locpe) {
+    locpe = classPathManager.getBuildDirectoryCP();
+    for (ClassPathEntry e: locpe) {
       interpreter.addBuildDirectoryClassPath(e.getEntry());
     }
 
-    locpe = classpathManager.getProjectFilesCP();
-    for (ClasspathEntry e: locpe) {
+    locpe = classPathManager.getProjectFilesCP();
+    for (ClassPathEntry e: locpe) {
       interpreter.addProjectFilesClassPath(e.getEntry());
     }
 
-    locpe = classpathManager.getExternalFilesCP();
-    for (ClasspathEntry e: locpe) {
+    locpe = classPathManager.getExternalFilesCP();
+    for (ClassPathEntry e: locpe) {
       interpreter.addExternalFilesClassPath(e.getEntry());
     }
 
-    locpe = classpathManager.getExtraCP();
-    for (ClasspathEntry e: locpe) {
+    locpe = classPathManager.getExtraCP();
+    for (ClassPathEntry e: locpe) {
       interpreter.addExtraClassPath(e.getEntry());
     }
 }
@@ -809,7 +809,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   public void addExtraClassPath(URL s) {
     //_dialog("add classpath: " + s);
-    if (_classpath.contains(s)) {
+    if (_classPath.contains(s)) {
       // Don't add it again
       return;
     }
@@ -829,7 +829,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     
     // Keep this entry on the accumulated classpath
-    _classpath.add(s);
+    _classPath.add(s);
   }
  
   /**
@@ -841,7 +841,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   public void addProjectClassPath(URL s) {
     //_dialog("add classpath: " + s);
-    if (_classpath.contains(s)) {
+    if (_classPath.contains(s)) {
       // Don't add it again
       return;
     }
@@ -861,7 +861,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     
     // Keep this entry on the accumulated classpath
-    _classpath.add(s);
+    _classPath.add(s);
   }
  
   /**
@@ -873,7 +873,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   public void addBuildDirectoryClassPath(URL s) {
     //_dialog("add classpath: " + s);
-    if (_classpath.contains(s)) {
+    if (_classPath.contains(s)) {
       // Don't add it again
       return;
     }
@@ -893,7 +893,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     
     // Keep this entry on the accumulated classpath
-    _classpath.add(s);
+    _classPath.add(s);
   }
   
  
@@ -906,7 +906,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   public void addProjectFilesClassPath(URL s) {
     //_dialog("add classpath: " + s);
-    if (_classpath.contains(s)) {
+    if (_classPath.contains(s)) {
       // Don't add it again
       return;
     }
@@ -926,7 +926,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     
     // Keep this entry on the accumulated classpath
-    _classpath.add(s);
+    _classPath.add(s);
   }
  
   /**
@@ -938,7 +938,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   public void addExternalFilesClassPath(URL s) {
     //_dialog("add classpath: " + s);
-    if (_classpath.contains(s)) {
+    if (_classPath.contains(s)) {
       // Don't add it again
       return;
     }
@@ -958,7 +958,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     
     // Keep this entry on the accumulated classpath
-    _classpath.add(s);
+    _classPath.add(s);
   }
   
   /**
@@ -966,30 +966,30 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    * @return a vector of strings so that RMI doesn't have to serialize
    * the URL object. Serializing URL objects fails when using jsr14.
    */
-  public Vector<String> getAugmentedClasspath() {
+  public Vector<String> getAugmentedClassPath() {
     Vector<String> ret = new Vector<String>();
-    List<ClasspathEntry> locpe = classpathManager.getProjectCP();
-    for (ClasspathEntry e: locpe) {
+    List<ClassPathEntry> locpe = classPathManager.getProjectCP();
+    for (ClassPathEntry e: locpe) {
       ret.add(e.getEntry().toString());
     }
 
-    locpe = classpathManager.getBuildDirectoryCP();
-    for (ClasspathEntry e: locpe) {
+    locpe = classPathManager.getBuildDirectoryCP();
+    for (ClassPathEntry e: locpe) {
       ret.add(e.getEntry().toString());
     }
 
-    locpe = classpathManager.getProjectFilesCP();
-    for (ClasspathEntry e: locpe) {
+    locpe = classPathManager.getProjectFilesCP();
+    for (ClassPathEntry e: locpe) {
       ret.add(e.getEntry().toString());
     }
 
-    locpe = classpathManager.getExternalFilesCP();
-    for (ClasspathEntry e: locpe) {
+    locpe = classPathManager.getExternalFilesCP();
+    for (ClassPathEntry e: locpe) {
       ret.add(e.getEntry().toString());
     }
 
-    locpe = classpathManager.getExtraCP();
-    for (ClasspathEntry e: locpe) {
+    locpe = classPathManager.getExtraCP();
+    for (ClassPathEntry e: locpe) {
       ret.add(e.getEntry().toString());
     }
     return ret;
@@ -1044,24 +1044,24 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    * and junit.
    * @return a vector of URLs with an intelligent toString();
    */
-  public ClasspathVector getClasspath() {
-    ClasspathVector ret = new ClasspathVector();
-    List<ClasspathEntry> locpe;
+  public ClassPathVector getClassPath() {
+    ClassPathVector ret = new ClassPathVector();
+    List<ClassPathEntry> locpe;
     
-    locpe = classpathManager.getProjectCP();
-    for (ClasspathEntry e: locpe) ret.add(e.getEntry());
+    locpe = classPathManager.getProjectCP();
+    for (ClassPathEntry e: locpe) ret.add(e.getEntry());
 
-    locpe = classpathManager.getBuildDirectoryCP();
-    for (ClasspathEntry e: locpe) ret.add(e.getEntry());
+    locpe = classPathManager.getBuildDirectoryCP();
+    for (ClassPathEntry e: locpe) ret.add(e.getEntry());
     
-    locpe = classpathManager.getProjectFilesCP();
-    for (ClasspathEntry e: locpe) ret.add(e.getEntry());
+    locpe = classPathManager.getProjectFilesCP();
+    for (ClassPathEntry e: locpe) ret.add(e.getEntry());
     
-    locpe = classpathManager.getExternalFilesCP();
-    for (ClasspathEntry e: locpe) ret.add(e.getEntry());
+    locpe = classPathManager.getExternalFilesCP();
+    for (ClassPathEntry e: locpe) ret.add(e.getEntry());
     
-    locpe = classpathManager.getExtraCP();
-    for (ClasspathEntry e: locpe) ret.add(e.getEntry());
+    locpe = classPathManager.getExtraCP();
+    for (ClassPathEntry e: locpe) ret.add(e.getEntry());
     
     return ret;
   } 

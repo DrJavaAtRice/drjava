@@ -37,7 +37,7 @@ import java.io.File;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.classloader.StickyClassLoader;
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
 
@@ -53,7 +53,7 @@ public class CompilerProxy implements CompilerInterface {
   private final ClassLoader _newLoader;
   private boolean _warningsEnabled = true;
   private File _buildDir;
-  private ClasspathVector _extraClasspath = new ClasspathVector();
+  private ClassPathVector _extraClassPath = new ClassPathVector();
   
   /** These classes will always be loaded using the previous classloader. This is important to make sure there is
    *  only one instance of them, so their values can be freely passed about the program.
@@ -87,7 +87,7 @@ public class CompilerProxy implements CompilerInterface {
 
       _realCompiler.setBuildDirectory(_buildDir);
       
-      _realCompiler.setExtraClassPath(File.pathSeparator + _extraClasspath.toString());
+      _realCompiler.setExtraClassPath(File.pathSeparator + _extraClassPath.toString());
 
       _realCompiler.setWarningsEnabled(_warningsEnabled);
       
@@ -176,8 +176,8 @@ public class CompilerProxy implements CompilerInterface {
    *  project's classpath, if any, and the entries from EXTRA_CLASSPATH.
    *  @param extraClassPath the classpath to use as the compiler's extra classpath
    */
-  public void setExtraClassPath(ClasspathVector extraClassPath) {
-    _extraClasspath = extraClassPath;
+  public void setExtraClassPath(ClassPathVector extraClassPath) {
+    _extraClassPath = extraClassPath;
   }
 
   /** Sets whether to allow assertions in Java 1.4. */

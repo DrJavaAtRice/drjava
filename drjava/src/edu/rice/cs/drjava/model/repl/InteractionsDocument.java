@@ -62,9 +62,6 @@ import edu.rice.cs.drjava.config.OptionListener;
  */
 public class InteractionsDocument extends ConsoleDocument {
 
-  /** Default banner. */
-  public static final String DEFAULT_BANNER = "Welcome to DrJava.\n";
-
   /** Default prompt. */
   public static final String DEFAULT_PROMPT = "> ";
 
@@ -85,9 +82,6 @@ public class InteractionsDocument extends ConsoleDocument {
    /** Command-line history. It's not reset when the interpreter is reset. */
   private final History _history;
 
-  /** String to print when the document is reset. Defaults to "Welcome to DrJava." */
-  private String _banner;
-  
   /* Constructors */
 
   /** Reset the document on startup.  Uses a history with configurable size.
@@ -103,8 +97,8 @@ public class InteractionsDocument extends ConsoleDocument {
   public InteractionsDocument(EditDocumentInterface document, int maxHistorySize) {
     this(document, new History(maxHistorySize));
   }
-
-  /** Reset the document on startup.  Uses the given history.
+  
+  /** Creates and resets the interactions document on DrJava startup.  Uses the given history.  
    *  @param document EditDocumentInterface to use for the model
    *  @param history History of commands
    */
@@ -112,21 +106,8 @@ public class InteractionsDocument extends ConsoleDocument {
     super(document);
     _history = history;
     _hasPrompt = true;
-    _banner = DEFAULT_BANNER;
     _prompt = DEFAULT_PROMPT;
-    reset();
-  }
-
-  /** Accessor for the banner, which is printed when the document resets. */
-  public String getBanner() {  return _banner; }
-
-  /** Sets the string to use for the banner when the document resets.
-   *  @param banner String to be printed when the document resets.
-   */
-  public void setBanner(String banner) { 
-    acquireWriteLock();
-    _banner = banner;
-    releaseWriteLock();
+    reset(InteractionsModel.getStartUpBanner());
   }
 
   /** Lets this document know whether an interaction is in progress.
@@ -142,11 +123,11 @@ public class InteractionsDocument extends ConsoleDocument {
   public boolean inProgress() { return ! _hasPrompt; }
 
   /** Resets the document to a clean state.  Does not reset the history. */
-  public void reset() {
+  public void reset(String banner) {
     acquireWriteLock();
     try {
       forceRemoveText(0, _document.getLength());
-      forceInsertText(0, _banner, OBJECT_RETURN_STYLE);
+      forceInsertText(0, banner, OBJECT_RETURN_STYLE);
       insertPrompt();
       _history.moveEnd();
       setInProgress(false);

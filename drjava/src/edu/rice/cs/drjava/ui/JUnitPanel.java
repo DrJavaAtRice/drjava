@@ -174,18 +174,14 @@ public class JUnitPanel extends ErrorPanel {
     _errorListPane.setJUnitInProgress();
   }
 
-  /**
-   * Clean up when the tab is closed.
-   */
+  /** Clean up when the tab is closed. */
   protected void _close() {
     super._close();
     getModel().getJUnitModel().resetJUnitErrors();
     reset();
   }
 
-  /**
-   * Reset the errors to the current error information.
-   */
+  /** Reset the errors to the current error information. */
   public void reset() {
     JUnitErrorModel juem = getModel().getJUnitModel().getJUnitErrorModel();
     boolean testsHaveRun = false;
@@ -198,9 +194,7 @@ public class JUnitPanel extends ErrorPanel {
     _errorListPane.updateListPane(testsHaveRun); //changed!!
   }
 
-  /**
-   * Resets the progress bar to start counting the given number of tests.
-   */
+  /** Resets the progress bar to start counting the given number of tests. */
   public void progressReset(int numTests) {
     _progressBar.reset();
     _progressBar.start(numTests);

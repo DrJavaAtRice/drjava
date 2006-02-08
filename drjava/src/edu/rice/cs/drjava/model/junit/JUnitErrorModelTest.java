@@ -159,8 +159,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     doc.startCompile();
-    if (_model.getCompilerModel().getNumErrors() > 0)
-      fail("compile failed: " + getCompilerErrorString());
+    if (_model.getCompilerModel().getNumErrors() > 0) fail("compile failed: " + getCompilerErrorString());
     listener.checkCompileOccurred();
     
     _runJUnit(doc);
@@ -237,10 +236,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
    *  Necessitated by the added code in the .java file associated with the .dj0 file (the import statement added by the
    *  language level compiler)
    */
+
   public void testLanguageLevelJUnitErrorLine() throws Exception {
-    
-    // ADAM LOOK HERE
-    
     
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     OpenDefinitionsDocument doc = setupDocument(LANGUAGE_LEVEL_TEST);
@@ -261,14 +258,11 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     listener.assertJUnitStartCount(1);
 
     // Clear document so we can make sure it's written to after startJUnit
-    _model.getJUnitModel().getJUnitDocument().remove
-      (0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
+    _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
 
     _m = _model.getJUnitModel().getJUnitErrorModel();
 
-    assertEquals("the test results should have one failure "+_m.getNumErrors(),
-                 1,
-                 _m.getNumErrors());
+    assertEquals("the test results should have one failure "+_m.getNumErrors(), 1, _m.getNumErrors());
 
     assertEquals("the error line should be line number 2", 2, _m.getError(0).lineNumber());
     

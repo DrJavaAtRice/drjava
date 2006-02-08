@@ -56,15 +56,10 @@ import javax.swing.filechooser.FileFilter;
 
 import java.util.Vector;
 
-
-/**
- * Graphical form of a VectorOption for the Extra Classpath/Sourcepath options.
- * Uses a file chooser for each File element.
- * @version $Id$
+/** Graphical form of a VectorOption for the Extra Classpath/Sourcepath options. Uses a file chooser for each File element.
+ *  @version $Id$
  */
-public class VectorFileOptionComponent extends VectorOptionComponent<File>
-  implements OptionConstants
-{
+public class VectorFileOptionComponent extends VectorOptionComponent<File> implements OptionConstants {
   private FileFilter _fileFilter;
   private JFileChooser _jfc;
   protected JButton _moveUpButton;
@@ -105,51 +100,37 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File>
 
     // set up JFileChooser
     File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File(System.getProperty("user.dir"));
-    }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
+    if (workDir == FileOption.NULL_FILE)  workDir = new File(System.getProperty("user.dir"));
+    if (workDir.isFile() && workDir.getParent() != null) workDir = workDir.getParentFile();
+
     _jfc = new JFileChooser(workDir);
     _jfc.setDialogTitle("Select");
     _jfc.setApproveButtonText("Select");
     _jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     _jfc.setMultiSelectionEnabled(true);
-    _fileFilter = ClasspathFilter.ONLY;
+    _fileFilter = ClassPathFilter.ONLY;
   }
   
-  /**
-   * Constructor that allows for a tooltip description.
-   */
-  public VectorFileOptionComponent (VectorOption<File> opt, String text,
-                                Frame parent, String description) {
+  /** Constructor that allows for a tooltip description. */
+  public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }
 
-  /**
-   * Displays the given value.
-   */
+  /** Displays the given value. */
   public void setValue(Vector<File> value) {
     File[] array = new File[value.size()];
     value.copyInto(array);
     _listModel.clear();
-    for (int i = 0; i < array.length; i++) {
-      _listModel.addElement(array[i]);
-    }
+    for (int i = 0; i < array.length; i++) { _listModel.addElement(array[i]); }
   }
 
-  /**
-   * Set the file filter for this vector option component
-   */
+  /** Set the file filter for this vector option component. */
   public void setFileFilter(FileFilter fileFilter) {
     _fileFilter = fileFilter;
   }
   
-  /**
-   * Shows a file chooser for adding a file to the element.
-   */
+  /** Shows a file chooser for adding a file to the element. */
   public void chooseFile() {
     File selection = (File) _list.getSelectedValue();
     if (selection != null) {

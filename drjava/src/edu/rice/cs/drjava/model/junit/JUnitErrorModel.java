@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.junit;
 
-import edu.rice.cs.drjava.model.IGetDocuments;
+import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 
 /**
@@ -63,7 +63,7 @@ public class JUnitErrorModel extends CompilerErrorModel {
    * @param model the model to load documents form for finding error positions
    * @param testsHaveRun whether or not the JUnit tests have completed
    */
-  public JUnitErrorModel(JUnitError[] errors, IGetDocuments model, boolean testsHaveRun) {
+  public JUnitErrorModel(JUnitError[] errors, GlobalModel model, boolean testsHaveRun) {
     super(errors, model);
     _testsHaveRun = testsHaveRun;
   }

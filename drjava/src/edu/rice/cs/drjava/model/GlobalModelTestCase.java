@@ -73,11 +73,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
   protected void _runJUnit(OpenDefinitionsDocument doc) throws IOException, ClassNotFoundException, 
     InterruptedException {
-    //    new ScrollableDialog(null, "Starting JUnit", "", "").show();
+//    Utilities.showDebug("Starting JUnit");
     _logJUnitStart();
-//    System.err.println("Starting JUnit");
+//    System.err.println("Starting JUnit on " + doc);
     doc.startJUnit();
-//    new ScrollableDialog(null, "JUnit Started", "", "").show();
+//    Utilities.showDebug("JUnit Started");
     _waitJUnitDone();
   }
   
@@ -144,7 +144,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Instantiates the GlobalModel to be used in the test cases. */
   protected void createModel() {
     //_model = new DefaultGlobalModel(_originalModel);
-    _model = new DefaultGlobalModel();
+    _model = new TestGlobalModel();
 
     // Wait until it has connected
     _model._interpreterControl.ensureInterpreterConnected();
@@ -226,30 +226,25 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return doc;
   }
 
-  /**
-   * Compiles a new file with the given text.
-   * The compile is expected to succeed and it is checked to make sure it worked
-   * reasonably.  This method does not return until the Interactions JVM
-   * has reset and is ready to use.
-   * @param text Code for the class to be compiled
-   * @param file File to save the class in
-   * @return Document after it has been saved and compiled
+  /** Compiles a new file with the given text. The compile is expected to succeed and it is checked to make sure it
+   *  worked reasonably.  This method does not return until the Interactions JVM has reset and is ready to use.
+   *  @param text Code for the class to be compiled
+   *  @param file File to save the class in
+   *  @return Document after it has been saved and compiled
    */
-  protected synchronized OpenDefinitionsDocument doCompile(String text, File file)
-    throws IOException, BadLocationException, InterruptedException
-  {
+  protected synchronized OpenDefinitionsDocument doCompile(String text, File file) throws IOException, 
+    BadLocationException, InterruptedException {
+    
     OpenDefinitionsDocument doc = setupDocument(text);
     doCompile(doc, file);
     return doc;
   }
 
-  /**
-   * Saves to the given file, and then compiles the given document.
-   * The compile is expected to succeed and it is checked to make sure it worked
-   * reasonably.  This method does not return until the Interactions JVM
-   * has reset and is ready to use.
-   * @param doc Document containing the code to be compiled
-   * @param file File to save the class in
+  /** Saves to the given file, and then compiles the given document. The compile is expected to succeed and it is 
+   *  checked to make sure it worked reasonably.  This method does not return until the Interactions JVM has reset
+   *  and is ready to use.
+   *  @param doc Document containing the code to be compiled
+   *  @param file File to save the class in
    */
   protected void doCompile(OpenDefinitionsDocument doc, File file) throws IOException, 
     InterruptedException {
@@ -270,7 +265,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       if (_model.getCompilerModel().getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
       }
-      listener.wait();
+      while (listener.notDone()) listener.wait();
     }
     listener.checkCompileOccurred();
     assertCompileErrorsPresent(false);
@@ -420,7 +415,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     //  buf.append("\nerror #" + i + ": " + errors[i]);
     //}
 
-    assertEquals(name + "compile errors > 0? numErrors=" + numErrors, b, numErrors > 0);
+    assertEquals(name + "compile errors > 0? numErrors =" + numErrors, b, numErrors > 0);
   }
 
     // These exceptions are specially used only in this test case.
@@ -576,6 +571,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void projectOpened(File pfile, FileOpenSelector files) { }
     public void projectClosed() { }
     public void projectBuildDirChanged() { }
+    public void projectWorkDirChanged() { }
     public void projectRunnableChanged() { }
     
     public void currentDirectoryChanged(File dir) { }
@@ -828,7 +824,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("compileStarted fired unexpectedly");
     }
 
-    public void compileEnded() {
+    public void compileEnded(File workDir) {
       listenerFail("compileEnded fired unexpectedly");
     }
 
@@ -840,7 +836,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("interactionsResetting fired unexpectedly");
     }
 
-    public void interpreterReady() {
+    public void interpreterReady(File wd) {
       listenerFail("interactionsReset fired unexpectedly");
     }
 
@@ -908,17 +904,22 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
   }
 
-
+  
+  
   /** If users expect the Interactions to be reset after a compilation, they must synchronize on this listener 
    *  when compiling, then wait() on it. The interactionsReset() method will notify().
    */
   public static class CompileShouldSucceedListener extends TestListener {
     private boolean _expectReset;
+    
+    private boolean _interactionsNotYetReset = true;  // records when interactions pane is reset
 
     /** Reset after a compilation.
      *  @param expectReset Whether to listen for interactions being
      */
     public CompileShouldSucceedListener(boolean expectReset) { _expectReset = expectReset; }
+    
+    public boolean notDone() { return _interactionsNotYetReset; }
 
     public void compileStarted() {
 //      Utilities.showDebug("compileStarted called in CSSListener");
@@ -930,7 +931,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       compileStartCount++;
     }
 
-    public void compileEnded() {
+    public void compileEnded(File workDir) {
 //      Utilities.showDebug("compileEnded called in CSSListener");
       assertCompileEndCount(0);
       assertCompileStartCount(1);
@@ -949,7 +950,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       interpreterResettingCount++;
     }
 
-    public void interpreterReady() {
+    public void interpreterReady(File wd) {
       synchronized(this) {
         assertInterpreterResettingCount(1);
         assertInterpreterReadyCount(0);
@@ -957,7 +958,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         assertCompileEndCount(1);
         // don't care whether interactions or console are reset first
         interpreterReadyCount++;
-        notify();
+        _interactionsNotYetReset = false;
+//        System.err.println("Interactions has been reset.");
+        notifyAll();
       }
     }
 
@@ -994,7 +997,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       compileStartCount++;
     }
 
-    public void compileEnded() {
+    public void compileEnded(File workDir) {
       assertCompileEndCount(0);
       assertCompileStartCount(1);
       compileEndCount++;
@@ -1056,7 +1059,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                    junitTestStartedCount);
     }
     public void nonTestCase(boolean isTestAll) {
-      if (printMessages) System.out.println("listener.nonTestCase, isTestAll="+isTestAll);
+      if (printMessages) System.out.println("listener.nonTestCase, isTestAll=" + isTestAll);
       nonTestCaseCount++;
       synchronized(_junitLock) {
         _junitDone = true;
@@ -1082,4 +1085,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       }
     }
   }
+  
+  /* A variant of DefaultGlobalModel used only for testing purposes.  This variant
+   * does not change the working directory when resetting interactions.  The definition of
+   * getWorkingDirectory() in DefaultGlobalModel breaks some unit tests on windows because
+   * the slave JVM keeps its working directory open until it shuts down. */
+  public class TestGlobalModel extends DefaultGlobalModel {
+    public File getWorkingDirectory() { return getRawWorkingDirectory(); }
+  } 
 }

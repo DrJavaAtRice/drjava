@@ -56,7 +56,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 /**
  * Test implementation of IGetDocuments interface.
  */
-public class TestDocGetter extends DummyGetDocuments {
+public class TestDocGetter extends DummyGlobalModel {
   /**
    * Storage for documents and File keys.
    */

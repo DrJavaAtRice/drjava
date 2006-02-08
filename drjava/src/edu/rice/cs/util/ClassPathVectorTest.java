@@ -45,58 +45,75 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
+import junit.framework.TestCase;
+
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.File;
+import java.io.IOException;
 import java.util.Vector;
 
 /**
- * A vector of classpath entries. Basically just a Vector<URL>, except
- * with additional logic to format the toString to be suitable for passing
- * to invocations of java -classpath ...
+ * A JUnit test case for the ClasspathVector class.
  */
-public class ClasspathVector extends Vector<URL> {
+public class ClassPathVectorTest extends TestCase {
   
-  public ClasspathVector() { }
-  
-  public ClasspathVector(int capacity) {
-    super(capacity);
+  /**
+   * Verifies the correctness of the formatting of the toString method of ClasspathVector.
+   */
+  public void test_toString() {
+    ClassPathVector v = new ClassPathVector();
+    assertEquals("Empty classpath", "", v.toString());
+    addElement(v, "file:///jsr14.jar");
+    assertEquals("One element classpath", File.separator+"jsr14.jar"+File.pathSeparator,v.toString());
+    addElement(v, "file:///wherever/supercool.jar");
+    String fileName = File.separator + "wherever" + File.separator + "supercool.jar";
+    assertEquals("Multiple element classpath", File.separator+"jsr14.jar" + File.pathSeparator + fileName + File.pathSeparator, v.toString());
+    addElement(v, "http://www.drjava.org/hosted.jar");
+    assertEquals("Multiple element classpath", File.separator+"jsr14.jar" + File.pathSeparator + fileName + File.pathSeparator + File.separator + "hosted.jar" + File.pathSeparator, v.toString());
   }
   
-  public String toString() {
-    StringBuffer cp = new StringBuffer();
-    for(URL u : this) {
-      cp.append(formatURL(u));
-      cp.append(File.pathSeparator);
-    }
-    return cp.toString();
-  }
-  
-  public void add(String entry) {
+  /**
+   * Tests the overloaded methods for translating other inputs to URLs on the fly
+   */
+  public void test_OverloadedAdds() {
+    ClassPathVector v = new ClassPathVector();
     try {
-      this.add(new URL(entry));
-    } catch(MalformedURLException e) {
-      IllegalArgumentException ee = new IllegalArgumentException(e.toString());
-      ee.initCause(e);
-      throw ee;
+      v.add("asdf");
+      fail("v.add(\"asdf\"): no exception thrown!");
+    } catch(IllegalArgumentException e) {
+      // EXPECTED //
+    } catch(Exception e) {
+      fail("v.add(\"asdf\") threw " + e.getClass().toString() + " instead of IllegalArgumentException!");
     }
+    
+    
   }
   
-  public void add(File entry) {
+  /**
+   * Tests to make sure the conversion to files is correct
+   */
+  public void test_asFileVector() throws IOException {
+    ClassPathVector vu = new ClassPathVector();
+    File[] files = new File[]{
+      new File("folder1/folder2/file1.ext"),
+      new File("folder1/folder2/file2.ext"),
+      new File("folder1/folder2/file3.ext")
+    };
+    for (File f : files) vu.add(f);
+    
+    Vector<File> vf = vu.asFileVector();
+    assertEquals("Size of vectors should agree", vu.size(), vf.size());
+    for(int i=0; i<files.length; i++)
+      assertEquals(files[i].getCanonicalFile(), vf.get(i));
+  }
+  
+  private void addElement(ClassPathVector v, String element) {
     try {
-      this.add(entry.toURL());
+      v.add(new URL(element));
     } catch(MalformedURLException e) {
-      IllegalArgumentException ee = new IllegalArgumentException(e.toString());
-      ee.initCause(e);
-      throw ee;
+      fail("Mysterious MalformedURLException. Probably not our fault.");
     }
   }
   
-  public Vector<File> asFileVector() {
-    Vector<File> v = new Vector<File>();
-    for(URL url : this) { v.add(new File(url.getFile())); }
-    return v;
-  }
-  
-  private String formatURL(URL url) { return new File(url.getFile()).toString(); }
 }

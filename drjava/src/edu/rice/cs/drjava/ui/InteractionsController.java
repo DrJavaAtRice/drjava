@@ -55,6 +55,8 @@ import java.awt.RenderingHints;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import java.io.File;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -112,7 +114,7 @@ public class InteractionsController extends AbstractConsoleController {
       Utilities.invokeLater(command);
     }
     
-    public void interpreterReady() { }  
+    public void interpreterReady(File wd) { }  
     public void interpreterResetFailed(Throwable t) { }  
     public void interpreterExited(int status) { }  
     public void interpreterChanged(boolean inProgress) { }

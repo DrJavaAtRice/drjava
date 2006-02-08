@@ -56,7 +56,7 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.lang.reflect.*;
 
-import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
+import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import edu.rice.cs.util.UnexpectedException;
 
 /** This class is an extension to DynamicJavaAdapter that allows us to process expressions involving the "this"
@@ -90,7 +90,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    *  @param className the class name of the current context of "this"
    */
   public JavaDebugInterpreter(String name, String className) {
-    super(new ClasspathManager());
+    super(new ClassPathManager());
     _name = name;
     setClassName(className);
     _translationVisitor = makeTranslationVisitor();

@@ -49,47 +49,33 @@ import java.io.File;
 
 import edu.rice.cs.util.Pair;
 
-/**
- * Classes that implement this interface are expected to 
- * give information specific to a single document that is
- * to be saved by the project file builder.  These objects
- * are passed to the builder upon a save.  These objects
- * should not be cached anywhere so that they may be gc'd.
- * They are meant for temporary transmition of data.
+/** Classes that implement this interface are expected to give information specific to a single document that is
+ *  to be saved by the project file builder.  These objects are passed to the builder upon a save.  These objects
+ *  should not be cached anywhere so that they may be gc'd.  They are meant for temporary transmition of data.
  */
 public interface DocumentInfoGetter {
   
-  /**
-   * @return the selection with the start and ending locations paired together.
-   * the cursor location is at the second location in the pair while the selection
-   * is defined between the two.
+  /** @return the selection with the start and ending locations paired together. The cursor location is at the second
+   *  location in the pair while the selection is defined between the two.
    */
   public Pair<Integer,Integer> getSelection();
   
-  /**
-   * @return the scroll offset of the scroll pane with the first element being
-   * the vertical scroll and the second being the horizontal scroll
+  /** @return the scroll offset of the scroll pane with the first element being the vertical scroll and the second 
+   *  being the horizontal scroll
    */
   public Pair<Integer,Integer> getScroll();
   
-  /**
-   * @return the filename of the document being described by this getter
-   */
+  /** @return the filename of the document being described by this getter. */
   public File getFile();
   
-  /**
-   * Returns the package declared in the java code within the document being described
-   * @return the package of this document.  
+  /** Returns the package declared in the java code within the document being described
+   *  @return the package of this document.  
    */
   public String getPackage();
   
-  /**
-   * @return true iff the described document is the current active document
-   */
+  /** @return true iff the described document is the current active document. */
   public boolean isActive();
   
-  /**
-   * @return whether the document has a file currently associated with it
-   */
+  /** @return whether the document has a file currently associated with it. */
   public boolean isUntitled();
 }

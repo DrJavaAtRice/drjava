@@ -141,11 +141,11 @@ public class ConsoleDocument implements EditDocumentInterface {
   }
 
   /** Resets the document to a clean state. */
-  public void reset() {
+  public void reset(String banner) {
     acquireWriteLock();
     try {
       forceRemoveText(0, _document.getLength());
-      _promptPos = 0;
+      forceInsertText(0, banner, DEFAULT_STYLE);
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
     finally { releaseWriteLock(); }

@@ -51,6 +51,7 @@ import java.awt.event.InputEvent;
 import java.io.IOException;
 import java.util.Locale;
 import junit.framework.*;
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.newjvm.ExecJVM;
 
 /**
@@ -152,8 +153,7 @@ public final class KeyStrokeOptionTest extends TestCase
     String className = "edu.rice.cs.drjava.config.KeyStrokeOptionTest";
     String[] args = new String[0];
 
-    Process process = ExecJVM.
-      runJVMPropagateClassPath(className, args);
+    Process process = ExecJVM.runJVMPropagateClassPath(className, args, FileOption.NULL_FILE);
     int status = process.waitFor();
     assertEquals("Local specific keystroke test failed!",
                  0, status);

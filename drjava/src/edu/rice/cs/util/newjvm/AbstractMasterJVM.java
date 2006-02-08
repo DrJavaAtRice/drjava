@@ -33,6 +33,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
+import edu.rice.cs.drjava.config.FileOption;
+
 import java.rmi.*;
 import java.rmi.server.*;
 import java.io.*;
@@ -55,7 +57,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   
   private static final String RUNNER = SlaveJVMRunner.class.getName();
   
-  /** The slave JVM remote stub, if it's connected, or null if not. */
+  /** The slave JVM remote stub if it's connected; null if not connected. */
   private SlaveRemote _slave = null;
 
   /** Is slave JVM in the progress of starting up? */
@@ -115,25 +117,25 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
    */
   protected final void invokeSlave() throws IOException, RemoteException {
-    invokeSlave(new String[0]);
+    invokeSlave(new String[0], FileOption.NULL_FILE);
   }
   
   /** Invokes slave JVM, using the system classpath.
    *  @param jvmArgs Array of arguments to pass to the JVM on startup
    *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
    */
-  protected final void invokeSlave(String[] jvmArgs) throws IOException, RemoteException {
-    invokeSlave(jvmArgs, System.getProperty("java.class.path"));
+  protected final void invokeSlave(String[] jvmArgs, File workDir) throws IOException, RemoteException {
+    invokeSlave(jvmArgs, System.getProperty("java.class.path"), workDir);
   }
   
   final static Object lock = new Object();
     
-  /** Creates and nvokes slave JVM.
+  /** Creates and invokes slave JVM.
    *  @param jvmArgs Array of arguments to pass to the JVM on startup
    *  @param cp Classpath to use when starting the JVM
    *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
    */
-  protected final void invokeSlave(String[] jvmArgs, String cp) throws IOException, RemoteException {
+  protected final void invokeSlave(String[] jvmArgs, String cp, File workDir) throws IOException, RemoteException {
     
     synchronized(_masterJVMLock) {
       if (_startupInProgress) throw new IllegalStateException("startup is in progress in invokeSlave");
@@ -225,7 +227,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       };
       
       /* Create the slave JVM. */
-      final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs);
+      final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs, workDir);
       
       // Start a thread to wait for the slave to die.  When it dies, restart it.
       Thread thread = new Thread(_waitForQuitThreadName) {
@@ -291,8 +293,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       handleSlaveConnected();
       
       if (_quitOnStartup) {
-        // quitSlave was called before the slave registered, so we now act on
-        // the deferred quit request.
+        // quitSlave was called before the slave registered, so we now act on the deferred quit request.
         _quitOnStartup = false;
         quitSlave();
       }
@@ -310,8 +311,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
         // registers in registerSlave.
         _quitOnStartup = true;
       
-      else if (_slave == null)
-        throw new IllegalStateException("tried to quit when no slave running and startup not in progress");
+      else if (_slave == null)  System.out.println("slave JVM quit invoked when no slave running");
+//        throw new IllegalStateException("tried to quit when no slave running and startup not in progress");
       else  _slave.quit();
     }
   }

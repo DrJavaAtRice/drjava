@@ -74,34 +74,25 @@ public final class VectorOptionTest extends TestCase {
     assertTrue(_ivo.parse("[]").isEmpty());
     assertTrue(_bvo.parse("[]").isEmpty());
 
-    try {
-      _ivo.parse("[,]"); fail("Comma at beginning.");
-    } catch (OptionParseException e) {
-    }
-    try {
-      _ivo.parse("[11"); fail("Missing footer.");
-    } catch (OptionParseException e) {
-    }
-    try {
-      _ivo.parse("[11,]"); fail("Comma w/o following list element.");
-    } catch (OptionParseException e) {
-    }
-    try {
-      _ivo.parse("11]"); fail("Missing header.");
-    } catch (OptionParseException e) {
-    }
-    try {
-      _ivo.parse("[11,,22]"); fail("Missing list element.");
-    } catch (OptionParseException e) {
-    }
-    try {
-      _ivo.parse("{11,22}"); fail("Illegal header and footer.");
-    } catch (OptionParseException e) {
-    }
-    try {
-      _ivo.parse("[11;22]"); fail("Illegal delimiter.");
-    } catch (OptionParseException e) {
-    }
+    try { _ivo.parse("[,]"); fail("Comma at beginning."); } 
+    catch (OptionParseException e) { }
+    
+    try { _ivo.parse("[11"); fail("Missing footer."); } 
+    catch (OptionParseException e) { }
+    try { _ivo.parse("[11,]"); fail("Comma w/o following list element."); } 
+    catch (OptionParseException e) { }
+    
+    try { _ivo.parse("11]"); fail("Missing header."); } 
+    catch (OptionParseException e) { }
+    
+    try { _ivo.parse("[11,,22]"); fail("Missing list element."); } 
+    catch (OptionParseException e) { }
+    
+    try { _ivo.parse("{11,22}"); fail("Illegal header and footer."); } 
+    catch (OptionParseException e) { }
+    
+    try { _ivo.parse("[11;22]"); fail("Illegal delimiter."); } 
+    catch (OptionParseException e) { }
 
     Vector<Boolean> bv = _bvo.parse("[true]");
 
@@ -116,10 +107,8 @@ public final class VectorOptionTest extends TestCase {
     assertEquals(Boolean.TRUE,  bv.get(2));
     assertEquals(Boolean.TRUE,  bv.get(3));
 
-    try {
-      _bvo.parse("[11]"); fail("Number instead of boolean.");
-    } catch (OptionParseException e) {
-    }
+    try { _bvo.parse("[11]"); fail("Number instead of boolean."); } 
+    catch (OptionParseException e) { }
   }
 
   public void testFormat() {

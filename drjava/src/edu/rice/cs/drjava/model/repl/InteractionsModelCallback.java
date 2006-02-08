@@ -45,6 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
+import java.io.File;
 import java.io.IOException;
 
 /** Callback interface which allows an InteractionsModel to respond to events in a remote Java interpreter.
@@ -136,5 +137,5 @@ public interface InteractionsModelCallback {
   public void interpreterResetting();
 
   /** Called when a new Java interpreter has registered and is ready for use. */
-  public void interpreterReady();
+  public void interpreterReady(File wd);
 }

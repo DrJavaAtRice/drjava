@@ -46,7 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.junit;
 
 import java.io.File;
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.classloader.ClassFileError;
 
 /**
@@ -104,7 +104,7 @@ public interface JUnitModelCallback {
    * Returns the accumulated classpath in use by all Java interpreters,
    * in the form of a ClasspathVector which has the correct toString()
    */
-  public ClasspathVector getClasspath();
+  public ClassPathVector getClassPath();
 
   /**
    * Called when the JVM used for unit tests has registered.

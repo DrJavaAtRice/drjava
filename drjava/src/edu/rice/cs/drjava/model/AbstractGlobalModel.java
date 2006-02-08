@@ -60,6 +60,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -69,7 +70,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
 
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.OrderedHashSet;
 import edu.rice.cs.util.Pair;
@@ -91,6 +92,7 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -398,14 +400,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _state = state;
     _notifier.projectRunnableChanged();
     _notifier.projectBuildDirChanged();
+    _notifier.projectWorkDirChanged();
     _notifier.projectModified();
   }
   
-  public FileGroupingState getFileGroupingState() { return _state; }
-  
   protected FileGroupingState 
-    makeProjectFileGroupingState(File main, File dir, File project, File[] files, ClasspathVector cp) {
-    return new ProjectFileGroupingState(main, dir, project, files, cp);
+    makeProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp) {
+    return new ProjectFileGroupingState(main, bd, wd, project, files, cp);
   }
   
   /** Notifies the project state that the project has been changed. */
@@ -468,6 +469,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return the class with the project's main method. */
   public File getBuildDirectory() { return _state.getBuildDirectory(); }
   
+  public File getWorkingDirectory() { return _state.getWorkingDirectory(); }
+  
+  public File getRawWorkingDirectory() { return _state.getRawWorkingDirectory(); }
+  
+  /** Sets the class with the project's main method. */
+  public void setWorkingDirectory(File f) {
+    _state.setWorkingDirectory(f);
+    _notifier.projectWorkDirChanged();
+    setProjectChanged(true);
+  }
+  
   public void cleanBuildDirectory() throws FileMovedException, IOException {
     _state.cleanBuildDirectory();
   }
@@ -482,22 +494,24 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   class ProjectFileGroupingState implements FileGroupingState {
     
     File _mainFile;
-    File _builtDir; 
+    File _builtDir;
+    File _workDir;
     final File projectFile;
     final File[] projectFiles;
-    ClasspathVector _projExtraClasspath;
+    ClassPathVector _projExtraClassPath;
     private boolean _isProjectChanged = false;
     
     //private ArrayList<File> _auxFiles = new ArrayList<File>();
     
     HashSet<String> _projFilePaths = new HashSet<String>();
     
-    ProjectFileGroupingState(File main, File dir, File project, File[] files, ClasspathVector cp) {
+    ProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp) {
       _mainFile = main;
-      _builtDir = dir;
+      _builtDir = bd;
+      _workDir = wd;
       projectFile = project;
       projectFiles = files;
-      _projExtraClasspath = cp;
+      _projExtraClassPath = cp;
       
       try {  for (File file : projectFiles) { _projFilePaths.add(file.getCanonicalPath()); } }
       catch(IOException e) { }
@@ -554,7 +568,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public File getBuildDirectory() { return _builtDir; }
     
+    public File getWorkingDirectory() { 
+      if (_workDir == null || _workDir == FileOption.NULL_FILE) return projectFile.getParentFile();  
+      // preceding default is project root
+      return _workDir; 
+    }
+    
+    public File getRawWorkingDirectory() { return _workDir; }
+      
     public void setBuildDirectory(File f) { _builtDir = f; }
+    
+    public void setWorkingDirectory(File f) { _workDir = f; }
     
     public File getMainClass() { return _mainFile; }
     
@@ -622,12 +646,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       throw new UnsupportedOperationException("AbstractGlobaModel does not support jarring");
     }
     
-    public ClasspathVector getExtraClasspath() {
-      return _projExtraClasspath;
+    public ClassPathVector getExtraClassPath() {
+      return _projExtraClassPath;
     }
     
-    public void setExtraClasspath(ClasspathVector cp) {
-      _projExtraClasspath = cp;
+    public void setExtraClassPath(ClassPathVector cp) {
+      _projExtraClassPath = cp;
     }
   }
   
@@ -635,11 +659,22 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   class FlatFileGroupingState implements FileGroupingState {
     public File getBuildDirectory() { return null; }
+    public File getWorkingDirectory() { 
+      File workDir = getRawWorkingDirectory(); 
+//      System.err.println("FlatFileGroupingState.getWorkingDirectory() called; IDE workDir field = " + workDir);
+      if (workDir != null && workDir != FileOption.NULL_FILE) return workDir;
+      File[] roots = getSourceRootSet();
+//      System.err.println("source root set is " + Arrays.toString(roots));
+      if (roots.length == 0) return new File(System.getProperty("user.dir"));
+      return roots[0];  // a flat file configuration should have exactly one source root
+    }
+    public File getRawWorkingDirectory() { return DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY); }
     public boolean isProjectActive() { return false; }
     public boolean isInProjectPath(OpenDefinitionsDocument doc) { return false; }
     public boolean isInProjectPath(File f) { return false; }
     public File getProjectFile() { return null; }
     public void setBuildDirectory(File f) { }
+    public void setWorkingDirectory(File f) { DrJava.getConfig().setSetting(OptionConstants.WORKING_DIRECTORY, f); }
     public File[] getProjectFiles() { return null; }
     public boolean inProject(File f) { return false; }
     public File getMainClass() { return null; }
@@ -666,9 +701,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /* Flat grouping states have no extra entries. */
-    public ClasspathVector getExtraClasspath() { return new ClasspathVector(); }
+    public ClassPathVector getExtraClassPath() { return new ClassPathVector(); }
     
-    public void setExtraClasspath(ClasspathVector cp) {
+    public void setExtraClassPath(ClassPathVector cp) {
       throw new UnsupportedOperationException("Flat grouping states do not have extra classpath entries.");
     }
   }
@@ -865,7 +900,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Utilities.showDebug("File " + file + " opened");
     // Make sure this is on the classpath
     try {
-      File classpath = odd.getSourceRoot();
+      File classPath = odd.getSourceRoot();
       if (odd.inProject() || odd.isAuxiliaryFile())
         throw new UnsupportedOperationException("Cannot add new project files to classPath");
 //        _interactionsModel.addProjectFilesClassPath(classpath.toURL());
@@ -944,7 +979,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     for (final OpenDefinitionsDocument d: filesOpened) {
       addDocToNavigator(d);
-      addDocToClasspath(d);
+      addDocToClassPath(d);
       _notifier.fileOpened(d);
     }
     
@@ -1071,11 +1106,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
 //    for (File f: currentclasspaths) { builder.addClasspathFile(f); }
     // New behavior: only save project-specific classpaths.
-    ClasspathVector exCp = getProjectExtraClasspath();
+    ClassPathVector exCp = getExtraClassPath();
     if (exCp != null) {
       Vector<File> exCpF = exCp.asFileVector();
       for (File f : exCpF) {
-        builder.addClasspathFile(f);
+        builder.addClassPathFile(f);
         //System.out.println("Saving project classpath entry " + f);
       }
     } else {
@@ -1083,8 +1118,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     // add build directory
-    File d = getBuildDirectory();
-    if (d != null) builder.setBuildDirectory(d);
+    File bd = getBuildDirectory();
+    if (bd != null) builder.setBuildDirectory(bd);
+    
+    // add working directory
+    File wd = getRawWorkingDirectory();  // the value of WORKING_DIRECTORY to be stored in the project
+    if (wd != null) builder.setWorkingDirectory(wd);
     
     // add jar main class
     File mainClass = getMainClass();
@@ -1100,7 +1139,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _auxiliaryFiles = auxFileList;
     }
     
-    setFileGroupingState(makeProjectFileGroupingState(mainClass, d, new File(filename), srcFiles, exCp));
+    setFileGroupingState(makeProjectFileGroupingState(mainClass, bd, wd, new File(filename), srcFiles, exCp));
   }
   
   /** Parses the given project file, sets up the state and other configurations such as the Navigator and the
@@ -1116,8 +1155,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final DocFile[] srcFiles = ir.getSourceFiles();
     final DocFile[] auxFiles = ir.getAuxiliaryFiles();
     final File buildDir = ir.getBuildDirectory();
+    final File workDir = ir.getWorkingDirectory();
     final File mainClass = ir.getMainClass();
-    final File[] projectClasspaths = ir.getClasspaths();
+    final File[] projectClassPaths = ir.getClassPaths();
     
     final String projfilepath = projectFile.getCanonicalPath();
     
@@ -1134,9 +1174,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         new LinkedList<Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>>();
     l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getSourceBinTitle(), 
         new INavigatorItemFilter<OpenDefinitionsDocument>() {
-          public boolean accept(OpenDefinitionsDocument n) {
-            return n.isInProjectPath();
-          }
+          public boolean accept(OpenDefinitionsDocument n) { return n.isInProjectPath(); }
         }));
     
     l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getAuxiliaryBinTitle(), 
@@ -1163,10 +1201,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       for (File file: auxFiles) { _auxiliaryFiles.add(file); }
     }
     
-    ClasspathVector extraClasspaths = new ClasspathVector();
-    for (File f : projectClasspaths) { extraClasspaths.add(f); }
+    ClassPathVector extraClassPaths = new ClassPathVector();
+    for (File f : projectClassPaths) { extraClassPaths.add(f); }
     
-    setFileGroupingState(makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles, extraClasspaths));
+    setFileGroupingState(makeProjectFileGroupingState(mainClass, buildDir, workDir, projectFile, srcFiles, extraClassPaths));
+    
+    resetInteractions(getWorkingDirectory());  // Shut down debugger and reset interactions pane in new working directory
     
     ArrayList<File> projFiles = new ArrayList<File>();
     File active = null;
@@ -1220,9 +1260,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       ((JTreeSortNavigator<?>)_documentNavigator).collapsePaths(ir.getCollapsedPaths());
     }
    
-// The following line is commented out because it is done in MainFrame.openProject before this method is called.
-//    resetInteractions(); // Since the classpath is most likely changed.  Clears out test pane as well.
-    
     return srcFiles; // Unnecessarily returns src files in keeping with the previous interface.
   }
   
@@ -1237,7 +1274,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // Reset rather than telling the user to reset. This was a design decision
     // made by the class Spring 2005 after much debate.
    
-    resetInteractions();
+    resetInteractions(getWorkingDirectory());
     _notifier.projectClosed();
   }
   
@@ -1518,11 +1555,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
 
   /** A degenerate operation since this has no interactions model. */
-  public void resetInteractions() { /* do nothing */ }
+  public void resetInteractions(File wd) { /* do nothing */ }
 
   /** Resets the console. Fires consoleReset() event. */
   public void resetConsole() {
-    _consoleDoc.reset();
+    _consoleDoc.reset("");
     _notifier.consoleReset();
   }
 
@@ -1557,14 +1594,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
 
-  /**
-   * Returns the entire history as a String with semicolons as needed
-   */
+  /** Returns the entire history as a String with semicolons as needed. */
   public String getHistoryAsStringWithSemicolons() {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
 
-  /** throws UnsupportedOperationException */
+  /** Throws UnsupportedOperationException */
   public String getHistoryAsString() {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
@@ -1632,22 +1667,22 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
 
   /** throws new UnsupportedOperationException */
-  public ClasspathVector getClasspath() { 
+  public ClassPathVector getClassPath() { 
     throw new UnsupportedOperationException("AbstractGlobalModel does not support classPaths");
   }
   
-  /** Returns only the project's extra classpaths.
+  /** Returns a project's extra classpaths; empty for FlatFileGroupingState
    *  @return The classpath entries loaded along with the project
    */
-  public ClasspathVector getProjectExtraClasspath() {
-    return _state.getExtraClasspath();
+  public ClassPathVector getExtraClassPath() {
+    return _state.getExtraClassPath();
   }
   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
    *  project preferences..
    */
-  public void setProjectExtraClasspath(ClasspathVector cp) {
-    _state.setExtraClasspath(cp);
+  public void setExtraClassPath(ClassPathVector cp) {
+    _state.setExtraClassPath(cp);
     //System.out.println("Setting project classpath to: " + cp);
   }
 
@@ -1758,12 +1793,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return getSourceFileFromPaths(filename, sourcepath);
   }
 
-  /**
-   * Searches for a file with the given name on the provided paths.
-   * Returns null if the file is not found.
-   * @param filename Name of the source file to look for
-   * @param paths An array of directories to search
-   * @return the file if it is found, or null otherwise
+  /** Searches for a file with the given name on the provided paths. Returns null if the file is not found.
+   *  @param filename Name of the source file to look for
+   *  @param paths An array of directories to search
+   *  @return the file if it is found, or null otherwise
    */
   public File getSourceFileFromPaths(String filename, Vector<File> paths) {
     for (File p: paths) {
@@ -1773,12 +1806,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return null;
   }
 
-  /**
-   * Gets the file named filename from the given path, if it exists.
-   * Returns null if it's not there.
-   * @param filename the file to look for
-   * @param path the path to look for it in
-   * @return the file if it exists
+  /** Gets the file named filename from the given path, if it exists.  Returns null if it's not there.
+   *  @param filename the file to look for
+   *  @param path the path to look for it in
+   *  @return the file if it exists
    */
   private File _getSourceFileFromPath(String filename, File path) {
     String root = path.getAbsolutePath();
@@ -1786,14 +1817,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return f.exists() ? f : null;
   }
 
-  /**
-   * Returns the document currently being tested (with JUnit) if there is
-   * one, otherwise null.
-   *
-  public OpenDefinitionsDocument getDocBeingTested() {
-  return _docBeingTested;
-  }*/
-  
   /** Throws UnsupportedOperationException */
   public void jarAll() { 
     throw new UnsupportedOperationException("AbstractGlobalModel does not support jarring documents");
@@ -2144,7 +2167,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           _notifier.fileSaved(openDoc);
           
           // Make sure this file is on the appropriate classpaths (does nothing in AbstractGlobalModel)
-          addDocToClasspath(this);
+          addDocToClassPath(this);
           
           /* update the navigator */
           _documentNavigator.refreshDocument(this, fixPathForNavigator(file.getCanonicalPath()));
@@ -2157,8 +2180,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         return false;
       }
     }
-
-    
+  
     /** Whenever this document has been saved, this method should be called so that it knows it's no longer in
      *  a modified state.
      */
@@ -3002,7 +3024,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Does nothing; overridden in DefaultGlobalModel. */
-  protected void addDocToClasspath(OpenDefinitionsDocument doc) { /* do nothing */ }
+  protected void addDocToClassPath(OpenDefinitionsDocument doc) { /* do nothing */ }
   
   /** Creates a document from a file.
    *  @param file File to read document from
@@ -3012,7 +3034,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     OpenDefinitionsDocument doc = _rawOpenFile(file);
     addDocToNavigator(doc);
-    addDocToClasspath(doc);
+    addDocToClassPath(doc);
     _notifier.fileOpened(doc);
     return doc;
   }

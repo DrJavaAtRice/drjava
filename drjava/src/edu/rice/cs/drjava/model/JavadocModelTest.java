@@ -68,7 +68,7 @@ public class JavadocModelTest extends TestCase {
    * Tests that a simple suggestion can be made for the destination directory.
    */
   public void testSimpleSuggestedDirectory() {
-    IGetDocuments getDocs = new DummyGetDocuments() {
+    GlobalModel getDocs = new DummyGlobalModel() {
       public boolean hasModifiedDocuments() {
         return false;  // pretend all docs are saved
       }
@@ -96,7 +96,7 @@ public class JavadocModelTest extends TestCase {
   public void testUnsavedSuggestedDirectory() {
     _storedFile = null;
     
-    IGetDocuments getDocs = new DummyGetDocuments() {
+    GlobalModel getDocs = new DummyGlobalModel() {
       public boolean hasModifiedDocuments() {
         return true;  // pretend doc is unsaved
       }
@@ -130,7 +130,7 @@ public class JavadocModelTest extends TestCase {
    * if there is no valid source root.
    */
   public void testNoSuggestedDirectory() {
-    IGetDocuments getDocs = new DummyGetDocuments() {
+    GlobalModel getDocs = new DummyGlobalModel() {
       public boolean hasModifiedDocuments() {
         return false;  // pretend all docs are saved
       }

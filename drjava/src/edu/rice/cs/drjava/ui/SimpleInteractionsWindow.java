@@ -48,7 +48,9 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.*;
 import java.awt.Font;
 import java.awt.event.*;
+import java.io.File;
 
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.model.repl.*;
 
 /** A standalone Interactions Window that provides the functionality of DrJava's Interactions Pane in a single JVM.
@@ -88,13 +90,13 @@ public class SimpleInteractionsWindow extends JFrame {
       }
       public void interpreterResetting() { _pane.setEditable(false); }
       public void interactionErrorOccurred(int offset, int length) { _pane.highlightError(offset, length); }
-      public void interpreterReady() {
+      public void interpreterReady(File wd) {
         _controller.moveToPrompt();
         _pane.setEditable(true);
       }
       public void interpreterExited(int status) { }
       public void interpreterChanged(boolean inProgress) { _pane.setEditable(inProgress); }
-      public void interpreterResetFailed(Throwable t) { interpreterReady(); }
+      public void interpreterResetFailed(Throwable t) { interpreterReady(FileOption.NULL_FILE); }
       public void interactionIncomplete() {
         int caretPos = _pane.getCaretPosition();
         _controller.getConsoleDoc().insertNewLine(caretPos);

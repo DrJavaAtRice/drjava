@@ -96,6 +96,12 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
+  public void projectWorkDirChanged() {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.projectWorkDirChanged(); } }
+    finally { _lock.endRead(); }
+  }
+  
   public void projectRunnableChanged() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.projectRunnableChanged(); } }
@@ -299,9 +305,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   }
 
   /** Called when the interactions window is reset. */
-  public void interpreterReady() {
+  public void interpreterReady(File wd) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.interpreterReady(); } }
+    try { for (GlobalModelListener l : _listeners) { l.interpreterReady(wd); } }
     finally { _lock.endRead(); }
   }
 
@@ -346,9 +352,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   }
 
   /** Called when a compile has finished running. */
-  public void compileEnded() {
+  public void compileEnded(File workDir) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.compileEnded(); } }
+    try { for (GlobalModelListener l : _listeners) { l.compileEnded(workDir); } }
     finally { _lock.endRead(); }
   }
 

@@ -45,43 +45,33 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-/**
- * Interface for any listener to an InteractionsModel.
- * @version $Id$
+import java.io.File;
+
+/** Interface for any listener to an InteractionsModel.
+ *  @version $Id$
  */
 public interface InteractionsListener {
 
-  /**
-   * Called when an interaction has started.
-   */
+  /** Called when an interaction has started. */
   public void interactionStarted();
 
-  /**
-   * Called when an interaction has ended.
-   */
+  /** Called when an interaction has ended. */
   public void interactionEnded();
   
-  /**
-   * Called when an interaction results in a syntax error.
-   * 
-   * @param offset the error's offset into the InteractionsDocument
-   * @param length the length of the error
+  /** Called when an interaction results in a syntax error.
+   *  @param offset the error's offset into the InteractionsDocument
+   *  @param length the length of the error
    */
   public void interactionErrorOccurred(int offset, int length);
   
-  /**
-   * Called when the interpreter has begun resetting.
-   */
+  /** Called when the interpreter has begun resetting. */
   public void interpreterResetting();
   
-  /**
-   * Called when the interpreter is ready to use.
-   */
-  public void interpreterReady();
+  /** Called when the interpreter is ready to use. */
+  public void interpreterReady(File wd);
   
-  /**
-   * Called if the interpreter could not be reset.
-   * @param t Throwable explaining why the reset failed.
+  /** Called if the interpreter could not be reset.
+   *  @param t Throwable explaining why the reset failed.
    */
   public void interpreterResetFailed(Throwable t);
   

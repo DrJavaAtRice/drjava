@@ -34,7 +34,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import  java.io.File;
-import  edu.rice.cs.util.ClasspathVector;
+import  edu.rice.cs.util.ClassPathVector;
 
 /** The minimum interface that a compiler must meet to be used by DrJava.
  *  @version $Id$
@@ -77,7 +77,7 @@ public interface CompilerInterface {
    *  the project's classpath, if any, and the entries from EXTRA_CLASSPATH.
    * @param extraClassPath the classpath to use as the compiler's extra classpath
    */
-  void setExtraClassPath(ClasspathVector extraClassPath);
+  void setExtraClassPath(ClassPathVector extraClassPath);
   
   /** Sets whether to allow assertions in Java 1.4.  (Allows us not to reference the config object in a 
    *  loaded class file.)

@@ -56,7 +56,7 @@ import java.io.File;
 * @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
 * @version $Id$
 */
-public class DummyGetDocumentsTest extends TestCase {
+public class DummyGlobalModelTest extends TestCase {
     
 
     /**
@@ -67,7 +67,7 @@ public class DummyGetDocumentsTest extends TestCase {
     * @exception java.io.IOException if an error occurs
     */
     public void testGetDocumentForFile() throws java.io.IOException {
- DummyGetDocuments dummy = new DummyGetDocuments();
+ DummyGlobalModel dummy = new DummyGlobalModel();
  try {
      dummy.getDocumentForFile(new File(""));
  }
@@ -86,7 +86,7 @@ public class DummyGetDocumentsTest extends TestCase {
     * @exception java.io.IOException if an error occurs
     */
     public void testIsAlreadyOpen() throws java.io.IOException {
- DummyGetDocuments dummy = new DummyGetDocuments();
+ DummyGlobalModel dummy = new DummyGlobalModel();
  try {
      dummy.getDocumentForFile(new File(""));
  }
@@ -106,7 +106,7 @@ public class DummyGetDocumentsTest extends TestCase {
     * @exception java.io.IOException if an error occurs
     */
     public void testGetDefinitionsDocuments() {
- DummyGetDocuments dummy = new DummyGetDocuments();
+ DummyGlobalModel dummy = new DummyGlobalModel();
  try {
      dummy.getOpenDefinitionsDocuments();
  }
@@ -126,7 +126,7 @@ public class DummyGetDocumentsTest extends TestCase {
     * @exception java.io.IOException if an error occurs
     */
     public void testHasModifiedDocuments() {
- DummyGetDocuments dummy = new DummyGetDocuments();
+ DummyGlobalModel dummy = new DummyGlobalModel();
  try {
      dummy.hasModifiedDocuments();
  }

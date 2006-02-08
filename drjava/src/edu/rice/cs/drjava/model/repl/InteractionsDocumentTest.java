@@ -47,25 +47,22 @@ package edu.rice.cs.drjava.model.repl;
 
 import junit.framework.*;
 
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.text.EditDocumentException;
 
-/**
- * Tests the functionality of the AbstractInteractionsDocument.
- * Most history functionality is tested in HistoryTest.
- * @version $Id$
+/** Tests the functionality of the InteractionsDocument.  Most history functionality is tested in HistoryTest.
+ *  @version $Id$
  */
 public final class InteractionsDocumentTest extends TestCase {
   protected InteractionsDocument _doc;
   
   /** Initialize fields for each test. */
   protected void setUp() {
+    // Use System.getProperty("user.dir") as working directory here and in call on reset(...) below
     _doc = new InteractionsDocument(new InteractionsDJDocument());
   }
 
-  /**
-   * Tests that the document prevents editing before the
-   * prompt, and beeps if you try.
-   */
+  /** Tests that the document prevents editing before the prompt, and beeps if you try. */
   public void testCannotEditBeforePrompt() throws EditDocumentException {
     TestBeep testBeep = new TestBeep();
     _doc.setBeep(testBeep);
@@ -77,9 +74,7 @@ public final class InteractionsDocumentTest extends TestCase {
     assertEquals("Doc length", origLength, _doc.getLength());
   }
 
-  /**
-   * Tests that clear current interaction works.
-   */
+  /** Tests that clear current interaction works. */
   public void testClearCurrent() throws EditDocumentException {
     int origLength = _doc.getLength();
     _doc.insertText(origLength, "text", InteractionsDocument.DEFAULT_STYLE);
@@ -91,15 +86,17 @@ public final class InteractionsDocumentTest extends TestCase {
 
   /** Tests that initial contents are the banner and prompt, and that reset works. */
   public void testContentsAndReset() throws EditDocumentException {
-    String origText = _doc.getBanner() + _doc.getPrompt();
-    assertEquals("Contents before insert", origText, _doc.getDocText(0, _doc.getLength()));
+    String banner = InteractionsModel.getStartUpBanner();
+    String prompt = _doc.getPrompt();
+    String newBanner = "THIS IS A NEW BANNER\n";
+    assertEquals("Contents before insert", banner + prompt, _doc.getDocText(0, _doc.getLength()));
     // Insert some text
     _doc.insertText(_doc.getLength(), "text", InteractionsDocument.DEFAULT_STYLE);
     _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("Contents before reset", _doc.getBanner() + "before" + _doc.getPrompt() + "text",
+    assertEquals("Contents before reset", banner + "before" + prompt + "text",  
                  _doc.getDocText(0, _doc.getLength()));
-    _doc.reset();
-    assertEquals("Contents after reset", origText, _doc.getDocText(0, _doc.getLength()));
+    _doc.reset(newBanner);
+    assertEquals("Contents after reset", newBanner + prompt, _doc.getDocText(0, _doc.getLength()));
   }
 
   /** Tests that inserting a newline works. */
@@ -108,38 +105,28 @@ public final class InteractionsDocumentTest extends TestCase {
     _doc.insertText(origLength, "command", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("current interaction before newline", "command", _doc.getCurrentInteraction());
     _doc.insertNewLine(origLength + 2);
-    assertEquals("current interaction after newline",
-                 "co" + System.getProperty("line.separator") + "mmand",
+    assertEquals("current interaction after newline", "co" + System.getProperty("line.separator") + "mmand",
                  _doc.getCurrentInteraction());
   }
 
-  /**
-   * Tests that recalling commands from the history works.
-   */
+  /** Tests that recalling commands from the history works. */
   public void testRecallFromHistory() throws EditDocumentException {
     String origText = _doc.getDocText(0, _doc.getLength());
     _doc.addToHistory("command");
-    assertEquals("Contents before recall prev",
-                 origText, _doc.getDocText(0, _doc.getLength()));
+    assertEquals("Contents before recall prev", origText, _doc.getDocText(0, _doc.getLength()));
 
     _doc.recallPreviousInteractionInHistory();
-    assertEquals("Contents after recall prev",
-                 origText + "command", _doc.getDocText(0, _doc.getLength()));
+    assertEquals("Contents after recall prev", origText + "command", _doc.getDocText(0, _doc.getLength()));
 
     _doc.recallNextInteractionInHistory();
-    assertEquals("Contents after recall next",
-                 origText, _doc.getDocText(0, _doc.getLength()));
+    assertEquals("Contents after recall next", origText, _doc.getDocText(0, _doc.getLength()));
   }
 
 
-  /**
-   * Silent beep for a test class.
-   */
+  /** Silent beep for a test class. */
   public static class TestBeep implements Runnable {
     int numBeeps = 0;
-    public void run() {
-      numBeeps++;
-    }
+    public void run() { numBeeps++; }
   }
 }
 

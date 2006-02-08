@@ -51,10 +51,10 @@ import java.net.URL;
 
 
 
-public class ClasspathEntry{
+public class ClassPathEntry{
   URL item;
   
-  public ClasspathEntry(URL entry) {
+  public ClassPathEntry(URL entry) {
     item = entry;
   }
   

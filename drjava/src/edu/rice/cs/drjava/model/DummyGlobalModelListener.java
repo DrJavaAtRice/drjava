@@ -60,6 +60,9 @@ public class DummyGlobalModelListener implements GlobalModelListener {
   /** Called when the project's build directory has changed. */
   public void projectBuildDirChanged() {  }
   
+  /** Called when the project's build directory has changed. */
+  public void projectWorkDirChanged() {  }
+  
   /** Called when the project is being opened and the model needs the gui to do some stuff for it. */
   public void projectOpened(File pfile, FileOpenSelector files) {  }
   
@@ -94,7 +97,7 @@ public class DummyGlobalModelListener implements GlobalModelListener {
   public void compileStarted() { }
 
   /** Called when a compile has finished running. */
-  public void compileEnded() { }
+  public void compileEnded(File workDir) { }
   
   /** Called when a file's main method is about to be run. */
   public void runStarted(OpenDefinitionsDocument doc) { }
@@ -151,7 +154,7 @@ public class DummyGlobalModelListener implements GlobalModelListener {
   public void interpreterResetting() { }
   
   /** Called when the interactions window is reset. */
-  public void interpreterReady() { }
+  public void interpreterReady(File wd) { }
 
   /** Called when the interactions JVM was closed by System.exit
    *  or by being aborted. Immediately after this the interactions

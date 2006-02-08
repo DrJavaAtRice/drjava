@@ -405,7 +405,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
         assertEquals("should run 1 test", 1, numTests);
         junitSuiteStartedCount++;
         // kill the infinite test once the tests have started
-        _model.resetInteractions();
+        _model.resetInteractions(new File(System.getProperty("user.dir")));
       }
       public void junitTestStarted(String name) {
         assertEquals("running wrong test", "testInfinite", name);
@@ -424,7 +424,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
         assertInterpreterReadyCount(0);
         interpreterResettingCount++;
       }
-      public void interpreterReady() {
+      public void interpreterReady(File wd) {
         assertInterpreterResettingCount(1);
         assertJUnitEndCount(0);
         interpreterReadyCount++;

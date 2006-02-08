@@ -100,7 +100,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   /**
    * Returns a copy of the list of unique entries on the classpath.
    */
-  public Vector<String> getAugmentedClasspath() throws RemoteException;
+  public Vector<String> getAugmentedClassPath() throws RemoteException;
 
   /**
    * Gets the string representation of the value of a variable in the current interpreter.

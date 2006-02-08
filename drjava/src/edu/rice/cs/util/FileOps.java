@@ -289,7 +289,13 @@ public abstract class FileOps {
    *          contents likely at least partially still exist.
    */
   public static boolean deleteDirectory(final File dir) {
-    if (! dir.isDirectory()) { return dir.delete(); }
+//    System.err.println("Deleting file or directory " + dir);
+    if (! dir.isDirectory()) { 
+      boolean res;
+      res = dir.delete();
+//      System.err.println("Deletion of " + dir + " returned " + res);
+      return res;
+    }
 
     boolean ret = true;
     File[] childFiles = dir.listFiles();
@@ -297,6 +303,7 @@ public abstract class FileOps {
     
     // Now we should have an empty directory
     ret = ret && dir.delete();
+//    System.err.println("Recursive deletion of " + dir + " returned " + ret);
     return ret;
   }
   

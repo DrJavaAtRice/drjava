@@ -54,11 +54,7 @@ import edu.rice.cs.util.*;
 
 import static edu.rice.cs.util.StringOps.convertToLiteral;
 
-/**
- * A JUnit test case class.
- * Every method starting with the word "test" will be called when running
- * the test with JUnit.
- */
+/** Test class for project files */
 public class ProjectTest extends TestCase {
 
   private String absp; // absolute path
@@ -114,6 +110,8 @@ public class ProjectTest extends TestCase {
       "   (path \"./[ External ]/\"))\n" +
       "(build-dir ;; absolute path\n" +
       "   (file (name "+convertToLiteral(new File(absp,"drjava/built").getCanonicalPath()) + ")))\n" +
+      "(work-dir ;; absolute path\n" +
+      "   (file (name "+convertToLiteral(new File(absp,"drjava/src").getCanonicalPath()) + ")))\n" +
       "(classpaths\n" +
       "   (file (name "+convertToLiteral(new File(absp,"drjava/src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
@@ -124,7 +122,7 @@ public class ProjectTest extends TestCase {
     assertEquals("number of source files", 7, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
-    assertEquals("number of classpaths", 1, pfir.getClasspaths().length);
+    assertEquals("number of classpaths", 1, pfir.getClassPaths().length);
     String base = f.getParent();
     assertEquals("first source filename", new File(base,"/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
     assertEquals("mod-date value", 
@@ -134,7 +132,8 @@ public class ProjectTest extends TestCase {
     assertEquals("first aux filename", new File(absp,"junk/sexp/Tokens.java").getPath(), pfir.getAuxiliaryFiles()[0].getCanonicalPath());
     assertEquals("last collapsed path", "./[ External ]/", pfir.getCollapsedPaths()[1]);
     assertEquals("build-dir name", new File(absp,"drjava/built").getPath(), pfir.getBuildDirectory().getCanonicalPath());
-    assertEquals("classpath name", new File(absp,"drjava/src/edu/rice/cs/lib").getPath(), pfir.getClasspaths()[0].getCanonicalPath());
+    assertEquals("work-dir name", new File(absp,"drjava/src").getPath(), pfir.getWorkingDirectory().getCanonicalPath());
+    assertEquals("classpath name", new File(absp,"drjava/src/edu/rice/cs/lib").getPath(), pfir.getClassPaths()[0].getCanonicalPath());
     assertEquals("main-class name", new File(base,"/sexp/SEList.java").getCanonicalPath(), pfir.getMainClass().getCanonicalPath());
 
   }
@@ -149,20 +148,21 @@ public class ProjectTest extends TestCase {
   }
 
   public void testWriteFile() throws IOException, MalformedProjectFileException {
-    File pf = _fillTempFile("test2.pjt","");
+    File pf = _fillTempFile("test2.pjt", "");
     ProjectFileBuilder fb = new ProjectFileBuilder(pf);
     String sr =pf.getCanonicalFile().getParent();
 
-    fb.addSourceFile(makeGetter(0,0,0,0,  "dir1/testfile1.java","dir1",false,false,pf));
-    fb.addSourceFile(makeGetter(1,1,0,0,  "dir1/testfile2.java","dir1",false,false,pf));
-    fb.addSourceFile(makeGetter(20,22,0,0,"dir2/testfile3.java","dir2",false,false,pf));
-    fb.addSourceFile(makeGetter(1,1,0,0,  "dir2/testfile4.java","dir2",true, false,pf));
-    fb.addSourceFile(makeGetter(0,0,0,0,  "dir3/testfile5.java","",false,false,pf));
-    fb.addAuxiliaryFile(makeGetter(1,1,0,0, absp+"test/testfile6.java","/home/javaplt",false, false,null));
-    fb.addAuxiliaryFile(makeGetter(1,1,0,0, absp+"test/testfile7.java","/home/javaplt",false, false,null));
+    fb.addSourceFile(makeGetter(0, 0, 0, 0,  "dir1/testfile1.java", "dir1", false, false, pf));
+    fb.addSourceFile(makeGetter(1, 1, 0, 0,  "dir1/testfile2.java", "dir1", false, false, pf));
+    fb.addSourceFile(makeGetter(20, 22, 0, 0, "dir2/testfile3.java", "dir2", false, false, pf));
+    fb.addSourceFile(makeGetter(1, 1, 0, 0,  "dir2/testfile4.java", "dir2", true, false, pf));
+    fb.addSourceFile(makeGetter(0, 0, 0, 0,  "dir3/testfile5.java", "", false, false, pf));
+    fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile6.java", "/home/javaplt", false, false, null));
+    fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile7.java", "/home/javaplt", false, false, null));
     fb.addCollapsedPath("./[ Source Files ]/dir1/");
-    fb.addClasspathFile(new File(absp,"drjava/lib"));
-    fb.setBuildDirectory(new File(absp,"drjava/built"));
+    fb.addClassPathFile(new File(absp, "drjava/lib"));
+    fb.setBuildDirectory(new File(absp, "drjava/built"));
+    fb.setWorkingDirectory(new File(absp, "drjava/src"));
     fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
 
     String expected = "";
@@ -188,7 +188,7 @@ public class ProjectTest extends TestCase {
     assertEquals("number of source files", 5, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 1, pfir.getCollapsedPaths().length);
-    assertEquals("number of classpaths", 1, pfir.getClasspaths().length);
+    assertEquals("number of classpaths", 1, pfir.getClassPaths().length);
 
     String base = pf.getParent();
     assertEquals("first source filename", new File(base,"/dir1/testfile1.java").getPath(), pfir.getSourceFiles()[0].getPath());
@@ -196,7 +196,8 @@ public class ProjectTest extends TestCase {
     assertEquals("first aux filename", new File(absp,"test/testfile6.java").getPath(), pfir.getAuxiliaryFiles()[0].getPath());
     assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);
     assertEquals("build-dir name", new File(absp,"drjava/built").getPath(), pfir.getBuildDirectory().getCanonicalPath());
-    assertEquals("classpath name", new File(absp,"drjava/lib").getPath(), pfir.getClasspaths()[0].getCanonicalPath());
+    assertEquals("work-dir name", new File(absp,"drjava/src").getPath(), pfir.getWorkingDirectory().getCanonicalPath());
+    assertEquals("classpath name", new File(absp,"drjava/lib").getPath(), pfir.getClassPaths()[0].getCanonicalPath());
     assertEquals("main-class name", new File(base,"/dir1/testfile1.java").getCanonicalPath(), pfir.getMainClass().getCanonicalPath());
     pf.delete();
   }
@@ -208,10 +209,8 @@ public class ProjectTest extends TestCase {
       public Pair<Integer,Integer> getSelection() { return new Pair<Integer,Integer>(new Integer(sel1),new Integer(sel2)); }
       public Pair<Integer,Integer> getScroll() { return new Pair<Integer,Integer>(new Integer(scrollv),new Integer(scrollh)); }
       public File getFile() {
-        if (pf == null)
-          return new File(fname);
-        else
-          return new File(pf.getParentFile(),fname);
+        if (pf == null) return new File(fname);
+        else return new File(pf.getParentFile(),fname);
       }
       public String getPackage() { return pack; }
       public boolean isActive() { return active; }

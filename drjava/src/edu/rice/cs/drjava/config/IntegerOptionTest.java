@@ -52,17 +52,13 @@ import junit.framework.*;
  * the proper functionality of the class IntegerOption.
  * @version $Id$
  */
-public final class IntegerOptionTest extends TestCase
-{
-  /**
-   * @param name The name of this test case.
-   */
+public final class IntegerOptionTest extends TestCase {
+  /** @param name The name of this test case. */
   public IntegerOptionTest(String name) { super(name); }
   
   public void setUp() { }
   
-  public void testGetName()
-  {
+  public void testGetName() {
     IntegerOption io1 = new IntegerOption("indent_size",null);
     IntegerOption io2 = new IntegerOption("max_files",null);
     
@@ -70,8 +66,7 @@ public final class IntegerOptionTest extends TestCase
     assertEquals("max_files",   io2.getName());
   }
   
-  public void testParse()
-  {
+  public void testParse() {
     IntegerOption io = new IntegerOption("max_files",null);
     
     assertEquals(new Integer(3), io.parse("3"));
@@ -84,8 +79,7 @@ public final class IntegerOptionTest extends TestCase
     catch (OptionParseException e) { }
   }
   
-  public void testFormat()
-  {
+  public void testFormat() {
     IntegerOption io1 = new IntegerOption("max_files",null);
     IntegerOption io2 = new IntegerOption("indent_size",null);
     

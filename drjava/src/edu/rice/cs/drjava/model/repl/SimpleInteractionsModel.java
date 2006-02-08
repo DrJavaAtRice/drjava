@@ -46,8 +46,11 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import java.net.URL;
+import java.io.File;
+
+
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
-import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
+import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 
 import edu.rice.cs.util.swing.Utilities;
 
@@ -73,7 +76,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   public SimpleInteractionsModel(InteractionsDJDocument document) {
     super(document, 1000, WRITE_DELAY);
-    _interpreter = new DynamicJavaAdapter(new ClasspathManager());
+    _interpreter = new DynamicJavaAdapter(new ClassPathManager());
 
     _interpreter.defineVariable("INTERPRETER", _interpreter);
   }
@@ -86,7 +89,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     try {
       Object result = _interpreter.interpret(toEval);
       if (result != Interpreter.NO_RESULT) {
-        _docAppend(String.valueOf(result) + System.getProperty("line.separator"),
+        append(String.valueOf(result) + System.getProperty("line.separator"),
                    InteractionsDocument.OBJECT_RETURN_STYLE);
       }
     }
@@ -187,12 +190,11 @@ public class SimpleInteractionsModel extends InteractionsModel {
   }
 
   /** Resets the Java interpreter. */
-  protected void _resetInterpreter() {
+  protected void _resetInterpreter(File wd) {
     interpreterResetting();
-    _interpreter = new DynamicJavaAdapter(new ClasspathManager());
-    interpreterReady();
+    _interpreter = new DynamicJavaAdapter(new ClassPathManager());
+    interpreterReady(wd);
   }
-
 
   /** Notifies listeners that an interaction has started. */
   protected void _notifyInteractionStarted() { 
@@ -210,12 +212,10 @@ public class SimpleInteractionsModel extends InteractionsModel {
   }
 
   /** Notifies listeners that the interpreter is resetting. */
-  protected void _notifyInterpreterResetting() {
-    // Ok, we don't need to do anything special
-  }
+  protected void _notifyInterpreterResetting() {  /* do nothing */  }
 
   /** Notifies listeners that the interpreter is ready.  */
-  protected void _notifyInterpreterReady() {
+  protected void _notifyInterpreterReady(File wd) {
     //  Ok, we don't need to do anything special
   }
 
