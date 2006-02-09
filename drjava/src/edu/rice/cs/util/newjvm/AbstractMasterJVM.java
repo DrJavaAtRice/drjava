@@ -226,7 +226,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
           _classLoaderStubFile.getAbsolutePath()
       };
       
-      /* Create the slave JVM. */
+      /* Create the slave JVM. */      
       final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs, workDir);
       
       // Start a thread to wait for the slave to die.  When it dies, restart it.
@@ -234,6 +234,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
         public void run() {
           try {
             int status = process.waitFor();
+            
             synchronized(AbstractMasterJVM.this) {
               if (_startupInProgress) {
                 // If we get here, the process died without registering.

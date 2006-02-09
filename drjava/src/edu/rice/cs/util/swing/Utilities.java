@@ -37,7 +37,10 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.swing;
 
 import java.awt.EventQueue;
-import javax.swing.JOptionPane;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.Border;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 
@@ -69,14 +72,88 @@ public class Utilities {
     Utilities.invokeAndWait(new Runnable() { public void run() { } });
   }
   
-  public static void showDebug(final String msg) {
-    Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
+  /**
+   * Show a modal debug message box with an OK button.
+   * @param msg string to display
+   */
+  public static void showDebug(String msg) {
+    showMessageBox(msg, "Debug Message");
   }
   
+  /**
+   * Show a modal message box with an OK button.
+   * @param msg string to display
+   */
+  public static void showMessageBox(final String msg, final String title) {
+    //Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
+    Utilities.invokeAndWait(new Runnable() { public void run() {
+      Utilities.TextAreaMessageDialog.showDialog(null, title, msg); 
+    } } );
+  }
+
   public static void showStackTrace(final Throwable t) {
     Utilities.invokeAndWait(new Runnable() { public void run() { 
       JOptionPane.showMessageDialog(null, StringOps.getStackTrace(t));
     } } );
   }
+  
+  
+  /**
+   * Message dialog with a word-wrapping text area that allows copy & paste.
+   */
+  public static class TextAreaMessageDialog extends JDialog {   
+    /**
+     * Show the initialized dialog.
+     * @param comp parent component, or null
+     * @param title dialog title
+     * @param message message for the text area
+     */
+    public static void showDialog(Component comp,
+                                  String title,
+                                  String message) {
+      Frame frame = JOptionPane.getFrameForComponent(comp);
+      TextAreaMessageDialog dialog = new TextAreaMessageDialog(frame, comp, title, message);
+      dialog.setVisible(true);
+    }
+
+    /**
+     * Private constructor for this dialog. Only gets used in the static showDialog method.
+     * @param frame owner frame
+     * @param comp parent component
+     * @param title dialog title
+     * @param message message for the text area
+     */
+    private TextAreaMessageDialog(Frame frame, Component comp, String title, String message) {
+      super(frame, title, true);
+      
+      //buttons
+      JButton okButton = new JButton("Ok");
+      okButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          TextAreaMessageDialog.this.setVisible(false);
+        }
+      });
+      getRootPane().setDefaultButton(okButton);
+      
+      JTextArea textArea = new JTextArea(message);
+      textArea.setEditable(false);
+      textArea.setLineWrap(true);
+      textArea.setWrapStyleWord(false);
+      // textArea.setBackground(getBackground());
+      textArea.setBackground(SystemColor.window);
+      
+      Border emptyBorder = BorderFactory.createEmptyBorder(10, 10, 10, 10);
+      textArea.setBorder(emptyBorder);
+      
+      Container contentPane = getContentPane();
+      contentPane.add(textArea, BorderLayout.CENTER);
+      contentPane.add(okButton, BorderLayout.SOUTH);
+      
+      Dimension parentDim = (comp!=null)?(comp.getSize()):getToolkit().getScreenSize();
+      int xs = (int)parentDim.getWidth()/4;
+      int ys = (int)parentDim.getHeight()/5;
+      setSize(Math.max(xs,350), Math.max(ys, 250));
+      setLocationRelativeTo(comp);
+    }
+  }
 }
-    

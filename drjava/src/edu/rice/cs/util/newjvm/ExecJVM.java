@@ -149,15 +149,25 @@ public final class ExecJVM {
     String[] argArray = args.toArray(new String[args.size()]);
     
     // exec our "java" command in the specified working directory setting
-
-    if (workDir != FileOption.NULL_FILE) {
+    Process p;
+    if ((workDir != null) && (workDir != FileOption.NULL_FILE)) {
       // execute in the working directory
-      return Runtime.getRuntime().exec(argArray, null, workDir);
+      if (workDir.exists()) {
+        p = Runtime.getRuntime().exec(argArray, null, workDir);
+      }
+      else {
+        edu.rice.cs.util.swing.Utilities.showMessageBox("Work directory does not exist:\n"+workDir+
+                                                        "\nClearing work directory setting. Press OK to continue.",
+                                                        "Configuration Error");
+        edu.rice.cs.drjava.DrJava.getConfig().setSetting(OptionConstants.WORKING_DIRECTORY, FileOption.NULL_FILE);
+        p = Runtime.getRuntime().exec(argArray);
+      }
     }
     else {
       // execute without caring about working directory
-      return Runtime.getRuntime().exec(argArray);
+      p = Runtime.getRuntime().exec(argArray);
     }
+    return p;
   }
 
   /** Empties BufferedReaders by copying lines into LinkedLists.
