@@ -45,28 +45,26 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
-import javax.swing.KeyStroke;
-import java.awt.event.KeyEvent;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.util.newjvm.ExecJVM;
+
+import javax.swing.*;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.Locale;
-import junit.framework.*;
-import edu.rice.cs.drjava.config.FileOption;
-import edu.rice.cs.util.newjvm.ExecJVM;
 
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class KeyStrokeOption.
  * @version $Id$
  */
-public final class KeyStrokeOptionTest extends TestCase
+public final class KeyStrokeOptionTest extends DrJavaTestCase
 {
   /**
    * @param name The name of this test case.
    */
   public KeyStrokeOptionTest(String name) { super(name); }
-
-  public void setUp() { }
 
   public void testGetName()
   {

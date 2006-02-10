@@ -43,72 +43,47 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.ui.config;
+package edu.rice.cs.drjava;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.drjava.config.FileOption;
-import edu.rice.cs.drjava.config.OptionConstants;
-
-import javax.swing.*;
-import java.awt.*;
-import java.io.File;
+import junit.framework.TestCase;
+import edu.rice.cs.util.swing.Utilities;
 
 /**
- * Tests functionality of this OptionComponent
+ * Test case class for all DrJava test cases. DrJava test cases should extend
+ * this class, potentially override setUp() and tearDown(), but make sure to
+ * invoke super.setUp() and super.tearDown() appropriately. That ensures that
+ * the system is correctly initialized for every test.
  */
-public final class FileOptionComponentTest extends DrJavaTestCase {
+public class DrJavaTestCase extends TestCase {
+  /**
+   * Create a new DrJava test case.
+   */
+  public DrJavaTestCase() {
+    super();
+  }
 
-  private static FileOptionComponent _option;
-
-  public FileOptionComponentTest(String name) {
+  /**
+   * Create a new DrJava test case.
+   * @param name name of the test case
+   */
+  public DrJavaTestCase(String name) {
     super(name);
   }
 
+  /**
+   * Set up for every test.
+   * @throws Exception
+   */
   protected void setUp() throws Exception {
     super.setUp();
-    _option = new FileOptionComponent(OptionConstants.JAVAC_LOCATION,
-                                      "Javac Location", new Frame(),
-                                      new JFileChooser());
-    DrJava.getConfig().resetToDefaults();
-
+    Utilities.TextAreaMessageDialog.TEST_MODE = true;
   }
 
-  public void testCancelDoesNotChangeConfig() {
-
-    File testFile = FileOption.NULL_FILE;
-
-    _option.setValue(testFile);
-    _option.resetToCurrent(); // should reset to the original.
-    _option.updateConfig(); // should update with original values therefore no change.
-
-    assertEquals("Cancel (resetToCurrent) should not change the config",
-                 OptionConstants.JAVAC_LOCATION.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
-
-  }
-
-  public void testApplyDoesChangeConfig() {
-    File testFile = FileOption.NULL_FILE;
-
-    _option.setValue(testFile);
-    _option.updateConfig();
-
-    assertEquals("Apply (updateConfig) should write change to file",
-                 testFile,
-                 DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
-  }
-
-  public void testApplyThenResetDefault() {
-    File testFile = FileOption.NULL_FILE;
-
-    _option.setValue(testFile);
-    _option.updateConfig();
-    _option.resetToDefault(); // resets to default
-    _option.updateConfig();
-
-    assertEquals("Apply (updateConfig) should write change to file",
-                 OptionConstants.JAVAC_LOCATION.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
+  /**
+   * Clean up for every test case.
+   * @throws Exception
+   */
+  protected void tearDown() throws Exception {
+    super.tearDown();
   }
 }

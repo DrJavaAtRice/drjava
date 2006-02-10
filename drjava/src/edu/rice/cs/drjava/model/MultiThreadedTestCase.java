@@ -45,23 +45,27 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import  junit.framework.*;
-import java.io.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import junit.framework.AssertionFailedError;
 
 /** TestCase which can fail if another thread causes an error or failure.
  *  @version $Id$
  */
-public abstract class MultiThreadedTestCase extends TestCase {
+public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   
   /** Flag to keep track of whether or not a test failed in another thread (not the testing thread). */
   protected static boolean _testFailed = false;
 
   /** Initialize test state to not failed. */
-  public void setUp() throws IOException { _testFailed = false; }
+  public void setUp() throws Exception {
+    super.setUp();
+    _testFailed = false;
+  }
 
   /** If any test failed, print a message saying that some test failed in another thread (not the testing thread). */
-  public void tearDown() throws IOException {
+  public void tearDown() throws Exception {
     if ( _testFailed ) fail("test failed in another thread");
+    super.tearDown();
   }
 
   /** This method prints the failure message to System.out and kills the JVM.  Just calling fail() doesn't always cause

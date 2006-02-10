@@ -45,15 +45,16 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.classloader;
 
-import junit.framework.*;
-import java.net.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+
+import java.net.URL;
 
 /**
  * Test cases for {@link StrictURLClassLoader}.
  *
  * @version $Id$
  */
-public class StrictURLClassLoaderTest extends TestCase {
+public class StrictURLClassLoaderTest extends DrJavaTestCase {
   /**
    * Make sure this loader doesn't load classes from the system
    * classloader.

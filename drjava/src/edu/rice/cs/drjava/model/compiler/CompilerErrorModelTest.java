@@ -57,12 +57,13 @@ import javax.swing.text.Position;
 
 import junit.framework.TestCase;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Tests the CompilerErrorModel.
  * @version $Id$
  */
-public final class CompilerErrorModelTest extends TestCase {
+public final class CompilerErrorModelTest extends DrJavaTestCase {
   private File[] files;
   private String[] texts;
   private TestDocGetter getter;

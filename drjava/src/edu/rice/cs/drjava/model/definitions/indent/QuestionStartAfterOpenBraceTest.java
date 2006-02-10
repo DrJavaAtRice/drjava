@@ -61,9 +61,7 @@ public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase
   
   private IndentRuleQuestion _rule = new QuestionStartAfterOpenBrace(null, null);
   
-  public void setUp() { super.setUp(); }    
-  
-  public void testNoBrace() throws BadLocationException 
+  public void testNoBrace() throws BadLocationException
   {
     _text = "method(\nint[] a, String b) {}";
     _setDocText(_text);

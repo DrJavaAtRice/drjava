@@ -46,11 +46,9 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.GlobalModelTestCase;
-import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.util.text.ConsoleDocument;
-
-import java.io.IOException;
+import edu.rice.cs.util.text.EditDocumentException;
 
 /**
  * bugs:
@@ -79,7 +77,7 @@ public final class ConsoleControllerTest extends GlobalModelTestCase {
   /**
    * Sets up the fields for the test methods.
    */
-  public void setUp() throws IOException {
+  public void setUp() throws Exception {
     super.setUp();
     _adapter = _model.getSwingConsoleDocument();
     _doc = _model.getConsoleDocument();
@@ -92,7 +90,7 @@ public final class ConsoleControllerTest extends GlobalModelTestCase {
   /**
    * Cleans up the fields after the test methods.
    */
-  public void tearDown() throws IOException {
+  public void tearDown() throws Exception {
     _adapter = null;
     _doc = null;
     _controller = null;

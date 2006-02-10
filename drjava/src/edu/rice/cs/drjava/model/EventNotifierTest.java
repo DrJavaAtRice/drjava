@@ -45,8 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import junit.framework.TestCase;
-
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.TestListener;
 
 /**
@@ -54,13 +53,19 @@ import edu.rice.cs.drjava.model.GlobalModelTestCase.TestListener;
  * of a global model.
  * @version $Id$
  */
-public final class EventNotifierTest extends TestCase {
+public final class EventNotifierTest extends DrJavaTestCase {
   
   protected GlobalEventNotifier _notifier;
   
-  public void setUp() { _notifier = new GlobalEventNotifier(); }
+  public void setUp() throws Exception {
+    super.setUp();
+    _notifier = new GlobalEventNotifier();
+  }
   
-  public void tearDown() { _notifier = null; }
+  public void tearDown() throws Exception {
+    _notifier = null;
+    super.tearDown();
+  }
   
   /**
    * Checks that the notifier adds and removes listeners correctly,

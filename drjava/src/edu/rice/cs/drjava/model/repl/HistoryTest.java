@@ -45,29 +45,29 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.model.GlobalModelTestCase.OverwriteException;
+import edu.rice.cs.drjava.model.GlobalModelTestCase.WarningFileSelector;
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.io.File;
 import java.io.IOException;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.model.GlobalModelTestCase.WarningFileSelector;
-import edu.rice.cs.drjava.model.GlobalModelTestCase.OverwriteException;
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.swing.Utilities;
-
 /** Tests the functionality of the repl History.
  *  @version $Id$
  */
-public final class HistoryTest extends TestCase implements OptionConstants{
+public final class HistoryTest extends DrJavaTestCase implements OptionConstants{
   private History _history;
   private File _tempDir;
 
   /**
    * Initialize fields for each test.
    */
-  public void setUp() throws IOException {
+  public void setUp() throws Exception {
+    super.setUp();
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
     _history = new History();
@@ -77,11 +77,12 @@ public final class HistoryTest extends TestCase implements OptionConstants{
   /**
    * Cleans up temporary files and tries to free used variables after each test.
    */
-  public void tearDown() {
+  public void tearDown() throws Exception {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
     _tempDir = null;
     _history = null;
+    super.tearDown();
   }
 
   /**

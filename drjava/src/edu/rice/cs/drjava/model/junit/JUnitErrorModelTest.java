@@ -45,10 +45,11 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.junit;
 
-import java.io.*;
-
-import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.GlobalModelTestCase;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.swing.Utilities;
+
+import java.io.File;
 
 /**
  * A test on the GlobalModel for JUnit testing.

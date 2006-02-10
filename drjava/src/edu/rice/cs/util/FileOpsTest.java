@@ -51,6 +51,7 @@ import java.io.*;
 import java.util.LinkedList;
 
 import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.FileOps;
 
@@ -59,7 +60,7 @@ import edu.rice.cs.util.FileOps;
  *
  * @version $Id$
  */
-public class FileOpsTest extends TestCase {
+public class FileOpsTest extends DrJavaTestCase {
   public static final String TEXT = "hi, dude.";
   public static final String PREFIX = "prefix";
   public static final String SUFFIX = ".suffix";

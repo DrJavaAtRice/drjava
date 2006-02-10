@@ -163,7 +163,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     /* 43 */   "}\n";
 
 
-  public void setUp() throws IOException {
+  public void setUp() throws Exception {
     super.setUp();
     // Creating a JavaDebugInterpreter with a custom
     // notifyInterpreterAssignment() method

@@ -33,20 +33,17 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.io.File;
-
-import junit.framework.*;
-
-import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.DummyGlobalModelListener;
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.ui.*;
-
+import edu.rice.cs.drjava.ui.InteractionsPane;
+import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.text.EditDocumentException;
-import edu.rice.cs.util.swing.Utilities;
+
+import java.io.File;
 
 /** Tests the functionality of the InteractionsDJDocument. */
-public final class InteractionsDJDocumentTest extends TestCase {
+public final class InteractionsDJDocumentTest extends DrJavaTestCase {
 
   protected InteractionsDJDocument _adapter;
   protected InteractionsModel _model;
@@ -55,7 +52,8 @@ public final class InteractionsDJDocumentTest extends TestCase {
   protected MainFrame mf;
   
   /** Initialize fields for each test. */
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     mf = new MainFrame();
     GlobalModel gm = mf.getModel();
     _model = gm.getInteractionsModel();

@@ -58,8 +58,6 @@ public final class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTest
     
 //  private IndentRuleQuestion _rule;
 
-  public void setUp() { super.setUp(); }
-
   public void testIsIn1DArray() throws BadLocationException
   { //01234567890123456789012345
     _text =

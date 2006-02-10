@@ -59,7 +59,8 @@ public final class MixedQuoteTest extends BraceReductionTestCase
   /**
    * Initializes the reduced models used in the tests.
    */
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     _model = new ReducedModelControl();
   }
 

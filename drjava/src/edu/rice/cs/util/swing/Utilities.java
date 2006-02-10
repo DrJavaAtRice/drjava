@@ -101,7 +101,12 @@ public class Utilities {
   /**
    * Message dialog with a word-wrapping text area that allows copy & paste.
    */
-  public static class TextAreaMessageDialog extends JDialog {   
+  public static class TextAreaMessageDialog extends JDialog {
+    /**
+     * True if the program is run in non-interactive test mode.
+     */
+    public static boolean TEST_MODE = false;
+
     /**
      * Show the initialized dialog.
      * @param comp parent component, or null
@@ -111,9 +116,14 @@ public class Utilities {
     public static void showDialog(Component comp,
                                   String title,
                                   String message) {
-      Frame frame = JOptionPane.getFrameForComponent(comp);
-      TextAreaMessageDialog dialog = new TextAreaMessageDialog(frame, comp, title, message);
-      dialog.setVisible(true);
+      if (TEST_MODE) {
+        System.out.println(title+": "+message);
+      }
+      else {
+        Frame frame = JOptionPane.getFrameForComponent(comp);
+        TextAreaMessageDialog dialog = new TextAreaMessageDialog(frame, comp, title, message);
+        dialog.setVisible(true);
+      }
     }
 
     /**
@@ -125,30 +135,30 @@ public class Utilities {
      */
     private TextAreaMessageDialog(Frame frame, Component comp, String title, String message) {
       super(frame, title, true);
-      
+      setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
       //buttons
       JButton okButton = new JButton("Ok");
       okButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          TextAreaMessageDialog.this.setVisible(false);
+          TextAreaMessageDialog.this.dispose();
         }
       });
       getRootPane().setDefaultButton(okButton);
-      
+
       JTextArea textArea = new JTextArea(message);
       textArea.setEditable(false);
       textArea.setLineWrap(true);
       textArea.setWrapStyleWord(false);
-      // textArea.setBackground(getBackground());
       textArea.setBackground(SystemColor.window);
-      
+
       Border emptyBorder = BorderFactory.createEmptyBorder(10, 10, 10, 10);
       textArea.setBorder(emptyBorder);
-      
+
       Container contentPane = getContentPane();
       contentPane.add(textArea, BorderLayout.CENTER);
       contentPane.add(okButton, BorderLayout.SOUTH);
-      
+
       Dimension parentDim = (comp!=null)?(comp.getSize()):getToolkit().getScreenSize();
       int xs = (int)parentDim.getWidth()/4;
       int ys = (int)parentDim.getHeight()/5;

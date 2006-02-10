@@ -45,11 +45,14 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
 
-import java.io.*;
-import junit.framework.*;
-import edu.rice.cs.util.classloader.LimitingClassLoader;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.util.classloader.LimitingClassLoader;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import java.io.File;
 
 /**
  * Test cases for {@link CompilerRegistry}.
@@ -58,7 +61,7 @@ import edu.rice.cs.drjava.DrJava;
  *
  * @version $Id$
  */
-public final class CompilerRegistryTest extends TestCase {
+public final class CompilerRegistryTest extends DrJavaTestCase {
   private static final CompilerRegistry _registry = CompilerRegistry.ONLY;
   private static final String[][] _defaultCompilers
     = CompilerRegistry.DEFAULT_COMPILERS;
@@ -89,14 +92,16 @@ public final class CompilerRegistryTest extends TestCase {
   }
 
   /** Test setup method, which saves the old base class loader. */
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     _oldBaseLoader = _registry.getBaseClassLoader();
     _registry.setActiveCompiler(NoCompilerAvailable.ONLY);
   }
 
   /** Test teardown method, which restores the old base class loader. */
-  public void tearDown() {
+  public void tearDown() throws Exception {
     _registry.setBaseClassLoader(_oldBaseLoader);
+    super.tearDown();
   }
 
   /**

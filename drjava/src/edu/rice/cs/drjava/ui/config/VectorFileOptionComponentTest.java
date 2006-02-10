@@ -46,18 +46,19 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui.config;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
-import junit.framework.TestCase;
 
 import java.awt.*;
 import java.io.File;
 import java.util.Vector;
 
 /** Tests functionality of this OptionComponent */
-public final class VectorFileOptionComponentTest extends TestCase {
+public final class VectorFileOptionComponentTest extends DrJavaTestCase {
   private static VectorFileOptionComponent _option;
 
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     _option = new VectorFileOptionComponent(OptionConstants.EXTRA_CLASSPATH, "Extra Classpath", new Frame());
     DrJava.getConfig().resetToDefaults();
   }

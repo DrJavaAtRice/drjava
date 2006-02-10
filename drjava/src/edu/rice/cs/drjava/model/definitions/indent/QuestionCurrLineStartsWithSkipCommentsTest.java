@@ -58,8 +58,6 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
     
   private IndentRuleQuestion _rule;
   
-  public void setUp() { super.setUp(); }
-
   public void testNoPrefix() throws BadLocationException
   {
     _text =

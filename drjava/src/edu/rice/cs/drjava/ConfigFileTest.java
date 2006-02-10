@@ -45,21 +45,19 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.config.FileConfiguration;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.FileOps;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.awt.Color;
-
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.*;
 
 /**
  * Tests that a custom config file can be specified.
  * @version $Id$
  */
-public final class ConfigFileTest extends TestCase {
+public final class ConfigFileTest extends DrJavaTestCase {
   private static final String CUSTOM_PROPS =
     "indent.level = 5\n" +
     "history.max.size = 1\n" +

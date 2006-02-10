@@ -50,7 +50,7 @@ import junit.framework.*;
 /** Test that ensures all external dependencies are met!
  *  @version $Id$
  */
-public final class DependenciesTest extends TestCase {
+public final class DependenciesTest extends DrJavaTestCase {
   public static final String REQUIRED_UTIL_VERSION = "20040521-1616";
 
   /** Constructor.

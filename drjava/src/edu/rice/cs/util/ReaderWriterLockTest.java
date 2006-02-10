@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import junit.framework.TestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Attempts to test the correctness of the ReaderWriterLock class,
@@ -59,14 +59,15 @@ import junit.framework.TestCase;
  *
  * @version $Id$
  */
-public class ReaderWriterLockTest extends TestCase {
+public class ReaderWriterLockTest extends DrJavaTestCase {
 
   protected ReaderWriterLock _lock;
 
   /**
    * Creates a new lock for the tests.
    */
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     _lock = new ReaderWriterLock();
   }
 

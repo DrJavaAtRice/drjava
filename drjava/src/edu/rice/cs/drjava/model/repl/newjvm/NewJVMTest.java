@@ -45,17 +45,18 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import junit.framework.*;
-import junit.extensions.*;
-
-import java.rmi.*;
-
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import java.rmi.RemoteException;
 
 /** Tests the functionality of the new JVM manager.
  *  @version $Id$
  */
-public final class NewJVMTest extends TestCase {
+public final class NewJVMTest extends DrJavaTestCase {
   private final boolean printMessages = false;
   
   private static TestJVMExtension _jvm;
@@ -65,16 +66,19 @@ public final class NewJVMTest extends TestCase {
   
   public NewJVMTest(String name) { super(name); }
 
-  protected void setUp() { _jvm.resetFlags(); }
+  protected void setUp() throws Exception {
+    super.setUp();
+    _jvm.resetFlags();
+  }
 
   public static Test suite() {
     TestSuite suite = new TestSuite(NewJVMTest.class);
     TestSetup setup = new TestSetup(suite) {
-      protected void setUp() {
+      protected void setUp() throws Exception {
         _jvm = new TestJVMExtension();
       }
 
-      protected void tearDown() { _jvm.killInterpreter(null); }
+      protected void tearDown() throws Exception { _jvm.killInterpreter(null); }
     };
 
     return setup;

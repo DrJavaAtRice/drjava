@@ -45,14 +45,14 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-import junit.framework.TestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
-import java.io.*;
-import java.util.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+import java.io.File;
+import java.util.HashSet;
 
-import javax.swing.tree.*;
-
-public class JTreeSortNavigatorTest extends TestCase {
+public class JTreeSortNavigatorTest extends DrJavaTestCase {
   
   protected JTreeSortNavigator<DummyINavigatorItem> tree;
   protected DefaultMutableTreeNode root;
@@ -62,7 +62,9 @@ public class JTreeSortNavigatorTest extends TestCase {
   protected String projName;
   DummyINavigatorItem i1, i2, i3, i4;
   
-  public void setUp() throws IOException {
+  public void setUp() throws Exception {
+    super.setUp();
+
     File f = File.createTempFile("project-",".pjt");
     tree = new JTreeSortNavigator<DummyINavigatorItem>(f.getCanonicalPath());
     

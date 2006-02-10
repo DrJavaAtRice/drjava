@@ -60,8 +60,6 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
   
   private IndentRuleAction _action;
   
-  public void setUp() { super.setUp(); }
-  
   public void testNoSuffix() throws BadLocationException {
     _action = new ActionBracePlus("");
     

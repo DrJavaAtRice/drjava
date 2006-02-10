@@ -45,16 +45,16 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui.config;
 
-import java.awt.*;
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.config.OptionConstants;
 
-import junit.framework.*;
+import java.awt.*;
 
 /**
  * Tests functionality of this OptionComponent
  */
-public final class BooleanOptionComponentTest extends TestCase {
+public final class BooleanOptionComponentTest extends DrJavaTestCase {
 
   private static BooleanOptionComponent _option;
 
@@ -62,7 +62,8 @@ public final class BooleanOptionComponentTest extends TestCase {
     super(name);
   }
 
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     _option = new BooleanOptionComponent( OptionConstants.LINEENUM_ENABLED, "Line Enumeration", new Frame());
     DrJava.getConfig().resetToDefaults();
 

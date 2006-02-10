@@ -33,22 +33,18 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import java.io.File;
-import java.io.IOException;
-
-import java.util.List;
-import javax.swing.text.BadLocationException;
-
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.text.EditDocumentInterface;
-import edu.rice.cs.util.text.EditDocumentException;
-import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.util.text.EditDocumentInterface;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.repl.*;
+import javax.swing.text.BadLocationException;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Base class for tests over the {@link GlobalModel}.
@@ -117,7 +113,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *  </LI>
    *  </OL>
    */
-  public void setUp() throws IOException {
+  public void setUp() throws Exception {
+    super.setUp();
     DrJava.getConfig().resetToDefaults();
     createModel();
     _model.setResetAfterCompile(false);
@@ -129,16 +126,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
-  public void tearDown() throws IOException {
-    
-    super.tearDown();
-    
+  public void tearDown() throws Exception {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
-    
+
     _model.dispose();
     _tempDir = null;
     _model = null;
+
+    super.tearDown();
   }
 
   /** Instantiates the GlobalModel to be used in the test cases. */

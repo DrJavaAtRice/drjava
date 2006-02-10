@@ -45,20 +45,25 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.project;
 
-import junit.framework.TestCase;
-import java.io.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.util.Pair;
+import static edu.rice.cs.util.StringOps.convertToLiteral;
+import edu.rice.cs.util.sexp.SEList;
+import edu.rice.cs.util.sexp.SExpParseException;
+import edu.rice.cs.util.sexp.SExpParser;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-import edu.rice.cs.util.sexp.*;
-import edu.rice.cs.util.*;
-
-import static edu.rice.cs.util.StringOps.convertToLiteral;
-
 /** Test class for project files */
-public class ProjectTest extends TestCase {
+public class ProjectTest extends DrJavaTestCase {
 
   private String absp; // absolute path
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     try {
       absp=new File(System.getProperty("java.io.tmpdir")).getCanonicalPath() +
         File.separator;

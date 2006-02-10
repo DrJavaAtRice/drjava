@@ -45,21 +45,22 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import  junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.util.FileOps;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
 
-import edu.rice.cs.util.FileOps;
-
 /**
  * Test functions of RecentFileManager.
  *
  * @version $Id$
  */
-public final class RecentFileManagerTest extends TestCase {
+public final class RecentFileManagerTest extends DrJavaTestCase {
 
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
@@ -78,18 +79,20 @@ public final class RecentFileManagerTest extends TestCase {
   /**
    * Setup method for each JUnit test case.
    */
-  public void setUp() throws IOException {
+  public void setUp() throws Exception {
+    super.setUp();
     _menu = new JMenu();
     _rfm = new RecentFileManager(0, _menu, null,false);
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
   }
 
-  public void tearDown() {
+  public void tearDown() throws Exception {
     _menu = null;
     _rfm = null;
     FileOps.deleteDirectory(_tempDir);
     _tempDir = null;
+    super.tearDown();
   }
 
   /**

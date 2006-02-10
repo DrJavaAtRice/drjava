@@ -45,21 +45,19 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class BooleanOption.
  * @version $Id$
  */
-public final class BooleanOptionTest extends TestCase
+public final class BooleanOptionTest extends DrJavaTestCase
 {
   /**
    * @param name The name of this test case.
    */
   public BooleanOptionTest(String name) { super(name); }
-  
-  public void setUp() { }
   
   public void testGetName()
   {

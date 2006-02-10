@@ -45,13 +45,16 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import java.io.*;
-
-import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.project.MalformedProjectFileException;
-import edu.rice.cs.drjava.project.ProjectFileParser;
-import edu.rice.cs.drjava.project.ProjectFileIR;
+import edu.rice.cs.drjava.model.FileOpenSelector;
+import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.model.OperationCanceledException;
+import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.project.DocFile;
+import edu.rice.cs.drjava.project.MalformedProjectFileException;
+import edu.rice.cs.drjava.project.ProjectFileIR;
+import edu.rice.cs.drjava.project.ProjectFileParser;
+
+import java.io.*;
 
 /**
  * Test functions of Project Facility working through the main frame and model.
@@ -81,42 +84,43 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   /**
    * Setup method for each JUnit test case.
    */
-  public void setUp() throws IOException {
+  public void setUp() throws Exception {
+    super.setUp();
+
     _projFile = File.createTempFile("test", ".pjt");
     _file1 = File.createTempFile("test1",".java");
     _file2 = File.createTempFile("test2",".java");
-    
+
     // generate the relative path names for the files in the project file
     String temp = _file1.getParentFile().getCanonicalPath();
-    _file1RelName = _file1.getCanonicalPath().substring(temp.length()+1); 
+    _file1RelName = _file1.getCanonicalPath().substring(temp.length()+1);
     temp = _file2.getParentFile().getCanonicalPath();
     _file2RelName = _file2.getCanonicalPath().substring(temp.length()+1);
-    
-    _projFileText = 
+
+    _projFileText =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
       "(source ;; comment\n" +
       "   (file (name \""+ _file1RelName +"\")(select 32 32))\n" +
       "   (file (name \""+ _file2RelName +"\")(select 0 0)(active)))\n";
-    
+
     reader = new BufferedReader(new FileReader(_projFile));
     BufferedWriter w = new BufferedWriter(new FileWriter(_projFile));
     w.write(_projFileText);
     w.close();
-    
+
     _frame = new MainFrame();
     _frame.pack();
-    
+
     _model = _frame.getModel();
-    super.setUp();
   }
 
-  public void tearDown() throws IOException {
-    super.tearDown();
+  public void tearDown() throws Exception {
     _projFile.delete();
     _frame.dispose();
     _projFile = null;
     _model = null;
     _frame = null;
+    super.tearDown();
   }
   
   public void testSetBuildDirectory() throws MalformedProjectFileException, IOException {

@@ -45,14 +45,15 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.sexp;
 
-import junit.framework.TestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
+
 import java.io.*;
-import java.util.*;
+import java.util.List;
 
 /** A JUnit test case class. Every method starting with the word "test" will be called when running
  *  the test with JUnit.
  */
-public class SExpParserTest extends TestCase {
+public class SExpParserTest extends DrJavaTestCase {
   
   /**
    * Creates a temporary file and writes the given string to that file

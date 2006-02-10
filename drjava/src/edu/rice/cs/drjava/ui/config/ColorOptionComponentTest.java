@@ -45,17 +45,18 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui.config;
 
-import java.awt.*;
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.Utilities;
-import junit.framework.*;
+
+import java.awt.*;
 
 /**
  * Tests functionality of this OptionComponent
  * @version $Id:
  */
-public final class ColorOptionComponentTest extends TestCase {
+public final class ColorOptionComponentTest extends DrJavaTestCase {
 
   private static ColorOptionComponent _option;
 
@@ -63,7 +64,8 @@ public final class ColorOptionComponentTest extends TestCase {
     super(name);
   }
 
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     _option = new ColorOptionComponent( OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", new Frame());
     DrJava.getConfig().resetToDefaults();
 

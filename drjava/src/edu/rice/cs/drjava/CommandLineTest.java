@@ -33,11 +33,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava;
 
-import junit.framework.*;
-import java.io.*;
-import java.util.List;
-import javax.swing.text.BadLocationException;
-
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
@@ -45,11 +40,17 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
+import javax.swing.text.BadLocationException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
+
 /**
  * Tests opening/creating files specified as command line arguments.
  * @version $Id$
  */
-public final class CommandLineTest extends TestCase {
+public final class CommandLineTest extends DrJavaTestCase {
 
   /** The MainFrame we're working with. */
   private MainFrame _mf;

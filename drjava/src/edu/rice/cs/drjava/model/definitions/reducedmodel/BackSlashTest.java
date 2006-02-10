@@ -62,7 +62,8 @@ public final class BackSlashTest extends BraceReductionTestCase
   /**
    * Initializes the reduced models used in the tests.
    */
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     model0 = new ReducedModelControl();
     model1 = new ReducedModelControl();
     model2 = new ReducedModelControl();

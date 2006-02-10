@@ -63,8 +63,6 @@ public final class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 
     private final IndentRuleQuestion _rule = new QuestionBraceIsParenOrBracket(null, null);
 
-    public void setUp() { super.setUp(); }
-
     public void testParen() throws BadLocationException
     {
       int i;

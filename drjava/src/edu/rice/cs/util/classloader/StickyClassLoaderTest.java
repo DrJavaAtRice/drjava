@@ -45,7 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.classloader;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+
 import java.net.URL;
 import java.security.SecureClassLoader;
 
@@ -54,7 +55,7 @@ import java.security.SecureClassLoader;
  *
  * @version $Id$
  */
-public class StickyClassLoaderTest extends TestCase {
+public class StickyClassLoaderTest extends DrJavaTestCase {
   private final String myName = getClass().getName();
   private final ClassLoader myLoader = getClass().getClassLoader();
 

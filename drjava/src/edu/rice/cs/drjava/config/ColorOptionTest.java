@@ -45,22 +45,21 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
-import junit.framework.*;
-import java.awt.Color;
+import edu.rice.cs.drjava.DrJavaTestCase;
+
+import java.awt.*;
 
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class ColorOption.
  * @version $Id$
  */
-public final class ColorOptionTest extends TestCase
+public final class ColorOptionTest extends DrJavaTestCase
 {
   /**
    * @param name The name of this test case.
    */
   public ColorOptionTest(String name) { super(name); }
-  
-  public void setUp() { }
   
   public void testGetName()
   {

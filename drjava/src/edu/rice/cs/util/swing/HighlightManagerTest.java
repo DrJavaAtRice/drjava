@@ -1,19 +1,19 @@
 package edu.rice.cs.util.swing;
 
-import javax.swing.text.JTextComponent;
-import javax.swing.JTextField;
-import java.awt.Color;
-import javax.swing.text.Highlighter;
-import javax.swing.text.DefaultHighlighter;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
-import junit.framework.TestCase;
+import javax.swing.*;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
 
 /**
  * A JUnit test case class for the class HighlightManager.
  * Every method starting with the word "test" will be called when running
  * the test with JUnit.
  */
-public class HighlightManagerTest extends TestCase {
+public class HighlightManagerTest extends DrJavaTestCase {
   
   /**
    * A test method.
@@ -26,8 +26,9 @@ public class HighlightManagerTest extends TestCase {
   Highlighter.HighlightPainter p, p1, p2;
   HighlightManager hm;
   
-  public void setUp() {
-  
+  public void setUp() throws Exception {
+    super.setUp();
+
     jtc = new JTextField();
     
     p = new DefaultHighlighter.DefaultHighlightPainter(Color.BLACK);

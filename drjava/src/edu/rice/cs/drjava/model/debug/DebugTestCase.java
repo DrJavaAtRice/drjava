@@ -246,14 +246,14 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 12 */ "}";
 
   /** Sets up the debugger for each test. */
-  public void setUp() throws IOException {
+  public void setUp() throws Exception {
     super.setUp();
     _debugger = (JPDADebugger) _model.getDebugger();
     assertNotNull("Debug Manager should not be null", _debugger);
   }
 
   /** Cleans up the debugger after each test. */
-  public void tearDown() throws IOException {
+  public void tearDown() throws Exception {
     _debugger = null;
     super.tearDown();
   }

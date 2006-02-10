@@ -33,21 +33,25 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions;
 
-import javax.swing.text.*;
-import java.util.Vector;
-
-import junit.framework.*;
-
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedToken;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import javax.swing.text.BadLocationException;
+import java.util.Vector;
 
 /**
  * Tests the functionality of the definitions document.
  * @version $Id$
  */
-public final class DefinitionsDocumentTest extends TestCase implements ReducedModelStates {
+public final class DefinitionsDocumentTest extends DrJavaTestCase implements ReducedModelStates {
   private DefinitionsDocument _defModel;
   private GlobalEventNotifier _notifier;
 
@@ -62,7 +66,8 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
   /**
    * Create a definitions document to work with.
    */
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     _notifier = new GlobalEventNotifier();
     _defModel = new DefinitionsDocument(_notifier);
     DrJava.getConfig().resetToDefaults();
@@ -571,7 +576,7 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
 
   /** Test package-finding on simple document, with no funny comments. */
   public void testPackageNameSimple()
-    throws BadLocationException, InvalidPackageException
+    throws Exception
   {
     final String[] comments = {
       "/* package very.bad; */",

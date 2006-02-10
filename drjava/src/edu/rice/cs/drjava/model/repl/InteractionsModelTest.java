@@ -45,26 +45,24 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import junit.framework.*;
-
-import java.net.URL;
-import java.io.File;
-import java.io.IOException;
-
-import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.FileOpenSelector;
+import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.OperationCanceledException;
-import edu.rice.cs.util.text.*;
-
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.text.EditDocumentException;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * Tests the functionality of an InteractionsModel.
  * @version $Id$
  */
-public final class InteractionsModelTest extends TestCase {
+public final class InteractionsModelTest extends DrJavaTestCase {
   protected InteractionsDJDocument _adapter;
   protected InteractionsModel _model;
   

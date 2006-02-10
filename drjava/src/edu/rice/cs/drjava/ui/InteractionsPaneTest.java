@@ -33,21 +33,21 @@
 
 package edu.rice.cs.drjava.ui;
 
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
+import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
-import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
-
-import junit.framework.*;
+import edu.rice.cs.util.text.EditDocumentException;
 
 /** Test functions of InteractionsPane.
  *  @version $Id$
  */
-public final class InteractionsPaneTest extends TestCase {
+public final class InteractionsPaneTest extends DrJavaTestCase {
 
   protected InteractionsDJDocument _adapter;
   protected InteractionsModel _model;

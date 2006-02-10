@@ -33,27 +33,27 @@
 
 package edu.rice.cs.drjava.ui;
 
-import  junit.framework.*;
-
-import javax.swing.*;
-import javax.swing.text.*;
-import java.awt.event.*;
-import java.util.Date;
-import java.io.*;
-
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
+
+import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.util.Date;
 
 /**
  * Tests the Definitions Pane
  * @version $Id$
  */
-public final class DefinitionsPaneTest extends TestCase {
+public final class DefinitionsPaneTest extends DrJavaTestCase {
   
   private MainFrame _frame;
   

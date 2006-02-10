@@ -45,22 +45,20 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.model.AbstractGlobalModel;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
-
-import junit.framework.TestCase;
-
-import java.io.IOException;
-import java.io.File;
-import javax.swing.text.BadLocationException;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
+
+import javax.swing.text.BadLocationException;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Tests the FindReplaceMachine.
  * @version $Id$
  */
-public class FindReplaceMachineTest extends TestCase{
+public class FindReplaceMachineTest extends DrJavaTestCase{
   private AbstractDocumentInterface _doc;
   private AbstractDocumentInterface _docPrev;
   private AbstractDocumentInterface _docNext;
@@ -108,7 +106,8 @@ public class FindReplaceMachineTest extends TestCase{
   /**
    * Initializes the document for the tests.
    */
-  public void setUp() throws IOException{
+  public void setUp() throws Exception {
+    super.setUp();
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
     _docPrev = _model.newFile(_tempDir);;
@@ -119,12 +118,13 @@ public class FindReplaceMachineTest extends TestCase{
     _frm.setDocument(_doc);
   }  
   
-  public void tearDown() throws IOException {
+  public void tearDown() throws Exception {
     _frm.cleanUp();
     _frm = null;
     _model.closeAllFiles();
     _tempDir = null;
-  }  
+    super.tearDown();
+  }
 
   private void _initFrm(int pos) {
     _frm.setStart(pos);

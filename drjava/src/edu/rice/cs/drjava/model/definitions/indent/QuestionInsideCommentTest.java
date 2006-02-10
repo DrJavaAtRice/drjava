@@ -54,7 +54,7 @@ public final class QuestionInsideCommentTest extends IndentRulesTestCase {
 
   static IndentRuleQuestion _rule = new QuestionInsideComment(null, null);
   
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     try {
       _setDocText("\n/*\nfoo\n*/\nbar\nfoo /* bar\n// /*\nfoo */ bar\n// /*\nblah");

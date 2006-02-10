@@ -45,8 +45,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import junit.framework.TestCase;
-import java.util.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Tests that an ArgumentTokenizer can correctly divide up a string
@@ -54,7 +56,7 @@ import java.util.*;
  * set by a Unix bash shell in most cases.
  * @version $Id$
  */
-public class ArgumentTokenizerTest extends TestCase {
+public class ArgumentTokenizerTest extends DrJavaTestCase {
 
   /**
    * Creates a new ArgumentTokenizer to be used in every test.

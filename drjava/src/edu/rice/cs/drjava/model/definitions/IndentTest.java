@@ -53,6 +53,7 @@ import  javax.swing.text.BadLocationException;
 //import java.io.IOException;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.config.*;
@@ -65,7 +66,7 @@ import edu.rice.cs.util.swing.Utilities;
  * Test the tab/enter/squiggly indenting functionality.
  * @version $Id$
  */
-public final class IndentTest extends TestCase {
+public final class IndentTest extends DrJavaTestCase {
   protected DefinitionsDocument doc;
 
   static String noBrace = IndentInfo.noBrace;
@@ -82,16 +83,14 @@ public final class IndentTest extends TestCase {
   public IndentTest(String name) { super(name); }
 
   /** Sets up the member bindings common to all tests. */
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     DrJava.getConfig().resetToDefaults();
     _notifier = new GlobalEventNotifier();
     doc = new DefinitionsDocument(_notifier);
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,indentLevel);
   }
   
-  /** Tears down any structures built in setUp() that will not be reclaimed by GC */
-  protected void tearDown() { }
-
   /** Builds the suite of tests for Indent.class.
    * @return the suite.
    */

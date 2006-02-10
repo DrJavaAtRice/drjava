@@ -45,16 +45,20 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.print;
 
-import  java.awt.print.*;
-import  java.awt.*;
-import  java.awt.image.*;
-import  junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
 
 /**
  * Test functions of DrJavaBook
  *
  */
-public final class DrJavaBookTest extends TestCase {
+public final class DrJavaBookTest extends DrJavaTestCase {
   /** The DrJavaBook instance we will be testing. */
   private DrJavaBook book = null;
   
@@ -68,11 +72,15 @@ public final class DrJavaBookTest extends TestCase {
    */
   public static Test suite() { return  new TestSuite(DrJavaBookTest.class); }
   
-  public void setUp() { 
+  public void setUp() throws Exception {
+    super.setUp();
     book = new DrJavaBook("import java.io.*;", "simple_file.java", new PageFormat());
   }
   
-  public void tearDown() { book = null; }
+  public void tearDown() throws Exception {
+    book = null;
+    super.tearDown();
+  }
   
   public void testGetNumberOfPages() {
     assertEquals("testGetNumberOfPages:", new Integer(1), new Integer(book.getNumberOfPages()));

@@ -84,13 +84,13 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
-import junit.framework.TestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Tests that the DebugWatchData class can display state correctly.
  * @version $Id$
  */
-public final class DebugWatchDataTest extends TestCase {
+public final class DebugWatchDataTest extends DrJavaTestCase {
  
   /**
    * Tests the state of a watch after its creation.

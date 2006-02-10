@@ -46,19 +46,21 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import  junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Tests the Brace class.
  * @version $Id$
  */
-public final class BraceTest extends TestCase implements ReducedModelStates {
+public final class BraceTest extends DrJavaTestCase implements ReducedModelStates {
   protected Brace rparen;
   protected Brace lparen;
 
   /**
    * Set up Braces for testing.
    */
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     lparen = Brace.MakeBrace("(", FREE);
     rparen = Brace.MakeBrace(")", FREE);
   }

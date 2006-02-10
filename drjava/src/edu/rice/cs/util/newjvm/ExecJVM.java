@@ -33,9 +33,15 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
-import java.io.*;
-import java.util.*;
-import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.config.FileOption;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Locale;
 
 /** A utility class to allow executing another JVM.
  *  @version $Id$
@@ -56,9 +62,9 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVM(String mainClass, String[] classParams, String[] classPath, String[] jvmParams, File workDir) 
+  public static Process runJVM(String mainClass, String[] classParams, String[] classPath, String[] jvmParams, File workDir)
     throws IOException {
-    
+
     StringBuffer buf = new StringBuffer();
     for (int i = 0; i < classPath.length; i++) {
       if (i != 0) buf.append(PATH_SEPARATOR);
@@ -75,12 +81,12 @@ public final class ExecJVM {
    *     DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY).
    * 3.  Questions:
    *     a.  Is running javadoc effected?  What directory should we run this command within?
-   *     b.  What working directory should we use with projects?  (I think it should be a project property that overrides the corresponding 
-   *         IDE property.  If so what should the default value be?  The project root?  I think this means that closing a project resets 
-   *         the working directory.  Hence, we need to reset interactions when we close a project.)  We can punt on what to do for projects 
+   *     b.  What working directory should we use with projects?  (I think it should be a project property that overrides the corresponding
+   *         IDE property.  If so what should the default value be?  The project root?  I think this means that closing a project resets
+   *         the working directory.  Hence, we need to reset interactions when we close a project.)  We can punt on what to do for projects
    *         in our first cut.
    */
-  
+
   /** Runs a new JVM.
    *
    * @param mainClass Class to run
@@ -90,9 +96,9 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVM(String mainClass, String[] classParams, String classPath, String[] jvmParams, File workDir) 
+  public static Process runJVM(String mainClass, String[] classParams, String classPath, String[] jvmParams, File workDir)
     throws IOException {
-    
+
     LinkedList<String> args = new LinkedList<String>();
     args.add("-classpath");
     args.add(edu.rice.cs.util.FileOps.convertToAbsolutePathEntries(classPath));
@@ -147,7 +153,7 @@ public final class ExecJVM {
     _addArray(args, classParams);
 
     String[] argArray = args.toArray(new String[args.size()]);
-    
+
     // exec our "java" command in the specified working directory setting
     Process p;
     if ((workDir != null) && (workDir != FileOption.NULL_FILE)) {
@@ -157,9 +163,8 @@ public final class ExecJVM {
       }
       else {
         edu.rice.cs.util.swing.Utilities.showMessageBox("Work directory does not exist:\n"+workDir+
-                                                        "\nClearing work directory setting. Press OK to continue.",
+                                                        "\nThe setting will be ignored. Press OK to continue.",
                                                         "Configuration Error");
-        edu.rice.cs.drjava.DrJava.getConfig().setSetting(OptionConstants.WORKING_DIRECTORY, FileOption.NULL_FILE);
         p = Runtime.getRuntime().exec(argArray);
       }
     }

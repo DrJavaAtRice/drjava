@@ -45,20 +45,26 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** Test cases for {@link PreventExitSecurityManager}.
  *
  *  @version $Id$
  */
-public class PreventExitSecurityManagerTest extends TestCase {
+public class PreventExitSecurityManagerTest extends DrJavaTestCase {
   private PreventExitSecurityManager _manager;
 
   /** Activates the security manager before each test. */
-  public void setUp() { _manager = PreventExitSecurityManager.activate(); }
+  public void setUp() throws Exception {
+    super.setUp();
+    _manager = PreventExitSecurityManager.activate();
+  }
 
   /** Deactivates the security manager after each test. */
-  public void tearDown() { _manager.deactivate(); }
+  public void tearDown() throws Exception {
+    _manager.deactivate();
+    super.tearDown();
+  }
 
   public void testSystemExitPrevented() {
     try {

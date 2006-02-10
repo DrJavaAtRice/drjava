@@ -45,16 +45,16 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
-import javax.swing.text.BadLocationException;
-import javax.swing.text.AttributeSet;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
-import junit.framework.TestCase;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 
 /**
  * Tests the SwingDocument.
  * @version $Id$
  */
-public class SwingDocumentTest extends TestCase {
+public class SwingDocumentTest extends DrJavaTestCase {
   protected SwingDocument _doc;
   
   public void setUp() throws Exception {

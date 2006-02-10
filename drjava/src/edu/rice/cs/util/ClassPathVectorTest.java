@@ -45,18 +45,18 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import junit.framework.TestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
-import java.net.URL;
-import java.net.MalformedURLException;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Vector;
 
 /**
  * A JUnit test case for the ClasspathVector class.
  */
-public class ClassPathVectorTest extends TestCase {
+public class ClassPathVectorTest extends DrJavaTestCase {
   
   /**
    * Verifies the correctness of the formatting of the toString method of ClasspathVector.

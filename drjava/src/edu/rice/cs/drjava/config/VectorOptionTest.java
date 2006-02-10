@@ -45,8 +45,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
+import edu.rice.cs.drjava.DrJavaTestCase;
+
 import java.util.Vector;
-import junit.framework.*;
 
 
 /**
@@ -55,11 +56,12 @@ import junit.framework.*;
  * VectorOption.
  * @version $Id$
  */
-public final class VectorOptionTest extends TestCase {
+public final class VectorOptionTest extends DrJavaTestCase {
   private VectorOption<Integer> _ivo;
   private VectorOption<Boolean> _bvo;
 
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     // name fields are irrelevant at this point.
     _ivo = new VectorOption<Integer>("whatever", new IntegerOption("", null), (Vector<Integer>) null);
     _bvo = new VectorOption<Boolean>("everwhat", new BooleanOption("", null), (Vector<Boolean>) null);

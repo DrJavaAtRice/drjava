@@ -45,18 +45,19 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.cache;
 
-import junit.framework.TestCase;
-
-import java.io.*;
-import java.util.*;
-import javax.swing.text.*;
-
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.definitions.*;
-import edu.rice.cs.util.*;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.util.FileOps;
+
+import javax.swing.text.BadLocationException;
+import java.io.File;
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.List;
 
 /** This used to extend GlobalModelTestCase, but now it extends just TestCase.  Perhaps it should be changed back. */
-public class DocumentCacheTest extends TestCase {
+public class DocumentCacheTest extends DrJavaTestCase {
   
   private DefaultGlobalModel _model;
   private DocumentCache _cache;

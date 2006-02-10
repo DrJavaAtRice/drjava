@@ -45,11 +45,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
-import java.io.*;
-
-import junit.framework.TestCase;
+import java.io.File;
 
 /**
  * Tests the functionality provided by an implementation of JavadocModel.
@@ -57,7 +56,7 @@ import junit.framework.TestCase;
  * extended to test any implementation of the interface.
  * @version $Id$
  */
-public class JavadocModelTest extends TestCase {
+public class JavadocModelTest extends DrJavaTestCase {
   
   /**
    * Field needed by testUnsavedSuggestedDirectory

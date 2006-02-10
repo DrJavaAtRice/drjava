@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import  junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Test cases which test the implementation of BraceReduction
@@ -53,7 +53,7 @@ import  junit.framework.*;
  * function for determining the state of the current token.
  * @version $Id$
  */
-public abstract class BraceReductionTestCase extends TestCase {
+public abstract class BraceReductionTestCase extends DrJavaTestCase {
   protected ReducedModelControl model0;
   protected ReducedModelControl model1;
   protected ReducedModelControl model2;
@@ -61,7 +61,8 @@ public abstract class BraceReductionTestCase extends TestCase {
   /**
    * Sets up the reduced model controls before each test.
    */
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     model0 = new ReducedModelControl();
     model1 = new ReducedModelControl();
     model2 = new ReducedModelControl();

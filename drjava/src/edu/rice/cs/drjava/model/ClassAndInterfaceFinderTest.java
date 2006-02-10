@@ -44,8 +44,10 @@
  END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
-import junit.framework.TestCase;
-import java.io.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+
+import java.io.Reader;
+import java.io.StringReader;
 
 /**
  * ClassAndInterfaceFinderTest for unit testing ClassAndInterfaceFinder.  Uses
@@ -55,7 +57,7 @@ import java.io.*;
  * @version $Id$
  */
 
-public class ClassAndInterfaceFinderTest extends TestCase {
+public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
   
   
   /**

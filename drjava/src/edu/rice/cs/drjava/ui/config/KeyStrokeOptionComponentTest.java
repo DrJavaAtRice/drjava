@@ -45,21 +45,23 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui.config;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.config.KeyStrokeOption;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.Utilities;
 
-import junit.framework.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
 
 /** Tests functionality of this OptionComponent. */
-public final class KeyStrokeOptionComponentTest extends TestCase {
+public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
 
   private static KeyStrokeOptionComponent _option;
 
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     _option = new KeyStrokeOptionComponent( OptionConstants.KEY_NEW_FILE, "Normal KeyStroke", new Frame());
     DrJava.getConfig().resetToDefaults();
   }

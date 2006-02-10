@@ -45,19 +45,17 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class IntegerOption.
  * @version $Id$
  */
-public final class IntegerOptionTest extends TestCase {
+public final class IntegerOptionTest extends DrJavaTestCase {
   /** @param name The name of this test case. */
   public IntegerOptionTest(String name) { super(name); }
-  
-  public void setUp() { }
-  
+   
   public void testGetName() {
     IntegerOption io1 = new IntegerOption("indent_size",null);
     IntegerOption io2 = new IntegerOption("max_files",null);

@@ -45,15 +45,18 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.jar;
 
-import junit.framework.TestCase;
-import java.util.jar.Manifest;
-import java.util.jar.Attributes;
-import java.util.jar.JarInputStream;
-import java.util.jar.JarEntry;
-import java.util.*;
-import java.io.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
-public class JarCreationTest extends TestCase {
+import java.io.*;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
+
+public class JarCreationTest extends DrJavaTestCase {
   /**
    * Tests the creation of manifest files through the ManifestWriter class
    */

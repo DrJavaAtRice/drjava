@@ -81,16 +81,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 //  private Log _log = new Log("MainFrameTestLog.txt", true);
   
   /** Setup method for each JUnit test case. */
-  public void setUp() throws IOException {
+  public void setUp() throws Exception {
+    super.setUp();
     Utilities.invokeAndWait(new Runnable() { public void run() { _frame = new MainFrame(); }});
     _frame.pack();
-    super.setUp();
   }
 
-  public void tearDown() throws IOException {
-    super.tearDown();
+  public void tearDown() throws Exception {
     _frame.dispose();
     _frame = null;
+    super.tearDown();
   }
 
   /** Tests that the returned JButton of <code>createManualToolbarButton</code>:

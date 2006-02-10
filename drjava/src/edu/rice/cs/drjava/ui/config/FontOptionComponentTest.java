@@ -45,19 +45,20 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui.config;
 
-import java.awt.*;
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.config.OptionConstants;
 
-import junit.framework.*;
+import java.awt.*;
 
 /**
  * Tests functionality of this OptionComponent
  */
-public final class FontOptionComponentTest extends TestCase {
+public final class FontOptionComponentTest extends DrJavaTestCase {
   private static FontOptionComponent _option;
 
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     _option = new FontOptionComponent( OptionConstants.FONT_MAIN, "Main font", new Frame());
     DrJava.getConfig().resetToDefaults();
 

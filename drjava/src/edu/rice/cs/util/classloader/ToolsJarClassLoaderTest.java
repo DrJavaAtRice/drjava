@@ -45,14 +45,14 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.classloader;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Test cases for {@link ToolsJarClassLoader}.
  *
  * @version $Id$
  */
-public class ToolsJarClassLoaderTest extends TestCase {
+public class ToolsJarClassLoaderTest extends DrJavaTestCase {
   /**
    * Test that ToolsJarClassLoader can correctly guess the default
    * SDK installation directory on Windows.

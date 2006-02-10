@@ -84,13 +84,16 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import junit.framework.*;
-import java.io.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * Test suite over InputStreamRedirector.
  */
-public class StreamRedirectorTest extends TestCase {
+public class StreamRedirectorTest extends DrJavaTestCase {
   /**
    * Tests that an InputStreamRedirector correctly rejects empty input.
    */

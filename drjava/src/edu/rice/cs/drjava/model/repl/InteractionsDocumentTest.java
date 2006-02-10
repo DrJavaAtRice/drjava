@@ -45,19 +45,18 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import junit.framework.*;
-
-import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** Tests the functionality of the InteractionsDocument.  Most history functionality is tested in HistoryTest.
  *  @version $Id$
  */
-public final class InteractionsDocumentTest extends TestCase {
+public final class InteractionsDocumentTest extends DrJavaTestCase {
   protected InteractionsDocument _doc;
   
   /** Initialize fields for each test. */
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     // Use System.getProperty("user.dir") as working directory here and in call on reset(...) below
     _doc = new InteractionsDocument(new InteractionsDJDocument());
   }

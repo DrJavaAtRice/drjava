@@ -45,17 +45,26 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
 
-import junit.framework.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Test cases for {@link ExecJVM}.
  *
  * @version $Id$
  */
-public class ExecJVMTest extends TestCase {
+public class ExecJVMTest extends DrJavaTestCase {
+  /**
+   * Setup for every test case.
+   */
+  public void setUp() throws Exception {
+    super.setUp();
+    edu.rice.cs.util.swing.Utilities.TextAreaMessageDialog.TEST_MODE = true;
+  }
+
   public void testExecFileCreator() throws IOException, InterruptedException {
     File tempFile = File.createTempFile("drjava-test", ".tmp");
     assertTrue("temp file exists", tempFile.exists());
@@ -102,6 +111,43 @@ public class ExecJVMTest extends TestCase {
       }
 
       System.exit(0);
+    }
+  }
+
+  public void testExecWorkingDirNotFound() throws IOException, InterruptedException {
+    // create and delete temp file
+    File tempFile = File.createTempFile("drjava-test", ".tmp");
+    assertTrue("temp file exists", tempFile.exists());
+    boolean ret = tempFile.delete();
+    assertTrue("temp file delete succeeded", ret);
+
+    // turn temp file into directory name, make directory, and delete again
+    File tempDir = new File(tempFile.toString() + File.separatorChar);
+    ret = tempDir.mkdirs();
+    assertTrue("temp dir exists", tempDir.exists());
+    assertTrue("temp dir is dir", tempDir.isDirectory());
+    ret = tempDir.delete();
+    assertTrue("temp dir delete succeeded", ret);
+
+    // Run new JVM to create the file
+    String className = getClass().getName() + "$" + NoOp.class.getSimpleName();
+    String tempName = tempFile.getAbsolutePath();
+    Process jvm = ExecJVM.runJVMPropagateClassPath(className, new String[] { tempName }, tempDir);
+
+    int result = jvm.waitFor();
+
+    // Check jvm executed OK
+    try {
+      assertEquals("jvm exit code", 0, result);
+      assertTrue("jvm System.out not empty", jvm.getInputStream().read() == -1);
+      assertTrue("jvm System.err not empty", jvm.getErrorStream().read() == -1);
+    }
+    finally {
+    }
+  }
+
+  public static final class NoOp {
+    public static void main(String[] args) {
     }
   }
 }

@@ -45,17 +45,17 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
 
-import junit.framework.*;
-import java.rmi.*;
+import java.rmi.RemoteException;
 
 /**
  * Test cases for the master/slave jvm control framework.
  *
  * @version $Id$
  */
-public class IntegratedMasterSlaveTest extends TestCase {
+public class IntegratedMasterSlaveTest extends DrJavaTestCase {
   private MasterImpl _testMaster = new MasterImpl();
 
   public void testItAll() throws Exception {

@@ -45,7 +45,8 @@
 
 package edu.rice.cs.drjava.config;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+
 import java.util.ArrayList;
 
 /**
@@ -53,13 +54,11 @@ import java.util.ArrayList;
  * the proper functionality of the class ForcedChoiceOption.
  * @version $Id$
  */
-public final class ForcedChoiceOptionTest extends TestCase {
+public final class ForcedChoiceOptionTest extends DrJavaTestCase {
   /**
    * @param name The name of this test case.
    */
   public ForcedChoiceOptionTest(String name) { super(name); }
-  
-  public void setUp() { }
   
   public void testGetName() {
     ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access",

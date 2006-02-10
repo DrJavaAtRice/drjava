@@ -64,8 +64,6 @@ public final class QuestionBraceIsCurlyTest extends IndentRulesTestCase {
   
   private final IndentRuleQuestion _rule = new QuestionBraceIsCurly(null, null);
   
-  public void setUp() { super.setUp(); }
-  
   public void testWithParen() throws BadLocationException {
     int i;
     

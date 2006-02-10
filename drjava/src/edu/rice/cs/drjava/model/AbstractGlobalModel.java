@@ -831,7 +831,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       buf.append("* setup if necessary.\n");
       buf.append("*/\n");
       if (! elementary) buf.append("public ");
-      buf.append("void setUp() {\n}\n\n");
+      buf.append("void setUp() throws Exception {\n}\n\n");
     }
     if (makeTearDown) {
       buf.append("/**\n");
@@ -839,7 +839,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       buf.append("* clean-up if necessary.\n");
       buf.append("*/\n");
       if (! elementary) buf.append("public ");
-      buf.append("void tearDown() {\n}\n\n");
+      buf.append("void tearDown() throws Exception {\n}\n\n");
     }
     buf.append("/**\n");
     buf.append("* A test method.\n");

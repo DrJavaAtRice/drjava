@@ -45,17 +45,18 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Tests the functionality of the ModelList list class.
  * @version $Id$
  */
-public final class ModelListTest extends TestCase {
+public final class ModelListTest extends DrJavaTestCase {
   protected ModelList<Integer> fEmpty;
   protected ModelList<Integer> fFull;
 
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     fFull = new ModelList<Integer>();
     fEmpty = new ModelList<Integer>();
   }

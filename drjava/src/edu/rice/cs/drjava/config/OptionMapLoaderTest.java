@@ -47,11 +47,13 @@ package edu.rice.cs.drjava.config;
 import junit.framework.TestCase;
 import java.io.*;
 
+import edu.rice.cs.drjava.DrJavaTestCase;
+
 /**
  * Tests the OptionMapLoader.
  * @version $Id$
  */
-public final class OptionMapLoaderTest extends TestCase 
+public final class OptionMapLoaderTest extends DrJavaTestCase
   implements OptionConstants
 {
   

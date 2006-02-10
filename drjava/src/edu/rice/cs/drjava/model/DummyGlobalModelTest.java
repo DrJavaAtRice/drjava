@@ -49,6 +49,8 @@ import junit.framework.*;
 
 import java.io.File;
 
+import edu.rice.cs.drjava.DrJavaTestCase;
+
 /**
 * DummyGetDocumentsTest for unit testing DummyGetDocuments.  Uses
 * JUnit for testing.
@@ -56,7 +58,7 @@ import java.io.File;
 * @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
 * @version $Id$
 */
-public class DummyGlobalModelTest extends TestCase {
+public class DummyGlobalModelTest extends DrJavaTestCase {
     
 
     /**

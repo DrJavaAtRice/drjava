@@ -45,19 +45,19 @@ END_COPYRIGHT_BLOCK*/
 
 package  edu.rice.cs.drjava.model.definitions;
 
-import  junit.framework.*;
-import  javax.swing.text.BadLocationException;
-
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJDocument;
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
+
+import javax.swing.text.BadLocationException;
 
 /**
  * Test the comment lines / uncomment lines functionality.
  * @version $Id$
  */
-public final class CommentTest extends TestCase {
+public final class CommentTest extends DrJavaTestCase {
   protected DefinitionsDocument doc;
   private Integer _indentLevel = new Integer(2);
 //  private Integer configIndent;
@@ -67,7 +67,8 @@ public final class CommentTest extends TestCase {
    * Resents configuration settings and sets up the indent level so that we
    * can predict the correct behavior for indenting.
    */
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     DrJava.getConfig().resetToDefaults();
     _notifier = new GlobalEventNotifier();
     doc = new DefinitionsDocument(_notifier);

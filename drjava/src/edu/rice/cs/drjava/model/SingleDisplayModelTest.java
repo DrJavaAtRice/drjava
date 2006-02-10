@@ -45,9 +45,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import java.io.*;
-
 import javax.swing.text.BadLocationException;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Test functions of the single display model.
@@ -130,9 +130,6 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
       fail("activeDocumentChanged fired unexpectedly");
     }
   }
-
-  /** Custom setup for SingleDisplayModel tests. */
-  public void setUp() throws IOException { super.setUp(); }
 
   /** Tests the invariant that at least one document is open at time of creation. */
   public void testNotEmptyOnStartup() throws BadLocationException {

@@ -45,24 +45,26 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import junit.framework.*;
-import javax.swing.text.*;
-
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
+
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
  * Superclass for all test classes for the indentation decision tree.
  * @version $Id$
  */
-public abstract class IndentRulesTestCase extends TestCase {
+public abstract class IndentRulesTestCase extends DrJavaTestCase {
 
   protected AbstractDJDocument _doc;
 //  private String _indent;
  // private GlobalEventNotifier _notifier;
 
   /** Sets up the test environment. */
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     //_notifier = new GlobalEventNotifier();
     //_doc = new DefinitionsDocument(_notifier);
     _doc = new AbstractDJDocument() {
@@ -89,10 +91,11 @@ public abstract class IndentRulesTestCase extends TestCase {
     };
   }
   
-  public void tearDown() {
+  public void tearDown() throws Exception {
     _doc = null;
     //_notifier = null;
     System.gc();
+    super.tearDown();
   }
   
   /** Clears the text of the _doc field and sets it to the given string.

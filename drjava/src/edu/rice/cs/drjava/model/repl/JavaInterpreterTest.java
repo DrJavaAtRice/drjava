@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
@@ -58,14 +59,15 @@ import junit.framework.*;
  * Tests the functionality of the repl interpreter.
  * @version $Id$
  */
-public final class JavaInterpreterTest extends TestCase {
+public final class JavaInterpreterTest extends DrJavaTestCase {
   private JavaInterpreter _interpreter;
   static public boolean testValue;
 
   /**
    * The setup method run before each test.
    */
-  protected void setUp() {
+  protected void setUp() throws Exception {
+    super.setUp();
     _interpreter = new DynamicJavaAdapter(new ClassPathManager());
     testValue = false;
   }

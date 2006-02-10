@@ -33,17 +33,20 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import  junit.framework.*;
-import  javax.swing.text.*;
-import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.AbstractDJDocument;
+import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
  * 
  * @version $Id$
  */
-public final class IndentInfoTest extends TestCase {
+public final class IndentInfoTest extends DrJavaTestCase {
   private String _text;
   //private DefinitionsDocument _document;
   //private BraceReduction _reduced;
@@ -52,7 +55,8 @@ public final class IndentInfoTest extends TestCase {
   private DJDocument _document;
   
   
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     //_notifier = new GlobalEventNotifier();
     // _document = new DefinitionsDocument(_notifier);
     _document = new AbstractDJDocument() {

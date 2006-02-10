@@ -45,14 +45,17 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import junit.framework.TestCase;
-import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.repl.DynamicJavaAdapter;
+import edu.rice.cs.drjava.model.repl.ExceptionReturnedException;
+import edu.rice.cs.drjava.model.repl.JavaInterpreter;
+
 import java.util.Hashtable;
 
 /**
  * simple test suite over InterpreterJVM
  */
-public final class InterpreterJVMTest extends TestCase {
+public final class InterpreterJVMTest extends DrJavaTestCase {
   private InterpreterJVM jvm = InterpreterJVM.ONLY;
   private Hashtable<String,InterpreterData> _debugInterpreters;
   private JavaInterpreter _interpreter1;
@@ -63,7 +66,8 @@ public final class InterpreterJVMTest extends TestCase {
     InterpreterJVM.ONLY.addInterpreter(name, interpreter);
   }
   
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     _debugInterpreters = InterpreterJVM.ONLY.getInterpreters();
     _interpreter1 = new DynamicJavaAdapter(new ClassPathManager());
     _interpreter2 = new DynamicJavaAdapter(new ClassPathManager());

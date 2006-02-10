@@ -45,10 +45,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
+import edu.rice.cs.drjava.DrJavaTestCase;
+
 import java.io.File;
 import java.io.IOException;
-
-import  junit.framework.*;
 
 
 /**
@@ -57,7 +57,7 @@ import  junit.framework.*;
 * @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
 * @version $Id$
 */
-public class TestDocGetterTest extends TestCase {
+public class TestDocGetterTest extends DrJavaTestCase {
 
 
     /**

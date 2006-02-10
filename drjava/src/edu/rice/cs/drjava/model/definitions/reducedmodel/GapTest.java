@@ -45,13 +45,13 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import  junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Tests the functionality of the Gap class.
  * @version $Id$
  */
-public final class GapTest extends TestCase {
+public final class GapTest extends DrJavaTestCase {
   /**
    * Tests the ability to grow a Gap.
    */

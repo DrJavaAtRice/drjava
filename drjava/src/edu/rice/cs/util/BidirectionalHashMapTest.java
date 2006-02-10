@@ -1,13 +1,16 @@
 package edu.rice.cs.util;
-import junit.framework.TestCase;
-import java.util.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * A JUnit test case class.
  * Every method starting with the word "test" will be called when running
  * the test with JUnit.
  */
-public class BidirectionalHashMapTest extends TestCase {
+public class BidirectionalHashMapTest extends DrJavaTestCase {
   
   public void testSearch() {
     Double dbl1 = new Double(.1);

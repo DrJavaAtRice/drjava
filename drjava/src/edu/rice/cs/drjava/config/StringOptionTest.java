@@ -45,20 +45,18 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class StringOption.
  * @version $Id$
  */
-public final class StringOptionTest extends TestCase {
+public final class StringOptionTest extends DrJavaTestCase {
   /**
    * @param name The name of this test case.
    */
   public StringOptionTest(String name) { super(name); }
-  
-  public void setUp() { }
   
   public void testGetName() {
     StringOption so = new StringOption("classpath",null);

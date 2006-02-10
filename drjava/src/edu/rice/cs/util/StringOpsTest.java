@@ -45,13 +45,14 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import junit.framework.*;
+import edu.rice.cs.drjava.DrJavaTestCase;
+
 import java.io.PrintWriter;
 
 /**
  * Test functions of StringOps.
  */
-public class StringOpsTest extends TestCase {
+public class StringOpsTest extends DrJavaTestCase {
   /**
    *  Test the replace() method of StringOps class
    */
