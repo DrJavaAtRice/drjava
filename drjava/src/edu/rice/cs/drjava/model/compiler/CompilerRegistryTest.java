@@ -263,25 +263,20 @@ public final class CompilerRegistryTest extends DrJavaTestCase {
      public void setBuildDirectory(File builddir) { }
   }
 
-  /**
-   * Test that createCompiler() does successfully instantiate
-   * compilers that do not have the ONLY static field, and those which
-   * do have it.
+  /** Test that createCompiler() does successfully instantiate compilers that do not have the ONLY static field,
+   *  and those that do have it.
    */
    public void testCreateCompiler() {
-     try{
-       _registry.createCompiler(Without.class);
-     }
+     try { _registry.createCompiler(Without.class); }
      catch(Throwable e) {
        e.printStackTrace();
        fail("testCreateCompiler: Unexpected Exception for class without ONLY field\n" + e);
      }
 
-     try{
-       _registry.createCompiler(JavacFromClassPath.ONLY.getClass());
-     }
+     try { _registry.createCompiler(JavacFromClassPath.ONLY.getClass()); 
+           _registry.createCompiler(JavacFromToolsJar.ONLY.getClass());
+     } 
      catch(Throwable e2) {
-
         fail("testCreateCompiler: Unexpected Exception for class with ONLY field\n" + e2);
      }
   }

@@ -566,9 +566,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Saves all documents, prompting for file names as necessary. */
   private Action _saveAllAction = new AbstractAction("Save All") {
-    public void actionPerformed(ActionEvent ae) {
-      _saveAll();
-    }
+    public void actionPerformed(ActionEvent ae) { _saveAll(); }
   };
   
   /** Prints the current document. */
@@ -2643,11 +2641,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _saveAll() {
+    hourglassOn();
     try {
       if (_model.isProjectActive()) _saveProject();
       _model.saveAllFiles(_saveSelector);
     }
     catch (IOException ioe) { _showIOError(ioe); }
+    finally { hourglassOff(); }
   }
   
   //Called by the ProjectPropertiesFrame
