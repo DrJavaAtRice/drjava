@@ -498,11 +498,8 @@ public class DefaultJavadocModel implements JavadocModel {
     
     // This was a quick fix in order to get a working jar out.
     
-    String jsr14path = DrJava.getConfig().getSetting(OptionConstants.JSR14_LOCATION).toString();
     double version = Double.valueOf(System.getProperty("java.specification.version"));
     String[] jvmArgs = new String[0];
-    if (version < 1.5 && jsr14path != null && !jsr14path.equals(""))
-      jvmArgs = new String[]{"-Xbootclasspath/p:" + jsr14path};
     
     // We must use this classpath nonsense to make sure our new Javadoc JVM
     // can see everything the interactions pane can see.

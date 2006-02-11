@@ -1543,11 +1543,8 @@ public class DirectoryChooser extends JPanel {
     
   }
   
-  /**
-   * This cell editor is responsible formaking sure the correct
-   * data gets passed into and out of the editor component (the text field).
-   * This is done in order to maintain the file structures stored in 
-   * the tree nodes.
+  /** This cell editor is responsible formaking sure the correct data gets passed into and out of the editor component 
+   *  (the text field). This is done in order to maintain the file structures stored in the tree nodes.
    */
   private class CustomCellEditor extends DefaultCellEditor {
     TreePath _currentPath = null;

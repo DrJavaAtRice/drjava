@@ -88,12 +88,6 @@ public interface OptionConstants {
   public static final FileOption JAVAC_LOCATION =
     new FileOption("javac.location", FileOption.NULL_FILE);
 
-  public static final FileOption JSR14_LOCATION =
-    new FileOption("jsr14.location", FileOption.NULL_FILE);
-
-  public static final FileOption JSR14_COLLECTIONSPATH =
-    new FileOption("jsr14.collectionspath", FileOption.NULL_FILE);
-
   public static final VectorOption<File> EXTRA_CLASSPATH =
     new ClassPathOption().evaluate("extra.classpath");
 

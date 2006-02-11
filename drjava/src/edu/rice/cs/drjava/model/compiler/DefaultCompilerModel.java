@@ -1,4 +1,4 @@
-/*BEGIN_COPYRIGHT_BLOCK
+/* BEGIN_COPYRIGHT_BLOCK
  *
  * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
  * or http://sourceforge.net/projects/drjava/
@@ -28,8 +28,8 @@
  * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
  * WITH THE SOFTWARE.
- * 
-END_COPYRIGHT_BLOCK*/
+ *
+ *END_COPYRIGHT_BLOCK */
 
 package edu.rice.cs.drjava.model.compiler;
 

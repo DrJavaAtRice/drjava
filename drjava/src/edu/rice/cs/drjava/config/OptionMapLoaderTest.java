@@ -73,32 +73,24 @@ public final class OptionMapLoaderTest extends DrJavaTestCase
     "this.is.a.real.key = value\n"+
     "indent.level = 1\n"+
     "javac.location = foo\n"+
-    "jsr14.location = bar\n"+
-    "jsr14.collectionspath = baz\n"+
     "extra.classpath = bam\n\n";
   
   public void testProperConfigSet() throws IOException {
-    checkSet(OPTION_DOC,new Integer(1),new File("foo"),new File("bar"),new File("baz"),1);
+    checkSet(OPTION_DOC,new Integer(1), new File("foo"), 1);
   }
   
-  private void checkSet(String set, Integer indent, File javac, File jsr, File col, int size) throws IOException {
+  private void checkSet(String set, Integer indent, File javac, int size) throws IOException {
     StringInputStream is = new StringInputStream(set);
     OptionMapLoader loader = new OptionMapLoader(is);
     DefaultOptionMap map = new DefaultOptionMap();
     loader.loadInto(map);
-    assertEquals("indent (integer) option",
-                 map.getOption(INDENT_LEVEL),indent);
+    assertEquals("indent (integer) option",  map.getOption(INDENT_LEVEL),indent);
     assertEquals("JAVAC", map.getOption(JAVAC_LOCATION),javac.getAbsoluteFile());
-    assertEquals("JSR14", map.getOption(JSR14_LOCATION),jsr.getAbsoluteFile());
-    assertEquals("COLLECTIONS", map.getOption(JSR14_COLLECTIONSPATH),col.getAbsoluteFile());
-    assertEquals("size of extra-classpath vector",
-                 new Integer(size),new Integer(map.getOption(EXTRA_CLASSPATH).size()));
+    assertEquals("size of extra-classpath vector", new Integer(size), 
+                 new Integer(map.getOption(EXTRA_CLASSPATH).size()));
   }
   
   public void testEmptyConfigSet() throws IOException {
-    checkSet("",INDENT_LEVEL.getDefault(),JAVAC_LOCATION.getDefault(),
-             JSR14_LOCATION.getDefault(),JSR14_COLLECTIONSPATH.getDefault(),
-             EXTRA_CLASSPATH.getDefault().size());
-    
+    checkSet("",INDENT_LEVEL.getDefault(), JAVAC_LOCATION.getDefault(),  EXTRA_CLASSPATH.getDefault().size());
   }
 }

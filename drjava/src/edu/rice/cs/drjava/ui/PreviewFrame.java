@@ -445,20 +445,14 @@ public abstract class PreviewFrame extends JFrame {
     }
   }
 
-  /**
-   * Static inner class which displays the image on the screen, and
-   * holds the Image object.
-   */
+  /** Static inner class which displays the image on the screen, and holds the Image object. */
   static class PagePreview extends JPanel {
     protected int _width;
     protected int _height;
     protected Image _source;
     protected Image _image;
 
-    /**
-     * Constructs a PagePreview object with given
-     * width and height.
-     */
+    /** Constructs a PagePreview object with given width and height. */
     public PagePreview(int width, int height) {
       super();
       _width = width;
@@ -467,18 +461,14 @@ public abstract class PreviewFrame extends JFrame {
       setBackground(Color.white);
     }
 
-    /**
-     * Scales the interal image to the appropriate
-     * size.
-     */
+    /** Scales the interal image to the appropriate size. */
     protected void updateScaled() {
       _image = _source.getScaledInstance(_width, _height, Image.SCALE_SMOOTH);
       _image.flush();
     }
 
-    /**
-     * Updates the image of this PagePreview.
-     * @param i The Image to place and show.
+    /** Updates the image of this PagePreview.
+     *  @param i The Image to place and show.
      */
     public void setImage(Image i) {
       _source = i;
@@ -486,17 +476,11 @@ public abstract class PreviewFrame extends JFrame {
       repaint();
     }
 
-    public Dimension getPreferredSize() {
-      return new Dimension(_width, _height);
-    }
+    public Dimension getPreferredSize() { return new Dimension(_width, _height); }
 
-    public Dimension getMaximumSize() {
-      return getPreferredSize();
-    }
+    public Dimension getMaximumSize() { return getPreferredSize(); }
 
-    public Dimension getMinimumSize() {
-      return getPreferredSize();
-    }
+    public Dimension getMinimumSize() { return getPreferredSize(); }
 
     public void paint(Graphics g) {
       g.setColor(getBackground());

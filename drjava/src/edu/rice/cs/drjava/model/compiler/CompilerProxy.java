@@ -77,39 +77,26 @@ public class CompilerProxy implements CompilerInterface {
   }
 
   private void _recreateCompiler() {
-    File collectionsPath = DrJava.getConfig().getSetting(OptionConstants.JSR14_COLLECTIONSPATH);
-
+    
     StickyClassLoader loader = new StickyClassLoader(_newLoader, getClass().getClassLoader(), _useOldLoader);
-
+    
     try {
       Class<?> c = loader.loadClass(_className);
       _realCompiler = CompilerRegistry.createCompiler(c);
-
+      
       _realCompiler.setBuildDirectory(_buildDir);
       
       _realCompiler.setExtraClassPath(File.pathSeparator + _extraClassPath.toString());
-
+      
       _realCompiler.setWarningsEnabled(_warningsEnabled);
       
       boolean allowAssertions =
         DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT).booleanValue();
       _realCompiler.setAllowAssertions(allowAssertions);
-
+      
       String compilerClass = _realCompiler.getClass().getName();
-      if ((compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v10Compiler") ||
-           compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v12Compiler") ||
-           compilerClass.equals("edu.rice.cs.drjava.model.compiler.JSR14v20Compiler")) &&
-          collectionsPath != FileOption.NULL_FILE) {
-        _realCompiler.addToBootClassPath(collectionsPath);
-      }
-
-//      DrJava.consoleErr().println("real compiler: " + _realCompiler + " this: " + this);
     }
-    catch (Throwable t) {
-        // don't do anything. realCompiler stays null.
-//        DrJava.consoleErr().println("loadClass fails: " + t);
-//        t.printStackTrace(DrJava.consoleErr());
-    }
+    catch (Throwable t) { /* don't do anything. realCompiler stays null. */ }
   }
 
 

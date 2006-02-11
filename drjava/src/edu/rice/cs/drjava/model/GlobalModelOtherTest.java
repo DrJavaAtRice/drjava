@@ -653,13 +653,14 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     doc.runMain();
     
     Utilities.clearEventQueue();
-    assertInteractionsContains("Foo");
+    assertInteractionsContains(InteractionsModel.BANNER_PREFIX);
     doc.insertString(doc.getLength(), " ", null);
     doc.runMain();
     
     Utilities.clearEventQueue();
     assertInteractionsContains(DefaultGlobalModel.DOCUMENT_OUT_OF_SYNC_MSG);
-    Utilities.clearEventQueue();  // Killing time here; Slave JVM may not have released Foo.class so that the file can be deleted on Windows.
+    Utilities.clearEventQueue();  
+    // Killing time here; Slave JVM may not have released Foo.class so that the file can be deleted on Windows.
     
 //    _log.log("testRunMainMethod() completed");
   }

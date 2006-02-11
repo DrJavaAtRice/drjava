@@ -1,47 +1,34 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
  * 
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
- * conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * 
- *     - Redistributions of source code must retain the above copyright 
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
  * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
- * OTHER DEALINGS WITH THE SOFTWARE.
- * 
-END_COPYRIGHT_BLOCK*/
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
 
@@ -54,42 +41,29 @@ import junit.framework.TestSuite;
 
 import java.io.File;
 
-/**
- * Test cases for {@link CompilerRegistry}.
- * Here we test that the compiler registry correctly finds
- * available compilers.
+/** Test cases for {@link CompilerRegistry}. Here we test that the compiler registry correctly finds
+ *  available compilers.
  *
- * @version $Id$
+ *  @version $Id$
  */
 public final class CompilerRegistryTest extends DrJavaTestCase {
   private static final CompilerRegistry _registry = CompilerRegistry.ONLY;
-  private static final String[][] _defaultCompilers
-    = CompilerRegistry.DEFAULT_COMPILERS;
+  private static final String[][] _defaultCompilers = CompilerRegistry.DEFAULT_COMPILERS;
 
-  private static final CompilerInterface[] _allAvailableCompilers
-    = _registry.getAvailableCompilers();
+  private static final CompilerInterface[] _allAvailableCompilers = _registry.getAvailableCompilers();
 
-  /**
-   * Stores the old state of {@link CompilerRegistry#getBaseClassLoader},
-   * so it can be reset later.
-   */
+  /** Stores the old state of {@link CompilerRegistry#getBaseClassLoader}, so it can be reset later. */
   private ClassLoader _oldBaseLoader;
 
-  /**
-   * Constructor.
-   * @param name
+  /** Constructor.
+   *  @param name
    */
-  public CompilerRegistryTest(String name) {
-    super(name);
-  }
+  public CompilerRegistryTest(String name) { super(name); }
 
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
+  /** Creates a test suite for JUnit to run.
+   *  @return a test suite based on the methods in this class
    */
-  public static Test suite() {
-    return new TestSuite(CompilerRegistryTest.class);
-  }
+  public static Test suite() { return new TestSuite(CompilerRegistryTest.class); }
 
   /** Test setup method, which saves the old base class loader. */
   public void setUp() throws Exception {
@@ -98,43 +72,37 @@ public final class CompilerRegistryTest extends DrJavaTestCase {
     _registry.setActiveCompiler(NoCompilerAvailable.ONLY);
   }
 
-  /** Test teardown method, which restores the old base class loader. */
   public void tearDown() throws Exception {
     _registry.setBaseClassLoader(_oldBaseLoader);
     super.tearDown();
   }
 
-  /**
-   * Test that the default compilers are available and what we expect.
-   * This requires the environment (CLASSPATH) to have these compilers
-   * available. This is OK though, since the build environment needs them!
-   *
-   * This test is now commented out because it put too must restriction
-   * on the developer's build environment. It required them to have all the
-   * compilers available, which they may not. Oh well. These matters
-   * of configuration are really hard to test nicely.
-   */
-  /*
-  public void testExpectedDefaultCompilers() {
-    CompilerInterface[] compilers = _registry.getAvailableCompilers();
+//  /** Test that the default compilers are available and what we expect. This requires the environment (CLASSPATH) to
+//   *  have these compilers available. This is OK though, since the build environment needs them!
+//   *
+//   *  This test is now commented out because it put too must restriction on the developer's build environment. It 
+//   *  required them to have all the compilers available, which they may not. Oh well. These matters of configuration 
+//   *  are really hard to test nicely.
+//   */
+//
+//  public void testExpectedDefaultCompilers() {
+//    CompilerInterface[] compilers = _registry.getAvailableCompilers();
+//
+//    assertEquals("Number of available compilers vs. number of default compilers",
+//                 _defaultCompilers.length,
+//                 compilers.length);
+//
+//    for (int i = 0; i < compilers.length; i++) {
+//      assertEquals("Name of available compiler #" + i + " is the same as the " +
+//                     "name of the corresponding default compiler",
+//                   _defaultCompilers[i],
+//                   compilers[i].getClass().getName());
+//    }
+//  }
 
-    assertEquals("Number of available compilers vs. number of default compilers",
-                 _defaultCompilers.length,
-                 compilers.length);
 
-    for (int i = 0; i < compilers.length; i++) {
-      assertEquals("Name of available compiler #" + i + " is the same as the " +
-                     "name of the corresponding default compiler",
-                   _defaultCompilers[i],
-                   compilers[i].getClass().getName());
-    }
-  }
-  */
-
-  /**
-   * Tests that list of available compilers effectively is restricted
-   * when the class is not available.
-   * Here this is done by limiting the available compilers one at a time.
+  /** Tests that list of available compilers effectively is restricted when the class is not available.
+   *  Here this is done by limiting the available compilers one at a time.
    */
   public void testLimitOneByOne() {
     for (int i = 0; i < _allAvailableCompilers.length; i++) {
@@ -144,10 +112,7 @@ public final class CompilerRegistryTest extends DrJavaTestCase {
     }
   }
 
-  /**
-   * Tests that list of available compilers effectively is restricted
-   * when all default compilers are not available.
-   */
+  /** Tests that list of available compilers effectively is restricted when all default compilers are not available. */
   public void testLimitAllAtOnce() {
     LimitingClassLoader loader = new LimitingClassLoader(_oldBaseLoader);
     _registry.setBaseClassLoader(loader);
@@ -159,28 +124,22 @@ public final class CompilerRegistryTest extends DrJavaTestCase {
     }
 
     CompilerInterface[] compilers = _registry.getAvailableCompilers();
-    assertEquals("Number of available compilers should be 1 " +
-                   "because all real compilers are restricted.",
-                 1,
+    assertEquals("Number of available compilers should be 1 because all real compilers are restricted.", 1,
                  compilers.length);
 
-    assertEquals("Only available compiler should be NoCompilerAvailable.ONLY",
-                 NoCompilerAvailable.ONLY,
+    assertEquals("Only available compiler should be NoCompilerAvailable.ONLY", NoCompilerAvailable.ONLY,
                  compilers[0]);
 
-    assertEquals("Active compiler",
-                 NoCompilerAvailable.ONLY,
-                 _registry.getActiveCompiler());
+    assertEquals("Active compiler",  NoCompilerAvailable.ONLY, _registry.getActiveCompiler());
     
-    assertEquals("DrJava.java should not see an available compiler",
-                 false,
-                 DrJava.hasAvailableCompiler());
+    /* The following test is commented out because DrJava uses the ToolsJarLoader to look for a compiler in the plausible
+     * locations.  The ONLY way to force it not to find a compiler would be to move tools.jar to a nonstandard location in
+     * the build environment which is a terrible idea.
+     */   
+//    assertEquals("DrJava.java should not see an available compiler", false, DrJava.hasAvailableCompiler());
   }
   
-  /**
-   * Tests that DrJava.java can see whether CompilerRegistry has an
-   * available compiler.
-   */
+  /** Tests that DrJava.java can see whether CompilerRegistry has an available compiler. */
   public void testAvailableCompilerSeenByDrJava() {
     assertEquals("DrJava.java should agree with CompilerRegistry",
                  _registry.getActiveCompiler() != NoCompilerAvailable.ONLY,

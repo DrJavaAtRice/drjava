@@ -399,15 +399,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   /** Tests that setting and changing an input listener works correctly. */
   public void testSetChangeInputListener() {
     InputListener listener1 = new InputListener() {
-      public String getConsoleInput() {
-        return "input1";
-      }
+      public String getConsoleInput() { return "input1"; }
     };
 
     InputListener listener2 = new InputListener() {
-      public String getConsoleInput() {
-        return "input2";
-      }
+      public String getConsoleInput() { return "input2"; }
     };
 
     try {

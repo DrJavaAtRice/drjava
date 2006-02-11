@@ -428,25 +428,7 @@ public class ConfigFrame extends JFrame {
                               _fileOptionChooser);
     javacLoc.setFileFilter(ClassPathFilter.ONLY);
     panel.addComponent(javacLoc);
-    FileOptionComponent jsr14Loc =
-      new FileOptionComponent(OptionConstants.JSR14_LOCATION,
-                              "JSR-14 Location", this,
-                              "Optional location of the JSR-14 compiler, for compiling with generics.",
-                              _fileOptionChooser);
-    jsr14Loc.setFileFilter(ClassPathFilter.ONLY);
-    panel.addComponent(jsr14Loc);
-    FileOptionComponent jsr14Col =
-      new FileOptionComponent(OptionConstants.JSR14_COLLECTIONSPATH,
-                              "JSR-14 Collections Path", this,
-                              "Optional location of the JSR-14 collect.jar file, which contains the collection classes.",
-                              _fileOptionChooser);
-    jsr14Col.setFileFilter(ClassPathFilter.ONLY);
-    panel.addComponent(jsr14Col);
-//    VectorClassnameOptionComponent extraCompilers =
-//      new VectorClassnameOptionComponent(OptionConstants.EXTRA_COMPILERS, "Custom Compilers", this,
-//                                         "<html>Class names for custom compilers.  These compilers should<br>" +
-//                                         "implement edu.rice.cs.drjava.model.compiler.CompilerInterface.</html>");
-//    panel.addComponent(extraCompilers);
+   
     panel.addComponent(new VectorFileOptionComponent(OptionConstants.EXTRA_CLASSPATH,
                                                  "Extra Classpath", this,
                                                  "<html>Any directories or jar files to add to the classpath<br>"+

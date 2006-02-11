@@ -166,8 +166,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
 
-  /** Performs pre-interpretation preparation of the interactions document and
-   *  notifies the view. */
+  /** Performs pre-interpretation preparation of the interactions document and notifies the view. */
   private void _prepareToInterpret(String text) {
     addNewLine();
     _notifyInteractionStarted();
@@ -603,7 +602,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
   /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady(File wd) {
-    if (!_waitingForFirstInterpreter) {
+    if (! _waitingForFirstInterpreter) {
       _document.reset(generateBanner(wd));
       _document.setInProgress(false);
       _notifyInterpreterReady(wd);

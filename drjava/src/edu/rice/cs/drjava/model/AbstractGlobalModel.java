@@ -92,6 +92,7 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
@@ -1010,7 +1011,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         public boolean accept(File f) { 
           return f.isDirectory() ||
             f.isFile() && 
-            f.getName().endsWith(DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+            f.getName().endsWith(DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
         }
       });
       

@@ -643,11 +643,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       jvmArgs.add("-Xnoagent");
       jvmArgs.add("-Djava.compiler=NONE");
     }
-    if (DrJava.usingJSR14v20()) {
-      // System.out.println("using jsr14 v2.0");
-      File jsr14 = DrJava.getConfig().getSetting(OptionConstants.JSR14_LOCATION);
-      jvmArgs.add("-Xbootclasspath/p:" + jsr14.getAbsolutePath());
-    }
     // Cannot do the following line because it causes an error on Macs in the Eclipse plug-in.
     // By instantiating the config, somehow the Apple JVM tries to start up AWT, which seems
     // to be prohibited by Eclipse.  Badness ensues.

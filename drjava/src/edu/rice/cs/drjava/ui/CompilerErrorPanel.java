@@ -112,7 +112,6 @@ public class CompilerErrorPanel extends ErrorPanel {
     customPanel.add(_compilerChoiceBox, BorderLayout.NORTH);
     
     DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener<File>());
-    DrJava.getConfig().addOptionListener(OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener<File>());
     DrJava.getConfig().addOptionListener(OptionConstants.EXTRA_COMPILERS, new CompilerLocationOptionListener<Vector<String>>());
   }
   

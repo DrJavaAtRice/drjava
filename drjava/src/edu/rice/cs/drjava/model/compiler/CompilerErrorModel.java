@@ -183,11 +183,10 @@ public class CompilerErrorModel {
     return buf.toString();
   }
 
-  /**
-   * This method finds and returns the error that is at the given offset
-   * @param odd the OpenDefinitionsDocument where you want to find the error at the caret
-   * @param offset the offset into the document
-   * @return the CompilerError at the given offset, null if no error corresponds to this location
+  /** This method finds and returns the error that is at the given offset
+   *  @param odd the OpenDefinitionsDocument where you want to find the error at the caret
+   *  @param offset the offset into the document
+   *  @return the CompilerError at the given offset, null if no error corresponds to this location
    */
   public CompilerError getErrorAtOffset(OpenDefinitionsDocument odd, int offset) {
     File file;
@@ -200,7 +199,6 @@ public class CompilerErrorModel {
     catch (IOException ioe) {
       // Oh well, we'll look for it as is.
     }
-
 
     StartAndEndIndex saei = _filesToIndexes.get(file);
     if (saei == null) return null;
@@ -232,7 +230,7 @@ public class CompilerErrorModel {
         String betweenDotAndErr = odd.getText(errPos, offset - errPos);
         if (betweenDotAndErr.indexOf('\n') == -1) shouldSelect = errorBefore;
       }
-      catch (BadLocationException willNeverHappen) { throw new UnexpectedException(willNeverHappen); }
+      catch (BadLocationException e) { /* source document has been edited; fail silently */ }
     }
 
     if ((shouldSelect == -1) && (errorAfter < end)) {// (errorAfter != _positions.length)) {
@@ -244,7 +242,7 @@ public class CompilerErrorModel {
         String betweenDotAndErr = odd.getText(offset, errPos - offset);
         if (betweenDotAndErr.indexOf('\n') == -1) shouldSelect = errorAfter;
       }
-      catch (BadLocationException e) { throw new UnexpectedException(e); }
+      catch (BadLocationException e) { /* source document has been edited; fail silently */ }
     }
 
     if (shouldSelect == -1) return null;

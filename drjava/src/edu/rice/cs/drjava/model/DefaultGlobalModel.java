@@ -47,11 +47,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
+import javax.swing.SwingUtilities;
 
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -834,39 +836,55 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     /** Starting compiling this document.  Used only for unit testing */
     public void startCompile() throws IOException { _compilerModel.compile(ConcreteOpenDefDoc.this); }
+    
+    private InteractionsListener _runMain;
 
-    /** Runs the main method in this document in the interactions pane. Demands that the definitions be saved
-     *  and compiled before proceeding. Fires an event to signal when execution is about to begin.
+    /** Runs the main method in this document in the interactions pane after resetting interactions with the source
+     *  root for this document as the working directory.  Warns the use if the class files for the doucment are not 
+     *  up to date.  Fires an event to signal when execution is about to begin.
+     *  NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
+     *  event thread execution!
      *  @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
      *  @exception IOException propagated from GlobalModel.compileAll()
      */
     public void runMain() throws ClassNameNotFoundException, IOException {
-      try {
-        // First, get the class name to use.  This relies on Java's convention of
-        // one top-level class per file.
-        String className = getDocument().getQualifiedClassName();
-        
-        // Then clear the current interaction and replace it with a "java X" line.
-        InteractionsDocument iDoc = _interactionsModel.getDocument();
-        
-        synchronized(_interpreterControl) {  // why is this synchronization here?
+      
+      // Get the class name for this document, the first top level class in the document.
+      final String className = getDocument().getQualifiedClassName();
+      final InteractionsDocument iDoc = _interactionsModel.getDocument();
+      if (! checkIfClassFileInSync()) {
+        iDoc.insertBeforeLastPrompt(DOCUMENT_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);
+        return;
+      }
+      
+      _runMain = new DummyGlobalModelListener() {
+        public void interpreterReady(File wd) {
+          
+          // Load the proper text into the interactions document
           iDoc.clearCurrentInput();
-          if (!checkIfClassFileInSync()) {
-            iDoc.insertBeforeLastPrompt(DOCUMENT_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);
-          }
+          
+
           iDoc.insertText(iDoc.getLength(), "java " + className, null);
-
-          // Notify listeners that the file is about to be run.
-          _notifier.runStarted(this);
-
-          // Finally, execute the new interaction.
+          
+          // Finally, execute the new interaction and record that event
           _interactionsModel.interpretCurrentInteraction();
+          _notifier.runStarted(ConcreteOpenDefDoc.this);
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() { 
+              /* Remove _runMain listener AFTER this interpreterReady listener completes and DROPS it readLock on
+               * _interactionsModel._notifier. */
+              _interactionsModel.removeListener(_runMain);
+            }
+          });
+          
         }
-      }
-      catch (EditDocumentException e) {
-        // This was thrown by insertText - and shouldn't have happened.
-        throw new UnexpectedException(e);
-      }
+      };
+      
+      _interactionsModel.addListener(_runMain);
+      
+      // Reset interactions to the soure root for this document; class will be executed when new interpreter is ready
+      resetInteractions(getSourceRoot());
+        
     }
 
     /** Runs JUnit on the current document. Used to compile all open documents
@@ -874,9 +892,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
      *  debugging of test cases. If the classes being tested are out of
      *  sync, a message is displayed.
      */
-    public void startJUnit() throws ClassNotFoundException, IOException {
-      _junitModel.junit(this);
-    }
+    public void startJUnit() throws ClassNotFoundException, IOException { _junitModel.junit(this); }
 
     /** Generates Javadoc for this document, saving the output to a temporary
      *  directory.  The location is provided to the javadocEnded event on

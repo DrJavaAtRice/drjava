@@ -54,6 +54,7 @@ import java.net.URL;
 import java.net.MalformedURLException;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
@@ -223,9 +224,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** For opening project files. */
   private JFileChooser _openProjectChooser;
   
-  /** For saving files. We have a persistent dialog to keep track of the last directory
-   *  from which we saved.
-   */
+  /** For saving files. We have a persistent dialog to keep track of the last directory from which we saved. */
   private JFileChooser _saveChooser;
   
   /** Filter for regular java files (.java and .j). */
@@ -364,8 +363,8 @@ public class MainFrame extends JFrame implements OptionConstants {
                                                     JOptionPane.QUESTION_MESSAGE);
       if (testName != null) {
         String ext;
-        for(int i=0; i < DrJava.LANGUAGE_LEVEL_EXTENSIONS.length; i++) {
-          ext = DrJava.LANGUAGE_LEVEL_EXTENSIONS[i];
+        for(int i=0; i < DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS.length; i++) {
+          ext = DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[i];
           if (testName.endsWith(ext)) testName = testName.substring(0, testName.length() - ext.length());
         }
         // For now, don't include setUp and tearDown
@@ -917,14 +916,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Shows the DebugConsole. */
   private Action _showDebugConsoleAction = new AbstractAction("Show DrJava Debug Console") {
     public void actionPerformed(ActionEvent e) {
-      DrJava.showDrJavaDebugConsole(MainFrame.this);
+      DrJavaRoot.showDrJavaDebugConsole(MainFrame.this);
     }
   };
   
   /** Resets the Interactions pane. */
   private Action _resetInteractionsAction = new AbstractAction("Reset Interactions") {
     public void actionPerformed(ActionEvent ae) {
-      if (!DrJava.getConfig().getSetting(INTERACTIONS_RESET_PROMPT).booleanValue()) {
+      if (! DrJava.getConfig().getSetting(INTERACTIONS_RESET_PROMPT).booleanValue()) {
         _doResetInteractions();
         return;
       }
@@ -1764,32 +1763,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     config.addOptionListener(QUIT_PROMPT, new QuitPromptOptionListener());
     config.addOptionListener(RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
     
-    config.addOptionListener(JSR14_LOCATION, new OptionListener<File>() {
-      public void optionChanged(OptionEvent<File> oe) {
-        boolean bootClassPathHasv2 = DrJava.bootClassPathHasJSR14v20();
-        boolean bootClassPathHasv24 = DrJava.bootClassPathHasJSR14v24();
-        if (oe.value != FileOption.NULL_FILE) {
-          boolean checkForV20 = DrJava.checkForJSR14v20();
-          boolean checkForV24 = DrJava.checkForJSR14v24();
-          if (checkForV24 && !bootClassPathHasv24) {
-            JOptionPane.showMessageDialog(_configFrame,
-                                          "You must restart DrJava to use the JSR-14 v2.4 compiler.",
-                                          "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
-          }
-          else if ((checkForV20 && !checkForV24) && (!bootClassPathHasv2 || bootClassPathHasv24)) {
-            JOptionPane.showMessageDialog(_configFrame,
-                                          "You must restart DrJava to use the JSR-14 v2.0/2.2 compiler.",
-                                          "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
-          }
-          else if (!checkForV20 && bootClassPathHasv2) {
-            JOptionPane.showMessageDialog(_configFrame,
-                                          "You must restart DrJava to switch to 1.x versions of the JSR-14 compiler.",
-                                          "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
-          }
-        }
-      }
-    });
-    
     config.addOptionListener(LOOK_AND_FEEL, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) {
 //        try {
@@ -2468,7 +2441,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    *  @param chooser the selector that returns the files to open
    */
   public void openFolder(DirectoryChooser chooser) {
-    String type = "'" + DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
+    String type = "'" + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
     chooser.setDialogTitle("Open All " + type + "Files In...");
     
     File openDir = null;
@@ -3042,7 +3015,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
   
-  
   private void _runProject() {
     if (_model.isProjectActive()) {
       try {
@@ -3079,8 +3051,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         "current document, so it could not run the class.  Please\n" +
         "make sure that the class is properly defined first.";
       
-      JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found",
-                                    JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found", JOptionPane.ERROR_MESSAGE);
     }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
     catch (IOException ioe) { _showIOError(ioe); }
@@ -3452,7 +3423,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (fc.getFileFilter() instanceof JavaSourceFilter) {
             if (chosen.getName().indexOf(".") == -1)
               return new File(chosen.getAbsolutePath() + 
-                              DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+                              DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
           }
           return chosen;
         }
@@ -4007,10 +3978,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     JRadioButtonMenuItem rbMenuItem;
     rbMenuItem = new JRadioButtonMenuItem("Full Java");
     rbMenuItem.setToolTipText("Use full Java syntax");
-    if (currentLanguageLevel == DrJava.FULL_JAVA) { rbMenuItem.setSelected(true); }
+    if (currentLanguageLevel == DrJavaRoot.FULL_JAVA) { rbMenuItem.setSelected(true); }
     rbMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        config.setSetting(LANGUAGE_LEVEL, DrJava.FULL_JAVA);
+        config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.FULL_JAVA);
       }});
       group.add(rbMenuItem);
       languageLevelMenu.add(rbMenuItem);
@@ -4018,30 +3989,30 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       rbMenuItem = new JRadioButtonMenuItem("Elementary");
       rbMenuItem.setToolTipText("Use Elementary language-level features");
-      if (currentLanguageLevel == DrJava.ELEMENTARY_LEVEL) { rbMenuItem.setSelected(true); }
+      if (currentLanguageLevel == DrJavaRoot.ELEMENTARY_LEVEL) { rbMenuItem.setSelected(true); }
       rbMenuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          config.setSetting(LANGUAGE_LEVEL, DrJava.ELEMENTARY_LEVEL);
+          config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.ELEMENTARY_LEVEL);
         }});
         group.add(rbMenuItem);
         languageLevelMenu.add(rbMenuItem);
         
         rbMenuItem = new JRadioButtonMenuItem("Intermediate");
         rbMenuItem.setToolTipText("Use Intermediate language-level features");
-        if (currentLanguageLevel == DrJava.INTERMEDIATE_LEVEL) { rbMenuItem.setSelected(true); }
+        if (currentLanguageLevel == DrJavaRoot.INTERMEDIATE_LEVEL) { rbMenuItem.setSelected(true); }
         rbMenuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            config.setSetting(LANGUAGE_LEVEL, DrJava.INTERMEDIATE_LEVEL);
+            config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.INTERMEDIATE_LEVEL);
           }});
           group.add(rbMenuItem);
           languageLevelMenu.add(rbMenuItem);
           
           rbMenuItem = new JRadioButtonMenuItem("Advanced");
           rbMenuItem.setToolTipText("Use Advanced language-level features");
-          if (currentLanguageLevel == DrJava.ADVANCED_LEVEL) { rbMenuItem.setSelected(true); }
+          if (currentLanguageLevel == DrJavaRoot.ADVANCED_LEVEL) { rbMenuItem.setSelected(true); }
           rbMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-              config.setSetting(LANGUAGE_LEVEL, DrJava.ADVANCED_LEVEL);
+              config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.ADVANCED_LEVEL);
             }});
             group.add(rbMenuItem);
             languageLevelMenu.add(rbMenuItem);

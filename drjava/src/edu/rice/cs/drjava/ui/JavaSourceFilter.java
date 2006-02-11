@@ -36,19 +36,16 @@ package edu.rice.cs.drjava.ui;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 
-/**
- * A file filter for files with extensions ".java" and ".gj".
- * Used in the file choosers for open and save.
- * @version $Id$
+/** A file filter for files with extensions ".java" and ".gj". Used in the file choosers for open and save. 
+ *  @version $Id$
  */
 public class JavaSourceFilter extends FileFilter {
   
-  /**
-   * Returns true if the file's extension matches Java or GJ.
-   */
+  /** Returns true if the file's extension matches Java or GJ. */
   public boolean accept(File f) {
     if (f.isDirectory()) {
       return true;
@@ -56,39 +53,27 @@ public class JavaSourceFilter extends FileFilter {
     String extension = getExtension(f);
     if (extension != null) {
       switch (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)) {
-        case (DrJava.FULL_JAVA) :
-          return (extension.equals("java") || extension.equals("j"));
-        case (DrJava.ELEMENTARY_LEVEL) :
-          return extension.equals("dj0");
-        case (DrJava.INTERMEDIATE_LEVEL) :
-          return extension.equals("dj1");
-        case (DrJava.ADVANCED_LEVEL) :
-          return extension.equals("dj2");
+        case (DrJavaRoot.FULL_JAVA): return (extension.equals("java") || extension.equals("j"));
+        case (DrJavaRoot.ELEMENTARY_LEVEL): return extension.equals("dj0");
+        case (DrJavaRoot.INTERMEDIATE_LEVEL): return extension.equals("dj1");
+        case (DrJavaRoot.ADVANCED_LEVEL): return extension.equals("dj2");
       }
     }
     return false;
   }
 
-  /**
-   * @return A description of this filter to display
-   */
+  /** @return A description of this filter to display. */
   public String getDescription() {
     switch (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)) {
-        case (DrJava.FULL_JAVA) :
-          return "Java source files";
-        case (DrJava.ELEMENTARY_LEVEL) :
-          return "Elementary source files (.dj0)";
-        case (DrJava.INTERMEDIATE_LEVEL) :
-          return "Intermediate source files (.dj1)";
-        case (DrJava.ADVANCED_LEVEL) :
-          return "Advanced source files (.dj2)";
+        case (DrJavaRoot.FULL_JAVA): return "Java source files";
+        case (DrJavaRoot.ELEMENTARY_LEVEL): return "Elementary source files (.dj0)";
+        case (DrJavaRoot.INTERMEDIATE_LEVEL): return "Intermediate source files (.dj1)";
+        case (DrJavaRoot.ADVANCED_LEVEL): return "Advanced source files (.dj2)";
       }
     return "Java source files";
   }
 
-  /*
-   * Get the extension of a file.
-   */
+  /* Get the extension of a file. */
   public static String getExtension(File f) {
     String ext = null;
     String s = f.getName();

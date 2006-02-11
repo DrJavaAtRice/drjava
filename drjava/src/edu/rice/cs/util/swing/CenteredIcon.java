@@ -48,11 +48,8 @@ package edu.rice.cs.util.swing;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * This icon takes the given icon and centers it into a canvas of the 
- * given width and height.  This is like a canvas resize for Icons.
- * If the new size is smaller than the icon's size, then the edges of 
- * the given icon are clipped.
+/** This icon takes the given icon and centers it into a canvas of the given width and height.  This is like a canvas
+ *  resize for Icons.  If the new size is smaller than the icon's size, then the edges of the given icon are clipped.
  */
 public class CenteredIcon implements Icon {
   private Icon _base;

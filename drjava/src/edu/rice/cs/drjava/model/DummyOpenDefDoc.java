@@ -75,10 +75,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    public int compareTo(OpenDefinitionsDocument d) {
     throw new UnsupportedOperationException("Dummy method");
   }
-  /**
-   * Determines if this definitions document has changed since the
-   * last save.
-   * @return true if the document has been modified
+  /** Determines if this definitions document has changed since the last save.
+   *  @return true if the document has been modified
    */
   public boolean isModifiedOnDisk() {
     throw new UnsupportedOperationException("Dummy method");

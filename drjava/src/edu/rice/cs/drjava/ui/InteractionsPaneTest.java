@@ -33,9 +33,13 @@
 
 package edu.rice.cs.drjava.ui;
 
+
+import java.io.File;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.DummyGlobalModelListener;
+import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
@@ -316,9 +320,15 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     }
   }
   
+  /** Fields used in a closure in testPromptList */
+  private int _firstPrompt, _secondPrompt, _size;
+  private boolean _resetDone;
+  
   public void testPromptListClearedOnReset() throws Exception {
-    //Can't use the fields declared in setUp - it doesn't use a real InteractionsModel
+    // Can't use the fields declared in setUp - it doesn't use a real InteractionsModel
     MainFrame mf = new MainFrame();
+    
+    final Object _resetLock = new Object();
     
     Utilities.clearEventQueue();
     GlobalModel gm = mf.getModel();
@@ -327,47 +337,66 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     _adapter = gm.getSwingInteractionsDocument();
     _doc = gm.getInteractionsDocument();
     _pane = mf.getInteractionsPane();
-    _pane.resetPrompts();
+    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { _pane.resetPrompts(); }
+    });
 
-    Utilities.clearEventQueue();
 //    System.err.println(_pane.getPromptList());
     assertEquals("PromptList before insert should contain 0 elements", 0, _pane.getPromptList().size());
         
     // Insert some text 
     
     _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);
-    _pane.setCaretPosition(_doc.getLength());
     
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { _pane.setCaretPosition(_doc.getLength()); }
+    });
+    
     assertEquals("PromptList after insert should contain 1 element", 1, _pane.getPromptList().size());    
     assertEquals("First prompt should be saved as being at position",
                  InteractionsModel.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length(),
                  (int)_pane.getPromptList().get(0)); //needs cast to prevent ambiguity
     
     _doc.insertPrompt();
-    _pane.setCaretPosition(_doc.getLength());
     
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        _pane.setCaretPosition(_doc.getLength());
+        _firstPrompt = (int) _pane.getPromptList().get(0); // cast prevents ambiguity
+        _secondPrompt = (int) _pane.getPromptList().get(1); // cast prevents ambiguity
+      }
+    });
+    
     assertEquals("PromptList after insertion of new prompt should contain 2 elements", 2, _pane.getPromptList().size());
     assertEquals("First prompt should be saved as being at position",
                  InteractionsModel.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length(),
-   (int) _pane.getPromptList().get(0)); //needs cast to prevent ambiguity
+                 _firstPrompt); 
     assertEquals("Second prompt should be saved as being at position",
                  InteractionsModel.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length() * 2 + 1,
-                 (int)_pane.getPromptList().get(1)); //needs cast to prevent ambiguity
+                 _secondPrompt); 
     
+    synchronized(_resetLock) { _resetDone = false; }
+    _model.addListener(new DummyGlobalModelListener() {
+      public void interpreterReady(File wd) {
+        synchronized(_resetLock) {
+          _resetDone = true;
+          _resetLock.notifyAll();
+        }
+      }});
+      
+    _model.resetInterpreter(FileOption.NULL_FILE);
+ 
+    /* Wait until reset has finished. */
+    synchronized(_resetLock) { while (! _resetDone) _resetLock.wait(); }
     
-    synchronized(_model) {
-      // Reset should clear
-      _model.setWaitingForFirstInterpreter(false);
-      //this adds the "Resetting Interactions" 
-      _model.resetInterpreter(FileOption.NULL_FILE);  // restarting the interpreter since argument is not null
-      _model.interpreterResetting();
-    }
-    Utilities.clearEventQueue();
-    synchronized(_model) {
-      assertEquals("PromptList after reset should contain no elements", 0, _pane.getPromptList().size());
-    }  
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { _size = _pane.getPromptList().size(); }
+    });
+    
+//    System.err.println(_pane.getPromptList());
+    
+    assertEquals("PromptList after reset should contain one element", 1, _size);
   }
     
 }

@@ -96,13 +96,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       for (DocumentClosedListener l: _closedListeners)  { l.close(); }
       _closedListeners = new LinkedList<DocumentClosedListener>();
     }
-    
-//    _closed = false;
   }
   
   // end debug code
-  
-  
+ 
   /** The maximum number of undos the model can remember */
   private static final int UNDO_LIMIT = 1000;
   /** Specifies if tabs are removed on open and converted to spaces. */
@@ -367,6 +364,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   public void remove(int offset, int len) throws BadLocationException {
     
+    if (len == 0) return;
+    
     writeLock();
     try {
       setModifiedSinceSave();
@@ -395,15 +394,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    System.out.println("DefinitionsDocument: set modified? " + _modifiedSinceSave);
     }
     finally { 
-      writeUnlock(); 
       if (! _modifiedSinceSave && _odd != null) _odd.documentReset();
+      writeUnlock();
 //    Utilities.showDebug("DefintionsDocument: _modifiedSinceSave = " + _modifiedSinceSave);
     }
   }
   
-   /** Sets the modification state of this document to true and updates the state of the associated _odd. */
+   /** Sets the modification state of this document to true and updates the state of the associated _odd. 
+    *  Assumes that write lock is already held. */
   private void setModifiedSinceSave() {
-    if (!_modifiedSinceSave) {
+    if (! _modifiedSinceSave) {
       _modifiedSinceSave = true;
       _classFileInSync = false;
       if (_odd != null) _odd.documentModified();
@@ -418,8 +418,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       _undoManager.documentSaved();
     }
     finally { 
-      writeUnlock(); 
       if (_odd != null) _odd.documentReset();  // null test required for some unit tests
+      writeUnlock(); 
+
     }
   }
   
@@ -437,11 +438,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  @return true if the document has been modified
    */
   public boolean isModifiedSinceSave() {
-//    readLock();
-//    try { 
-      return  _modifiedSinceSave; 
-//    }
-//    finally { readUnlock(); }
+    readLock();
+    try { return  _modifiedSinceSave; }
+    finally { readUnlock(); }
   }
   
   /** Return the current column of the cursor position. Uses a 0 based index. */
