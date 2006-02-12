@@ -29,7 +29,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
  * WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
@@ -146,6 +146,7 @@ public class ConsoleDocument implements EditDocumentInterface {
     try {
       forceRemoveText(0, _document.getLength());
       forceInsertText(0, banner, DEFAULT_STYLE);
+      _promptPos = 0;
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
     finally { releaseWriteLock(); }
@@ -310,6 +311,19 @@ public class ConsoleDocument implements EditDocumentInterface {
     return _document.getDocText(offs, len);
   }
 
+  /** Returns the entire text of the document.  Identical to getText() in AbstractDocumentInterface.
+   *  @param offs First offset of the desired text
+   *  @param len Number of characters to return
+   *  @throws EditDocumentException if the offset or length are illegal
+   */
+  public String getText() {
+    acquireWriteLock();
+    try {
+      return _document.getDocText(0, getLength());
+    }
+    finally { releaseWriteLock(); }
+  }
+  
   /** Returns the string that the user has entered at the current prompt.
    *  May contain newline characters.
    */

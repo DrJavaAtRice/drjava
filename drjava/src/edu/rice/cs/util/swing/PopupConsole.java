@@ -137,7 +137,9 @@ public class PopupConsole implements Serializable {
   public void insertConsoleText(String txt) {
     synchronized (commandLock) {
       if (_insertTextCommand != null) _insertTextCommand.apply(txt); 
-      else throw new IllegalStateException("Console not ready for text insertion");
+      else {
+        throw new IllegalStateException("Console not ready for text insertion");
+      }
     }
   }
   

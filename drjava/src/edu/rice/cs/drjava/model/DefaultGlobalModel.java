@@ -102,6 +102,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Interface between the InteractionsDocument and the JavaInterpreter, which runs in a separate JVM. */
   protected DefaultInteractionsModel _interactionsModel;
   
+  /** Core listener attached to interactions model */
   protected InteractionsListener _interactionsListener = new InteractionsListener() {
     public void interactionStarted() { }
     
@@ -567,9 +568,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    */
   public void resetInteractions(File wd) {
     if (_debugger.inDebugMode()) _debugger.shutdown();
-
     _interactionsModel.resetInterpreter(wd);
-    if (DrJava.getConfig().getSetting(OptionConstants.RESET_CLEAR_CONSOLE).booleanValue()) { resetConsole(); } 
+    resetConsole();
   }
 
   /** Interprets the current given text at the prompt in the interactions pane. */
@@ -862,8 +862,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           
           // Load the proper text into the interactions document
           iDoc.clearCurrentInput();
-          
-
           iDoc.insertText(iDoc.getLength(), "java " + className, null);
           
           // Finally, execute the new interaction and record that event

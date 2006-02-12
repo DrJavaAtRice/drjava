@@ -38,15 +38,15 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
-/** Tests the SwingDocument.
+/** Tests ConsoleDocument.
  *  @version $Id$
  */
-public class SwingDocumentTest extends DrJavaTestCase {
-  protected SwingDocument _doc;
+public class ConsoleDocumentTest extends DrJavaTestCase {
+  protected ConsoleDocument _doc;
   
   public void setUp() throws Exception {
     super.setUp();
-    _doc = new SwingDocument();
+    _doc = new ConsoleDocument(new SwingDocument());
   }
   
   public void tearDown() throws Exception {
@@ -91,8 +91,8 @@ public class SwingDocumentTest extends DrJavaTestCase {
     _doc.setEditCondition(c);
     _doc.insertText(4, "1", null);
     assertEquals("insertText should be rejected", "initial", _doc.getText());
-    _doc.insertString(2, "1", null);
-    assertEquals("insertString should be rejected", "initial", _doc.getText());
+    _doc.insertText(2, "1", null);
+    assertEquals("insertText should be rejected", "initial", _doc.getText());
     _doc.insertText(6, "2", null);
     assertEquals("insertText should be accepted", "initia2l", _doc.getText());
     _doc.forceInsertText(2, "3", null);
@@ -100,7 +100,7 @@ public class SwingDocumentTest extends DrJavaTestCase {
     
     _doc.removeText(3, 1);
     assertEquals("removeText should be rejected", "in3itia2l", _doc.getText());
-    _doc.remove(6, 1);
+    _doc.removeText(6, 1);
     assertEquals("remove should be rejected", "in3itia2l", _doc.getText());
     _doc.removeText(1, 2);
     assertEquals("removeText should be accepted", "iitia2l", _doc.getText());
@@ -108,5 +108,12 @@ public class SwingDocumentTest extends DrJavaTestCase {
     assertEquals("forceRemove should be accepted", "iitia2", _doc.getText());
     _doc.append("THE END", (String) null);
     assertEquals("forceRemove should be accepted", "iitia2THE END", _doc.getText());
+    _doc.reset("");
+    assertEquals("promptPos reset when doc is reset", 0, _doc.getPromptPos());
+    _doc.setEditCondition(new DocumentEditCondition());
+    _doc.append("THE END", null);
+    assertEquals("append to reset document should be accepted", "THE END", _doc.getText());
+    _doc.setPromptPos(_doc.getLength());
+    assertEquals("promptPos is character position at end of document", _doc.getLength(), _doc.getPromptPos());
   }
 }
