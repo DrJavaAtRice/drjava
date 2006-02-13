@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.plugins.eclipse.repl;
 
+
 import java.io.*;
 
 import java.util.LinkedList;
@@ -48,6 +49,7 @@ import org.eclipse.core.resources.*;
 import org.eclipse.jdt.core.*;
 
 import edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin;
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.RMIInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
@@ -588,7 +590,7 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
   
   /** Gets the console tab document for this interactions model */
   public ConsoleDocument getConsoleDocument() {
-	  return null;
+	  return new ConsoleDocument(new InteractionsDJDocument());
   }
 
   
