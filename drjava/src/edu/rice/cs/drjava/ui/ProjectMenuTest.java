@@ -69,6 +69,8 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   /**
    * temporary files
    */
+  private File _projDir;
+  private File _auxFile;
   private File _projFile;
   private File _file1;
   private File _file2;
@@ -87,10 +89,15 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   public void setUp() throws Exception {
     super.setUp();
 
-    _projFile = File.createTempFile("test", ".pjt");
-    _file1 = File.createTempFile("test1",".java");
-    _file2 = File.createTempFile("test2",".java");
-
+    // create project in a directory with an auxiliary file outside of it
+    _auxFile = File.createTempFile("aux", ".java");
+    File auxFileParent = _auxFile.getParentFile();
+    _projDir = new File(auxFileParent, "project-dir");
+    _projDir.mkdir();
+    _projFile = File.createTempFile("test", ".pjt", _projDir);
+    _file1 = File.createTempFile("test1",".java", _projDir);
+    _file2 = File.createTempFile("test2",".java", _projDir);
+    
     // generate the relative path names for the files in the project file
     String temp = _file1.getParentFile().getCanonicalPath();
     _file1RelName = _file1.getCanonicalPath().substring(temp.length()+1);
@@ -100,9 +107,8 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     _projFileText =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
       "(source ;; comment\n" +
-      "   (file (name \""+ _file1RelName +"\")(select 32 32))\n" +
-      "   (file (name \""+ _file2RelName +"\")(select 0 0)(active)))\n";
-
+      "   (file (name \""+ _file1RelName +"\")(select 32 32)(active)))\n";
+    
     reader = new BufferedReader(new FileReader(_projFile));
     BufferedWriter w = new BufferedWriter(new FileWriter(_projFile));
     w.write(_projFileText);
@@ -116,6 +122,10 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
 
   public void tearDown() throws Exception {
     _projFile.delete();
+    _auxFile.delete();
+    _file1.delete();
+    _file2.delete();
+    _projDir.delete();
     _frame.dispose();
     _projFile = null;
     _model = null;
@@ -147,30 +157,37 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   }
   
   public void testSaveProject() throws IOException, MalformedProjectFileException{
-    FileOpenSelector _projFOS = new FileOpenSelector() {
-      public File[] getFiles() throws OperationCanceledException {
-        return new File[] {_projFile};
-      }
-    };
+    
     _frame.openProject(new FileOpenSelector() {
       public File[] getFiles() throws OperationCanceledException {
         return new File[] {_projFile};
       }
     });
-    _frame.saveProject();
-    _frame._closeProject();
-    
+        
     // check to make sure it transitions from flat file mode to project mode well
     _frame.open(new FileOpenSelector() {
       public File[] getFiles() throws OperationCanceledException {
-        return new File[] {_file1};
+        return new File[] {_file2};
       }
     });
-    _frame._saveProjectHelper(_projFile);
+    _frame.open(new FileOpenSelector() {
+      public File[] getFiles() throws OperationCanceledException {
+        return new File[] {_auxFile};
+      }
+    });
+    
+    _frame._moveToAuxiliary();
+    
+    _frame.saveProject();
+    _frame._closeProject();
+    
     ProjectFileIR pfir = ProjectFileParser.ONLY.parse(_projFile);
-    DocFile[] dfs = pfir.getSourceFiles();
-    assertEquals("Number of saved src files", 1, dfs.length);
-    assertEquals("Wrong file name,", _file1, dfs[0]);
+    DocFile[] src = pfir.getSourceFiles();
+    DocFile[] aux = pfir.getAuxiliaryFiles();
+    assertEquals("Number of saved src files", 2, src.length);
+    assertEquals("Number of saved aux files", 1, aux.length);
+    assertEquals("Wrong file name,", _file1, src[0]);
+    assertEquals("Wrong aux file", _auxFile, aux[0]);
   }
   
 }

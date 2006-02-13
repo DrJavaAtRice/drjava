@@ -230,7 +230,7 @@ public class PopupConsole implements Serializable {
   
   private JDialog createDialog(JTextArea inputBox, Frame parentFrame) {
     
-    final JDialog dialog = new JDialog(parentFrame, _title, true);
+    final JDialog dialog = new JDialog(parentFrame, _title, false);
     
     inputBox.setText("");
 

@@ -2182,7 +2182,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public void setStatusMessageColor(Color c) { _sbMessage.setForeground(c); }
   
-  private void _moveToAuxiliary() {
+  // Made package protected rather than private in order to facilitate the ProjectMenuTest.testSaveProject
+  void _moveToAuxiliary() {
     OpenDefinitionsDocument d = _model.getDocumentNavigator().getCurrent();
     if (d != null) {
       if (! d.isUntitled()) {

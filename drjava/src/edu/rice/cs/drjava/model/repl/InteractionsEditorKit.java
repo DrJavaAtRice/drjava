@@ -66,8 +66,14 @@ public class InteractionsEditorKit extends StyledEditorKit {
 
   private static ViewFactory _factory = new ViewFactory() {
     public View create(Element elem) {
+      // Allows UI components to be embedded in the document
+      if (StyleConstants.ComponentElementName.equals(elem.getName())) {
+        return new ComponentView(elem);
+      }
+      
       // The following line is for performance analysis only!
       // return new PlainView(elem, true);
+      
       return new ColoringView(elem);
     }
   };
@@ -80,7 +86,5 @@ public class InteractionsEditorKit extends StyledEditorKit {
   /** We want to use our ColoringView to render text, so here we return a factory that creates ColoringViews. */
   public final ViewFactory getViewFactory() { return _factory; }
 }
-
-
 
 
