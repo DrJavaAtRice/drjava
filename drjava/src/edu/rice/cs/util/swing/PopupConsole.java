@@ -99,7 +99,6 @@ public class PopupConsole implements Serializable {
    *  waiting for input cannot be aborted. */
   private volatile boolean inputAborted = false;
   
-
   /** Creates a PopupConsole that belongs to the given component (typically the interactions pane). The given
    *  text component will be placed in the console dialog box to receive text.
    *  @param owner The component that owns the dialogs created by the PopupConsole
@@ -116,13 +115,19 @@ public class PopupConsole implements Serializable {
     setTitle(title);
   }
   
+  private String _consoleLine;
   /** Receives input from the user dialog box or programatically through the <code>insertConsoleText</code> method.
    *  @return The text inputted by the user
    */
   public String getConsoleInput() { 
-    Frame parentFrame = JOptionPane.getFrameForComponent(_parentComponent);
-    if (parentFrame.isVisible()) return showDialog(parentFrame) + "\n";
-    else return silentInput() + "\n";
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        Frame parentFrame = JOptionPane.getFrameForComponent(_parentComponent);
+        if (parentFrame.isVisible()) _consoleLine = showDialog(parentFrame);
+        else _consoleLine = silentInput();
+      }
+    });
+    return _consoleLine + "\n";
   }
   
   /** Forces the console to stop receiving input from the user and return what has been inputted so far. */
@@ -143,9 +148,8 @@ public class PopupConsole implements Serializable {
     }
   }
   
-  /** Causes the current thread to wait until the console is ready for input 
-   *  via the insertConsoleText method. This should be used right before a call to 
-   *  <code>insertConsoleText</code> or <code>interruptConsole</code> to avoid
+  /** Causes the current thread to wait until the console is ready for input via the insertConsoleText method. This 
+   *  should be used right before a call to <code>insertConsoleText</code> or <code>interruptConsole</code> to avoid
    *  calling these methods before the console starts receiving any input.
    */
   public void waitForConsoleReady() throws InterruptedException {
@@ -157,7 +161,7 @@ public class PopupConsole implements Serializable {
   }
   
   public void setInputBox(JTextArea inputBox) {
-    if (inputBox == null) _inputBox = new PopupConsole.InputBox();
+    if (inputBox == null) _inputBox = new InputBox();
     else _inputBox = inputBox;
     
     InputMap im = _inputBox.getInputMap();
@@ -179,8 +183,7 @@ public class PopupConsole implements Serializable {
   
   public String getTitle() { return _title; }
   
-  /** Pops up the dialog box and creates the interrupt and insert commands,
-   *  returning when the user is done inputting text.
+  /** Pops up the dialog box and creates the interrupt and insert commands, returning when the user is done inputting text.
    *  @param parentFrame the frame to set as the dialog's parent
    *  @return The text inputted by the user through the dialog box.
    */
@@ -235,7 +238,8 @@ public class PopupConsole implements Serializable {
     cp.add(new JScrollPane(inputBox), BorderLayout.CENTER);
     
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-    JLabel label = new JLabel("Enter a full line of input. Hit SHIFT+<Enter> for an embedded newline character ");
+    JLabel label = new JLabel("<html>Enter a full line of input.<br>" +
+                              "Hit SHIFT+&lt;Enter&gt; to insert a newline character.&nbsp</html>");
     buttonPanel.add(label);
     
     Action inputEnteredAction = new AbstractAction("Done") {
@@ -263,8 +267,8 @@ public class PopupConsole implements Serializable {
     inputBox.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
     inputBox.getActionMap().put(INPUT_ENTERED_NAME, inputEnteredAction);
     
-    buttonPanel.setSize(600, 80);
-    dialog.setSize(600, 200);
+    buttonPanel.setSize(500, 100);
+    dialog.setSize(500, 100);
     dialog.setLocationRelativeTo(parentFrame);
     return dialog;
   }
@@ -315,23 +319,25 @@ public class PopupConsole implements Serializable {
     synchronized (commandLock) { return input.toString(); }
   }
   
-  /** A box that can be inserted into the console box if no external JTextArea is spceified. */
-  private static class InputBox extends JTextArea {
-    private static final int BORDER_WIDTH = 1;
-    private static final int INNER_BUFFER_WIDTH = 3;
-    private static final int OUTER_BUFFER_WIDTH = 2;
-    
-    public InputBox() {
-      setBorder(_createBorder());
-      setLineWrap(true);
-    }
-    
-    private Border _createBorder() {
-      Border outerouter = BorderFactory.createLineBorder(getBackground(), OUTER_BUFFER_WIDTH);
-      Border outer = BorderFactory.createLineBorder(getForeground(), BORDER_WIDTH);
-      Border inner = BorderFactory.createLineBorder(getBackground(), INNER_BUFFER_WIDTH);
-      Border temp = BorderFactory.createCompoundBorder(outer, inner);
-      return BorderFactory.createCompoundBorder(outerouter, temp);
-    }
-  }
+// User InputBox class (lifted from InteractionsController) instead of following:
+  
+//  /** A box that can be inserted into the console box if no external JTextArea is spceified. */
+//  private static class InputBox extends JTextArea {
+//    private static final int BORDER_WIDTH = 1;
+//    private static final int INNER_BUFFER_WIDTH = 3;
+//    private static final int OUTER_BUFFER_WIDTH = 2;
+//    
+//    public InputBox() {
+//      setBorder(_createBorder());
+//      setLineWrap(true);
+//    }
+//    
+//    private Border _createBorder() {
+//      Border outerouter = BorderFactory.createLineBorder(getBackground(), OUTER_BUFFER_WIDTH);
+//      Border outer = BorderFactory.createLineBorder(getForeground(), BORDER_WIDTH);
+//      Border inner = BorderFactory.createLineBorder(getBackground(), INNER_BUFFER_WIDTH);
+//      Border temp = BorderFactory.createCompoundBorder(outer, inner);
+//      return BorderFactory.createCompoundBorder(outerouter, temp);
+//    }
+//  }
 }

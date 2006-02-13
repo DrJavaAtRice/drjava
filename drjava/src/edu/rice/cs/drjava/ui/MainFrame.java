@@ -2784,9 +2784,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    }
    */
   
-  /**
-   * Saves the current
-   */
+  /** Saves the current */
   private void _saveCurrentDirectory() {
     try {
       try {
@@ -2827,7 +2825,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     
-    if (! _checkProjectClose()) return;
+    if (! _closeProject()) return;  // close project if a project is open; false => open project was not saved
     
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
@@ -2844,9 +2842,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model.quit();
   }
   
-  /** Stores the current position and size info for window and panes to the
-   *  config framework.
-   */
+  /** Stores the current position and size info for window and panes to the config framework. */
   private void _storePositionInfo() {
     Configuration config = DrJava.getConfig();
     
@@ -2872,13 +2868,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     // Doc list width.
-    config.setSetting(DOC_LIST_WIDTH,
-                      new Integer(_docSplitPane.getDividerLocation()));
+    config.setSetting(DOC_LIST_WIDTH, new Integer(_docSplitPane.getDividerLocation()));
   }
   
-  private void _cleanUpForCompile() {
-    if (inDebugMode()) _model.getDebugger().shutdown();
-  }
+  private void _cleanUpForCompile() { if (inDebugMode()) _model.getDebugger().shutdown(); }
   
   private void _compile() {
     _cleanUpForCompile();

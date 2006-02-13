@@ -54,6 +54,7 @@ import java.io.Serializable;
 
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.swing.Utilities;
 
 /** @version $Id$ */
 public class ConsoleController extends AbstractConsoleController implements Serializable {
@@ -93,7 +94,9 @@ public class ConsoleController extends AbstractConsoleController implements Seri
     public String getConsoleInput() {
 //     return JOptionPane.showInputDialog(MainFrame.this, "Please enter System.in:",
 //                                        "System.in", JOptionPane.QUESTION_MESSAGE);
-      _pane.setEditable(true);
+      Utilities.invokeAndWait(new Runnable() {
+        public void run() { _pane.setEditable(true); }
+      });
       //_pane.getCaret().setVisible(true);
       _waitForInput();
       String s = _doc.getCurrentInput();

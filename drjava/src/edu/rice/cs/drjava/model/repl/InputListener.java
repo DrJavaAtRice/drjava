@@ -45,9 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-/**
- * Listens for input requests from System.in.
- * @version $Id$
+/** Listens for input requests from System.in.
+ *  @version $Id$
  */
 public interface InputListener {
   public String getConsoleInput();

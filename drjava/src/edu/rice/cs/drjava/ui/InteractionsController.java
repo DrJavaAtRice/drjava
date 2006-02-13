@@ -68,6 +68,7 @@ import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
 
+import edu.rice.cs.util.swing.InputBox;
 import edu.rice.cs.util.swing.PopupConsole;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -460,68 +461,4 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /** A box that can be inserted into the interactions pane for separate input. */
-  private static class InputBox extends JTextArea {
-    private static final int BORDER_WIDTH = 1;
-    private static final int INNER_BUFFER_WIDTH = 3;
-    private static final int OUTER_BUFFER_WIDTH = 2;
-    private Color _bgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
-    private Color _fgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
-    private Color _sysInColor = DrJava.getConfig().getSetting(OptionConstants.SYSTEM_IN_COLOR);
-    private boolean _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS);
-    
-    public InputBox() {
-      setForeground(_sysInColor);
-      setBackground(_bgColor);
-      setCaretColor(_fgColor);
-      setBorder(_createBorder());
-      setLineWrap(true);
-      
-      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
-                                           new OptionListener<Color>() {
-        public void optionChanged(OptionEvent<Color> oe) {
-          _fgColor = oe.value;
-          setBorder(_createBorder());
-          setCaretColor(oe.value);
-        }
-      });
-      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
-                                           new OptionListener<Color>() {
-        public void optionChanged(OptionEvent<Color> oe) {
-          _bgColor = oe.value;
-          setBorder(_createBorder());
-          setBackground(oe.value);
-        }
-      });
-      DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_IN_COLOR,
-                                           new OptionListener<Color>() {
-        public void optionChanged(OptionEvent<Color> oe) {
-          _sysInColor = oe.value;
-          setForeground(oe.value);
-        }
-      });
-      DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS,
-                                           new OptionListener<Boolean>() {
-        public void optionChanged(OptionEvent<Boolean> oce) {
-          _antiAliasText = oce.value.booleanValue();
-          InputBox.this.repaint();
-        }
-      });
-    }
-    private Border _createBorder() {
-      Border outerouter = BorderFactory.createLineBorder(_bgColor, OUTER_BUFFER_WIDTH);
-      Border outer = BorderFactory.createLineBorder(_fgColor, BORDER_WIDTH);
-      Border inner = BorderFactory.createLineBorder(_bgColor, INNER_BUFFER_WIDTH);
-      Border temp = BorderFactory.createCompoundBorder(outer, inner);
-      return BorderFactory.createCompoundBorder(outerouter, temp);
-    }
-    /** Enable anti-aliased text by overriding paintComponent. */
-    protected void paintComponent(Graphics g) {
-      if (_antiAliasText && g instanceof Graphics2D) {
-        Graphics2D g2d = (Graphics2D)g;
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-      }
-      super.paintComponent(g);
-    }
-  }
 }
