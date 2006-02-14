@@ -121,7 +121,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   }
 
   public void tearDown() throws Exception {
-    _projFile.delete();
+    _projFile.deleteOnExit();
     _auxFile.delete();
     _file1.delete();
     _file2.delete();
@@ -186,8 +186,8 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     DocFile[] aux = pfir.getAuxiliaryFiles();
     assertEquals("Number of saved src files", 2, src.length);
     assertEquals("Number of saved aux files", 1, aux.length);
-    assertEquals("Wrong file name,", _file1, src[0]);
-    assertEquals("Wrong aux file", _auxFile, aux[0]);
+    assertEquals("Wrong file name", _file1.getCanonicalPath(), src[0].getCanonicalPath());
+    assertEquals("Wrong aux file", _auxFile.getCanonicalPath(), aux[0].getCanonicalPath());
   }
   
 }
