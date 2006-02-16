@@ -195,5 +195,267 @@ public abstract class StringOps {
     return sw.toString();
   }
   
+  /**
+   * Character.isDigit answers <tt>true</tt> to some non-ascii
+   * digits.  This one does not.
+   */
+  public static boolean isAsciiDigit(char c) {
+    return '0' <= c && c <= '9';
+  }
   
+  /**
+   * Returns true if the class is an anonymous inner class.
+   * This works just like Class.isAnonymousClass() in Java 5.0 but is not version-specific.
+   * @param c class to check
+   * @return true if anonymous inner class
+   */
+  public static boolean isAnonymousClass(Class c) {
+    String simpleName = c.getName();
+    int idx = simpleName.lastIndexOf('$');
+    if (idx >= 0) {
+      // see if we have just numbers after the $
+      for (int pos=idx+1; pos < simpleName.length(); ++pos) {
+        if (!isAsciiDigit(simpleName.charAt(pos))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+  
+  /**
+   * Returns true if the class is a member class.
+   * This works just like Class.isMemberClass() in Java 5.0 but is not version-specific.
+   * @param c class to check
+   * @return true if member class
+   */
+  public static boolean isMemberClass(Class c) {
+    String simpleName = c.getName();
+    int idx = simpleName.lastIndexOf('$');
+    if (idx == -1) {
+      return false;
+    }
+    return !isAnonymousClass(c);
+  }
+  
+  /**
+   * Returns the simple class name.
+   * This works just like Class.getSimpleName() in Java 5.0 but is not version-specific.
+   * @param c class for which to get the simple name
+   * @return simple name
+   */
+  public static String getSimpleName(Class c) {
+    if (c.isArray())
+      return getSimpleName(c.getComponentType())+"[]";
+
+    if (isAnonymousClass(c)) {
+      return "";
+    }
+    
+    String simpleName = c.getName();
+    int idx = Math.max(simpleName.lastIndexOf('.'), 
+                       simpleName.lastIndexOf('$'));
+    return simpleName.substring(idx+1); // strip the package name
+  }
+  
+  /**
+   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   */
+  public static String toString(long[] a) {
+    if (a == null)
+      return "null";
+    if (a.length == 0)
+      return "[]";
+    
+    StringBuilder buf = new StringBuilder();
+    buf.append('[');
+    buf.append(a[0]);
+    
+    for (int i = 1; i < a.length; i++) {
+      buf.append(", ");
+      buf.append(a[i]);
+    }
+    
+    buf.append("]");
+    return buf.toString();
+  }
+  
+  /**
+   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   */
+  public static String toString(int[] a) {
+    if (a == null)
+      return "null";
+    if (a.length == 0)
+      return "[]";
+    
+    StringBuilder buf = new StringBuilder();
+    buf.append('[');
+    buf.append(a[0]);
+    
+    for (int i = 1; i < a.length; i++) {
+      buf.append(", ");
+      buf.append(a[i]);
+    }
+    
+    buf.append("]");
+    return buf.toString();
+  }
+  
+  /**
+   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   */
+  public static String toString(short[] a) {
+    if (a == null)
+      return "null";
+    if (a.length == 0)
+      return "[]";
+    
+    StringBuilder buf = new StringBuilder();
+    buf.append('[');
+    buf.append(a[0]);
+    
+    for (int i = 1; i < a.length; i++) {
+      buf.append(", ");
+      buf.append(a[i]);
+    }
+    
+    buf.append("]");
+    return buf.toString();
+  }
+  
+  /**
+   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   */
+  public static String toString(char[] a) {
+    if (a == null)
+      return "null";
+    if (a.length == 0)
+      return "[]";
+    
+    StringBuilder buf = new StringBuilder();
+    buf.append('[');
+    buf.append(a[0]);
+    
+    for (int i = 1; i < a.length; i++) {
+      buf.append(", ");
+      buf.append(a[i]);
+    }
+    
+    buf.append("]");
+    return buf.toString();
+  }
+  
+  /**
+   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   */
+  public static String toString(byte[] a) {
+    if (a == null)
+      return "null";
+    if (a.length == 0)
+      return "[]";
+    
+    StringBuilder buf = new StringBuilder();
+    buf.append('[');
+    buf.append(a[0]);
+    
+    for (int i = 1; i < a.length; i++) {
+      buf.append(", ");
+      buf.append(a[i]);
+    }
+    
+    buf.append("]");
+    return buf.toString();
+  }
+  
+  /**
+   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   */
+  public static String toString(boolean[] a) {
+    if (a == null)
+      return "null";
+    if (a.length == 0)
+      return "[]";
+    
+    StringBuilder buf = new StringBuilder();
+    buf.append('[');
+    buf.append(a[0]);
+    
+    for (int i = 1; i < a.length; i++) {
+      buf.append(", ");
+      buf.append(a[i]);
+    }
+    
+    buf.append("]");
+    return buf.toString();
+  }
+  
+  /**
+   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   */
+  public static String toString(float[] a) {
+    if (a == null)
+      return "null";
+    if (a.length == 0)
+      return "[]";
+    
+    StringBuilder buf = new StringBuilder();
+    buf.append('[');
+    buf.append(a[0]);
+    
+    for (int i = 1; i < a.length; i++) {
+      buf.append(", ");
+      buf.append(a[i]);
+    }
+    
+    buf.append("]");
+    return buf.toString();
+  }
+  
+  /**
+   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   */
+  public static String toString(double[] a) {
+    if (a == null)
+      return "null";
+    if (a.length == 0)
+      return "[]";
+    
+    StringBuilder buf = new StringBuilder();
+    buf.append('[');
+    buf.append(a[0]);
+    
+    for (int i = 1; i < a.length; i++) {
+      buf.append(", ");
+      buf.append(a[i]);
+    }
+    
+    buf.append("]");
+    return buf.toString();
+  }
+  
+  /**
+   * This works just like java.util.Arrays.toString in Java 5.0 but is not version-specific.
+   */
+  public static String toString(Object[] a) {
+    if (a == null)
+      return "null";
+    if (a.length == 0)
+      return "[]";
+    
+    StringBuilder buf = new StringBuilder();
+    
+    for (int i = 0; i < a.length; i++) {
+      if (i == 0)
+        buf.append('[');
+      else
+        buf.append(", ");
+      
+      buf.append(String.valueOf(a[i]));
+    }
+    
+    buf.append("]");
+    return buf.toString();
+  }
 }

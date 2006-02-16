@@ -47,6 +47,7 @@ package edu.rice.cs.util.newjvm;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.util.StringOps;
 
 import java.io.File;
 import java.io.IOException;
@@ -130,7 +131,7 @@ public class ExecJVMTest extends DrJavaTestCase {
     assertTrue("temp dir delete succeeded", ret);
 
     // Run new JVM to create the file
-    String className = getClass().getName() + "$" + NoOp.class.getSimpleName();
+    String className = getClass().getName() + "$" + StringOps.getSimpleName(NoOp.class);
     String tempName = tempFile.getAbsolutePath();
     Process jvm = ExecJVM.runJVMPropagateClassPath(className, new String[] { tempName }, tempDir);
 
