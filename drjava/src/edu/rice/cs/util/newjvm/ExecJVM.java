@@ -135,15 +135,14 @@ public final class ExecJVM {
     return runJVMPropagateClassPath(mainClass, classParams, new String[0], workDir);
   }
 
-  /** Creates and runs a new JVM.
-   * This method is private now because it cannot change the classpath entries to absolute paths,
-   * so it should not be used.
+  /** Creates and runs a new JVM.  This method is private now because it cannot change the classpath entries to 
+   *  absolute paths, so it should not be used.
    *
-   * @param mainClass Class to run
-   * @param classParams Parameters to pass to the main class
-   * @param jvmParams Array of additional command-line parameters to pass to JVM
+   *  @param mainClass Class to run
+   *  @param classParams Parameters to pass to the main class
+   *  @param jvmParams Array of additional command-line parameters to pass to JVM
    *
-   * @return {@link Process} object corresponding to the executed JVM
+   *  @return {@link Process} object corresponding to the executed JVM
    */
   private static Process _runJVM(String mainClass, String[] classParams, String[] jvmParams, File workDir) throws IOException {
     LinkedList<String> args = new LinkedList<String>();
@@ -158,9 +157,7 @@ public final class ExecJVM {
     Process p;
     if ((workDir != null) && (workDir != FileOption.NULL_FILE)) {
       // execute in the working directory
-      if (workDir.exists()) {
-        p = Runtime.getRuntime().exec(argArray, null, workDir);
-      }
+      if (workDir.exists()) p = Runtime.getRuntime().exec(argArray, null, workDir);
       else {
         edu.rice.cs.util.swing.Utilities.showMessageBox("Work directory does not exist:\n"+workDir+
                                                         "\nThe setting will be ignored. Press OK to continue.",

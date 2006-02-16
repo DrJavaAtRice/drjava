@@ -72,9 +72,7 @@ public class FileOpsTest extends DrJavaTestCase {
       assertTrue("temp directory has correct prefix",
                  dir.getName().startsWith(PREFIX));
     }
-    finally {
-      assertTrue("delete directory", dir.delete());
-    }
+    finally { assertTrue("delete directory", dir.delete()); }
   }
 
   public void testReadAndWriteTempFile() throws IOException {

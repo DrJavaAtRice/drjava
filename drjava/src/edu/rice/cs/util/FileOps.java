@@ -48,15 +48,22 @@ package edu.rice.cs.util;
 import java.io.*;
 import java.util.*;
 
-/**
- * A class to provide some convenient file operations as static methods.
- * It's abstract to prevent (useless) instantiation, though it can be subclassed
- * to provide convenient namespace importation of its methods.
+/** A class to provide some convenient file operations as static methods.
+ *  It's abstract to prevent (useless) instantiation, though it can be subclassed
+ *  to provide convenient namespace importation of its methods.
  *
- * @version $Id$
+ *  @version $Id$
  */
 public abstract class FileOps {
-   
+  
+  /** Special File object corresponding to a dummy file. */
+  public static final File NULL_FILE = new File("") {
+    public String getAbsolutePath() { return ""; }
+    public String getName() { return ""; }
+    public String toString() { return ""; }
+    public boolean exists() { return true; }
+  };
+  
   /** Makes a file from the abs file that is relative such that making a new file:
    *  <code>new File(base,makeRelativeTo(base,abs)).getCanonicalPath()</code> would
    *  create the same file as <code>abs.getCanonicalPath()</code><p> 

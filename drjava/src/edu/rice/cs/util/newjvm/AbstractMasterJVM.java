@@ -142,9 +142,9 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       if (_slave != null) throw new IllegalStateException("slave nonnull in invoke: " + _slave);
       _startupInProgress = true;
       
-      //*******************************************
-      // first, we we export ourselves to a file...
-      //*******************************************
+      /**********************************************
+       * First, we we export ourselves to a file... *
+       **********************************************/
       
       Thread t = new Thread(_exportMasterThreadName) {
         public void run() {
@@ -153,10 +153,10 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
               _stub = UnicastRemoteObject.exportObject(AbstractMasterJVM.this);
               
               // Debug: check that the IP address is 127.0.0.1
-              //javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
+              // javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
             }
             catch (RemoteException re) {
-              //javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
+              // javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
               throw new edu.rice.cs.util.UnexpectedException(re);
             }
             lock.notify();
@@ -165,10 +165,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       };
       synchronized (lock) {
         t.start();
-        while (_stub == null) {
-          try { lock.wait(); }
-          catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
-        }
+        try { while (_stub == null) { lock.wait(); } }
+        catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
       }
       _stubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
       _stubFile.deleteOnExit();
@@ -179,12 +177,11 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       ostream.flush();
       fstream.close();
       
-      //*******************************************
-      // done exporting ourselves to a file...
-      // now lets export our classloader
-      // this will be used to handle classloading 
-      // requests from the slave jvm
-      //*******************************************
+      /***********************************************************************************
+       * Done exporting ourselves to a file ...  Now let's export our classloader        *
+       * This will be used to handle classloading requests from the slave jvm.           *
+       ***********************************************************************************/
+      
       final RemoteClassLoader rClassLoader = new RemoteClassLoader(getClass().getClassLoader());
       t = new Thread(_exportMasterThreadName) {
         public void run() {
@@ -205,10 +202,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       };
       synchronized(lock) {
         t.start();
-        while (_classLoaderStub == null) {
-          try { lock.wait(); }
-          catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
-        }
+        try { while (_classLoaderStub == null) { lock.wait(); } }
+        catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
       }
       _classLoaderStubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
       _classLoaderStubFile.deleteOnExit();

@@ -47,26 +47,36 @@ package edu.rice.cs.util.classloader;
 
 import java.net.*;
 import java.io.File;
-
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.swing.Utilities;
 
 /** A class loader that tries to load classes from tools.jar.  It will never delegate to the system loader.
- *
  *  @version $Id$
  */
 public class ToolsJarClassLoader extends URLClassLoader {
-  public ToolsJarClassLoader() { super(getToolsJarURLs()); }
+  
+  /* Directory containing tools.jar, if known by caller */
+  
+  /** Standard constructors */
+  public ToolsJarClassLoader(File toolsJar) { super(getToolsJarURLs(toolsJar)); }
+  public ToolsJarClassLoader() { this(FileOps.NULL_FILE); }
 
   /** Returns an array of possible Files for the tools.jar file. */
-  public static File[] getToolsJarFiles() {
+  public static File[] getToolsJarFiles(File toolsJar) {
     String javaHome = System.getProperty("java.home");
     File home = new File(javaHome);
     ArrayList<File> files = new ArrayList<File>();
+    
+    // Check JAVAC_LOCATION
+    if (toolsJar.exists()) files.add(toolsJar);
 
     // Check $JAVA_HOME/lib/tools.jar
     File libDir = new File(home, "lib");
-    File jar = new File(libDir, "tools.jar");
-    if (jar.exists()) files.add(jar);
+    File jar1 = new File(libDir, "tools.jar");
+    if (jar1.exists()) files.add(jar1);
 
     // Check $JAVA_HOME/../lib/tools.jar
     File libDir2 = new File(home.getParentFile(), "lib");
@@ -83,10 +93,13 @@ public class ToolsJarClassLoader extends URLClassLoader {
     files.toArray(fileArray);
     return fileArray;
   }
-
+  
   /** Returns an array of possible URLs for the tools.jar file. */
-  public static URL[] getToolsJarURLs() {
-    File[] files = getToolsJarFiles();
+  public static URL[] getToolsJarURLs() { return getToolsJarURLs(FileOps.NULL_FILE); }
+  
+  /** Returns an array of possible URLs for the tools.jar file. */
+  public static URL[] getToolsJarURLs(File toolsJar) {
+    File[] files = getToolsJarFiles(toolsJar);
     try {
       URL[] urls = new URL[files.length];
       for (int i=0; i < files.length; i++) {
@@ -98,13 +111,13 @@ public class ToolsJarClassLoader extends URLClassLoader {
       return new URL[0];
     }
   }
+  
+   /** Returns a string containing all possible tools.jar locations, separated by the system's path separator. */
+  public static String getToolsJarClassPath() { return getToolsJarClassPath(FileOps.NULL_FILE); }
 
-  /**
-   * Returns a string containing all possible tools.jar locations,
-   * separated by the system's path separator.
-   */
-  public static String getToolsJarClassPath() {
-    File[] files = getToolsJarFiles();
+  /** Returns a string containing all possible tools.jar locations, separated by the system's path separator. */
+  public static String getToolsJarClassPath(File toolsJar) {
+    File[] files = getToolsJarFiles(toolsJar);
     StringBuffer classPath = new StringBuffer();
     String pathSep = System.getProperty("path.separator");
 
@@ -125,9 +138,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
    * @param javaHome The current JAVA_HOME System property
    */
   public static String getWindowsToolsJar(String javaHome) {
-    if (javaHome.indexOf("Program Files") == -1) {
-      return "";
-    }
+    if (javaHome.indexOf("Program Files") == -1) return "";
 
     String prefix = "C:\\j2sdk";
     String suffix = "\\lib\\tools.jar";
