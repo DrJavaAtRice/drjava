@@ -29,7 +29,7 @@
 		<key>JVMVersion</key>
 		<string>1.4+</string>
 		<key>ClassPath</key>
-		<string>$JAVAROOT/DrJava.jar</string>
+		<string>$JAVAROOT/DrJavaRoot.jar</string>
 		<key>Properties</key>
 		<dict>
 			<key>apple.laf.useScreenMenuBar</key>
