@@ -40,6 +40,12 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.text.SwingDocument;
 
 public interface JUnitModel {
+  
+  //-------------------------- Field Setters --------------------------------//
+  
+  
+  /** set the forceTestSuffix flag that forces class names in projects to end in "Test */
+  public void setForceTestSuffix(boolean b);
 
   //-------------------------- Listener Management --------------------------//
 

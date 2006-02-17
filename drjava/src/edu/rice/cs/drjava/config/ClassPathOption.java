@@ -47,14 +47,13 @@ package edu.rice.cs.drjava.config;
 import java.io.File;
 import java.util.Vector;
 
-/**
- * Generate vector options separately to appease javadoc.
- * (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
+/** Generate vector options separately to appease javadoc.
+ *  (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
  */
 class ClassPathOption {
+  
   private String warning =
-    "WARNING: Configurability interface only supports path separators"+
-    " of maximum length 1 character as of this moment.";
+    "WARNING: Configurability interface only supports path separators of at most one character";
 
   public VectorOption<File> evaluate(String optionName) {
     // system path separator

@@ -29,7 +29,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
  * WITH THE SOFTWARE.
  * 
- END_COPYRIGHT_BLOCK*/
+ * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
@@ -1829,6 +1829,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });
     
+    config.addOptionListener(FORCE_TEST_SUFFIX, new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        _model.getJUnitModel().setForceTestSuffix(oce.value.booleanValue());
+      }
+    });
+    
     // Initialize breakpoint highlights hashtable, for easy removal of highlights
     _breakpointHighlights = new java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
     
@@ -2176,9 +2182,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public void setStatusMessageFont(Font f) { _sbMessage.setFont(f); }
   
-  /**
-   * Sets the color of the text in the status bar message
-   * @param c The color of the text
+  /** Sets the color of the text in the status bar message
+   *  @param c The color of the text
    */
   public void setStatusMessageColor(Color c) { _sbMessage.setForeground(c); }
   
@@ -5690,8 +5695,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void interpreterExited(final int status) {
-      // Only show prompt if option is set
-      if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue()) {
+      // Only show prompt if option is set and not in TEST_MODE
+      if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue() && 
+          ! Utilities.TextAreaMessageDialog.TEST_MODE) {
         // Show the dialog in a Swing thread, so Interactions can
         // start resetting right away.
         Runnable command = new Runnable() {

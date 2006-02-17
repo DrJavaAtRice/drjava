@@ -183,10 +183,9 @@ public class JUnitTestManager {
     return true;
   }
 
-  /**
-   * Determines if the given class is a junit Test.
-   * @param c the class to check
-   * @return true iff the given class is an instance of junit.framework.Test
+  /** Determines if the given class is a junit Test.
+   *  @param c the class to check
+   *  @return true iff the given class is an instance of junit.framework.Test
    */
   private boolean _isJUnitTest(Class c) {
 //    new ScrollableDialog(null, "_isJUnitTestCase called on " + c, "", "").show();
@@ -195,23 +194,19 @@ public class JUnitTestManager {
       !Modifier.isInterface(c.getModifiers());
   }
 
-  /**
-   * Checks whether the given file name corresponds to
-   * a valid JUnit Test.
-   */
+  /** Checks whether the given file name corresponds to a valid JUnit Test. */
   private boolean _isTestCase(String className) {
     try { return _isJUnitTest(_testRunner.getLoader().load(className)); }
     catch (ClassNotFoundException cnfe) { return false; }
   }
 
   
-  /**
-   * Constructs a new JUnitError from a TestFailure
-   * @param failure A given TestFailure
-   * @param classNames The classes that were used for this test suite
-   * @param isError The passed TestFailure may signify either an error or a failure
-   * @param files The files that were used for this test suite
-   * @return JUnitError
+  /** Constructs a new JUnitError from a TestFailure
+   *  @param failure A given TestFailure
+   *  @param classNames The classes that were used for this test suite
+   *  @param isError The passed TestFailure may signify either an error or a failure
+   *  @param files The files that were used for this test suite
+   *  @return JUnitError
    */
   private JUnitError _makeJUnitError(TestFailure failure, List<String> classNames,
                                      boolean isError, List<File> files) {

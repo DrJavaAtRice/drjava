@@ -178,11 +178,7 @@ public final class SlaveJVMRunner {
     String msg = "An error occurred while starting the slave JVM:\n  " +
       cause + "\n\nOriginal error:\n" + StringOps.getStackTrace(t);
 
-    if (SHOW_DEBUG_DIALOGS) {
-      new ScrollableDialog(null, "Error", "Error details:", msg).show();
-    }
-    else {
-      System.out.println(msg);
-    }
+    if (SHOW_DEBUG_DIALOGS) new ScrollableDialog(null, "Error", "Error details:", msg).show();
+    else System.out.println(msg);
   }
 }

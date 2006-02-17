@@ -84,6 +84,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** State flag to prevent starting new tests on top of old ones */
   private boolean _testInProgress = false;
   
+  /** State flag to record if test classes in projects must end in "Test" */
+  private boolean _forceTestSuffix = false;
+  
   /** lock to protect _testInProgress */
   final private Object _testLock = new Object();
   
@@ -101,6 +104,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     _model = model;
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _model, false);
   }
+  
+  //-------------------------- Field Setters --------------------------------//
+  
+  public void setForceTestSuffix(boolean b) { _forceTestSuffix = b; }
   
   //-------------------------- Listener Management --------------------------//
   
@@ -194,8 +201,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       return;
     }
     catch (NoClassDefFoundError e) {
-      // Method getTest in junit.framework.BaseTestRunner can throw a
-      // NoClassDefFoundError (via reflection).
+      // Method getTest in junit.framework.BaseTestRunner can throw a NoClassDefFoundError (via reflection).
         _notifier.junitEnded();  // balances junitStarted()
         synchronized(_testLock) { _testInProgress = false; }
         throw e;
@@ -329,14 +335,16 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             String name = entry.getName();
             if (! name.endsWith(".class")) continue;
             
-            /* In projects, ignore class names that do not end in "Test") */
-            String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
-            int indexOfLastDot = noExtName.lastIndexOf('.');
-            String simpleClassName = noExtName.substring(indexOfLastDot + 1);
+            /* In projects, ignore class names that do not end in "Test" if FORCE_TEST_SUFFIX option is set */
+            if (_forceTestSuffix) {
+              String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
+              int indexOfLastDot = noExtName.lastIndexOf('.');
+              String simpleClassName = noExtName.substring(indexOfLastDot + 1);
 //            System.err.println("Simple class name is " + simpleClassName);
-            if (isProject && ! simpleClassName.endsWith("Test")) continue;
+              if (isProject && ! simpleClassName.endsWith("Test")) continue;
+            }
             
-//            System.err.println("Found test class: " + simpleClassName);
+//            System.err.println("Found test class: " + noExtName);
             
             /* ignore entries that do not correspond to files?  Can this happen? */
             if (! entry.isFile()) continue;

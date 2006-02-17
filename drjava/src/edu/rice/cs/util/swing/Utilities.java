@@ -72,17 +72,20 @@ public class Utilities {
     Utilities.invokeAndWait(new Runnable() { public void run() { } });
   }
   
-  /**
-   * Show a modal debug message box with an OK button.
-   * @param msg string to display
+  /** Show a modal debug message box with an OK button regardless of TEST_MODE.
+   *  @param msg string to display
    */
-  public static void showDebug(String msg) {
-    showMessageBox(msg, "Debug Message");
+  public static void show(final String msg) { 
+     Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
   }
   
-  /**
-   * Show a modal message box with an OK button.
-   * @param msg string to display
+  /** Show a modal debug message box with an OK button when not in TEST_MODE.
+   *  @param msg string to display
+   */
+  public static void showDebug(String msg) { showMessageBox(msg, "Debug Message"); }
+  
+  /** Show a modal message box with an OK button.
+   *  @param msg string to display
    */
   public static void showMessageBox(final String msg, final String title) {
     //Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
@@ -98,27 +101,19 @@ public class Utilities {
   }
   
   
-  /**
-   * Message dialog with a word-wrapping text area that allows copy & paste.
-   */
+  /** Message dialog with a word-wrapping text area that allows copy & paste. */
   public static class TextAreaMessageDialog extends JDialog {
-    /**
-     * True if the program is run in non-interactive test mode.
-     */
+    
+    /** True if the program is run in non-interactive test mode. */
     public static boolean TEST_MODE = false;
 
-    /**
-     * Show the initialized dialog.
-     * @param comp parent component, or null
-     * @param title dialog title
-     * @param message message for the text area
+    /** Show the initialized dialog.
+     *  @param comp parent component, or null
+     *  @param title dialog title
+     *  @param message message for the text area
      */
-    public static void showDialog(Component comp,
-                                  String title,
-                                  String message) {
-      if (TEST_MODE) {
-        System.out.println(title+": "+message);
-      }
+    public static void showDialog(Component comp, String title, String message) {
+      if (TEST_MODE) System.out.println(title + ": " + message);
       else {
         Frame frame = JOptionPane.getFrameForComponent(comp);
         TextAreaMessageDialog dialog = new TextAreaMessageDialog(frame, comp, title, message);

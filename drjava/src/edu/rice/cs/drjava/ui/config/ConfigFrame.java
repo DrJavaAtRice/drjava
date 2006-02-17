@@ -315,9 +315,7 @@ public class ConfigFrame extends JFrame {
     _tree.setCellRenderer(dtcr);
   }
 
-  /**
-   * Creates an individual panel, adds it to the JTree and the list of panels, and
-   *  returns the tree node.
+  /**Creates an individual panel, adds it to the JTree and the list of panels, and returns the tree node.
    * @param t the title of this panel
    * @param parent the parent tree node
    * @return this tree node
@@ -601,9 +599,7 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
 
-  /**
-   * Add all of the components for the Javadoc panel of the preferences window.
-   */
+  /** Add all of the components for the Javadoc panel of the preferences window. */
   private void _setupJavadocPanel(ConfigPanel panel) {
     panel.addComponent
       (new ForcedChoiceOptionComponent(OptionConstants.JAVADOC_ACCESS_LEVEL,
@@ -758,6 +754,10 @@ public class ConfigFrame extends JFrame {
                                                   "Whether to allow users to access private (and protected) fields and methods."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING, "Show sample of source code when fast switching", this,
                                                   "Whether to show a sample of the source code under the document's filename when fast switching documents."));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.FORCE_TEST_SUFFIX, 
+                                                  "Require test classes in projects to end in \"Test\"", this,
+                                                  "Whether to force test classes in projects to end in \"Test\"."));
+
     panel.addComponent(new StringOptionComponent(OptionConstants.JVM_ARGS, "JVM Args for Interactions", this,
                                                  "The command-line arguments to pass to the Interactions JVM."));
 

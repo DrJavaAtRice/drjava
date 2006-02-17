@@ -113,10 +113,6 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
     
     /** the destructor for a mapping in the magic-typed hashtable. */
     T remove(DefaultOptionMap om) { return map.remove(om); }
-    
-
-
-
 }
 
 

@@ -1697,7 +1697,8 @@ public class DirectoryChooser extends JPanel {
       String lafName = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
       LookAndFeel laf = (LookAndFeel)Class.forName(lafName).newInstance();
       UIManager.setLookAndFeel(laf);
-    }catch (Exception e) { System.out.println("unable to set windows laf"); }
+    }
+    catch (Exception e) { System.out.println("unable to set windows laf"); }
     
     File dir = null;
     if (args.length > 0) {

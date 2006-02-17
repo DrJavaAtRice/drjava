@@ -53,22 +53,18 @@ import edu.rice.cs.drjava.project.DocFile;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParser;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.io.*;
 
-/**
- * Test functions of Project Facility working through the main frame and model.
- *
- */
+/** Test functions of Project Facility working through the main frame and model. */
 public final class ProjectMenuTest extends MultiThreadedTestCase {
 
   private MainFrame _frame;
   
   private SingleDisplayModel _model;
   
-  /**
-   * temporary files
-   */
+  /** Temporary files */
   private File _projDir;
   private File _auxFile;
   private File _projFile;
@@ -78,14 +74,12 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   private String _file1RelName;
   private String _file2RelName;
   
-   /* the reader which reads the test project file */
+  /* The reader which reads the test project file */
   BufferedReader reader = null;
   
   private String _projFileText = null;
   
-  /**
-   * Setup method for each JUnit test case.
-   */
+  /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
 
@@ -134,34 +128,39 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   }
   
   public void testSetBuildDirectory() throws MalformedProjectFileException, IOException {
+    
+//    Utilities.showDebug("executing testSetBuildDirectory");
+    
     //test set build directory when not in project mode
     File f = new File("");
     _model.setBuildDirectory(f);
-    assertEquals("Build directory should not have been set",null,_model.getBuildDirectory());
+    assertEquals("Build directory should not have been set", null, _model.getBuildDirectory());
     
     _model.openProject(_projFile);
     
-    assertEquals("Build directory should not have been set",null,_model.getBuildDirectory());
+    assertEquals("Build directory should not have been set", null, _model.getBuildDirectory());
     
     _model.setBuildDirectory(f);
-    assertEquals("Build directory should have been set",f,_model.getBuildDirectory());
+    assertEquals("Build directory should have been set", f, _model.getBuildDirectory());
     
   }
   
   public void testCloseAllClosesProject()  throws MalformedProjectFileException, IOException {
+    
+//    Utilities.showDebug("executing testCloseAllClosesProject");
     _model.openProject(_projFile);
     
-    assertTrue("Project should have been opened",_model.isProjectActive());
+    assertTrue("Project should have been opened", _model.isProjectActive());
     _frame.closeAll();
-    assertFalse("Project should have been closed",_model.isProjectActive());
+    assertFalse("Project should have been closed", _model.isProjectActive());
   }
   
-  public void testSaveProject() throws IOException, MalformedProjectFileException{
+  public void testSaveProject() throws IOException, MalformedProjectFileException {
+    
+//     Utilities.showDebug("executing testSaveProject");
     
     _frame.openProject(new FileOpenSelector() {
-      public File[] getFiles() throws OperationCanceledException {
-        return new File[] {_projFile};
-      }
+      public File[] getFiles() throws OperationCanceledException { return new File[] {_projFile}; }
     });
         
     // check to make sure it transitions from flat file mode to project mode well
