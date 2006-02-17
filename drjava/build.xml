@@ -122,6 +122,9 @@
   <taskdef name="retroweaver" classpath="lib/buildlib/retroweaver-ex.jar" 
            classname="com.rc.retroweaver.ant.RetroWeaverTask" />
         
+  <!-- Clover tasks, used to generate test coverage reports -->
+  <taskdef resource="clovertasks" classpath="lib/buildlib/clover.jar" />
+
                  
   <!-- ***********
        Help Target
@@ -135,7 +138,7 @@
     <echo message="" />
     <echo message="For this build file to function properly, the following environment " />
     <echo message="variables should be defined:" />
-    <echo message="JAVA14_HOME: Home folder of the JRE version 1.4" />
+    <echo message="JAVA14_HOME: Home folder of the JDK (or J2SDK) version 1.4" />
     <echo message="PATH: 'cvs' needs to refer to the CVS executable" />
     <echo message="" />
     <echo message="Additionally, Ant must be run under Java 5.0 or later.  If that is " />
@@ -251,12 +254,77 @@
     <input message="Please enter your CVS user name: " addproperty="cvs-user-name" />
   </target>
   
+  <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
+       otherwise, the out-of-date target file is deleted (if it exists).  Note that, since
+       properties can only be set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-file-from-file">
+    <dependset>
+      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
+      <targetfilelist dir="${basedir}" files="${generate-file}" />
+    </dependset>
+    <condition property="already-generated">
+      <available file="${generate-file}" />
+    </condition>
+  </target>
+
+  <!-- Sets "already-generated" if "generate-file" is more recent than everything in
+       "generate-sourcedir"; otherwise, the out-of-date target file is deleted (if it exists).
+        Note that, since properties can only be set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-file-from-dir">
+    <dependset>
+      <srcfileset dir="${generate-sourcedir}" />
+      <targetfilelist dir="${basedir}" files="${generate-file}" />
+    </dependset>
+    <condition property="already-generated">
+      <available file="${generate-file}" />
+    </condition>
+  </target>
+
+  <!-- Sets "already-generated" if everything in "generate-dir" is more recent than "generate-sourcefile";
+       otherwise, the target files will be deleted (if they exist), leaving behind an empty
+       directory.  Note that, since properties can only be set once, this should happen underneath an
+       "antcall". -->
+  <target name="check-generate-dir-from-file">
+    <dependset>
+      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
+      <targetfileset dir="${generate-dir}" />
+    </dependset>
+    <!-- We use pathconvert as a hack to find out if dependset did anything -->
+    <pathconvert property="already-generated" pathsep="," setonempty="false">
+      <path>
+        <fileset dir="${basedir}" includes="${generate-dir}/**">
+          <type type="file" />
+        </fileset>
+      </path>
+    </pathconvert>
+  </target>
+  
+  <!-- Sets "already-generated" if everything in "generate-dir" is more recent than everything in
+       "generate-sourcedir"; otherwise, the target files will be deleted (if they exist), leaving 
+       behind an empty directory.  Note that, since properties can only be set once, this should 
+       happen underneath an "antcall". -->
+  <target name="check-generate-dir-from-dir">
+    <dependset>
+      <srcfileset dir="${generate-sourcedir}" />
+      <targetfileset dir="${generate-dir}" />
+    </dependset>
+    <!-- We use pathconvert as a hack to find out if dependset did anything -->
+    <pathconvert property="already-generated" pathsep="," setonempty="false">
+      <path>
+        <fileset dir="${basedir}" includes="${generate-dir}/**">
+          <type type="file" />
+        </fileset>
+      </path>
+    </pathconvert>
+  </target>
+
+
   <!-- ************
        Build Target
        ************ -->
   
-  <target name="build" depends="generate-source, compile, test, jar-14" 
-          description="Shortcut for 'generate-source compile test jar-14'">
+  <target name="build" depends="test, jar-14" 
+          description="Shortcut for 'test' and 'jar-14'">
   </target>
   
 
@@ -275,38 +343,13 @@
     <copy file="${version-source}" tofile="${version-target}" filtering="yes" />
   </target>
 
-  <target name="check-generate-file">
-    <dependset>
-      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
-      <targetfilelist dir="${basedir}" files="${generate-file}" />
-    </dependset>
-    <condition property="already-generated">
-      <available file="${generate-file}" />
-    </condition>
-  </target>
 
-  <target name="check-generate-dir">
-    <dependset>
-      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
-      <targetfileset dir="${generate-dir}" />
-    </dependset>
-    <!-- We use pathconvert as a hack to find out if dependset did anything -->
-    <pathconvert property="already-generated" pathsep="," setonempty="false">
-      <path>
-        <fileset dir="${basedir}" includes="${generate-dir}/**">
-          <type type="file" />
-        </fileset>
-      </path>
-    </pathconvert>
-  </target>
-  
-    
   <!-- *******************
        Compilation Targets
        ******************* -->
   
-  <target name="compile" depends="generate-source, check-rmi-compile, do-compile, rmi-compile, copy-resources, unjar-libs, retroweave"
-          description="Compile all source files and make them 1.4 compatible (after generating the source)">
+  <target name="compile" depends="generate-source, check-rmi-compile, do-compile, rmi-compile, copy-resources, unjar-libs"
+          description="Compile all source files (after generating the source)">
   </target>
   
   <target name="do-compile" depends="assert-15, resolve-java15-tools">
@@ -326,7 +369,6 @@
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base" />
-        <pathelement location="classes/test" />
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
@@ -353,7 +395,8 @@
         <not>
           <or>
             <!-- If a source is "up to date" with respect to its class file
-                (reversing the usual order), the class file is out of date -->
+                (reversing the usual order), the class file is out of date.  This
+                allows for a one-to-many relationship between a source and its classes.  -->
             <uptodate>
               <srcfiles dir="classes/base">
                 <patternset refid="rmi-base-classes" />
@@ -403,13 +446,14 @@
     </copy>
   </target>
   
-  <target name="check-unjar-libs">
-    <uptodate property="unjarred-libs-uptodate" targetfile="classes/lib">
-      <srcfiles refid="libs" />
-    </uptodate>
+  <target name="unjar-libs">
+    <antcall target="do-unjar-libs">
+      <param name="generate-sourcedir" value="lib" />
+      <param name="generate-dir" value="classes/lib" />
+    </antcall>
   </target>
   
-  <target name="unjar-libs" depends="check-unjar-libs" unless="unjarred-libs-uptodate">
+  <target name="do-unjar-libs" depends="check-generate-dir-from-dir" unless="already-generated">
     <echo message="Unjarring jar files in the lib directory" />
     <!-- Delete "classes/lib" in case it exists (but is out of date) -->
     <delete dir="classes/lib" />
@@ -420,10 +464,11 @@
     </unjar>
   </target>
   
-  <target name="retroweave" depends="do-compile, unjar-libs, resolve-java14-runtime, resolve-java14-tools">
+  <target name="compile-14" depends="compile, resolve-java14-runtime, resolve-java14-tools"
+          description="Create 1.4 versions of the classes (after compiling)">
     <!-- Note: This target, in addition to checking 1.4 compatibility, serves to ensure that there are no dependencies
          on test classes or JUnit classes in the base.  If 1.4 compatibility is no longer needed, a similar dependency
-         check should still be done. -->
+         check should probably still be done. -->
     <echo message="Generating 1.4 versions of the classes directories (this may take awhile after a large compile)" />
     
     <!-- Convert lib classes -->
@@ -472,9 +517,9 @@
   </target>
 
 
-  <!-- **************
-       Testing Target
-       ************** -->
+  <!-- ***************
+       Testing Targets
+       *************** -->
   
   <target name="test" depends="test-14-in-15" description="Shortcut for 'test-14-in-15'">
   </target>
@@ -499,7 +544,7 @@
     </junit>
   </target>
 
-  <target name="test-14" depends="compile, resolve-java14-exec, resolve-java14-tools"
+  <target name="test-14" depends="compile-14, resolve-java14-exec, resolve-java14-tools"
           description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
     <!-- TODO: Experiment with performance under different forkmodes -->
@@ -519,7 +564,7 @@
     </junit>
   </target>
 
-  <target name="test-14-in-15" depends="compile, assert-15, resolve-java15-tools"
+  <target name="test-14-in-15" depends="compile-14, assert-15, resolve-java15-tools"
           description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
     <!-- TODO: Experiment with performance under different forkmodes -->
@@ -555,7 +600,7 @@
     </java>
   </target>
         
-  <target name="run-14" depends="compile, resolve-java14-exec, resolve-java14-tools"
+  <target name="run-14" depends="compile-14, resolve-java14-exec, resolve-java14-tools"
           description="Run the DrJava 1.4 classes under Java 1.4 (after compiling)">
     <echo message="Running the DrJava application (1.4 classses in Java 1.4)" />
     <java classname="${jar-main-class}" jvm="${java14-exec}" fork="yes" spawn="yes">
@@ -567,7 +612,7 @@
     </java>
   </target>
         
-  <target name="run-14-in-15" depends="compile, assert-15, resolve-java15-tools"
+  <target name="run-14-in-15" depends="compile-14, assert-15, resolve-java15-tools"
           description="Run the DrJava 1.4 classes under Java 5.0 (after compiling)">
     <echo message="Running the DrJava application (1.4 classses in Java 5.0)" />
     <java classname="${jar-main-class}" fork="yes" spawn="yes">
@@ -609,7 +654,7 @@
     </jar>
   </target>
 
-  <target name="jar-14" depends="compile, resolve-version-tag" 
+  <target name="jar-14" depends="compile-14, resolve-version-tag" 
           description="Create the 1.4 jar file with all classes and libs (compiling first)">
     <jar jarfile="${jar-14-filename}">
       <manifest>
@@ -622,7 +667,7 @@
     </jar>
   </target>
 
-  <target name="jar-base-14" depends="compile, resolve-version-tag" 
+  <target name="jar-base-14" depends="compile-14, resolve-version-tag" 
           description="Create the 1.4 jar file without any support libs (compiling first)">
     <jar jarfile="${jar-base-14-filename}">
       <manifest>
@@ -634,15 +679,20 @@
     </jar>
   </target>
 
-  <!-- ***************
-       Javadoc Targets
-       *************** -->
+  <!-- *********************
+       Documentation Targets
+       ********************* -->
   
-  <target name="javadoc" depends="generate-source, assert-15, check-javadoc, resolve-version-tag, resolve-java15-tools" unless="javadocs-exist"
+  <target name="javadoc" depends="generate-source, assert-15, resolve-version-tag, resolve-java15-tools"
           description="Generate javadocs from the source folder (generating source first)">
+    <antcall target="do-javadoc">
+      <param name="generate-sourcedir" value="src" />
+      <param name="generate-dir" value="docs/javadoc" />
+    </antcall>
+  </target>
+  
+  <target name="do-javadoc" depends="check-generate-dir-from-dir" unless="already-generated">
     <echo message="Generating javadocs" />
-    <!-- Unfortunately, dependset doesn't delete nested directories, so we have
-         to clean up the empty directories here -->
     <delete dir="docs/javadoc" />
     <mkdir dir="docs/javadoc" />
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc"
@@ -655,21 +705,6 @@
       <link href="http://java.sun.com/j2se/1.5/docs/api" />
       <link href="http://junit.org/junit/javadoc/3.8.1" />
     </javadoc>
-  </target>
-
-  <target name="check-javadoc">
-    <dependset>
-      <srcfileset dir="src" />
-      <targetfileset dir="docs/javadoc" />
-    </dependset>
-    <!-- We use pathconvert as a hack to find out if dependset did anything -->
-    <pathconvert property="javadocs-exist" pathsep="," setonempty="false">
-      <path>
-        <fileset dir="${basedir}" includes="docs/javadoc/**">
-          <type type="file" />
-        </fileset>
-      </path>
-    </pathconvert>
   </target>
 
   
@@ -699,6 +734,7 @@
         <include name="${ant.project.name}-*" />
         <include name="${code-status-target}" />
         <include name="${version-target}" />
+        <include name="src/**/*.class" />
         <!-- We could get rid of backups, but "update" ignores them, so they're okay.
              (doesn't work if defaultexcludes is "yes") -->
         <!-- <include name="**/*~" /> -->
@@ -726,7 +762,7 @@
   </target>
 
   <target name="do-commit">
-    <antcall target="clean" inheritall="false"> <!-- Clean up after the latest build -->
+    <antcall target="clean"> <!-- Clean up after the latest build -->
       <param name="delete-jars" value="no" />
       <param name="clean-can-fail" value="no" />
     </antcall>
@@ -753,14 +789,14 @@
        *************** -->
        
   <target name="release-stable" description="Generate all release files tagged with 'stable'">
-    <antcall target="release" inheritall="false">
+    <antcall target="release">
       <param name="tag-append" value="-stable" />
       <param name="is-development" value="no" />
     </antcall>
   </target>
 
   <target name="release-beta" description="Generate all release files tagged with 'beta'">
-    <antcall target="release" inheritall="false">
+    <antcall target="release">
       <param name="tag-append" value="-beta" />
       <param name="is-development" value="no" />
     </antcall>
