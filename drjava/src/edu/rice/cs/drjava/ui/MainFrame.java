@@ -48,6 +48,7 @@ import java.io.*;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.net.URL;
@@ -66,6 +67,8 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
+import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
+import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.swing.DelegatingAction;
@@ -876,6 +879,138 @@ public class MainFrame extends JFrame implements OptionConstants {
       int pos = _gotoLine();
       _currentDefPane.requestFocusInWindow();
       if (pos != -1) _currentDefPane.setCaretPosition(pos);  // brute force attempt to fix intermittent failure to display caret
+    }
+  };
+
+  /**
+   * Wrapper class for the "Go to File" dialog list entries.
+   * Provides the ability to have the same OpenDefinitionsDocument in there multiple times
+   * with different toString() results.
+   */
+  private static class GoToFileListEntry implements Comparable<GoToFileListEntry> {
+    public final OpenDefinitionsDocument doc;
+    private final String str;
+    public GoToFileListEntry(OpenDefinitionsDocument d, String s) {
+      doc = d;
+      str = s;
+    }
+    public String toString() {
+      return str;
+    }
+    public int compareTo(GoToFileListEntry other) {
+      return str.toLowerCase().compareTo(other.str.toLowerCase());
+    }
+  }
+
+  /**
+   * Reset the position of the "Go to File" dialog.
+   */
+  public void resetGotoFileDialogPosition() {
+    _gotoFileDialog.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_GOTOFILE_STATE, "default");
+    }
+  }
+
+  /**
+   * The "Go to File" dialog instance.
+   */
+  private PredictiveInputFrame<GoToFileListEntry> _gotoFileDialog = null;
+ 
+  /** Asks the user for a file name and goes there. */
+  private Action _gotoFileAction = new AbstractAction("Go to File...") {
+    public void actionPerformed(ActionEvent ae) {
+      if (_gotoFileDialog==null) {
+        PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
+          public String apply(GoToFileListEntry entry) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(entry);
+            if (entry.doc != null) {
+              try {
+                try {
+                  sb.append("\nin " + FileOps.makeRelativeTo(entry.doc.getFile(), entry.doc.getSourceRoot()));
+                }
+                catch(IOException e) {
+                  sb.append("\nin " + entry.doc.getFile());
+                }
+              }
+              catch(edu.rice.cs.drjava.model.FileMovedException e) {
+                sb.append("\nfile was moved");
+              }
+              catch(java.lang.IllegalStateException e) {
+                // do nothing
+              }
+            }
+            return sb.toString();
+          }
+        };
+        PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+          public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+            if (p.getItem()!=null) {
+              _model.setActiveDocument(p.getItem().doc);
+            }
+            return null;
+          }
+        };
+        PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+          public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+            // nothing to do
+            return null;
+          }
+        };
+        java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>> strategies =
+          new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>>();
+        strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
+        strategies.add(new PredictiveInputModel.FragmentStrategy<GoToFileListEntry>());
+        strategies.add(new PredictiveInputModel.RegExStrategy<GoToFileListEntry>());
+        _gotoFileDialog = 
+          new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
+                                                      "Go to File",
+                                                      true, // force
+                                                      true, // ignore case
+                                                      info,
+                                                      strategies,
+                                                      okAction,
+                                                      cancelAction,
+                                                      new GoToFileListEntry(null, "dummy")); // put one dummy entry in the list, later it will be changed anyway
+        if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
+          _gotoFileDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STATE));
+        }      
+      }
+      
+      List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+      if ((docs==null) || (docs.size() == 0)) {
+        return; // do nothing
+      }
+      GoToFileListEntry currentEntry = null;
+      ArrayList<GoToFileListEntry> list = new ArrayList<GoToFileListEntry>(2*docs.size());
+      for(OpenDefinitionsDocument d: docs) {
+        GoToFileListEntry entry = new GoToFileListEntry(d, d.toString());
+        if (d.equals(_model.getActiveDocument())) {
+          currentEntry = entry;
+        }
+        list.add(entry);
+        try {
+          try {
+            File relative = FileOps.makeRelativeTo(d.getFile(), d.getSourceRoot());
+            if (!relative.toString().equals(d.toString())) {
+              list.add(new GoToFileListEntry(d, relative.toString().replace(File.separatorChar,'.')));
+            }
+          }
+          catch(IOException e) {
+            // ignore
+          }
+        }
+        catch(java.lang.IllegalStateException e) {
+          // ignore
+        }
+      }
+
+      _gotoFileDialog.setItems(true, list); // ignore case
+      if (currentEntry!=null) {
+        _gotoFileDialog.setCurrentItem(currentEntry);
+      }      
+      _gotoFileDialog.setVisible(true);
     }
   };
   
@@ -2868,6 +3003,16 @@ public class MainFrame extends JFrame implements OptionConstants {
       config.setSetting(WINDOW_Y, WINDOW_Y.getDefault());
     }
     
+    // "Go to File" dialog position and size.
+    if ((DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue())
+          && (_gotoFileDialog.getFrameState()!=null)) {
+      config.setSetting(DIALOG_GOTOFILE_STATE, (_gotoFileDialog.getFrameState().toString()));
+    }
+    else {
+      // Reset to defaults to restore pristine behavior.
+      config.setSetting(DIALOG_GOTOFILE_STATE, DIALOG_GOTOFILE_STATE.getDefault());
+    }
+    
     // Panel heights.
     if (_debugPanel != null) {
       config.setSetting(DEBUG_PANEL_HEIGHT, new Integer(_debugPanel.getHeight()));
@@ -3810,6 +3955,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(editMenu, _findNextAction, KEY_FIND_NEXT);
     _addMenuItem(editMenu, _findPrevAction, KEY_FIND_PREV);
     _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
+    _addMenuItem(editMenu, _gotoFileAction, KEY_GOTO_FILE);
     
     // Next, prev doc
     editMenu.addSeparator();

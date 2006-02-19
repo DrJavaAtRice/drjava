@@ -450,6 +450,13 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_G, mask));
 
   /**
+   * The key binding for goto file.
+   */
+  public static final KeyStrokeOption KEY_GOTO_FILE =
+    new KeyStrokeOption("key.goto.file",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_G, mask|KeyEvent.SHIFT_MASK));
+
+  /**
    * The key binding for indenting
    *
   public static final KeyStrokeOption KEY_INDENT =
@@ -1171,4 +1178,16 @@ public interface OptionConstants {
    * The command-line arguments to be passed to the interpreter jvm.
    */
   public static final StringOption JVM_ARGS = new StringOption("jvm.args", "");
+
+  /**
+   * The last state of the "Go to File" dialog.
+   */
+  public static final StringOption DIALOG_GOTOFILE_STATE =
+    new StringOption("dialog.gotofile.state", "default");
+
+  /**
+   * Whether to save and restore window size and position at startup/shutdown.
+   */
+  public static final BooleanOption DIALOG_GOTOFILE_STORE_POSITION =
+    new BooleanOption("dialog.gotofile.store.position", Boolean.TRUE);
 }
