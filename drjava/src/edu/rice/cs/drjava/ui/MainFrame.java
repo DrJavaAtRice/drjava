@@ -902,9 +902,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  /**
-   * Reset the position of the "Go to File" dialog.
-   */
+  /** Reset the position of the "Go to File" dialog. */
   public void resetGotoFileDialogPosition() {
     _gotoFileDialog.setFrameState("default");
     if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
@@ -912,9 +910,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  /**
-   * The "Go to File" dialog instance.
-   */
+  /** The "Go to File" dialog instance. */
   private PredictiveInputFrame<GoToFileListEntry> _gotoFileDialog = null;
  
   /** Asks the user for a file name and goes there. */
@@ -3005,7 +3001,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // "Go to File" dialog position and size.
     if ((DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue())
-          && (_gotoFileDialog.getFrameState()!=null)) {
+          && (_gotoFileDialog != null) && (_gotoFileDialog.getFrameState() != null)) {
       config.setSetting(DIALOG_GOTOFILE_STATE, (_gotoFileDialog.getFrameState().toString()));
     }
     else {
