@@ -176,6 +176,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
    */
   public void testInteractionAbort() throws BadLocationException, EditDocumentException, InterruptedException, 
     IOException {
+    
     doCompile(setupDocument(FOO_TEXT), tempFile());
     final String beforeAbort = interpret("DrJavaTestFoo.class.getName()");
     assertEquals("\"DrJavaTestFoo\"", beforeAbort);
@@ -190,15 +191,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //        assertInteractionStartCount(2);
         interactionEndCount++;
       }
-
-//      public void interpreterExited(int status) {
-//        try {
-//          Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//        }
-//        assertInteractionStartCount(1);
-//        interpreterExitedCount++;
-//      }
 
       public void interpreterResetting() {
 //        assertInteractionStartCount(1);
@@ -218,9 +210,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
         }
       }
 
-      public void consoleReset() {
-        consoleResetCount++;
-      }
+      public void consoleReset() { consoleResetCount++; }
     };
 
     _model.addListener(listener);
@@ -236,7 +226,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     listener.assertInterpreterResettingCount(1);
     listener.assertInterpreterReadyCount(1);
     listener.assertInterpreterExitedCount(0);
-    listener.assertConsoleResetCount(1);
+    listener.assertConsoleResetCount(0);
 
     // now make sure it still works!
     assertEquals("5", interpret("5"));

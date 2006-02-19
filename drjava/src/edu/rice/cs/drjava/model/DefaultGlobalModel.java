@@ -569,7 +569,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public void resetInteractions(File wd) {
     if (_debugger.inDebugMode()) _debugger.shutdown();
     _interactionsModel.resetInterpreter(wd);
-    resetConsole();
+//    resetConsole();
   }
 
   /** Interprets the current given text at the prompt in the interactions pane. */
