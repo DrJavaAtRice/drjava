@@ -570,7 +570,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getBuildDirectory() { return _builtDir; }
     
     public File getWorkingDirectory() { 
-      if (_workDir == null || _workDir == FileOption.NULL_FILE) return projectFile.getParentFile();  
+      try {
+      if (_workDir == null || _workDir == FileOption.NULL_FILE) 
+        return projectFile.getParentFile().getCanonicalFile();  
+      }
+      catch(IOException e) { /* fall through */ }
       // preceding default is project root
       return _workDir; 
     }
@@ -667,6 +671,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File[] roots = getSourceRootSet();
 //      System.err.println("source root set is " + Arrays.toString(roots));
       if (roots.length == 0) return new File(System.getProperty("user.dir"));
+      try  { return roots[0].getCanonicalFile(); }
+      catch(IOException e) { /* fall through */ }
       return roots[0];  // a flat file configuration should have exactly one source root
     }
     public File getRawWorkingDirectory() { return DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY); }
@@ -1136,9 +1142,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // set the state if all went well
     File[] srcFiles = srcFileList.toArray(new File[srcFileList.size()]);
     
-    synchronized(_auxiliaryFiles) {
-      _auxiliaryFiles = auxFileList;
-    }
+    synchronized(_auxiliaryFiles) { _auxiliaryFiles = auxFileList;  }
     
     setFileGroupingState(makeProjectFileGroupingState(mainClass, bd, wd, new File(filename), srcFiles, exCp));
   }

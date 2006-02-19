@@ -2795,7 +2795,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveProjectHelper(_currentProjFile);
   }
   
-  
   /** Closes all files and makes a new project. */
   private void _newProject() {
     _closeAll();
@@ -2815,8 +2814,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _saveChooser.setSelectedFile(null);
     }
     
-    if (_currentProjFile != null) 
-      _saveChooser.setSelectedFile(_currentProjFile);
+    if (_currentProjFile != null) _saveChooser.setSelectedFile(_currentProjFile);
     
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
@@ -2824,8 +2822,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (!file.exists() || _verifyOverwrite()) {
         _saveProjectHelper(file);
         try {
-          if (file.getCanonicalPath().endsWith(".pjt")) _openProjectHelper(file);
-          else _openProjectHelper(new File(file.getCanonicalPath() + ".pjt"));
+          file = file.getCanonicalFile();
+          if (file.getPath().endsWith(".pjt")) _openProjectHelper(file);
+          else _openProjectHelper(new File(file.getAbsolutePath() + ".pjt"));
         }
         catch (IOException e) {
           throw new UnexpectedException(e);
