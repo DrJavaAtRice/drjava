@@ -181,7 +181,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
 
       java.util.StringTokenizer tok = new java.util.StringTokenizer(b);
       while(tok.hasMoreTokens()) {
-        if (a.indexOf(tok.nextToken())>=0) {
+        if (a.indexOf(tok.nextToken())<0) {
           return false;
         }
       }
