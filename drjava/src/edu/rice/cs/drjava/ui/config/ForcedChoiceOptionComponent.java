@@ -49,6 +49,7 @@ import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.Iterator;
 
 /**
@@ -70,6 +71,12 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     // Build the combo box from the Iterator of legal values
     Iterator<String> values = option.getLegalValues();
     _comboBox = new JComboBox();
+    
+    _comboBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        notifyChangeListeners();
+      }
+    });
 
     while(values.hasNext()) {
       String currValue = values.next();
@@ -102,6 +109,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
    */
   public void resetToCurrent(String current) {
     _comboBox.setSelectedItem(current);
+    
 //    String current = DrJava.getConfig().getSetting(_option);
 //    Iterator values = ((ForcedChoiceOption)_option).getLegalValues();
 //    int i = 0;

@@ -68,6 +68,11 @@ public class ButtonComponent extends OptionComponent<Object> {
     super(null, "", parent);
     _jb = new JButton(text);
     _jb.addActionListener(l);
+    _jb.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        notifyChangeListeners();
+      }
+    });
   }
 
   /**

@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
+import javax.swing.event.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import java.awt.*;
@@ -61,6 +62,17 @@ public class StringOptionComponent extends OptionComponent<String> {
     super(opt, text, parent);
     _jtf = new JTextField();
     _jtf.setText(_option.format(DrJava.getConfig().getSetting(_option)));
+    _jtf.getDocument().addDocumentListener(new DocumentListener() {
+      public void insertUpdate(DocumentEvent e) {
+        notifyChangeListeners();
+      }
+      public void removeUpdate(DocumentEvent e) {
+        notifyChangeListeners();
+      }
+      public void changedUpdate(DocumentEvent e) {
+        notifyChangeListeners();
+      }
+    });
   }
 
   /** Constructor that allows for a tooltip description. */

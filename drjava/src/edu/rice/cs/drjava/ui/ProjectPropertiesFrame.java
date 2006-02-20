@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.ui;
 
 
 import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.*;
 import java.awt.*;
@@ -95,6 +96,7 @@ public class ProjectPropertiesFrame extends JFrame {
         boolean successful = true;
         successful = saveSettings();
         if (successful)  ProjectPropertiesFrame.this.setVisible(false);
+        _applyButton.setEnabled(false);
       }
     };
     _okButton = new JButton(okAction);
@@ -103,9 +105,11 @@ public class ProjectPropertiesFrame extends JFrame {
       public void actionPerformed(ActionEvent e) {
         // Always save settings
         saveSettings();
+        _applyButton.setEnabled(false);
       }
     };
     _applyButton = new JButton(applyAction);
+    _applyButton.setEnabled(false);
     
     Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed(ActionEvent e) {
@@ -158,6 +162,7 @@ public class ProjectPropertiesFrame extends JFrame {
   /** Resets the frame and hides it. */
   public void cancel() {
     reset();
+    _applyButton.setEnabled(false);
     ProjectPropertiesFrame.this.setVisible(false);
   }
   
@@ -354,6 +359,18 @@ public class ProjectPropertiesFrame extends JFrame {
     dirChooser.setEditable(true);
     _builtDirSelector = new DirectorySelectorComponent(this,dirChooser, 20, 12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    _builtDirSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
+      public void insertUpdate(DocumentEvent e) {
+        _applyButton.setEnabled(true);
+      }
+      public void removeUpdate(DocumentEvent e) {
+        _applyButton.setEnabled(true);
+      }
+      public void changedUpdate(DocumentEvent e) {
+        _applyButton.setEnabled(true);
+      }
+    });
+
     return _builtDirSelector;
   }
   
@@ -365,11 +382,28 @@ public class ProjectPropertiesFrame extends JFrame {
     dirChooser.setEditable(true);
     _workDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    _workDirSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
+      public void insertUpdate(DocumentEvent e) {
+        _applyButton.setEnabled(true);
+      }
+      public void removeUpdate(DocumentEvent e) {
+        _applyButton.setEnabled(true);
+      }
+      public void changedUpdate(DocumentEvent e) {
+        _applyButton.setEnabled(true);
+      }
+    });
     return _workDirSelector;
   }
   
   public Component _extraClassPathComponent() {
     _extraClassPathList = new VectorFileOptionComponent(null, "Extra Project Classpaths", this);
+    _extraClassPathList.addChangeListener(new OptionComponent.ChangeListener() {
+      public Object apply(Object oc) {
+        _applyButton.setEnabled(true);
+        return null;
+      }
+    });
     return _extraClassPathList.getComponent();
   }
   
@@ -402,6 +436,17 @@ public class ProjectPropertiesFrame extends JFrame {
     chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
     _jarMainClassSelector = new DirectorySelectorComponent(this,chooser,20,12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    _jarMainClassSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
+      public void insertUpdate(DocumentEvent e) {
+        _applyButton.setEnabled(true);
+      }
+      public void removeUpdate(DocumentEvent e) {
+        _applyButton.setEnabled(true);
+      }
+      public void changedUpdate(DocumentEvent e) {
+        _applyButton.setEnabled(true);
+      }
+    });
     return _jarMainClassSelector;
   }
   

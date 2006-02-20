@@ -105,9 +105,11 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
           if (index == _listModel.getSize()) { // we removed the last element
             if (index > 0) // and there's more than one element in the list
             _list.setSelectedIndex(index - 1);
+            notifyChangeListeners();
           }
           else {
             _list.setSelectedIndex(index);
+            notifyChangeListeners();
           }
         }
       }

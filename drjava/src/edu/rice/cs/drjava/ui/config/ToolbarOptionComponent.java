@@ -49,6 +49,7 @@ import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import java.awt.*;
+import java.awt.event.*;
 
 /**
  * The special option component for the toolbar text and toolbar icon options.
@@ -86,15 +87,35 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
 
     _noneButton = new JRadioButton(NONE);
     _noneButton.setActionCommand(NONE);
+    _noneButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        notifyChangeListeners();
+      }
+    });
     
     _textButton = new JRadioButton(TEXT_ONLY);
     _textButton.setActionCommand(TEXT_ONLY);
+    _textButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        notifyChangeListeners();
+      }
+    });
 
     _iconsButton = new JRadioButton(ICONS_ONLY);
     _iconsButton.setActionCommand(ICONS_ONLY);
+    _iconsButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        notifyChangeListeners();
+      }
+    });
 
     _textAndIconsButton = new JRadioButton(TEXT_AND_ICONS);
     _textAndIconsButton.setActionCommand(TEXT_AND_ICONS);
+    _textAndIconsButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        notifyChangeListeners();
+      }
+    });
 
     resetToCurrent();
 
@@ -208,24 +229,44 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     boolean wasEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue();
     
     if (btnIdent.equals(NONE)) {
-      if (wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.FALSE);      
+      if (wasEnabled) {
+        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.FALSE);      
+      }
     }
     if (btnIdent.equals(TEXT_ONLY)) {
-      if (!textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
-      if (iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.FALSE);
-      if (!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);   
+      if (!textWasEnabled) {
+        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
+      }
+      if (iconsWereEnabled) {
+        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.FALSE);
+      }
+      if (!wasEnabled) {
+        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);   
+      }
     }
 
     if (btnIdent.equals(ICONS_ONLY)) {
-      if (!iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
-      if (textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.FALSE);
-      if (!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);  
+      if (!iconsWereEnabled) {
+        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
+      }
+      if (textWasEnabled) {
+        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.FALSE);
+      }
+      if (!wasEnabled) {
+        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);  
+      }
     }
 
     if (btnIdent.equals(TEXT_AND_ICONS)) {
-      if (!textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
-      if (!iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
-      if (!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);        
+      if (!textWasEnabled) {
+        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
+      }
+      if (!iconsWereEnabled) {
+        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
+      }
+      if (!wasEnabled) {
+        DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);        
+      }
     }
 
     return true;

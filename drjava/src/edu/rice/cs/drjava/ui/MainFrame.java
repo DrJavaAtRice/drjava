@@ -904,9 +904,71 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Reset the position of the "Go to File" dialog. */
   public void resetGotoFileDialogPosition() {
+    initGotoFileDialog();
     _gotoFileDialog.setFrameState("default");
     if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
       DrJava.getConfig().setSetting(DIALOG_GOTOFILE_STATE, "default");
+    }
+  }
+  
+  /** Initialize dialog if necessary. */
+  private void initGotoFileDialog() {
+    if (_gotoFileDialog==null) {
+      PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
+        public String apply(GoToFileListEntry entry) {
+          StringBuilder sb = new StringBuilder();
+          sb.append(entry);
+          if (entry.doc != null) {
+            try {
+              try {
+                sb.append("\nin " + FileOps.makeRelativeTo(entry.doc.getFile(), entry.doc.getSourceRoot()));
+              }
+              catch(IOException e) {
+                sb.append("\nin " + entry.doc.getFile());
+              }
+            }
+            catch(edu.rice.cs.drjava.model.FileMovedException e) {
+              sb.append("\nfile was moved");
+            }
+            catch(java.lang.IllegalStateException e) {
+              // do nothing
+            }
+          }
+          return sb.toString();
+        }
+      };
+      PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+        public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+          if (p.getItem()!=null) {
+            _model.setActiveDocument(p.getItem().doc);
+          }
+          return null;
+        }
+      };
+      PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+        public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+          // nothing to do
+          return null;
+        }
+      };
+      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>> strategies =
+        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>>();
+      strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
+      strategies.add(new PredictiveInputModel.FragmentStrategy<GoToFileListEntry>());
+      strategies.add(new PredictiveInputModel.RegExStrategy<GoToFileListEntry>());
+      _gotoFileDialog = 
+        new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
+                                                    "Go to File",
+                                                    true, // force
+                                                    true, // ignore case
+                                                    info,
+                                                    strategies,
+                                                    okAction,
+                                                    cancelAction,
+                                                    new GoToFileListEntry(null, "dummy")); // put one dummy entry in the list, later it will be changed anyway
+      if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
+        _gotoFileDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STATE));
+      }      
     }
   }
 
@@ -916,64 +978,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Asks the user for a file name and goes there. */
   private Action _gotoFileAction = new AbstractAction("Go to File...") {
     public void actionPerformed(ActionEvent ae) {
-      if (_gotoFileDialog==null) {
-        PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
-          public String apply(GoToFileListEntry entry) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(entry);
-            if (entry.doc != null) {
-              try {
-                try {
-                  sb.append("\nin " + FileOps.makeRelativeTo(entry.doc.getFile(), entry.doc.getSourceRoot()));
-                }
-                catch(IOException e) {
-                  sb.append("\nin " + entry.doc.getFile());
-                }
-              }
-              catch(edu.rice.cs.drjava.model.FileMovedException e) {
-                sb.append("\nfile was moved");
-              }
-              catch(java.lang.IllegalStateException e) {
-                // do nothing
-              }
-            }
-            return sb.toString();
-          }
-        };
-        PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
-          public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
-            if (p.getItem()!=null) {
-              _model.setActiveDocument(p.getItem().doc);
-            }
-            return null;
-          }
-        };
-        PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
-          public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
-            // nothing to do
-            return null;
-          }
-        };
-        java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>> strategies =
-          new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>>();
-        strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
-        strategies.add(new PredictiveInputModel.FragmentStrategy<GoToFileListEntry>());
-        strategies.add(new PredictiveInputModel.RegExStrategy<GoToFileListEntry>());
-        _gotoFileDialog = 
-          new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
-                                                      "Go to File",
-                                                      true, // force
-                                                      true, // ignore case
-                                                      info,
-                                                      strategies,
-                                                      okAction,
-                                                      cancelAction,
-                                                      new GoToFileListEntry(null, "dummy")); // put one dummy entry in the list, later it will be changed anyway
-        if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
-          _gotoFileDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STATE));
-        }      
-      }
-      
+      initGotoFileDialog();
       List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
       if ((docs==null) || (docs.size() == 0)) {
         return; // do nothing

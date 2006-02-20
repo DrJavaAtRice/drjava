@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
+import javax.swing.event.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.FileSelectorComponent;
@@ -110,6 +111,17 @@ public class FileOptionComponent extends OptionComponent<File>
     if (setting != _option.getDefault()) {
       _component.setFileField(setting);
     }
+    _component.getFileField().getDocument().addDocumentListener(new DocumentListener() {
+      public void insertUpdate(DocumentEvent e) {
+        notifyChangeListeners();
+      }
+      public void removeUpdate(DocumentEvent e) {
+        notifyChangeListeners();
+      }
+      public void changedUpdate(DocumentEvent e) {
+        notifyChangeListeners();
+      }
+    });
   }
 
   /**

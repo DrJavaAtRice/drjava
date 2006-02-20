@@ -77,6 +77,7 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
             _listModel.remove(index);
             _listModel.insertElementAt(o, index - 1);
             _list.setSelectedIndex(index - 1);
+            notifyChangeListeners();
           }
         }
       }
@@ -91,6 +92,7 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
             _listModel.remove(index);
             _listModel.insertElementAt(o, index + 1);
             _list.setSelectedIndex(index + 1);
+            notifyChangeListeners();
           }
         }
       }
@@ -159,6 +161,7 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
       public void actionPerformed(ActionEvent ae) {
         chooseFile();
         _list.setSelectedIndex(_listModel.getSize() - 1);
+        notifyChangeListeners();
       }
     };
   }

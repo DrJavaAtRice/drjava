@@ -49,6 +49,7 @@ import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import java.awt.*;
+import java.awt.event.*;
 
 
 /**
@@ -68,6 +69,11 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
     super(opt, "", parent);
     _jcb = new JCheckBox();
     _jcb.setText(text);
+    _jcb.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        notifyChangeListeners();
+      }
+    });
     
     _jcb.setSelected(DrJava.getConfig().getSetting(_option).booleanValue());
   }
@@ -102,7 +108,9 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
     Boolean oldValue = DrJava.getConfig().getSetting(_option);
     Boolean newValue = Boolean.valueOf(_jcb.isSelected());
     
-    if (!oldValue.equals(newValue)) DrJava.getConfig().setSetting(_option, newValue);
+    if (!oldValue.equals(newValue)) {
+      DrJava.getConfig().setSetting(_option, newValue);      
+    }
     return true;
   } 
   

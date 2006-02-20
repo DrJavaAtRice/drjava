@@ -126,12 +126,16 @@ public class FontOptionComponent extends OptionComponent<Font> {
    * Shows a custom font chooser dialog to pick a new font.
    */
   public void chooseFont() {
+    String oldText = _fontField.getText();
     Font f = FontChooser.showDialog(_parent, 
                                     "Choose '" + getLabelText() + "'",
                                     _font);
     if (f != null) {
       _font = f;
       _updateField(_font);
+      if (!oldText.equals(_fontField.getText())) {
+        notifyChangeListeners();        
+      }
     }
   }
   

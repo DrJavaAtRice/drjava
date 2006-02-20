@@ -88,7 +88,11 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
                              true);
         }
 
+        String oldText = _keyField.getText();
         _getKeyDialog.promptKey(KeyStrokeOptionComponent.this);
+        if (!_keyField.getText().equals(oldText)) {
+          notifyChangeListeners();
+        }
       }
     });
     _button.setText("...");

@@ -49,9 +49,11 @@ import javax.swing.*;
 import java.awt.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.util.Lambda;
 
 /** The graphical form of an Option. Provides a way to see the values of Option
  *  while running DrJava and perform live updating of Options.
@@ -148,6 +150,42 @@ public abstract class OptionComponent<T> implements Serializable {
                                   JOptionPane.WARNING_MESSAGE);
   }
   
+  /**
+   * Interface for change listener.
+   */
+  public static interface ChangeListener extends Lambda<Object, Object> {
+    public abstract Object apply(Object c);
+  }
+  
+  /**
+   * Adds a change listener to this component.
+   * @param listener listener to add
+   */
+  public void addChangeListener(ChangeListener listener) {
+    _changeListeners.add(listener);
+  }
+  
+  /**
+   * Removes a change listener to this component.
+   * @param listener listener to remove
+   */
+  public void removeChangeListener(ChangeListener listener) {
+    _changeListeners.remove(listener);
+  }
+  
+  /**
+   * Notify all change listeners of a change.
+   */
+  protected void notifyChangeListeners() {
+    for(ChangeListener l: _changeListeners) {
+      l.apply(this);
+    }
+  }
+  
+  /**
+   * List of change listeners.
+   */
+  private ArrayList<ChangeListener> _changeListeners = new ArrayList<ChangeListener>();
 }
                                       
   
