@@ -398,10 +398,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  /**
-   * Asks user for file name and and reads that file into
-   * the definitions pane.
-   */
+  /** Asks user for file name and and reads that file into the definitions pane. */
   private Action _openFileOrProjectAction = new AbstractAction("Open...") {
     public void actionPerformed(ActionEvent ae) { 
       _openFileOrProject(); 
@@ -409,9 +406,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  /**
-   * Asks user for project file name and and reads the associated files into
-   * the file navigator (and places the first source file in the editor pane)
+  /** Asks user for project file name and and reads the associated files into the file navigator (and places the first
+   *  source file in the editor pane)
    */
   private Action _openProjectAction = new AbstractAction("Open") {
     public void actionPerformed(ActionEvent ae) { _openProject(); }
@@ -2463,10 +2459,16 @@ public class MainFrame extends JFrame implements OptionConstants {
    worker.start();
    }*/
   
-  /** Signals the model to close the project, then closes all open files.  It also restores the list view navigator
-   *  @return true if the project is closed, false if cancelled
+  /** Closes project when DrJava is not in the process of quitting.
+   *   @return true if the project is closed, false if cancelled.
    */
-  boolean _closeProject() {
+  boolean _closeProject() { return _closeProject(false); }
+  
+  /** Signals the model to close the project, then closes all open files.  It also restores the list view navigator
+   *   @ param quitting whether the project is being closed as part of quitting DrJava
+   *   @return true if the project is closed, false if cancelled
+   */
+  boolean _closeProject(boolean quitting) {
     if (_checkProjectClose()) {
       List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
       //    for(OpenDefinitionsDocument d: projDocs) {
@@ -2474,7 +2476,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       //    }
       boolean couldClose = _model.closeFiles(projDocs);
       if (! couldClose) return false;
-      _model.closeProject();
+      _model.closeProject(quitting);
       Component renderer = _model.getDocumentNavigator().getRenderer();
       new ForegroundColorListener(renderer);
       new BackgroundColorListener(renderer);
@@ -2965,8 +2967,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     }
-    
-    if (! _closeProject()) return;  // close project if a project is open; false => open project was not saved
+
+    _closeProject(true);
     
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
@@ -5668,7 +5670,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             _compilerErrorPanel.reset();
             if (inDebugMode()) {
               _model.getActiveDocument().checkIfClassFileInSync();
-              _model.refreshActiveDocument();
+//              _model.refreshActiveDocument();
               _updateDebugStatus();
             }
 //          }
@@ -5744,7 +5746,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _junitErrorPanel.getErrorListPane().
             testEnded(name, succeeded, causedError); // this does nothing!
           _junitErrorPanel.progressStep(succeeded);
-          _model.refreshActiveDocument();
+//          _model.refreshActiveDocument();
         }
       });
     }
@@ -5757,7 +5759,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           try {
             _restoreJUnitActionsEnabled();
             _junitErrorPanel.reset();
-            _model.refreshActiveDocument();
+//            _model.refreshActiveDocument();
           }
           finally { 
 //            new ScrollableDialog(null, "MainFrame.junitEnded() ready to return", "", "").show();
@@ -5795,7 +5797,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             _javadocAllAction.setEnabled(true);
             _javadocCurrentAction.setEnabled(true);
             _javadocErrorPanel.reset();
-            _model.refreshActiveDocument();
+//            _model.refreshActiveDocument();
           }
           finally { hourglassOff(); }
           
@@ -6118,7 +6120,9 @@ public class MainFrame extends JFrame implements OptionConstants {
           _junitErrorPanel.reset();
         }});
     }
-    public void currentDirectoryChanged(File dir) { _setCurrentDirectory(dir); }
+   
+    /** Only callable from within the event-handling thread */
+    public void currentDirectoryChanged(final File dir) { _setCurrentDirectory(dir); }
     
     /** Check if the specified document has been modified. If it has, ask the user if he would like to save it 
      *  and save the document if yes. Also give the user a "cancel" option to cancel doing the operation 
@@ -6383,7 +6387,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       public void run() {
         _showJUnitInterrupted(e);
         removeTab(_junitErrorPanel);
-        _model.refreshActiveDocument();
+//        _model.refreshActiveDocument();
         // hourglassOff();
       }
     });

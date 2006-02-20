@@ -293,7 +293,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch(RemoteException re) { _threwException(re); }
   }
   
-  
   public void addExternalFilesClassPath(URL path) {
     if (! _restart) return;
     ensureInterpreterConnected();

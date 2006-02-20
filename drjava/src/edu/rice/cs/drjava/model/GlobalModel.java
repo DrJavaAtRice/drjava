@@ -200,7 +200,7 @@ public interface GlobalModel extends ILoadDocuments {
   /** Performs any needed operations on the model before closing the project and its files.  This is not responsible
    *  for actually closing the files since that is handled in MainFrame._closeProject()
    */
-  public void closeProject();
+  public void closeProject(boolean qutting);
   
   /** Searches for a file with the given name on the current source roots and the augmented classpath.
    *  @param filename Name of the source file to look for

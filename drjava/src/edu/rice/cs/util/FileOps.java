@@ -56,12 +56,12 @@ import java.util.*;
  */
 public abstract class FileOps {
   
-  /** Special File object corresponding to a dummy file. */
+  /** Special File object corresponding to a dummy file. Simliar to FileOption.NULL_FILE but exits() returns false. */
   public static final File NULL_FILE = new File("") {
     public String getAbsolutePath() { return ""; }
     public String getName() { return ""; }
     public String toString() { return ""; }
-    public boolean exists() { return true; }
+    public boolean exists() { return false; }
   };
   
   /** Makes a file from the abs file that is relative such that making a new file:

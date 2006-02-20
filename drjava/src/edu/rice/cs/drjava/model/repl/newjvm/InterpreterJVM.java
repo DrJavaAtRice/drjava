@@ -832,12 +832,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _classPath.add(s);
   }
  
-  /**
-   * Adds the given path to the classpath shared by ALL Java interpreters.
-   * This method <b>cannot</b> take multiple paths separated by
-   * a path separator; it must be called separately for each path.
-   * Only unique paths are added.
-   * @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple 
+   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
+   *  @param s Entry to add to the accumulated classpath
    */
   public void addProjectClassPath(URL s) {
     //_dialog("add classpath: " + s);

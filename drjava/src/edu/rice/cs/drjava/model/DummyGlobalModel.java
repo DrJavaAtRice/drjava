@@ -252,7 +252,7 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call openProject on a Dummy");
   }
 
-  public void closeProject() {
+  public void closeProject(boolean quitting) {
      throw new UnsupportedOperationException("Tried to call closeProject on a Dummy");
   }
   

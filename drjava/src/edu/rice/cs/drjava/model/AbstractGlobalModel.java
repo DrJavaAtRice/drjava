@@ -292,18 +292,20 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   private void _init() {
+    
+    /** This visitor is invoked by the DocumentNavigator to update _activeDocument among other things */
     final NodeDataVisitor<OpenDefinitionsDocument, Boolean> _gainVisitor = new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
-      public Boolean itemCase(OpenDefinitionsDocument docu) {
-        _setActiveDoc(docu);  // sets _activeDocument, the shadow copy of the active document
-//        Utilities.showDebug("Setting the active doc done");
-        File dir = _activeDocument.getParentDirectory();
+      public Boolean itemCase(OpenDefinitionsDocument doc) {
+        _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document
         
-        if (dir != null) {  
-        /* If the file is in External or Auxiliary Files then then we do not want to change our project directory
-         * to something outside the project. */
-          _activeDirectory = dir;
-          _notifier.currentDirectoryChanged(_activeDirectory);
-        }
+//        Utilities.showDebug("Setting the active doc done");
+//        File dir = doc.getParentDirectory();
+//        if (dir != null) {  
+//        /* If the file is in External or Auxiliary Files then then we do not want to change our project directory
+//         * to something outside the project. */
+//          _activeDirectory = dir;
+//          _notifier.currentDirectoryChanged(_activeDirectory);
+//        }
         return Boolean.valueOf(true); 
       }
       public Boolean fileCase(File f) {
@@ -571,11 +573,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public File getWorkingDirectory() { 
       try {
-      if (_workDir == null || _workDir == FileOption.NULL_FILE) 
-        return projectFile.getParentFile().getCanonicalFile();  
+        if (_workDir == null || _workDir == FileOption.NULL_FILE) 
+          return projectFile.getParentFile().getCanonicalFile(); // preceding default is project root
+        return _workDir.getCanonicalFile();
       }
       catch(IOException e) { /* fall through */ }
-      // preceding default is project root
       return _workDir; 
     }
     
@@ -665,15 +667,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   class FlatFileGroupingState implements FileGroupingState {
     public File getBuildDirectory() { return null; }
     public File getWorkingDirectory() { 
-      File workDir = getRawWorkingDirectory(); 
-//      System.err.println("FlatFileGroupingState.getWorkingDirectory() called; IDE workDir field = " + workDir);
-      if (workDir != null && workDir != FileOption.NULL_FILE) return workDir;
-      File[] roots = getSourceRootSet();
+      
+      try { 
+        File workDir = getRawWorkingDirectory();
+//        System.err.println("FlatFileGroupingState.getWorkingDirectory() called; IDE workDir field = " + workDir);
+        if (workDir != null && workDir != FileOption.NULL_FILE) return workDir.getCanonicalFile();
+        File[] roots = getSourceRootSet();
 //      System.err.println("source root set is " + Arrays.toString(roots));
-      if (roots.length == 0) return new File(System.getProperty("user.dir"));
-      try  { return roots[0].getCanonicalFile(); }
+        if (roots.length == 0) return new File(System.getProperty("user.dir"));
+        return roots[0].getCanonicalFile(); 
+      }
       catch(IOException e) { /* fall through */ }
-      return roots[0];  // a flat file configuration should have exactly one source root
+      return new File(System.getProperty("user.dir"));  // a flat file configuration should have exactly one source root
     }
     public File getRawWorkingDirectory() { return DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY); }
     public boolean isProjectActive() { return false; }
@@ -1269,17 +1274,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Performs any needed operations on the model before closing the project and its files.  This is not 
-   *  responsible for actually closing the files since that is handled in MainFrame._closeProject().
-   *  This version is degenerate; it does not reset the interactions pane.
+   *   responsible for actually closing the files since that is handled in MainFrame._closeProject().
+   *   Resets interations unless quitting is true.
    */
-  public void closeProject() {
-    setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeListNavigator(getDocumentNavigator()));
+  public void closeProject(boolean quitting) {
+    setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().
+                           makeListNavigator(getDocumentNavigator()));
     setFileGroupingState(makeFlatFileGroupingState());
 
     // Reset rather than telling the user to reset. This was a design decision
     // made by the class Spring 2005 after much debate.
    
-    resetInteractions(getWorkingDirectory());
+    if (! quitting) resetInteractions(getWorkingDirectory());
     _notifier.projectClosed();
   }
   
@@ -1386,7 +1392,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Closes all open documents without creating a new empty document.  It cannot be cancelled by the user
-   *  because it would leave the current project in an inconsistent state.  It does Method is public for 
+   *  because it would leave the current project in an inconsistent state.  Method is public for 
    *  testing purposes.
    */
   public void closeAllFilesOnQuit() {
@@ -1402,6 +1408,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Exits the program.  Quits regardless of whether all documents are successfully closed. */
   public void quit() {
     closeAllFilesOnQuit();
+//    Utilities.show("Closed all files");
     dispose();  // kills the interpreter
     
 //    if (DrJava.getSecurityManager() != null) DrJava.getSecurityManager().exitVM(0);
@@ -1415,7 +1422,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void dispose() {
     
     _notifier.removeAllListeners();
+//    Utilities.show("All listeners removed");
     synchronized(_documentsRepos) { _documentsRepos.clear(); }
+//    Utilities.show("Document Repository cleared");
     Utilities.invokeAndWait(new SRunnable() { 
       public void run() { _documentNavigator.clear(); }  // this operation must run in event thread
     });
@@ -3063,7 +3072,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void setActiveDocument(final OpenDefinitionsDocument doc) {
     /* The following code fixes a potential race because this method modifies the documentNavigator which is a swing
      * component. Hence it must run in the event thread.  Note that setting the active document triggers the execution
-     * of listeners some of which also need to run in the event thread. */
+     * of listeners some of which also need to run in the event thread. 
+     * 
+     * The _activeDoc field is set by _gainVisitor when the DocumentNavigator changes the active document.
+     */
     
 //    if (_activeDocument == doc) return; // this optimization appears to cause some subtle bugs 
 //    Utilities.showDebug("DEBUG: Called setActiveDocument()");
@@ -3071,7 +3083,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     try {
       Utilities.invokeAndWait(new SRunnable() {  
         public void run() { _documentNavigator.setActiveDoc(doc); }
-      }); // might be relaxed to invokeLater
+      });
     }
     catch(Exception e) { throw new UnexpectedException(e); } 
   }
@@ -3141,9 +3153,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setActiveDocument(docs.get(0));
   }
   
-  private synchronized void _setActiveDoc(INavigatorItem idoc) {
-      _activeDocument = (OpenDefinitionsDocument) idoc;  // FIX THIS!
-      refreshActiveDocument();
+  private void _setActiveDoc(INavigatorItem idoc) {
+    synchronized (this) { _activeDocument = (OpenDefinitionsDocument) idoc; }
+    refreshActiveDocument();
   }
   
   /** Invokes the activeDocumentChanged method in the global listener on the argument _activeDocument.  This process sets up

@@ -50,18 +50,14 @@ import java.net.MalformedURLException;
 import java.io.File;
 import java.util.Vector;
 
-/**
- * A vector of classpath entries. Basically just a Vector<URL>, except
- * with additional logic to format the toString to be suitable for passing
- * to invocations of java -classpath ...
+/** A vector of classpath entries. Basically just a Vector<URL>, except with additional logic to format the toString
+ *  to be suitable for passing to invocations of java -classpath ...
  */
 public class ClassPathVector extends Vector<URL> {
   
   public ClassPathVector() { }
   
-  public ClassPathVector(int capacity) {
-    super(capacity);
-  }
+  public ClassPathVector(int capacity) { super(capacity); }
   
   public String toString() {
     StringBuffer cp = new StringBuffer();
@@ -72,23 +68,25 @@ public class ClassPathVector extends Vector<URL> {
     return cp.toString();
   }
   
+  /* Adds specified URL to this; malformed URL's are ignored. */
   public void add(String entry) {
     try {
       this.add(new URL(entry));
     } catch(MalformedURLException e) {
-      IllegalArgumentException ee = new IllegalArgumentException(e.toString());
-      ee.initCause(e);
-      throw ee;
+//      IllegalArgumentException ee = new IllegalArgumentException(e.toString());
+//      ee.initCause(e);
+//      throw ee;
     }
   }
   
+  /* Adds specified URL to this; malformed URL's are ignored. */
   public void add(File entry) {
     try {
       this.add(entry.toURL());
     } catch(MalformedURLException e) {
-      IllegalArgumentException ee = new IllegalArgumentException(e.toString());
-      ee.initCause(e);
-      throw ee;
+//      IllegalArgumentException ee = new IllegalArgumentException(e.toString());
+//      ee.initCause(e);
+//      throw ee;
     }
   }
   

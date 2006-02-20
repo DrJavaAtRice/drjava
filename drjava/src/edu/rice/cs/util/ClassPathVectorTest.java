@@ -53,14 +53,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
 
-/**
- * A JUnit test case for the ClasspathVector class.
- */
+/** A JUnit test case for the ClasspathVector class. */
 public class ClassPathVectorTest extends DrJavaTestCase {
   
-  /**
-   * Verifies the correctness of the formatting of the toString method of ClasspathVector.
-   */
+  /** Verifies the correctness of the formatting of the toString method of ClasspathVector. */
   public void test_toString() {
     ClassPathVector v = new ClassPathVector();
     assertEquals("Empty classpath", "", v.toString());
@@ -73,26 +69,14 @@ public class ClassPathVectorTest extends DrJavaTestCase {
     assertEquals("Multiple element classpath", File.separator+"jsr14.jar" + File.pathSeparator + fileName + File.pathSeparator + File.separator + "hosted.jar" + File.pathSeparator, v.toString());
   }
   
-  /**
-   * Tests the overloaded methods for translating other inputs to URLs on the fly
-   */
+  /** Tests the overloaded methods for translating other inputs to URLs on the fly.*/
   public void test_OverloadedAdds() {
     ClassPathVector v = new ClassPathVector();
-    try {
-      v.add("asdf");
-      fail("v.add(\"asdf\"): no exception thrown!");
-    } catch(IllegalArgumentException e) {
-      // EXPECTED //
-    } catch(Exception e) {
-      fail("v.add(\"asdf\") threw " + e.getClass().toString() + " instead of IllegalArgumentException!");
-    }
-    
-    
+      v.add("asdf");  // illegal path should be ignored 
+      assertEquals("Nothing should be added", "", v.toString());
   }
   
-  /**
-   * Tests to make sure the conversion to files is correct
-   */
+  /** Tests to make sure the conversion to files is correct */
   public void test_asFileVector() throws IOException {
     ClassPathVector vu = new ClassPathVector();
     File[] files = new File[]{
