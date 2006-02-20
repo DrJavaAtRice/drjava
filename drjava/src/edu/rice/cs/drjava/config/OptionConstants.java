@@ -1178,4 +1178,10 @@ public interface OptionConstants {
    */
   public static final BooleanOption DIALOG_GOTOFILE_STORE_POSITION =
     new BooleanOption("dialog.gotofile.store.position", Boolean.TRUE);
+
+  /**
+   * Whether to also list files with fully qualified paths.
+   */
+  public static final BooleanOption DIALOG_GOTOFILE_FULLY_QUALIFIED =
+    new BooleanOption("dialog.gotofile.fully.qualified", Boolean.FALSE);
 }

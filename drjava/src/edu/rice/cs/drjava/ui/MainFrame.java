@@ -917,7 +917,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (entry.doc != null) {
             try {
               try {
-                sb.append("\nin " + FileOps.makeRelativeTo(entry.doc.getFile(), entry.doc.getSourceRoot()));
+                sb.append("\nin " + FileOps.makeRelativeTo(entry.doc.file(), entry.doc.getSourceRoot()));
               }
               catch(IOException e) {
                 sb.append("\nin " + entry.doc.getFile());
@@ -929,6 +929,9 @@ public class MainFrame extends JFrame implements OptionConstants {
             catch(java.lang.IllegalStateException e) {
               // do nothing
             }
+            catch(edu.rice.cs.drjava.model.definitions.InvalidPackageException e) { 
+              // ignore
+            }
           }
           return sb.toString();
         }
@@ -938,12 +941,13 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (p.getItem()!=null) {
             _model.setActiveDocument(p.getItem().doc);
           }
+          hourglassOff();
           return null;
         }
       };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
-          // nothing to do
+          hourglassOff();
           return null;
         }
       };
@@ -980,33 +984,44 @@ public class MainFrame extends JFrame implements OptionConstants {
         return; // do nothing
       }
       GoToFileListEntry currentEntry = null;
-      ArrayList<GoToFileListEntry> list = new ArrayList<GoToFileListEntry>(2*docs.size());
+      ArrayList<GoToFileListEntry> list;
+      if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_FULLY_QUALIFIED).booleanValue()) {
+        list = new ArrayList<GoToFileListEntry>(2*docs.size());
+      }
+      else {
+        list = new ArrayList<GoToFileListEntry>(docs.size());
+      }
       for(OpenDefinitionsDocument d: docs) {
         GoToFileListEntry entry = new GoToFileListEntry(d, d.toString());
         if (d.equals(_model.getActiveDocument())) {
           currentEntry = entry;
         }
         list.add(entry);
-        try {
+        if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_FULLY_QUALIFIED).booleanValue()) {
           try {
-            File relative = FileOps.makeRelativeTo(d.getFile(), d.getSourceRoot());
-            if (!relative.toString().equals(d.toString())) {
-              list.add(new GoToFileListEntry(d, relative.toString().replace(File.separatorChar,'.')));
+            try {
+              File relative = FileOps.makeRelativeTo(d.getFile(), d.getSourceRoot());
+              if (!relative.toString().equals(d.toString())) {
+                list.add(new GoToFileListEntry(d, d.getPackageName()+"."+d.toString()));
+              }
+            }
+            catch(IOException e) {
+              // ignore
+            }
+            catch(edu.rice.cs.drjava.model.definitions.InvalidPackageException e) { 
+              // ignore
             }
           }
-          catch(IOException e) {
+          catch(java.lang.IllegalStateException e) {
             // ignore
           }
         }
-        catch(java.lang.IllegalStateException e) {
-          // ignore
-        }
       }
-
       _gotoFileDialog.setItems(true, list); // ignore case
       if (currentEntry!=null) {
         _gotoFileDialog.setCurrentItem(currentEntry);
-      }      
+      }
+      hourglassOn();
       _gotoFileDialog.setVisible(true);
     }
   };

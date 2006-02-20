@@ -464,6 +464,10 @@ public class ConfigFrame extends JFrame {
         _mainFrame.resetGotoFileDialogPosition();
       }
     }, "Reset \"Go to File\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_FULLY_QUALIFIED,
+                                                  "Display Fully-Qualified Class Names in \"Go to File\" Dialog", this,
+                                                  "Whether to also display fully-qualified class names in the \"Go to File\" dialog.\n"+
+                                                         "Enabling this option on network drives might cause the dialog to display after a slight delay."));
     panel.displayComponents();
   }
 

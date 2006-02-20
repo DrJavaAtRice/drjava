@@ -68,7 +68,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   
   /**
    * Interface for an action to be performed when the user closes the frame,
-   * either by using "Ok" or "Cancel".
+   * either by using "OK" or "Cancel".
    */
   public static interface CloseAction<X extends Comparable<? super X>> extends Lambda<Object, PredictiveInputFrame<X>> {
     public Object apply(PredictiveInputFrame<X> param);
@@ -193,7 +193,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   private Frame _owner;
   
   /**
-   * Action to be performed when the user closes the frame using "Ok".
+   * Action to be performed when the user closes the frame using "OK".
    */
   private CloseAction<T> _okAction;
   
@@ -224,7 +224,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    * @param ignoreCase true if case should be ignored
    * @param info information supplier to use for additional information display
    * @param strategies array of matching strategies
-   * @param okAction action to be performed when the user closes the frame using "Ok"
+   * @param okAction action to be performed when the user closes the frame using "OK"
    * @param cancelAction action to be performed when the user closes the frame using "Cancel"
    * @param items list of items
    */
@@ -254,7 +254,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    * @param force true if the user is forced to select one of the items
    * @param info information supplier to use for additional information display
    * @param strategies array of matching strategies
-   * @param okAction action to be performed when the user closes the frame using "Ok"
+   * @param okAction action to be performed when the user closes the frame using "OK"
    * @param cancelAction action to be performed when the user closes the frame using "Cancel"
    * @param items varargs/array of items
    */
@@ -447,7 +447,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     });
 
     // buttons
-    _okButton = new JButton("Ok");
+    _okButton = new JButton("OK");
     _okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         okButtonPressed();
@@ -688,9 +688,14 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    */
   public void setVisible(boolean b) {
     validate();
-    super.setVisible(b);
     _owner.setEnabled(!b);
-    if (!b) _owner.toFront();
+    super.setVisible(b);
+    if (b) {
+      _textField.requestFocus();
+    }
+    else {
+      _owner.toFront();
+    }
   }
 
   /**

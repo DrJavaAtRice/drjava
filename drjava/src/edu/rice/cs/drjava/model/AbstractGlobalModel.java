@@ -1853,6 +1853,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //     private boolean _modifiedSinceSave;
     
     private File _file;
+        
     private long _timestamp;
     
     /** The folder containing this document */
