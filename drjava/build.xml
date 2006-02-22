@@ -696,7 +696,7 @@
     <delete dir="docs/javadoc" />
     <mkdir dir="docs/javadoc" />
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc"
-             access="protected" Use="yes" Version="yes" Author="yes" Windowtitle="${version tag} API">
+             access="protected" Use="yes" Version="yes" Author="yes" Windowtitle="${version-tag} API">
       <classpath>
         <pathelement location="${java15-tools}" />
         <fileset refid="libs" />
