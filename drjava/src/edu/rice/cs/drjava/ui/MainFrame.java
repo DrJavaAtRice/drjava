@@ -913,25 +913,27 @@ public class MainFrame extends JFrame implements OptionConstants {
       PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
         public String apply(GoToFileListEntry entry) {
           StringBuilder sb = new StringBuilder();
-          sb.append(entry);
+          
           if (entry.doc != null) {
             try {
               try {
-                sb.append("\nin " + FileOps.makeRelativeTo(entry.doc.file(), entry.doc.getSourceRoot()));
+                sb.append(FileOps.makeRelativeTo(entry.doc.file(), entry.doc.getSourceRoot()));
               }
               catch(IOException e) {
-                sb.append("\nin " + entry.doc.getFile());
+                sb.append(entry.doc.getFile());
               }
             }
             catch(edu.rice.cs.drjava.model.FileMovedException e) {
-              sb.append("\nfile was moved");
+              sb.append(entry + " was moved");
             }
             catch(java.lang.IllegalStateException e) {
-              // do nothing
+              sb.append(entry);
             }
             catch(edu.rice.cs.drjava.model.definitions.InvalidPackageException e) { 
-              // ignore
+              sb.append(entry);
             }
+          } else {
+            sb.append(entry);
           }
           return sb.toString();
         }

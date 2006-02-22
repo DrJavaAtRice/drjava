@@ -178,9 +178,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   InfoSupplier<? super T> _info = TO_STRING_SUPPLIER;
 
   /**
-   * Text are for additional information.
+   * Text area for additional information.
    */
-  private JTextArea _infoArea;
+  private JLabel _infoLabel;
   
   /**
    * Last frame state. It can be stored and restored.
@@ -329,9 +329,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     }
     else {
       Dimension parentDim = (_owner!=null)?(_owner.getSize()):getToolkit().getScreenSize();
-      int xs = (int)parentDim.getWidth()/4;
-      int ys = (int)parentDim.getHeight()/5;
-      setSize(Math.max(xs,350), Math.max(ys, 250));
+      int xs = (int)parentDim.getWidth()/3;
+      int ys = (int)parentDim.getHeight()/4;
+      setSize(Math.max(xs,400), Math.max(ys, 300));
       setLocationRelativeTo(_owner);
       _currentStrategy = _strategies.get(0);
       _strategyBox.setSelectedIndex(0);
@@ -483,14 +483,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       }
     });
 
-    JPanel buttonPanel = new JPanel();
-    buttonPanel.setLayout(new FlowLayout());
-    buttonPanel.add(new JLabel("Matching strategy:"));
-    buttonPanel.add(_strategyBox);
-    buttonPanel.add(_okButton);
-    buttonPanel.add(cancelButton);
-    buttonPanel.setMinimumSize(new Dimension(100,40));
-
     // text field
     _textField = new JTextField();
     _textField.setDragEnabled(false);
@@ -637,43 +629,62 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
         addListener();
       }
     });
-
-    _sharedExtLabel = new JLabel("");
-    JPanel labelPanel = new JPanel();
-    _tabCompletesLabel = new JLabel("Tab completes: ");
-    labelPanel.add(_tabCompletesLabel);
-    labelPanel.add(_sharedExtLabel);
-
-    final JPanel topPanel = new JPanel();
-    topPanel.setLayout(new BorderLayout());
-    topPanel.add(_textField, BorderLayout.NORTH);
-    topPanel.add(new JScrollPane(_matchList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-    topPanel.add(labelPanel, BorderLayout.SOUTH);
-    topPanel.setPreferredSize(new Dimension(240, 120));
-
+    
     // put everything together
     Container contentPane = getContentPane();
-    contentPane.add(topPanel, BorderLayout.CENTER);
-
-    _infoArea = new JTextArea("");
+    
+    GridBagLayout layout = new GridBagLayout();
+    contentPane.setLayout(layout);
+    
+    GridBagConstraints c = new GridBagConstraints();
+    c.anchor = GridBagConstraints.NORTHWEST;
+    c.weightx = 1.0;
+    c.weighty = 0.0;
+    c.gridwidth = GridBagConstraints.REMAINDER; // end row
+    c.insets.set(2,2,2,2);
+    
+    _infoLabel = new JLabel("");
     if (info) {
-      _infoArea.setDragEnabled(false);
-      _infoArea.setFocusTraversalKeysEnabled(false);
-      _infoArea.setEditable(false);
-      JPanel centerPanel = new JPanel();
-      centerPanel.setLayout(new BorderLayout());
-      centerPanel.add(new JLabel("Information about current selection:"), BorderLayout.NORTH);
-      centerPanel.add(new JScrollPane(_infoArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-      centerPanel.add(buttonPanel, BorderLayout.SOUTH);
-      centerPanel.setPreferredSize(new Dimension(240, 108));
-      buttonPanel = centerPanel;
+      c.fill = GridBagConstraints.NONE;
+      contentPane.add(_infoLabel, c);
     }
-    contentPane.add(buttonPanel, BorderLayout.SOUTH);
+
+    c.fill = GridBagConstraints.BOTH;
+    c.weighty = 1.0;
+    contentPane.add(new JScrollPane(_matchList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), c);
+    
+    c.anchor = GridBagConstraints.SOUTHWEST;
+    c.fill = GridBagConstraints.NONE;
+    c.weightx = 0.0;
+    c.weighty = 0.0;
+    c.gridwidth = 1;
+    _tabCompletesLabel = new JLabel("Tab completes: ");
+    contentPane.add(_tabCompletesLabel, c);
+    
+    c.fill = GridBagConstraints.HORIZONTAL;
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    _sharedExtLabel = new JLabel("");
+    contentPane.add(_sharedExtLabel, c);
+    
+    contentPane.add(_textField, c);
+    
+    c.anchor = GridBagConstraints.SOUTH;
+    
+    JPanel buttonPanel = new JPanel(new GridBagLayout());
+    GridBagConstraints bc = new GridBagConstraints();
+    bc.insets.set(0,2,0,2);
+    buttonPanel.add(new JLabel("Matching strategy:"), bc);
+    buttonPanel.add(_strategyBox, bc);
+    buttonPanel.add(_okButton, bc);
+    buttonPanel.add(cancelButton, bc);
+    
+    contentPane.add(buttonPanel, c);
 
     Dimension parentDim = (_owner!=null)?(_owner.getSize()):getToolkit().getScreenSize();
-    int xs = (int)parentDim.getWidth()/4;
-    int ys = (int)parentDim.getHeight()/5;
-    setSize(Math.max(xs,350), Math.max(ys, 250));
+    int xs = (int)parentDim.getWidth()/3;
+    int ys = (int)parentDim.getHeight()/4;
+    setSize(Math.max(xs,400), Math.max(ys, 300));
     setLocationRelativeTo(_owner);
 
     removeListener();
@@ -746,12 +757,11 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    */
   private void updateInfo() {
     if (_matchList.getModel().getSize()>0) {
-      _infoArea.setText(_info.apply(_pim.getCurrentItem()));
+      _infoLabel.setText("Path:   " + _info.apply(_pim.getCurrentItem()));
     }
     else {
-      _infoArea.setText("");
+      _infoLabel.setText("No file selected");
     }
-    _infoArea.setCaretPosition(0);
   }
   
   /**
