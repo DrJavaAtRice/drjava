@@ -641,7 +641,10 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     c.weightx = 1.0;
     c.weighty = 0.0;
     c.gridwidth = GridBagConstraints.REMAINDER; // end row
-    c.insets.set(2,2,2,2);
+    c.insets.top = 2;
+    c.insets.left = 2;
+    c.insets.bottom = 2;
+    c.insets.right = 2;
     
     _infoLabel = new JLabel("");
     if (info) {
@@ -673,7 +676,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     
     JPanel buttonPanel = new JPanel(new GridBagLayout());
     GridBagConstraints bc = new GridBagConstraints();
-    bc.insets.set(0,2,0,2);
+    bc.insets.left = 2;
+    bc.insets.right = 2;
     buttonPanel.add(new JLabel("Matching strategy:"), bc);
     buttonPanel.add(_strategyBox, bc);
     buttonPanel.add(_okButton, bc);
