@@ -365,11 +365,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Get source root (current directory only)
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 0, roots.length);
-    /*assertEquals("source root (current directory)",
-                 workDir,
-                 roots[0]);
-                 */
-    // Create temp directory
+
+     // Create temp directory
     File baseTempDir = tempDirectory();
 
     // Now make subdirectory a/b/c
@@ -389,6 +386,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Get source roots
     roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
+    // Get the source root for the new file in directory subdir
     assertEquals("source root", subdir, roots[0]);
     
 //    _log.log("testGetSourceRootDefaultPackage() completed");

@@ -500,7 +500,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
     public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc) { /* dummy method */ }
     public void saveAllFiles(FileSaveSelector fs) throws IOException { saveAllFilesHelper(fs); }
     
-    public OpenDefinitionsDocument newFile() { return newFile(null); }
+    public OpenDefinitionsDocument newFile() { return newFile(getMasterWorkingDirectory()); }
     public OpenDefinitionsDocument openFile(FileOpenSelector fs) 
       throws IOException, OperationCanceledException, AlreadyOpenException { 
       return openFileHelper(fs); 

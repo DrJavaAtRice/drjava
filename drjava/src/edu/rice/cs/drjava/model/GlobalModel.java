@@ -160,11 +160,15 @@ public interface GlobalModel extends ILoadDocuments {
   /** Saves all open documents, prompting when necessary. */
   public void saveAllFiles(FileSaveSelector com) throws IOException;
   
+  /**Creats a new project and saves it to disk
+   * @param filename where to save the project
+   */
+  public void newProject(File f) throws IOException;
+  
   /**Writes the project file to disk
    * @param filename where to save the project
    */
-  public void saveProject(String filename, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) 
-    throws IOException;
+  public void saveProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
   
   /** Formats a string pathname for use in the document navigator. */
   public String fixPathForNavigator(String path) throws IOException;
@@ -206,13 +210,13 @@ public interface GlobalModel extends ILoadDocuments {
    *  @param filename Name of the source file to look for
    *  @return the file corresponding to the given name, or null if it cannot be found
    */
-  public File getSourceFile(String filename);
+  public File getSourceFile(String fileName);
 
   /** Searches for a file with the given name on the provided paths. Returns null if the file is not found.
    *  @param filename Name of the source file to look for
    *  @param paths An array of directories to search
    */
-  public File getSourceFileFromPaths(String filename, Vector<File> paths);
+  public File getSourceFileFromPaths(String fileName, List<File> paths);
 
   /** Gets an array of all sourceRoots for the open definitions documents, without duplicates. */
   public File[] getSourceRootSet();
@@ -377,13 +381,13 @@ public interface GlobalModel extends ILoadDocuments {
    /** Sets the current build directory. */
   public void setBuildDirectory(File f);
   
-  /** @return the working directory. */
+  /** @return the working directory for the Master JVM. */
+  public File getMasterWorkingDirectory();
+  
+  /** @return the working directory for the Slave JVM (only applied to project mode). */
   public File getWorkingDirectory();
   
-  /** @return the value of the WORKING_DIRECTORY property. */
-  public File getRawWorkingDirectory();
-  
-   /** Sets the WORKING_DIRECTORY property. */
+   /** Sets the WORKING_DIRECTORY property for the Slave JVM (only applies to project mode). */
   public void setWorkingDirectory(File f);
 
   /** Sets the main file of the project. */

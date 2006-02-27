@@ -392,6 +392,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     File root = doc.getSourceRoot();
     Utilities.clearEventQueue();
+//    System.err.println("Source root is: " + root);
     assertEquals("source root", new File("").getCanonicalFile(), root);
    
     // Close this doc to clean up after ourselves for the next check.

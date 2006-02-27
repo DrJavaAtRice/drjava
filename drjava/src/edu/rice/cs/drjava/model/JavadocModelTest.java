@@ -58,14 +58,10 @@ import java.io.File;
  */
 public class JavadocModelTest extends DrJavaTestCase {
   
-  /**
-   * Field needed by testUnsavedSuggestedDirectory
-   */
+  /** Field needed by testUnsavedSuggestedDirectory */
   private File _storedFile;
 
-  /**
-   * Tests that a simple suggestion can be made for the destination directory.
-   */
+  /** Tests that a simple suggestion can be made for the destination directory. */
   public void testSimpleSuggestedDirectory() {
     GlobalModel getDocs = new DummyGlobalModel() {
       public boolean hasModifiedDocuments() {
@@ -88,10 +84,7 @@ public class JavadocModelTest extends DrJavaTestCase {
     assertEquals("simple suggested destination", expected, suggestion);
   }
   
-  /**
-   * Tests that a suggestion can be made for an unsaved file,
-   * if the user chooses to save it.
-   */
+  /** Tests that a suggestion can be made for an unsaved file, if the user chooses to save it. */
   public void testUnsavedSuggestedDirectory() {
     _storedFile = null;
     
@@ -124,10 +117,7 @@ public class JavadocModelTest extends DrJavaTestCase {
     assertEquals("simple suggested destination", expected, suggestion);
   }
 
-  /**
-   * Tests that a no suggestion can be made for the destination directory
-   * if there is no valid source root.
-   */
+  /** Tests that a no suggestion can be made for the destination directory if there is no valid source root. */
   public void testNoSuggestedDirectory() {
     GlobalModel getDocs = new DummyGlobalModel() {
       public boolean hasModifiedDocuments() {
@@ -149,50 +139,16 @@ public class JavadocModelTest extends DrJavaTestCase {
     assertNull("suggestion should be null", suggestion);
   }
 
-  public void testFileDefaultPackage() {
-
-  }
-
-  public void testFileOnePackage() {
-
-  }
-
-  public void testFilesOnePackage() {
-
-  }
-
-  public void testFilesMultiplePackages() {
-
-  }
-
-  public void testWarnings() {
-
-  }
-
-  public void testErrors() {
-
-  }
-
-  public void testSaveFirst() {
-
-  }
-
-  public void testPromptForDestination() {
-
-  }
-
-  public void testExtractErrors() {
-
-  }
-
-  public void testParseLine() {
-
-  }
-
-  /**
-   * Be sure to test: -tag require:a:"Require:"
-   */
-  public void testCustomArguments() {
-
-  }
+  public void testFileDefaultPackage() { }
+  public void testFileOnePackage() { }
+  public void testFilesOnePackage() { }
+  public void testFilesMultiplePackages() { }
+  public void testWarnings() { }
+  public void testErrors() { }
+  public void testSaveFirst() { }
+  public void testPromptForDestination() { }
+  public void testExtractErrors() { }
+  public void testParseLine() { }
+  /** Be sure to test: -tag require:a:"Require:" */
+  public void testCustomArguments() { }
 }

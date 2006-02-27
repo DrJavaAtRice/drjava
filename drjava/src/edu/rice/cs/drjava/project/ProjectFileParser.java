@@ -345,7 +345,7 @@ public class ProjectFileParser {
   /** Concrete implementation of the ProjectFileIR which is the interface through which DrJava
    *  access info stored in a project file
    */
-  private static class ProjectFileIRImpl implements ProjectFileIR {
+  public static class ProjectFileIRImpl implements ProjectFileIR {
     List<DocFile> _src;
     List<DocFile> _aux;
     List<String> _collapsed;
@@ -382,11 +382,8 @@ public class ProjectFileParser {
     /** @return the build directory stored in this project file. */
     public File getBuildDirectory() { return _buildDir; }
     
-    /** @return the working directory stored in this project file (null is converted to FileOption.NULL_FILE. */
-    public File getWorkingDirectory() {
-      if (_workDir != null) return _workDir; 
-      return FileOption.NULL_FILE;
-    }
+    /** @return the working directory stored in this project file . */
+    public File getWorkingDirectory() { return _workDir; }
     
     /** @return the file of the class whose main method should be run when running the project in DrJava. */
     public File getMainClass() { return _mainClass; }

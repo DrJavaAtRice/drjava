@@ -652,14 +652,14 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
                        "}"
                          , null);
       
-      String filename = GlobalModelNaming.getDisplayFullPath(doc);
+      String fileName = GlobalModelNaming.getDisplayFullPath(doc);
       
       definitions.setCaretPosition(4);
-      assertEquals("Should display the document path", filename, _frame.getFileNameField());
+      assertEquals("Should display the document path", fileName, _frame.getFileNameField());
       definitions.setCaretPosition(115);
       assertEquals("Should display the line matched", "Matches:      new Object() {", _frame.getFileNameField());
       definitions.setCaretPosition(102);
-      assertEquals("Should display the document matched", filename, _frame.getFileNameField());
+      assertEquals("Should display the document matched", fileName, _frame.getFileNameField());
       definitions.setCaretPosition(119);
       assertEquals("Should display the line matched", "Matches:   private void _method()...{", _frame.getFileNameField());
       definitions.setCaretPosition(121);

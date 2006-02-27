@@ -461,6 +461,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   public ItemT getNext(ItemT doc) {
     synchronized (_model) {
       DefaultMutableTreeNode node = _doc2node.get(doc);
+      if (node == null) return doc; // doc may not be contained in navigator
       // TODO: check for "package" case
       DefaultMutableTreeNode next = node.getNextLeaf();
       if (next == null || next == _model.getRoot()) { return doc; }
@@ -475,6 +476,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   public ItemT getPrevious(ItemT doc) {
     synchronized (_model) {
       DefaultMutableTreeNode node = _doc2node.get(doc);
+      if (node == null) return doc; // doc may not be contained in navigator
       // TODO: check for "package" case
       DefaultMutableTreeNode prev = node.getPreviousLeaf();
       if (prev == null || prev == _model.getRoot()) { return doc; }

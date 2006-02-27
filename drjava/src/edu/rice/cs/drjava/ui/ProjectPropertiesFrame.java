@@ -172,7 +172,7 @@ public class ProjectPropertiesFrame extends JFrame {
     if (bd == null) bdTextField.setText("");
     else _builtDirSelector.setFileField(bd);
     
-    final File wd = _mainFrame.getModel().getRawWorkingDirectory();
+    final File wd = _mainFrame.getModel().getWorkingDirectory();
     final JTextField wdTextField = _workDirSelector.getFileField();
     if (wd == null) wdTextField.setText("");
     else _workDirSelector.setFileField(wd);
@@ -218,7 +218,7 @@ public class ProjectPropertiesFrame extends JFrame {
   
   /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getWorkDir() {
-    File workDir = _mainFrame.getModel().getRawWorkingDirectory();
+    File workDir = _mainFrame.getModel().getMasterWorkingDirectory();
     if (workDir != null) return workDir;
     return FileOption.NULL_FILE;
   }

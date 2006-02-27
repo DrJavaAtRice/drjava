@@ -121,19 +121,18 @@ public class Utilities {
       }
     }
 
-    /**
-     * Private constructor for this dialog. Only gets used in the static showDialog method.
-     * @param frame owner frame
-     * @param comp parent component
-     * @param title dialog title
-     * @param message message for the text area
+    /** Private constructor for this dialog. Only gets used in the static showDialog method.
+     *  @param frame owner frame
+     *  @param comp parent component
+     *  @param title dialog title
+     *  @param message message for the text area
      */
     private TextAreaMessageDialog(Frame frame, Component comp, String title, String message) {
       super(frame, title, true);
       setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
       //buttons
-      JButton okButton = new JButton("Ok");
+      JButton okButton = new JButton("OK");
       okButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           TextAreaMessageDialog.this.dispose();

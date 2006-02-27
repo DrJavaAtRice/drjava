@@ -546,12 +546,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       String fileAndLineNumber = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]";
       doc.append(fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
       
-      if (error.isWarning()) {
-        doc.append(_getWarningText(), BOLD_ATTRIBUTES);
-      }
-      else {
-        doc.append(_getErrorText(), BOLD_ATTRIBUTES);
-      }
+      if (error.isWarning()) doc.append(_getWarningText(), BOLD_ATTRIBUTES);
+      else doc.append(_getErrorText(), BOLD_ATTRIBUTES);
       
       doc.append(error.message(), NORMAL_ATTRIBUTES);
       doc.append("\n", NORMAL_ATTRIBUTES);
@@ -560,17 +556,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** Returns the string to identify a warning. */
     protected String _getWarningText() { return "Warning: "; }
     
-    /**
-     * Returns the string to identify an error.
-     */
-    protected String _getErrorText() {
-      return "Error: ";
-    }
+    /** Returns the string to identify an error. */
+    protected String _getErrorText() { return "Error: "; }
     
-    /**
-     * When the selection of the current error changes, remove
-     * the highlight in the error pane.
-     */
+    /** When the selection of the current error changes, remove the highlight in the error pane. */
     protected void _removeListHighlight() {
       if (_listHighlightTag != null) {
         _listHighlightTag.remove();
@@ -698,7 +687,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
 //          Utilities.showDebug("active document being set to " + doc + " in ErrorPanel.switchToError");
           
           if (! prevDoc.equals(doc)) model.setActiveDocument(doc);
-//          else model.refreshActiveDocument();
+          else model.refreshActiveDocument();
           
 //          Utilities.showDebug("setting active document has completed");
           

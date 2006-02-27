@@ -638,7 +638,7 @@ public class DefaultJavadocModel implements JavadocModel {
 
     if (errStart != -1) {
       // filename is everything up to and including the '.java'
-      String filename = line.substring(0, errStart+5);
+      String fileName = line.substring(0, errStart+5);
 
       // line number is all contiguous number characters after the colon
       int lineno = -1;
@@ -671,10 +671,10 @@ public class DefaultJavadocModel implements JavadocModel {
       }
 
       if (lineno >= 0) {
-        error = new CompilerError(new File(filename), lineno, 0, errMessage, false);
+        error = new CompilerError(new File(fileName), lineno, 0, errMessage, false);
           
       } else {
-        error = new CompilerError(new File(filename), errMessage, false);
+        error = new CompilerError(new File(fileName), errMessage, false);
       }
     }
     return error;
@@ -693,12 +693,9 @@ public class DefaultJavadocModel implements JavadocModel {
    * @throws IllegalStateException if the doc has no file (hasn't been saved)
    * @throws IOException if the file can't be saved after it was moved
    */
-  private File _getFileFromDocument(OpenDefinitionsDocument doc, FileSaveSelector saver)
-    throws IOException
-  {
+  private File _getFileFromDocument(OpenDefinitionsDocument doc, FileSaveSelector saver) throws IOException {
     try {
-      // This call will abort the iteration if there is no file,
-      // unless we can recover (like for a FileMovedException).
+      // This call will abort the iteration if there is no file, unless we can recover (like for a FileMovedException).
       return doc.getFile();
     }
     catch (FileMovedException fme) {

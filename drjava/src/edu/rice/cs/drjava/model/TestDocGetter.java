@@ -99,17 +99,11 @@ public class TestDocGetter extends DummyGlobalModel {
   public OpenDefinitionsDocument getDocumentForFile(File file)
     throws IOException {
     // Try to find the key in docs.
-    if (docs.containsKey(file)) {
-      return docs.get(file);
-    }
-    else {
-      throw new IllegalStateException("TestDocGetter can't open new files!");
-    }
+    if (docs.containsKey(file)) return docs.get(file);
+    else throw new IllegalStateException("TestDocGetter can't open new files!");
   }
 
-  /**
-   * Test implementation of OpenDefinitionsDocument interface.
-   */
+  /** Test implementation of OpenDefinitionsDocument interface. */
   private static class TestOpenDoc extends DummyOpenDefDoc {
     DefinitionsDocument _doc;
     File _file;
@@ -119,22 +113,12 @@ public class TestDocGetter extends DummyGlobalModel {
       _file = null;
     }
 
-    /**
-     * This is the only method that we care about.
-     */
-    protected DefinitionsDocument getDocument() {
-      return _doc;
-    }
+    /** This is the only method that we care about. */
+    protected DefinitionsDocument getDocument() { return _doc; }
 
-    /**
-     * Okay, I lied.  We need this one, too.
-     */
-    public File getFile() throws IllegalStateException, FileMovedException  {
-      return _file;
-    }
+    /** Okay, I lied.  We need this one, too. */
+    public File getFile() throws FileMovedException  { return _file; }
     
-    public void setFile(File f) {
-      _file = f;
-    }
+    public void setFile(File f) { _file = f; }
   }
 }

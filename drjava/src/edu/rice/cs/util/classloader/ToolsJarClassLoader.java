@@ -50,7 +50,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
   
   /** Standard constructors */
   public ToolsJarClassLoader(File toolsJar) { super(getToolsJarURLs(toolsJar)); }
-  public ToolsJarClassLoader() { this(FileOps.NULL_FILE); }
+  public ToolsJarClassLoader() { this(FileOps.NONEXISTENT_FILE); }
 
   /** Returns an array of possible Files for the tools.jar file. */
   public static File[] getToolsJarFiles(File toolsJar) {
@@ -83,7 +83,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
   }
   
   /** Returns an array of possible URLs for the tools.jar file. */
-  public static URL[] getToolsJarURLs() { return getToolsJarURLs(FileOps.NULL_FILE); }
+  public static URL[] getToolsJarURLs() { return getToolsJarURLs(FileOps.NONEXISTENT_FILE); }
   
   /** Returns an array of possible URLs for the tools.jar file. */
   public static URL[] getToolsJarURLs(File toolsJar) {
@@ -101,7 +101,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
   }
   
    /** Returns a string containing all possible tools.jar locations, separated by the system's path separator. */
-  public static String getToolsJarClassPath() { return getToolsJarClassPath(FileOps.NULL_FILE); }
+  public static String getToolsJarClassPath() { return getToolsJarClassPath(FileOps.NONEXISTENT_FILE); }
 
   /** Returns a string containing all possible tools.jar locations, separated by the system's path separator. */
   public static String getToolsJarClassPath(File toolsJar) {

@@ -42,22 +42,22 @@ public class GlobalModelNaming {
    *  if it is present. */
   public static String getDisplayFilename(OpenDefinitionsDocument doc) {
 
-    String filename = doc.getFilename();
+    String fileName = doc.getFilename();
 
     // Remove ".java" if at the end of name
-    if (filename.endsWith(".java")) {
-      int extIndex = filename.lastIndexOf(".java");
+    if (fileName.endsWith(".java")) {
+      int extIndex = fileName.lastIndexOf(".java");
       if (extIndex > 0) {
-        filename = filename.substring(0, extIndex);
+        fileName = fileName.substring(0, extIndex);
       }
     }
 
     // Mark if modified
     if (doc.isModifiedSinceSave()) {
-      filename = filename + " *";
+      fileName = fileName + " *";
     }
 
-    return filename;
+    return fileName;
   }
 
   /**
@@ -65,13 +65,10 @@ public class GlobalModelNaming {
    */
   public static String getDisplayFullPath(OpenDefinitionsDocument doc) {
 
-    String path = "(untitled)";
+    String path = "(Untitled)";
     try {
       File file = doc.getFile();
-      path = file.getAbsolutePath();
-    }
-    catch (IllegalStateException ise) {
-      // No file, filename stays "Untitled"
+      if (file != null) path = file.getAbsolutePath();
     }
     catch (FileMovedException fme) {
       // Recover, even though file was deleted
@@ -80,10 +77,7 @@ public class GlobalModelNaming {
     }
 
     // Mark if modified
-    if (doc.isModifiedSinceSave()) {
-      path = path + " *";
-    }
-
+    if (doc.isModifiedSinceSave()) path = path + " *";
     return path;
   }
 }

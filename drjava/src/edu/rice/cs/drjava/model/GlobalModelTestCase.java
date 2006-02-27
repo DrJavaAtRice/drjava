@@ -122,7 +122,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
 //    FileOps.deleteDirectoryOnExit(_tempDir);
 //    _model.getOpenDefinitionsDocuments().get(0).saveFile(new FileSelector(new File(_tempDir, "blank document")));
-    super.setUp();
+//    super.setUp();
   }
 
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
@@ -1083,10 +1083,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
   
   /* A variant of DefaultGlobalModel used only for testing purposes.  This variant
-   * does not change the working directory when resetting interactions.  The definition of
-   * getWorkingDirectory() in DefaultGlobalModel breaks some unit tests on windows because
-   * the slave JVM keeps its working directory open until it shuts down. */
+   * does not change the working directory when resetting interactions.  This test class and its
+   * descendants were written before the distinction between getWorkingDirectoru and getMasterDirectory.
+   * This method override restores the old semantics for getWorkingDirectory.  The new definition breaks
+   * some unit tests because the slave JVM keeps its working directory open until it shuts down. 
+   */
   public class TestGlobalModel extends DefaultGlobalModel {
-    public File getWorkingDirectory() { return getRawWorkingDirectory(); }
+    public File getWorkingDirectory() { return getMasterWorkingDirectory(); }
   } 
 }

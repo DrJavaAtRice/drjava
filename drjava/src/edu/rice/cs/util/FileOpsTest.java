@@ -313,45 +313,36 @@ public class FileOpsTest extends DrJavaTestCase {
 
     base = new File("src/test1/test2/file.txt");
     abs = new File("built/test1/test2/file.txt");
-    assertEquals("Wrong Relative Path 1",
-                 "../../../built/test1/test2/file.txt",
+    assertEquals("Wrong Relative Path 1", "../../../built/test1/test2/file.txt",
                  fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
     base = new File("file.txt");
     abs = new File("built/test1/test2/file.txt");
-    assertEquals("Wrong Relative Path 2",
-                 "built/test1/test2/file.txt",
+    assertEquals("Wrong Relative Path 2", "built/test1/test2/file.txt",
                  fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
     base = new File("built/test1/test2test/file.txt");
     abs = new File("built/test1/test2/file.txt");
-    assertEquals("Wrong Relative Path 3",
-                 "../test2/file.txt",
+    assertEquals("Wrong Relative Path 3", "../test2/file.txt",
                  fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
     base = new File("file.txt");
     abs = new File("test.txt");
-    assertEquals("Wrong Relative Path 4",
-                 "test.txt",
+    assertEquals("Wrong Relative Path 4", "test.txt",
                  fixPathFormat(FileOps.makeRelativeTo(abs,base).getPath()));
   }
 
-  /**
-   * Main method to be called by testDeleteDirectoryOnExit.  Runs in
-   * a new JVM so the files can be deleted.
-   * Exits with status 1 if wrong number of arguments.
-   * Exits with status 2 if file doesn't exist
-   * @param args should contain the file name of the directory to delete on exit
+  /** Main method to be called by testDeleteDirectoryOnExit.  Runs in a new JVM so the files can be deleted.
+   *  Exits with status 1 if wrong number of arguments.  Exits with status 2 if file doesn't exist
+   *  @param args should contain the file name of the directory to delete on exit
    */
   public static void main(String[] args) {
-    if (args.length != 1) {
-      System.exit(1);
-    }
+    if (args.length != 1) System.exit(1);
 
     File dir = new File(args[0]);
-    if (!dir.exists()) {
-      System.exit(2);
-    }
+   
+    if (! dir.exists()) System.exit(2);
+
     FileOps.deleteDirectoryOnExit(dir);
 
-    // Ok, exit cleanly
+    // OK, exit cleanly
     System.exit(0);
   }
   
@@ -364,29 +355,22 @@ public class FileOpsTest extends DrJavaTestCase {
     input = "."+p+"drjava"+p+p+f+"home"+f+"foo"+f+"junit.jar";
     expected = ud+f+"."+p+ud+f+"drjava"+p+ud+p+(new File(f+"home"+f+"foo"+f+"junit.jar")).getAbsolutePath();
     actual = FileOps.convertToAbsolutePathEntries(input);
-    assertEquals("testConvertToAbsolutePathEntries for several paths failed, input='"+input+"', expected='"+expected+"', actual='"+actual+"'",
-                 expected,
-                 actual);
-    
+    assertEquals("testConvertToAbsolutePathEntries for several paths failed, input = '" + input + "', expected = '" + 
+                 expected + "', actual = '" + actual + "'", expected, actual);
     input = "";
     expected = ud;
     actual = FileOps.convertToAbsolutePathEntries(input);
-    assertEquals("testConvertToAbsolutePathEntries for empty path failed, input='"+input+"', expected='"+expected+"', actual='"+actual+"'",
-                 expected,
-                 actual);
-    
-    input = p+p+p+".";
-    expected = ud+p+ud+p+ud+p+ud+f+".";
+    assertEquals("testConvertToAbsolutePathEntries for empty path failed, input = '" + input + "', expected = '" + 
+                 expected + "', actual = '" + actual + "'", expected, actual); 
+    input = p + p + p + ".";
+    expected = ud + p + ud + p + ud + p + ud + f + ".";
     actual = FileOps.convertToAbsolutePathEntries(input);
-    assertEquals("testConvertToAbsolutePathEntries for several empty paths failed, input='"+input+"', expected='"+expected+"', actual='"+actual+"'",
-                 expected,
-                 actual);
-    
-    input = p+p;
-    expected = ud+p+ud+p+ud;
+    assertEquals("testConvertToAbsolutePathEntries for several empty paths failed, input = '" + input + 
+                 "', expected = '" +expected+"', actual = '" + actual + "'", expected, actual);
+    input = p + p;
+    expected = ud + p + ud + p + ud;
     actual = FileOps.convertToAbsolutePathEntries(input);
-    assertEquals("testConvertToAbsolutePathEntries for trailing empty paths failed, input='"+input+"', expected='"+expected+"', actual='"+actual+"'",
-                 expected,
-                 actual);
+    assertEquals("testConvertToAbsolutePathEntries for trailing empty paths failed, input = '" + input + 
+                 "', expected = '" + expected + "', actual = '" + actual + "'", expected, actual);
   }
 }

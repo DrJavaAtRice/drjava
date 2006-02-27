@@ -203,8 +203,6 @@ public class ConfigFrame extends JFrame {
 
     cp.add(bottom, BorderLayout.SOUTH);
 
-
-
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
     // suggested from zaq@nosi.com, to keep the frame on the screen!
@@ -232,17 +230,14 @@ public class ConfigFrame extends JFrame {
     _tree.expandRow(2);
   }
 
-  /** Returns the current working directory, or the user's current directory
-   *  if none is set. 20040213 Changed default value to user's current directory.
+  /** Returns the current master working directory, or the user's current directory if none is set. 20040213 Changed default 
+   *  value to user's current directory.
    */
   private File _getWorkDir() {
-    File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = new File(System.getProperty("user.dir"));
-    }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
+    File workDir = _mainFrame.getModel().getMasterWorkingDirectory();  // cannot be null
+    if (workDir.isDirectory()) return workDir;
+    
+    if (workDir.getParent() != null) workDir = workDir.getParentFile();
     return workDir;
   }
 
@@ -257,18 +252,14 @@ public class ConfigFrame extends JFrame {
     _rootNode.resetToCurrent();
   }
 
-  /**
-   * Resets the frame and hides it.
-   */
+  /** Resets the frame and hides it. */
   public void cancel() {
     resetToCurrent();
     _applyButton.setEnabled(false);
     ConfigFrame.this.setVisible(false);
   }
 
-  /**
-   * Write the configured option values to disk.
-   */
+  /** Write the configured option values to disk. */
   public boolean saveSettings() throws IOException {
     boolean successful = apply();
     if (successful) {
@@ -276,9 +267,7 @@ public class ConfigFrame extends JFrame {
         DrJava.getConfig().saveConfiguration();
       }
       catch (IOException ioe) {
-        JOptionPane.showMessageDialog(this,
-                                      "Could not save changes to your '.drjava' file " +
-                                      "in your home directory. \n\n" + ioe,
+        JOptionPane.showMessageDialog(this,"Could not save changes to your '.drjava' file in your home directory. \n\n" + ioe,
                                       "Could Not Save Changes",
                                       JOptionPane.ERROR_MESSAGE);
         //return false;
@@ -747,7 +736,7 @@ public class ConfigFrame extends JFrame {
     
     addOptionComponent(panel, new DirectoryOptionComponent(OptionConstants.WORKING_DIRECTORY,
                                                     "Working Directory", this,
-                                                    "The directory that DrJava should consider the default working directory.",
+                                                    "The working directory for the DrJava editor and GUI interface.",
                                                     _dirChooser));
 
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this,

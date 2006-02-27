@@ -77,12 +77,6 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final File file = new File(_tempDir, "DrJavaTestFoo.java");
     doc.saveFile(new FileSelector(file));
     
-//    /** Temporarily set the WORKING_DIRECTORY option to same file as the System "user.dir" property in the testing
-//     *  JVM.  When the interactions pane is reset, the new slave JVM holds onto the created temp directory as 
-//     * "user.dir". */
-//    File savedWorkDir = _model.getRawWorkingDirectory();
-//    _model.setWorkingDirectory(new File(System.getProperty("user.dir")));
-
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.setResetAfterCompile(true);
     _model.addListener(listener);
@@ -97,10 +91,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
 //    System.err.println("Reached end of compilation");
     assertCompileErrorsPresent("compile should succeed", false);
     listener.checkCompileOccurred();
-    
-//    /* Restore original WORKING_DIRECTORY property in .drjava */
-//    _model.setWorkingDirectory(savedWorkDir);
-    
+ 
 //    System.err.println("Checked that compile occurred");
     _model.removeListener(listener);
 //    System.err.println("Removed compilation listener");
@@ -195,15 +186,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
 
-        //File f = null;
-        try {
-          //f =
-          doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          throw new UnexpectedException(ise);
-        }
+        try { doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
@@ -277,13 +260,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertConsoleResetCount(0);
 
         File f = null;
-        try {
-          f = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          throw new UnexpectedException(ise);
-        }
+        try { f = doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");

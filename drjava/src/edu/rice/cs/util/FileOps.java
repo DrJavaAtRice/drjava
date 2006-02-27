@@ -48,6 +48,8 @@ package edu.rice.cs.util;
 import java.io.*;
 import java.util.*;
 
+import edu.rice.cs.drjava.config.FileOption;
+
 /** A class to provide some convenient file operations as static methods.
  *  It's abstract to prevent (useless) instantiation, though it can be subclassed
  *  to provide convenient namespace importation of its methods.
@@ -56,39 +58,38 @@ import java.util.*;
  */
 public abstract class FileOps {
   
-  /** Special File object corresponding to a dummy file. Simliar to FileOption.NULL_FILE but exits() returns false. */
-  public static final File NULL_FILE = new File("") {
+  /** Special File object corresponding to a dummy file. Simliar to FileOption.NULL_FILE but exists() returns false. */
+  public static final File NONEXISTENT_FILE = new File("") {
     public String getAbsolutePath() { return ""; }
     public String getName() { return ""; }
     public String toString() { return ""; }
     public boolean exists() { return false; }
   };
   
-  /** Makes a file from the abs file that is relative such that making a new file:
-   *  <code>new File(base,makeRelativeTo(base,abs)).getCanonicalPath()</code> would
-   *  create the same file as <code>abs.getCanonicalPath()</code><p> 
-   *  The abs file in linux is: <code>/home/username/folder/file.java</code>
-   *  and the base file is <code>/home/username/folder/sublevel/file2.java</code>, 
-   *  the resulting path of this method would be: <code>../file.java</code> while
-   *  its canoncial path would be <code>/home/username/folder/file.java</code>. </p>
-   *  @param abs The absolute path that is to be made relative to the base file
-   *  @param base The file to make the next file relative to
-   *  @return A new file whose path is relative to the base file while the value of 
-   *  <code>getCanonicalPath()</code> for the returned file is the same as the result 
-   *  of <code>getCanonicalPath()</code> in the given absolute file.
+  /** Makes a file equivalent to the given file f that is relative to base file b.  In other words,
+   *  <code>new File(b,makeRelativeTo(base,abs)).getCanonicalPath()</code> equals
+   *  <code>f.getCanonicalPath()</code><p> 
+   *  In Linux/Unix, if the file f is <code>/home/username/folder/file.java</code> and the file b is 
+   *  <code>/home/username/folder/sublevel/file2.java</code>, then the resulting File path from this method would be 
+   *  <code>../file.java</code> while its canoncial path would be <code>/home/username/folder/file.java</code>.</p>
+   *  @param f The path that is to be made relative to the base file
+   *  @param b The file to make the next file relative to
+   *  @return A new file whose path is relative to the base file while the value of <code>getCanonicalPath()</code> 
+   *    for the returned file is the same as the result of <code>getCanonicalPath()</code> for the given file.
    */
-  public static File makeRelativeTo(File abs, File base) throws IOException, SecurityException{
-    base = base.getCanonicalFile();
-    abs  = abs.getCanonicalFile();
-    if (!base.isDirectory()) base = base.getParentFile();
+  public static File makeRelativeTo(File f, File b) throws IOException, SecurityException {
+    File base = b.getCanonicalFile();
+    File abs  = f.getCanonicalFile();  // If  f is relative, uses current working directory ("user.dir")
+    if (! base.isDirectory()) base = base.getParentFile();
     
     String last = "";
-    if (!abs.isDirectory()) {
+    if (! abs.isDirectory()) {
       String tmp = abs.getPath();
-      last = tmp.substring(tmp.lastIndexOf(File.separator)+1);
+      last = tmp.substring(tmp.lastIndexOf(File.separator) + 1);
       abs = abs.getParentFile();
     }
     
+//    System.err.println("makeRelativeTo called; f = " + f + " = " + abs + "; b = " + b + " = " + base);
     String[] basParts = splitFile(base);
     String[] absParts = splitFile(abs);
     
@@ -109,19 +110,19 @@ public abstract class FileOps {
       result.append(absParts[i]).append(File.separator);
     }
     result.append(last);
+//    System.err.println("makeRelativeTo(" + f + ", " + b + ") = " + result);
     return new File(result.toString());
   }
   
-  /** Splits a file into an array of strings representing each parent folder of
-   *  the given file.  The file whose path is <code>/home/username/txt.txt</code> 
-   *  in linux would be split into the string array: {&quot;&quot;,&quot;home&quot;,
-   *  &quot;username&quot;,&quot;txt.txt&quot;}. Delimeters are excluded.
+  /** Splits a file into an array of strings representing each parent folder of the given file.  The file whose path
+   *  is <code>/home/username/txt.txt</code> in linux would be split into the string array: 
+   *  {&quot;&quot;,&quot;home&quot;,&quot;username&quot;,&quot;txt.txt&quot;}. Delimeters are excluded.
    *  @param fileToSplit the file to split into its directories.
    */
   public static String[] splitFile(File fileToSplit) {
     String path = fileToSplit.getPath();
     ArrayList<String> list = new ArrayList<String>();
-    while (!path.equals("")) {
+    while (! path.equals("")) {
       int idx = path.indexOf(File.separator);
       if (idx < 0) {
         list.add(path);
@@ -153,6 +154,20 @@ public abstract class FileOps {
       }
     }      
     else acc.add(d);
+  }
+  
+  /** @return the canonical file equivalent to f.  Identical to f.getCanonicalFile() except it does not throw an exception
+   *          if the file path syntax is incorrect. */
+  public static File getCanonicalFile(File f) {
+    try { if (f.exists()) return f.getCanonicalFile(); }
+    catch(IOException e) { /* fall through */ }
+    return FileOption.NULL_FILE;  // This File object exists
+  }
+  
+  /** @returns the file f unchanged if f exists; otherwise returns NULL_FILE. */
+  public static File validate(File f) {
+    if (f.exists()) return f;
+    return FileOption.NULL_FILE;  // This File object exists
   }
   
   /** This filter checks for files with names that end in ".java". */
@@ -429,7 +444,7 @@ public abstract class FileOps {
     if (makeBackup) {
       backup = fileSaver.getBackupFile();
       if (!renameFile(file, backup)){
-        throw new IOException("Save failed: Could not create backup file "
+        throw new IOException("Save failed. Could not create backup file "
                                 + backup.getAbsolutePath() +
                               "\nIt may be possible to save by disabling file backups\n");
       }
@@ -474,7 +489,7 @@ public abstract class FileOps {
       fos.close();
 
       if (tempFileUsed && !renameFile(tempFile, file))
-        throw new IOException("Save failed: Another process may be using " + file + ".");
+        throw new IOException("Save failed. Another process may be using " + file + ".");
 
       success = true;
     } 
@@ -574,17 +589,15 @@ public abstract class FileOps {
     }
   }
   
-  /**
-   * Convert all path entries in a path string to absolute paths.
-   * The delimiter in the path string is the "path.separator" property.
-   * Empty entries are equivalent to "." and will thus get converted to
-   * to the "user.dir" (current directory).
-   * Example:
-   * ".:drjava::/home/foo/junit.jar" with "user.dir" set to "/home/foo/bar" will
-   * get converted to "/home/foo/bar:/home/foo/bar/drjava:/home/foo/bar:/home/foo/junit.jar".
+  /** Convert all path entries in a path string to absolute paths. The delimiter in the path string is the 
+   *  "path.separator" property.  Empty entries are equivalent to "." and will thus are converted to the 
+   *  "user.dir" (working directory).
+   *  Example:
+   *    ".:drjava::/home/foo/junit.jar" with "user.dir" set to "/home/foo/bar" will be converted to 
+   *    "/home/foo/bar:/home/foo/bar/drjava:/home/foo/bar:/home/foo/junit.jar".
    * 
-   * @param path path string with entries to convert
-   * @return path string with all entries as absolute paths
+   *  @param path path string with entries to convert
+   *  @return path string with all entries as absolute paths
    */
   public static String convertToAbsolutePathEntries(String path) {
     String pathSep = System.getProperty("path.separator");

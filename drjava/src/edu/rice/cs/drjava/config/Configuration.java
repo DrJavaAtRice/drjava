@@ -79,22 +79,16 @@ public class Configuration {
   }
   
   /** Gets the current value of the given Option. */
-  public <T> T getSetting(Option<T> op) {
-    return map.getOption(op);
-  }
+  public <T> T getSetting(Option<T> op) { return map.getOption(op); }
   
   /** Adds an OptionListener to the given Option, to be notified each time the option changes.
    *  @param op Option to listen for changes on
    *  @param l OptionListener wishing to listen
    */
-  public <T> void addOptionListener(Option<T> op, OptionListener<T> l) {
-    op.addListener(this,l);
-  }
+  public <T> void addOptionListener(Option<T> op, OptionListener<T> l) { op.addListener(this,l); }
   
   /** Removes an OptionListener from an Option to which it was listening. */
-  public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) {
-    op.removeListener(this,l);
-  }
+  public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) { op.removeListener(this,l); }
   
   /** Resets to the default values, overwriting any existing values. */
   public void resetToDefaults() { OptionMapLoader.DEFAULT.loadInto(map); }
@@ -105,8 +99,8 @@ public class Configuration {
   /** Returns the exception caught during startup, or null if none were caught. */
   public Exception getStartupException() { return _startupException; }
   
-  /** Stores any exception caught during the creation of this Configuration object, so it can be displayed later by the UI.
-   * @param e Exception caught during startup
+  /** Stores exception caught during creation of this Configuration object, so it can be displayed later by the UI.
+   *  @param e Exception caught during startup
    */
   public void storeStartupException(Exception e) { _startupException = e; }
   

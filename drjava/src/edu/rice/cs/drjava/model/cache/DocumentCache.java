@@ -149,7 +149,7 @@ public class DocumentCache {
     private int _stat; // I know, this is not very OO
     private DDReconstructor _rec;
     private DefinitionsDocument _doc;
-    private String _filename;
+    private String _fileName;
     
     /** Instantiates a manager for the documents that are produced by the given document reconstructor.
      *  @param rec The reconstructor used to create the document
@@ -160,7 +160,7 @@ public class DocumentCache {
       else _stat = NOT_IN_QUEUE;
       _rec = rec;
       _doc = null;
-     _filename = fn;
+     _fileName = fn;
     }
     
     public DDReconstructor getReconstructor() { return _rec; }
@@ -222,7 +222,7 @@ public class DocumentCache {
 //      Utilities.showDebug("Document " + _doc + " has been saved as " + fileName);
       synchronized(_cacheLock) {  // lock the document manager so that document manager fields can be updated
         if (isUnmanagedOrUntitled()) {
-          _filename = fileName;
+          _fileName = fileName;
           add();  // add formerly unmanaged/untitled document to queue
         }
       }
@@ -268,7 +268,7 @@ public class DocumentCache {
       _stat = NOT_IN_QUEUE;
     }
     
-    public String toString() { return _filename; } 
+    public String toString() { return _fileName; } 
   }
   
   ////////////////////////////////////////

@@ -52,20 +52,15 @@ public class ProjectTest extends DrJavaTestCase {
   private String absp; // absolute path
   public void setUp() throws Exception {
     super.setUp();
-    try {
-      absp=new File(System.getProperty("java.io.tmpdir")).getCanonicalPath() +
-        File.separator;
-    }
-    catch(IOException e) {
-      fail("could not initialize temp path string");
-    }
+    try { absp=new File(System.getProperty("java.io.tmpdir")).getCanonicalPath() + File.separator; }
+    
+    catch(IOException e) { fail("could not initialize temp path string"); }
   }
 
-  /**
-   * Creates a temporary file and writes the given string to that file
-   * @param fname the name of the file to create
-   * @param text the text to write to the file
-   * @return the File that was created
+  /** Creates a temporary file and writes the given string to that file
+   *  @param fname the name of the file to create
+   *  @param text the text to write to the file
+   *  @return the File that was created
    */
   private File _fillTempFile(String fname, String text) {
     File f = null;
@@ -75,15 +70,11 @@ public class ProjectTest extends DrJavaTestCase {
       fw.write(text, 0, text.length());
       fw.close();
     }
-    catch (IOException e) {
-      throw new RuntimeException("IOException thrown while writing to temp file");
-    }
+    catch (IOException e) { throw new RuntimeException("IOException thrown while writing to temp file"); }
     return f;
   }
 
-  /**
-   * Test to make sure all elements of the project are read correctly into the IR
-   */
+  /** Test to make sure all elements of the project are read correctly into the IR */
   public void testParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj1 =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
@@ -128,7 +119,6 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("work-dir name", new File(absp,"drjava/src").getPath(), pfir.getWorkingDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(absp,"drjava/src/edu/rice/cs/lib").getPath(), pfir.getClassPaths()[0].getCanonicalPath());
     assertEquals("main-class name", new File(base,"/sexp/SEList.java").getCanonicalPath(), pfir.getMainClass().getCanonicalPath());
-
   }
 
   public void testParseFile() throws SExpParseException {
@@ -142,8 +132,8 @@ public class ProjectTest extends DrJavaTestCase {
 
   public void testWriteFile() throws IOException, MalformedProjectFileException {
     File pf = _fillTempFile("test2.pjt", "");
-    ProjectFileBuilder fb = new ProjectFileBuilder(pf);
-    String sr =pf.getCanonicalFile().getParent();
+    ProjectProfile fb = new ProjectProfile(pf);
+    String sr = pf.getCanonicalFile().getParent();
 
     fb.addSourceFile(makeGetter(0, 0, 0, 0,  "dir1/testfile1.java", "dir1", false, false, pf));
     fb.addSourceFile(makeGetter(1, 1, 0, 0,  "dir1/testfile2.java", "dir1", false, false, pf));
@@ -165,7 +155,7 @@ public class ProjectTest extends DrJavaTestCase {
     FileReader fr = new FileReader(pf);
     int c = fr.read();
     while (c >= 0) {
-      received += (char)c;
+      received += (char) c;
       c = fr.read();
     }
 //    assertEquals("Make relative", "dir1/test.java",
@@ -184,12 +174,13 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("number of classpaths", 1, pfir.getClassPaths().length);
 
     String base = pf.getParent();
+    
     assertEquals("first source filename", new File(base,"/dir1/testfile1.java").getPath(), pfir.getSourceFiles()[0].getPath());
     assertEquals("last source filename", new File(base,"/dir3/testfile5.java").getPath(), pfir.getSourceFiles()[4].getPath());
     assertEquals("first aux filename", new File(absp,"test/testfile6.java").getPath(), pfir.getAuxiliaryFiles()[0].getPath());
     assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);
-    assertEquals("build-dir name", new File(absp,"drjava/built").getPath(), pfir.getBuildDirectory().getCanonicalPath());
-    assertEquals("work-dir name", new File(absp,"drjava/src").getPath(), pfir.getWorkingDirectory().getCanonicalPath());
+    assertEquals("build-dir name", null, pfir.getBuildDirectory());
+    assertEquals("work-dir name", null, pfir.getWorkingDirectory());
     assertEquals("classpath name", new File(absp,"drjava/lib").getPath(), pfir.getClassPaths()[0].getCanonicalPath());
     assertEquals("main-class name", new File(base,"/dir1/testfile1.java").getCanonicalPath(), pfir.getMainClass().getCanonicalPath());
     pf.delete();

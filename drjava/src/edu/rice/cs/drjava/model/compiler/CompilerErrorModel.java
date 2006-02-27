@@ -190,8 +190,10 @@ public class CompilerErrorModel {
    */
   public CompilerError getErrorAtOffset(OpenDefinitionsDocument odd, int offset) {
     File file;
-    try { file = odd.getFile(); }
-    catch (IllegalStateException e) { return null; }
+    try { 
+      file = odd.getFile(); 
+      if (file == null) return null;
+    }
     catch (FileMovedException e) { file = e.getFile(); }
 
     // Use the canonical file if possible
@@ -252,11 +254,12 @@ public class CompilerErrorModel {
   /** This function tells if there are errors with source locations associated with the given file. */
   public boolean hasErrorsWithPositions(OpenDefinitionsDocument odd) {
     File file = null;
-    try { file = odd.getFile(); }
-    catch (IllegalStateException ise) { /* no associated file, do nothing */ }
+    try { 
+      file = odd.getFile();
+      if (file == null) return false;
+    }
     catch (FileMovedException fme) { file = fme.getFile(); }
-    if (file == null) return false;
-
+    
     // Try to use the canonical file
     try { file = file.getCanonicalFile(); }
     catch (IOException ioe) { /* Oh well, look for the file as is.*/ }

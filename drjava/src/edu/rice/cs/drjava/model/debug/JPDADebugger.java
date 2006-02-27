@@ -1090,8 +1090,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
     // No stored doc, look on the source root set (later, also the sourcepath)
     ReferenceType rt = location.declaringType();
-    String filename;
-    try { filename = getPackageDir(rt.name()) + rt.sourceName(); }
+    String fileName;
+    try { fileName = getPackageDir(rt.name()) + rt.sourceName(); }
     catch (AbsentInformationException aie) {
       // Don't know real source name:
       //   assume source name is same as file name
@@ -1106,11 +1106,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         className = className.substring(0, indexOfDollar);
       }
 
-      filename = className + ".java";
+      fileName = className + ".java";
     }
 
     // Check source root set (open files)
-    File f = _model.getSourceFile(filename);
+    File f = _model.getSourceFile(fileName);
 //    File[] sourceRoots = _model.getSourceRootSet();
 //    Vector<File> roots = new Vector<File>();
 //    for (int i=0; i < sourceRoots.length; i++) {

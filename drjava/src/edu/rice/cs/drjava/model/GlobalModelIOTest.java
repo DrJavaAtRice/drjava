@@ -181,25 +181,16 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
         File file = null;
-        try {
-          file = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        try { file = doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
         }
         try {
-          assertEquals("file to open", tempFile.getCanonicalFile(),
-                       file.getCanonicalFile());
+          assertEquals("file to open", tempFile.getCanonicalFile(), file.getCanonicalFile());
           openCount++;
         }
-        catch (IOException ioe) {
-          fail("could not get canonical file");
-        }
+        catch (IOException ioe) { fail("could not get canonical file"); }
       }
       
       public void fileClosed(OpenDefinitionsDocument doc) {
@@ -311,13 +302,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
         File file = null;
-        try {
-          file = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          fail("file does not yet exist");
-        }
+        try { file = doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
@@ -404,13 +389,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
         File file = null;
-        try {
-          file = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        try { file = doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
@@ -418,13 +397,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
         try {
           if (tempFile1.equals(file)) {
-            assertEquals("file to open", tempFile1.getCanonicalFile(),
-                         file.getCanonicalFile());
+            assertEquals("file to open", tempFile1.getCanonicalFile(), file.getCanonicalFile());
           } else {
-            assertEquals("file to open", tempFile2.getCanonicalFile(),
-                         file.getCanonicalFile());
+            assertEquals("file to open", tempFile2.getCanonicalFile(), file.getCanonicalFile());
           }
-
           openCount++;
         }
         catch (IOException ioe) {
@@ -535,20 +511,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
       public void fileOpened(OpenDefinitionsDocument doc) {
         File file = null;
-        try {
-          file = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        try { file = doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
         }
         try {
-          assertEquals("file to open", tempFile1.getCanonicalFile(),
-                       file.getCanonicalFile());
+          assertEquals("file to open", tempFile1.getCanonicalFile(), file.getCanonicalFile());
           openCount++;
         }
         catch (IOException ioe) {
@@ -641,15 +610,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
-        //File file = null;
-        try {
-          //file =
-          doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        try { doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
@@ -702,28 +663,20 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   /**
    * Makes a first save of the current document.
    */
-  public void testRealSaveFirstSave() throws BadLocationException, IOException
-  {
+  public void testRealSaveFirstSave() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
 
     TestListener listener = new TestListener() {
       public void fileSaved(OpenDefinitionsDocument doc) {
         File f = null;
-        try {
-          f = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file exists
-          fail("file does not exist");
-        }
+        try { f = doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
         }
         try {
-          assertEquals("saved file name", file.getCanonicalFile(),
-                       f.getCanonicalFile());
+          assertEquals("saved file name", file.getCanonicalFile(), f.getCanonicalFile());
           saveCount++;
         }
         catch (IOException ioe) {
@@ -768,25 +721,16 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     TestListener listener = new TestListener() {
       public void fileSaved(OpenDefinitionsDocument doc) {
         File f = null;
-        try {
-          f = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file exists
-          fail("file does not exist");
-        }
+        try { f = doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
         }
         try {
-          assertEquals("saved file", file.getCanonicalFile(),
-                       f.getCanonicalFile());
+          assertEquals("saved file", file.getCanonicalFile(), f.getCanonicalFile());
           saveCount++;
         }
-        catch (IOException ioe) {
-          fail("could not get canonical file");
-        }
+        catch (IOException ioe) { fail("could not get canonical file"); }
       }
     };
 
@@ -848,25 +792,16 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     TestListener listener = new TestListener() {
       public void fileSaved(OpenDefinitionsDocument doc) {
         File f = null;
-        try {
-          f = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file exists
-          fail("file does not exist");
-        }
+        try { f = doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
         }
         try {
-          assertEquals("saved file", file.getCanonicalFile(),
-                       f.getCanonicalFile());
+          assertEquals("saved file", file.getCanonicalFile(), f.getCanonicalFile());
           saveCount++;
         }
-        catch (IOException ioe) {
-          fail("could not get canonical file");
-        }
+        catch (IOException ioe) { fail("could not get canonical file"); }
       }
     };
 
@@ -940,25 +875,16 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     TestListener listener = new TestListener() {
       public void fileSaved(OpenDefinitionsDocument doc) {
         File f = null;
-        try {
-          f = doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file exists
-          fail("file does not exist");
-        }
+        try { f = doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");
         }
         try {
-          assertEquals("saved file", file2.getCanonicalFile(),
-                       f.getCanonicalFile());
+          assertEquals("saved file", file2.getCanonicalFile(), f.getCanonicalFile());
           saveCount++;
         }
-        catch (IOException ioe) {
-          fail("could not get canonical file");
-        }
+        catch (IOException ioe) { fail("could not get canonical file"); }
       }
     };
 
@@ -969,17 +895,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     doc.saveFileAs(new FileSelector(file2));
 
-    assertEquals("contents of saved file1",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(file1));
+    assertEquals("contents of saved file1", FOO_TEXT, FileOps.readFileAsString(file1));
 
-    assertEquals("contents of saved file2",
-                 BAR_TEXT,
-                 FileOps.readFileAsString(file2));
+    assertEquals("contents of saved file2", BAR_TEXT, FileOps.readFileAsString(file2));
   }
 
-  public void testSaveAsExistsForOverwrite()
-    throws BadLocationException, IOException {
+  public void testSaveAsExistsForOverwrite() throws BadLocationException, IOException {
 
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file1 = tempFile();
@@ -1060,15 +981,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
-        //File file = null;
-        try {
-          //file =
-          doc.getFile();
-        }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        try { assertTrue("Source file should exist", doc.getFile() != null); }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");

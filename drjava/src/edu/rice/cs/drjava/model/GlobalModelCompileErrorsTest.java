@@ -108,7 +108,6 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": "; 
   }
 
-
   /** Tests calling compileAll with different source roots works if the files have errors in them.  (Each file
    *  has 1 error.)
    * Note that this testcase will fail if several compilers can be found through the .drjava file.
@@ -121,10 +120,10 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     aDir.mkdir();
     bDir.mkdir();
     
-    
     OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = new File(aDir, "DrJavaTestFoo.java");
     doc.saveFile(new FileSelector(file));
+                      
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
     doc2.saveFile(new FileSelector(file2));
@@ -135,6 +134,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     CompilerModel cm = _model.getCompilerModel();    
     cm.compileAll();
     _waitCompileDone();
+
     assertCompileErrorsPresent(_name(), true);
     assertEquals("Should have 2 compiler errors", 2, _model.getCompilerModel().getNumErrors());
     _failListener.checkCompileOccurred();
@@ -273,15 +273,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
 
     CompilerError ce1 = cme.getError(0);
     CompilerError ce2 = cme.getError(1);
-    assertEquals("first doc should have an error", file.getCanonicalFile(), 
-                 ce1.file().getCanonicalFile());
-    assertEquals("second doc should have an error", file2.getCanonicalFile(), 
-                 ce2.file().getCanonicalFile());
+    assertEquals("first doc should have an error", file.getCanonicalFile(), ce1.file().getCanonicalFile());
+    assertEquals("second doc should have an error", file2.getCanonicalFile(), ce2.file().getCanonicalFile());
 
     Position p1 = cme.getPosition(ce1);
     Position p2 = cme.getPosition(ce2);
-    assertTrue("location of first error should be between 20 and 29 " +
-               "inclusive (line 2), but was " + p1.getOffset(),
+    assertTrue("location of first error should be between 20 and 29 inclusive (line 2), but was " + p1.getOffset(),
                p1.getOffset() <= 20 && p1.getOffset() <= 29);
     assertTrue("location of error should be after 34 (line 3 or 4)", p2.getOffset() >= 34);
   }

@@ -146,9 +146,9 @@ public class DirectorySelectorComponent extends JPanel {
    */
   public void setFileField(File file) {
     _file = file;
-    if (file != null && !file.getPath().equals("")) {
+    if (file != null && ! file.getPath().equals("")) {
       try { _file = file.getCanonicalFile(); }
-      catch(IOException e) { _file = null; }
+      catch(IOException e) { /* do nothing */ }
     }
     resetFileField();
   }
@@ -202,14 +202,14 @@ public class DirectorySelectorComponent extends JPanel {
     String newValue = _fileField.getText().trim();
     
     File newFile = null;
-    if (!newValue.equals("")){
+    if (! newValue.equals("")) {
       newFile = new File(newValue);
-      if (!newFile.isDirectory() && !_chooser.getShowFiles()) {
+      if (! newFile.isDirectory() && ! _chooser.getShowFiles()) {
         newFile = newFile.getParentFile();
       }
     }
     
-    if (newFile != null && !newFile.exists()) {
+    if (newFile != null && ! newFile.exists()) {
       JOptionPane.showMessageDialog(_parent,
                                     "The file '"+ newValue + "'\n" +
                                     "is invalid because it does not exist.",

@@ -216,10 +216,6 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
       public void fileOpened(OpenDefinitionsDocument doc) {
         File file = null;
         try { file = doc.getFile(); }
-        catch (IllegalStateException ise) {
-          // We know file should exist
-          fail("file does not exist");
-        }
         catch (FileMovedException fme) {
           // We know file should exist
           fail("file does not exist");

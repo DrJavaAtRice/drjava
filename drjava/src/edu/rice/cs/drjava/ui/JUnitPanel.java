@@ -55,16 +55,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * The panel which displays all the testing errors.
- * 
- * Question:  why are methods in this class synchronized?  These methods should only be run from event
- * handling thread, which makes synchronization unnecessary and undesirable.  Do we violate this invariant?
- * 
- * @version $Id$
+/** The panel that displays all the testing errors.
+ *  @version $Id$
  */
 public class JUnitPanel extends ErrorPanel {
-  private static final String START_JUNIT_MSG = "Testing in progress.  Please wait...\n";
+  private static final String START_JUNIT_MSG = "Testing in progress.  Please wait ...\n";
   private static final String JUNIT_FINISHED_MSG = "All tests completed successfully.\n";
   private static final String NO_TESTS_MSG = "";
 
@@ -91,7 +86,7 @@ public class JUnitPanel extends ErrorPanel {
   }
 
   private static final String TEST_OUT_OF_SYNC =
-    "The document(s) being tested have been modified and should be recompiled!\n";
+    "The document(s) being tested has been modified and should be recompiled!\n";
 
   protected JUnitErrorListPane _errorListPane;
   private int _testCount;
@@ -118,10 +113,9 @@ public class JUnitPanel extends ErrorPanel {
   private final JLabel _testLabel = new JLabel();
   private final JLabel _fileLabel = new JLabel();
 
-  /**
-   * Constructor.
-   * @param model SingleDisplayModel in which we are running
-   * @param frame MainFrame in which we are displayed
+  /** Constructor.
+   *  @param model SingleDisplayModel in which we are running
+   *  @param frame MainFrame in which we are displayed
    */
   public JUnitPanel(SingleDisplayModel model, MainFrame frame) {
     super(model, frame, "Test Output", "Test Progress");
@@ -141,9 +135,7 @@ public class JUnitPanel extends ErrorPanel {
   /** Returns the JUnitErrorListPane that this panel manages. */
   public JUnitErrorListPane getErrorListPane() { return _errorListPane; }
 
-  protected JUnitErrorModel getErrorModel() { 
-    return getModel().getJUnitModel().getJUnitErrorModel();
-  }
+  protected JUnitErrorModel getErrorModel() { return getModel().getJUnitModel().getJUnitErrorModel(); }
 
   /**
    * Updates all document styles with the attributes contained in newSet.
@@ -190,9 +182,8 @@ public class JUnitPanel extends ErrorPanel {
     _testCount = 0;
   }
 
-  /**
-   * Steps the progress bar forward by one test.
-   * @param successful Whether the last test was successful or not.
+  /** Steps the progress bar forward by one test.
+   *  @param successful Whether the last test was successful or not.
    */
   public void progressStep(boolean successful) {
     _testCount++;
@@ -200,8 +191,7 @@ public class JUnitPanel extends ErrorPanel {
     _progressBar.step(_testCount, _testsSuccessful);
   }
 
-  public void testStarted(String className, String testName) {
-  }
+  public void testStarted(String className, String testName) { }
 
   private void _displayStackTrace (JUnitError e) {
     _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
@@ -218,26 +208,17 @@ public class JUnitPanel extends ErrorPanel {
     _stackFrame.setVisible(true);
   }
 
-  /**
-   * A pane to show JUnit errors. It acts a bit like a listbox (clicking
-   * selects an item) but items can each wrap, etc.
-   */
+  /** A pane to show JUnit errors. It acts like a listbox (clicking selects an item) but items can each wrap, etc. */
   public class JUnitErrorListPane extends ErrorPanel.ErrorListPane {
     private JPopupMenu _popMenu;
     private String _runningTestName;
     private boolean _warnedOutOfSync;
     private static final String JUNIT_WARNING = "junit.framework.TestSuite$1.warning";
 
-
-    /**
-     * Maps any test names in the currently running suite to the position
-     * that they appear in the list pane.
-     */
+    /** Maps any test names in the currently running suite to the position that they appear in the list pane. */
     private final HashMap<String, Position> _runningTestNamePositions;
 
-    /**
-     * Constructs the JUnitErrorListPane.
-     */
+    /** Constructs the JUnitErrorListPane. */
     public JUnitErrorListPane() {
       removeMouseListener(defaultMouseListener);
       _popMenu = new JPopupMenu();
@@ -252,27 +233,20 @@ public class JUnitPanel extends ErrorPanel {
 
     private String _getTestFromName(String name) {
       int paren = name.indexOf('(');
-      if ((paren > -1) && (paren < name.length())) {
-        return name.substring(0, paren);
-      }
-      else {
-        throw new IllegalArgumentException("Name does not contain any parens: " + name);
-      }
+      
+      if ((paren > -1) && (paren < name.length())) return name.substring(0, paren);
+      
+      else throw new IllegalArgumentException("Name does not contain any parens: " + name);
     }
 
     private String _getClassFromName(String name) {
       int paren = name.indexOf('(');
-      if ((paren > -1) && (paren < name.length())) {
-        return name.substring(paren + 1, name.length() - 1);
-      }
-      else {
-        throw new IllegalArgumentException("Name does not contain any parens: " + name);
-      }
+      
+      if ((paren > -1) && (paren < name.length())) return name.substring(paren + 1, name.length() - 1);
+      else throw new IllegalArgumentException("Name does not contain any parens: " + name);
     }
 
-    /**
-     * Provides the ability to display the name of the test being run.
-     */
+    /** Provides the ability to display the name of the test being run. */
     public void testStarted(String name) {
       String testName = _getTestFromName(name);
       String className = _getClassFromName(name);
@@ -303,15 +277,12 @@ public class JUnitPanel extends ErrorPanel {
       }
     }
 
-    /**
-     * Provides the ability to display the results of a test that has finished.
-     */
+    /** Displays the results of a test that has finished. */
     public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
       String testName = _getTestFromName(name);
       String fullName = _getClassFromName(name) + "." + testName;
-      if (fullName.equals(JUNIT_WARNING)) {
-        return;
-      }
+      if (fullName.equals(JUNIT_WARNING)) return;
+      
       Document doc = getDocument();
       Position namePos = _runningTestNamePositions.get(fullName);
       AttributeSet set;
@@ -320,9 +291,7 @@ public class JUnitPanel extends ErrorPanel {
       if (namePos != null) {
         int index = namePos.getOffset();
         int length = testName.length();
-        if (doc instanceof SwingDocument) {
-          ((SwingDocument)doc).setCharacterAttributes(index, length, set, false);
-        }
+        if (doc instanceof SwingDocument) ((SwingDocument)doc).setCharacterAttributes(index, length, set, false);
       }
     }
 
@@ -361,51 +330,8 @@ public class JUnitPanel extends ErrorPanel {
       switchToError(0);
     }
 
-    /**
-     * Prints a message for the given error
-     * @param error the error to print
-     * @param doc the document in the error pane
-     *
-     * This code inserts the error text underneath the test name (which should be red) in the
-     * pane.  However, the highlighter is dependent on the errors being contiguous and at the
-     * end of the document, so this is disabled pending an overhaul of the highlight manager.
-     */
-//    protected void _insertErrorText(Error error, Document doc) throws BadLocationException {
-//      // Show file and line number
-//      JUnitError err = (JUnitError)error;
-//      String test = err.testName();
-//      String name = err.className() + "." + test;
-//      int index;
-//      Position pos = _runningTestNamePositions.get(name);
-//      if (pos != null) {
-//        index = pos.getOffset() + test.length() + 1;
-//      }
-//      else {
-//        index = doc.getLength();
-//      }
-//      String toInsert = "File: ";
-//      doc.insertString(index, toInsert, BOLD_ATTRIBUTES);
-//      index += toInsert.length();
-//      toInsert = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]\n";
-//      doc.insertString(index, toInsert, NORMAL_ATTRIBUTES);
-//      index += toInsert.length();
-//
-//      if (error.isWarning()) {
-//        toInsert = _getWarningText();
-//      }
-//      else {
-//        toInsert = _getErrorText();
-//      }
-//      doc.insertString(index, toInsert, BOLD_ATTRIBUTES);
-//      index += toInsert.length();
-//
-//      toInsert = error.message() + "\n";
-//      doc.insertString(index, toInsert, NORMAL_ATTRIBUTES);
-//    }
-
-    /**
-     * Replaces the "Testing in progress..." text with the given message.
-     * @param msg the text to insert
+    /** Replaces the "Testing in progress..." text with the given message.
+     *  @param msg the text to insert
      */
     private void _replaceInProgressText(String msg) throws BadLocationException {
       int start = 0;
@@ -418,16 +344,11 @@ public class JUnitPanel extends ErrorPanel {
       }
     }
 
-    /**
-     * Returns the string to identify a warning.
-     * In JUnit, warnings (the odd case) indicate errors/exceptions.
+    /** Returns the string to identify a warning. In JUnit, warnings (the odd case) indicate errors/exceptions.
      */
     protected String _getWarningText() {  return "Error: "; }
 
-    /**
-     * Returns the string to identify an error.
-     * In JUnit, errors (the normal case) indicate TestFailures.
-     */
+    /** Returns the string to identify an error.  In JUnit, errors (the normal case) indicate TestFailures. */
     protected String _getErrorText() { return "Failure: "; }
 
     /** Updates the list pane with no errors. */

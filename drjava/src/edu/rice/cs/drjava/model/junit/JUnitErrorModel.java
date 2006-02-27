@@ -36,29 +36,24 @@ package edu.rice.cs.drjava.model.junit;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 
-/**
- * Contains the JUnitErrors for a particular file after
- * a test has ended.
- * @version $Id$
+/** Contains the JUnitErrors for a particular file after a test has ended.
+ *  @version $Id$
  */
 public class JUnitErrorModel extends CompilerErrorModel {
   private boolean _testsHaveRun = false;
 
-  /**
-   * Constructs a new JUnitErrorModel to be maintained
-   * by a particular OpenDefinitionsDocument.
-   * @param errors the errors this JUnitErrorModel represents
-   * @param model the model to load documents form for finding error positions
-   * @param testsHaveRun whether or not the JUnit tests have completed
+  /** Constructs a new JUnitErrorModel to be maintained by a particular OpenDefinitionsDocument.
+   *  @param errors the errors this JUnitErrorModel represents
+   *  @param model the model to load documents form for finding error positions
+   *  @param testsHaveRun whether or not the JUnit tests have completed
    */
   public JUnitErrorModel(JUnitError[] errors, GlobalModel model, boolean testsHaveRun) {
     super(errors, model);
     _testsHaveRun = testsHaveRun;
   }
 
-  /**
-   * Accessor
-   * @return whether tests have been run before.
+  /** Accessor
+   *  @return whether tests have been run before.
    */
   public boolean haveTestsRun() { return _testsHaveRun; }
 }

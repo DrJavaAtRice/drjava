@@ -52,6 +52,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.FileOps;
 
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
@@ -181,6 +182,8 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Compiles all documents in the specified list of OpenDefinitionsDocuments. */
   public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
     
+//    System.err.println("compile(" + defDocs + ") called");
+    
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
     // check for modified project files, in case they didn't save when prompted
@@ -195,14 +198,14 @@ public class DefaultCompilerModel implements CompilerModel {
     File f;
     String[] exts = getCompilableExtensions();
     for (OpenDefinitionsDocument doc : defDocs) {
-      try {
-        f = doc.getFile();
-        if (endsWithExt(f, exts)) filesToCompile.add(f);
-      }
-      catch (IllegalStateException ise) {
-        // No file for this document; skip it
-      }
+      f = doc.getFile();
+//      System.err.println("File name for " + doc + " is " + f);
+      if (f == null) continue; // No file for this document; skip it
+      if (endsWithExt(f, exts)) filesToCompile.add(f);
     } 
+    
+//    System.err.println("Filtered list of docs to compile: " + filesToCompile);
+    
     _rawCompile(getSourceRootSet(), filesToCompile.toArray(new File[0]));
   }
   
@@ -314,7 +317,7 @@ public class DefaultCompilerModel implements CompilerModel {
 
 //    CompilerError[] errors = new CompilerError[0];
     
-//    Utilities.showDebug("Compiling files: " + Arrays.toString(files) + " to " + buildDir);
+//    System.err.println("Compiling files: " + Arrays.toString(files) + " to " + buildDir);
       
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> errors;
     LinkedList<JExprParseException> parseExceptions;
@@ -324,7 +327,7 @@ public class DefaultCompilerModel implements CompilerModel {
     CompilerInterface compiler = CompilerRegistry.ONLY.getActiveCompiler();
     
     /* Canonicalize buildDir */
-    if (buildDir != null) buildDir = buildDir.getCanonicalFile();
+    if (buildDir != null) buildDir = FileOps.getCanonicalFile(buildDir);
 
     compiler.setBuildDirectory(buildDir);
     ClassPathVector extraClassPath = new ClassPathVector();
@@ -425,16 +428,13 @@ public class DefaultCompilerModel implements CompilerModel {
 
       try {
         File root = doc.getSourceRoot();
-
+        if (root == null) continue;
         // Don't add duplicate Files, based on path
-        if (!roots.contains(root)) { roots.add(root); }
+        if (! roots.contains(root)) { roots.add(root); }
       }
       catch (InvalidPackageException e) {
-        // oh well, invalid package statement for this one
-        // can't add it to roots
-      }/*catch(RuntimeException) {
-       * Adam look here
-       * }*/
+        // invalid package statement for this one; suppress adding it to roots
+      }
     }
 
     return roots.toArray(new File[roots.size()]);
@@ -443,13 +443,14 @@ public class DefaultCompilerModel implements CompilerModel {
   /** This method would normally be called from the getter; however, with the introduction of projects, the 
    *  list of files that may not be modified is not known.  We pull the relevant documents from the getter 
    *  and instead of calling it from there, we check it from here.
+   *  Modified, untitled documents are ignored in project mode.
    *  @param defDocs the list of documents to check
    *  @return whether any of the given documents are modified
    */
   protected boolean _hasModifiedFiles(List<OpenDefinitionsDocument> defDocs) {
     boolean isProjActive = _model.isProjectActive();
     for (OpenDefinitionsDocument doc : defDocs) {
-      if (doc.isModifiedSinceSave() && (! isProjActive || ! doc.isUntitled())) return true;
+      if (doc.isModifiedSinceSave() && ( ! isProjActive || ! doc.isUntitled())) return true;
     }
     return false;
   }

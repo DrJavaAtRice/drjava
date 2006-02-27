@@ -88,28 +88,18 @@ public abstract class DocumentDebugAction<T extends EventRequest>
     }
     try {
       _file = doc.getFile();
+      if (_file == null) throw new DebugException("This document has no source file.");
     }
     catch (FileMovedException fme) {
-      throw new DebugException("This document's file no longer exists: " +
-                               fme.getMessage());
-    }
-    catch (IllegalStateException ise) {
-      throw new DebugException("This document has no file: " +
-                               ise.getMessage());
+      throw new DebugException("This document's file no longer exists: " + fme.getMessage());
     }
     _doc = doc;
   }
 
-  /**
-   * Returns the class name this DebugAction occurs in.
-   */
-  public String getClassName() {
-    return _className;
-  }
+  /** Returns the class name this DebugAction occurs in. */
+  public String getClassName() { return _className; }
 
-  /**
-   * Returns the file this DebugAction occurs in.
-   */
+  /** Returns the file this DebugAction occurs in. */
   public File getFile() {
     return _file;
   }

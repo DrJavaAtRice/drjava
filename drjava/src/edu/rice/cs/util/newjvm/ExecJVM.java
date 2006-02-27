@@ -159,7 +159,7 @@ public final class ExecJVM {
       // execute in the working directory
       if (workDir.exists()) p = Runtime.getRuntime().exec(argArray, null, workDir);
       else {
-        edu.rice.cs.util.swing.Utilities.showMessageBox("Work directory does not exist:\n"+workDir+
+        edu.rice.cs.util.swing.Utilities.showMessageBox("Working directory does not exist:\n" + workDir +
                                                         "\nThe setting will be ignored. Press OK to continue.",
                                                         "Configuration Error");
         p = Runtime.getRuntime().exec(argArray);

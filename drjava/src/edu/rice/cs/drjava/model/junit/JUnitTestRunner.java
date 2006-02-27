@@ -132,7 +132,7 @@ public class JUnitTestRunner extends TestRunner {
       failure = true;
       _failureCount++;
     }
-    boolean success = !(failure || error);
+    boolean success = ! (failure || error);
     _jmc.testEnded(test.toString(), success, failure);
   }
 }

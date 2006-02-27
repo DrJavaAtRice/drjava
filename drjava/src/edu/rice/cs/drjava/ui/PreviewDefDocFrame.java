@@ -45,11 +45,8 @@ public class PreviewDefDocFrame extends PreviewFrame {
 
   private OpenDefinitionsDocument _document;
 
-  /**
-   * Contructs a new PreviewDefDocFrame using a parent model and a MainFrame object.
-   */
-  public PreviewDefDocFrame(SingleDisplayModel model, MainFrame mainFrame)
-    throws IllegalStateException {
+  /** Contructs a new PreviewDefDocFrame using a parent model and a MainFrame object. */
+  public PreviewDefDocFrame(SingleDisplayModel model, MainFrame mainFrame) throws IllegalStateException {
     super(model, mainFrame, false);
   }
   

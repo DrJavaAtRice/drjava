@@ -49,7 +49,6 @@ import java.io.File;
 
 import edu.rice.cs.util.Pair;
 
-
 public class DocFile extends File {
   
   private Pair<Integer,Integer> _sel;
@@ -58,29 +57,14 @@ public class DocFile extends File {
   private String _package;
   private long _mod;
   
-  /**
-   * Creates a docfile that has the same path as the given
-   * file, with default values for everything else
-   */
-  public DocFile(File f) {
-    this(f, null, null, false, null);
-  }
+  /** Creates a docfile that has the same path as the given file, with default values for everything else. */
+  public DocFile(File f) { this(f, null, null, false, null); }
   
-  /**
-   * Creates a docfile from the given pathname with
-   * default values for everything else
-   */
-  public DocFile(String pathname) {
-    this(pathname, null, null, false, null);
-  }
+  /** Creates a docfile from the given pathname with default values for everything else. */
+  public DocFile(String pathname) { this(pathname, null, null, false, null); }
   
-  /**
-   * Creates a docfile from the given parent and child with
-   * default values for everything else
-   */
-  public DocFile(String parent, String child) {
-    this(parent, child, null, null, false, null);
-  }
+  /** Creates a docfile from the given parent and child with default values for everything else. */
+  public DocFile(String parent, String child) { this(parent, child, null, null, false, null); }
   
   public DocFile(String pathname, Pair<Integer,Integer> selection, Pair<Integer,Integer> scroll, boolean active, String srcRoot) {
     super(pathname);
@@ -105,9 +89,7 @@ public class DocFile extends File {
   ///////////////////// Overriden Methods //////////////////////
   
   public File getAbsoluteFile() {
-    if (isAbsolute()) {
-      return this;
-    }
+    if (isAbsolute()) return this;
     else {
       return new DocFile(super.getAbsoluteFile(),_sel,_scroll,_active,_package);
     }
@@ -168,12 +150,8 @@ public class DocFile extends File {
   public void setActive(boolean active) {
     _active = active;
   }
-  /**
-   * @return the package of the document stored in this file
-   */
-  public String getPackage() {
-    return _package;
-  }
+  /** @return the package of the document stored in this file */
+  public String getPackage() { return _package; }
   /**
    * @param pack the name of the package defined in the document text
    */

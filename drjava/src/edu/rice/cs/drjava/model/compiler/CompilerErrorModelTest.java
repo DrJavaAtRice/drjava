@@ -70,9 +70,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   private CompilerError[] errors;
   private CompilerErrorModel model;
   
-  /**
-   * Tests CompilerErrorModel setup code with no compiler errors.
-   */
+  /** Tests CompilerErrorModel setup code with no compiler errors. */
   public void testConstructNoErrors() {
     getter = new TestDocGetter();
     model = new CompilerErrorModel(new CompilerError[0], getter);
@@ -84,10 +82,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     assertTrue("hasOnlyWarnings should return true.", model.hasOnlyWarnings());
   }
   
-  /**
-   * Tests CompilerErrorModel setup code with only warnings without files.
-   * Also tests hasOnlyWarnings logic.
-   */
+  /** Tests CompilerErrorModel setup code with only warnings without files. Also tests hasOnlyWarnings logic. */
   public void testConstructOnlyWarnings() {
     getter = new TestDocGetter();
     errors = new CompilerError[]
@@ -102,9 +97,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     assertTrue("hasOnlyWarnings should return true.", model.hasOnlyWarnings());
   }
   
-  /**
-   * Tests CompilerErrorModel setup code with only errors without files.
-   */
+  /** Tests CompilerErrorModel setup code with only errors without files. */
   public void testConstructDoclessErrors() {
     getter = new TestDocGetter();
     errors = new CompilerError[]
@@ -127,10 +120,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /**
-   * Tests CompilerErrorModel setup code with one file and only errors
-   * without line numbers.
-   */
+  /** Tests CompilerErrorModel setup code with one file and only errors without line numbers. */
   public void testConstructOneDocWithoutLineNums() {
     setupDoc();
     errors = new CompilerError[]
@@ -152,10 +142,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /**
-   * Tests CompilerErrorModel setup code with one file and only errors
-   * with line numbers.
-   */
+  /** Tests CompilerErrorModel setup code with one file and only errors with line numbers. */
   public void testConstructOneDocWithLineNums() {
     setupDoc();
     errors = new CompilerError[]
@@ -181,10 +168,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /**
-   * Tests CompilerErrorModel setup code with one file and errors both
-   * with and without line numbers.
-   */
+  /** Tests CompilerErrorModel setup code with one file and errors both with and without line numbers. */
   public void testConstructOneDocWithBoth() {
     setupDoc();
     errors = new CompilerError[]
@@ -216,10 +200,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
   
-  /**
-   * Tests CompilerErrorModel setup code with several files and only errors
-   * without line numbers.
-   */
+  /** Tests CompilerErrorModel setup code with several files and only errors without line numbers. */
   public void testConstructManyDocsWithoutLineNums() {
     setupDocs();
     errors = new CompilerError[]

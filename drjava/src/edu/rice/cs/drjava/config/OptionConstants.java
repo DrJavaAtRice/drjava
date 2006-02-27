@@ -32,9 +32,11 @@
  *END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
+
 import java.io.File;
 import java.util.Vector;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -46,8 +48,9 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 
-/**
- * @version $Id$
+
+/** Defines the commonly used Option constants in DrJava config and project profiles.
+ *  @version $Id$
  */
 public interface OptionConstants {
 
@@ -55,39 +58,26 @@ public interface OptionConstants {
 
   /* ---------- Resource Location and Classpath Options ---------- */
 
-  /**
-   * A file path to a user's preferred browser.
-   */
-  public static final FileOption BROWSER_FILE =
-    new FileOption("browser.file", FileOption.NULL_FILE);
+  /** A file path to a user's preferred browser. */
+  public static final FileOption BROWSER_FILE = new FileOption("browser.file", FileOption.NULL_FILE);
 
-  /**
-   * A String used with the command to launch a user's preferred browser.
-   * This will be tokenized and appended to the file path.
-   */
-  public static final StringOption BROWSER_STRING =
-    new StringOption("browser.string", "");
+  /** A String used to launch a user's preferred browser. It is tokenized and appended to the file path. */
+  public static final StringOption BROWSER_STRING = new StringOption("browser.string", "");
   
-  /** 
-   * the extension for a DrJava project file 
-   */
+  /** The extension for a DrJava project file */
   public static final String PROJECT_FILE_EXTENSION = ".pjt";
   
-  public static final FileOption JAVAC_LOCATION =
-    new FileOption("javac.location", FileOption.NULL_FILE);
+  public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOption.NULL_FILE);
 
-  public static final VectorOption<File> EXTRA_CLASSPATH =
-    new ClassPathOption().evaluate("extra.classpath");
+  public static final VectorOption<File> EXTRA_CLASSPATH = new ClassPathOption().evaluate("extra.classpath");
 
   public static final VectorOption<String> EXTRA_COMPILERS =
     new VectorOption<String>("extra.compilers", new StringOption("",""), new Vector<String>());
 
   /* ---------- Color Options ---------- */
 
-  public static final ColorOption DEFINITIONS_NORMAL_COLOR =
-    new ColorOption("definitions.normal.color", Color.black);
-  public static final ColorOption DEFINITIONS_KEYWORD_COLOR =
-    new ColorOption("definitions.keyword.color", Color.blue);
+  public static final ColorOption DEFINITIONS_NORMAL_COLOR = new ColorOption("definitions.normal.color", Color.black);
+  public static final ColorOption DEFINITIONS_KEYWORD_COLOR = new ColorOption("definitions.keyword.color", Color.blue);
   public static final ColorOption DEFINITIONS_TYPE_COLOR =
     new ColorOption("definitions.type.color", Color.blue.darker().darker());
   public static final ColorOption DEFINITIONS_COMMENT_COLOR =
@@ -98,47 +88,30 @@ public interface OptionConstants {
     new ColorOption("definitions.single.quoted.color", Color.magenta);
   public static final ColorOption DEFINITIONS_NUMBER_COLOR =
     new ColorOption("definitions.number.color", Color.cyan.darker());
-  public static final ColorOption SYSTEM_OUT_COLOR =
-    new ColorOption("system.out.color", Color.green.darker().darker());
-  public static final ColorOption SYSTEM_ERR_COLOR =
-    new ColorOption("system.err.color", Color.red);
-  public static final ColorOption SYSTEM_IN_COLOR =
-    new ColorOption("system.in.color", Color.magenta.darker().darker());
+  public static final ColorOption SYSTEM_OUT_COLOR = new ColorOption("system.out.color", Color.green.darker().darker());
+  public static final ColorOption SYSTEM_ERR_COLOR = new ColorOption("system.err.color", Color.red);
+  public static final ColorOption SYSTEM_IN_COLOR = new ColorOption("system.in.color", Color.magenta.darker().darker());
   public static final ColorOption INTERACTIONS_ERROR_COLOR =
     new ColorOption("interactions.error.color", Color.red.darker());
-  public static final ColorOption DEBUG_MESSAGE_COLOR =
-    new ColorOption("debug.message.color", Color.blue.darker());
+  public static final ColorOption DEBUG_MESSAGE_COLOR = new ColorOption("debug.message.color", Color.blue.darker());
 
 
-  /**
-   * Color for background of definitions pane.
-   */
+  /** Color for background of definitions pane. */
   public static final ColorOption DEFINITIONS_BACKGROUND_COLOR =
     new ColorOption("definitions.background.color", Color.white);
 
-  /**
-   * Color for highlighting brace-matching.
-   */
+  /** Color for highlighting brace-matching. */
   public static final ColorOption DEFINITIONS_MATCH_COLOR =
     new ColorOption("definitions.match.color", new Color(190, 255, 230));
 
-  /**
-   * Color for highlighting errors and test failures.
-   */
-  public static final ColorOption COMPILER_ERROR_COLOR =
-    new ColorOption("compiler.error.color", Color.yellow);
+  /** Color for highlighting errors and test failures. */
+  public static final ColorOption COMPILER_ERROR_COLOR = new ColorOption("compiler.error.color", Color.yellow);
 
-  /**
-   * Color for highlighting breakpoints.
-   */
-  public static final ColorOption DEBUG_BREAKPOINT_COLOR =
-    new ColorOption("debug.breakpoint.color", Color.red);
+  /** Color for highlighting breakpoints. */
+  public static final ColorOption DEBUG_BREAKPOINT_COLOR = new ColorOption("debug.breakpoint.color", Color.red);
 
-  /**
-   * Color for highlighting thread locations.
-   */
-  public static final ColorOption DEBUG_THREAD_COLOR =
-    new ColorOption("debug.thread.color", new Color(100,255,255));
+  /** Color for highlighting thread locations. */
+  public static final ColorOption DEBUG_THREAD_COLOR = new ColorOption("debug.thread.color", new Color(100,255,255));
 
 
   /* ---------- Font Options ---------- */
@@ -844,37 +817,21 @@ public interface OptionConstants {
     }
   }
 
-  /**
-   * The lowest access level of classes and members to include in the javadoc.
-   */
+  /** The lowest access level of classes and members to include in the javadoc. */
   public static final ForcedChoiceOption JAVADOC_ACCESS_LEVEL =
     new ForcedChoiceOption("javadoc.access.level", "package", accessLevelChoices);
 
-  /**
-   * Possible options for Javadoc system class documentation links.
-   */
+  /** Possible options for Javadoc system class documentation links. */
   static final String JAVADOC_NONE_TEXT = "none";
   static final String JAVADOC_1_3_TEXT = "1.3";
   static final String JAVADOC_1_4_TEXT = "1.4";
   static final String JAVADOC_1_5_TEXT = "1.5";
+  
+  static final String[] choices = new String[]{JAVADOC_NONE_TEXT, JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT};
+  
+  static final ArrayList<String> linkVersionChoices = new ArrayList(Arrays.asList(choices));
 
-  static final ArrayList<String> linkVersionChoices =
-    LinkVersionChoices.evaluate();
-  static class LinkVersionChoices {
-    public static ArrayList<String> evaluate() {
-      ArrayList<String> aList = new ArrayList<String>(4);
-      aList.add(JAVADOC_NONE_TEXT);
-      aList.add(JAVADOC_1_3_TEXT);
-      aList.add(JAVADOC_1_4_TEXT);
-      aList.add(JAVADOC_1_5_TEXT);
-      return aList;
-    }
-  }
-
-  /**
-   * Constants for the URLs of Sun's system class documentation for different
-   * versions of Java.
-   */
+  /** Constants for the URLs of Sun's system class documentation for different versions of Java. */
   public static final StringOption JAVADOC_1_3_LINK =
     new StringOption("javadoc.1.3.link", "http://java.sun.com/j2se/1.3/docs/api");
   public static final StringOption JAVADOC_1_4_LINK =
@@ -882,46 +839,31 @@ public interface OptionConstants {
   public static final StringOption JAVADOC_1_5_LINK =
     new StringOption("javadoc.1.5.link", "http://java.sun.com/j2se/1.5/docs/api");
 
-  /**
-   * The version of Java to use for links to Javadoc for system classes.
-   */
+  /** The version of Java to use for links to Javadoc for system classes. */
   public static final ForcedChoiceOption JAVADOC_LINK_VERSION =
     new ForcedChoiceOption("javadoc.link.version",
-                           (System.getProperty("java.specification.version").equals("1.3") ?
-                              JAVADOC_1_3_TEXT :
-                              (System.getProperty("java.specification.version").equals("1.4") ?
-                                 JAVADOC_1_4_TEXT : 
+                           (System.getProperty("java.specification.version").equals("1.3") ? JAVADOC_1_3_TEXT :
+                              (System.getProperty("java.specification.version").equals("1.4") ? JAVADOC_1_4_TEXT : 
                                  JAVADOC_1_5_TEXT)),
                            linkVersionChoices);
 
-  /**
-   * Whether to include the entire package heirarchy from the source roots when
-   * generating JavaDoc output.
-   */
-  public static final BooleanOption JAVADOC_FROM_ROOTS =
-    new BooleanOption("javadoc.from.roots", Boolean.FALSE);
+  /** Whether to include the entire package heirarchy from the source roots when generating JavaDoc output. */
+  public static final BooleanOption JAVADOC_FROM_ROOTS = new BooleanOption("javadoc.from.roots", Boolean.FALSE);
 
-  /**
-   * A string containing custom options to be passed to Javadoc.
-   * This needs to be tokenized before passing it to Javadoc.
+  /** A string containing custom options to be passed to Javadoc. This needs to be tokenized before passing it to 
+   *  Javadoc.
    */
-  public static final StringOption JAVADOC_CUSTOM_PARAMS =
+  public static final StringOption JAVADOC_CUSTOM_PARAMS = 
     new StringOption("javadoc.custom.params", "-author -version");
 
-  /**
-   * The default destination directory for Javadoc output.
-   */
-  public static final FileOption JAVADOC_DESTINATION =
-    new FileOption("javadoc.destination", FileOption.NULL_FILE);
+  /** The default destination directory for Javadoc output. */
+  public static final FileOption JAVADOC_DESTINATION = new FileOption("javadoc.destination", FileOption.NULL_FILE);
 
-  /**
-   * Whether to always prompt for a destination directory, whether or not a
-   * default has been set.
-   */
+  /** Whether to always prompt for a destination directory, whether or not a default has been set. */
   public static final BooleanOption JAVADOC_PROMPT_FOR_DESTINATION =
     new BooleanOption("javadoc.prompt.for.destination", Boolean.TRUE);
 
-  /* ---------- Notifications Options ---------- */
+  /* ---------- NOTIFICATION OPTIONS ---------- */
 
   /** Whether to prompt when the interactions pane is unexpectedly reset. */
   public static final BooleanOption INTERACTIONS_EXIT_PROMPT =
@@ -953,67 +895,41 @@ public interface OptionConstants {
   public static final BooleanOption ALWAYS_SAVE_BEFORE_JAVADOC =
     new BooleanOption("save.before.javadoc", Boolean.FALSE);
 
-  /**
-   * Whether to prompt to save before compiling.
-   */
+  /** Whether to prompt to save before compiling. */
   public static final BooleanOption ALWAYS_SAVE_BEFORE_DEBUG =
     new BooleanOption("save.before.debug", Boolean.FALSE);
 
-  /**
-   * Whether to warn if a document has been modified before allowing the
-   * user to set a breakpoint in it.
-   */
+  /** Whether to warn if a document has been modified before allowing the user to set a breakpoint in it. */
   public static final BooleanOption WARN_BREAKPOINT_OUT_OF_SYNC =
     new BooleanOption("warn.breakpoint.out.of.sync", Boolean.TRUE);
 
-  /**
-   * Whether to warn that the user is debugging a file that is out of sync
-   * with its class file.
-   */
+  /** Whether to warn that the user is debugging a file that is out of sync with its class file. */
   public static final BooleanOption WARN_DEBUG_MODIFIED_FILE =
     new BooleanOption("warn.debug.modified.file", Boolean.TRUE);
 
-  /**
-   * Whether to warn that a restart is necessary before the look and feel will change.
-   */
-  public static final BooleanOption WARN_CHANGE_LAF =
-    new BooleanOption("warn.change.laf", Boolean.TRUE);
+  /** Whether to warn that a restart is necessary before the look and feel will change. */
+  public static final BooleanOption WARN_CHANGE_LAF = new BooleanOption("warn.change.laf", Boolean.TRUE);
 
-  /**
-   * Whether to warn that a file's path contains a "#' symbol.
-   */
+  /** Whether to warn that a file's path contains a "#' symbol. */
   public static final BooleanOption WARN_PATH_CONTAINS_POUND =
     new BooleanOption("warn.path.contains.pound", Boolean.TRUE);
 
-  /* ---------- Misc Options ---------- */
+  /* ---------- MISC OPTIONS ---------- */
 
-  /**
-   * whether to warn when cleaning the build directory
-   */
-  public static final BooleanOption PROMPT_BEFORE_CLEAN = 
-    new BooleanOption("prompt.before.clean", Boolean.TRUE);
+  /** Whether to warn when cleaning the build directory */
+  public static final BooleanOption PROMPT_BEFORE_CLEAN = new BooleanOption("prompt.before.clean", Boolean.TRUE);
   
-  /**
-   * open directory should default to recursive
-   */
-  public static final BooleanOption OPEN_FOLDER_RECURSIVE = 
-    new BooleanOption("open.folder.recursive", Boolean.FALSE);
+  /** Open directory should default to recursive */
+  public static final BooleanOption OPEN_FOLDER_RECURSIVE =  new BooleanOption("open.folder.recursive", Boolean.FALSE);
   
-  /**
-   * Directory to start looking for files in when DrJava starts up.
-   */
-  public static final FileOption WORKING_DIRECTORY =
-    new FileOption("working.directory", FileOption.NULL_FILE);
+  /** Directory to start looking for files in when DrJava starts up. */
+  public static final FileOption WORKING_DIRECTORY = new FileOption("working.directory", FileOption.NULL_FILE);
 
-  /**
-   * How many spaces to use for indenting.
-   */
-  public static final NonNegativeIntegerOption INDENT_LEVEL =
+  /** How many spaces to use for indenting. */
+  public static final NonNegativeIntegerOption INDENT_LEVEL = 
     new NonNegativeIntegerOption("indent.level",new Integer(2));
 
-  /**
-   * Number of lines to remember in the Interactions History
-   */
+  /** Number of lines to remember in the Interactions History */
   public static final NonNegativeIntegerOption HISTORY_MAX_SIZE =
     new NonNegativeIntegerOption("history.max.size", new Integer(500));
 
@@ -1044,138 +960,89 @@ public interface OptionConstants {
 
   /* ---------- COMPILER OPTIONS ------------- */
   
-  /**
-   * Whether to show unchecked warnings
-   */
+  /** Whether to show unchecked warnings */
   public static final BooleanOption SHOW_UNCHECKED_WARNINGS = 
     new BooleanOption("show.unchecked.warnings", Boolean.TRUE);
   
-  /**
-   * Whether to show deprecation warnings
-   */
+  /** Whether to show deprecation warnings */
   public static final BooleanOption SHOW_DEPRECATION_WARNINGS = 
     new BooleanOption("show.deprecation.warnings", Boolean.TRUE);
     
-  /**
-   * Whether to show finally warnings
-   */
-  public static final BooleanOption SHOW_FINALLY_WARNINGS = 
-    new BooleanOption("show.finally.warnings", Boolean.FALSE);
+  /** Whether to show finally warnings */
+  public static final BooleanOption SHOW_FINALLY_WARNINGS = new BooleanOption("show.finally.warnings", Boolean.FALSE);
   
-  /**
-   * Whether to show serial warnings
-   */
+  /** Whether to show serial warnings */
   public static final BooleanOption SHOW_SERIAL_WARNINGS = 
     new BooleanOption("show.serial.warnings", Boolean.FALSE);
   
-  /**
-   * Whether to show serial warnings
-   */
+  /** Whether to show serial warnings */
   public static final BooleanOption SHOW_FALLTHROUGH_WARNINGS = 
     new BooleanOption("show.fallthrough.warnings", Boolean.FALSE);
   
-  /**
-   * Whether to show serial warnings
-   */
+  /** Whether to show serial warnings */
   public static final BooleanOption SHOW_PATH_WARNINGS = 
     new BooleanOption("show.path.warnings", Boolean.FALSE);
   
-  
-  
-  /* ---------- Undisplayed Options ---------- */
+  /* ---------- UNDISPLAYED OPTIONS ---------- */
 
-  /**
-   * The language level to use when starting DrJava.  Stores the most recently used one.
-   * Defaults to full java.
-   */
-  public static final IntegerOption LANGUAGE_LEVEL =
-    new IntegerOption("language.level", new Integer(0));
+  /** The language level to use when starting DrJava.  Stores the most recently used one.  Defaults to full java. */
+  public static final IntegerOption LANGUAGE_LEVEL = new IntegerOption("language.level", new Integer(0));
   
-  /**
-   * A vector containing the most recently used files.
-   */
+  /** A vector containing the most recently used files. */
   public static final VectorOption<File> RECENT_FILES =
     new VectorOption<File>("recent.files",new FileOption("",null),new Vector<File>());
 
-  /**
-   * A vector containing the most recently used projects.
-   */
+  /** A vector containing the most recently used projects. */
   public static final VectorOption<File> RECENT_PROJECTS =
     new VectorOption<File>("recent.projects",new FileOption("",null),new Vector<File>());
   
-  /**
-   * Whether to enabled the Show Debug Console menu item in the Tools menu.
-   */
-  public static final BooleanOption SHOW_DEBUG_CONSOLE =
-    new BooleanOption("show.debug.console", Boolean.FALSE);
+  /** Whether to enabled the Show Debug Console menu item in the Tools menu. */
+  public static final BooleanOption SHOW_DEBUG_CONSOLE = new BooleanOption("show.debug.console", Boolean.FALSE);
 
-  /**
-   * Height of MainFrame at startup.  Can be overridden if out of bounds.
-   */
+  /** Height of MainFrame at startup.  Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption WINDOW_HEIGHT =
     new NonNegativeIntegerOption("window.height",new Integer(700));
 
-  /**
-   * Width of MainFrame at startup.  Can be overridden if out of bounds.
-   */
+  /** Width of MainFrame at startup.  Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption WINDOW_WIDTH =
     new NonNegativeIntegerOption("window.width",new Integer(800));
 
-  /**
-   * X position of MainFrame at startup.  Can be overridden if out of bounds.
-   * This value can legally be negative in a multi-screen setup.
+  /** X position of MainFrame at startup.  Can be overridden if out of bounds. This value can legally be negative in a
+   *  multi-screen setup.
    */
-  public static final IntegerOption WINDOW_X =
-    new IntegerOption("window.x", new Integer(Integer.MAX_VALUE));
+  public static final IntegerOption WINDOW_X = new IntegerOption("window.x", new Integer(Integer.MAX_VALUE));
 
-  /**
-   * Y position of MainFrame at startup.  Can be overridden if out of bounds.
-   * This value can legally be negative in a multi-screen setup.
+  /** Y position of MainFrame at startup.  Can be overridden if out of bounds. This value can legally be negative in a
+   *  multi-screen setup.
    */
-  public static final IntegerOption WINDOW_Y =
-    new IntegerOption("window.y", new Integer(Integer.MAX_VALUE));
+  public static final IntegerOption WINDOW_Y = new IntegerOption("window.y", new Integer(Integer.MAX_VALUE));
 
-  /**
-   * Width of DocList at startup.  Must be less than WINDOW_WIDTH.
-   * Can be overridden if out of bounds.
-   */
+  /** Width of DocList at startup.  Must be less than WINDOW_WIDTH. Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption DOC_LIST_WIDTH =
     new NonNegativeIntegerOption("doc.list.width",new Integer(150));
 
-  /**
-   * Height of tabbed panel at startup.  Must be less than WINDOW_HEIGHT +
-   * DEBUG_PANEL_HEIGHT.  Can be overridden if out of bounds.
+  /** Height of tabbed panel at startup.  Must be less than WINDOW_HEIGHT + DEBUG_PANEL_HEIGHT.  Can be overridden if 
+   *  out of bounds.
    */
   public static final NonNegativeIntegerOption TABS_HEIGHT =
     new NonNegativeIntegerOption("tabs.height",new Integer(120));
 
-  /**
-   * Height of debugger panel at startup.  Must be less than WINDOW_HEIGHT +
-   * TABS_HEIGHT.  Can be overridden if out of bounds.
+  /** Height of debugger panel at startup.  Must be less than WINDOW_HEIGHT + TABS_HEIGHT.  Can be overridden if out of
+   *  bounds.
    */
   public static final NonNegativeIntegerOption DEBUG_PANEL_HEIGHT =
     new NonNegativeIntegerOption("debug.panel.height",new Integer(0));
 
-  /**
-   * The directory in use by the user upon the previous quit.
-   */
-  public static final FileOption LAST_DIRECTORY =
-    new FileOption("last.dir", FileOption.NULL_FILE);
+  /** The directory in use by the user upon the previous quit. */
+  public static final FileOption LAST_DIRECTORY = new FileOption("last.dir", FileOption.NULL_FILE);
 
-  /**
-   * The command-line arguments to be passed to the interpreter jvm.
-   */
+  /** The command-line arguments to be passed to the interpreter jvm. */
   public static final StringOption JVM_ARGS = new StringOption("jvm.args", "");
 
-  /**
-   * The last state of the "Go to File" dialog.
-   */
-  public static final StringOption DIALOG_GOTOFILE_STATE =
-    new StringOption("dialog.gotofile.state", "default");
+  /** The last state of the "Go to File" dialog. */
+  public static final StringOption DIALOG_GOTOFILE_STATE = new StringOption("dialog.gotofile.state", "default");
 
-  /**
-   * Whether to save and restore window size and position at startup/shutdown.
-   */
+  /** Whether to save and restore window size and position at startup/shutdown. */
   public static final BooleanOption DIALOG_GOTOFILE_STORE_POSITION =
     new BooleanOption("dialog.gotofile.store.position", Boolean.TRUE);
 

@@ -180,7 +180,7 @@ public class DrJava {
     }
     catch (Throwable t) {
       // Show any errors to the System.err and in an AWTExceptionHandler
-      System.err.println(t.getClass().getName() + ": " + t.getMessage());
+      System.out.println(t.getClass().getName() + ": " + t.getMessage());
       t.printStackTrace(System.err);System.out.println("error thrown");
       new AWTExceptionHandler().handle(t);
     }
@@ -348,8 +348,8 @@ public class DrJava {
   /** Switches the config object to use a custom config file. Ensures that Java source files aren't 
    *  accidentally used.
    */
-  static void setPropertiesFile(String filename) {
-    if (!filename.endsWith(".java"))  _propertiesFile = new File(filename);
+  static void setPropertiesFile(String fileName) {
+    if (!fileName.endsWith(".java"))  _propertiesFile = new File(fileName);
   }
   
   /** Initializes the configuration object with the current notion of the properties file.

@@ -47,31 +47,22 @@ package edu.rice.cs.util.swing;
 
 import java.io.File;
 
-/**
- * FileIconManagers choose the icons to use when displaying files
- * using their icons in lists or trees.
- */
+/** FileIconManagers choose the icons to use when displaying file using their icons in lists or trees. */
 public interface FileDisplayManager extends DisplayManager<File> {
   
-  /**
-   * Creates a file display that displays a file as this manager specifies
-   * @param f the file to display using the display manager
-   * @return the file display object used to display a file's name
+  /** Creates a file display that displays a file as this manager specifies
+   *  @param f the file to display using the display manager
+   *  @return the file display object used to display a file's name
    */
   public FileDisplay makeFileDisplay(File f);
   
-  /**
-   * Creates a FileDisplay representing a new untitled folder that is 
-   * yet to be created.
-   * @param parent the parent location to place this new folder
-   * @return the new file display
+  /** Creates a FileDisplay representing a new untitled folder that is  yet to be created.
+   *  @param parent the parent location to place this new folder
+   *  @return the new file display
    */
   public FileDisplay makeNewFolderDisplay(File parent);
   
-  /**
-   * Notifies the manager that the file system has changed. This may
-   * affect the way the manager chooses icons for the files.
-   */
+  /** Notifies the manager that the file system has changed. This may affect the way the manager chooses icons for the files. */
   public void update();
   
 }

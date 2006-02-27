@@ -75,6 +75,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    public int compareTo(OpenDefinitionsDocument d) {
     throw new UnsupportedOperationException("Dummy method");
   }
+   
   /** Determines if this definitions document has changed since the last save.
    *  @return true if the document has been modified
    */
@@ -82,13 +83,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  /**
-   * Saves the document with a FileWriter.  If the file name is already
-   * set, the method will use that name instead of whatever selector
-   * is passed in.
-   * @param com a selector that picks the file name
-   * @exception IOException
-   * @return true if the file was saved, false if the operation was canceled
+  /** Saves the document with a FileWriter.  If the file name is already set, the method will use that name instead of
+   *  whatever selector is passed in.
+   *  @param com a selector that picks the file name
+   *  @exception IOException
+   *  @return true if the file was saved, false if the operation was canceled
    */
   public boolean saveFile(FileSaveSelector com) throws IOException {
     throw new UnsupportedOperationException("Dummy method");
@@ -132,7 +131,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    *  @throws IllegalStateException if document never had a file
    *  @throws FileMovedException if the document's file no longer exists
    */
-  public File getFile() throws IllegalStateException, FileMovedException {
+  public File getFile() throws FileMovedException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -353,6 +352,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public void close() { }
   
   public boolean isInProjectPath() { return false; }
+  
+  public boolean isInNewProjectPath(File f) { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean inProject() { return false; }
   

@@ -61,7 +61,7 @@ public interface DCacheAdapter {
   public DDReconstructor getReconstructor();
   
   /* Method for notifying the DCacheAdapter that this document has been saved to a file. */
-  public void documentSaved(String filename);
+  public void documentSaved(String fileName);
   
   /* Method for notifying the DCacheAdapter that this document has been modified. */
   public void documentModified();

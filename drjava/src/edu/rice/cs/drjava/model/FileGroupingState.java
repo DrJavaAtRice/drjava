@@ -80,13 +80,10 @@ public interface FileGroupingState {
   /** Sets the current built directory. */
   public void setBuildDirectory(File f);
   
-  /** Returns the effective working directory. */
+  /** Returns the working directory for the slave (interactions pane) JVM. */
   public File getWorkingDirectory();
   
-   /** Returns the value of the WORKING_DIRECTORY property (which may be null or FileOption.NULL_FILE). */
-  public File getRawWorkingDirectory();
-  
-  /** Sets the current working directory. */
+   /** Sets the current working directory for the interactions pane. */
   public void setWorkingDirectory(File f);
   
   /** Returns the source file that has the main method of the project

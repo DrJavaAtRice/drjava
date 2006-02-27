@@ -43,55 +43,39 @@ import java.awt.*;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
-/**
- * Graphical form of a FileOption.
+/** Graphical form of a FileOption.
  *
- * @version $Id$
+ *  @version $Id$
  */
-public class DirectoryOptionComponent extends OptionComponent<File>
-  implements OptionConstants {
+public class DirectoryOptionComponent extends OptionComponent<File> implements OptionConstants {
 
   private DirectorySelectorComponent _component;
 
-  public DirectoryOptionComponent (FileOption opt, String text,
-                              Frame parent, DirectoryChooser dc) {
+  public DirectoryOptionComponent (FileOption opt, String text,Frame parent, DirectoryChooser dc) {
     super(opt, text, parent);
     
     _component = new DirectorySelectorComponent(parent, dc, 30, 10f);
     _component.setFileField(DrJava.getConfig().getSetting(_option));
     _component.getFileField().getDocument().addDocumentListener(new DocumentListener() {
-      public void insertUpdate(DocumentEvent e) {
-        notifyChangeListeners();
-      }
-      public void removeUpdate(DocumentEvent e) {
-        notifyChangeListeners();
-      }
-      public void changedUpdate(DocumentEvent e) {
-        notifyChangeListeners();
-      }
+      public void insertUpdate(DocumentEvent e) { notifyChangeListeners(); }
+      public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
+      public void changedUpdate(DocumentEvent e) { notifyChangeListeners(); }
     });
   }
 
-  /**
-   * Constructor that allows for a tooltip description.
-   */
-  public DirectoryOptionComponent (FileOption opt, String text, Frame parent,
-                              String description, DirectoryChooser dc) {
+  /** Constructor that allows for a tooltip description. */
+  public DirectoryOptionComponent (FileOption opt, String text, Frame parent, String desc, DirectoryChooser dc) {
     this(opt, text, parent, dc);
-    setDescription(description);
+    setDescription(desc);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
-   * @param description the tooltip text
+  /** Sets the tooltip description text for this option.
+   *  @param description the tooltip text
    */
-  public void setDescription(String description) {
-    _label.setToolTipText(description);
-  }
+  public void setDescription(String description) { _label.setToolTipText(description); }
 
-  /**
-   * Updates the config object with the new setting.
-   * @return true if the new value is set successfully
+  /** Updates the config object with the new setting.
+   *  @return true if the new value is set successfully
    */
   public boolean updateConfig() {
     File componentFile = _component.getFileFromField();
@@ -107,26 +91,14 @@ public class DirectoryOptionComponent extends OptionComponent<File>
     return true;
   }
 
-  /**
-   * Displays the given value.
-   */
-  public void setValue(File value) {
-    _component.setFileField(value);
-  }
+  /** Displays the given value. */
+  public void setValue(File value) { _component.setFileField(value); }
 
-  /**
-   * Return's this OptionComponent's configurable component.
-   */
-  public JComponent getComponent() {
-    return _component;
-  }
+  /** Return's this OptionComponent's configurable component. */
+  public JComponent getComponent() { return _component; }
 
-
-  /**
-   * adds a filter to decide if a directory can be chosen
-   */
+  /** Adds a filter to decide if a directory can be chosen. */
   public void addChoosableFileFilter(FileFilter filter) {
     _component.addChoosableFileFilter(filter);
   }
-
 }

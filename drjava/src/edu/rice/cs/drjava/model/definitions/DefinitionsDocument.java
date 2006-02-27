@@ -211,9 +211,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   public void setOpenDefDoc(OpenDefinitionsDocument odd) { if (_odd == null) _odd = odd; }
   
-  /**
-   * @return the OpenDefinitonsDocument that is associated with this DefinitionsDocument
-   */
+  /** @return the OpenDefinitonsDocument that is associated with this DefinitionsDocument. */
   public OpenDefinitionsDocument getOpenDefDoc() {
     if (_odd == null)
       throw new IllegalStateException("The OpenDefinitionsDocument for this DefinitionsDocument has never been set");

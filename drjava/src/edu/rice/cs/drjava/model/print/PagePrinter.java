@@ -61,18 +61,18 @@ public class PagePrinter implements Printable {
   // private int _page;
   private ArrayList<TextLayout> _textLayouts;
   private ArrayList<TextLayout> _lineNumbers;
-  private String _filename;
+  private String _fileName;
   private DrJavaBook _parent;
 
   /**
    * Constructs a PagePrinter for a given page number (which is ignored!), a
    * given filename, and parent.
    */
-  public PagePrinter(int page, String filename, DrJavaBook parent) {
+  public PagePrinter(int page, String fileName, DrJavaBook parent) {
     // _page = page;
     _textLayouts = new ArrayList<TextLayout>();
     _lineNumbers = new ArrayList<TextLayout>();
-    _filename = filename;
+    _fileName = fileName;
     _parent = parent;
   }
 
@@ -128,7 +128,7 @@ public class PagePrinter implements Printable {
    * @param page The page number to print.
    */
   private void printFooter(Graphics2D g2d, PageFormat format, int page) {
-    TextLayout footerFile = new TextLayout(_filename, DrJavaBook.FOOTER_FONT, g2d.getFontRenderContext());
+    TextLayout footerFile = new TextLayout(_fileName, DrJavaBook.FOOTER_FONT, g2d.getFontRenderContext());
     float footerPlace = (float) (format.getImageableWidth() - footerFile.getAdvance()) / 2;
 
     footerFile.draw(g2d, footerPlace, (float) format.getImageableHeight() - footerFile.getDescent());

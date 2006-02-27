@@ -47,10 +47,7 @@ package edu.rice.cs.util.swing;
 
 import javax.swing.Icon;
 
-/**
- * FileIconManagers choose the icons to use when displaying files
- * using their icons in lists or trees.
- */
+/** FileIconManagers choose the icons to use when displaying files using their icons in lists or trees. */
 public interface DisplayManager<T> {
   
   /**

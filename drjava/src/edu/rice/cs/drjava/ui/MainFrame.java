@@ -1444,7 +1444,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _interactionsHistoryChooser.setDialogTitle("Save Interactions History");
       FileSaveSelector selector = new FileSaveSelector() {
         public File getFile() throws OperationCanceledException {
-          // Don't try to set the filename with getSaveFile;
+          // Don't try to set the fileName with getSaveFile;
           // just display the dialog and get file with getChosenFile, otherwise
           // the suggested file name will be whatever document is open.
           // ED (8.14.03): Had to add this next block of code from getSaveFile to
@@ -1619,7 +1619,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     public Icon getIcon(OpenDefinitionsDocument odd) {
       File f = null;
       try { f = odd.getFile(); }
-      catch(IllegalStateException ise) { /* do nothing */ }
       catch(FileMovedException fme) { /* do nothing */ }
       
       if (odd.isModifiedSinceSave()) return makeLayeredIcon(_default.getIcon(f), _star);
@@ -1718,16 +1717,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         workDir = new File(System.getProperty("user.dir"));
       }
     }
-    if (workDir.isFile() && workDir.getParent() != null) {
-      workDir = workDir.getParentFile();
-    }
+    if (workDir.isFile() && workDir.getParent() != null) workDir = workDir.getParentFile();
+
     // Overrides JFileChooser to display the full path of the directory
     _openChooser = new JFileChooser() {
       public void setCurrentDirectory(File dir) {
         //next two lines are order dependent!
         super.setCurrentDirectory(dir);
         setDialogTitle("Open:  " + getCurrentDirectory());
-        
       }
     };
     _openChooser.setPreferredSize(new Dimension(650, 410));
@@ -1744,10 +1741,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     Vector<File> recentProjects = config.getSetting(RECENT_PROJECTS);
     _openProjectChooser = new JFileChooser();
     _openProjectChooser.setPreferredSize(new Dimension(650, 410));
+    
     if (recentProjects.size()>0 && recentProjects.elementAt(0).getParentFile() != null)
       _openProjectChooser.setCurrentDirectory(recentProjects.elementAt(0).getParentFile());
     else
       _openProjectChooser.setCurrentDirectory(workDir);
+    
     _openProjectChooser.setFileFilter(_projectFilter);
     _openProjectChooser.setMultiSelectionEnabled(false);
     _saveChooser = new JFileChooser() {
@@ -2191,10 +2190,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Updates the title bar with the name of the active document. */
   public void updateFileTitle() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
-    String filename = GlobalModelNaming.getDisplayFullPath(doc);
-    if (!filename.equals(_fileTitle)) {
-      _fileTitle = filename;
-      setTitle("File: " + filename);
+    String fileName = GlobalModelNaming.getDisplayFullPath(doc);
+    if (!fileName.equals(_fileTitle)) {
+      _fileTitle = fileName;
+      setTitle("File: " + fileName);
       _model.getDocCollectionWidget().repaint();
     }
     // Always update this field-- two files in different directories
@@ -2488,6 +2487,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   boolean _closeProject(boolean quitting) {
     if (_checkProjectClose()) {
       List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
+//      System.err.println("projDocs = " + projDocs);
       //    for(OpenDefinitionsDocument d: projDocs) {
       //      _model.closeFile(d);
       //    }
@@ -2550,15 +2550,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     catch (AlreadyOpenException aoe) {
       OpenDefinitionsDocument openDoc = aoe.getOpenDocument();
-      String filename;
-      try { filename = openDoc.getFile().getName(); }
+      String fileName;
+      try { fileName = openDoc.getFile().getName(); }
       catch (IllegalStateException ise) {
         // Can't happen: this open document must have a file
         throw new UnexpectedException(ise);
       }
       catch (FileMovedException fme) {
         // File was deleted, but use the same name anyway
-        filename = fme.getFile().getName();
+        fileName = fme.getFile().getName();
       }
       
       // Always switch to doc
@@ -2567,7 +2567,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Prompt to revert if modified
       if (openDoc.isModifiedSinceSave()) {
         String title = "Revert to Saved?";
-        String message = filename + " is already open and modified.\n" +
+        String message = fileName + " is already open and modified.\n" +
           "Would you like to revert to the version on disk?\n";
         int choice = JOptionPane.showConfirmDialog(this, message, title, JOptionPane.YES_NO_OPTION);
         if (choice == JOptionPane.YES_OPTION) _revert();
@@ -2604,9 +2604,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     chooser.setDialogTitle("Open All " + type + "Files In...");
     
     File openDir = null;
-    try { openDir = _model.getActiveDocument().getFile().getParentFile(); }
+    try { 
+      File activeFile = _model.getActiveDocument().getFile();
+      if (activeFile != null) openDir = activeFile.getParentFile(); }
     catch(FileMovedException e) { /* do nothing */ }
-    catch(IllegalStateException e) { /* do nothing */ }
     
     int result = chooser.showDialog(openDir);
     if (result != DirectoryChooser.APPROVE_OPTION)  return; // canceled or error
@@ -2639,25 +2640,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     if ((_model.isProjectActive() && _model.getActiveDocument().isInProjectPath()) ||
         _model.getActiveDocument().isAuxiliaryFile()) {
       
-      String filename = null;
+      String fileName = null;
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       try{
-        if (doc.isUntitled()) filename = "File";
-        else filename = _model.getActiveDocument().getFile().getName();
+        if (doc.isUntitled()) fileName = "File";
+        else fileName = _model.getActiveDocument().getFile().getName();
       }
-      catch(FileMovedException e) { filename = e.getFile().getName(); }
+      catch(FileMovedException e) { fileName = e.getFile().getName(); }
       String text = "Closing this file will permanently remove it from the current project." + 
         "\nAre you sure that you want to close this file?";
       
       Object[] options = {"Yes", "No"};
-      int rc = JOptionPane.showOptionDialog(MainFrame.this,
-                                            text,
-                                            "Close " + filename + "?",
-                                            JOptionPane.YES_NO_OPTION,
-                                            JOptionPane.QUESTION_MESSAGE,
-                                            null,
-                                            options,
-                                            options[1]);
+      int rc = 
+        JOptionPane.showOptionDialog(MainFrame.this, text,"Close " + fileName + "?", JOptionPane.YES_NO_OPTION,
+                                     JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
       if (rc != JOptionPane.YES_OPTION) return;
       _model.setProjectChanged(true);
     }
@@ -2811,7 +2807,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     finally { hourglassOff(); }
   }
   
-  //Called by the ProjectPropertiesFrame
+  // Called by the ProjectPropertiesFrame
   void saveProject() { _saveProject(); }
   
   private void _saveProject() {
@@ -2821,10 +2817,24 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Closes all files and makes a new project. */
   private void _newProject() {
-    _closeAll();
-    _saveProjectAs();
+//    _closeAll();
+    
+    _saveChooser.setFileFilter(_projectFilter);
+    int rc = _saveChooser.showSaveDialog(this);
+    if (rc == JFileChooser.APPROVE_OPTION) {
+      File file = _saveChooser.getSelectedFile();
+      String fileName = file.getName();
+      // ensure that saved file has extesion ".pjt"
+      if (! fileName.endsWith(".pjt")) {
+        int lastIndex = fileName.lastIndexOf(".");
+        if (lastIndex == -1) file = new File (file.getAbsolutePath() + ".pjt");
+        else file = new File(fileName.substring(0, lastIndex) + ".pjt");
+      }
+      try { _model.newProject(file); }
+      catch(IOException e) { throw new UnexpectedException(e); }
+    }
   }
-  
+
   private void _saveProjectAs() {
     
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
@@ -2832,7 +2842,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
     _saveChooser.setFileFilter(_projectFilter);
     File selection = _saveChooser.getSelectedFile();
-    if (selection != null) {
+    if (selection != null) {  // what is this block of commands for?
       _saveChooser.setSelectedFile(selection.getParentFile());
       _saveChooser.setSelectedFile(selection);
       _saveChooser.setSelectedFile(null);
@@ -2843,25 +2853,23 @@ public class MainFrame extends JFrame implements OptionConstants {
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
       File file = _saveChooser.getSelectedFile();
-      if (!file.exists() || _verifyOverwrite()) {
+      if (! file.exists() || _verifyOverwrite()) {
         _saveProjectHelper(file);
         try {
           file = file.getCanonicalFile();
           if (file.getPath().endsWith(".pjt")) _openProjectHelper(file);
           else _openProjectHelper(new File(file.getAbsolutePath() + ".pjt"));
         }
-        catch (IOException e) {
-          throw new UnexpectedException(e);
-        }
+        catch (IOException e) { throw new UnexpectedException(e); }
       }
     }
   }
   
   void _saveProjectHelper(File file) {
     try {
-      if (file.getName().indexOf(".") == -1) file =  new File (file.getAbsolutePath() + ".pjt");
-      String filename = file.getCanonicalPath();
-      _model.saveProject(filename, _gatherDocInfo());
+      if (file.getName().indexOf(".") == -1) file = new File (file.getAbsolutePath() + ".pjt");
+      String fileName = file.getCanonicalPath();
+      _model.saveProject(file, _gatherDocInfo());
 //      if (!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)) {
 //        _openProjectHelper(file);
 //      }    
@@ -4520,19 +4528,6 @@ public class MainFrame extends JFrame implements OptionConstants {
 //        Utilities.showDebug("MainFrame.stateChanged called with event");
         clearStatusMessage();
         
-//        if (_tabbedPane.getSelectedComponent() == _interactionsContainer) {
-//          /**
-//           * This was probably a bad design decision but I couldn't think
-//           * of any other way around it.  When the interactions tab gains
-//           * focus we want the interactions pane (editor pane) to receive
-//           * the focus.  But focus is given to the tab itself *AFTER* this
-//           * listener is called on.  This code waits for a bit for Swing
-//           * to give the tab focus, then steals the focus back to the
-//           * interactions pane.  
-//           * This commented-out code looks like an ugly kluge that is dependent on fortuitous timing.  
-//           */
-//        }
-//        else 
         if (_tabbedPane.getSelectedComponent() == _consoleScroll)
           SwingUtilities.invokeLater(new Runnable() { public void run() { _consolePane.requestFocusInWindow(); } });
           // SwingUtilities used above because this action must execute after all pending events in the event queue */
@@ -4548,8 +4543,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     //_interactionsWithSyncPanel = new JPanel(new BorderLayout());
     //_syncStatus = new JLabel("Testing");
-    //_interactionsWithSyncPanel.add(new BorderlessScrollPane(_interactionsPane),
-    //                               BorderLayout.CENTER);
+    //_interactionsWithSyncPanel.add(new BorderlessScrollPane(_interactionsPane), BorderLayout.CENTER);
     //_interactionsWithSyncPanel.add(_syncStatus, BorderLayout.SOUTH);
     
     _tabbedPane.add("Interactions", _interactionsContainer);
@@ -5043,10 +5037,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setCurrentDirectory(OpenDefinitionsDocument doc) {
     try {
       File file = doc.getFile();
-      _setCurrentDirectory(file);
-    }
-    catch (IllegalStateException ise) {
-      // no file, leave in current directory
+      if (file != null) _setCurrentDirectory(file); // if no file, leave in current directory
     }
     catch (FileMovedException fme) {
       // file was deleted, but try to go the directory
@@ -5508,9 +5499,6 @@ public class MainFrame extends JFrame implements OptionConstants {
             File f = doc.getFile();
             if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
           }
-          catch (IllegalStateException ise) { throw new UnexpectedException(ise); }
-          // Impossible because saved => has a file
-          
           catch (FileMovedException fme) {
             File f = fme.getFile();
             // Recover, show it in the list anyway
@@ -5535,7 +5523,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (_model.isInProjectPath(doc)) _model.setProjectChanged(true);
         }
       }
-      catch (IllegalStateException ise) { throw new UnexpectedException(ise); } /* impossible */
       catch (FileMovedException fme) {
         File f = fme.getFile();
         // Recover, show it in the list anyway
@@ -5556,13 +5543,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (jsp != null) {
         ((DefinitionsPane)jsp.getViewport().getView()).close();
         _defScrollPanes.remove(doc);
-      }
-      if (doc != null) {
-        try {
-          File f = doc.getFile();
-        }
-        catch(FileMovedException fme) { /* do nothing */ }
-        catch(IllegalStateException ise) { /* do nothing */ }
       }
     }
     
@@ -5686,8 +5666,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 //          try {
             _compilerErrorPanel.reset();
             if (inDebugMode()) {
-              _model.getActiveDocument().checkIfClassFileInSync();
-//              _model.refreshActiveDocument();
+//              _model.getActiveDocument().checkIfClassFileInSync();
+              _model.refreshActiveDocument();
               _updateDebugStatus();
             }
 //          }
@@ -5709,6 +5689,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void junitStarted() {
       /* Note: hourglassOn() is done by various junit commands (other than junitClasses); hourglass must be off for 
        * actual testing; the balancing hourglassOff() is located here and in nonTestCase */
+      
       // Only change GUI from event-dispatching thread
 //      new ScrollableDialog(null, "junitStarted(" + docs + ") called in MainFrame", "", "").show();
       Utilities.invokeLater(new Runnable() {
@@ -5744,9 +5725,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //public void junitRunning() { }
     
     public void junitSuiteStarted(final int numTests) {
-      Utilities.invokeLater(new Runnable() {
-        public void run() { _junitErrorPanel.progressReset(numTests); }
-      });
+      Utilities.invokeLater(new Runnable() { public void run() { _junitErrorPanel.progressReset(numTests); } });
     }
     
     public void junitTestStarted(final String name) {
@@ -5760,10 +5739,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       // syncUI...?
       Utilities.invokeLater(new Runnable() {
         public void run() {
-          _junitErrorPanel.getErrorListPane().
-            testEnded(name, succeeded, causedError); // this does nothing!
+          _junitErrorPanel.getErrorListPane().testEnded(name, succeeded, causedError); // this does nothing!
           _junitErrorPanel.progressStep(succeeded);
-//          _model.refreshActiveDocument();
+          _model.refreshActiveDocument();
         }
       });
     }
@@ -5776,7 +5754,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           try {
             _restoreJUnitActionsEnabled();
             _junitErrorPanel.reset();
-//            _model.refreshActiveDocument();
+            _model.refreshActiveDocument();
           }
           finally { 
 //            new ScrollableDialog(null, "MainFrame.junitEnded() ready to return", "", "").show();
@@ -5814,7 +5792,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             _javadocAllAction.setEnabled(true);
             _javadocCurrentAction.setEnabled(true);
             _javadocErrorPanel.reset();
-//            _model.refreshActiveDocument();
+            _model.refreshActiveDocument();
           }
           finally { hourglassOff(); }
           
@@ -5832,13 +5810,12 @@ public class MainFrame extends JFrame implements OptionConstants {
               className = "";
             }
             try {
-              String filename = (allDocs || className.equals("")) ?
+              String fileName = (allDocs || className.equals("")) ?
                 "index.html" : (className + ".html");
-              File index = new File(destDir, filename);
+              File index = new File(destDir, fileName);
               URL address = index.getAbsoluteFile().toURL();
               if (!PlatformFactory.ONLY.openURL(address)) {
-                JavadocFrame _javadocFrame =
-                  new JavadocFrame(destDir, className, allDocs);
+                JavadocFrame _javadocFrame = new JavadocFrame(destDir, className, allDocs);
                 _javadocFrame.setVisible(true);
               }
             }
@@ -6066,41 +6043,20 @@ public class MainFrame extends JFrame implements OptionConstants {
 //      Utilities.showStackTrace(new UnexpectedException("We should not have called nonTestCase"));
       
       final String message = isTestAll ?
-        "There are no open JUnit test cases.  Please make sure that:\n" +
-        "  - The documents containing tests have been compiled.\n" +
-        "  - They are subclasses of junit.framework.TestCase.\n" +
-        "For more information on writing JUnit TestCases, view the\n" +
-        "JUnit chapter in the User Documentation."
+        "There are no compiled JUnit TestCases available for execution.\n" +
+        "Perhaps you have not yet compiled your test files."
         :
         "The current document is not a valid JUnit test case.\n" +
         "Please make sure that:\n" +
-        "  - This document has been compiled.\n" +
-        "  - It is a subclass of junit.framework.TestCase.\n" +
-        "For more information on writing JUnit TestCases, view the\n" +
-        "JUnit chapter in the User Documentation.";
-//        "There are no open test cases.  Please make sure all\n" +
-//        "open documents have been compiled, and at least one\n" +
-//        "of them is a subclass of junit.framework.TestCase." :
-//
-//        "The  Test  button  (and menu item) in  DrJava invokes the JUnit\n"  +
-//        "test  harness  over  the currently open document.  In order for\n" +
-//        "that  to  work,  the  current  document  must  be a valid JUnit\n" +
-//        "TestCase, i.e., a subclass of junit.framework.TestCase.\n\n" +
-//
-//        "Make  sure  the current  document  has been saved and  compiled\n" +
-//        "before using the Test button.\n\n" +
-//
-//        "For information on how to write JUnit TestCases, view the JUnit\n" +
-//        "chapter in the User Documentation or the online Help, or visit:\n\n" +
-//
-//        "  http://www.junit.org/\n\n";
-      
+        "- it has been compiled and\n" +
+        "- it is a subclass of junit.framework.TestCase.\n";
+
       // Not necessarily invoked from event-handling thread!
       
       Utilities.invokeLater(new Runnable() {
         public void run() {
           JOptionPane.showMessageDialog(MainFrame.this, message,
-                                        "Test Works Only On JUnit TestCases",
+                                        "Test Only Executes JUnit test cases",
                                         JOptionPane.ERROR_MESSAGE);
           // clean up as in JUnitEnded 
           try {
@@ -6120,7 +6076,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void classFileError(ClassFileError e) {
       
       final String message = 
-        "The class file for class " + e.getClassName() + "in source file " + e.getCanonicalPath() + " cannot be loaded.\n "
+        "The class file for class " + e.getClassName() + " in source file " + e.getCanonicalPath() + " cannot be loaded.\n "
         + "When DrJava tries to load it, the following error is generated:\n" +  e.getError();
       
       // Not necessarily invoked from event-handling thread!
@@ -6128,7 +6084,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       Utilities.invokeLater(new Runnable() {
         public void run() {
           JOptionPane.showMessageDialog(MainFrame.this, message,
-                                        "Testing works only on well-formed, verifiable class files",
+                                        "Testing works only on valid class files",
                                         JOptionPane.ERROR_MESSAGE);
           // clean up as junitEnded except hourglassOff (should factored into a private method)
           showTab(_junitErrorPanel);
@@ -6158,13 +6114,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       boolean notFound = false;
       try {
         File file = doc.getFile();
-        fname = file.getName();
-        text = fname + " has been modified. Would you like to save it?";
-      }
-      catch (IllegalStateException ise) {
-        // No file exists
-        fname = "Untitled file";
-        text = "Untitled file has been modified. Would you like to save it?";
+        if (file == null) {
+          fname = "Untitled file";
+          text = "Untitled file has been modified. Would you like to save it?";
+        }
+        else {
+          fname = file.getName();
+          text = fname + " has been modified. Would you like to save it?";
+        }
       }
       catch (FileMovedException fme) {
         // File was deleted, but use the same name anyway
@@ -6180,13 +6137,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (notFound) saved = _saveAs(); 
           else saved = _save();
           if (doc != lastActive) _model.setActiveDocument(lastActive);  // breaks when "if" clause omitted
-          if (! saved) return false;
-          if (doc.isAuxiliaryFile() || (_model.isProjectActive() && doc.isInProjectPath())) { // what is this test for?
-            try { doc.getFile().getName(); }
-            catch(IllegalStateException ise) { throw new UnexpectedException(ise); }
-            catch(FileMovedException fme) { throw new UnexpectedException(fme); }
-          }
-          return true;
+          return saved;
         case JOptionPane.NO_OPTION:
           if (doc != lastActive) _model.setActiveDocument(lastActive);  // breaks when "if" clause omitted
           return true;
@@ -6209,9 +6160,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (! _model.getActiveDocument().equals(doc)) _model.setActiveDocument(doc);
       try {
         File file = doc.getFile();
-        fname = file.getName();
+        if (file == null) fname = "Untitled file";
+        else fname = file.getName();
       }
-      catch (IllegalStateException ise) { fname = "Untitled file"; } // No file exists
       catch (FileMovedException fme) { fname = fme.getFile().getName(); }
       // File was deleted, but use the same name anyway
       
@@ -6270,7 +6221,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
-//      _model.refreshActiveDocument();
+      _model.refreshActiveDocument();
     }
     
     public void projectRunnableChanged() {
@@ -6404,7 +6355,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       public void run() {
         _showJUnitInterrupted(e);
         removeTab(_junitErrorPanel);
-//        _model.refreshActiveDocument();
+        _model.refreshActiveDocument();
         // hourglassOff();
       }
     });

@@ -120,8 +120,8 @@ public class JavadocFrame extends HTMLFrame {
             int startIndex = line.indexOf(start) + start.length();
             int endIndex = line.indexOf("\">");
             if ((startIndex != -1) && (endIndex != -1)) {
-              String filename = line.substring(startIndex, endIndex);
-              return new File(destDir, filename);
+              String fileName = line.substring(startIndex, endIndex);
+              return new File(destDir, fileName);
             }
           }
         }

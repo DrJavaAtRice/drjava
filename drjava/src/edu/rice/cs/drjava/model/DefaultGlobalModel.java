@@ -207,134 +207,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _interpreterControl.startInterpreterJVM();
   }
   
-//  /** Returns a source root given a package and filename. */
-//  protected File getSourceRoot(String packageName, File sourceFile) throws InvalidPackageException {
-//    if (packageName.equals("")) {
-//      return sourceFile.getParentFile();
-//    }
-//    
-//    ArrayList<String> packageStack = new ArrayList<String>();
-//    int dotIndex = packageName.indexOf('.');
-//    int curPartBegins = 0;
-//    
-//    while (dotIndex != -1) {
-//      packageStack.add(packageName.substring(curPartBegins, dotIndex));
-//      curPartBegins = dotIndex + 1;
-//      dotIndex = packageName.indexOf('.', dotIndex + 1);
-//    }
-//    
-//    // Now add the last package component
-//    packageStack.add(packageName.substring(curPartBegins));
-//    
-//    // Must use the canonical path, in case there are dots in the path
-//    //  (which will conflict with the package name)
-//    try {
-//      File parentDir = sourceFile.getCanonicalFile();
-//      while (!packageStack.isEmpty()) {
-//        String part = pop(packageStack);
-//        parentDir = parentDir.getParentFile();
-//        if (parentDir == null) throw new RuntimeException("parent dir is null?!");
-//        
-//        // Make sure the package piece matches the directory name
-//        if (! part.equals(parentDir.getName())) {
-//          String msg = "The source file " + sourceFile.getAbsolutePath() +
-//            " is in the wrong directory or in the wrong package. " +
-//            "The directory name " + parentDir.getName() +
-//            " does not match the package component " + part + ".";
-//          
-//          throw new InvalidPackageException(-1, msg);
-//        }
-//      }
-//      
-//      // OK, now parentDir points to the directory of the first component of the
-//      // package name. The parent of that is the root.
-//      parentDir = parentDir.getParentFile();
-//      if (parentDir == null) {
-//        throw new RuntimeException("parent dir of first component is null?!");
-//      }
-//      
-//      return parentDir;
-//    }
-//    catch (IOException ioe) {
-//      String msg = "Could not locate directory of the source file: " + ioe;
-//      throw new InvalidPackageException(-1, msg);
-//    }
-//  }
-  
-  // ----- STATE -----
-//  protected FileGroupingState _state;
-//  /** Delegates the compileAll command to the _state, a FileGroupingState.
-//   *  Synchronization is handled by the compilerModel.
-//   */
+
   public void compileAll() throws IOException{ 
 //    ScrollableDialog sd = new ScrollableDialog(null, "DefaultGlobalModel.compileAll() called", "", "");
 //    sd.show();
     _state.compileAll(); 
   }
   
-//  /**
-//   * @param state the new file grouping state that will handle
-//   * project specific properties such as the build directory.
-//   */
-//  public void setFileGroupingState(FileGroupingState state) {
-//    _state = state;
-//    _notifier.projectRunnableChanged();
-//    _notifier.projectBuildDirChanged();
-//    _notifier.projectModified();
-//  }
-//  
-//  public FileGroupingState getFileGroupingState() { return _state; }
-//  
-//  /**
-//   * Notifies the project state that the project has been changed
-//   */
-//  public void setProjectChanged(boolean changed) {
-//    _state.setProjectChanged(changed);
-//    _notifier.projectModified();
-//  }
-//  
-//  /** @return true if the project state has been changed
-//   */
-//  public boolean isProjectChanged() {
-//    return _state.isProjectChanged();
-//  }
-//  
-//  /** @return true if the model has a project open, false otherwise. */
-//  public boolean isProjectActive() { return _state.isProjectActive(); }
-//  
-//  /** @return the file that points to the current project file. Null if not currently in project view
-//   */
-//  public File getProjectFile() { return _state.getProjectFile(); }
-//  
-//  /** @return all files currently saved as source files in the project file.
-//   *  If _state not in project mode, returns null
-//   */
-//  public File[] getProjectFiles() { return _state.getProjectFiles(); }
-//  
-//  /** @return true the given file is in the current project file. */
-//  public boolean inProject(File f) {
-//    return _state.inProject(f);
-//  }
-//  
-//  /** A file is in the project if the source root is the same as the
-//   *  project root. this means that project files must be saved at the
-//   *  source root. (we query the model through the model's state)
-//   */
-//  public boolean isInProjectPath(OpenDefinitionsDocument doc) {
-//    return _state.isInProjectPath(doc);
-//  }
-//  
-//  /** Sets the class with the project's main method
-//   */
-//  public void setJarMainClass(File f) {
-//    _state.setJarMainClass(f);
-//    _notifier.projectRunnableChanged();
-//    setProjectChanged(true);
-//  }
-//  
-//  /** @return the class with the project's main method. */
-//  public File getMainClass() { return _state.getMainClass(); }
-  
+
   public void junitAll() { _state.junitAll(); }
   
   /** Sets the class with the project's main method. */
@@ -356,8 +236,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     setProjectChanged(true);
   }
   
-  protected FileGroupingState makeProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, 
-                                                           ClassPathVector cp) {
+  protected FileGroupingState 
+    makeProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp) {
     return new ProjectFileGroupingState(main, bd, wd, project, files, cp);
   }
   
@@ -417,15 +297,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
                   los.add(sourceRoot);
                 }
               }
-            } 
+            }
             catch(FileMovedException fme) {
               // the file's not on disk, but send it in anyways
               f = fme.getFile();
               lof.add(f);
               los.add(sourceRoot);
             } 
-            catch(IllegalStateException e) { /* do nothing */ }
-          } 
+          }
           catch(InvalidPackageException e) { /* do nothing */ }
         }
       }
@@ -474,11 +353,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
             catch(FileMovedException fme) {
               // the file's not on disk, but send it in anyways
               f = fme.getFile();
-              lof.add(f);
-              los.add(classname);
-            }
-            catch(IllegalStateException e) {
-              // it doesn't have a file, so don't try and test it...
+              if (f != null) {
+                lof.add(f);
+                los.add(classname);
+              }
             }
           }
           catch(ClassNameNotFoundException e) {
@@ -636,27 +514,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     //System.out.println("Setting project classpath to: " + cp);
   }
 
-  /** Gets an array of all sourceRoots for the open definitions documents, without duplicates. Note that if any of
-   *  the open documents has an invalid package statement, it won't be adde to the source root set. On 8.7.02 
-   *  changed the sourceRootSet such that the directory DrJava was executed from is now after the sourceRoots
-   *  of the currently open documents in order that whatever version the user is looking at corresponds to the
-   *  class file the interactions window uses.
-   * TODO: Fix out of date comment, possibly remove this here?
-   */
-  public File[] getSourceRootSet() {
-    LinkedList<File> roots = new LinkedList<File>();
-    OpenDefinitionsDocument[] docs;
-    
-    synchronized(_documentsRepos) { docs =  _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) {
-      try {
-        File root = doc.getSourceRoot();
-        if (!roots.contains(root)) { roots.add(root); } // Don't add duplicate Files, based on path
-      }
-      catch (InvalidPackageException e) { /* file has invalid package statement; ignore it */ }
-    }
-    return roots.toArray(new File[roots.size()]);
-  }
   
   /** Return the name of the file, or "(untitled)" if no file exists.
    *  Does not include the ".java" if it is present.
@@ -664,18 +521,18 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    */
   public String getDisplayFilename(OpenDefinitionsDocument doc) {
 
-    String filename = doc.getFilename();
+    String fileName = doc.getFilename();
 
     // Remove ".java" if at the end of name
-    if (filename.endsWith(".java")) {
-      int extIndex = filename.lastIndexOf(".java");
-      if (extIndex > 0) filename = filename.substring(0, extIndex);
+    if (fileName.endsWith(".java")) {
+      int extIndex = fileName.lastIndexOf(".java");
+      if (extIndex > 0) fileName = fileName.substring(0, extIndex);
     }
     
     // Mark if modified
-    if (doc.isModifiedSinceSave()) filename = filename + "*";
+    if (doc.isModifiedSinceSave()) fileName = fileName + "*";
     
-    return filename;
+    return fileName;
   }
 
   /** Return the absolute path of the file with the given index, or "(untitled)" if no file exists. */
@@ -752,87 +609,91 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     
 
-    /** Saves the document with a FileWriter.  The FileSaveSelector will either provide a file name or prompt the 
-     *  user for one.  It is up to the caller to decide what needs to be done to choose a file to save to.  Once 
-     *  the file has been saved succssfully, this method fires fileSave(File).  If the save fails for any
-     *  reason, the event is not fired. This is synchronized against the compiler model to prevent saving and
-     *  compiling at the same time- this used to freeze drjava.
-     *  @param com a selector that picks the file name.
-     *  @throws IOException if the save fails due to an IO error
-     *  @return true if the file was saved, false if the operation was canceled
-     *  TODO: factor out common code with same method in superclass
-     */
-    public boolean saveFileAs(FileSaveSelector com) throws IOException {
-      try {
-        final OpenDefinitionsDocument openDoc = this;
-        final File file = com.getFile();
-        OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
-        boolean shouldSave = false;
-        boolean openInOtherDoc = ((otherDoc != null) && (openDoc != otherDoc));
-        // Check if file is already open in another document
-        if (openInOtherDoc) shouldSave = com.warnFileOpen(file);
-          // Can't save over an open document
-        
-        // If the file exists, make sure it's ok to overwrite it
-        if ((shouldSave && openInOtherDoc) || 
-            (!openInOtherDoc && (!file.exists() || com.verifyOverwrite()))) {
-
-          // Correct the case of the filename (in Windows)
-          if (! file.getCanonicalFile().getName().equals(file.getName())) file.renameTo(file);
-          
-          // Check for # in the path of the file because if there
-          // is one, then the file cannot be used in the Interactions Pane
-          if (file.getAbsolutePath().indexOf("#") != -1) _notifier.filePathContainsPound();
-          
-          // have FileOps save the file
-          FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
-            public void saveTo(OutputStream os) throws IOException {
-              DefinitionsDocument doc = getDocument();
-              try { _editorKit.write(os, doc, 0, doc.getLength()); } 
-              catch (BadLocationException docFailed) { throw new UnexpectedException(docFailed); }
-            }
-          });
-          
-          resetModification();
-          setFile(file);
-          
-          try {
-            // This calls getDocument().getPackageName() because this may be untitled and this.getPackageName() 
-            // returns "" if it's untitled.  Right here we are interested in parsing the DefinitionsDocument's text
-            _packageName = getDocument().getPackageName();
-          } 
-          catch(InvalidPackageException e) { _packageName = null; }
-          getDocument().setCachedClassFile(null);
-          checkIfClassFileInSync();
-          
-//          Utilities.showDebug("ready to fire fileSaved for " + this); 
-          _notifier.fileSaved(openDoc);
-          
-          // Make sure this file is on the classpath
-          try {
-            File classPath = getSourceRoot();
-            try {
-              if (inProject() || isAuxiliaryFile())
-                _interactionsModel.addProjectFilesClassPath(new File(classPath.getAbsolutePath()).toURL());
-              else
-                _interactionsModel.addExternalFilesClassPath(new File(classPath.getAbsolutePath()).toURL());
-            }
-            catch(MalformedURLException murle) { /* fail silently */ }
-          }
-          catch (InvalidPackageException e) { /* do nothing */ }
-          
-          /* update the navigator */
-          //System.out.println(fixPathForNavigator(file.getCanonicalPath()));
-          _documentNavigator.refreshDocument(this, fixPathForNavigator(file.getCanonicalPath()));
-        }
-        return true;
-      }
-      catch (OperationCanceledException oce) {
-        // Thrown by com.getFile() if the user cancels.
-        //   We don't save if this happens.
-        return false;
-      }
-    }
+//    /** Saves the document with a FileWriter.  The FileSaveSelector will either provide a file name or prompt the 
+//     *  user for one.  It is up to the caller to decide what needs to be done to choose a file to save to.  Once 
+//     *  the file has been saved succssfully, this method fires fileSave(File).  If the save fails for any
+//     *  reason, the event is not fired. This is synchronized against the compiler model to prevent saving and
+//     *  compiling at the same time- this used to freeze drjava.
+//     *  @param com a selector that picks the file name.
+//     *  @throws IOException if the save fails due to an IO error
+//     *  @return true if the file was saved, false if the operation was canceled
+//     *  TODO: factor out common code with same method in superclass
+//     */
+//    public boolean saveFileAs(FileSaveSelector com) throws IOException {
+//      try {
+//        final OpenDefinitionsDocument openDoc = this;
+//        final File file = com.getFile();
+//        System.err.println("saveFileAs called on " + file);
+//        
+//        // Check if file is already open in another document
+//        OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
+//        boolean shouldSave = false;
+//        boolean openInOtherDoc = ((otherDoc != null) && (openDoc != otherDoc));
+//        if (openInOtherDoc) shouldSave = com.warnFileOpen(file);
+//          // Can't save over an open document
+//        
+//        // If the file exists, make sure it's OK to overwrite it
+//        
+//        System.err.println("shouldSave = " + shouldSave + " openInOtherDoc = " + openInOtherDoc);
+//        if ((shouldSave && openInOtherDoc) || 
+//            (! openInOtherDoc && (! file.exists() || com.verifyOverwrite()))) {
+//
+//          // Correct the case of the filename (in Windows)
+//          if (! file.getCanonicalFile().getName().equals(file.getName())) file.renameTo(file);
+//          
+//          // Check for # in the path of the file because if there
+//          // is one, then the file cannot be used in the Interactions Pane
+//          if (file.getAbsolutePath().indexOf("#") != -1) _notifier.filePathContainsPound();
+//          
+//          // have FileOps save the file
+//          FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
+//            public void saveTo(OutputStream os) throws IOException {
+//              DefinitionsDocument doc = getDocument();
+//              try { _editorKit.write(os, doc, 0, doc.getLength()); } 
+//              catch (BadLocationException docFailed) { throw new UnexpectedException(docFailed); }
+//            }
+//          });
+//          
+//          resetModification();
+//          setFile(file);
+//          
+//          try {
+//            // This calls getDocument().getPackageName() because this may be untitled and this.getPackageName() 
+//            // returns "" if it's untitled.  Right here we are interested in parsing the DefinitionsDocument's text
+//            _packageName = getDocument().getPackageName();
+//          } 
+//          catch(InvalidPackageException e) { _packageName = null; }
+//          getDocument().setCachedClassFile(null);
+//          checkIfClassFileInSync();
+//          
+////          Utilities.showDebug("ready to fire fileSaved for " + this); 
+//          _notifier.fileSaved(openDoc);
+//          
+//          // Make sure this file is on the classpath
+//          try {
+//            File classPath = getSourceRoot();
+//            try {
+//              if (inProject() || isAuxiliaryFile())
+//                _interactionsModel.addProjectFilesClassPath(new File(classPath.getAbsolutePath()).toURL());
+//              else
+//                _interactionsModel.addExternalFilesClassPath(new File(classPath.getAbsolutePath()).toURL());
+//            }
+//            catch(MalformedURLException murle) { /* fail silently */ }
+//          }
+//          catch (InvalidPackageException e) { /* do nothing */ }
+//          
+//          /* update the navigator */
+//          //System.out.println(fixPathForNavigator(file.getCanonicalPath()));
+//          _documentNavigator.refreshDocument(this, fixPathForNavigator(file.getCanonicalPath()));
+//        }
+//        return true;
+//      }
+//      catch (OperationCanceledException oce) {
+//        // Thrown by com.getFile() if the user cancels.
+//        //   We don't save if this happens.
+//        return false;
+//      }
+//    }
     
     /** Starting compiling this document.  Used only for unit testing */
     public void startCompile() throws IOException { _compilerModel.compile(ConcreteOpenDefDoc.this); }
@@ -986,14 +847,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    */
   protected ConcreteOpenDefDoc _createOpenDefinitionsDocument(File f) throws IOException { return new ConcreteOpenDefDoc(f); }
   
-  /** Adds a documents source root to the interactions classpath this function is a helper to open file.
+  /** Adds the source root for doc to the interactions classpath; this function is a helper to _openFiles.
    *  @param doc the document to add to the classpath
    */
   protected void addDocToClassPath(OpenDefinitionsDocument doc) {
     try {
       File classPath = doc.getSourceRoot();
       try {
-        if (doc.inProject() || doc.isAuxiliaryFile())
+        if (doc.isAuxiliaryFile())
           _interactionsModel.addProjectFilesClassPath(classPath.toURI().toURL());
         else _interactionsModel.addExternalFilesClassPath(classPath.toURI().toURL());
       }
@@ -1054,10 +915,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     
     odds = getNonProjectDocuments();
+//    Utilities.show(odds.toString());
     for (OpenDefinitionsDocument odd: odds) {
       // this forwards directly to InterpreterJVM.addClassPath(String)
-      try { _interactionsModel.addExternalFilesClassPath(odd.getSourceRoot().toURL()); }
-      catch(MalformedURLException murle) { /* fail silently */ }
+      try { 
+        File sourceRoot = odd.getSourceRoot();
+        if (sourceRoot != null) _interactionsModel.addExternalFilesClassPath(sourceRoot.toURL()); 
+      }
+      catch(MalformedURLException murle) { /* ignore it */ }
       catch(InvalidPackageException e) { /* ignore it */ }
     }
   }

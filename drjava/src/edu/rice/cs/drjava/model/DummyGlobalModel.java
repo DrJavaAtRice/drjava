@@ -130,7 +130,7 @@ import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.project.DocFile;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
-import edu.rice.cs.drjava.project.ProjectFileBuilder;
+import edu.rice.cs.drjava.project.ProjectProfile;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParser;
 import edu.rice.cs.drjava.model.cache.DCacheAdapter;
@@ -220,7 +220,11 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call saveAllFiles on a Dummy");
   }
   
-  public void saveProject(String fname, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> ht) throws IOException {
+  public void newProject(File f) throws IOException {
+     throw new UnsupportedOperationException("Tried to call newProject on a Dummy");
+  }
+  
+  public void saveProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> ht) throws IOException {
      throw new UnsupportedOperationException("Tried to call saveProject on a Dummy");
   }
   
@@ -256,11 +260,11 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call closeProject on a Dummy");
   }
   
-  public File getSourceFile(String filename) {
+  public File getSourceFile(String fileName) {
      throw new UnsupportedOperationException("Tried to call getSourceFile on a Dummy");
   }
 
-  public File getSourceFileFromPaths(String filename, Vector<File> paths) {
+  public File getSourceFileFromPaths(String fileName, List<File> paths) {
      throw new UnsupportedOperationException("Tried to call getSourceFileFromPaths on a Dummy");
   }
 
@@ -428,13 +432,13 @@ public class DummyGlobalModel implements GlobalModel {
   public void setBuildDirectory(File f) {
      throw new UnsupportedOperationException("Tried to call setBuildDirectory on a Dummy");
   }
+  
+  public File getMasterWorkingDirectory() {
+     throw new UnsupportedOperationException("Tried to call getMasterWorkingDirectory on a Dummy");
+  }
 
   public File getWorkingDirectory() {
      throw new UnsupportedOperationException("Tried to call getWorkingDirectory on a Dummy");
-  }
-  
-  public File getRawWorkingDirectory() {
-     throw new UnsupportedOperationException("Tried to call getRawWorkingDirectory on a Dummy");
   }
   
   public void setWorkingDirectory(File f) {

@@ -40,9 +40,7 @@ import java.io.*;
  */
 public class FileOption extends Option<File> {
   
-  /** Special sentinal file indicating that this option is not set. Another definition of this File object is located 
-   *  in edu.rice.cs.util.FileOps. 
-   */
+  /** Special sentinal file indicating that this option is not set. */
   public static final File NULL_FILE = new File("") {
     public String getAbsolutePath() { return ""; }
     public String getName() { return ""; }
@@ -53,8 +51,8 @@ public class FileOption extends Option<File> {
   /** @param key The name of this option. */
   public FileOption(String key, File def) { super(key,def); }
   
-  /** @param s The String to be parsed, must represent the absolute path of the File to be created.
-   *  @return The File object corresponding to path "p".
+  /** @param s The String to be parsed, must represent a legal file path for the File to be created.
+   *  @return The absolute File object corresponding to the input path string.
    */
   public File parse(String s) { 
     if (s.trim().equals("")) return NULL_FILE;
