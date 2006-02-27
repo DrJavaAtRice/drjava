@@ -13,5 +13,7 @@ buildlib/retroweaver-ex.jar: Retroweaver 1.1, patched with SourceForge patch #12
                              and some modifications by Dan Smith to support incremental
                              reference verification.
 
+buildlib/astgen.jar: astgen-20060227-1521
+
 buildlib/junit.jar: JUnit 3.8.1
 
