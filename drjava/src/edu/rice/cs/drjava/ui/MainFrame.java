@@ -2832,6 +2832,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       try { _model.newProject(file); }
       catch(IOException e) { throw new UnexpectedException(e); }
+      _currentProjFile = file;
     }
   }
 
