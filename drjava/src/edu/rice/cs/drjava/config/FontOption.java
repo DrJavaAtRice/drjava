@@ -43,10 +43,10 @@ public class FontOption extends Option<Font> {
 
   public FontOption(String key, Font def) { super(key,def); }
 
-  //Changed on 5/19/2004 to reflect a change in the API specifications of decode in the most recent release of 
-  //java 1.5.0 beta. Decode no longer likes "PLAIN", assuming it to be default and returning the wrong font (dialog)
-  //if the word is present /**/ This may be fixed in future versions of 1.5.0, but the use of the word PLAIN appears to
-  //have been deprecated since 1.3
+  /* Changed on 5/19/2004 to reflect a change in the API specifications of decode in the most recent release of
+   * Java 1.5.0 beta. Decode no longer likes "PLAIN", assuming it to be default and returning the wrong font (dialog)
+   * if the word is present  This may be fixed in future versions of 1.5.0, but the use of the word PLAIN appears to
+   * have been deprecated since 1.3 */
   public Font parse(String s) {
     String newS = s;// s.replaceAll("PLAIN-","")
     int idx = newS.indexOf("PLAIN-");
@@ -57,10 +57,7 @@ public class FontOption extends Option<Font> {
     return Font.decode(newS);  //Font.decode(s);
   }
 
-  /**
-   * Create a String representation of the Font object, in the format:
-   *   fontname-fontstyle-fontsize
-   */
+  /** Create a String representation of the Font object, in the format: fontname-fontstyle-fontsize. */
   public String format(Font f) {
     StringBuffer str = new StringBuffer(f.getName());
     str.append("-");

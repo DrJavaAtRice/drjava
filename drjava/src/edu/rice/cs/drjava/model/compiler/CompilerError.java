@@ -73,20 +73,13 @@ public class CompilerError implements Comparable, Serializable {
     if (lineNumber < 0) _noLocation = true;
   }
     
-  /**
-   * Constructor for an CompilerError with an associated file but no location in the source
-   */
-  public CompilerError(File file, String message, boolean isWarning) {
-    this(file, -1, -1, message, isWarning);
-  }
+  /** Constructor for an CompilerError with an associated file but no location in the source */
+  public CompilerError(File file, String message, boolean isWarning) { this(file, -1, -1, message, isWarning); }
   
   /** Constructor for CompilerErrors without files.
    *  @param message the error message
    */
-  public CompilerError(String message, boolean isWarning) {
-    this(null, message, isWarning);
-  }
-  
+  public CompilerError(String message, boolean isWarning) { this(null, message, isWarning); }
   
   /** This function returns true if and only if the given error has no location */
   public boolean hasNoLocation() { return _noLocation; }
@@ -168,7 +161,7 @@ public class CompilerError implements Comparable, Serializable {
    * files.  Warnings are considered greater than errors, all else equal.
    */
   public int compareTo(Object o) {
-    CompilerError other = (CompilerError)o;
+    CompilerError other = (CompilerError) o;
     
     // Determine if I have a file
     if (_file != null) {
@@ -186,16 +179,13 @@ public class CompilerError implements Comparable, Serializable {
     // My file is null
     if (other.file() == null) {
       // All else equal.
-      //                        I'm a warning.           I'm not a warning.
-      return (this.isWarning()? (other.isWarning()? 0:1):(other.isWarning()? -1:0));
+      //                           I'm a warning.                I'm not a warning.
+      return (this.isWarning() ? (other.isWarning() ? 0 : 1) : (other.isWarning()? -1:0));
     }
     else return -1; // Errors without files are smaller
   }
   
-  /**
-   * Compares this error with the given one, based first
-   * on line number, and then by column.
-   */
+  /** Compares this error with the given one, based first on line number, and then by column. */
   private int compareByPosition(CompilerError other) {
     // Compare by line unless lines are equal
     if (_lineNumber == other._lineNumber) {

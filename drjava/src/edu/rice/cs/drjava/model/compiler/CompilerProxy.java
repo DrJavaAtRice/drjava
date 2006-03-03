@@ -38,6 +38,7 @@ import java.io.File;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.classloader.StickyClassLoader;
 import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
 
@@ -45,6 +46,8 @@ import edu.rice.cs.drjava.config.FileOption;
  *  @version $Id$
  */
 public class CompilerProxy implements CompilerInterface {
+  
+  public static final String VERSION = System.getProperty("java.specification.version");
   
   /** The actual compiler interface. If it's null, we couldn't load it. */
   private CompilerInterface _realCompiler = null;
@@ -82,6 +85,7 @@ public class CompilerProxy implements CompilerInterface {
     
     try {
       Class<?> c = loader.loadClass(_className);
+//      Utilities.show("Class " + c + " loaded");
       _realCompiler = CompilerRegistry.createCompiler(c);
       
       _realCompiler.setBuildDirectory(_buildDir);
@@ -95,8 +99,10 @@ public class CompilerProxy implements CompilerInterface {
       _realCompiler.setAllowAssertions(allowAssertions);
       
       String compilerClass = _realCompiler.getClass().getName();
+//      Utilities.show("Compiler created with name " + compilerClass);
     }
-    catch (Throwable t) { /* don't do anything. realCompiler stays null. */ }
+    catch (Throwable t) {  /* don't do anything. realCompiler stays null. */ }
+    
   }
 
 
@@ -139,38 +145,31 @@ public class CompilerProxy implements CompilerInterface {
    *  the {@link #compile} method should not fail due to class not being found.
    */
   public boolean isAvailable() {
+//    Utilities.show("CompilerProxy.isAvailable() called for " + getClass() + " real compiler = " + _realCompiler);
     if (_realCompiler == null) return false;
     else return _realCompiler.isAvailable();
   }
 
   /** Returns the name of this compiler, appropriate to show to the user. */
   public String getName() {
-    if (!isAvailable())  return "(unavailable)";
+    if (! isAvailable())  return "(unavailable)";
     return _realCompiler.getName();
   }
 
   /** Should return info about compiler, at least including name. */
   public String toString() { return getName(); }
 
-  /** Allows us to set the extra classpath for the compilers without referencing the
-   *  config object in a loaded class file
-   */
-  public void setExtraClassPath( String extraClassPath) {
-    _realCompiler.setExtraClassPath(extraClassPath);
-  }
+  /** Sets the extra classpath for the compilers without referencing the config object in a loaded class file. */
+  public void setExtraClassPath( String extraClassPath) { _realCompiler.setExtraClassPath(extraClassPath); }
   
   /** Sets the extra classpath in the form of a ClasspathVector. This should include any classpath entries from the
    *  project's classpath, if any, and the entries from EXTRA_CLASSPATH.
    *  @param extraClassPath the classpath to use as the compiler's extra classpath
    */
-  public void setExtraClassPath(ClassPathVector extraClassPath) {
-    _extraClassPath = extraClassPath;
-  }
+  public void setExtraClassPath(ClassPathVector extraClassPath) { _extraClassPath = extraClassPath; }
 
   /** Sets whether to allow assertions in Java 1.4. */
-  public void setAllowAssertions(boolean allow) {
-    _realCompiler.setAllowAssertions(allow);
-  }
+  public void setAllowAssertions(boolean allow) { _realCompiler.setAllowAssertions(allow); }
   
   /** Sets whether or not warnings are allowed. */
   public void setWarningsEnabled(boolean warningsEnabled) {
@@ -178,12 +177,10 @@ public class CompilerProxy implements CompilerInterface {
     _warningsEnabled = warningsEnabled;
   }
 
-  /** This method allows us to set the JSR14 collections path across a class loader.
+  /** Sets the JSR14 collections path across a class loader.
    *  (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */
-  public void addToBootClassPath( File cp) {
-    _realCompiler.addToBootClassPath(cp);
-  }
+  public void addToBootClassPath( File cp) { _realCompiler.addToBootClassPath(cp); }
 
   /** Sets the build directory for the compilers. */
   public void setBuildDirectory(File buildDir) {

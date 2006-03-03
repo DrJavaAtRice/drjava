@@ -41,9 +41,12 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.Border;
+
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 
+import edu.rice.cs.drjava.ui.AWTExceptionHandler;
+  
 public class Utilities {
   
   /** Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
@@ -78,6 +81,13 @@ public class Utilities {
   public static void show(final String msg) { 
      Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
   }
+  
+  /** Show a modal debug message box containing a backtrace for the Throwable t.
+   *  @param t the Throwable to be back traced.
+   */
+  public static void showTrace(final Throwable t) { 
+    Utilities.invokeAndWait(new Runnable() { public void run() { new AWTExceptionHandler().handle(t); } } );
+  } 
   
   /** Show a modal debug message box with an OK button when not in TEST_MODE.
    *  @param msg string to display

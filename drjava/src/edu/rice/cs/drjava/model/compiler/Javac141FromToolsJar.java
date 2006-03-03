@@ -44,7 +44,6 @@ public class Javac141FromToolsJar extends CompilerProxy {
 
   /** Private constructor due to singleton. */
   private Javac141FromToolsJar() {
-    super("edu.rice.cs.drjava.model.compiler.Javac141Compiler",
-          new ToolsJarClassLoader());
+    super("edu.rice.cs.drjava.model.compiler.Javac141Compiler", new ToolsJarClassLoader());
   }
 }

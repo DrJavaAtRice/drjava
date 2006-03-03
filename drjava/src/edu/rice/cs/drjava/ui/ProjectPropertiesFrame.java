@@ -177,35 +177,6 @@ public class ProjectPropertiesFrame extends JFrame {
     if (wd == null) wdTextField.setText("");
     else _workDirSelector.setFileField(wd);
     
-    // Main class
-    File rootFile = _mainFrame.getModel().getProjectFile();
-    try {
-      rootFile = rootFile.getCanonicalFile();
-    } catch(IOException e) { }
-    
-    DirectoryChooser chooser = new DirectoryChooser(this,rootFile);
-    chooser.setDialogTitle("Select Main Document");
-    chooser.setTopMessage("Select the main document for the project:");
-    chooser.setApproveButtonText("Select");
-    FileFilter filter = new FileFilter() {
-      public boolean accept(File f) {
-        String name = f.getName();
-        return  !f.isDirectory() &&
-          (name.endsWith(".java") ||
-           name.endsWith(".dj0") ||
-           name.endsWith(".dj1") ||
-           name.endsWith(".dj2"));
-      }
-      public String getDescription() {
-        return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2)";
-      }
-    };
-    chooser.addChoosableFileFilter(filter);
-    chooser.addFileFilter(filter);
-    chooser.setShowFiles(true);
-    chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
-    _jarMainClassSelector.setFileChooser(chooser);
-    
     final File mc = _mainFrame.getModel().getMainClass();
     final JTextField mcTextField = _jarMainClassSelector.getFileField();
     if (mc == null) mcTextField.setText("");
@@ -277,7 +248,7 @@ public class ProjectPropertiesFrame extends JFrame {
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    JPanel bdPanel = _createBuiltDirectoryPanel();
+    JPanel bdPanel = _builtDirectoryPanel();
     gridbag.setConstraints(bdPanel, c);
     panel.add(bdPanel);
     
@@ -296,7 +267,7 @@ public class ProjectPropertiesFrame extends JFrame {
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    JPanel wdPanel = _createWorkDirectoryPanel();
+    JPanel wdPanel = _workDirectoryPanel();
     gridbag.setConstraints(wdPanel, c);
     panel.add(wdPanel);
     
@@ -316,7 +287,7 @@ public class ProjectPropertiesFrame extends JFrame {
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    JPanel mainClassPanel = _createJarMainClassSelectorPanel();
+    JPanel mainClassPanel = _jarMainClassSelector();
     gridbag.setConstraints(mainClassPanel, c);
     panel.add(mainClassPanel);
     
@@ -338,7 +309,7 @@ public class ProjectPropertiesFrame extends JFrame {
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    Component extrasComponent = _createExtraClassPathComponent();
+    Component extrasComponent = _extraClassPathComponent();
     gridbag.setConstraints(extrasComponent, c);
     panel.add(extrasComponent);
     
@@ -380,7 +351,7 @@ public class ProjectPropertiesFrame extends JFrame {
     //    panel.add(manifestFilePanel);
   }
   
-  private JPanel _createBuiltDirectoryPanel() {
+  public JPanel _builtDirectoryPanel() {
     DirectoryChooser dirChooser = new DirectoryChooser(this);
     dirChooser.setSelectedDirectory(_getBuildDir());
     dirChooser.setDialogTitle("Select Build Directory");
@@ -403,7 +374,7 @@ public class ProjectPropertiesFrame extends JFrame {
     return _builtDirSelector;
   }
   
-  private JPanel _createWorkDirectoryPanel() {
+  public JPanel _workDirectoryPanel() {
     DirectoryChooser dirChooser = new DirectoryChooser(this);
     dirChooser.setSelectedDirectory(_getWorkDir());
     dirChooser.setDialogTitle("Select Working Directory");
@@ -425,7 +396,7 @@ public class ProjectPropertiesFrame extends JFrame {
     return _workDirSelector;
   }
   
-  private Component _createExtraClassPathComponent() {
+  public Component _extraClassPathComponent() {
     _extraClassPathList = new VectorFileOptionComponent(null, "Extra Project Classpaths", this);
     _extraClassPathList.addChangeListener(new OptionComponent.ChangeListener() {
       public Object apply(Object oc) {
@@ -436,8 +407,34 @@ public class ProjectPropertiesFrame extends JFrame {
     return _extraClassPathList.getComponent();
   }
   
-  private JPanel _createJarMainClassSelectorPanel() {
-    _jarMainClassSelector = new DirectorySelectorComponent(this,null,20,12f);
+  public JPanel _jarMainClassSelector() {
+    File rootFile = _mainFrame.getModel().getProjectFile();
+    try {
+      rootFile = rootFile.getCanonicalFile();
+    } catch(IOException e) { }
+    
+    DirectoryChooser chooser = new DirectoryChooser(this,rootFile);
+    chooser.setDialogTitle("Select Main Document");
+    chooser.setTopMessage("Select the main document for the project:");
+    chooser.setApproveButtonText("Select");
+    FileFilter filter = new FileFilter() {
+      public boolean accept(File f) {
+        String name = f.getName();
+        return  !f.isDirectory() &&
+          (name.endsWith(".java") ||
+           name.endsWith(".dj0") ||
+           name.endsWith(".dj1") ||
+           name.endsWith(".dj2"));
+      }
+      public String getDescription() {
+        return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2)";
+      }
+    };
+    chooser.addChoosableFileFilter(filter);
+    chooser.addFileFilter(filter);
+    chooser.setShowFiles(true);
+    chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
+    _jarMainClassSelector = new DirectorySelectorComponent(this,chooser,20,12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     _jarMainClassSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
       public void insertUpdate(DocumentEvent e) {
@@ -453,7 +450,7 @@ public class ProjectPropertiesFrame extends JFrame {
     return _jarMainClassSelector;
   }
   
-  private JPanel _createManifestFileSelectorPanel() {
+  public JPanel _manifestFileSelector() {
     JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
     fileChooser.setDialogTitle("Select Output jar File");
     fileChooser.setApproveButtonText("Select");
@@ -473,7 +470,7 @@ public class ProjectPropertiesFrame extends JFrame {
     return _manifestFileSelector;
   }
   
-  private JPanel _createJarFileSelectorPanel() {
+  public JPanel _jarFileSelector() {
     JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
     fileChooser.setDialogTitle("Select Manifest File");
     fileChooser.setApproveButtonText("Select");

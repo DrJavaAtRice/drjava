@@ -95,7 +95,6 @@ public interface OptionConstants {
     new ColorOption("interactions.error.color", Color.red.darker());
   public static final ColorOption DEBUG_MESSAGE_COLOR = new ColorOption("debug.message.color", Color.blue.darker());
 
-
   /** Color for background of definitions pane. */
   public static final ColorOption DEFINITIONS_BACKGROUND_COLOR =
     new ColorOption("definitions.background.color", Color.white);
@@ -829,7 +828,7 @@ public interface OptionConstants {
   
   static final String[] choices = new String[]{JAVADOC_NONE_TEXT, JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT};
   
-  static final ArrayList<String> linkVersionChoices = new ArrayList(Arrays.asList(choices));
+  static final ArrayList<String> linkVersionChoices = new ArrayList<String>(Arrays.asList(choices));
 
   /** Constants for the URLs of Sun's system class documentation for different versions of Java. */
   public static final StringOption JAVADOC_1_3_LINK =

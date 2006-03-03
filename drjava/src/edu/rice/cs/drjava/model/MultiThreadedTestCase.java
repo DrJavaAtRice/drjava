@@ -95,7 +95,8 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
       o.wait();
     }
     catch(InterruptedException e) {
-      throw new edu.rice.cs.util.UnexpectedException(e, "Thread.join was unexpectedly interrupted.");
+      e.printStackTrace();
+      throw new edu.rice.cs.util.UnexpectedException(e, "Thread.wait was unexpectedly interrupted.");
     }
   }
   

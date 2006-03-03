@@ -101,15 +101,5 @@ public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestC
   /**
    * Returns whether the currently active compiler supports generics.
    */
-  protected boolean _isGenericCompiler() {
-    String name = _model.getCompilerModel().getActiveCompiler().getClass().getName();
-    for (int i=0; i < CompilerRegistry.GENERIC_JAVA_COMPILERS.length; i++) {
-      if (name.equals(CompilerRegistry.GENERIC_JAVA_COMPILERS[i])) {
-        //System.out.println(name + " supports generics");
-        return true;
-      }
-    }
-    //System.out.println(name + " doesn't support generics");
-    return false;
-  }
+  protected boolean _isGenericCompiler() { return ! CompilerProxy.VERSION.equals("1.4"); }
 }

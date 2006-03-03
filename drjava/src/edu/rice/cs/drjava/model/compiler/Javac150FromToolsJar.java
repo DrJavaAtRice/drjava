@@ -43,15 +43,9 @@ public class Javac150FromToolsJar extends CompilerProxy {
 
   /** Private constructor due to singleton. */
   private Javac150FromToolsJar() {
-    super("edu.rice.cs.drjava.model.compiler.JSR14v20Compiler",
-          new ToolsJarClassLoader());
+    super("edu.rice.cs.drjava.model.compiler.Javac150Compiler", new ToolsJarClassLoader());
   }
 
-  public boolean isAvailable() {
-    return System.getProperty("java.specification.version").equals("1.5") && super.isAvailable();
-  }
-
-  public String getName() {
-    return "javac 1.5.0";
-  }
+  public boolean isAvailable() { return VERSION.equals("1.5") && super.isAvailable(); }
+  public String getName() { return "javac 1.5.0"; }
 }

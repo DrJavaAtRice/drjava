@@ -56,23 +56,18 @@ public class Javac141FromSetLocation extends CompilerProxy
 
   /** Private constructor due to singleton. */
   public Javac141FromSetLocation() {
-    super("edu.rice.cs.drjava.model.compiler.Javac141Compiler",
-          _getClassLoader());
+    super("edu.rice.cs.drjava.model.compiler.Javac141Compiler", _getClassLoader());
   }
 
   private static ClassLoader _getClassLoader() {
     File loc = DrJava.getConfig().getSetting(JAVAC_LOCATION);
-    if (loc == FileOption.NULL_FILE) {
-      throw new RuntimeException("javac location not set");
-    }
+    if (loc == FileOption.NULL_FILE) { throw new RuntimeException("javac location not set"); }
 
     try {
       //URL url = new File(loc).toURL();
       URL url = loc.toURL();
       return new URLClassLoader(new URL[] { url });
     }
-    catch (MalformedURLException e) {
-      throw new RuntimeException("malformed url exception");
-    }
+    catch (MalformedURLException e) { throw new RuntimeException("malformed url exception"); }
   }
 }

@@ -316,10 +316,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 //    _log.log("testMultilineIndentAfterScroll completed");
   }
 
-  /**
-   * Ensure that a document's editable status is set appropriately throughout
-   * the compile process.  Since the behavior is interesting only when the model
-   * changes its active document, that's what this test looks most like.
+  /** Ensure that a document's editable status is set appropriately throughout the compile process.  Since the behavior
+   *  is interesting only when the model changes its active document, that's what this test looks most like.
    */
   public void testGlassPaneEditableState() {
     SingleDisplayModel model = _frame.getModel();
@@ -371,15 +369,11 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     DefinitionsPane defPane1 = (DefinitionsPane) pane1.getViewport().getView();
     DefinitionsPane defPane2 = (DefinitionsPane) pane2.getViewport().getView();
     
-
     _frame.hourglassOn();
 
     defPane1.processKeyEvent(makeFindKeyEvent(defPane1, 70));
-
     assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
-    
     _frame.getInteractionsPane().processKeyEvent(makeFindKeyEvent(_frame.getInteractionsPane(), 0));
- 
     assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
 
     _frame.hourglassOff();
@@ -504,18 +498,13 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 //     _log.log("testDancingUIFileOpened completed");
   }
 
-    /**
-   * A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
-   * Basically, add a component listener to the leftComponent of _docSplitPane and
-   * make certain its size does not change while closing an OpenDefinitionsDocument
-   * outside the event thread
+  /** A Test to guarantee that the Dancing UI bug will not rear its ugly head again. Basically, add a component listener
+   *  to the leftComponent of _docSplitPane and make certain its size does not change while closing an 
+   *  OpenDefinitionsDocument outside the event thread.
    */
   public void testDancingUIFileClosed() throws IOException {
-    /**
-     * Maybe this sequence of calls should be incorporated into one function
-     * createTestDir(), which would get the username and create the temporary
-     * directory
-     * Only sticky part is deciding where to put it, in FileOps maybe?
+    /** Maybe this sequence of calls should be incorporated into one function createTestDir(), which would get the 
+     *  username and create the temporary directory. Only sticky part is deciding where to put it, in FileOps maybe?
      */
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);

@@ -34,6 +34,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.newjvm;
 
 import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -159,7 +160,7 @@ public final class ExecJVM {
       // execute in the working directory
       if (workDir.exists()) p = Runtime.getRuntime().exec(argArray, null, workDir);
       else {
-        edu.rice.cs.util.swing.Utilities.showMessageBox("Working directory does not exist:\n" + workDir +
+        Utilities.showMessageBox("Working directory does not exist:\n" + workDir +
                                                         "\nThe setting will be ignored. Press OK to continue.",
                                                         "Configuration Error");
         p = Runtime.getRuntime().exec(argArray);

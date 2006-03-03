@@ -51,35 +51,27 @@ import edu.rice.cs.drjava.config.FileOption;
 public class Javac150FromSetLocation extends CompilerProxy implements OptionConstants {
   // To implement #523222, we had to make this not a singleton,
   // to allow it to re-determine the location of the compiler multiple times.
-  //public static final CompilerInterface ONLY = new JavacFromSetLocation();
+//  public static final CompilerInterface ONLY = new JavacFromSetLocation();
+  
+  private static final String VERSION = System.getProperty("java.specification.version");
 
   /** Private constructor due to singleton. */
   public Javac150FromSetLocation() {
-    super("edu.rice.cs.drjava.model.compiler.JSR14v20Compiler",
-          _getClassLoader());
+    super("edu.rice.cs.drjava.model.compiler.Javac150Compiler", _getClassLoader());
   }
 
   private static ClassLoader _getClassLoader() {
     File loc = DrJava.getConfig().getSetting(JAVAC_LOCATION);
-    if (loc == FileOption.NULL_FILE) {
-      throw new RuntimeException("javac location not set");
-    }
+    if (loc == FileOption.NULL_FILE) throw new RuntimeException("javac location not set");
 
     try {
       //URL url = new File(loc).toURL();
       URL url = loc.toURL();
       return new URLClassLoader(new URL[] { url });
     }
-    catch (MalformedURLException e) {
-      throw new RuntimeException("malformed url exception");
-    }
+    catch (MalformedURLException e) { throw new RuntimeException("malformed url exception"); }
   }
 
-  public boolean isAvailable() {
-    return System.getProperty("java.specification.version").equals("1.5") && super.isAvailable();
-  }
-
-  public String getName() {
-    return "javac 1.5.0";
-  }
+  public boolean isAvailable() { return VERSION.equals("1.5") && super.isAvailable(); }
+  public String getName() { return "javac 1.5.0"; }
 }

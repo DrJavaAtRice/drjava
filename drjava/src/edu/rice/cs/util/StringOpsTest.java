@@ -276,11 +276,8 @@ public class StringOpsTest extends DrJavaTestCase {
                  act);
   }
   
-  /**
-   * Tests for getting the simple name of a class.
-   * Works by comparing with Java 1.5.0's Class.getSimpleName().
-   * This test is commented out to remove it from regular unit testing
-   * because it interferes with Retroweaver.
+  /** Tests for getting the simple name of a class. Works by comparing with Java 1.5.0's Class.getSimpleName().
+   *  This test is commented out to remove it from regular unit testing because it is incompatible with Java 1.4.
    */
 //  public void testGetSimpleName15() {
 //    String exp = java.lang.Integer.class.getSimpleName();

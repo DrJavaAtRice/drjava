@@ -35,6 +35,8 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.util.LinkedList;
 import java.lang.reflect.Field;
+import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.UnexpectedException;
 
 /** Registry for all CompilerInterface implementations. Allows registration, by class name, of {@link CompilerInterface}
  *  implementations. Later, the list of these registered compilers (but only those that successfully loaded) can be 
@@ -42,27 +44,41 @@ import java.lang.reflect.Field;
  *  @version $Id$
  */
 public class CompilerRegistry {
-
-  /** A subset of DEFAULT_COMPILERS that support Generic Java. */
-  public static final String[] GENERIC_JAVA_COMPILERS = {
+  
+  /* classes that load and adapt various compilers */
+  
+  public static final String[] JAVA_16_COMPILERS = {
+    // javac 1.6
+    "edu.rice.cs.drjava.model.compiler.Javac160FromSetLocation",
+    "edu.rice.cs.drjava.model.compiler.Javac160FromClasspath",
+    "edu.rice.cs.drjava.model.compiler.Javac160FromToolsJar"
+  };
+  
+  public static final String[] JAVA_15_COMPILERS = {
     // javac 1.5
     "edu.rice.cs.drjava.model.compiler.Javac150FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.Javac150FromClasspath",
     "edu.rice.cs.drjava.model.compiler.Javac150FromToolsJar"
   };
 
-  /** The list of compiler interfaces that are distributed with DrJava. */
-  static final String[][] DEFAULT_COMPILERS = {
-    // javac 1.5 and JSR14/GJ
-    GENERIC_JAVA_COMPILERS,
+  /** A subset of DEFAULT_COMPILERS that support Raw (non-generic) Java. */
+  public static final String[] JAVA_14_COMPILERS = {
     // javac 1.4
-    new String[] {
-      "edu.rice.cs.drjava.model.compiler.Javac141FromSetLocation",
-        "edu.rice.cs.drjava.model.compiler.Javac141FromClasspath",
-        "edu.rice.cs.drjava.model.compiler.Javac141FromToolsJar"
-    }
+    "edu.rice.cs.drjava.model.compiler.Javac141FromSetLocation",
+    "edu.rice.cs.drjava.model.compiler.Javac141FromClasspath",
+    "edu.rice.cs.drjava.model.compiler.Javac141FromToolsJar"
   };
 
+  /** The list of compiler interfaces that are distributed with DrJava. */
+  static final String[][] DEFAULT_COMPILERS = {
+    // javac 1.6 
+    JAVA_16_COMPILERS,
+    // javac 1.5 
+    JAVA_15_COMPILERS,
+    // javac 1.4
+    JAVA_14_COMPILERS
+  };
+    
   /** Singleton instance. */
   public static final CompilerRegistry ONLY = new CompilerRegistry();
 
@@ -88,22 +104,30 @@ public class CompilerRegistry {
    */
   public CompilerInterface[] getAvailableCompilers() {
     LinkedList<CompilerInterface> availableCompilers = new LinkedList<CompilerInterface>();
+    
+    String[] candidateCompilers = null;
+    
+    String version = CompilerProxy.VERSION; // version of executing JVM: 1.4, 1.5, 1.6
+    
+    if (version.equals("1.4")) candidateCompilers = JAVA_14_COMPILERS;
+    else if (version.equals("1.5")) candidateCompilers = JAVA_15_COMPILERS;
+    else if (version.equals("1.6")) candidateCompilers = JAVA_16_COMPILERS;
+    else throw new 
+      UnexpectedException("Java specification version " + version + "is not supported.  Must be 1.4, 1.5, or 1.6");
 
-    for (String[] row:  DEFAULT_COMPILERS) {
+    for (String name : candidateCompilers) {
 //      DrJava.consoleOut().print("REGISTRY:  Checking compiler: " + name + ": ");
-      for (String name: row) {
-        try { if (_createCompiler(name, availableCompilers)) break; }
-        catch (Throwable t) {
+      try { if (_createCompiler(name, availableCompilers)) break; }
+      catch (Throwable t) {
         // This compiler didn't load. Keep on going.
 //        DrJava.consoleOut().println("failed to load:");
         //t.printStackTrace(DrJava.consoleOut());
         //System.err.println();
-        }
       }
     }
 
     if (availableCompilers.size() == 0) availableCompilers.add(NoCompilerAvailable.ONLY);
-
+    
     return availableCompilers.toArray(new CompilerInterface[availableCompilers.size()]);
   }
 
@@ -118,7 +142,7 @@ public class CompilerRegistry {
         //System.err.println("\tset to active.");
         _activeCompiler = compiler;
       }
-
+//      Utilities.show("Adding compiler " + compiler);
       availableCompilers.add(compiler);
       return true;
     }
@@ -169,15 +193,14 @@ public class CompilerRegistry {
    */
   private CompilerInterface _instantiateCompiler(String name) throws Throwable {
     Class<?> clazz = _baseClassLoader.loadClass(name);
+//    Utilities.show("Loaded compiler named " + name + " with class name " + clazz);
     return createCompiler(clazz);
   }
 
   public static CompilerInterface createCompiler(Class clazz) throws Throwable {
     try {
       Field field = clazz.getField("ONLY");
-      // null is passed to get since it's a static field
-      Object val = field.get(null);
-
+      Object val = field.get(null);  // null is passed to get since it's a static field
       return (CompilerInterface) val;
     }
     catch (Throwable t) {

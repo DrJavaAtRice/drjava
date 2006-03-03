@@ -69,7 +69,7 @@ public class DirectorySelectorComponent extends JPanel {
   protected final JButton _chooserButton;
 
   /** File chooser to open when clicking the "..." button. */
-  protected DirectoryChooser _chooser;
+  protected final DirectoryChooser _chooser;
 
   /** The current file */
   protected File _file;
@@ -131,9 +131,6 @@ public class DirectorySelectorComponent extends JPanel {
 
   /** Returns the file chooser. */
   public DirectoryChooser getFileChooser() { return _chooser; }
-
-  /** Sets the file chooser. */
-  public void setFileChooser(DirectoryChooser c) { _chooser = c; }
 
   /** Returns the file currently typed into the file field. THE SIDE EFFECTS OF THIS METHOD ARE OBSCENE!  Corky 2/5/06 */
   public File getFileFromField() {

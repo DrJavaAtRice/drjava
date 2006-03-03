@@ -95,7 +95,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     TokenList.Iterator it = _cursor._copy();
     if (! it.atStart()) it.prev();
     
-    while (!it.atStart()) {
+    while (! it.atStart()) {
       off += it.current().getSize();
       it.prev();
     }
