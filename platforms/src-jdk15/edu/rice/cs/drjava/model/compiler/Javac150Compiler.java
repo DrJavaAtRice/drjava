@@ -66,9 +66,10 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Log;
 
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.newjvm.ExecJVM;
+import edu.rice.cs.util.swing.Utilities;
 
 /**
  * An implementation of the CompilerInterface that supports compiling with
@@ -94,8 +95,7 @@ public class Javac150Compiler implements CompilerInterface {
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new Javac150Compiler();
 
-  public static final String COMPILER_CLASS_NAME =
-    "com.sun.tools.javac.main.JavaCompiler";
+  public static final String COMPILER_CLASS_NAME = "com.sun.tools.javac.main.JavaCompiler";
   
   protected Context context = null;
   
@@ -108,27 +108,19 @@ public class Javac150Compiler implements CompilerInterface {
     public void close() throws IOException {}
   };
 
-  /**
-   * A no-op printwriter to pass to the compiler to print error messages.
-   */
-  private static final PrintWriter NULL_PRINT_WRITER =
-    new PrintWriter(NULL_WRITER);
+  /** A no-op printwriter to pass to the compiler to print error messages. */
+  private static final PrintWriter NULL_PRINT_WRITER = new PrintWriter(NULL_WRITER);
 
   //private final boolean _supportsGenerics;
   protected JavaCompiler compiler;
 
-  /**
-   * We need to explicitly make the compiler's log and pass it
-   * to JavaCompiler.make() so we can keep a pointer to the log,
-   * since the log is not retrievable from the compiler. We
-   * need to use the log to determine if any errors occurred.
+  /** We need to explicitly make the compiler's log and pass it to JavaCompiler.make() so we can keep a 
+   *  pointer to the log, because the log is not retrievable from the compiler.  We need to use the log 
+   *  to determine if any errors occurred.
    */
   protected OurLog compilerLog;
 
-  /**
-   * Constructor for Javac150Compiler will throw a RuntimeException if an invalid version
-   * of the JDK is in use. 
-   */ 
+  /** Constructor for Javac150Compiler will throw a RuntimeException if an invalid version of the JDK is in use.  */ 
   protected Javac150Compiler() {
     if (!_isValidVersion()) {
       throw new RuntimeException("Invalid version of Java compiler.");
@@ -136,78 +128,61 @@ public class Javac150Compiler implements CompilerInterface {
     _isJSR14v2_4 = _isJSR14v2_4();
   }
   
-  /**
-   * Uses reflection on the Log object to deduce which JDK is being used.
-   * If the constructor for Log in this JDK does not match that of 
-   * JSR-14 v2.0, then the version is not supported.
+  /** Uses reflection on the Log object to deduce which JDK is being used. If the constructor for Log in this JDK 
+   *  does not match that of JSR-14 v2.0, then the version is not supported.
    */
   protected boolean _isValidVersion() {
     
     Class log = com.sun.tools.javac.util.Log.class;
+
     // The JSR14 1.2 version of the Log instance method
-    Class[] validArgs1 = {
-      Context.class
-    };
+    Class[] validArgs1 = { Context.class };
     
     try { 
-      log.getMethod("instance", validArgs1);
-      // succeeds, therefore must be correct version
-      return true;
+      log.getMethod("instance", validArgs1);  // found in Java 5.0 compilers (and JSR14 prototypes >= 1.2)
+      try {
+        log.getMethod("hasDiagnosticListener");  // only found in Java 6.0 (1.6.0) and later
+        return false; // supports Java 6.0 method; hence not a Java 5.0 compiler
+      }
+      catch(NoSuchMethodException e) {
+        return true; // supports Java 5.0 method but does not support Java 6.0 method
+      }
     }
     catch (NoSuchMethodException e) {
-      // Didn't have expected method, so we can't use this compiler.
-      return false;
+      return false;  // does not support Java 5.0 Log functionality (added in JSR14 1.2 prototype)
     }
   }
   
-  /**
-   * Compile the given files.
-   * @param files Source files to compile.
-   * @param sourceRoot Source root directory, the base of the package structure.
+  /** Compile the given files.
+   *  @param files Source files to compile.
+   *  @param sourceRoot Source root directory, the base of the package structure.
    *
-   * @return Array of errors that occurred. If no errors, should be zero
-   * length array (not null).
+   *  @return Array of errors that occurred. If no errors, should be zero length array (not null).
    */
   public CompilerError[] compile(File sourceRoot, File[] files) {
     File[] sourceRoots = new File[] { sourceRoot };
     return compile(sourceRoots, files);
   }
   
-  /**
-   * Compile the given files.
-   * @param files Source files to compile.
-   * @param sourceRoots Array of source root directories, the base of
-   *  the package structure for all files to compile.
+  /** Compile the given files.
+   *  @param files Source files to compile.
+   *  @param sourceRoots Array of source root directories, the base of the package structure for all files to compile.
    *
-   * @return Array of errors that occurred. If no errors, should be zero
-   * length array (not null).
+   *  @return Array of errors that occurred. If no errors, should be zero length array (not null).
    */
   public CompilerError[] compile(File[] sourceRoots, File[] files) {
-    // We must re-initialize the compiler on each compile. Otherwise
-    // it gets very confused.
-    //DrJava.consoleOut().println("-- In JavacGJCompiler: SourceRoots:");
-    //for (int i = 0 ; i < sourceRoots.length; i ++) {
-    //  DrJava.consoleOut().println(sourceRoots[i]);
-    //}
+
     initCompiler(sourceRoots);
     List<String> filesToCompile = _emptyStringList();
 
-    for (int i = 0; i < files.length; i++) {
-      filesToCompile = filesToCompile.prepend(files[i].getAbsolutePath());
-    }
+    for (File f : files) filesToCompile = filesToCompile.prepend(f.getAbsolutePath());
 
-    try {
-      compiler.compile(filesToCompile);
-    }
+    try { compiler.compile(filesToCompile); }
     catch (Throwable t) {
-      // GJ defines the compile method to throw Throwable?!
-      //System.err.println("Compile error: " + t);
-      //t.printStackTrace();
-      
-      
-      //Added to account for error in javac whereby a variable that was not declared will
-      //cause an out of memory error. This change allows us to output both errors and not
-      //just the out of memory error
+
+      /* Added to account for error in javac whereby a variable that was not declared will cause an out of memory error.
+       * This change allows us to output both errors and not just the out of memory error.
+       */
       
       CompilerError[] errorArray = new CompilerError[compilerLog.getErrors().length + 1];
       for(int i = 0; i < compilerLog.getErrors().length; i++) {
@@ -215,16 +190,11 @@ public class Javac150Compiler implements CompilerInterface {
       }
       errorArray[0] = new CompilerError("Compile exception: " + t, false);
       return errorArray; 
-//      return new CompilerError[] {
-//        new CompilerError("Compile exception: " + t, false)
-//      };
     }
 
     CompilerError[] errors = compilerLog.getErrors();
-//    System.out.println("Errors: " + compiler.errorCount());
-//    System.out.println("Warnings: " + compiler.warningCount());
     
-    // null out things to not keep pointers to dead data
+    // release these bindings to free heap memory
     compiler = null;
     compilerLog = null;
     return errors;
@@ -233,9 +203,7 @@ public class Javac150Compiler implements CompilerInterface {
   public boolean isAvailable() {
     try {
       Class.forName(COMPILER_CLASS_NAME);
-      try {
-        Class.forName("java.lang.Enum");
-      }
+      try { Class.forName("java.lang.Enum"); }
       catch (Exception e) {
         // If java.lang.Enum is not found, there's a chance the user specified JSR14v2.5 
         // For some reason, java.lang.Enum got moved to collect.jar which we can't put on the
@@ -245,60 +213,38 @@ public class Javac150Compiler implements CompilerInterface {
       }
       return _isValidVersion();
     }
-    catch (Exception e) {
-      return false;
-    }
+    catch (Exception e) { return false; }
   }
 
   public String getName() {
-    if (_isJSR14v2_5) {
-      return "JSR-14 v2.5";
-    }
-    else if (_isJSR14v2_4) {
-      return "JSR-14 v2.4";
-    }
-    else {
-      return "JSR-14 v2.0/2.2";// + com.sun.tools.javac.Main.class.getResource("Main.class");
-    }
+    if (_isJSR14v2_5) return "JSR-14 v2.5";
+    else if (_isJSR14v2_4) return "JSR-14 v2.4";
+    else return "JSR-14 v2.0/2.2";// + com.sun.tools.javac.Main.class.getResource("Main.class");
   }
 
-  public String toString() {
-    return getName();
-  }
+  public String toString() { return getName(); }
 
-  /**
-   * Allows us to set the extra classpath for the compilers without referencing the
-   * config object in a loaded class file
+  /** Allows us to set the extra classpath for the compilers without referencing the config object in a loaded class 
+   *  file
    */ 
-  public void setExtraClassPath( String extraClassPath) {
-      _extraClassPath = extraClassPath;
-  }
+  public void setExtraClassPath(String extraClassPath) { _extraClassPath = extraClassPath; }
 
-  public void setExtraClassPath(ClasspathVector extraClassPath) {
+  public void setExtraClassPath(ClassPathVector extraClassPath) {
     setExtraClassPath(extraClassPath.toString());
   }
   
-  /**
-   * This method allows us to set the JSR14 collections path across a class loader.
-   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
+  /** Sets the JSR14 collections path across a class loader.  We cannot cast a loaded class to a subclass (?), 
+   *  so all compiler interfaces must have this method.
    */
   public void addToBootClassPath( File cp) {
     throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
   }
 
-  /**
-   * Sets whether to allow assert statements.
-   */
-  public void setAllowAssertions(boolean allow) {
-    _allowAssertions = allow;
-  }
+  /** Sets whether to allow assert statements. */
+  public void setAllowAssertions(boolean allow) { _allowAssertions = allow; }
   
-   /**
-   * Sets whether or not warnings are allowed
-   */
-  public void setWarningsEnabled(boolean warningsEnabled) {
-    _warningsEnabled = warningsEnabled;
-  }
+   /** Sets whether or not warnings are allowed */
+  public void setWarningsEnabled(boolean warningsEnabled) { _warningsEnabled = warningsEnabled; }
   
   protected Context createContext(File[] sourceRoots) {
     Context context = new Context();
@@ -322,27 +268,18 @@ public class Javac150Compiler implements CompilerInterface {
     return context;
   }
 
-  /**
-   * Adds the appropriate values for the source and target arguments.
-   */
+  /** Adds the appropriate values for the source and target arguments. */
   protected void _addSourceAndTargetOptions(Options options) {
     options.put("-source", "1.5");
-    if (System.getProperty("java.specification.version").equals("1.5")) {
-      options.put("-target", "1.5");
-    }
-    else if (_isJSR14v2_4) {
-      options.put("-target", "jsr14");
-    }
+    if (System.getProperty("java.specification.version").equals("1.5")) options.put("-target", "1.5");
+    else if (_isJSR14v2_4) options.put("-target", "jsr14");
     options.put("-fork", "on");
 
-    if (!_builtPath.equals("")) {
-      options.put("-d", _builtPath);
-    }
+    if (!_builtPath.equals("")) options.put("-d", _builtPath);
   }
 
-  /**
-   * Package protected utility method for getting a properly formatted
-   * string with several source paths from an array of files.
+  /** Package protected utility method for getting a properly formatted string with several source paths from an array
+   *  of files.
    */
   protected String getSourceRootString(File[] sourceRoots) {
     StringBuffer roots = new StringBuffer();
@@ -363,6 +300,7 @@ public class Javac150Compiler implements CompilerInterface {
     // Using reflection to allow for JSR14v2.3 since the "make"
     // method was changed to "instance".
     Class javaCompilerClass = JavaCompiler.class;
+//    Utilities.show("Compiler Class is: " + javaCompilerClass);
     Class[] validArgs1 = {
       Context.class
     };
@@ -372,12 +310,8 @@ public class Javac150Compiler implements CompilerInterface {
         m = javaCompilerClass.getMethod("instance", validArgs1);
         compiler = (JavaCompiler)m.invoke(null, new Object[] {context});
       }
-      catch (NoSuchMethodException e) {
-        throw new UnexpectedException(e);
-      }
-      catch (IllegalAccessException e) {
-        throw new UnexpectedException(e);
-      }
+      catch (NoSuchMethodException e) { throw new UnexpectedException(e); }
+      catch (IllegalAccessException e) { throw new UnexpectedException(e); }
       catch (InvocationTargetException e) {
         e.printStackTrace();
         throw new UnexpectedException(e);
@@ -388,30 +322,19 @@ public class Javac150Compiler implements CompilerInterface {
         m = javaCompilerClass.getMethod("make", validArgs1);
         compiler = (JavaCompiler)m.invoke(null, new Object[] {context});
       }
-      catch (NoSuchMethodException e) {
-        throw new UnexpectedException(e);
-      }
-      catch (IllegalAccessException e) {
-        throw new UnexpectedException(e);
-      }
-      catch (InvocationTargetException e) {
-        throw new UnexpectedException(e);
-      }
+      catch (NoSuchMethodException e) { throw new UnexpectedException(e); }
+      catch (IllegalAccessException e) { throw new UnexpectedException(e); }
+      catch (InvocationTargetException e) { throw new UnexpectedException(e); }
 //      compiler = JavaCompiler.make(context);
     }
   }
   
   public void setBuildDirectory(File dir){
-    if(dir == null)
-      _builtPath = "";
-    else
-      _builtPath=dir.getAbsolutePath(); 
+    if (dir == null) _builtPath = "";
+    else _builtPath=dir.getAbsolutePath(); 
   }
   
-  /**
-   * Check if we're using JSR14v2.4 or 2.5.  We're skipping version 2.3
-   * because it will never be officially released.
-   */
+  /** Check if we're using JSR14v2.4 or 2.5 (skipping version 2.3 because it will never be officially released). */
   private boolean _isJSR14v2_4() {
     try {
       Class.forName("com.sun.tools.javac.main.Main$14");
@@ -422,16 +345,11 @@ public class Javac150Compiler implements CompilerInterface {
         Class.forName("com.sun.tools.javac.main.Main+1");
         return true;
       }
-      catch (Exception e2) {
-        return false;
-      }
+      catch (Exception e2) { return false; }
     }
   }
 
-  /**
-   * Get an empty List using reflection, since the method to do so changed
-   * with version 1.5.0_04.
-   */
+  /** Get an empty List using reflection, since the method to do so changed  with version 1.5.0_04. */
   private List<String> _emptyStringList() {
     try {
       Method nil = List.class.getMethod("nil");
@@ -458,16 +376,10 @@ public class Javac150Compiler implements CompilerInterface {
     private LinkedList<CompilerError> _errors = new LinkedList<CompilerError>();
     private String _sourceName = "";
 
-    public OurLog(Context context) {
-      super(context, NULL_PRINT_WRITER, NULL_PRINT_WRITER, NULL_PRINT_WRITER);
-    }
+    public OurLog(Context context) { super(context, NULL_PRINT_WRITER, NULL_PRINT_WRITER, NULL_PRINT_WRITER); }
 
-    /**
-     * JSR14 uses this crazy signature on warning method because it localizes
-     * the warning message.
-     */
-    public void warning(int pos, String key, Object ... args)
-    {
+    /** JSR14 uses this crazy signature on warning method because it localizes the warning message. */
+    public void warning(int pos, String key, Object ... args) {
       super.warning(pos, key, args);
       //System.out.println("warning: pos = " + pos);
 
@@ -480,12 +392,8 @@ public class Javac150Compiler implements CompilerInterface {
                                         true));
     }
 
-    /**
-     * JSR14 uses this crazy signature on error method because it localizes
-     * the error message.
-     */
-    public void error(int pos, String key, Object ... args)
-    {
+    /** JSR14 uses this crazy signature on error method because it localizes the error message. */
+    public void error(int pos, String key, Object ... args) {
       super.error(pos, key, args);
       //System.out.println("error: pos = " + pos);
 
@@ -498,8 +406,6 @@ public class Javac150Compiler implements CompilerInterface {
                                         false));
     }
 
-    public CompilerError[] getErrors() {
-      return (CompilerError[]) _errors.toArray(new CompilerError[0]);
-    }
+    public CompilerError[] getErrors() { return (CompilerError[]) _errors.toArray(new CompilerError[0]); }
   }
 }
