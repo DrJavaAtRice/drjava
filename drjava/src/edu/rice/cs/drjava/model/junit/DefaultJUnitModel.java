@@ -58,8 +58,6 @@ import edu.rice.cs.util.swing.Utilities;
 import org.apache.bcel.classfile.*;
 
 /** Manages unit testing via JUnit.
- *  TODO: Remove dependence on GlobalModel
- *
  *  @version $Id$
  */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
@@ -67,15 +65,15 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
   
-  /** RMI interface to a secondary JVM for running tests.
-   *  Using a second JVM prevents tests from disrupting normal usage of DrJava.
+  /** RMI interface to a secondary JVM for running tests.  Using a second JVM prevents interactions and tests from 
+   *  corrupting the state of DrJava.
    */
   private final MainJVM _jvm;
   
   /** Compiler model containing a lock used to prevent simultaneous test and compile. */
   private final CompilerModel _compilerModel;
   
-  /** GlobalModel, used only for getSourceFile. */
+  /** The global model to which the JUnitModel belongs */
   private final GlobalModel _model;
   
   /** The error model containing all current JUnit errors. */

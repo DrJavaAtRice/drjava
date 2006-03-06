@@ -492,10 +492,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
   }
   private int _memLeakCounter;
   
-  /**
-   * This is just so that we can have an instance of a DefaultGlobalModel
-   * rather than a single display model.
-   */
+  /** This is just so that we can have an instance of a DefaultGlobalModel rather than a single display model. */
   private class TestGlobalModel extends DefaultGlobalModel {
     public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc) { /* dummy method */ }
     public void saveAllFiles(FileSaveSelector fs) throws IOException { saveAllFilesHelper(fs); }

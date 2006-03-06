@@ -281,21 +281,17 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
             Throwable t = e.getContainedException();
 //            Utilities.showStackTrace(t);
             _dialog("interp exception: " + t);
-            
-            if (t instanceof ParseException) 
-              _mainJVM.interpretResult(new SyntaxErrorResult((ParseException)t, input));
-            else if (t instanceof TokenMgrError) 
-              _mainJVM.interpretResult(new SyntaxErrorResult((TokenMgrError)t, input));
-            else if (t instanceof ParseError) 
-              _mainJVM.interpretResult(new SyntaxErrorResult((ParseError)t, input));
+            // TODO: replace the following if ladder by dynamic dispatch.  Create a visitor for DynamicJava errors?
+            if (t instanceof ParseException)
+              _mainJVM.interpretResult(new SyntaxErrorResult((ParseException) t, input));
+            else if (t instanceof TokenMgrError)
+              _mainJVM.interpretResult(new SyntaxErrorResult((TokenMgrError) t, input));
+            else if (t instanceof ParseError)
+              _mainJVM.interpretResult(new SyntaxErrorResult((ParseError) t, input));
             else {
               //Other exceptions are non lexical/parse related exceptions. These include arithmetic exceptions, 
               //wrong version exceptions, etc.
               
-              //_dialog("before call to threwException");
-              //return new ExceptionResult(t.getClass().getName(),
-              //                           t.getMessage(),
-              //                           getStackTrace(t));
               _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
                                                            t.getMessage(),
                                                            InterpreterJVM.getStackTrace(t),
@@ -335,8 +331,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   /** Gets the string representation of the value of a variable in the current interpreter.
    *  @param var the name of the variable
-   *  @return null if the variable is not defined, "null" if the value is null, or else the string representation
-   *          of the value
+   *  @return null if the variable is not defined, "null" if the value is null, or else its string representation
    */
   public String getVariableToString(String var) throws RemoteException {
     // Add to the default interpreter, if it is a JavaInterpreter
@@ -357,7 +352,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   /** Gets the class name of a variable in the current interpreter.
-   * @param var the name of the variable
+   *  @param var the name of the variable
    */
   public String getVariableClassName(String var) throws RemoteException {
     // Add to the default interpreter, if it is a JavaInterpreter
@@ -365,47 +360,20 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     if (i instanceof JavaInterpreter) {
       try {
         Class c = ((JavaInterpreter)i).getVariableClass(var);
-        if (c == null) {
-          return "null";
-        }
-        else {
-          return c.getName();
-        }
+        if (c == null) return "null";
+        else return c.getName();
       }
       catch (IllegalStateException e) {
         // variable was not defined
         return null;
       }
     }
-    else {
-      return null;
-    }
+    else return null;
   }
   
-  /**
-   * Notifies that an assignment has been made in the given interpreter.
-   * Does not notify on declarations.
-   *
-   * This method is not currently necessary, since we don't copy back
-   * values in a debug interpreter until the thread has resumed.
-   *
-   * @param name the name of the interpreter
-   *
-   public void notifyInterpreterAssignment(String name) {
-   try {
-   _mainJVM.notifyDebugInterpreterAssignment(name);
-   }
-   catch (RemoteException re) {
-   // nothing to do
-   _log.logTime("notifyAssignment: " + re.toString());
-   }
-   }*/
-  
-  /**
-   * Adds a named DynamicJavaAdapter to the list of interpreters.
-   * Presets it to contain the current accumulated classpath.
-   * @param name the unique name for the interpreter
-   * @throws IllegalArgumentException if the name is not unique
+  /** Adds a named DynamicJavaAdapter to list of interpreters. Presets it to contain the current accumulated classpath.
+   *  @param name the unique name for the interpreter
+   *  @throws IllegalArgumentException if the name is not unique
    */
   public void addJavaInterpreter(String name) {
     JavaInterpreter interpreter = new DynamicJavaAdapter(classPathManager);
@@ -414,12 +382,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     addInterpreter(name, interpreter);
   }
   
-  /**
-   * Adds a named JavaDebugInterpreter to the list of interpreters.
-   * @param name the unique name for the interpreter
-   * @param className the fully qualified class name of the class
-   * the debug interpreter is in
-   * @throws IllegalArgumentException if the name is not unique
+  /** Adds a named JavaDebugInterpreter to the list of interpreters.
+   *  @param name the unique name for the interpreter
+   *  @param className the fully qualified class name of the class the debug interpreter is in
+   *  @throws IllegalArgumentException if the name is not unique
    */
   public void addDebugInterpreter(String name, String className) {
     JavaDebugInterpreter interpreter = new JavaDebugInterpreter(name, className);
@@ -429,11 +395,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     addInterpreter(name, interpreter);
   }
   
-  /**
-   * Adds a named interpreter to the list of interpreters.
-   * @param name the unique name for the interpreter
-   * @param interpreter the interpreter to add
-   * @throws IllegalArgumentException if the name is not unique
+  /** Adds a named interpreter to the list of interpreters.
+   *  @param name the unique name for the interpreter
+   *  @param interpreter the interpreter to add
+   *  @throws IllegalArgumentException if the name is not unique
    */
   public void addInterpreter(String name, Interpreter interpreter) {
     if (_interpreters.containsKey(name)) {
@@ -442,27 +407,22 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _interpreters.put(name, new InterpreterData(interpreter));
   }
   
-  /**
-   * Removes the interpreter with the given name, if it exists.
-   * @param name Name of the interpreter to remove
+  /** Removes the interpreter with the given name, if it exists.
+   *  @param name Name of the interpreter to remove
    */
   public void removeInterpreter(String name) {
     _interpreters.remove(name);
   }
   
-  /**
-   * Returns the interpreter (with metadata) with the given name
-   * @param name the unique name of the desired interpreter
-   * @throws IllegalArgumentException if no such named interpreter exists
+  /** Returns the interpreter (with metadata) with the given name
+   *  @param name the unique name of the desired interpreter
+   *  @throws IllegalArgumentException if no such named interpreter exists
    */
   InterpreterData getInterpreter(String name) {
     InterpreterData interpreter = _interpreters.get(name);
-    if (interpreter != null) {
-      return interpreter;
-    }
-    else {
-      throw new IllegalArgumentException("Interpreter '" + name + "' does not exist.");
-    }
+    
+    if (interpreter != null) return interpreter;
+    else throw new IllegalArgumentException("Interpreter '" + name + "' does not exist.");
   }
   
   /** Returns the Java interpreter with the given name
@@ -492,38 +452,25 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     return _activeInterpreter.isInProgress();
   }
   
-  /**
-   * Sets the default interpreter to be active.
-   * @return Whether the new interpreter is currently in progress
-   * with an interaction
+  /** Sets the default interpreter to be active.
+   *  @return Whether the new interpreter is currently in progress with an interaction
    */
   public boolean setToDefaultInterpreter() {
     _activeInterpreter = _defaultInterpreter;
     return _activeInterpreter.isInProgress();
   }
   
-  /**
-   * Gets the hashtable containing the named interpreters.  Package private
-   * for testing purposes.
-   * @return said hashtable
+  /** Gets the hashtable containing the named interpreters.  Package private for testing purposes.
+   *  @return said hashtable
    */
-  Hashtable<String,InterpreterData> getInterpreters() {
-    return _interpreters;
-  }
+  Hashtable<String,InterpreterData> getInterpreters() { return _interpreters; }
   
-  /**
-   * Returns the current active interpreter.  Package private; for tests only.
-   */
-  Interpreter getActiveInterpreter() {
-    return _activeInterpreter.getInterpreter();
-  }
+  /** Returns the current active interpreter.  Package private; for tests only. */
+  Interpreter getActiveInterpreter() { return _activeInterpreter.getInterpreter(); }
   
-  
-  /**
-   * Gets the stack trace from the given exception, stripping off
-   * the bottom parts of the trace that are internal to the interpreter.
-   * This would be much easier to do in JDK 1.4, since you can get the
-   * stack trace frames directly, instead of having to parse this!
+  /** Gets the stack trace from the given exception, stripping off the bottom parts of the trace that are internal 
+   *  to the interpreter.  This would be much easier to do in JDK 1.4, since you can get the stack trace frames 
+   *  directly, instead of having to parse this!  TODO: revise this code to use the JDK 1.4+ API.
    */
   public static String getStackTrace(Throwable t) {
     //_dialog("before creating reader");
@@ -548,17 +495,14 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       return "Unable to get stack trace";
     }
     
-    // OK, now we crop off everything after the first "koala.dynamicjava." or
-    //  "edu.rice.cs.drjava.", if there is one.
+    // OK, now we crop off everything after the first "koala.dynamicjava." or "edu.rice.cs.drjava.", if there is one.
     
     //  First, find the index of an occurrence.
     int index = -1;
     for (int i=0; i < traceItems.size(); i++) {
       String item = traceItems.get(i);
       item = item.trim();
-      if (item.startsWith("at edu.rice.cs.drjava.") ||
-          item.startsWith("at koala.dynamicjava."))
-      {
+      if (item.startsWith("at edu.rice.cs.drjava.") || item.startsWith("at koala.dynamicjava.")) {
         index = i;
         break;
       }
@@ -566,17 +510,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     // Now crop off the rest
     if (index > -1) {
-      while (traceItems.size() > index) {
-        traceItems.removeLast();
-      }
+      while (traceItems.size() > index) traceItems.removeLast();
     }
     
-    // Last check: See if there are no items left. If there are none,
-    // put one in to say it happened at top-level.
-    if (traceItems.isEmpty()) {
-      traceItems.add(EMPTY_TRACE_TEXT);
-    }
-    
+    // Last check: See if there are no items left. If there are none, put one in to say it happened at top-level.
+    if (traceItems.isEmpty()) traceItems.add(EMPTY_TRACE_TEXT);
     
     // OK, now rebuild string
     StringBuffer buf = new StringBuffer();
@@ -584,13 +522,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     String newLine = System.getProperty("line.separator");
     boolean first = true;
     while (itor.hasNext()) {
-      if (first) {
-        first = false;
-      }
-      else {
-        buf.append(newLine);
-      }
-      
+      if (first) first = false; else buf.append(newLine);
+
       buf.append("  " + ((String) itor.next()).trim());
     }
     
@@ -599,10 +532,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   // ---------- Java-specific methods ----------
   
-  /**
-   * Sets the package scope for the current active interpreter,
-   * if it is a JavaInterpreter.
-   */
+  /** Sets the package scope for the current active interpreter, if it is a JavaInterpreter. */
   public void setPackageScope(String s) {
     Interpreter active = _activeInterpreter.getInterpreter();
     if (active instanceof JavaInterpreter) {
@@ -610,9 +540,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  /**
-   * @param show Whether to show a message if a reset operation fails.
-   */
+  /** @param show Whether to show a message if a reset operation fails. */
   public void setShowMessageOnResetFailure(boolean show) {
     _messageOnResetFailure = show;
   }

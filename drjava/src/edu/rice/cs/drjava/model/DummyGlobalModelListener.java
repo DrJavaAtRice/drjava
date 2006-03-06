@@ -49,13 +49,13 @@ import java.io.File;
 import java.util.List;
 import edu.rice.cs.util.classloader.ClassFileError;
 
-/** A dummy, do-nothing GlobalModelListener. Useful for listening to only a small number of events.
+/** A dummy GlobalModelListener that does nothing. Useful for listening to only a small number of events.
  *  @version $Id$
  */
 public class DummyGlobalModelListener implements GlobalModelListener {
   
   /** Called when trying to open a file that does not exist. */
-  public void fileNotFound(File f) {   }
+  public void fileNotFound(File f) {  }
   
   /** Called when the project's build directory has changed. */
   public void projectBuildDirChanged() {  }

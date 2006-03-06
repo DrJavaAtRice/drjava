@@ -63,7 +63,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    *  @param document Toolkit-independent document adapter
    */
   public SimpleInteractionsModel(InteractionsDJDocument document) {
-    super(document, 1000, WRITE_DELAY);
+    super(document, new File(System.getProperty("user.dir")), 1000, WRITE_DELAY);
     _interpreter = new DynamicJavaAdapter(new ClassPathManager());
 
     _interpreter.defineVariable("INTERPRETER", _interpreter);
@@ -203,7 +203,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected void _notifyInterpreterResetting() {  /* do nothing */  }
 
   /** Notifies listeners that the interpreter is ready.  */
-  protected void _notifyInterpreterReady(File wd) {
+  public void notifyInterpreterReady(File wd) {
     //  Ok, we don't need to do anything special
   }
 

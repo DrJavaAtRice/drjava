@@ -845,9 +845,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       _findReplace.setVisible(true);
       _tabbedPane.setSelectedComponent(_findReplace);
-      try { Thread.sleep(100); } 
-      catch(Exception e) { e.printStackTrace(); }
-      _findReplace.requestFocusInWindow();
+      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
+      SwingUtilities.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
+//      try { Thread.sleep(100); } 
+//      catch(Exception e) { e.printStackTrace(); }
+//      _findReplace.requestFocusInWindow();
       //_setDividerLocation();
     }
   };
@@ -1710,14 +1712,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // Working directory is default place to start, else
     // use user.dir (bug #895998).
-    File workDir = config.getSetting(WORKING_DIRECTORY);
-    if (workDir == FileOption.NULL_FILE) {
-      workDir = config.getSetting(LAST_DIRECTORY);
-      if (workDir == FileOption.NULL_FILE || !workDir.exists()) {
-        workDir = new File(System.getProperty("user.dir"));
-      }
-    }
-    if (workDir.isFile() && workDir.getParent() != null) workDir = workDir.getParentFile();
+    File workDir = _model.getMasterWorkingDirectory();
 
     // Overrides JFileChooser to display the full path of the directory
     _openChooser = new JFileChooser() {

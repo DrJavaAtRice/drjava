@@ -62,21 +62,20 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    *  @param control RMI interface to the Interpreter JVM
    *  @param adapter InteractionsDJDocument to use for the document
    */
-  public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM control, EditDocumentInterface adapter) {
-    super(control, adapter,
-          DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
+  public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM control, EditDocumentInterface adapter, File wd) {
+    super(control, adapter, wd, DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
           DefaultGlobalModel.WRITE_DELAY);
     _model = model;
     // Set whether to allow "assert" statements to be run in the remote JVM.
     Boolean allow = DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT);
-    _interpreterControl.setAllowAssertions(allow.booleanValue());
+    _jvm.setAllowAssertions(allow.booleanValue());
     
     // Add option listeners  // WHEN ARE THESE EVER REMOVED?
     DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE, _document.getHistoryOptionListener());
     DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_ALLOW_ASSERT,
                                          new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
-        _interpreterControl.setAllowAssertions(oce.value.booleanValue());
+        _jvm.setAllowAssertions(oce.value.booleanValue());
       }
     });
   }
@@ -142,7 +141,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
 
   /** Notifies listeners that the interpreter is ready. */
-  protected void _notifyInterpreterReady(final File wd) { 
+  public void notifyInterpreterReady(final File wd) { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(wd); } });
   }
 

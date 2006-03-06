@@ -56,7 +56,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Banner prefix. */
   public static final String BANNER_PREFIX = "Welcome to DrJava.";
-
+  
   /** Keeps track of any listeners to the model. */
   protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
 
@@ -69,8 +69,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Whether we are waiting for the interpreter to register for the first time. */
   protected boolean _waitingForFirstInterpreter;
 
-  /** Whether the interpreter has been used since its last reset. */
-  protected boolean _interpreterUsed;
+  /** The working directory for the current interpreter. */
+  protected File _workingDirectory;
 
   /** A lock object to prevent multiple threads from interpreting at once. */
   private final Object _interpreterLock;
@@ -106,12 +106,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *  @param historySize Number of lines to store in the history
    *  @param writeDelay Number of milliseconds to wait after each println
    */
-  public InteractionsModel(EditDocumentInterface adapter, int historySize, int writeDelay) {
+  public InteractionsModel(EditDocumentInterface adapter, File wd, int historySize, int writeDelay) {
     _writeDelay = writeDelay;
     _document = new InteractionsDocument(adapter, historySize);
     _adapter = adapter;
     _waitingForFirstInterpreter = true;
-    _interpreterUsed = false;
+    _workingDirectory = wd;
     _interpreterLock = new Object();
     _writerLock = new Object();
     _debugPort = -1;
@@ -120,16 +120,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
 
   /** Add a JavadocListener to the model.
-   * @param listener a listener that reacts to Interactions events */
+   *  @param listener a listener that reacts to Interactions events */
   public void addListener(InteractionsListener listener) { _notifier.addListener(listener); }
 
-  /** Remove an InteractionsListener from the model.  If the listener is not
-   *  currently listening to this model, this method has no effect.
+  /** Remove an InteractionsListener from the model.  If the listener is not currently listening to this model, this 
+   *  method has no effect.
    *  @param listener a listener that reacts to Interactions events
    */
-  public void removeListener(InteractionsListener listener) {
-    _notifier.removeListener(listener);
-  }
+  public void removeListener(InteractionsListener listener) { _notifier.removeListener(listener); }
 
   /** Removes all InteractionsListeners from this model. */
   public void removeAllInteractionListeners() { _notifier.removeAllListeners(); }
@@ -143,13 +141,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifyInteractionIncomplete();
   }
   
-  /** Sets this model's notion of whether it is waiting for the first
-   *  interpreter to connect.  The interactionsReady event is not fired
-   *  for the first interpreter.
+  /** Sets this model's notion of whether it is waiting for the first interpreter to connect.  The interactionsReady
+   *  event is not fired for the first interpreter.
    */
-  public void setWaitingForFirstInterpreter(boolean waiting) {
-    _waitingForFirstInterpreter = waiting;
-  }
+  public void setWaitingForFirstInterpreter(boolean waiting) { _waitingForFirstInterpreter = waiting; }
 
   /** Interprets the current given text at the prompt in the interactions doc. */
   public void interpretCurrentInteraction() {
@@ -180,10 +175,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Interprets the given command.
    *  @param toEval command to be evaluated. */
   public final void interpret(String toEval) {
-    synchronized(_interpreterLock) {
-      _interpreterUsed = true;
-      _interpret(toEval);
-    }
+    synchronized(_interpreterLock) { _interpret(toEval); }
   }
 
   /** Interprets the given command.  This should only be called from interpret, never directly.
@@ -207,21 +199,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   public abstract String getVariableClassName(String var);
 
-  /** Resets the Java interpreter with working directry wd, resetting the flag to indicate whether the interpreter has
-   *  been used since the last reset.
-   */
+  /** Resets the Java interpreter with working directry wd. */
   public final void resetInterpreter(File wd) {
-    _interpreterUsed = false;
+    _workingDirectory = wd;
     _resetInterpreter(wd);
   }
 
   /** Resets the Java interpreter.  This should only be called from resetInterpreter, never directly. */
   protected abstract void _resetInterpreter(File wd);
-
-  /** Returns whether the interpreter has been used since the last reset operation.  (Set to true in interpret and
-   *  false in resetInterpreter.)
-   */
-  public boolean interpreterUsed() { return _interpreterUsed; }
+  
+  /** Returns the working directory for the current interpreter. */
+  public File getWorkingDirectory() { return _workingDirectory; }
 
   /** These add the given path to the classpaths used in the interpreter.
    *  @param path Path to add
@@ -547,7 +535,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
   /** Called when the interpreter starts to reset. */
   public void interpreterResetting() {
-//    Utilities.showDebug("InteractionsModel: interpreterResetting called.  _waitingForFirstInterpreter = " + _waitingForFirstInterpreter);
+//    Utilities.showDebug("InteractionsModel: interpreterResetting called.  _waitingForFirstInterpreter = " + 
+//      _waitingForFirstInterpreter);
     if (! _waitingForFirstInterpreter) {
       _document.acquireWriteLock();
       try {
@@ -605,13 +594,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (! _waitingForFirstInterpreter) {
       _document.reset(generateBanner(wd));
       _document.setInProgress(false);
-      _notifyInterpreterReady(wd);
+      notifyInterpreterReady(wd);
     }
     _waitingForFirstInterpreter = false;
   }
 
   /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */
-  protected abstract void _notifyInterpreterReady(File wd);
+  protected abstract void notifyInterpreterReady(File wd);
 
   /** Assumes a trimmed String. Returns a string of the main call that the interpretor can use. */
   protected static String _testClassCall(String s) {

@@ -55,7 +55,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompileAllWithNoFiles() throws BadLocationException, IOException, InterruptedException {
     // Open one empty doc
     _model.newFile();
-
+    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     _model.getCompilerModel().compileAll();
@@ -76,6 +76,10 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = new File(_tempDir, "DrJavaTestFoo.java");
     doc.saveFile(new FileSelector(file));
+    
+    // Use the interpreter so resetInteractions is not optimized to a no-op
+    interpret("0");
+
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.setResetAfterCompile(true);

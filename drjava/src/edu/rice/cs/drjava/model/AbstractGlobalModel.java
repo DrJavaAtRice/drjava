@@ -455,6 +455,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return the working directory for the Slave (Interactions) JVM */
   public File getWorkingDirectory() { 
 //    Utilities.show("getWorkingDirectory() returns " + _state.getWorkingDirectory());
+//    Utilities.show("isProjectActive() return " + isProjectActive());
     return _state.getWorkingDirectory(); 
   }
   
@@ -786,7 +787,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    */
   public OpenDefinitionsDocument newFile() {
     File dir = _activeDirectory;
-    if (dir == null) dir = new File(System.getProperty("user.dir"));
+    if (dir == null) dir = getMasterWorkingDirectory();
     OpenDefinitionsDocument doc = newFile(dir);
     setActiveDocument(doc);
     return doc;

@@ -496,19 +496,17 @@ public class DefaultJavadocModel implements JavadocModel {
     final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main";
     Process javadocProcess;
     
-    // This was a quick fix in order to get a working jar out.
+    // TODO: clean up this code, particularly the busy-wait
     
     double version = Double.valueOf(System.getProperty("java.specification.version"));
     String[] jvmArgs = new String[0];
     
-    // We must use this classpath nonsense to make sure our new Javadoc JVM
-    // can see everything the interactions pane can see.
+    // We must set the classpath so our new Javadoc JVM can see everything the interactions pane can see.
     javadocProcess =  ExecJVM.runJVM(JAVADOC_CLASS, args, new String[]{classPath}, jvmArgs, FileOption.NULL_FILE);
 
     //System.err.println("javadoc started with args:\n" + Arrays.asList(args));
 
-    /* waitFor() call appears to block indefinitely in 1.4.1, because
-     * the process will block if output buffers get full.
+    /* waitFor() call appears to block indefinitely in 1.4.1, because the process will block if output buffers get full.
      * Yes, this is extremely retarded.
      */
 //     value = javadocProcess.waitFor();

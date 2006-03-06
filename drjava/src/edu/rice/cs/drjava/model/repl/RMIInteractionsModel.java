@@ -48,37 +48,35 @@ import java.io.File;
 public abstract class RMIInteractionsModel extends InteractionsModel {
 
   /** RMI interface to the remote Java interpreter.*/
-  protected final MainJVM _interpreterControl;
+  protected final MainJVM _jvm;
 
   /** Constructs an InteractionsModel which can communicate with another JVM.
-   *  @param control RMI interface to the Java interpreter
+   *  @param jvm RMI interface to the slave JVM
    *  @param adapter InteractionsDJDocument to use in the InteractionsDocument
    *  @param historySize Number of lines to store in the history
    *  @param writeDelay Number of milliseconds to wait after each println
    */
-  public RMIInteractionsModel(MainJVM control, EditDocumentInterface adapter, int historySize, int writeDelay) {
-    super(adapter, historySize, writeDelay);
-    _interpreterControl = control;
+  public RMIInteractionsModel(MainJVM jvm, EditDocumentInterface adapter, File wd, int historySize, int writeDelay) {
+    super(adapter, wd, historySize, writeDelay);
+    _jvm = jvm;
   }
 
   /** Interprets the given command.
    *  @param toEval command to be evaluated
    */
-  protected void _interpret(String toEval) { _interpreterControl.interpret(toEval); }
+  protected void _interpret(String toEval) { _jvm.interpret(toEval); }
 
   /** Gets the string representation of the value of a variable in the current interpreter.
    *  @param var the name of the variable
    */
-  public String getVariableToString(String var) {
-    return _interpreterControl.getVariableToString(var);
-  }
+  public String getVariableToString(String var) { return _jvm.getVariableToString(var); }
 
   /**
    * Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
    */
   public String getVariableClassName(String var) {
-    return _interpreterControl.getVariableClassName(var);
+    return _jvm.getVariableClassName(var);
   }
 
   /**
@@ -89,24 +87,24 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 //    _interpreterControl.addClassPath(path);
 //  }
 //  
-  public void addProjectClassPath(URL path) { _interpreterControl.addProjectClassPath(path); }
+  public void addProjectClassPath(URL path) { _jvm.addProjectClassPath(path); }
 
-  public void addBuildDirectoryClassPath(URL path) { _interpreterControl.addBuildDirectoryClassPath(path); }
+  public void addBuildDirectoryClassPath(URL path) { _jvm.addBuildDirectoryClassPath(path); }
   
-  public void addProjectFilesClassPath(URL path) { _interpreterControl.addProjectFilesClassPath(path); }
+  public void addProjectFilesClassPath(URL path) { _jvm.addProjectFilesClassPath(path); }
   
-  public void addExternalFilesClassPath(URL path) { _interpreterControl.addExternalFilesClassPath(path); }
+  public void addExternalFilesClassPath(URL path) { _jvm.addExternalFilesClassPath(path); }
   
-  public void addExtraClassPath(URL path) { _interpreterControl.addExtraClassPath(path); }
+  public void addExtraClassPath(URL path) { _jvm.addExtraClassPath(path); }
   
   /** Resets the Java interpreter. */
-  protected void _resetInterpreter(File wd) { _interpreterControl.killInterpreter(wd); }
+  protected void _resetInterpreter(File wd) { _jvm.killInterpreter(wd); }
 
   /** Adds a named DynamicJavaAdapter to the list of interpreters.
    *  @param name the unique name for the interpreter
    *  @throws IllegalArgumentException if the name is not unique
    */
-  public void addJavaInterpreter(String name) { _interpreterControl.addJavaInterpreter(name); }
+  public void addJavaInterpreter(String name) { _jvm.addJavaInterpreter(name); }
 
   /** Adds a named JavaDebugInterpreter to the list of interpreters.
    *  @param name the unique name for the debug interpreter
@@ -114,14 +112,14 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    *  @throws IllegalArgumentException if the name is not unique
    */
   public void addDebugInterpreter(String name, String className) {
-    _interpreterControl.addDebugInterpreter(name, className);
+    _jvm.addDebugInterpreter(name, className);
   }
 
   /** Removes the interpreter with the given name, if it exists.
    *  @param name Name of the interpreter to remove
    */
   public void removeInterpreter(String name) {
-    _interpreterControl.removeInterpreter(name);
+    _jvm.removeInterpreter(name);
   }
 
   /** Sets the active interpreter.
@@ -129,8 +127,8 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    *  @param prompt the prompt the interpreter should have.
    */
   public void setActiveInterpreter(String name, String prompt) {
-    String currName = _interpreterControl.getCurrentInterpreterName();
-    boolean inProgress = _interpreterControl.setActiveInterpreter(name);
+    String currName = _jvm.getCurrentInterpreterName();
+    boolean inProgress = _jvm.setActiveInterpreter(name);
     _updateDocument(prompt, inProgress, !currName.equals(name));
     _notifyInterpreterChanged(inProgress);
   }
@@ -138,10 +136,10 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Sets the default interpreter to be the current one. */
   public void setToDefaultInterpreter() {
     // Only print prompt if we're not already the default
-    String currName = _interpreterControl.getCurrentInterpreterName();
+    String currName = _jvm.getCurrentInterpreterName();
     boolean printPrompt = !MainJVM.DEFAULT_INTERPRETER_NAME.equals(currName);
 
-    boolean inProgress = _interpreterControl.setToDefaultInterpreter();
+    boolean inProgress = _jvm.setToDefaultInterpreter();
 
     _updateDocument(InteractionsDocument.DEFAULT_PROMPT, inProgress, printPrompt);
     _notifyInterpreterChanged(inProgress);
@@ -169,11 +167,11 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 
   /** Sets whether or not the interpreter should allow access to private members. */
   public void setPrivateAccessible(boolean allow) {
-    _interpreterControl.setPrivateAccessible(allow);
+    _jvm.setPrivateAccessible(allow);
   }
 
   /** Gets the interpreter classpath from the interpreter jvm.
    * @return a vector of classpath elements
    */
-  public Vector<URL> getClassPath() { return _interpreterControl.getClassPath(); }
+  public Vector<URL> getClassPath() { return _jvm.getClassPath(); }
 }

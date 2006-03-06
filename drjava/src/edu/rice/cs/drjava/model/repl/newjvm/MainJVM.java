@@ -86,6 +86,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Used to protect interpreterJVM setting */
   private Object _interpreterLock = new Object();
   
+  /** Records state of slaveJVM (interpreterJVM); used to suppress restartInteractions on a fresh JVM */
+  private boolean _slaveJVMUsed = false;
+  
   /** This flag is set to false to inhibit the automatic restart of the JVM. */
   private boolean _restart = true;
   
@@ -158,6 +161,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   public boolean isInterpreterRunning() { return _interpreterJVM() != null; }
   
+  public boolean slaveJVMUsed() { return _slaveJVMUsed; }
+  
   /** Provides an object to listen to interactions-related events. */
   public void setInteractionsModel(InteractionsModelCallback model) { _interactionsModel = model; }
   
@@ -191,6 +196,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     //  (will receive result in the interpretResult(...) method)
     try {
       _log.logTime("main.interp: " + s);
+      _slaveJVMUsed = true;
       _interpreterJVM().interpret(s);
     }
     catch (java.rmi.UnmarshalException ume) {
@@ -426,6 +432,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param testName The name of the test being started.
    */
   public void testStarted(String testName) throws RemoteException {
+    _slaveJVMUsed = true;
     _junitModel.testStarted(testName);
   }
   
@@ -440,32 +447,27 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _junitModel.testEnded(testName, wasSuccessful, causedError);
   }
   
-  /**
-   * Called when a full suite of tests has finished running.
-   * Forwards from the other JVM to the local JUnit model.
-   * @param errors The array of errors from all failed tests in the suite.
+  /** Called when a full suite of tests has finished running. Forwards from the other JVM to the local JUnit model.
+   *  @param errors The array of errors from all failed tests in the suite.
    */
   public void testSuiteEnded(JUnitError[] errors) throws RemoteException {
 //    Utilities.showDebug("MainJVM.testSuiteEnded() called");
     _junitModel.testSuiteEnded(errors);
   }
   
-  /**
-   * Called when the JUnitTestManager wants to open a file that is not currently open.
-   * @param className the name of the class for which we want to find the file
-   * @return the file associated with the given class
+  /** Called when the JUnitTestManager wants to open a file that is not currently open.
+   *  @param className the name of the class for which we want to find the file
+   *  @return the file associated with the given class
    */
   public File getFileForClassName(String className) throws RemoteException {
     return _junitModel.getFileForClassName(className);
   }
   
-  /**
-   * Notifies the main jvm that an assignment has been made in the given debug
-   * interpreter.
-   * Does not notify on declarations.
+  /** Notifies the main jvm that an assignment has been made in the given debug interpreter.
+   *  Does not notify on declarations.
    *
-   * This method is not currently necessary, since we don't copy back
-   * values in a debug interpreter until the thread has resumed.
+   *  This method is not currently necessary, since we don't copy back values in a debug interpreter until the thread
+   *  has resumed.
    *
    * @param name the name of the debug interpreter
    *
@@ -532,11 +534,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException re) { _threwException(re); }
   }
   
-  /**
-   * sets the current interpreter to the one specified by name
-   * @param name the unique name of the interpreter to set active
-   * @return Whether the new interpreter is currently in progress
-   * with an interaction (ie. whether an interactionEnded event will be fired)
+  /** Sets the current interpreter to the one specified by name
+   *  @param name the unique name of the interpreter to set active
+   *  @return Whether the new interpreter is currently processing an interaction (i.e., whether an interactionEnded
+   *          event will be fired)
    */
   public boolean setActiveInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
@@ -600,7 +601,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         _restart = (wd != null);
         _cleanlyRestarting = true;
         if (_restart) _interactionsModel.interpreterResetting();
-        quitSlave();
+        quitSlave();  // new slave JVM is restarted by call on startInterpreterJVM on death of current slave
       }
       catch (ConnectException ce) {
         _log.logTime("Could not connect to the interpreterJVM while trying to kill it", ce);
@@ -636,8 +637,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     int debugPort = getDebugPort();
     _log.logTime("starting with debug port: " + debugPort);
     if (debugPort > -1) {
-      jvmArgs.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" +
-                  debugPort);
+      jvmArgs.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + debugPort);
       jvmArgs.add("-Xdebug");
       jvmArgs.add("-Xnoagent");
       jvmArgs.add("-Djava.compiler=NONE");
@@ -649,21 +649,24 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     //    List<String> optionArgs = ArgumentTokenizer.tokenize(optionArgString);
     jvmArgs.addAll(_optionArgs);
     String[] jvmArgsArray = new String[jvmArgs.size()];
-    for (int i=0; i < jvmArgs.size(); i++) { jvmArgsArray[i] = jvmArgs.get(i); }
+    for (int i = 0; i < jvmArgs.size(); i++) { jvmArgsArray[i] = jvmArgs.get(i); }
     
     // Create and invoke the Interpreter JVM
     try {
       // _startupClasspath is sent in as the interactions classpath
 //      System.out.println("startup: " + _startupClasspath);
-//      Utilities.showDebug("Calling invokeSlave(" + jvmArgs + ", " + _startupClasspath + ", " + _model.getWorkingDirectory() +")");
+//      Utilities.showDebug("Calling invokeSlave(" + jvmArgs + ", " + _startupClasspath + ", " + 
+//        _model.getWorkingDirectory() +")");
       invokeSlave(jvmArgsArray, _startupClassPath, _workDir);
+      _slaveJVMUsed = false;
     }
     catch (RemoteException re) { _threwException(re); }
     catch (IOException ioe) { _threwException(ioe); }
   }
   
-  /** React if the slave JVM quits.  Restarts the JVM unless _restart is false, and notifies the 
-   *  InteractionsModel if the quit was unexpected.
+  /** React if the slave JVM quits.  Restarts the JVM unless _restart is false, and notifies the InteractionsModel
+   *  if the quit was unexpected.  Called from a thread within AbstractMasterJVM waiting for the death of the process
+   *  that starts and runs the slave JVM.
    *  @param status Status returned by the dead process.
    */
   protected void handleSlaveQuit(int status) {
@@ -716,9 +719,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   
   /** Returns whether a JVM is currently starting.  This override widens the visibility of the method. */
-  public boolean isStartupInProgress() {
-    return super.isStartupInProgress();
-  }
+  public boolean isStartupInProgress() { return super.isStartupInProgress(); }
   
   /** Called when the Interpreter JVM connects to us after being started. */
   protected void handleSlaveConnected() {

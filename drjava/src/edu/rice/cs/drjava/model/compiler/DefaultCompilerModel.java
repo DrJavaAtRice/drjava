@@ -58,11 +58,9 @@ import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 
-
-/** Default implementation all compiler functionality in the model, as specified in the CompilerModel interface.
- *  This is the implementation that is used in most circumstances during normal use (as opposed to test-specific 
- *  purposes).
- * @version $Id$
+/** Default implementation of the CompilerModel interface. This implementation is used for normal DrJava execution
+ *  (as opposed to testing DrJava).
+ *  @version $Id$
  */
 public class DefaultCompilerModel implements CompilerModel {
 
@@ -72,8 +70,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Manages listeners to this model. */
   private final CompilerEventNotifier _notifier = new CompilerEventNotifier();
 
-  /** Used by CompilerErrorModel to open documents that have errors. 
-   *  A reference to the global model. */
+  /** The global model to which this compiler model belongs. */
   private final GlobalModel _model;
 
   /** The error model containing all current compiler errors. */
@@ -91,7 +88,7 @@ public class DefaultCompilerModel implements CompilerModel {
   public DefaultCompilerModel(GlobalModel m) {
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new CompilerError[0], _model);
-    _workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
+    _workDir = _model.getWorkingDirectory();
   }
   
   //--------------------------------- Locking -------------------------------//

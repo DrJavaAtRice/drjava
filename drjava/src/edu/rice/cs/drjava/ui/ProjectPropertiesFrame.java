@@ -146,14 +146,11 @@ public class ProjectPropertiesFrame extends JFrame {
     }
     
     this.setSize(frameSize);
-    this.setLocation((screenSize.width - frameSize.width) / 2,
-                     (screenSize.height - frameSize.height) / 2);
+    this.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
     
     
-    addWindowListener(new WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent e) {
-        cancel();
-      }
+    addWindowListener(new WindowAdapter() { 
+      public void windowClosing(java.awt.event.WindowEvent e) { cancel(); } 
     });
     
     reset();
@@ -218,7 +215,7 @@ public class ProjectPropertiesFrame extends JFrame {
   
   /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getWorkDir() {
-    File workDir = _mainFrame.getModel().getMasterWorkingDirectory();
+    File workDir = _mainFrame.getModel().getWorkingDirectory();
     if (workDir != null) return workDir;
     return FileOption.NULL_FILE;
   }

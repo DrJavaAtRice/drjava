@@ -88,7 +88,6 @@ import edu.rice.cs.drjava.model.junit.JUnitModel;
  */
 public class DefaultGlobalModel extends AbstractGlobalModel {
   
-  
   /* FIELDS */
   
   /* Interpreter fields */
@@ -97,7 +96,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   protected final InteractionsDJDocument _interactionsDocument;
   
   /** RMI interface to the Interactions JVM. */
-  final MainJVM _interpreterControl = new MainJVM(getWorkingDirectory());
+  final MainJVM _jvm = new MainJVM(getWorkingDirectory());
   
   /** Interface between the InteractionsDocument and the JavaInterpreter, which runs in a separate JVM. */
   protected DefaultInteractionsModel _interactionsModel;
@@ -117,7 +116,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       if (buildDir != null) {
         //        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
         try {
-          _interpreterControl.addBuildDirectoryClassPath(new File(buildDir.getAbsolutePath()).toURL());
+          _jvm.addBuildDirectoryClassPath(new File(buildDir.getAbsolutePath()).toURL());
         } catch(MalformedURLException murle) {
           // edit this later! this is bad! we should handle this exception better!
           throw new RuntimeException(murle);
@@ -160,7 +159,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /* JUnit Fields */
   
   /** JUnitModel manages all JUnit functionality. */
-  private final DefaultJUnitModel _junitModel = new DefaultJUnitModel(_interpreterControl, _compilerModel, this);
+  private final DefaultJUnitModel _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
   
   /* Javadoc Fields */
   
@@ -178,15 +177,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public DefaultGlobalModel() {
     super();
     _interactionsDocument = new InteractionsDJDocument();
-    _interactionsModel = new DefaultInteractionsModel(this, _interpreterControl,_interactionsDocument);
+    _interactionsModel = new DefaultInteractionsModel(this, _jvm, _interactionsDocument, getWorkingDirectory());
     _interactionsModel.addListener(_interactionsListener);
-    _interpreterControl.setInteractionsModel(_interactionsModel);
-    _interpreterControl.setJUnitModel(_junitModel);
+    _jvm.setInteractionsModel(_interactionsModel);
+    _jvm.setJUnitModel(_junitModel);
     
-    _interpreterControl.setOptionArgs(DrJava.getConfig().getSetting(JVM_ARGS));
+    _jvm.setOptionArgs(DrJava.getConfig().getSetting(JVM_ARGS));
     DrJava.getConfig().addOptionListener(JVM_ARGS, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) {
-        _interpreterControl.setOptionArgs(oe.value);
+        _jvm.setOptionArgs(oe.value);
       }
     }); 
     
@@ -204,7 +203,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _compilerModel.addListener(_clearInteractionsListener);
     
     // Perhaps do this in another thread to allow startup to continue...
-    _interpreterControl.startInterpreterJVM();
+    _jvm.startInterpreterJVM();
   }
   
 
@@ -223,7 +222,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (f != null) {
       //      System.out.println("adding: " + f.getAbsolutePath());
       try {
-        _interpreterControl.addBuildDirectoryClassPath(new File(f.getAbsolutePath()).toURL());
+        _jvm.addBuildDirectoryClassPath(new File(f.getAbsolutePath()).toURL());
       }
       catch(MalformedURLException murle) {
         // TODO! change this! we should handle this exception better!
@@ -434,7 +433,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
     // Kill the interpreter
-    _interpreterControl.killInterpreter(null);
+    _jvm.killInterpreter(null);
     
     super.dispose();
   }
@@ -446,6 +445,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    */
   public void resetInteractions(File wd) {
     if (_debugger.inDebugMode()) _debugger.shutdown();
+    if (! _jvm.slaveJVMUsed() && wd.equals(_interactionsModel.getWorkingDirectory())) {
+      // eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
+      _interactionsModel.notifyInterpreterReady(wd);
+      return; 
+    }
     _interactionsModel.resetInterpreter(wd);
 //    resetConsole();
   }
@@ -500,11 +504,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   }
 
   /** Blocks until the interpreter has registered. */
-  public void waitForInterpreter() { _interpreterControl.ensureInterpreterConnected(); }
+  public void waitForInterpreter() { _jvm.ensureInterpreterConnected(); }
 
 
   /** Returns the current classpath in use by the Interpreter JVM. */
-  public ClassPathVector getClassPath() { return _interpreterControl.getClassPath(); }
+  public ClassPathVector getClassPath() { return _jvm.getClassPath(); }
   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
    *  project preferences..
@@ -723,7 +727,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           
           // Load the proper text into the interactions document
           iDoc.clearCurrentInput();
-          iDoc.insertText(iDoc.getLength(), "java " + className, null);
+          iDoc.append("java " + className, null);
           
           // Finally, execute the new interaction and record that event
           _interactionsModel.interpretCurrentInteraction();
@@ -742,8 +746,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       _interactionsModel.addListener(_runMain);
       
       // Reset interactions to the soure root for this document; class will be executed when new interpreter is ready
-      resetInteractions(getSourceRoot());
-        
+      resetInteractions(getSourceRoot());  
     }
 
     /** Runs JUnit on the current document. Used to compile all open documents
@@ -871,7 +874,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   private void _createDebugger() {
     try {
       _debugger = new JPDADebugger(this);
-      _interpreterControl.setDebugModel((JPDADebugger) _debugger);
+      _jvm.setDebugModel((JPDADebugger) _debugger);
     }
     catch( NoClassDefFoundError ncdfe ) {
       // JPDA not available, so we won't use it.

@@ -143,7 +143,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model = new TestGlobalModel();
 
     // Wait until it has connected
-    _model._interpreterControl.ensureInterpreterConnected();
+    _model._jvm.ensureInterpreterConnected();
     // Wait until all pending events have finished
   }
 

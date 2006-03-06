@@ -46,9 +46,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-/**
- * Tests the functionality of an InteractionsModel.
- * @version $Id$
+/** Tests the functionality of an InteractionsModel.
+ *  @version $Id$
  */
 public final class InteractionsModelTest extends DrJavaTestCase {
   protected InteractionsDJDocument _adapter;
@@ -451,7 +450,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     /** Constructs a new InteractionsModel. */
     public TestInteractionsModel(InteractionsDJDocument adapter) {
       // Adapter, history size, write delay
-      super(adapter, 1000, 25);
+      super(adapter, new File(System.getProperty("user.dir")), 1000, 25);
     }
 
     protected void _interpret(String toEval) { this.toEval = toEval; }
@@ -478,7 +477,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     protected void _notifyInterpreterExited(int status) { }
     protected void _notifyInterpreterResetting() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
-    protected void _notifyInterpreterReady(File wd) { }
+    public void notifyInterpreterReady(File wd) { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _notifyInteractionIncomplete() { }
     public ConsoleDocument getConsoleDocument() { return null; }
@@ -491,9 +490,9 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     /** Constructs a new IncompleteInputInteractionsModel. */
     public IncompleteInputInteractionsModel(InteractionsDJDocument adapter) {
       // MainJVM, Adapter, history size, write delay
-      super(new MainJVM(null), adapter, 1000, 25);
-      _interpreterControl.setInteractionsModel(this);
-      _interpreterControl.startInterpreterJVM();
+      super(new MainJVM(null), adapter, new File(System.getProperty("user.dir")), 1000, 25);
+      _jvm.setInteractionsModel(this); // _jvm is set to MainJVM(null) by super call;
+      _jvm.startInterpreterJVM();
       continuationException = false;
       syntaxException = false;
     }
@@ -504,7 +503,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     protected void _notifyInterpreterExited(int status) { }
     protected void _notifyInterpreterResetting() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
-    protected void _notifyInterpreterReady(File wd) { }
+    public void notifyInterpreterReady(File wd) { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _notifyInteractionIncomplete() { }
     protected void _notifyInterpreterChanged(boolean inProgress) { }

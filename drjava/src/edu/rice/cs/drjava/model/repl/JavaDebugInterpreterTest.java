@@ -46,12 +46,10 @@ import koala.dynamicjava.util.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.interpreter.context.*;
 
-/**
- * Class to test JavaDebugInterpreters by ensuring that appropriate
- * events are generated on each assignment.
+/** Class to test JavaDebugInterpreters by ensuring that appropriate events are generated on each assignment.
  *
- * NOTE: The tests at the bottom are disabled for now, since nothing needs to be done
- * on an assignment.  (We just copy back when the thread is resumed.)
+ * NOTE: The tests at the bottom are disabled for now, since nothing needs to be done on an assignment.  (We 
+ * just copy back when the thread is resumed.)
  *
  * @version $Id$
  */
@@ -153,8 +151,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
 
   public void setUp() throws Exception {
     super.setUp();
-    // Creating a JavaDebugInterpreter with a custom
-    // notifyInterpreterAssignment() method
+    // Creating a JavaDebugInterpreter with a custom notifyInterpreterAssignment() method
     _debugInterpreter = new JavaDebugInterpreter("test", "") {
       public EvaluationVisitorExtension makeEvaluationVisitor(Context context) {
         return new DebugEvaluationVisitor(context, _name);
@@ -208,39 +205,30 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     actual.acceptVisitor(dve);
     String s2 = baos.toString();
     //System.out.println("s1 = " + s1 + "\ns2 = " + s2);
-    assertEquals(message,
-                 s1,
-                 s2);
+    assertEquals(message, s1, s2);
   }
 
-  /**
-   * Tests that a this expression with no classname will be correctly
-   * converted to a QualifiedName.
-   */
+  /** Tests that a this expression with no classname will be correctly converted to a QualifiedName. */
   public void testConvertToName() {
     ThisExpression thisExp = _debugInterpreter.buildUnqualifiedThis();
     Node n = _debugInterpreter.visitThis(thisExp);
     LinkedList<IdentifierToken> thisList = new LinkedList<IdentifierToken>(); // Add parameterization <Identifier>.
     thisList.add(new Identifier("this"));
     QualifiedName expected = new QualifiedName(thisList);
-    assertEqualsNodes("convertThisToName did not return the correct QualifiedName",
-                      expected,
-                      n);
+    assertEqualsNodes("convertThisToName did not return the correct QualifiedName", expected, n);
   }
 
-  /**
-   * Tests that a this expression with a classname will be correctly
-   * converted to an ObjectFieldAccess.
-   */
+  /** Tests that a this expression with a classname will be correctly converted to an ObjectFieldAccess. */
   public void testConvertToObjectFieldAccess() {
     _debugInterpreter.setClassName("bar.baz.Foo$FooInner$FooInnerInner");
     LinkedList<IdentifierToken> ids = new LinkedList<IdentifierToken>(); // Add parameterization <Identifier>.
     ids.add(new Identifier("Foo"));
     ThisExpression thisExp = new ThisExpression(ids, "", 0, 0, 0, 0);
     Node n = _debugInterpreter.visitThis(thisExp);
-    Node expected = new ObjectFieldAccess(new ObjectFieldAccess(_debugInterpreter._convertThisToName(_debugInterpreter.buildUnqualifiedThis()),
-                                                                "this$1"),
-                                          "this$0");
+    Node expected = 
+      new ObjectFieldAccess(
+        new ObjectFieldAccess(_debugInterpreter._convertThisToName(_debugInterpreter.buildUnqualifiedThis()), "this$1"),
+          "this$0");
 
     assertEqualsNodes("convertThisToObjectFieldAccess did not return the correct ObjectFieldAccess",
                       expected,
@@ -275,8 +263,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
        while (_pendingNotifies > 0) _notifierLock.wait();
      }
 
-    // Calling interpret instead of interpretIgnoreResult because we want
-    // to wait until the interaction has ended.
+    // Calling interpret instead of interpretIgnoreResult because we want to wait until the interaction has ended.
 
     // Test that IdentityVisitor really does visit all nodes and their subnodes
     // by giving it a statement consisting of lots of different syntax components.
@@ -293,7 +280,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
               "               }\n" +
               "    }\n" +
               "  }\n" +
-              "}\n"+
+              "}\n" +
               "catch(Exception e) { System.out.println(MonkeyThreeDeep.this.threeDeepFoo);}\n" +
               "finally {System.out.println(MonkeyInner.MonkeyTwoDeep.this.twoDeepFoo);}");
     assertInteractionsDoesNotContain("18");
@@ -336,10 +323,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     _debugger.removeListener(debugListener);
   }
 
-  /**
-   * Tests that the user can access static fields of outer classes
-   * in the debug interpreter.
-   */
+  /** Tests that the user can access static fields of outer classes in the debug interpreter. */
   public void testAccessStaticFieldsAndMethodsOfOuterClasses()
     throws DebugException, BadLocationException, EditDocumentException, IOException, InterruptedException {
     File dir = new File(_tempDir, "monkey");
@@ -386,56 +370,40 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
                  interpret("monkey.MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
 
     interpret("int twoDeepFoo = -10;");
-    assertEquals("Should have successfully shadowed field of static outer class",
-                 "-10",
-                 interpret("twoDeepFoo"));
-    assertEquals("should have assigned the field of static outer class",
-                 "100",
+    assertEquals("Should have successfully shadowed field of static outer class", "-10", interpret("twoDeepFoo"));
+    
+    assertEquals("should have assigned the field of static outer class", "100",
                  interpret("MonkeyTwoDeep.twoDeepFoo"));
-    assertEquals("should have assigned the field of static outer class",
-                 "100",
+    
+    assertEquals("should have assigned the field of static outer class", "100",
                  interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
 
-    assertEquals("Should be able to access a static field of a non-static outer class",
-                 "6",
-                 interpret("foo"));
-    assertEquals("Should be able to access a static field of a non-static outer class",
-                 "6",
+    assertEquals("Should be able to access a static field of a non-static outer class", "6", interpret("foo"));
+    assertEquals("Should be able to access a static field of a non-static outer class", "6",
                  interpret("MonkeyStaticStuff.foo"));
 
     interpret("foo = 987;");
-    assertEquals("Should have changed the value of a static field of a non-static outer class",
-                 "987",
+    assertEquals("Should have changed the value of a static field of a non-static outer class", "987",
                  interpret("foo"));
-    assertEquals("Should have changed the value of a static field of a non-static outer class",
-                 "987",
+    
+    assertEquals("Should have changed the value of a static field of a non-static outer class", "987",
                  interpret("MonkeyStaticStuff.foo"));
 
     interpret("int foo = 56;");
-    assertEquals("Should have defined a new variable",
-                 "56",
-                 interpret("foo"));
-    assertEquals("Should have shadowed the value of a static field of a non-static outer class",
-                 "987",
+    assertEquals("Should have defined a new variable", "56", interpret("foo"));
+    assertEquals("Should have shadowed the value of a static field of a non-static outer class", "987",
                  interpret("MonkeyStaticStuff.foo"));
 
-    assertEquals("should be able to call method of outer class",
-                 "-2",
-                 interpret("getNegativeTwo()"));
-    assertEquals("should be able to call method of outer class",
-                 "-2",
-                 interpret("MonkeyTwoDeep.getNegativeTwo()"));
-    assertEquals("should be able to call method of outer class",
-                 "-2",
+    assertEquals("should be able to call method of outer class", "-2", interpret("getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class", "-2", interpret("MonkeyTwoDeep.getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class", "-2",
                  interpret("MonkeyInner.MonkeyTwoDeep.getNegativeTwo()"));
-    assertEquals("should be able to call method of outer class",
-                 "-2",
+    assertEquals("should be able to call method of outer class", "-2",
                  interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.getNegativeTwo()"));
 
     // Shutdown the debugger
-    if (printMessages) {
-      System.out.println("Shutting down...");
-    }
+    if (printMessages) System.out.println("Shutting down...");
+
     synchronized(_notifierLock) {
       _debugger.shutdown();
       _setPendingNotifies(1);  // shutdown
@@ -443,9 +411,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) {
-      System.out.println("Shut down.");
-    }
+    if (printMessages) System.out.println("Shut down.");
+
     _debugger.removeListener(debugListener);
   }
 
