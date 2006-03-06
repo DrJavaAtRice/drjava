@@ -196,11 +196,15 @@ public class JarOptionsDialog extends JFrame {
     _jarSources.setSelected(((f & JAR_SOURCES) != 0));
     _makeExecutable.setSelected(((f & MAKE_EXECUTABLE) != 0));
     
-    if ((_model.getBuildDirectory() == null) || (_model.hasOutOfSyncDocuments())) {
+    boolean outOfSync = true;
+    if (_model.getBuildDirectory() != null) {
+      outOfSync = _model.hasOutOfSyncDocuments();
+    }
+    if ((_model.getBuildDirectory() == null) || (outOfSync)) {
       _jarClasses.setSelected(false);
       _jarClasses.setEnabled(false);
       String s;
-      if ((_model.getBuildDirectory() == null) && (_model.hasOutOfSyncDocuments())) {
+      if ((_model.getBuildDirectory() == null) && (outOfSync)) {
         s = "<html><center>A build directory must be specified in order to jar class files,<br>and the project needs to be compiled.</center></html>";
       }
       else
@@ -536,7 +540,7 @@ public class JarOptionsDialog extends JFrame {
   private void _ok() {
     // Always apply and save settings
     _saveSettings();
-    
+
     File jarOut = _jarFileSelector.getFileFromField();
     if (jarOut == null) {
       JOptionPane.showMessageDialog(JarOptionsDialog.this,
@@ -752,7 +756,8 @@ public class JarOptionsDialog extends JFrame {
   /** Save the settings for this dialog. */
   private boolean _saveSettings() {
     _lastState = new FrameState(this);
-    if (!_model.getCreateJarFile().getName().equals(_jarFileSelector.getFileFromField().getName())) {
+    if ((_model.getCreateJarFile() != null) && 
+        (!_model.getCreateJarFile().getName().equals(_jarFileSelector.getFileFromField().getName()))) {
       _model.setCreateJarFile(_jarFileSelector.getFileFromField());
     }
     int f = 0;
