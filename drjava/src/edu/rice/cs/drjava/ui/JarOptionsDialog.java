@@ -498,7 +498,7 @@ public class JarOptionsDialog extends JFrame {
     fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     fileChooser.setMultiSelectionEnabled(false);
 
-    _jarFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f);
+    _jarFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f, false);
     _jarFileSelector.setFileFilter(new FileFilter() {
       public boolean accept(File f) {
         return f.getName().endsWith(".jar") || f.isDirectory();
@@ -726,12 +726,13 @@ public class JarOptionsDialog extends JFrame {
                          // ignore, we don't interrupt
                        }
                      }
+                     jarFileProcess.waitFor();
                      JOptionPane.showMessageDialog(JarOptionsDialog.this,"Execution of jar file terminated (exit value = "+
                                                    jarFileProcess.exitValue()+")", "Execution terminated.",
                                                    JOptionPane.INFORMATION_MESSAGE);
                    }
-                   catch(IOException ioe) {
-                     JOptionPane.showMessageDialog(JarOptionsDialog.this, "An error occured while running the jar file.", "Error: File Access", JOptionPane.ERROR_MESSAGE);
+                   catch(Exception e) {
+                     JOptionPane.showMessageDialog(JarOptionsDialog.this, "An error occured while running the jar file: \n"+e, "Error", JOptionPane.ERROR_MESSAGE);
                    }
                    return null;
                  }

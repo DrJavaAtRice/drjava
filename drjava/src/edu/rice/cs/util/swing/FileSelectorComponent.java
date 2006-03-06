@@ -73,6 +73,9 @@ public class FileSelectorComponent extends JPanel {
   
   /** The current file */
   protected File _file;
+  
+  /** True if file must exist. */
+  protected boolean _mustExist;
 
   /** Creates a new FileSelectorComponent with default dimensions.
    *
@@ -80,8 +83,9 @@ public class FileSelectorComponent extends JPanel {
    *  @param chooser File chooser to display from the "..." button.
    */
   public FileSelectorComponent(Frame parent, JFileChooser chooser) {
-    this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE);
+    this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE, true);
   }
+
 
   /** Creates a new FileSelectorComponent.
    *
@@ -92,9 +96,23 @@ public class FileSelectorComponent extends JPanel {
    */
   public FileSelectorComponent(Frame parent, JFileChooser chooser,
                                int numCols, float fontSize) {
+    this(parent, chooser, numCols, fontSize, true);
+  }
+  
+  /** Creates a new FileSelectorComponent.
+   *
+   *  @param parent    Parent of this component.
+   *  @param chooser   File chooser to display from the "..." button.
+   *  @param numCols   Number of columns to display in the text field
+   *  @param fontSize  Font size for the text field
+   *  @param mustExist force selection of existing file
+   */
+  public FileSelectorComponent(Frame parent, JFileChooser chooser,
+                               int numCols, float fontSize, boolean mustExist) {
     _parent = parent;
     _chooser = chooser;
     _fileFilter = null;
+    _mustExist = mustExist;
     
     _fileField = new JTextField(numCols) {
       public Dimension getMaximumSize() {
@@ -222,7 +240,7 @@ public class FileSelectorComponent extends JPanel {
     if (!newValue.equals(""))
       newFile = new File(newValue);
     
-    if (newFile != null && !newFile.exists()) {
+    if (newFile != null && _mustExist && !newFile.exists()) {
       JOptionPane.showMessageDialog(_parent,
                                     "The file '"+ newValue + "'\n" +
                                     "is invalid because it does not exist.",
