@@ -383,8 +383,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   protected FileGroupingState 
-    makeProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp) {
-    return new ProjectFileGroupingState(main, bd, wd, project, files, cp);
+    makeProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
+    return new ProjectFileGroupingState(main, bd, wd, project, files, cp, cjf, cjflags);
   }
   
   /** Notifies the project state that the project has been changed. */
@@ -427,6 +427,24 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** @return the class with the project's main method. */
   public File getMainClass() { return _state.getMainClass(); }
+  
+  /** Sets the create jar file of the project. */
+  public void setCreateJarFile(File f) {
+    _state.setCreateJarFile(f);
+    setProjectChanged(true);
+  }
+  
+    /** Return the create jar file for the project. If not in project mode, returns null. */
+  public File getCreateJarFile() { return _state.getCreateJarFile(); }
+  
+  /** Sets the create jar flags of the project. */
+  public void setCreateJarFlags(int f) {
+    _state.setCreateJarFlags(f);
+    setProjectChanged(true);
+  }
+  
+    /** Return the create jar flags for the project. If not in project mode, returns 0. */
+  public int getCreateJarFlags() { return _state.getCreateJarFlags(); }
   
   /** throws UnsupportedOperationException */
   public void junitAll() { 
@@ -498,12 +516,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final File[] projectFiles;
     ClassPathVector _projExtraClassPath;
     private boolean _isProjectChanged = false;
+    File _createJarFile;
+    int _createJarFlags;
     
     //private ArrayList<File> _auxFiles = new ArrayList<File>();
     
     HashSet<String> _projFilePaths = new HashSet<String>();
     
-    ProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp) {
+    ProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
       _mainFile = main;
       _builtDir = bd;
       _workDir = wd;
@@ -513,6 +533,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       try {  for (File file : projectFiles) { _projFilePaths.add(file.getCanonicalPath()); } }
       catch(IOException e) { }
+      
+      _createJarFile = cjf;
+      _createJarFlags = cjflags;
     }
     
     public boolean isProjectActive() { return true; }
@@ -574,6 +597,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getMainClass() { return _mainFile; }
     
     public void setMainClass(File f) { _mainFile = f; }
+    
+    public void setCreateJarFile(File f) { _createJarFile = f; }
+  
+    public File getCreateJarFile() { return _createJarFile; }
+    
+    public void setCreateJarFlags(int f) { _createJarFlags = f; }
+  
+    public int getCreateJarFlags() { return _createJarFlags; }
     
     public boolean isProjectChanged() { return _isProjectChanged; }
     
@@ -666,6 +697,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean inProject(File f) { return false; }
     public File getMainClass() { return null; }
     public void setMainClass(File f) { }
+    public void setCreateJarFile(File f) { }
+    public File getCreateJarFile() { return null; }
+    public void setCreateJarFlags(int f) { }
+    public int getCreateJarFlags() { return 0; }
     public boolean isProjectChanged() { return false; }
     public void setProjectChanged(boolean changed) { /* Do nothing  */  }
     public boolean isAuxiliaryFile(File f) { return false; }
@@ -1149,6 +1184,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     File mainClass = getMainClass();
     if (mainClass != null) builder.setMainClass(mainClass);
     
+    // add create jar file
+    File createJarFile = getCreateJarFile();
+    if (createJarFile != null) builder.setCreateJarFile(createJarFile);
+    
+    int createJarFlags = getCreateJarFlags();
+    if (createJarFlags != 0) builder.setCreateJarFlags(createJarFlags);
+    
     // write to disk
     builder.write();
     
@@ -1157,7 +1199,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     synchronized(_auxiliaryFiles) { _auxiliaryFiles = auxFileList;  }
     
-    setFileGroupingState(makeProjectFileGroupingState(mainClass, bd, wd, file, srcFiles, exCp));
+    setFileGroupingState(makeProjectFileGroupingState(mainClass, bd, wd, file, srcFiles, exCp, createJarFile, createJarFlags));
   }
   
   /** Parses the given project file and loads it int the document navigator and resets interactions pane.  
@@ -1182,6 +1224,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final File workDir = ir.getWorkingDirectory();
     final File mainClass = ir.getMainClass();
     final File[] projectClassPaths = ir.getClassPaths();
+    final File createJarFile  = ir.getCreateJarFile();
+    int createJarFlags = ir.getCreateJarFlags();
     
     final String projfilepath = projectFile.getCanonicalPath();
     
@@ -1228,7 +1272,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     ClassPathVector extraClassPaths = new ClassPathVector();
     for (File f : projectClassPaths) { extraClassPaths.add(f); }
     
-    setFileGroupingState(makeProjectFileGroupingState(mainClass, buildDir, workDir, projectFile, srcFiles, extraClassPaths));
+    setFileGroupingState(makeProjectFileGroupingState(mainClass, buildDir, workDir, projectFile, srcFiles, extraClassPaths, createJarFile, createJarFlags));
     
     resetInteractions(getWorkingDirectory());  // Shut down debugger and reset interactions pane in new working directory
     

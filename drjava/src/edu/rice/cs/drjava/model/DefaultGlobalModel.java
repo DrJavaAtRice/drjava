@@ -236,14 +236,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   }
   
   protected FileGroupingState 
-    makeProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp) {
-    return new ProjectFileGroupingState(main, bd, wd, project, files, cp);
+    makeProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
+    return new ProjectFileGroupingState(main, bd, wd, project, files, cp, cjf, cjflags);
   }
   
   class ProjectFileGroupingState extends AbstractGlobalModel.ProjectFileGroupingState {
       
-    ProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp) {
-      super(main, bd, wd, project, files, cp);
+    ProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
+      super(main, bd, wd, project, files, cp, cjf, cjflags);
     }
       
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---

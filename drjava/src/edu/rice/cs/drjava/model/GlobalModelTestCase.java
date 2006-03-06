@@ -45,6 +45,7 @@ import edu.rice.cs.util.text.EditDocumentInterface;
 import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.*;
 
 /**
  * Base class for tests over the {@link GlobalModel}.
@@ -369,6 +370,31 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                  + "\nActual contents of Interactions document:\n"
                  + interactText,
                (contains != -1) == shouldContain);
+  }
+
+  /** Asserts that the text in the Interactions Document matches the given regex. */
+  protected void assertInteractionsMatches(String regex) throws EditDocumentException {
+    _assertInteractionMatchesHelper(regex, true);
+  }
+
+  /** Asserts that the text in the Interactions Document does NOT match the given regex. */
+  protected void assertInteractionsDoesNotMatch(String regex)
+    throws EditDocumentException {
+    _assertInteractionMatchesHelper(regex, false);
+  }
+  
+  private void _assertInteractionMatchesHelper(String regex, boolean shouldMatch)
+    throws EditDocumentException {
+
+    String interactText = getInteractionsText();
+    boolean matches = Pattern.compile(regex, Pattern.MULTILINE|Pattern.DOTALL).matcher(interactText).matches();
+    assertTrue("Interactions document should " +
+               (shouldMatch ? "" : "not ")
+                 + "match:\n"
+                 + regex
+                 + "\nActual contents of Interactions document:\n"
+                 + interactText,
+               matches == shouldMatch);
   }
 
   /** Returns the current contents of the interactions document */

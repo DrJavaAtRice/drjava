@@ -76,4 +76,10 @@ public interface ProjectFileIR {
   
   /** @return the directory that is the root of the project source tree. */
   public File getProjectRoot();
+  
+  /** @return the output file used in the "Create Jar" dialog. */
+  public File getCreateJarFile();
+  
+  /** @return the flags used in the "Create Jar" dialog. */
+  public int getCreateJarFlags();
 }

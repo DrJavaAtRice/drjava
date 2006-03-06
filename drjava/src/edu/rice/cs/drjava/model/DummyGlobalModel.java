@@ -452,6 +452,22 @@ public class DummyGlobalModel implements GlobalModel {
   public File getMainClass() {
      throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
   }
+  
+  public void setCreateJarFile(File f) {
+     throw new UnsupportedOperationException("Tried to call setCreateJarFile on a Dummy");
+  }
+  
+  public File getCreateJarFile() {
+     throw new UnsupportedOperationException("Tried to call getCreateJarFile on a Dummy");
+  }
+  public void setCreateJarFlags(int f) {
+     throw new UnsupportedOperationException("Tried to call setCreateJarFlags on a Dummy");
+  }
+  
+  public int getCreateJarFlags() {
+     throw new UnsupportedOperationException("Tried to call getCreateJarFlags on a Dummy");
+  }
+
 
   public boolean inProject(File f) {
      throw new UnsupportedOperationException("Tried to call inProject on a Dummy");

@@ -67,6 +67,10 @@ public class ProjectProfile implements ProjectFileIR {
   private File _projRoot = null;
   private File _projectFile;
   
+  private File _createJarFile = null;
+  
+  private int _createJarFlags = 0;
+  
   /* Constructors */
   
   public ProjectProfile(String fileName) { _projectFile = new File(fileName); }
@@ -100,6 +104,12 @@ public class ProjectProfile implements ProjectFileIR {
   /** @return the directory that is the root of the project source tree. */
   public File getProjectRoot() { return _projRoot; }
   
+  /** @return the output file used in the "Create Jar" dialog. */
+  public File getCreateJarFile() { return _createJarFile; }
+  
+  /** @return the output file used in the "Create Jar" dialog. */
+  public int getCreateJarFlags() { return _createJarFlags; }
+  
   /** Public setters, modifiers */
   
   public void addSourceFile(DocFile df) { _sourceFiles.add(df); }
@@ -126,6 +136,8 @@ public class ProjectProfile implements ProjectFileIR {
   public void setWorkingDirectory(File dir) { _workDir = FileOps.validate(dir); }
   public void setMainClass(File main) { _mainClass = main;  }
   public void setProjectRoot(File root) { _projRoot = root; }
+  public void setCreateJarFile(File createJarFile) { _createJarFile = createJarFile; }
+  public void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
   
   /** This method writes what information has been passed to this builder so far to disk in s-expression format. */
   public void write() throws IOException {
@@ -201,6 +213,20 @@ public class ProjectProfile implements ProjectFileIR {
       fw.write(")");
     }
     else fw.write("\n;; no main class");
+    
+    // write the create jar file
+    if (_createJarFile != null) {
+      fw.write("\n(create-jar-file");
+      fw.write("\n" + encodeFile(_createJarFile, "  ", true));
+      fw.write(")");
+    }
+    else fw.write("\n;; no create jar file");
+    
+    // write the create jar flags
+    if (_createJarFlags != 0) {
+      fw.write("\n(create-jar-flags " + _createJarFlags + ")");
+    }
+    else fw.write("\n;; no create jar flags");
     
     fw.close();
   }

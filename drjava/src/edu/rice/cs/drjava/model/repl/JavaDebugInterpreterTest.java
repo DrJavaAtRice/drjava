@@ -283,13 +283,13 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
               "}\n" +
               "catch(Exception e) { System.out.println(MonkeyThreeDeep.this.threeDeepFoo);}\n" +
               "finally {System.out.println(MonkeyInner.MonkeyTwoDeep.this.twoDeepFoo);}");
-    assertInteractionsDoesNotContain("18");
-    assertInteractionsDoesNotContain("6");
-    assertInteractionsContains("8" + _newLine + "13" + _newLine);
+    assertInteractionsDoesNotMatch(".*^18$.*");
+    assertInteractionsDoesNotMatch(".*^6$.*");
+    assertInteractionsMatches(".*^8" + _newLine + "13$.*");
 
     // Tests that the debugger has the correct notion of
     interpret("foo");
-    assertInteractionsContains("6");
+    assertInteractionsMatches(".*^6$.*");
 
     interpret("foo = 123");
     assertEquals("foo should have been modified" , "123", interpret("MonkeyStuff.this.foo"));

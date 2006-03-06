@@ -395,6 +395,18 @@ public interface GlobalModel extends ILoadDocuments {
   
   /** Return the main file for the project If not in project mode, returns null. */
   public File getMainClass();
+
+  /** Sets the create jar file of the project. */
+  public void setCreateJarFile(File f);
+  
+  /** Return the create jar file for the project. If not in project mode, returns null. */
+  public File getCreateJarFile();
+
+  /** Sets the create jar flags of the project. */
+  public void setCreateJarFlags(int f);
+  
+  /** Return the create jar file for the project. If not in project mode, returns 0. */
+  public int getCreateJarFlags();
   
   /** Returns true the given file is in the current project file. */
   public boolean inProject(File f);

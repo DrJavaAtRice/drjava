@@ -345,11 +345,34 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
+  /** The jar options dialog. */
+  private JarOptionsDialog _jarOptionsDialog;
+  
+  /** Initializes the "Create Jar from Project dialog. */
+  private void initJarOptionsDialog() {
+    if (_jarOptionsDialog==null) {
+      _jarOptionsDialog = new JarOptionsDialog(MainFrame.this);
+      if (DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue()) {
+        _jarOptionsDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STATE));
+      }      
+    }
+  }
+  
+  /** Reset the position of the "Create Jar from Project" dialog. */
+  public void resetJarOptionsDialogPosition() {
+    initJarOptionsDialog();
+    _jarOptionsDialog.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_JAROPTIONS_STATE, "default");
+    }
+  }
+  
   private Action _jarProjectAction = new AbstractAction("Create Jar File from Project") {
     public void actionPerformed(ActionEvent ae) {
       new SwingWorker() {
         public Object construct() {
-          new JarOptionsDialog(MainFrame.this, MainFrame.this.getModel()).setVisible(true);
+          initJarOptionsDialog();
+          _jarOptionsDialog.setVisible(true);
           return null;
         }
       }.start();
@@ -3034,6 +3057,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     else {
       // Reset to defaults to restore pristine behavior.
       config.setSetting(DIALOG_GOTOFILE_STATE, DIALOG_GOTOFILE_STATE.getDefault());
+    }
+    
+    // "Create Jar from Project" dialog position and size.   
+    if ((DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue())
+          && (_jarOptionsDialog != null) && (_jarOptionsDialog.getFrameState() != null)) {
+      config.setSetting(DIALOG_JAROPTIONS_STATE, (_jarOptionsDialog.getFrameState().toString()));
+    }
+    else {
+      // Reset to defaults to restore pristine behavior.
+      config.setSetting(DIALOG_JAROPTIONS_STATE, DIALOG_JAROPTIONS_STATE.getDefault());
     }
     
     // Panel heights.
@@ -6542,4 +6575,3 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 }
-

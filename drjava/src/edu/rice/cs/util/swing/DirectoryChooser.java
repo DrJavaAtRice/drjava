@@ -878,6 +878,8 @@ public class DirectoryChooser extends JPanel {
     JDialog dialog = createDialog();
     _approveButton.setEnabled(enable && DirectoryChooser.this.isEnabled());
     _newFolderButton.setEnabled(enable && DirectoryChooser.this.isEnabled());
+    dialog.setLocation((int)(_owner.getLocation().getX() + (_owner.getSize().width - dialog.getSize().width)/2),
+                       (int)(_owner.getLocation().getY() + (_owner.getSize().height - dialog.getSize().height)/2));
     dialog.setVisible(true);
     int res = _finalResult;
     _finalResult = ERROR_OPTION;

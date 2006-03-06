@@ -96,6 +96,18 @@ public interface FileGroupingState {
    */
   public void setMainClass(File f);
   
+  /** Sets the create jar file of the project. */
+  public void setCreateJarFile(File f);
+  
+  /** Return the create jar file for the project. If not in project mode, returns 0. */
+  public File getCreateJarFile();
+  
+  /** Sets the create jar flags of the project. */
+  public void setCreateJarFlags(int f);
+  
+  /** Return the create jar flags for the project. If not in project mode, returns null. */
+  public int getCreateJarFlags();
+  
   /** Return all files saved as source files in the project file. If not in project mode, returns null. */
   public File[] getProjectFiles();
   

@@ -34,73 +34,243 @@
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.jar.JarBuilder;
 import edu.rice.cs.util.jar.ManifestWriter;
+import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.swing.DirectorySelectorStringComponent;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.newjvm.ExecJVM;
+import edu.rice.cs.util.StreamRedirectThread;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-// import java.io.FileFilter;  // Collides with javax.swing.filechooser.FileFilter
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
+import java.util.NoSuchElementException;
 
-public class JarOptionsDialog extends JDialog {
-
-  private JCheckBox _jarClasses;
+public class JarOptionsDialog extends JFrame {
+  /** Class to save the frame state, i.e. location. */
+  public static class FrameState {
+    private Point _loc;
+    public FrameState(Point l) {
+      _loc = l;
+    }
+    public FrameState(String s) {
+      StringTokenizer tok = new StringTokenizer(s);
+      try {
+        int x = Integer.valueOf(tok.nextToken());
+        int y = Integer.valueOf(tok.nextToken());
+        _loc = new Point(x, y);
+      }
+      catch(NoSuchElementException nsee) {
+        throw new IllegalArgumentException("Wrong FrameState string: " + nsee);
+      }
+      catch(NumberFormatException nfe) {
+        throw new IllegalArgumentException("Wrong FrameState string: " + nfe);
+      }
+    }
+    public FrameState(JarOptionsDialog comp) {
+      _loc = comp.getLocation();
+    }
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      sb.append(_loc.x);
+      sb.append(' ');
+      sb.append(_loc.y);
+      return sb.toString();
+    }
+    public Point getLocation() { return _loc; }
+  }
+  
+  /** Bitflags for default selection. */
+  public static final int JAR_CLASSES = 1;
+  public static final int JAR_SOURCES = 2;
+  public static final int MAKE_EXECUTABLE = 4;
+  
+  /** Determines whether class files should be jar-ed. */
+  private JCheckBox _jarClasses; 
+  /** Determines whether source files should be jar-ed. */
   private JCheckBox _jarSources;
+  /** Determines whether the jar file should be made executable. */
   private JCheckBox _makeExecutable;
+  /** File selector for the jar output file. */
   private FileSelectorComponent _jarFileSelector;
-  private JTextField _mainClassField;
+  /** Text field for the main class. */
+  private DirectorySelectorStringComponent _mainClassField;
+  /** Label for main class. */
+  private JLabel _mainClassLabel;
+  /** OK button. */
   private JButton _okButton;
+  /** Cancel button. */
   private JButton _cancelButton;
-  private SwingWorker _worker = null;
+  /** Main frame. */
+  private MainFrame _mainFrame;
+  /** Model. */
+  private GlobalModel _model;
+  /** Label explaining why classes can't be jar-ed. */
+  private JLabel _cantJarClassesLabel;
+  /** Root of the chooser. */
+  private File _rootFile;
+  /** Processing dialog. */
+  private ProcessingFrame _processingFrame;  
+  /** Last frame state. It can be stored and restored. */
+  private FrameState _lastState = null;
 
-  private SingleDisplayModel _model;
+  
+  /** Returns the last state of the frame, i.e. the location and dimension.
+   *  @return frame state
+   */
+  public FrameState getFrameState() { return _lastState; }
+  
+  /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
+   *  @param state, or null to reset
+   */
+  public void setFrameState(FrameState ds) {
+    _lastState = ds;
+    if (_lastState!=null) {
+      setLocation(_lastState.getLocation());
+      validate();
+    }
+  }  
+  
+  /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
+   *  @param state, or null to reset
+   */
+  public void setFrameState(String s) {
+    try { _lastState = new FrameState(s); }
+    catch(IllegalArgumentException e) { _lastState = null; }
+    if (_lastState!=null) {
+      setLocation(_lastState.getLocation());
+    }
+    else {
+      setLocationRelativeTo(_mainFrame);
+    }
+    validate();
+  }
+  
+  /** Frame that gets displayed when the program is processing data. */
+  private static class ProcessingFrame extends JFrame {
+    private Component _parent;
+    public ProcessingFrame(Component parent, String title, String label) {
+      super(title);
+      _parent = parent;
+      setSize(350, 150);
+      setLocationRelativeTo(parent);
+      JLabel waitLabel = new JLabel(label, SwingConstants.CENTER);
+      getRootPane().setLayout(new BorderLayout());
+      getRootPane().add(waitLabel, BorderLayout.CENTER);
+    }
+    public void setVisible(boolean vis) {
+      setLocation((int)(_parent.getLocation().getX() + (_parent.getSize().width - getSize().width)/2),
+                  (int)(_parent.getLocation().getY() + (_parent.getSize().height - getSize().height)/2));
+      super.setVisible(vis);
+    }
+  }
 
   /** Create a configuration diaglog
    *  @param mf the instance of mainframe to query into the project
    */
-  public JarOptionsDialog(JFrame parent, SingleDisplayModel mf) {
-    super(parent, "Jar Options", false);
-    _model = mf;
+  public JarOptionsDialog(MainFrame mf) {
+    super("Create Jar File from Project");
+    _mainFrame = mf;
+    _model = mf.getModel();
     initComponents();
-
-    _loadSettings();
   }
 
   /** Load the initial state from the previous files or with defaults. */
   private void _loadSettings() {
-    // TODO: This is temporary, we would like to save the defaults in the project or something
-    //       like that
-    if (_model.getBuildDirectory() == null) {
+    int f = _model.getCreateJarFlags();
+    _jarClasses.setSelected(((f & JAR_CLASSES) != 0));
+    _jarSources.setSelected(((f & JAR_SOURCES) != 0));
+    _makeExecutable.setSelected(((f & MAKE_EXECUTABLE) != 0));
+    
+    if ((_model.getBuildDirectory() == null) || (_model.hasOutOfSyncDocuments())) {
       _jarClasses.setSelected(false);
       _jarClasses.setEnabled(false);
-      _jarClasses.setToolTipText("A build directory must be specified in order to jar classes");
-      _disableExecutable();
-      _makeExecutable.setSelected(false);
+      String s;
+      if ((_model.getBuildDirectory() == null) && (_model.hasOutOfSyncDocuments())) {
+        s = "<html><center>A build directory must be specified in order to jar class files,<br>and the project needs to be compiled.</center></html>";
+      }
+      else
+      if (_model.getBuildDirectory() == null) {
+        s = "<html>A build directory must be specified in order to jar class files.</html>";
+      }
+      else {
+        s = "<html>The project needs to be compiled.</html>";
+      }
+      _cantJarClassesLabel.setText(s);
     }
     else {
-      _jarClasses.setSelected(true);
-      _enableExecutable();
-      _makeExecutable.setSelected(false);
+      _jarClasses.setEnabled(true);
+      _cantJarClassesLabel.setText(" ");
+
+      // Main class
+      _rootFile = _model.getBuildDirectory();
+      try {
+        _rootFile = _rootFile.getCanonicalFile();
+      } catch(IOException e) { }
+    
+      DirectoryChooser chooser = new DirectoryChooser(this,_rootFile);
+      chooser.setDialogTitle("Select Main Class");
+      chooser.setTopMessage("Select the main class for the executable jar file:");
+      chooser.setApproveButtonText("Select");
+      FileFilter filter = new FileFilter() {
+        public boolean accept(File f) {
+          String name = f.getName();
+          return  !f.isDirectory() && name.endsWith(".class");
+        }
+        public String getDescription() {
+          return "Class Files (*.class)";
+        }
+      };
+      chooser.addChoosableFileFilter(filter);
+      chooser.addFileFilter(filter);
+      chooser.setShowFiles(true);
+      chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
+      _mainClassField.setFileChooser(chooser);
+      
+      final File mc = _model.getMainClass();
+      if (mc == null) {
+        _mainClassField.setText("");
+      }
+      else {
+        try {
+          OpenDefinitionsDocument mcDoc = _model.getDocumentForFile(mc);
+          _mainClassField.setText(mcDoc.getQualifiedClassName());
+        }
+        catch(IOException ioe) {
+          _mainClassField.setText("");
+        }
+        catch(edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException e) {
+          _mainClassField.setText("");
+        }
+      }
     }
-    _jarSources.setSelected(false);
+    
+    if (_model.getCreateJarFile()!=null) {
+      _jarFileSelector.setFileField(_model.getCreateJarFile());
+    }
+    
+    _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected());
+    _setEnableExecutable(_jarClasses.isSelected());
   }
 
   /** Build the dialog. */
   private void initComponents() {
     JPanel main = _makePanel();
     super.getContentPane().setLayout(new BorderLayout());
-
     super.getContentPane().add(main, BorderLayout.NORTH);
 
     Action okAction = new AbstractAction("OK") {
@@ -129,6 +299,10 @@ public class JarOptionsDialog extends JDialog {
     super.getContentPane().add(bottom, BorderLayout.SOUTH);
     super.setResizable(false);
     pack();
+    
+    setLocationRelativeTo(_mainFrame);
+
+    _processingFrame = new ProcessingFrame(this, "Creating Jar File", "Processing, please wait.");
   }
 
   /** Make the options panel. 
@@ -151,13 +325,21 @@ public class JarOptionsDialog extends JDialog {
     c.insets = labelInsets;
     c.fill = GridBagConstraints.HORIZONTAL;
 
-    JPanel dirPanel = _makeClassesPanel();
-    gridbag.setConstraints(dirPanel, c);
-    panel.add(dirPanel);
+    JPanel jarClassesPanel = _makeClassesPanel();
+    gridbag.setConstraints(jarClassesPanel, c);
+    panel.add(jarClassesPanel);
 
+    _cantJarClassesLabel = new JLabel("<html><center>A build directory must be specified in order to jar class files,<br>and the project needs to be compiled.</center></html>",  SwingConstants.CENTER);
+    c.gridx = 0;
+    c.anchor = GridBagConstraints.WEST;
+    c.fill = GridBagConstraints.HORIZONTAL;
+    gridbag.setConstraints(jarClassesPanel, c);
+    panel.add(_cantJarClassesLabel);
+    
     // Jar Sources
     _jarSources = new JCheckBox(new AbstractAction("Jar source files") {
       public void actionPerformed(ActionEvent e) {
+        _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected());
       }
     });
 
@@ -170,7 +352,6 @@ public class JarOptionsDialog extends JDialog {
 
     // Output file
     c.gridx = 0;
-    c.weightx = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
     JLabel label = new JLabel("Jar File");
@@ -183,7 +364,7 @@ public class JarOptionsDialog extends JDialog {
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = labelInsets;
 
-    JPanel jarFilePanel = _jarFileSelector();
+    JPanel jarFilePanel = _makeJarFileSelector();
     gridbag.setConstraints(jarFilePanel, c);
     panel.add(jarFilePanel);
 
@@ -195,40 +376,37 @@ public class JarOptionsDialog extends JDialog {
    */
   private JPanel _makeClassesPanel() {
     JPanel panel = new JPanel();
+    GridBagConstraints gridBagConstraints;
     panel.setLayout(new GridBagLayout());
+    
     _jarClasses = new JCheckBox(new AbstractAction("Jar classes") {
       public void actionPerformed(ActionEvent e) {
         _toggleClassOptions();
+        _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected());
       }
     });
-    _makeExecutable = new JCheckBox(new AbstractAction("Make executable") {
-      public void actionPerformed(ActionEvent e) {
-        _toggleMainClass();
-      }
-    });
-    GridBagConstraints gridBagConstraints;
-
-    JPanel addclasses = new JPanel();
-
-    panel.setLayout(new java.awt.GridBagLayout());
-
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     panel.add(_jarClasses, gridBagConstraints);
 
+    JPanel addclasses = new JPanel();
     addclasses.setLayout(new GridBagLayout());
-
+    _makeExecutable = new JCheckBox(new AbstractAction("Make executable") {
+      public void actionPerformed(ActionEvent e) {
+        _toggleMainClass();        
+      }
+    });
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     addclasses.add(_makeExecutable, gridBagConstraints);
-
+    
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new Insets(0, 20, 0, 0);
-    addclasses.add(_mainFileSelector(), gridBagConstraints);
+    addclasses.add(_makeMainClassSelectorPanel(), gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -239,30 +417,84 @@ public class JarOptionsDialog extends JDialog {
 
     return panel;
   }
-
-  /** Create a file selector to select the main class file
-   *  @return The JPanel that contains the selector
+ 
+  /** Make the panel that lets you select the jar's main class.
+   *  @return the panel containing the label and the selector for the main class.
    */
-  private JTextField _mainFileSelector() {
-    // JTextFields aren't resized so I add the width
-    _mainClassField = new JTextField(18);
-    _mainClassField.setToolTipText("The fully qualified class name of the main document to be run");
-    return _mainClassField;
+  private JPanel _makeMainClassSelectorPanel() {
+    _mainClassField = new DirectorySelectorStringComponent(this,null,20,12f) {
+        public File convertStringToFile(String s) {
+          s = s.trim().replace('.', java.io.File.separatorChar) + ".class";
+          if (s.equals("")) {
+            return null;
+          }
+          else {
+            return new File(_rootFile, s);
+          }
+        }
+        public String convertFileToString(File f) {
+          if (f==null) {
+            return "";
+          }
+          else {
+            try {
+              String s = edu.rice.cs.util.FileOps.makeRelativeTo(f, _rootFile).toString();
+              s = s.substring(0, s.lastIndexOf(".class"));
+              s = s.replace(java.io.File.separatorChar, '.').replace('$', '.');
+              int pos = 0;
+              boolean ok = true;
+              while((pos=s.indexOf('.', pos)) >= 0) {
+                if ((s.length()<=pos+1) || (Character.isDigit(s.charAt(pos+1)))) {
+                  ok = false;
+                  break;
+                }
+                ++pos;
+              }
+              if (ok) {
+                return s;
+              }
+              else {
+                return "";
+              }
+            }
+            catch(Exception e) {
+              return "";
+            }
+          }
+        }
+    };
+    _mainClassField.getTextField().getDocument().addDocumentListener(new DocumentListener() {
+      public void insertUpdate(DocumentEvent e) {
+        _okButton.setEnabled(true);
+      }
+      public void removeUpdate(DocumentEvent e) {
+        _okButton.setEnabled(true);
+      }
+      public void changedUpdate(DocumentEvent e) {
+        _okButton.setEnabled(true);
+      }
+    });
+    JPanel p = new JPanel();
+    p.setLayout(new BorderLayout());
+    _mainClassLabel = new JLabel("Main class:  ");
+    _mainClassLabel.setLabelFor(_mainClassField);
+    p.add(_mainClassLabel, BorderLayout.WEST);
+    p.add(_mainClassField, BorderLayout.CENTER);
+    return p;
   }
 
-  /**
-   * Create a file selector to select the output jar file
-   *
-   * @return The JPanel that contains the selector
+
+  /** Create a file selector to select the output jar file
+   *  @return The JPanel that contains the selector
    */
-  private JPanel _jarFileSelector() {
+  private JPanel _makeJarFileSelector() {
     JFileChooser fileChooser = new JFileChooser(_model.getBuildDirectory());
     fileChooser.setDialogTitle("Select Jar Output File");
     fileChooser.setApproveButtonText("Select");
     fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     fileChooser.setMultiSelectionEnabled(false);
 
-    _jarFileSelector = new FileSelectorComponent(null, fileChooser, 20, 12f);
+    _jarFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f);
     _jarFileSelector.setFileFilter(new FileFilter() {
       public boolean accept(File f) {
         return f.getName().endsWith(".jar") || f.isDirectory();
@@ -277,62 +509,56 @@ public class JarOptionsDialog extends JDialog {
     return _jarFileSelector;
   }
 
-  /**
-   * Modifies state for when the executable check box is selected
-   */
-  private void _enableExecutable() {
-    _makeExecutable.setEnabled(true);
-    if (_makeExecutable.isSelected())
-      _mainClassField.setEnabled(true);
-    else
-      _mainClassField.setEnabled(false);
+  /** Modifies state for when the executable check box is selected */
+  private void _setEnableExecutable(boolean b) {
+    _makeExecutable.setEnabled(b);
+    _toggleMainClass();
   }
-
-  /**
-   * Modifies state for when the executable check box is not selected
-   */
-  private void _disableExecutable() {
-    _makeExecutable.setEnabled(false);
-    _mainClassField.setEnabled(false);
-  }
-
-  /**
-   * Method to run when the jar class file is selected
-   */
+ 
+  /** Method to run when the jar class file is selected */
   private void _toggleClassOptions() {
-    if (_jarClasses.isSelected())
-      _enableExecutable();
-    else
-      _disableExecutable();
+    _setEnableExecutable(_jarClasses.isSelected());
   }
 
-  /**
-   * Method to call when the 'Make Executable' check box is clicked.
-   */
+  /** Method to call when the 'Make Executable' check box is clicked. */
   private void _toggleMainClass() {
-    if (_makeExecutable.isSelected())
-      _mainClassField.setEnabled(true);
-    else
-      _mainClassField.setEnabled(false);
+    _mainClassField.setEnabled(_makeExecutable.isSelected() && _jarClasses.isSelected());
+    _mainClassLabel.setEnabled(_makeExecutable.isSelected() && _jarClasses.isSelected());
   }
 
-  /**
-   * Method that handels the Cancel button
-   */
+  /** Method that handels the Cancel button */
   private void _cancel() {
-    if ( _worker != null ) {
-      _worker.interrupt();
-    }
+    _lastState = new FrameState(this);
     this.setVisible(false);
   }
 
-  /**
-   * Do the Jar
-   */
+  /** Do the Jar. */
   private void _ok() {
     // Always apply and save settings
     _saveSettings();
-    _worker = new SwingWorker() {
+    
+    File jarOut = _jarFileSelector.getFileFromField();
+    if (jarOut == null) {
+      JOptionPane.showMessageDialog(JarOptionsDialog.this,
+                                    "You must specify an output file",
+                                    "Error: No File Specified",
+                                    JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+    else if (jarOut.exists()) {
+      if (JOptionPane.showConfirmDialog(JarOptionsDialog.this,
+                                        "Are you sure you want to overwrite the file '" + jarOut.getPath() + "'?",
+                                        "Overwrite file?",
+                                        JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+        // I want to focus back to the dialog
+        return;
+      }
+    }
+
+    setEnabled(false);
+    _processingFrame.setVisible(true);
+    SwingWorker worker = new SwingWorker() {
+      boolean _success = false;
 
       /**
        * Takes input of a file which is a directory and compresses all the class files in it
@@ -365,11 +591,11 @@ public class JarOptionsDialog extends JDialog {
       /**
        * Takes the model and the jar and writes all the sources to the jar
        *
-       * @param model the SingleDisplayModel that the files are to come out of
+       * @param model the GlobalModel that the files are to come out of
        * @param jar   the JarBuilder that the data should be written to
        * @return true on success, false on failure
        */
-      private boolean jarSources(SingleDisplayModel model, JarBuilder jar) {
+      private boolean jarSources(GlobalModel model, JarBuilder jar) {
         List<OpenDefinitionsDocument> srcs = model.getProjectDocuments();
 
         Iterator<OpenDefinitionsDocument> iter = srcs.iterator();
@@ -408,137 +634,147 @@ public class JarOptionsDialog extends JDialog {
        * @return null
        */
       public Object construct() {
+        try {
           File jarOut = _jarFileSelector.getFileFromField();
-          if (jarOut == null) {
-            JOptionPane.showMessageDialog(JarOptionsDialog.this,
-                    "You must specify an output file",
-                    "Error: No File Specified",
-                    JOptionPane.OK_OPTION);
-            return null;
+          if (!jarOut.exists()) {
+            jarOut.createNewFile();
           }
-          else if (jarOut.exists()) {
-            if (JOptionPane.showConfirmDialog(JarOptionsDialog.this,
-                    "Are you sure you want to overwrite the file '" + jarOut.getPath() + "'?",
-                    "Overwrite file?",
-                    JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
-              // I want to focus back to the dialog
-              return null;
+          
+          if (_jarClasses.isSelected() && _jarSources.isSelected()) {
+            JarBuilder mainJar = null;
+            if (_makeExecutable.isSelected()) {
+              ManifestWriter mw = new ManifestWriter();
+              mw.setMainClass(_mainClassField.getText());
+              mainJar = new JarBuilder(jarOut, mw.getManifest());
             }
+            else {
+              mainJar = new JarBuilder(jarOut);
+            }
+            
+            jarBuildDirectory(_model.getBuildDirectory(), mainJar);
+            
+            File sourceJarFile = File.createTempFile(_model.getBuildDirectory().getName(), ".jar");
+            JarBuilder sourceJar = new JarBuilder(sourceJarFile);
+            jarSources(_model, sourceJar);
+            sourceJar.close();
+            mainJar.addFile(sourceJarFile, "", "source.jar");
+            
+            mainJar.close();
+            sourceJarFile.delete();
+          }
+          else if (_jarClasses.isSelected()) {
+            JarBuilder jb;
+            if (_makeExecutable.isSelected()) {
+              ManifestWriter mw = new ManifestWriter();
+              mw.setMainClass(_mainClassField.getText());
+              jb = new JarBuilder(jarOut, mw.getManifest());
+            }
+            else {
+              jb = new JarBuilder(jarOut);
+            }
+            jarBuildDirectory(_model.getBuildDirectory(), jb);
+            jb.close();
           }
           else {
-            try {
-              jarOut.createNewFile();
-            }
-            catch (IOException e) {
-              JarOptionsDialog.this.setVisible(false);
-              e.printStackTrace();
-              throw new UnexpectedException(e);
-            }
+            JarBuilder jb = new JarBuilder(jarOut);
+            jarSources(_model, jb);
+            jb.close();
           }
-
-          // If the classes are going to be bundled, we compile them
-          if (_jarClasses.isSelected()) {
-            try {
-              _model.getCompilerModel().compileAll();
-            }
-            catch (IOException e) {
-              return null;
-            }
+          _success = true;
+        }
+        catch (Exception e) {
+          e.printStackTrace();
+        }
+        return null;
+      }
+      public void finished() {
+        _processingFrame.setVisible(false);
+        JarOptionsDialog.this.setEnabled(true);
+        if (_success) {
+          if (_makeExecutable.isSelected()) {
+             Object[] options = { "OK", "Run" };
+             int res = JOptionPane.showOptionDialog(JarOptionsDialog.this, "Jar file successfully written to '"+_jarFileSelector.getFileFromField().getName()+"'",
+                                                    "Jar Creation Successful", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                                                    null, options, options[0]);
+             JarOptionsDialog.this.setVisible(false);
+             if (1==res) {
+               SwingWorker jarRunner = new SwingWorker() {
+                 public Object construct() {
+                   try {
+                     Process jarFileProcess = ExecJVM.runJVM(_mainClassField.getText(), // mainClass
+                                                             new String[] {}, // classParams,
+                                                             new String[] { _jarFileSelector.getFileFromField().getAbsolutePath() }, // classPath,
+                                                             new String[] {}, // jvmParams,
+                                                             _jarFileSelector.getFileFromField().getParentFile());
+                                                             
+                     StreamRedirectThread errThread = new StreamRedirectThread("error reader", jarFileProcess.getErrorStream(), System.err);
+                     StreamRedirectThread outThread = new StreamRedirectThread("output reader", jarFileProcess.getInputStream(), System.out);
+                     errThread.start();
+                     outThread.start();
+                     boolean notDead = true;
+                     while(notDead) {
+                       try {
+                         errThread.join();
+                         outThread.join();
+                         notDead = false;
+                       }
+                       catch (InterruptedException exc) {
+                         // ignore, we don't interrupt
+                       }
+                     }
+                     JOptionPane.showMessageDialog(JarOptionsDialog.this,"Execution of jar file terminated (exit value = "+
+                                                   jarFileProcess.exitValue()+")", "Execution terminated.",
+                                                   JOptionPane.INFORMATION_MESSAGE);
+                   }
+                   catch(IOException ioe) {
+                     JOptionPane.showMessageDialog(JarOptionsDialog.this, "An error occured while running the jar file.", "Error: File Access", JOptionPane.ERROR_MESSAGE);
+                   }
+                   return null;
+                 }
+               };
+               jarRunner.start();
+             }
           }
-
-          if (_jarClasses.isSelected() && _jarSources.isSelected()) {
-            try {
-              File classJarFile = File.createTempFile(_model.getBuildDirectory().getName(), ".jar");
-              JarBuilder classJar = new JarBuilder(classJarFile);
-              jarBuildDirectory(_model.getBuildDirectory(), classJar);
-              classJar.close();
-
-              JarBuilder mainJar = null;
-              if (_makeExecutable.isSelected()) {
-                ManifestWriter mw = new ManifestWriter();
-                mw.addClassPath(_model.getBuildDirectory().getName() + ".jar");
-                mw.setMainClass(_mainClassField.getText());
-                mainJar = new JarBuilder(jarOut, mw.getManifest());
-              }
-              else {
-                ManifestWriter mw = new ManifestWriter();
-                mw.addClassPath(_model.getBuildDirectory().getName() + ".jar");
-                mainJar = new JarBuilder(jarOut, mw.getManifest());
-              }
-              mainJar.addFile(classJarFile, "", _model.getBuildDirectory().getName() + ".jar");
-
-              jarSources(_model, mainJar);
-
-              mainJar.close();
-              classJarFile.delete();
-              JarOptionsDialog.this.setVisible(false);
-            }
-            catch (IOException e) {
-              // There was a file access error of some sort
-              JOptionPane.showConfirmDialog(JarOptionsDialog.this, "An error occured while writing the jar file. This could be becasue the file that you are writing to or the file you are reading from could not be opened.", "Error: File Access", JOptionPane.OK_OPTION);
-            }
-          }
-          else if (_jarClasses.isSelected() && !_jarSources.isSelected()) {
-            try {
-              JarBuilder jb;
-              if (_makeExecutable.isSelected()) {
-                ManifestWriter mw = new ManifestWriter();
-                mw.setMainClass(_mainClassField.getText());
-                jb = new JarBuilder(jarOut, mw.getManifest());
-              }
-              else {
-                jb = new JarBuilder(jarOut);
-              }
-              jarBuildDirectory(_model.getBuildDirectory(), jb);
-              jb.close();
-              JarOptionsDialog.this.setVisible(false);
-            }
-            catch (IOException e) {
-              // There was a file access error of some sort
-              JOptionPane.showConfirmDialog(JarOptionsDialog.this, "An error occured while writing the jar file. This could be becasue the file that you are writing to or the file you are reading from could not be opened.", "Error: File Access", JOptionPane.OK_OPTION);
-            }
-          }
-          else if (!_jarClasses.isSelected() && _jarSources.isSelected()) {
-            try {
-              JarBuilder jb = new JarBuilder(jarOut);
-              jarSources(_model, jb);
-              jb.close();
-              JarOptionsDialog.this.setVisible(false);
-            }
-            catch (IOException e) {
-              // There was a file access error of some sort
-              JOptionPane.showConfirmDialog(JarOptionsDialog.this, "An error occured while writing the jar file. This could be becasue the file that you are writing to or the file you are reading from could not be opened.", "Error: File Access", JOptionPane.OK_OPTION);
-            }
-          }
-          else if (!_jarClasses.isSelected() && !_jarSources.isSelected()) {
+          else {
+            JOptionPane.showMessageDialog(JarOptionsDialog.this,"Jar file successfully written to '"+_jarFileSelector.getFileFromField().getName()+"'", "Jar Creation Successful", JOptionPane.INFORMATION_MESSAGE);
             JarOptionsDialog.this.setVisible(false);
-            // We aren't jarring anything
-            return null;
           }
-          JOptionPane.showConfirmDialog(JarOptionsDialog.this,"Jar file successfully written to '"+jarOut.getName()+"'", "Jar Creation Successful", JOptionPane.OK_CANCEL_OPTION);
-          return null;
+        }
+        else {
+          JOptionPane.showMessageDialog(JarOptionsDialog.this, "An error occured while creating the jar file. This could be because the file that you are writing to or the file you are reading from could not be opened.", "Error: File Access", JOptionPane.ERROR_MESSAGE);
+          JarOptionsDialog.this.setVisible(false);
+        }
       }
     };
-    _worker.start();
+    worker.start();
   }
 
-  /**
-   * Save the settings for this dialog
-   */
+  /** Save the settings for this dialog. */
   private boolean _saveSettings() {
-    // TODO: We want to save these settings in the project
+    _lastState = new FrameState(this);
+    if (!_model.getCreateJarFile().getName().equals(_jarFileSelector.getFileFromField().getName())) {
+      _model.setCreateJarFile(_jarFileSelector.getFileFromField());
+    }
+    int f = 0;
+    if (_jarClasses.isSelected()) f |= JAR_CLASSES;
+    if (_jarSources.isSelected()) f |= JAR_SOURCES;
+    if (_makeExecutable.isSelected()) f |= MAKE_EXECUTABLE;
+    if (f!=_model.getCreateJarFlags()) {
+      _model.setCreateJarFlags(f);
+    }
     return true;
   }
 
+  /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
+    validate();
+    _mainFrame.setEnabled(!vis);
     if (vis) {
-//    suggested from zaq@nosi.com, to keep the frame on the screen!
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      Dimension frameSize = this.getSize();
-      this.setLocation((screenSize.width - frameSize.width) / 2,
-              (screenSize.height - frameSize.height) / 2);
+      ProcessingFrame pf = new ProcessingFrame(this, "Checking class files", "Processing, please wait.");
+      pf.setVisible(true);
+      _loadSettings();
+      pf.setVisible(false);
     }
     super.setVisible(vis);
-  }
-  
+  }  
 }

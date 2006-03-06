@@ -1050,4 +1050,11 @@ public interface OptionConstants {
    */
   public static final BooleanOption DIALOG_GOTOFILE_FULLY_QUALIFIED =
     new BooleanOption("dialog.gotofile.fully.qualified", Boolean.FALSE);
+
+  /** The last state of the "Create Jar from Project " dialog. */
+  public static final StringOption DIALOG_JAROPTIONS_STATE = new StringOption("dialog.jaroptions.state", "default");
+
+  /** Whether to save and restore window size and position at startup/shutdown. */
+  public static final BooleanOption DIALOG_JAROPTIONS_STORE_POSITION =
+    new BooleanOption("dialog.jaroptions.store.position", Boolean.TRUE);
 }

@@ -162,6 +162,22 @@ public class ProjectFileParser {
         pfir.setProjectRoot(fList.get(0));
       }
     }
+    else if (name.compareToIgnoreCase("create-jar-file") == 0) {
+      List<DocFile> fList = exp.getRest().accept(flv);
+      if (fList.size() > 1) {
+        throw new PrivateProjectException("Cannot have more than one \"create jar\" file");
+      }
+      else if (fList.size() == 0) {
+        pfir.setCreateJarFile(null);
+      }
+      else {
+        pfir.setCreateJarFile(fList.get(0));
+      }
+    }
+    else if (name.compareToIgnoreCase("create-jar-flags") == 0) {
+      Integer i = exp.getRest().accept(NumberVisitor.ONLY);
+      pfir.setCreateJarFlags(i);
+    }
   } 
   
   /** Parses out the labeled node (a non-empty list) into a DocFile. The node must have the "file" label on it.
@@ -341,7 +357,30 @@ public class ProjectFileParser {
     }
   };
   
-  
+  /** Retrieves the number of a node.  The node should either be a list with its first element being a number atom, 
+   *  or a number atom itself.
+   */
+  private static class NumberVisitor implements SExpVisitor<Integer> {
+    public static final NumberVisitor ONLY = new NumberVisitor();
+    private NumberVisitor() { }
+    
+    public Integer forEmpty(Empty e) {
+      throw new PrivateProjectException("Found an empty node, expected an integer");
+    }
+    public Integer forCons(Cons c) {
+      return c.getFirst().accept(this);
+    }
+    public Integer forBoolAtom(BoolAtom b) {
+      throw new PrivateProjectException("Found a boolean, expected an integer");
+    }
+    public Integer forNumberAtom(NumberAtom n) {
+      return n.intValue();
+    }
+    public Integer forTextAtom(TextAtom t) {
+      throw new PrivateProjectException("Found a string, expected an integer");
+    }
+  };
+    
   /** Concrete implementation of the ProjectFileIR which is the interface through which DrJava
    *  access info stored in a project file
    */
@@ -354,6 +393,8 @@ public class ProjectFileParser {
     List<? extends File> _classPaths;
     File _mainClass;
     File _projRoot;
+    File _createJarFile;
+    int _createJarFlags;
     
     /** Starts the project file IR off with all its default values. */
     public ProjectFileIRImpl() {
@@ -365,6 +406,7 @@ public class ProjectFileParser {
       _workDir = null;
       _mainClass = null;
       _projRoot = null;
+      _createJarFlags = 0;
     }
     
     /** @return an array full of all the source files in this project file. */
@@ -391,7 +433,13 @@ public class ProjectFileParser {
     /** @return the file pointing to the directory that all source files are relative to. */
     public File getProjectRoot() { return _projRoot; }
     
-    /* Package Protected Setter Methods */
+    /** @return the output file used in the "Create Jar" dialog. */
+    public File getCreateJarFile() { return _createJarFile; }
+    
+    /** @return the flags used in the "Create Jar" dialog. */
+    public int getCreateJarFlags() { return _createJarFlags; }
+
+  /* Package Protected Setter Methods */
     
     void setSourceFiles(List<DocFile> src) { _src = src; }
     void setAuxiliaryFiles(List<DocFile> aux) { _aux = aux; }
@@ -401,6 +449,8 @@ public class ProjectFileParser {
     void setWorkingDirectory(File dir) { _workDir = dir; }
     void setMainClass(File main) { _mainClass = main; }
     void setProjectRoot(File root) { _projRoot = root; }
+    void setCreateJarFile(File createJarFile) { _createJarFile = createJarFile; }
+    void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
   } // end ProjectFileIRImpl class
 
   

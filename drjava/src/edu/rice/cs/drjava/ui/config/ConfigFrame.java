@@ -457,6 +457,14 @@ public class ConfigFrame extends JFrame {
                                                   "Display Fully-Qualified Class Names in \"Go to File\" Dialog", this,
                                                   "Whether to also display fully-qualified class names in the \"Go to File\" dialog.\n"+
                                                          "Enabling this option on network drives might cause the dialog to display after a slight delay."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_JAROPTIONS_STORE_POSITION,
+                                                  "Save \"Create Jar File from Project\" Dialog Position", this,
+                                                  "Whether to save and restore the position of the \"Create Jar File from Project\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _mainFrame.resetJarOptionsDialogPosition();
+      }
+    }, "Reset \"Create Jar File from Project\" Dialog Position", this, "This resets the dialog position to its default values."));
     panel.displayComponents();
   }
 
