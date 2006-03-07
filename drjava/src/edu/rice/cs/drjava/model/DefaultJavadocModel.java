@@ -184,8 +184,6 @@ public class DefaultJavadocModel implements JavadocModel {
       public void run() { _javadocAllWorker(destDirF, saver, classPath); }
     }.start();
   }
-    
-   
 
   /**
    * This method handles most of the logic of performing a Javadoc operation,
@@ -478,15 +476,9 @@ public class DefaultJavadocModel implements JavadocModel {
     }
   }
 
-  /**
-   * This function invokes javadoc.  It should work for all versions of Java
-   * from 1.3 on, assuming com.sun.tools.javadoc is in the classpath (generally
-   * found in the same tools.jar that is needed for using the debugger).
-   * [ed. this line is no longer true] - OR javadoc is in the path.
-   *
-   * TODO: this should be moved to the platform specific area of the code base
-   * when we develop the 1.4 javadoc process, which doesn't need to start a new
-   * JVM.  (Of course, it can be a fallback for 1.4 also.)
+  /** This function invokes javadoc.  It should work for all versions of Java from 1.3 on, assuming 
+   *  com.sun.tools.javadoc is in the classpath (located in the same tools.jar archive as the compiler
+   *  and debugging framework
    *
    * @param args the command-line arguments for Javadoc
    * @param classpath an array of classpath elements to use in the Javadoc JVM

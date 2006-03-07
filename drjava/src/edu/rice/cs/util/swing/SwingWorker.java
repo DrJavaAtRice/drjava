@@ -84,20 +84,15 @@ public abstract class SwingWorker {
    */
   public void finished() { }
 
-  /**
-   * A new method that interrupts the worker thread.  Call this method
-   * to force the worker to stop what it's doing.
-   */
+  /** A new method that interrupts the worker thread.  Call this method to force the worker to stop what it's doing. */
   public void interrupt() {
     Thread t = _threadVar.get();
     if (t != null) t.interrupt();
     _threadVar.clear();
   }
 
-  /**
-   * Return the value created by the <code>construct</code> method.
-   * Returns null if either the constructing thread or the current
-   * thread was interrupted before a value was produced.
+  /** Return the value created by the <code>construct</code> method.  Returns null if either the constructing thread 
+   *  or the current thread was interrupted before a value was produced.
    *
    * @return the value created by the <code>construct</code> method
    */

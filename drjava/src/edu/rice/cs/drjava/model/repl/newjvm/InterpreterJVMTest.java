@@ -57,7 +57,7 @@ import java.util.Hashtable;
  */
 public final class InterpreterJVMTest extends DrJavaTestCase {
   private InterpreterJVM jvm = InterpreterJVM.ONLY;
-  private Hashtable<String,InterpreterData> _debugInterpreters;
+  private Hashtable<String, InterpreterData> _debugInterpreters;
   private JavaInterpreter _interpreter1;
   private JavaInterpreter _interpreter2;
   private JavaInterpreter _interpreter3;

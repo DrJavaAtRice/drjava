@@ -145,14 +145,12 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     }
   }
 
-  /**
-   * Given a field, looks at enclosing classes until it finds
-   * one that contains the field. It returns the ObjectFieldAccess
-   * that represents the field.
-   * @param field the name of the field
-   * @param context the context
-   * @return the ObjectFieldAccess that represents the field or null
-   * if it cannot find the field in any enclosing class.
+  /** Given a field, looks at enclosing classes until it finds one that contains the field. It returns the 
+   *  ObjectFieldAccess that represents the field.
+   *  @param field the name of the field
+   *  @param context the context
+   *  @return the ObjectFieldAccess that represents the field or null if it cannot find the field in any enclosing
+   *  class.
    */
   protected ObjectFieldAccess _getObjectFieldAccessForField(String field, Context context) {
     AbstractTypeChecker tc = makeTypeChecker(context);

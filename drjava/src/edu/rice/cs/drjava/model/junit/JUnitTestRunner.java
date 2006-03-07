@@ -83,11 +83,11 @@ public class JUnitTestRunner extends TestRunner {
     // Reset all bookkeeping
     _errorCount = 0;
     _failureCount = 0;
-    _jmc.testSuiteStarted(suite.countTestCases());
 
     // Run the test
     _result = createTestResult();
     _result.addListener(this);
+    _jmc.testSuiteStarted(suite.countTestCases());
 //    long startTime = System.currentTimeMillis();
     suite.run(_result);
 //    long endTime = System.currentTimeMillis();

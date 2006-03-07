@@ -38,7 +38,6 @@ import java.io.File;
 import java.io.IOException;
 
 /** Test functions of the single display model.
- *
  *  @version $Id$
  */
 public class SingleDisplayModelTest extends GlobalModelTestCase {

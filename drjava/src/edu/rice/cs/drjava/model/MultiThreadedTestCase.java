@@ -106,45 +106,36 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
    * main class, i.e. if an assertion fails in a thread that is not the main thread, the unit test will not fail!
    */
   private static class ExceptionHandler implements java.lang.Thread.UncaughtExceptionHandler {
-    /**
-     * Stored throwable, or null if nothing stored.
-     */
+    
+    /** Stored throwable, or null if nothing stored. */
     private Throwable _e = null;
     
-    /**
-     * Stored thread that threw, or null if none.
-     */
+    /** Stored thread that threw or null if none. */
     private java.lang.Thread _t = null;
     
-    /**
-     * Thread that spawns the other threads.
-     */
+    /**  Thread that spawns the other threads. */
     private java.lang.Thread _mainThread = java.lang.Thread.currentThread();
     
-    /**
-     * Gets called if an uncaught exception occurs in a thread.
-     * @param t the thread
-     * @param e the uncaught exception
+    /** Gets called if an uncaught exception occurs in a thread.
+     *  @param t the thread
+     *  @param e the uncaught exception
      */
     public void uncaughtException(java.lang.Thread t, Throwable e) {
       _t = t;
       _e = e;
       if (_mainThread != null) {
+        System.out.println("Uncaught Exception in spawned thread within a MultiThreadedTestCase:\n" + e);
         _mainThread.interrupt();
       }
     }
     
-    /**
-     * Reset the stored exception and thread.
-     */
+    /** Reset the stored exception and thread. */
     public void reset() {
       _t = null;
       _e = null;
     }
     
-    /**
-     * Rethrow the exception, if one was stored.
-     */
+    /** Rethrow the exception, if one was stored. */
     public void rethrow() {
       if (exceptionOccurred()) {
         if (_e instanceof Error) {

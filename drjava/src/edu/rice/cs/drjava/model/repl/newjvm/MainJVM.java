@@ -424,11 +424,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param numTests The number of tests in the suite to be run.
    */
   public void testSuiteStarted(int numTests) throws RemoteException {
+    _slaveJVMUsed = true;
     _junitModel.testSuiteStarted(numTests);
   }
   
-  /** Called when a particular test is started.
-   *  Forwards from the other JVM to the local JUnit model.
+  /** Called when a particular test is started.  Forwards from the slave JVM to the local JUnit model.
    *  @param testName The name of the test being started.
    */
   public void testStarted(String testName) throws RemoteException {
@@ -439,11 +439,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Called when a particular test has ended. Forwards from the other JVM to the local JUnit model.
    *  @param testName The name of the test that has ended.
    *  @param wasSuccessful Whether the test passed or not.
-   *  @param causedError If not successful, whether the test caused an error
-   *  or simply failed.
+   *  @param causedError If not successful, whether the test caused an error or simply failed.
    */
-  public void testEnded(String testName, boolean wasSuccessful, boolean causedError)
-    throws RemoteException {
+  public void testEnded(String testName, boolean wasSuccessful, boolean causedError) throws RemoteException {
     _junitModel.testEnded(testName, wasSuccessful, causedError);
   }
   

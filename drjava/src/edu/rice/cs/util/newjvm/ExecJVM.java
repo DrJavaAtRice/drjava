@@ -53,15 +53,12 @@ public final class ExecJVM {
 
   private ExecJVM() { }
 
-  /**
-   * Runs a new JVM.
-   *
-   * @param mainClass Class to run
-   * @param classParams Parameters to pass to the main class
-   * @param classPath Array of items to put in classpath of new JVM
-   * @param jvmParams Array of additional command-line parameters to pass to JVM
-   *
-   * @return {@link Process} object corresponding to the executed JVM
+  /** Runs a new JVM.
+   *  @param mainClass Class to run
+   *  @param classParams Parameters to pass to the main class
+   *  @param classPath Array of items to put in classpath of new JVM
+   *  @param jvmParams Array of additional command-line parameters to pass to JVM
+   *  @return {@link Process} object corresponding to the executed JVM
    */
   public static Process runJVM(String mainClass, String[] classParams, String[] classPath, String[] jvmParams, File workDir)
     throws IOException {
@@ -109,9 +106,7 @@ public final class ExecJVM {
     return _runJVM(mainClass, classParams, jvmWithCP, workDir);
   }
 
-  /**
-   * Runs a new JVM, propogating the present classpath.
-   * It does change the entries of the current class path to global paths, though.
+  /** Runs a new JVM, propagating the present classpath.  It changes the entries in the class path to absolute form.
    *
    * @param mainClass Class to run
    * @param classParams Parameters to pass to the main class
@@ -125,8 +120,7 @@ public final class ExecJVM {
     return runJVM(mainClass, classParams, cp, jvmParams, workDir);
   }
 
-  /** Runs a new JVM, propogating the present classpath.
-   *
+  /** Runs a new JVM, propagating the present classpath.
    *  @param mainClass Class to run
    *  @param classParams Parameters to pass to the main class
    *  @return {@link Process} object corresponding to the executed JVM

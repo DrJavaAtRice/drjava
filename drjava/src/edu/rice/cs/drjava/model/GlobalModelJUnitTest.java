@@ -45,9 +45,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.junit.*;
 
-/**
- * A test on the GlobalModel for JUnit testing.
- *
+/** A test of Junit testing support in the GlobalModel.
  * @version $Id$
  */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
@@ -172,7 +170,6 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    return  new TestSuite(GlobalModelJUnitTest.class);
 //  }
   
-
   /** Tests that a JUnit file with no errors is reported to have no errors. */
   public void testNoJUnitErrors() throws Exception {
     if (printMessages) System.out.println("----testNoJUnitErrors-----");
@@ -391,6 +388,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
         junitStartCount++;
       }
       public void junitSuiteStarted(int numTests) {
+//        Utilities.show("junitSuiteStarted called");
         assertEquals("should run 1 test", 1, numTests);
         junitSuiteStartedCount++;
         // kill the infinite test once the tests have started; use SwingUtilities.invokeLater to ensure that
@@ -437,11 +435,12 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     _logJUnitStart();
     try {
+//      Utilities.show("startJUnit being called");
       doc.startJUnit();
       _waitJUnitDone();
       fail("slave JVM should throw an exception because testing is interrupted by resetting interactions");
     }
-    catch (UnexpectedException e) { }
+    catch (UnexpectedException e) { /* Expected behavior for this test */ }
     
     if (printMessages) System.out.println("after test");
     listener2.assertJUnitStartCount(1);

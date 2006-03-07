@@ -559,24 +559,20 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  /**
-   * Sets the interpreter to allow access to private members.
-   */
+  /** Sets the interpreter to allow access to private members. */
   public void setPrivateAccessible(boolean allow) {
     Interpreter active = _activeInterpreter.getInterpreter();
     if (active instanceof JavaInterpreter) {
       ((JavaInterpreter)active).setPrivateAccessible(allow);
     }
-  }
-  
+  } 
   
   // ---------- JUnit methods ----------
-  /**
-   * Sets up a JUnit test suite in the Interpreter JVM and finds
-   * which classes are really TestCases classes (by loading them)
-   * @param classNames the class names to run in a test
-   * @param files the associated file
-   * @return the class names that are actually test cases
+  /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCases classes (by 
+   *  loading them)
+   *  @param classNames the class names to run in a test
+   *  @param files the associated file
+   *  @return the class names that are actually test cases
    */
   public List<String> findTestClasses(List<String> classNames, List<File> files)
     throws RemoteException {
@@ -584,9 +580,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     return _junitTestManager.findTestClasses(classNames, files);
   }
   
-  /**
-   * Runs the JUnit test suite already cached in the Interpreter JVM.
-   * @return false if no test suite is cached; true otherwise
+  /** Runs the JUnit test suite already cached in the Interpreter JVM.
+   *  @return false if no test suite is cached; true otherwise
    */
   public boolean runTestSuite() throws RemoteException {
     // new ScrollableDialog(null, "InterpreterJVM.runTestSuite() called!", "", "").show();
@@ -615,9 +610,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  /**
-   * Notifies that a suite of tests has started running.
-   * @param numTests The number of tests in the suite to be run.
+  /** Notifies that a suite of tests has started running.
+   *  @param numTests The number of tests in the suite to be run.
    */
   public void testSuiteStarted(int numTests) {
     try {
@@ -629,9 +623,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  /**
-   * Notifies that a particular test has started.
-   * @param testName The name of the test being started.
+  /** Notifies that a particular test has started.
+   *  @param testName The name of the test being started.
    */
   public void testStarted(String testName) {
     try {
@@ -643,12 +636,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  /**
-   * Notifies that a particular test has ended.
-   * @param testName The name of the test that has ended.
-   * @param wasSuccessful Whether the test passed or not.
-   * @param causedError If not successful, whether the test caused an error
-   *  or simply failed.
+  /** Notifies that a particular test has ended.
+   *  @param testName The name of the test that has ended.
+   *  @param wasSuccessful Whether the test passed or not.
+   *  @param causedError If not successful, whether the test caused an error or simply failed.
    */
   public void testEnded(String testName, boolean wasSuccessful, boolean causedError) {
     try {
@@ -660,9 +651,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  /**
-   * Notifies that a full suite of tests has finished running.
-   * @param errors The array of errors from all failed tests in the suite.
+  /** Notifies that a full suite of tests has finished running.
+   *  @param errors The array of errors from all failed tests in the suite.
    */
   public void testSuiteEnded(JUnitError[] errors) {
     try {
@@ -674,10 +664,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  /**
-   * Called when the JUnitTestManager wants to open a file that is not currently open.
-   * @param className the name of the class for which we want to find the file
-   * @return the file associated with the given class
+  /** Called when the JUnitTestManager wants to open a file that is not currently open.
+   *  @param className the name of the class for which we want to find the file
+   *  @return the file associated with the given class
    */
   public File getFileForClassName(String className) {
     try {
@@ -698,9 +687,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   // ALL functions regarding classpath
   //////////////////////////////////////////////////////////////
   
-  /**
-   * Adds a classpath to the given interpreter.
-   * @param interpreter the interpreter
+  /** Adds a classpath to the given interpreter.
+   *  @param interpreter the interpreter
    */
   protected void _updateInterpreterClassPath(JavaInterpreter interpreter) {
     List<ClassPathEntry> locpe = classPathManager.getProjectCP();
@@ -728,12 +716,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       interpreter.addExtraClassPath(e.getEntry());
     }
 }
-  /**
-   * Adds the given path to the classpath shared by ALL Java interpreters.
-   * This method <b>cannot</b> take multiple paths separated by
-   * a path separator; it must be called separately for each path.
-   * Only unique paths are added.
-   * @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple
+   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
+   *  @param s Entry to add to the accumulated classpath
    */
   public void addExtraClassPath(URL s) {
     //_dialog("add classpath: " + s);
@@ -990,14 +975,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     return ret;
   } 
-  
 }
 
-
-/**
- * Bookkeeping class to maintain meta information about each interpreter,
- * such as whether it is currently in progress.
- */
+/** Bookkeeping class to maintain information about each interpreter, such as whether it is currently in progress. */
 class InterpreterData {
   protected final Interpreter _interpreter;
   protected boolean _inProgress;

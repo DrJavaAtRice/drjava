@@ -104,18 +104,12 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
       public void run() {
 //        PreventExitSecurityManager.activate();
         while (true) {
-          try {
-            Thread.sleep(CHECK_MAIN_VM_ALIVE_MINUTES*60*1000);
-          }
-          catch (InterruptedException ie) {
-          }
+          try { Thread.sleep(CHECK_MAIN_VM_ALIVE_MINUTES*60*1000); }
+          catch (InterruptedException ie) { }
 
-          try {
-            master.checkStillAlive();
-          }
+          try { master.checkStillAlive(); }
           catch (RemoteException re) {
-            // not there anymore. quit!
-            quit();
+            quit(); // not there anymore. quit!
           }
         }
       }

@@ -42,36 +42,34 @@ public class CompletionMonitorTest extends TestCase {
     private static class ThreadInterrupter {
       
       private Object _lock = new Object();
-        
+      
       private int _timeout;
       private boolean _targetComplete;
       
       private Thread _target;
-	
+      
       private Thread _interrupter = new Thread() {
         public void run() {
-	    synchronized(_lock) {
-          try {
-            // This is an 'if' rather than a 'while'
-            // because we do not want to wait beyond
-            // _timeout milliseconds if the target
-            // fails to complete
-
+          synchronized(_lock) {
+            try {
+              // This is an 'if' rather than a 'while'
+              // because we do not want to wait beyond
+              // _timeout milliseconds if the target
+              // fails to complete
+              
               if (!_targetComplete) {
                 _lock.wait(_timeout);
               }
-          }
-          catch(InterruptedException e) {
-            // Do nothing if interrupted. simply go to the finally block
-          }
-          finally {
-            // This code may be called due to the timeout on the wait
-            // or by an interruption by the target thread.
-            if(!_targetComplete) {
-              _target.interrupt();
+            }
+            catch(InterruptedException e) {
+              // Do nothing if interrupted. simply go to the finally block
+            }
+            finally {
+              // This code may be called due to the timeout on the wait
+              // or by an interruption by the target thread.
+              if(!_targetComplete)  _target.interrupt();
             }
           }
-	    }
         }
       };
       
@@ -95,9 +93,9 @@ public class CompletionMonitorTest extends TestCase {
       
       public void targetCompleted() {
         synchronized(_lock) {
-	  _targetComplete = true;
+   _targetComplete = true;
           _lock.notify();
-	}
+ }
       }
     }
 }
