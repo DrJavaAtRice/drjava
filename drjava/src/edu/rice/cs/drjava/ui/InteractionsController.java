@@ -36,8 +36,11 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import javax.swing.border.Border;
 
@@ -46,6 +49,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.DefaultStyledDocument;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -56,6 +60,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import java.io.File;
+
+import java.util.EventListener;
+import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -72,6 +79,8 @@ import edu.rice.cs.util.swing.InputBox;
 import edu.rice.cs.util.swing.PopupConsole;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.CompletionMonitor;
+import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.UnexpectedException;
 
 /** This class installs listeners and actions between an InteractionsDocument in the model and an InteractionsPane 
@@ -81,6 +90,10 @@ import edu.rice.cs.util.UnexpectedException;
  *  @version $Id$
  */
 public class InteractionsController extends AbstractConsoleController {
+  
+  private static final String INPUT_ENTERED_NAME = "Input Entered";
+  private static final String INSERT_NEWLINE_NAME = "Insert Newline";
+  
   /** InteractionsModel to handle interpretation. */
   private InteractionsModel _model;
 
@@ -93,12 +106,120 @@ public class InteractionsController extends AbstractConsoleController {
   /** Style to use for debug messages. */
   private final SimpleAttributeSet _debugStyle;
 
-  PopupConsole _popupConsole;
+  /** Lambda used to input text into the embedded System.in input box */
+  private Lambda<String, String> _insertTextCommand;
   
-  /** Listens for input requests from System.in displaying an input box as needed. */
-  private InputListener _inputListener = new InputListener() {
-    public String getConsoleInput() { return _popupConsole.getConsoleInput(); }
+  /** 
+   * Runnable command used to force the System.in input to complete <p>
+   *
+   * <b>NOTE:</b> This command must be executed on swing's event handling thread.
+   */
+  private Runnable _inputCompletionCommand;
+    
+  /** 
+   * A lock used to ensure that the _insertTextCommand and 
+   * _inputCompletionCommand are set synchronously
+   */
+  private Object _consoleInputCommandLock = new Object();
+  
+  /** Default implementation of the insert text command */
+  private static final Lambda<String, String> _defaultInsertTextCommand = 
+    new Lambda<String,String>() {
+      public String apply(String input) {
+        throw new UnsupportedOperationException("Cannot insert text. There is no console input in progress");
+      }
+    };
+  
+  /** Default implementation of the input completion command */
+  private static final Runnable _defaultInputCompletionCommand = 
+    new Runnable() {
+      public void run() {
+        // Do nothing
+      }    
+    };
+  
+  /** Listens for input requests from System.in, displaying an input box as needed. */
+  protected InputListener _inputListener = new InputListener() {
+    public String getConsoleInput() {
+      
+      final InputBox box = new InputBox();
+      final CompletionMonitor completionMonitor = new CompletionMonitor();
+      
+      Runnable inputCompletionCommand = new Runnable() {
+        public void run() {
+          // Reset the commands to their default inactive state
+          _setConsoleInputCommands(_defaultInputCompletionCommand, _defaultInsertTextCommand);
+          
+          box.dissableInputs();
+                    
+          completionMonitor.set();
+          
+          // Move the cursor back to the end of the interactions pane
+          _pane.setEditable(true);
+          _pane.setCaretPosition(_doc.getLength());
+          _pane.requestFocus();
+        }
+      };
+      
+      Lambda<String,String> insertTextCommand = box.makeInsertTextCommand();
+      
+      box.setInputCompletionCommand(inputCompletionCommand);
+      
+      _setConsoleInputCommands(inputCompletionCommand, insertTextCommand);
+      
+      // Embed the input box into the interactions pane.
+      // This operation must be performed in the UI thread
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {       
+          
+          _pane.setEditable(true);
+          
+          int pos = _doc.getPositionBeforePrompt();
+          _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
+           
+          javax.swing.text.MutableAttributeSet inputAttributes = _pane.getInputAttributes();
+          inputAttributes.removeAttributes(inputAttributes);
+          StyleConstants.setComponent(inputAttributes, box);
+          try {
+            DefaultStyledDocument.ElementSpec[] specs = new DefaultStyledDocument.ElementSpec[]{ 
+              new DefaultStyledDocument.ElementSpec(inputAttributes, DefaultStyledDocument.ElementSpec.ContentType, "[component]".toCharArray(), 0, 11)
+            };
+            
+            _pane.getStyledDocument().insertString(pos, "[component]", inputAttributes);
+          }
+          catch(BadLocationException e) {
+            completionMonitor.set();
+            return;
+          }
+          finally {
+            inputAttributes.removeAttributes(inputAttributes);
+          }
+          
+          _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
+          
+          box.setVisible(true);
+          box.requestFocus();
+
+          _pane.setEditable(false);
+
+          System.out.println("Finished embedding");
+        }
+      });
+      fireConsoleInputStarted();
+      
+      System.out.println("Before fire console input started");
+      // Wait for the inputCompletionCommand to be invoked
+      completionMonitor.waitOne();
+            
+      String text = box.getText() + "\n";
+      fireConsoleInputCompleted(text);
+      
+      return text;
+    }
   };
+  
+  private Vector<ConsoleStateListener> _consoleStateListeners;
+  
   
   private InteractionsListener _viewListener = new InteractionsListener() {
     public void interactionStarted() { }
@@ -115,9 +236,9 @@ public class InteractionsController extends AbstractConsoleController {
       Utilities.invokeLater(command);
     }
     
-    public void interpreterReady(File wd) { }  
-    public void interpreterResetFailed(Throwable t) { }  
-    public void interpreterExited(int status) { }  
+    public void interpreterReady(File wd) { }
+    public void interpreterResetFailed(Throwable t) { }
+    public void interpreterExited(int status) { }
     public void interpreterChanged(boolean inProgress) { }
     public void interactionIncomplete() { }
   };
@@ -127,8 +248,12 @@ public class InteractionsController extends AbstractConsoleController {
    *  @param adapter InteractionsDJDocument being used by the model's doc
    */
   public InteractionsController(final InteractionsModel model, InteractionsDJDocument adapter) {
-    this(model, adapter, new InteractionsPane(adapter) { 
-      public int getPromptPos() { return model.getDocument().getPromptPos(); }}); 
+    this(model, adapter, 
+         new InteractionsPane(adapter) { 
+           public int getPromptPos() { 
+             return model.getDocument().getPromptPos(); 
+           }
+         }); 
   }
 
   /** Glue together the given model and view.
@@ -153,32 +278,75 @@ public class InteractionsController extends AbstractConsoleController {
 
     _model.setInputListener(_inputListener);
     _model.addListener(_viewListener);
-    _popupConsole = 
-      new PopupConsole(_pane, _doc, _model.getConsoleDocument(), new InputBox(), "Standard Input (System.in)");
-
+    
+    _inputCompletionCommand = _defaultInputCompletionCommand;
+    _insertTextCommand = _defaultInsertTextCommand;
+    _consoleStateListeners = new Vector<ConsoleStateListener>();
+    
     _init();
   }
   
-  /** Gets the input listener for console input requests. */
+  public void addConsoleStateListener(ConsoleStateListener listener) {
+    _consoleStateListeners.add(listener);
+  }
+  
+  public void removeConsoleStateListener(ConsoleStateListener listener) {
+    _consoleStateListeners.remove(listener);
+  }
+  
+  private void fireConsoleInputStarted() {
+    for(ConsoleStateListener listener : _consoleStateListeners) {
+      listener.consoleInputStarted(this);
+    }
+  }
+  
+  private void fireConsoleInputCompleted(String text) {
+    for(ConsoleStateListener listener : _consoleStateListeners) {
+      listener.consoleInputCompleted(text, this);
+    }
+  }
+  
+  /** 
+   * Gets the input listener for console input requests.
+   * @return the input listener for console input requests.
+   */
   public InputListener getInputListener() { return _inputListener; }
 
-  /** Notifies the inputEnteredAction. Called by DefaultGlobalModel when reset is called so that this lock is 
-   *  released. */
-  public void notifyInputEnteredAction() { _popupConsole.interruptConsole(); }
+  /** 
+   * Forces console input to complete without the user hitting <Enter>. 
+   * Called by MainFrame when reset is called so that this lock is released.
+   * <p>
+   * This method is thread safe.
+   * @throws UnsupportedOperationException If the interactions pane is not receiving console input
+   */
+  public void interruptConsoleInput() {
+    synchronized(_consoleInputCommandLock) {
+      SwingUtilities.invokeLater(_inputCompletionCommand);
+    }
+  }
   
-  /** Inserts text into the console.  This waits for the console to be ready, so it should not be called unless
-   *  a call to getConsoleInput has been made or will be made shortly. */
+  /** 
+   * Inserts text into the console.
+   * <p>
+   * This method is thread safe 
+   * @param input The text to insert into the console input box
+   * @throws UnsupportedOperationException If the the interactions pane is not receiving console input
+   */
   public void insertConsoleText(String input) {
-    try { _popupConsole.waitForConsoleReady(); } 
-    catch (InterruptedException ie) { }
-    _popupConsole.insertConsoleText(input);
+    synchronized(_consoleInputCommandLock) {
+      _insertTextCommand.apply(input);
+    }
   }
 
-  /** Accessor method for the InteractionsModel. */
+  /** 
+   * Accessor method for the InteractionsModel.
+   * @return the interactions model
+   */
   public InteractionsModel getInteractionsModel() {  return _model; }
 
-  /** Allows the abstract superclass to use the document.
-   *  @return the InteractionsDocument
+  /**
+   * Allows the abstract superclass to use the document.
+   * @return the InteractionsDocument
    */
   public ConsoleDocument getConsoleDoc() { return _doc; }
 
@@ -280,6 +448,18 @@ public class InteractionsController extends AbstractConsoleController {
         _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
       }
     });
+  }
+  
+  /**
+   * Sets the commands used to manipulate the console input process.  Since the console
+   * is accessed from multiple threads, all access to these commands is protected by
+   * the _consoleInputCommandLock.
+   */
+  private void _setConsoleInputCommands(Runnable inputCompletionCommand, Lambda<String,String> insertTextCommand) {
+    synchronized(_consoleInputCommandLock) {
+      _insertTextCommand = insertTextCommand;
+      _inputCompletionCommand = inputCompletionCommand;
+    }
   }
 
   // The fields below were made package private for testing purposes.
@@ -460,5 +640,160 @@ public class InteractionsController extends AbstractConsoleController {
       }
     }
   };
+  
 
+  /** A box that can be inserted into the interactions pane for separate input. */
+  private static class InputBox extends JTextArea {
+    private static final int BORDER_WIDTH = 1;
+    private static final int INNER_BUFFER_WIDTH = 3;
+    private static final int OUTER_BUFFER_WIDTH = 2;
+    private Color _bgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
+    private Color _fgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
+    private Color _sysInColor = DrJava.getConfig().getSetting(OptionConstants.SYSTEM_IN_COLOR);
+    private boolean _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS);
+    
+    public InputBox() {
+      setForeground(_sysInColor);
+      setBackground(_bgColor);
+      setCaretColor(_fgColor);
+      setBorder(_createBorder());
+      setLineWrap(true);
+      
+      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
+                                           new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oe) {
+          _fgColor = oe.value;
+          setBorder(_createBorder());
+          setCaretColor(oe.value);
+        }
+      });
+      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
+                                           new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oe) {
+          _bgColor = oe.value;
+          setBorder(_createBorder());
+          setBackground(oe.value);
+        }
+      });
+      DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_IN_COLOR,
+                                           new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oe) {
+          _sysInColor = oe.value;
+          setForeground(oe.value);
+        }
+      });
+      DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS,
+                                           new OptionListener<Boolean>() {
+        public void optionChanged(OptionEvent<Boolean> oce) {
+          _antiAliasText = oce.value.booleanValue();
+          InputBox.this.repaint();
+        }
+      });
+      
+      // Add the input listener for <Shift+Enter>
+      Action newLineAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+           insert("\n", getCaretPosition());
+        }
+      };
+      
+      InputMap im = getInputMap(WHEN_FOCUSED);
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,java.awt.Event.SHIFT_MASK), INSERT_NEWLINE_NAME);
+      
+      ActionMap am = getActionMap();
+      am.put(INSERT_NEWLINE_NAME, newLineAction);
+       
+    }
+        
+    private Border _createBorder() {
+      Border outerouter = BorderFactory.createLineBorder(_bgColor, OUTER_BUFFER_WIDTH);
+      Border outer = BorderFactory.createLineBorder(_fgColor, BORDER_WIDTH);
+      Border inner = BorderFactory.createLineBorder(_bgColor, INNER_BUFFER_WIDTH);
+      Border temp = BorderFactory.createCompoundBorder(outer, inner);
+      return BorderFactory.createCompoundBorder(outerouter, temp);
+    }
+    /** Enable anti-aliased text by overriding paintComponent. */
+    protected void paintComponent(Graphics g) {
+      if (_antiAliasText && g instanceof Graphics2D) {
+        Graphics2D g2d = (Graphics2D)g;
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+      }
+      super.paintComponent(g);
+    }
+    
+    /**
+     * Specifies what to do when the <Enter> key is hit.
+     */
+    public void setInputCompletionCommand(final Runnable command) {
+      InputMap im = getInputMap(WHEN_FOCUSED);
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
+      
+      ActionMap am = getActionMap();
+      am.put(INPUT_ENTERED_NAME, new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+          command.run();
+        }
+      });
+    }
+    
+    /**
+     * Generates a lambda that can be used to insert text into this input box
+     * @return A lambda that inserts the given text into the textbox when applied
+     */
+    public Lambda<String,String> makeInsertTextCommand() {
+      return new Lambda<String, String>() {
+        public String apply(String input) {
+          insert(input, getCaretPosition());
+          return input;
+        }
+      };
+    }
+    
+    /**
+     * Behaves somewhat like setEnable(false) in that it dissables all
+     * input to the text box, but it does not change the appearance of the text.
+     */
+    public void dissableInputs() {
+      setEditable(false);
+      
+      ActionMap am = getActionMap();
+      Action action;
+      
+      action = am.get(INPUT_ENTERED_NAME);
+      if (action != null) {
+        action.setEnabled(false);
+      }
+      
+      action = am.get(INSERT_NEWLINE_NAME);
+      if (action != null) {
+        action.setEnabled(false);
+      }
+      
+      getCaret().setVisible(false);
+    }
+  }
+  
+  /**
+   * A listener interface that allows for others outside the interactions
+   * controller to be notified when the input console is enabled in the
+   * interactions pane.
+   */
+  public interface ConsoleStateListener extends EventListener {
+    
+    /**
+     * Called when the input console is started in the interactions pane 
+     * <p>
+     * This method is called from the thread that initiated the console input
+     */
+    public void consoleInputStarted(InteractionsController c);
+    
+    /**
+     * Called when the console input is complete.
+     * <p>
+     * This method is called from the thread that initiated the console input
+     * @param result The text that was inputted to the console
+     */
+    public void consoleInputCompleted(String result, InteractionsController c);
+  
+  }
 }

@@ -5930,7 +5930,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           // it was possible to get an InputBox in InteractionsController
           // between interpreterResetting and interpreterReady.
           // Fixes bug #917054 "Interactions Reset Bug".
-          _interactionsController.notifyInputEnteredAction();
+          _interactionsController.interruptConsoleInput();
         }
       };
       Utilities.invokeLater(command);

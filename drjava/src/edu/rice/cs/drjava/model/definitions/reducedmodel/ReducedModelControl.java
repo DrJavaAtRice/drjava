@@ -410,6 +410,10 @@ public class ReducedModelControl implements BraceReduction {
 
     while ((curLocation + curLength) < (start + length)) {
       cursor.next();
+      //TODO: figure out why this function is iterating past the end of the collection
+      //when it gets called from the ColoringGlyphPainter after deleting the last character
+      if(cursor.atEnd())
+        break;
       int nextState = cursor.current().getHighlightState();
 
       if (nextState == curState) {

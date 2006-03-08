@@ -47,6 +47,7 @@ import edu.rice.cs.drjava.model.repl.InteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.util.CompletionMonitor;
 
 /** Test functions of InteractionsPane.
  *  @version $Id$
@@ -293,28 +294,35 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   public void testSystemIn() {
     final Object bufLock = new Object();
     final StringBuffer buf = new StringBuffer();
-//    System.err.println("_controller = " + _controller);
+    
+    final CompletionMonitor completionMonitor = new CompletionMonitor();
+    
+    _controller.addConsoleStateListener(new InteractionsController.ConsoleStateListener() {
+      public void consoleInputStarted(InteractionsController c) {
+        completionMonitor.set();
+      }     
+      public void consoleInputCompleted(String text, InteractionsController c) {
+        // do not assert the text here since it won't be called from the testing thread.
+        // It is called on the following thread that calls getConsoleInput()
+      }
+    });
     
     new Thread("Testing System.in") {
       public void run() {
-//        System.err.println("System.in thread running");
-        synchronized(bufLock) { 
-          String s = _controller._popupConsole.getConsoleInput();
-//          System.err.println("s = " + s);
-          buf.append(s); 
+        synchronized(bufLock) {
+          String s = _controller.getInputListener().getConsoleInput();
+          buf.append(s);
         }
       }
     }.start();
     
-//    System.err.println("Waiting For ConsoleReady");
+    // Wait for console input to begin
+    completionMonitor.waitOne();
+        
+    _controller.insertConsoleText("test-text");
+    _controller.interruptConsoleInput();
     
-    try { _controller._popupConsole.waitForConsoleReady(); }
-    catch (InterruptedException ie) { }
-    
-    assertTrue("Console should be ready", _controller._popupConsole.isConsoleReady());
-    
-    _controller._popupConsole.insertConsoleText("test-text");
-    _controller._popupConsole.interruptConsole();
+    // Make sure the buffer 'buf' is updated
     synchronized(bufLock) {
       assertEquals("Should have returned the correct text.", "test-text\n", buf.toString());
     }

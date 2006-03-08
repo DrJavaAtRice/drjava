@@ -130,6 +130,7 @@ public abstract class OptionComponent<T> implements Serializable {
   public void resetToDefault() {
     if (_option != null) {
       setValue(_option.getDefault());
+      notifyChangeListeners();
     }
   }
   
