@@ -201,13 +201,10 @@ public class InteractionsController extends AbstractConsoleController {
           box.requestFocus();
 
           _pane.setEditable(false);
-
-          System.out.println("Finished embedding");
         }
       });
       fireConsoleInputStarted();
       
-      System.out.println("Before fire console input started");
       // Wait for the inputCompletionCommand to be invoked
       completionMonitor.waitOne();
             

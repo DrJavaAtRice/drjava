@@ -79,6 +79,14 @@ public class DefaultFileDisplayManager implements FileDisplayManager {
    */
   public FileDisplay makeFileDisplay(File f) { return new FileDisplay(f, this); }
   
+  /** Creates a file display that displays a file as this manager specifies
+   *  @param parent the parent of the file to display using the display manager
+   *  @param child the name of the child such that <code>new File(parent, child)</code> is 
+   *         the file to be displayed.
+   *  @return the file display object used to display a file's name
+   */
+  public FileDisplay makeFileDisplay(File parent, String child) { return new FileDisplay(parent, child, this); }
+  
   /** Creates a FileDisplay representing a new untitled folder that is yet to be created.
    *  @param parent the parent folder of the new folder
    *  @return the new file display
