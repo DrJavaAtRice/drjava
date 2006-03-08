@@ -80,12 +80,13 @@
   </patternset>
   
   <property name="readable-project-name" value="DrJava" />
-  <property name="jar-filename" value="drjava-15.jar" />
-  <property name="jar-base-filename" value="drjava-base-15.jar" />
+  <property name="jar-15-filename" value="drjava-15.jar" />
+  <property name="jar-base-15-filename" value="drjava-base-15.jar" />
   <property name="jar-14-filename" value="drjava.jar" />
   <property name="jar-base-14-filename" value="drjava-base-14.jar" />
   <property name="jar-main-class" value="edu.rice.cs.drjava.DrJava" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
+  <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
 
   <!-- Relative paths to generated sources.  Note: changes to this list should be mirrorred
        in the "Source-generating Targets" section and the "clean" target. -->
@@ -139,7 +140,7 @@
     <echo message="For this build file to function properly, the following environment " />
     <echo message="variables should be defined:" />
     <echo message="JAVA14_HOME: Home folder of the JDK (or J2SDK) version 1.4" />
-    <echo message="PATH: 'cvs' needs to refer to the CVS executable" />
+    <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
     <echo message="" />
     <echo message="Additionally, Ant must be run under Java 5.0 or later.  If that is " />
     <echo message="not the system default, it may be set for Ant by using JAVA_HOME." />
@@ -220,7 +221,10 @@
     <fail message="The specified target requires Ant to be run under Java 5.0">
       <condition>
         <not>
-          <contains string="${java.version}" substring="1.5." />
+          <or>
+            <contains string="${java.version}" substring="1.5." />
+            <contains string="${java.version}" substring="1.6." />
+          </or>
         </not>
       </condition>
     </fail>
@@ -254,6 +258,10 @@
     <input message="Please enter your CVS user name: " addproperty="cvs-user-name" />
   </target>
   
+  <target name="resolve-svn-user-name">
+    <input message="Please enter your Subversion user name: " addproperty="svn-user-name" />
+  </target>
+  
   <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
        otherwise, the out-of-date target file is deleted (if it exists).  Note that, since
        properties can only be set once, this should happen underneath an "antcall". -->
@@ -280,42 +288,22 @@
     </condition>
   </target>
 
-  <!-- Sets "already-generated" if everything in "generate-dir" is more recent than "generate-sourcefile";
-       otherwise, the target files will be deleted (if they exist), leaving behind an empty
-       directory.  Note that, since properties can only be set once, this should happen underneath an
-       "antcall". -->
+  <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
+       than "generate-sourcefile".  Note that, since properties can only be set once, this 
+       should happen underneath an "antcall". -->
   <target name="check-generate-dir-from-file">
-    <dependset>
-      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
-      <targetfileset dir="${generate-dir}" />
-    </dependset>
-    <!-- We use pathconvert as a hack to find out if dependset did anything -->
-    <pathconvert property="already-generated" pathsep="," setonempty="false">
-      <path>
-        <fileset dir="${basedir}" includes="${generate-dir}/**">
-          <type type="file" />
-        </fileset>
-      </path>
-    </pathconvert>
+    <uptodate property="already-generated" targetfile="${generate-dir}">
+      <srcfiles dir="${generate-sourcefile}" />
+    </uptodate>
   </target>
   
-  <!-- Sets "already-generated" if everything in "generate-dir" is more recent than everything in
-       "generate-sourcedir"; otherwise, the target files will be deleted (if they exist), leaving 
-       behind an empty directory.  Note that, since properties can only be set once, this should 
-       happen underneath an "antcall". -->
+  <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
+       than everything in "generate-sourcedir".  Note that, since properties can only be 
+       set once, this should happen underneath an "antcall". -->
   <target name="check-generate-dir-from-dir">
-    <dependset>
-      <srcfileset dir="${generate-sourcedir}" />
-      <targetfileset dir="${generate-dir}" />
-    </dependset>
-    <!-- We use pathconvert as a hack to find out if dependset did anything -->
-    <pathconvert property="already-generated" pathsep="," setonempty="false">
-      <path>
-        <fileset dir="${basedir}" includes="${generate-dir}/**">
-          <type type="file" />
-        </fileset>
-      </path>
-    </pathconvert>
+    <uptodate property="already-generated" targetfile="${generate-dir}" >
+      <srcfiles dir="${basedir}" includes="lib/dynamicjava.jar" />
+    </uptodate>
   </target>
 
 
@@ -323,8 +311,8 @@
        Build Target
        ************ -->
   
-  <target name="build" depends="test, jar-14" 
-          description="Shortcut for 'test' and 'jar-14'">
+  <target name="build" depends="test-14-in-15, jar-14" 
+          description="Shortcut for 'test-14-in-15' and 'jar-14'">
   </target>
   
 
@@ -347,8 +335,11 @@
   <!-- *******************
        Compilation Targets
        ******************* -->
+       
+  <target name="compile" depends="compile-15" description="Shortcut for 'compile-15'">
+  </target>
   
-  <target name="compile" depends="generate-source, check-rmi-compile, do-compile, rmi-compile, copy-resources, unjar-libs"
+  <target name="compile-15" depends="generate-source, check-rmi-compile, do-compile, rmi-compile, copy-resources, unjar-libs"
           description="Compile all source files (after generating the source)">
   </target>
   
@@ -446,6 +437,29 @@
     </copy>
   </target>
   
+  
+  
+  
+  <target name="check-generate-libs">
+    <fileset dir="${basedir}" includes="lib/dynamicjava.jar" id="libs-to-check"  />
+    <pathconvert pathsep=", " property="listedfiles" refid="libs-to-check" />
+    <echo message="Files: ${libs-to-check}" />
+  
+    <uptodate property="already-generated" targetfile="classes/lib" >
+      <srcfiles refid="libs-to-check" />
+    </uptodate>
+    
+    <echo message="already-generated?: ${already-generated}"/>
+    
+  </target>
+  
+  <target name="update-libs">
+    <touch file="libs/dynamicjava.jar" />
+  </target>
+
+
+
+
   <target name="unjar-libs">
     <antcall target="do-unjar-libs">
       <param name="generate-sourcedir" value="lib" />
@@ -453,7 +467,7 @@
     </antcall>
   </target>
   
-  <target name="do-unjar-libs" depends="check-generate-dir-from-dir" unless="already-generated">
+  <target name="do-unjar-libs" depends="check-generate-libs" unless="already-generated">
     <echo message="Unjarring jar files in the lib directory" />
     <!-- Delete "classes/lib" in case it exists (but is out of date) -->
     <delete dir="classes/lib" />
@@ -464,7 +478,7 @@
     </unjar>
   </target>
   
-  <target name="compile-14" depends="compile, resolve-java14-runtime, resolve-java14-tools"
+  <target name="compile-14" depends="compile-15, resolve-java14-runtime, resolve-java14-tools"
           description="Create 1.4 versions of the classes (after compiling)">
     <!-- Note: This target, in addition to checking 1.4 compatibility, serves to ensure that there are no dependencies
          on test classes or JUnit classes in the base.  If 1.4 compatibility is no longer needed, a similar dependency
@@ -521,10 +535,10 @@
        Testing Targets
        *************** -->
   
-  <target name="test" depends="test-14-in-15" description="Shortcut for 'test-14-in-15'">
+  <target name="test" depends="test-15" description="Shortcut for 'test-15'">
   </target>
   
-  <target name="test-15" depends="compile, assert-15, resolve-java15-tools"
+  <target name="test-15" depends="compile-15, assert-15, resolve-java15-tools"
           description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
     <echo message="Running all 5.0 tests matching '${test-spec}' under Java 5.0" />
     <!-- TODO: Experiment with performance under different forkmodes -->
@@ -585,10 +599,10 @@
   </target>
 
 
-  <target name="run" depends="run-14-in-15" description="Shortcut for 'run-14-in-15'">
+  <target name="run" depends="run-15" description="Shortcut for 'run-15'">
   </target>
   
-  <target name="run-15" depends="compile, assert-15, resolve-java15-tools"
+  <target name="run-15" depends="compile-15, assert-15, resolve-java15-tools"
           description="Run the DrJava 5.0 classes under Java 5.0 (after compiling)">
     <echo message="Running the DrJava application (5.0 classes in Java 5.0)" />
     <java classname="${jar-main-class}" fork="yes" spawn="yes">
@@ -629,9 +643,11 @@
        Jar Targets
        *********** -->
        
-  <target name="jar" depends="compile, resolve-version-tag" 
+  <target name="jar" depends="jar-15" description="Shortcut for 'jar-15'" />
+       
+  <target name="jar-15" depends="compile-15, resolve-version-tag" 
           description="Create the jar file with all classes and libs (compiling first)">
-    <jar jarfile="${jar-filename}">
+    <jar jarfile="${jar-15-filename}">
       <manifest>
         <attribute name="Main-Class" value="${jar-main-class}" />
         <attribute name="Built-By" value="${user.name}" />
@@ -642,9 +658,9 @@
     </jar>
   </target>
 
-  <target name="jar-base" depends="compile, resolve-version-tag" 
+  <target name="jar-base-15" depends="compile-15, resolve-version-tag" 
           description="Create the jar file without any support libs (compiling first)">
-    <jar jarfile="${jar-base-filename}">
+    <jar jarfile="${jar-base-15-filename}">
       <manifest>
         <attribute name="Main-Class" value="${jar-main-class}" />
         <attribute name="Built-By" value="${user.name}" />
@@ -712,7 +728,8 @@
        Clean Target
        ************ -->
        
-  <target name="clean" description="Remove all build products; the result should match the intended CVS contents">
+  <target name="clean" unless="skip-clean"
+          description="Remove all build products; the result should match the intended Subversion contents">
     <echo message="Deleting all build products" />
     <delete dir="classes" failonerror="${clean-can-fail}" />
     <delete dir="docs" failonerror="${clean-can-fail}" />
@@ -784,6 +801,55 @@
   </target>
 
   
+  <!-- ******************
+       Subversion Targets 
+       ****************** -->
+  
+  <target name="update-svn" depends="clean" description="Reconcile source with the Subversion archive">
+    <echo message="Running Subversion update" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="update" />
+    </exec>
+  </target>
+  
+  <target name="commit-svn" depends="update-svn, build" 
+          description="Commit source to the Subversion archive (after building)">
+    <antcall target="clean"> <!-- Clean up after the latest build -->
+      <param name="delete-jars" value="no" />
+      <param name="clean-can-fail" value="no" />
+    </antcall>
+    <echo message="Running Subversion commit" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="commit" />
+    </exec>
+  </target>
+
+  <target name="tag-svn" depends="resolve-version-tag" 
+          description="Copy the working copy to a new Subversion tag">
+    <echo message="Creating a new Subversion tag with name ${version-tag}"/>
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${basedir}" />
+      <arg value="${svn-repository}/tags/${version-tag}" />
+      <arg value="-m" />
+      <arg value="Created tag ${version-tag}" />
+    </exec>
+  </target>
+  
+  <target name="branch-svn" description="Copy the working copy to a new Subversion branch">
+    <input message="Enter a name for the new branch: "
+           addproperty="svn-branch-name" />
+    <echo message="Creating a new Subversion branch ${svn-branch-name}" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${base-dir}" />
+      <arg value="${svn-repository}/branches/${svn-branch-name}" />
+      <arg value="-m" />
+      <arg value="Created branch ${svn-branch-name}" />
+    </exec>
+  </target>
+
+
   <!-- ***************
        Release Targets
        *************** -->
@@ -802,7 +868,7 @@
     </antcall>
   </target>
        
-  <target name="release" depends="update, build, resolve-version-tag, tag, jar-app, mac-app, windows-app, src-zip, javadoc-zip" 
+  <target name="release" depends="update-svn, build, resolve-version-tag, tag-svn, jar-app, mac-app, windows-app, src-zip, javadoc-zip" 
           description="Generate all release files (after building)">
     <delete dir="${version-tag}" />
   </target>
@@ -860,6 +926,40 @@
   </target>
 
   
+  
+  <target name="release-stable-svn" description="Generate all release files tagged with 'stable'">
+    <antcall target="release-svn">
+      <param name="tag-append" value="-stable" />
+      <param name="is-development" value="no" />
+    </antcall>
+  </target>
+
+  <target name="release-beta-svn" description="Generate all release files tagged with 'beta'">
+    <antcall target="release-svn">
+      <param name="tag-append" value="-beta" />
+      <param name="is-development" value="no" />
+    </antcall>
+  </target>
+       
+  <target name="release-svn" depends="update-svn, build, resolve-version-tag, tag-svn, jar-app, mac-app, windows-app, src-zip-svn, javadoc-zip" 
+          description="Generate all release files (after building)">
+    <delete dir="${version-tag}" />
+  </target>
+  
+  <target name="src-zip-svn" depends="resolve-version-tag">
+    <echo message="Creating ${version-tag}-src.zip" />
+    <mkdir dir="${version-tag}/src" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="export" />
+      <arg value="${svn-repository}/tags/${version-tag}" />
+      <arg value="${version-tag}/src" />
+    </exec>
+    <zip destfile="${version-tag}-src.zip">
+      <zipfileset dir="${version-tag}/src" prefix="${version-tag}/src" />
+    </zip>
+  </target>
+  
+  
   <!-- ********************************
        Misc Occasionally-Useful Targets
        ******************************** -->
@@ -884,10 +984,10 @@
     </replace>
   </target>
   
-  <!-- Standardize all newline character sequences.  CVS takes care of this 
+  <!-- Standardize all newline character sequences.  Subversion takes care of this 
        automatically, but sometimes files crop up with the wrong sequence.
        Use "cvs update" after running this to see which files were fixed. -->
-  <target name="fix-newlines">
+  <target name="fix-newlines" description="Standardize newline character sequences in all text files">
     <!-- If we're in Windows, use \r\n -->
     <condition property="newline-code" value="crlf">
       <os family="windows" />
