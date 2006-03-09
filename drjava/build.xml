@@ -270,9 +270,7 @@
       <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
       <targetfilelist dir="${basedir}" files="${generate-file}" />
     </dependset>
-    <condition property="already-generated">
-      <available file="${generate-file}" />
-    </condition>
+    <available file="${generate-file}" property="already-generated" />
   </target>
 
   <!-- Sets "already-generated" if "generate-file" is more recent than everything in
@@ -283,27 +281,27 @@
       <srcfileset dir="${generate-sourcedir}" />
       <targetfilelist dir="${basedir}" files="${generate-file}" />
     </dependset>
-    <condition property="already-generated">
-      <available file="${generate-file}" />
-    </condition>
+    <available file="${generate-file}" property="already-generated" />
   </target>
 
   <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
        than "generate-sourcefile".  Note that, since properties can only be set once, this 
        should happen underneath an "antcall". -->
   <target name="check-generate-dir-from-file">
-    <uptodate property="already-generated" targetfile="${generate-dir}">
-      <srcfiles dir="${generate-sourcefile}" />
-    </uptodate>
+    <uptodate property="already-generated" targetfile="${generate-dir}" srcfile="${generate-sourcefile}" />
   </target>
   
   <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
        than everything in "generate-sourcedir".  Note that, since properties can only be 
        set once, this should happen underneath an "antcall". -->
   <target name="check-generate-dir-from-dir">
+    <!-- Unfortunately, a bug in uptodate prevents this from working properly,
+         so we just have to equate *existence* with being up to date.
     <uptodate property="already-generated" targetfile="${generate-dir}" >
-      <srcfiles dir="${basedir}" includes="lib/dynamicjava.jar" />
+      <srcfiles dir="${generate-sourcedir}" />
     </uptodate>
+    -->
+    <available file="${generate-dir}" property="already-generated" />
   </target>
 
 
@@ -437,29 +435,6 @@
     </copy>
   </target>
   
-  
-  
-  
-  <target name="check-generate-libs">
-    <fileset dir="${basedir}" includes="lib/dynamicjava.jar" id="libs-to-check"  />
-    <pathconvert pathsep=", " property="listedfiles" refid="libs-to-check" />
-    <echo message="Files: ${libs-to-check}" />
-  
-    <uptodate property="already-generated" targetfile="classes/lib" >
-      <srcfiles refid="libs-to-check" />
-    </uptodate>
-    
-    <echo message="already-generated?: ${already-generated}"/>
-    
-  </target>
-  
-  <target name="update-libs">
-    <touch file="libs/dynamicjava.jar" />
-  </target>
-
-
-
-
   <target name="unjar-libs">
     <antcall target="do-unjar-libs">
       <param name="generate-sourcedir" value="lib" />
@@ -467,7 +442,7 @@
     </antcall>
   </target>
   
-  <target name="do-unjar-libs" depends="check-generate-libs" unless="already-generated">
+  <target name="do-unjar-libs" depends="check-generate-dir-from-dir" unless="already-generated">
     <echo message="Unjarring jar files in the lib directory" />
     <!-- Delete "classes/lib" in case it exists (but is out of date) -->
     <delete dir="classes/lib" />
@@ -810,6 +785,9 @@
     <exec executable="svn" failonerror="yes">
       <arg value="update" />
     </exec>
+    <exec executable="svn" failonerror="yes">
+      <arg value="status" />
+    </exec>
   </target>
   
   <target name="commit-svn" depends="update-svn, build" 
@@ -818,9 +796,16 @@
       <param name="delete-jars" value="no" />
       <param name="clean-can-fail" value="no" />
     </antcall>
+    <exec executable="svn" failonerror="yes">
+      <arg value="status" />
+    </exec>
+    <input message="Please enter a log message for the commit: "
+           addproperty="svn-commit-message" />
     <echo message="Running Subversion commit" />
     <exec executable="svn" failonerror="yes">
       <arg value="commit" />
+      <arg value="-m" />
+      <arg value="${svn-commit-message}" />
     </exec>
   </target>
 
@@ -948,7 +933,6 @@
   
   <target name="src-zip-svn" depends="resolve-version-tag">
     <echo message="Creating ${version-tag}-src.zip" />
-    <mkdir dir="${version-tag}/src" />
     <exec executable="svn" failonerror="yes">
       <arg value="export" />
       <arg value="${svn-repository}/tags/${version-tag}" />
