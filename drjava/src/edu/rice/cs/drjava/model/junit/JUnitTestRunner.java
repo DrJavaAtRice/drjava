@@ -40,13 +40,11 @@ import junit.framework.*;
 import junit.textui.TestRunner;
 
 /** DrJava's own testrunner. It updates the document in the JUnit pane as error and failure events are fired.
- *
- * @version $Id$
+ *  @version $Id$
  */
 public class JUnitTestRunner extends TestRunner {
-  /**
-   * Receives updates on the test suite's progress.
-   */
+  
+  /** Receives updates on the test suite's progress. */
   private JUnitModelCallback _jmc;
 
   /** Used to tie the output of the ui textrunner to nothing. */

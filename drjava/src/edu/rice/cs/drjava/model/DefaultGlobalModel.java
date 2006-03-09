@@ -447,11 +447,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (_debugger.inDebugMode()) _debugger.shutdown();
     if (! _jvm.slaveJVMUsed() && wd.equals(_interactionsModel.getWorkingDirectory())) {
       // eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
+//      Utilities.show("Suppressing resetting of interactions pane");
       _interactionsModel.notifyInterpreterReady(wd);
       return; 
     }
+//    Utilities.show("Resetting interactions with working directory = " + wd);
     _interactionsModel.resetInterpreter(wd);
-//    resetConsole();
   }
 
   /** Interprets the current given text at the prompt in the interactions pane. */

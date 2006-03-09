@@ -62,43 +62,10 @@ import java.util.Vector;
 public class VectorFileOptionComponent extends VectorOptionComponent<File> implements OptionConstants {
   private FileFilter _fileFilter;
   private JFileChooser _jfc;
-  protected JButton _moveUpButton;
-  protected JButton _moveDownButton;
+
   
   public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent) {
-    super(opt, text, parent);
-
-    _moveUpButton = new JButton(new AbstractAction("Move Up") {
-      public void actionPerformed(ActionEvent ae) {
-        if (!_list.isSelectionEmpty()) {
-          int index = _list.getSelectedIndex();
-          if (index > 0) {
-            Object o = _listModel.getElementAt(index);
-            _listModel.remove(index);
-            _listModel.insertElementAt(o, index - 1);
-            _list.setSelectedIndex(index - 1);
-            notifyChangeListeners();
-          }
-        }
-      }
-    });
-
-    _moveDownButton = new JButton(new AbstractAction("Move Down") {
-      public void actionPerformed(ActionEvent ae) {
-        if (!_list.isSelectionEmpty()) {
-          int index = _list.getSelectedIndex();
-          if (index < _listModel.getSize() - 1) {
-            Object o = _listModel.getElementAt(index);
-            _listModel.remove(index);
-            _listModel.insertElementAt(o, index + 1);
-            _list.setSelectedIndex(index + 1);
-            notifyChangeListeners();
-          }
-        }
-      }
-    });
-    _buttonPanel.add(_moveUpButton);
-    _buttonPanel.add(_moveDownButton);
+    super(opt, text, parent);  // creates all four buttons
 
     // set up JFileChooser
     File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
@@ -117,6 +84,13 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
   public VectorFileOptionComponent (VectorOption<File> opt, String text, Frame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
+  }
+  
+  /** Adds buttons to _buttonPanel */
+  protected void _addButtons() {
+    super._addButtons();
+    _buttonPanel.add(_moveUpButton);
+    _buttonPanel.add(_moveDownButton);
   }
 
   /** Displays the given value. */

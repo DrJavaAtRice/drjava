@@ -72,48 +72,48 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private Log _log = new Log("MainJVMLog", false);
   
   /** Working directory for slave JVM */
-  private File _workDir;
+  private volatile File _workDir;
   
   /** Listens to interactions-related events. */
-  private InteractionsModelCallback _interactionsModel;
+  private volatile InteractionsModelCallback _interactionsModel;
   
   /** Listens to JUnit-related events. */
-  private JUnitModelCallback _junitModel;
+  private volatile JUnitModelCallback _junitModel;
   
   /** Listens to debug-related events */
-  private DebugModelCallback _debugModel;
+  private volatile DebugModelCallback _debugModel;
   
   /** Used to protect interpreterJVM setting */
-  private Object _interpreterLock = new Object();
+  private final Object _interpreterLock = new Object();
   
   /** Records state of slaveJVM (interpreterJVM); used to suppress restartInteractions on a fresh JVM */
-  private boolean _slaveJVMUsed = false;
+  private volatile boolean _slaveJVMUsed = false;
   
   /** This flag is set to false to inhibit the automatic restart of the JVM. */
-  private boolean _restart = true;
+  private volatile boolean _restart = true;
   
   /** This flag is set to remember that the JVM is cleanly restarting, so that the replCalledSystemExit method
    *  does not need to be called.
    */
-  private boolean _cleanlyRestarting = false;
+  private volatile boolean _cleanlyRestarting = false;
   
   /** Instance of inner class to handle interpret result. */
   private final ResultHandler _handler = new ResultHandler();
   
   /** Whether to allow "assert" statements to run in the remote JVM. */
-  private boolean _allowAssertions = false;
+  private volatile boolean _allowAssertions = false;
   
   /** Classpath to use for starting the interpreter JVM */
-  private String _startupClassPath;
+  private volatile String _startupClassPath;
   
   /** Starting classpath reorganized into a vector. */
-  private ClassPathVector _startupClassPathVector;
+  private volatile ClassPathVector _startupClassPathVector;
   
   /** A list of user-defined arguments to pass to the interpreter. */
-  private List<String> _optionArgs;
+  private volatile List<String> _optionArgs;
   
   /** The name of the current interpreter. */
-  private String _currentInterpreterName = DEFAULT_INTERPRETER_NAME;
+  private volatile String _currentInterpreterName = DEFAULT_INTERPRETER_NAME;
   
   /** Creates a new MainJVM to interface to another JVM;  the MainJVM has a link to the partially initialized 
    *  global model.  The MainJVM but does not automatically start the Interpreter JVM.  Callers must set the
@@ -425,6 +425,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void testSuiteStarted(int numTests) throws RemoteException {
     _slaveJVMUsed = true;
+//    Utilities.show("MainJVM.testSuiteStarted(" + numTests + ") called");
     _junitModel.testSuiteStarted(numTests);
   }
   
@@ -433,6 +434,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void testStarted(String testName) throws RemoteException {
     _slaveJVMUsed = true;
+//     Utilities.show("MainJVM.testStarted(" + testName + ") called");
     _junitModel.testStarted(testName);
   }
   

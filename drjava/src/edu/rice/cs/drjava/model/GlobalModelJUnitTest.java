@@ -391,11 +391,8 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //        Utilities.show("junitSuiteStarted called");
         assertEquals("should run 1 test", 1, numTests);
         junitSuiteStartedCount++;
-        // kill the infinite test once the tests have started; use SwingUtilities.invokeLater to ensure that
-        // testing  actually starts before the reset occurs.
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() { _model.resetInteractions(new File(System.getProperty("user.dir"))); }
-        } );
+        // kill the infinite test once testSuiteProcessing starts
+        _model.resetInteractions(new File(System.getProperty("user.dir")));
       }
       public void junitTestStarted(String name) {
         assertEquals("running wrong test", "testInfinite", name);

@@ -39,13 +39,14 @@ import edu.rice.cs.drjava.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.util.Vector;
 
 
-/**
- * Graphical form of a VectorOption for the Extra Classpath option.
- * Uses a file chooser for each String element.
- * @version $Id$
+/** Graphical form of a VectorOption for the Extra Classpath option. Uses a file chooser for each String element.
+ *  TODO: define a static make method that adds buttons so that moveUp and moveDown button definitions can be moved
+ *  to subclass
+ *  @version $Id$
  */
 public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>> implements OptionConstants {
   protected JScrollPane _listScrollPane;
@@ -54,6 +55,8 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected JPanel _buttonPanel;
   protected JButton _addButton;
   protected JButton _removeButton;
+  protected JButton _moveUpButton;   /* Only used in VectorFileOptionComponent subclass. */
+  protected JButton _moveDownButton; /* Only used in VectorFileOptionComponent subclass. */
   protected DefaultListModel _listModel;
   protected static final int NUM_ROWS = 5;
   protected static final int PIXELS_PER_ROW = 18;
@@ -102,14 +105,47 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
         }
       }
     });
+    
+    /* Only used in VectorFileOptionComponent subclass */
+    _moveUpButton = new JButton(new AbstractAction("Move Up") {
+      public void actionPerformed(ActionEvent ae) {
+        if (!_list.isSelectionEmpty()) {
+          int index = _list.getSelectedIndex();
+          if (index > 0) {
+            Object o = _listModel.getElementAt(index);
+            _listModel.remove(index);
+            _listModel.insertElementAt(o, index - 1);
+            _list.setSelectedIndex(index - 1);
+            notifyChangeListeners();
+          }
+        }
+      }
+    });
 
+    /* Only used in VectorFileOptionComponent subclass */
+    _moveDownButton = new JButton(new AbstractAction("Move Down") {
+      public void actionPerformed(ActionEvent ae) {
+        if (!_list.isSelectionEmpty()) {
+          int index = _list.getSelectedIndex();
+          if (index < _listModel.getSize() - 1) {
+            Object o = _listModel.getElementAt(index);
+            _listModel.remove(index);
+            _listModel.insertElementAt(o, index + 1);
+            _list.setSelectedIndex(index + 1);
+            notifyChangeListeners();
+          }
+        }
+      }
+    });
+    
+    
     _buttonPanel = new JPanel();
-    _buttonPanel.add(_addButton);
-    _buttonPanel.add(_removeButton);
-    //buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
-    //buttons.add(Box.createGlue());
-    //buttons.add(Box.createGlue());
-    //buttons.add(Box.createGlue());
+    _buttonPanel.setBorder(new EmptyBorder(5,5,5,5));
+    _buttonPanel.setLayout(new BoxLayout(_buttonPanel, BoxLayout.X_AXIS));
+    
+    _buttonPanel.add(Box.createHorizontalGlue());
+    _addButtons(); // all buttons needs to be added consecutively as a group for glue to work properly               
+    _buttonPanel.add(Box.createHorizontalGlue());
 
     _listScrollPane = new JScrollPane(_list,
                                       JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -122,6 +158,12 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _listScrollPane.setPreferredSize(new Dimension(0, NUM_ROWS * PIXELS_PER_ROW));
   }
 
+  /** Adds buttons to _buttonPanel */
+  protected void _addButtons() {
+    _buttonPanel.add(_addButton);
+    _buttonPanel.add(_removeButton);
+  }
+  
   /**
    * Constructor that allows for a tooltip description.
    */
@@ -167,9 +209,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     return current;
   }
 
-  /**
-   * Displays the given value.
-   */
+  /** Displays the given value. */
   public void setValue(Vector<T> value) {
     _listModel.clear();
     for (int i = 0; i < value.size(); i++) {
@@ -177,15 +217,9 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     }
   }
 
-  /**
-   * Return's this OptionComponent's configurable component.
-   */
-  public JComponent getComponent() {
-    return _panel;
-  }
+  /** Return's this OptionComponent's configurable component. */
+  public JComponent getComponent() { return _panel; }
 
-  /**
-   * Gets an action that adds a component to the set of options.
-   */
+  /** Gets an action that adds a component to the set of options. */
   protected abstract Action _getAddAction();
 }
