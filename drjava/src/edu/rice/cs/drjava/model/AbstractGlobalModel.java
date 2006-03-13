@@ -2967,6 +2967,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Swing-style writeUnlock(). */
     public void releaseWriteLock() { getDocument().releaseWriteLock(); }
     
+    /** @return the number of lines in this document. */
+    public int getNumberOfLines() { return getDefaultRootElement().getElementIndex(getEndPosition().getOffset()-1); }
   } /* End of ConcreteOpenDefDoc */
 
   private static class TrivialFSS implements FileSaveSelector {

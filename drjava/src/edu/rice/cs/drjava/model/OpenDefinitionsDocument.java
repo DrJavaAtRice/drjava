@@ -323,4 +323,6 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 //  /** @return a list of all registered undoable edit listeners */
 //  public List<UndoableEditListener> getUndoableEditListeners();
 
+  /** @return the number of lines in this document. */
+  public int getNumberOfLines();
 }

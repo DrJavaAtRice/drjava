@@ -5186,8 +5186,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void revalidateLineNums() {
     if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
       LineEnumRule ler = (LineEnumRule)_defScrollPanes.get(_model.getActiveDocument()).getRowHeader().getView();
-      ler.revalidate();
-      _repaintLineNums();
+      if (ler.getCachedLastLine() != _model.getActiveDocument().getNumberOfLines()) {
+        ler.revalidate();
+        _repaintLineNums();
+      }
     }
   }
   

@@ -616,4 +616,6 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    /** Swing-style writeUnlock(). */
   public void releaseWriteLock() { throw new UnsupportedOperationException("Dummy method"); }
   
+  /** @return the number of lines in this document. */
+  public int getNumberOfLines() { return 0; }
 }

@@ -63,6 +63,9 @@ public class LineEnumRule extends JComponent {
   protected Font _newFont;
   /** font metrics for the new font */
   protected FontMetrics _nfm;
+  
+  /** The number of lines in this document, the last time the line number ruler was updated. */
+  private int _cachedLastLine = -1;
 
   /**
    * Create a new component to display line numbers along the left of
@@ -129,7 +132,7 @@ public class LineEnumRule extends JComponent {
     // ticks and labels
     final OpenDefinitionsDocument odd = _pane.getOpenDefDocument();
     final int endOffset = odd.getEndPosition().getOffset()-1;
-    int lastLine = odd.getDefaultRootElement().getElementIndex(endOffset);
+    int lastLine = _cachedLastLine = odd.getNumberOfLines();
 
     if (odd.getLineStartPos(endOffset)!=odd.getLineEndPos(endOffset)) { ++lastLine; }
     for (int i = start; i < end; i += _increment) {
@@ -186,5 +189,6 @@ public class LineEnumRule extends JComponent {
     return lnf;
   }
   
+  /** @return the number of lines in this document, the last time the line number ruler was updated. */
+  public int getCachedLastLine() { return _cachedLastLine; }
 }
-
