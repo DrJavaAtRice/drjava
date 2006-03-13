@@ -792,7 +792,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       else super.actionPerformed(e);
       
-      if (c != null) c.requestFocusInWindow();
+      if (c != null) c.requestFocusInWindow();      
     }
   };
   
@@ -4830,6 +4830,30 @@ public class MainFrame extends JFrame implements OptionConstants {
     ErrorCaretListener caretListener = new ErrorCaretListener(doc, pane, this);
     pane.addErrorCaretListener(caretListener);
     
+    doc.addDocumentListener(new DocumentUIListener() {
+      public void changedUpdate(DocumentEvent e) {
+        Utilities.invokeLater(new Runnable() {
+          public void run() {
+            revalidateLineNums();
+          }
+        });
+      }
+      public void insertUpdate(DocumentEvent e) {
+        Utilities.invokeLater(new Runnable() {
+          public void run() {
+            revalidateLineNums();
+          }
+        });
+      }
+      public void removeUpdate(DocumentEvent e) {
+        Utilities.invokeLater(new Runnable() {
+          public void run() {
+            revalidateLineNums();
+          }
+        });
+      }
+    });
+    
     // add a listener to update line and column.
     pane.addCaretListener(_posListener);
     
@@ -4837,7 +4861,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     pane.addFocusListener(new LastFocusListener());
     
     // Add to a scroll pane
-    JScrollPane scroll = new BorderlessScrollPane(pane,
+    final JScrollPane scroll = new BorderlessScrollPane(pane,
                                                   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                                   JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     pane.setScrollPane(scroll);
@@ -5155,6 +5179,15 @@ public class MainFrame extends JFrame implements OptionConstants {
         Component view = rhvport.getView();
         view.repaint();
       }
+    }
+  }
+  
+  /** Revalidate the line numers, i.e. also redraw the ones not currently visible. */
+  public void revalidateLineNums() {
+    if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
+      LineEnumRule ler = (LineEnumRule)_defScrollPanes.get(_model.getActiveDocument()).getRowHeader().getView();
+      ler.revalidate();
+      _repaintLineNums();
     }
   }
   
@@ -6410,7 +6443,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * in again will cause bug #803304 "Uncomment lines wont rebind".
    */
   private void _setUpKeyBindingMaps() {
-    ActionMap _actionMap = _currentDefPane.getActionMap();
+    final ActionMap _actionMap = _currentDefPane.getActionMap();
     
     KeyBindingManager.Singleton.put(KEY_BACKWARD, _actionMap.get(DefaultEditorKit.backwardAction),null, "Backward");
     KeyBindingManager.Singleton.addShiftAction(KEY_BACKWARD, DefaultEditorKit.selectionBackwardAction);

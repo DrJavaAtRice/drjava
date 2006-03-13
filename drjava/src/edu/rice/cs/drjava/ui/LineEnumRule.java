@@ -38,6 +38,7 @@ import javax.swing.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /**
  * The row header of the DefinitionsPane which displays the line numbers
@@ -126,8 +127,15 @@ public class LineEnumRule extends JComponent {
     int baseline = (int) (( _nfm.getAscent() + _fm.getHeight() - _fm.getDescent())/2.0 );
 
     // ticks and labels
+    final OpenDefinitionsDocument odd = _pane.getOpenDefDocument();
+    final int endOffset = odd.getEndPosition().getOffset()-1;
+    int lastLine = odd.getDefaultRootElement().getElementIndex(endOffset);
+
+    if (odd.getLineStartPos(endOffset)!=odd.getLineEndPos(endOffset)) { ++lastLine; }
     for (int i = start; i < end; i += _increment) {
-      String text = Integer.toString(i/_increment +1);
+      final int lineNo = i/_increment +1;
+      if (lineNo>lastLine) break;
+      String text = Integer.toString(lineNo);
 
       // When we paint, we get a good look at the Graphics hints.
       // Use them to update our estimate of total width.
