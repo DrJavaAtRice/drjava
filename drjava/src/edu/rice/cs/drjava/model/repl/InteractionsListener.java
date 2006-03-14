@@ -75,22 +75,20 @@ public interface InteractionsListener {
    */
   public void interpreterResetFailed(Throwable t);
   
-  /**
-   * Called when the interpreter exits unexpectedly.
-   * @param status the exit code
+  /** Called when the interpreter exits unexpectedly.
+   *  @param status the exit code
    */
   public void interpreterExited(int status);
   
-  /**
-   * Called when the active interpreter is changed.
-   * @param inProgress Whether the new interpreter is currently in progress
-   * with an interaction (ie. whether an interactionEnded event will be fired)
+  /** Called when the active interpreter is changed.
+   *  @param inProgress Whether the new interpreter is currently in processing an interaction (i.e., whether an 
+   *  interactionEnded event is pending.)
    */
   public void interpreterChanged(boolean inProgress);
 
-  /**
-   * Called when enter was typed in the interactions pane but
-   * the interaction was incomplete.
-   */
+  /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete();
+  
+  /** Called when the slave JVM is used by the interpreter or unit testing. */
+  public void slaveJVMUsed();
 }

@@ -46,6 +46,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.io.IOException;
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.OperationCanceledException;
 
 /** This interface encapsulates the behavior of a document loader. Components which provide a means to load 
  *  documents (e.g. from disk, from a stream, from the ether) should implement this interface, rather than the

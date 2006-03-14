@@ -45,6 +45,7 @@ import java.util.LinkedList;
 // TODO: Check synchronization.
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.drjava.model.*;

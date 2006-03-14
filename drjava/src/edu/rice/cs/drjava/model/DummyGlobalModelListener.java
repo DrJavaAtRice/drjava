@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.util.List;
 import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.FileOpenSelector;
 
 /** A dummy GlobalModelListener that does nothing. Useful for listening to only a small number of events.
  *  @version $Id$
@@ -174,6 +175,9 @@ public class DummyGlobalModelListener implements GlobalModelListener {
 
   /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
   public void interactionIncomplete() { }
+  
+  /** Called when the slave JVM is used for interpretation or unit testing. */
+  public void slaveJVMUsed() { }
 
   //-------------------- End InteractionsListener Methods --------------------//
   

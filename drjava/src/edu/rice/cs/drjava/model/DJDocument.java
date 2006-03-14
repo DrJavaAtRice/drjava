@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
+import edu.rice.cs.util.OperationCanceledException;
 
 
 import java.util.Vector;

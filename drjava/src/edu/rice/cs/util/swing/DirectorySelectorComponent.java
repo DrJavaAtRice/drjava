@@ -42,13 +42,9 @@ import java.awt.event.FocusListener;
 import java.awt.event.FocusEvent;
 import java.io.*;
 
-/**
- * A JPanel with a text box and a "..." button used to select
- * a file or directory.  The file name is editable in the text
- * box, and a JFileChooser is displayed if the user clicks the
- * "..." button.
- *
- * @version $Id$
+/** A JPanel with a text box and a "..." button to select a file or directory.  The file name is editable in the text
+ *  box, and a JFileChooser is displayed if the user clicks the "..." button.
+ *  @version $Id$
  */
 public class DirectorySelectorComponent extends JPanel {
   
@@ -57,7 +53,6 @@ public class DirectorySelectorComponent extends JPanel {
 
   /** The default font size for the text box. */
   public static final float DEFAULT_FONT_SIZE = 10f;
-
 
   /** The parent component of this component. */
   protected final Component _parent;
@@ -89,6 +84,7 @@ public class DirectorySelectorComponent extends JPanel {
    *  @param fontSize Font size for the text field
    */
   public DirectorySelectorComponent(Component parent, DirectoryChooser chooser, int numCols, float fontSize) {
+    
     _parent = parent;
     _chooser = chooser;
     _file = null;
@@ -96,15 +92,15 @@ public class DirectorySelectorComponent extends JPanel {
     _fileField = new JTextField(numCols) {
       public Dimension getMaximumSize() { return new Dimension(Short.MAX_VALUE, super.getPreferredSize().height); }
     };
+    
     _fileField.setFont(_fileField.getFont().deriveFont(fontSize));
     _fileField.setPreferredSize(new Dimension(22,22));
     _fileField.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) { validateTextField(); }
     });
+    
     _fileField.addFocusListener(new FocusListener() {
-      public void focusGained(FocusEvent e) { 
-//        validateTextField();
-      }
+      public void focusGained(FocusEvent e) { /* validateTextField(); */ }
       public void focusLost(FocusEvent e) { validateTextField(); }
     });
     
@@ -112,8 +108,10 @@ public class DirectorySelectorComponent extends JPanel {
     _chooserButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _chooseFile(); }
     });
+    
     _chooserButton.setMaximumSize(new Dimension(22, 22));
     _chooserButton.setMargin(new Insets(0,5,0,5));
+    
     // Add components
     this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
     this.add(_fileField);
@@ -167,32 +165,20 @@ public class DirectorySelectorComponent extends JPanel {
     _chooserButton.setToolTipText(text);
   }
 
-  /**
-   * adds a filter to decide if a directory can be chosen
-   */
-  public void addChoosableFileFilter(FileFilter filter) {
-    _chooser.addChoosableFileFilter(filter);
-  }
+  /** Adds a filter to decide if a directory can be chosen. */
+  public void addChoosableFileFilter(FileFilter filter) { _chooser.addChoosableFileFilter(filter); }
   
-  /**
-   * removes the given filefilter from the chooser
-   */
-  public void removeChoosableFileFilter(FileFilter filter) {
-    _chooser.removeChoosableFileFilter(filter);
-  }
+  /** Removes the given filefilter from the chooser. */
+  public void removeChoosableFileFilter(FileFilter filter) { _chooser.removeChoosableFileFilter(filter); }
   
-  public void clearChoosableFileFilters() {
-    _chooser.clearChoosableFileFilters();
-  }
+  public void clearChoosableFileFilters() { _chooser.resetChoosableFileFilters(); }
    
-  // used so that the focus listener and the action listener do not
-  // both validate the incorrect text.  This ensures that only the first
-  // one gets it.
+  /** Flag indicating that validation by the focus listener or action listener is pending.  The flag is used to avoid
+   *  duplicating the validation process. 
+   */
   private boolean _validationInProgress = false;
   
-  /**
-   *  The chooser method for the validation of filenames that are manually entered
-   *  into the text field.
+  /** The chooser method for the validation of filenames that are manually entered into the text field.
    *  @return False, if file does not exist. True, otherwise.
    */
   public boolean validateTextField() {
@@ -204,17 +190,12 @@ public class DirectorySelectorComponent extends JPanel {
     File newFile = null;
     if (! newValue.equals("")) {
       newFile = new File(newValue);
-      if (! newFile.isDirectory() && ! _chooser.getShowFiles()) {
-        newFile = newFile.getParentFile();
-      }
+      if (! newFile.isDirectory() && _chooser.isFileSelectionEnabled()) newFile = newFile.getParentFile();
     }
     
     if (newFile != null && ! newFile.exists()) {
-      JOptionPane.showMessageDialog(_parent,
-                                    "The file '"+ newValue + "'\n" +
-                                    "is invalid because it does not exist.",
-                                    "Invalid File Name",
-                                    JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(_parent, "The file '"+ newValue + "'\nis invalid because it does not exist.",
+                                    "Invalid File Name", JOptionPane.ERROR_MESSAGE);
       resetFileField(); // revert if not valid
       _validationInProgress = false;
       return false;
@@ -233,9 +214,7 @@ public class DirectorySelectorComponent extends JPanel {
     int returnValue = _chooser.showDialog(_file);
     if (returnValue == DirectoryChooser.APPROVE_OPTION) {
       File chosen = _chooser.getSelectedDirectory();
-      if (chosen != null) {
-        setFileField(chosen);
-      }
+      if (chosen != null) setFileField(chosen);
     }
   }
 

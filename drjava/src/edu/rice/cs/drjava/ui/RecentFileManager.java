@@ -43,6 +43,8 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.config.*;
 
+import edu.rice.cs.util.FileOpenSelector;
+
 /**
  * Manages a list of the most recently used files to be displayed
  * in the File menu.

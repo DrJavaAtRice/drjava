@@ -150,7 +150,7 @@ public class DirectorySelectorStringComponent extends JPanel {
     File newFile = null;
     if (! newValue.equals("")) {
       newFile = convertStringToFile(newValue);
-      if (! newFile.isDirectory() && ! _chooser.getShowFiles()) {
+      if (! newFile.isDirectory() && ! _chooser.isFileSelectionEnabled()) {
         newFile = newFile.getParentFile();
       }
     }
@@ -206,7 +206,7 @@ public class DirectorySelectorStringComponent extends JPanel {
   }
   
   public void clearChoosableFileFilters() {
-    _chooser.clearChoosableFileFilters();
+    _chooser.resetChoosableFileFilters();
   }
   
   /** Opens the file chooser to select a file, putting the result in the file field. */

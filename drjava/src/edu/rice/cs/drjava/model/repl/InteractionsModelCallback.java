@@ -126,4 +126,7 @@ public interface InteractionsModelCallback {
 
   /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady(File wd);
+  
+  /** Called when the slave JVM is used */
+  public void slaveJVMUsed();
 }

@@ -40,8 +40,8 @@ import java.util.ArrayList;
 import java.net.URL;
 
 import edu.rice.cs.drjava.CodeStatus;
-import edu.rice.cs.drjava.model.FileOpenSelector;
-import edu.rice.cs.drjava.model.OperationCanceledException;
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentInterface;
@@ -67,10 +67,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected final InteractionsDocument _document;
 
   /** Whether we are waiting for the interpreter to register for the first time. */
-  protected boolean _waitingForFirstInterpreter;
+  protected volatile boolean _waitingForFirstInterpreter;
 
   /** The working directory for the current interpreter. */
-  protected File _workingDirectory;
+  protected volatile File _workingDirectory;
 
   /** A lock object to prevent multiple threads from interpreting at once. */
   private final Object _interpreterLock;
@@ -79,27 +79,25 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *  the JVM, ensuring the UI remains responsive. */
   private final Object _writerLock;
 
-  /** Number of milliseconds to wait after each println, to prevent
-   *  the JVM from being flooded with print calls. */
-  private int _writeDelay;
+  /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls. */
+  private final int _writeDelay;
 
   /** Port used by the debugger to connect to the Interactions JVM. Uniquely created in getDebugPort(). */
-  private int _debugPort;
+  private volatile int _debugPort;
 
-  /** Whether the debug port has been set already or not.
-   *  If not, calling getDebugPort will generate an available port. */
-  private boolean _debugPortSet;
+  /** Whether the debug port has already been set.  If not, calling getDebugPort will generate an available port. */
+  private volatile boolean _debugPortSet;
   
   /** The String added to history when the interaction is complete or an error is thrown */
-  private String _toAddToHistory = "";
+  private volatile String _toAddToHistory = "";
 
   /** The input listener to listen for requests to System.in. */
-  protected InputListener _inputListener;
+  protected volatile InputListener _inputListener;
 
-  protected EditDocumentInterface _adapter;
+  protected final EditDocumentInterface _adapter;
   
   /** Banner displayed at top of the interactions document */
-  private String _banner;
+  private volatile String _banner;
   
   /** Constructs an InteractionsModel.
    *  @param adapter DocumentAdapter to use in the InteractionsDocument
@@ -540,8 +538,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (! _waitingForFirstInterpreter) {
       _document.acquireWriteLock();
       try {
-      _document.insertBeforeLastPrompt("Resetting Interactions..." + _newLine, InteractionsDocument.ERROR_STYLE);
-      _document.setInProgress(true);
+        _document.insertBeforeLastPrompt("Resetting Interactions..." + _newLine, InteractionsDocument.ERROR_STYLE);
+        _document.setInProgress(true);
       }
       finally { _document.releaseWriteLock(); }
 //      Utilities.showDebug("interpreter resetting in progress");
@@ -594,13 +592,19 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (! _waitingForFirstInterpreter) {
       _document.reset(generateBanner(wd));
       _document.setInProgress(false);
-      notifyInterpreterReady(wd);
+      _notifyInterpreterReady(wd);
     }
     _waitingForFirstInterpreter = false;
   }
-
+  
   /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */
-  protected abstract void notifyInterpreterReady(File wd);
+  public abstract void _notifyInterpreterReady(File wd);
+  
+   /** Called when the slave JVM has been used for interpretation or unit testing. */ 
+  public void slaveJVMUsed() { _notifySlaveJVMUsed(); }
+  
+  /** Notifies listeners that the slave JVM has been used. (Subclasses must maintain listeners.) */
+  protected abstract void _notifySlaveJVMUsed();
 
   /** Assumes a trimmed String. Returns a string of the main call that the interpretor can use. */
   protected static String _testClassCall(String s) {

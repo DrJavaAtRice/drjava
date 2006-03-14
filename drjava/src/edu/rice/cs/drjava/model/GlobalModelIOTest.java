@@ -38,7 +38,9 @@ import java.io.*;
 import java.util.List;
 import javax.swing.text.BadLocationException;
 
+import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;

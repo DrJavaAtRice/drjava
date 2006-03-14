@@ -42,13 +42,11 @@ import java.awt.*;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
-/**
- * Graphical form of a FileOption.
+/** Graphical form of a FileOption.
  *
- * TO DO: Replace the internal components here with an
- * edu.rice.cs.util.swing.FileSelectorComponent.
+ *  TO DO: Replace the internal components here with an edu.rice.cs.util.swing.FileSelectorComponent.
  *
- * @version $Id$
+ *  @version $Id$
  */
 public class FileOptionComponent extends OptionComponent<File>
   implements OptionConstants {
@@ -60,8 +58,7 @@ public class FileOptionComponent extends OptionComponent<File>
 //  private FileFilter _fileFilter;  // null if not customized
   private FileSelectorComponent _component;
 
-  public FileOptionComponent (FileOption opt, String text,
-                              Frame parent, JFileChooser jfc) {
+  public FileOptionComponent (FileOption opt, String text, Frame parent, JFileChooser jfc) {
     super(opt, text, parent);
 //    _button = new JButton();
 //    _button.addActionListener(new ActionListener() {
@@ -100,30 +97,20 @@ public class FileOptionComponent extends OptionComponent<File>
       _component.setFileField(setting);
     }
     _component.getFileField().getDocument().addDocumentListener(new DocumentListener() {
-      public void insertUpdate(DocumentEvent e) {
-        notifyChangeListeners();
-      }
-      public void removeUpdate(DocumentEvent e) {
-        notifyChangeListeners();
-      }
-      public void changedUpdate(DocumentEvent e) {
-        notifyChangeListeners();
-      }
+      public void insertUpdate(DocumentEvent e) { notifyChangeListeners(); }
+      public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
+      public void changedUpdate(DocumentEvent e) { notifyChangeListeners(); }
     });
   }
 
-  /**
-   * Constructor that allows for a tooltip description.
-   */
-  public FileOptionComponent (FileOption opt, String text, Frame parent,
-                              String description, JFileChooser jfc) {
+  /** Constructor that allows for a tooltip description. */
+  public FileOptionComponent (FileOption opt, String text, Frame parent, String description, JFileChooser jfc) {
     this(opt, text, parent, jfc);
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
-   * @param description the tooltip text
+  /** Sets the tooltip description text for this option.
+   *  @param description the tooltip text
    */
   public void setDescription(String description) {
     _component.setToolTipText(description);
@@ -150,9 +137,7 @@ public class FileOptionComponent extends OptionComponent<File>
     return true;
   }
 
-  /**
-   * Displays the given value.
-   */
+  /** Displays the given value. */
   public void setValue(File value) {
 //    _file = value;
 //    _updateTextField(value);

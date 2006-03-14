@@ -254,7 +254,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
 
     // Set one breakpoint
     int index = MONKEY_STUFF.indexOf("System.out.println");
-    _debugger.toggleBreakpoint(doc,index,11);
+    _debugger.toggleBreakpoint(doc, index, 11);
 
     // Run the main() method, hitting the breakpoint
     synchronized(_notifierLock) {
@@ -286,11 +286,14 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     assertInteractionsDoesNotMatch(".*^18$.*");
     assertInteractionsDoesNotMatch(".*^6$.*");
     assertInteractionsMatches(".*^8" + _newLine + "13$.*");
-
+    
     // Tests that the debugger has the correct notion of
     interpret("foo");
-    assertInteractionsMatches(".*^6$.*");
+    
+//    System.err.println(getInteractionsText());
 
+    assertInteractionsMatches(".*^6$.*");
+    
     interpret("foo = 123");
     assertEquals("foo should have been modified" , "123", interpret("MonkeyStuff.this.foo"));
     interpret("int foo = 999;");

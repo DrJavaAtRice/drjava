@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.project;
 
 import java.io.*;
+import java.util.List;
 
 public interface ProjectFileIR {
   /** @return an array full of all the source files in this project file. */
@@ -74,6 +75,9 @@ public interface ProjectFileIR {
   /** @return the name of the file that holds the Jar main class associated with this project */
   public File getMainClass();
   
+  /** @return the project file for this project. */
+  public File getProjectFile();
+  
   /** @return the directory that is the root of the project source tree. */
   public File getProjectRoot();
   
@@ -82,4 +86,15 @@ public interface ProjectFileIR {
   
   /** @return the flags used in the "Create Jar" dialog. */
   public int getCreateJarFlags();
+  
+  public void setSourceFiles(List<DocFile> sf);
+  public void setAuxiliaryFiles(List<DocFile> aux);
+  public void setCollapsedPaths(List<String> paths);
+  public void setClassPaths(List<File> cp);
+  public void setBuildDirectory(File dir);
+  public void setWorkingDirectory(File dir);
+  public void setMainClass(File main);
+  public void setProjectRoot(File root);
+  public void setCreateJarFile(File createJarFile);
+  public void setCreateJarFlags(int createJarFlags);
 }

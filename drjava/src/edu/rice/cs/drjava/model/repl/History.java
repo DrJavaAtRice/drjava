@@ -39,6 +39,7 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.util.OperationCanceledException;
 
 import java.io.Serializable;
 import java.io.IOException;

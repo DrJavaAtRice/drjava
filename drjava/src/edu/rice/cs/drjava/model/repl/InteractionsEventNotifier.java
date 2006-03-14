@@ -64,9 +64,7 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when an interaction has finished running.
-   */
+  /** Called when an interaction has finished running. */
   public void interactionEnded() {
     _lock.startRead();
     try {
@@ -154,6 +152,16 @@ public class InteractionsEventNotifier extends EventNotifier<InteractionsListene
     try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++)  _listeners.get(i).interactionIncomplete();
+    }
+    finally { _lock.endRead(); }
+  }
+  
+  /** Notifies listeners that the slaveJVM has been used. */
+  public void slaveJVMUsed() {
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for (int i = 0; i < size; i++)  _listeners.get(i).slaveJVMUsed();
     }
     finally { _lock.endRead(); }
   }

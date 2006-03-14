@@ -228,38 +228,30 @@ public class JarOptionsDialog extends JFrame {
     
       DirectoryChooser chooser = new DirectoryChooser(this,_rootFile);
       chooser.setDialogTitle("Select Main Class");
-      chooser.setTopMessage("Select the main class for the executable jar file:");
+//      chooser.setTopMessage("Select the main class for the executable jar file:");
       chooser.setApproveButtonText("Select");
       FileFilter filter = new FileFilter() {
         public boolean accept(File f) {
           String name = f.getName();
           return  !f.isDirectory() && name.endsWith(".class");
         }
-        public String getDescription() {
-          return "Class Files (*.class)";
-        }
+        public String getDescription() { return "Class Files (*.class)"; }
       };
       chooser.addChoosableFileFilter(filter);
-      chooser.addFileFilter(filter);
-      chooser.setShowFiles(true);
-      chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
+//      chooser.addChoosableFileFilter(filter);
+//      chooser.setShowFiles(true);
+//      chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
       _mainClassField.setFileChooser(chooser);
       
       final File mc = _model.getMainClass();
-      if (mc == null) {
-        _mainClassField.setText("");
-      }
+      if (mc == null)  _mainClassField.setText("");
       else {
         try {
           OpenDefinitionsDocument mcDoc = _model.getDocumentForFile(mc);
           _mainClassField.setText(mcDoc.getQualifiedClassName());
         }
-        catch(IOException ioe) {
-          _mainClassField.setText("");
-        }
-        catch(edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException e) {
-          _mainClassField.setText("");
-        }
+        catch(IOException ioe) { _mainClassField.setText(""); }
+        catch(edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException e) { _mainClassField.setText(""); }
       }
     }
     
@@ -500,14 +492,8 @@ public class JarOptionsDialog extends JFrame {
 
     _jarFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f, false);
     _jarFileSelector.setFileFilter(new FileFilter() {
-      public boolean accept(File f) {
-        return f.getName().endsWith(".jar") || f.isDirectory();
-      }
-
-      public String getDescription() {
-        return "Java Archive Files (*.jar)";
-      }
-
+      public boolean accept(File f) { return f.getName().endsWith(".jar") || f.isDirectory(); }
+      public String getDescription() { return "Java Archive Files (*.jar)"; }
     });
 
     return _jarFileSelector;

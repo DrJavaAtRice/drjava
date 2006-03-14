@@ -84,6 +84,8 @@ import java.util.Vector;
 
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.OrderedHashSet;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.SRunnable;
@@ -423,6 +425,14 @@ public class DummyGlobalModel implements GlobalModel {
   
   public File[] getProjectFiles() {
      throw new UnsupportedOperationException("Tried to call getProjectFiles on a Dummy");
+  }
+  
+  public File getProjectRoot() {
+     throw new UnsupportedOperationException("Tried to call getProjectRoot on a Dummy");
+  }
+  
+  public void setProjectRoot(File f) {
+     throw new UnsupportedOperationException("Tried to call setProjectRoot on a Dummy");
   }
 
   public File getBuildDirectory() {

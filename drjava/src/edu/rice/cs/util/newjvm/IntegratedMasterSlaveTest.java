@@ -36,6 +36,8 @@ package edu.rice.cs.util.newjvm;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
 
+import edu.rice.cs.util.swing.Utilities;
+
 import java.rmi.RemoteException;
 
 /**
@@ -44,198 +46,178 @@ import java.rmi.RemoteException;
  * @version $Id$
  */
 public class IntegratedMasterSlaveTest extends DrJavaTestCase {
+  
   private MasterImpl _testMaster = new MasterImpl();
-
+ 
   public void testItAll() throws Exception {
     // run a couple of times. each one forks its own jvm so not
     // too many! we run multiple times to prove that the master
     // can invoke multiple slaves (only one active at a time though)
-    for (int i = 0; i < 2; i++) {
-      _testMaster.runTestSequence();
-    }
+    for (int i = 0; i < 2; i++) _testMaster.runTestSequence();
   }
 
   public void testImmediateQuit() throws Exception {
-    for (int i = 0; i < 5; i++) {
-      _testMaster.runImmediateQuitTest();
-    }
+    for (int i = 0; i < 5; i++)  _testMaster.runImmediateQuitTest();
   }
 
   private class MasterImpl extends AbstractMasterJVM implements MasterI {
+    
+    /** Lock for accessing shared test fields. */
+    private Object _testLock = new Object();
+
     private char _letter;
     private boolean _justQuit;
+    private boolean _connected; // false until slave is created and connected
+    
     private String _currentTest = "";
 
-    public MasterImpl() {
-      super(IntegratedMasterSlaveTest.class.getName() + "$CounterSlave");
-    }
+    public MasterImpl() { super(IntegratedMasterSlaveTest.class.getName() + "$CounterSlave"); }
 
-    /**
-     * In util-20020414-0647, if quitSlave were called between the time the
-     * slave was invoked and the time it registered, an IllegalStateException
-     * was thrown. The correct behavior, which we test for here, is for the
-     * slave to quit as soon as it is started up.
+    /** In util-20020414-0647, if quitSlave were called between the time the slave was invoked and the time it 
+     *  registered, an IllegalStateException was thrown. The correct behavior, which we test for here, is for the
+     *  slave to quit as soon as it is started up.
      */
-    public synchronized void runImmediateQuitTest() throws Exception {
-      _currentTest = "runImmediateQuitTest";
-      _justQuit = false;
-
-      // this needs to be reset because the slave is going to check it!
-      _letter = 'a';
-
-      invokeSlave(new String[]{"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"}, FileOption.NULL_FILE);
-//      invokeSlave();
+    public void runImmediateQuitTest() throws Exception {
       
-      // we don't wait for it to start before calling quit.
-      // This should not throw an exception! It should quickly return,
-      // queueing up a quit to be processes ASAP.
-      quitSlave();
-
-      // now we just wait for the quit to process
-      while (! _justQuit) {
-        wait();
+//      Utilities.show("ImmediateQuitTest started");
+      
+      _currentTest = "runImmediateQuitTest";
+      synchronized (_testLock) { 
+        _justQuit = false; 
+        _connected = false;
+        _letter = 'a';  // this needs to be reset because the slave is going to check it!
       }
 
-      // If we get here, it worked as expected.
+      invokeSlave(new String[]{"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"}, FileOption.NULL_FILE);
+
+//      Utilities.show("slave invoked");
+      
+      // Immediately call quit, which should not throw an exception. It should return without waiting.
+      quitSlave();
+                     
+//      Utilities.show("slave quit");     
+
+      // now we just wait for the quit to process
+      synchronized(_testLock) { 
+        while (! _justQuit) _testLock.wait(); 
+        _currentTest = "";  // If we get here, it worked as expected.
+      }
+                     
+//      Utilities.show("ImmediateQuitTest finished");
+      
       // (All of the post-quit invariants are checked in handleSlaveQuit.
-      _currentTest = "";
     }
 
-    public synchronized void runTestSequence() throws Exception {
-      _currentTest = "runTestSequence";
-      _justQuit = false;
-      _letter = 'a';
+    public void runTestSequence() throws Exception {
+      
+      synchronized (_testLock) {
+        _currentTest = "runTestSequence";
+        _justQuit = false;
+        _connected = false;
+        _letter = 'a';
+      }
+      
+      invokeSlave(new String[] {"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"}, FileOption.NULL_FILE);           
 
-//      long start, end;
-//      start = System.currentTimeMillis();
-      invokeSlave(new String[]{"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"}, FileOption.NULL_FILE);
-//      invokeSlave();
-      wait();  // for handleConnected
-//      end = System.currentTimeMillis();
-//      System.err.println((end-start) + "ms waiting for invocation");
+      synchronized (_testLock) { while (! _connected) _testLock.wait();  }
 
       ((SlaveI)getSlave()).startLetterTest();
 
-      // now, wait until five getletter calls passed
-      // (after fifth call letter is 'f' due to the ++
-//      start = System.currentTimeMillis();
-      while (_letter != 'f') {
-        wait();  // for getLetter()
-      }
+      // now, wait until five getletter calls passed; after fifth call letter is 'f' due to the ++
+      synchronized(_testLock) { while (_letter != 'f') { _testLock.wait(); } }
 
-//      end = System.currentTimeMillis();
-//      System.err.println((end-start) + "ms waiting for 'f'");
-
-      // now make some slave calls
-//      start = System.currentTimeMillis();
       for (int i = 0; i < 7; i++) {
         int value = ((SlaveI) getSlave()).getNumber();
         assertEquals("value returned by slave", i, value);
       }
-//      end = System.currentTimeMillis();
-      //System.err.println((end-start) + "ms calling getNumber");
 
-      // OK, time to kill the slave
-//      start = System.currentTimeMillis();
       quitSlave();
-      wait(); // for quit to finish
-//      end = System.currentTimeMillis();
-//      System.err.println((end-start) + "ms waiting to quit");
+      synchronized(_testLock) { while (! _justQuit) _testLock.wait(); } // for quit to finish
       _currentTest = "";
     }
 
-    public synchronized char getLetter() {
-      char ret = _letter;
-      _letter++;
-
-      notify();
-
-      return ret;
+    public char getLetter() {
+      synchronized(_testLock) {
+        char ret = _letter;
+        _letter++;
+        _testLock.notify();
+        return ret;
+      }
     }
 
     protected synchronized void handleSlaveConnected() {
       SlaveI slave = (SlaveI) getSlave();
       assertTrue("slave is set", slave != null);
-      assertTrue("startup not in progress", !isStartupInProgress());
+      assertTrue("startup not in progress", ! isStartupInProgress());
       // getLetter should have never been called.
       assertEquals("letter value", 'a', _letter);
-      notify();
+      synchronized(_testLock) { 
+        _connected = true;
+        _testLock.notify(); 
+      }
     }
 
-    protected synchronized void handleSlaveQuit(int status) {
+    protected void handleSlaveQuit(int status) {
       assertEquals("slave result code", 0, status);
       if (_currentTest.equals("runTestSequence")) {
         // 5 letter calls must have occurred, so 'f' should be next
         assertEquals("last letter returned", 'f', _letter);
       }
       assertTrue("slave is not set", getSlave() == null);
-      assertTrue("startup not in progress", !isStartupInProgress());
+      assertTrue("startup not in progress", ! isStartupInProgress());
 
       // alert test method that quit occurred.
-      notify();
-      _justQuit = true;
+      synchronized(_testLock) {
+        _testLock.notify();
+        _justQuit = true;
+      }
     }
 
-    /**
-     * Called if the slave JVM dies before it is able to register.
-     * @param cause The Throwable which caused the slave to die.
+    /** Called if the slave JVM dies before it is able to register.
+     *  @param cause The Throwable which caused the slave to die.
      */
     public void errorStartingSlave(Throwable cause) throws RemoteException {
       fail("There was an error starting the slave JVM: " + cause);
     }
   }
 
-
-  /**
-   * The slave will exit with error codes in the case of problems,
-   * since there is no other thing it can do!
-   * <DL>
-   * <DT>1</DT><DD>MasterRemote class cast exception.</DD>
-   * <DT>2</DT><DD>Incorect value from getLetter</DD>
-   * <DT>3</DT><DD>RemoteException caught</DD>
-   * <DT>4</DT><DD>Timeout waiting for master JVM to call</DD>
-   * <DT>4</DT><DD>Interrupted while waiting for master JVM to call</DD>
-   * </DL>
+  /** The slave will exit with error codes in the case of problems, since there is no other thing it can do!
+   *  <DL>
+   *  <DT>1</DT><DD>MasterRemote class cast exception.</DD>
+   *  <DT>2</DT><DD>Incorect value from getLetter</DD>
+   *  <DT>3</DT><DD>RemoteException caught</DD>
+   *  <DT>4</DT><DD>Timeout waiting for master JVM to call</DD>
+   *  <DT>5</DT><DD>Interrupted while waiting for master JVM to call</DD>
+   *  </DL>
    */
   public static class CounterSlave extends AbstractSlaveJVM implements SlaveI {
     private int _counter = 0;
     private MasterI _master = null;
 
-    public int getNumber() {
-      return _counter++;
-    }
+    public int getNumber() { return _counter++; }
 
-    protected void handleStart(MasterRemote m) {
-      _master = (MasterI) m;
-    }
+    protected void handleStart(MasterRemote m) { _master = (MasterI) m; }
 
     public void startLetterTest() throws RemoteException {
-      // Run this part of the test in a new thread, so this call will
-      //  immediately return
+      // Run this part of the test in a new thread, so this call will immediately return
       Thread thread = new Thread() {
         public void run() {
           try {
             for (char c = 'a'; c <= 'e'; c++) {
               char got = _master.getLetter();
-              if (c != got) {
-                System.exit(2);
-              }
+              if (c != got) System.exit(2);
             }
 
             // OK, now wait up till 15 seconds for master jvm to call
             Thread.sleep(15000);
             System.exit(4);
           }
-          catch (InterruptedException e) {
-            System.exit(5);
-          }
+          catch (InterruptedException e) { System.exit(5); }
           catch (RemoteException re) {
             javax.swing.JOptionPane.showMessageDialog(null, re.toString());
             System.exit(3);
           }
-          catch (ClassCastException cce) {
-            System.exit(1);
-          }
+          catch (ClassCastException cce) { System.exit(1); }
         }
       };
       thread.start();

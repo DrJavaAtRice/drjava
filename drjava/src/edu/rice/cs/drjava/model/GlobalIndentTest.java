@@ -49,6 +49,7 @@ import javax.swing.text.BadLocationException;
 import java.util.List;
 
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.util.OperationCanceledException;
 
 /**
  * Tests the indenting functionality on the level of the GlobalModel.
@@ -72,8 +73,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * character.
    * @throws BadLocationException
    */
-  public void testIndentGrowTabAtStart()
-      throws BadLocationException, OperationCanceledException {
+  public void testIndentGrowTabAtStart() throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     
     openDoc.insertString(0, FOO_EX_1, null);

@@ -38,8 +38,8 @@ import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.model.DirectorySelector;
-import edu.rice.cs.drjava.model.OperationCanceledException;
+import edu.rice.cs.util.DirectorySelector;
+import edu.rice.cs.util.OperationCanceledException;
 
 import javax.swing.*;
 import java.io.File;
@@ -88,7 +88,7 @@ public class JavadocDialog implements DirectorySelector {
     DirectoryChooser chooser = new DirectoryChooser();
     chooser.setMultiSelectionEnabled(false);
     chooser.setApproveButtonText("Select");
-    chooser.setEditable(true);
+//    chooser.setEditable(true);
     
     // Create components for dialog
     String msg = "Select a destination directory for the Javadoc files:";

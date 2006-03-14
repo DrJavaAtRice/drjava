@@ -69,9 +69,13 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
+import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
+import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.DelegatingAction;
+import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
@@ -334,9 +338,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   private Action _newProjectAction = new AbstractAction("New") {
-    public void actionPerformed(ActionEvent ae) {
-      _newProject();
-    }
+    public void actionPerformed(ActionEvent ae) { _newProject(); }
   };
   
   private Action _runProjectAction = new AbstractAction("Run Main Document") {
@@ -1263,14 +1265,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   private Action _projectPropertiesAction = new AbstractAction("Project Properties") {
     public void actionPerformed(ActionEvent ae) {
-      //Create frame if we haven't yet
-      if (_projectPropertiesFrame == null) {
-        _projectPropertiesFrame = new ProjectPropertiesFrame(MainFrame.this);
-      }
-      _projectPropertiesFrame.setVisible(true);
-      _projectPropertiesFrame.toFront();
+      _editProject();
     }
   };
+    
   
   
   /** Enables the debugger */
@@ -1706,8 +1704,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     _posListener = new PositionListener();
     _setUpStatusBar();
     
+//    Utilities.show("MainFrame starting");
+    
     // create our model
     _model = new DefaultGlobalModel();
+    
+//    Utilities.show("Global Model started");
     
     _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
     _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
@@ -2023,7 +2025,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   private DirectoryChooser makeFolderChooser(File workDir) {
     DirectoryChooser dc = new DirectoryChooser(this);
-    dc.setSelectedDirectory(workDir);
+    dc.setSelectedFile(workDir);
     dc.setApproveButtonText("Select");
     dc.setDialogTitle("Open Folder");
     dc.setAccessory(_openRecursiveCheckBox);
@@ -2199,11 +2201,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _lastFocusOwner.requestFocusInWindow();
   }
   
-  
   public void updateFileTitle(String text) {
     _fileNameField.setText(text);
   }
-  
   
   /** Updates the title bar with the name of the active document. */
   public void updateFileTitle() {
@@ -2220,21 +2220,21 @@ public class MainFrame extends JFrame implements OptionConstants {
 //    System.out.println("setting " + doc + " to display name: " + GlobalModelNaming.getDisplayFullPath(doc));
   }
   
-  /** Prompt the user to select a place to open a file from, then load it. Ask the user if they'd like to save 
+  /** Prompt the user to select a place to open files from, then load them. Ask the user if they'd like to save 
    *  previous changes (if the current document has been modified) before opening.
    *  @param jfc the open dialog from which to extract information
    *  @return an array of the files that were chosen
    */
   public File[] getOpenFiles(JFileChooser jfc) throws OperationCanceledException {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
-    File selection = jfc.getSelectedFile();//_openChooser.getSelectedFile();
-    if (selection != null) {
-//      jfc.setSelectedFile(selection.getParentFile());
-//      jfc.setSelectedFile(selection);
+    File selection = jfc.getSelectedFile();
+    if (selection != null) { // necessary for OS X?
+      jfc.setSelectedFile(selection.getParentFile());
+      jfc.setSelectedFile(selection);
       jfc.setSelectedFile(null);
     }
-    int rc = jfc.showOpenDialog(this);//_openChooser.showOpenDialog(this);
-    return getChosenFiles(jfc, rc);//_openChooser, rc);
+    int rc = jfc.showOpenDialog(this);
+    return getChosenFiles(jfc, rc);
   }
   
   /** Prompt the user to select a place to save the current document. */
@@ -2833,14 +2833,24 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveProjectHelper(_currentProjFile);
   }
   
+  private void _editProject() {
+    // Create project properties frame from global model state if we haven't yet
+    if (_projectPropertiesFrame == null) {
+      _projectPropertiesFrame = new ProjectPropertiesFrame(MainFrame.this);
+    }
+    _projectPropertiesFrame.setVisible(true);
+    _projectPropertiesFrame.reset();
+    _projectPropertiesFrame.toFront();
+  }
+  
   /** Closes all files and makes a new project. */
   private void _newProject() {
-//    _closeAll();
-    
+
+    _closeProject(true);  // supress resetting interactions; it will be done in _model.newProject() below
     _saveChooser.setFileFilter(_projectFilter);
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
-      File file = _saveChooser.getSelectedFile();
+      File file = _saveChooser.getSelectedFile();  // project file
       String fileName = file.getName();
       // ensure that saved file has extesion ".pjt"
       if (! fileName.endsWith(".pjt")) {
@@ -2848,6 +2858,11 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (lastIndex == -1) file = new File (file.getAbsolutePath() + ".pjt");
         else file = new File(fileName.substring(0, lastIndex) + ".pjt");
       }
+      
+      _projectPropertiesFrame = new ProjectPropertiesFrame(MainFrame.this, file);
+      _editProject();    // Uses new project properties frame
+      _projectPropertiesFrame.saveSettings();   // Saves edited profile in global model
+      
       try { _model.newProject(file); }
       catch(IOException e) { throw new UnexpectedException(e); }
       _currentProjFile = file;
@@ -3726,8 +3741,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_openFileOrProjectAction, "Open", "Open an existing file or project");
     _setUpAction(_openProjectAction, "Open", "Open an existing project");
     _setUpAction(_saveAction, "Save", "Save the current document");
-    _setUpAction(_saveAsAction, "Save As", "SaveAs",
-                 "Save the current document with a new name");
+    _setUpAction(_saveAsAction, "Save As", "SaveAs", "Save the current document with a new name");
     _setUpAction(_saveProjectAction, "Save", "Save", "Save the current project");
     _saveProjectAction.setEnabled(false);
     // No longer used
@@ -3823,6 +3837,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     //_setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset the Interactions Pane");
+    _resetInteractionsAction.setEnabled(false);
+    
     _setUpAction(_viewInteractionsClassPathAction, "View Interactions Classpath", 
                  "Display the classpath in use by the Interactions Pane");
     _setUpAction(_copyInteractionToDefinitionsAction, "Lift Current Interaction", 
@@ -5641,9 +5657,9 @@ public class MainFrame extends JFrame implements OptionConstants {
           _switchDefScrollPane();
           
           boolean isModified = active.isModifiedSinceSave();
-          boolean canCompile = (!isModified && !active.isUntitled());
-          _saveAction.setEnabled(!canCompile);
-          _revertAction.setEnabled(!active.isUntitled());
+          boolean canCompile = (! isModified && ! active.isUntitled());
+          _saveAction.setEnabled(! canCompile);
+          _revertAction.setEnabled(! active.isUntitled());
           
           // Update error highlights
           int pos = _currentDefPane.getCaretPosition();
@@ -5957,7 +5973,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           _runAction.setEnabled(true);
           _junitAction.setEnabled(true);
           _junitAllAction.setEnabled(true);
-          _resetInteractionsAction.setEnabled(true);
+// This action should not be enabled until the slave JVM is used          
+//          _resetInteractionsAction.setEnabled(true);
           if (_model.getDebugger().isAvailable()) {
             _toggleDebuggerAction.setEnabled(true);
           }
@@ -5970,6 +5987,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       };
       Utilities.invokeLater(command);
     }
+    
+    public void slaveJVMUsed() { _resetInteractionsAction.setEnabled(true); }
     
     public void consoleReset() { }
     

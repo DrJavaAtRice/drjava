@@ -37,6 +37,9 @@ import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.IOException;
 
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.OperationCanceledException;
+
 /** Test functions of the single display model.
  *  @version $Id$
  */

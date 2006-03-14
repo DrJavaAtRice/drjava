@@ -112,63 +112,40 @@ public class SimpleInteractionsModel extends InteractionsModel {
     return c.getName();
   }
 
-  /**
-   * Adds the given path to the interpreter's classpath.
-   * @param path Path to add
+  /** Adds the given path to the interpreter's classpath.
+   *  @param path Path to add
    */
-  public void addProjectClassPath(URL path) {
-    _interpreter.addProjectClassPath(path);
-  }
+  public void addProjectClassPath(URL path) { _interpreter.addProjectClassPath(path); }
 
-  /**
-   * Adds the given path to the interpreter's classpath.
-   * @param path Path to add
+  /** Adds the given path to the interpreter's classpath.
+   *  @param path Path to add
    */
-  public void addBuildDirectoryClassPath(URL path) {
-    _interpreter.addBuildDirectoryClassPath(path);
-  }
+  public void addBuildDirectoryClassPath(URL path) { _interpreter.addBuildDirectoryClassPath(path); }
 
-  /**
-   * Adds the given path to the interpreter's classpath.
-   * @param path Path to add
+  /** Adds the given path to the interpreter's classpath.
+   *  @param path Path to add
    */
-  public void addProjectFilesClassPath(URL path) {
-    _interpreter.addProjectFilesClassPath(path);
-  }
+  public void addProjectFilesClassPath(URL path) { _interpreter.addProjectFilesClassPath(path); }
 
-  /**
-   * Adds the given path to the interpreter's classpath.
-   * @param path Path to add
+  /** Adds the given path to the interpreter's classpath.
+   *  @param path Path to add
    */
-  public void addExternalFilesClassPath(URL path) {
-    _interpreter.addExternalFilesClassPath(path);
-  }
+  public void addExternalFilesClassPath(URL path) { _interpreter.addExternalFilesClassPath(path); }
 
-  /**
-   * Adds the given path to the interpreter's classpath.
-   * @param path Path to add
+  /** Adds the given path to the interpreter's classpath.
+   *  @param path Path to add
    */
-  public void addExtraClassPath(URL path) {
-    _interpreter.addExtraClassPath(path);
-  }
+  public void addExtraClassPath(URL path) { _interpreter.addExtraClassPath(path); }
 
 
-  /**
-   * Defines a variable in the interpreter to the given value.
-   */
-  public void defineVariable(String name, Object value) {
-    _interpreter.defineVariable(name, value);
-  }
+  /** Defines a variable in the interpreter to the given value. */
+  public void defineVariable(String name, Object value) { _interpreter.defineVariable(name, value); }
 
   /** Defines a final variable in the interpreter to the given value. */
-  public void defineConstant(String name, Object value) {
-    _interpreter.defineConstant(name, value);
-  }
+  public void defineConstant(String name, Object value) { _interpreter.defineConstant(name, value); }
 
   /** Sets whether protected and private variables and methods can be accessed from within the interpreter. */
-  public void setInterpreterPrivateAccessible(boolean accessible) {
-    _interpreter.setPrivateAccessible(accessible);
-  }
+  public void setInterpreterPrivateAccessible(boolean accessible) { _interpreter.setPrivateAccessible(accessible); }
 
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
    *  @param t The Throwable thrown by System.exit
@@ -203,7 +180,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected void _notifyInterpreterResetting() {  /* do nothing */  }
 
   /** Notifies listeners that the interpreter is ready.  */
-  public void notifyInterpreterReady(File wd) {
+  public void _notifyInterpreterReady(File wd) {
     //  Ok, we don't need to do anything special
   }
 
@@ -223,6 +200,9 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected void _notifyInteractionIncomplete() {
     // Oh well.  Nothing to do.
   }
+  
+  /** Notifies listeners that the slave JVM has been used. */
+  protected void _notifySlaveJVMUsed() { /* do nothing; no slave JVM */ }
    
   /** Returns null because console tab document is not supported in this model */
   public ConsoleDocument getConsoleDocument() { return null; }

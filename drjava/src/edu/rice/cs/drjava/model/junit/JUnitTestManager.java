@@ -185,7 +185,6 @@ public class JUnitTestManager {
     try { return _isJUnitTest(_testRunner.getLoader().load(className)); }
     catch (ClassNotFoundException cnfe) { return false; }
   }
-
   
   /** Constructs a new JUnitError from a TestFailure
    *  @param failure A given TestFailure
@@ -194,8 +193,7 @@ public class JUnitTestManager {
    *  @param files The files that were used for this test suite
    *  @return JUnitError
    */
-  private JUnitError _makeJUnitError(TestFailure failure, List<String> classNames,
-                                     boolean isError, List<File> files) {
+  private JUnitError _makeJUnitError(TestFailure failure, List<String> classNames, boolean isError, List<File> files) {
 
     Test failedTest = failure.failedTest();
     String testName;
@@ -206,10 +204,7 @@ public class JUnitTestManager {
     int firstIndex = testString.indexOf('(') + 1;
     int secondIndex = testString.indexOf(')');
     
-    /**
-     * junit can come back with a string in two different formats:
-     * so we'll parse both formats, and then decide which one to use
-     */
+    /** junit can return a string in two different formats; we parse both formats, and then decide which one to use. */
     
     String className;
     String className1 = testString.substring(firstIndex, secondIndex);
@@ -217,24 +212,11 @@ public class JUnitTestManager {
     if (firstIndex == secondIndex) className = className2;
     else className = className1;
     
-//    String ps = System.getProperty("file.separator");
-//    // replace periods with the System's file separator
-//    className = StringOps.replace(className, ".", ps);
-//
-//    // crop off the $ if there is one and anything after it
-//    int indexOfDollar = className.indexOf('$');
-//    if (indexOfDollar > -1) {
-//      className = className.substring(0, indexOfDollar);
-//    }
-//
-//    String filename = className + ".java";
-
     String classNameAndTest = className + "." + testName;
     String stackTrace = StringOps.getStackTrace(failure.thrownException());
     
-    /**
-     * if the classname is not in the stacktrace, then the test that
-     * failed was inherited by a superclass. let's look for that classname
+    /** If the classname is not in the stacktrace, then the test that failed was inherited from a superclass. let's look
+     *  for that classname
      */
     if (stackTrace.indexOf(className) == -1) {
       /* get the stack trace of the junit error */
@@ -300,15 +282,17 @@ public class JUnitTestManager {
     
     // a test didn't fail, we couldn't even open the test.
     if (file == null) {
-      return new JUnitError(new File("nofile"), 0,  //lineNum, 
-                          0, exception, !isFailure, testName, className, stackTrace);
+      return new JUnitError(new File("nofile"), 0, 0, exception, !isFailure, testName, className, stackTrace);
     }
     
-    //The conditional has been added because of the augmented code in the .dj0 files - it causes the error to be highlighted on the wrong line
-    //At the elementary level it should always be off by one
-    //NOTE: this presupposes that 
-    return new JUnitError(file, (file.getName().endsWith(".dj0") ? lineNum-1 : lineNum),  //lineNum, 
-                          0, exception, !isFailure, testName, className, stackTrace);
+    // The code augmentation for elementary and intermediate level files causes the error to be highlighted on
+    // the wrong line.  The following code adjusts for this discrepancy.
+    String name = file.getName();
+    int adjLineNum;
+    if (name.endsWith(".dj0") || name.endsWith(".dj0")) adjLineNum = lineNum - 1;
+    else adjLineNum = lineNum;
+    
+    return new JUnitError(file, adjLineNum, 0, exception, !isFailure, testName, className, stackTrace);
   }
 
   /**

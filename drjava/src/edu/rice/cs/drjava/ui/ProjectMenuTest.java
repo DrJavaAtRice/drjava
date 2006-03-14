@@ -33,14 +33,16 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.model.FileOpenSelector;
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
-import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.project.DocFile;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParser;
+
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.io.*;
@@ -53,6 +55,9 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   private SingleDisplayModel _model;
   
   /** Temporary files */
+  private File _base;
+  private File _parent;
+  private File _srcDir;
   private File _projDir;
   private File _auxFile;
   private File _projFile;
@@ -70,31 +75,38 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
+    
+    // create temp directory for this test
+    _base = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
+    _parent = FileOps.createTempDirectory("proj", _base);
+    _srcDir = new File(_parent, "src");
+    _srcDir.mkdir(); // create the src directory
 
     // create project in a directory with an auxiliary file outside of it
     _auxFile = File.createTempFile("aux", ".java");
     File auxFileParent = _auxFile.getParentFile();
-    _projDir = new File(auxFileParent, "project-dir");
-    _projDir.mkdir();
-    _projFile = File.createTempFile("test", ".pjt", _projDir);
-    _file1 = File.createTempFile("test1",".java", _projDir);
-    _file2 = File.createTempFile("test2",".java", _projDir);
+    _projFile = new File(_parent, "test.pjt");
     
-    // generate the relative path names for the files in the project file
-    String temp = _file1.getParentFile().getCanonicalPath();
-    _file1RelName = _file1.getCanonicalPath().substring(temp.length()+1);
-    temp = _file2.getParentFile().getCanonicalPath();
-    _file2RelName = _file2.getCanonicalPath().substring(temp.length()+1);
+    _file1 = new File(_srcDir, "test1.java");
+    FileOps.writeStringToFile(_file1, "");  // create dummy file
+    _file2 = new File(_srcDir, "test2.java");
+    FileOps.writeStringToFile(_file2, "");// create dummy file
+    
+//    System.err.println("test1.java and test1.java created");
+    
+//    // generate the relative path names for the files in the project file
+//    String temp = _file1.getParentFile().getCanonicalPath();
+//    _file1RelName = _file1.getCanonicalPath().substring(temp.length() + 1);
+//    temp = _file2.getParentFile().getCanonicalPath();
+//    _file2RelName = _file2.getCanonicalPath().substring(temp.length() + 1);
 
     _projFileText =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
       "(source ;; comment\n" +
-      "   (file (name \""+ _file1RelName +"\")(select 32 32)(active)))\n";
+      "   (file (name \"src/test1.java\")(select 32 32)(active)))";
+//      "   (file (name \"src/test2.java\")(select 32 32)(active)))";
     
-    reader = new BufferedReader(new FileReader(_projFile));
-    BufferedWriter w = new BufferedWriter(new FileWriter(_projFile));
-    w.write(_projFileText);
-    w.close();
+    FileOps.writeStringToFile(_projFile, _projFileText);
 
     _frame = new MainFrame();
     _frame.pack();
@@ -103,11 +115,8 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   }
 
   public void tearDown() throws Exception {
-    _projFile.deleteOnExit();
+    FileOps.deleteDirectoryOnExit(_parent);
     _auxFile.delete();
-    _file1.delete();
-    _file2.delete();
-    _projDir.delete();
     _frame.dispose();
     _projFile = null;
     _model = null;

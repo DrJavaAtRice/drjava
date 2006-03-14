@@ -54,7 +54,7 @@ import edu.rice.cs.util.ReaderWriterLock;
  */
 public abstract class EventNotifier<T> {
 
-  /** All T Listeners that are listening to the model.  nAccesses to this collection are protected by the 
+  /** All T Listeners that are listening to the model.  Accesses to this collection are protected by the 
    *  ReaderWriterLock. The collection must be synchronized, since multiple readers could access it at once.
    */
   protected final LinkedList<T> _listeners = new LinkedList<T>();

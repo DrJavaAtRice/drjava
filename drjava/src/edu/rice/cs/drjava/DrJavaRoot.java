@@ -43,6 +43,7 @@ import java.util.jar.JarFile;
 import javax.swing.UIManager;
 import javax.swing.*;
 
+import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.newjvm.ExecJVM;
@@ -97,7 +98,7 @@ public class DrJavaRoot {
 
   public static void main(String[] _filesToOpen) {
     
-//    Utilities.showDebug("DrJavaRoot started with _filesToOpen = " + Arrays.toString(_filesToOpen));
+//    Utilities.show("DrJavaRoot started with _filesToOpen = " + Arrays.toString(_filesToOpen));
     
     boolean _showDebugConsole = false;
     int len = _filesToOpen.length;

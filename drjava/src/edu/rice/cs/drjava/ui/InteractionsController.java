@@ -217,7 +217,6 @@ public class InteractionsController extends AbstractConsoleController {
   
   private Vector<ConsoleStateListener> _consoleStateListeners;
   
-  
   private InteractionsListener _viewListener = new InteractionsListener() {
     public void interactionStarted() { }
     public void interactionEnded() { }    
@@ -238,6 +237,7 @@ public class InteractionsController extends AbstractConsoleController {
     public void interpreterExited(int status) { }
     public void interpreterChanged(boolean inProgress) { }
     public void interactionIncomplete() { }
+    public void slaveJVMUsed() { }
   };
 
   /** Glue together the given model and a new view.

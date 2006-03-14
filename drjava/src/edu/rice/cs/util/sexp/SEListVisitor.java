@@ -45,10 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.sexp;
 
-/**
- * Just your every-day visitor.  It works on the lists only.<br>
- * The return types are parameterized.
- */
+/** The usual generically typed visitor for functional lists.*/
+
 public interface SEListVisitor<Ret> {
   
   public Ret forEmpty(Empty e);

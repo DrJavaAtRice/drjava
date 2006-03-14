@@ -75,6 +75,12 @@ public class ProjectFileParser {
   /** Xingleton instance of ProjectFileParser */
   public static final ProjectFileParser ONLY = new ProjectFileParser();
   
+  private File _projectFile;
+  private String _parentDir;
+  
+  ListVisitor<File> fileListVisitor = new ListVisitor<File>();
+  ListVisitor<DocFile> docFileListVisitor = new ListVisitor<DocFile>();
+  
   private ProjectFileParser() { }
   
   /* methods */
@@ -82,20 +88,24 @@ public class ProjectFileParser {
   /** @param projFile the file to parse
    *  @return the project file IR
    */
-  public ProjectFileIR parse(File projFile) 
-    throws IOException, FileNotFoundException, MalformedProjectFileException{
+  public ProjectFileIR parse(File projFile) throws IOException, FileNotFoundException, MalformedProjectFileException {
+    
+    _projectFile = projFile;
+    _parentDir = projFile.getParent();
+//    System.err.println("Parsing project file " + projFile + " with parent " + _parentDir);
+    
     List<SEList> forest = null;
     try { forest = SExpParser.parse(projFile); }
-    catch(SExpParseException e) {
-      throw new MalformedProjectFileException("Parse Error: " + e.getMessage());
-    }
+    catch(SExpParseException e) { throw new MalformedProjectFileException("Parse Error: " + e.getMessage()); }
     
-    ProjectFileIRImpl pfir = new ProjectFileIRImpl();
+    ProjectFileIR pfir = new ProjectProfile(projFile);
     
     try {
-      for (SEList exp : forest) { evaluateExpression(exp, pfir, new FileListVisitor(projFile.getParent())); }
+      for (SEList exp : forest) evaluateExpression(exp, pfir);
     }
     catch(PrivateProjectException e) { throw new MalformedProjectFileException("Parse Error: " + e.getMessage()); }
+    
+//    System.err.println("Parsed buildDir is " + pfir.getBuildDirectory());
     
     return pfir;
   }
@@ -105,74 +115,63 @@ public class ProjectFileParser {
    *  @param e the top-level s-expression to check
    *  @param pfir the ProjectFileIR to update
    */
-  private void evaluateExpression(SEList e, ProjectFileIRImpl pfir, FileListVisitor flv) {
+  private void evaluateExpression(SEList e, ProjectFileIR pfir) {
     if (e == Empty.ONLY) return;
     Cons exp = (Cons)e; // If it's not empty, it's a cons
       
     String name = exp.accept(NameVisitor.ONLY);
     if (name.compareToIgnoreCase("source") == 0) {
-      List<DocFile> fList = exp.getRest().accept(flv);
-      pfir.setSourceFiles(fList);
+      List<DocFile> dfList = exp.getRest().accept(docFileListVisitor);
+      pfir.setSourceFiles(dfList);
+    }
+    if (name.compareToIgnoreCase("proj-root") == 0) {
+      List<File> fList = exp.getRest().accept(fileListVisitor);
+      if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple source roots");
+      else if (fList.size() == 0) pfir.setProjectRoot(null);
+      pfir.setProjectRoot(fList.get(0));
     }
     else if (name.compareToIgnoreCase("auxiliary") == 0) {
-      List<DocFile> fList = exp.getRest().accept(flv);
-      pfir.setAuxiliaryFiles(fList);
+      List<DocFile> dfList = exp.getRest().accept(docFileListVisitor);
+      pfir.setAuxiliaryFiles(dfList);
     }
     else if (name.compareToIgnoreCase("collapsed") == 0) {
       List<String> sList = exp.getRest().accept(PathListVisitor.ONLY);
       pfir.setCollapsedPaths(sList);
     }
     else if (name.compareToIgnoreCase("build-dir") == 0) {
-      List<DocFile> fList = exp.getRest().accept(flv);
+      List<File> fList = exp.getRest().accept(fileListVisitor);
+//      System.err.println("BuildDir fList = " + fList);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple build directories");
       else if (fList.size() == 0) pfir.setBuildDirectory(null);
       else pfir.setBuildDirectory(fList.get(0));
     }
     else if (name.compareToIgnoreCase("work-dir") == 0) {
-      List<DocFile> fList = exp.getRest().accept(flv);
+      List<File> fList = exp.getRest().accept(fileListVisitor);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple working directories");
       else if (fList.size() == 0) pfir.setWorkingDirectory(null);
       else pfir.setWorkingDirectory(fList.get(0));
     }
     else if (name.compareToIgnoreCase("classpaths") == 0) {
-      List<DocFile> fList = exp.getRest().accept(flv);
+      List<File> fList = exp.getRest().accept(fileListVisitor);
       pfir.setClassPaths(fList);
     }
     else if (name.compareToIgnoreCase("main-class") == 0) {
-      List<DocFile> fList = exp.getRest().accept(flv);
-      if (fList.size() > 1) {
-        throw new PrivateProjectException("Cannot have multiple main classes");
-      }
-      else if (fList.size() == 0) {
-        pfir.setMainClass(null);
-      }
-      else {
-        pfir.setMainClass(fList.get(0));
-      }
+      List<File> fList = exp.getRest().accept(fileListVisitor);
+      if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple main classes");
+      else if (fList.size() == 0) pfir.setMainClass(null);
+      else pfir.setMainClass(fList.get(0));
     }
     else if (name.compareToIgnoreCase("proj-root") == 0) {
-      List<DocFile> fList = exp.getRest().accept(flv);
-      if (fList.size() > 1) {
-        throw new PrivateProjectException("Cannot have multiple project roots");
-      }
-      else if (fList.size() == 0) {
-        pfir.setProjectRoot(null);
-      }
-      else {
-        pfir.setProjectRoot(fList.get(0));
-      }
+      List<File> fList = exp.getRest().accept(fileListVisitor);
+      if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple project roots");
+      else if (fList.size() == 0) pfir.setProjectRoot(null);
+      else pfir.setProjectRoot(fList.get(0));
     }
     else if (name.compareToIgnoreCase("create-jar-file") == 0) {
-      List<DocFile> fList = exp.getRest().accept(flv);
-      if (fList.size() > 1) {
-        throw new PrivateProjectException("Cannot have more than one \"create jar\" file");
-      }
-      else if (fList.size() == 0) {
-        pfir.setCreateJarFile(null);
-      }
-      else {
-        pfir.setCreateJarFile(fList.get(0));
-      }
+      List<File> fList = exp.getRest().accept(fileListVisitor);
+      if (fList.size() > 1) throw new PrivateProjectException("Cannot have more than one \"create jar\" file");
+      else if (fList.size() == 0) pfir.setCreateJarFile(null);
+      else pfir.setCreateJarFile(fList.get(0));
     }
     else if (name.compareToIgnoreCase("create-jar-flags") == 0) {
       Integer i = exp.getRest().accept(NumberVisitor.ONLY);
@@ -259,16 +258,13 @@ public class ProjectFileParser {
   
   /* nested/inner classes */
   
-  
   /** Parses out a list of file nodes. */
-  private static class FileListVisitor implements SEListVisitor<List<DocFile>> {
-    String _parentDir;
-    public FileListVisitor(String parent) { _parentDir = parent; }
-    public List<DocFile> forEmpty(Empty e) { return new ArrayList<DocFile>(); }
-    public List<DocFile> forCons(Cons c) {
-      List<DocFile> list = c.getRest().accept(this);
-      DocFile tmp = ProjectFileParser.ONLY.parseFile(c.getFirst(), _parentDir);
-      list.add(0,tmp); // add to the end
+  private class ListVisitor<U extends File> implements SEListVisitor<List<U>> {
+    public List<U> forEmpty(Empty e) { return new ArrayList<U>(); }
+    public List<U> forCons(Cons c) {
+      List<U> list = c.getRest().accept(this);
+      U tmp = (U) ProjectFileParser.ONLY.parseFile(c.getFirst(), _parentDir);
+      list.add(0, tmp); // add to the end
       return list;
     }
   };
@@ -381,77 +377,6 @@ public class ProjectFileParser {
     }
   };
     
-  /** Concrete implementation of the ProjectFileIR which is the interface through which DrJava
-   *  access info stored in a project file
-   */
-  public static class ProjectFileIRImpl implements ProjectFileIR {
-    List<DocFile> _src;
-    List<DocFile> _aux;
-    List<String> _collapsed;
-    File _buildDir;
-    File _workDir;
-    List<? extends File> _classPaths;
-    File _mainClass;
-    File _projRoot;
-    File _createJarFile;
-    int _createJarFlags;
-    
-    /** Starts the project file IR off with all its default values. */
-    public ProjectFileIRImpl() {
-      _src = new ArrayList<DocFile>();
-      _aux = new ArrayList<DocFile>();
-      _collapsed = new ArrayList<String>();
-      _classPaths = new ArrayList<DocFile>();
-      _buildDir = null;
-      _workDir = null;
-      _mainClass = null;
-      _projRoot = null;
-      _createJarFlags = 0;
-    }
-    
-    /** @return an array full of all the source files in this project file. */
-    public DocFile[] getSourceFiles() { return _src.toArray(new DocFile[0]); }
-    
-    /** @return an array full of all the resource files in this project file. */
-    public DocFile[] getAuxiliaryFiles() { return _aux.toArray(new DocFile[0]); }
-    
-    /** @return an array full of all the resource files in this project file. */
-    public String[] getCollapsedPaths() { return _collapsed.toArray(new String[0]); }
-    
-    /** @return an array full of all the classpath path elements in the classpath for this project file. */
-    public File[] getClassPaths() { return _classPaths.toArray(new File[0]); }
-
-    /** @return the build directory stored in this project file. */
-    public File getBuildDirectory() { return _buildDir; }
-    
-    /** @return the working directory stored in this project file . */
-    public File getWorkingDirectory() { return _workDir; }
-    
-    /** @return the file of the class whose main method should be run when running the project in DrJava. */
-    public File getMainClass() { return _mainClass; }
-    
-    /** @return the file pointing to the directory that all source files are relative to. */
-    public File getProjectRoot() { return _projRoot; }
-    
-    /** @return the output file used in the "Create Jar" dialog. */
-    public File getCreateJarFile() { return _createJarFile; }
-    
-    /** @return the flags used in the "Create Jar" dialog. */
-    public int getCreateJarFlags() { return _createJarFlags; }
-
-  /* Package Protected Setter Methods */
-    
-    void setSourceFiles(List<DocFile> src) { _src = src; }
-    void setAuxiliaryFiles(List<DocFile> aux) { _aux = aux; }
-    void setCollapsedPaths(List<String> path) { _collapsed = path; }
-    void setClassPaths(List<DocFile> cp) { _classPaths = cp; }
-    void setBuildDirectory(File dir) { _buildDir = dir; }
-    void setWorkingDirectory(File dir) { _workDir = dir; }
-    void setMainClass(File main) { _mainClass = main; }
-    void setProjectRoot(File root) { _projRoot = root; }
-    void setCreateJarFile(File createJarFile) { _createJarFile = createJarFile; }
-    void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
-  } // end ProjectFileIRImpl class
 
   
   private static class PrivateProjectException extends RuntimeException{

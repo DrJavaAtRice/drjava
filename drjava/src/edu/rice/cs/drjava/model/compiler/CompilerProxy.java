@@ -94,8 +94,7 @@ public class CompilerProxy implements CompilerInterface {
       
       _realCompiler.setWarningsEnabled(_warningsEnabled);
       
-      boolean allowAssertions =
-        DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT).booleanValue();
+      boolean allowAssertions = DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT).booleanValue();
       _realCompiler.setAllowAssertions(allowAssertions);
       
       String compilerClass = _realCompiler.getClass().getName();

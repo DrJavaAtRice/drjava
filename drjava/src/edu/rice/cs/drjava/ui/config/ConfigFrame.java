@@ -105,7 +105,7 @@ public class ConfigFrame extends JFrame {
     _browserChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
     _dirChooser = new DirectoryChooser(this);
-    _dirChooser.setSelectedDirectory(_getWorkDir());
+    _dirChooser.setSelectedFile(_getWorkDir());
     _dirChooser.setDialogTitle("Select");
     _dirChooser.setApproveButtonText("Select");
     _dirChooser.setMultiSelectionEnabled(false);
@@ -392,13 +392,10 @@ public class ConfigFrame extends JFrame {
     oc.addChangeListener(_changeListener);
   }
   
-  /**
-   * Add all of the components for the Resource Locations panel of the preferences window.
-   */
+  /** Add all of the components for the Resource Locations panel of the preferences window. */
   private void _setupResourceLocPanel(ConfigPanel panel) {
     FileOptionComponent browserLoc =
-      new FileOptionComponent(OptionConstants.BROWSER_FILE,
-                              "Web Browser", this,
+      new FileOptionComponent(OptionConstants.BROWSER_FILE, "Web Browser", this,
                               "<html>Location of a web browser to use for Javadoc and Help links.<br>" +
                               "If left blank, only the Web Browser Command will be used.<br>" +
                               "This is not necessary if a default browser is available on your system.",
@@ -406,16 +403,14 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, browserLoc);    
 
     StringOptionComponent browserCommand =
-      new StringOptionComponent(OptionConstants.BROWSER_STRING,
-                              "Web Browser Command", this,
+      new StringOptionComponent(OptionConstants.BROWSER_STRING, "Web Browser Command", this,
                               "<html>Command to send to the web browser to view a web location.<br>" +
                               "The string <code>&lt;URL&gt;</code> will be replaced with the URL address.<br>" +
                               "This is not necessary if a default browser is available on your system.");
     addOptionComponent(panel, browserCommand);
 
     FileOptionComponent javacLoc =
-      new FileOptionComponent(OptionConstants.JAVAC_LOCATION,
-                              "Tools.jar Location", this,
+      new FileOptionComponent(OptionConstants.JAVAC_LOCATION, "Tools.jar Location", this,
                               "Optional location of the JDK's tools.jar, which contains the compiler and debugger.",
                               _fileOptionChooser);
     javacLoc.setFileFilter(ClassPathFilter.ONLY);
@@ -432,9 +427,8 @@ public class ConfigFrame extends JFrame {
   /** Add all of the components for the Display Options panel of the preferences window. */
   private void _setupDisplayPanel(ConfigPanel panel) {
 
-    addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL,
-                                                       "Look and Feel", this,
-                                                       "Changes the general appearance of DrJava."));
+    addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL, "Look and Feel", this,
+                                                              "Changes the general appearance of DrJava."));
 
     //ToolbarOptionComponent is a degenerate option component
     addOptionComponent(panel, new ToolbarOptionComponent("Toolbar Buttons", this,
@@ -449,9 +443,7 @@ public class ConfigFrame extends JFrame {
                                                   "Save \"Go to File\" Dialog Position", this,
                                                   "Whether to save and restore the size and position of the \"Go to File\" dialog."));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        _mainFrame.resetGotoFileDialogPosition();
-      }
+      public void actionPerformed(ActionEvent e) { _mainFrame.resetGotoFileDialogPosition(); }
     }, "Reset \"Go to File\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_FULLY_QUALIFIED,
                                                   "Display Fully-Qualified Class Names in \"Go to File\" Dialog", this,

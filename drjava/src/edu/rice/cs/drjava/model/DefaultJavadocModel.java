@@ -43,6 +43,10 @@ import java.util.Collection;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.ArgumentTokenizer;
+import edu.rice.cs.util.DirectorySelector;
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;

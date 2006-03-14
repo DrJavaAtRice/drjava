@@ -38,11 +38,11 @@ import java.awt.print.*;
 
 import edu.rice.cs.drjava.model.print.DrJavaBook;
 
+import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentInterface;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.ConsoleDocument;
-import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.config.OptionListener;
 
 /** Toolkit-independent document that provides console-like interaction with a Java interpreter.

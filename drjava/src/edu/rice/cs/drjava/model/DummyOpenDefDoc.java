@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.model.FinalizationListener;
 
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.util.text.SwingDocument;
 

@@ -41,10 +41,9 @@ import java.awt.*;
 // TODO: Check synchronization.
 import java.util.Vector;
 
-/**
- * The panel on which each set of configuration options (e.g. Fonts, Colors)
- * displays its configurable items as read from the OptionConstants.
- * @version $Id$
+/** The panel that set of configuration options (e.g. Fonts, Colors) uses to display its configurable items as read
+ *  from OptionConstants.
+ *  @version $Id$
  */
 public class ConfigPanel extends JPanel {
 
@@ -52,15 +51,13 @@ public class ConfigPanel extends JPanel {
   protected String _title;
   protected Vector<OptionComponent> _components;
 
-  /**
-   * Constructor for this ConfigPanel
-   * @param title the title for this panel
+  /** Constructor for this ConfigPanel
+   *  @param title the title for this panel
    */
   public ConfigPanel(String title) {
     //_title = new JLabel(title);
     _title = title;
     _components = new Vector<OptionComponent>();
-
   }
 
   public String getTitle() {
@@ -68,9 +65,8 @@ public class ConfigPanel extends JPanel {
     return _title;
   }
 
-  /**
-   * The method for adding new OptionComponents to this ConfigPanel
-   * @param oc the OptionComponent to be added
+  /** The method for adding new OptionComponents to this ConfigPanel
+   *  @param oc the OptionComponent to be added
    */
   public void addComponent( OptionComponent oc) {
     _components.add(oc);
@@ -84,11 +80,11 @@ public class ConfigPanel extends JPanel {
     panel.setLayout(new BorderLayout());
     JPanel panel2 = new JPanel();  // contains OptionComponents
     panel.add(panel2, BorderLayout.NORTH);
-    JScrollPane scroll = new JScrollPane(panel,
-                                         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    scroll.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-                                               _title));
+    
+    JScrollPane scroll = 
+      new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    scroll.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), _title));
+    
     // Fix increment on scrollbar
     JScrollBar bar = scroll.getVerticalScrollBar();
     bar.setUnitIncrement(25);
@@ -126,10 +122,8 @@ public class ConfigPanel extends JPanel {
 
     // Reset Button
     JButton _resetToDefaultButton = new JButton("Reset to Defaults");
-    _resetToDefaultButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        resetToDefault();
-      }
+    _resetToDefaultButton.addActionListener(new ActionListener() { 
+      public void actionPerformed(ActionEvent e) { resetToDefault(); }
     });
     JPanel resetPanel = new JPanel();
     resetPanel.setLayout(new FlowLayout());
@@ -140,31 +134,25 @@ public class ConfigPanel extends JPanel {
     this.add(scroll, BorderLayout.CENTER);
   }
 
-  /**
-   * Tells each component in the vector to update Config with its value
-   * @return whether update() of all the components succeeded
+  /** Tells each component in the vector to update Config with its value
+   *  @return whether update() of all the components succeeded
    */
   public boolean update() {
 
-    for (int i= 0; i<_components.size();i++) {
+    for (int i = 0; i < _components.size();i++) {
       boolean isValidUpdate = _components.get(i).updateConfig();
-      if (!isValidUpdate) return false;
+      if (! isValidUpdate) return false;
     }
-
     return true;
   }
 
   /** Tells each component to reset its display field to the current value. */
   public void resetToCurrent() {
-    for (int i=0; i < _components.size(); i++) {
-      _components.get(i).resetToCurrent();
-    }
+    for (int i=0; i < _components.size(); i++) _components.get(i).resetToCurrent();
   }
 
   /** Tells each component to reset its value to the component's default. */
   public void resetToDefault() {
-    for (int i=0; i < _components.size(); i++) {
-      _components.get(i).resetToDefault();
-    }
+    for (int i=0; i < _components.size(); i++) _components.get(i).resetToDefault();
   }
 }

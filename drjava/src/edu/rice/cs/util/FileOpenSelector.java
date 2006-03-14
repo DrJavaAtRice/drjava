@@ -43,31 +43,14 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.util;
 
 import java.io.File;
-/** An interface to give GlobalModel a directory for various operations.
- *
- * @version $Id$
+import java.io.Serializable;
+
+/** An interface for a GUI frame that opens files.
+ *  @version $Id$
  */
-public interface DirectorySelector {
-  
-  /** Gets a directory.
-   *  @param start a file to start the search from, or null to allow implementation to determine
-   *  @return any valid directory on the file system
-   *  @throws OperationCanceledException if the selection request is canceled
-   */
-  public File getDirectory(File start) throws OperationCanceledException;
-  
-  /** Asks the user a yes/no question.
-   *  @return true if the user responded affirmatively, false if negatively
-   */
-  public boolean askUser(String message, String title);
-  
-  /** Warns the user about an error condition. */
-  public void warnUser(String message, String title);
-  
-  /** Returns true if the user wants the directory to include all subdirectories. */
-  public boolean isRecursive();
-  
+public interface FileOpenSelector extends Serializable {
+  public File[] getFiles() throws OperationCanceledException;
 }

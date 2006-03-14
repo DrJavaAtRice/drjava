@@ -82,29 +82,20 @@ public abstract class OptionComponent<T> implements Serializable {
    *  @param labelText Text for descriptive label of this option.
    *  @param parent The parent frame.
    */
-  public OptionComponent (String labelText, Frame parent) {
-    this(null, labelText, parent);
-  }
+  public OptionComponent (String labelText, Frame parent) { this(null, labelText, parent); }
   
-  public Option<T> getOption() {
-    return _option;
-  }
+  public Option<T> getOption() { return _option; }
   
-  public String getLabelText() {
-    return _label.getText();
-  } 
+  public String getLabelText() { return _label.getText(); } 
   
   public JLabel getLabel() { return _label; } 
   
-  /**
-   * Returns the JComponent to display for this OptionComponent.
-   */
+  /** Returns the JComponent to display for this OptionComponent. */
   public abstract JComponent getComponent();
 
-  /**
-   * Sets the detailed description text for all components in this OptionComponent.
-   * Should be called by subclasses that wish to display a description.
-   * @param description the description of the component
+  /** Sets the detailed description text for all components in this OptionComponent.
+   *  Should be called by subclasses that wish to display a description.
+   *  @param description the description of the component
    */
   public abstract void setDescription(String description);
 

@@ -89,6 +89,7 @@ public class SimpleInteractionsWindow extends JFrame {
         int caretPos = _pane.getCaretPosition();
         _controller.getConsoleDoc().insertNewLine(caretPos);
       }
+      public void slaveJVMUsed() { }
     });
 
     JScrollPane scroll = new JScrollPane(_pane);

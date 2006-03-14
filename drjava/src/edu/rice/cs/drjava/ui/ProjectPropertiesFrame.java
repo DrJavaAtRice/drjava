@@ -33,7 +33,6 @@
 
 package edu.rice.cs.drjava.ui;
 
-
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
@@ -44,6 +43,7 @@ import java.io.File;
 import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.config.*;
 
@@ -51,23 +51,27 @@ import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.swing.Utilities;
+
 import javax.swing.filechooser.FileFilter;
 
-/**
- * The frame for setting Project Preferences
- */
+/** A frame for setting Project Preferences */
 public class ProjectPropertiesFrame extends JFrame {
   
   private static final int FRAME_WIDTH = 500;
   private static final int FRAME_HEIGHT = 300;
+  
+  private MainFrame _mainFrame;      
+  private SingleDisplayModel _model; 
+  private File _projFile;
+    
   private JButton _okButton;
   private JButton _applyButton;
   private JButton _cancelButton;
   //  private JButton _saveSettingsButton;
   private JPanel _mainPanel;
-  
-  private MainFrame _mainFrame;
-  
+
+  private DirectorySelectorComponent _projRootSelector;
   private DirectorySelectorComponent _builtDirSelector;
   private DirectorySelectorComponent _workDirSelector;
   private DirectorySelectorComponent _jarMainClassSelector;
@@ -76,12 +80,19 @@ public class ProjectPropertiesFrame extends JFrame {
   private FileSelectorComponent _manifestFileSelector;
   
   private VectorFileOptionComponent _extraClassPathList;
+
+  /** Constructs project properties frame for the global model and displays it. */
+  public ProjectPropertiesFrame(MainFrame mf) { this(mf, mf.getModel().getProjectFile()); }
   
-  /** Sets up the frame and displays it. */
-  public ProjectPropertiesFrame(MainFrame mf) {
+  /** Constructs project properties frame for a new project and displays it. */
+  public ProjectPropertiesFrame(MainFrame mf, File projFile) {
     super("Project Properties");
     
+//    Utilities.show("ProjectPropertiesFrame(" + mf + ", " + projFile + ")");
+    
     _mainFrame = mf;
+    _model = _mainFrame.getModel();
+    _projFile = projFile;
     _mainPanel= new JPanel();
     _setupPanel(_mainPanel);
     
@@ -95,7 +106,7 @@ public class ProjectPropertiesFrame extends JFrame {
         // Always apply and save settings
         boolean successful = true;
         successful = saveSettings();
-        if (successful)  ProjectPropertiesFrame.this.setVisible(false);
+        if (successful) ProjectPropertiesFrame.this.setVisible(false);
         _applyButton.setEnabled(false);
       }
     };
@@ -112,9 +123,7 @@ public class ProjectPropertiesFrame extends JFrame {
     _applyButton.setEnabled(false);
     
     Action cancelAction = new AbstractAction("Cancel") {
-      public void actionPerformed(ActionEvent e) {
-        cancel();
-      }
+      public void actionPerformed(ActionEvent e) { cancel(); }
     };
     _cancelButton = new JButton(cancelAction);
     
@@ -130,30 +139,23 @@ public class ProjectPropertiesFrame extends JFrame {
     
     cp.add(bottom, BorderLayout.SOUTH);
     
-    
-    
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
     
-    if (frameSize.height > screenSize.height) {
-      frameSize.height = screenSize.height;
-    }
-    if (frameSize.width > screenSize.width) {
-      frameSize.width = screenSize.width;
-    }
+    if (frameSize.height > screenSize.height) frameSize.height = screenSize.height;
+    if (frameSize.width > screenSize.width) frameSize.width = screenSize.width;
     
     this.setSize(frameSize);
     this.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
-    
     
     addWindowListener(new WindowAdapter() { 
       public void windowClosing(java.awt.event.WindowEvent e) { cancel(); } 
     });
     
-    reset();
+    reset(projFile.getParentFile());
   }
   
   /** Resets the frame and hides it. */
@@ -163,47 +165,64 @@ public class ProjectPropertiesFrame extends JFrame {
     ProjectPropertiesFrame.this.setVisible(false);
   }
   
-  private void reset() {
-    final File bd = _mainFrame.getModel().getBuildDirectory();
+  public void reset() { reset(_model.getProjectRoot()); }
+  
+  private void reset(File projRoot) {
+//    Utilities.show("reset(" + projRoot + ")");
+    _projRootSelector.setFileField(projRoot);
+    
+    final File bd = _model.getBuildDirectory();
     final JTextField bdTextField = _builtDirSelector.getFileField();
     if (bd == null) bdTextField.setText("");
     else _builtDirSelector.setFileField(bd);
     
-    final File wd = _mainFrame.getModel().getWorkingDirectory();
+    final File wd = _model.getWorkingDirectory();
     final JTextField wdTextField = _workDirSelector.getFileField();
     if (wd == null) wdTextField.setText("");
     else _workDirSelector.setFileField(wd);
     
-    final File mc = _mainFrame.getModel().getMainClass();
+    final File mc = _model.getMainClass();
     final JTextField mcTextField = _jarMainClassSelector.getFileField();
     if (mc == null) mcTextField.setText("");
     else _jarMainClassSelector.setFileField(mc);
     
-    ClassPathVector cp = _mainFrame.getModel().getExtraClassPath();
+    ClassPathVector cp = _model.getExtraClassPath();
     _extraClassPathList.setValue(cp.asFileVector());
   }
   
-  /** Write the settings to the project file */
+  /** Caches the settings in the global model */
   public boolean saveSettings() {//throws IOException {
+
+    File pr = _projRootSelector.getFileFromField();
+    if (_projRootSelector.getFileField().getText().equals("")) pr = null;
+    _model.setProjectRoot(pr);
+    
     File bd = _builtDirSelector.getFileFromField();
     if (_builtDirSelector.getFileField().getText().equals("")) bd = null;
-    _mainFrame.getModel().setBuildDirectory(bd);
+    _model.setBuildDirectory(bd);
     
     File wd = _workDirSelector.getFileFromField();
     if (_workDirSelector.getFileField().getText().equals("")) wd = null;
-    _mainFrame.getModel().setWorkingDirectory(wd);
+    _model.setWorkingDirectory(wd);
     
     File mc = _jarMainClassSelector.getFileFromField();
     if (_jarMainClassSelector.getFileField().getText().equals("")) mc = null;
-    _mainFrame.getModel().setMainClass(mc);
+    _model.setMainClass(mc);
     
     Vector<File> extras = _extraClassPathList.getValue();
     ClassPathVector cpv = new ClassPathVector();
     for (File cf : extras) { cpv.add(cf); }
-    _mainFrame.getModel().setExtraClassPath(cpv);
+    _model.setExtraClassPath(cpv);
  
     //    _mainFrame.saveProject();
     return true;
+  }
+  
+  /** Returns the current project root in the project profile. */
+  private File _getProjRoot() {
+    File projRoot = _mainFrame.getModel().getProjectRoot();
+    if (projRoot != null) return projRoot;
+    return FileOption.NULL_FILE;
   }
   
   /** Returns the current build directory in the project profile. */
@@ -227,6 +246,26 @@ public class ProjectPropertiesFrame extends JFrame {
     c.fill = GridBagConstraints.HORIZONTAL;
     Insets labelInsets = new Insets(5, 10, 0, 0);
     Insets compInsets  = new Insets(5, 5, 0, 10);
+    
+    // Project Root
+    
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+
+    JLabel prLabel = new JLabel("Project Root");
+    prLabel.setToolTipText("<html>The root directory for the project source files .<br>"+
+                         "If not specified, the parent directory of the project file.</html>");
+    gridbag.setConstraints(prLabel, c);
+    
+    panel.add(prLabel);
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    
+    JPanel prPanel = _projRootPanel();
+    gridbag.setConstraints(prPanel, c);
+    panel.add(prPanel);
     
     // Build Directory
     
@@ -311,61 +350,40 @@ public class ProjectPropertiesFrame extends JFrame {
     panel.add(extrasComponent);
     
     
-    //    // Jar output file
-    //    c.weightx = 0.0;
-    //    c.gridwidth = 1;
-    //    c.insets = labelInsets;
-    //
-    //    JLabel jarLabel = new JLabel("Jar File");
-    //    classLabel.setToolTipText("The file that the jar is to be written to");
-    //    gridbag.setConstraints(jarLabel, c);
-    //    panel.add(jarLabel);
-    //
-    //    c.weightx = 1.0;
-    //    c.gridwidth = GridBagConstraints.REMAINDER;
-    //    c.insets = compInsets;
-    //
-    //    JPanel jarFilePanel = _jarFileSelector();
-    //    gridbag.setConstraints(jarFilePanel, c);
-    //    panel.add(jarFilePanel);
-    //
-    //    // Jar manifest file
-    //    c.weightx = 0.0;
-    //    c.gridwidth = 1;
-    //    c.insets = labelInsets;
-    //
-    //    JLabel manifestLabel = new JLabel("Jar Manifest File");
-    //    classLabel.setToolTipText("The manifest file that the jar is to be used to create the jar file");
-    //    gridbag.setConstraints(manifestLabel, c);
-    //    panel.add(manifestLabel);
-    //
-    //    c.weightx = 1.0;
-    //    c.gridwidth = GridBagConstraints.REMAINDER;
-    //    c.insets = compInsets;
-    //
-    //    JPanel manifestFilePanel = _manifestFileSelector();
-    //    gridbag.setConstraints(manifestFilePanel, c);
-    //    panel.add(manifestFilePanel);
+
+  }
+  
+  public JPanel _projRootPanel() {
+    DirectoryChooser dirChooser = new DirectoryChooser(this);
+    dirChooser.setSelectedFile(_getProjRoot());
+    dirChooser.setDialogTitle("Select Project Root Folder");
+    dirChooser.setApproveButtonText("Select");
+//    dirChooser.setEditable(true);
+    _projRootSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f);
+    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    
+    _projRootSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
+      public void insertUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
+      public void removeUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
+      public void changedUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
+    });
+
+    return _projRootSelector;
   }
   
   public JPanel _builtDirectoryPanel() {
     DirectoryChooser dirChooser = new DirectoryChooser(this);
-    dirChooser.setSelectedDirectory(_getBuildDir());
+    dirChooser.setSelectedFile(_getBuildDir());
     dirChooser.setDialogTitle("Select Build Directory");
     dirChooser.setApproveButtonText("Select");
-    dirChooser.setEditable(true);
-    _builtDirSelector = new DirectorySelectorComponent(this,dirChooser, 20, 12f);
+//    dirChooser.setEditable(true);
+    _builtDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    
     _builtDirSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
-      public void insertUpdate(DocumentEvent e) {
-        _applyButton.setEnabled(true);
-      }
-      public void removeUpdate(DocumentEvent e) {
-        _applyButton.setEnabled(true);
-      }
-      public void changedUpdate(DocumentEvent e) {
-        _applyButton.setEnabled(true);
-      }
+      public void insertUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
+      public void removeUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
+      public void changedUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
     });
 
     return _builtDirSelector;
@@ -373,22 +391,17 @@ public class ProjectPropertiesFrame extends JFrame {
   
   public JPanel _workDirectoryPanel() {
     DirectoryChooser dirChooser = new DirectoryChooser(this);
-    dirChooser.setSelectedDirectory(_getWorkDir());
+    dirChooser.setSelectedFile(_getWorkDir());
     dirChooser.setDialogTitle("Select Working Directory");
     dirChooser.setApproveButtonText("Select");
-    dirChooser.setEditable(true);
+//    dirChooser.setEditable(true);
     _workDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    
     _workDirSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
-      public void insertUpdate(DocumentEvent e) {
-        _applyButton.setEnabled(true);
-      }
-      public void removeUpdate(DocumentEvent e) {
-        _applyButton.setEnabled(true);
-      }
-      public void changedUpdate(DocumentEvent e) {
-        _applyButton.setEnabled(true);
-      }
+      public void insertUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
+      public void removeUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
+      public void changedUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
     });
     return _workDirSelector;
   }
@@ -405,86 +418,73 @@ public class ProjectPropertiesFrame extends JFrame {
   }
   
   public JPanel _jarMainClassSelector() {
-    File rootFile = _mainFrame.getModel().getProjectFile();
+    File rootFile = _getProjRoot();
     try {
       rootFile = rootFile.getCanonicalFile();
     } catch(IOException e) { }
     
     DirectoryChooser chooser = new DirectoryChooser(this,rootFile);
     chooser.setDialogTitle("Select Main Document");
-    chooser.setTopMessage("Select the main document for the project:");
+//    chooser.setTopMessage("Select the main document for the project:");
     chooser.setApproveButtonText("Select");
+    
     FileFilter filter = new FileFilter() {
       public boolean accept(File f) {
         String name = f.getName();
-        return  !f.isDirectory() &&
-          (name.endsWith(".java") ||
-           name.endsWith(".dj0") ||
-           name.endsWith(".dj1") ||
-           name.endsWith(".dj2"));
+        return !f.isDirectory() &&
+          (name.endsWith(".java") || name.endsWith(".dj0") || name.endsWith(".dj1") || name.endsWith(".dj2"));
       }
-      public String getDescription() {
-        return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2)";
-      }
+      public String getDescription() { return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2)"; }
     };
+    
     chooser.addChoosableFileFilter(filter);
-    chooser.addFileFilter(filter);
-    chooser.setShowFiles(true);
-    chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
+//    chooser.addChoosableFileFilter(filter);
+//    chooser.setShowFiles(true);
+//    chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
     _jarMainClassSelector = new DirectorySelectorComponent(this,chooser,20,12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    
     _jarMainClassSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
-      public void insertUpdate(DocumentEvent e) {
-        _applyButton.setEnabled(true);
-      }
-      public void removeUpdate(DocumentEvent e) {
-        _applyButton.setEnabled(true);
-      }
-      public void changedUpdate(DocumentEvent e) {
-        _applyButton.setEnabled(true);
-      }
+      public void insertUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
+      public void removeUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
+      public void changedUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
     });
     return _jarMainClassSelector;
   }
   
   public JPanel _manifestFileSelector() {
-    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
+    JFileChooser fileChooser = new JFileChooser(_getProjRoot().getParentFile());
     fileChooser.setDialogTitle("Select Output jar File");
     fileChooser.setApproveButtonText("Select");
     fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     fileChooser.setMultiSelectionEnabled(false);
-    _manifestFileSelector = new FileSelectorComponent(this,fileChooser,20,12f);
+    _manifestFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f);
+    
     _manifestFileSelector.setFileFilter(new FileFilter() {
-      public boolean accept(File f) {
-        return f.getName().endsWith(".jar") || f.isDirectory();
-      }
-      public String getDescription() {
-        return "Java Archive Files (*.jar)";
-      }
-      
+      public boolean accept(File f) { return f.getName().endsWith(".jar") || f.isDirectory(); }
+      public String getDescription() { return "Java Archive Files (*.jar)"; }
     });
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _manifestFileSelector;
   }
   
   public JPanel _jarFileSelector() {
-    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
+    JFileChooser fileChooser = new JFileChooser(_getProjRoot());
     fileChooser.setDialogTitle("Select Manifest File");
     fileChooser.setApproveButtonText("Select");
     fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     fileChooser.setMultiSelectionEnabled(false);
-    _jarFileSelector = new FileSelectorComponent(this,fileChooser,20,12f);
+    _jarFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f);
     _jarFileSelector.setFileFilter(new FileFilter() {
       public boolean accept(File f) { return f.getName().endsWith(".jar") || f.isDirectory(); }
       public String getDescription() { return "Java Archive Files (*.jar)"; }
-      
     });
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _jarFileSelector;
   }
   
-  public void setVisible(boolean vis) {
-    super.setVisible(vis);
-    reset();
-  }
+//  public void setVisible(boolean vis) {
+//    super.setVisible(vis);
+//    reset();
+//  }
 }

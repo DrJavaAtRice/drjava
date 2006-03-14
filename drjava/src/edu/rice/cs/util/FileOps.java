@@ -184,6 +184,7 @@ public abstract class FileOps {
       File test = new File(new String(name));
       return (test.equals(f));
     }
+    public String getDescription() { return "Java Source Files (*.java)"; }
   };
   
   /** Reads the stream until it reaches EOF, and then returns the read contents as a byte array. This call may 
@@ -378,6 +379,7 @@ public abstract class FileOps {
         exploredDirectories.add(f);
         return toReturn;
       }
+      public String getDescription() { return "All Folders"; }
     };
 
     // Explore each directory, adding (unique) subdirectories to the working list.  If a directory has .java 

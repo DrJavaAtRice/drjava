@@ -306,7 +306,6 @@ public class FindReplaceMachine {
       count++;
       fr = findNext();
       _doc = fr.getDocument();
-
     }
     return count;
   }
@@ -332,7 +331,6 @@ public class FindReplaceMachine {
     if (!_searchBackwards) return _findNext(_current.getOffset(), _doc.getLength()-_current.getOffset());
     return _findNext(0, _current.getOffset());
   }        
-  
   
   /** Helper method for findNext that searches for _findWord inside a document. If necessary (i.e. an instance wasn't
    *  found), it delegates to _findNextInAllDocuments (if searching through all open documents) and/or to _findWrapped.
@@ -387,8 +385,8 @@ public class FindReplaceMachine {
         if (_searchAllDocuments) {
           AbstractDocumentInterface nextDocToSearch;
           
-          nextDocToSearch = (!_searchBackwards ? _docIterator.getNextDocument(_doc) :
-                                                 _docIterator.getPrevDocument(_doc));
+          nextDocToSearch = 
+            (!_searchBackwards ? _docIterator.getNextDocument(_doc) : _docIterator.getPrevDocument(_doc));
           
           tempFr = _findNextInAllDocs(nextDocToSearch, 0, nextDocToSearch.getLength());
           foundOffset = tempFr.getFoundOffset();
@@ -517,8 +515,10 @@ public class FindReplaceMachine {
           foundOffset += start;
           if (!_searchBackwards) {
             foundOffset += findWord.length();
+            _current = _doc.createPosition(foundOffset);
             return _findNextInAllDocs(docToSearch, foundOffset, docLen-foundOffset);
           }
+          _current = _doc.createPosition(foundOffset);
           return _findNextInAllDocs(docToSearch, start, foundOffset-start);
         }       
             

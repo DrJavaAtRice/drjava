@@ -35,7 +35,10 @@ package edu.rice.cs.drjava.project;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.Pair;
+import edu.rice.cs.util.FileOps;
+
 import static edu.rice.cs.util.StringOps.convertToLiteral;
+
 import edu.rice.cs.util.sexp.SEList;
 import edu.rice.cs.util.sexp.SExpParseException;
 import edu.rice.cs.util.sexp.SExpParser;
@@ -48,77 +51,104 @@ import java.text.SimpleDateFormat;
 
 /** Test class for project files */
 public class ProjectTest extends DrJavaTestCase {
+  
+  File base;
+  File parent;
+  File buildDir;
+  File srcDir;
 
   private String absp; // absolute path
   public void setUp() throws Exception {
     super.setUp();
-    try { absp=new File(System.getProperty("java.io.tmpdir")).getCanonicalPath() + File.separator; }
-    
+    try { 
+      base = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
+      parent = FileOps.createTempDirectory("proj", base);
+      buildDir = new File(parent, "built");
+      buildDir.mkdir();  // create the specified directory
+      srcDir = new File(parent, "src");
+      srcDir.mkdir(); // create the specified directory
+      absp = parent.getCanonicalPath() + File.separator; 
+      FileOps.deleteDirectoryOnExit(parent);
+    }
     catch(IOException e) { fail("could not initialize temp path string"); }
   }
 
-  /** Creates a temporary file and writes the given string to that file
-   *  @param fname the name of the file to create
-   *  @param text the text to write to the file
-   *  @return the File that was created
-   */
-  private File _fillTempFile(String fname, String text) {
-    File f = null;
-    try {
-      f = File.createTempFile(fname, null);
-      FileWriter fw = new FileWriter(f);
-      fw.write(text, 0, text.length());
-      fw.close();
-    }
-    catch (IOException e) { throw new RuntimeException("IOException thrown while writing to temp file"); }
-    return f;
-  }
+//  /** Creates a temporary file and writes the given string to that file
+//   *  @param fname the name of the file to create
+//   *  @param text the text to write to the file
+//   *  @return the File that was created
+//   */
+//  private File _fillTempFile(String fname, String text) {
+//    File f = null;
+//    try {
+//      f = File.createTempFile(fname, null);
+//      FileWriter fw = new FileWriter(f);
+//      fw.write(text, 0, text.length());
+//      fw.close();
+//    }
+//    catch (IOException e) { throw new RuntimeException("IOException thrown while writing to temp file"); }
+//    return f;
+//  }
 
   /** Test to make sure all elements of the project are read correctly into the IR */
   public void testParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj1 =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
       "(source ;; comment\n" +
-      "   (file (name \"sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\")(active))\n" +
-      "   (file (name \"sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
+      "   (file (name \"src/sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\")(active))\n" +
+      "   (file (name \"src/sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name \"src/sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
       "(auxiliary ;; absolute file names\n" +
-      "   (file (name "+convertToLiteral(new File(absp,"junk/sexp/Tokens.java").getCanonicalPath()) +")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name "+convertToLiteral(new File(absp,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
+      "   (file (name " + convertToLiteral(new File(parent,"junk/sexp/Tokens.java").getCanonicalPath()) +")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name " + convertToLiteral(new File(parent,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
       "(collapsed ;; relative paths\n" +
       "   (path \"./[ Source Files ]/sexp/\")\n" +
       "   (path \"./[ External ]/\"))\n" +
       "(build-dir ;; absolute path\n" +
-      "   (file (name "+convertToLiteral(new File(absp,"drjava/built").getCanonicalPath()) + ")))\n" +
+      "   (file (name "+ convertToLiteral(new File(parent,"built").getCanonicalPath()) + ")))\n" +
       "(work-dir ;; absolute path\n" +
-      "   (file (name "+convertToLiteral(new File(absp,"drjava/src").getCanonicalPath()) + ")))\n" +
+      "   (file (name "+ convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
+      "(proj-root ;; absolute path\n" +
+      "   (file (name "+ convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
       "(classpaths\n" +
-      "   (file (name "+convertToLiteral(new File(absp,"drjava/src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
+      "   (file (name "+ convertToLiteral(new File(parent,"src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
-      "   (file (name \"sexp/SEList.java\")))";
+      "   (file (name \"src/sexp/SEList.java\")))";
+    
+    File f = new File(parent, "test1.pjt");
 
-    File f = _fillTempFile("test1.pjt", proj1);
+    FileOps.writeStringToFile(f, proj1);
+//    System.err.println("Project directory is " + parent);
+//    System.err.println("Project file is " + f);
+//    System.err.println("projFile exists? " + f.exists());
     ProjectFileIR pfir = ProjectFileParser.ONLY.parse(f);
+//    System.err.println("buildDir = " + pfir.getBuildDirectory().getCanonicalPath());
     assertEquals("number of source files", 7, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 1, pfir.getClassPaths().length);
-    String base = f.getParent();
-    assertEquals("first source filename", new File(base,"/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
+    File base = f.getParentFile();
+    assertEquals("first source filename", new File(base,"src/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
     assertEquals("mod-date value", 
                  new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse("16-Jul-2004 03:45:23").getTime(),
                  pfir.getSourceFiles()[0].getSavedModDate());
-    assertEquals("last source filename", new File(base,"/sexp/SEList.java").getPath(), pfir.getSourceFiles()[6].getPath());
-    assertEquals("first aux filename", new File(absp,"junk/sexp/Tokens.java").getPath(), pfir.getAuxiliaryFiles()[0].getCanonicalPath());
+    assertEquals("last source filename", new File(base,"src/sexp/SEList.java").getPath(), 
+                 pfir.getSourceFiles()[6].getPath());
+    assertEquals("first aux filename", new File(base,"junk/sexp/Tokens.java").getPath(), 
+                 pfir.getAuxiliaryFiles()[0].getCanonicalPath());
     assertEquals("last collapsed path", "./[ External ]/", pfir.getCollapsedPaths()[1]);
-    assertEquals("build-dir name", new File(absp,"drjava/built").getPath(), pfir.getBuildDirectory().getCanonicalPath());
-    assertEquals("work-dir name", new File(absp,"drjava/src").getPath(), pfir.getWorkingDirectory().getCanonicalPath());
-    assertEquals("classpath name", new File(absp,"drjava/src/edu/rice/cs/lib").getPath(), pfir.getClassPaths()[0].getCanonicalPath());
-    assertEquals("main-class name", new File(base,"/sexp/SEList.java").getCanonicalPath(), pfir.getMainClass().getCanonicalPath());
+    assertEquals("build-dir name", new File(base, "built").getCanonicalPath(), 
+                 pfir.getBuildDirectory().getCanonicalPath());
+    assertEquals("work-dir name", new File(base, "src").getCanonicalPath(), 
+                 pfir.getWorkingDirectory().getCanonicalPath());
+    assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
+                 pfir.getClassPaths()[0].getCanonicalPath());
+    assertEquals("main-class name", new File(base, "src/sexp/SEList.java").getCanonicalPath(), 
+                 pfir.getMainClass().getCanonicalPath());
   }
 
   public void testParseFile() throws SExpParseException {
@@ -131,7 +161,8 @@ public class ProjectTest extends DrJavaTestCase {
   }
 
   public void testWriteFile() throws IOException, MalformedProjectFileException {
-    File pf = _fillTempFile("test2.pjt", "");
+    File pf = new File(parent, "test2.pjt");
+    FileOps.writeStringToFile(pf, "");
     ProjectProfile fb = new ProjectProfile(pf);
     String sr = pf.getCanonicalFile().getParent();
 
@@ -143,9 +174,9 @@ public class ProjectTest extends DrJavaTestCase {
     fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile6.java", "/home/javaplt", false, false, null));
     fb.addAuxiliaryFile(makeGetter(1, 1, 0, 0, absp + "test/testfile7.java", "/home/javaplt", false, false, null));
     fb.addCollapsedPath("./[ Source Files ]/dir1/");
-    fb.addClassPathFile(new File(absp, "drjava/lib"));
-    fb.setBuildDirectory(new File(absp, "drjava/built"));
-    fb.setWorkingDirectory(new File(absp, "drjava/src"));
+    fb.addClassPathFile(new File(parent, "lib"));
+    fb.setBuildDirectory(new File(parent, "built"));
+    fb.setWorkingDirectory(new File(parent, "src"));
     fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
 
     String expected = "";
@@ -175,14 +206,14 @@ public class ProjectTest extends DrJavaTestCase {
 
     String base = pf.getParent();
     
-    assertEquals("first source filename", new File(base,"/dir1/testfile1.java").getPath(), pfir.getSourceFiles()[0].getPath());
-    assertEquals("last source filename", new File(base,"/dir3/testfile5.java").getPath(), pfir.getSourceFiles()[4].getPath());
-    assertEquals("first aux filename", new File(absp,"test/testfile6.java").getPath(), pfir.getAuxiliaryFiles()[0].getPath());
+    assertEquals("first source filename", new File(parent,"/dir1/testfile1.java").getPath(), pfir.getSourceFiles()[0].getPath());
+    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), pfir.getSourceFiles()[4].getPath());
+    assertEquals("first aux filename", new File(parent,"test/testfile6.java").getPath(), pfir.getAuxiliaryFiles()[0].getPath());
     assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);
-    assertEquals("build-dir name", null, pfir.getBuildDirectory());
-    assertEquals("work-dir name", null, pfir.getWorkingDirectory());
-    assertEquals("classpath name", new File(absp,"drjava/lib").getPath(), pfir.getClassPaths()[0].getCanonicalPath());
-    assertEquals("main-class name", new File(base,"/dir1/testfile1.java").getCanonicalPath(), pfir.getMainClass().getCanonicalPath());
+    assertEquals("build-dir name", buildDir, pfir.getBuildDirectory());
+    assertEquals("work-dir name", srcDir, pfir.getWorkingDirectory());
+    assertEquals("classpath name", new File(parent,"lib"), pfir.getClassPaths()[0]);
+    assertEquals("main-class name", new File(parent,"/dir1/testfile1.java"), pfir.getMainClass());
     pf.delete();
   }
 

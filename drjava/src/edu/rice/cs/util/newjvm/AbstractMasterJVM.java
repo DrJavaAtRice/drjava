@@ -51,27 +51,30 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   /** Name for the thread that exports the MasterJVM to RMI. */
   protected String _exportMasterThreadName = "Export MasterJVM Thread";
   
-  /** Lock for accessing the state of this AbstractMasterJVM */
+  /** Lock for accessing the state of this AbstractMasterJVM (except volatiles) */
   protected Object _masterJVMLock = new Object();
   
   private static final String RUNNER = SlaveJVMRunner.class.getName();
   
   /** The slave JVM remote stub if it's connected; null if not connected. */
-  private SlaveRemote _slave = null;
+  private volatile SlaveRemote _slave = null;
 
   /** Is slave JVM in the progress of starting up? */
-  private boolean _startupInProgress = false;
+  private volatile boolean _startupInProgress = false;
 
   /** This flag is set when a quit request is issued before the slave has even finished starting up. 
    *  In that case, immediately after starting up, we quit it.
    */
   private boolean _quitOnStartup = false;
+  
+  /** Lock used in exporting this object to a file and loading it in the slaveJVM; protects stub variables. */
+  final static Object _exportLock = new Object();
 
   /** The current remote stub for this main JVM object. This field is null except between the time the slave
    *  JVM is first invoked and the time the slave registers itself.
    */
   private Remote _stub;
-
+  
   /** The file containing the serialized remote stub. This field is null except between the time the slave
    *  JVM is first invoked and the time the slave registers itself.
    */
@@ -80,7 +83,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   /** The current remote stub for this main JVM's classloader. This field is null except between the time 
    *  the slave JVM is first invoked and the time the slave registers itself.
    */
-  Remote _classLoaderStub;
+  private Remote _classLoaderStub;
 
   /** The file containing the serialized remote classloader stub. This field is null except between the 
    *  time the slave JVM is first invoked and the time the slave registers itself.
@@ -126,9 +129,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   protected final void invokeSlave(String[] jvmArgs, File workDir) throws IOException, RemoteException {
     invokeSlave(jvmArgs, System.getProperty("java.class.path"), workDir);
   }
-  
-  final static Object lock = new Object();
-    
+ 
   /** Creates and invokes slave JVM.
    *  @param jvmArgs Array of arguments to pass to the JVM on startup
    *  @param cp Classpath to use when starting the JVM
@@ -148,7 +149,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       
       Thread t = new Thread(_exportMasterThreadName) {
         public void run() {
-          synchronized(lock) {
+          synchronized(_exportLock) {
             try {
               _stub = UnicastRemoteObject.exportObject(AbstractMasterJVM.this);
               
@@ -159,13 +160,13 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
               // javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
               throw new edu.rice.cs.util.UnexpectedException(re);
             }
-            lock.notify();
+            _exportLock.notify();
           }
         }
       };
-      synchronized (lock) {
+      synchronized(_exportLock) {
         t.start();
-        try { while (_stub == null) { lock.wait(); } }
+        try { while (_stub == null) { _exportLock.wait(); } }
         catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
       }
       _stubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
@@ -185,7 +186,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       final RemoteClassLoader rClassLoader = new RemoteClassLoader(getClass().getClassLoader());
       t = new Thread(_exportMasterThreadName) {
         public void run() {
-          synchronized(lock) {
+          synchronized(_exportLock) {
             try {
               _classLoaderStub = UnicastRemoteObject.exportObject(rClassLoader);
               
@@ -196,13 +197,13 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
               //javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
               throw new edu.rice.cs.util.UnexpectedException(re);
             }
-            lock.notify();
+            _exportLock.notify();
           }
         }
       };
-      synchronized(lock) {
+      synchronized(_exportLock) {
         t.start();
-        try { while (_classLoaderStub == null) { lock.wait(); } }
+        try { while (_classLoaderStub == null) { _exportLock.wait(); } }
         catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
       }
       _classLoaderStubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
@@ -214,11 +215,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       ostream.flush();
       fstream.close();
       
-      String[] args = new String[] { 
-        _stubFile.getAbsolutePath(),
-          _slaveClassName,
-          _classLoaderStubFile.getAbsolutePath()
-      };
+      String[] args = 
+        new String[] { _stubFile.getAbsolutePath(), _slaveClassName, _classLoaderStubFile.getAbsolutePath() };
       
       /* Create the slave JVM. */      
       final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs, workDir);
@@ -308,12 +306,12 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       
       else if (_slave == null)  System.out.println("slave JVM quit invoked when no slave running");
 //        throw new IllegalStateException("tried to quit when no slave running and startup not in progress");
-      else  _slave.quit();
+      else _slave.quit();
     }
   }
   
   /** Returns slave remote instance, or null if not connected. */
-  protected final SlaveRemote getSlave() { return _slave; }
+  protected final SlaveRemote getSlave() {  return _slave; }
   
   /** Returns true if the slave is in the process of starting. */
   protected boolean isStartupInProgress() { return _startupInProgress; }

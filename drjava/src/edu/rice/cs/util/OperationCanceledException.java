@@ -43,7 +43,7 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.util;
 
 /**
  * Indicates that a GUI operation has been canceled, e.g., choosing

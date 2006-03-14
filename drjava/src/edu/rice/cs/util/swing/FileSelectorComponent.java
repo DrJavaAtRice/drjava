@@ -55,7 +55,6 @@ public class FileSelectorComponent extends JPanel {
   /** The default font size for the text box. */
   public static final float DEFAULT_FONT_SIZE = 10f;
 
-
   /** The parent frame of this component. */
   protected final Frame _parent;
 
@@ -86,7 +85,6 @@ public class FileSelectorComponent extends JPanel {
     this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE, true);
   }
 
-
   /** Creates a new FileSelectorComponent.
    *
    *  @param parent   Parent of this component.
@@ -94,8 +92,7 @@ public class FileSelectorComponent extends JPanel {
    *  @param numCols  Number of columns to display in the text field
    *  @param fontSize Font size for the text field
    */
-  public FileSelectorComponent(Frame parent, JFileChooser chooser,
-                               int numCols, float fontSize) {
+  public FileSelectorComponent(Frame parent, JFileChooser chooser, int numCols, float fontSize) {
     this(parent, chooser, numCols, fontSize, true);
   }
   
@@ -107,8 +104,8 @@ public class FileSelectorComponent extends JPanel {
    *  @param fontSize  Font size for the text field
    *  @param mustExist force selection of existing file
    */
-  public FileSelectorComponent(Frame parent, JFileChooser chooser,
-                               int numCols, float fontSize, boolean mustExist) {
+  public FileSelectorComponent(Frame parent, JFileChooser chooser, int numCols, float fontSize, boolean mustExist) {
+    
     _parent = parent;
     _chooser = chooser;
     _fileFilter = null;
@@ -119,30 +116,26 @@ public class FileSelectorComponent extends JPanel {
         return new Dimension(Short.MAX_VALUE, super.getPreferredSize().height);
       }
     };
+    
     _fileField.setFont(_fileField.getFont().deriveFont(fontSize));
-    _fileField.setPreferredSize(new Dimension(22,22));
+    _fileField.setPreferredSize(new Dimension(22, 22));
     _fileField.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        validateTextField();
-      }
+      public void actionPerformed(ActionEvent e) { validateTextField(); }
     });
+    
     _fileField.addFocusListener(new FocusListener() {
-      public void focusGained(FocusEvent e) {
-//        validateTextField();
-      }
-      public void focusLost(FocusEvent e) {
-        validateTextField();
-      }
+      public void focusGained(FocusEvent e) { /* validateTextField(); */ }
+      public void focusLost(FocusEvent e) { validateTextField(); }
     });
     
     _chooserButton = new JButton("...");
     _chooserButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        _chooseFile();
-      }
+      public void actionPerformed(ActionEvent e) { _chooseFile(); }
     });
+    
     _chooserButton.setMaximumSize(new Dimension(22, 22));
-    _chooserButton.setMargin(new Insets(0,5,0,5));
+    _chooserButton.setMargin(new Insets(0, 5 ,0, 5));
+    
     // Add components
     this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
     this.add(_fileField);
@@ -208,17 +201,13 @@ public class FileSelectorComponent extends JPanel {
     }
 
     // Apply the filter
-    if (_fileFilter != null) {
-      _chooser.setFileFilter(_fileFilter);
-    }
+    if (_fileFilter != null) _chooser.setFileFilter(_fileFilter);
 
     // Get the file from the chooser
     int returnValue = _chooser.showDialog(_parent, null);
     if (returnValue == JFileChooser.APPROVE_OPTION) {
       File chosen = _chooser.getSelectedFile();
-      if (chosen != null) {
-        setFileField(chosen);
-      }
+      if (chosen != null) setFileField(chosen);
     }
   }
    
@@ -241,11 +230,8 @@ public class FileSelectorComponent extends JPanel {
       newFile = new File(newValue);
     
     if (newFile != null && _mustExist && !newFile.exists()) {
-      JOptionPane.showMessageDialog(_parent,
-                                    "The file '"+ newValue + "'\n" +
-                                    "is invalid because it does not exist.",
-                                    "Invalid File Name",
-                                    JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(_parent, "The file '"+ newValue + "'\nis invalid because it does not exist.",
+                                    "Invalid File Name", JOptionPane.ERROR_MESSAGE);
       if (!_file.exists()) _file = null;
       resetFileField(); // revert if not valid
       

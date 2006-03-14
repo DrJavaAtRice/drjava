@@ -50,7 +50,10 @@ import java.util.Vector;
 import javax.swing.SwingUtilities;
 
 import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
@@ -124,13 +127,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       }
     }
     
-    public void interpreterResetFailed(Throwable t) {    }
+    public void interpreterResetFailed(Throwable t) { }
     
-    public void interpreterExited(int status) {    }
+    public void interpreterExited(int status) { }
     
-    public void interpreterChanged(boolean inProgress) {    }
+    public void interpreterChanged(boolean inProgress) { }
     
-    public void interactionIncomplete() {    }
+    public void interactionIncomplete() { }
+    
+    public void slaveJVMUsed() { }
   };
   
   private CompilerListener _clearInteractionsListener =
@@ -176,7 +181,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
     super();
+//    Utilities.show("DefaultGlobalModel super call performed");
     _interactionsDocument = new InteractionsDJDocument();
+
     _interactionsModel = new DefaultInteractionsModel(this, _jvm, _interactionsDocument, getWorkingDirectory());
     _interactionsModel.addListener(_interactionsListener);
     _jvm.setInteractionsModel(_interactionsModel);
@@ -188,7 +195,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         _jvm.setOptionArgs(oe.value);
       }
     }); 
-    
+
     _createDebugger();
         
     // Chain notifiers so that all events also go to GlobalModelListeners.
@@ -196,6 +203,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _compilerModel.addListener(_notifier);
     _junitModel.addListener(_notifier);
     _javadocModel.addListener(_notifier);
+    
+//    Utilities.show("Notifier chaining done");
         
     // Listen to compiler to clear interactions appropriately.
     // XXX: The tests need this to be registered after _notifier, sadly.
@@ -236,21 +245,21 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   }
   
   protected FileGroupingState 
-    makeProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
-    return new ProjectFileGroupingState(main, bd, wd, project, files, cp, cjf, cjflags);
+    makeProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
+    return new ProjectFileGroupingState(pr, main, bd, wd, project, files, cp, cjf, cjflags);
   }
   
   class ProjectFileGroupingState extends AbstractGlobalModel.ProjectFileGroupingState {
       
-    ProjectFileGroupingState(File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
-      super(main, bd, wd, project, files, cp, cjf, cjflags);
+    ProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
+      super(pr, main, bd, wd, project, files, cp, cjf, cjflags);
     }
       
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
     public void compileAll() throws IOException{
 //        ScrollableDialog sd = new ScrollableDialog(null, "FileGroupingState.compileAll() called", "", "");
 //        sd.show();
-      File dir = getProjectFile().getParentFile();
+      File dir = getProjectRoot();
       final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter() {
         public boolean accept(File pathname) {
           return pathname.isDirectory() || 
@@ -316,7 +325,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     public void junitAll() {
       // Is this code reachable? I don't think so.  MainFrame bypasses it by calling junitProject() on the junit model
       // instead of junitAll on the global model
-      File dir = getProjectFile().getParentFile();
+      File dir = getProjectRoot();
 //        ArrayList<String> classNames = new ArrayList<String>();
       final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter() {
         public boolean accept(File pathname) {
@@ -448,7 +457,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (! _jvm.slaveJVMUsed() && wd.equals(_interactionsModel.getWorkingDirectory())) {
       // eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
 //      Utilities.show("Suppressing resetting of interactions pane");
-      _interactionsModel.notifyInterpreterReady(wd);
+      _interactionsModel._notifyInterpreterReady(wd);
       return; 
     }
 //    Utilities.show("Resetting interactions with working directory = " + wd);

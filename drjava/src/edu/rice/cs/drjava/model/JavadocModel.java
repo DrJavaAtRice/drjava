@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.IOException;
 
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
+import edu.rice.cs.util.DirectorySelector;
 
 /**
  * Model interface for Javadoc integration features.

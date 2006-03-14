@@ -34,11 +34,12 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.drjava.model.FileOpenSelector;
-import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.OperationCanceledException;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
+
+import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
@@ -283,9 +284,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       public File getFile() { return temp; }
       public boolean warnFileOpen(File f) { return true; }
       public boolean verifyOverwrite() { return true; }
-      public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
-        return true;
-      }
+      public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
     });
 
     // Load the history as a script
@@ -477,9 +476,10 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     protected void _notifyInterpreterExited(int status) { }
     protected void _notifyInterpreterResetting() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
-    public void notifyInterpreterReady(File wd) { }
+    public void _notifyInterpreterReady(File wd) { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _notifyInteractionIncomplete() { }
+    protected void _notifySlaveJVMUsed() { }
     public ConsoleDocument getConsoleDocument() { return null; }
   }
 
@@ -503,10 +503,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     protected void _notifyInterpreterExited(int status) { }
     protected void _notifyInterpreterResetting() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
-    public void notifyInterpreterReady(File wd) { }
+    public void _notifyInterpreterReady(File wd) { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _notifyInteractionIncomplete() { }
     protected void _notifyInterpreterChanged(boolean inProgress) { }
+    protected void _notifySlaveJVMUsed() { }
     
     public ConsoleDocument getConsoleDocument() { return null; }
 

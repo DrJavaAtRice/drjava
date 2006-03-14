@@ -624,13 +624,15 @@ class FindReplaceDialog extends TabbedPanel {
         _frame.setStatusMessage("Search wrapped around all documents.");
       }
       
-      if (pos >= 0) {
-        _selectFoundItem();
-        
-        _replaceAction.setEnabled(true);
-        _replaceFindNextAction.setEnabled(true);
-        _replaceFindPreviousAction.setEnabled(true);
-        _machine.setLastFindWord();
+      if (pos >= 0) {  // defer executing this code until after active document switch (if any) is complete
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            _selectFoundItem();
+            _replaceAction.setEnabled(true);
+            _replaceFindNextAction.setEnabled(true);
+            _replaceFindPreviousAction.setEnabled(true);
+            _machine.setLastFindWord();
+          }});
       }
       // else the entire document was searched and no instance of the string
       // was found. display at most 50 characters of the non-found string
@@ -645,8 +647,6 @@ class FindReplaceDialog extends TabbedPanel {
     }
     _findField.requestFocusInWindow();
   }
-
-  
 
   protected void _close() {
     _defPane.requestFocusInWindow();
@@ -761,11 +761,10 @@ class FindReplaceDialog extends TabbedPanel {
     _defPane.centerViewOnOffset(from);
     _defPane.select(from, to);
 
-    // Found this little statement that will show the selected text
-    // in _defPane without giving _defPane focus, allowing the
-    // user to hit enter repeatedly and change the document while finding
-    // next.
+    // Found this little statement that will show the selected text in _defPane without giving _defPane 
+    // focus, allowing the user to hit enter repeatedly and change the document while finding next.
     _defPane.getCaret().setSelectionVisible(true);
+//    _defPane.centerViewOnOffset(from);
   }
 
 //  private void _close() { hide(); }

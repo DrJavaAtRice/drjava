@@ -46,7 +46,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.drjava.model.DJDocument;
-import edu.rice.cs.drjava.model.OperationCanceledException;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.*;
 
 /** The view component for repl interaction.

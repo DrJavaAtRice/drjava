@@ -47,6 +47,7 @@ import edu.rice.cs.util.text.*;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Interactions model which can notify GlobalModelListeners on events.
+ *  TODO: remove invokeLater wrappers here and enforce the policy that all of the listener methods must use them
  *  @version $Id$
  */
 public class DefaultInteractionsModel extends RMIInteractionsModel {
@@ -141,10 +142,15 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
 
   /** Notifies listeners that the interpreter is ready. */
-  public void notifyInterpreterReady(final File wd) { 
+  public void _notifyInterpreterReady(final File wd) { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(wd); } });
   }
 
+  /** Notifies listeners that slave JVM has been used. */
+  protected void _notifySlaveJVMUsed(final File wd) { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.slaveJVMUsed(); } });
+  }
+  
   /** Notifies listeners that the interpreter has exited unexpectedly.
    *  @param status Status code of the dead process
    */
@@ -162,6 +168,11 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** Notifies the view that the current interaction is incomplete. */
   protected void _notifyInteractionIncomplete() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionIncomplete(); } });
+  }
+  
+   /** Notifies listeners that the slave JVM has been used. */
+  protected void _notifySlaveJVMUsed() {
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.slaveJVMUsed(); } });
   }
   
   public ConsoleDocument getConsoleDocument() { return _model.getConsoleDocument(); }

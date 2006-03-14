@@ -119,7 +119,6 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setPosition(pos);
   }
   
-  
   public void testCreateMachineSuccess() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
     _initFrm(4);

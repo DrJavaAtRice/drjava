@@ -38,6 +38,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Keeps track of all listeners to the model, and has the ability to notify them of some event.
@@ -513,6 +514,12 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void interactionIncomplete() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.interactionIncomplete(); } }
+    finally { _lock.endRead(); }
+  }
+  
+  public void slaveJVMUsed() {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.slaveJVMUsed(); } }
     finally { _lock.endRead(); }
   }
 

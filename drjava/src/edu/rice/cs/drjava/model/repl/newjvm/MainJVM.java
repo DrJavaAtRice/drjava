@@ -197,6 +197,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     try {
       _log.logTime("main.interp: " + s);
       _slaveJVMUsed = true;
+      _interactionsModel.slaveJVMUsed();
       _interpreterJVM().interpret(s);
     }
     catch (java.rmi.UnmarshalException ume) {
@@ -426,6 +427,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public void testSuiteStarted(int numTests) throws RemoteException {
     _slaveJVMUsed = true;
 //    Utilities.show("MainJVM.testSuiteStarted(" + numTests + ") called");
+    _interactionsModel.slaveJVMUsed();
     _junitModel.testSuiteStarted(numTests);
   }
   
@@ -433,6 +435,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param testName The name of the test being started.
    */
   public void testStarted(String testName) throws RemoteException {
+//    Utilities.show("MainJVM.testStarted(" + testName + ") called");
     _slaveJVMUsed = true;
 //     Utilities.show("MainJVM.testStarted(" + testName + ") called");
     _junitModel.testStarted(testName);
@@ -622,7 +625,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Starts the interpreter if it's not running already. */
   public void startInterpreterJVM() {
-//    Utilities.showDebug("MainJVM: startInterpreterJVM() called");
+//    Utilities.show("MainJVM: startInterpreterJVM() called");
     synchronized(_masterJVMLock) {  // synch is probably overkill
       if (isStartupInProgress() || isInterpreterRunning())  return;
     }
@@ -655,8 +658,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     try {
       // _startupClasspath is sent in as the interactions classpath
 //      System.out.println("startup: " + _startupClasspath);
-//      Utilities.showDebug("Calling invokeSlave(" + jvmArgs + ", " + _startupClasspath + ", " + 
-//        _model.getWorkingDirectory() +")");
+//      Utilities.showDebug("Calling invokeSlave(" + jvmArgs + ", " + _startupClassPath + ", " + 
+//        _workDir +")");
       invokeSlave(jvmArgsArray, _startupClassPath, _workDir);
       _slaveJVMUsed = false;
     }
@@ -819,9 +822,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       return null;
     }
     
-    /**
-     * Returns a value result (as a String) back to the model.
-     * @return null
+    /** Returns a value result (as a String) back to the model.
+     *  @return null
      */
     public Object forValueResult(ValueResult that) {
       String result = that.getValueStr();
@@ -830,29 +832,21 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       return null;
     }
     
-    /**
-     * Returns an exception back to the model.
-     * @return null
+    /** Returns an exception back to the model.
+     *  @return null
      */
     public Object forExceptionResult(ExceptionResult that) { /**/
-      _interactionsModel.replThrewException(that.getExceptionClass(),
-                                            that.getExceptionMessage(),
-                                            that.getStackTrace(),
+      _interactionsModel.replThrewException(that.getExceptionClass(), that.getExceptionMessage(), that.getStackTrace(),
                                             that.getSpecialMessage());
       return null;
     }
     
-    /**
-     * Indicates there was a syntax error to the model.
-     * @return null
+    /** Indicates there was a syntax error to the model.
+     *  @return null
      */
     public Object forSyntaxErrorResult(SyntaxErrorResult that) {
-      _interactionsModel.replReturnedSyntaxError(that.getErrorMessage(),
-                                                 that.getInteraction(),
-                                                 that.getStartRow(),
-                                                 that.getStartCol(),
-                                                 that.getEndRow(),
-                                                 that.getEndCol() );
+      _interactionsModel.replReturnedSyntaxError(that.getErrorMessage(), that.getInteraction(), that.getStartRow(),
+                                                 that.getStartCol(), that.getEndRow(), that.getEndCol() );
       return null;
     }
   }
@@ -880,6 +874,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void interpreterResetting() { }
     public void interpreterResetFailed(Throwable th) { }
     public void interpreterReady(File wd) { }
+    public void slaveJVMUsed() { }
   }
   
   /** JUnitModel which does not react to events. */

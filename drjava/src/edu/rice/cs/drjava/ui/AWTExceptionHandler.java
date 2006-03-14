@@ -44,8 +44,5 @@ public class AWTExceptionHandler {
   public void handle(Throwable thrown) {
     if (frame == null) frame = new JFrame();
     new UncaughtExceptionWindow(frame, thrown);
-    // causes DrJava to hang when exception is thrown in event thread
-    // removing it makes the exception window behave non-modally, which is what we want in the future anyway
-    // while (true) { }
   }
 }

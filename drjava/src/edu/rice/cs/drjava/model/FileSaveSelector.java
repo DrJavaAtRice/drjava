@@ -47,6 +47,8 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 
+import edu.rice.cs.util.OperationCanceledException;
+
 /** An interface to give GlobalModel a file to save a document to.
  *  @version $Id$
  */

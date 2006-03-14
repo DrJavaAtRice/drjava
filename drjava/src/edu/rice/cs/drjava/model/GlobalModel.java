@@ -41,6 +41,9 @@ import java.util.List;
 import java.util.Vector;
 
 import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.swing.DocumentIterator;
@@ -374,6 +377,12 @@ public interface GlobalModel extends ILoadDocuments {
   
   /** @return the directory that the class files should be stored after compilation. */
   public File[] getProjectFiles();
+
+  /** @return the source root for the project. */
+  public File getProjectRoot();
+  
+  /** Sets the source root for the project. */
+  public void setProjectRoot(File f);
 
   /** @return the directory that the class files should be stored after compilation. */
   public File getBuildDirectory();

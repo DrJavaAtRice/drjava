@@ -45,7 +45,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.drjava.model.FileGroupingState;
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.OperationCanceledException;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
 

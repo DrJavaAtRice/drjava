@@ -119,16 +119,13 @@ public class JarBuilder {
     origin.close();
   }
 
-  /**
-   * Add the directory into the directory specified by parent
-   * @param dir the directory to add
-   * @param parent the path inside the jar that the directory should be added to
+  /** Add the directory into the directory specified by parent
+   *  @param dir the directory to add
+   *  @param parent the path inside the jar that the directory should be added to
    */
   public void addDirectoryRecursive(File dir, String parent) {
     addDirectoryRecursiveHelper(dir, parent, new byte[2048], new FileFilter() {
-      public boolean accept(File pathname) {
-        return true;
-      }
+      public boolean accept(File pathname) { return true; }
     });
   }
 

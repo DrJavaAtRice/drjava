@@ -56,6 +56,7 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.*;
 import edu.rice.cs.util.swing.Utilities;

@@ -36,7 +36,9 @@ package edu.rice.cs.drjava.model.cache;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.OperationCanceledException;
 
 import javax.swing.text.BadLocationException;
 import java.io.File;

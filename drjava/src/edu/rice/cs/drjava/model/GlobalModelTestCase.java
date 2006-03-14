@@ -35,7 +35,9 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
+import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
@@ -282,8 +284,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *  prompt. To be sure this is the case, you can reset interactions first.
    *
    *  @param input text to interpret
-   *  @return The output from this interpretation, in String form, as it was
-   *         printed to the interactions document.
+   *  @return The output from this interpretation, in String form, as it was printed to the interactions document.
    */
   protected String interpret(String input) throws EditDocumentException {
     InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
@@ -294,9 +295,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     final int resultsStartLocation = interactionsDoc.getLength() + newLineLen;
 
     TestListener listener = new TestListener() {
-      public void interactionStarted() {
-        interactionStartCount++;
-      }
+      public void interactionStarted() { interactionStartCount++; }
 
       public void interactionEnded() {
         assertInteractionStartCount(1);
@@ -869,7 +868,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void interpreterResetFailed(Throwable t) {
       listenerFail("interpreterResetFailed fired unexpectedly");
     }
-
+    
+    public void slaveJVMUsed() { /* ignore it */ }
+    
     public void consoleReset() {
       listenerFail("consoleReset fired unexpectedly");
     }

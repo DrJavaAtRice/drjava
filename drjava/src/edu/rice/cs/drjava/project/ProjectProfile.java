@@ -33,16 +33,19 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.project;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
+//import java.util.Vector;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.io.*;
 
+import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.util.StringOps.*;
 import static edu.rice.cs.util.FileOps.*;
@@ -54,27 +57,36 @@ public class ProjectProfile implements ProjectFileIR {
   
   /* Private fields */
   
-  private List<DocFile> _sourceFiles = new Vector<DocFile>();
-  private List<DocFile> _auxFiles = new Vector<DocFile>();
-  private List<String> _collapsedPaths = new Vector<String>();
+  private List<DocFile> _sourceFiles = new ArrayList<DocFile>();
+  private List<DocFile> _auxFiles = new ArrayList<DocFile>();
+  private List<String> _collapsedPaths = new ArrayList<String>();
   
   private File _buildDir = null;
   private File _workDir = null;
   
-  private List<File> _classPathFiles = new Vector<File>();
+  private List<File> _classPathFiles = new ArrayList<File>();
   
   private File _mainClass = null;
-  private File _projRoot = null;
-  private File _projectFile;
+  
+  /** root of project source tree */
+  private File _projectRoot;
+  
+  private File _projectFile;  /* Invariant: _projectFile.getParentFile() != null */
   
   private File _createJarFile = null;
   
   private int _createJarFlags = 0;
   
-  /* Constructors */
+  /* Constructors create new ProjectProfiles with specifed project file name and project root that is parent folder of
+   * the project file.  The project file presumably may not exist yet.  */
   
   public ProjectProfile(String fileName) { _projectFile = new File(fileName); }
-  public ProjectProfile(File f) { _projectFile = f; }
+  public ProjectProfile(File f) { 
+    _projectFile = f; 
+    _projectRoot = _projectFile.getParentFile();
+//    Utilities.show("Initial Project Root is " + _projRoot);
+    assert _projectRoot != null;
+  }
   
   /* Public getters */
   
@@ -83,6 +95,9 @@ public class ProjectProfile implements ProjectFileIR {
     
   /** @return an array full of all the aux files (project outside source tree) in this project. */
   public DocFile[] getAuxiliaryFiles() { return _auxFiles.toArray(new DocFile[_auxFiles.size()]); }
+  
+  /** @return project file. */
+  public File getProjectFile() { return _projectFile; }
     
   /** @return the build directory stored in this project file */
   public File getBuildDirectory() { return _buildDir; }
@@ -101,8 +116,13 @@ public class ProjectProfile implements ProjectFileIR {
   /** @return the name of the file that holds the Jar main class associated with this project */
   public File getMainClass() { return _mainClass; }
   
-  /** @return the directory that is the root of the project source tree. */
-  public File getProjectRoot() { return _projRoot; }
+  /** @return the directory that is the root of the project source tree. If project root is not set, returns the parent
+   *  of the project file.  Never returns null. */
+  public File getProjectRoot() { 
+    if ((_projectRoot == null) || _projectRoot.equals(FileOption.NULL_FILE))
+      _projectRoot = _projectFile.getParentFile();
+    return _projectRoot;
+  }
   
   /** @return the output file used in the "Create Jar" dialog. */
   public File getCreateJarFile() { return _createJarFile; }
@@ -132,10 +152,24 @@ public class ProjectProfile implements ProjectFileIR {
   
   public void addClassPathFile(File cp) { if (cp != null) _classPathFiles.add(cp); }
   public void addCollapsedPath(String cp) { if (cp != null) _collapsedPaths.add(cp); }
-  public void setBuildDirectory(File dir) { _buildDir = FileOps.validate(dir); }
+  public void setBuildDirectory(File dir) { 
+//    System.err.println("setBuildDirectory(" + dir + ") called");
+    _buildDir = FileOps.validate(dir); 
+//    System.err.println("Vaidated form is: " + _buildDir);
+  }
   public void setWorkingDirectory(File dir) { _workDir = FileOps.validate(dir); }
   public void setMainClass(File main) { _mainClass = main;  }
-  public void setProjectRoot(File root) { _projRoot = root; }
+  public void setSourceFiles(List<DocFile> sf) { _sourceFiles = sf; }
+  public void setClassPaths(List<File> cpf) { _classPathFiles = cpf; }
+  public void setCollapsedPaths(List<String> cp) { _collapsedPaths = cp; }
+  public void setAuxiliaryFiles(List<DocFile> af) { _auxFiles = af; }
+
+  /** Assumes that root.getParentFile != null */
+  public void setProjectRoot(File root) { 
+    _projectRoot = root; 
+    assert root.getParentFile() != null;
+  }
+  
   public void setCreateJarFile(File createJarFile) { _createJarFile = createJarFile; }
   public void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
   
@@ -145,14 +179,16 @@ public class ProjectProfile implements ProjectFileIR {
     
     // write opening comment line
     fw.write(";; DrJava project file, written by build " + Version.getBuildTimeString());
-    fw.write(";; relative files are made relative to: " + _projectFile.getParentFile().getCanonicalFile());
+    fw.write(";; relative files are made relative to: " + _projectFile.getCanonicalPath());
     
     // write the project root
-    if (_projRoot != null) {
+    if (_projectRoot != null) {
       fw.write("\n(proj-root");
-      fw.write("\n" + encodeFile(_projRoot, "  ", true));
+//      Utilities.show("Writing project root = " + _projRoot);
+      fw.write("\n" + encodeFile(_projectRoot, "  ", true));
       fw.write(")");
     }
+    else fw.write("\n;; no project root; should never happen");
         
     // write source files
     if (!_sourceFiles.isEmpty()) {

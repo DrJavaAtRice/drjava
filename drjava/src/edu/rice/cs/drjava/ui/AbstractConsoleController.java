@@ -137,11 +137,9 @@ public abstract class AbstractConsoleController implements Serializable {
     });
   }
 
-  /**
-   * Sets the font for the document, updating all existing text.
-   * This behavior is only necessary in Mac OS X, since
-   * setFont() works fine on JTextPane on all other tested platforms.
-   * @param f New font to use.
+  /** Sets the font for the document, updating all existing text.  This behavior is only necessary in Mac OS X, since
+   *  setFont() works fine on JTextPane on all other tested platforms.
+   *  @param f New font to use.
    */
   public void setDefaultFont(Font f) {
     Color c = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
@@ -182,9 +180,8 @@ public abstract class AbstractConsoleController implements Serializable {
     }
   }
 
-  /**
-   * Updates all document styles with the attributes contained in newSet.
-   * @param newSet Style containing new attributes to use.
+  /** Updates all document styles with the attributes contained in newSet.
+   *  @param newSet Style containing new attributes to use.
    */
   protected void _updateStyles(AttributeSet newSet) {
     _defaultStyle.addAttributes(newSet);

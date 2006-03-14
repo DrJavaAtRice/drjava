@@ -38,16 +38,14 @@ import java.io.IOException;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.util.ClassPathVector;
 
-/**
- * This state pattern is used by the global model to store any information 
- * pertaining to the currently open project.  The state pattern is used because
- * most project information is not needed in list view. (Elspeth Rocks)
+/** This state pattern is used by the global model to store any information pertaining to the currently open project.  
+ *  The state pattern is used because most project information is not needed in list view. (Elspeth Rocks)
  * 
- * Hint: if you're looking for the instances of this interface, look in 
- * DefaultGlobalModel where they are defined as anonymous inner classes.
+ *  Hint: if you're looking for the instances of this interface, look in DefaultGlobalModel where they are defined 
+ *  as anonymous inner classes.
  */
 public interface FileGroupingState {
-  
+
   /** @return true if the model is in project mode, false otherwi */
   public boolean isProjectActive();
   
@@ -72,12 +70,20 @@ public interface FileGroupingState {
    */
   public File getProjectFile();
   
+  /** Returns the project source root 
+   *  @return null if no build directory is specified
+   */
+  public File getProjectRoot();
+  
+  /** Sets the current project root. */
+  public void setProjectRoot(File f);
+  
   /** Returns the directory in which to put the class files after compilation
    *  @return null if no build directory is specified
    */
   public File getBuildDirectory();
   
-  /** Sets the current built directory. */
+  /** Sets the current build directory. */
   public void setBuildDirectory(File f);
   
   /** Returns the working directory for the slave (interactions pane) JVM. */
