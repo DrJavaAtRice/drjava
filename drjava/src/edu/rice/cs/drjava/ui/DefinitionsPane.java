@@ -812,9 +812,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   private JScrollPane _scrollPane;
   
-  public void setScrollPane(JScrollPane s) {
-    _scrollPane = s;
-  }
+  public void setScrollPane(JScrollPane s) { _scrollPane = s; }
   
   
   /** Uxed to save the caret position, selection, and scroll when setting the definitions pane to be inactive */
@@ -858,10 +856,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
     
-  /** This function is called when switching a pane to be the active document pane.
-   *  It allows the pane to do any "startup" it needs to. since setInactive swapped
-   *  out the document for a dummy document, we need to reload the actual document
-   *  and reset its caret position to the saved location.
+  /** This function is called when switching a pane to be the active document pane.  It allows the pane to do whatever 
+   *  "startup" is required.  Since setInactive swapped out the document for a dummy document, we need to reload the 
+   *  actual document and reset its caret position to the saved location.
    */
   public void notifyActive() {
     super.setDocument(_doc);
@@ -892,6 +889,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //    synchronized(_lock) {  // Why synchronize?  This code now runs in the event thread, but was not in legacy code
     _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
     _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
+    // Explicitly set scrollbar policies fixing bug #1445898 
+    _scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+    _scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
   }
   
   public int getVerticalScroll() {
@@ -977,7 +977,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     if (selectionStart < 0) selectionStart = 0;
     if (selectionEnd < 0) selectionEnd = 0;
     setCaretPosition(selectionStart);
-    moveCaretPosition(selectionEnd);  // What the caret position in the reduced model?  It is now inconsistent!
+    moveCaretPosition(selectionEnd);  // What about the caret position in the reduced model?  It is now inconsistent!
   }
 
   /** Reset the document Undo list. */

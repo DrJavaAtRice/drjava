@@ -3716,10 +3716,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     return -1;
   }
   
-  /**
-   * Removes the ErrorCaretListener corresponding to
-   * the given document, after that document has been closed.
-   * (Allows pane and listener to be garbage collected...)
+  /** Removes the ErrorCaretListener corresponding to the given document, after that document has been closed.
+   *  (Allows pane and listener to be garbage collected...)
    */
   private void _removeErrorListener(OpenDefinitionsDocument doc) {
     JScrollPane scroll = _defScrollPanes.get(doc);
@@ -4930,16 +4928,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     else _debugPanel = null;
     
     // Overall layout
-    _docSplitPane = new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                                            true,
-                                            new JScrollPane(_model.getDocumentNavigator().asContainer()),
-                                            defScroll);
+    _docSplitPane = 
+      new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT, true,
+                              new JScrollPane(_model.getDocumentNavigator().asContainer()), defScroll);
     _debugSplitPane = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT, true);
     _debugSplitPane.setBottomComponent(_debugPanel);
-    _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                                true,
-                                _docSplitPane,
-                                _tabbedPane);
+    _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, _docSplitPane, _tabbedPane);
     _mainSplit.setResizeWeight(1.0);
     _debugSplitPane.setResizeWeight(1.0);
     getContentPane().add(_mainSplit, BorderLayout.CENTER);

@@ -44,8 +44,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.swing.DisplayManager;
 
-/** This class extends a Swing view class.  Hence it should only be accessed from
- *  the event-handling thread. */
+/** This class extends a Swing view class.  Hence it should only be accessed from the event-handling thread. */
 public class RecentDocFrame extends JWindow {
   // MainFrame
   MainFrame _frame;
@@ -115,8 +114,7 @@ public class RecentDocFrame extends JWindow {
         if (CodeStatus.DEVELOPMENT) {
           if (_antiAliasText && g instanceof Graphics2D) {
             Graphics2D g2d = (Graphics2D)g;
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
           }
         }
         super.paintComponent(g);
