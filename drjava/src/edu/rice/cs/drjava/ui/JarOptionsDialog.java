@@ -255,9 +255,7 @@ public class JarOptionsDialog extends JFrame {
       }
     }
     
-    if (_model.getCreateJarFile()!=null) {
-      _jarFileSelector.setFileField(_model.getCreateJarFile());
-    }
+    _jarFileSelector.setFileField(_model.getCreateJarFile());
     
     _okButton.setEnabled(_jarSources.isSelected() || _jarClasses.isSelected());
     _setEnableExecutable(_jarClasses.isSelected());
@@ -743,7 +741,7 @@ public class JarOptionsDialog extends JFrame {
   /** Save the settings for this dialog. */
   private boolean _saveSettings() {
     _lastState = new FrameState(this);
-    if ((_model.getCreateJarFile() != null) && 
+    if ((_model.getCreateJarFile() == null) ||
         (!_model.getCreateJarFile().getName().equals(_jarFileSelector.getFileFromField().getName()))) {
       _model.setCreateJarFile(_jarFileSelector.getFileFromField());
     }
