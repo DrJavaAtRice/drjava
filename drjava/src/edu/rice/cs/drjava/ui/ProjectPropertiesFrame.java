@@ -74,7 +74,8 @@ public class ProjectPropertiesFrame extends JFrame {
   private DirectorySelectorComponent _projRootSelector;
   private DirectorySelectorComponent _builtDirSelector;
   private DirectorySelectorComponent _workDirSelector;
-  private DirectorySelectorComponent _jarMainClassSelector;
+  
+  private FileSelectorComponent _jarMainClassSelector;
   
   private FileSelectorComponent _jarFileSelector;
   private FileSelectorComponent _manifestFileSelector;
@@ -220,21 +221,21 @@ public class ProjectPropertiesFrame extends JFrame {
   
   /** Returns the current project root in the project profile. */
   private File _getProjRoot() {
-    File projRoot = _mainFrame.getModel().getProjectRoot();
+    File projRoot = _model.getProjectRoot();
     if (projRoot != null) return projRoot;
     return FileOption.NULL_FILE;
   }
   
   /** Returns the current build directory in the project profile. */
   private File _getBuildDir() {
-    File buildDir = _mainFrame.getModel().getBuildDirectory();
+    File buildDir = _model.getBuildDirectory();
     if (buildDir != null) return buildDir;
     return FileOption.NULL_FILE;
   }
   
   /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getWorkDir() {
-    File workDir = _mainFrame.getModel().getWorkingDirectory();
+    File workDir = _model.getWorkingDirectory();
     if (workDir != null) return workDir;
     return FileOption.NULL_FILE;
   }
@@ -323,7 +324,7 @@ public class ProjectPropertiesFrame extends JFrame {
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    JPanel mainClassPanel = _jarMainClassSelector();
+    JPanel mainClassPanel = _jarMainClassPanel();
     gridbag.setConstraints(mainClassPanel, c);
     panel.add(mainClassPanel);
     
@@ -348,9 +349,6 @@ public class ProjectPropertiesFrame extends JFrame {
     Component extrasComponent = _extraClassPathComponent();
     gridbag.setConstraints(extrasComponent, c);
     panel.add(extrasComponent);
-    
-    
-
   }
   
   public JPanel _projRootPanel() {
@@ -417,38 +415,32 @@ public class ProjectPropertiesFrame extends JFrame {
     return _extraClassPathList.getComponent();
   }
   
-  public JPanel _jarMainClassSelector() {
-    File rootFile = _getProjRoot();
-    try {
-      rootFile = rootFile.getCanonicalFile();
-    } catch(IOException e) { }
+  public JPanel _jarMainClassPanel() {
     
-    DirectoryChooser chooser = new DirectoryChooser(this,rootFile);
-    chooser.setDialogTitle("Select Main Document");
+    JFileChooser mainChooser = new JFileChooser(_getProjRoot());
+    mainChooser.setDialogTitle("Select Main Document for the project");
+    mainChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 //    chooser.setTopMessage("Select the main document for the project:");
-    chooser.setApproveButtonText("Select");
+    mainChooser.setApproveButtonText("Select");
     
-    FileFilter filter = new FileFilter() {
+    _jarMainClassSelector = new FileSelectorComponent(this, mainChooser, 20, 12f);
+    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    
+    _jarMainClassSelector.setFileFilter(new FileFilter() {
       public boolean accept(File f) {
         String name = f.getName();
-        return !f.isDirectory() &&
+        return f.isDirectory() ||
           (name.endsWith(".java") || name.endsWith(".dj0") || name.endsWith(".dj1") || name.endsWith(".dj2"));
       }
       public String getDescription() { return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2)"; }
-    };
-    
-    chooser.addChoosableFileFilter(filter);
-//    chooser.addChoosableFileFilter(filter);
-//    chooser.setShowFiles(true);
-//    chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
-    _jarMainClassSelector = new DirectorySelectorComponent(this,chooser,20,12f);
-    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    });
     
     _jarMainClassSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
       public void insertUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
       public void removeUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
       public void changedUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
     });
+    
     return _jarMainClassSelector;
   }
   
