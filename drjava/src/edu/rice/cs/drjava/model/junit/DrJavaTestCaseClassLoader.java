@@ -121,9 +121,7 @@ public final class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
    */
   public boolean isExcluded(String name) {
     for (int i= 0; i < fExcluded.size(); i++) {
-      if (name.startsWith((String) fExcluded.elementAt(i))) {
-        return true;
-      }
+      if (name.startsWith(fExcluded.elementAt(i))) return true;
     }
     return false; 
   }
@@ -169,13 +167,11 @@ public final class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
     return c;
   }
   
-  /**
-   * read in and return data from class file for the given classname
-   */
+  /** Reads in and returns data from class file for the given classname. */
   private byte[] lookupClassData(String className) throws ClassNotFoundException {
     byte[] data= null;
     for (int i= 0; i < fPathItems.size(); i++) {
-      String path= (String) fPathItems.elementAt(i);
+      String path= fPathItems.elementAt(i);
       String fileName= className.replace('.', '/')+".class";
       if (isJar(path)) {
         data= loadJarData(path, fileName);

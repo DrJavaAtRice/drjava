@@ -279,7 +279,7 @@ public class IdentityVisitor implements Visitor<Node> {
    */
   public Node visit(IfThenStatement node) {
     node.setCondition((Expression)node.getCondition().acceptVisitor(this));
-    node.setThenStatement((Node)node.getThenStatement().acceptVisitor(this));
+    node.setThenStatement(node.getThenStatement().acceptVisitor(this));
     return node;
   }
 

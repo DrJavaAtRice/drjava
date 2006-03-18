@@ -376,7 +376,7 @@ public class DefaultCompilerModel implements CompilerModel {
       compilerErrors.addAll(_visitorErrors2CompilerErrors(visitorErrors));
       CompilerError[] compilerErrorsArray = null;
       
-      compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[compilerErrors.size()]);
+      compilerErrorsArray = compilerErrors.toArray(new CompilerError[compilerErrors.size()]);
 
       /** Compile the files in specified sourceRoots and files */
     

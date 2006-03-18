@@ -45,10 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-/**
- * Indicates that the file attempting to be opened is
- * already open.
- * @version $Id$
+/** Indicates that the file attempting to be opened is already open.
+ *  @version $Id$
  */
 public class AlreadyOpenException extends Exception {
   private OpenDefinitionsDocument _openDoc;

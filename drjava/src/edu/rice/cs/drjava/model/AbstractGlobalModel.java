@@ -3197,18 +3197,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Sets the active document to be the next one in the collection. */
   public void setActiveNextDocument() {
     OpenDefinitionsDocument key = _activeDocument;
-    OpenDefinitionsDocument nextKey = (OpenDefinitionsDocument) _documentNavigator.getNext(key);
+    OpenDefinitionsDocument nextKey = _documentNavigator.getNext(key);
     if (key != nextKey) setActiveDocument(nextKey);
-    else setActiveDocument((OpenDefinitionsDocument)_documentNavigator.getFirst());
+    else setActiveDocument(_documentNavigator.getFirst());
     /* selects the active document in the navigator, which signals a listener to call _setActiveDoc(...) */
   }
 
   /** Sets the active document to be the previous one in the collection. */
   public void setActivePreviousDocument() {
     OpenDefinitionsDocument key = _activeDocument;
-    OpenDefinitionsDocument prevKey = (OpenDefinitionsDocument) _documentNavigator.getPrevious(key);
+    OpenDefinitionsDocument prevKey = _documentNavigator.getPrevious(key);
     if (key != prevKey) setActiveDocument(prevKey);
-    else setActiveDocument((OpenDefinitionsDocument)_documentNavigator.getLast());
+    else setActiveDocument(_documentNavigator.getLast());
       /* selects the active document in the navigator, which signals a listener to call _setActiveDoc(...) */
   }
 
@@ -3234,14 +3234,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       IDocumentNavigator<OpenDefinitionsDocument> nav = getDocumentNavigator();
       
       OpenDefinitionsDocument item = docs.get(docs.size()-1);
-      OpenDefinitionsDocument nextActive = (OpenDefinitionsDocument) nav.getNext(item);
+      OpenDefinitionsDocument nextActive = nav.getNext(item);
       if (!nextActive.equals(item)) {
         setActiveDocument(nextActive); 
         return;
       }
       
       item = docs.get(0);
-      nextActive = (OpenDefinitionsDocument) nav.getPrevious(item);
+      nextActive = nav.getPrevious(item);
       if (!nextActive.equals(item)) { 
         setActiveDocument(nextActive);
         return;
