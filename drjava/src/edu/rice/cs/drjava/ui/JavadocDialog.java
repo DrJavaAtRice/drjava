@@ -44,14 +44,11 @@ import edu.rice.cs.util.OperationCanceledException;
 import javax.swing.*;
 import java.io.File;
 
-/**
- * Manages a dialog box that can select a destination directory for generating
- * Javadoc.  The getDirectory method should be called to show the dialog,
- * using the suggested location for the Javadoc as the "start" file.  If the
- * user modifies the selection once, the user's choice will be remembered and
- * no further suggestions will be used.
+/** Manages a dialog box that can select a destination directory for generating Javadoc.  The getDirectory method should
+ *  be called to show the dialog, using the suggested location for the Javadoc as the "start" file.  If the user 
+ *  modifies the selection once, the user's choice will be remembered and no further suggestions will be used.
  *
- * @version $Id$
+ *  @version $Id$
  */
 public class JavadocDialog implements DirectorySelector {
   /** Parent frame of the dialog. */

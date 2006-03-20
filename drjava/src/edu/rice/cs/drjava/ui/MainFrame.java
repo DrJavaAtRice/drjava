@@ -199,7 +199,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private HelpFrame _helpFrame;
   private QuickStartFrame _quickStartFrame;
   private AboutDialog _aboutDialog;
-  private ProjectPropertiesFrame _projectPropertiesFrame;
+//  private ProjectPropertiesFrame _projectPropertiesFrame;
   
   /** Keeps track of the recent files list in the File menu. */
   private RecentFileManager _recentFileManager;
@@ -1057,94 +1057,89 @@ public class MainFrame extends JFrame implements OptionConstants {
    
   /** Goes to the file specified by the word the cursor is on. */
   void _gotoFileUnderCursor() {
-      List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-      if ((docs==null) || (docs.size() == 0)) {
-        return; // do nothing
+//    Utilities.show("Calling gotoFileUnderCursor()");
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    if ((docs==null) || (docs.size() == 0)) return; // do nothing
+    
+    GoToFileListEntry currentEntry = null;
+    ArrayList<GoToFileListEntry> list;
+    list = new ArrayList<GoToFileListEntry>(docs.size());
+    for(OpenDefinitionsDocument d: docs) {
+      GoToFileListEntry entry = new GoToFileListEntry(d, d.toString());
+      if (d.equals(_model.getActiveDocument())) currentEntry = entry;
+      list.add(entry);
+    }
+    
+    PredictiveInputModel<GoToFileListEntry> pim =
+      new PredictiveInputModel<GoToFileListEntry>(true,
+                                                  new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>(),
+                                                  list);
+    OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+    odd.acquireReadLock();
+    String mask = "";
+    try {
+      int loc = getCurrentDefPane().getCaretPosition();
+      String s = odd.getText();
+      // find start
+      int start = loc;
+      while(start>0) {
+        if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+        --start;
       }
-      GoToFileListEntry currentEntry = null;
-      ArrayList<GoToFileListEntry> list;
-      list = new ArrayList<GoToFileListEntry>(docs.size());
-      for(OpenDefinitionsDocument d: docs) {
-        GoToFileListEntry entry = new GoToFileListEntry(d, d.toString());
-        if (d.equals(_model.getActiveDocument())) {
-          currentEntry = entry;
-        }
-        list.add(entry);
+      while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+        ++start;
       }
-      PredictiveInputModel<GoToFileListEntry> pim =
-          new PredictiveInputModel<GoToFileListEntry>(true,
-                                                      new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>(),
-                                                      list);
-      OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-      odd.acquireReadLock();
-      String mask = "";
-      try {
-          int loc = getCurrentDefPane().getCaretPosition();
-          String s = odd.getText();
-          // find start
-          int start = loc;
-          while(start>0) {
-              if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
-              --start;
-          }
-          while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
-              ++start;
-          }
-          // find end
-          int end = loc-1;
-          while(end<s.length()-1) {
-              if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
-              ++end;
-          }
-          if ((start>=0) && (end<s.length())) {
-              mask = s.substring(start, end+1);
-              pim.setMask(mask);
-          }
+      // find end
+      int end = loc-1;
+      while(end<s.length()-1) {
+        if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
+        ++end;
       }
-      finally { odd.releaseReadLock(); }
-
+      if ((start>=0) && (end<s.length())) {
+        mask = s.substring(start, end+1);
+        pim.setMask(mask);
+      }
+    }
+    finally { odd.releaseReadLock(); }
+    
+//    Utilities.show("Matching items are: " + pim.getMatchingItems());
+    
+    if (pim.getMatchingItems().size() == 1) {
+      // exactly one match, go to file
+      if (pim.getCurrentItem() != null) _model.setActiveDocument(pim.getCurrentItem().doc);
+    }
+    else {
+      // try appending ".java" and see if it's unique
+      pim.extendMask(".java");
       if (pim.getMatchingItems().size() == 1) {
-          // exactly one match, go to file
-          if (pim.getCurrentItem()!=null) {
-            _model.setActiveDocument(pim.getCurrentItem().doc);
-          }
+        // exactly one match with ".java" appended, go to file
+        if (pim.getCurrentItem() != null) _model.setActiveDocument(pim.getCurrentItem().doc);
       }
       else {
-          // try appending ".java" and see if it's unique
-          pim.extendMask(".java");
-          if (pim.getMatchingItems().size() == 1) {
-              // exactly one match with ".java" appended, go to file
-              if (pim.getCurrentItem()!=null) {
-                  _model.setActiveDocument(pim.getCurrentItem().doc);
-              }
+        // not exactly one match
+        pim.setMask(mask);
+        if (pim.getMatchingItems().size() == 0) {
+          // if there are no matches, shorten the mask until there is at least one
+          mask = pim.getMask();
+          while(mask.length()>0) {
+            mask = mask.substring(0, mask.length()-1);
+            pim.setMask(mask);
+            if (pim.getMatchingItems().size()>0) { break; }
           }
-          else {
-              // not exactly one match
-              pim.setMask(mask);
-              if (pim.getMatchingItems().size() == 0) {
-                  // if there are no matches, shorten the mask until there is at least one
-                  mask = pim.getMask();
-                  while(mask.length()>0) {
-                      mask = mask.substring(0, mask.length()-1);
-                      pim.setMask(mask);
-                      if (pim.getMatchingItems().size()>0) { break; }
-                  }
-              }       
-              initGotoFileDialog();
-              _gotoFileDialog.setModel(true, pim); // ignore case
-              if (currentEntry!=null) {
-                  _gotoFileDialog.setCurrentItem(currentEntry);
-              }
-              hourglassOn();
-              _gotoFileDialog.setVisible(true);
-          }
+        }       
+        initGotoFileDialog();
+        _gotoFileDialog.setModel(true, pim); // ignore case
+        if (currentEntry != null) _gotoFileDialog.setCurrentItem(currentEntry);
+        hourglassOn();
+        _gotoFileDialog.setVisible(true);
       }
+    }
   }
   
   /** Goes to the file specified by the word the cursor is on. */
   final Action gotoFileUnderCursorAction = new AbstractAction("Go to File Under Cursor...") {
     public void actionPerformed(ActionEvent ae) {
-        _gotoFileUnderCursor();
+      _gotoFileUnderCursor();
     }
   };
   
@@ -2104,7 +2099,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _helpFrame = null;
     _aboutDialog = null;
     _interactionsScriptController = null;
-    _projectPropertiesFrame = null;
+//    _projectPropertiesFrame = null;
     
     // If any errors occurred while parsing config file, show them
     _showConfigException();
@@ -2926,14 +2921,17 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveProjectHelper(_currentProjFile);
   }
   
-  private void _editProject() {
-    // Create project properties frame from global model state if we haven't yet
-    if (_projectPropertiesFrame == null) {
-      _projectPropertiesFrame = new ProjectPropertiesFrame(MainFrame.this);
-    }
-    _projectPropertiesFrame.setVisible(true);
-    _projectPropertiesFrame.reset();
-    _projectPropertiesFrame.toFront();
+  /** Edit the project in the global model. */
+  private void _editProject() { _editProject(null); }
+  
+  /** Edit new project frame ppf (if not null); otherwise edit the project in the global model. */  
+  private void _editProject(ProjectPropertiesFrame ppf) {
+    if (ppf == null) 
+      // Create new project properties frame consistent with the current project state in the global model
+      ppf = new ProjectPropertiesFrame(MainFrame.this);
+    ppf.setVisible(true);
+    ppf.reset();
+    ppf.toFront();  // ppf actions save state of ppf in global model
   }
   
   /** Closes all files and makes a new project. */
@@ -2952,9 +2950,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         else file = new File(fileName.substring(0, lastIndex) + ".pjt");
       }
       
-      _projectPropertiesFrame = new ProjectPropertiesFrame(MainFrame.this, file);
-      _editProject();    // Uses new project properties frame
-      _projectPropertiesFrame.saveSettings();   // Saves edited profile in global model
+      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
+      _editProject(ppf);    // Uses new project properties frame
+//      ppf.saveSettings();   // Saves edited profile in global model
       
       try { _model.newProject(file); }
       catch(IOException e) { throw new UnexpectedException(e); }

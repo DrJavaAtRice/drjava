@@ -610,6 +610,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   
   /** Tests that "go to file under cursor" works if unique. */
   public void testGotoFileUnderCursor() throws IOException {
+//    Utilities.show("Running testGotoFileUnderCursor");
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
 
@@ -710,6 +711,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   
   /** Tests that "go to file under cursor" displays the dialog if choice is not unique */
   public void testGotoFileUnderCursorShowDialog() throws IOException {
+//    Utilities.show("Running testGotoFileUnderCursorShowDialog()");
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
 
@@ -727,9 +729,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       public void run() {
         _frame.pack();
         _frame.open(new FileOpenSelector() {
-          public File[] getFiles() {
-              return new File[] { goto1_file, goto2_file };
-          }
+          public File[] getFiles() { return new File[] { goto1_file, goto2_file }; }
         });
       }
     });
@@ -750,9 +750,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
     OpenDefinitionsDocument goto2_doc = model.getDocumentForFile(goto2_file);
     model.setActiveDocument(model.getDocumentForFile(goto1_file));
+
     assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
     
     _frame._gotoFileUnderCursor();
+    Utilities.clearEventQueue();  // wait for command to complete
+    Utilities.clearEventQueue();
     assertEquals("Did not activate _gotoFileDialog", 1, count[0]);
     assertEquals("Did not open _gotoFileDialog", 1, count[1]);
   }

@@ -48,9 +48,11 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.config.*;
 
 import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.swing.FileChooser;
 import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.filechooser.FileFilter;
@@ -74,8 +76,7 @@ public class ProjectPropertiesFrame extends JFrame {
   private DirectorySelectorComponent _projRootSelector;
   private DirectorySelectorComponent _builtDirSelector;
   private DirectorySelectorComponent _workDirSelector;
-  
-  private FileSelectorComponent _jarMainClassSelector;
+  private FileSelectorComponent _mainDocumentSelector;
   
   private FileSelectorComponent _jarFileSelector;
   private FileSelectorComponent _manifestFileSelector;
@@ -117,6 +118,7 @@ public class ProjectPropertiesFrame extends JFrame {
       public void actionPerformed(ActionEvent e) {
         // Always save settings
         saveSettings();
+        reset();
         _applyButton.setEnabled(false);
       }
     };
@@ -183,9 +185,9 @@ public class ProjectPropertiesFrame extends JFrame {
     else _workDirSelector.setFileField(wd);
     
     final File mc = _model.getMainClass();
-    final JTextField mcTextField = _jarMainClassSelector.getFileField();
+    final JTextField mcTextField = _mainDocumentSelector.getFileField();
     if (mc == null) mcTextField.setText("");
-    else _jarMainClassSelector.setFileField(mc);
+    else _mainDocumentSelector.setFileField(mc);
     
     ClassPathVector cp = _model.getExtraClassPath();
     _extraClassPathList.setValue(cp.asFileVector());
@@ -206,8 +208,8 @@ public class ProjectPropertiesFrame extends JFrame {
     if (_workDirSelector.getFileField().getText().equals("")) wd = null;
     _model.setWorkingDirectory(wd);
     
-    File mc = _jarMainClassSelector.getFileFromField();
-    if (_jarMainClassSelector.getFileField().getText().equals("")) mc = null;
+    File mc = _mainDocumentSelector.getFileFromField();
+    if (_mainDocumentSelector.getFileField().getText().equals("")) mc = null;
     _model.setMainClass(mc);
     
     Vector<File> extras = _extraClassPathList.getValue();
@@ -221,22 +223,29 @@ public class ProjectPropertiesFrame extends JFrame {
   
   /** Returns the current project root in the project profile. */
   private File _getProjRoot() {
-    File projRoot = _model.getProjectRoot();
+    File projRoot = _mainFrame.getModel().getProjectRoot();
     if (projRoot != null) return projRoot;
     return FileOption.NULL_FILE;
   }
   
   /** Returns the current build directory in the project profile. */
   private File _getBuildDir() {
-    File buildDir = _model.getBuildDirectory();
+    File buildDir = _mainFrame.getModel().getBuildDirectory();
     if (buildDir != null) return buildDir;
     return FileOption.NULL_FILE;
   }
   
   /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getWorkDir() {
-    File workDir = _model.getWorkingDirectory();
+    File workDir = _mainFrame.getModel().getWorkingDirectory();
     if (workDir != null) return workDir;
+    return FileOption.NULL_FILE;
+  }
+  
+   /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
+  private File _getMainFile() {
+    File mainFile = _mainFrame.getModel().getMainClass();
+    if (mainFile != null) return mainFile;
     return FileOption.NULL_FILE;
   }
   
@@ -324,7 +333,7 @@ public class ProjectPropertiesFrame extends JFrame {
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     
-    JPanel mainClassPanel = _jarMainClassPanel();
+    JPanel mainClassPanel = _mainDocumentSelector();
     gridbag.setConstraints(mainClassPanel, c);
     panel.add(mainClassPanel);
     
@@ -415,33 +424,44 @@ public class ProjectPropertiesFrame extends JFrame {
     return _extraClassPathList.getComponent();
   }
   
-  public JPanel _jarMainClassPanel() {
+  public JPanel _mainDocumentSelector() {
+    File rootFile = _getProjRoot();
+    try {
+      rootFile = rootFile.getCanonicalFile();
+    } catch(IOException e) { }
     
-    JFileChooser mainChooser = new JFileChooser(_getProjRoot());
-    mainChooser.setDialogTitle("Select Main Document for the project");
-    mainChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-//    chooser.setTopMessage("Select the main document for the project:");
-    mainChooser.setApproveButtonText("Select");
+    final File root = rootFile;
     
-    _jarMainClassSelector = new FileSelectorComponent(this, mainChooser, 20, 12f);
-    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    FileChooser chooser = new FileChooser(root);
+    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    chooser.setDialogType(JFileChooser.CUSTOM_DIALOG);
+ 
+    chooser.setDialogTitle("Select Main Document");
+//    Utilities.show("Main Document Root is: " + root);
+    chooser.setCurrentDirectory(root);
+    File mainFile = _getMainFile();
+    if (mainFile != FileOption.NULL_FILE) chooser.setSelectedFile(mainFile);
+
+    chooser.setApproveButtonText("Select");
     
-    _jarMainClassSelector.setFileFilter(new FileFilter() {
+    FileFilter filter = new FileFilter() {
       public boolean accept(File f) {
         String name = f.getName();
-        return f.isDirectory() ||
-          (name.endsWith(".java") || name.endsWith(".dj0") || name.endsWith(".dj1") || name.endsWith(".dj2"));
+        return  FileOps.isInFileTree(f, root) && (f.isDirectory() ||
+          (name.endsWith(".java") || name.endsWith(".dj0") || name.endsWith(".dj1") || name.endsWith(".dj2")));
       }
-      public String getDescription() { return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2)"; }
-    });
+      public String getDescription() { return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2) in project"; }
+    };
     
-    _jarMainClassSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
+    chooser.addChoosableFileFilter(filter);
+    _mainDocumentSelector = new FileSelectorComponent(this, chooser, 20, 12f);
+    
+    _mainDocumentSelector.getFileField().getDocument().addDocumentListener(new DocumentListener() {
       public void insertUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
       public void removeUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
       public void changedUpdate(DocumentEvent e) { _applyButton.setEnabled(true); }
     });
-    
-    return _jarMainClassSelector;
+    return _mainDocumentSelector;
   }
   
   public JPanel _manifestFileSelector() {

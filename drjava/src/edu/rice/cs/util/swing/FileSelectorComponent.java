@@ -44,6 +44,7 @@ import java.io.*;
 
 /** A JPanel with a text box and a "..." button used to select a file or directory.  The file name is editable in the
  *  text box, and a JFileChooser is displayed if the user clicks the "..." button.
+ *  TODO: make this inherit from FileSelectorStringComponent or factor the common code into an abstract class!  Duplicated code!
  *
  *  @version $Id$
  */

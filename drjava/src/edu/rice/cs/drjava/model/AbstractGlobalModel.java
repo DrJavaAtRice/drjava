@@ -506,18 +506,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     else return "";
   }
   
-  /** Determines whether the specified file in within the specified file tree.
-   *  No synchronization is required because only immutable data is accessed.
-   */
-  private static boolean isInFileTree(File f, File root) {
-    try {
-      String filePath = f.getParentFile().getCanonicalPath() + File.separator;
-      String projectPath = root.getCanonicalPath() + File.separator;
-      return (filePath.startsWith(projectPath));
-    }
-    catch(IOException e) { return false; }
-  }
-  
+
   class ProjectFileGroupingState implements FileGroupingState {
     
     File _projRoot;
@@ -576,7 +565,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Determines whether the specified file in within the project file tree.
      *  No synchronization is required because only immutable data is accessed.
      */
-    public boolean isInProjectPath(File f) { return isInFileTree(f, getProjectRoot()); }
+    public boolean isInProjectPath(File f) { return FileOps.isInFileTree(f, getProjectRoot()); }
     
     /** @return the absolute path to the project file.  Since projectFile is final, no synchronization
      *  is necessary.
@@ -1139,7 +1128,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (doc.isUntitled()) {
         extFileList.add(f);
       }
-      else if (isInFileTree(f, projectRoot)) {
+      else if (FileOps.isInFileTree(f, projectRoot)) {
         builder.addSourceFile(new DocFile(f));
         srcFileList.add(f);
       }
@@ -2022,7 +2011,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** An open file is in the new project if the source root is the same as the new project root. 
      */
     public boolean isInNewProjectPath(File projRoot) { 
-      try { return ! isUntitled() && isInFileTree(getFile(), projRoot); }
+      try { return ! isUntitled() && FileOps.isInFileTree(getFile(), projRoot); }
       catch(FileMovedException e) { return false; }
     }
   

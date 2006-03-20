@@ -66,6 +66,19 @@ public abstract class FileOps {
     public boolean exists() { return false; }
   };
   
+  /** Determines whether the specified file in within the specified file tree. */
+  public static boolean isInFileTree(File f, File root) {
+    if (root == null) return false;
+    try {
+      if (! f.isDirectory()) f = f.getParentFile();
+      String filePath = f.getCanonicalPath() + File.separator;
+      String projectPath = root.getCanonicalPath() + File.separator;
+      return (filePath.startsWith(projectPath));
+    }
+    catch(IOException e) { return false; }
+  }
+  
+  
   /** Makes a file equivalent to the given file f that is relative to base file b.  In other words,
    *  <code>new File(b,makeRelativeTo(base,abs)).getCanonicalPath()</code> equals
    *  <code>f.getCanonicalPath()</code><p> 

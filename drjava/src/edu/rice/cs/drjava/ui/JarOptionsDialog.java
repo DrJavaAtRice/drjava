@@ -39,8 +39,8 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.jar.JarBuilder;
 import edu.rice.cs.util.jar.ManifestWriter;
-import edu.rice.cs.util.swing.DirectoryChooser;
-import edu.rice.cs.util.swing.DirectorySelectorStringComponent;
+import edu.rice.cs.util.swing.FileChooser;
+import edu.rice.cs.util.swing.FileSelectorStringComponent;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.newjvm.ExecJVM;
@@ -108,7 +108,7 @@ public class JarOptionsDialog extends JFrame {
   /** File selector for the jar output file. */
   private FileSelectorComponent _jarFileSelector;
   /** Text field for the main class. */
-  private DirectorySelectorStringComponent _mainClassField;
+  private FileSelectorStringComponent _mainClassField;
   /** Label for main class. */
   private JLabel _mainClassLabel;
   /** OK button. */
@@ -226,7 +226,7 @@ public class JarOptionsDialog extends JFrame {
         _rootFile = _rootFile.getCanonicalFile();
       } catch(IOException e) { }
     
-      DirectoryChooser chooser = new DirectoryChooser(this,_rootFile);
+      FileChooser chooser = new FileChooser(_rootFile);
       chooser.setDialogTitle("Select Main Class");
 //      chooser.setTopMessage("Select the main class for the executable jar file:");
       chooser.setApproveButtonText("Select");
@@ -416,20 +416,15 @@ public class JarOptionsDialog extends JFrame {
    *  @return the panel containing the label and the selector for the main class.
    */
   private JPanel _makeMainClassSelectorPanel() {
-    _mainClassField = new DirectorySelectorStringComponent(this,null,20,12f) {
-        public File convertStringToFile(String s) {
+    _mainClassField = new FileSelectorStringComponent(this, null, 20, 12f) {
+        public File convertStringToFile(String s) { 
           s = s.trim().replace('.', java.io.File.separatorChar) + ".class";
-          if (s.equals("")) {
-            return null;
-          }
-          else {
-            return new File(_rootFile, s);
-          }
+          if (s.equals("")) return null;
+          else return new File(_rootFile, s);
         }
+        
         public String convertFileToString(File f) {
-          if (f==null) {
-            return "";
-          }
+          if (f == null)  return "";
           else {
             try {
               String s = edu.rice.cs.util.FileOps.makeRelativeTo(f, _rootFile).toString();
@@ -437,23 +432,17 @@ public class JarOptionsDialog extends JFrame {
               s = s.replace(java.io.File.separatorChar, '.').replace('$', '.');
               int pos = 0;
               boolean ok = true;
-              while((pos=s.indexOf('.', pos)) >= 0) {
-                if ((s.length()<=pos+1) || (Character.isDigit(s.charAt(pos+1)))) {
+              while((pos = s.indexOf('.', pos)) >= 0) {
+                if ((s.length() <= pos + 1) || (Character.isDigit(s.charAt(pos + 1)))) {
                   ok = false;
                   break;
                 }
                 ++pos;
               }
-              if (ok) {
-                return s;
-              }
-              else {
-                return "";
-              }
-            }
-            catch(Exception e) {
+              if (ok) return s;
               return "";
             }
+            catch(Exception e) { return ""; }
           }
         }
     };
