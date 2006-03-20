@@ -417,6 +417,13 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_G, mask|KeyEvent.SHIFT_MASK));
 
   /**
+   * The key binding for goto this file.
+   */
+  public static final KeyStrokeOption KEY_GOTO_FILE_UNDER_CURSOR =
+    new KeyStrokeOption("key.goto.file.under.cursor",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
+
+  /**
    * The key binding for indenting
    *
   public static final KeyStrokeOption KEY_INDENT =

@@ -638,6 +638,17 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     });
     _popMenu.add(uncommentLinesItem);
 
+    /* Go to this file... */
+    _popMenu.addSeparator();
+    JMenuItem gotoFileUnderCursorItem = new JMenuItem("Go to File Under Cursor...");
+    gotoFileUnderCursorItem.addActionListener ( new AbstractAction() {
+      public void actionPerformed( ActionEvent ae) {
+        _doc.setCurrentLocation(getCaretPosition());
+        _mainFrame._gotoFileUnderCursor();
+      }
+    });
+    _popMenu.add(gotoFileUnderCursorItem);
+      
     if (_mainFrame.getModel().getDebugger().isAvailable()) {
       _popMenu.addSeparator();
 
@@ -705,7 +716,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _mainFrame.uncommentLines();
 //    _doc.uncommentLinesInDefinitions(getSelectionStart(), getSelectionEnd()); 
   }
-
 
   /** @return the undo action. */
   public UndoAction getUndoAction() { return  _undoAction; }

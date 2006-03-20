@@ -935,7 +935,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   /** Initialize dialog if necessary. */
-  private void initGotoFileDialog() {
+  void initGotoFileDialog() {
     if (_gotoFileDialog==null) {
       PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
         public String apply(GoToFileListEntry entry) {
@@ -1002,7 +1002,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   /** The "Go to File" dialog instance. */
-  private PredictiveInputFrame<GoToFileListEntry> _gotoFileDialog = null;
+  PredictiveInputFrame<GoToFileListEntry> _gotoFileDialog = null;
  
   /** Asks the user for a file name and goes there. */
   private Action _gotoFileAction = new AbstractAction("Go to File...") {
@@ -1052,6 +1052,99 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       hourglassOn();
       _gotoFileDialog.setVisible(true);
+    }
+  };
+   
+  /** Goes to the file specified by the word the cursor is on. */
+  void _gotoFileUnderCursor() {
+      List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+      if ((docs==null) || (docs.size() == 0)) {
+        return; // do nothing
+      }
+      GoToFileListEntry currentEntry = null;
+      ArrayList<GoToFileListEntry> list;
+      list = new ArrayList<GoToFileListEntry>(docs.size());
+      for(OpenDefinitionsDocument d: docs) {
+        GoToFileListEntry entry = new GoToFileListEntry(d, d.toString());
+        if (d.equals(_model.getActiveDocument())) {
+          currentEntry = entry;
+        }
+        list.add(entry);
+      }
+      PredictiveInputModel<GoToFileListEntry> pim =
+          new PredictiveInputModel<GoToFileListEntry>(true,
+                                                      new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>(),
+                                                      list);
+      OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+      odd.acquireReadLock();
+      String mask = "";
+      try {
+          int loc = getCurrentDefPane().getCaretPosition();
+          String s = odd.getText();
+          // find start
+          int start = loc;
+          while(start>0) {
+              if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+              --start;
+          }
+          while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+              ++start;
+          }
+          // find end
+          int end = loc-1;
+          while(end<s.length()-1) {
+              if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
+              ++end;
+          }
+          if ((start>=0) && (end<s.length())) {
+              mask = s.substring(start, end+1);
+              pim.setMask(mask);
+          }
+      }
+      finally { odd.releaseReadLock(); }
+
+      if (pim.getMatchingItems().size() == 1) {
+          // exactly one match, go to file
+          if (pim.getCurrentItem()!=null) {
+            _model.setActiveDocument(pim.getCurrentItem().doc);
+          }
+      }
+      else {
+          // try appending ".java" and see if it's unique
+          pim.extendMask(".java");
+          if (pim.getMatchingItems().size() == 1) {
+              // exactly one match with ".java" appended, go to file
+              if (pim.getCurrentItem()!=null) {
+                  _model.setActiveDocument(pim.getCurrentItem().doc);
+              }
+          }
+          else {
+              // not exactly one match
+              pim.setMask(mask);
+              if (pim.getMatchingItems().size() == 0) {
+                  // if there are no matches, shorten the mask until there is at least one
+                  mask = pim.getMask();
+                  while(mask.length()>0) {
+                      mask = mask.substring(0, mask.length()-1);
+                      pim.setMask(mask);
+                      if (pim.getMatchingItems().size()>0) { break; }
+                  }
+              }       
+              initGotoFileDialog();
+              _gotoFileDialog.setModel(true, pim); // ignore case
+              if (currentEntry!=null) {
+                  _gotoFileDialog.setCurrentItem(currentEntry);
+              }
+              hourglassOn();
+              _gotoFileDialog.setVisible(true);
+          }
+      }
+  }
+  
+  /** Goes to the file specified by the word the cursor is on. */
+  final Action gotoFileUnderCursorAction = new AbstractAction("Go to File Under Cursor...") {
+    public void actionPerformed(ActionEvent ae) {
+        _gotoFileUnderCursor();
     }
   };
   
@@ -4026,6 +4119,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(editMenu, _findPrevAction, KEY_FIND_PREV);
     _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
     _addMenuItem(editMenu, _gotoFileAction, KEY_GOTO_FILE);
+    _addMenuItem(editMenu, gotoFileUnderCursorAction, KEY_GOTO_FILE_UNDER_CURSOR);
     
     // Next, prev doc
     editMenu.addSeparator();

@@ -276,6 +276,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
    */
   public PredictiveInputModel(boolean ignoreCase, PredictiveInputModel<T> pim) {
     this(ignoreCase, pim._strategy, pim._items);
+    setMask(pim.getMask());
   }
 
   /**

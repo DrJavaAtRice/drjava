@@ -607,4 +607,153 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     f.deleteOnExit();
     return f;
   }
+  
+  /** Tests that "go to file under cursor" works if unique. */
+  public void testGotoFileUnderCursor() throws IOException {
+    String user = System.getProperty("user.name");
+    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+
+    final File goto1_file = new File(_tempDir, "GotoFileUnderCursor1.java");
+    String goto1_string = "GotoFileUnderCursorTest";
+    FileOps.writeStringToFile(goto1_file, goto1_string);
+    goto1_file.deleteOnExit();
+
+    final File goto2_file = new File(_tempDir, "GotoFileUnderCursorTest.java");
+    String goto2_string = "GotoFileUnderCursor1";
+    FileOps.writeStringToFile(goto2_file, goto2_string);
+    goto2_file.deleteOnExit();
+
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() {
+        _frame.pack();
+        _frame.open(new FileOpenSelector() {
+          public File[] getFiles() {
+              return new File[] { goto1_file, goto2_file };
+          }
+        });
+      }
+    });
+    
+    _frame.initGotoFileDialog();
+    _frame._gotoFileDialog.addWindowListener(new WindowListener() {
+        public void windowActivated(WindowEvent e) { throw new RuntimeException("Should not activate _gotoFileDialog"); }
+        public void windowClosed(WindowEvent e) { throw new RuntimeException("Should not close _gotoFileDialog"); }
+        public void windowClosing(WindowEvent e) { throw new RuntimeException("Should not be closing _gotoFileDialog"); }
+        public void windowDeactivated(WindowEvent e) { throw new RuntimeException("Should not deactivate _gotoFileDialog"); }
+        public void windowDeiconified(WindowEvent e) { throw new RuntimeException("Should not deiconify _gotoFileDialog"); }
+        public void windowIconified(WindowEvent e) { throw new RuntimeException("Should not iconify _gotoFileDialog"); }
+        public void windowOpened(WindowEvent e) { throw new RuntimeException("Should not open _gotoFileDialog"); }
+    });
+    
+    SingleDisplayModel model = _frame.getModel();
+    OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
+    OpenDefinitionsDocument goto2_doc = model.getDocumentForFile(goto2_file);
+    model.setActiveDocument(model.getDocumentForFile(goto1_file));
+    assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
+    
+    _frame._gotoFileUnderCursor();
+    assertEquals("Incorrect active document; did not go to?", goto2_doc, model.getActiveDocument());
+    
+    _frame._gotoFileUnderCursor();
+    assertEquals("Incorrect active document; did not go to?", goto1_doc, model.getActiveDocument());
+  }
+  
+  /** Tests that "go to file under cursor" works if unique after appending ".java" */
+  public void testGotoFileUnderCursorAppendJava() throws IOException {
+    String user = System.getProperty("user.name");
+    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+
+    final File goto1_file = new File(_tempDir, "GotoFileUnderCursor2Test.java");
+    String goto1_string = "GotoFileUnderCursor2";
+    FileOps.writeStringToFile(goto1_file, goto1_string);
+    goto1_file.deleteOnExit();
+
+    final File goto2_file = new File(_tempDir, "GotoFileUnderCursor2.java");
+    String goto2_string = "GotoFileUnderCursor2Test";
+    FileOps.writeStringToFile(goto2_file, goto2_string);
+    goto2_file.deleteOnExit();
+
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() {
+        _frame.pack();
+        _frame.open(new FileOpenSelector() {
+          public File[] getFiles() {
+              return new File[] { goto1_file, goto2_file };
+          }
+        });
+      }
+    });
+    
+    _frame.initGotoFileDialog();
+    _frame._gotoFileDialog.addWindowListener(new WindowListener() {
+        public void windowActivated(WindowEvent e) { throw new RuntimeException("Should not activate _gotoFileDialog"); }
+        public void windowClosed(WindowEvent e) { throw new RuntimeException("Should not close _gotoFileDialog"); }
+        public void windowClosing(WindowEvent e) { throw new RuntimeException("Should not be closing _gotoFileDialog"); }
+        public void windowDeactivated(WindowEvent e) { throw new RuntimeException("Should not deactivate _gotoFileDialog"); }
+        public void windowDeiconified(WindowEvent e) { throw new RuntimeException("Should not deiconify _gotoFileDialog"); }
+        public void windowIconified(WindowEvent e) { throw new RuntimeException("Should not iconify _gotoFileDialog"); }
+        public void windowOpened(WindowEvent e) { throw new RuntimeException("Should not open _gotoFileDialog"); }
+    });
+    
+    SingleDisplayModel model = _frame.getModel();
+    OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
+    OpenDefinitionsDocument goto2_doc = model.getDocumentForFile(goto2_file);
+    model.setActiveDocument(model.getDocumentForFile(goto1_file));
+    assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
+    
+    _frame._gotoFileUnderCursor();
+    assertEquals("Incorrect active document; did not go to?", goto2_doc, model.getActiveDocument());
+    
+    _frame._gotoFileUnderCursor();
+    assertEquals("Incorrect active document; did not go to?", goto1_doc, model.getActiveDocument());
+  }
+  
+  /** Tests that "go to file under cursor" displays the dialog if choice is not unique */
+  public void testGotoFileUnderCursorShowDialog() throws IOException {
+    String user = System.getProperty("user.name");
+    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+
+    final File goto1_file = new File(_tempDir, "GotoFileUnderCursor3.java");
+    String goto1_string = "GotoFileUnderCursor";
+    FileOps.writeStringToFile(goto1_file, goto1_string);
+    goto1_file.deleteOnExit();
+
+    final File goto2_file = new File(_tempDir, "GotoFileUnderCursor4.java");
+    String goto2_string = "GotoFileUnderCursor3";
+    FileOps.writeStringToFile(goto2_file, goto2_string);
+    goto2_file.deleteOnExit();
+
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() {
+        _frame.pack();
+        _frame.open(new FileOpenSelector() {
+          public File[] getFiles() {
+              return new File[] { goto1_file, goto2_file };
+          }
+        });
+      }
+    });
+    
+    final int[] count = new int[2];
+    _frame.initGotoFileDialog();
+    _frame._gotoFileDialog.addWindowListener(new WindowListener() {
+        public void windowActivated(WindowEvent e) { ++count[0]; }
+        public void windowClosed(WindowEvent e) { throw new RuntimeException("Should not close _gotoFileDialog"); }
+        public void windowClosing(WindowEvent e) { throw new RuntimeException("Should not be closing _gotoFileDialog"); }
+        public void windowDeactivated(WindowEvent e) { throw new RuntimeException("Should not deactivate _gotoFileDialog"); }
+        public void windowDeiconified(WindowEvent e) { throw new RuntimeException("Should not deiconify _gotoFileDialog"); }
+        public void windowIconified(WindowEvent e) { throw new RuntimeException("Should not iconify _gotoFileDialog"); }
+        public void windowOpened(WindowEvent e) { ++count[1]; }
+    });
+    
+    SingleDisplayModel model = _frame.getModel();
+    OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
+    OpenDefinitionsDocument goto2_doc = model.getDocumentForFile(goto2_file);
+    model.setActiveDocument(model.getDocumentForFile(goto1_file));
+    assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
+    
+    _frame._gotoFileUnderCursor();
+    assertEquals("Did not activate _gotoFileDialog", 1, count[0]);
+    assertEquals("Did not open _gotoFileDialog", 1, count[1]);
+  }
 }
