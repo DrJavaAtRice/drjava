@@ -853,7 +853,7 @@
     </antcall>
   </target>
        
-  <target name="release" depends="update-svn, build, resolve-version-tag, tag-svn, jar-app, mac-app, windows-app, src-zip, javadoc-zip" 
+  <target name="release" depends="update, build, resolve-version-tag, tag, jar-app, mac-app, windows-app, src-zip, javadoc-zip" 
           description="Generate all release files (after building)">
     <delete dir="${version-tag}" />
   </target>
