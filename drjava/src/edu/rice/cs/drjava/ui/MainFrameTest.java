@@ -635,16 +635,20 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       }
     });
     
-    _frame.initGotoFileDialog();
-    _frame._gotoFileDialog.addWindowListener(new WindowListener() {
-        public void windowActivated(WindowEvent e) { throw new RuntimeException("Should not activate _gotoFileDialog"); }
-        public void windowClosed(WindowEvent e) { throw new RuntimeException("Should not close _gotoFileDialog"); }
-        public void windowClosing(WindowEvent e) { throw new RuntimeException("Should not be closing _gotoFileDialog"); }
-        public void windowDeactivated(WindowEvent e) { throw new RuntimeException("Should not deactivate _gotoFileDialog"); }
-        public void windowDeiconified(WindowEvent e) { throw new RuntimeException("Should not deiconify _gotoFileDialog"); }
-        public void windowIconified(WindowEvent e) { throw new RuntimeException("Should not iconify _gotoFileDialog"); }
-        public void windowOpened(WindowEvent e) { throw new RuntimeException("Should not open _gotoFileDialog"); }
-    });
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        _frame.initGotoFileDialog();
+        _frame._gotoFileDialog.addWindowListener(new WindowListener() {
+          public void windowActivated(WindowEvent e) { throw new RuntimeException("Should not activate _gotoFileDialog"); }
+          public void windowClosed(WindowEvent e) { throw new RuntimeException("Should not close _gotoFileDialog"); }
+          public void windowClosing(WindowEvent e) { throw new RuntimeException("Should not be closing _gotoFileDialog"); }
+          public void windowDeactivated(WindowEvent e) { throw new RuntimeException("Should not deactivate _gotoFileDialog"); }
+          public void windowDeiconified(WindowEvent e) { throw new RuntimeException("Should not deiconify _gotoFileDialog"); }
+          public void windowIconified(WindowEvent e) { throw new RuntimeException("Should not iconify _gotoFileDialog"); }
+          public void windowOpened(WindowEvent e) { throw new RuntimeException("Should not open _gotoFileDialog"); }
+        });
+      }});
+    
     
     SingleDisplayModel model = _frame.getModel();
     OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
@@ -652,10 +656,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     model.setActiveDocument(model.getDocumentForFile(goto1_file));
     assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
     
-    _frame._gotoFileUnderCursor();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { _frame._gotoFileUnderCursor(); }
+    });
     assertEquals("Incorrect active document; did not go to?", goto2_doc, model.getActiveDocument());
     
-    _frame._gotoFileUnderCursor();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { _frame._gotoFileUnderCursor(); }
+    });
     assertEquals("Incorrect active document; did not go to?", goto1_doc, model.getActiveDocument());
   }
   
@@ -685,16 +693,19 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       }
     });
     
-    _frame.initGotoFileDialog();
-    _frame._gotoFileDialog.addWindowListener(new WindowListener() {
-        public void windowActivated(WindowEvent e) { throw new RuntimeException("Should not activate _gotoFileDialog"); }
-        public void windowClosed(WindowEvent e) { throw new RuntimeException("Should not close _gotoFileDialog"); }
-        public void windowClosing(WindowEvent e) { throw new RuntimeException("Should not be closing _gotoFileDialog"); }
-        public void windowDeactivated(WindowEvent e) { throw new RuntimeException("Should not deactivate _gotoFileDialog"); }
-        public void windowDeiconified(WindowEvent e) { throw new RuntimeException("Should not deiconify _gotoFileDialog"); }
-        public void windowIconified(WindowEvent e) { throw new RuntimeException("Should not iconify _gotoFileDialog"); }
-        public void windowOpened(WindowEvent e) { throw new RuntimeException("Should not open _gotoFileDialog"); }
-    });
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        _frame.initGotoFileDialog();
+        _frame._gotoFileDialog.addWindowListener(new WindowListener() {
+          public void windowActivated(WindowEvent e) { throw new RuntimeException("Should not activate _gotoFileDialog"); }
+          public void windowClosed(WindowEvent e) { throw new RuntimeException("Should not close _gotoFileDialog"); }
+          public void windowClosing(WindowEvent e) { throw new RuntimeException("Should not be closing _gotoFileDialog"); }
+          public void windowDeactivated(WindowEvent e) { throw new RuntimeException("Should not deactivate _gotoFileDialog"); }
+          public void windowDeiconified(WindowEvent e) { throw new RuntimeException("Should not deiconify _gotoFileDialog"); }
+          public void windowIconified(WindowEvent e) { throw new RuntimeException("Should not iconify _gotoFileDialog"); }
+          public void windowOpened(WindowEvent e) { throw new RuntimeException("Should not open _gotoFileDialog"); }
+        });
+      }});
     
     SingleDisplayModel model = _frame.getModel();
     OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
@@ -702,10 +713,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     model.setActiveDocument(model.getDocumentForFile(goto1_file));
     assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
     
-    _frame._gotoFileUnderCursor();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { _frame._gotoFileUnderCursor(); }
+    });
     assertEquals("Incorrect active document; did not go to?", goto2_doc, model.getActiveDocument());
     
-    _frame._gotoFileUnderCursor();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { _frame._gotoFileUnderCursor(); }
+    });
     assertEquals("Incorrect active document; did not go to?", goto1_doc, model.getActiveDocument());
   }
   
@@ -742,7 +757,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
           public void windowActivated(WindowEvent e) { ++count[0]; }
           public void windowClosed(WindowEvent e) { throw new RuntimeException("Should not close _gotoFileDialog"); }
           public void windowClosing(WindowEvent e) { throw new RuntimeException("Should not be closing _gotoFileDialog"); }
-          public void windowDeactivated(WindowEvent e) { throw new RuntimeException("Should not deactivate _gotoFileDialog"); }
+          public void windowDeactivated(WindowEvent e) { /* throw new RuntimeException("Should not deactivate _gotoFileDialog"); */ }
           public void windowDeiconified(WindowEvent e) { throw new RuntimeException("Should not deiconify _gotoFileDialog"); }
           public void windowIconified(WindowEvent e) { throw new RuntimeException("Should not iconify _gotoFileDialog"); }
           public void windowOpened(WindowEvent e) { ++count[1]; }
