@@ -925,6 +925,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void activeDocumentChanged(OpenDefinitionsDocument active) {
       // listenerFail("activeDocumentChanged fired unexpectedly"); // this event is not tested !!
     }
+    
+    public void focusOnDefinitionsPane() {
+      // listenerFail("focusOnDefinitionsPane fired unexpectedly"); // this event is not tested !!
+    }
   }
 
   

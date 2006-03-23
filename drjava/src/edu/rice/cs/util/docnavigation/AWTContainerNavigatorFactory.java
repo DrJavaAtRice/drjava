@@ -46,8 +46,10 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.docnavigation;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.swing.Utilities;
+
 import java.util.List;
 import java.util.*;
+import java.awt.event.FocusListener;
 
 public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implements IDocumentNavigatorFactory<ItemT> {
   
@@ -111,14 +113,9 @@ public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implemen
       Enumeration<ItemT> enumerator =  parent.getDocuments();
       while (enumerator.hasMoreElements()) {
         ItemT navitem = enumerator.nextElement();
-        parent.removeDocument(navitem);
         child.addDocument(navitem);
-        
-        // I don't understand the motivation behind this line.  Is it possible for
-        // enumerator to become invalid?  If so, what's to prevent that from happening
-        // again after this line but before we call nextElement()?
-        enumerator = parent.getDocuments(); 
       }
+      parent.clear(); // Remove documents from old navigator (parent)
     }
     
     /** Migrates all the listeners from parent to child
@@ -128,17 +125,7 @@ public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implemen
     // As a first step to weakening the restriction on parent's type, this allows parent to be based on an arbitrary item type, as
     // long as it extends ItemT.
     private void migrateListeners(IDocumentNavigator<ItemT> child, IDocumentNavigator<ItemT> parent) {
-      Collection<INavigationListener<? super ItemT>> listeners = parent.getNavigatorListeners();
-      Iterator<INavigationListener<? super ItemT>> it = listeners.iterator();
-      while (it.hasNext()) {
-        INavigationListener<? super ItemT> listener = it.next();
-        child.addNavigationListener(listener);
-        parent.removeNavigationListener(listener);
-        
-        // I don't understand the motivation behind this line.  Is it possible for
-        // it to become invalid?  If so, what's to prevent that from happening
-        // again after this line but before we call next()?
-        it = listeners.iterator();
-      }
+      for (INavigationListener nl: parent.getNavigatorListeners())  child.addNavigationListener(nl);
+      for (FocusListener fl: parent.getFocusListeners())  child.addFocusListener(fl);
     }
 }

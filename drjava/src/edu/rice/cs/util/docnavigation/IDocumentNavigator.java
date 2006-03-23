@@ -35,11 +35,11 @@ package edu.rice.cs.util.docnavigation;
 
 import java.util.*;
 import java.awt.Container;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
-/**
- * <code>IDocumentNavigator</code> provides a framework through which
- * individual <code>IDocuments</code> can be navigated.
- */ 
+/** <code>IDocumentNavigator</code> provides a framework through which individual <code>IDocuments</code> can be 
+ *  navigated. */ 
 public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTContainerNavigatorActor {
   /** @return an AWT component which interacts with this document navigator */
   public Container asContainer();
@@ -140,6 +140,15 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
    * @param listener the listener to be removed from this navigator
    */
   public void removeNavigationListener(INavigationListener<? super ItemT> listener);
+  
+  /** Add FocusListener to navigator. */
+  public void addFocusListener(FocusListener e);
+  
+  /** Remove FocusListener from navigator. */
+  public void removeFocusListener(FocusListener e);
+  
+  /** Gets the FocustListeners. */
+  public FocusListener[] getFocusListeners();
   
   /** Returns a collection of all listeners registered with this navigator.
    *  @return the collection of nav listeners listening to this navigator.

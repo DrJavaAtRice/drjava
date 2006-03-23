@@ -34,6 +34,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.awt.Container;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterJob;
 import java.awt.print.PrinterException;
@@ -302,6 +304,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public void lostSelection(NodeData<? extends OpenDefinitionsDocument> dat) {
       // not important, only one document selected at a time
       }
+    });
+    
+    _documentNavigator.addFocusListener(new FocusListener() {
+      public void focusGained(FocusEvent e) { 
+//        Utilities.show("focusGained called with event " + e);
+        _notifier.focusOnDefinitionsPane(); 
+      }
+      public void focusLost(FocusEvent e) { }
     });
     
     _isClosingAllDocs = false;
@@ -1494,14 +1504,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
   /** Exits the program.  Quits regardless of whether all documents are successfully closed. */
   public void quit() {
-    closeAllFilesOnQuit();
+    try {
+      closeAllFilesOnQuit();
 //    Utilities.show("Closed all files");
-    dispose();  // kills the interpreter
-    
-//    if (DrJava.getSecurityManager() != null) DrJava.getSecurityManager().exitVM(0);
-//    else 
-      System.exit(0); // If we are being debugged by another copy of DrJava,
-    // then we have no security manager.  Just exit cleanly.
+      dispose();  // kills the interpreter
+    }
+    catch(Throwable t) { /* do nothing */ }
+    finally { System.exit(0); }
   }
 
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. 

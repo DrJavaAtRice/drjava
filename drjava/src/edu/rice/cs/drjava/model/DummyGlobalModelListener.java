@@ -236,5 +236,7 @@ public class DummyGlobalModelListener implements GlobalModelListener {
   
   public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   
+  public void focusOnDefinitionsPane() { }
+  
   public void documentNotFound(OpenDefinitionsDocument d, File f) { }
 }

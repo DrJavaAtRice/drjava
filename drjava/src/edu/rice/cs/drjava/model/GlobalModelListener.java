@@ -91,6 +91,9 @@ public interface GlobalModelListener extends InteractionsListener,
   /** Called when a new active document is selected */
   public void activeDocumentChanged(OpenDefinitionsDocument active);
   
+  /** Called when the focus must be changed to the active document in the definitions pane */
+  public void focusOnDefinitionsPane();
+  
   /** Called when the selection in the navigator changes the current directory without changing the active document. */
   public void currentDirectoryChanged(File dir);
     
@@ -99,7 +102,6 @@ public interface GlobalModelListener extends InteractionsListener,
   
   /** Called when the working directory is modified in the model. */
   public void projectWorkDirChanged();
-  
   
   /** Called while the project is being opened.
    *  @param projectFile the location of the project file

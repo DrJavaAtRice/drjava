@@ -5777,6 +5777,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
     
+    public void focusOnDefinitionsPane() {
+      _currentDefPane.requestFocusInWindow();
+    }
+    
     public void interactionStarted() {
       Utilities.invokeLater(new Runnable() {
         public void run() {

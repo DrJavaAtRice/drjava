@@ -262,7 +262,12 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  
+   /** Called to shift the focus to the Definitions Pane. */
+  public void focusOnDefinitionsPane() {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.focusOnDefinitionsPane(); } }
+    finally { _lock.endRead(); }
+  }
 //  /** Called to demand that all files be saved before running the main method of a document. It is up to the caller
 //   *  of this method to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is
 //   *  nor used currently, but it is commented out in case it is needed later. */
