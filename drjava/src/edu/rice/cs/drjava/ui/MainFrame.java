@@ -342,9 +342,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   private Action _runProjectAction = new AbstractAction("Run Main Document") {
-    public void actionPerformed(ActionEvent ae) {
-      _runProject();
-    }
+    public void actionPerformed(ActionEvent ae) { _runProject(); }
   };
   
   /** The jar options dialog. */
@@ -518,9 +516,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Ensures that pack() is run in the event thread. Only used in test code */
   public void pack() {
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { packHelp(); }
-    });
+    Utilities.invokeAndWait(new Runnable() { public void run() { packHelp(); } });
   }
   
   /** Helper method that provides access to super.pack() within the anonymous class new Runnable() {...} above */
@@ -3859,7 +3855,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 //    _compileOpenProjectAction.setEnabled(false);
     _compileProjectAction.setEnabled(false);
     
-    _setUpAction(_runProjectAction, "Run","Run the project's main method");
+    _setUpAction(_runProjectAction, "Run", "Run the project's main method");
     _runProjectAction.setEnabled(false);
     
     _setUpAction(_jarProjectAction, "Jar", "Create a jar archive from this project");
@@ -3916,7 +3912,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
     _setUpAction(_javadocAllAction, "Javadoc", "Create and save Javadoc for the packages of all open documents");
     _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
-    _setUpAction(_runAction, "Run Document", "Run the main method of the current document");
+    _setUpAction(_runAction, "Run", "Run the main method of the current document");
     
     _setUpAction(_executeHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
     _setUpAction(_loadHistoryScriptAction, "Load History as Script", 
@@ -4338,9 +4334,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     return helpMenu;
   }
   
-  /**
-   * Creates a toolbar button for undo and redo, which behave differently.
-   */
+  /** Creates a toolbar button for undo and redo, which behave differently. */
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
     
@@ -4376,10 +4370,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     return ret;
   }
   
-  /**
-   * Sets up all buttons for the toolbar except for undo and redo, which use
-   * _createManualToolbarButton.
-   */
+  /** Sets up all buttons for the toolbar except for undo and redo, which use _createManualToolbarButton. */
   public JButton _createToolbarButton(Action a) {
     boolean useText = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
     boolean useIcons = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
@@ -4389,16 +4380,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     result.setText((String) a.getValue(Action.DEFAULT));
     result.setFont(buttonFont);
     if (!useIcons) result.setIcon(null);
-    if (!useText && (result.getIcon() != null)) {
-      result.setText("");
-    }
+    if (!useText && (result.getIcon() != null)) result.setText("");
     return result;
   }
   
-  /**
-   * Sets up the toolbar with several useful buttons.
-   * Most buttons are always enabled, but those that are not are
-   * maintained in fields to allow enabling and disabling.
+  /** Sets up the toolbar with several useful buttons.  Most buttons are always enabled, but those that are not are
+   *  maintained in fields to allow enabling and disabling.
    */
   private void _setUpToolBar() {
     _toolBar = new JToolBar();
@@ -4442,9 +4429,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _toolBar.add(_createToolbarButton(_resetInteractionsAction));
     //_toolBar.add(_createToolbarButton(_abortInteractionAction));
     
-    // Junit
+    // Run, Junit, and JavaDoc
     _toolBar.addSeparator();
     
+    _toolBar.add(_createToolbarButton(_runAction));
     _toolBar.add(_createToolbarButton(_junitAllAction));
     _toolBar.add(_createToolbarButton(_javadocAllAction));
     
@@ -4455,16 +4443,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _updateToolbarVisible();
   }
   
-  /**
-   * Sets the toolbar as either visible or invisible based on the config option
-   */
+  /** Sets the toolbar as either visible or invisible based on the config option. */
   private void _updateToolbarVisible() {
     _toolBar.setVisible(DrJava.getConfig().getSetting(TOOLBAR_ENABLED));
   }  
   
-  /**
-   * Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED,
-   * TOOLBAR_TEXT_ENABLED, or FONT_TOOLBAR (name, style, text)
+  /** Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED, TOOLBAR_TEXT_ENABLED, or 
+   *  FONT_TOOLBAR (name, style, text)
    */
   private void _updateToolbarButtons() {
     _updateToolbarVisible();
