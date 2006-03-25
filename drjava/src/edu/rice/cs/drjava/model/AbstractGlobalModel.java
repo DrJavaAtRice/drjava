@@ -275,13 +275,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** This visitor is invoked by the DocumentNavigator to update _activeDocument among other things */
     final NodeDataVisitor<OpenDefinitionsDocument, Boolean> _gainVisitor = new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
       public Boolean itemCase(OpenDefinitionsDocument doc) {
+        OpenDefinitionsDocument oldDoc = AbstractGlobalModel.this.getActiveDocument();
         _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document
         
 //        Utilities.showDebug("Setting the active doc done");
+        File oldDir = _activeDirectory;
         File dir = doc.getParentDirectory();
-        if (dir != null) {  
+        if (! dir.equals(oldDir)) { 
         /* If the file is in External or Auxiliary Files then then we do not want to change our project directory
-         * to something outside the project. */
+         * to something outside the project. ?? */
           _activeDirectory = dir;
           _notifier.currentDirectoryChanged(_activeDirectory);
         }
@@ -309,7 +311,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _documentNavigator.addFocusListener(new FocusListener() {
       public void focusGained(FocusEvent e) { 
 //        Utilities.show("focusGained called with event " + e);
-        _notifier.focusOnDefinitionsPane(); 
+        if (_documentNavigator.getCurrent() != null) // past selection is leaf node
+          _notifier.focusOnDefinitionsPane(); 
       }
       public void focusLost(FocusEvent e) { }
     });
