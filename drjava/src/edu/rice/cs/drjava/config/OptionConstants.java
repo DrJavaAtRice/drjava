@@ -735,6 +735,10 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_DEBUG_BREAKPOINT_TOGGLE =
     new KeyStrokeOption("key.debug.breakpoint.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_B, mask));
 
+  /** The key binding for displaying the breakpoints panel. */
+  public static final KeyStrokeOption KEY_DEBUG_BREAKPOINT_PANEL =
+    new KeyStrokeOption("key.debug.breakpoint.panel", KeyStroke.getKeyStroke(KeyEvent.VK_B, mask | InputEvent.SHIFT_MASK));
+
   /** The key binding for clearing all breakpoints. */
   public static final KeyStrokeOption KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
     new KeyStrokeOption("key.debug.clear.all.breakpoints", KeyStrokeOption.NULL_KEYSTROKE);

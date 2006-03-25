@@ -133,6 +133,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JUnitPanel _junitErrorPanel;
   private JavadocErrorPanel _javadocErrorPanel;
   private FindReplaceDialog _findReplace;
+  private BreakpointsPanel _breakpointsPanel;
   private LinkedList<TabbedPanel> _tabs;
   
   private Component _lastFocusOwner;
@@ -1406,6 +1407,22 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Clears all breakpoints */
   private Action _clearAllBreakpointsAction = new AbstractAction("Clear All Breakpoints") {
     public void actionPerformed(ActionEvent ae) { debuggerClearAllBreakpoints(); }
+  };
+  
+  /** Shows the breakpoints tab. */
+  private Action _breakpointsPanelAction = new AbstractAction("Breakpoints...") {
+    public void actionPerformed(ActionEvent ae) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes(); 
+      if (! _breakpointsPanel.isDisplayed()) {
+        showTab(_breakpointsPanel);
+        _breakpointsPanel.beginListeningTo(_currentDefPane);
+      }
+      _breakpointsPanel.setVisible(true);
+      _tabbedPane.setSelectedComponent(_breakpointsPanel);
+      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
+      SwingUtilities.invokeLater(new Runnable() { public void run() { _breakpointsPanel.requestFocusInWindow(); } });
+    }
   };
   
   /** Cuts from the caret to the end of the current line to the clipboard. */
@@ -3522,7 +3539,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Toggles a breakpoint on the current line. */
   void debuggerToggleBreakpoint() {
-    if (inDebugMode()) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       
       boolean isUntitled = doc.isUntitled();
@@ -3581,7 +3597,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         _showError(de, "Debugger Error", "Could not set a breakpoint at the current line.");
       }
     }
-  }
   
   
 //  private void _getText(String name) { _field = name; }
@@ -4223,6 +4238,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //_printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
     //_clearAllBreakpointsMenuItem =
     _addMenuItem(debugMenu, _clearAllBreakpointsAction, KEY_DEBUG_CLEAR_ALL_BREAKPOINTS);
+    _addMenuItem(debugMenu, _breakpointsPanelAction, KEY_DEBUG_BREAKPOINT_PANEL);
     debugMenu.addSeparator();
     
     //_addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND);
@@ -4250,9 +4266,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     _stepIntoDebugAction.setEnabled(false);
     _stepOverDebugAction.setEnabled(false);
     _stepOutDebugAction.setEnabled(false);
-    _toggleBreakpointAction.setEnabled(enabled);
-    //_printBreakpointsAction.setEnabled(enabled);
-    _clearAllBreakpointsAction.setEnabled(enabled);
     
     if (_debugPanel != null) _debugPanel.disableButtons();
   }
@@ -4641,6 +4654,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _junitErrorPanel = new JUnitPanel(_model, this);
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
+    _breakpointsPanel = new BreakpointsPanel(this);
     
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
@@ -4675,6 +4689,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabs.addLast(_junitErrorPanel);
     _tabs.addLast(_javadocErrorPanel);
     _tabs.addLast(_findReplace);
+    _tabs.addLast(_breakpointsPanel);
     
     _interactionsPane.addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = _interactionsContainer; }
@@ -5442,10 +5457,6 @@ public class MainFrame extends JFrame implements OptionConstants {
 //        public void run() {
           hideDebugger();
           _removeThreadLocationHighlight();
-          
-          // Ensure all doc breakpoints are gone
-          List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-          for (OpenDefinitionsDocument doc: docs) { doc.removeFromDebugger(); }
 //        }
 //      };
 //      Utilities.invokeLater(command);
@@ -5520,8 +5531,8 @@ public class MainFrame extends JFrame implements OptionConstants {
               if (shouldHighlight) {
                 // Give the interactions pane focus so we can debug
                 _interactionsPane.requestFocusInWindow();
+                showTab(_interactionsPane);
               }
-              showTab(_interactionsPane);
               _updateDebugStatus();
             }
           });
@@ -6026,7 +6037,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       Runnable command = new Runnable() {
         public void run() {
           Debugger dm = _model.getDebugger();
-          if (dm.isAvailable() && dm.isReady()) dm.shutdown();
+//          if (dm.isAvailable() && dm.isReady()) dm.shutdown();
           _resetInteractionsAction.setEnabled(false);
           _junitAction.setEnabled(false);
           _junitAllAction.setEnabled(false);

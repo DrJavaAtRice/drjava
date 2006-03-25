@@ -115,6 +115,8 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.Debugger;
+import edu.rice.cs.drjava.model.debug.DebugException;
+import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
@@ -1462,6 +1464,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (canClose) return closeFileWithoutPrompt(doc);
     return false;
   }
+  
   /** Similar to closeFileHelper except that saving cannot be cancelled. */
   protected void closeFileOnQuitHelper(OpenDefinitionsDocument doc) {
     //    System.err.println("closing " + doc);
@@ -1482,6 +1485,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     synchronized(_documentsRepos) { found = _documentsRepos.remove(doc); }
     
     if (! found) return false;
+        
+    // remove breakpoints for this file
+    Debugger dbg = getDebugger();
+    if (dbg.isAvailable()) {
+      Vector<Breakpoint> bps = new Vector<Breakpoint>(doc.getBreakpoints());
+      for (int i = 0; i < bps.size(); i++) {
+        Breakpoint bp = bps.get(i);
+        try { dbg.removeBreakpoint(bp); }
+        catch(DebugException de) { /* ignore */ }
+      }
+    }
     
     Utilities.invokeLater(new SRunnable() { 
       public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread
@@ -1857,7 +1871,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
   /** throws UnsupportedOperationException */
   public Debugger getDebugger() {
-    throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
+    // throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
+    return NoDebuggerAvailable.ONLY;
   }
 
   /** throws UnsupportedOperationException */

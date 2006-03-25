@@ -68,9 +68,13 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
       throw new UnexpectedException(ble);
     }
 
-    _initializeRequests(_manager.getReferenceTypes(_className, _lineNumber));
+    if (_manager.isReady()) {
+      // the debugger is on, so initialize now
+      // otherwise breakpoint gets re-set when debugger is enabled
+      _initializeRequests(_manager.getReferenceTypes(_className, _lineNumber));
+    }
   }
-
+  
   /** Creates appropriate EventRequests from the EventRequestManager and
    *  stores them in the _requests field.
    *  @param refTypes All (identical) ReferenceTypes to which this action

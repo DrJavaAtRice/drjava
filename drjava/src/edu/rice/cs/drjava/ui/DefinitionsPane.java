@@ -662,7 +662,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         }
       });
       _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
-      _toggleBreakpointMenuItem.setEnabled(false);
     }
   }
 
@@ -684,15 +683,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         //move caret to clicked position, deselecting previous selection
         setCaretPosition(viewToModel(e.getPoint()));
       }
-
-      //Don't show the "Toggle Breakpoint" option in the contextual menu, if the JMenuItem is null.
-      if (_toggleBreakpointMenuItem != null) {
-        _toggleBreakpointMenuItem.setEnabled(_mainFrame.inDebugMode());
-      }
-      //Don't show the "Add Watch" option in the contextual menu, if the JMenuItem is null.
-      //if (_addWatchMenuItem != null) {
-      //  _addWatchMenuItem.setEnabled(_mainFrame.inDebugMode());
-      //}
     }
 
     protected void _popupAction(MouseEvent e) {

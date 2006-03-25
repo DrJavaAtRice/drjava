@@ -63,9 +63,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JPanel _tabsAndStatusPane;
 
   private JTable _watchTable;
-  private DefaultMutableTreeNode _breakpointRootNode;
-  private DefaultTreeModel _bpTreeModel;
-  private JTree _bpTree;
   private JTable _stackTable;
   private JTable _threadTable;
   private long _currentThreadID;
@@ -73,7 +70,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
   // private JPopupMenu _threadRunningPopupMenu;
   private JPopupMenu _threadSuspendedPopupMenu;
   private JPopupMenu _stackPopupMenu;
-  private JPopupMenu _breakpointPopupMenu;
   private JPopupMenu _watchPopupMenu;
   private DebugThreadData _threadInPopup;
 
@@ -136,7 +132,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     // Setup the color listeners.
     _setColors(_watchTable);
-    _setColors(_bpTree);
     _setColors(_stackTable);
     _setColors(_threadTable);
   }
@@ -168,7 +163,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
       _watches = new Vector<DebugWatchData>();
       _threads = new Vector<DebugThreadData>();
       _stackFrames = new Vector<DebugStackData>();
-      // also clear breakpoint tree?
     }
 
     ((AbstractTableModel)_watchTable.getModel()).fireTableDataChanged();
@@ -182,24 +176,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     // Watches table
     _initWatchTable();
-
-    // Breakpoint tree
-    _breakpointRootNode = new DefaultMutableTreeNode("Breakpoints");
-    _bpTreeModel = new DefaultTreeModel(_breakpointRootNode);
-    _bpTree = new BPTree(_bpTreeModel);
-    _bpTree.setEditable(false);
-    _bpTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-    _bpTree.setShowsRootHandles(true);
-    _bpTree.setRootVisible(false);
-    _bpTree.putClientProperty("JTree.lineStyle", "Angled");
-    _bpTree.setScrollsOnExpand(true);
-    // Breakpoint tree cell renderer
-    dtcr = new BreakPointRenderer();
-    dtcr.setOpaque(false);
-    _setColors(dtcr);
-    _bpTree.setCellRenderer(dtcr);
-    
-    _leftPane.addTab("Breakpoints", new JScrollPane(_bpTree));
 
     // Stack table
     _stackTable = new JTable( new StackTableModel());
@@ -267,42 +243,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
     };
     _threadTable.getColumnModel().getColumn(0).setCellRenderer(threadTableRenderer);
     _threadTable.getColumnModel().getColumn(1).setCellRenderer(threadTableRenderer);
-  }
-
-  /** Adds config color support to DefaultTreeCellEditor. */
-  static class BreakPointRenderer extends DefaultTreeCellRenderer {
-
-    public void setBackground(Color c) {
-      this.setBackgroundNonSelectionColor(c);
-    }
-    
-    public void setForeground(Color c) {
-      this.setTextNonSelectionColor(c);
-    }
-    
-    private BreakPointRenderer() {
-      this.setTextSelectionColor(Color.black);
-      setLeafIcon(null);
-      setOpenIcon(null);
-      setClosedIcon(null);
-    }
-
-    /**
-     * Overrides the default renderer component to use proper coloring.
-     */
-    public Component getTreeCellRendererComponent
-        (JTree tree, Object value, boolean selected, boolean expanded,
-         boolean leaf, int row, boolean hasFocus) {
-      Component renderer = super.getTreeCellRendererComponent
-        (tree, value, selected, expanded, leaf, row, hasFocus);
-
-      if (renderer instanceof JComponent) {
-        ((JComponent) renderer).setOpaque(false);
-      }
-
-      _setColors(renderer);
-      return renderer;
-    }
   }
 
   /** Adds config color support to DefaultCellEditor. */
@@ -559,23 +499,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     });
 
-    _breakpointPopupMenu = new JPopupMenu("Breakpoint");
-    _breakpointPopupMenu.add(new AbstractAction("Scroll to Source") {
-      public void actionPerformed(ActionEvent e) {
-        _scrollToSourceIfBreakpoint();
-      }
-    });
-    _breakpointPopupMenu.add(new AbstractAction("Remove Breakpoint") {
-      public void actionPerformed(ActionEvent e) {
-        try {
-          Breakpoint bp = _getSelectedBreakpoint();
-          if (bp != null) _debugger.removeBreakpoint(bp);
-        }
-        catch (DebugException de) { _frame._showDebugError(de); }
-      }
-    });
-    _bpTree.addMouseListener(new BreakpointMouseAdapter());
-
     _watchPopupMenu = new JPopupMenu("Watches");
     _watchPopupMenu.add(new AbstractAction("Remove Watch") {
       public void actionPerformed(ActionEvent e) {
@@ -608,38 +531,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
       catch(DebugException de) {
         _frame._showDebugError(de);
       }
-    }
-  }
-
-  /** Gets the currently selected breakpoint in the breakpoint tree, or null if the selected node is a classname and not a breakpoint.
-   *  @return the current breakpoint in the tree
-   *  @throws DebugException if the node is not a valid breakpoint
-   */
-  private Breakpoint _getSelectedBreakpoint() throws DebugException {
-    TreePath path = _bpTree.getSelectionPath();
-    if (path == null || path.getPathCount() != 3) {
-      return null;
-    }
-    else {
-      DefaultMutableTreeNode lineNode =
-        (DefaultMutableTreeNode)path.getLastPathComponent();
-      int line = ((Integer) lineNode.getUserObject()).intValue();
-      DefaultMutableTreeNode classNameNode =
-        (DefaultMutableTreeNode) path.getPathComponent(1);
-      String className = (String) classNameNode.getUserObject();
-      return _debugger.getBreakpoint(line, className);
-    }
-  }
-
-  private void _scrollToSourceIfBreakpoint() {
-    try {
-      Breakpoint bp = _getSelectedBreakpoint();
-      if (bp != null) {
-        _debugger.scrollToSource(bp);
-      }
-    }
-    catch (DebugException de) {
-      _frame._showDebugError(de);
     }
   }
 
@@ -684,138 +575,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
      */
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
 
-    /** Called when a breakpoint is set in a document. Adds the breakpoint to the tree of breakpoints.
-     *  Must be executed in event thread.
-     *  @param bp the breakpoint
-     */
-    public void breakpointSet(final Breakpoint bp) {
-//      // Only change GUI from event-dispatching thread
-//      Runnable doCommand = new Runnable() {
-//        public void run() {
-          DefaultMutableTreeNode bpDocNode = new DefaultMutableTreeNode(bp.getClassName());
-
-          // Look for matching document node
-          // Raw type here due to Swing's use of raw types.
-          Enumeration documents = _breakpointRootNode.children();
-          while (documents.hasMoreElements()) {
-            DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-            if (doc.getUserObject().equals(bpDocNode.getUserObject())) {
-
-              // Create a new breakpoint in this node
-              //Sort breakpoints by line number.
-              // Raw type here due to Swing's use of raw types.
-              Enumeration lineNumbers = doc.children();
-              while (lineNumbers.hasMoreElements()) {
-                DefaultMutableTreeNode lineNumber = (DefaultMutableTreeNode)lineNumbers.nextElement();
-
-                //if line number of indexed breakpoint is less than new breakpoint, continue
-                if (((Integer)lineNumber.getUserObject()).intValue() > bp.getLineNumber()) {
-
-                  //else, add to the list
-                  DefaultMutableTreeNode newBreakpoint =
-                    new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
-                  _bpTreeModel.insertNodeInto(newBreakpoint, doc, doc.getIndex(lineNumber));
-
-                  // Make sure this node is visible
-                  _bpTree.scrollPathToVisible(new TreePath(newBreakpoint.getPath()));
-                  return;
-                }
-              }
-              //if none are greater, add at the end
-              DefaultMutableTreeNode newBreakpoint =
-                new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
-              _bpTreeModel.insertNodeInto(newBreakpoint, doc, doc.getChildCount());
-
-              // Make sure this node is visible
-              _bpTree.scrollPathToVisible(new TreePath(newBreakpoint.getPath()));
-              return;
-            }
-          }
-          // No matching document node was found, so create one
-          _bpTreeModel.insertNodeInto(bpDocNode, _breakpointRootNode, _breakpointRootNode.getChildCount());
-          DefaultMutableTreeNode newBreakpoint =
-            new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
-          _bpTreeModel.insertNodeInto(newBreakpoint, bpDocNode, bpDocNode.getChildCount());
-
-          // Make visible
-          TreePath pathToNewBreakpoint = new TreePath(newBreakpoint.getPath());
-          _bpTree.scrollPathToVisible(pathToNewBreakpoint);
-//        }
-//      };
-//      Utilities.invokeLater(doCommand);
-    }
+    /** Called when a breakpoint is set in a document. Must be executed in event thread. */
+    public void breakpointSet(final Breakpoint bp) { }
 
     /**
-     * Called when a breakpoint is reached during execution.
-     * @param bp the breakpoint
-     */
-    public void breakpointReached(final Breakpoint bp) {
-      // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          DefaultMutableTreeNode bpDoc = new DefaultMutableTreeNode(bp.getClassName());
+     * Called when a breakpoint is reached during execution. */
+    public void breakpointReached(final Breakpoint bp) { }
 
-          // Find the document node for this breakpoint
-          Enumeration documents = _breakpointRootNode.children();
-          while (documents.hasMoreElements()) {
-            DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-            if (doc.getUserObject().equals(bpDoc.getUserObject())) {
-              // Find the correct line number node for this breakpoint
-              Enumeration lineNumbers = doc.children();
-              while (lineNumbers.hasMoreElements()) {
-                DefaultMutableTreeNode lineNumber =
-                  (DefaultMutableTreeNode)lineNumbers.nextElement();
-                if (lineNumber.getUserObject().equals(new Integer(bp.getLineNumber()))) {
-
-                  // Select the node which has been hit
-                  TreePath pathToNewBreakpoint = new TreePath(lineNumber.getPath());
-                  _bpTree.scrollPathToVisible(pathToNewBreakpoint);
-                  _bpTree.setSelectionPath(pathToNewBreakpoint);
-                }
-              }
-            }
-          }
-        }
-      };
-      Utilities.invokeLater(doCommand);
-    }
-
-    /**
-     * Called when a breakpoint is removed from a document.
-     * Removes the breakpoint from the tree of breakpoints.
-     * @param bp the breakpoint
-     */
-    public void breakpointRemoved(final Breakpoint bp) {
-      // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          DefaultMutableTreeNode bpDocNode = new DefaultMutableTreeNode(bp.getClassName());
-
-          // Find the document node for this breakpoint
-          Enumeration documents = _breakpointRootNode.children();
-          while (documents.hasMoreElements()) {
-            DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-            if (doc.getUserObject().equals(bpDocNode.getUserObject())) {
-              // Find the correct line number node for this breakpoint
-              Enumeration lineNumbers = doc.children();
-              while (lineNumbers.hasMoreElements()) {
-                DefaultMutableTreeNode lineNumber =
-                  (DefaultMutableTreeNode)lineNumbers.nextElement();
-                if (lineNumber.getUserObject().equals(new Integer(bp.getLineNumber()))) {
-                  _bpTreeModel.removeNodeFromParent(lineNumber);
-                  if (doc.getChildCount() == 0) {
-                    // this document has no more breakpoints, remove it
-                    _bpTreeModel.removeNodeFromParent(doc);
-                  }
-                  return;
-                }
-              }
-            }
-          }
-        }
-      };
-      Utilities.invokeLater(doCommand);
-    }
+    /** Called when a breakpoint is removed from a document. */
+    public void breakpointRemoved(final Breakpoint bp) { }
 
     /** Called when a step is requested on the current thread. */
     public void stepRequested() { }
@@ -887,35 +655,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
     if (_stackPopupMenu != null) {
       SwingUtilities.updateComponentTreeUI(_stackPopupMenu);
     }
-    if (_breakpointPopupMenu != null) {
-      SwingUtilities.updateComponentTreeUI(_breakpointPopupMenu);
-    }
     if (_watchPopupMenu != null) {
       SwingUtilities.updateComponentTreeUI(_watchPopupMenu);
     }
   }*/
-
-  /**
-   * Mouse adapter for the breakpoint tree.
-   */
-  private class BreakpointMouseAdapter extends RightClickMouseAdapter {
-    protected void _popupAction(MouseEvent e) {
-      int x = e.getX();
-      int y = e.getY();
-      TreePath path = _bpTree.getPathForLocation(x, y);
-      if (path != null && path.getPathCount() == 3) {
-        _bpTree.setSelectionRow(_bpTree.getRowForLocation(x, y));
-        _breakpointPopupMenu.show(e.getComponent(), x, y);
-      }
-    }
-
-    public void mousePressed(MouseEvent e) {
-      super.mousePressed(e);
-      if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-        _scrollToSourceIfBreakpoint();
-      }
-    }
-  }
 
   /**
    * Concrete DebugTableMouseAdapter for the thread table.

@@ -53,6 +53,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
   protected String _className;
   protected File _file;
   protected OpenDefinitionsDocument _doc;
+  protected int _offset;
 
 
   /**
@@ -94,6 +95,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
       throw new DebugException("This document's file no longer exists: " + fme.getMessage());
     }
     _doc = doc;
+    _offset = offset;
   }
 
   /** Returns the class name this DebugAction occurs in. */
@@ -110,6 +112,9 @@ public abstract class DocumentDebugAction<T extends EventRequest>
   public OpenDefinitionsDocument getDocument() {
     return _doc;
   }
+
+  /** @return offset of this debug action. */
+  public int getOffset() { return _offset; }
 
   /**
    * Creates EventRequests corresponding to this DebugAction, using the

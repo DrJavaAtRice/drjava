@@ -453,7 +453,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    *  previously running in the interactions JVM, so a restart is essential.
    */
   public void resetInteractions(File wd) {
-    if (_debugger.inDebugMode()) _debugger.shutdown();
     if (! _jvm.slaveJVMUsed() && wd.equals(_interactionsModel.getWorkingDirectory())) {
       // eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
 //      Utilities.show("Suppressing resetting of interactions pane");
@@ -732,8 +731,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         return;
       }
       
+      final boolean wasDebuggerEnabled = getDebugger().isReady();
+      
       _runMain = new DummyGlobalModelListener() {
         public void interpreterReady(File wd) {
+          // Restart debugger if it was previously enabled and is now off
+          if (wasDebuggerEnabled && (!getDebugger().isReady())) {
+            try { getDebugger().startup(); } catch(DebugException de) { /* ignore, continue without debugger */ }
+          }
           
           // Load the proper text into the interactions document
           iDoc.clearCurrentInput();

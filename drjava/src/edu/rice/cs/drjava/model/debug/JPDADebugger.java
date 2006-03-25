@@ -59,6 +59,7 @@ import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
 import com.sun.jdi.request.*;
 import com.sun.jdi.event.*;
+import javax.swing.SwingUtilities;
 
 /** An integrated debugger which attaches to the Interactions JVM using
  *  Sun's Java Platform Debugger Architecture (JPDA/JDI) interface.
@@ -231,6 +232,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       EventHandlerThread eventHandler = new EventHandlerThread(this, _vm);
       eventHandler.start();
       _model.addListener(_watchListener);
+      
+      // re-set breakpoints that have already been set
+      Vector<Breakpoint> oldBreakpoints = new Vector<Breakpoint>(_breakpoints);
+      removeAllBreakpoints();
+      for (int i = 0; i < oldBreakpoints.size(); i++) {
+        Breakpoint bp = oldBreakpoints.get(i);
+        setBreakpoint(new Breakpoint(bp.getDocument(), bp.getOffset(), bp.getLineNumber(), this));
+      }
     }
 
     else
@@ -305,32 +314,40 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    *  @throws IllegalStateException if debugger is not ready
    */
   public synchronized void shutdown() {
-    if (!isReady()) throw new IllegalStateException("Cannot shut down if debugger is not active.");
-
-    _model.removeListener(_watchListener);
-
-    try {
-      _removeAllDebugInterpreters();
-      removeAllBreakpoints();
-      removeAllWatches();
-    }
-    catch (DebugException de) {
-      // Couldn't remove breakpoints/watches
-      _log("Could not remove breakpoints/watches: " + de);
-    }
-
-    try {
-      _vm.dispose();
-    }
-    catch (VMDisconnectedException vmde) {
-      //VM was shutdown prematurely
-    }
-    finally {
-      _model.getInteractionsModel().setToDefaultInterpreter();
-      _vm = null;
-      _suspendedThreads = new RandomAccessStack();
-      _eventManager = null;
-      _runningThread = null;
+    if (isReady()) {
+      Runnable command = new Runnable() {
+        public void run() {
+          _model.removeListener(_watchListener);
+        }
+      };
+      // use SwingUtilities.invokeLater rather than our own invokeLater
+      // because this might be run from the event thread already, and we
+      // don't want it to execute right now, just as soon as possible
+      SwingUtilities.invokeLater(command);
+      
+      try {
+        _removeAllDebugInterpreters();
+        // removeAllBreakpoints();
+        removeAllWatches();
+      }
+      catch (DebugException de) {
+        // Couldn't remove breakpoints/watches
+        _log("Could not remove breakpoints/watches: " + de);
+      }
+      
+      try {
+        _vm.dispose();
+      }
+      catch (VMDisconnectedException vmde) {
+        //VM was shutdown prematurely
+      }
+      finally {
+        _model.getInteractionsModel().setToDefaultInterpreter();
+        _vm = null;
+        _suspendedThreads = new RandomAccessStack();
+        _eventManager = null;
+        _runningThread = null;
+      }
     }
   }
 
@@ -867,7 +884,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum) 
     throws DebugException {
     
-    _ensureReady();
     Breakpoint breakpoint = doc.getBreakpointAt(offset);
     
     if (breakpoint == null)  setBreakpoint(new Breakpoint (doc, offset, lineNum, this));
@@ -878,8 +894,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    *  @param breakpoint The new breakpoint to set
    */
   public synchronized void setBreakpoint(final Breakpoint breakpoint) throws DebugException {
-    
-    _ensureReady();
     breakpoint.getDocument().checkIfClassFileInSync();
 
     _breakpoints.add(breakpoint);
@@ -894,8 +908,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   * @param breakpoint The breakpoint to remove.
   */
   public synchronized void removeBreakpoint(final Breakpoint breakpoint) throws DebugException {
-    _ensureReady();
-
     _breakpoints.remove(breakpoint);
 
     Vector<BreakpointRequest> requests = breakpoint.getRequests();
@@ -927,8 +939,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
   /** Removes all the breakpoints from the manager's vector of breakpoints. */
   public synchronized void removeAllBreakpoints() throws DebugException {
-    _ensureReady();
-
     while (_breakpoints.size() > 0) {
       removeBreakpoint( _breakpoints.get(0));
     }
@@ -958,8 +968,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    *  all open documents contain.
    */
   public synchronized Vector<Breakpoint> getBreakpoints() throws DebugException {
-    _ensureReady();
-
     Vector<Breakpoint> sortedBreakpoints = new Vector<Breakpoint>();
     List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     for (int i = 0; i < docs.size(); i++) {
@@ -977,8 +985,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Pane.  Both pending and resolved breakpoints are listed.
    */
   public synchronized void printBreakpoints() throws DebugException {
-    _ensureReady();
-
     Enumeration<Breakpoint> breakpoints = getBreakpoints().elements();
     if (breakpoints.hasMoreElements()) {
       printMessage("Breakpoints: ");
@@ -995,7 +1001,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
   /** Returns all currently watched fields and variables. */
   public synchronized Vector<DebugWatchData> getWatches() throws DebugException {
-    _ensureReady();
+    //_ensureReady();
     return _watches;
   }
 
