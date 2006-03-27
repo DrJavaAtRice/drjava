@@ -1140,6 +1140,210 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
+  /** Reset the position of the "Complete File" dialog. */
+  public void resetCompleteFileDialogPosition() {
+    initCompleteFileDialog();
+    _completeFileDialog.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_FILE_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_COMPLETE_FILE_STATE, "default");
+    }
+  }
+  
+  /** Initialize dialog if necessary. */
+  void initCompleteFileDialog() {
+    if (_completeFileDialog==null) {
+      PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
+        public String apply(GoToFileListEntry entry) {
+          StringBuilder sb = new StringBuilder();
+          
+          if (entry.doc != null) {
+            try {
+              try {
+                sb.append(FileOps.makeRelativeTo(entry.doc.file(), entry.doc.getSourceRoot()));
+              }
+              catch(IOException e) {
+                sb.append(entry.doc.getFile());
+              }
+            }
+            catch(edu.rice.cs.drjava.model.FileMovedException e) {
+              sb.append(entry + " was moved");
+            }
+            catch(java.lang.IllegalStateException e) {
+              sb.append(entry);
+            }
+            catch(edu.rice.cs.drjava.model.definitions.InvalidPackageException e) { 
+              sb.append(entry);
+            }
+          } else {
+            sb.append(entry);
+          }
+          return sb.toString();
+        }
+      };
+      PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+        public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+          if (p.getItem()!=null) {
+            OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+            try {
+              String mask = "";
+              int loc = getCurrentDefPane().getCaretPosition();
+              String s = odd.getText();
+              
+              // check that we're at the end of a word
+              if ((loc<s.length()) && (!Character.isWhitespace(s.charAt(loc))) &&
+                  ("()[]{}<>.,:;/*+-!~&|%".indexOf(s.charAt(loc))==-1)) return null;
+              
+              // find start
+              int start = loc;
+              while(start>0) {
+                if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+                --start;
+              }
+              while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+                ++start;
+              }
+              
+              if (!s.substring(start, loc).equals(p.getItem().toString())) {
+                odd.remove(start, loc-start);
+                odd.insertString(start, p.getItem().toString(), null);
+              }
+            }
+            catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
+            finally { odd.releaseWriteLock(); }
+          }
+          hourglassOff();
+          System.out.println("end of dialog ok");
+          return null;
+        }
+      };
+      PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+        public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+          hourglassOff();
+          return null;
+        }
+      };
+      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>> strategies =
+        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>>();
+      strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
+      strategies.add(new PredictiveInputModel.FragmentStrategy<GoToFileListEntry>());
+      strategies.add(new PredictiveInputModel.RegExStrategy<GoToFileListEntry>());
+      _completeFileDialog = 
+        new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
+                                                    "Auto-Complete File",
+                                                    true, // force
+                                                    true, // ignore case
+                                                    info,
+                                                    strategies,
+                                                    okAction,
+                                                    cancelAction,
+                                                    new GoToFileListEntry(null, "dummy")); // put one dummy entry in the list, later it will be changed anyway
+      if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_FILE_STORE_POSITION).booleanValue()) {
+        _completeFileDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_COMPLETE_FILE_STATE));
+      }      
+    }
+  }
+
+  /** The "Complete File" dialog instance. */
+  PredictiveInputFrame<GoToFileListEntry> _completeFileDialog = null;
+   
+  /** Complete the file specified by the word the cursor is on. */
+  void _completeFileUnderCursor() {
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    if ((docs==null) || (docs.size() == 0)) return; // do nothing
+    
+    GoToFileListEntry currentEntry = null;
+    ArrayList<GoToFileListEntry> list;
+    list = new ArrayList<GoToFileListEntry>(docs.size());
+    for(OpenDefinitionsDocument d: docs) {
+      if (d.isUntitled()) continue;
+      String str = d.toString();
+      if (str.lastIndexOf('.')>=0) {
+        str = str.substring(0, str.lastIndexOf('.'));
+      }
+      GoToFileListEntry entry = new GoToFileListEntry(d, str);
+      if (d.equals(_model.getActiveDocument())) currentEntry = entry;
+      list.add(entry);
+    }
+    
+    PredictiveInputModel<GoToFileListEntry> pim =
+      new PredictiveInputModel<GoToFileListEntry>(true,
+                                                  new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>(),
+                                                  list);
+    OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+    odd.acquireWriteLock();
+    boolean uniqueMatch = true;
+    try {
+      String mask = "";
+      int loc = getCurrentDefPane().getCaretPosition();
+      String s = odd.getText();
+      
+      // check that we're at the end of a word
+      if ((loc<s.length()) && (!Character.isWhitespace(s.charAt(loc))) &&
+          ("()[]{}<>.,:;/*+-!~&|%".indexOf(s.charAt(loc))==-1)) return;
+      
+      // find start
+      int start = loc;
+      while(start>0) {
+        if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+        --start;
+      }
+      while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+        ++start;
+      }
+      
+      int end = loc-1;
+      
+      if ((start>=0) && (end<s.length())) {
+        mask = s.substring(start, end+1);
+        pim.setMask(mask);
+      }
+      
+      System.out.println("mask is "+mask);
+      
+      if (pim.getMatchingItems().size() == 1) {
+        if (pim.getCurrentItem() != null) {
+          // exactly one match, auto-complete
+          if (!s.substring(start, loc).equals(pim.getCurrentItem().toString())) {
+            odd.remove(start, loc-start);
+            odd.insertString(start, pim.getCurrentItem().toString(), null);
+          }
+          return;
+        }
+      }
+      else {
+        // not exactly one match
+        uniqueMatch = false;
+        pim.setMask(mask);
+        if (pim.getMatchingItems().size() == 0) {
+          // if there are no matches, shorten the mask until there is at least one
+          mask = pim.getMask();
+          while(mask.length()>0) {
+            mask = mask.substring(0, mask.length()-1);
+            pim.setMask(mask);
+            if (pim.getMatchingItems().size()>0) { break; }
+          }
+        }       
+        initCompleteFileDialog();
+        _completeFileDialog.setModel(true, pim); // ignore case
+        if (currentEntry != null) _completeFileDialog.setCurrentItem(currentEntry);
+        hourglassOn();
+        _completeFileDialog.setVisible(true);
+      }
+    }
+    catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
+    finally { 
+      System.out.println("_completeFileUnderCursor finally");
+      if (uniqueMatch) { odd.releaseWriteLock(); }
+    }
+  }
+  
+  /** Auto-completes file specified by the word the cursor is on. */
+  final Action completeFileUnderCursorAction = new AbstractAction("Auto-Complete File Under Cursor...") {
+    public void actionPerformed(ActionEvent ae) {
+      _completeFileUnderCursor();
+    }
+  };
+  
   /** Indents the current selection. */
   private Action _indentLinesAction = new AbstractAction("Indent Line(s)") {
     public void actionPerformed(ActionEvent ae) {
@@ -3178,6 +3382,16 @@ public class MainFrame extends JFrame implements OptionConstants {
       config.setSetting(DIALOG_GOTOFILE_STATE, DIALOG_GOTOFILE_STATE.getDefault());
     }
     
+    // "Complete File" dialog position and size.
+    if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_FILE_STORE_POSITION).booleanValue())
+          && (_completeFileDialog != null) && (_completeFileDialog.getFrameState() != null)) {
+      config.setSetting(DIALOG_COMPLETE_FILE_STATE, (_completeFileDialog.getFrameState().toString()));
+    }
+    else {
+      // Reset to defaults to restore pristine behavior.
+      config.setSetting(DIALOG_COMPLETE_FILE_STATE, DIALOG_COMPLETE_FILE_STATE.getDefault());
+    }
+        
     // "Create Jar from Project" dialog position and size.   
     if ((DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue())
           && (_jarOptionsDialog != null) && (_jarOptionsDialog.getFrameState() != null)) {
@@ -4120,6 +4334,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     editItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
     _addMenuItem(editMenu, _commentLinesAction, KEY_COMMENT_LINES);
     _addMenuItem(editMenu, _uncommentLinesAction, KEY_UNCOMMENT_LINES);
+    _addMenuItem(editMenu, completeFileUnderCursorAction, KEY_COMPLETE_FILE);
     
     // Find/replace, goto
     editMenu.addSeparator();

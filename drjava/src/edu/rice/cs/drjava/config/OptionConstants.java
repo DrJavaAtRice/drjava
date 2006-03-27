@@ -424,6 +424,13 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
 
   /**
+   * The key binding for complete file.
+   */
+  public static final KeyStrokeOption KEY_COMPLETE_FILE =
+    new KeyStrokeOption("key.complete.file",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, mask|KeyEvent.SHIFT_MASK));
+
+  /**
    * The key binding for indenting
    *
   public static final KeyStrokeOption KEY_INDENT =
@@ -1061,6 +1068,13 @@ public interface OptionConstants {
    */
   public static final BooleanOption DIALOG_GOTOFILE_FULLY_QUALIFIED =
     new BooleanOption("dialog.gotofile.fully.qualified", Boolean.FALSE);
+
+  /** The last state of the "Complete File" dialog. */
+  public static final StringOption DIALOG_COMPLETE_FILE_STATE = new StringOption("dialog.completefile.state", "default");
+
+  /** Whether to save and restore window size and position at startup/shutdown. */
+  public static final BooleanOption DIALOG_COMPLETE_FILE_STORE_POSITION =
+    new BooleanOption("dialog.completefile.store.position", Boolean.TRUE);
 
   /** The last state of the "Create Jar from Project " dialog. */
   public static final StringOption DIALOG_JAROPTIONS_STATE = new StringOption("dialog.jaroptions.state", "default");
