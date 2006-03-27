@@ -589,6 +589,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
   /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady(File wd) {
+//    System.out.println("interpreterReady(" + wd + ") called in InteractionsModel");  // DEBUG
+//    System.out.println("_waitingForFirstInterpreter = " + _waitingForFirstInterpreter);  // DEBUG
     if (! _waitingForFirstInterpreter) {
       _document.reset(generateBanner(wd));
       _document.setInProgress(false);

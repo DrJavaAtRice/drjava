@@ -190,10 +190,9 @@ class FindReplaceDialog extends TabbedPanel {
     }
   };
 
-  // Replaces all occurences of the findfield text with that
-  // of the replacefield text both before and after the cursor
-  // without prompting for wrapping around the end of the
-  // document
+  /** Replaces all occurences of the findfield text with that of the replacefield text both before and after the cursor
+   *  without prompting for wrapping around the end of the document.
+   */
   private Action _replaceAllAction = new AbstractAction("Replace All") {
     public void actionPerformed(ActionEvent e) {
       _updateMachine();

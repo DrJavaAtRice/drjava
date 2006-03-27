@@ -125,7 +125,7 @@ public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implemen
     // As a first step to weakening the restriction on parent's type, this allows parent to be based on an arbitrary item type, as
     // long as it extends ItemT.
     private void migrateListeners(IDocumentNavigator<ItemT> child, IDocumentNavigator<ItemT> parent) {
-      for (INavigationListener nl: parent.getNavigatorListeners())  child.addNavigationListener(nl);
+      for (INavigationListener<? super ItemT> nl: parent.getNavigatorListeners())  child.addNavigationListener(nl);
       for (FocusListener fl: parent.getFocusListeners())  child.addFocusListener(fl);
     }
 }

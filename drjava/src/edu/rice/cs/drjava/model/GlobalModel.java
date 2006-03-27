@@ -163,10 +163,13 @@ public interface GlobalModel extends ILoadDocuments {
   /** Saves all open documents, prompting when necessary. */
   public void saveAllFiles(FileSaveSelector com) throws IOException;
   
-  /**Creats a new project and saves it to disk
-   * @param filename where to save the project
+  /**Creates a new project with specified project file and default values for other properties.
+   * @param projFile the new project file (which does not yet exist in the file system).
    */
-  public void newProject(File f) throws IOException;
+  public void createNewProject(File projFile);
+  
+  /**Configures a new project (created by createNewProject) and saves it to disk. */
+  public void configNewProject() throws IOException;
   
   /**Writes the project file to disk
    * @param filename where to save the project

@@ -411,9 +411,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  /**
-   * Asks user for directory name and and reads it's files (and subdirectories files, on request) to
-   * the definitions pane.
+  /** Asks user for directory name and and reads it's files (and subdirectories files, on request) to
+   *  the definitions pane.
    */
   private Action _openFolderAction  = new AbstractAction("Open Folder...") {
     public void actionPerformed(ActionEvent ae) { 
@@ -1553,9 +1552,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   private Action _projectPropertiesAction = new AbstractAction("Project Properties") {
-    public void actionPerformed(ActionEvent ae) {
-      _editProject();
-    }
+    public void actionPerformed(ActionEvent ae) { _editProject(); }
   };
     
   
@@ -2924,12 +2921,14 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public void openFolder(DirectoryChooser chooser) {
     String type = "'" + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
-    chooser.setDialogTitle("Open All " + type + "Files In...");
+    chooser.setDialogTitle("Open All " + type + "Files in ...");
     
     File openDir = null;
     try { 
       File activeFile = _model.getActiveDocument().getFile();
-      if (activeFile != null) openDir = activeFile.getParentFile(); }
+      if (activeFile != null) openDir = activeFile.getParentFile();
+      else openDir = _model.getProjectRoot();
+    }
     catch(FileMovedException e) { /* do nothing */ }
     
     int result = chooser.showDialog(openDir);
@@ -3138,14 +3137,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveProjectHelper(_currentProjFile);
   }
   
-  /** Edit the project in the global model. */
-  private void _editProject() { _editProject(null); }
+//  /** Edit the project in the global model. */
+//  private void _editProject() { _editProject(new ProjectPropertiesFrame(MainFrame.this)); }
   
-  /** Edit new project frame ppf (if not null); otherwise edit the project in the global model. */  
-  private void _editProject(ProjectPropertiesFrame ppf) {
-    if (ppf == null) 
-      // Create new project properties frame consistent with the current project state in the global model
-      ppf = new ProjectPropertiesFrame(MainFrame.this);
+  /** Edit project frame ppf.  */  
+  private void _editProject() {
+    ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(this);
     ppf.setVisible(true);
     ppf.reset();
     ppf.toFront();  // ppf actions save state of ppf in global model
@@ -3158,22 +3155,22 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveChooser.setFileFilter(_projectFilter);
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
-      File file = _saveChooser.getSelectedFile();  // project file
-      String fileName = file.getName();
+      File pf = _saveChooser.getSelectedFile();  // project file
+      String fileName = pf.getName();
       // ensure that saved file has extesion ".pjt"
       if (! fileName.endsWith(".pjt")) {
         int lastIndex = fileName.lastIndexOf(".");
-        if (lastIndex == -1) file = new File (file.getAbsolutePath() + ".pjt");
-        else file = new File(fileName.substring(0, lastIndex) + ".pjt");
+        if (lastIndex == -1) pf = new File (pf.getAbsolutePath() + ".pjt");
+        else pf = new File(fileName.substring(0, lastIndex) + ".pjt");
       }
       
-      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
-      _editProject(ppf);    // Uses new project properties frame
-//      ppf.saveSettings();   // Saves edited profile in global model
-      
-      try { _model.newProject(file); }
+      _model.createNewProject(pf); // sets model to a new FileGroupingState for project file pf
+//      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
+//      ppf.saveSettings();  // Saves new project profile in global model
+      _editProject();  // edits the properties of the new FileGroupingState
+      try { _model.configNewProject(); }  // configures the new project in the model
       catch(IOException e) { throw new UnexpectedException(e); }
-      _currentProjFile = file;
+      _currentProjFile = pf;
     }
   }
 

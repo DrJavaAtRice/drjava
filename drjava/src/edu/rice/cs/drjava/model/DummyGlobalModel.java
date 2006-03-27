@@ -222,8 +222,12 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call saveAllFiles on a Dummy");
   }
   
-  public void newProject(File f) throws IOException {
-     throw new UnsupportedOperationException("Tried to call newProject on a Dummy");
+  public void createNewProject(File f) {
+     throw new UnsupportedOperationException("Tried to call createNewProject on a Dummy");
+  }
+  
+  public void configNewProject() throws IOException {
+     throw new UnsupportedOperationException("Tried to call configNewProject on a Dummy");
   }
   
   public void saveProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> ht) throws IOException {

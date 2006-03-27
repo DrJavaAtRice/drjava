@@ -541,7 +541,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Degenerate constructor for a new project; only the file project name is known. */
     ProjectFileGroupingState(File project) {
-      this(project.getParentFile(), null, null, null, project, null, null, null, 0);
+      this(project.getParentFile(), null, null, null, project, new File[0], new ClassPathVector(), null, 0);
     }
     
     ProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
@@ -1110,16 +1110,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   }
   
-  /** Creates a new project file and writes it to disk; only runs in event thread.
+  
+  /** Creates a new FileGroupingState for specificed project file and default values for other properties.
+   *  @param projFile the new project file (which does not yet exist in the file system)
+   */
+  public void createNewProject(File projFile) { setFileGroupingState(new ProjectFileGroupingState(projFile)); }
+    
+  /** Configures a new project (created by createNewProject) and writes it to disk; only runs in event thread.
    *  @param filename where to save the project
    */
-  public void newProject(File file) throws IOException {
+  public void configNewProject() throws IOException {
     
 //    FileGroupingState oldState = _state;
+    File projFile = getProjectFile();
     
-    setFileGroupingState(new ProjectFileGroupingState(file));
-    
-    ProjectProfile builder = new ProjectProfile(file);
+    ProjectProfile builder = new ProjectProfile(projFile);
     
     // FileLists for project file
     ArrayList<File> srcFileList = new ArrayList<File>();
@@ -1140,9 +1145,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       File f = doc.getFile();
       
-      if (doc.isUntitled()) {
-        extFileList.add(f);
-      }
+      if (doc.isUntitled()) extFileList.add(f);
       else if (FileOps.isInFileTree(f, projectRoot)) {
         builder.addSourceFile(new DocFile(f));
         srcFileList.add(f);
@@ -1151,9 +1154,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         builder.addAuxiliaryFile(new DocFile(f));
         auxFileList.add(f);
       }
-      else /* doc is external file */ {
-        extFileList.add(f);
-      }
+      else /* doc is external file */ extFileList.add(f);
     }
     
     File[] srcFiles = srcFileList.toArray(new File[srcFileList.size()]);

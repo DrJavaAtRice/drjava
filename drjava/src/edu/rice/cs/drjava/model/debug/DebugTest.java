@@ -40,16 +40,13 @@ import edu.rice.cs.drjava.model.*;
 
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Tests the JPDA-based debugger.
- *
- * @version $Id$
+/** Tests the JPDA-based debugger.
+ *  @version $Id$
  */
 public final class DebugTest extends DebugTestCase implements OptionConstants {
-  /**
-   * Tests startup and shutdown, ensuring that all appropriate fields are
-   * initialized.  Ensures multiple startups and shutdowns work, even
-   * after a reset, which changes the debug port.
+  
+  /** Tests startup and shutdown, ensuring that all appropriate fields are initialized.  Ensures multiple startups
+   *  and shutdowns work, even after a reset, which changes the debug port.
    */
   public void testStartupAndShutdown() throws DebugException, InterruptedException {
     if (printMessages) System.out.println("----testStartupAndShutdown----");
@@ -89,6 +86,9 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     debugListener.assertDebuggerStartedCount(2);  //fires
     debugListener.assertDebuggerShutdownCount(1);
+    
+    // Use the interpeter so that resetInteractions restarts the slave JVM
+    interpret("2+2");
 
     // Reset interactions (which shuts down debugger)
     InterpretListener resetListener = new InterpretListener() {
@@ -98,6 +98,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
       }
       public void interpreterResetting() {
         // Don't notify: happens in the same thread
+        if (printMessages) System.out.println("interpreterResetting called in resetListener");
         interpreterResettingCount++;
       }
       public void interpreterReady(File wd) {
@@ -107,18 +108,18 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
           _notifyLock();
         }
       }
-
-      public void consoleReset() {
-        consoleResetCount++;
-      }
+      public void consoleReset() { consoleResetCount++; }
     };
+    
     _model.addListener(resetListener);
     synchronized(_notifierLock) {
       _model.resetInteractions(FileOption.NULL_FILE);
-      _setPendingNotifies(2);  // shutdown, interpreterReady
+      _setPendingNotifies(3);  // interactionEnded, shutdown, interpreterReady
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
+    
     _model.removeListener(resetListener);
+
     resetListener.assertInterpreterResettingCount(1);  //fires (no waiting)
     resetListener.assertInterpreterReadyCount(1);  //fires
     debugListener.assertDebuggerStartedCount(2);

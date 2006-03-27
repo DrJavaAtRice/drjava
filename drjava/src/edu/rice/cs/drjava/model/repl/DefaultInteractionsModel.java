@@ -110,6 +110,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
 
   /** Called when the Java interpreter is ready to use. Adds any open documents to the classpath. */
   public void interpreterReady(File wd) {
+//    System.out.println("interpreterReady(" + wd + ") called in DefaultInteractionsModel");  // DEBUG
     _model.resetInteractionsClassPath();
     super.interpreterReady(wd);
   }
@@ -143,6 +144,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
 
   /** Notifies listeners that the interpreter is ready. */
   public void _notifyInterpreterReady(final File wd) { 
+//    System.out.println("Asynchronously notifying interpreterReady event listeners");  // DEBUG
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(wd); } });
   }
 

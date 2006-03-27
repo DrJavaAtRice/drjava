@@ -37,11 +37,9 @@ import edu.rice.cs.drjava.model.*;
 
 import java.io.*;
 
-/**
- * This class contains the basic fields and methods that are necessary
- * for any test file that needs to use the JPDADebugger.
- *
- * @version $Id$
+/** This class contains the basic fields and methods that are necessary for any test file that needs to use the
+ *  JPDADebugger.
+ *  @version $Id$
  */
 public abstract class DebugTestCase extends GlobalModelTestCase {
 

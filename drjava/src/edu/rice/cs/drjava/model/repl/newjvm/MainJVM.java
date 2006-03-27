@@ -728,12 +728,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   protected void handleSlaveConnected() {
     // we reset the enabled flag since, unless told otherwise via
     // killInterpreter(false), we want to automatically respawn
+//    System.out.println("handleSlaveConnected() called in MainJVM");  // DEBUG
     _restart = true;
     _cleanlyRestarting = false;
     
     Boolean allowAccess = DrJava.getConfig().getSetting(OptionConstants.ALLOW_PRIVATE_ACCESS);
     setPrivateAccessible(allowAccess.booleanValue());
     
+//    System.out.println("Calling interpreterReady(" + _workDir + ") called in MainJVM");  // DEBUG
     _interactionsModel.interpreterReady(_workDir);
     _junitModel.junitJVMReady();
     
