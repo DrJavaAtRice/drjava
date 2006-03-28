@@ -281,9 +281,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document
         
 //        Utilities.showDebug("Setting the active doc done");
-        File oldDir = _activeDirectory;
-        File dir = doc.getParentDirectory();
-        if (! dir.equals(oldDir)) { 
+        File oldDir = _activeDirectory;  // _activeDirectory can be null
+        File dir = doc.getParentDirectory();  // dir can be null
+        if (dir != null && ! dir.equals(oldDir)) { 
         /* If the file is in External or Auxiliary Files then then we do not want to change our project directory
          * to something outside the project. ?? */
           _activeDirectory = dir;
@@ -292,11 +292,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         return Boolean.valueOf(true); 
       }
       public Boolean fileCase(File f) {
-        if (! f.isAbsolute()) {
+        if (! f.isAbsolute()) { // should never happen because all file names are canonicalized
           File root = _state.getProjectFile().getParentFile().getAbsoluteFile();
           f = new File(root, f.getPath());
         }
-        _activeDirectory = f;
+        _activeDirectory = f;  // Invariant: activeDirectory != null
         _notifier.currentDirectoryChanged(f);
         return Boolean.valueOf(true);
       }
@@ -1013,7 +1013,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (f == null) throw new IOException("File name returned from FileSelector is null");
       try {
         //always return last opened Doc
-        retDoc = _rawOpenFile(f.getAbsoluteFile());
+        retDoc = _rawOpenFile(f.getCanonicalFile());
         filesOpened.add(retDoc);
       }
       catch (AlreadyOpenException aoe) {
@@ -1982,13 +1982,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private DCacheAdapter _cacheAdapter;
 
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.
-     *  @param f file describing DefinitionsDocument to manage
+     *  @param f file describing DefinitionsDocument to manage; should be in canonical form
      */
     ConcreteOpenDefDoc(File f) throws IOException {
       if (! f.exists()) throw new FileNotFoundException("file " + f + " cannot be found");
       
       _file = f;
-      _parentDir = f.getParentFile();
+      _parentDir = f.getParentFile();  // should be canonical
       _timestamp = f.lastModified();
       init();
     }
@@ -2026,7 +2026,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Get the parent directory of this document
-     *  @return The parent directory
+     *  @return The parent directory; should be canonical
      */
     public File getParentDirectory() { return _parentDir; }
     
@@ -2674,9 +2674,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return _packageName;
     }
     
-    /** Finds the root directory of the source files.
+    /** Finds the root directory of the source file.
      *  @param packageName Package name, already fetched from the document
-     *  @return The root directory of the source files based on the package statement.
+     *  @return The root directory of the source file based on the package statement.
      *  @throws InvalidPackageException If the package statement is invalid, or if it does not match up with the
      *          location of the source file.
      */
@@ -2714,7 +2714,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           String part = pop(packageStack);
           parentDir = parentDir.getParentFile();
 
-          if (parentDir == null) throw new RuntimeException("parent dir is null?!");
+          if (parentDir == null) throw new RuntimeException("parent dir is null!");
 
           // Make sure the package piece matches the directory name
           if (! part.equals(parentDir.getName())) {

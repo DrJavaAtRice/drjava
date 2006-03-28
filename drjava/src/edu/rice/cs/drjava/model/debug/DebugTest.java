@@ -87,9 +87,6 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertDebuggerStartedCount(2);  //fires
     debugListener.assertDebuggerShutdownCount(1);
     
-    // Use the interpeter so that resetInteractions restarts the slave JVM
-    interpret("2+2");
-
     // Reset interactions (which shuts down debugger)
     InterpretListener resetListener = new InterpretListener() {
       public void interpreterChanged(boolean inProgress) {
@@ -111,6 +108,9 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
       public void consoleReset() { consoleResetCount++; }
     };
     
+    // Use the interpeter so that resetInteractions restarts the slave JVM
+    interpret("2+2");
+
     _model.addListener(resetListener);
     synchronized(_notifierLock) {
       _model.resetInteractions(FileOption.NULL_FILE);
