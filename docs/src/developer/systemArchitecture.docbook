@@ -1,0 +1,27 @@
+<!--
+  Chapter describing system architecture in the DrJava Developer 
+  Documentation.  All chapters are joined into a single document 
+  in devdoc.docbook.
+  
+  @version $Id: devdoc.docbook 3498 2006-01-17 22:36:31Z dlsmith $
+-->
+
+<chapter id="systemArchitecture">
+  <title>System Architecture</title>
+  <para>[TODO]</para>
+  
+  <!-- Clipped from the previous docs (for the description under the "docs" module):
+        <para>Emacs and modern versions of KDE's KWrite are both good editors for DocBook files.  Please try to maintain a consistent style within the documentation, both in tone (eg. somewhat informal &mdash; "you" instead of "the user") and formatting (eg. literal tags for small bits of code, paragraphs on one line, etc).</para>
+-->
+
+<!-- Also clipped from the previous docs:
+
+        <formalpara>
+          <title>Use of the Configuration Framework</title>
+          <para>DrJava's configurable options are managed through a framework in the <literal>edu.rice.cs.drjava.config</literal> package.  This framework takes care of loading and saving options from the <filename>.drjava</filename> file, as well as managing listeners to changed configuration options.  The main class of interest is <literal>OptionConstants</literal>, which defines all options and their default values.  You can get and change settings using the static <literal>DrJava.getConfig()</literal> method.</para>
+        </formalpara>
+        <para>It is very important never to use the configuration framework in the Interpreter JVM, since this will instantiate a new copy of the framework inconsistent with the one in the Main JVM.  (It also causes the "SlaveJVMRunner" icon to appear in Mac OS X.)  It is also very important never to use the configuration framework in the Eclipse plug-in, because it causes Eclipse to crash.  (We're not sure why, but it's better for us to use Eclipse's preferences in that world anyway.)</para>
+        -->
+
+  
+</chapter>

@@ -1,0 +1,16 @@
+<!--
+  Project admin chapter for the DrJava Developer Documentation.  All 
+  chapters are joined into a single document in devdoc.docbook.
+  
+  @version $Id: devdoc.docbook 3498 2006-01-17 22:36:31Z dlsmith $
+-->
+
+<chapter id="projectAdministration">
+  <title>Project Administration</title>
+  <para>[TODO]</para>
+  
+  <!-- Clipped from the previous docs:
+  
+  <para>It is important to update the DrJava website after all changes to the documentation.  This involves copying the HTML files for the user, quickstart, and developer documentation (and the PDF file for the user documentation) to <filename>drjava.sf.net:/home/groups/d/dr/drjava/htdocs/</filename>.  The HTML files should go in the <filename>userdocs/</filename>, <filename>quickstartdocs</filename>, and <filename>devdocs/</filename> directories, respectively, while the PDF should be saved as <filename>drjava-userdoc.pdf</filename> directly in <filename>htdocs/</filename>.</para>
+  -->
+</chapter>

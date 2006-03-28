@@ -1,0 +1,11 @@
+<!--
+  Chapter on best practices for the DrJava Developer Documentation.  All 
+  chapters are joined into a single document in devdoc.docbook.
+  
+  @version $Id: devdoc.docbook 3498 2006-01-17 22:36:31Z dlsmith $
+-->
+<chapter id="bestPractices">
+  <title>Development Best Practices</title>
+  <para>[TODO]</para>
+  
+</chapter>

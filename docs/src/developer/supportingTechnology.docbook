@@ -1,0 +1,141 @@
+<!--
+  Chapter covering supporting technology in the DrJava Developer 
+  Documentation.  All chapters are joined into a single document 
+  in devdoc.docbook.
+  
+  @version $Id: devdoc.docbook 3498 2006-01-17 22:36:31Z dlsmith $
+-->
+
+<chapter id="supportingTechnology">
+  <title>Supporting Technology</title>
+  <para>This section is intended as a repository of acquired knowledge with respect to the ins and outs of supporting technology used with DrJava.  For each tool or library, a section will address questions like:
+  
+    <itemizedlist>
+      <listitem><para>How is this technology used in the DrJava code base or build process?</para></listitem>
+      
+      <listitem><para>How is the technology distributed; what needs to be done to install it?</para></listitem>
+      
+      <listitem><para>Do we depend on a specific version of the software?</para></listitem>
+      
+      <listitem><para>What are the key options or classes that developers should be aware of?</para></listitem>
+      
+      <listitem><para>Where can more comprehensive documentation be found?</para></listitem>
+
+      <listitem><para>Why has this particular technology been chosen?  What are the alternatives?</para></listitem>
+      
+    </itemizedlist>
+  </para>
+
+  <section id="java">
+    <title>Java Language & APIs</title>
+    <para>[TODO]</para>
+  </section>
+
+  <section id="javac">
+    <title><command>javac</command></title>
+    <para>[TODO]</para>
+    <!-- We can point to the <link linkend="installJDK">JDK installation instructions</link> for installation details -->
+  </section>
+  
+  <section id="javadoc">
+    <title><command>javadoc</command></title>
+    <para>[TODO]</para>
+    <!-- We can point to the <link linkend="installJDK">JDK installation instructions</link> for installation details -->
+  </section>
+  
+  <section id="rmi">
+    <title>RMI</title>
+    <para>[TODO]</para>
+    <!-- We can point to the <link linkend="installJDK">JDK installation instructions</link> for installation details -->
+  </section>
+  
+  <section id="jpda">
+    <title>JPDA</title>
+    <para>[TODO]</para>
+    <!-- We can point to the <link linkend="installJDK">JDK installation instructions</link> for installation details -->
+  </section>
+  
+  <section id="subversion">
+    <title>Subversion</title>
+    <para>[TODO]</para>
+    <!-- We can point to the <link linkend="installSubversion">Subversion installation instructions</link> for installation details -->
+    <!-- Should include instructions on moving and adding files, and on tagging and branching -->
+    <!-- Clipped from the previous docs:
+              <para>If you will be adding new files as part of your commit, you will need to first let the CVS server know that the new files exist.  Run "<literal>cvs add [FILE]</literal>" for each new file that you will be adding before running <literal>ant commit</literal>.  Also, it is very important that you copy the license comment from another file into your new file.  We also prefer that you include a "<literal>@version &#36;Id&#36;</literal>" tag in your class-level Javadoc comment, which helps us note the last time the file was modified.</para>
+-->
+  </section>
+  
+  <section id="ant">
+    <title>Ant</title>
+    <para>[TODO]</para>
+    <!-- We can point to the <link linkend="installAnt">Ant installation instructions</link> for installation details -->
+  </section>
+  
+  <section id="junit">
+    <title>JUnit</title>
+    <para>[TODO]</para>
+    <!-- We can point to the <link linkend="installJUnit">JUnit installation instructions</link> for installation details -->
+  </section>
+  
+  <section id="SourceForge">
+    <title>SourceForge</title>
+    <para>[TODO]</para>
+  </section>
+  
+  <section id="clover">
+    <title>Clover</title>
+    <para>[TODO]</para>
+  </section>
+  
+  <section id="retroweaver">
+    <title>Retroweaver</title>
+    <para>[TODO]</para>
+  </section>
+  
+  <section id="docbook">
+    <title>DocBook</title>
+    <para>[TODO]</para>
+    <!-- Clipped from the previous docs:
+    Beware that some versions of these tools may not work with our build script or may generate HTML files without an <filename>index.html</filename> file.  (If this is the case, as it is currently on the greenland server, you'll probably want to copy <filename>book1.html</filename> to <filename>index.html</filename>.  Don't just rename it, because other files will link to the old one.)
+    -->
+  </section>
+  
+  <section id="javacc">
+    <title>JavaCC</title>
+    <para>[TODO]</para>
+  </section>
+  
+  <section id="bcel">
+    <title>BCEL</title>
+    <para>[TODO]</para>
+  </section>
+  
+  <section id="otherTools">
+    <title>Other Useful Development Tools</title>
+    <para>[TODO]</para>
+    
+    <section id="findbugs">
+      <title>FindBugs</title>
+      <para>[TODO]</para>
+    </section>
+  
+    <section id="x11">
+      <title>X11</title>
+      <para>[TODO]</para>
+      <!-- This can contain tips and guidance on building remotely using X11 -->
+      <!-- Clipped from the previous docs:
+        <para>If you are running the tests on Windows over an SSH connection to a Unix server, you will need to have an X server running (such as X-Win32), and you will need to enable "X11 Tunneling" in the preferences of your SSH client.  This is because Swing components will be created in the tests, which require an X server even if they are not explicitly shown.</para>
+        -->
+
+    </section>
+
+    <section id="eclipse">
+      <title>Eclipse</title>
+      <para>[TODO]</para>
+      <!-- This can contain tips on how to use some of Eclipse's features - how to use it as the IDE, taking advantage of its extensive compiler warnings, etc. -->
+    </section>
+    
+  </section>
+  
+</chapter>
+

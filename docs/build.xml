@@ -252,43 +252,64 @@
   </target>
 
 
-  <!-- ***********
-       CVS Targets 
-       *********** -->
+  <!-- ******************
+       Subversion Targets 
+       ****************** -->
   
-  <target name="update" depends="clean" description="Reconcile source with the CVS archive">
-    <echo message="Running CVS update ('-q' -- you will only see output for files that don't match)" />
-    <!-- TODO: Experiment with the 'compression' option -->
-    <cvs command="update -d -P" quiet="true" />
+  <target name="update" depends="clean" description="Reconcile source with the Subversion archive">
+    <echo message="Running Subversion update" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="update" />
+    </exec>
+    <exec executable="svn" failonerror="yes">
+      <arg value="status" />
+    </exec>
   </target>
   
-  <target name="commit" depends="update, build, do-commit, tag" 
-          description="Commit source to the CVS archive (after building)">
-    <echo message="New version is committed to CVS" />
-  </target>
-
-  <target name="do-commit">
-    <antcall target="clean" inheritall="false"> <!-- Clean up after the latest build -->
+  <target name="commit" depends="update, build" 
+          description="Commit source to the Subversion archive (after building)">
+    <antcall target="clean"> <!-- Clean up after the latest build -->
       <param name="delete-jars" value="no" />
     </antcall>
+    <exec executable="svn" failonerror="yes">
+      <arg value="status" />
+    </exec>
     <input message="Please enter a log message for the commit: "
-           addproperty="cvs.commit.message" />
-    <echo message="Running CVS commit"/>
-    <cvs quiet="true">
-      <commandline> 
-         <argument value="commit" />
-         <argument value="-m" />
-         <argument value="${cvs.commit.message}" />
-      </commandline>
-    </cvs>
-  </target>
-  
-  <target name="tag" depends="resolve-version-tag">
-    <echo message="Running CVS tag with version ${version-tag}"/>
-    <cvs command="tag -c ${version-tag}" reallyquiet="true" />
+           addproperty="svn-commit-message" />
+    <echo message="Running Subversion commit" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="commit" />
+      <arg value="-m" />
+      <arg value="${svn-commit-message}" />
+    </exec>
   </target>
 
+  <target name="tag" depends="resolve-version-tag" 
+          description="Copy the working copy to a new Subversion tag">
+    <echo message="Creating a new Subversion tag with name ${version-tag}"/>
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${basedir}" />
+      <arg value="${svn-repository}/tags/${version-tag}" />
+      <arg value="-m" />
+      <arg value="Created tag ${version-tag}" />
+    </exec>
+  </target>
   
+  <target name="branch" description="Copy the working copy to a new Subversion branch">
+    <input message="Enter a name for the new branch: "
+           addproperty="svn-branch-name" />
+    <echo message="Creating a new Subversion branch ${svn-branch-name}" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${base-dir}" />
+      <arg value="${svn-repository}/branches/${svn-branch-name}" />
+      <arg value="-m" />
+      <arg value="Created branch ${svn-branch-name}" />
+    </exec>
+  </target>
+
+
   <!-- ********************************
        Misc Occasionally-Useful Targets
        ******************************** -->

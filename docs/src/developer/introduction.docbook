@@ -1,0 +1,50 @@
+<!--
+  Introductory chapter for the DrJava Developer Documentation.  All 
+  chapters are joined into a single document in devdoc.docbook.
+  
+  @version $Id: devdoc.docbook 3498 2006-01-17 22:36:31Z dlsmith $
+-->
+
+<chapter id="introduction">
+  <title>Introduction</title>
+  
+  <para>This document is primarily intended as an orientation resource and collection of acquired knowledge for Rice students working as DrJava developers.  As an open-source project, DrJava's source code is also available for browsing and modification to the general public, and so the following will also serve to provide those interested with the necessary tools to build, fix, and improve the code base.  (Although we do not usually provide direct CVS commit access to individuals outside the Rice development team, interested parties are welcome to submit changes via the SourceForge Tracker forums.)</para>
+  
+  <section>
+    <title>Overview</title>
+  
+    <para>We cover the following topics:
+    
+      <itemizedlist>
+        <listitem><para><link linkend="introduction">Introduction</link> provides a high-level sense of purpose and history for the DrJava project.</para></listitem>
+
+        <listitem><para><link linkend="gettingStarted">Getting Started</link> describes how to set up and use the essential tools required to build and modify the DrJava source code.</para></listitem>
+      
+        <listitem><para><link linkend="supportingTechnology">Supporting Technology</link> provides a more in-depth guide to a variety of third-party technologies (applications and libraries) used to build and run DrJava.</para></listitem>
+      
+        <listitem><para><link linkend="systemArchitecture">System Architecture</link> provides a high-level view of the DrJava sources.  It describes the code organization and discusses various significant design decisions.</para></listitem>
+      
+        <listitem><para><link linkend="bestPractices">Development Best Practices</link> describes the coding and testing standards we maintain (or aspire to) in the DrJava code base.</para></listitem>
+      
+        <listitem><para><link linkend="projectAdministration">Project Administration</link> contains instructions directed at project administrators.  It covers, for example, making official DrJava releases and maintaining the project Web site.</para></listitem>
+      </itemizedlist>
+    </para>
+  </section>
+  
+  
+  <section>
+    <title>Project Philosophy</title>
+    <para>DrJava is a lightweight, powerful Java development environment.  Its target audience includes both beginning Computer Science students and advanced professional users.  Clearly, there is a tension between these goals &mdash; "lightweight" versus "powerful"; "beginning" versus "advanced."  This tension is generally resolved by <emphasis>insuring</emphasis> the prior conditions &mdash; that DrJava be easy to use and inobtrusive for beginners &mdash; and adding "advanced" features only if they can be presented in a simple, lightweight (both in terms of system resources and user interface) manner.  The interactions pane is an ideal example of a nice marriage between the goals of simplicity and power.  It is easy for beginners to understand and use &mdash; in fact, it's where many beginners get their first taste of Java programming.  Yet professional developers also find it quite handy, and sometimes lament the lack of something like it in heavier-weight IDEs.</para>
+      
+    <para>Because DrJava was originally conceived as a teaching tool, and because it has been almost entirely developed by undergraduate and graduate students, it is uniquely positioned to address the needs of students, teachers, and researchers.  We hope that this fount of experience will translate into a relevant, useful, and unique product.  However, development on the project is at a relative disadvantage due to the lack of a full-time or long-term workforce.  These challenges are addressed by maintaining a self-documenting, self-testing code base.  Developers should keep in mind that the code they write will be browsed and modified subsequently by many others, and if the reasoning behind the code is not documented by comments and tests, it will probably be lost.</para>
+    
+    <para>Finally, DrJava is open source software.  [TODO: discuss; explain the DrJava license]</para>
+  </section>
+  
+  
+  <section>
+    <title>Project History</title>
+    <para>[TODO]</para>
+  </section>
+  
+</chapter>
