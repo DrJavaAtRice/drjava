@@ -245,9 +245,9 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   }
 
   /** Ensures that the given object will wait for n notifications. Callers must call o.wait() AFTER this is 
-   *  called.  Use _notifyObject instead of o.notify() when using this method. Only one object (o) can use this 
+   *  called.  Use _notifyLock instead of o.notify() when using this method. Only one object (o) can use this 
    *  synchronization protocol at a time, since it uses a field to store the number of pending notifications.
-   *  @param n The number of times to be "notified" through _notifyObject
+   *  @param n The number of times to be "notified" through _notifyLock
    */
   protected void _setPendingNotifies(int n) throws InterruptedException {
     synchronized(_notifierLock) {
@@ -314,10 +314,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     if (printMessages) System.out.println("Shut down.");
   }
 
-  /**
-   * Cleanly shuts down the debugger, waiting for a suspended
-   * interaction to complete.
-   */
+  /** Cleanly shuts down the debugger, waiting for a suspended interaction to complete. */
   protected void _shutdownAndWaitForInteractionEnded() throws Exception {
     _debugger.removeAllBreakpoints();
 

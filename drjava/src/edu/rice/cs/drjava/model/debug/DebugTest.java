@@ -87,10 +87,21 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertDebuggerStartedCount(2);  //fires
     debugListener.assertDebuggerShutdownCount(1);
     
-    // Reset interactions (which shuts down debugger)
+    // Define listener that will count notification events
     InterpretListener resetListener = new InterpretListener() {
+      public void interactionStarted() {
+        // Don't notify: happens in the same thread
+        if (printMessages) System.out.println("interactionStarted called in resetListener");
+        interactionStartCount++;
+      }
+      public void interactionEnded() {
+         // Don't notify: happens in the same thread
+        if (printMessages) System.out.println("interactionEnded called in resetListener");
+        interactionEndCount++;
+      }
       public void interpreterChanged(boolean inProgress) {
         // Don't notify: happens in the same thread
+        if (printMessages) System.out.println("interpreterChanged called in resetListener");
         interpreterChangedCount++;
       }
       public void interpreterResetting() {
@@ -108,18 +119,19 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
       public void consoleReset() { consoleResetCount++; }
     };
     
+    // Install listener
+    _model.addListener(resetListener); // interactionStarted, interactionEnded, shutdown, interpreterReady
+    _setPendingNotifies(2);
+    
     // Use the interpeter so that resetInteractions restarts the slave JVM
     interpret("2+2");
+    
+    _model.resetInteractions(FileOption.NULL_FILE);
 
-    _model.addListener(resetListener);
-    synchronized(_notifierLock) {
-      _model.resetInteractions(FileOption.NULL_FILE);
-      _setPendingNotifies(3);  // interactionEnded, shutdown, interpreterReady
-      while (_pendingNotifies > 0) _notifierLock.wait();
-    }
+    synchronized(_notifierLock) { while (_pendingNotifies > 0) _notifierLock.wait(); }
     
     _model.removeListener(resetListener);
-
+    
     resetListener.assertInterpreterResettingCount(1);  //fires (no waiting)
     resetListener.assertInterpreterReadyCount(1);  //fires
     debugListener.assertDebuggerStartedCount(2);
