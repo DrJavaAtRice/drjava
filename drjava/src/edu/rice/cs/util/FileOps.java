@@ -174,7 +174,9 @@ public abstract class FileOps {
   public static File getCanonicalFile(File f) {
     try { if (f.exists()) return f.getCanonicalFile(); }
     catch(IOException e) { /* fall through */ }
-    return FileOption.NULL_FILE;  // This File object exists
+    finally {
+      return f.getAbsoluteFile();
+    }
   }
   
   /** @returns the file f unchanged if f exists; otherwise returns NULL_FILE. */
