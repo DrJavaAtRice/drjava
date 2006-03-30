@@ -64,7 +64,7 @@ public class SExpParserTest extends DrJavaTestCase {
   private File _fillTempFile(String fname, String text) {
     File f = null;
     try {
-      f = File.createTempFile(fname, null);
+      f = File.createTempFile(fname, null).getCanonicalFile();
       FileWriter fw = new FileWriter(f);
       fw.write(text, 0, text.length());
       fw.close();

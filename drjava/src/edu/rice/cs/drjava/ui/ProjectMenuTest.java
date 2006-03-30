@@ -83,7 +83,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     _srcDir.mkdir(); // create the src directory
 
     // create project in a directory with an auxiliary file outside of it
-    _auxFile = File.createTempFile("aux", ".java");
+    _auxFile = File.createTempFile("aux", ".java").getCanonicalFile();
     File auxFileParent = _auxFile.getParentFile();
     _projFile = new File(_parent, "test.pjt");
     

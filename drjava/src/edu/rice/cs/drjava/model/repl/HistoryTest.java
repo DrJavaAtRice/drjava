@@ -78,7 +78,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
    */
   public void testSaveAsExistsForOverwrite() throws IOException {
     _history.add("some text");
-    final File file1 = File.createTempFile("DrJava-test", ".hist", _tempDir);
+    final File file1 = File.createTempFile("DrJava-test", ".hist", _tempDir).getCanonicalFile();
     file1.deleteOnExit();
     try {
       _history.writeToFile(new WarningFileSelector(file1));

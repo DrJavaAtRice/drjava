@@ -98,7 +98,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
 
   /** Create a new temporary file in _tempDir. */
   protected File tempFile() throws IOException {
-    return File.createTempFile("DrJava-test", ".java", _tempDir);
+    return File.createTempFile("DrJava-test", ".java", _tempDir).getCanonicalFile();
   }
   
   /** Create a new temporary file in _tempDir.  Calls with the same
@@ -106,7 +106,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
    *  ints will return different filenames.
    */
   protected File tempFile(int i) throws IOException {
-    return File.createTempFile("DrJava-test" + i, ".java", _tempDir);
+    return File.createTempFile("DrJava-test" + i, ".java", _tempDir).getCanonicalFile();
   }
   
   protected OpenDefinitionsDocument openFile(final File f) throws IOException {

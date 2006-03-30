@@ -315,14 +315,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    */
   public synchronized void shutdown() {
     if (isReady()) {
-      Runnable command = new Runnable() {
-        public void run() {
-          _model.removeListener(_watchListener);
-        }
-      };
-      // use SwingUtilities.invokeLater rather than our own invokeLater
-      // because this might be run from the event thread already, and we
-      // don't want it to execute right now, just as soon as possible
+      Runnable command = new Runnable() { public void run() { _model.removeListener(_watchListener); } };
+      
+      /* Use SwingUtilities.invokeLater rather than Utilities.invokeLater because we want to defer executing this
+       * code after pending events (that may involve the _watchListener) */
       SwingUtilities.invokeLater(command);
       
       try {
@@ -335,9 +331,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         _log("Could not remove breakpoints/watches: " + de);
       }
       
-      try {
-        _vm.dispose();
-      }
+      try { _vm.dispose(); }
       catch (VMDisconnectedException vmde) {
         //VM was shutdown prematurely
       }

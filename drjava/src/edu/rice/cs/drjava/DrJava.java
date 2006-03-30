@@ -119,6 +119,7 @@ public class DrJava {
 //    Utilities.showDebug("Calling configureAndLoadDrJavaRoot with args = " + args);
     configureAndLoadDrJavaRoot(args); 
     
+    // This obviously only runs in the main thread, not the UI thread, so use SwingUtilities rather than Utilities.
     SwingUtilities.invokeLater(new Runnable() { 
       public void run() { 
         try { Thread.currentThread().sleep(PAUSE_TIME); }

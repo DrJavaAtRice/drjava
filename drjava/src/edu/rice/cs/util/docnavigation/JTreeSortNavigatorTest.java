@@ -65,7 +65,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
   public void setUp() throws Exception {
     super.setUp();
 
-    File f = File.createTempFile("project-",".pjt");
+    File f = File.createTempFile("project-",".pjt").getCanonicalFile();
     tree = new JTreeSortNavigator<DummyINavigatorItem>(f.getCanonicalPath());
     
     tree.addTopLevelGroup("[ Source Files ]", new INavigatorItemFilter<INavigatorItem>(){

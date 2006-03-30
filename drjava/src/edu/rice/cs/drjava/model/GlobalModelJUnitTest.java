@@ -184,7 +184,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     
     _runJUnit(doc);
-    
+
     Utilities.clearEventQueue();
     
     listener.assertJUnitStartCount(1);

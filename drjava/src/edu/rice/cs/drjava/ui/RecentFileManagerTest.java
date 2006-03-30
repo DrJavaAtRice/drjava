@@ -89,7 +89,7 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
    * ints will return different filenames.
    */
   protected File tempFile() throws IOException {
-    return File.createTempFile("DrJava-test", ".java", _tempDir);
+    return File.createTempFile("DrJava-test", ".java", _tempDir).getCanonicalFile();
   }
 
   /**

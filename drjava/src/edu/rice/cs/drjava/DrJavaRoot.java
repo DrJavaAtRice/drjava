@@ -128,9 +128,10 @@ public class DrJavaRoot {
       
       _openCommandLineFiles(mf, _filesToOpen, len);
       
-      /* setVibible is moved to the end of the eventqueue to be sure all files have finished loading and added to the
-       * fileview before the MainFrame is set visible.  When this was not done, occassionally a NullPointerException 
-       * was encountered on startup when specifying a file (ex: java -jar drjava.jar somefile.java)
+      /* This call on invokeLater only runs in the main thread, so we use SwingUtilities rather than Utilities.
+       * We use invokeLater here ensure all files have finished loading and added to the fileview before the MainFrame
+       * is set visible.  When this was not done, we occasionally encountered a NullPointerExceptio on startup when 
+       * specifying a file (ex: java -jar drjava.jar somefile.java)
        */
       SwingUtilities.invokeLater(new Runnable(){ public void run(){mf.setVisible(true);}});
       

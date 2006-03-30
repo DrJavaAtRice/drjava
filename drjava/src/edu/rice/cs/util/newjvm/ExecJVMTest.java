@@ -55,7 +55,7 @@ public class ExecJVMTest extends DrJavaTestCase {
   }
 
   public void testExecFileCreator() throws IOException, InterruptedException {
-    File tempFile = File.createTempFile("drjava-test", ".tmp");
+    File tempFile = File.createTempFile("drjava-test", ".tmp").getCanonicalFile();
     assertTrue("temp file exists", tempFile.exists());
     boolean ret = tempFile.delete();
     assertTrue("temp file delete succeeded", ret);
@@ -74,9 +74,7 @@ public class ExecJVMTest extends DrJavaTestCase {
       assertTrue("jvm System.out not empty", jvm.getInputStream().read() == -1);
       assertTrue("jvm System.err not empty", jvm.getErrorStream().read() == -1);
     }
-    finally {
-    }
-
+    finally { /*do nothing */ }
 
     // clean up file
     ret = tempFile.delete();
@@ -87,25 +85,16 @@ public class ExecJVMTest extends DrJavaTestCase {
     public static void main(String[] args) {
       File file = new File(args[0]);
       boolean ret;
-
-      try {
-        ret = file.createNewFile();
-      }
-      catch (IOException ioe) {
-        ret = false;
-      }
-
-      if (!ret) {
-        throw new RuntimeException("file creation failed");
-      }
-
+      try { ret = file.createNewFile(); }
+      catch (IOException ioe) { ret = false; }
+      if (!ret) throw new RuntimeException("file creation failed");
       System.exit(0);
     }
   }
 
   public void testExecWorkingDirNotFound() throws IOException, InterruptedException {
     // create and delete temp file
-    File tempFile = File.createTempFile("drjava-test", ".tmp");
+    File tempFile = File.createTempFile("drjava-test", ".tmp").getCanonicalFile();
     assertTrue("temp file exists", tempFile.exists());
     boolean ret = tempFile.delete();
     assertTrue("temp file delete succeeded", ret);

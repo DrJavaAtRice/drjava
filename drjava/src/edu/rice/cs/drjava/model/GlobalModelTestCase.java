@@ -161,16 +161,16 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   /** Create a new temporary file in _tempDir. */
   protected File tempFile() throws IOException {
-    return File.createTempFile("DrJava-test", ".java", _tempDir);
+    File f = File.createTempFile("DrJava-test", ".java", _tempDir).getCanonicalFile();
+//    System.err.println("temp file created with name " + f);
+    return f;
   }
 
-  /**
-   * Create a new temporary file in _tempDir.  Calls with the same
-   * int will return the same filename, while calls with different
-   * ints will return different filenames.
+  /** Create a new temporary file in _tempDir.  Calls with the same int will return the same filename, while calls
+   *  with different ints will return different filenames.
    */
   protected File tempFile(int i) throws IOException {
-    return File.createTempFile("DrJava-test" + i, ".java", _tempDir);
+    return File.createTempFile("DrJava-test" + i, ".java", _tempDir).getCanonicalFile();
   }
 
   /** Create a new temporary directory in _tempDir. */
@@ -178,9 +178,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return FileOps.createTempDirectory("DrJava-test", _tempDir);
   }
 
-  protected File createFile(String name) {
-    return new File(_tempDir, name);
-  }
+  protected File createFile(String name) { return new File(_tempDir, name); }
 
   /** Given a .java file and a class file name, returns the corresponding .class file. */
   protected File classForJava(File sourceFile, String className) {

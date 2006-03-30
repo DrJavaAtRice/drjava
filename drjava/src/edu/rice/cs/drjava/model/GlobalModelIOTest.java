@@ -174,9 +174,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     listener.assertCloseCount(0);
   }
 
-  /**
-   * Opens a file.
-   */
+  /** Opens a file. */
   public void testOpenRealFile() throws BadLocationException, IOException {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
 
@@ -379,12 +377,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
   }
 
-  /**
-   * Opens multiple files.
-   */
-  public void testOpenMultipleFiles()
-    throws BadLocationException, IOException
-  {
+  /** Opens multiple files. */
+  public void testOpenMultipleFiles() throws BadLocationException, IOException {
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     final File tempFile2 = writeToNewTempFile(BAR_TEXT);
 
@@ -494,12 +488,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     }
   }
 
-
-  /**
-   * Attempts to open a non-existent file.
-   */
-  public void testOpenMultipleNonexistentFiles() throws IOException
-  {
+  /** Attempts to open a non-existent file. */
+  public void testOpenMultipleNonexistentFiles() throws IOException {
 
     OpenDefinitionsDocument doc = null;
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
@@ -507,9 +497,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     //TestListener listener = new TestListener();
     TestListener listener = new TestListener() {
 
-      public void fileNotFound(File f) {
-        fileNotFoundCount++;
-      }
+      public void fileNotFound(File f) { fileNotFoundCount++; }
 
       public void fileOpened(OpenDefinitionsDocument doc) {
         File file = null;
@@ -522,9 +510,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           assertEquals("file to open", tempFile1.getCanonicalFile(), file.getCanonicalFile());
           openCount++;
         }
-        catch (IOException ioe) {
-          fail("could not get canonical file");
-        }
+        catch (IOException ioe) { fail("could not get canonical file"); }
       }
       
       public void fileClosed(OpenDefinitionsDocument doc) {
@@ -646,11 +632,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertContents(BAR_TEXT, doc2);
   }
 
-  /**
-   * Attempts to make the first save of a document, but cancels instead.
-   */
-  public void testCancelFirstSave() throws BadLocationException, IOException
-  {
+  /** Attempts to make the first save of a document, but cancels instead. */
+  public void testCancelFirstSave() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     // No need to override methods since no events should be fired
@@ -662,9 +645,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertContents(FOO_TEXT, doc);
   }
 
-  /**
-   * Makes a first save of the current document.
-   */
+  /** Makes a first save of the current document. */
   public void testRealSaveFirstSave() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
@@ -699,11 +680,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
                  FileOps.readFileAsString(file));
   }
 
-  /**
-   * Saves a file already saved and overwrites its contents.
-   */
-  public void testSaveAlreadySaved() throws BadLocationException, IOException
-  {
+  /** Saves a file already saved and overwrites its contents. */
+  public void testSaveAlreadySaved() throws BadLocationException, IOException {
     //disable file backups, remember original setting
     Boolean backupStatus = DrJava.getConfig().getSetting(BACKUP_FILES);
     DrJava.getConfig().setSetting(BACKUP_FILES, Boolean.FALSE);

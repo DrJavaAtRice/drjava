@@ -603,7 +603,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
   /** Create a new temporary file in _tempDir. */
   protected File tempFile(String fileName) throws IOException {
-    File f =  File.createTempFile(fileName, ".java", _tempDir);
+    File f =  File.createTempFile(fileName, ".java", _tempDir).getCanonicalFile();
     f.deleteOnExit();
     return f;
   }

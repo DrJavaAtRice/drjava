@@ -114,7 +114,7 @@ public class FileOpsTest extends DrJavaTestCase {
    * the save fails (bug #782963).
    */
   public void testSaveFile() throws IOException {
-    File writeTo = File.createTempFile("fileops", ".test");
+    File writeTo = File.createTempFile("fileops", ".test").getCanonicalFile();
     writeTo.deleteOnExit();
     File backup = new File(writeTo.getPath() + "~");
 
@@ -268,11 +268,11 @@ public class FileOpsTest extends DrJavaTestCase {
     //     DrJavaTest-#.tmp
     File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
     assertTrue("dir1 exists", dir1.exists());
-    File file1 = File.createTempFile("DrJavaTest-", ".temp", dir1);
+    File file1 = File.createTempFile("DrJavaTest-", ".temp", dir1).getCanonicalFile();
     assertTrue("file1 exists", file1.exists());
-    File dir2 = FileOps.createTempDirectory("TempDir", dir1);
+    File dir2 = FileOps.createTempDirectory("TempDir", dir1).getCanonicalFile();
     assertTrue("dir2 exists", dir2.exists());
-    File file2 = File.createTempFile("DrJavaTest-", ".temp", dir2);
+    File file2 = File.createTempFile("DrJavaTest-", ".temp", dir2).getCanonicalFile();
     assertTrue("file2 exists", file2.exists());
 
     String className = "edu.rice.cs.util.FileOpsTest";

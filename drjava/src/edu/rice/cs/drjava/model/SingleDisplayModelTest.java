@@ -314,7 +314,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     assertEquals("untitled display filename", "(Untitled)", _sdModel.getDisplayFilename(doc));
 
     // Ends in ".java"
-    File file = File.createTempFile("DrJava-filename-test", ".java", _tempDir);
+    File file = File.createTempFile("DrJava-filename-test", ".java", _tempDir).getCanonicalFile();
     file.deleteOnExit();
     String name = file.getName();
     doc = _sdModel.openFile(new FileSelector(file));
@@ -323,14 +323,14 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
                  _sdModel.getDisplayFilename(doc));
 
     // Doesn't contain ".java"
-    file = File.createTempFile("DrJava-filename-test", ".txt", _tempDir);
+    file = File.createTempFile("DrJava-filename-test", ".txt", _tempDir).getCanonicalFile();
     file.deleteOnExit();
     name = file.getName();
     doc = _sdModel.openFile(new FileSelector(file));
     assertEquals(".txt display filename", name, _sdModel.getDisplayFilename(doc));
 
     // Doesn't end in ".java"
-    file = File.createTempFile("DrJava-filename-test", ".java.txt", _tempDir);
+    file = File.createTempFile("DrJava-filename-test", ".java.txt", _tempDir).getCanonicalFile();
     file.deleteOnExit();
     name = file.getName();
     doc = _sdModel.openFile(new FileSelector(file));
