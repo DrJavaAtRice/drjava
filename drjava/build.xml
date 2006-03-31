@@ -826,7 +826,7 @@
     <echo message="Creating a new Subversion branch ${svn-branch-name}" />
     <exec executable="svn" failonerror="yes">
       <arg value="copy" />
-      <arg value="${base-dir}" />
+      <arg value="${basedir}" />
       <arg value="${svn-repository}/branches/${svn-branch-name}" />
       <arg value="-m" />
       <arg value="Created branch ${svn-branch-name}" />
