@@ -138,6 +138,30 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
       _lock.endRead();
     }
   }
+  
+  /** Called when a watch is set.  Must be executed in event thread.
+   *  @param w the watch
+   */
+  public void watchSet(DebugWatchData w) {
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for (int i = 0; i < size; i++) { _listeners.get(i).watchSet(w); }
+    }
+    finally { _lock.endRead(); }
+  }
+  
+  /** Called when a watch is removed.  Must be executed in event thread.
+   *  @param w the watch
+   */
+  public void watchRemoved(DebugWatchData w) {
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for (int i = 0; i < size; i++) { _listeners.get(i).watchRemoved(w); }
+    }
+    finally { _lock.endRead(); }
+  }
 
   /** Called when a breakpoint is removed from a document.  Must be executed in event thread.
    *  @param bp the breakpoint

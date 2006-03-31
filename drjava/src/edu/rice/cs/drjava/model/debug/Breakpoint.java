@@ -47,18 +47,19 @@ import com.sun.jdi.request.*;
 
 /** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest
  */
-public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
+public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implements DebugBreakpointData {
 
    private Position _startPos;
    private Position _endPos;
 
   /** @throws DebugException if the document does not have a file */
-  public Breakpoint(OpenDefinitionsDocument doc, int offset, int lineNumber, JPDADebugger manager)
+  public Breakpoint(OpenDefinitionsDocument doc, int offset, int lineNumber, boolean enabled, JPDADebugger manager)
     throws DebugException {
 
     super(manager, doc, offset);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
+    _enabled = enabled;
 
     try {
       _startPos = doc.createPosition(doc.getLineStartPos(offset));
@@ -68,10 +69,12 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
       throw new UnexpectedException(ble);
     }
 
-    if (_manager.isReady()) {
+    if ((_manager!=null) && (_manager.isReady())) {
       // the debugger is on, so initialize now
       // otherwise breakpoint gets re-set when debugger is enabled
       _initializeRequests(_manager.getReferenceTypes(_className, _lineNumber));
+      System.out.println("initialized requests");
+      setEnabled(enabled);
     }
   }
   
@@ -100,6 +103,8 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
         Location loc = (Location) lines.get(0);
         BreakpointRequest request =
           _manager.getEventRequestManager().createBreakpointRequest(loc);
+        request.setEnabled(_enabled);
+        System.out.println("adding breakpoint request, enabled = "+request.isEnabled());
         _requests.add(request);
       }
     }
@@ -121,6 +126,21 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
    */
   public int getEndOffset() {
     return _endPos.getOffset();
+  }  
+  
+  /** @return true if breakpoint is enabled. */
+  public boolean isEnabled() { return _enabled; }
+  
+  /** Enable/disable the breakpoint. */
+  public void setEnabled(boolean enabled) {
+    _enabled = enabled;
+    try {
+      for(BreakpointRequest bpr: _requests) {
+        System.out.println("Breakpoint request: enabled = "+bpr.isEnabled());
+        bpr.setEnabled(enabled);
+      }
+    }
+    catch(VMDisconnectedException vmde) { /* just ignore */ }
   }
 
   public String toString() {

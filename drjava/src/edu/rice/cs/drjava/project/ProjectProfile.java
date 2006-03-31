@@ -46,6 +46,9 @@ import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+import edu.rice.cs.drjava.model.debug.DebugWatchData;
+import edu.rice.cs.drjava.model.debug.DebugException;
 
 import static edu.rice.cs.util.StringOps.*;
 import static edu.rice.cs.util.FileOps.*;
@@ -76,6 +79,9 @@ public class ProjectProfile implements ProjectFileIR {
   private File _createJarFile = null;
   
   private int _createJarFlags = 0;
+  
+  private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
+  private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
   
   /* Constructors create new ProjectProfiles with specifed project file name and project root that is parent folder of
    * the project file.  The project file presumably may not exist yet.  */
@@ -130,6 +136,12 @@ public class ProjectProfile implements ProjectFileIR {
   /** @return the output file used in the "Create Jar" dialog. */
   public int getCreateJarFlags() { return _createJarFlags; }
   
+  /** @return an array of the breakpoints in this project. */
+  public DebugBreakpointData[] getBreakpoints() { return _breakpoints.toArray(new DebugBreakpointData[_breakpoints.size()]); }
+  
+  /** @return an array of the watches in this project. */
+  public DebugWatchData[] getWatches() { return _watches.toArray(new DebugWatchData[_watches.size()]); }
+  
   /** Public setters, modifiers */
   
   public void addSourceFile(DocFile df) { _sourceFiles.add(df); }
@@ -172,6 +184,9 @@ public class ProjectProfile implements ProjectFileIR {
   
   public void setCreateJarFile(File createJarFile) { _createJarFile = createJarFile; }
   public void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
+  
+  public void setBreakpoints(List<DebugBreakpointData> bps) { _breakpoints = bps; }
+  public void setWatches(List<DebugWatchData> ws) { _watches = ws; }
   
   /** This method writes what information has been passed to this builder so far to disk in s-expression format. */
   public void write() throws IOException {
@@ -263,7 +278,23 @@ public class ProjectProfile implements ProjectFileIR {
       fw.write("\n(create-jar-flags " + _createJarFlags + ")");
     }
     else fw.write("\n;; no create jar flags");
-    
+
+    // write breakpoints
+    if (!_breakpoints.isEmpty()) {
+      fw.write("\n(breakpoints");
+      for(DebugBreakpointData bp: _breakpoints) { fw.write("\n" + encodeBreakpoint(bp, "  ")); }
+      fw.write(")"); // close the breakpoints expression
+    }
+    else fw.write("\n;; no breakpoints");
+
+    // write watches
+    if (!_watches.isEmpty()) {
+      fw.write("\n(watches");
+      for(DebugWatchData w: _watches) { fw.write("\n" + encodeWatch(w, "  ")); }
+      fw.write(")"); // close the watches expression
+    }
+    else fw.write("\n;; no watches");
+
     fw.close();
   }
   
@@ -347,6 +378,54 @@ public class ProjectProfile implements ProjectFileIR {
   }
   private String encodeDocFile(DocFile df, String prefix, boolean relative) throws IOException {
     return encodeDocFile(df, prefix, relative, true);
+  }
+  
+  /** This encodes a breakpoint.
+   *  @param bp the breakpoint to encode
+   *  @param prefix the indent level to place the s-expression at
+   *  @param relative whether the file containing the breakpoint should be made relative to the project path
+   *  @return the s-expression syntax to describe the given breakpoint.
+   */
+  private String encodeBreakpoint(DebugBreakpointData bp, String prefix, boolean relative) throws IOException {
+    String ret = "";
+    String path;
+    if (relative) path = makeRelative(bp.getFile());
+    else path = bp.getFile().getCanonicalPath();
+
+    path = replace(path,File.separator,"/");
+    ret += prefix + "(breakpoint (name " + convertToLiteral(path) + ")";
+    
+    int offset = bp.getOffset();
+    int lineNumber = bp.getLineNumber();
+    ret += "\n" + prefix + "      ";
+    ret += "(offset " + offset + ")";
+    ret += "(line " + lineNumber + ")";
+    if (bp.isEnabled()) ret += "(enabled)";
+    ret += ")"; // close the breakpoint expression
+    
+    return ret;
+  }
+  /** This encodes a breakpoint.  The path defaults to relative.
+   *  @param bp the breakpoint to encode
+   *  @param prefix the indent level
+   *  @return the s-expression syntax to describe the given breakpoint.
+   */
+  private String encodeBreakpoint(DebugBreakpointData bp, String prefix) throws IOException {
+    return encodeBreakpoint(bp, prefix, true);
+  }
+  
+  
+  /** This encodes a watch.
+   *  @param w the watch to encode
+   *  @param prefix the indent level to place the s-expression at
+   *  @return the s-expression syntax to describe the given watch.
+   */
+  private String encodeWatch(DebugWatchData w, String prefix) throws IOException {
+    String ret = "";
+
+    ret += prefix + "(watch " + convertToLiteral(w.getName()) + ")";
+    
+    return ret;
   }
   
   /** @param f the file whose path to make relative to the project path

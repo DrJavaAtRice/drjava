@@ -56,6 +56,9 @@ import java.text.SimpleDateFormat;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.sexp.*;
+import edu.rice.cs.drjava.model.debug.DebugWatchData;
+import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+import edu.rice.cs.drjava.model.debug.DebugException;
 
 /** This parser uses the s-expression parser defined in the util pacakge.  The SExp tree given by the parser is 
  *  interpreted into a ProjectFileIR that is given to the user.  This class must also deal with different
@@ -72,7 +75,7 @@ import edu.rice.cs.util.sexp.*;
  *  corresponding methods to the ProjectFileIR, ProjectFileIRImpl, and ProjectFileBuilder</p>
  */
 public class ProjectFileParser {
-  /** Xingleton instance of ProjectFileParser */
+  /** Singleton instance of ProjectFileParser */
   public static final ProjectFileParser ONLY = new ProjectFileParser();
   
   private File _projectFile;
@@ -80,6 +83,7 @@ public class ProjectFileParser {
   
   ListVisitor<File> fileListVisitor = new ListVisitor<File>();
   ListVisitor<DocFile> docFileListVisitor = new ListVisitor<DocFile>();
+  BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
   
   private ProjectFileParser() { }
   
@@ -99,7 +103,7 @@ public class ProjectFileParser {
     catch(SExpParseException e) { throw new MalformedProjectFileException("Parse Error: " + e.getMessage()); }
     
     ProjectFileIR pfir = new ProjectProfile(projFile);
-    
+
     try {
       for (SEList exp : forest) evaluateExpression(exp, pfir);
     }
@@ -124,7 +128,7 @@ public class ProjectFileParser {
       List<DocFile> dfList = exp.getRest().accept(docFileListVisitor);
       pfir.setSourceFiles(dfList);
     }
-    if (name.compareToIgnoreCase("proj-root") == 0) {
+    else if (name.compareToIgnoreCase("proj-root") == 0) {
       List<File> fList = exp.getRest().accept(fileListVisitor);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple source roots");
       else if (fList.size() == 0) pfir.setProjectRoot(null);
@@ -177,6 +181,14 @@ public class ProjectFileParser {
       Integer i = exp.getRest().accept(NumberVisitor.ONLY);
       pfir.setCreateJarFlags(i);
     }
+    else if (name.compareToIgnoreCase("breakpoints") == 0) {
+       List<DebugBreakpointData> bpList = exp.getRest().accept(breakpointListVisitor);
+       pfir.setBreakpoints(bpList);
+    }
+    else if (name.compareToIgnoreCase("watches") == 0) {
+      List<DebugWatchData> sList = exp.getRest().accept(WatchListVisitor.ONLY);
+      pfir.setWatches(sList);
+    }
   } 
   
   /** Parses out the labeled node (a non-empty list) into a DocFile. The node must have the "file" label on it.
@@ -204,6 +216,19 @@ public class ProjectFileParser {
         String name = l.accept(NameVisitor.ONLY);
         name = edu.rice.cs.util.StringOps.replace(name,"\\","/");
         return name;
+      }
+    }
+    else throw new PrivateProjectException("expected name tag, found string");
+  }
+  
+  private int parseInt(SExp s) {
+    if (s instanceof Cons) {
+      SEList l = ((Cons)s).getRest();
+      if (l == Empty.ONLY)
+        throw new PrivateProjectException("expected integer, but nothing found");
+      else {
+        int i = l.accept(NumberVisitor.ONLY);
+        return i;
       }
     }
     else throw new PrivateProjectException("expected name tag, found string");
@@ -373,11 +398,102 @@ public class ProjectFileParser {
       return n.intValue();
     }
     public Integer forTextAtom(TextAtom t) {
-      throw new PrivateProjectException("Found a string, expected an integer");
+      throw new PrivateProjectException("Found a string '"+t+"', expected an integer");
+    }
+  };
+
+  /** Parses out a list of watch names into a list of watches. */
+  private static class WatchListVisitor implements SEListVisitor<List<DebugWatchData>> {
+    public static final WatchListVisitor ONLY = new WatchListVisitor();
+    private WatchListVisitor() { }
+    
+    public List<DebugWatchData> forEmpty(Empty e) { return new ArrayList<DebugWatchData>(); }
+    public List<DebugWatchData> forCons(Cons c) {
+      List<DebugWatchData> list = c.getRest().accept(this);
+      SExp first = c.getFirst();
+      String name = first.accept(NameVisitor.ONLY); 
+      if (name.compareToIgnoreCase("watch") == 0) {
+        String tmp = ProjectFileParser.ONLY.parseStringNode(c.getFirst());
+        list.add(0,new DebugWatchData(tmp)); // add to the end
+      }
+      return list;
+    }
+  };
+  
+  // === breakpoints ===
+  
+  /** Parses out a list of breakpoint nodes. */
+  private class BreakpointListVisitor implements SEListVisitor<List<DebugBreakpointData>> {
+    public List<DebugBreakpointData> forEmpty(Empty e) { return new ArrayList<DebugBreakpointData>(); }
+    public List<DebugBreakpointData> forCons(Cons c) {
+      List<DebugBreakpointData> list = c.getRest().accept(this);
+      DebugBreakpointData tmp = (DebugBreakpointData) ProjectFileParser.ONLY.parseBreakpoint(c.getFirst(), _parentDir);
+      list.add(0, tmp); // add to the end
+      return list;
     }
   };
     
-
+  /** Parses out the labeled node (a non-empty list) into a breakpoint. The node must have the "breakpoint" label on it.
+   *  @param s the non-empty list expression
+   *  @return the breakpoint described by this s-expression
+   */
+  DebugBreakpointData parseBreakpoint(SExp s, String parentDir) {
+    String name = s.accept(NameVisitor.ONLY);
+    if (name.compareToIgnoreCase("breakpoint") != 0)
+      throw new PrivateProjectException("Expected a breakpoint tag, found: " + name);
+    if (! (s instanceof Cons))
+      throw new PrivateProjectException("Expected a labeled node, found a label: " + name);
+    SEList c = ((Cons)s).getRest(); // get parameter list
+    
+    BreakpointPropertyVisitor v = new BreakpointPropertyVisitor(parentDir);
+    return c.accept(v);
+  }
+  
+  
+  /** Traverses the list of expressions found after "breakpoint" tag and returns the Breakpoint described by those properties. */
+  private static class BreakpointPropertyVisitor implements SEListVisitor<DebugBreakpointData> {
+    private String fname = null;
+    private Integer offset = null;
+    private Integer lineNumber = null;
+    private boolean enabled = false;
+    
+    private String _parentDir;
+    public BreakpointPropertyVisitor(String parentDir) { _parentDir = parentDir; }
+    
+    public DebugBreakpointData forCons(Cons c) {
+      String name = c.getFirst().accept(NameVisitor.ONLY); 
+      if (name.compareToIgnoreCase("name") == 0) { fname = ProjectFileParser.ONLY.parseFileName(c.getFirst()); }
+      else if (name.compareToIgnoreCase("offset") == 0) { offset = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
+      else if (name.compareToIgnoreCase("line") == 0) { lineNumber = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
+      else if (name.compareToIgnoreCase("enabled") == 0) { enabled = true; }
+        
+      return c.getRest().accept(this);
+    }
+    
+    public DebugBreakpointData forEmpty(Empty c) {
+      if ((fname == null) || (offset == null) || (lineNumber == null)) {
+        throw new PrivateProjectException("Breakpoint information incomplete, need name, offset and line tags");
+      }
+      if (_parentDir == null || new File(fname).isAbsolute()) {
+        final File f = new File(fname);
+        return new DebugBreakpointData() {
+          public File getFile() { return f; }
+          public int getOffset() { return offset; }
+          public int getLineNumber() { return lineNumber; }
+          public boolean isEnabled() { return enabled; }
+        };
+      }
+      else {
+        final File f = new File(_parentDir, fname);
+        return new DebugBreakpointData() {
+          public File getFile() { return f; }
+          public int getOffset() { return offset; }
+          public int getLineNumber() { return lineNumber; }
+          public boolean isEnabled() { return enabled; }
+        };
+      }
+    }
+  }
   
   private static class PrivateProjectException extends RuntimeException{
     public PrivateProjectException(String message) {

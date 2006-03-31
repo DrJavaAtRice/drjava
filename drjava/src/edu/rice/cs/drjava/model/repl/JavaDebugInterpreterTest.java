@@ -254,7 +254,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
 
     // Set one breakpoint
     int index = MONKEY_STUFF.indexOf("System.out.println");
-    _debugger.toggleBreakpoint(doc, index, 11);
+    _debugger.toggleBreakpoint(doc, index, 11, true);
 
     // Run the main() method, hitting the breakpoint
     synchronized(_notifierLock) {
@@ -314,7 +314,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     debugListener.assertBreakpointRemovedCount(1);  //fires once
 
     // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
+    if (printMessages) printStream.println("Shutting down...");
     synchronized(_notifierLock) {
       _debugger.shutdown();
       _setPendingNotifies(1);  // shutdown
@@ -322,7 +322,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) System.out.println("Shut down.");
+    if (printMessages) printStream.println("Shut down.");
     _debugger.removeListener(debugListener);
   }
 
@@ -344,7 +344,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
 
     // Set one breakpoint
     int index = MONKEY_STATIC_STUFF.indexOf("System.out.println");
-    _debugger.toggleBreakpoint(doc,index,11);
+    _debugger.toggleBreakpoint(doc,index,11,true);
 
     // Run the main() method, hitting both breakpoints in different threads
     synchronized(_notifierLock) {
@@ -405,7 +405,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
                  interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.getNegativeTwo()"));
 
     // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
+    if (printMessages) printStream.println("Shutting down...");
 
     synchronized(_notifierLock) {
       _debugger.shutdown();
@@ -414,7 +414,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) System.out.println("Shut down.");
+    if (printMessages) printStream.println("Shut down.");
 
     _debugger.removeListener(debugListener);
   }
@@ -434,9 +434,9 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
 
     // Set one breakpoint
     int index = MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;");
-    _debugger.toggleBreakpoint(doc,index,10);
+    _debugger.toggleBreakpoint(doc,index,10,true);
     index = MONKEY_WITH_INNER_CLASS.indexOf("System.out.println(\"localVar = \" + localVar);");
-    _debugger.toggleBreakpoint(doc,index,32);
+    _debugger.toggleBreakpoint(doc,index,32,true);
 
     // Run the main() method, hitting both breakpoints in different threads
     synchronized(_notifierLock) {
@@ -468,7 +468,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
 
     // Shutdown the debugger
     if (printMessages) {
-      System.out.println("Shutting down...");
+      printStream.println("Shutting down...");
     }
     synchronized(_notifierLock) {
       _debugger.shutdown();
@@ -478,7 +478,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) {
-      System.out.println("Shut down.");
+      printStream.println("Shut down.");
     }
     _debugger.removeListener(debugListener);
   }

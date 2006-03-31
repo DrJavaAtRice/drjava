@@ -141,9 +141,10 @@ public class NoDebuggerAvailable implements Debugger {
    *  @param doc Document in which to set or remove the breakpoint
    *  @param offset Start offset on the line to set the breakpoint
    *  @param lineNum Line on which to set or remove the breakpoint
+   *  @param enabled true if this breakpoint should be enabled
    */
   public void toggleBreakpoint(OpenDefinitionsDocument doc,
-                               int offset, int lineNum)
+                               int offset, int lineNum, boolean enabled)
     throws DebugException
   {
     throw new IllegalStateException("No debugger is available");

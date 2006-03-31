@@ -71,6 +71,9 @@ import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.debug.JPDADebugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+import edu.rice.cs.drjava.model.debug.DebugListener;
+import edu.rice.cs.drjava.model.debug.DebugWatchData;
+import edu.rice.cs.drjava.model.debug.DebugThreadData;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
@@ -890,6 +893,33 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     try {
       _debugger = new JPDADebugger(this);
       _jvm.setDebugModel((JPDADebugger) _debugger);
+      
+      // add listener to set the project file to "changed" when a breakpoint or watch is added, removed, or changed
+      _debugger.addListener(new DebugListener() {
+        public void debuggerStarted() { }
+        public void debuggerShutdown() { }
+        public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
+        public void breakpointSet(final Breakpoint bp) {
+          setProjectChanged(true);
+        }
+        public void breakpointReached(final Breakpoint bp) { }
+        public void breakpointRemoved(final Breakpoint bp) {
+          setProjectChanged(true);
+        }    
+        public void watchSet(final DebugWatchData w) {
+          setProjectChanged(true);
+        }
+        public void watchRemoved(final DebugWatchData w) {
+          setProjectChanged(true);
+        }    
+        public void stepRequested() { }
+        public void currThreadSuspended() { }
+        public void currThreadResumed() { }
+        public void threadStarted() { }
+        public void currThreadDied() { }
+        public void nonCurrThreadDied() {  }
+        public void currThreadSet(DebugThreadData thread) { }
+      });
     }
     catch( NoClassDefFoundError ncdfe ) {
       // JPDA not available, so we won't use it.

@@ -81,6 +81,16 @@ public interface DebugListener {
    *  @param bp the breakpoint
    */
   public void breakpointRemoved(Breakpoint bp);
+
+  /** Called when a watch is set.  Must be executed in event thread.
+   *  @param w the watch
+   */
+  public void watchSet(DebugWatchData w);
+  
+  /** Called when a watch is removed.  Must be executed in event thread.
+   *  @param w the watch
+   */
+  public void watchRemoved(DebugWatchData w);
   
   /** Called when a step is requested on the current thread.  Must be executed in event thread. */
   public void stepRequested();

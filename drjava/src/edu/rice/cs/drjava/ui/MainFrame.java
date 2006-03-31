@@ -342,7 +342,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) { _newProject(); }
   };
   
-  private Action _runProjectAction = new AbstractAction("Run Main Document") {
+  private AbstractAction _runProjectAction = new AbstractAction("Run Main Document") {
     public void actionPerformed(ActionEvent ae) { _runProject(); }
   };
   
@@ -505,7 +505,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Tests all the files in a folder. */
-  private Action _junitFolderAction = new AbstractAction("Test Folder") {
+  private AbstractAction _junitFolderAction = new AbstractAction("Test Folder") {
     public void actionPerformed(ActionEvent ae) { _junitFolder(); }
   };
   
@@ -639,7 +639,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Compiles all the project. */
-  private Action _compileProjectAction = new AbstractAction("Compile Project") {
+  private AbstractAction _compileProjectAction = new AbstractAction("Compile Project") {
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -649,7 +649,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Compiles all documents in the navigators active group. */
-  private Action _compileFolderAction = new AbstractAction("Compile Folder") {
+  private AbstractAction _compileFolderAction = new AbstractAction("Compile Folder") {
     public void actionPerformed(ActionEvent ae) { 
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -659,7 +659,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Compiles all open documents. */
-  private Action _compileAllAction = new AbstractAction("Compile All Documents") {
+  private AbstractAction _compileAllAction = new AbstractAction("Compile All Documents") {
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -669,17 +669,17 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** cleans the build directory */
-  private Action _cleanAction = new AbstractAction("Clean Build Directory") {
+  private AbstractAction _cleanAction = new AbstractAction("Clean Build Directory") {
     public void actionPerformed(ActionEvent ae) { _clean(); }
   };
   
   /** Finds and runs the main method of the current document, if it exists. */
-  private Action _runAction = new AbstractAction("Run Document's Main Method") {
+  private AbstractAction _runAction = new AbstractAction("Run Document's Main Method") {
     public void actionPerformed(ActionEvent ae) { _runMain(); }
   };
   
   /** Runs JUnit on the document in the definitions pane. */
-  private Action _junitAction = new AbstractAction("Test Current Document") {
+  private AbstractAction _junitAction = new AbstractAction("Test Current Document") {
     public void actionPerformed(ActionEvent ae) { 
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -688,7 +688,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Runs JUnit over all open JUnit tests. */
-  private Action _junitAllAction = new AbstractAction("Test All Documents") {
+  private AbstractAction _junitAllAction = new AbstractAction("Test All Documents") {
     public void actionPerformed(ActionEvent e) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -699,7 +699,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Runs JUnit over all open JUnit tests in the project directory. */
-  private Action _junitOpenProjectFilesAction = new AbstractAction("Test Project") {
+  private AbstractAction _junitOpenProjectFilesAction = new AbstractAction("Test Project") {
     public void actionPerformed(ActionEvent e) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -1138,7 +1138,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _gotoFileUnderCursor();
     }
   };
-  
+
   /** Reset the position of the "Complete File" dialog. */
   public void resetCompleteFileDialogPosition() {
     initCompleteFileDialog();
@@ -1211,7 +1211,6 @@ public class MainFrame extends JFrame implements OptionConstants {
             finally { odd.releaseWriteLock(); }
           }
           hourglassOff();
-          System.out.println("end of dialog ok");
           return null;
         }
       };
@@ -1297,8 +1296,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         pim.setMask(mask);
       }
       
-      System.out.println("mask is "+mask);
-      
       if (pim.getMatchingItems().size() == 1) {
         if (pim.getCurrentItem() != null) {
           // exactly one match, auto-complete
@@ -1331,7 +1328,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
     finally { 
-      System.out.println("_completeFileUnderCursor finally");
       if (uniqueMatch) { odd.releaseWriteLock(); }
     }
   }
@@ -1342,7 +1338,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _completeFileUnderCursor();
     }
   };
-  
+
   /** Indents the current selection. */
   private Action _indentLinesAction = new AbstractAction("Indent Line(s)") {
     public void actionPerformed(ActionEvent ae) {
@@ -1551,12 +1547,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  private Action _projectPropertiesAction = new AbstractAction("Project Properties") {
+  private AbstractAction _projectPropertiesAction = new AbstractAction("Project Properties") {
     public void actionPerformed(ActionEvent ae) { _editProject(); }
   };
     
-  
-  
   /** Enables the debugger */
   private Action _toggleDebuggerAction = new AbstractAction("Debug Mode") {
     public void actionPerformed(ActionEvent ae) { 
@@ -3590,7 +3584,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _junit() {
     new Thread("Run JUnit on Current Document") {
       public void run() {
-        _dissableJUnitActions();
+        _disableJUnitActions();
         hourglassOn();  // turned off in JUnitStarted/NonTestCase  
         try { _model.getActiveDocument().startJUnit(); }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
@@ -3613,7 +3607,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new Thread("Run JUnit on specified folder") {
       public void run() { 
         INavigatorItem n;
-        _dissableJUnitActions();
+        _disableJUnitActions();
         hourglassOn();  // turned off when JUnitStarted event is fired
         if (_model.getDocumentNavigator().isGroupSelected()) {
           Enumeration<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
@@ -3635,7 +3629,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _junitAll() {
     new Thread("Running Junit Tests") {
       public void run() {
-        _dissableJUnitActions();
+        _disableJUnitActions();
         hourglassOn();  // turned off in JUnitStarted/NonTestCase event
         try {
           if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
@@ -3647,19 +3641,37 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   /* These are used to save the state of the enabled property of the actions dissabled during junit testing. */
-  private boolean _compileProjectActionEnabled;
-  private boolean _compileAllActionEnabled;
-  //private boolean _compileOpenProjectActionEnabled;
-  private boolean _compileFolderActionEnabled;
-  private boolean _junitFolderActionEnabled;
-  private boolean _junitAllActionEnabled;
-  private boolean _junitActionEnabled;
-  private boolean _junitOpenProjectFilesActionEnabled;
-  //private boolean _junitProjectActionEnabled;
-  private boolean _cleanActionEnabled;
-  private boolean _projectPropertiesActionEnabled;
-  private boolean _runProjectActionEnabled;
-  private boolean _runActionEnabled;
+  private DecoratedAction _junit_compileProjectDecoratedAction;
+  private DecoratedAction _junit_compileAllDecoratedAction;
+  private DecoratedAction _junit_compileFolderDecoratedAction;
+  private DecoratedAction _junit_junitFolderDecoratedAction;
+  private DecoratedAction _junit_junitAllDecoratedAction;
+  private DecoratedAction _junit_junitDecoratedAction;
+  private DecoratedAction _junit_junitOpenProjectFilesDecoratedAction;
+  private DecoratedAction _junit_cleanDecoratedAction;
+  private DecoratedAction _junit_projectPropertiesDecoratedAction;
+  private DecoratedAction _junit_runProjectDecoratedAction;
+  private DecoratedAction _junit_runDecoratedAction;
+  
+  /** An AbstractAction that prevents changes to the decoree's enabled flag. */
+  private class DecoratedAction extends AbstractAction {
+    /** The AbstractAction that is being decorated. */
+    AbstractAction _decoree;
+    /** The "shallow" enabled flag. */
+    boolean _shallowEnabled;
+    /** Create an action decorating the specified action, then sets the decoree's enabled flag to b. */
+    public DecoratedAction(AbstractAction a, boolean b) {
+      super((String)a.getValue("Name"));
+      _decoree = a;
+      _shallowEnabled = _decoree.isEnabled();
+      _decoree.setEnabled(b);
+    }
+    public void actionPerformed(ActionEvent ae) { _decoree.actionPerformed(ae); }
+    /** Do not change the decoree's enabled flag, but cache this value in the shallow enabled flag. */
+    public void setEnabled(boolean b) { _shallowEnabled = b; }
+    /** Write the shallow enabled flag to the decoree, then return the decoree */
+    public AbstractAction getUpdatedDecoree() { _decoree.setEnabled(_shallowEnabled); return _decoree; }
+  }
   
   /**
    * Sets the enabled status to false of all actions that 
@@ -3668,49 +3680,66 @@ public class MainFrame extends JFrame implements OptionConstants {
    * each action so that when the test is finished, any action
    * dissabled before the test will remain dissabled afterward.
    */
-  private void _dissableJUnitActions() {
-    _compileProjectActionEnabled = _compileProjectAction.isEnabled();
-    _compileAllActionEnabled = _compileAllAction.isEnabled();
-    //_compileOpenProjectActionEnabled = _compileOpenProjectAction.isEnabled();
-    _compileFolderActionEnabled = _compileFolderAction.isEnabled();
-    _junitFolderActionEnabled = _junitFolderAction.isEnabled();
-    _junitAllActionEnabled = _junitAllAction.isEnabled();
-    _junitActionEnabled = _junitAction.isEnabled();
-    _junitOpenProjectFilesActionEnabled = _junitOpenProjectFilesAction.isEnabled();
-    //_junitProjectActionEnabled = _junitProjectAction.isEnabled();
-    _cleanActionEnabled = _cleanAction.isEnabled();
-    _projectPropertiesActionEnabled = _projectPropertiesAction.isEnabled();
-    _runProjectActionEnabled = _runProjectAction.isEnabled();
-    _runActionEnabled = _runAction.isEnabled();
+  private void _disableJUnitActions() {
+    // _compileProjectActionEnabled = _compileProjectAction.isEnabled();
+    // _compileAllActionEnabled = _compileAllAction.isEnabled();
+    //_compileFolderActionEnabled = _compileFolderAction.isEnabled();
+    //_junitFolderActionEnabled = _junitFolderAction.isEnabled();
+    //_junitAllActionEnabled = _junitAllAction.isEnabled();
+    //_junitActionEnabled = _junitAction.isEnabled();
+    //_junitOpenProjectFilesActionEnabled = _junitOpenProjectFilesAction.isEnabled();
+    //_cleanActionEnabled = _cleanAction.isEnabled();
+    //_projectPropertiesActionEnabled = _projectPropertiesAction.isEnabled();
+    //_runProjectActionEnabled = _runProjectAction.isEnabled();
     
-    _compileProjectAction.setEnabled(false);
-    _compileAllAction.setEnabled(false);
-    //_compileOpenProjectAction.setEnabled(false);
-    _compileFolderAction.setEnabled(false);
-    _junitFolderAction.setEnabled(false);
-    _junitAllAction.setEnabled(false);
-    _junitAction.setEnabled(false);
-    _junitOpenProjectFilesAction.setEnabled(false);
-    //_junitProjectAction.setEnabled(false);
-    _cleanAction.setEnabled(false);
-    _projectPropertiesAction.setEnabled(false);
-    _runProjectAction.setEnabled(false);
-    _runAction.setEnabled(false);
+    // _compileProjectAction.setEnabled(false);
+    //_compileAllAction.setEnabled(false);
+    //_compileFolderAction.setEnabled(false);
+    //_junitFolderAction.setEnabled(false);
+    //_junitAllAction.setEnabled(false);
+    //_junitAction.setEnabled(false);
+    //_junitOpenProjectFilesAction.setEnabled(false);
+    //_cleanAction.setEnabled(false);
+    //_projectPropertiesAction.setEnabled(false);
+    //_runProjectAction.setEnabled(false);
+
+    _compileProjectAction = _junit_compileProjectDecoratedAction = new DecoratedAction(_compileProjectAction, false);
+    _compileAllAction = _junit_compileAllDecoratedAction = new DecoratedAction(_compileAllAction, false);
+    _compileFolderAction = _junit_compileFolderDecoratedAction = new DecoratedAction(_compileFolderAction, false);
+    _junitFolderAction = _junit_junitFolderDecoratedAction = new DecoratedAction(_junitFolderAction, false);
+    _junitAllAction = _junit_junitAllDecoratedAction = new DecoratedAction(_junitAllAction, false);
+    _junitAction = _junit_junitDecoratedAction = new DecoratedAction(_junitAction, false);
+    _junitOpenProjectFilesAction = _junit_junitOpenProjectFilesDecoratedAction = new DecoratedAction(_junitOpenProjectFilesAction, false);
+    _cleanAction = _junit_cleanDecoratedAction = new DecoratedAction(_cleanAction, false);
+    _projectPropertiesAction = _junit_projectPropertiesDecoratedAction = new DecoratedAction(_projectPropertiesAction, false);
+    _runProjectAction = _junit_runProjectDecoratedAction = new DecoratedAction(_runProjectAction, false);
+    _runAction = _junit_runDecoratedAction = new DecoratedAction(_runAction, false);
   }
   private void _restoreJUnitActionsEnabled() {
-    _compileProjectAction.setEnabled(_compileProjectActionEnabled);
-    _compileAllAction.setEnabled(_compileAllActionEnabled);
-    //_compileOpenProjectAction.setEnabled(_compileOpenProjectActionEnabled);
-    _compileFolderAction.setEnabled(_compileFolderActionEnabled);
-    _junitFolderAction.setEnabled(_junitFolderActionEnabled);
-    _junitAllAction.setEnabled(_junitAllActionEnabled);
-    _junitAction.setEnabled(_junitActionEnabled);
-    _junitOpenProjectFilesAction.setEnabled(_junitOpenProjectFilesActionEnabled);
-    //_junitProjectAction.setEnabled(_junitProjectActionEnabled);
-    _cleanAction.setEnabled(_cleanActionEnabled);
-    _projectPropertiesAction.setEnabled(_projectPropertiesActionEnabled);
-    _runProjectAction.setEnabled(_runProjectActionEnabled);
-    _runAction.setEnabled(_runActionEnabled);
+//    _compileProjectAction.setEnabled(_compileProjectActionEnabled);
+//    _compileAllAction.setEnabled(_compileAllActionEnabled);
+//    //_compileOpenProjectAction.setEnabled(_compileOpenProjectActionEnabled);
+//    _compileFolderAction.setEnabled(_compileFolderActionEnabled);
+//    _junitFolderAction.setEnabled(_junitFolderActionEnabled);
+//    _junitAllAction.setEnabled(_junitAllActionEnabled);
+//    _junitAction.setEnabled(_junitActionEnabled);
+//    _junitOpenProjectFilesAction.setEnabled(_junitOpenProjectFilesActionEnabled);
+//    //_junitProjectAction.setEnabled(_junitProjectActionEnabled);
+//    _cleanAction.setEnabled(_cleanActionEnabled);
+//    _projectPropertiesAction.setEnabled(_projectPropertiesActionEnabled);
+//    _runProjectAction.setEnabled(_runProjectActionEnabled);
+    
+    _compileProjectAction = _junit_compileProjectDecoratedAction.getUpdatedDecoree();
+    _compileAllAction = _junit_compileAllDecoratedAction.getUpdatedDecoree();
+    _compileFolderAction = _junit_compileFolderDecoratedAction.getUpdatedDecoree();
+    _junitFolderAction = _junit_junitFolderDecoratedAction.getUpdatedDecoree();
+    _junitAllAction = _junit_junitAllDecoratedAction.getUpdatedDecoree();
+    _junitAction = _junit_junitDecoratedAction.getUpdatedDecoree();
+    _junitOpenProjectFilesAction = _junit_junitOpenProjectFilesDecoratedAction.getUpdatedDecoree();
+    _cleanAction = _junit_cleanDecoratedAction.getUpdatedDecoree();
+    _projectPropertiesAction = _junit_projectPropertiesDecoratedAction.getUpdatedDecoree();
+    _runProjectAction = _junit_runProjectDecoratedAction.getUpdatedDecoree();
+    _runAction = _junit_runDecoratedAction.getUpdatedDecoree();
   }
   
 //  /**
@@ -3802,7 +3831,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       try {
         Debugger debugger = _model.getDebugger();
-        debugger.toggleBreakpoint(doc, _currentDefPane.getCaretPosition(), _currentDefPane.getCurrentLine());
+        debugger.toggleBreakpoint(doc, _currentDefPane.getCaretPosition(), _currentDefPane.getCurrentLine(), true);
       }
       catch (DebugException de) {
         _showError(de, "Debugger Error", "Could not set a breakpoint at the current line.");
@@ -5499,10 +5528,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Revalidate the line numers, i.e. also redraw the ones not currently visible. */
   public void revalidateLineNums() {
     if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
-      LineEnumRule ler = (LineEnumRule)_defScrollPanes.get(_model.getActiveDocument()).getRowHeader().getView();
-      if (ler.getCachedLastLine() != _model.getActiveDocument().getNumberOfLines()) {
-        ler.revalidate();
-        _repaintLineNums();
+      JScrollPane sp = _defScrollPanes.get(_model.getActiveDocument());
+      if (sp!=null) {
+        LineEnumRule ler = (LineEnumRule)sp.getRowHeader().getView();
+        if (ler.getCachedLastLine() != _model.getActiveDocument().getNumberOfLines()) {
+          ler.revalidate();
+          _repaintLineNums();
+        }
       }
     }
   }
@@ -5783,6 +5815,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (highlight != null) highlight.remove();
       _breakpointHighlights.remove(bp);
     }
+    
+    public void watchSet(final DebugWatchData w) { }
+    public void watchRemoved(final DebugWatchData w) { }
     
     /** Called when a step is requested on the current thread.  Must be executed in event thread. */
     public void stepRequested() {
@@ -6076,8 +6111,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           
           try { showTab(_junitErrorPanel);
             _junitErrorPanel.setJUnitInProgress();
-            _junitAction.setEnabled(false);
-            _junitAllAction.setEnabled(false);
+            // _junitAction.setEnabled(false);
+            // _junitAllAction.setEnabled(false);
           }
           finally { hourglassOff(); }  
         }
@@ -6094,8 +6129,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 //          hourglassOn();
           showTab(_junitErrorPanel);
           _junitErrorPanel.setJUnitInProgress();
-          _junitAction.setEnabled(false);
-          _junitAllAction.setEnabled(false);
+          // _junitAction.setEnabled(false);
+          // _junitAllAction.setEnabled(false);
         } // no hourglassOff here because junitClasses does not perform hourglassOn
       });
     }

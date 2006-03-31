@@ -283,7 +283,8 @@ public class EventHandlerThread extends Thread {
     synchronized(_debugger) {
       _connected = false;
       if (_debugger.isReady()) {
-        if (_debugger.hasSuspendedThreads()) _debugger.currThreadDied();
+        // caused crash if "Run Document's Main Method" was invoked while debugging
+        // if (_debugger.hasSuspendedThreads()) _debugger.currThreadDied();
         _debugger.shutdown();
       }
     }

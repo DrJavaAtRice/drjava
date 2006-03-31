@@ -140,8 +140,9 @@ public interface Debugger {
    *  @param doc Document in which to set or remove the breakpoint
    *  @param offset Start offset on the line to set the breakpoint
    *  @param lineNum Line on which to set or remove the breakpoint
+   *  @param enabled true if this breakpoint should be enabled
    */
-  public void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum) throws DebugException;
+  public void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean enabled) throws DebugException;
 
   /** Sets a breakpoint.
    *  @param breakpoint The new breakpoint to set

@@ -45,6 +45,13 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
   protected final boolean printEvents = false;
   protected final boolean printMessages = false;
+  protected PrintStream printStream = System.out; 
+  /*
+  {
+    try { printStream = new PrintStream(new FileOutputStream("log.txt", true), true); }
+    catch(java.io.IOException ioe) { printStream = System.out; }
+  }
+  */
 
   protected int _pendingNotifies = 0;
   protected Object _notifierLock = new Object();
@@ -251,7 +258,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
    */
   protected void _setPendingNotifies(int n) throws InterruptedException {
     synchronized(_notifierLock) {
-      if (printMessages) System.out.println("waiting for " + n + " notifications...");
+      if (printMessages) printStream.println("waiting for " + n + " notifications...");
       _pendingNotifies = n;
     }
   }
@@ -259,10 +266,10 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   /** Notifies _notifierLock if the after the notify count has expired. See _setPendingNotifies. */
   protected void _notifyLock() {
     synchronized(_notifierLock) {
-      if (printMessages) System.out.println("notified");
       _pendingNotifies--;
+      if (printMessages) printStream.println("notified, count = "+_pendingNotifies);     
       if (_pendingNotifies == 0) {
-        if (printMessages) System.out.println("Notify count reached 0 -- notifying!");
+        if (printMessages) printStream.println("Notify count reached 0 -- notifying!");
         _notifierLock.notifyAll();  // can accommodate multiple threads waiting on this event (NOT USED?)
       }
       if (_pendingNotifies < 0) fail("Notified too many times");
@@ -305,13 +312,13 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _debugger.removeAllBreakpoints();
 
     // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
+    if (printMessages) printStream.println("Shutting down...");
     synchronized(_notifierLock) {
       _setPendingNotifies(1);  // shutdown
       _debugger.shutdown();
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
-    if (printMessages) System.out.println("Shut down.");
+    if (printMessages) printStream.println("Shut down.");
   }
 
   /** Cleanly shuts down the debugger, waiting for a suspended interaction to complete. */
@@ -319,7 +326,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _debugger.removeAllBreakpoints();
 
     // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
+    if (printMessages) printStream.println("Shutting down...");
     InterpretListener interpretListener = new InterpretListener() {
        public void interpreterChanged(boolean inProgress) {
          // Don't notify: happens in the same thread
@@ -336,7 +343,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     interpretListener.assertInterpreterChangedCount(1);  // fires (don't wait)
     _model.removeListener(interpretListener);
 
-    if (printMessages) System.out.println("Shut down.");
+    if (printMessages) printStream.println("Shut down.");
   }
 
   /** Sets the current debugger thread to the specified thread t.*/
@@ -394,6 +401,8 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     protected int breakpointSetCount = 0;
     protected int breakpointReachedCount = 0;
     protected int breakpointRemovedCount = 0;
+    protected int watchSetCount = 0;
+    protected int watchRemovedCount = 0;
     protected int stepRequestedCount = 0;
     protected int currThreadSuspendedCount = 0;
     protected int currThreadResumedCount = 0;
@@ -424,6 +433,14 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
     public void assertBreakpointRemovedCount(int i) {
       assertEquals("number of times breakpointRemoved fired", i, breakpointRemovedCount);
+    }
+
+    public void assertWatchSetCount(int i) {
+      assertEquals("number of times watchSet fired", i, watchSetCount);
+    }
+
+    public void assertWatchRemovedCount(int i) {
+      assertEquals("number of times watchRemoved fired", i, watchRemovedCount);
     }
 
     public void assertStepRequestedCount(int i) {
@@ -473,6 +490,10 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
     public void breakpointRemoved(Breakpoint bp) { fail("breakpointRemoved fired unexpectedly"); }
 
+    public void watchSet(DebugWatchData w) { fail("watchSet fired unexpectedly"); }
+
+    public void watchRemoved(DebugWatchData w) { fail("watchRemoved fired unexpectedly"); }
+
     public void stepRequested() { fail("stepRequested fired unexpectedly"); }
 
     public void currThreadSuspended() { fail("currThreadSuspended fired unexpectedly"); }
@@ -496,7 +517,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
         debuggerStartedCount++;
-        if (printEvents) System.out.println("debuggerStarted " + debuggerStartedCount);
+        if (printEvents) printStream.println("debuggerStarted " + debuggerStartedCount);
         _notifyLock();
       }
     }
@@ -504,7 +525,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
         debuggerShutdownCount++;
-        if (printEvents) System.out.println("debuggerShutdown " + debuggerShutdownCount);
+        if (printEvents) printStream.println("debuggerShutdown " + debuggerShutdownCount);
         _notifyLock();
       }
     }
@@ -521,39 +542,39 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
         breakpointReachedCount++;
-        if (printEvents) System.out.println("breakpointReached " + breakpointReachedCount);
+        if (printEvents) printStream.println("breakpointReached " + breakpointReachedCount);
         _notifyLock();
       }
     }
     public void breakpointRemoved(Breakpoint bp) {
       // Manager's thread: test shouldn't wait
       breakpointRemovedCount++;
-      if (printEvents) System.out.println("breakpointRemoved " + breakpointRemovedCount);
+      if (printEvents) printStream.println("breakpointRemoved " + breakpointRemovedCount);
     }
 
     public void currThreadSuspended() {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
         currThreadSuspendedCount++;
-        if (printEvents) System.out.println("threadSuspended " + currThreadSuspendedCount);
+        if (printEvents) printStream.println("threadSuspended " + currThreadSuspendedCount);
         _notifyLock();
       }
     }
     public void currThreadResumed() {
       // Manager's thread: test shouldn't wait
       currThreadResumedCount++;
-      if (printEvents) System.out.println("threadResumed " + currThreadResumedCount);
+      if (printEvents) printStream.println("threadResumed " + currThreadResumedCount);
     }
     public void currThreadSet(DebugThreadData dtd) {
       // Manager's thread: test shouldn't wait
       currThreadSetCount++;
-      if (printEvents) System.out.println("threadSet " + currThreadSetCount);
+      if (printEvents) printStream.println("threadSet " + currThreadSetCount);
     }
     public void currThreadDied() {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
         currThreadDiedCount++;
-        if (printEvents) System.out.println("currThreadDied " + currThreadDiedCount);
+        if (printEvents) printStream.println("currThreadDied " + currThreadDiedCount);
         _notifyLock();
       }
     }
@@ -561,9 +582,19 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
         threadLocationUpdatedCount++;
-        if (printEvents) System.out.println("threadUpdated " + threadLocationUpdatedCount);
+        if (printEvents) printStream.println("threadUpdated " + threadLocationUpdatedCount);
         _notifyLock();
       }
+    }
+    public void watchSet(DebugWatchData w) {
+      // Manager's thread: test shouldn't wait
+      watchSetCount++;
+      if (printEvents) printStream.println("watchSet " + watchSetCount);
+    }
+    public void watchRemoved(DebugWatchData w) {
+      // Manager's thread: test shouldn't wait
+      watchRemovedCount++;
+      if (printEvents) printStream.println("watchRemoved " + watchRemovedCount);
     }
   }
 
@@ -572,7 +603,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     public void stepRequested() {
       // Manager's thread: test shouldn't wait
       stepRequestedCount++;
-      if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
+      if (printEvents) printStream.println("stepRequested " + stepRequestedCount);
     }
   }
 
@@ -582,14 +613,14 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     public void interactionStarted() {
       synchronized(_notifierLock) {
         interactionStartCount++;
-        if (printEvents) System.out.println("interactionStarted " + interactionStartCount);
+        if (printEvents) printStream.println("interactionStarted " + interactionStartCount);
         _notifyLock();
       }
     }
     public void interactionEnded() {
       synchronized(_notifierLock) {
         interactionEndCount++;
-        if (printEvents) System.out.println("interactionEnded " + interactionEndCount);
+        if (printEvents) printStream.println("interactionEnded " + interactionEndCount);
         _notifyLock();
       }
     }
@@ -597,7 +628,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     public void interpreterChanged(boolean inProgress) {
       synchronized(_notifierLock) {
         interpreterChangedCount++;
-        if (printEvents) System.out.println("interpreterChanged " + interpreterChangedCount);
+        if (printEvents) printStream.println("interpreterChanged " + interpreterChangedCount);
         _notifyLock();
       }
     }

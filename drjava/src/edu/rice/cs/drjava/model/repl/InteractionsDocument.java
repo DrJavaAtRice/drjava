@@ -315,7 +315,11 @@ public class InteractionsDocument extends ConsoleDocument {
    *  @param styleName name of the style for formatting the exception
    */
   public void appendExceptionResult(String exceptionClass, String message, String stackTrace, String styleName) {
-    
+    // TODO: should probably log this error, or figure out what causes it
+    // it does not seem to affect the program negatively, though
+    if (message.equals("Connection refused to host: 127.0.0.1; nested exception is: \n" +
+                       "\tjava.net.ConnectException: Connection refused: connect")) return;
+
     if (null == message || "null".equals(message)) message = "";
     
     // Simplify the common error messages

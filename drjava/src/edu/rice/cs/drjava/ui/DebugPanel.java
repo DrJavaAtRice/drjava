@@ -585,6 +585,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
     /** Called when a breakpoint is removed from a document. */
     public void breakpointRemoved(final Breakpoint bp) { }
 
+    public void watchSet(final DebugWatchData w) { }
+    public void watchRemoved(final DebugWatchData w) { }
+
     /** Called when a step is requested on the current thread. */
     public void stepRequested() { }
 

@@ -48,7 +48,7 @@ public final class DebugContextTest extends DebugTestCase {
   
   /** Tests that the sourcepath config option properly adds files to the search directories. */
   public void testDebugSourcepath() throws Exception {
-    if (printMessages) System.out.println("----testDebugSourcePath----");
+    if (printMessages) printStream.println("----testDebugSourcePath----");
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
 
@@ -58,7 +58,7 @@ public final class DebugContextTest extends DebugTestCase {
     path.addElement(_tempDir);  // directory where doc's file is saved
 
     // Add a breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4,true);
 
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -116,7 +116,7 @@ public final class DebugContextTest extends DebugTestCase {
 
   /** Tests that breakpoints behave correctly in non-public classes. */
   public synchronized void testBreakpointsAndStepsInNonPublicClasses() throws Exception {
-    if (printMessages) System.out.println("----testBreakpointsAndStepsInNonPublicClasses----");
+    if (printMessages) printStream.println("----testBreakpointsAndStepsInNonPublicClasses----");
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
 
@@ -124,7 +124,7 @@ public final class DebugContextTest extends DebugTestCase {
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
 
     // Add a breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"), 14);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"), 14,true);
     
     Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
@@ -136,7 +136,7 @@ public final class DebugContextTest extends DebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
+    if (printMessages) printStream.println("----After breakpoint:\n" + getInteractionsText());
 
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
@@ -146,10 +146,10 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsDoesNotContain("Baz Line 1");
 
-    if (printMessages) System.out.println("adding another breakpoint");
+    if (printMessages) printStream.println("adding another breakpoint");
 
     // Set another breakpoint (after is class loaded)
-    _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
+    _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9,true);
     
     Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(2);
@@ -161,7 +161,7 @@ public final class DebugContextTest extends DebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    if (printMessages) System.out.println("****"+getInteractionsText());
+    if (printMessages) printStream.println("****"+getInteractionsText());
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2); // fires
@@ -173,12 +173,12 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Resume until next breakpoint
     synchronized(_notifierLock) {
-      if (printMessages) System.out.println("resuming");
+      if (printMessages) printStream.println("resuming");
       _setPendingNotifies(3);  // suspended, updated, breakpointReached
       _asyncResume();
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
-    if (printMessages) System.out.println("----After one resume:\n" + getInteractionsText());
+    if (printMessages) printStream.println("----After one resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(2);  //fires (no waiting)
     debugListener.assertBreakpointReachedCount(2);  //fires
     debugListener.assertThreadLocationUpdatedCount(3);  //fires
@@ -187,12 +187,12 @@ public final class DebugContextTest extends DebugTestCase {
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
 
-    if ( printMessages ) System.out.println("-------- Adding interpret listener --------");
+    if ( printMessages ) printStream.println("-------- Adding interpret listener --------");
     // Resume until finished, waiting for call to interpret to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      if ( printMessages ) System.out.println("-------- resuming --------");
+      if ( printMessages ) printStream.println("-------- resuming --------");
       _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied (since it's the last thread)
       _asyncResume();
       while (_pendingNotifies > 0) _notifierLock.wait();
@@ -200,7 +200,7 @@ public final class DebugContextTest extends DebugTestCase {
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
 
-    if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
+    if (printMessages) printStream.println("----After second resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
     debugListener.assertBreakpointReachedCount(2);
     debugListener.assertThreadLocationUpdatedCount(3);
@@ -215,7 +215,7 @@ public final class DebugContextTest extends DebugTestCase {
   /** Tests that stepping into a breakpoint works. */
   public synchronized void testStepIntoOverBreakpoint() throws Exception {
     if (printMessages) {
-      System.out.println("----testStepIntoOverBreakpoint----");
+      printStream.println("----testStepIntoOverBreakpoint----");
     }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
@@ -224,8 +224,8 @@ public final class DebugContextTest extends DebugTestCase {
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
 
     // Add a breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"), 3);
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();\n"), 4);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"), 3,true);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();\n"), 4,true);
     
     Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(2);
@@ -237,7 +237,7 @@ public final class DebugContextTest extends DebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
+    if (printMessages) printStream.println("----After breakpoint:\n" + getInteractionsText());
 
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
@@ -269,7 +269,7 @@ public final class DebugContextTest extends DebugTestCase {
     }
 
     if (printMessages) {
-      System.out.println("****"+getInteractionsText());
+      printStream.println("****"+getInteractionsText());
     }
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
@@ -290,7 +290,7 @@ public final class DebugContextTest extends DebugTestCase {
     _model.removeListener(interpretListener);
 
     if (printMessages) {
-      System.out.println("----After resume:\n" + getInteractionsText());
+      printStream.println("----After resume:\n" + getInteractionsText());
     }
     debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
     debugListener.assertBreakpointReachedCount(1);
@@ -303,7 +303,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertBreakpointRemovedCount(2);  //fires (no waiting)
 
     // Shutdown the debugger
-    if (printMessages) System.out.println("Shutting down...");
+    if (printMessages) printStream.println("Shutting down...");
 
     synchronized(_notifierLock) {
       _setPendingNotifies(1);  // shutdown
@@ -312,13 +312,13 @@ public final class DebugContextTest extends DebugTestCase {
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) System.out.println("Shut down.");
+    if (printMessages) printStream.println("Shut down.");
     _debugger.removeListener(debugListener);
   }
 
   /** Tests that static fields are consistent across different interpreter contexts. */
   public void testStaticFieldsConsistent() throws Exception {
-    if (printMessages) System.out.println("----testStaticFieldsConsistent----");
+    if (printMessages) printStream.println("----testStaticFieldsConsistent----");
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
 
@@ -327,7 +327,7 @@ public final class DebugContextTest extends DebugTestCase {
                                                    CLASS_WITH_STATIC_FIELD);
 
     // Set a breakpoint
-    _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"), 4);
+    _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"), 4,true);
     
     Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
@@ -344,7 +344,7 @@ public final class DebugContextTest extends DebugTestCase {
     DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
 
      if (printMessages) {
-      System.out.println("----After breakpoint:\n" + getInteractionsText());
+      printStream.println("----After breakpoint:\n" + getInteractionsText());
     }
 
     // Ensure breakpoint is hit
@@ -380,7 +380,7 @@ public final class DebugContextTest extends DebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     if (printMessages) {
-      System.out.println("****"+getInteractionsText());
+      printStream.println("****"+getInteractionsText());
     }
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
@@ -415,7 +415,7 @@ public final class DebugContextTest extends DebugTestCase {
    */
   public void testNonStaticWatches() throws Exception {
     if (printMessages) {
-      System.out.println("----testNonStaticWatches----");
+      printStream.println("----testNonStaticWatches----");
     }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
@@ -425,8 +425,8 @@ public final class DebugContextTest extends DebugTestCase {
                                                    MONKEY_WITH_INNER_CLASS);
 
     // Set a breakpoint
-    _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;"), 10);
-    _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("System.out.println(\"localVar = \" + localVar);"), 32);
+    _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;"), 10, true);
+    _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("System.out.println(\"localVar = \" + localVar);"), 32, true);
     
     Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(2);
@@ -437,6 +437,7 @@ public final class DebugContextTest extends DebugTestCase {
       interpretIgnoreResult("new Monkey().bar()");//new MonkeyInner().new MonkeyInnerInner().innerMethod()");
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
+
     _debugger.addWatch("foo");
     _debugger.addWatch("innerFoo");
     _debugger.addWatch("innerInnerFoo");
@@ -444,9 +445,11 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.addWatch("asdf");
     _debugger.addWatch("nullString");
     _debugger.addWatch("localVar");
+    Utilities.clearEventQueue();
+    debugListener.assertWatchSetCount(7);
 
     if (printMessages) {
-      System.out.println("first step");
+      printStream.println("first step");
     }
     // Step to line 11
     synchronized(_notifierLock) {
@@ -486,7 +489,7 @@ public final class DebugContextTest extends DebugTestCase {
     assertEquals("watch value incorrect", "8", watches.get(1).getValue());
 
     if (printMessages) {
-      System.out.println("second step");
+      printStream.println("second step");
     }
     // Step to line 12
     synchronized(_notifierLock) {
@@ -502,7 +505,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadDiedCount(0);
 
     if (printMessages) {
-      System.out.println("third step");
+      printStream.println("third step");
     }
     // Step to line 13
     synchronized(_notifierLock) {
@@ -518,7 +521,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadDiedCount(0);
 
     if (printMessages) {
-      System.out.println("fourth step");
+      printStream.println("fourth step");
     }
     // Step to line 14
     synchronized(_notifierLock) {
@@ -534,7 +537,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadDiedCount(0);
 
     if (printMessages) {
-      System.out.println("fifth step");
+      printStream.println("fifth step");
     }
     // Step to line 15
     synchronized(_notifierLock) {
@@ -565,7 +568,7 @@ public final class DebugContextTest extends DebugTestCase {
     assertEquals("watch type incorrect", "java.lang.String", watches.get(5).getType());
 
     if (printMessages) {
-      System.out.println("sixth step");
+      printStream.println("sixth step");
     }
     // Step into static method
     synchronized(_notifierLock) {
@@ -630,7 +633,7 @@ public final class DebugContextTest extends DebugTestCase {
    */
   public void testStaticWatches() throws Exception {
     if (printMessages) {
-      System.out.println("----testStaticWatches----");
+      printStream.println("----testStaticWatches----");
     }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
@@ -641,7 +644,7 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Set a breakpoint
     int index = MONKEY_STATIC_STUFF.indexOf("System.out.println(MonkeyInner.MonkeyTwoDeep.twoDeepFoo);");
-    _debugger.toggleBreakpoint(doc, index, 14);
+    _debugger.toggleBreakpoint(doc, index, 14, true);
     
     Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
@@ -652,12 +655,15 @@ public final class DebugContextTest extends DebugTestCase {
       interpretIgnoreResult("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepMethod();");
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
+
     _debugger.addWatch("foo");
     _debugger.addWatch("innerFoo");
     _debugger.addWatch("twoDeepFoo");
     _debugger.addWatch("threeDeepFoo");
     _debugger.addWatch("asdf");
-
+    Utilities.clearEventQueue();
+    debugListener.assertWatchSetCount(5);
+    
     Vector<DebugWatchData> watches = _debugger.getWatches();
     assertEquals("watch name incorrect", "foo", watches.get(0).getName());
     assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
@@ -693,7 +699,7 @@ public final class DebugContextTest extends DebugTestCase {
    */
   public void testWatchLocalVarsFromInnerClass() throws Exception {
     if (printMessages) {
-      System.out.println("----testWatchLocalVarsFromInnerClass----");
+      printStream.println("----testWatchLocalVarsFromInnerClass----");
     }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
@@ -704,7 +710,7 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Set a breakpoint
     int index = INNER_CLASS_WITH_LOCAL_VARS.indexOf("numArgs:");
-    _debugger.toggleBreakpoint(doc, index, 7);
+    _debugger.toggleBreakpoint(doc, index, 7, true);
     
     Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
@@ -718,6 +724,8 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.addWatch("numArgs");
     _debugger.addWatch("args");
     _debugger.addWatch("inlined");
+    Utilities.clearEventQueue();
+    debugListener.assertWatchSetCount(3);
 
     // Check watch values
     Vector<DebugWatchData> watches = _debugger.getWatches();
@@ -744,7 +752,7 @@ public final class DebugContextTest extends DebugTestCase {
    */
   public void testThreadShouldDie() throws Exception {
     if (printMessages) {
-      System.out.println("----testThreadShouldDie----");
+      printStream.println("----testThreadShouldDie----");
     }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);

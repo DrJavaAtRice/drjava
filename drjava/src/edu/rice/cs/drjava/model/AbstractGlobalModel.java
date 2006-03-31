@@ -114,6 +114,8 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
+import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
@@ -1233,6 +1235,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     int createJarFlags = getCreateJarFlags();
     if (createJarFlags != 0) builder.setCreateJarFlags(createJarFlags);
     
+    // add breakpoints and watches
+    try {
+      ArrayList<DebugBreakpointData> l = new ArrayList<DebugBreakpointData>();
+      for(Breakpoint bp: getDebugger().getBreakpoints()) { l.add(bp); }
+      builder.setBreakpoints(l);
+    }
+    catch(DebugException de) { /* ignore, just don't store breakpoints */ }
+    try {
+      builder.setWatches(getDebugger().getWatches());
+    }
+    catch(DebugException de) { /* ignore, just don't store watches */ }
+    
     // write to disk
     builder.write();
     
@@ -1272,6 +1286,22 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final File[] projectClassPaths = ir.getClassPaths();
     final File createJarFile  = ir.getCreateJarFile();
     int createJarFlags = ir.getCreateJarFlags();
+    
+    // set breakpoints
+    try { getDebugger().removeAllBreakpoints(); }
+    catch(DebugException de) { /* ignore, just don't remove old breakpoints */ }
+    for (DebugBreakpointData dbd: ir.getBreakpoints()) {
+      try { getDebugger().toggleBreakpoint(getDocumentForFile(dbd.getFile()), dbd.getOffset(), dbd.getLineNumber(), dbd.isEnabled()); }
+      catch(DebugException de) { /* ignore, just don't add breakpoint */ }
+    }
+    
+    // set watches
+    try { getDebugger().removeAllWatches(); }
+    catch(DebugException de) { /* ignore, just don't remove old watches */ }
+    for (DebugWatchData dwd: ir.getWatches()) {
+      try { getDebugger().addWatch(dwd.getName()); }
+      catch(DebugException de) { /* ignore, just don't add watch */ }
+    }
     
     final String projfilepath = projectFile.getCanonicalPath();
     

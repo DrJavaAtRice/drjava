@@ -48,6 +48,9 @@ package edu.rice.cs.drjava.project;
 import java.io.*;
 import java.util.List;
 
+import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+import edu.rice.cs.drjava.model.debug.DebugWatchData;
+
 public interface ProjectFileIR {
   /** @return an array full of all the source files in this project file. */
   public DocFile[] getSourceFiles();
@@ -87,6 +90,12 @@ public interface ProjectFileIR {
   /** @return the flags used in the "Create Jar" dialog. */
   public int getCreateJarFlags();
   
+  /** @return the array of breakpoints. */
+  public DebugBreakpointData[] getBreakpoints();
+  
+  /** @return the array of watches. */
+  public DebugWatchData[] getWatches();
+  
   public void setSourceFiles(List<DocFile> sf);
   public void setAuxiliaryFiles(List<DocFile> aux);
   public void setCollapsedPaths(List<String> paths);
@@ -97,4 +106,6 @@ public interface ProjectFileIR {
   public void setProjectRoot(File root);
   public void setCreateJarFile(File createJarFile);
   public void setCreateJarFlags(int createJarFlags);
+  public void setBreakpoints(List<DebugBreakpointData> bps);
+  public void setWatches(List<DebugWatchData> ws);
 }

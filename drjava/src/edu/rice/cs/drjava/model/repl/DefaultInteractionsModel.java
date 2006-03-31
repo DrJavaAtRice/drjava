@@ -119,7 +119,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInteractionStarted() { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionStarted(); } });
   }
-
+  
   /** Notifies listeners that an interaction has ended. */
   protected void _notifyInteractionEnded() { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionEnded(); } });

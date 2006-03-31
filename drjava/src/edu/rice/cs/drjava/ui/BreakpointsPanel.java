@@ -180,8 +180,8 @@ public class BreakpointsPanel extends TabbedPanel {
       _enableDisableButton.setEnabled(enable);
       _removeButton.setEnabled(enable);
       if (enable) {
-        // TODO: check for enabled/disabled
-        if (true) {
+        System.out.println("breakpoint enabled = "+bp.isEnabled());
+        if (bp.isEnabled()) {
           _enableDisableButton.setText("Disable");
         }
         else {
@@ -241,7 +241,7 @@ public class BreakpointsPanel extends TabbedPanel {
     
     Action enableDisableAction = new AbstractAction("Disable") {
       public void actionPerformed(ActionEvent ae) {
-        // TODO
+        _enableDisableBreakpoint();
       }
     };
     _enableDisableButton = new JButton(enableDisableAction);
@@ -325,6 +325,20 @@ public class BreakpointsPanel extends TabbedPanel {
       Breakpoint bp = _getSelectedBreakpoint();
       if (bp != null) {
         _debugger.scrollToSource(bp);
+      }
+    }
+    catch (DebugException de) {
+      _frame._showDebugError(de);
+    }
+  }
+  
+  /** Toggle breakpoint's enable/disable flag. */
+  private void _enableDisableBreakpoint() {
+    try {
+      Breakpoint bp = _getSelectedBreakpoint();
+      if (bp != null) {
+        bp.setEnabled(!bp.isEnabled());
+        _updateButtons();
       }
     }
     catch (DebugException de) {
@@ -495,6 +509,9 @@ public class BreakpointsPanel extends TabbedPanel {
       };
       Utilities.invokeLater(doCommand);
     }
+    
+    public void watchSet(final DebugWatchData w) { }
+    public void watchRemoved(final DebugWatchData w) { }
     
     /** Called when a step is requested on the current thread. */
     public void stepRequested() { }
