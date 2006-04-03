@@ -109,6 +109,9 @@ public interface OptionConstants {
   /** Color for highlighting breakpoints. */
   public static final ColorOption DEBUG_BREAKPOINT_COLOR = new ColorOption("debug.breakpoint.color", Color.red);
 
+  /** Color for highlighting disabled breakpoints. */
+  public static final ColorOption DEBUG_BREAKPOINT_DISABLED_COLOR = new ColorOption("debug.breakpoint.disabled.color", new Color(128,0,0));
+
   /** Color for highlighting thread locations. */
   public static final ColorOption DEBUG_THREAD_COLOR = new ColorOption("debug.thread.color", new Color(100,255,255));
 

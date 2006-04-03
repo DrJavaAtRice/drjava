@@ -5819,7 +5819,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           DefinitionsPane bpPane = getDefPaneGivenODD(bp.getDocument());
           _breakpointHighlights.
             put(bp, bpPane.getHighlightManager().
-                  addHighlight(bp.getStartOffset(), bp.getEndOffset(), DefinitionsPane.BREAKPOINT_PAINTER));
+                    addHighlight(bp.getStartOffset(), bp.getEndOffset(), 
+                                 bp.isEnabled()?DefinitionsPane.BREAKPOINT_PAINTER:DefinitionsPane.DISABLED_BREAKPOINT_PAINTER));
           _updateDebugStatus();
 //        }
 //      };

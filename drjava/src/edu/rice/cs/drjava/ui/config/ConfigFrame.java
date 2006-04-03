@@ -515,6 +515,8 @@ public class ConfigFrame extends JFrame {
                                                 "The color for compiler error highlights in the Definitions Pane.", true));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEBUG_BREAKPOINT_COLOR, "Debugger Breakpoint Color", this,
                                                 "The color for breakpoints in the Definitions Pane.", true));
+    addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, "Disabled Debugger Breakpoint Color", this,
+                                                "The color for disabled breakpoints in the Definitions Pane.", true));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEBUG_THREAD_COLOR, "Debugger Location Color", this,
                                                 "The color for the location of the current suspended thread in the Definitions Pane.", true));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.SYSTEM_OUT_COLOR, "System.out Color", this,

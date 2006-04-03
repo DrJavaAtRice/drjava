@@ -95,6 +95,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   static DefaultHighlighter.DefaultHighlightPainter BREAKPOINT_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
 
+  /** Highlight painter for disabled breakpoints. */
+  static DefaultHighlighter.DefaultHighlightPainter DISABLED_BREAKPOINT_PAINTER =
+    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
+
   /** Highlight painter for thread's current location. */
   static DefaultHighlighter.DefaultHighlightPainter THREAD_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
@@ -196,6 +200,13 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private static class BreakpointColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       BREAKPOINT_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+    }
+  }
+
+  /** The OptionListener for DEBUG_BREAKPOINT_DISABLED_COLOR. */
+  private static class DisabledBreakpointColorOptionListener implements OptionListener<Color> {
+    public void optionChanged(OptionEvent<Color> oce) {
+      DISABLED_BREAKPOINT_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
     }
   }
 
@@ -453,6 +464,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, temp);
     _colorOptionListeners.add(pair);
     DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_COLOR, temp);
+    
+    temp = new DisabledBreakpointColorOptionListener();
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, temp);
+    _colorOptionListeners.add(pair);
+    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, temp);
     
     temp = new ThreadColorOptionListener();
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_THREAD_COLOR, temp);

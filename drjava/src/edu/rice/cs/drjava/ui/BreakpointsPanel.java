@@ -180,7 +180,6 @@ public class BreakpointsPanel extends TabbedPanel {
       _enableDisableButton.setEnabled(enable);
       _removeButton.setEnabled(enable);
       if (enable) {
-        System.out.println("breakpoint enabled = "+bp.isEnabled());
         if (bp.isEnabled()) {
           _enableDisableButton.setText("Disable");
         }
