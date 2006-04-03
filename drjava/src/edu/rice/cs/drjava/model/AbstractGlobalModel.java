@@ -481,6 +481,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setProjectChanged(true);
   }
   
+  /** Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. */
+  public void setProjectFile(File f) { _state.setProjectFile(f); }
+  
   /** @return the build directory for the project (assuming one exists). */
   public File getBuildDirectory() { return _state.getBuildDirectory(); }
   
@@ -530,7 +533,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     File _mainFile;
     File _builtDir;
     File _workDir;
-    final File projectFile;
+    File _projectFile;
     final File[] projectFiles;
     ClassPathVector _projExtraClassPath;
     private boolean _isProjectChanged = false;
@@ -548,10 +551,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     ProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
       _projRoot = pr;
+//      System.err.println("Project root initialized to " + pr);
       _mainFile = main;
       _builtDir = bd;
       _workDir = wd;
-      projectFile = project;
+      _projectFile = project;
       projectFiles = files;
       _projExtraClassPath = cp;
       
@@ -587,7 +591,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** @return the absolute path to the project file.  Since projectFile is final, no synchronization
      *  is necessary.
      */
-    public File getProjectFile() { return projectFile; }
+    public File getProjectFile() { return _projectFile; }
     
     public boolean inProject(File f) {
       String path;
@@ -603,7 +607,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File[] getProjectFiles() { return projectFiles; }
     
     public File getProjectRoot() { 
-      if (_projRoot == null || _projRoot.equals(FileOption.NULL_FILE)) return projectFile.getParentFile();
+      if (_projRoot == null || _projRoot.equals(FileOption.NULL_FILE)) return _projectFile.getParentFile();
 //      Utilities.show("File grouping state returning project root of " + _projRoot);
       return _projRoot;
     }
@@ -613,14 +617,20 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getWorkingDirectory() { 
       try {
         if (_workDir == null || _workDir == FileOption.NULL_FILE) 
-          return projectFile.getParentFile().getCanonicalFile(); // default is project root
+          return _projectFile.getParentFile().getCanonicalFile(); // default is project root
         return _workDir.getCanonicalFile();
       }
       catch(IOException e) { /* fall through */ }
       return _workDir.getAbsoluteFile(); 
     }
     
-    public void setProjectRoot(File f) { _projRoot = f; }
+    /** Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. */
+    public void setProjectFile(File f) { _projectFile = f; }
+    
+    public void setProjectRoot(File f) { 
+      _projRoot = f; 
+//      System.err.println("Project root set to " + f);
+    }
     
     public void setBuildDirectory(File f) { _builtDir = f; }
     
@@ -725,6 +735,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean isInProjectPath(File f) { return false; }
     public File getProjectFile() { return null; }
     public void setBuildDirectory(File f) { }
+    public void setProjectFile(File f) { }
     public void setProjectRoot(File f) { }
     public void setWorkingDirectory(File f) { }
     public File[] getProjectFiles() { return null; }
@@ -1176,6 +1187,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     ProjectProfile builder = new ProjectProfile(file);
     
+    // add project root
+    File pr = getProjectRoot();
+    if (pr != null) builder.setProjectRoot(pr);
+    
     // add opendefinitionsdocument
     ArrayList<File> srcFileList = new ArrayList<File>();
     LinkedList<File> auxFileList = new LinkedList<File>();
@@ -1211,10 +1226,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     } 
 //    else System.err.println("Project ClasspathVector is null!");
-    
-    // add project root
-    File pr = getProjectRoot();
-    if (pr != null) builder.setProjectRoot(pr);
     
     // add build directory
     File bd = getBuildDirectory();
@@ -1291,7 +1302,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     try { getDebugger().removeAllBreakpoints(); }
     catch(DebugException de) { /* ignore, just don't remove old breakpoints */ }
     for (DebugBreakpointData dbd: ir.getBreakpoints()) {
-      try { getDebugger().toggleBreakpoint(getDocumentForFile(dbd.getFile()), dbd.getOffset(), dbd.getLineNumber(), dbd.isEnabled()); }
+      try { 
+        getDebugger().toggleBreakpoint(getDocumentForFile(dbd.getFile()), dbd.getOffset(), dbd.getLineNumber(), 
+                                           dbd.isEnabled()); 
+      }
       catch(DebugException de) { /* ignore, just don't add breakpoint */ }
     }
     
@@ -1303,7 +1317,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       catch(DebugException de) { /* ignore, just don't add watch */ }
     }
     
-    final String projfilepath = projectFile.getCanonicalPath();
+    final String projfilepath = projectRoot.getCanonicalPath();
     
     // Get the list of documents that are still open
 //    final List<OpenDefinitionsDocument> oldDocs = getOpenDefintionsDocuments();
@@ -3126,23 +3140,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return projectDocs;
   }
   /* Extracts relative path (from project origin) to parent of file identified by path.  Assumes path does not end in 
-   * File.separator. */
+   * File.separator. TODO: convert this method to take a File argument. */
   public String fixPathForNavigator(String path) throws IOException {
-    path = path.substring(0, path.lastIndexOf(File.separator));
-    String _topLevelPath;
-    if (getProjectFile() != null) {
-      _topLevelPath = getProjectFile().getCanonicalPath();
-      _topLevelPath = _topLevelPath.substring(0, _topLevelPath.lastIndexOf(File.separator));;
-    }
-    else _topLevelPath = "";
+    String parent = path.substring(0, path.lastIndexOf(File.separator));
+    String topLevelPath;
+    String rootPath = getProjectRoot().getCanonicalPath();
     
-    if (!path.equals(_topLevelPath) && !path.startsWith(_topLevelPath + File.separator))
-      /** it's in external files, so don't give it a path */
+    if (! parent.equals(rootPath) && ! parent.startsWith(rootPath + File.separator))
+      /** it's an external file, so don't give it a path */
       return "";
-    else {
-      path = path.substring(_topLevelPath.length());
-      return path;
-    }
+    else 
+      return parent.substring(rootPath.length());
   }
   
   /** Creates an OpenDefinitionsDocument for a file. Does not add to the navigator or notify that the file's open.

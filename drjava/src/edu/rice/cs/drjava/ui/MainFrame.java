@@ -534,18 +534,16 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   private Action _saveProjectAction = new AbstractAction("Save") {
     public void actionPerformed(ActionEvent ae) {
-//      _saveProject(); // isn't this redundant since _saveAll saves the project file if one is active
-      _saveAll();
+      _saveAll();  // saves project file and all modified project source files; does not save external files
     }
   };
   
-  // Not clear what "save as" should do for a project
-//  private Action _saveProjectAsAction = new AbstractAction("Save As...") {
-//    public void actionPerformed(ActionEvent ae) {
-//      _saveProjectAs();
-//      _saveAll();
-//    }
-//  };
+  private Action _saveProjectAsAction = new AbstractAction("Save As...") {
+    public void actionPerformed(ActionEvent ae) {
+      _saveProjectAs();  // asks the user for a new project file name; sets _projectFile in global model to this value
+      _saveAll();  // performs a save all operation using this new project file name
+    }
+  };
   
   /** Reverts the current document. */
   private Action _revertAction = new AbstractAction("Revert to Saved") {
@@ -2766,6 +2764,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (_model.isProjectActive()) {
       _closeProjectAction.setEnabled(true);
       _saveProjectAction.setEnabled(true);
+      _saveProjectAsAction.setEnabled(true);
       _projectPropertiesAction.setEnabled(true);
 //      _junitProjectAction.setEnabled(true);
       _junitOpenProjectFilesAction.setEnabled(true);
@@ -2815,6 +2814,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (_model.getDocumentCount() == 1) _model.setActiveFirstDocument();
       _closeProjectAction.setEnabled(false);
       _saveProjectAction.setEnabled(false);
+      _saveProjectAsAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
 //      _junitProjectAction.setEnabled(false);
       _jarProjectAction.setEnabled(false);
@@ -3131,10 +3131,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveProjectHelper(_currentProjFile);
   }
   
-//  /** Edit the project in the global model. */
-//  private void _editProject() { _editProject(new ProjectPropertiesFrame(MainFrame.this)); }
-  
-  /** Edit project frame ppf.  */  
+  /** Edit project frame.  */  
   private void _editProject() {
     ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(this);
     ppf.setVisible(true);
@@ -3168,32 +3165,29 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
+  /** Pops up the _saveChooser dialog, asks the user for a new project file name, and sets the project file to the 
+   *  specified file.  Nothing is written in the file system; this action is performed by a subsequent _saveAll(). */
   private void _saveProjectAs() {
     
-    // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
+//    // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
     _saveChooser.removeChoosableFileFilter(_projectFilter);
     _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
     _saveChooser.setFileFilter(_projectFilter);
-    File selection = _saveChooser.getSelectedFile();
-    if (selection != null) {  // what is this block of commands for?
-      _saveChooser.setSelectedFile(selection.getParentFile());
-      _saveChooser.setSelectedFile(selection);
-      _saveChooser.setSelectedFile(null);
-    }
+//    File selection = _saveChooser.getSelectedFile();
+//    if (selection != null) {  // what is this block of commands for?
+//      _saveChooser.setSelectedFile(selection.getParentFile());
+//      _saveChooser.setSelectedFile(selection);
+//      _saveChooser.setSelectedFile(null);
+//    }
     
     if (_currentProjFile != null) _saveChooser.setSelectedFile(_currentProjFile);
     
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
       File file = _saveChooser.getSelectedFile();
-      if (! file.exists() || _verifyOverwrite()) {
-        _saveProjectHelper(file);
-        try {
-          file = file.getCanonicalFile();
-          if (file.getPath().endsWith(".pjt")) _openProjectHelper(file);
-          else _openProjectHelper(new File(file.getAbsolutePath() + ".pjt"));
-        }
-        catch (IOException e) { throw new UnexpectedException(e); }
+      if (! file.exists() || _verifyOverwrite()) { 
+        _model.setProjectFile(file);
+        _currentProjFile = file;
       }
     }
   }
@@ -4084,9 +4078,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_saveAsAction, "Save As", "SaveAs", "Save the current document with a new name");
     _setUpAction(_saveProjectAction, "Save", "Save", "Save the current project");
     _saveProjectAction.setEnabled(false);
-    // No longer used
-//    _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", 
-//                 "Save all currently open files to new project file");
+    _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", "Save current project to new project file");
+    _saveProjectAsAction.setEnabled(false);
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
     // No longer used
 //    _setUpAction(_revertAllAction, "Revert All", "RevertAll",
@@ -4313,7 +4306,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveAction.setEnabled(true);
     _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
     _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES);
-    //fileMenu.add(_saveProjectAsAction);
+//    fileMenu.add(_saveProjectAsAction);
     
     _addMenuItem(fileMenu, _revertAction, KEY_REVERT_FILE);
     _revertAction.setEnabled(false);
@@ -4442,7 +4435,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //Save
     projectMenu.add(_saveProjectAction);
     //SaveAs
-//    projectMenu.add(_saveProjectAsAction);
+    projectMenu.add(_saveProjectAsAction);
     
     // Close
     _addMenuItem(projectMenu, _closeProjectAction, KEY_CLOSE_PROJECT);

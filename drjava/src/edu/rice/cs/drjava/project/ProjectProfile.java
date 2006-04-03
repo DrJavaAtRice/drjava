@@ -71,10 +71,10 @@ public class ProjectProfile implements ProjectFileIR {
   
   private File _mainClass = null;
   
-  /** root of project source tree */
+  /** root of project source tree.  Invariant: _projectRoot.exists() */
   private File _projectRoot;
   
-  private File _projectFile;  /* Invariant: _projectFile.getParentFile() != null */
+  private File _projectFile;  /* Invariant: _projectFile.getParentFile().exists() */
   
   private File _createJarFile = null;
   
@@ -83,15 +83,18 @@ public class ProjectProfile implements ProjectFileIR {
   private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
   private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
   
-  /* Constructors create new ProjectProfiles with specifed project file name and project root that is parent folder of
-   * the project file.  The project file presumably may not exist yet.  */
+  /** Constructs a File for fileName and forwards this call to the main constructor. */
+  public ProjectProfile(String fileName) throws IOException { this(new File(fileName)); }
   
-  public ProjectProfile(String fileName) { _projectFile = new File(fileName); }
-  public ProjectProfile(File f) { 
+  /** Creates new ProjectProfiles with specifed project file name and project root that is parent folder of
+   *  the project file.  The project file presumably may not exist yet, but its parent folder is assumed to exist.
+   *  @throws IOException parent directory of project file does not exist.
+   */
+  public ProjectProfile(File f) throws IOException { 
     _projectFile = f; 
     _projectRoot = _projectFile.getParentFile();
-//    Utilities.show("Initial Project Root is " + _projRoot);
-    assert _projectRoot != null;
+    if (! _projectRoot.exists()) throw new IOException("Parent directory of project root " + _projectRoot + 
+                                                       " does not exist");
   }
   
   /* Public getters */
@@ -122,13 +125,8 @@ public class ProjectProfile implements ProjectFileIR {
   /** @return the name of the file that holds the Jar main class associated with this project */
   public File getMainClass() { return _mainClass; }
   
-  /** @return the directory that is the root of the project source tree. If project root is not set, returns the parent
-   *  of the project file.  Never returns null. */
-  public File getProjectRoot() { 
-    if ((_projectRoot == null) || _projectRoot.equals(FileOption.NULL_FILE))
-      _projectRoot = _projectFile.getParentFile();
-    return _projectRoot;
-  }
+  /** @return the project root directory which must exist. */
+  public File getProjectRoot() { return _projectRoot; }
   
   /** @return the output file used in the "Create Jar" dialog. */
   public File getCreateJarFile() { return _createJarFile; }
@@ -194,13 +192,14 @@ public class ProjectProfile implements ProjectFileIR {
     
     // write opening comment line
     fw.write(";; DrJava project file, written by build " + Version.getBuildTimeString());
-    fw.write(";; relative files are made relative to: " + _projectFile.getCanonicalPath());
+    fw.write("\n;; files in the source tree are relative to: " + _projectRoot.getCanonicalPath());
+    fw.write("\n;; other files with relative paths are rooted at (the parent of) this project file");
     
     // write the project root
     if (_projectRoot != null) {
-      fw.write("\n(proj-root");
+      fw.write("\n(proj-root-and-base");
 //      Utilities.show("Writing project root = " + _projRoot);
-      fw.write("\n" + encodeFile(_projectRoot, "  ", true));
+      fw.write("\n" + encodeFileRelative(_projectRoot, "  ", _projectFile));
       fw.write(")");
     }
     else fw.write("\n;; no project root; should never happen");
@@ -208,7 +207,7 @@ public class ProjectProfile implements ProjectFileIR {
     // write source files
     if (!_sourceFiles.isEmpty()) {
       fw.write("\n(source");
-      for(DocFile df: _sourceFiles) { fw.write("\n" + encodeDocFile(df, "  ")); }
+      for(DocFile df: _sourceFiles) { fw.write("\n" + encodeDocFileRelative(df, "  ")); }
       fw.write(")"); // close the source expression
     }
     else fw.write("\n;; no source files");
@@ -216,7 +215,7 @@ public class ProjectProfile implements ProjectFileIR {
     // write aux files
     if (!_auxFiles.isEmpty()) {
       fw.write("\n(auxiliary");
-      for(DocFile df: _auxFiles) { fw.write("\n" + encodeDocFile(df, "  ", false)); }
+      for(DocFile df: _auxFiles) { fw.write("\n" + encodeDocFileAbsolute(df, "  ")); }
       fw.write(")"); // close the auxiliary expression
     }
     else fw.write("\n;; no aux files");
@@ -235,7 +234,7 @@ public class ProjectProfile implements ProjectFileIR {
     if (!_classPathFiles.isEmpty()) {
       fw.write("\n(classpaths");
       for(File f: _classPathFiles) {
-        fw.write("\n" + encodeFile(f, "  ", false));
+        fw.write("\n" + encodeFileAbsolute(f, "  "));
       }
       fw.write(")"); // close the classpaths expression
     }
@@ -244,7 +243,7 @@ public class ProjectProfile implements ProjectFileIR {
     // write the build directory
     if (_buildDir != null && _buildDir.getPath() != "") {
       fw.write("\n(build-dir");
-      fw.write("\n" + encodeFile(_buildDir, "  ", true));
+      fw.write("\n" + encodeFileRelative(_buildDir, "  ", _projectFile));
       fw.write(")");
     }
     else fw.write("\n;; no build directory");
@@ -252,7 +251,7 @@ public class ProjectProfile implements ProjectFileIR {
      // write the working directory
     if (_workDir != null && _workDir.getPath() != "") {
       fw.write("\n(work-dir");
-      fw.write("\n" + encodeFile(_workDir, "  ", true));
+      fw.write("\n" + encodeFileRelative(_workDir, "  ", _projectFile));
       fw.write(")");
     }
     else fw.write("\n;; no working directory");
@@ -260,29 +259,29 @@ public class ProjectProfile implements ProjectFileIR {
     // write the main class
     if (_mainClass != null) {
       fw.write("\n(main-class");
-      fw.write("\n" + encodeFile(_mainClass, "  ", true));
+      fw.write("\n" + encodeFileRelative(_mainClass, "  "));
       fw.write(")");
     }
     else fw.write("\n;; no main class");
     
-    // write the create jar file
-    if (_createJarFile != null) {
-      fw.write("\n(create-jar-file");
-      fw.write("\n" + encodeFile(_createJarFile, "  ", true));
-      fw.write(")");
-    }
-    else fw.write("\n;; no create jar file");
-    
-    // write the create jar flags
-    if (_createJarFlags != 0) {
-      fw.write("\n(create-jar-flags " + _createJarFlags + ")");
-    }
-    else fw.write("\n;; no create jar flags");
+//    // write the create jar file
+//    if (_createJarFile != null) {
+//      fw.write("\n(create-jar-file");
+//      fw.write("\n" + encodeFile(_createJarFile, "  ", true));
+//      fw.write(")");
+//    }
+//    else fw.write("\n;; no create jar file");
+//    
+//    // write the create jar flags
+//    if (_createJarFlags != 0) {
+//      fw.write("\n(create-jar-flags " + _createJarFlags + ")");
+//    }
+//    else fw.write("\n;; no create jar flags");
 
     // write breakpoints
     if (!_breakpoints.isEmpty()) {
       fw.write("\n(breakpoints");
-      for(DebugBreakpointData bp: _breakpoints) { fw.write("\n" + encodeBreakpoint(bp, "  ")); }
+      for(DebugBreakpointData bp: _breakpoints) { fw.write("\n" + encodeBreakpointRelative(bp, "  ")); }
       fw.write(")"); // close the breakpoints expression
     }
     else fw.write("\n;; no breakpoints");
@@ -308,17 +307,31 @@ public class ProjectProfile implements ProjectFileIR {
       return new DocFile(g.getFile().getCanonicalPath(), g.getSelection(), g.getScroll(), g.isActive(), g.getPackage());
   }
   
-  /** This encodes a normal file.  None of the special tags are added.
+  
+  /** This encodes a normal file relative to File base.  None of the special tags are added.
    *  @param f the file to encode
    *  @param prefix the indent level to place the s-expression at
    *  @param relative whether this file should be made relative to the project path
    *  @return the s-expression syntax to describe the given file.
    */
-  private String encodeFile(File f, String prefix, boolean relative) throws IOException {
-    String path;
-    if (relative) path = makeRelative(f);
-    else path = f.getCanonicalPath();
+  private String encodeFileRelative(File f, String prefix, File base) throws IOException {
+    String path = FileOps.makeRelativeTo(f, base).getPath();
+    path = replace(path, File.separator, "/");
+    return prefix + "(file (name " + convertToLiteral(path) + "))";
+  }
 
+  /** This encodes a normal file relative to _projectRoot.  None of the special tags are added. */
+  private String encodeFileRelative(File f, String prefix) throws IOException { 
+    return encodeFileRelative(f, prefix, _projectRoot); 
+  }
+    
+  /** This encodes a normal file with its canonical path.  None of the special tags are added.
+   *  @param f the file to encode
+   *  @param prefix the indent level to place the s-expression at
+   *  @return the s-expression syntax to describe the given file.
+   */
+  private String encodeFileAbsolute(File f, String prefix) throws IOException {
+    String path = f.getCanonicalPath();
     path = replace(path,File.separator, "/");
     return prefix + "(file (name " + convertToLiteral(path) + "))";
   }
@@ -326,14 +339,13 @@ public class ProjectProfile implements ProjectFileIR {
   /** This encodes a docfile, adding all the special tags that store document-specific information.
    *  @param df the doc file to encode
    *  @param prefix the indent level to place the s-expression at
-   *  @param relative whether this file should be made relative to the project path
-   *  @param hasDate whether to include the modification date
+   *  @param relative whether this file should be made relative to _projectRoot
    *  @return the s-expression syntax to describe the given docfile.
    */
-  private String encodeDocFile(DocFile df, String prefix, boolean relative, boolean hasDate) throws IOException {
+  private String encodeDocFile(DocFile df, String prefix, boolean relative) throws IOException {
     String ret = "";
     String path;
-    if (relative) path = makeRelative(df);
+    if (relative) path = makeRelativeTo(df, _projectRoot).getPath();
     else path = df.getCanonicalPath();
 
     path = replace(path,File.separator,"/");
@@ -351,7 +363,7 @@ public class ProjectProfile implements ProjectFileIR {
 
     if (p2 != null) ret += "(scroll " + p2.getFirst() + " " + p2.getSecond() + ")";
 
-    if (hasDate && modDate > 0) {
+    if (modDate > 0) {
       String s = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date(modDate));
       ret += "(mod-date " + convertToLiteral(s) + ")";
     }
@@ -369,29 +381,27 @@ public class ProjectProfile implements ProjectFileIR {
     
     return ret;
   }
-  /** Encodes a doc file.  The path defaults to relative.
+  /** Encodes a doc file relative to _projectRoot.
    *  @param df the DocFile to encode
    *  @param prefix the indent level
    */
-  private String encodeDocFile(DocFile df, String prefix) throws IOException {
-    return encodeDocFile(df, prefix, true, true);
+  private String encodeDocFileRelative(DocFile df, String prefix) throws IOException {
+    return encodeDocFile(df, prefix, true);
   }
-  private String encodeDocFile(DocFile df, String prefix, boolean relative) throws IOException {
-    return encodeDocFile(df, prefix, relative, true);
+  private String encodeDocFileAbsolute(DocFile df, String prefix) throws IOException {
+    return encodeDocFile(df, prefix, false);
   }
   
-  /** This encodes a breakpoint.
+  /** This encodes a breakpoint relative to _projectRoot.
    *  @param bp the breakpoint to encode
    *  @param prefix the indent level to place the s-expression at
    *  @param relative whether the file containing the breakpoint should be made relative to the project path
    *  @return the s-expression syntax to describe the given breakpoint.
    */
-  private String encodeBreakpoint(DebugBreakpointData bp, String prefix, boolean relative) throws IOException {
+  private String encodeBreakpointRelative(DebugBreakpointData bp, String prefix) throws IOException {
     String ret = "";
-    String path;
-    if (relative) path = makeRelative(bp.getFile());
-    else path = bp.getFile().getCanonicalPath();
-
+    String path = makeRelativeTo(bp.getFile(), _projectRoot).getPath();
+    
     path = replace(path,File.separator,"/");
     ret += prefix + "(breakpoint (name " + convertToLiteral(path) + ")";
     
@@ -405,16 +415,7 @@ public class ProjectProfile implements ProjectFileIR {
     
     return ret;
   }
-  /** This encodes a breakpoint.  The path defaults to relative.
-   *  @param bp the breakpoint to encode
-   *  @param prefix the indent level
-   *  @return the s-expression syntax to describe the given breakpoint.
-   */
-  private String encodeBreakpoint(DebugBreakpointData bp, String prefix) throws IOException {
-    return encodeBreakpoint(bp, prefix, true);
-  }
-  
-  
+ 
   /** This encodes a watch.
    *  @param w the watch to encode
    *  @param prefix the indent level to place the s-expression at
@@ -427,9 +428,4 @@ public class ProjectProfile implements ProjectFileIR {
     
     return ret;
   }
-  
-  /** @param f the file whose path to make relative to the project path
-   *  @return the string name of the file's path relative to the project path
-   */
-  private String makeRelative(File f) throws IOException { return makeRelativeTo(f, _projectFile).getPath(); }
 }

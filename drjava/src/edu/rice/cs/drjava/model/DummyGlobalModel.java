@@ -435,6 +435,10 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call getProjectRoot on a Dummy");
   }
   
+  public void setProjectFile(File f) {
+    throw new UnsupportedOperationException("Tried to call setProjectFile on a Dummy");
+  }
+
   public void setProjectRoot(File f) {
      throw new UnsupportedOperationException("Tried to call setProjectRoot on a Dummy");
   }

@@ -384,6 +384,9 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return the source root for the project. */
   public File getProjectRoot();
   
+  /** Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. */
+  public void setProjectFile(File f);
+  
   /** Sets the source root for the project. */
   public void setProjectRoot(File f);
 

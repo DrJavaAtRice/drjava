@@ -61,10 +61,10 @@ public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implemen
     public IDocumentNavigator<ItemT> makeListNavigator() { return new JListSortNavigator<ItemT>(); }
 
   /** Returns a new tree Navigator with the specified root
-   *  @param name the name of the root node
+   *  @param path the path name of the root node
    *  @return a tree navigator
    */
-    public IDocumentNavigator<ItemT> makeTreeNavigator(String name) { return new JTreeSortNavigator<ItemT>(name); }
+    public IDocumentNavigator<ItemT> makeTreeNavigator(String path) { return new JTreeSortNavigator<ItemT>(path); }
     
   /** Creates a list navigator and migrates the navigator items from parent to the new navigator
    *  @param parent the navigator to migrate from

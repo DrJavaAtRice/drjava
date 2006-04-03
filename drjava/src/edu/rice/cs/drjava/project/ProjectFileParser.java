@@ -79,10 +79,11 @@ public class ProjectFileParser {
   public static final ProjectFileParser ONLY = new ProjectFileParser();
   
   private File _projectFile;
-  private String _parentDir;
+  private String _parent;
+  private String _srcFileBase;
   
-  ListVisitor<File> fileListVisitor = new ListVisitor<File>();
-  ListVisitor<DocFile> docFileListVisitor = new ListVisitor<DocFile>();
+  ListVisitor<File> fileListVisitor;
+  ListVisitor<DocFile> docFileListVisitor;
   BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
   
   private ProjectFileParser() { }
@@ -95,8 +96,11 @@ public class ProjectFileParser {
   public ProjectFileIR parse(File projFile) throws IOException, FileNotFoundException, MalformedProjectFileException {
     
     _projectFile = projFile;
-    _parentDir = projFile.getParent();
-//    System.err.println("Parsing project file " + projFile + " with parent " + _parentDir);
+    _parent = projFile.getParent();  
+    _srcFileBase = _parent; // oldest legacy file format may omit proj-root or proj-root-and-base node
+    fileListVisitor = new ListVisitor<File>(_parent);
+    docFileListVisitor = new ListVisitor<DocFile>(_parent);
+//    System.err.println("Parsing project file " + projFile + " with parent " + _parent);
     
     List<SEList> forest = null;
     try { forest = SExpParser.parse(projFile); }
@@ -104,9 +108,7 @@ public class ProjectFileParser {
     
     ProjectFileIR pfir = new ProjectProfile(projFile);
 
-    try {
-      for (SEList exp : forest) evaluateExpression(exp, pfir);
-    }
+    try { for (SEList exp : forest) evaluateExpression(exp, pfir); }
     catch(PrivateProjectException e) { throw new MalformedProjectFileException("Parse Error: " + e.getMessage()); }
     
 //    System.err.println("Parsed buildDir is " + pfir.getBuildDirectory());
@@ -119,20 +121,29 @@ public class ProjectFileParser {
    *  @param e the top-level s-expression to check
    *  @param pfir the ProjectFileIR to update
    */
-  private void evaluateExpression(SEList e, ProjectFileIR pfir) {
+  private void evaluateExpression(SEList e, ProjectFileIR pfir) throws IOException {
     if (e == Empty.ONLY) return;
     Cons exp = (Cons)e; // If it's not empty, it's a cons
       
     String name = exp.accept(NameVisitor.ONLY);
     if (name.compareToIgnoreCase("source") == 0) {
-      List<DocFile> dfList = exp.getRest().accept(docFileListVisitor);
+      ListVisitor<DocFile> srcFileListVisitor = new ListVisitor<DocFile>(_srcFileBase);
+      List<DocFile> dfList = exp.getRest().accept(srcFileListVisitor);
       pfir.setSourceFiles(dfList);
     }
-    else if (name.compareToIgnoreCase("proj-root") == 0) {
+    else if (name.compareToIgnoreCase("proj-root") == 0) {  // legacy node form; all paths relative to project file
       List<File> fList = exp.getRest().accept(fileListVisitor);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple source roots");
-      else if (fList.size() == 0) pfir.setProjectRoot(null);
+      else if (fList.size() == 0) pfir.setProjectRoot(null); // can this ever happen?
       pfir.setProjectRoot(fList.get(0));
+    }
+    else if (name.compareToIgnoreCase("proj-root-and-base") == 0) { // source file paths are relative to project root
+      List<File> fList = exp.getRest().accept(fileListVisitor);
+      if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple source roots");
+      File root = fList.get(0);
+      if (! root.exists()) throw new IOException("Project root " + root + " no longer exists");
+      pfir.setProjectRoot(root);
+      _srcFileBase = root.getCanonicalPath();
     }
     else if (name.compareToIgnoreCase("auxiliary") == 0) {
       List<DocFile> dfList = exp.getRest().accept(docFileListVisitor);
@@ -165,22 +176,16 @@ public class ProjectFileParser {
       else if (fList.size() == 0) pfir.setMainClass(null);
       else pfir.setMainClass(fList.get(0));
     }
-    else if (name.compareToIgnoreCase("proj-root") == 0) {
-      List<File> fList = exp.getRest().accept(fileListVisitor);
-      if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple project roots");
-      else if (fList.size() == 0) pfir.setProjectRoot(null);
-      else pfir.setProjectRoot(fList.get(0));
-    }
-    else if (name.compareToIgnoreCase("create-jar-file") == 0) {
-      List<File> fList = exp.getRest().accept(fileListVisitor);
-      if (fList.size() > 1) throw new PrivateProjectException("Cannot have more than one \"create jar\" file");
-      else if (fList.size() == 0) pfir.setCreateJarFile(null);
-      else pfir.setCreateJarFile(fList.get(0));
-    }
-    else if (name.compareToIgnoreCase("create-jar-flags") == 0) {
-      Integer i = exp.getRest().accept(NumberVisitor.ONLY);
-      pfir.setCreateJarFlags(i);
-    }
+//    else if (name.compareToIgnoreCase("create-jar-file") == 0) {
+//      List<File> fList = exp.getRest().accept(fileListVisitor);
+//      if (fList.size() > 1) throw new PrivateProjectException("Cannot have more than one \"create jar\" file");
+//      else if (fList.size() == 0) pfir.setCreateJarFile(null);
+//      else pfir.setCreateJarFile(fList.get(0));
+//    }
+//    else if (name.compareToIgnoreCase("create-jar-flags") == 0) {
+//      Integer i = exp.getRest().accept(NumberVisitor.ONLY);
+//      pfir.setCreateJarFlags(i);
+//    }
     else if (name.compareToIgnoreCase("breakpoints") == 0) {
        List<DebugBreakpointData> bpList = exp.getRest().accept(breakpointListVisitor);
        pfir.setBreakpoints(bpList);
@@ -195,7 +200,7 @@ public class ProjectFileParser {
    *  @param s the non-empty list expression
    *  @return the DocFile described by this s-expression
    */
-  DocFile parseFile(SExp s, String parentDir) {
+  DocFile parseFile(SExp s, String pathRoot) {
     String name = s.accept(NameVisitor.ONLY);
     if (name.compareToIgnoreCase("file") != 0)
       throw new PrivateProjectException("Expected a file tag, found: " + name);
@@ -203,7 +208,7 @@ public class ProjectFileParser {
       throw new PrivateProjectException("Expected a labeled node, found a label: " + name);
     SEList c = ((Cons)s).getRest(); // get parameter list
     
-    FilePropertyVisitor v = new FilePropertyVisitor(parentDir);
+    FilePropertyVisitor v = new FilePropertyVisitor(pathRoot);
     return c.accept(v);
   }
   
@@ -275,9 +280,8 @@ public class ProjectFileParser {
 
     /** Takes input of form "(str str)" and returns the second string. */
     private String parseStringNode(SExp n) {
-      if (n instanceof Cons) {
+      if (n instanceof Cons) 
         return ((Cons)n).getRest().accept(NameVisitor.ONLY);
-      }
       else throw new PrivateProjectException("List expected, but found text instead");  
     }
   
@@ -285,10 +289,13 @@ public class ProjectFileParser {
   
   /** Parses out a list of file nodes. */
   private class ListVisitor<U extends File> implements SEListVisitor<List<U>> {
+    /** Base directory for relative paths */
+    private String _base;
+    ListVisitor(String base) { _base = base; }
     public List<U> forEmpty(Empty e) { return new ArrayList<U>(); }
     public List<U> forCons(Cons c) {
       List<U> list = c.getRest().accept(this);
-      U tmp = (U) ProjectFileParser.ONLY.parseFile(c.getFirst(), _parentDir);
+      U tmp = (U) ProjectFileParser.ONLY.parseFile(c.getFirst(), _base);
       list.add(0, tmp); // add to the end
       return list;
     }
@@ -303,8 +310,8 @@ public class ProjectFileParser {
     private String pack = "";
     private Date modDate = null;
     
-    private String _parentDir;
-    public FilePropertyVisitor(String parentDir) { _parentDir = parentDir; }
+    private String pathRoot;
+    public FilePropertyVisitor(String pr) { pathRoot = pr; }
     
     public DocFile forCons(Cons c) {
       String name = c.getFirst().accept(NameVisitor.ONLY); 
@@ -325,11 +332,11 @@ public class ProjectFileParser {
     }
     
     public DocFile forEmpty(Empty c) {
-      if (_parentDir == null || new File(fname).isAbsolute()) {
+      if (pathRoot == null || new File(fname).isAbsolute()) {
         return new DocFile(fname, select, scroll, active, pack);
       }
       else {
-        DocFile f = new DocFile(_parentDir, fname, select, scroll, active, pack);
+        DocFile f = new DocFile(pathRoot, fname, select, scroll, active, pack);
         if (modDate != null) f.setSavedModDate(modDate.getTime());
         return f;
       }
@@ -364,18 +371,14 @@ public class ProjectFileParser {
     public String forEmpty(Empty e) {
       throw new PrivateProjectException("Found an empty node, expected a labeled node");
     }
-    public String forCons(Cons c) {
-      return c.getFirst().accept(this);
-    }
+    public String forCons(Cons c) { return c.getFirst().accept(this); }
     public String forBoolAtom(BoolAtom b) {
       throw new PrivateProjectException("Found a boolean, expected a label");
     }
     public String forNumberAtom(NumberAtom n) {
       throw new PrivateProjectException("Found a number, expected a label");
     }
-    public String forTextAtom(TextAtom t) {
-      return t.getText();
-    }
+    public String forTextAtom(TextAtom t) { return t.getText(); }
   };
   
   /** Retrieves the number of a node.  The node should either be a list with its first element being a number atom, 
@@ -388,15 +391,11 @@ public class ProjectFileParser {
     public Integer forEmpty(Empty e) {
       throw new PrivateProjectException("Found an empty node, expected an integer");
     }
-    public Integer forCons(Cons c) {
-      return c.getFirst().accept(this);
-    }
+    public Integer forCons(Cons c) { return c.getFirst().accept(this); }
     public Integer forBoolAtom(BoolAtom b) {
       throw new PrivateProjectException("Found a boolean, expected an integer");
     }
-    public Integer forNumberAtom(NumberAtom n) {
-      return n.intValue();
-    }
+    public Integer forNumberAtom(NumberAtom n) { return n.intValue(); }
     public Integer forTextAtom(TextAtom t) {
       throw new PrivateProjectException("Found a string '"+t+"', expected an integer");
     }
@@ -427,7 +426,7 @@ public class ProjectFileParser {
     public List<DebugBreakpointData> forEmpty(Empty e) { return new ArrayList<DebugBreakpointData>(); }
     public List<DebugBreakpointData> forCons(Cons c) {
       List<DebugBreakpointData> list = c.getRest().accept(this);
-      DebugBreakpointData tmp = (DebugBreakpointData) ProjectFileParser.ONLY.parseBreakpoint(c.getFirst(), _parentDir);
+      DebugBreakpointData tmp = (DebugBreakpointData) ProjectFileParser.ONLY.parseBreakpoint(c.getFirst(), _srcFileBase);
       list.add(0, tmp); // add to the end
       return list;
     }
@@ -437,7 +436,7 @@ public class ProjectFileParser {
    *  @param s the non-empty list expression
    *  @return the breakpoint described by this s-expression
    */
-  DebugBreakpointData parseBreakpoint(SExp s, String parentDir) {
+  DebugBreakpointData parseBreakpoint(SExp s, String pathRoot) {
     String name = s.accept(NameVisitor.ONLY);
     if (name.compareToIgnoreCase("breakpoint") != 0)
       throw new PrivateProjectException("Expected a breakpoint tag, found: " + name);
@@ -445,7 +444,7 @@ public class ProjectFileParser {
       throw new PrivateProjectException("Expected a labeled node, found a label: " + name);
     SEList c = ((Cons)s).getRest(); // get parameter list
     
-    BreakpointPropertyVisitor v = new BreakpointPropertyVisitor(parentDir);
+    BreakpointPropertyVisitor v = new BreakpointPropertyVisitor(pathRoot);
     return c.accept(v);
   }
   
@@ -457,8 +456,8 @@ public class ProjectFileParser {
     private Integer lineNumber = null;
     private boolean enabled = false;
     
-    private String _parentDir;
-    public BreakpointPropertyVisitor(String parentDir) { _parentDir = parentDir; }
+    private String pathRoot;
+    public BreakpointPropertyVisitor(String pr) { pathRoot = pr; }
     
     public DebugBreakpointData forCons(Cons c) {
       String name = c.getFirst().accept(NameVisitor.ONLY); 
@@ -474,7 +473,7 @@ public class ProjectFileParser {
       if ((fname == null) || (offset == null) || (lineNumber == null)) {
         throw new PrivateProjectException("Breakpoint information incomplete, need name, offset and line tags");
       }
-      if (_parentDir == null || new File(fname).isAbsolute()) {
+      if (pathRoot == null || new File(fname).isAbsolute()) {
         final File f = new File(fname);
         return new DebugBreakpointData() {
           public File getFile() { return f; }
@@ -484,7 +483,7 @@ public class ProjectFileParser {
         };
       }
       else {
-        final File f = new File(_parentDir, fname);
+        final File f = new File(pathRoot, fname);
         return new DebugBreakpointData() {
           public File getFile() { return f; }
           public int getOffset() { return offset; }
@@ -496,8 +495,6 @@ public class ProjectFileParser {
   }
   
   private static class PrivateProjectException extends RuntimeException{
-    public PrivateProjectException(String message) {
-      super(message);
-    }
+    public PrivateProjectException(String message) { super(message); }
   }
 }

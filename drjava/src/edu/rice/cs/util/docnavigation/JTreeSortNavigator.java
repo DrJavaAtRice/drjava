@@ -110,11 +110,11 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Standard constructor.
-   *  @param projfilepath the path identifying the root node for the project
+   *  @param projRoot the path identifying the root node for the project
    */
-  public JTreeSortNavigator(String projfilepath) {
+  public JTreeSortNavigator(String projRoot) {
     
-    super(new DefaultTreeModel(new RootNode<ItemT>(projfilepath.substring(projfilepath.lastIndexOf(File.separator) + 1))));
+    super(new DefaultTreeModel(new RootNode<ItemT>(projRoot.substring(projRoot.lastIndexOf(File.separator) + 1))));
     
     addTreeSelectionListener(this);
     addTreeExpansionListener(this);
@@ -132,8 +132,8 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    *  @param projfilepath the path identifying the root node for the project
    *  @param dm the display manager for the navigagtor
    */
-  public JTreeSortNavigator(String projfilepath, DisplayManager<? super ItemT> dm) {
-    this(projfilepath);
+  public JTreeSortNavigator(String projRoot, DisplayManager<? super ItemT> dm) {
+    this(projRoot);
     _displayManager = dm;
   }
   

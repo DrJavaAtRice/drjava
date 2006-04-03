@@ -75,6 +75,9 @@ public interface FileGroupingState {
    */
   public File getProjectRoot();
   
+  /** Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. */
+  public void setProjectFile(File f);
+  
   /** Sets the current project root. */
   public void setProjectRoot(File f);
   
