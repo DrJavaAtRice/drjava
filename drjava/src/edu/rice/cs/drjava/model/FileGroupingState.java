@@ -33,6 +33,7 @@
 
 package edu.rice.cs.drjava.model;
 
+import java.util.List;
 import java.io.File;
 import java.io.IOException;
 import edu.rice.cs.drjava.model.FileMovedException;
@@ -140,6 +141,9 @@ public interface FileGroupingState {
    * cleans the build directory
    */
   public void cleanBuildDirectory() throws FileMovedException, IOException;
+  
+  /** @return a list of class files. */
+  public List<File> getClassFiles();
   
   /**
    * Jars all the open documents or the current project

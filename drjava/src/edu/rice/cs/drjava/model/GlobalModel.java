@@ -443,6 +443,9 @@ public interface GlobalModel extends ILoadDocuments {
   /** Cleans the build directory. */
   public void cleanBuildDirectory() throws FileMovedException, IOException;
   
+  /** @return a list of class files. */
+  public List<File> getClassFiles();
+  
   /** Returns a collection of all documents currently open for editing.  This is equivalent to the results of 
    *  getDocumentForFile for the set of all files for which isAlreadyOpen returns true.  The order of documents 
    *  is the same as in the display of documents in the view.

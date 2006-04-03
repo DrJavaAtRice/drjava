@@ -46,6 +46,7 @@ import java.beans.*;
 
 import java.io.*;
 import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
@@ -917,6 +918,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     public int compareTo(GoToFileListEntry other) {
       return str.toLowerCase().compareTo(other.str.toLowerCase());
     }
+    public boolean equals(Object other) {
+      if (!(other instanceof GoToFileListEntry)) return false;
+      return str.equals(((GoToFileListEntry)other).str);
+    }
+    public int hashCode() {
+      return str.hashCode();
+    }
   }
 
   /** Reset the position of the "Go to File" dialog. */
@@ -1149,34 +1157,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Initialize dialog if necessary. */
   void initCompleteFileDialog() {
     if (_completeFileDialog==null) {
-      PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
-        public String apply(GoToFileListEntry entry) {
-          StringBuilder sb = new StringBuilder();
-          
-          if (entry.doc != null) {
-            try {
-              try {
-                sb.append(FileOps.makeRelativeTo(entry.doc.file(), entry.doc.getSourceRoot()));
-              }
-              catch(IOException e) {
-                sb.append(entry.doc.getFile());
-              }
-            }
-            catch(edu.rice.cs.drjava.model.FileMovedException e) {
-              sb.append(entry + " was moved");
-            }
-            catch(java.lang.IllegalStateException e) {
-              sb.append(entry);
-            }
-            catch(edu.rice.cs.drjava.model.definitions.InvalidPackageException e) { 
-              sb.append(entry);
-            }
-          } else {
-            sb.append(entry);
-          }
-          return sb.toString();
-        }
-      };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
           if (p.getItem()!=null) {
@@ -1228,7 +1208,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                                     "Auto-Complete File",
                                                     true, // force
                                                     true, // ignore case
-                                                    info,
+                                                    null,
                                                     strategies,
                                                     okAction,
                                                     cancelAction,
@@ -1249,16 +1229,22 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     GoToFileListEntry currentEntry = null;
     ArrayList<GoToFileListEntry> list;
-    list = new ArrayList<GoToFileListEntry>(docs.size());
-    for(OpenDefinitionsDocument d: docs) {
-      if (d.isUntitled()) continue;
-      String str = d.toString();
-      if (str.lastIndexOf('.')>=0) {
-        str = str.substring(0, str.lastIndexOf('.'));
+    if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) &&
+        (_completeClassList.size()>0)) {
+      list = _completeClassList;
+    }
+    else {
+      list = new ArrayList<GoToFileListEntry>(docs.size());
+      for(OpenDefinitionsDocument d: docs) {
+        if (d.isUntitled()) continue;
+        String str = d.toString();
+        if (str.lastIndexOf('.')>=0) {
+          str = str.substring(0, str.lastIndexOf('.'));
+        }
+        GoToFileListEntry entry = new GoToFileListEntry(d, str);
+        if (d.equals(_model.getActiveDocument())) currentEntry = entry;
+        list.add(entry);
       }
-      GoToFileListEntry entry = new GoToFileListEntry(d, str);
-      if (d.equals(_model.getActiveDocument())) currentEntry = entry;
-      list.add(entry);
     }
     
     PredictiveInputModel<GoToFileListEntry> pim =
@@ -2745,7 +2731,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _openProjectHelper(File projectFile) {
     _currentProjFile = projectFile;
-    try { _model.openProject(projectFile); }
+    try {
+      _model.openProject(projectFile);
+      _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
+    }
     catch(MalformedProjectFileException e) {
       _showProjectFileParseError(e); // add to an error adapter
       return;
@@ -2791,7 +2780,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Closes project when DrJava is not in the process of quitting.
    *   @return true if the project is closed, false if cancelled.
    */
-  boolean _closeProject() { return _closeProject(false); }
+  boolean _closeProject() {
+    _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
+    return _closeProject(false);
+  }
   
   /** Signals the model to close the project, then closes all open files.  It also restores the list view navigator
    *   @ param quitting whether the project is being closed as part of quitting DrJava
@@ -3531,6 +3523,48 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     };
     worker.start();
+  }
+
+  /** List with entries for the complete dialog. */
+  ArrayList<GoToFileListEntry> _completeClassList = new ArrayList<GoToFileListEntry>();
+  
+  /** Scan the build directory for class files and update the auto-completion list. */
+  private void _scanClassFiles() {
+    Thread t = new Thread(new Runnable() {
+      public void run() {
+        List<File> classFiles = _model.getClassFiles();
+        
+        HashSet<GoToFileListEntry> hs = new HashSet<GoToFileListEntry>(classFiles.size());
+        DummyOpenDefDoc dummyDoc = new DummyOpenDefDoc();
+        for(File f: classFiles) {          
+          String s = f.toString();
+          if (s.lastIndexOf(java.io.File.separatorChar)>=0) {
+            s = s.substring(s.lastIndexOf(java.io.File.separatorChar)+1);
+          }
+          s = s.substring(0, s.lastIndexOf(".class"));
+          s = s.replace('$', '.');
+          int pos = 0;
+          boolean ok = true;
+          while((pos=s.indexOf('.', pos)) >= 0) {
+            if ((s.length()<=pos+1) || (Character.isDigit(s.charAt(pos+1)))) {
+              ok = false;
+              break;
+            }
+            ++pos;
+          }
+          if (ok) {
+            if (s.lastIndexOf('.')>=0) {
+              s = s.substring(s.lastIndexOf('.')+1);
+            }
+            GoToFileListEntry entry = new GoToFileListEntry(dummyDoc, s);
+            hs.add(entry);
+          }
+        }
+        _completeClassList = new ArrayList<GoToFileListEntry>(hs);
+      }
+    });
+    t.setPriority(Thread.MIN_PRIORITY);
+    t.start();
   }
   
   private void _runProject() {
@@ -6078,6 +6112,9 @@ public class MainFrame extends JFrame implements OptionConstants {
             }
 //          }
 //          finally { hourglassOff(); }
+            if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) {
+              _scanClassFiles();
+            }
         }
       });
     }

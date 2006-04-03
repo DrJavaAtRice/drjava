@@ -511,6 +511,10 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call cleanBuildDirectory on a Dummy");
   }
   
+  public List<File> getClassFiles()  {
+     throw new UnsupportedOperationException("Tried to call getClassFiles on a Dummy");
+  }
+  
   public OpenDefinitionsDocument getDocumentForFile(File file) throws IOException {
     throw new UnsupportedOperationException("Tried to getDocumentForFile on a Dummy with file: " + file);
   }

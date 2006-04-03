@@ -73,7 +73,6 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
       // the debugger is on, so initialize now
       // otherwise breakpoint gets re-set when debugger is enabled
       _initializeRequests(_manager.getReferenceTypes(_className, _lineNumber));
-      System.out.println("initialized requests");
       setEnabled(enabled);
     }
   }
@@ -104,7 +103,6 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
         BreakpointRequest request =
           _manager.getEventRequestManager().createBreakpointRequest(loc);
         request.setEnabled(_enabled);
-        System.out.println("adding breakpoint request, enabled = "+request.isEnabled());
         _requests.add(request);
       }
     }
@@ -136,7 +134,6 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
     _enabled = enabled;
     try {
       for(BreakpointRequest bpr: _requests) {
-        System.out.println("Breakpoint request: enabled = "+bpr.isEnabled());
         bpr.setEnabled(enabled);
       }
     }

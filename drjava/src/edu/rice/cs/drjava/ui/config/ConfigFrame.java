@@ -455,6 +455,10 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetCompleteFileDialogPosition(); }
     }, "Reset \"Auto-Complete File\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_SCAN_CLASS_FILES,
+                                                  "Scan Class Files For Auto-Completion After Each Compile", this,
+                                                  "Whether to scan the class files after a compile to generate auto-completion class names.\n"+
+                                                         "Enabling this option will slow compiles down."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_JAROPTIONS_STORE_POSITION,
                                                   "Save \"Create Jar File from Project\" Dialog Position", this,
                                                   "Whether to save and restore the position of the \"Create Jar File from Project\" dialog."));

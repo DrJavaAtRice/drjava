@@ -1075,6 +1075,10 @@ public interface OptionConstants {
   /** Whether to save and restore window size and position at startup/shutdown. */
   public static final BooleanOption DIALOG_COMPLETE_FILE_STORE_POSITION =
     new BooleanOption("dialog.completefile.store.position", Boolean.TRUE);
+  
+  /** Whether to scan class files for auto-completion class names. */
+  public static final BooleanOption DIALOG_COMPLETE_SCAN_CLASS_FILES =
+    new BooleanOption("dialog.completefile.scan.class.files", Boolean.FALSE);
 
   /** The last state of the "Create Jar from Project " dialog. */
   public static final StringOption DIALOG_JAROPTIONS_STATE = new StringOption("dialog.jaroptions.state", "default");

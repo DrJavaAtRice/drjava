@@ -71,6 +71,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
+import java.util.WeakHashMap;
 
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOps;
@@ -519,6 +520,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _state.cleanBuildDirectory();
   }
   
+  public List<File> getClassFiles() { return _state.getClassFiles(); }
+  
   /** Helper method used in subsequent anonymous inner class */
   protected static String getPackageName(String classname) {
     int index = classname.lastIndexOf(".");
@@ -526,7 +529,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     else return "";
   }
   
-
+  
   class ProjectFileGroupingState implements FileGroupingState {
     
     File _projRoot;
@@ -691,6 +694,27 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       } else if (f.getName().endsWith(".class")) f.delete();
     }
     
+    public List<File> getClassFiles() {
+      File dir = this.getBuildDirectory();
+      LinkedList<File> acc = new LinkedList<File>();
+      getClassFilesHelper(dir, acc);
+      if (! dir.exists()) dir.mkdirs();
+      return acc;
+    }
+    
+    private void getClassFilesHelper(File f, LinkedList<File> acc) {
+      if (f.isDirectory()) {
+        
+        File fs[] = f.listFiles(new FilenameFilter() {
+          public boolean accept(File parent, String name) {
+            return new File(parent, name).isDirectory() || name.endsWith(".class");
+          }
+        });
+        
+        for (File kid: fs) { getClassFilesHelper(kid, acc); }
+        
+      } else if (f.getName().endsWith(".class")) acc.add(f);
+    }    
     
     /** returns the name of the package from a fully qualified classname. */
     
@@ -762,6 +786,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       throw new UnsupportedOperationException("AbstractGlobalModel does not support unit tests");
     }
     public void cleanBuildDirectory() throws FileMovedException, IOException { }
+    
+    public List<File> getClassFiles() { return new LinkedList<File>(); }
     
     /** Jars all the open files. 
      throws UnsupportedOperationException */
@@ -2105,6 +2131,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         private List<FinalizationListener<DefinitionsDocument>> _finalListeners =
           new LinkedList<FinalizationListener<DefinitionsDocument>>();
         
+        // Weak hashmap that associates a WrappedPosition with its offset when saveDocInfo was called
+        private WeakHashMap<DefinitionsDocument.WrappedPosition, Integer> _positions =
+          new WeakHashMap<DefinitionsDocument.WrappedPosition, Integer>();
+        
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException {
           DefinitionsDocument tempDoc;
           tempDoc = new DefinitionsDocument(_notifier);
@@ -2125,6 +2155,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             tempDoc.addFinalizationListener(l);
           }
 
+          // re-create and update all positions
+          tempDoc.setWrappedPositionOffsets(_positions);
+          
           tempDoc.resetModification();  // Why is this necessary? A reconstructed document is already unmodified.
 
           //            tempDoc.setUndoManager(_undo);
@@ -2141,6 +2174,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           _loc = doc.getCurrentLocation();
           _list = doc.getDocumentListeners();
           _finalListeners = doc.getFinalizationListeners();
+          
+          // save offsets of all positions
+          _positions.clear();
+          _positions = doc.getWrappedPositionOffsets();
         }
         
         public void addDocumentListener(DocumentListener dl) {

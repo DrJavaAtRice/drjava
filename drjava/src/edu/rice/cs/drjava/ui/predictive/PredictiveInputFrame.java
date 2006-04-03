@@ -189,7 +189,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
                               java.util.List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               CloseAction<T> okAction, CloseAction<T> cancelAction, java.util.List<T> items) {
     super(title);
-    if (info==null) throw new IllegalArgumentException("info is null");
     _strategies = strategies;
     _currentStrategy = _strategies.get(0);
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
@@ -198,7 +197,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     _owner = owner;
     _okAction = okAction;
     _cancelAction = cancelAction;
-    init(true);
+    init(_info!=null);
   }
 
   /** Create a new predictive string input frame.
@@ -214,7 +213,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
                               java.util.List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               CloseAction<T> okAction, CloseAction<T> cancelAction, T... items) {
     super(title);
-    if (info==null)  throw new IllegalArgumentException("info is null");
     _strategies = strategies;
     _currentStrategy = _strategies.get(0);
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
@@ -223,7 +221,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     _owner = owner;
     _okAction = okAction;
     _cancelAction = cancelAction;
-    init(true);
+    init(_info!=null);
   }
   
   /** Returns the last state of the frame, i.e. the location and dimension.
@@ -672,6 +670,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
 
   /** Update the information. */
   private void updateInfo() {
+    if (_info==null) return;
     if (_matchList.getModel().getSize()>0)  _infoLabel.setText("Path:   " + _info.apply(_pim.getCurrentItem()));
     else _infoLabel.setText("No file selected");
   }
