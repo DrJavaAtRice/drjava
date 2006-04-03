@@ -138,6 +138,22 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
       _lock.endRead();
     }
   }
+
+  /** Called when a breakpoint is changed during execution. Must be executed in event thread.
+   *  @param bp the breakpoint
+   */
+  public void breakpointChanged(Breakpoint bp) {
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for (int i = 0; i < size; i++) {
+        _listeners.get(i).breakpointChanged(bp);
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
   
   /** Called when a watch is set.  Must be executed in event thread.
    *  @param w the watch

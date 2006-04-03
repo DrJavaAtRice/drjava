@@ -400,6 +400,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     protected int threadLocationUpdatedCount = 0;
     protected int breakpointSetCount = 0;
     protected int breakpointReachedCount = 0;
+    protected int breakpointChangedCount = 0;
     protected int breakpointRemovedCount = 0;
     protected int watchSetCount = 0;
     protected int watchRemovedCount = 0;
@@ -429,6 +430,10 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
     public void assertBreakpointReachedCount(int i) {
       assertEquals("number of times breakpointReached fired", i, breakpointReachedCount);
+    }
+
+    public void assertBreakpointChangedCount(int i) {
+      assertEquals("number of times breakpointChanged fired", i, breakpointChangedCount);
     }
 
     public void assertBreakpointRemovedCount(int i) {
@@ -487,6 +492,8 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     public void breakpointSet(Breakpoint bp) { fail("breakpointSet fired unexpectedly"); }
 
     public void breakpointReached(Breakpoint bp) { fail("breakpointReached fired unexpectedly"); }
+
+    public void breakpointChanged(Breakpoint bp) { fail("breakpointChanged fired unexpectedly"); }
 
     public void breakpointRemoved(Breakpoint bp) { fail("breakpointRemoved fired unexpectedly"); }
 

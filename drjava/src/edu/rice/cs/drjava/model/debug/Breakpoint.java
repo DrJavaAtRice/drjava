@@ -45,6 +45,8 @@ import javax.swing.text.Position;
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
+import java.io.*;
+
 /** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest
  */
 public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implements DebugBreakpointData {
@@ -72,7 +74,8 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
     if ((_manager!=null) && (_manager.isReady())) {
       // the debugger is on, so initialize now
       // otherwise breakpoint gets re-set when debugger is enabled
-      _initializeRequests(_manager.getReferenceTypes(_className, _lineNumber));
+      Vector<ReferenceType> refTypes = _manager.getReferenceTypes(_className, _lineNumber);
+      _initializeRequests(refTypes);
       setEnabled(enabled);
     }
   }
@@ -97,9 +100,11 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
         List lines = rt.locationsOfLine(_lineNumber);
         if (lines.size() == 0) {
           // Can't find a location on this line
+          setEnabled(false);          
           throw new DebugException("Could not find line number: " + _lineNumber);
         }
         Location loc = (Location) lines.get(0);
+        
         BreakpointRequest request =
           _manager.getEventRequestManager().createBreakpointRequest(loc);
         request.setEnabled(_enabled);
@@ -124,20 +129,19 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
    */
   public int getEndOffset() {
     return _endPos.getOffset();
-  }  
-  
-  /** @return true if breakpoint is enabled. */
-  public boolean isEnabled() { return _enabled; }
+  }
   
   /** Enable/disable the breakpoint. */
   public void setEnabled(boolean enabled) {
-    _enabled = enabled;
+    boolean old = _enabled;
+    super.setEnabled(enabled);
     try {
       for(BreakpointRequest bpr: _requests) {
         bpr.setEnabled(enabled);
       }
     }
     catch(VMDisconnectedException vmde) { /* just ignore */ }
+    if (_enabled!=old) _manager._notifier.breakpointChanged(this);
   }
 
   public String toString() {

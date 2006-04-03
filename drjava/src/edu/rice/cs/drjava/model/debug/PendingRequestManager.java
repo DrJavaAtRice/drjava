@@ -41,6 +41,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
+import java.io.*;
+
 /**
  * Keeps track of DocumentDebugActions that are waiting to be resolved when the
  * classes they corresponed to are prepared.  (Only DocumentDebugActions have
@@ -98,6 +100,28 @@ public class PendingRequestManager {
   }
 
   /**
+   * Recursively look through all nested types to see if the line number exists.
+   * @param lineNumber line number to look for
+   * @param rt reference type to start at
+   * @return true if line number is found
+   */
+  private boolean recursiveFindLineNumber(int lineNumber, ReferenceType rt) {
+    try {
+      for(Location l: rt.allLineLocations()) {
+        if (l.lineNumber()==lineNumber) { return true; }
+      }
+      for(ReferenceType nested: rt.nestedTypes()) {
+        if (recursiveFindLineNumber(lineNumber, nested)==true) { return true; }
+      }
+    }
+    catch (AbsentInformationException aie) {
+      // ignore, return false
+    }
+    
+    return false;
+  }
+  
+  /**
    * Called by the EventHandler whenever a ClassPrepareEvent occurs.
    * This will take the event, get the class that was prepared, lookup
    * the Vector of DebugAction that was waiting for this class's preparation,
@@ -146,6 +170,9 @@ public class PendingRequestManager {
         try {
           List lines = rt.locationsOfLine(lineNumber);
           if (lines.size() == 0) {
+            // Do not disable action; the line number might just be in another class in the same file
+            //actions.get(i).setEnabled(false);
+
             // Requested line number not in reference type, skip this action
             //i++;
             continue;

@@ -77,8 +77,13 @@ public interface DebugListener {
    */
   public void breakpointReached(Breakpoint bp);
   
-  /** Called when a breakpoint is removed from a document.  Must be executed in event thread.
+  /** Called when a breakpoint is changed.
    *  @param bp the breakpoint
+   */
+  public void breakpointChanged(Breakpoint bp);
+  
+  /** Called when a breakpoint is removed from a document.  Must be executed in event thread.
+   *  @param old the previous breakpoint data
    */
   public void breakpointRemoved(Breakpoint bp);
 

@@ -582,6 +582,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
      * Called when a breakpoint is reached during execution. */
     public void breakpointReached(final Breakpoint bp) { }
 
+    /**
+     * Called when a breakpoint is changed. */
+    public void breakpointChanged(final Breakpoint bp) { }
+
     /** Called when a breakpoint is removed from a document. */
     public void breakpointRemoved(final Breakpoint bp) { }
 

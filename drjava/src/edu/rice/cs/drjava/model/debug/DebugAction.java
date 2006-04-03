@@ -154,4 +154,13 @@ public abstract class DebugAction<T extends EventRequest> {
     // Add properties
     request.putProperty("debugAction", this);
   }
+  
+  /** @return true if breakpoint is enabled. */
+  public boolean isEnabled() { return _enabled; }
+  
+  
+  /** Enable/disable the breakpoint. */
+  public void setEnabled(boolean enabled) {
+    _enabled = enabled;
+  }
 }

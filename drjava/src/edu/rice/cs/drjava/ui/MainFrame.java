@@ -5836,6 +5836,12 @@ public class MainFrame extends JFrame implements OptionConstants {
 //      _currentDefPane.notifyActive();
     }
     
+    /** Called when a breakpoint is changed. Must execute in event thread. */
+    public void breakpointChanged(Breakpoint bp) { 
+      breakpointRemoved(bp);
+      breakpointSet(bp);
+    }
+    
     /* Must be executed in event thread. */
     public void breakpointRemoved(final Breakpoint bp) {
       

@@ -310,7 +310,7 @@ public class BreakpointsPanel extends TabbedPanel {
     else {
       DefaultMutableTreeNode lineNode =
         (DefaultMutableTreeNode)path.getLastPathComponent();
-      int line = ((Integer) lineNode.getUserObject()).intValue();
+      int line = ((BPTreeUserObj) lineNode.getUserObject()).lineNumber();
       DefaultMutableTreeNode classNameNode =
         (DefaultMutableTreeNode) path.getPathComponent(1);
       String className = (String) classNameNode.getUserObject();
@@ -396,11 +396,11 @@ public class BreakpointsPanel extends TabbedPanel {
             DefaultMutableTreeNode lineNumber = (DefaultMutableTreeNode)lineNumbers.nextElement();
             
             //if line number of indexed breakpoint is less than new breakpoint, continue
-            if (((Integer)lineNumber.getUserObject()).intValue() > bp.getLineNumber()) {
+            if (((BPTreeUserObj)lineNumber.getUserObject()).lineNumber() > bp.getLineNumber()) {
               
               //else, add to the list
               DefaultMutableTreeNode newBreakpoint =
-                new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
+                new DefaultMutableTreeNode(new BPTreeUserObj(bp.getLineNumber(), bp.isEnabled()));
               _bpTreeModel.insertNodeInto(newBreakpoint, doc, doc.getIndex(lineNumber));
               
               // Make sure this node is visible
@@ -410,7 +410,7 @@ public class BreakpointsPanel extends TabbedPanel {
           }
           //if none are greater, add at the end
           DefaultMutableTreeNode newBreakpoint =
-            new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
+            new DefaultMutableTreeNode(new BPTreeUserObj(bp.getLineNumber(), bp.isEnabled()));
           _bpTreeModel.insertNodeInto(newBreakpoint, doc, doc.getChildCount());
           
           // Make sure this node is visible
@@ -421,7 +421,7 @@ public class BreakpointsPanel extends TabbedPanel {
       // No matching document node was found, so create one
       _bpTreeModel.insertNodeInto(bpDocNode, _breakpointRootNode, _breakpointRootNode.getChildCount());
       DefaultMutableTreeNode newBreakpoint =
-        new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
+        new DefaultMutableTreeNode(new BPTreeUserObj(bp.getLineNumber(), bp.isEnabled()));
       _bpTreeModel.insertNodeInto(newBreakpoint, bpDocNode, bpDocNode.getChildCount());
       
       // Make visible
@@ -470,6 +470,44 @@ public class BreakpointsPanel extends TabbedPanel {
     }
     
     /**
+     * Called when a breakpoint is changed.
+     * Removes the breakpoint from the tree of breakpoints.
+     * @param bp the breakpoint
+     */
+    public void breakpointChanged(final Breakpoint bp) {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          DefaultMutableTreeNode bpDocNode = new DefaultMutableTreeNode(bp.getClassName());
+          
+          // Find the document node for this breakpoint
+          Enumeration documents = _breakpointRootNode.children();
+          boolean found = false;
+          while ((!found) && (documents.hasMoreElements())) {
+            DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
+            if (doc.getUserObject().equals(bpDocNode.getUserObject())) {
+              // Find the correct line number node for this breakpoint
+              Enumeration lineNumbers = doc.children();
+              while (lineNumbers.hasMoreElements()) {
+                DefaultMutableTreeNode lineNumber =
+                  (DefaultMutableTreeNode)lineNumbers.nextElement();
+                BPTreeUserObj uo = (BPTreeUserObj)lineNumber.getUserObject();
+                if (uo.lineNumber()==bp.getLineNumber()) {
+                  uo.setEnabled(bp.isEnabled());
+                  ((DefaultTreeModel)_bpTree.getModel()).nodeChanged(lineNumber);
+                  found = true;
+                  break;
+                }
+              }
+            }
+          }
+          _updateButtons();
+        }
+      };
+      Utilities.invokeLater(doCommand);
+    }
+    
+    /**
      * Called when a breakpoint is removed from a document.
      * Removes the breakpoint from the tree of breakpoints.
      * @param bp the breakpoint
@@ -491,7 +529,7 @@ public class BreakpointsPanel extends TabbedPanel {
               while (lineNumbers.hasMoreElements()) {
                 DefaultMutableTreeNode lineNumber =
                   (DefaultMutableTreeNode)lineNumbers.nextElement();
-                if (lineNumber.getUserObject().equals(new Integer(bp.getLineNumber()))) {
+                if (((BPTreeUserObj)lineNumber.getUserObject()).lineNumber()==bp.getLineNumber()) {
                   _bpTreeModel.removeNodeFromParent(lineNumber);
                   if (doc.getChildCount() == 0) {
                     // this document has no more breakpoints, remove it
@@ -572,5 +610,15 @@ public class BreakpointsPanel extends TabbedPanel {
       super.setBackground(c);
       if (BreakpointsPanel.this != null && dtcr != null) dtcr.setBackgroundNonSelectionColor(c);
     }
+  }
+  
+  private class BPTreeUserObj {
+    private int _lineNumber;
+    private boolean _enabled;
+    public int lineNumber() { return _lineNumber; }
+    public boolean isEnabled() { return _enabled; }
+    public void setEnabled(boolean e) { _enabled = e; }
+    public BPTreeUserObj(int l, boolean e) { _lineNumber = l; _enabled = e; }
+    public String toString() { return String.valueOf(_lineNumber) + ((_enabled)?"":" (disabled)"); }
   }
 }

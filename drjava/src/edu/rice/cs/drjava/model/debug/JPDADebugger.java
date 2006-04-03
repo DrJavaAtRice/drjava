@@ -97,7 +97,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private PendingRequestManager _pendingRequestManager;
 
   /** Provides a way for the JPDADebugger to communicate with the view. */
-  private final DebugEventNotifier _notifier = new DebugEventNotifier();
+  final DebugEventNotifier _notifier = new DebugEventNotifier();
 
   /** The running ThreadReference that we are debugging. */
   private ThreadReference _runningThread;

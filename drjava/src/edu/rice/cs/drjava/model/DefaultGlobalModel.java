@@ -86,6 +86,8 @@ import edu.rice.cs.drjava.model.compiler.DefaultCompilerModel;
 import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 
+import java.io.*;
+
 /** Handles the bulk of DrJava's program logic. The UI components interface with the GlobalModel through its public
  *  methods, and teh GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
  *  UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile
@@ -903,6 +905,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           setProjectChanged(true);
         }
         public void breakpointReached(final Breakpoint bp) { }
+        public void breakpointChanged(final Breakpoint bp) {
+          setProjectChanged(true);
+        }    
         public void breakpointRemoved(final Breakpoint bp) {
           setProjectChanged(true);
         }    
