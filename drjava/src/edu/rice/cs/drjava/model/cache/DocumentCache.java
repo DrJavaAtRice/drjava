@@ -72,7 +72,7 @@ import edu.rice.cs.util.OrderedHashSet;
 
 public class DocumentCache {
   
-  private static final int INIT_CACHE_SIZE = 2; // normally 24
+  private static final int INIT_CACHE_SIZE = 24;
   
   /** @invariant _residentQueue.size() <= CACHE_SIZE */
   private int CACHE_SIZE;

@@ -33,34 +33,27 @@
 
 package edu.rice.cs.drjava;
 
-import java.io.*;
+import static edu.rice.cs.drjava.config.OptionConstants.JAVAC_LOCATION;
+import static edu.rice.cs.drjava.config.OptionConstants.WORKING_DIRECTORY;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.StringTokenizer;
-import java.util.jar.JarFile;
-import javax.swing.UIManager;
-import javax.swing.*;
 
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.OutputStreamRedirector;
-import edu.rice.cs.util.newjvm.ExecJVM;
-import edu.rice.cs.util.classloader.ToolsJarClassLoader;
-import edu.rice.cs.util.swing.Utilities;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
-import edu.rice.cs.drjava.ui.MainFrame;
-import edu.rice.cs.drjava.ui.SplashScreen;
-import edu.rice.cs.drjava.ui.ClassPathFilter;
-import edu.rice.cs.drjava.ui.AWTExceptionHandler;
-import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
-import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.config.FileConfiguration;
-import edu.rice.cs.drjava.config.*;
-
-import static edu.rice.cs.drjava.config.OptionConstants.*;
+import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.drjava.ui.AWTExceptionHandler;
+import edu.rice.cs.drjava.ui.ClassPathFilter;
+import edu.rice.cs.drjava.ui.SplashScreen;
+import edu.rice.cs.util.classloader.ToolsJarClassLoader;
+import edu.rice.cs.util.newjvm.ExecJVM;
 
 /** Startup class for DrJava.  The main method reads the .drjava file (creating one if none exists) to get the
  *  critical information required to start the main JVM for DrJava: 
@@ -122,7 +115,7 @@ public class DrJava {
     // This obviously only runs in the main thread, not the UI thread, so use SwingUtilities rather than Utilities.
     SwingUtilities.invokeLater(new Runnable() { 
       public void run() { 
-        try { Thread.currentThread().sleep(PAUSE_TIME); }
+        try { Thread.sleep(PAUSE_TIME); }
         catch(InterruptedException e) { }
         splash.dispose(); 
       }});
@@ -280,7 +273,6 @@ public class DrJava {
    *  debugger.  
    *  @param needCompiler whether DrJava needs tools.jar for a compiler
    *  @param needDebugger whether DrJava needs tools.jar for the debugger
-   *  @return whether we will need to restart to put tools.jar on classpath
    */
   public static void promptForToolsJar(boolean needCompiler, boolean needDebugger) {
     final String[] text  = new String[] {
