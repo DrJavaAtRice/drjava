@@ -63,9 +63,8 @@ import edu.rice.cs.javalanglevels.tree.*;
  *  @version $Id$
  */
 public class DefaultCompilerModel implements CompilerModel {
-
-  /** Returns file extensions of files types that we can compile. */
-  private String[] getCompilableExtensions() { return new String[]{".java", ".dj0", ".dj1", ".dj2"}; }
+  
+  private static final String[] EXTENSIONS = new String[]{".java", ".dj0", ".dj1", ".dj2"};
   
   /** Manages listeners to this model. */
   private final CompilerEventNotifier _notifier = new CompilerEventNotifier();
@@ -150,31 +149,31 @@ public class DefaultCompilerModel implements CompilerModel {
     compile(defDocs);
   }
   
-  //TODO: compileAll(roots,files), compile(docs), and compile(doc) contain very similar code;
-  //  they should be refactored into one core routine and three adaptations (instantiations?)
-  
-  /** Compiles all files with the specified source root set.  
-   *  @param sourceRootSet a list of source roots
-   *  @param filesToCompile a list of files to compile
-   */
-  public void compileAll(List<File> sourceRootSet, List<File> filesToCompile) throws IOException {
- 
-    List<OpenDefinitionsDocument> defDocs;
-    
-    defDocs = _model.getOpenDefinitionsDocuments(); 
-    
-//    System.err.println("Docs to compile: " + defDocs);
-    
-    // Only compile if all are saved
-    if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
-    
-    // Check for modified project files, in case they didn't save when prompted. If any files haven't been saved
-    // after we told our listeners to do so, don't proceed with the rest of the compile.
-    if (_hasModifiedFiles(defDocs)) return;
-    
-    // Get sourceroots and all files
-    _rawCompile(sourceRootSet.toArray(new File[0]), filesToCompile.toArray(new File[0]));
-  }
+//  //TODO: compileAll(roots,files), compile(docs), and compile(doc) contain very similar code;
+//  //  they should be refactored into one core routine and three adaptations (instantiations?)
+//  
+//  /** Compiles all files with the specified source root set.  
+//   *  @param sourceRootSet a list of source roots
+//   *  @param filesToCompile a list of files to compile
+//   */
+//  public void compileAll(List<File> sourceRootSet, List<File> filesToCompile) throws IOException {
+// 
+//    List<OpenDefinitionsDocument> defDocs;
+//    
+//    defDocs = _model.getOpenDefinitionsDocuments(); 
+//    
+////    System.err.println("Docs to compile: " + defDocs);
+//    
+//    // Only compile if all are saved
+//    if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
+//    
+//    // Check for modified project files, in case they didn't save when prompted. If any files haven't been saved
+//    // after we told our listeners to do so, don't proceed with the rest of the compile.
+//    if (_hasModifiedFiles(defDocs)) return;
+//    
+//    // Get sourceroots and all files
+//    _rawCompile(sourceRootSet.toArray(new File[0]), filesToCompile.toArray(new File[0]), new File[0]);
+//  }
   
   /** Compiles all documents in the specified list of OpenDefinitionsDocuments. */
   public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
@@ -191,21 +190,22 @@ public class DefaultCompilerModel implements CompilerModel {
     
     // Get sourceroots and all files
     ArrayList<File> filesToCompile = new ArrayList<File>();
+    ArrayList<File> excludedFiles = new ArrayList<File>();
     
     File f;
-    String[] exts = getCompilableExtensions();
+    
     for (OpenDefinitionsDocument doc : defDocs) {
       f = doc.getFile();
 //      System.err.println("File name for " + doc + " is " + f);
       if (f == null) continue; // No file for this document; skip it
-      if (endsWithExt(f, exts)) filesToCompile.add(f);
+      if (endsWithExt(f, EXTENSIONS)) filesToCompile.add(f);
+      else excludedFiles.add(f);
     } 
     
 //    System.err.println("Filtered list of docs to compile: " + filesToCompile);
     
-    _rawCompile(getSourceRootSet(), filesToCompile.toArray(new File[0]));
+    _rawCompile(getSourceRootSet(), filesToCompile.toArray(new File[0]), excludedFiles.toArray(new File[0]));
   }
-  
   
   /** Starts compiling the specified source document.  Demands that the definitions be saved before proceeding
    *  with the compile. If the compile can proceed, a compileStarted event is fired which guarantees that a 
@@ -234,14 +234,24 @@ public class DefaultCompilerModel implements CompilerModel {
       if (doc.isUntitled()) return;
     }
     
-    File[] files = { doc.getFile() };  
-    // throws a FileMovedException if file has moved, which is preferable to the InvalidPackageException produced
-    // by getSourceRoot for the same circumstances
-     
-    _rawCompile(new File[] { doc.getSourceRoot() }, files); 
+    File f = doc.getFile();
+    File[] files, excludedFiles;
+    
+    if (endsWithExt(f, EXTENSIONS)) {
+      files = new File[]{f};
+      excludedFiles = new File[0];
+    }
+    else {
+      files = new File[0];
+      excludedFiles = new File[]{f};
+    }
+    _rawCompile(new File[] { doc.getSourceRoot() }, files, excludedFiles); 
   }
   
-  private void _rawCompile(File[] sourceRoots, File[] files) throws IOException {
+  private void _rawCompile(File[] sourceRoots, File[] files, File[] excludedFiles) throws IOException {
+    
+//    Utilities.show("_rawCompile(" + Arrays.toString(sourceRoots) + ", " + 
+//                   Arrays.toString(files) + ", " + Arrays.toString(excludedFiles) + ")");
     
     File buildDir = _model.getBuildDirectory();
     File workDir = _model.getWorkingDirectory();
@@ -260,7 +270,7 @@ public class DefaultCompilerModel implements CompilerModel {
       CompilerError[] errors = new CompilerError[] { err };
       _distributeErrors(errors);
     }
-    finally { _notifier.compileEnded(workDir); }
+    finally { _notifier.compileEnded(workDir, excludedFiles); }
   }
   
 

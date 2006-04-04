@@ -69,6 +69,9 @@ public class CompilerErrorPanel extends ErrorPanel {
   private CompilerErrorListPane _errorListPane;
   private final JComboBox _compilerChoiceBox;
   
+  /** The list of files from the last compilation unit that were not compiled because they were not source files. */
+  private File[] _excludedFiles = new File[0];
+  
   /** Constructor.
    *  @param model SingleDisplayModel in which we are running
    *  @param frame MainFrame in which we are displayed
@@ -147,6 +150,12 @@ public class CompilerErrorPanel extends ErrorPanel {
     reset();
   }
   
+  /** Reset the errors to the current error information immediately following compilation */
+  public void reset(File[] excludedFiles) {
+    _excludedFiles = excludedFiles;
+    reset();
+  }
+  
   /** Reset the errors to the current error information. */
   public void reset() {
     // _nextErrorButton.setEnabled(false);
@@ -191,8 +200,15 @@ public class CompilerErrorPanel extends ErrorPanel {
     protected void _updateNoErrors(boolean done) throws BadLocationException {
       SwingDocument doc = new SwingDocument();
       String message;
-      if (_compileHasOccurred) 
-        message = "Last compilation completed successfully.";
+      if (_compileHasOccurred) {
+        if (_excludedFiles.length == 0) message = "Compilation completed.";
+        else {
+          StringBuffer msgBuffer = 
+            new StringBuffer("Compilation completed.  The following files were not compiled:\n");
+          for (File f: _excludedFiles)  msgBuffer.append("  ").append(f).append('\n'); 
+          message = msgBuffer.toString();
+        }
+      }
       else if (getModel().getCompilerModel().getAvailableCompilers().length == 0)
         message = "No compiler is available.  Please specify one in\nthe Preferences dialog in the Edit menu.";
       else if (getModel().getCompilerModel().getActiveCompiler() == NoCompilerAvailable.ONLY)

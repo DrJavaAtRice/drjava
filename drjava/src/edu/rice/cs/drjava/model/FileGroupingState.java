@@ -63,9 +63,6 @@ public interface FileGroupingState {
   /** junits all files that the state considers "all" (ie, all files in project directory in project mode). */
   public void junitAll();
   
-  /** Compiles all files that the state considers "all" (ie, all files in project directory in project mode). */
-  public void compileAll() throws IOException;
-  
   /** Returns the current project file
    *  @return null if not currently in a project
    */

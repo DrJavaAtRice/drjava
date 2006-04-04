@@ -127,9 +127,7 @@ public class JavadocErrorPanel extends ErrorPanel {
       _updateWithErrors(failureName, "found", doc);
     }
 
-    /**
-     * Used to show that the last compile was successful.
-     */
+    /** Used to show that the last compile was successful. */
     protected void _updateNoErrors(boolean done) throws BadLocationException {
       SwingDocument doc = new SwingDocument();
       String msg = (done) ? "Javadoc generated successfully." : "";

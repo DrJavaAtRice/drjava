@@ -358,9 +358,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   }
 
   /** Called when a compile has finished running. */
-  public void compileEnded(File workDir) {
+  public void compileEnded(File workDir, File[] excludedFiles) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.compileEnded(workDir); } }
+    try { for (GlobalModelListener l : _listeners) { l.compileEnded(workDir, excludedFiles); } }
     finally { _lock.endRead(); }
   }
 

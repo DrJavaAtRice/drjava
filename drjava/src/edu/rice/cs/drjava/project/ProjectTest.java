@@ -73,23 +73,6 @@ public class ProjectTest extends DrJavaTestCase {
     catch(IOException e) { fail("could not initialize temp path string"); }
   }
 
-//  /** Creates a temporary file and writes the given string to that file
-//   *  @param fname the name of the file to create
-//   *  @param text the text to write to the file
-//   *  @return the File that was created
-//   */
-//  private File _fillTempFile(String fname, String text) {
-//    File f = null;
-//    try {
-//      f = File.createTempFile(fname, null);
-//      FileWriter fw = new FileWriter(f);
-//      fw.write(text, 0, text.length());
-//      fw.close();
-//    }
-//    catch (IOException e) { throw new RuntimeException("IOException thrown while writing to temp file"); }
-//    return f;
-//  }
-
   /** Test to make sure all elements of the project are read correctly into the IR */
   public void testLegacyParseProject() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String proj1 =
@@ -167,8 +150,10 @@ public class ProjectTest extends DrJavaTestCase {
       "   (file (name \"sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
       "(auxiliary ;; absolute file names\n" +
-      "   (file (name " + convertToLiteral(new File(parent,"junk/sexp/Tokens.java").getCanonicalPath()) +")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name " + convertToLiteral(new File(parent,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
+      "   (file (name " + convertToLiteral(new File(parent,"junk/sexp/Tokens.java").getCanonicalPath()) +
+          ")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
+      "   (file (name " + convertToLiteral(new File(parent,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +
+          ")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
       "(collapsed ;; relative paths\n" +
       "   (path \"./[ Source Files ]/sexp/\")\n" +
       "   (path \"./[ External ]/\"))\n" +
@@ -269,9 +254,12 @@ public class ProjectTest extends DrJavaTestCase {
 
     String base = pf.getParent();
     
-    assertEquals("first source filename", new File(parent,"/dir1/testfile1.java").getPath(), pfir.getSourceFiles()[0].getPath());
-    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), pfir.getSourceFiles()[4].getPath());
-    assertEquals("first aux filename", new File(parent,"test/testfile6.java").getPath(), pfir.getAuxiliaryFiles()[0].getPath());
+    assertEquals("first source filename", new File(parent,"/dir1/testfile1.java").getPath(), 
+                 pfir.getSourceFiles()[0].getPath());
+    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), 
+                 pfir.getSourceFiles()[4].getPath());
+    assertEquals("first aux filename", new File(parent,"test/testfile6.java").getPath(), 
+                 pfir.getAuxiliaryFiles()[0].getPath());
     assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);
     assertEquals("build-dir name", buildDir, pfir.getBuildDirectory());
     assertEquals("work-dir name", srcDir, pfir.getWorkingDirectory());
@@ -284,8 +272,12 @@ public class ProjectTest extends DrJavaTestCase {
                                         final int scrollh, final String fname, final String pack,
                                         final boolean active, final boolean untitled, final File pf) {
     return new DocumentInfoGetter() {
-      public Pair<Integer,Integer> getSelection() { return new Pair<Integer,Integer>(new Integer(sel1),new Integer(sel2)); }
-      public Pair<Integer,Integer> getScroll() { return new Pair<Integer,Integer>(new Integer(scrollv),new Integer(scrollh)); }
+      public Pair<Integer,Integer> getSelection() { 
+        return new Pair<Integer,Integer>(new Integer(sel1),new Integer(sel2)); 
+      }
+      public Pair<Integer,Integer> getScroll() { 
+        return new Pair<Integer,Integer>(new Integer(scrollv),new Integer(scrollh)); 
+      }
       public File getFile() {
         if (pf == null) return new File(fname);
         else return new File(pf.getParentFile(),fname);

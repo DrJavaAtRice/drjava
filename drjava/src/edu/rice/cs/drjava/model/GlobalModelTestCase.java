@@ -843,7 +843,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("compileStarted fired unexpectedly");
     }
 
-    public void compileEnded(File workDir) {
+    public void compileEnded(File workDir, File[] excludedFiles) {
       listenerFail("compileEnded fired unexpectedly");
     }
 
@@ -956,7 +956,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       compileStartCount++;
     }
 
-    public void compileEnded(File workDir) {
+    public void compileEnded(File workDir, File[] excludedFiles) {
 //      Utilities.showDebug("compileEnded called in CSSListener");
       assertCompileEndCount(0);
       assertCompileStartCount(1);
@@ -1022,7 +1022,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       compileStartCount++;
     }
 
-    public void compileEnded(File workDir) {
+    public void compileEnded(File workDir, File[] excludedFiles) {
       assertCompileEndCount(0);
       assertCompileStartCount(1);
       compileEndCount++;

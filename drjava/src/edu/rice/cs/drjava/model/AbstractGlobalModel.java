@@ -390,9 +390,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Delegates the compileAll command to the _state, a FileGroupingState.
    *  Synchronization is handled by the compilerModel.
    */
-  public void compileAll() throws IOException { 
-    throw new UnsupportedOperationException("AbstractGlobalModel does not support compilation");
-  }
+//  public void compileAll() throws IOException { 
+//    throw new UnsupportedOperationException("AbstractGlobalModel does not support compilation");
+//  }
   
   /** @param state the new file grouping state. */
   public void setFileGroupingState(FileGroupingState state) {
@@ -716,14 +716,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       } else if (f.getName().endsWith(".class")) acc.add(f);
     }    
     
-    /** returns the name of the package from a fully qualified classname. */
-    
-//      // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
-    //throws UnsupportedOperationException
-    public void compileAll() throws IOException {
-      throw new UnsupportedOperationException("AbstractGlobalModel does not support compilation");
-    }
-    
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
     //throws UnsupportedOperationException
     public void junitAll() {
@@ -775,11 +767,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean isProjectChanged() { return false; }
     public void setProjectChanged(boolean changed) { /* Do nothing  */  }
     public boolean isAuxiliaryFile(File f) { return false; }
-    
-    //throws UnsupportedOperationException
-    public void compileAll() throws IOException {
-      throw new UnsupportedOperationException("AbstractGlobalModel does not suport compilation");
-    }
     
     //throws UnsupportedOperationException
     public void junitAll() { 
@@ -2393,6 +2380,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           
           /* update the navigator */
           _documentNavigator.refreshDocument(this, fixPathForNavigator(file.getCanonicalPath()));
+          
+          /* set project changed flag */
+          setProjectChanged(true);
         }
         return true;
       }
@@ -2403,9 +2393,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
   
-    /** Whenever this document has been saved, this method should be called so that it knows it's no longer in
-     *  a modified state.
-     */
+    /** Whenever this document has been saved, this method should be called to update its "isModified" information. */ 
     public void resetModification() {
       getDocument().resetModification();
       if (_file != null) _timestamp = _file.lastModified();

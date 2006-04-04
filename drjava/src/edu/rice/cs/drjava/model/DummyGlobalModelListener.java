@@ -98,7 +98,7 @@ public class DummyGlobalModelListener implements GlobalModelListener {
   public void compileStarted() { }
 
   /** Called when a compile has finished running. */
-  public void compileEnded(File workDir) { }
+  public void compileEnded(File workDir, File[] excludedFiles) { }
   
   /** Called when a file's main method is about to be run. */
   public void runStarted(OpenDefinitionsDocument doc) { }

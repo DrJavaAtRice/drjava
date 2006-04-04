@@ -80,9 +80,9 @@ class CompilerEventNotifier extends EventNotifier<CompilerListener> implements C
   }
 
   /** Called when a compile has finished running. */
-  public void compileEnded(File workDir) {
+  public void compileEnded(File workDir, File[] excludedFiles) {
     _lock.startRead();
-    try { for (CompilerListener cl : _listeners) { cl.compileEnded(workDir); } }
+    try { for (CompilerListener cl : _listeners) { cl.compileEnded(workDir, excludedFiles); } }
     finally { _lock.endRead(); }
   }
 

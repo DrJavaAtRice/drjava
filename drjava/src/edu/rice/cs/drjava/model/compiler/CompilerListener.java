@@ -44,7 +44,7 @@ public interface CompilerListener {
   public void compileStarted();
 
   /** Called when a compile has finished running. */
-  public void compileEnded(File workDir);
+  public void compileEnded(File workDir, File[] excludedFiles);
   
   /** Called to demand that all files be saved before compiling.  It is up to the caller of this method 
    *  to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().

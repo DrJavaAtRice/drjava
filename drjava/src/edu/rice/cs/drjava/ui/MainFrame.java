@@ -3433,26 +3433,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 //    update(getGraphics()); 
   }
   
-  private void _compileProject() { 
-    _compileAll();  
-//    _cleanUpForCompile();
-//
-//    final SwingWorker worker = new SwingWorker() {
-//      public Object construct() {
-//        OpenDefinitionsDocument activeDoc = _model.getActiveDocument();
-//        try {
-//         hourglassOn();
-//          _model.compileAll();
-//        }
-//        catch (FileMovedException fme) { _showFileMovedError(fme); }
-//        catch (IOException ioe) { _showIOError(ioe); }
-//        finally { hourglassOff();}
-//        return null;
-//      }
-//    };
-//    worker.start();
-//    update(getGraphics()); 
-  }
+  private void _compileProject() { _compileAll(); }
   
   private void _compileAll() {
     _cleanUpForCompile();
@@ -4148,8 +4129,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_cleanAction, "Clean", "Clean Build directory");
     _cleanAction.setEnabled(false);
     _setUpAction(_compileAction, "Compile", "Compile the current document");
-    _setUpAction(_compileAllAction, "Compile All", "CompileAll",
-                 "Compile all open documents");
+    _setUpAction(_compileAllAction, "Compile All", "CompileAll", "Compile all open documents");
     _setUpAction(_printDefDocAction, "Print", "Print the current main document");
     _setUpAction(_printConsoleAction, "Print", "Print the Console pane");
     _setUpAction(_printInteractionsAction, "Print", "Print the Interactions pane");
@@ -6106,12 +6086,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }    
     
-    public void compileEnded(File workDir) {
+    public void compileEnded(File workDir, final File[] excludedFiles) {
       // Only change GUI from event-dispatching thread
       Utilities.invokeLater(new Runnable() {
         public void run() {
 //          try {
-            _compilerErrorPanel.reset();
+            _compilerErrorPanel.reset(excludedFiles);
             if (inDebugMode()) {
 //              _model.getActiveDocument().checkIfClassFileInSync();
               _model.refreshActiveDocument();
@@ -6421,8 +6401,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         public void run() {
           _saveAllBeforeProceeding
             ("To run Javadoc, you must first save ALL modified files.\n" +
-             "Would you like to save and then run Javadoc?",
-             ALWAYS_SAVE_BEFORE_JAVADOC,
+             "Would you like to save and then run Javadoc?", ALWAYS_SAVE_BEFORE_JAVADOC,
              "Always save before running Javadoc");
         }
       });

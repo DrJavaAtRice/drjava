@@ -58,8 +58,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   private final Object _compileLock = new Object();
   
   private final CompileShouldFailListener _failListener = new CompileShouldFailListener() {
-      public void compileEnded(File workDir) {
-        super.compileEnded(workDir);
+      public void compileEnded(File workDir, File[] excludedFiles) {
+        super.compileEnded(workDir, excludedFiles);
         _compileDone = true;
         synchronized(_compileLock) { _compileLock.notify(); }
       }

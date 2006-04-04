@@ -51,14 +51,11 @@ import java.io.File;
 import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
-/**
- * Interface for all compiler functionality in the model.  The compilation
- * process itself can be monitored through the CompilerListener interface.
- * The four primary uses of this interface will be to manage listeners, to
- * trigger compilation of (a) document(s), to handle the results, and to manage
- * available compilers.
+/** Interface for all compiler functionality in the model.  The compilation process itself can be monitored through
+ *  the CompilerListener interface.  The four primary uses of this interface will be to manage listeners, to trigger
+ *  compilation of (a) document(s), to handle the results, and to manage available compilers.
  * 
- * @version $Id$
+ *  @version $Id$
  */
 public interface CompilerModel {
   
@@ -69,9 +66,8 @@ public interface CompilerModel {
   
   //-------------------------- Listener Management --------------------------//
   
-  /**
-   * Add a CompilerListener to the model.
-   * @param listener a listener that reacts to compiler events
+  /** Add a CompilerListener to the model.
+   *  @param listener a listener that reacts to compiler events
    */
   public void addListener(CompilerListener listener);
 
@@ -89,33 +85,20 @@ public interface CompilerModel {
   
   //-------------------------------- Triggers --------------------------------//
   
-  /**
-   * Compiles all documents with the active compiler.
-   * This normally requires that the documents be saved first.
-   * @throws IOException if a filesystem-related problem prevents compilation
+  /** Compiles all documents, which requires that the documents be saved first.
+   *  @throws IOException if a filesystem-related problem prevents compilation
    */
   public void compileAll() throws IOException;
   
-  /**
-   * compiles all files with the specified source root set
-   * @param sourceroots a list of source roots
-   * @param files a list of files to compile
+  /** Compiles the specified documents which must be saved first.
+   *  @param doc the document to be compiled
+   *  @throws IOException if a filesystem-related problem prevents compilation
    */
-  public void compileAll(List<File> sourceroots, List<File> files) throws IOException ;
+  public void compile(List<OpenDefinitionsDocument> docs) throws IOException;
   
-  /**
-   * Compiles a single document with the active compiler.
-   * This normally requires that the document be saved first.
-   * @param doc the document to be compiled
-   * @throws IOException if a filesystem-related problem prevents compilation
-   */
-  public void compile(List<OpenDefinitionsDocument> doc) throws IOException;
-  
-  /**
-   * Compiles a single document with the active compiler.
-   * This normally requires that the document be saved first.
-   * @param doc the document to be compiled
-   * @throws IOException if a filesystem-related problem prevents compilation
+  /** Compiles a single document which must be saved first.
+   *  @param doc the document to be compiled
+   *  @throws IOException if a filesystem-related problem prevents compilation
    */
   public void compile(OpenDefinitionsDocument doc) throws IOException;
   
@@ -123,6 +106,7 @@ public interface CompilerModel {
   
   /** Gets the CompilerErrorModel representing the last compile. */
   public CompilerErrorModel getCompilerErrorModel();
+  
   /** Gets the total number of current errors. */
   public int getNumErrors();
   

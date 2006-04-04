@@ -574,7 +574,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     public void compileStarted() { }
 
     /** Just notify when the compile has ended */
-    public void compileEnded(File workDir) {
+    public void compileEnded(File workDir, File[] excludedFiles) {
       synchronized(_compileLock) { 
         _compileDone = true;
         _compileLock.notify();

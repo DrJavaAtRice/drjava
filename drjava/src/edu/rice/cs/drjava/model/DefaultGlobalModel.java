@@ -147,7 +147,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     new CompilerListener() {
     public void compileStarted() { }
     
-    public void compileEnded(File workDir) {
+    public void compileEnded(File workDir, File[] excludedFiles) {
       // Only clear interactions if there were no errors
       if ( ((_compilerModel.getNumErrors() == 0) || (_compilerModel.getCompilerErrorModel().hasOnlyWarnings()))
             && _resetAfterCompile) {
@@ -221,11 +221,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   }
   
 
-  public void compileAll() throws IOException{ 
-//    ScrollableDialog sd = new ScrollableDialog(null, "DefaultGlobalModel.compileAll() called", "", "");
-//    sd.show();
-    _state.compileAll(); 
-  }
+//  public void compileAll() throws IOException{ 
+////    ScrollableDialog sd = new ScrollableDialog(null, "DefaultGlobalModel.compileAll() called", "", "");
+////    sd.show();
+//    _state.compileAll(); 
+//  }
   
 
   public void junitAll() { _state.junitAll(); }
@@ -259,73 +259,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     ProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
       super(pr, main, bd, wd, project, files, cp, cjf, cjflags);
     }
-      
-    // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
-    public void compileAll() throws IOException{
-//        ScrollableDialog sd = new ScrollableDialog(null, "FileGroupingState.compileAll() called", "", "");
-//        sd.show();
-      File dir = getProjectRoot();
-      final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter() {
-        public boolean accept(File pathname) {
-          return pathname.isDirectory() || 
-            pathname.getPath().toLowerCase().endsWith(".java") ||
-            pathname.getPath().toLowerCase().endsWith(".dj0") ||
-            pathname.getPath().toLowerCase().endsWith(".dj1") ||
-            pathname.getPath().toLowerCase().endsWith(".dj2");
-        }
-      });
-      
-      
-      ClassAndInterfaceFinder finder;
-      List<File> lof = new LinkedList<File>(); // the list of files to compile
-      List<File> los = new LinkedList<File>(); // the list of sourceroots for the files
-      
-      for (File f: files) {
-        finder = new ClassAndInterfaceFinder(f);
-        String classname = finder.getClassOrInterfaceName();
-        String packagename = getPackageName(classname);
-        try {
-          File sourceroot = getSourceRoot(packagename, f);
-          if (! los.contains(sourceroot)) los.add(sourceroot);
-          lof.add(f);
-        } 
-        catch(InvalidPackageException e) { /* do nothing */ }
-      }
-      
-//        ScrollableDialog sd1 = new ScrollableDialog(null, "Constructed list of files to compile: " + lof, "", "");
-//        sd1.show();
-      
-      String[] exts = new String[]{".java", ".dj0", ".dj1", ".dj2"};
-      List<OpenDefinitionsDocument> lod = getOpenDefinitionsDocuments();
-      for (OpenDefinitionsDocument d: lod) {
-        if (d.isAuxiliaryFile()) {
-          try {
-            File f;
-            File sourceRoot = d.getSourceRoot();
-            try {
-              f = d.getFile();
-              for (String ext: exts) {
-                if (f.getName().endsWith(ext)) {
-                  lof.add(f);
-                  los.add(sourceRoot);
-                }
-              }
-            }
-            catch(FileMovedException fme) {
-              // the file's not on disk, but send it in anyways
-              f = fme.getFile();
-              lof.add(f);
-              los.add(sourceRoot);
-            } 
-          }
-          catch(InvalidPackageException e) { /* do nothing */ }
-        }
-      }
-//        ScrollableDialog sd2 = new ScrollableDialog(null, "Constructed list of sourceroots for compile: " + lof, "", "");
-//        sd2.show();
-      getCompilerModel().compileAll(los, lof);
-    }
-    
+
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
     public void junitAll() {
       // Is this code reachable? I don't think so.  MainFrame bypasses it by calling junitProject() on the junit model
@@ -388,7 +322,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   class FlatFileGroupingState extends AbstractGlobalModel.FlatFileGroupingState {
     
-    public void compileAll() throws IOException { getCompilerModel().compileAll(); }
     public void junitAll() { getJUnitModel().junitAll(); }
     public void jarAll() { }
   }

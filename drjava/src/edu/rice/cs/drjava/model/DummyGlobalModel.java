@@ -410,10 +410,6 @@ public class DummyGlobalModel implements GlobalModel {
   public List<OpenDefinitionsDocument> getProjectDocuments() {
      throw new UnsupportedOperationException("Tried to call getProjectDocuments on a Dummy");
   }
-  
-  public void compileAll() throws IOException {
-     throw new UnsupportedOperationException("Tried to call compileAll on a Dummy");
-  }
 
   public boolean isProjectActive() {
      throw new UnsupportedOperationException("Tried to call isProjectActive on a Dummy");
