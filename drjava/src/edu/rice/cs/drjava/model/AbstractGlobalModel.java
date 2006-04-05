@@ -385,7 +385,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   }
   
-  // ----- STATE -----
+  //-------- STATE --------//
+  
   protected FileGroupingState _state;
   /** Delegates the compileAll command to the _state, a FileGroupingState.
    *  Synchronization is handled by the compilerModel.
@@ -1711,7 +1712,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return true if all open documents are in sync with their primary class files. */
   public boolean hasOutOfSyncDocuments() {
     synchronized(_documentsRepos) {      
-      for (OpenDefinitionsDocument doc: _documentsRepos) { if (! doc.checkIfClassFileInSync()) return true; }
+      for (OpenDefinitionsDocument doc: _documentsRepos) { 
+        if (doc.isSourceFile() && ! doc.checkIfClassFileInSync()) return true; 
+      }
       return false;
     }
   }
@@ -1844,12 +1847,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
   }
 
-
   /** throw new UnsupportedOperationException */
   public void waitForInterpreter() { 
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
-
 
   /** throws new UnsupportedOperationException */
   public ClassPathVector getClassPath() { 
@@ -1896,36 +1897,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Return the name of the file, or "(untitled)" if no file exists. Does not include the ".java" if it is present.
-   *  TODO: move to a static utility class?
+   *  TODO: move to a static utility class?  Should we remove language level extensions as well?
    */
-  public String getDisplayFilename(OpenDefinitionsDocument doc) {
-
-    String fileName = doc.getFilename();
-
-    // Remove ".java" if at the end of name
-    if (fileName.endsWith(".java")) {
-      int extIndex = fileName.lastIndexOf(".java");
-      if (extIndex > 0) fileName = fileName.substring(0, extIndex);
-    }
-    
-    // Mark if modified
-    if (doc.isModifiedSinceSave()) fileName = fileName + "*";
-    
-    return fileName;
-  }
+  public String getDisplayFileName(OpenDefinitionsDocument doc) { return doc.getDisplayFileName(); }
 
   /** Return the absolute path of the file with the given index, or "(untitled)" if no file exists. */
   public String getDisplayFullPath(int index) {
     OpenDefinitionsDocument doc = getOpenDefinitionsDocuments().get(index);
     if (doc == null) throw new RuntimeException( "Document not found with index " + index);
-    return GlobalModelNaming.getDisplayFullPath(doc);
+    return doc.getDisplayFullPath();
   }
-   
-//  /** Sets whether or not the Interactions JVM will be reset after a compilation succeeds.  This should ONLY be used 
-//   *  in tests!
-//   *  @param shouldReset Whether to reset after compiling
-//   */
-//  void setResetAfterCompile(boolean shouldReset) { _resetAfterCompile = shouldReset; }
 
   /** throws UnsupportedOperationException */
   public Debugger getDebugger() {
@@ -1945,9 +1926,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument[] docs;
     
     synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) { 
-      if (doc.isModifiedSinceSave()) return true;  
-    }
+    for (OpenDefinitionsDocument doc: docs) { if (doc.isModifiedSinceSave()) return true; }
     return false;
   }
   
@@ -1958,9 +1937,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument[] docs;
     
     synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) { 
-      if (doc.isUntitled()) return true;  
-    }
+    for (OpenDefinitionsDocument doc: docs) { if (doc.isUntitled()) return true; }
     return false;
   }
 
@@ -2002,12 +1979,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return f.exists() ? f : null;
   }
 
-  /** Throws UnsupportedOperationException */
-  public void jarAll() { 
-    throw new UnsupportedOperationException("AbstractGlobalModel does not support jarring documents");
-  }
+  /** Jar the current documents or the current project  */
+  public void jarAll() { _state.jarAll(); }
   
-  private static int ID_COUNTER = 0; /* Seed for assigning id numbers to OpenDefinitionsDocuments */
+  private static volatile int ID_COUNTER = 0; /* Seed for assigning id numbers to OpenDefinitionsDocuments */
   // ---------- ConcreteOpenDefDoc inner class ----------
 
   /** A wrapper around a DefinitionsDocument or potential DefinitionsDocument (if it has been kicked out of the cache)
@@ -2017,26 +1992,27 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    */
   class ConcreteOpenDefDoc implements OpenDefinitionsDocument, AbstractDocumentInterface {
     
-    private int _id;
-    private DrJavaBook _book;
-    protected Vector<Breakpoint> _breakpoints;
-    
 //     private boolean _modifiedSinceSave;
     
-    private File _file;
-    private long _timestamp;
+    private volatile File _file;
+    private volatile long _timestamp;
     
     /** The folder containing this document */
-    private File _parentDir;  
+    private volatile File _parentDir;  
 
-    protected String _packageName = null;
+    protected volatile String _packageName = null;
     
-    private int _initVScroll;
-    private int _initHScroll;
-    private int _initSelStart;
-    private int _initSelEnd;
+    private volatile DCacheAdapter _cacheAdapter;
     
-    private DCacheAdapter _cacheAdapter;
+    protected volatile Vector<Breakpoint> _breakpoints;
+    
+    private volatile int _initVScroll;
+    private volatile int _initHScroll;
+    private volatile int _initSelStart;
+    private volatile int _initSelEnd;
+    
+    private volatile int _id;
+    private volatile DrJavaBook _book;
 
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.
      *  @param f file describing DefinitionsDocument to manage; should be in canonical form
@@ -2057,6 +2033,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       init();
     }
     
+    //----------- Initialization -----------//
     public void init() {
       _id = ID_COUNTER++;
       
@@ -2070,8 +2047,38 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _breakpoints = new Vector<Breakpoint>();
     }
     
-    /** Getter for document id; used to sort documents into creation order */
-    public int id() { return _id; }
+    //------------ Getters and Setters -------------//
+    
+    /** Returns the file field for this document; does not check whether the file exists. */
+    public File file() { return _file; }
+    
+    /** Returns the file for this document, null if the document is untitled (and hence has no file.  If the document's
+     *  file does not exist, this throws a FileMovedException.  If a FileMovedException is thrown, you 
+     *  can retrieve the non-existence source file from the FileMovedException by using the getFile() method.
+     *  @return the file for this document
+     */
+    public File getFile() throws FileMovedException {
+        if (_file == null) return null;
+        if (_file.exists()) return _file;
+        else throw new FileMovedException(_file, "This document's file has been moved or deleted.");
+    }
+    /** Sets the file for this openDefinitionsDocument. */
+    public void setFile(File file) {
+      _file = file;
+      if (_file != null) _timestamp = _file.lastModified();
+    }
+    
+    /** Returns the timestamp. */
+    public long getTimestamp() { return _timestamp; }
+    
+    /** Whenever this document has been saved, this method should be called to update its "isModified" information. */ 
+    public void resetModification() {
+      getDocument().resetModification();
+      if (_file != null) _timestamp = _file.lastModified();
+    }
+    
+    /** @return The parent directory; should be in canonical form. */
+    public File getParentDirectory() { return _parentDir; }
     
     /** Sets the parent directory of the document only if it is "Untitled"
      *  @param pd The parent directory
@@ -2082,10 +2089,114 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _parentDir = pd;  
     }
     
-    /** Get the parent directory of this document
-     *  @return The parent directory; should be canonical
+    void setPackage(String pack)   { _packageName = pack; }
+    
+    public int getInitialVerticalScroll()   { return _initVScroll; }
+    public int getInitialHorizontalScroll() { return _initHScroll; }
+    public int getInitialSelectionStart()   { return _initSelStart; }
+    public int getInitialSelectionEnd()     { return _initSelEnd; }
+
+    void setInitialVScroll(int i)  { _initVScroll = i; }
+    void setInitialHScroll(int i)  { _initHScroll = i; }
+    void setInitialSelStart(int i) { _initSelStart = i; }
+    void setInitialSelEnd(int i)   { _initSelEnd = i; }
+    
+    /** Gets the definitions document being handled.
+     *  @return document being handled
      */
-    public File getParentDirectory() { return _parentDir; }
+    protected DefinitionsDocument getDocument() {
+
+//      Utilities.showDebug("getDocument() called on " + this);
+      try { return _cacheAdapter.getDocument(); } 
+      catch(IOException ioe) { // document has been moved or deleted
+//        Utilities.showDebug("getDocument() failed for " + this);
+        try {
+          _notifier.documentNotFound(this, _file);
+          final String path = fixPathForNavigator(getFile().getCanonicalFile().getCanonicalPath());
+          Utilities.invokeAndWait(new SRunnable() {
+            public void run() { _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); }
+          });
+          return _cacheAdapter.getDocument(); 
+        }
+        catch(Throwable t) { throw new UnexpectedException(t); }
+      }
+    }
+
+    /** Returns the name of the top level class, if any.
+     *  @throws ClassNameNotFoundException if no top level class name found.
+     */
+    public String getFirstTopLevelClassName() throws ClassNameNotFoundException {
+      return getDocument().getFirstTopLevelClassName();
+    }
+    
+    /** Returns the name of this file, or "(untitled)" if no file. */
+    public String getFileName() {
+      if (_file == null) return "(Untitled)";
+      return _file.getName();
+    }
+
+    /** Returns the name of the file for this document with an appended asterisk (if modified) or spaces */
+    public String getName() {
+      String fileName = getFileName();
+      if (isModifiedSinceSave()) fileName = fileName + "*";
+      else fileName = fileName + "  ";  // forces the cell renderer to allocate space for an appended "*"
+      return fileName;
+    }
+
+    /** Return the name of the file for this document or "(Untitled)" if no file exists. Excludes the ".java" 
+     *  extension if it is present. TODO: should language extensions be removed? 
+     */
+    public String getDisplayFileName() {
+      
+      String fileName = getFileName();
+      
+      // Remove ".java" if at the end of name
+      if (fileName.endsWith(".java")) {
+        int extIndex = fileName.lastIndexOf(".java");
+        if (extIndex > 0) fileName = fileName.substring(0, extIndex);
+      }
+      
+      // Mark if modified
+      if (isModifiedSinceSave()) fileName = fileName + '*';
+      return fileName;
+    }
+    
+    /** Return the absolute path of this document's file, or "(Untitled)" if no file exists. */
+    public String getDisplayFullPath() {
+      
+      String path = "(Untitled)";
+      try {
+        File file = getFile();
+        if (file != null) path = file.getAbsolutePath();
+      }
+      catch (FileMovedException fme) {
+        // Recover, even though file was deleted
+        File file = fme.getFile();
+        path = file.getAbsolutePath();
+      }
+      
+      // Mark if modified
+      if (isModifiedSinceSave()) path = path + " *";
+      return path;
+    }
+    
+    /** Originally designed to allow undoManager to set the current document to be modified whenever an undo
+     *  or redo is performed.  Now it actually does this.
+     */
+    public void updateModifiedSinceSave() { getDocument().updateModifiedSinceSave(); }
+    
+    /** Getter for document id; used to sort documents into creation order */
+    public int id() { return _id; }
+        
+    /** Returns the Pageable object for printing.
+     *  @return A Pageable representing this document.
+     */
+    public Pageable getPageable() throws IllegalStateException { return _book; }
+    
+    /** Clears the pageable object used to hold the print job. */
+    public void cleanUpPrintJob() { _book = null; }
+
+    //--------------- Simple Predicates ---------------//
     
     /** A file is in the project if the source root is the same as the
      *  project root. this means that project files must be saved at the
@@ -2093,8 +2204,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      */
     public boolean isInProjectPath() { return _state.isInProjectPath(this); }
     
-    /** An open file is in the new project if the source root is the same as the new project root. 
-     */
+    /** An open file is in the new project if the source root is the same as the new project root. */
     public boolean isInNewProjectPath(File projRoot) { 
       try { return ! isUntitled() && FileOps.isInFileTree(getFile(), projRoot); }
       catch(FileMovedException e) { return false; }
@@ -2103,8 +2213,43 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** A file is in the project if it is explicitly listed as part of the project. */
     public boolean inProject() { return ! isUntitled() && _state.inProject(_file); }
     
-    /** @return true if the file is an auxiliary file. */
+    /** @return true if this is an auxiliary file. */
     public boolean isAuxiliaryFile() { return ! isUntitled() && _state.isAuxiliaryFile(_file); }
+    
+    /** @return true if this has a legal source file name (ends in extension ".java", ".dj0", ".dj1", or ".dj2". */
+    public boolean isSourceFile() {
+      if (_file == null) return false;
+      String name = _file.getName();
+      for (String ext: CompilerModel.EXTENSIONS) { if (name.endsWith(ext)) return true; }
+      return false;
+    }
+     
+    /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).
+     *  @return true if the document is untitled and has no file
+     */
+    public boolean isUntitled() { return _file == null; }
+    
+    /** Returns true if the file exists on disk. Returns false if the file has been moved or deleted */
+    public boolean fileExists() { return _file != null && _file.exists(); }
+    
+    //--------------- Major Operations ----------------//
+    
+    /** Returns true if the file exists on disk. Prompts the user otherwise */
+    public boolean verifyExists() {
+//      Utilities.showDebug("verifyExists called on " + _file);
+      if (fileExists()) return true;
+      //prompt the user to find it
+      try {
+        _notifier.documentNotFound(this, _file);
+        File f = getFile();
+        if (f == null) return false;
+        String path = fixPathForNavigator(getFile().getCanonicalPath());
+        _documentNavigator.refreshDocument(this, path);
+        return true;
+      } 
+      catch(Throwable t) { return false; }
+//      catch(DocumentFileClosed e) { /* not clear what to do here */ }
+    }
     
     /** Makes a default DDReconstructor that will make the corresponding DefinitionsDocument. */
     protected DDReconstructor makeReconstructor() {
@@ -2155,6 +2300,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         
         public void saveDocInfo(DefinitionsDocument doc) {
+          
 // These lines were commented out to fix a memory leak; evidently, the undomanager holds on to the document          
 //          _undo = doc.getUndoManager();
 //          _undoListeners = doc.getUndoableEditListeners();
@@ -2175,104 +2321,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         public String toString() { return ConcreteOpenDefDoc.this.toString(); }
       };
-    }
-    
-    public int getInitialVerticalScroll()   { return _initVScroll; }
-    public int getInitialHorizontalScroll() { return _initHScroll; }
-    public int getInitialSelectionStart()   { return _initSelStart; }
-    public int getInitialSelectionEnd()     { return _initSelEnd; }
-    
-    void setPackage(String pack)   { _packageName = pack; }
-    void setInitialVScroll(int i)  { _initVScroll = i; }
-    void setInitialHScroll(int i)  { _initHScroll = i; }
-    void setInitialSelStart(int i) { _initSelStart = i; }
-    void setInitialSelEnd(int i)   { _initSelEnd = i; }
-      
-    /** Originally designed to allow undoManager to set the current document to be modified whenever an undo
-     *  or redo is performed.  Now it actually does this.
-     */
-    public void updateModifiedSinceSave() { getDocument().updateModifiedSinceSave(); }
-
-    /** Gets the definitions document being handled.
-     *  @return document being handled
-     */
-    protected DefinitionsDocument getDocument() {
-
-//      Utilities.showDebug("getDocument() called on " + this);
-      try { return _cacheAdapter.getDocument(); } 
-      catch(IOException ioe) { // document has been moved or deleted
-//        Utilities.showDebug("getDocument() failed for " + this);
-        try {
-          _notifier.documentNotFound(this, _file);
-          final String path = fixPathForNavigator(getFile().getCanonicalFile().getCanonicalPath());
-          Utilities.invokeAndWait(new SRunnable() {
-            public void run() { _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); }
-          });
-          return _cacheAdapter.getDocument(); 
-        }
-        catch(Throwable t) { throw new UnexpectedException(t); }
-      }
-    }
-
-    /** Returns the name of the top level class, if any.
-     *  @throws ClassNameNotFoundException if no top level class name found.
-     */
-    public String getFirstTopLevelClassName() throws ClassNameNotFoundException {
-      return getDocument().getFirstTopLevelClassName();
-    }
-
-    /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).
-     *  @return true if the document is untitled and has no file
-     */
-    public boolean isUntitled() { return _file == null; }
-
-    /** Returns the file for this document, null if the document is untitled (and hence has no file.  If the document's
-     *  file does not exist, this throws a FileMovedException.  If a FileMovedException is thrown, you 
-     *  can retrieve the non-existence source file from the FileMovedException by using the getFile() method.
-     *  @return the file for this document
-     */
-    public File getFile() throws FileMovedException {
-        if (_file == null) return null;
-        if (_file.exists()) return _file;
-        else throw new FileMovedException(_file, "This document's file has been moved or deleted.");
-    }
-    
-    /** Returns true if the file exists on disk. Returns false if the file has been moved or deleted */
-    public boolean fileExists() { return _file != null && _file.exists(); }
-    
-    
-    /** Pure getter for _file; does not check for null. */
-    public File file() { return _file; }
-    
-    /** Returns true if the file exists on disk. Prompts the user otherwise */
-    public boolean verifyExists() {
-//      Utilities.showDebug("verifyExists called on " + _file);
-      if (fileExists()) return true;
-      //prompt the user to find it
-      try {
-        _notifier.documentNotFound(this, _file);
-        File f = getFile();
-        if (f == null) return false;
-        String path = fixPathForNavigator(getFile().getCanonicalPath());
-        _documentNavigator.refreshDocument(this, path);
-        return true;
-      } 
-      catch(Throwable t) { return false; }
-//      catch(DocumentFileClosed e) { /* not clear what to do here */ }
-    }
-
-    /** Returns the name of this file, or "(untitled)" if no file. */
-    public String getFilename() {
-      if (_file == null) return "(Untitled)";
-      return _file.getName();
-    }
-
-    /** Returns the name of the file for this document with an appended asterisk (if modified) or spaces */
-    public String getName() {
-      String fileName = getFilename();
-      if (isModifiedSinceSave()) fileName = fileName + "*";
-      else fileName = fileName + "  ";  // forces the cell renderer to allocate space for an appended "*"
-      return fileName;
     }
 
     /** Saves the document with a FileWriter.  If the file name is already set, the method will use 
@@ -2392,24 +2440,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         return false;
       }
     }
-  
-    /** Whenever this document has been saved, this method should be called to update its "isModified" information. */ 
-    public void resetModification() {
-      getDocument().resetModification();
-      if (_file != null) _timestamp = _file.lastModified();
-    }
     
-    /** Sets the file for this openDefinitionsDocument. */
-    public void setFile(File file) {
-      _file = file;
-//      resetModification();
-      //jim: maybe need lock
-      if (_file != null) _timestamp = _file.lastModified();
-    }
-    
-    /** Returns the timestamp. */
-    public long getTimestamp() { return _timestamp; }
-    
+ 
     /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
     public void preparePrintJob() throws BadLocationException, FileMovedException {
       String fileName = "(Untitled)";
@@ -2428,13 +2460,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       cleanUpPrintJob();
     }
 
-    /** Returns the Pageable object for printing.
-     *  @return A Pageable representing this document.
-     */
-    public Pageable getPageable() throws IllegalStateException { return _book; }
-    
-    /** Clears the pageable object used to hold the print job. */
-    public void cleanUpPrintJob() { _book = null; }
 
     /** throws UnsupportedOperationException */
     public void startCompile() throws IOException { 
@@ -2467,7 +2492,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       else return false;
     }
     
-    public void documentSaved() { _cacheAdapter.documentSaved(getFilename()); }
+    public void documentSaved() { _cacheAdapter.documentSaved(getFileName()); }
     
     public void documentModified() { _cacheAdapter.documentModified(); }
     
@@ -2811,7 +2836,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
-    public String toString() { return getFilename(); }
+    public String toString() { return getFileName(); }
     
     /** Orders ODDs by their id's. */
     public int compareTo(OpenDefinitionsDocument o) { return _id - o.id(); }

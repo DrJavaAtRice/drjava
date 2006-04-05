@@ -457,44 +457,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Returns the current classpath in use by the Interpreter JVM. */
   public ClassPathVector getClassPath() { return _jvm.getClassPath(); }
   
-  /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
-   *  project preferences..
-   */
-  public void setExtraClassPath(ClassPathVector cp) {
-    _state.setExtraClassPath(cp);
-    //System.out.println("Setting project classpath to: " + cp);
-  }
-
-  
-  /** Return the name of the file, or "(untitled)" if no file exists.
-   *  Does not include the ".java" if it is present.
-   *  TODO: move to a static utility class?
-   */
-  public String getDisplayFilename(OpenDefinitionsDocument doc) {
-
-    String fileName = doc.getFilename();
-
-    // Remove ".java" if at the end of name
-    if (fileName.endsWith(".java")) {
-      int extIndex = fileName.lastIndexOf(".java");
-      if (extIndex > 0) fileName = fileName.substring(0, extIndex);
-    }
-    
-    // Mark if modified
-    if (doc.isModifiedSinceSave()) fileName = fileName + "*";
-    
-    return fileName;
-  }
-
-  /** Return the absolute path of the file with the given index, or "(untitled)" if no file exists. */
-  public String getDisplayFullPath(int index) {
-    OpenDefinitionsDocument doc = getOpenDefinitionsDocuments().get(index);
-    if (doc == null) throw new RuntimeException( "Document not found with index " + index);
-    return GlobalModelNaming.getDisplayFullPath(doc);
-  }
-   
   /** Sets whether or not the Interactions JVM will be reset after a compilation succeeds.  This should ONLY be used 
-   *  in tests!
+   *  in tests!  This method is not supported by AbstractGlobalModel.
    *  @param shouldReset Whether to reset after compiling
    */
   void setResetAfterCompile(boolean shouldReset) { _resetAfterCompile = shouldReset; }
@@ -502,46 +466,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Gets the Debugger used by DrJava. */
   public Debugger getDebugger() { return _debugger; }
 
-  /**
-   * Returns an available port number to use for debugging the interactions JVM.
-   * @throws IOException if unable to get a valid port number.
+  /** Returns an available port number to use for debugging the interactions JVM.
+   *  @throws IOException if unable to get a valid port number.
    */
-  public int getDebugPort() throws IOException {
-    return _interactionsModel.getDebugPort();
-  }
+  public int getDebugPort() throws IOException { return _interactionsModel.getDebugPort(); }
 
-  /**
-   * Checks if any open definitions documents have been modified since last being saved.
-   * @return whether any documents have been modified
-   */
-  public boolean hasModifiedDocuments() { 
-    OpenDefinitionsDocument[] docs;
-    
-    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) { 
-      if (doc.isModifiedSinceSave()) return true;  
-    }
-    return false;
-  }
-  
-  /**
-   * Checks if any open definitions documents are untitled.
-   * @return whether any documents are untitled
-   */
-  public boolean hasUntitledDocuments() {
-    OpenDefinitionsDocument[] docs;
-    
-    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) { 
-      if (doc.isUntitled()) return true;  
-    }
-    return false;
-  }
-
-  // TODO: This function should probably be moved to a better location
-  /** Jar the current documents or the current project  */
-  public void jarAll() { _state.jarAll(); }
-  
   // ---------- ConcreteOpenDefDoc inner class ----------
 
   /** Inner class to handle operations on each of the open DefinitionsDocuments by the GlobalModel. <br><br>
@@ -557,94 +486,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     /* Standard constructor for a new document (no associated file) */
     ConcreteOpenDefDoc() { super(); }
-    
-    
-
-//    /** Saves the document with a FileWriter.  The FileSaveSelector will either provide a file name or prompt the 
-//     *  user for one.  It is up to the caller to decide what needs to be done to choose a file to save to.  Once 
-//     *  the file has been saved succssfully, this method fires fileSave(File).  If the save fails for any
-//     *  reason, the event is not fired. This is synchronized against the compiler model to prevent saving and
-//     *  compiling at the same time- this used to freeze drjava.
-//     *  @param com a selector that picks the file name.
-//     *  @throws IOException if the save fails due to an IO error
-//     *  @return true if the file was saved, false if the operation was canceled
-//     *  TODO: factor out common code with same method in superclass
-//     */
-//    public boolean saveFileAs(FileSaveSelector com) throws IOException {
-//      try {
-//        final OpenDefinitionsDocument openDoc = this;
-//        final File file = com.getFile();
-//        System.err.println("saveFileAs called on " + file);
-//        
-//        // Check if file is already open in another document
-//        OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
-//        boolean shouldSave = false;
-//        boolean openInOtherDoc = ((otherDoc != null) && (openDoc != otherDoc));
-//        if (openInOtherDoc) shouldSave = com.warnFileOpen(file);
-//          // Can't save over an open document
-//        
-//        // If the file exists, make sure it's OK to overwrite it
-//        
-//        System.err.println("shouldSave = " + shouldSave + " openInOtherDoc = " + openInOtherDoc);
-//        if ((shouldSave && openInOtherDoc) || 
-//            (! openInOtherDoc && (! file.exists() || com.verifyOverwrite()))) {
-//
-//          // Correct the case of the filename (in Windows)
-//          if (! file.getCanonicalFile().getName().equals(file.getName())) file.renameTo(file);
-//          
-//          // Check for # in the path of the file because if there
-//          // is one, then the file cannot be used in the Interactions Pane
-//          if (file.getAbsolutePath().indexOf("#") != -1) _notifier.filePathContainsPound();
-//          
-//          // have FileOps save the file
-//          FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
-//            public void saveTo(OutputStream os) throws IOException {
-//              DefinitionsDocument doc = getDocument();
-//              try { _editorKit.write(os, doc, 0, doc.getLength()); } 
-//              catch (BadLocationException docFailed) { throw new UnexpectedException(docFailed); }
-//            }
-//          });
-//          
-//          resetModification();
-//          setFile(file);
-//          
-//          try {
-//            // This calls getDocument().getPackageName() because this may be untitled and this.getPackageName() 
-//            // returns "" if it's untitled.  Right here we are interested in parsing the DefinitionsDocument's text
-//            _packageName = getDocument().getPackageName();
-//          } 
-//          catch(InvalidPackageException e) { _packageName = null; }
-//          getDocument().setCachedClassFile(null);
-//          checkIfClassFileInSync();
-//          
-////          Utilities.showDebug("ready to fire fileSaved for " + this); 
-//          _notifier.fileSaved(openDoc);
-//          
-//          // Make sure this file is on the classpath
-//          try {
-//            File classPath = getSourceRoot();
-//            try {
-//              if (inProject() || isAuxiliaryFile())
-//                _interactionsModel.addProjectFilesClassPath(new File(classPath.getAbsolutePath()).toURL());
-//              else
-//                _interactionsModel.addExternalFilesClassPath(new File(classPath.getAbsolutePath()).toURL());
-//            }
-//            catch(MalformedURLException murle) { /* fail silently */ }
-//          }
-//          catch (InvalidPackageException e) { /* do nothing */ }
-//          
-//          /* update the navigator */
-//          //System.out.println(fixPathForNavigator(file.getCanonicalPath()));
-//          _documentNavigator.refreshDocument(this, fixPathForNavigator(file.getCanonicalPath()));
-//        }
-//        return true;
-//      }
-//      catch (OperationCanceledException oce) {
-//        // Thrown by com.getFile() if the user cancels.
-//        //   We don't save if this happens.
-//        return false;
-//      }
-//    }
     
     /** Starting compiling this document.  Used only for unit testing */
     public void startCompile() throws IOException { _compilerModel.compile(ConcreteOpenDefDoc.this); }

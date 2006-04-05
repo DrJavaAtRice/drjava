@@ -278,7 +278,7 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call getSourceRootSet on a Dummy");
   } 
   
-  public String getDisplayFilename(OpenDefinitionsDocument doc) {
+  public String getDisplayFileName(OpenDefinitionsDocument doc) {
      throw new UnsupportedOperationException("Tried to call getDisplayFilename on a Dummy");
   }
   

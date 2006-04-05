@@ -64,8 +64,6 @@ import edu.rice.cs.javalanglevels.tree.*;
  */
 public class DefaultCompilerModel implements CompilerModel {
   
-  private static final String[] EXTENSIONS = new String[]{".java", ".dj0", ".dj1", ".dj2"};
-  
   /** Manages listeners to this model. */
   private final CompilerEventNotifier _notifier = new CompilerEventNotifier();
 
@@ -195,11 +193,8 @@ public class DefaultCompilerModel implements CompilerModel {
     File f;
     
     for (OpenDefinitionsDocument doc : defDocs) {
-      f = doc.getFile();
-//      System.err.println("File name for " + doc + " is " + f);
-      if (f == null) continue; // No file for this document; skip it
-      if (endsWithExt(f, EXTENSIONS)) filesToCompile.add(f);
-      else excludedFiles.add(f);
+      if (doc.isSourceFile()) filesToCompile.add(doc.getFile());
+      else excludedFiles.add(doc.getFile());
     } 
     
 //    System.err.println("Filtered list of docs to compile: " + filesToCompile);

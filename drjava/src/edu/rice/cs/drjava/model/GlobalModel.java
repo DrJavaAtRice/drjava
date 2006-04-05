@@ -228,7 +228,7 @@ public interface GlobalModel extends ILoadDocuments {
   public File[] getSourceRootSet();
 
   /** Return the name of the file, or "(untitled)" if no file exists. Does not include the ".java" if it is present. */      
-  public String getDisplayFilename(OpenDefinitionsDocument doc);
+  public String getDisplayFileName(OpenDefinitionsDocument doc);
   
   /** Return the absolute path of the file with the given index, or "(untitled)" if no file exists. */
   public String getDisplayFullPath(int index);

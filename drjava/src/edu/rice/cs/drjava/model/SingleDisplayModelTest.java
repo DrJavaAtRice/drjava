@@ -311,7 +311,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
   public void testDisplayFilename() throws IOException, OperationCanceledException, AlreadyOpenException {
     // Untitled
     OpenDefinitionsDocument doc = _sdModel.getActiveDocument();
-    assertEquals("untitled display filename", "(Untitled)", _sdModel.getDisplayFilename(doc));
+    assertEquals("untitled display filename", "(Untitled)", _sdModel.getDisplayFileName(doc));
 
     // Ends in ".java"
     File file = File.createTempFile("DrJava-filename-test", ".java", _tempDir).getCanonicalFile();
@@ -320,21 +320,21 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     doc = _sdModel.openFile(new FileSelector(file));
     assertEquals(".java display filename",
                  name.substring(0, name.length()-5),
-                 _sdModel.getDisplayFilename(doc));
+                 _sdModel.getDisplayFileName(doc));
 
     // Doesn't contain ".java"
     file = File.createTempFile("DrJava-filename-test", ".txt", _tempDir).getCanonicalFile();
     file.deleteOnExit();
     name = file.getName();
     doc = _sdModel.openFile(new FileSelector(file));
-    assertEquals(".txt display filename", name, _sdModel.getDisplayFilename(doc));
+    assertEquals(".txt display filename", name, _sdModel.getDisplayFileName(doc));
 
     // Doesn't end in ".java"
     file = File.createTempFile("DrJava-filename-test", ".java.txt", _tempDir).getCanonicalFile();
     file.deleteOnExit();
     name = file.getName();
     doc = _sdModel.openFile(new FileSelector(file));
-    assertEquals(".java.txt display filename", name, _sdModel.getDisplayFilename(doc));
+    assertEquals(".java.txt display filename", name, _sdModel.getDisplayFileName(doc));
 //    _log.log("testDisplayFilename completed");
   }
   

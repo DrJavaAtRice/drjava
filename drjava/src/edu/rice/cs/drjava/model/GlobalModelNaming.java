@@ -36,48 +36,13 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 
 public class GlobalModelNaming {
-    private GlobalModelNaming() { }
+  private GlobalModelNaming() { }
 
   /** Return the name of the file, or "(untitled)" if no file exists. Does not include the ".java" 
    *  if it is present. */
-  public static String getDisplayFilename(OpenDefinitionsDocument doc) {
+  public static String getDisplayFileName(OpenDefinitionsDocument doc) { return doc.getDisplayFileName(); }
 
-    String fileName = doc.getFilename();
+  /** Return the absolute path of the file, or "(untitled)" if no file exists. */
+  public static String getDisplayFullPath(OpenDefinitionsDocument doc) { return doc.getDisplayFullPath(); }
 
-    // Remove ".java" if at the end of name
-    if (fileName.endsWith(".java")) {
-      int extIndex = fileName.lastIndexOf(".java");
-      if (extIndex > 0) {
-        fileName = fileName.substring(0, extIndex);
-      }
-    }
-
-    // Mark if modified
-    if (doc.isModifiedSinceSave()) {
-      fileName = fileName + " *";
-    }
-
-    return fileName;
-  }
-
-  /**
-   * Return the absolute path of the file, or "(untitled)" if no file exists.
-   */
-  public static String getDisplayFullPath(OpenDefinitionsDocument doc) {
-
-    String path = "(Untitled)";
-    try {
-      File file = doc.getFile();
-      if (file != null) path = file.getAbsolutePath();
-    }
-    catch (FileMovedException fme) {
-      // Recover, even though file was deleted
-      File file = fme.getFile();
-      path = file.getAbsolutePath();
-    }
-
-    // Mark if modified
-    if (doc.isModifiedSinceSave()) path = path + " *";
-    return path;
-  }
 }

@@ -59,6 +59,9 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
  */
 public interface CompilerModel {
   
+  /** Legal source file name extensions */
+  public static final String[] EXTENSIONS = new String[]{".java", ".dj0", ".dj1", ".dj2"};
+  
   //----------------------------Locking--------------------------------------//
   
   /** Returns the lock used to prevent simultaneous compilation and JUnit testing */

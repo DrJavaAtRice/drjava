@@ -1927,7 +1927,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (odd.isModifiedSinceSave()) return makeLayeredIcon(_default.getIcon(f), _star);
       return _default.getIcon(f);
     }
-    public String getName(OpenDefinitionsDocument doc) { return doc.getFilename(); }
+    public String getName(OpenDefinitionsDocument doc) { return doc.getFileName(); }
     private LayeredIcon makeLayeredIcon(Icon base, Icon star) {
       return new LayeredIcon(new Icon[]{base, star}, new int[]{0, 0}, 
                              new int[]{0, (base.getIconHeight() / 4)});
@@ -2488,7 +2488,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Updates the title bar with the name of the active document. */
   public void updateFileTitle() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
-    String fileName = GlobalModelNaming.getDisplayFullPath(doc);
+    String fileName = doc.getDisplayFullPath();
     if (!fileName.equals(_fileTitle)) {
       _fileTitle = fileName;
       setTitle("File: " + fileName);
@@ -2496,7 +2496,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     // Always update this field-- two files in different directories
     //  can have the same _fileTitle
-    _fileNameField.setText(GlobalModelNaming.getDisplayFullPath(doc));
+    _fileNameField.setText(doc.getDisplayFullPath());
 //    System.out.println("setting " + doc + " to display name: " + GlobalModelNaming.getDisplayFullPath(doc));
   }
   

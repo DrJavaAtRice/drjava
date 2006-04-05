@@ -207,23 +207,14 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /** Remove the given Breakpoint from the hashtable.
    *  @param breakpoint the Breakpoint to be removed.
    */
-  public void removeBreakpoint(Breakpoint breakpoint) {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+  public void removeBreakpoint(Breakpoint breakpoint) { throw new UnsupportedOperationException("Dummy method"); }
   
   /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).
    *  @return true if the document is untitled and has no file
    */
-  public boolean isUntitled() {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+  public boolean isUntitled() { throw new UnsupportedOperationException("Dummy method"); }
   
-//  /** Create a find and replace mechanism starting at the current character offset in the definitions.
-//   * NOT USED.
-//   */
-//  public FindReplaceMachine createFindReplaceMachine() {
-//    throw new UnsupportedOperationException("Dummy method");
-//  }
+  public boolean isSourceFile() { throw new UnsupportedOperationException("Dummy method"); }
   
   /** Finds the root directory of the source files.
    *  @return The root directory of the source files, based on the package statement.
@@ -234,18 +225,23 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  /** Returns the Breakpoint in this OpenDefinitionsDocument at the given linenumber, or null if one does not 
-   *  exist.
+  /** Returns the Breakpoint in this OpenDefinitionsDocument at the given linenumber, or null if one does not exist.
    *  @param lineNumber the line number of the breakpoint
    *  @return the Breakpoint at the given lineNumber, or null if it does not exist.
    */
   public Breakpoint getBreakpointAt(int lineNumber) { throw new UnsupportedOperationException("Dummy method"); }
   
   /** Returns the name of this file, or "(untitled)" if no file. */
-  public String getFilename() { throw new UnsupportedOperationException("Dummy method"); }
+  public String getFileName() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  /** Return the name of this file exluding ".java" extension, or "(Untitled)" if no file exists. */
+  public String getDisplayFileName() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  /** Return the absolute path of the file, or "(Untitled)" if no file exists. */
+  public String getDisplayFullPath() { throw new UnsupportedOperationException("Dummy method"); }
   
   /** Same as above but INavigatorItem interface */
-  public String getName() { return getFilename(); }
+  public String getName() { return getFileName(); }
   
   /** Add the supplied Breakpoint to the hashtable, keyed by its BreakpointRequest
    *  @param breakpoint the Breakpoint to be inserted into the hashtable
@@ -285,11 +281,6 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /** Tells the document to remove all breakpoints. */
   public void clearBreakpoints() { throw new UnsupportedOperationException("Dummy method"); }
   
-//  /** A forwardidefDocng method to comment out the current line or selection in the definitions. */
-//  public void commentLinesInDefinitions(int selStart, int selEnd) {
-//    throw new UnsupportedOperationException("Dummy method");
-//  }
-  
   /** Saves the document with a FileWriter.  The FileSaveSelector will either provide a file name or prompt the 
    *  user for one.  It is up to the caller to decide what needs to be done to choose a file to save to.  Once 
    *  the file has been saved succssfully, this method fires fileSave(File).  If the save fails for any reason, 
@@ -307,8 +298,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  /** Forwarding method to find the match for the closing brace immediately to the left, assuming there is such 
-   *  a brace.
+  /** Forwarding method to find the match for the closing brace immediately to the left, assuming it exists. 
    *  @return the relative distance backwards to the offset before the matching brace.
    */
   public int balanceBackward() { throw new UnsupportedOperationException("Dummy method"); }

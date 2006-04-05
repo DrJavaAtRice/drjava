@@ -581,7 +581,7 @@ public class JarOptionsDialog extends JFrame {
           if (doc.inProject() && !doc.isAuxiliaryFile()) {
             try {
               // Since the file compiled without any errors, this shouldn't have any problems
-              jar.addFile(doc.getFile(), packageNameToPath(doc.getPackageName()), doc.getFilename());
+              jar.addFile(doc.getFile(), packageNameToPath(doc.getPackageName()), doc.getFileName());
             }
             catch (IOException e) {
               e.printStackTrace();

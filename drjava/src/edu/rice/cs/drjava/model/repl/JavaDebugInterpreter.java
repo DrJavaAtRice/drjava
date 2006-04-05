@@ -385,7 +385,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     List<IdentifierToken> ids = new LinkedList<IdentifierToken>(); // Add parameterization <Identifier>.
     ids.add(new Identifier("this", node.getBeginLine(), node.getBeginColumn(),
                            node.getEndLine(), node.getEndColumn()));
-    return new QualifiedName(ids, node.getFilename(),
+    return new QualifiedName(ids, node.getFilename(),  // TODO: change getFilename to GetFileName in DynamicJava
                              node.getBeginLine(), node.getBeginColumn(),
                              node.getEndLine(), node.getEndColumn());
   }

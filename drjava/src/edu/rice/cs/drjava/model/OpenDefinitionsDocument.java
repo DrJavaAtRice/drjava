@@ -58,9 +58,11 @@ import edu.rice.cs.drjava.model.definitions.*;
  */
 public interface OpenDefinitionsDocument extends DJDocument, Finalizable<DefinitionsDocument>,
   Comparable<OpenDefinitionsDocument>, INavigatorItem, AbstractDocumentInterface {
+  
+  //----- Forwarding Methods -----/
 
-  // The following methods are forwarding methods required by the rest of the
-  // program in order for the OpenDefinitionsDocument to handle DefinitionsDocuments
+  /** The following methods are forwarding methods required by the rest of the program in order for the 
+   *  OpenDefinitionsDocument to handle DefinitionsDocuments */
   public int id();
   public int commentLines(int selStart, int selEnd);
   public int uncommentLines(int selStart, int selEnd);
@@ -75,25 +77,57 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public DocumentListener[] getDocumentListeners();
   public UndoableEditListener[] getUndoableEditListeners();
   
+  //----- Regular methods -----/
+  
+  //----- Getters and Setters -----/
+  
+  /** Returns the file for this document; does not check whether the file exists. */
+  public File file();
+  
+  /** Returns the file for this document. 
+   *  @return the file for this document
+   *  @throws FileMovedException if the document's file no longer exists
+   */
+  public File getFile() throws FileMovedException;
+
+  /** Sets this document's file
+   *  @param file the file that this OpenDefinitionsDocument is associated with
+   */
+  public void setFile(File file);
+  
+  /** Returns the name of this file, or "(Untitled)" if no file. */
+  public String getFileName();
+  
+   /** Return the name of this file exluding ".java" extension, or "(Untitled)" if no file exists. */
+  public String getDisplayFileName(); 
+  
+  /** Return the absolute path of the file, or "(Untitled)" if no file exists. */
+  public String getDisplayFullPath(); 
+
+  /** Returns the parent directory of this file, null if it has none. */
+  public File getParentDirectory();
+
+  public Pageable getPageable() throws IllegalStateException;
+  
+  //----- Simple Predicates -----//
+  
   /** @return whether the undo manager can perform any undos. */
   public boolean undoManagerCanUndo();
   
   /** @return whether the undo manager can perform any redos. */
   public boolean undoManagerCanRedo();
   
-  /** Returns the name of the top level class, if any.
-   *  @throws ClassNameNotFoundException if no top level class name found.
-   */
-  public String getFirstTopLevelClassName() throws ClassNameNotFoundException;
-  
   /** Determines if this document in the file system tree below the active project root. */
   public boolean isInProjectPath();
   
-   /** Determines if this document in the file system tree below the specified root. */
+  /** Determines if this document in the file system tree below the specified root. */
   public boolean isInNewProjectPath(File root);
   
   /** @return true if the document's file is a project auxiliary file. */
   public boolean isAuxiliaryFile();
+  
+  /** @return true if the document's filename ends with the extension ".java", ".dj0", "dj1", or "dj2". */
+  public boolean isSourceFile();
   
   /** @return true if the documents file is saved in the current project file. */
   public boolean inProject();
@@ -102,37 +136,35 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    *  @return true if the document is untitled and has no file
    */
   public boolean isUntitled();
-    
-  /** Returns the file for this document.  If the document is untitled, it throws an IllegalStateException.
-   *  @return the file for this document
-   *  @throws IllegalStateException if document never had a file
-   *  @throws FileMovedException if the document's file no longer exists
-   */
-  public File getFile() throws FileMovedException;
-  
-  /** Returns the file for this document; does not check for null. */
-  public File file();
-  
-  /** Sets this document's file
-   *  @param file the file that this OpenDefinitionsDocument is associated with
-   */
-  public void setFile(File file);
-
+ 
   /** Returns true if the file exists on disk, or if the user has located it on disk. Returns false if the 
    *  file has been moved or deleted
    */
   public boolean fileExists();
   
+  /** Determines if this definitions document has changed since the last save.
+   *  @return true if the document has been modified
+   */
+  public boolean isModifiedOnDisk();
+  
+  /** Resets the document to be unmodified. */
+  public void resetModification();
+  
+  /** Returns the date that this document was last modified. */
+  public long getTimestamp();
+  
+  
+  //----- Major Operations -----//
+    
+  /** Returns the name of the top level class, if any.
+   *  @throws ClassNameNotFoundException if no top level class name found.
+   */
+  public String getFirstTopLevelClassName() throws ClassNameNotFoundException;
+  
   /** If the file exists, returns true. If it does not exist, prompts the user to look it up.  If the user
    *  chooses a file, returns true, false otherwise. */
   public boolean verifyExists();  
   
-  /** Returns the name of this file, or "(untitled)" if no file. */
-  public String getFilename();
-  
-  /** Returns the parent directory of this file, null if it has none. */
-  public File getParentDirectory();
-
   /** Saves the document with a FileWriter.  If the file name is already set, the method will use that name 
    *  instead of whatever selector is passed in.
    *  @param com a selector that picks the file name
@@ -185,11 +217,6 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public boolean isModifiedSinceSave();
 
-  /** Determines if this definitions document has changed since the last save.
-   *  @return true if the document has been modified
-   */
-  public boolean isModifiedOnDisk();
-
   /** Asks the GlobalModel if it can revert current definitions to version on disk. If ok, it reverts the file 
    *  to the version on disk.
    *  @return true if the document has been reverted
@@ -211,16 +238,6 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public int gotoLine(int line);
 
-  // unnecessary: only called from DefPane and defPane has reference to mainFrame which deals with commenting code
-//  /** A forwarding method to comment out the current line or selection in the definitions. */
-//  public void commentLinesInDefinitions(int selStart, int selEnd);
-//
-//  /** A forwarding method to un-comment the current line or selection in the definitions. */
-//  public void uncommentLinesInDefinitions(int selStart, int selEnd);
-
-//  /** Create a find and replace mechanism starting at the current character offset in the definitions. */
-//  public FindReplaceMachine createFindReplaceMachine();
-
   /** Finds the root directory of the source files.
    *  @return The root directory of the source files, based on the package statement.
    *  @throws InvalidPackageException If the package statement is invalid, or if it does not match
@@ -230,21 +247,14 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 
   /** Gets the name of the package for this source file (as declared in the source text). It does this by 
    *  minimally parsing the source file to find the package statement.
-   *
-   *  @return The declared name of package for this source file (the empty string if there is no package 
-   *          statement).
-   *
-   * @exception InvalidPackageException if there is some sort of a
-   *                                    <TT>package</TT> statement but it
-   *                                    is invalid.
+   *  @return The declared name of package for this source file (the empty string if there is no package statement).
+   *  @exception InvalidPackageException if there is some sort of a <TT>package</TT> statement but it is invalid.
    */
   public String getPackageName() throws InvalidPackageException;
   
   public void preparePrintJob() throws BadLocationException, FileMovedException;
 
   public void print() throws PrinterException, BadLocationException, FileMovedException;
-
-  public Pageable getPageable() throws IllegalStateException;
 
   public void cleanUpPrintJob();
 
@@ -290,23 +300,11 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** Called when this document is being closed, removing related state from the debug manager. */
   public void removeFromDebugger();
   
-  /** Resets the document to be unmodified. */
-  public void resetModification();
-  
-  /** Returns the date that this document was last modified. */
-  public long getTimestamp();
-  
   /** Sets the document as modified. */
   public void updateModifiedSinceSave();
 
   /** Should be called when closing an ODD to let the ODD clean up after itself. */
   public void close();
-
-//  /**
-//   * @return true if the document belongs to this opendefintions document
-//   * @param doc the document to test
-//   */
-//  public boolean belongsHuh(Document doc);
   
   /** @return the initial vertical scroll the pane should use when initialized. */
   public int getInitialVerticalScroll();
@@ -314,18 +312,12 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** @return the initial vertical scroll the pane should use when initialized. */
   public int getInitialHorizontalScroll();
   
-  /** @return the starting location of the cursor selection that should be set in the pane when 
-   *  initialized. */
+  /** @return the starting location of the cursor selection that should be set in the pane when initialized. */
   public int getInitialSelectionStart();
   
-  /** @return the final location of the cursor selection that should be set in the pane when it 
-   *  is initialized.
-   */
+  /** @return the final location of the cursor selection that should be set in the pane when it is initialized. */
   public int getInitialSelectionEnd();
   
-//  /** @return a list of all registered undoable edit listeners */
-//  public List<UndoableEditListener> getUndoableEditListeners();
-
   /** @return the number of lines in this document. */
   public int getNumberOfLines();
 }
