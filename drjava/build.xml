@@ -857,16 +857,17 @@
     <delete dir="${version-tag}" />
   </target>
   
-  <target name="jar-app" depends="assert-jar-exists">
+  <target name="jar-app" depends="assert-jar-exists, resolve-version-tag">
     <echo message="Creating ${version-tag}.jar" />
     <copy file="${ant.project.name}.jar" tofile="${version-tag}.jar" />
   </target>
 
-  <target name="mac-app" depends="assert-jar-exists">
+  <target name="mac-app" depends="assert-jar-exists, resolve-version-tag">
     <echo message="Creating ${version-tag}-osx.tar.gz" />
     <property name="mac-app-dir" value="${version-tag}/osx" />
     <mkdir dir="${mac-app-dir}" />
-    <copy todir="${mac-app-dir}/${readable-project-name}.app">
+    <filter token="VERSION" value="${version-tag}" />
+    <copy todir="${mac-app-dir}/${readable-project-name}.app" filtering="yes" >
       <fileset dir="packaging/${readable-project-name}.app" excludes="**/*jar-goes-here" />
     </copy>
     <copy file="${ant.project.name}.jar" 
@@ -880,7 +881,7 @@
     <gzip src="${mac-app-dir}/${version-tag}-osx.tar" destfile="${version-tag}-osx.tar.gz" />
   </target>
   
-  <target name="windows-app" depends="assert-jar-exists">
+  <target name="windows-app" depends="assert-jar-exists, resolve-version-tag">
     <echo message="Creating ${version-tag}.exe" />
     <concat destfile="${version-tag}.exe">
       <filelist dir="${basedir}">
