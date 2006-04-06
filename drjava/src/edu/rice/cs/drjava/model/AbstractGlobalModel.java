@@ -1144,7 +1144,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void createNewProject(File projFile) { setFileGroupingState(new ProjectFileGroupingState(projFile)); }
     
   /** Configures a new project (created by createNewProject) and writes it to disk; only runs in event thread.
-   *  @param filename where to save the project
    */
   public void configNewProject() throws IOException {
     
@@ -1194,7 +1193,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
     
   /** Writes the project profile augmented by usage info to specified file.  Assumes DrJava is in project mode.
-   *  @param filename where to save the project
+   *  @param file where to save the project
    */
   public void saveProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) 
     throws IOException {
@@ -1492,10 +1491,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  we can successfully notify the user that the file is selected for closing and ask whether to
    *  saveAs, close, or cancel.
    *  @param docList the list od OpenDefinitionsDocuments to close
-   *  @param together if true then no files will be closed if not all can be abandoned
    *  @return whether all files were closed
-   * 
-   * Question: what is the together flag for?  How does it affect observable behavior?
    */
   public boolean closeFiles(List<OpenDefinitionsDocument> docList) {
     if (docList.size() == 0) return true;
@@ -1956,7 +1952,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
 
   /** Searches for a file with the given name on the provided paths. Returns null if the file is not found.
-   *  @param filename Name of the source file to look for
+   *  @param fileName Name of the source file to look for
    *  @param paths An array of directories to search
    *  @return the file if it is found, or null otherwise
    */

@@ -590,8 +590,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Kills the running interpreter JVM, and restarts with working directory wd if wd != null.  If wd == null, the
    *  interpreter is not restarted.
-   *  @param shouldRestart if true, the interpreter will be restarted automatically.
-   *  Note: If the interpreter is not restarted, all of the methods that delgate to the interpreter will 
+   *  Note: If the interpreter is not restarted, all of the methods that delegate to the interpreter will 
    *  silently fail! Therefore, killing without restarting should be used with extreme care and only in 
    *  carefully controlled test cases or when DrJava is quitting anyway.
    */
@@ -614,7 +613,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Sets the classpath to use for starting the interpreter JVM. Must include the classes for the interpreter.
-   *  @param classpath Classpath for the interpreter JVM
+   *  @param classPath Classpath for the interpreter JVM
    */
   public void setStartupClassPath(String classPath) {
     synchronized(_masterJVMLock) {

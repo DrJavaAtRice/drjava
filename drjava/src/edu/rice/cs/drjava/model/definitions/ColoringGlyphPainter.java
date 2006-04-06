@@ -252,7 +252,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
    * @param v the view 
    * @param p0 the location in the model where the
    *  fragment should start its representation >= 0
-   * @param pos the graphic location along the axis that the
+   * @param x the graphic location along the axis that the
    *  broken view would occupy >= 0; this may be useful for
    *  things like tab calculations
    * @param len specifies the distance into the view

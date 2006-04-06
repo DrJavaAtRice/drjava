@@ -135,7 +135,7 @@ public class JarOptionsDialog extends JFrame {
   public FrameState getFrameState() { return _lastState; }
   
   /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
-   *  @param state, or null to reset
+   *  @param ds State to update to, or {@code null} to reset
    */
   public void setFrameState(FrameState ds) {
     _lastState = ds;
@@ -146,7 +146,7 @@ public class JarOptionsDialog extends JFrame {
   }  
   
   /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
-   *  @param state, or null to reset
+   *  @param s  State to update to, or {@code null} to reset
    */
   public void setFrameState(String s) {
     try { _lastState = new FrameState(s); }

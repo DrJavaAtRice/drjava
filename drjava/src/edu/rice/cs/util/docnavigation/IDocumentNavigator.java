@@ -82,23 +82,21 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   /** The following five operations impose a natural ordering on the documents in the navigator.
    *  For lists, it is order of insertion. For trees, it is depth-first enumeration.
    *  This convention supports operations setActiveNextDocument() in the global model of DrJava
-   *  @returns the INavigatorItem which comes after doc
+   *  @return the INavigatorItem which comes after doc
    *  @param doc the INavigatorItem of interest
    */
   public ItemT getNext(ItemT doc);
   
-  /** @returns the INavigatorItem which comes before doc
+  /** @return the INavigatorItem which comes before doc
    *  @param doc the INavigatorItem of interest
    */
   public ItemT getPrevious(ItemT doc);
   
-  /** @returns the INavigatorItem which comes first in the enumeration
-   *  @param doc the INavigatorItem of interest
+  /** @return the INavigatorItem which comes first in the enumeration
    */
   public ItemT getFirst();
   
-  /** @returns the INavigatorItem which comes last in the enumeration
-   *  @param doc the INavigatorItem of interest
+  /** @return the INavigatorItem which comes last in the enumeration
    */
   public ItemT getLast();
   
@@ -189,7 +187,7 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
    *  correspond to an INavigatorItem, this method forces the navigator to select an item that does; 
    *  specifically the one given.  If the navigator already has an INavigatorItem selected, this method does
    *  nothing.
-   *  @param ini The suggested current INavigatorItem.
+   *  @param i The suggested current INavigatorItem.
    */
   
    public void requestSelectionUpdate(ItemT i);

@@ -73,7 +73,7 @@ public class DefaultJavadocModel implements JavadocModel {
   private CompilerErrorModel _javadocErrorModel;
 
   /** Main constructor.
-   *  @param getter Source of documents for this JavadocModel
+   *  @param model Source of documents for this JavadocModel
    */
   public DefaultJavadocModel(GlobalModel model) {
     _model = model;
@@ -117,7 +117,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param select a command object for selecting a directory and warning a user
    *        about bad input
    * @param saver a command object for saving a document (if it moved/changed)
-   * @param classpath a collection of classpath elements to be used by Javadoc
+   * @param classPath a collection of classpath elements to be used by Javadoc
    *
    * @throws IOException if there is a problem manipulating files
    */
@@ -319,7 +319,7 @@ public class DefaultJavadocModel implements JavadocModel {
    *
    * @param doc Document to generate Javadoc for
    * @param saver a command object for saving the document (if it moved/changed)
-   * @param classpath a collection of classpath elements to be used by Javadoc
+   * @param classPath a collection of classpath elements to be used by Javadoc
    *
    * @throws IOException if there is a problem manipulating files
    */
@@ -723,7 +723,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param docUnits All files or packages to include in the Javadoc
    * @param destDir Destination directory to pass
    * @param sourcePath Full sourcepath to pass
-   * @param classpath All classpath entries to pass
+   * @param classPath All classpath entries to pass
    */
   protected ArrayList<String> _buildCommandLineArgs(Collection<String> docUnits,
                                                     String destDir,
@@ -746,7 +746,7 @@ public class DefaultJavadocModel implements JavadocModel {
    *
    * @param file the file
    * @param destDir Destination directory to pass
-   * @param classpath All classpath entries to pass
+   * @param classPath All classpath entries to pass
    */
   protected ArrayList<String> _buildCommandLineArgs(File file, String destDir,
                                                     String classPath)

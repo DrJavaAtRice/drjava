@@ -312,8 +312,6 @@ public class ConsoleDocument implements EditDocumentInterface {
   }
 
   /** Returns the entire text of the document.  Identical to getText() in AbstractDocumentInterface.
-   *  @param offs First offset of the desired text
-   *  @param len Number of characters to return
    *  @throws EditDocumentException if the offset or length are illegal
    */
   public String getText() {

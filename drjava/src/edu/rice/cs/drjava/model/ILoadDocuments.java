@@ -55,7 +55,6 @@ import edu.rice.cs.util.OperationCanceledException;
  *  instead of this interface.
  *  TODO: Subdivide GlobalModelListener to target only events generated here.
  *  TODO: Simplify signatures to avoid command pattern overhead.
- *  @see IGetDocuments
  *  @see GlobalModel
  *  @see DefaultGlobalModel
  *  @version $Id$

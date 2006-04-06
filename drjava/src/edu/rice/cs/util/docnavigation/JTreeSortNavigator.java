@@ -129,7 +129,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Alternate constructor specifying the display manager that provides icons for the navigator.
-   *  @param projfilepath the path identifying the root node for the project
+   *  @param projRoot the path identifying the root node for the project
    *  @param dm the display manager for the navigagtor
    */
   public JTreeSortNavigator(String projRoot, DisplayManager<? super ItemT> dm) {

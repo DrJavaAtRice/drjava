@@ -94,7 +94,7 @@ public interface CompilerModel {
   public void compileAll() throws IOException;
   
   /** Compiles the specified documents which must be saved first.
-   *  @param doc the document to be compiled
+   *  @param docs the documents to be compiled
    *  @throws IOException if a filesystem-related problem prevents compilation
    */
   public void compile(List<OpenDefinitionsDocument> docs) throws IOException;

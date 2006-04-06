@@ -76,7 +76,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
 
     /**
      * Returns the item from the list that is the longest match.
-     * @oaram item target item
+     * @param item target item
      * @param items list with items
      * @param pim predictive input model
      * @return longest match
@@ -305,7 +305,6 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
 
   /**
    * Sets the strategy
-   * @param items list of items
    */
   public void setStrategy(MatchingStrategy<T> strategy) {
     _strategy = strategy;

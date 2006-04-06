@@ -99,7 +99,6 @@ public class CompilerErrorModel {
   private final GlobalModel _model;
 
   /** Constructs an empty CompilerErrorModel.
-   *  @param empty the empty array of T
    */
   public CompilerErrorModel() {
     _model = new DummyGlobalModel() {

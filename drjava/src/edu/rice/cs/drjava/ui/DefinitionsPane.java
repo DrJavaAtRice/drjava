@@ -1060,7 +1060,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    *  @param selEnd - the selection end
    *  @param reason - the reason for the indent
    *  @param pm - the ProgressMonitor used by the indenter
-   *  @param loc - the offset of the caret (which may not match _currentLocation)
    */
   protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
     //_mainFrame.hourglassOn();

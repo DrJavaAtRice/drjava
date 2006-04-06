@@ -80,7 +80,7 @@ public class DefaultCompilerModel implements CompilerModel {
   private Object _slaveJVMLock = new Object();
 
   /** Main constructor.  
-   *  @param getter the GlobalModel that is the source of documents for this CompilerModel
+   *  @param m the GlobalModel that is the source of documents for this CompilerModel
    */
   public DefaultCompilerModel(GlobalModel m) {
     _model = m;

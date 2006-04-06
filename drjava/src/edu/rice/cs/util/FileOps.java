@@ -179,7 +179,7 @@ public abstract class FileOps {
     catch(IOException e) { return f.getAbsoluteFile(); }
   }
   
-  /** @returns the file f unchanged if f exists; otherwise returns NULL_FILE. */
+  /** @return the file f unchanged if f exists; otherwise returns NULL_FILE. */
   public static File validate(File f) {
     if (f.exists()) return f;
     return FileOption.NULL_FILE;  // This File object exists

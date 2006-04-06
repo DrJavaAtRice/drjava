@@ -67,7 +67,6 @@ import edu.rice.cs.drjava.project.DocumentInfoGetter;
  *  the compile an unit testing functionality of DrJava, along with many other things.  An ongoing refactoring effort 
  *  will be moving many GlobalModel functions into more specific sub-interfaces for particular behaviors:
  *  @see DefaultGlobalModel
- *  @see IGetDocuments
  *  @see ILoadDocuments
  *  @see CompilerModel
  *  @see JUnitModel
@@ -172,7 +171,7 @@ public interface GlobalModel extends ILoadDocuments {
   public void configNewProject() throws IOException;
   
   /**Writes the project file to disk
-   * @param filename where to save the project
+   * @param f where to save the project
    */
   public void saveProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
   
@@ -213,14 +212,14 @@ public interface GlobalModel extends ILoadDocuments {
   public void closeProject(boolean qutting);
   
   /** Searches for a file with the given name on the current source roots and the augmented classpath.
-   *  @param filename Name of the source file to look for
+   *  @param fileName Name of the source file to look for
    *  @return the file corresponding to the given name, or null if it cannot be found
    */
   public File getSourceFile(String fileName);
 
   /** Searches for a file with the given name on the provided paths. Returns null if the file is not found.
-   *  @param filename Name of the source file to look for
-   *  @param paths An array of directories to search
+   *  @param fileName Name of the source file to look for
+   *  @param paths The directories to search
    */
   public File getSourceFileFromPaths(String fileName, List<File> paths);
 

@@ -102,7 +102,7 @@ public interface JavadocModel {
    * @param select a command object for selecting a directory and warning a user
    *        about bad input
    * @param saver a command object for saving a document (if it moved/changed)
-   * @param classpath a collection of classpath elements to be used by Javadoc
+   * @param classPath a collection of classpath elements to be used by Javadoc
    * 
    * @throws IOException if there is a problem manipulating files
    */
@@ -117,7 +117,7 @@ public interface JavadocModel {
    * 
    * @param doc Document to generate Javadoc for
    * @param saver a command object for saving the document (if it moved/changed)
-   * @param classpath a collection of classpath elements to be used by Javadoc
+   * @param classPath a collection of classpath elements to be used by Javadoc
    * 
    * @throws IOException if there is a problem manipulating files
    */

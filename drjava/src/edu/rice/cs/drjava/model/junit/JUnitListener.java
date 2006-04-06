@@ -50,7 +50,6 @@ public interface JUnitListener {
   public void nonTestCase(boolean isTestAll);
   
   /** Called when JUnit encounters an illegal class file.
-   *  @param s the canonical path for the offending path.
    *  @param e the error or exception thrown by loading and resolving f.
    */
   public void classFileError(ClassFileError e);
