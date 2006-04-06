@@ -117,8 +117,8 @@ public class SExpParser {
      * @return the top-level list s-expression
      */
     public SEList parseTopLevelExp() {
-      SExpToken t = _lex.readToken();
-      if (t == LeftParenToken.ONLY) {
+      Tokens.SExpToken t = _lex.readToken();
+      if (t == Tokens.LeftParenToken.ONLY) {
         return parseList();
       }
       else if (t == null) {
@@ -136,9 +136,9 @@ public class SExpParser {
      * @return the next s-expression in the read buffer.
      */
     public SExp parseExp() {
-      SExpToken t = _lex.readToken();
+      Tokens.SExpToken t = _lex.readToken();
       assertNotEOF(t);
-      if (t == LeftParenToken.ONLY) {
+      if (t == Tokens.LeftParenToken.ONLY) {
         return parseList();
       }
       else {
@@ -153,15 +153,15 @@ public class SExpParser {
      */
     private SEList parseList() {
       LinkedList<SExp> list = new LinkedList<SExp>();
-      SExpToken t = _lex.peek();
+      Tokens.SExpToken t = _lex.peek();
       assertNotEOF(t);
       
-      while (t != RightParenToken.ONLY) {
+      while (t != Tokens.RightParenToken.ONLY) {
         list.addFirst(parseExp());
         t = _lex.peek();
       }
       
-      // t has to be a RightParenToken at this point.
+      // t has to be a Tokens.RightParenToken at this point.
       // simply eat the token
       _lex.readToken();
       
@@ -181,17 +181,17 @@ public class SExpParser {
      * @param t the token to interpret
      * @return the correct corresponding atom
      */
-    private Atom parseAtom(SExpToken t) {
-      if (t instanceof BooleanToken) {
-        if (((BooleanToken)t).getValue())
+    private Atom parseAtom(Tokens.SExpToken t) {
+      if (t instanceof Tokens.BooleanToken) {
+        if (((Tokens.BooleanToken)t).getValue())
           return BoolAtom.TRUE;
         else 
           return BoolAtom.FALSE;
       }
-      else if (t instanceof NumberToken) {
-        return new NumberAtom(((NumberToken)t).getValue());
+      else if (t instanceof Tokens.NumberToken) {
+        return new NumberAtom(((Tokens.NumberToken)t).getValue());
       }
-      else if (t instanceof QuotedTextToken) {
+      else if (t instanceof Tokens.QuotedTextToken) {
         return new QuotedTextAtom(t.getText());
       }
       else {
@@ -203,7 +203,7 @@ public class SExpParser {
      * Throws the EOF exception if the given token is the end of file
      * @param t the token to check
      */
-    private void assertNotEOF(SExpToken t) {
+    private void assertNotEOF(Tokens.SExpToken t) {
       if (t == null) {
         throw new PrivateParseException("Unexpected <EOF> at line " + _lex.lineno());
       }

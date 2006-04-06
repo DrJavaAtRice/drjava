@@ -50,9 +50,9 @@ import java.io.*;
 
 class Lexer extends StreamTokenizer {
   
-  public HashMap<String,SExpToken> wordTable = new HashMap<String,SExpToken>();
+  public HashMap<String,Tokens.SExpToken> wordTable = new HashMap<String,Tokens.SExpToken>();
   
-  private SExpToken buffer;
+  private Tokens.SExpToken buffer;
   
   public Lexer(File file) throws FileNotFoundException{
     this(new BufferedReader(new FileReader(file)));
@@ -98,63 +98,63 @@ class Lexer extends StreamTokenizer {
     }
   }
   
-  /** Returns the next SExpToken without consuming it */
-  public SExpToken peek() {
+  /** Returns the next Tokens.SExpToken without consuming it */
+  public Tokens.SExpToken peek() {
     if (buffer == null) buffer = readToken();
     return buffer;
   }
   
-  /** Reads the next SExpToken from the input stream and consumes it;
-   *  Returns the SExpToken object representing this SExpToken */
-  public SExpToken readToken() {
+  /** Reads the next Tokens.SExpToken from the input stream and consumes it;
+   *  Returns the Tokens.SExpToken object representing this Tokens.SExpToken */
+  public Tokens.SExpToken readToken() {
     
     if (buffer != null) {
-      SExpToken token = buffer;
+      Tokens.SExpToken token = buffer;
       buffer = null;          // clear buffer
       return token;
     }
     
     int tokenType = getToken();
-    // Process the SExpToken returned by StreamTokenizer
+    // Process the Tokens.SExpToken returned by StreamTokenizer
     switch (tokenType) {
       case TT_NUMBER: 
-        return new NumberToken(nval);
+        return new Tokens.NumberToken(nval);
         
       case TT_WORD:
         String s = sval.toLowerCase();
-        SExpToken regToken = wordTable.get(s);
-        if (regToken == null) return new WordToken(sval);
+        Tokens.SExpToken regToken = wordTable.get(s);
+        if (regToken == null) return new Tokens.WordToken(sval);
         
         return regToken;
         
       case TT_EOF: return null;
-      case '(': return LeftParenToken.ONLY;
-      case ')': return RightParenToken.ONLY;
-      case '"': return new QuotedTextToken(sval);
+      case '(': return Tokens.LeftParenToken.ONLY;
+      case ')': return Tokens.RightParenToken.ONLY;
+      case '"': return new Tokens.QuotedTextToken(sval);
       case '\\': 
 //        int t = getToken();
 //        if (t == '"') {
-//          return new WordToken("\"");
+//          return new Tokens.WordToken("\"");
 //        }
 //        else if (t == '\\') {
-//          return new WordToken("\\");
+//          return new Tokens.WordToken("\\");
 //        }
 //        else if (t == ' ') {
-//          return new WordToken(" ");
+//          return new Tokens.WordToken(" ");
 //        }
 //        else if (t == 'n') {
-//          return new WordToken("\n");
+//          return new Tokens.WordToken("\n");
 //        }
 //        else if (t == 't') {
-//          return new WordToken("\t");
+//          return new Tokens.WordToken("\t");
 //        }
 //        else {
 //          pushBack();
-          return BackSlashToken.ONLY;
+          return Tokens.BackSlashToken.ONLY;
 //          throw new SExpParseException("Invalid escape sequence: \\" + (char)t);
         
       default:
-        return new WordToken("" + (char)tokenType);
+        return new Tokens.WordToken("" + (char)tokenType);
     }
   }
   
@@ -162,7 +162,7 @@ class Lexer extends StreamTokenizer {
   /** Initialize the word table used by the lexer to classify Tokens */
   private void initWordTable() {
     // initialize wordTable
-    wordTable.put("true", BooleanToken.TRUE);
-    wordTable.put("false", BooleanToken.FALSE);
+    wordTable.put("true", Tokens.BooleanToken.TRUE);
+    wordTable.put("false", Tokens.BooleanToken.FALSE);
   }
 }
