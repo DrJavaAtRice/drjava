@@ -172,9 +172,11 @@ public abstract class FileOps {
   /** @return the canonical file equivalent to f.  Identical to f.getCanonicalFile() except it does not throw an 
    *  exception when the file path syntax is incorrect. */
   public static File getCanonicalFile(File f) {
-    try { if (f.exists()) return f.getCanonicalFile(); }
-    catch(IOException e) { /* do nothing */ }
-    finally { return f.getAbsoluteFile(); }
+    try { 
+      if (f.exists()) return f.getCanonicalFile();
+      else return f.getAbsoluteFile();
+    }
+    catch(IOException e) { return f.getAbsoluteFile(); }
   }
   
   /** @returns the file f unchanged if f exists; otherwise returns NULL_FILE. */

@@ -96,16 +96,16 @@ public interface ProjectFileIR {
   /** @return the array of watches. */
   public DebugWatchData[] getWatches();
   
-  public void setSourceFiles(List<DocFile> sf);
-  public void setAuxiliaryFiles(List<DocFile> aux);
-  public void setCollapsedPaths(List<String> paths);
-  public void setClassPaths(List<File> cp);
+  public void setSourceFiles(List<? extends DocFile> sf);
+  public void setAuxiliaryFiles(List<? extends DocFile> aux);
+  public void setCollapsedPaths(List<? extends String> paths);
+  public void setClassPaths(List<? extends File> cp);
   public void setBuildDirectory(File dir);
   public void setWorkingDirectory(File dir);
   public void setMainClass(File main);
   public void setProjectRoot(File root);
   public void setCreateJarFile(File createJarFile);
   public void setCreateJarFlags(int createJarFlags);
-  public void setBreakpoints(List<DebugBreakpointData> bps);
-  public void setWatches(List<DebugWatchData> ws);
+  public void setBreakpoints(List<? extends DebugBreakpointData> bps);
+  public void setWatches(List<? extends DebugWatchData> ws);
 }

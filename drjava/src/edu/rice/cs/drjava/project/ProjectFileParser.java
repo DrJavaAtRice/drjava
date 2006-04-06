@@ -82,8 +82,6 @@ public class ProjectFileParser {
   private String _parent;
   private String _srcFileBase;
   
-  ListVisitor<File> fileListVisitor;
-  ListVisitor<DocFile> docFileListVisitor;
   BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
   
   private ProjectFileParser() { }
@@ -98,8 +96,6 @@ public class ProjectFileParser {
     _projectFile = projFile;
     _parent = projFile.getParent();  
     _srcFileBase = _parent; // oldest legacy file format may omit proj-root or proj-root-and-base node
-    fileListVisitor = new ListVisitor<File>(_parent);
-    docFileListVisitor = new ListVisitor<DocFile>(_parent);
 //    System.err.println("Parsing project file " + projFile + " with parent " + _parent);
     
     List<SEList> forest = null;
@@ -108,7 +104,7 @@ public class ProjectFileParser {
     
     ProjectFileIR pfir = new ProjectProfile(projFile);
 
-    try { for (SEList exp : forest) evaluateExpression(exp, pfir); }
+    try { for (SEList exp : forest) evaluateExpression(exp, pfir, new FileListVisitor(_parent)); }
     catch(PrivateProjectException e) { throw new MalformedProjectFileException("Parse Error: " + e.getMessage()); }
     
 //    System.err.println("Parsed buildDir is " + pfir.getBuildDirectory());
@@ -121,24 +117,23 @@ public class ProjectFileParser {
    *  @param e the top-level s-expression to check
    *  @param pfir the ProjectFileIR to update
    */
-  private void evaluateExpression(SEList e, ProjectFileIR pfir) throws IOException {
+  private void evaluateExpression(SEList e, ProjectFileIR pfir, FileListVisitor flv) throws IOException {
     if (e == Empty.ONLY) return;
     Cons exp = (Cons)e; // If it's not empty, it's a cons
       
     String name = exp.accept(NameVisitor.ONLY);
     if (name.compareToIgnoreCase("source") == 0) {
-      ListVisitor<DocFile> srcFileListVisitor = new ListVisitor<DocFile>(_srcFileBase);
-      List<DocFile> dfList = exp.getRest().accept(srcFileListVisitor);
+      List<DocFile> dfList = exp.getRest().accept(new FileListVisitor(_srcFileBase));
       pfir.setSourceFiles(dfList);
     }
     else if (name.compareToIgnoreCase("proj-root") == 0) {  // legacy node form; all paths relative to project file
-      List<File> fList = exp.getRest().accept(fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple source roots");
       else if (fList.size() == 0) pfir.setProjectRoot(null); // can this ever happen?
       pfir.setProjectRoot(fList.get(0));
     }
     else if (name.compareToIgnoreCase("proj-root-and-base") == 0) { // source file paths are relative to project root
-      List<File> fList = exp.getRest().accept(fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple source roots");
       File root = fList.get(0);
       if (! root.exists()) throw new IOException("Project root " + root + " no longer exists");
@@ -146,7 +141,7 @@ public class ProjectFileParser {
       _srcFileBase = root.getCanonicalPath();
     }
     else if (name.compareToIgnoreCase("auxiliary") == 0) {
-      List<DocFile> dfList = exp.getRest().accept(docFileListVisitor);
+      List<DocFile> dfList = exp.getRest().accept(flv);
       pfir.setAuxiliaryFiles(dfList);
     }
     else if (name.compareToIgnoreCase("collapsed") == 0) {
@@ -154,24 +149,24 @@ public class ProjectFileParser {
       pfir.setCollapsedPaths(sList);
     }
     else if (name.compareToIgnoreCase("build-dir") == 0) {
-      List<File> fList = exp.getRest().accept(fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
 //      System.err.println("BuildDir fList = " + fList);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple build directories");
       else if (fList.size() == 0) pfir.setBuildDirectory(null);
       else pfir.setBuildDirectory(fList.get(0));
     }
     else if (name.compareToIgnoreCase("work-dir") == 0) {
-      List<File> fList = exp.getRest().accept(fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple working directories");
       else if (fList.size() == 0) pfir.setWorkingDirectory(null);
       else pfir.setWorkingDirectory(fList.get(0));
     }
     else if (name.compareToIgnoreCase("classpaths") == 0) {
-      List<File> fList = exp.getRest().accept(fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
       pfir.setClassPaths(fList);
     }
     else if (name.compareToIgnoreCase("main-class") == 0) {
-      List<File> fList = exp.getRest().accept(fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple main classes");
       else if (fList.size() == 0) pfir.setMainClass(null);
       else pfir.setMainClass(fList.get(0));
@@ -288,14 +283,14 @@ public class ProjectFileParser {
   /* nested/inner classes */
   
   /** Parses out a list of file nodes. */
-  private class ListVisitor<U extends File> implements SEListVisitor<List<U>> {
+  private static class FileListVisitor implements SEListVisitor<List<DocFile>> {
     /** Base directory for relative paths */
     private String _base;
-    ListVisitor(String base) { _base = base; }
-    public List<U> forEmpty(Empty e) { return new ArrayList<U>(); }
-    public List<U> forCons(Cons c) {
-      List<U> list = c.getRest().accept(this);
-      U tmp = (U) ProjectFileParser.ONLY.parseFile(c.getFirst(), _base);
+    FileListVisitor(String base) { _base = base; }
+    public List<DocFile> forEmpty(Empty e) { return new ArrayList<DocFile>(); }
+    public List<DocFile> forCons(Cons c) {
+      List<DocFile> list = c.getRest().accept(this);
+      DocFile tmp = ProjectFileParser.ONLY.parseFile(c.getFirst(), _base);
       list.add(0, tmp); // add to the end
       return list;
     }

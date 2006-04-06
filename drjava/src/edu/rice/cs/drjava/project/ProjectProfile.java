@@ -169,10 +169,10 @@ public class ProjectProfile implements ProjectFileIR {
   }
   public void setWorkingDirectory(File dir) { _workDir = FileOps.validate(dir); }
   public void setMainClass(File main) { _mainClass = main;  }
-  public void setSourceFiles(List<DocFile> sf) { _sourceFiles = sf; }
-  public void setClassPaths(List<File> cpf) { _classPathFiles = cpf; }
-  public void setCollapsedPaths(List<String> cp) { _collapsedPaths = cp; }
-  public void setAuxiliaryFiles(List<DocFile> af) { _auxFiles = af; }
+  public void setSourceFiles(List<? extends DocFile> sf) { _sourceFiles = new ArrayList<DocFile>(sf); }
+  public void setClassPaths(List<? extends File> cpf) { _classPathFiles = new ArrayList<File>(cpf); }
+  public void setCollapsedPaths(List<? extends String> cp) { _collapsedPaths = new ArrayList<String>(cp); }
+  public void setAuxiliaryFiles(List<? extends DocFile> af) { _auxFiles = new ArrayList<DocFile>(af); }
 
   /** Assumes that root.getParentFile != null */
   public void setProjectRoot(File root) { 
@@ -183,8 +183,8 @@ public class ProjectProfile implements ProjectFileIR {
   public void setCreateJarFile(File createJarFile) { _createJarFile = createJarFile; }
   public void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
   
-  public void setBreakpoints(List<DebugBreakpointData> bps) { _breakpoints = bps; }
-  public void setWatches(List<DebugWatchData> ws) { _watches = ws; }
+  public void setBreakpoints(List<? extends DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
+  public void setWatches(List<? extends DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
   
   /** This method writes what information has been passed to this builder so far to disk in s-expression format. */
   public void write() throws IOException {
