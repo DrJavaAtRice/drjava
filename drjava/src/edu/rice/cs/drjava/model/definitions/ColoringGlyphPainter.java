@@ -67,11 +67,14 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
   public static Color ERROR_COLOR = DrJava.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
   public static Color DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
   
-  private boolean _listenersAttached = false;
+  private boolean _listenersAttached;
   private Runnable _lambdaRepaint;
+  private FontMetrics _metrics;
   
   public ColoringGlyphPainter(Runnable lambdaRepaint) {
+    _listenersAttached = false;
     _lambdaRepaint = lambdaRepaint;
+    // _metrics is initialized by sync(), which thus must be called before any use of _metrics
   }
   
   /**
@@ -99,12 +102,12 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     int p = v.getStartOffset();
     if (p != p0) {
       text = v.getText(p, p0);
-      int width = Utilities.getTabbedTextWidth(text, metrics, x, expander, p);
+      int width = Utilities.getTabbedTextWidth(text, _metrics, x, expander, p);
       x += width;
     }
     
     // determine the y coordinate to render the glyphs
-    int y = alloc.y + metrics.getHeight() - metrics.getDescent();
+    int y = alloc.y + _metrics.getHeight() - _metrics.getDescent();
     
     text = v.getText(p0, p1);
     
@@ -155,13 +158,13 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
                        TabExpander e, float x) {
     sync(v);
     Segment text = v.getText(p0, p1);
-    int width = Utilities.getTabbedTextWidth(text, metrics, (int) x, e, p0);
+    int width = Utilities.getTabbedTextWidth(text, _metrics, (int) x, e, p0);
     return width;
   }
   
   public float getHeight(GlyphView v) {
     sync(v);
-    return metrics.getHeight();
+    return _metrics.getHeight();
   }
   
   /**
@@ -170,7 +173,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
    */
   public float getAscent(GlyphView v) {
     sync(v);
-    return metrics.getAscent();
+    return _metrics.getAscent();
   }
   
   /**
@@ -179,7 +182,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
    */
   public float getDescent(GlyphView v) {
     sync(v);
-    return metrics.getDescent();
+    return _metrics.getDescent();
   }
   
   public Shape modelToView(GlyphView v, int pos, Position.Bias bias,
@@ -196,13 +199,13 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
       // The caller of this is left to right and borders a right to
       // left view, return our end location.
       return new Rectangle(alloc.x + alloc.width, alloc.y, 0,
-                           metrics.getHeight());
+                           _metrics.getHeight());
     }
     if ((pos >= p0) && (pos <= p1)) {
       // determine range to the left of the position
       text = v.getText(p0, pos);
-      int width = Utilities.getTabbedTextWidth(text, metrics, alloc.x, expander, p0);
-      return new Rectangle(alloc.x + width, alloc.y, 0, metrics.getHeight());
+      int width = Utilities.getTabbedTextWidth(text, _metrics, alloc.x, expander, p0);
+      return new Rectangle(alloc.x + width, alloc.y, 0, _metrics.getHeight());
     }
     throw new BadLocationException("modelToView - can't convert", p1);
   }
@@ -230,7 +233,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     TabExpander expander = v.getTabExpander();
     Segment text = v.getText(p0, p1);
     
-    int offs = Utilities.getTabbedTextOffset(text, metrics, 
+    int offs = Utilities.getTabbedTextOffset(text, _metrics, 
                                              alloc.x, (int) x, expander, p0);
     int retValue = p0 + offs;
     if(retValue == p1) {
@@ -264,7 +267,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     sync(v);
     TabExpander expander = v.getTabExpander();
     Segment s = v.getText(p0, v.getEndOffset());
-    int index = Utilities.getTabbedTextOffset(s, metrics, (int)x, (int)(x+len),
+    int index = Utilities.getTabbedTextOffset(s, _metrics, (int)x, (int)(x+len),
                                               expander, p0, false);
     int p1 = p0 + index;
     return p1;
@@ -272,7 +275,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
   
   void sync(GlyphView v) {
     Font f = v.getFont();
-    if ((metrics == null) || (! f.equals(metrics.getFont()))) {
+    if ((_metrics == null) || (! f.equals(_metrics.getFont()))) {
       // fetch a new FontMetrics
       Toolkit kit;
       Component c = v.getContainer();
@@ -281,7 +284,17 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
       } else {
         kit = Toolkit.getDefaultToolkit();
       }
-      metrics = kit.getFontMetrics(f);
+      /* Use of the deprecated method here is necessary to get a handle on
+       * a FontMetrics object.  This is required by our dependence on the
+       * javax.swing.text.Utilities class, which does a lot of Java 1.1-style
+       * calculation (presumably these methods should be deprecated, too).
+       * The deprecated use can't be fixed without an in-depth understanding
+       * of fonts, glyphs, and font rendering.  Where _metrics is currently used,
+       * the Font methods getLineMetrics, getStringBounds, getHeight, getAscent,
+       * and getDescent will probably be helpful.
+       */
+      @SuppressWarnings("deprecation") FontMetrics newMetrics = kit.getFontMetrics(f);
+      _metrics = newMetrics;
     }
     
     Document doc = v.getDocument();
@@ -415,7 +428,5 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
       MAIN_FONT = DrJava.getConfig().getSetting(FONT_MAIN);
     }
   }
-  // --- variables ---------------------------------------------
-  
-  FontMetrics metrics;
+
 }
