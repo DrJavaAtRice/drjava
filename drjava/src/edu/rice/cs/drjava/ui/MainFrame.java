@@ -6099,7 +6099,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             }
 //          }
 //          finally { hourglassOff(); }
-            if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) {
+            if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) && (_model.getBuildDirectory()!=null)) {
               _scanClassFiles();
             }
         }
