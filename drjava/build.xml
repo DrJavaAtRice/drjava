@@ -496,9 +496,8 @@
         <pathelement location="classes/lib-14" />
       </path>
     </pathconvert>
-    <!-- Note: "verifyrefs" is called "refclasspath" in the documentation, but that name is incorrect -->
-    <retroweaver srcdir="classes/test" destdir="classes/test-14" version="1.4" failonerror="true" 
-                 verifyrefs="${retroweaver-test-classpath}" />
+    <!-- We do not check references here, thus allowing 1.5 references in test classes -->
+    <retroweaver srcdir="classes/test" destdir="classes/test-14" version="1.4" failonerror="true" />
     <copy todir="classes/test-14">
       <fileset dir="classes/test" excludes="**/*.class" />
     </copy>
@@ -516,9 +515,7 @@
   <target name="test-15" depends="compile-15, assert-15, resolve-java15-tools"
           description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
     <echo message="Running all 5.0 tests matching '${test-spec}' under Java 5.0" />
-    <!-- TODO: Experiment with performance under different forkmodes -->
-    <junit printsummary="on" haltonerror="on" haltonfailure="on" fork="on" 
-           maxmemory="256M" dir="${basedir}">
+    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="${java15-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
@@ -526,19 +523,20 @@
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
       </classpath>
-      <formatter type="plain" usefile="false" />
+      <formatter type="brief" usefile="false" />
       <batchtest>
         <fileset dir="classes/test" includes="**/*${test-spec}*Test.class" />
       </batchtest>
     </junit>
+    
   </target>
 
   <target name="test-14" depends="compile-14, resolve-java14-exec, resolve-java14-tools"
           description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
-    <!-- TODO: Experiment with performance under different forkmodes -->
-    <junit printsummary="on" haltonerror="on" haltonfailure="on" fork="on" 
-           maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
+    <echo message="WARNING: 1.4-compatible test classes are (intentionally) not checked for Java 5 API references." />
+    <echo message="If such references exist, these tests will probably fail." />
+    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
       <classpath>
         <pathelement location="${java14-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
@@ -546,7 +544,7 @@
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
-      <formatter type="plain" usefile="false" />
+      <formatter type="brief" usefile="false" />
       <batchtest>
         <fileset dir="classes/test-14" includes="**/*${test-spec}*Test.class" />
       </batchtest>
@@ -556,9 +554,7 @@
   <target name="test-14-in-15" depends="compile-14, assert-15, resolve-java15-tools"
           description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
-    <!-- TODO: Experiment with performance under different forkmodes -->
-    <junit printsummary="on" haltonerror="on" haltonfailure="on" fork="on" 
-           maxmemory="256M" dir="${basedir}">
+    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="${java15-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
@@ -566,7 +562,7 @@
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
-      <formatter type="plain" usefile="false" />
+      <formatter type="brief" usefile="false" />
       <batchtest>
         <fileset dir="classes/test" includes="**/*${test-spec}*Test.class" />
       </batchtest>
