@@ -257,7 +257,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    */
   protected IDocumentNavigator<OpenDefinitionsDocument> _documentNavigator = 
       new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeListNavigator(); 
+
+  /** Light-weight parsing controller. */
+  protected LightWeightParsingControl _parsingControl;
   
+  /** @return the parsing control */
+  public LightWeightParsingControl getParsingControl() { return _parsingControl; }
   
   // ----- CONSTRUCTORS -----
   
@@ -675,6 +680,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void cleanBuildDirectory() throws FileMovedException, IOException{
       File dir = this.getBuildDirectory();
+      // clear cached class file of all documents
+      for (OpenDefinitionsDocument doc: _documentsRepos) { doc.setCachedClassFile(null); }
+
       cleanHelper(dir);
       if (! dir.exists()) dir.mkdirs();
     }
@@ -1993,6 +2001,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private volatile File _file;
     private volatile long _timestamp;
     
+    /** Caret position, as set by the view. */
+    private int _caretPosition;
+    
     /** The folder containing this document */
     private volatile File _parentDir;  
 
@@ -2526,7 +2537,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         // Not cached, so locate the file
         classFile = _locateClassFile();
         getDocument().setCachedClassFile(classFile);
-        if (classFile == null) {
+        if ((classFile == null) || (!classFile.exists())) {
           // couldn't find the class file
           getDocument().setClassFileInSync(false);
           return false;
@@ -2687,13 +2698,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
 
     /** Forwarding method to sync the definitions with whatever view component is representing them. */
-    public void setCurrentLocation(int location) { getDocument().setCurrentLocation(location); }
+    public void setCurrentLocation(int location) { _caretPosition = location; getDocument().setCurrentLocation(location); }
 
     /**
      * Get the location of the cursor in the definitions according
      * to the definitions document.
      */
     public int getCurrentLocation() { return getDocument().getCurrentLocation(); }
+    
+    /** @return the caret position as set by the view. */
+    public int getCaretPosition() { return _caretPosition; }
 
     /**
      * Forwarding method to find the match for the closing brace
@@ -2954,6 +2968,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
       
     public File getCachedClassFile() { return getDocument().getCachedClassFile(); }
+      
+    public void setCachedClassFile(File f) { getDocument().setCachedClassFile(f); }
     
     public DocumentListener[] getDocumentListeners() { return getDocument().getDocumentListeners(); }
     
@@ -2966,6 +2982,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean posInParenPhrase(int pos) { return getDocument().posInParenPhrase(pos); }
     
     public boolean posInParenPhrase() { return getDocument().posInParenPhrase(); }
+
+    public String getEnclosingClassName(int pos, boolean fullyQualified) throws BadLocationException, ClassNameNotFoundException {
+      return getDocument().getEnclosingClassName(pos, fullyQualified);
+    }
+    
+    public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+      return getDocument().findPrevEnclosingBrace(pos, opening, closing);
+    }
+
+    public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+      return getDocument().findNextEnclosingBrace(pos, opening, closing);
+    }
     
     public int findPrevNonWSCharPos(int pos) throws BadLocationException {
       return getDocument().findPrevNonWSCharPos(pos);

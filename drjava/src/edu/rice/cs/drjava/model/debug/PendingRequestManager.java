@@ -165,16 +165,20 @@ public class PendingRequestManager {
       return;
     }
     for (int i = 0; i < actions.size(); i++) {
-      int lineNumber = actions.get(i).getLineNumber();
+      DocumentDebugAction<?> a = actions.get(i);
+      int lineNumber = a.getLineNumber();
       if (lineNumber != DebugAction.ANY_LINE) {
         try {
           List lines = rt.locationsOfLine(lineNumber);
           if (lines.size() == 0) {
             // Do not disable action; the line number might just be in another class in the same file
-            //actions.get(i).setEnabled(false);
+            String exactClassName = a.getExactClassName();
+            if ((exactClassName!=null) && (exactClassName.equals(rt.name()))) {
+              _manager.printMessage(actions.get(i).toString()+" not on an executable line; disabled.");
+              actions.get(i).setEnabled(false);
+            }
 
             // Requested line number not in reference type, skip this action
-            //i++;
             continue;
           }
         }
@@ -187,34 +191,11 @@ public class PendingRequestManager {
       try {
         Vector<ReferenceType> refTypes = new Vector<ReferenceType>();
         refTypes.add(rt);
-        // next line was in condition for if
-        actions.get(i).createRequests(refTypes);  // This type warning will go away in JDK 1.5
-        // actions.get(i) has raw type because type parameter in actions is the raw approximation to an existential type /**?
-
-//        if (!) {
-          // if no request created, skip this action
-          //i++;
-//        }
-//        else {
-          // Experiment: try never removing the action or event request.
-          //  This way, multiple classloads of this class will always have
-          //  the DebugActions set properly
-          /*
-
-          // if request created, remove the current action and keep i here
-          actions.remove(i);
-          // check if the vector is empty
-          if (actions.size() == 0) {
-            _pendingActions.remove(className);
-            _manager.getEventRequestManager().deleteEventRequest(event.request());
-          }
-        */
-//        }
+        a.createRequests(refTypes);  // This type warning will go away in JDK 1.5
       }
       catch (DebugException e) {
-        failedActions.add(actions.get(i));
-        //i++;
-       // DrJava.consoleOut().println("Exception preparing request!! " + e);
+        failedActions.add(a);
+        // DrJava.consoleOut().println("Exception preparing request!! " + e);
       }
     }
 

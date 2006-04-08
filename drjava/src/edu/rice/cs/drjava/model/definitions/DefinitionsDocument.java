@@ -879,6 +879,396 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
     }
     finally { readUnlock(); }
+  }  
+  
+  private int _findNextOpenSquiggly(String text, int pos) throws BadLocationException {
+    // readLock assumed to be held,
+    int i;
+    int reducedPos = pos;
+    
+    synchronized(_reduced) {
+      final int origLocation = _currentLocation;
+      // Move reduced model to location pos
+      _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
+      
+      // Walk forward from specificed position
+      i = text.indexOf('{', reducedPos);
+      while(i>-1) {
+        // Move reduced model to walker's location
+        _reduced.move(i - reducedPos);  // reduced model points to i
+        reducedPos = i;                 // reduced model points to reducedPos
+        
+        // Check if matching keyword should be ignored because it is within a comment, or quotes
+        ReducedModelState state = _reduced.getStateAtCurrent();
+        if (!state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
+              || ((i > 0) && _isStartOfComment(text, i - 1))) {
+          i = text.indexOf('{', reducedPos+1);
+          continue;  // ignore matching brace
+        }
+        else {
+          break; // found our brace
+        }        
+      }  // end synchronized
+      
+      _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
+    }
+    
+    if (i == -1) reducedPos = ERROR_INDEX; // No matching brace was found
+    return reducedPos;  
+  }
+  
+  private int _findPrevKeyword(String text, String kw, int pos) throws BadLocationException {
+    // readLock assumed to be held,
+    int i;
+    int reducedPos = pos;
+    
+    synchronized(_reduced) {
+      final int origLocation = _currentLocation;
+      // Move reduced model to location pos
+      _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
+      
+      // Walk backwards from specificed position
+      i = text.lastIndexOf(kw, reducedPos);
+      while(i>-1) {
+        // Check that this is the beginning of a word
+        if (i>0) {
+          if (Character.isJavaIdentifierPart(text.charAt(i-1))) {
+            // not begining
+            i = text.lastIndexOf(kw, i-1);
+            continue;  // ignore matching keyword 
+          }
+        }
+
+        // Check that this not just the beginning of a longer word
+        if (i+kw.length()<text.length()) {
+          if (Character.isJavaIdentifierPart(text.charAt(i+kw.length()))) {
+            // not begining
+            i = text.lastIndexOf(kw, i-1);
+            continue;  // ignore matching keyword 
+          }
+        }
+        
+        // Move reduced model to walker's location
+        _reduced.move(i - reducedPos);  // reduced model points to i
+        reducedPos = i;                 // reduced model points to reducedPos
+        
+        // Check if matching keyword should be ignored because it is within a comment, or quotes
+        ReducedModelState state = _reduced.getStateAtCurrent();
+        if (!state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
+              || ((i > 0) && _isStartOfComment(text, i - 1))) {
+          i = text.lastIndexOf(kw, reducedPos-1);
+          continue;  // ignore matching keyword 
+        }
+        else {
+          break; // found our keyword
+        }        
+      }  // end synchronized/
+      
+      _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
+    }
+    
+    if (i == -1) reducedPos = ERROR_INDEX; // No matching keyword was found
+    return reducedPos;  
+  }
+ 
+//  public static boolean log = true;
+  
+  /**
+   * Searching backwards finds the name of the enclosing named class or
+   * interface. NB: ignores comments.
+   * @param pos Position to start from
+   * @param fullyQualified true to find the fully qualified class name
+   * @return name of the enclosing named class or interface
+   */
+  public String getEnclosingClassName(int pos, boolean fullyQualified) throws BadLocationException, ClassNameNotFoundException {    
+//    boolean oldLog = log; log = false;
+    // Check cache
+    StringBuffer keyBuf = new StringBuffer("getEnclosingClassName:").append(pos);
+    keyBuf.append(":").append(fullyQualified);
+    String key = keyBuf.toString();
+    String cached = (String) _checkCache(key);
+    if (cached != null) return cached;
+
+    char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=',
+      '!','@','#','$','%','^','~','\\','"','`','|'};
+    String name = "";
+
+    readLock();
+    try {
+      String text = getText(DOCSTART, pos+1);
+      
+      int curPos = pos;
+      if ((text.charAt(curPos)!='{') && (text.charAt(curPos)!='}')) { ++curPos; }
+
+//      if (oldLog) System.out.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10), Math.min(text.length(), curPos+1))+"`");
+      
+      do {
+        curPos = findPrevEnclosingBrace(curPos, '{', '}');
+        if (curPos==ERROR_INDEX) { break; }
+        int classPos = _findPrevKeyword(text, "class", curPos);
+        int interPos = _findPrevKeyword(text, "interface", curPos);
+        int otherPos = findPrevDelimiter(curPos, delims);
+        int newPos = ERROR_INDEX;
+        // see if there's a ) closer by
+        int closeParenPos = findPrevNonWSCharPos(curPos);
+        if ((closeParenPos!=ERROR_INDEX) && (text.charAt(closeParenPos)==')')) {
+          // yes, find the matching (
+          int openParenPos = findPrevEnclosingBrace(closeParenPos, '(', ')');
+          if ((openParenPos!=ERROR_INDEX) && (text.charAt(openParenPos)=='(')) {
+            // this might be an inner class
+            newPos = _findPrevKeyword(text, "new", openParenPos);
+//            if (oldLog) System.out.println("\tnew found at "+newPos+", openSquigglyPos="+curPos);
+            if (!_isAnonymousInnerClass(newPos, curPos)) {
+              // not an anonymous inner class
+              newPos = ERROR_INDEX;
+            }
+          }
+        }
+//        if (oldLog) System.out.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
+//        if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `"+text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
+        while((classPos!=ERROR_INDEX) || (interPos!=ERROR_INDEX) || (newPos!=ERROR_INDEX)) {
+          if (newPos!=ERROR_INDEX) {
+//            if (oldLog) System.out.println("\tanonymous inner class! newPos = "+newPos);
+            classPos = ERROR_INDEX;
+            interPos = ERROR_INDEX;
+            break;
+          }
+          else if ((otherPos>classPos) && (otherPos>interPos)) {
+            curPos = findPrevEnclosingBrace(otherPos, '{', '}');
+            classPos = _findPrevKeyword(text, "class", curPos);
+            interPos = _findPrevKeyword(text, "interface", curPos);
+            otherPos = findPrevDelimiter(curPos, delims);
+            newPos = ERROR_INDEX;
+            // see if there's a ) closer by
+            closeParenPos = findPrevNonWSCharPos(curPos);
+//            if (closeParenPos!=ERROR_INDEX) if (oldLog) System.out.println("nonWS before curPos = "+closeParenPos+" `"+text.charAt(closeParenPos)+"`");
+            if ((closeParenPos!=ERROR_INDEX) && (text.charAt(closeParenPos)==')')) {
+              // yes, find the matching (
+              int openParenPos = findPrevEnclosingBrace(closeParenPos, '(', ')');
+              if ((openParenPos!=ERROR_INDEX) && (text.charAt(openParenPos)=='(')) {
+                // this might be an inner class
+                newPos = _findPrevKeyword(text, "new", openParenPos);
+//                if (oldLog) System.out.println("\tnew found at "+newPos+", openSquigglyPos="+curPos);
+                if (_isAnonymousInnerClass(newPos, curPos)) {
+                  // yes, anonymous inner class
+                }
+                else {
+                  newPos = ERROR_INDEX;
+                }
+              }
+            }
+//            if (oldLog) System.out.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
+//            if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `"+text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
+          }
+          else {
+            // either class or interface found first            
+            curPos = Math.max(classPos, Math.max(interPos, newPos));
+            break;
+          }
+        }
+        
+        if ((classPos!=ERROR_INDEX) || (interPos!=ERROR_INDEX)) {
+          if (classPos>interPos) {
+            // class found first
+            curPos += "class".length();
+          }
+          else {
+            // interface found first
+            curPos += "interface".length();
+          }
+          int nameStart = getFirstNonWSCharPos(curPos);
+          if (nameStart==ERROR_INDEX) { throw new ClassNameNotFoundException("Cannot determine enclosing class name"); }
+          int nameEnd = nameStart+1;
+          while(nameEnd<text.length()) {
+            if (!Character.isJavaIdentifierPart(text.charAt(nameEnd))) {
+              // delimiter found
+              break;
+            }
+            ++nameEnd;
+          }
+          name = text.substring(nameStart,nameEnd) + '$' + name;
+        }
+        else if (newPos!=ERROR_INDEX) {
+          name = String.valueOf(_getAnonymousInnerClassIndex(curPos)) + "$" + name;
+          curPos = newPos;
+        }
+        else {
+          // neither class nor interface found
+          break;
+        }
+      } while(fullyQualified);
+    }
+    finally { readUnlock(); }
+    
+    // chop off '$' at the end.
+    if (name.length()>0) name = name.substring(0, name.length()-1);
+    
+    if (fullyQualified) {
+      String pn = getPackageName();
+      if ((pn.length()>0) && (name.length()>0)) {
+        name = getPackageName() + "." + name;
+      }
+    }
+//    log = oldLog;
+    return name;
+  }
+  
+  /**
+   * Returns true if this position is the instantiation of an anonymous inner class,
+   * i.e. "new Identifier(params, params) {".
+   * @param newPos position of "new"
+   * @param openSquigglyPos position of the next '{'
+   * @return true if anonymous inner class instantiation
+   */
+  private boolean _isAnonymousInnerClass(int newPos, int openSquigglyPos) throws BadLocationException {
+//    String t = getText(DOCSTART, openSquigglyPos+1);
+//    System.out.print ("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+")");
+//    System.out.println("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+"): `"+
+//                       t.substring(newPos, openSquigglyPos+1)+"`");
+    
+    // Check cache
+    StringBuffer keyBuf = new StringBuffer("_getAnonymousInnerClassIndex:").append(newPos).append(':').append(openSquigglyPos);
+    String key = keyBuf.toString();
+    Boolean cached = (Boolean) _checkCache(key);
+    if (cached != null) {
+//      System.out.println(" ==> "+cached);
+      return cached;
+    }
+
+    // readLock assumed to be held
+    cached = false;
+    String text = getText(DOCSTART, openSquigglyPos+1);
+    int origNewPos = newPos;
+    newPos += "new".length();
+    int classStart = getFirstNonWSCharPos(newPos);
+    if (classStart!=ERROR_INDEX) { 
+      int classEnd = classStart+1;
+      while(classEnd<text.length()) {
+        if (!Character.isJavaIdentifierPart(text.charAt(classEnd))) {
+          // delimiter found
+          break;
+        }
+        ++classEnd;
+      }
+      // System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
+      int parenStart = getFirstNonWSCharPos(classEnd);
+      if (parenStart!=ERROR_INDEX) {
+        int origParenStart = parenStart;
+
+        // System.out.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
+        if (text.charAt(origParenStart)=='<') {
+          parenStart = ERROR_INDEX;
+          // might be a generic class
+          int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
+          if (closePointyBracket!=ERROR_INDEX) {
+            if (text.charAt(closePointyBracket)=='>') {
+              parenStart = getFirstNonWSCharPos(closePointyBracket+1);
+            }
+          }
+        }
+      }
+      if (parenStart!=ERROR_INDEX) {
+        if (text.charAt(parenStart)=='(') {
+          final int origLocation = _currentLocation;
+          _reduced.move(parenStart+1 - origLocation);  // reduced model points to pos == parenStart+1
+          int parenEnd = balanceForward();
+          _reduced.move(origLocation - (parenStart+1));    // Restore the state of the reduced model;
+          if (parenEnd > -1) {
+            parenEnd = parenEnd + parenStart+1;
+            // System.out.println("\tafter closing paren = "+parenEnd);
+            int afterParen = getFirstNonWSCharPos(parenEnd);
+            // System.out.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
+            cached = (afterParen==openSquigglyPos);          
+          }
+        }
+      }
+    }
+    
+    _storeInCache(key, cached);
+    
+//    System.out.println(" ==> "+cached);
+    return cached;
+  }
+  
+  /**
+   * Return the index of the anonymous inner class being instantiated at the specified position.
+   * @param position of the opening curly brace of the anonymous inner class
+   * @return anonymous class index
+   */
+  int _getAnonymousInnerClassIndex(int pos) throws BadLocationException, ClassNameNotFoundException {   
+//    boolean oldLog = log; log = false;
+    
+    // Check cache
+    StringBuffer keyBuf = new StringBuffer("_getAnonymousInnerClassIndex:").append(pos);
+    String key = keyBuf.toString();
+    Integer cached = (Integer) _checkCache(key);
+    if (cached != null) {
+//      log = oldLog;
+      return cached.intValue();
+    }
+
+    // readLock assumed to be held
+    char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=',
+      '!','@','#','$','%','^','~','\\','"','`','|'};
+    String className = getEnclosingClassName(pos, true);
+    String text = getText(DOCSTART, pos);
+    int index = 1;
+    int newPos = pos;
+//    if (oldLog) System.out.println("anon before "+pos+" enclosed by "+className);
+    while((newPos = _findPrevKeyword(text, "new", newPos-1)) != ERROR_INDEX) {
+//      if (oldLog) System.out.println("new found at "+newPos);
+      int afterNewPos = newPos + "new".length();
+      int classStart = getFirstNonWSCharPos(afterNewPos);
+      if (classStart==ERROR_INDEX) { continue; }
+      int classEnd = classStart+1;
+      while(classEnd<text.length()) {
+        if (!Character.isJavaIdentifierPart(text.charAt(classEnd))) {
+          // delimiter found
+          break;
+        }
+        ++classEnd;
+      }
+//      if (oldLog) System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
+      int parenStart = getFirstNonWSCharPos(classEnd);
+      if (parenStart==ERROR_INDEX) { continue; }
+      int origParenStart = parenStart;
+      
+//      if (oldLog) System.out.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
+      if (text.charAt(origParenStart)=='<') {
+        parenStart = ERROR_INDEX;
+        // might be a generic class
+        int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
+        if (closePointyBracket!=ERROR_INDEX) {
+          if (text.charAt(closePointyBracket)=='>') {
+            parenStart = getFirstNonWSCharPos(closePointyBracket+1);
+          }
+        }
+      }
+      if (parenStart==ERROR_INDEX) { continue; }      
+      if (text.charAt(parenStart)!='(') { continue; }
+      int parenEnd = findNextEnclosingBrace(parenStart, '(', ')');
+    
+      int nextOpenSquiggly = _findNextOpenSquiggly(text, parenEnd);
+      if (nextOpenSquiggly==ERROR_INDEX) { continue; }
+//      if (oldLog) System.out.println("{ found at "+nextOpenSquiggly+": `"+text.substring(newPos, nextOpenSquiggly+1)+"`");
+//      if (oldLog) System.out.println("_isAnonymousInnerClass("+newPos+", "+nextOpenSquiggly+")");
+      if (_isAnonymousInnerClass(newPos, nextOpenSquiggly)) {
+//        if (oldLog) System.out.println("is anonymous inner class");
+        String cn = getEnclosingClassName(newPos, true);
+//        if (oldLog) System.out.println("enclosing class = "+cn);
+        if (!cn.startsWith(className)) { break; }
+        else if (!cn.equals(className)) {
+          newPos = findPrevEnclosingBrace(newPos, '{', '}');
+          continue;
+        }
+        else {
+          ++index;
+        }
+      }
+    }
+    _storeInCache(key, new Integer(index));
+//    oldLog = log;
+    return index;
   }
 
   /** Gets the name of the package this source file claims it's in (with the package keyword). It does this by 

@@ -491,7 +491,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Returns whether the debugger currently has any suspended threads.
    */
   public synchronized boolean hasSuspendedThreads() throws DebugException {
-    _ensureReady();
+    if (!isReady()) return false;
     return _suspendedThreads.size() > 0;
   }
 
@@ -500,7 +500,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Returns whether the debugger's current thread is suspended.
    */
   public synchronized boolean isCurrentThreadSuspended() throws DebugException {
-    _ensureReady();
+    if (!isReady()) return false;
     return hasSuspendedThreads() && !hasRunningThread();
   }
 
@@ -508,7 +508,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Returns whether the thread the debugger is tracking is now running.
    */
   public synchronized boolean hasRunningThread() throws DebugException {
-    _ensureReady();
+    if (!isReady()) return false;
     return _runningThread != null;
   }
 
@@ -890,7 +890,19 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     
     Breakpoint breakpoint = doc.getBreakpointAt(offset);
     
-    if (breakpoint == null)  setBreakpoint(new Breakpoint (doc, offset, lineNum, enabled, this));
+    if (breakpoint == null) {
+      if (doc.getLineStartPos(offset) == doc.getLineEndPos(offset)) {
+        printMessage("Cannot set a breakpoint on an empty line.");
+      }
+      else {
+        try {
+          setBreakpoint(new Breakpoint (doc, offset, lineNum, enabled, this));
+        }
+        catch(LineNotExecutableException lnee) {
+          printMessage(lnee.getMessage());
+        }
+      }
+    }
     else removeBreakpoint(breakpoint);
   }
 

@@ -37,20 +37,22 @@ import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
 import java.util.Vector;
+import java.util.List;
 import java.io.File;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
+import javax.swing.text.BadLocationException;
 
 /**
  * Superclasses all DebugActions that are associated with specific
  * OpenDefinitionsDocuments.
  * @version $Id$
  */
-public abstract class DocumentDebugAction<T extends EventRequest>
-  extends DebugAction<T> {
+public abstract class DocumentDebugAction<T extends EventRequest> extends DebugAction<T> {
 
   protected String _className;
+  protected String _exactClassName;
   protected File _file;
   protected OpenDefinitionsDocument _doc;
   protected int _offset;
@@ -67,14 +69,21 @@ public abstract class DocumentDebugAction<T extends EventRequest>
    */
   public DocumentDebugAction (JPDADebugger manager,
                               OpenDefinitionsDocument doc,
-                              int offset)
-    throws DebugException
-  {
+                              int offset) throws DebugException {
     super(manager);
     try {
       if (offset >= 0) {
-        _className = doc.getQualifiedClassName(offset);
+        _exactClassName = doc.getEnclosingClassName(offset, true);
       }
+    }
+    catch(ClassNameNotFoundException cnnfe) {
+      _exactClassName = null;
+    }
+    catch(BadLocationException ble) {
+      _exactClassName = null;
+    }
+    try {
+      _className = doc.getQualifiedClassName(offset);
     }
     catch (ClassNameNotFoundException cnnfe) {
       // Couldn't find class name at offset, use the first class name
@@ -87,6 +96,8 @@ public abstract class DocumentDebugAction<T extends EventRequest>
         _className = "";
       }
     }
+    // System.out.println("Breakpoint added: "+_className+", exact="+_exactClassName);
+    
     try {
       _file = doc.getFile();
       if (_file == null) throw new DebugException("This document has no source file.");
@@ -115,6 +126,9 @@ public abstract class DocumentDebugAction<T extends EventRequest>
 
   /** @return offset of this debug action. */
   public int getOffset() { return _offset; }
+  
+  /** @return exact class name, or null if not available. */
+  public String getExactClassName() { return _exactClassName; }
 
   /**
    * Creates EventRequests corresponding to this DebugAction, using the
@@ -124,9 +138,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
    * types for the same class if a custom class loader is used.)
    * @return true if the EventRequest is successfully created
    */
-  public boolean createRequests(Vector<ReferenceType> refTypes)
-    throws DebugException
-  {
+  public boolean createRequests(Vector<ReferenceType> refTypes) throws DebugException {
     _createRequests(refTypes);
     if (_requests.size() > 0) {
       _prepareRequests(_requests);
@@ -143,11 +155,18 @@ public abstract class DocumentDebugAction<T extends EventRequest>
    * also adds this action to the pending request manager (so identical
    * classes loaded in the future will also have this action).
    */
-  protected void _initializeRequests(Vector<ReferenceType> refTypes)
-    throws DebugException
-  {
+  protected void _initializeRequests(Vector<ReferenceType> refTypes) throws DebugException {
     if (refTypes.size() > 0) {
       createRequests(refTypes);
+    }
+    else {
+      if (_exactClassName!=null) {
+        List<ReferenceType> referenceTypes = _manager.getVM().classesByName(_exactClassName);
+        if (referenceTypes.size()>0) {
+          // class has been loaded, but couldn't find this line number
+          throw new LineNotExecutableException(toString()+" not on an executable line; not set.");
+        }
+      }
     }
     //if (_request == null) {
       // couldn't create the request yet, add to the pending request manager
@@ -164,8 +183,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
    * applies.  (There may be multiple if a custom class loader is in use.)
    * @throws DebugException if the requests could not be created.
    */
-  protected abstract void _createRequests(Vector<ReferenceType> refTypes)
-    throws DebugException;
+  protected abstract void _createRequests(Vector<ReferenceType> refTypes) throws DebugException;
 
   /**
    * Prepares this EventRequest with the current stored values.

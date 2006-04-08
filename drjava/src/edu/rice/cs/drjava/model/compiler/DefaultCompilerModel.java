@@ -193,7 +193,10 @@ public class DefaultCompilerModel implements CompilerModel {
     File f;
     
     for (OpenDefinitionsDocument doc : defDocs) {
-      if (doc.isSourceFile()) filesToCompile.add(doc.getFile());
+      if (doc.isSourceFile()) {
+        filesToCompile.add(doc.getFile());
+        doc.setCachedClassFile(null); // clear cached class file
+      }
       else excludedFiles.add(doc.getFile());
     } 
     
@@ -240,6 +243,7 @@ public class DefaultCompilerModel implements CompilerModel {
       files = new File[0];
       excludedFiles = new File[]{f};
     }
+    doc.setCachedClassFile(null); // clear cached class file
     _rawCompile(new File[] { doc.getSourceRoot() }, files, excludedFiles); 
   }
   

@@ -105,8 +105,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
         }
         Location loc = (Location) lines.get(0);
         
-        BreakpointRequest request =
-          _manager.getEventRequestManager().createBreakpointRequest(loc);
+        BreakpointRequest request = _manager.getEventRequestManager().createBreakpointRequest(loc);
         request.setEnabled(_enabled);
         _requests.add(request);
       }
@@ -145,17 +144,19 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
   }
 
   public String toString() {
+    String cn = getClassName();
+    if (_exactClassName!=null) { cn = _exactClassName.replace('$', '.'); }
     if (_requests.size() > 0) {
       // All BreakpointRequests are identical-- one copy for each loaded
       //  class.  So just print info from the first one, and how many there are.
-      return "Breakpoint[class: " + getClassName() +
+      return "Breakpoint[class: " + cn +
         ", lineNumber: " + getLineNumber() +
         ", method: " + _requests.get(0).location().method() +
         ", codeIndex: " + _requests.get(0).location().codeIndex() +
         ", numRefTypes: " + _requests.size() + "]";
     }
     else {
-      return "Breakpoint[class: " + getClassName() +
+      return "Breakpoint[class: " + cn +
         ", lineNumber: " + getLineNumber() + "]";
     }
   }

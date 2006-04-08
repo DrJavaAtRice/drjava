@@ -43,74 +43,15 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
-
-import java.util.List;
+package edu.rice.cs.drjava.model.debug;
 
 /**
- * A GlobalModel that enforces invariants associated with having
- * one active document at a time.
- *
- * Invariants:
- * <OL>
- * <LI>{@link #getOpenDefinitionsDocuments} will always return an array of
- *     at least size 1.
- * </LI>
- * <LI>(follows from previous) If there is ever no document in the model,
- *     a new one will be created.
- * </LI>
- * <LI>There is always exactly one active document, which can be get/set
- *     via {@link #getActiveDocument} and {@link #setActiveDocument}.
- * </LI>
- * </OL>
- *
- * Other functions added by this class:
- * <OL>
- * <LI>When calling {@link #openFile}, if there is currently only one open
- *     document, and it is untitled and unchanged, it will be closed after the
- *     new document is opened. This means that, in one atomic transaction, the
- *     model goes from having one totally empty document open to having one
- *     document (the requested one) open.
- * </LI>
- * </OL>
- *
+ * Thrown when a breakpoint is set on a line that's not executable.
+ * 
  * @version $Id$
  */
-public interface SingleDisplayModel extends GlobalModel {
-  /**
-   * @return the currently active document.
-   */
-  public OpenDefinitionsDocument getActiveDocument();
-
-  /** Sets the currently active document by updating the selection model.
-   *  @param doc Document to set as active
-   */
-  public void setActiveDocument(OpenDefinitionsDocument doc);
-  
-  /** Invokes the activeDocumentChanged method in the global listener on the argument _activeDocument. */
-  public void refreshActiveDocument();
-
-  /** @return the IDocumentNavigator container expressed as an AWT component. */
-  public java.awt.Container getDocCollectionWidget();
-
-  /** Sets the active document to be the next one in the list. */
-  public void setActiveNextDocument();
-
-  /** Sets the active document to be the previous one in the list. */
-  public void setActivePreviousDocument();
-
-  /** Shared code between close project and close All files which only sets the new active document after all documents
-   *  to be closed have been closed.
-   *  @param docList the list of files to close
-   */
-  public boolean closeFiles(List<OpenDefinitionsDocument> docList);  
-  
-  public void setActiveFirstDocument();
-
-  public void jarAll();
-  
-  public void dispose();
-
-  /** @return the parsing control */
-  public LightWeightParsingControl getParsingControl();
+public class LineNotExecutableException extends DebugException {
+  public LineNotExecutableException(String desc) {
+    super(desc);
+  }
 }

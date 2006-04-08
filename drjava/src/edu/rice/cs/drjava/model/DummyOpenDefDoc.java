@@ -62,6 +62,7 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.model.FinalizationListener;
+import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.docnavigation.*;
@@ -278,6 +279,17 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
+  /**
+   * Searching backwards finds the name of the enclosing named class or
+   * interface. NB: ignores comments.
+   * @param pos Position to start from
+   * @param fullyQualified true to find the fully qualified class name
+   * @return name of the enclosing named class or interface
+   */
+  public String getEnclosingClassName(int pos, boolean fullyQualified) throws BadLocationException, ClassNameNotFoundException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
   /** Tells the document to remove all breakpoints. */
   public void clearBreakpoints() { throw new UnsupportedOperationException("Dummy method"); }
   
@@ -454,6 +466,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public File getCachedClassFile() { throw new UnsupportedOperationException("Dummy method"); }
   
+  public void setCachedClassFile(File f) { throw new UnsupportedOperationException("Dummy method"); }
+  
   public DocumentListener[] getDocumentListeners() { throw new UnsupportedOperationException("Dummy method"); }
   
   public UndoableEditListener[] getUndoableEditListeners() {
@@ -510,6 +524,14 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public boolean posInParenPhrase(int pos) { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean posInParenPhrase() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
   
   public int findPrevNonWSCharPos(int pos) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
@@ -609,4 +631,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   /** @return the number of lines in this document. */
   public int getNumberOfLines() { return 0; }
+  
+  /** @return the caret position as set by the view. */
+  public int getCaretPosition() { return 0; }
 }

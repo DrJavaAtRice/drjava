@@ -36,7 +36,7 @@ package edu.rice.cs.drjava.model;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.OperationCanceledException;
-
+import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 
 import java.util.Vector;
 import javax.swing.text.AttributeSet;
@@ -109,6 +109,28 @@ public interface DJDocument extends StyledDocument, AbstractDocumentInterface {
   public ReducedModelState getStateAtCurrent();
   
   public void resetReducedModelLocation();
+  
+  /**
+   * Searching backwards, finds the position of the enclosing brace.
+   * NB: ignores comments.
+   * @param pos Position to start from
+   * @param opening opening brace character
+   * @param closing closing brace character
+   * @return position of enclosing squiggly brace, or ERROR_INDEX if beginning
+   * of document is reached.
+   */
+  public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
+  
+  /**
+   * Searching forwards, finds the position of the enclosing brace.
+   * NB: ignores comments.
+   * @param pos Position to start from
+   * @param opening opening brace character
+   * @param closing closing brace character
+   * @return position of enclosing squiggly brace, or ERROR_INDEX if beginning
+   * of document is reached.
+   */
+  public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
   /**
    * 

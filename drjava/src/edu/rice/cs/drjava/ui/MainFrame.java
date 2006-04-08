@@ -89,6 +89,7 @@ import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.drjava.project.*;
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.*;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /** DrJava's main window. */
 public class MainFrame extends JFrame implements OptionConstants {
@@ -1164,7 +1165,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             try {
               String mask = "";
               int loc = getCurrentDefPane().getCaretPosition();
-              String s = odd.getText();
+              String s = odd.getText(AbstractDJDocument.DOCSTART, loc);
               
               // check that we're at the end of a word
               if ((loc<s.length()) && (!Character.isWhitespace(s.charAt(loc))) &&
@@ -1257,7 +1258,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       String mask = "";
       int loc = getCurrentDefPane().getCaretPosition();
-      String s = odd.getText();
+      String s = odd.getText(AbstractDJDocument.DOCSTART, loc);
       
       // check that we're at the end of a word
       if ((loc<s.length()) && (!Character.isWhitespace(s.charAt(loc))) &&
@@ -1492,6 +1493,34 @@ public class MainFrame extends JFrame implements OptionConstants {
       this.setEnabled(false);
       _switchPaneFocus(false);
       this.setEnabled(true);
+    }
+  };
+  
+  /** Go to the closing brace. */
+  private Action _gotoClosingBraceAction =  new AbstractAction("Go to Closing Brace") {
+    public void actionPerformed(ActionEvent ae) {
+        OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+        odd.acquireReadLock();
+        try {
+          int pos = odd.findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
+          if (pos!=AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
+        }
+        catch(BadLocationException ble) { /* just ignore and don't move */ }
+        finally { odd.releaseReadLock(); }
+    }
+  };
+  
+  /** Go to the opening brace. */
+  private Action _gotoOpeningBraceAction =  new AbstractAction("Go to Opening Brace") {
+    public void actionPerformed(ActionEvent ae) {
+        OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+        odd.acquireReadLock();
+        try {
+          int pos = odd.findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
+          if (pos!=AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
+        }
+        catch(BadLocationException ble) { /* just ignore and don't move */ }
+        finally { odd.releaseReadLock(); }
     }
   };
   
@@ -1969,8 +1998,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     return _navPaneDisplayManager;
   }
   
-  
-  
   /* ----------------------- Constructor is here! --------------------------- */
   
   /** Creates the main window, and shows it. */
@@ -1988,6 +2015,25 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // create our model
     _model = new DefaultGlobalModel();
+    
+    // The OptionListener for LIGHTWEIGHT_PARSING_ENABLED.
+    OptionListener<Boolean> parsingEnabledListener = new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        if (oce.value) {
+          _model.getParsingControl().addListener(new LightWeightParsingListener() {
+            public void enclosingClassNameUpdated(OpenDefinitionsDocument doc, String old, String updated) {
+              if (doc==_model.getActiveDocument()) { updateFileTitle(); }
+            }
+          });
+        }
+        _model.getParsingControl().reset();
+        _model.getParsingControl().setAutomaticUpdates(oce.value);
+        updateFileTitle();
+      }
+    };
+    DrJava.getConfig().addOptionListener(LIGHTWEIGHT_PARSING_ENABLED, parsingEnabledListener);
+    parsingEnabledListener.optionChanged(new OptionEvent<Boolean>(LIGHTWEIGHT_PARSING_ENABLED, 
+                                                                  DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()));
     
 //    Utilities.show("Global Model started");
     
@@ -2494,9 +2540,16 @@ public class MainFrame extends JFrame implements OptionConstants {
       setTitle("File: " + fileName);
       _model.getDocCollectionWidget().repaint();
     }
+    
+    String fileTitle = doc.getDisplayFullPath();
+    if (DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()) {
+      String temp = _model.getParsingControl().getEnclosingClassName(doc);
+      if ((temp!=null) && (temp.length()>0)) { fileTitle = fileTitle + " - " + temp; }
+    }
+
     // Always update this field-- two files in different directories
     //  can have the same _fileTitle
-    _fileNameField.setText(doc.getDisplayFullPath());
+    if (!_fileNameField.getText().equals(fileTitle)) { _fileNameField.setText(fileTitle); }
 //    System.out.println("setting " + doc + " to display name: " + GlobalModelNaming.getDisplayFullPath(doc));
   }
   
@@ -4384,6 +4437,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(editMenu, _switchToNextAction, KEY_NEXT_DOCUMENT);
     _addMenuItem(editMenu, _switchToPreviousPaneAction, KEY_PREVIOUS_PANE);
     _addMenuItem(editMenu, _switchToNextPaneAction, KEY_NEXT_PANE);
+    _addMenuItem(editMenu, _gotoOpeningBraceAction, KEY_OPENING_BRACE);
+    _addMenuItem(editMenu, _gotoClosingBraceAction, KEY_CLOSING_BRACE);
     
     // access to configurations GUI
     editMenu.addSeparator();
@@ -4824,7 +4879,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _currLocationField = new JLabel();
     _currLocationField.setFont(_currLocationField.getFont().deriveFont(Font.PLAIN));
     _currLocationField.setHorizontalAlignment(SwingConstants.RIGHT);
-    _currLocationField.setPreferredSize(new Dimension(65,12));
+    _currLocationField.setPreferredSize(new Dimension(165,12));
     //_currLocationField.setVisible(true);
     
     // Create the status bar panel
@@ -4868,7 +4923,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     public void updateLocation() {
       DefinitionsPane p = _currentDefPane;
-      _currLocationField.setText(p.getCurrentLine() + ":" + p.getCurrentCol() + "\t");
+      _currLocationField.setText(p.getCurrentLine() + ":" + p.getCurrentCol() + ")\t");
+      _model.getParsingControl().delay();
     }
   }
   
@@ -5590,7 +5646,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     } 
     else {
       // Show message
-      if (_debugPanel.getStatusText().equals("")) _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+      if (_debugPanel.getStatusText().equals("")) {
+        _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+      }
     }
     _debugPanel.repaint();  // display the updated panel
   }

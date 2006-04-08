@@ -74,6 +74,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public CompoundUndoManager getUndoManager();
   public void resetUndoManager();
   public File getCachedClassFile();
+  public void setCachedClassFile(File f);
   public DocumentListener[] getDocumentListeners();
   public UndoableEditListener[] getUndoableEditListeners();
   
@@ -155,7 +156,6 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   
   //----- Major Operations -----//
-    
   /** Returns the name of the top level class, if any.
    *  @throws ClassNameNotFoundException if no top level class name found.
    */
@@ -252,6 +252,15 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public String getPackageName() throws InvalidPackageException;
   
+  /**
+   * Searching backwards finds the name of the enclosing named class or
+   * interface. NB: ignores comments.
+   * @param pos Position to start from
+   * @param fullyQualified true to find the fully qualified class name
+   * @return name of the enclosing named class or interface
+   */
+  public String getEnclosingClassName(int pos, boolean fullyQualified) throws BadLocationException, ClassNameNotFoundException;
+  
   public void preparePrintJob() throws BadLocationException, FileMovedException;
 
   public void print() throws PrinterException, BadLocationException, FileMovedException;
@@ -320,4 +329,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   /** @return the number of lines in this document. */
   public int getNumberOfLines();
+  
+  /** @return the caret position as set by the view. */
+  public int getCaretPosition();
 }

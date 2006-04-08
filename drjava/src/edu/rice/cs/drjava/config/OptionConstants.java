@@ -476,11 +476,25 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, mask));
 
   /**
-   * The key binding for changing the focus to the previous pane
+   * The key binding for changing the focus to the next pane
    */
   public static final KeyStrokeOption KEY_NEXT_PANE =
     new KeyStrokeOption("key.next.pane",
                         KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, mask));
+
+  /**
+   * The key binding for going to the opening brace.
+   */
+  public static final KeyStrokeOption KEY_OPENING_BRACE =
+    new KeyStrokeOption("key.goto.opening.brace",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, mask|InputEvent.SHIFT_MASK));
+
+  /**
+   * The key binding for going to the closing brace.
+   */
+  public static final KeyStrokeOption KEY_CLOSING_BRACE =
+    new KeyStrokeOption("key.goto.closing.brace",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, mask|InputEvent.SHIFT_MASK));
 
   /**
    * The key binding for openning the preferences dialog
@@ -1082,6 +1096,14 @@ public interface OptionConstants {
   /** Whether to scan class files for auto-completion class names. */
   public static final BooleanOption DIALOG_COMPLETE_SCAN_CLASS_FILES =
     new BooleanOption("dialog.completefile.scan.class.files", Boolean.FALSE);
+  
+  /** Whether to perform light-weight parsing. */
+  public static final BooleanOption LIGHTWEIGHT_PARSING_ENABLED =
+    new BooleanOption("lightweight.parsing.enabled", Boolean.FALSE);
+  
+  /** Delay for light-weight parsing. */
+  public static final NonNegativeIntegerOption DIALOG_LIGHTWEIGHT_PARSING_DELAY =
+    new NonNegativeIntegerOption("lightweight.parsing.delay", new Integer(500));
 
   /** The last state of the "Create Jar from Project " dialog. */
   public static final StringOption DIALOG_JAROPTIONS_STATE = new StringOption("dialog.jaroptions.state", "default");

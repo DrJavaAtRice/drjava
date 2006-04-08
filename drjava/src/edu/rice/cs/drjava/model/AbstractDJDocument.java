@@ -47,6 +47,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelControl;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
+import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -77,7 +78,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    *  synchronization.  All operations that access or modify this virtual object should be synchronized on _reduced.
    */
   public BraceReduction _reduced = new ReducedModelControl();  // public only for locking purposes
-  
+
   /** The absolute character offset in the document. */
   protected int _currentLocation = 0;
   
@@ -404,7 +405,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    * @return where the cursor is as the number of characters into the document 
    */
   public int getCurrentLocation() { return  _currentLocation; }
-  
+
   /** Change the current location of the document
    *  @param loc the new absolute location 
    */
@@ -499,6 +500,153 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     finally { readUnlock(); } 
   }
   
+  /**
+   * Searching backwards, finds the position of the enclosing brace.
+   * NB: ignores comments.
+   * @param pos Position to start from
+   * @param opening opening brace character
+   * @param closing closing brace character
+   * @return position of enclosing squiggly brace, or ERROR_INDEX if beginning
+   * of document is reached.
+   */
+  public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+    // Check cache
+    StringBuffer keyBuf = new StringBuffer("findPrevEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
+    String key = keyBuf.toString();
+    Integer cached = (Integer) _checkCache(key);
+    if (cached != null) return cached.intValue();
+    
+    if ((pos>=getLength()) || (pos==DOCSTART)) { return ERROR_INDEX; }
+    
+    final char[] delims = {opening, closing};
+    int reducedPos = pos;
+    int i;  // index of for loop below
+    int braceBalance = 0;
+    readLock();
+    try {
+      String text = getText(DOCSTART, pos);
+      
+      synchronized(_reduced) {
+        final int origLocation = _currentLocation;
+        // Move reduced model to location pos
+        _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
+        
+        // Walk backwards from specificed position
+        for (i = pos-1; i >= DOCSTART; i--) {
+          /* Invariant: reduced model points to reducedPos, text[i+1:pos] contains no valid delims, 
+           * DOCSTART <= i < reducedPos <= pos */
+          
+          if (match(text.charAt(i),delims)) {
+            // Move reduced model to walker's location
+            _reduced.move(i - reducedPos);  // reduced model points to i
+            reducedPos = i;                 // reduced model points to reducedPos
+            
+            // Check if matching char should be ignored because it is within a comment, 
+            // quotes, or ignored paren phrase
+            ReducedModelState state = _reduced.getStateAtCurrent();
+            if (!state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
+                  || ((i > 0) && _isStartOfComment(text, i - 1)))
+              continue;  // ignore matching char 
+            else {
+              // found valid matching char
+              if (text.charAt(i)==closing) {
+                ++braceBalance;
+              }
+              else {
+                if (braceBalance==0) break; // found our opening brace
+                --braceBalance;
+              }
+            }
+          }
+        }
+        
+        /* Invariant: same as for loop except that DOCSTART-1 <= i <= reducedPos <= pos */
+        
+        _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
+      }  // end synchronized
+    }
+    finally { readUnlock(); }
+    
+    // Return position of matching char or ERROR_INDEX 
+    
+    if (i == DOCSTART-1) reducedPos = ERROR_INDEX; // No matching char was found
+    _storeInCache(key, new Integer(reducedPos));
+    return reducedPos;  
+  }
+    
+  /**
+   * Searching forward, finds the position of the enclosing squiggly brace.
+   * NB: ignores comments.
+   * @param pos Position to start from
+   * @param opening opening brace character
+   * @param closing closing brace character
+   * @return position of enclosing squiggly brace, or ERROR_INDEX if beginning
+   * of document is reached.
+   */
+  public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
+    // Check cache
+    StringBuffer keyBuf = new StringBuffer("findNextEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
+    String key = keyBuf.toString();
+    Integer cached = (Integer) _checkCache(key);
+    if (cached != null) return cached.intValue();
+
+    if (pos>=getLength()-1) { return ERROR_INDEX; }
+    
+    final char[] delims = {opening, closing};
+    int reducedPos = pos;
+    int i;  // index of for loop below
+    int braceBalance = 0;
+    readLock();
+    String text = getText();
+    try {      
+      synchronized(_reduced) {
+        final int origLocation = _currentLocation;
+        // Move reduced model to location pos
+        _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
+        
+        // Walk forward from specificed position
+        for (i = pos+1; i < text.length(); i++) {
+          /* Invariant: reduced model points to reducedPos, text[pos:i-1] contains no valid delims, 
+           * pos <= reducedPos < i <= text.length() */
+          
+          if (match(text.charAt(i),delims)) {
+            // Move reduced model to walker's location
+            _reduced.move(i - reducedPos);  // reduced model points to i
+            reducedPos = i;                 // reduced model points to reducedPos
+            
+            // Check if matching char should be ignored because it is within a comment, 
+            // quotes, or ignored paren phrase
+            ReducedModelState state = _reduced.getStateAtCurrent();
+            if (!state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
+                  || ((i > 0) && _isStartOfComment(text, i - 1)))
+              continue;  // ignore matching char 
+            else {
+              // found valid matching char
+              if (text.charAt(i)==opening) {
+                ++braceBalance;
+              }
+              else {
+                if (braceBalance==0) break; // found our closing brace
+                --braceBalance;
+              }
+            }
+          }
+        }
+        
+        /* Invariant: same as for loop except that pos <= reducedPos <= i <= text.length() */
+        
+        _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
+      }  // end synchronized
+    }
+    finally { readUnlock(); }
+    
+    // Return position of matching char or ERROR_INDEX 
+    
+    if (i == text.length()) reducedPos = ERROR_INDEX; // No matching char was found
+    _storeInCache(key, new Integer(reducedPos));
+    return reducedPos;  
+  }
+
   /** Searching backwards, finds the position of the first character that is one of the given delimiters.  Does
    *  not look for delimiters inside paren phrases (e.g., skips semicolons used inside for statements.)  
    *  NB: ignores comments.
@@ -659,7 +807,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
             continue;
           }
           
-          if (_isEndOfComment(text, i)) { /* char is second character is opening comment market */  
+          if (_isReversteStartOfComment(text, i)) { /* char is second character in opening comment marker */  
             // Move i past the first comment character and continue searching
             i = i - 2;
             continue;
@@ -1183,16 +1331,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return false;
   }
 
-  /** Helper method for findPrevNonWSCharPos. Determines whether the current character is the end of a comment: 
-   *  "*\/" or a hanging "//"
-   *  @return true if (pos-1,pos) == '*\/' or '//'
+  /** Helper method for findPrevNonWSCharPos. Determines whether the current character is the start of a comment
+   *  encountered from the end: '/' or '*' preceded by a '/'.
+   *  @return true if (pos-1,pos) == '/*' or '//'
    */
-  protected static boolean _isEndOfComment(String text, int pos) {
+  protected static boolean _isReversteStartOfComment(String text, int pos) {
     char currChar = text.charAt(pos);
-    if (currChar == '/') {
+    if ((currChar == '/')||(currChar == '*')) {
       try {
         char beforeCurrChar = text.charAt(pos - 1);
-        if ((beforeCurrChar == '/') || (beforeCurrChar == '*'))  return true;
+        if (beforeCurrChar == '/')  return true;
       } catch (StringIndexOutOfBoundsException e) { /* do nothing */ }
     }
     return false;

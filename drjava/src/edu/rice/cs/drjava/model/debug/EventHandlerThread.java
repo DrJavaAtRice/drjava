@@ -39,6 +39,7 @@ import com.sun.jdi.*;
 import com.sun.jdi.event.*;
 import com.sun.jdi.request.*;
 import java.util.*;
+import java.io.*;
 
 /**
  * A thread which listens and responds to events from JPDA when the debugger
@@ -123,6 +124,9 @@ public class EventHandlerThread extends Thread {
         _debugger.eventHandlerError(e);
         _debugger.printMessage("An exception occurred in the event handler:\n" + e);
         _debugger.printMessage("The debugger may have become unstable as a result.");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        e.printStackTrace(new PrintWriter(baos, true));
+        _debugger.printMessage("Stack trace: "+baos.toString());
       }
     }
 

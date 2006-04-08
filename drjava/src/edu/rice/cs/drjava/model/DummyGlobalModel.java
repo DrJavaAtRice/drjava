@@ -530,4 +530,9 @@ public class DummyGlobalModel implements GlobalModel {
   public boolean hasUntitledDocuments() {
     throw new UnsupportedOperationException("Tried to call hasUntitliedDocuments on a Dummy!");
   }
+  
+  /** @return the parsing control */
+  public LightWeightParsingControl getParsingControl() {
+    throw new UnsupportedOperationException("Tried to call getParsingControl on a Dummy!");
+  }
 }
