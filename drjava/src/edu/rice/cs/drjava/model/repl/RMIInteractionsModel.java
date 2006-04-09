@@ -91,7 +91,10 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 
   public void addBuildDirectoryClassPath(URL path) { _jvm.addBuildDirectoryClassPath(path); }
   
-  public void addProjectFilesClassPath(URL path) { _jvm.addProjectFilesClassPath(path); }
+  public void addProjectFilesClassPath(URL path) { 
+//    System.err.println("Adding " + path + " to projectFilesClassPath in the slave JVM");
+    _jvm.addProjectFilesClassPath(path); 
+  }
   
   public void addExternalFilesClassPath(URL path) { _jvm.addExternalFilesClassPath(path); }
   

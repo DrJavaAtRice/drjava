@@ -78,12 +78,11 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
     _jcb.setSelected(DrJava.getConfig().getSetting(_option).booleanValue());
   }
 
-  /**
-   * Constructs a new BooleanOptionComponent with a tooltip description.
-   * @param opt the BooleanOption this component represents
-   * @param text the text to display with the option
-   * @param parent the parent frame
-   * @param description text to show in a tooltip over 
+  /** Constructs a new BooleanOptionComponent with a tooltip description.
+   *  @param opt the BooleanOption this component represents
+   *  @param text the text to display with the option
+   *  @param parent the parent frame
+   *  @param description text to show in a tooltip over 
    */
   public BooleanOptionComponent(BooleanOption opt, String text,
                                 Frame parent, String description) {
@@ -91,32 +90,27 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
-   * @param description the tooltip text
+  /** Sets the tooltip description text for this option.
+   *  @param description the tooltip text
    */
   public void setDescription(String description) {
     _jcb.setToolTipText(description);
     _label.setToolTipText(description);
   }
 
-  /**
-   * Updates the config object with the new setting.
-   * @return true if the new value is set successfully
+  /** Updates the config object with the new setting.
+   *  @return true if the new value is set successfully
    */
   public boolean updateConfig() {
     Boolean oldValue = DrJava.getConfig().getSetting(_option);
     Boolean newValue = Boolean.valueOf(_jcb.isSelected());
     
-    if (!oldValue.equals(newValue)) {
-      DrJava.getConfig().setSetting(_option, newValue);      
-    }
+    if (!oldValue.equals(newValue)) DrJava.getConfig().setSetting(_option, newValue);      
+
     return true;
   } 
   
-  /**
-   * Displays the given value.
-   */
+  /** Displays the given value. */
   public void setValue(Boolean value) {
     _jcb.setSelected(value.booleanValue());
   }

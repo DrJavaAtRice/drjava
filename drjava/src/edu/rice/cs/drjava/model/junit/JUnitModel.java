@@ -99,6 +99,13 @@ public interface JUnitModel {
    */
   public void junitClasses(List<String> qualifiedClassnames, List<File> files);
   
+  //---------------------------- Model Callbacks ----------------------------//
+  
+  /** Cleans up an attempt JUnit test exeuction when suitable test code is not available.
+   *  @param isTestAll whether or not it was a use of the test all button
+   */
+  public void nonTestCase(boolean isTestAll);
+  
   //----------------------------- Error Results -----------------------------//
 
   /** Gets the JUnitErrorModel, which contains error info for the last test run. */

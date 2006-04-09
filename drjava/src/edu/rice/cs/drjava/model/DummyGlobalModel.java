@@ -258,7 +258,7 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call removeAuxiliaryFile on a Dummy");
   }
   
-  public File[] openProject(File file) throws IOException, MalformedProjectFileException {
+  public void openProject(File file) throws IOException, MalformedProjectFileException {
      throw new UnsupportedOperationException("Tried to call openProject on a Dummy");
   }
 
@@ -278,11 +278,7 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call getSourceRootSet on a Dummy");
   } 
   
-  public String getDisplayFileName(OpenDefinitionsDocument doc) {
-     throw new UnsupportedOperationException("Tried to call getDisplayFilename on a Dummy");
-  }
-  
-  public String getDisplayFullPath(int index) {
+  public String getCompletePath(int index) {
      throw new UnsupportedOperationException("Tried to call getDisplayFullPath on a Dummy");
   }
 
@@ -415,9 +411,9 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call isProjectActive on a Dummy");
   }
   
-  public void junitAll() {
-     throw new UnsupportedOperationException("Tried to call junitAll on a Dummy");
-  }
+//  public void junitAll() {
+//     throw new UnsupportedOperationException("Tried to call junitAll on a Dummy");
+//  }
   
   public File getProjectFile() {
      throw new UnsupportedOperationException("Tried to call getProjectFile on a Dummy");

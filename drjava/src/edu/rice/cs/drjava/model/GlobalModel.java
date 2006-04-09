@@ -204,7 +204,7 @@ public interface GlobalModel extends ILoadDocuments {
    *  @param file The project file to parse
    *  @return an array of document's files to open
    */
-  public File[] openProject(File file) throws IOException, MalformedProjectFileException;
+  public void openProject(File file) throws IOException, MalformedProjectFileException;
 
   /** Performs any needed operations on the model before closing the project and its files.  This is not responsible
    *  for actually closing the files since that is handled in MainFrame._closeProject()
@@ -226,11 +226,8 @@ public interface GlobalModel extends ILoadDocuments {
   /** Gets an array of all sourceRoots for the open definitions documents, without duplicates. */
   public File[] getSourceRootSet();
 
-  /** Return the name of the file, or "(untitled)" if no file exists. Does not include the ".java" if it is present. */      
-  public String getDisplayFileName(OpenDefinitionsDocument doc);
-  
-  /** Return the absolute path of the file with the given index, or "(untitled)" if no file exists. */
-  public String getDisplayFullPath(int index);
+//  /** Return the absolute path of the file with the given index, or "(untitled)" if no file exists. */
+//  public String getDisplayFullPath(int index);
 
   /*------------------------------ Definitions ------------------------------*/
 
@@ -371,8 +368,8 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return true if the model has a project open, false otherwise. */
   public boolean isProjectActive();
   
-  /** junits all the appropriate files */
-  public void junitAll();
+//  /** junits all the appropriate files */
+//  public void junitAll();
   
   /** @return the file that points to the current project file. Null if not currently in project view */
   public File getProjectFile();

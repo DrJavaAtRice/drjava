@@ -407,6 +407,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     OpenDefinitionsDocument doc =
       setupDocument("package a.b.c;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
+//    System.err.println("Package name is: " + _model.getPackageName());
 
     // No events should fire
     _model.addListener(new TestListener());
@@ -612,6 +613,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Create a new Java interpreter, and set it to be active
     dim.addJavaInterpreter("testInterpreter");
+    
     dim.setActiveInterpreter("testInterpreter", "myPrompt>");
     
     Utilities.clearEventQueue();

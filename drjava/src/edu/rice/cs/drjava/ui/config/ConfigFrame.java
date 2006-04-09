@@ -148,6 +148,7 @@ public class ConfigFrame extends JFrame {
         // Always apply and save settings
         boolean successful = true;
         try {
+          _mainFrame.enableResetInteractions();
           successful = saveSettings();
         }
         catch (IOException ioe) {
@@ -164,7 +165,12 @@ public class ConfigFrame extends JFrame {
     Action applyAction = new AbstractAction("Apply") {
       public void actionPerformed(ActionEvent e) {
         // Always save settings
-        try { saveSettings(); _applyButton.setEnabled(false); }
+        try {
+          _mainFrame.enableResetInteractions();
+          saveSettings(); 
+          _applyButton.setEnabled(false); 
+  
+        }
         catch (IOException ioe) {
         }
       }

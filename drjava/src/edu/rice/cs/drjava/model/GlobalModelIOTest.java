@@ -266,9 +266,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   }
 
 
-  /**
-   * Attempts to open a non-existent file.
-   */
+  /** Attempts to open a non-existent file. */
   public void testOpenNonexistentFile() throws IOException {
     _model.addListener(new TestListener());
 
@@ -293,9 +291,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertEquals("non-existant file", doc, null);
   }
 
-  /**
-   * Attempts to reopen an already open file.
-   */
+  /** Attempts to reopen an already open file. */
   public void testReopenFile() throws BadLocationException, IOException {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
 
@@ -1147,9 +1143,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     // wait for interpret to finish
     while (listener.interactionEndCount == 0) {
       synchronized(listener) {
-        try {
-          listener.wait();
-        }
+        try { listener.wait(); }  // TODO: move the while loop inside synchronized
         catch (InterruptedException ie) {
           throw new UnexpectedException(ie);
         }
@@ -1160,9 +1154,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     interpretIgnoreResult(s2);
     while (listener.interactionEndCount == 1) {
       synchronized(listener) {
-        try {
-          listener.wait();
-        }
+        try { listener.wait(); }  // TODO: move the while loop inside synchronized
         catch (InterruptedException ie) {
           throw new UnexpectedException(ie);
         }
@@ -1171,9 +1163,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     interpretIgnoreResult(s3);
     while (listener.interactionEndCount == 2) {
       synchronized(listener) {
-        try {
-          listener.wait();
-        }
+        try { listener.wait(); }  // TODO: move the while loop inside synchronized
         catch (InterruptedException ie) {
           throw new UnexpectedException(ie);
         }
@@ -1205,9 +1195,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     _model.loadHistory(fs);
     while (listener.interactionEndCount == 3) {
       synchronized(listener) {
-        try {
-          listener.wait();
-        }
+        try { listener.wait(); }  // TODO: move the while loop inside synchronized
         catch (InterruptedException ie) {
           throw new UnexpectedException(ie);
         }
@@ -1259,9 +1247,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     _model.loadHistory(fs1);
     while (listener.interactionEndCount == 0) {
       synchronized(listener) {
-        try {
-          listener.wait();
-        }
+        try { listener.wait(); }  // TODO: move the while loop inside synchronized
         catch (InterruptedException ie) {
           throw new UnexpectedException(ie);
         }
@@ -1270,9 +1256,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     _model.loadHistory(fs2);
     while (listener.interactionEndCount < 2) {
       synchronized(listener) {
-        try {
-          listener.wait();
-        }
+        try { listener.wait(); }  // TODO: move the while loop inside synchronized
         catch (InterruptedException ie) {
           throw new UnexpectedException(ie);
         }

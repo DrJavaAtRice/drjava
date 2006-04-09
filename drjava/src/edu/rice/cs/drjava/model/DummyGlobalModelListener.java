@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 import java.util.List;
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.FileOpenSelector;
 
@@ -109,7 +110,7 @@ public class DummyGlobalModelListener implements GlobalModelListener {
   /** Called to demand that all class file must be in sync before running unit tests. It is up to the caller of this 
    *  method to check if the documents are out of sync, using OpenDefinitionsDocument.checkIfClassFileInSync().
    */
-  public void compileBeforeJUnit() { }
+  public void compileBeforeJUnit(final CompilerListener l) { }
 
   /** Called after JUnit is started by the GlobalModel. */
   public void junitStarted() { }

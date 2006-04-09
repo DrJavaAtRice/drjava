@@ -97,7 +97,7 @@ public class DocumentCache {
   public DCacheAdapter register(OpenDefinitionsDocument odd, DDReconstructor rec) {
     DocManager mgr = new DocManager(rec, odd.toString(), odd.isUntitled());
     notifyRegistrationListeners(odd, mgr);
-//    Utilities.showDebug("register(" + odd + ", " + rec + ") called");
+//    System.err.println("register(" + odd + ", " + rec + ") called");
     return mgr;
   }
   
@@ -191,7 +191,7 @@ public class DocumentCache {
     }
     
     /** Checks whether the document is in the cache. 
-     *  @return if the document is resident incvcx s  bs ss s zazzszzz the cache.
+     *  @return if the document is resident in the cache.
      */
     public boolean isReady() { synchronized (_cacheLock) { return _doc != null; } }
   
@@ -250,6 +250,7 @@ public class DocumentCache {
     /** Called by the cache when the document is removed from the active queue and subject to virtualization. 
      *  @pre lock for this already held. */
     void kickOut() { kickOut(false); }
+    
     /** Called by the cache when the document is being closed.   Note that _doc can be null in this case!
      *  @pre lock for this already held. */
     void closingKickOut() { kickOut(true); }

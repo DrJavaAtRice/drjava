@@ -169,10 +169,10 @@ public class ProjectProfile implements ProjectFileIR {
   }
   public void setWorkingDirectory(File dir) { _workDir = FileOps.validate(dir); }
   public void setMainClass(File main) { _mainClass = main;  }
-  public void setSourceFiles(List<? extends DocFile> sf) { _sourceFiles = new ArrayList<DocFile>(sf); }
+  public void setSourceFiles(List<DocFile> sf) { _sourceFiles = new ArrayList<DocFile>(sf); }
   public void setClassPaths(List<? extends File> cpf) { _classPathFiles = new ArrayList<File>(cpf); }
-  public void setCollapsedPaths(List<? extends String> cp) { _collapsedPaths = new ArrayList<String>(cp); }
-  public void setAuxiliaryFiles(List<? extends DocFile> af) { _auxFiles = new ArrayList<DocFile>(af); }
+  public void setCollapsedPaths(List<String> cp) { _collapsedPaths = new ArrayList<String>(cp); }
+  public void setAuxiliaryFiles(List<DocFile> af) { _auxFiles = new ArrayList<DocFile>(af); }
 
   /** Assumes that root.getParentFile != null */
   public void setProjectRoot(File root) { 
@@ -183,8 +183,8 @@ public class ProjectProfile implements ProjectFileIR {
   public void setCreateJarFile(File createJarFile) { _createJarFile = createJarFile; }
   public void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
   
-  public void setBreakpoints(List<? extends DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
-  public void setWatches(List<? extends DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
+  public void setBreakpoints(List<DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
+  public void setWatches(List<DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
   
   /** This method writes what information has been passed to this builder so far to disk in s-expression format. */
   public void write() throws IOException {
@@ -196,6 +196,8 @@ public class ProjectProfile implements ProjectFileIR {
     fw.write("\n;; other files with relative paths are rooted at (the parent of) this project file");
     
     // write the project root
+    /* In the new project file form, this property has been renamed "proj-root-and-base" (instead of "proj-root") to
+     * indicate that the project root now serves as the base for source file path names. */
     if (_projectRoot != null) {
       fw.write("\n(proj-root-and-base");
 //      Utilities.show("Writing project root = " + _projRoot);
@@ -205,8 +207,11 @@ public class ProjectProfile implements ProjectFileIR {
     else fw.write("\n;; no project root; should never happen");
         
     // write source files
+    /* This property has been renamed "source-files" (instead of "source") so that old versions of DrJava will not 
+     * recognize it.  In the new project file format, source files are relative to the project root, not the parent
+     * of the project file. */
     if (!_sourceFiles.isEmpty()) {
-      fw.write("\n(source");
+      fw.write("\n(source-files");
       for(DocFile df: _sourceFiles) { fw.write("\n" + encodeDocFileRelative(df, "  ")); }
       fw.write(")"); // close the source expression
     }
@@ -346,9 +351,9 @@ public class ProjectProfile implements ProjectFileIR {
     String ret = "";
     String path;
     if (relative) path = makeRelativeTo(df, _projectRoot).getPath();
-    else path = df.getCanonicalPath();
+    else path = FileOps.getCanonicalPath(df);
 
-    path = replace(path,File.separator,"/");
+    path = replace(path, File.separator, "/");
     ret += prefix + "(file (name " + convertToLiteral(path) + ")";
     
     Pair<Integer,Integer> p1 = df.getSelection();

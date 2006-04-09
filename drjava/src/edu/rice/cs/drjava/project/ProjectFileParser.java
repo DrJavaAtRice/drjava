@@ -104,7 +104,7 @@ public class ProjectFileParser {
     
     ProjectFileIR pfir = new ProjectProfile(projFile);
 
-    try { for (SEList exp : forest) evaluateExpression(exp, pfir, new FileListVisitor(_parent)); }
+    try { for (SEList exp : forest) evaluateExpression(exp, pfir, new DocFileListVisitor(_parent)); }
     catch(PrivateProjectException e) { throw new MalformedProjectFileException("Parse Error: " + e.getMessage()); }
     
 //    System.err.println("Parsed buildDir is " + pfir.getBuildDirectory());
@@ -117,13 +117,13 @@ public class ProjectFileParser {
    *  @param e the top-level s-expression to check
    *  @param pfir the ProjectFileIR to update
    */
-  private void evaluateExpression(SEList e, ProjectFileIR pfir, FileListVisitor flv) throws IOException {
+  private void evaluateExpression(SEList e, ProjectFileIR pfir, DocFileListVisitor flv) throws IOException {
     if (e == Empty.ONLY) return;
-    Cons exp = (Cons)e; // If it's not empty, it's a cons
+    Cons exp = (Cons) e; // If it's not empty, it's a cons
       
     String name = exp.accept(NameVisitor.ONLY);
-    if (name.compareToIgnoreCase("source") == 0) {
-      List<DocFile> dfList = exp.getRest().accept(new FileListVisitor(_srcFileBase));
+    if ((name.compareToIgnoreCase("source") == 0) || (name.compareToIgnoreCase("source-files") == 0)) {
+      List<DocFile> dfList = exp.getRest().accept(new DocFileListVisitor(_srcFileBase));
       pfir.setSourceFiles(dfList);
     }
     else if (name.compareToIgnoreCase("proj-root") == 0) {  // legacy node form; all paths relative to project file
@@ -203,7 +203,7 @@ public class ProjectFileParser {
       throw new PrivateProjectException("Expected a labeled node, found a label: " + name);
     SEList c = ((Cons)s).getRest(); // get parameter list
     
-    FilePropertyVisitor v = new FilePropertyVisitor(pathRoot);
+    DocFilePropertyVisitor v = new DocFilePropertyVisitor(pathRoot);
     return c.accept(v);
   }
   
@@ -283,10 +283,10 @@ public class ProjectFileParser {
   /* nested/inner classes */
   
   /** Parses out a list of file nodes. */
-  private static class FileListVisitor implements SEListVisitor<List<DocFile>> {
+  private static class DocFileListVisitor implements SEListVisitor<List<DocFile>> {
     /** Base directory for relative paths */
     private String _base;
-    FileListVisitor(String base) { _base = base; }
+    DocFileListVisitor(String base) { _base = base; }
     public List<DocFile> forEmpty(Empty e) { return new ArrayList<DocFile>(); }
     public List<DocFile> forCons(Cons c) {
       List<DocFile> list = c.getRest().accept(this);
@@ -297,7 +297,7 @@ public class ProjectFileParser {
   };
   
   /** Traverses the list of expressions found after "file" tag and returns the DocFile described by those properties. */
-  private static class FilePropertyVisitor implements SEListVisitor<DocFile> {
+  private static class DocFilePropertyVisitor implements SEListVisitor<DocFile> {
     private String fname = "";
     private Pair<Integer,Integer> select = new Pair<Integer,Integer>(new Integer(0),new Integer(0));
     private Pair<Integer,Integer> scroll = new Pair<Integer,Integer>(new Integer(0),new Integer(0));
@@ -306,7 +306,7 @@ public class ProjectFileParser {
     private Date modDate = null;
     
     private String pathRoot;
-    public FilePropertyVisitor(String pr) { pathRoot = pr; }
+    public DocFilePropertyVisitor(String pr) { pathRoot = pr; }
     
     public DocFile forCons(Cons c) {
       String name = c.getFirst().accept(NameVisitor.ONLY); 

@@ -679,8 +679,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  public void junitJVMReady() {
-  }
+  public void junitJVMReady() { }
   
   
   //////////////////////////////////////////////////////////////
@@ -691,41 +690,30 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    *  @param interpreter the interpreter
    */
   protected void _updateInterpreterClassPath(JavaInterpreter interpreter) {
-    List<ClassPathEntry> locpe = classPathManager.getProjectCP();
-    for (ClassPathEntry e: locpe) {
+    
+    for (ClassPathEntry e: classPathManager.getProjectCP())
       interpreter.addProjectClassPath(e.getEntry());
-    }
-
-    locpe = classPathManager.getBuildDirectoryCP();
-    for (ClassPathEntry e: locpe) {
+    
+    for (ClassPathEntry e: classPathManager.getBuildDirectoryCP())
       interpreter.addBuildDirectoryClassPath(e.getEntry());
-    }
-
-    locpe = classPathManager.getProjectFilesCP();
-    for (ClassPathEntry e: locpe) {
+    
+    for (ClassPathEntry e: classPathManager.getProjectFilesCP())
       interpreter.addProjectFilesClassPath(e.getEntry());
-    }
-
-    locpe = classPathManager.getExternalFilesCP();
-    for (ClassPathEntry e: locpe) {
+    
+    for (ClassPathEntry e: classPathManager.getExternalFilesCP())
       interpreter.addExternalFilesClassPath(e.getEntry());
-    }
-
-    locpe = classPathManager.getExtraCP();
-    for (ClassPathEntry e: locpe) {
+    
+    for (ClassPathEntry e: classPathManager.getExtraCP())
       interpreter.addExtraClassPath(e.getEntry());
-    }
-}
+  }
+  
   /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple
    *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
    *  @param s Entry to add to the accumulated classpath
    */
   public void addExtraClassPath(URL s) {
     //_dialog("add classpath: " + s);
-    if (_classPath.contains(s)) {
-      // Don't add it again
-      return;
-    }
+    if (_classPath.contains(s)) return;    // Don't add it again
     
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
@@ -751,10 +739,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   public void addProjectClassPath(URL s) {
     //_dialog("add classpath: " + s);
-    if (_classPath.contains(s)) {
-      // Don't add it again
-      return;
-    }
+    if (_classPath.contains(s)) return;  // Don't add it again
     
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
@@ -774,19 +759,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _classPath.add(s);
   }
  
-  /**
-   * Adds the given path to the classpath shared by ALL Java interpreters.
-   * This method <b>cannot</b> take multiple paths separated by
-   * a path separator; it must be called separately for each path.
-   * Only unique paths are added.
-   * @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple 
+   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
+   *  @param s Entry to add to the accumulated classpath
    */
   public void addBuildDirectoryClassPath(URL s) {
     //_dialog("add classpath: " + s);
-    if (_classPath.contains(s)) {
-      // Don't add it again
-      return;
-    }
+    if (_classPath.contains(s)) return;  // Don't add it again
     
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
@@ -807,19 +786,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
  
-  /**
-   * Adds the given path to the classpath shared by ALL Java interpreters.
-   * This method <b>cannot</b> take multiple paths separated by
-   * a path separator; it must be called separately for each path.
-   * Only unique paths are added.
-   * @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple 
+   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
+   *  @param s Entry to add to the accumulated classpath
    */
   public void addProjectFilesClassPath(URL s) {
     //_dialog("add classpath: " + s);
-    if (_classPath.contains(s)) {
-      // Don't add it again
-      return;
-    }
+    if (_classPath.contains(s)) return;  // Don't add it again
     
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
@@ -839,19 +812,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _classPath.add(s);
   }
  
-  /**
-   * Adds the given path to the classpath shared by ALL Java interpreters.
-   * This method <b>cannot</b> take multiple paths separated by
-   * a path separator; it must be called separately for each path.
-   * Only unique paths are added.
+  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple
+   *  paths separated by a path separator; it must be called separately for each path. Only unique paths are added.
    * @param s Entry to add to the accumulated classpath
    */
   public void addExternalFilesClassPath(URL s) {
     //_dialog("add classpath: " + s);
-    if (_classPath.contains(s)) {
-      // Don't add it again
-      return;
-    }
+    if (_classPath.contains(s)) return;  // Don't add it again
     
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
@@ -871,37 +838,27 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _classPath.add(s);
   }
   
-  /**
-   * Returns a copy of the list of unique entries on the classpath.
-   * @return a vector of strings so that RMI doesn't have to serialize
-   * the URL object. Serializing URL objects fails when using jsr14.
+  /** Returns a copy of the list of unique entries on the classpath.
+   *  @return a vector of strings so that RMI doesn't have to serialize the URL object. Serializing URL objects fails
+   *  when using jsr14.
    */
   public Vector<String> getAugmentedClassPath() {
     Vector<String> ret = new Vector<String>();
-    List<ClassPathEntry> locpe = classPathManager.getProjectCP();
-    for (ClassPathEntry e: locpe) {
-      ret.add(e.getEntry().toString());
-    }
 
-    locpe = classPathManager.getBuildDirectoryCP();
-    for (ClassPathEntry e: locpe) {
-      ret.add(e.getEntry().toString());
-    }
+    for (ClassPathEntry e: classPathManager.getProjectCP())  ret.add(e.getEntry().toString());
 
-    locpe = classPathManager.getProjectFilesCP();
-    for (ClassPathEntry e: locpe) {
+    for (ClassPathEntry e: classPathManager.getBuildDirectoryCP()) 
       ret.add(e.getEntry().toString());
-    }
+    
+    for (ClassPathEntry e: classPathManager.getProjectFilesCP())
+      ret.add(e.getEntry().toString());
 
-    locpe = classPathManager.getExternalFilesCP();
-    for (ClassPathEntry e: locpe) {
+    for (ClassPathEntry e: classPathManager.getExternalFilesCP())
       ret.add(e.getEntry().toString());
-    }
 
-    locpe = classPathManager.getExtraCP();
-    for (ClassPathEntry e: locpe) {
+    for (ClassPathEntry e: classPathManager.getExtraCP())
       ret.add(e.getEntry().toString());
-    }
+
     return ret;
   }
   
@@ -910,68 +867,46 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   //// be successfully serialized when using JSR14.
   
   public void addExtraClassPath(String s) {
-    try {
-      addExtraClassPath(new URL(s));
-    } catch(MalformedURLException e) {
-      throw new edu.rice.cs.util.UnexpectedException(e);
-    }
+    try { addExtraClassPath(new URL(s)); } 
+    catch(MalformedURLException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
   }
+  
   public void addProjectClassPath(String s) {
-    try {
-      addProjectClassPath(new URL(s));
-    } catch(MalformedURLException e) {
-      throw new edu.rice.cs.util.UnexpectedException(e);
-    }
-  } 
+    try { addProjectClassPath(new URL(s)); } 
+    catch(MalformedURLException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
+  }
+  
   public void addBuildDirectoryClassPath(String s) {
-    try {
-      addBuildDirectoryClassPath(new URL(s));
-    } catch(MalformedURLException e) {
-      throw new edu.rice.cs.util.UnexpectedException(e);
-    }
+    try { addBuildDirectoryClassPath(new URL(s)); } 
+    catch(MalformedURLException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
   }
+  
   public void addProjectFilesClassPath(String s) {
-    try {
-      addProjectFilesClassPath(new URL(s));
-    } catch(MalformedURLException e) {
-      throw new edu.rice.cs.util.UnexpectedException(e);
-    }
+    try { addProjectFilesClassPath(new URL(s)); } 
+    catch(MalformedURLException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
   }
+  
   public void addExternalFilesClassPath(String s) { 
-    try {
-      addExternalFilesClassPath(new URL(s));
-    } catch(MalformedURLException e) {
-      throw new edu.rice.cs.util.UnexpectedException(e);
-    }
+    try { addExternalFilesClassPath(new URL(s)); } 
+    catch(MalformedURLException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
   }
   
-  
-  /**
-   * Returns the true vector of URL objects in the form
-   * of a ClasspathVector which has an intelligent toString().
-   * The toString() of this ClasspathVector is usable as the
-   * classpath commandline argument for java, javac javadoc, 
-   * and junit.
-   * @return a vector of URLs with an intelligent toString();
+  /** Returns the vector of URL objects as a ClasspathVector which has an intelligent toString().  The toString()
+   *  method of ClasspathVector is usable as the classpath command line argument for java, javac javadoc, and junit.
+   *  @return a vector of URLs with an intelligent toString();
    */
   public ClassPathVector getClassPath() {
     ClassPathVector ret = new ClassPathVector();
-    List<ClassPathEntry> locpe;
     
-    locpe = classPathManager.getProjectCP();
-    for (ClassPathEntry e: locpe) ret.add(e.getEntry());
-
-    locpe = classPathManager.getBuildDirectoryCP();
-    for (ClassPathEntry e: locpe) ret.add(e.getEntry());
+    for (ClassPathEntry e: classPathManager.getProjectCP()) ret.add(e.getEntry());
     
-    locpe = classPathManager.getProjectFilesCP();
-    for (ClassPathEntry e: locpe) ret.add(e.getEntry());
+    for (ClassPathEntry e: classPathManager.getBuildDirectoryCP()) ret.add(e.getEntry());
     
-    locpe = classPathManager.getExternalFilesCP();
-    for (ClassPathEntry e: locpe) ret.add(e.getEntry());
+    for (ClassPathEntry e: classPathManager.getProjectFilesCP()) ret.add(e.getEntry());
     
-    locpe = classPathManager.getExtraCP();
-    for (ClassPathEntry e: locpe) ret.add(e.getEntry());
+    for (ClassPathEntry e: classPathManager.getExternalFilesCP()) ret.add(e.getEntry());
+    
+    for (ClassPathEntry e: classPathManager.getExtraCP()) ret.add(e.getEntry());
     
     return ret;
   } 

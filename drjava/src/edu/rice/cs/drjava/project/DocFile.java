@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.project;
 
 import java.io.File;
+import java.io.IOException;
 
 import edu.rice.cs.util.Pair;
 
@@ -88,12 +89,16 @@ public class DocFile extends File {
   }
   ///////////////////// Overriden Methods //////////////////////
   
-  public File getAbsoluteFile() {
+  
+  public DocFile getAbsoluteFile() {
     if (isAbsolute()) return this;
     else
-      return new DocFile(super.getAbsoluteFile(),_sel,_scroll,_active,_package);
+      return new DocFile(super.getAbsoluteFile(), _sel, _scroll, _active, _package);
   }
   
+  public DocFile getCanonicalFile() throws IOException {
+    return new DocFile(super.getCanonicalFile(), _sel, _scroll, _active, _package);
+  }
   ///////////////////// Extra Data Methods /////////////////////
   
   /** @return the selection with the start and ending locations paired together.  The cursor location is at the second
@@ -134,7 +139,7 @@ public class DocFile extends File {
   public String getPackage() { return _package; }
   
   /** @param pack the name of the package defined in the document text. */
-  public void setPackage(String pack) { _package = pack; }
+  public void setPackage(String pkg) { _package = pkg; }
   
   /** Sets lastModified for this file to the time the including project file was saved. The <code>lastModified</code>
    *  date any documents saved after the project file was written will not match the date recorded in the project file.

@@ -37,6 +37,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
+
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.swing.Utilities;
@@ -403,9 +405,10 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   /** Called before attempting unit testing if tested class files are out of sync, to give the user a chance to save. Do
    *  not continue with JUnit if the user doesn't recompile!
    */
-  public void compileBeforeJUnit() {
+  public void compileBeforeJUnit(final CompilerListener cl) {
+//    Utilities.show("compileBeforeJUnit invoked with argument " + cl + " in GlobalEventNotifier " + this);
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.compileBeforeJUnit(); } }
+    try { for (GlobalModelListener l : _listeners) { l.compileBeforeJUnit(cl); } }
     finally { _lock.endRead(); }
   }
   

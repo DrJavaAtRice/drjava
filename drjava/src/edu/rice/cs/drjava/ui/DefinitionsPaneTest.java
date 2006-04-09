@@ -652,7 +652,7 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
                        "}"
                          , null);
       
-      String fileName = doc.getDisplayFullPath();
+      String fileName = doc.getCompletePath();
       
       definitions.setCaretPosition(4);
       assertEquals("Should display the document path", fileName, _frame.getFileNameField());

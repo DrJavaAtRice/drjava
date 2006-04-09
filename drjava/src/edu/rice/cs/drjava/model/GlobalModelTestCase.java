@@ -34,6 +34,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
@@ -41,6 +42,7 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.EditDocumentInterface;
 
@@ -65,7 +67,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected DefaultGlobalModel _model;
   protected File _tempDir;
   
-  protected boolean _junitDone;
+  protected volatile boolean _junitDone;
   protected final Object _junitLock = new Object();
   
   protected void _logJUnitStart() { _junitDone = false; }
@@ -76,7 +78,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _logJUnitStart();
 //    System.err.println("Starting JUnit on " + doc);
     doc.startJUnit();
-//    Utilities.showDebug("JUnit Started");
+//    System.err.println("JUnit Started on " + doc);
     _waitJUnitDone();
   }
   
@@ -218,6 +220,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     assertModified(false, doc);
 
     changeDocumentText(text, doc);
+    assertModified(true, doc);
     _model.removeListener(listener); 
 
     return doc;
@@ -310,7 +313,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     try {
       synchronized(listener) {
         _model.interpretCurrentInteraction();
-        listener.wait();
+        listener.wait();  // TODO: fix this naked wait which depends on being executed before interpreter finishes!
+        
  /**///In previous versions of 1.5.0-beta compiler, several tests hang right here, because 
  /////in DebugContextTest and JavaDebugInterpreterTest, the files that were being tested, 
  /////for example, MonkeyStuff.java, was being compiled without the -g flag, so debugging was 
@@ -585,7 +589,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       filePathContainsPoundCount = 0;
     }
 
-    
     public void projectModified() { }
     public void projectOpened(File pfile, FileOpenSelector files) { }
     public void projectClosed() { }
@@ -718,10 +721,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 //      assertEquals("number of times saveBeforeRun fired", i, saveBeforeRunCount);
 //    }
 //
-//    /** Not used. */
-//    public void assertSaveBeforeJUnitCount(int i) {
-//      assertEquals("number of times saveBeforeJUnit fired", i, saveBeforeJUnitCount);
-//    }
+    public void assertCompileBeforeJUnitCount(int i) {
+      assertEquals("number of times compileBeforeJUnit fired", i, compileBeforeJUnitCount);
+    }
 
     public void assertSaveBeforeJavadocCount(int i) {
       assertEquals("number of times saveBeforeJavadoc fired", i, saveBeforeJavadocCount);
@@ -877,7 +879,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("saveUntitled fired unexpectedly");
     }
     
-    public void compileBeforeJUnit() {
+    public void compileBeforeJUnit(CompilerListener cl) {
       compileBeforeJUnitCount++;
     }
 
@@ -944,6 +946,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
      */
     public CompileShouldSucceedListener(boolean expectReset) { _expectReset = expectReset; }
     
+    public CompileShouldSucceedListener() { this(false); }
+    
     public boolean notDone() { return _interactionsNotYetReset; }
 
     public void compileStarted() {
@@ -985,7 +989,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         interpreterReadyCount++;
         _interactionsNotYetReset = false;
 //        System.err.println("Interactions has been reset.");
-        notifyAll();
+        notify();
       }
     }
 
@@ -1034,34 +1038,20 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
   }
   
-  public class JUnitNonTestListener extends JUnitTestListener {
-    private boolean _shouldBeTestAll;
-    public JUnitNonTestListener() {
-      _shouldBeTestAll = false;
-    }
-    public JUnitNonTestListener(boolean shouldBeTestAll) {
-      _shouldBeTestAll = shouldBeTestAll;
-    }
-    public void nonTestCase(boolean isTestAll) {
-      nonTestCaseCount++;
-      assertEquals("Non test case heard the wrong value for test current/test all", _shouldBeTestAll, isTestAll);
-      synchronized(_junitLock) {
-//        System.err.println("JUnit aborted as nonTestCase");
-        _junitDone = true;
-        _junitLock.notify();
-      }
-    }
-  }
 
   public class JUnitTestListener extends CompileShouldSucceedListener {
-    // handle System.out's separately but default to outter class's printMessage value
+    // handle System.out's separately but default to outer class's printMessage value
     protected boolean printMessages = GlobalModelJUnitTest.printMessages;
     /** Construct JUnitTestListener without resetting interactions */
-    public JUnitTestListener() { this(false,false);  }
+    public JUnitTestListener() { this(false, false);  }
     public JUnitTestListener(boolean shouldResetAfterCompile) {  this(shouldResetAfterCompile, false); }
     public JUnitTestListener(boolean shouldResetAfterCompile, boolean printListenerMessages) {
       super(shouldResetAfterCompile);
       this.printMessages = printListenerMessages;
+    }
+    public void resetCompileCounts() { 
+      compileStartCount = 0; 
+      compileEndCount = 0;
     }
     public void junitStarted() {
       if (printMessages) System.out.println("listener.junitStarted");
@@ -1111,6 +1101,24 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
   }
   
+  /** This listener must be dynamic because it references _junitDone and _junitLock */
+  public class JUnitNonTestListener extends JUnitTestListener {
+    private boolean _shouldBeTestAll;
+    public JUnitNonTestListener() {  this(false); }
+    public JUnitNonTestListener(boolean shouldBeTestAll) { _shouldBeTestAll = shouldBeTestAll; }
+    public void nonTestCase(boolean isTestAll) {
+      nonTestCaseCount++;
+      assertEquals("Non test case heard the wrong value for test current/test all", _shouldBeTestAll, isTestAll);
+//      Utilities.show("synchronizing on _junitLock");
+      synchronized(_junitLock) {
+//        System.err.println("JUnit aborted as nonTestCase");
+        _junitDone = true;
+        _junitLock.notify();
+      }
+//      Utilities.show("synchronization complete");
+    }
+  }
+
   /* A variant of DefaultGlobalModel used only for testing purposes.  This variant
    * does not change the working directory when resetting interactions.  This test class and its
    * descendants were written before the distinction between getWorkingDirectoru and getMasterDirectory.

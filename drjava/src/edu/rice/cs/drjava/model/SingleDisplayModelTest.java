@@ -307,34 +307,35 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
 //    _log.log("testCloseFiles completed");
   }
 
-  /** Tests the displayFileName method. */
-  public void testDisplayFilename() throws IOException, OperationCanceledException, AlreadyOpenException {
+  /** Tests the getCompleteFileName method. */
+  public void testCompleteFilename() throws BadLocationException, IOException, OperationCanceledException, 
+    AlreadyOpenException {
     // Untitled
     OpenDefinitionsDocument doc = _sdModel.getActiveDocument();
-    assertEquals("untitled display filename", "(Untitled)", _sdModel.getDisplayFileName(doc));
+    assertEquals("untitled display filename", "(Untitled)", doc.getCompletePath());
 
     // Ends in ".java"
     File file = File.createTempFile("DrJava-filename-test", ".java", _tempDir).getCanonicalFile();
     file.deleteOnExit();
-    String name = file.getName();
+    String name = file.getAbsolutePath();
     doc = _sdModel.openFile(new FileSelector(file));
-    assertEquals(".java display filename",
-                 name.substring(0, name.length()-5),
-                 _sdModel.getDisplayFileName(doc));
+            
+    assertEquals(".java display filename", name, doc.getCompletePath());
 
     // Doesn't contain ".java"
     file = File.createTempFile("DrJava-filename-test", ".txt", _tempDir).getCanonicalFile();
     file.deleteOnExit();
-    name = file.getName();
+    name = file.getAbsolutePath();
     doc = _sdModel.openFile(new FileSelector(file));
-    assertEquals(".txt display filename", name, _sdModel.getDisplayFileName(doc));
+    assertEquals(".txt display filename", name, doc.getCompletePath());
 
-    // Doesn't end in ".java"
-    file = File.createTempFile("DrJava-filename-test", ".java.txt", _tempDir).getCanonicalFile();
+    // Modified File
+    file = File.createTempFile("DrJava-filename-test", ".java", _tempDir).getCanonicalFile();
     file.deleteOnExit();
-    name = file.getName();
+    name = file.getAbsolutePath();
     doc = _sdModel.openFile(new FileSelector(file));
-    assertEquals(".java.txt display filename", name, _sdModel.getDisplayFileName(doc));
+    changeDocumentText("foo", doc);
+    assertEquals(".java.txt display filename", name + " *", doc.getCompletePath());
 //    _log.log("testDisplayFilename completed");
   }
   

@@ -141,7 +141,7 @@ public class ProjectTest extends DrJavaTestCase {
     String proj1 =
       ";; DrJava project file.  Written with build: 2006??\n" +
       "(proj-root-and-base (file (name \"src\")))\n" +
-      "(source ;; comment\n" +
+      "(source-files ;; comment\n" +
       "   (file (name \"sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +

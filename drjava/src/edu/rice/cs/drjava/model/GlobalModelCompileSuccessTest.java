@@ -45,6 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
+import edu.rice.cs.drjava.model.definitions.InvalidPackageException; 
+
 import java.io.*;
 
 import javax.swing.text.BadLocationException;
@@ -149,9 +151,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
    * DrJavaTestFoo2 when compiling DrJavaTestFoo.
    * Doesn't reset interactions because no interpretations are performed.
    */
-  public void testCompileClassPathOKDifferentPackages()
-    throws BadLocationException, IOException, InterruptedException, edu.rice.cs.drjava.model.definitions.InvalidPackageException
-  {
+  public void testCompileClassPathOKDifferentPackages() throws BadLocationException, IOException, InterruptedException,
+    InvalidPackageException {
 //    System.out.println("testCompileClasspathOKDifferentPackages()");
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -160,10 +161,14 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
 
     // Create/compile foo, assuming it works
     // foo must be public and in DrJavaTestFoo.java!
-    OpenDefinitionsDocument doc1 =
-      setupDocument("package a;\n" + "public " + FOO_TEXT);
+    OpenDefinitionsDocument doc1 = setupDocument("package a;\n" + "public " + FOO_TEXT);
     final File fooFile = new File(aDir, "DrJavaTestFoo.java");
+//    System.err.println("fooFile = " + fooFile.getCanonicalPath());
     doc1.saveFile(new FileSelector(fooFile));
+    // _packageName must be updated on save
+    assertEquals("Check package name of doc1", "a", ((AbstractGlobalModel.ConcreteOpenDefDoc) doc1)._packageName); 
+//    System.err.println("doc1 = " + doc1);
+//    System.err.println("doc1 has source root " + doc1.getSourceRoot());
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
     
@@ -177,7 +182,11 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     OpenDefinitionsDocument doc2 =
       setupDocument("package b;\nimport a.DrJavaTestFoo;\n" + FOO2_EXTENDS_FOO_TEXT);
     final File foo2File = new File(bDir, "DrJavaTestFoo2.java");
+//    System.err.println("foo2File = " + foo2File.getCanonicalPath());
     doc2.saveFile(new FileSelector(foo2File));
+    // _packageName must be updated on save
+    assertEquals("Check packangeName of doc2", "b", ((AbstractGlobalModel.ConcreteOpenDefDoc) doc2)._packageName); 
+//    System.err.println("doc2 = " + doc2);
 
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
     _model.addListener(listener2);

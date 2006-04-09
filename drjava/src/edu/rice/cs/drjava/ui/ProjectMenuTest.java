@@ -34,6 +34,7 @@
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.project.DocFile;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
@@ -46,6 +47,8 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.List;
 
 /** Test functions of Project Facility working through the main frame and model. */
 public final class ProjectMenuTest extends MultiThreadedTestCase {
@@ -103,8 +106,8 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     _projFileText =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
       "(source ;; comment\n" +
-      "   (file (name \"src/test1.java\")(select 32 32)(active)))";
-//      "   (file (name \"src/test2.java\")(select 32 32)(active)))";
+      "   (file (name \"src/test1.java\")(select 32 32)(active))" +
+      "   (file (name \"src/test2.java\")(select 32 32)))";
     
     FileOps.writeStringToFile(_projFile, _projFileText);
 
@@ -133,7 +136,10 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     _model.setBuildDirectory(f);
     assertEquals("Build directory should not have been set", null, _model.getBuildDirectory());
     
+//    System.err.println("Opening Project File");
     _model.openProject(_projFile);
+//    System.err.println("Completed Opening Project File");
+//    System.err.println("Project documents are: " + _model.getProjectDocuments());
     
     assertEquals("Build directory should not have been set", null, _model.getBuildDirectory());
     
@@ -160,29 +166,30 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
       public File[] getFiles() throws OperationCanceledException { return new File[] {_projFile}; }
     });
         
-    // check to make sure it transitions from flat file mode to project mode well
-    _frame.open(new FileOpenSelector() {
-      public File[] getFiles() throws OperationCanceledException {
-        return new File[] {_file2};
-      }
-    });
+    // open a new file and make it an auxiliary file
     _frame.open(new FileOpenSelector() {
       public File[] getFiles() throws OperationCanceledException {
         return new File[] {_auxFile};
       }
     });
-    
     _frame._moveToAuxiliary();
     
     _frame.saveProject();
     _frame._closeProject();
     
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    assertEquals("One empty document remaining", 1, docs.size());
+    assertEquals("Name is (Untitled)", "(Untitled)", _model.getActiveDocument().toString());
+    
     ProjectFileIR pfir = ProjectFileParser.ONLY.parse(_projFile);
     DocFile[] src = pfir.getSourceFiles();
+//    System.err.println(Arrays.toString(src));
     DocFile[] aux = pfir.getAuxiliaryFiles();
+//    System.err.println(Arrays.toString(aux));
     assertEquals("Number of saved src files", 2, src.length);
     assertEquals("Number of saved aux files", 1, aux.length);
-    assertEquals("Wrong file name", _file1.getCanonicalPath(), src[0].getCanonicalPath());
+    assertEquals("wrong name for _file2", _file2.getCanonicalPath(), src[0].getCanonicalPath()); // assumes reverse order
+    assertEquals("Wrong name for _file1", _file1.getCanonicalPath(), src[1].getCanonicalPath());
     assertEquals("Wrong aux file", _auxFile.getCanonicalPath(), aux[0].getCanonicalPath());
   }
   

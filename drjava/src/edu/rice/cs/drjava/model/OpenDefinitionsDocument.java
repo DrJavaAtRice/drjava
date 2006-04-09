@@ -83,7 +83,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   //----- Getters and Setters -----/
   
   /** Returns the file for this document; does not check whether the file exists. */
-  public File file();
+  public File getRawFile();
   
   /** Returns the file for this document. 
    *  @return the file for this document
@@ -99,11 +99,11 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** Returns the name of this file, or "(Untitled)" if no file. */
   public String getFileName();
   
-   /** Return the name of this file exluding ".java" extension, or "(Untitled)" if no file exists. */
-  public String getDisplayFileName(); 
-  
-  /** Return the absolute path of the file, or "(Untitled)" if no file exists. */
-  public String getDisplayFullPath(); 
+  /** Returns canonical path for well-formed file, "(Untitled)" if no file exists, and absolute path if ill-formed. */
+  public String getCanonicalPath(); 
+
+  /** Returns canonical path (as defined above) followed by " *" if modified. */
+  public String getCompletePath(); 
 
   /** Returns the parent directory of this file, null if it has none. */
   public File getParentDirectory();
@@ -244,23 +244,23 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    *          up with the location of the source file.
    */
   public File getSourceRoot() throws InvalidPackageException;
+  
+  /**  @return the name of the package currently embedded in document. Forwards to wrapped DefinitionsDocument. */
+  public String getPackageNameFromDocument();
 
-  /** Gets the name of the package for this source file (as declared in the source text). It does this by 
-   *  minimally parsing the source file to find the package statement.
-   *  @return The declared name of package for this source file (the empty string if there is no package statement).
-   *  @exception InvalidPackageException if there is some sort of a <TT>package</TT> statement but it is invalid.
-   */
-  public String getPackageName() throws InvalidPackageException;
+  /**  @return the name of the package at the time of the most recent save or load operation. */
+  public String getPackageName();
   
-  /**
-   * Searching backwards finds the name of the enclosing named class or
-   * interface. NB: ignores comments.
-   * @param pos Position to start from
-   * @param fullyQualified true to find the fully qualified class name
-   * @return name of the enclosing named class or interface
-   */
-  public String getEnclosingClassName(int pos, boolean fullyQualified) throws BadLocationException, ClassNameNotFoundException;
+  /** Sets the cached package name returned by getPackageName(); */
+  public void setPackage(String s);
   
+  /** Searching backwards finds the name of the enclosing named class or interface. NB: ignores comments.
+   *  @param pos Position to start from
+   *  @param qual true to find the fully qualified class name
+   *  @return name of the enclosing named class or interface
+   */
+  public String getEnclosingClassName(int pos, boolean qual) throws BadLocationException, ClassNameNotFoundException;
+
   public void preparePrintJob() throws BadLocationException, FileMovedException;
 
   public void print() throws PrinterException, BadLocationException, FileMovedException;

@@ -46,11 +46,9 @@ public interface CompilerListener {
   /** Called when a compile has finished running. */
   public void compileEnded(File workDir, File[] excludedFiles);
   
-  /** Called to demand that all files be saved before compiling.  It is up to the caller of this method 
-   *  to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
-   */
+  /** Called to demand that all open source files be saved before compiling. */
   public void saveBeforeCompile();
-  
+
   /** Called to demand that the active document, which is untitled, be saved before compiling. */
   public void saveUntitled();
 }

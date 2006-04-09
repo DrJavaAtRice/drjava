@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model;
 
 import java.util.LinkedList;
 import edu.rice.cs.util.ReaderWriterLock;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Base class for all component-specific EventNotifiers.  This class provides common methods to 
  *  manage listeners of a specific type.  T the type of the listener class to be managed.
@@ -69,7 +70,7 @@ public abstract class EventNotifier<T> {
    *  @param listener a listener that reacts on events
    */
   public void addListener(T listener) {
-//    new ScrollableDialog(null, "Grabbing writeLock on event queue", "", "").show();
+//    Utilities.showDebug("Adding listener " + listener + " to event notifier " + this);
     _lock.startWrite();
     try { _listeners.add(listener); }
     finally {
@@ -82,7 +83,7 @@ public abstract class EventNotifier<T> {
    *  @param listener a listener that reacts on events
    */
   public void removeListener(T listener) {
-//    new ScrollableDialog(null, "Grabbing writeLock on event queue", "", "").show();
+//    Utilities.show("writeLock on _listeners grabbed by " + this);
     _lock.startWrite();
     try { _listeners.remove(listener); }
     finally {

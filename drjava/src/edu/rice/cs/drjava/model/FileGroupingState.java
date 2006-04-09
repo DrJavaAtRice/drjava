@@ -60,8 +60,8 @@ public interface FileGroupingState {
    */
   public boolean isInProjectPath(File f);
   
-  /** junits all files that the state considers "all" (ie, all files in project directory in project mode). */
-  public void junitAll();
+//  /** junits all files that the state considers "all" (ie, all files in project directory in project mode). */
+//  public void junitAll();
   
   /** Returns the current project file
    *  @return null if not currently in a project

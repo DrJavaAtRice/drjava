@@ -578,7 +578,7 @@ public class JarOptionsDialog extends JFrame {
         Iterator<OpenDefinitionsDocument> iter = srcs.iterator();
         while (iter.hasNext()) {
           OpenDefinitionsDocument doc = iter.next();
-          if (doc.inProject() && !doc.isAuxiliaryFile()) {
+          if (doc.inProject() && ! doc.isAuxiliaryFile()) {
             try {
               // Since the file compiled without any errors, this shouldn't have any problems
               jar.addFile(doc.getFile(), packageNameToPath(doc.getPackageName()), doc.getFileName());
@@ -587,28 +587,20 @@ public class JarOptionsDialog extends JFrame {
               e.printStackTrace();
               throw new UnexpectedException(e);
             }
-            catch (InvalidPackageException e) {
-              e.printStackTrace();
-              throw new UnexpectedException(e);
-            }
           }
         }
         return true;
       }
 
-      /**
-       * Helper function to convert a package name to its path form
-       *
-       * @param packageName the name of the package
-       * @return the String which is should be the directory that it should be contained within
+      /** Helper function to convert a package name to its path form
+       *  @param packageName the name of the package
+       *  @return the String which is should be the directory that it should be contained within
        */
       private String packageNameToPath(String packageName) {
         return packageName.replaceAll("\\.", System.getProperty("file.separator").replaceAll("\\\\", "\\\\\\\\"));
       }
-      /**
-       * The method to perform the work
-       *
-       * @return null
+      /** The method to perform the work
+       *  @return null
        */
       public Object construct() {
         try {

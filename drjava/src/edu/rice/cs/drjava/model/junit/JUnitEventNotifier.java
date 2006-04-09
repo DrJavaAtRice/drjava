@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.model.junit;
 import java.util.List;
 import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -72,6 +73,11 @@ import edu.rice.cs.util.swing.Utilities;
  * @version $Id$
  */
 class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitListener {
+  
+  public void addListener(JUnitListener jul) {
+    super.addListener(jul);
+//    Utilities.show("Adding listener " + jul + " to listener list in " + this);
+  }
 
   /** Called when trying to test a non-TestCase class.
    *  @param isTestAll whether or not it was a use of the test all button
@@ -88,11 +94,10 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     finally { _lock.endRead(); }
   }
   
- /** Called before junit?? is started by the DefaultJUnitModel. */
-  public void compileBeforeJUnit() {
-//    Utilities.showDebug("compileBeforeJUnit called in JUnitEventNotifier");
+ /** Called before JUnit is started by the DefaultJUnitModel. */
+  public void compileBeforeJUnit(final CompilerListener cl) {
     _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.compileBeforeJUnit(); } }
+    try { for (JUnitListener jul : _listeners) { jul.compileBeforeJUnit(cl); } }
     finally { _lock.endRead(); }
   }
   
@@ -119,9 +124,8 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when a particular test is started.
-   * @param name The name of the test being started.
+  /** Called when a particular test is started.
+   *  @param name The name of the test being started.
    */
   public void junitTestStarted(String name) {
     _lock.startRead();
@@ -129,12 +133,10 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when a particular test has ended.
-   * @param name The name of the test that has ended.
-   * @param wasSuccessful Whether the test passed or not.
-   * @param causedError If not successful, whether the test caused an error
-   *  or simply failed.
+  /** Called when a particular test has ended.
+   *  @param name The name of the test that has ended.
+   *  @param wasSuccessful Whether the test passed or not.
+   *  @param causedError If not successful, whether the test caused an error or simply failed.
    */
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
     _lock.startRead();

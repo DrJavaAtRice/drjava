@@ -46,6 +46,7 @@ import java.io.File;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.*;
@@ -102,29 +103,33 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   // end debug code
- 
+  
+  
   /** The maximum number of undos the model can remember */
   private static final int UNDO_LIMIT = 1000;
   /** Specifies if tabs are removed on open and converted to spaces. */
   private static boolean _tabsRemoved = true;
   /** Specifies if the document has been modified since the last save. */
-  private boolean _modifiedSinceSave = false;
+  private volatile boolean _modifiedSinceSave = false;
   /** Specifies if classFile is in sync with current state of the document */
-  private boolean _classFileInSync = false;
+  private volatile boolean _classFileInSync = false;
   /** Cached location, aides in determining line number. */
-  private int _cachedLocation;
+  private volatile int _cachedLocation;
   /** Cached current line number. */
-  private int _cachedLineNum;
+  private volatile int _cachedLineNum;
   /** Cached location of previous line. */
-  private int _cachedPrevLineLoc;
+  private volatile int _cachedPrevLineLoc;
   /** Cached location of next line. */
-  private int _cachedNextLineLoc;
+  private volatile int _cachedNextLineLoc;
 
-  private File _classFile;
+  /** The package name last extracted from this document. */
+  private volatile String _packageName;
+  
+  private volatile File _classFile;
 
   /** This reference to the OpenDefinitionsDocument is needed so that the document iterator 
    * (the DefaultGlobalModel) can find the next ODD given a DD. */
-  private OpenDefinitionsDocument _odd;
+  private volatile OpenDefinitionsDocument _odd;
   
   private CompoundUndoManager _undoManager;
   
@@ -145,11 +150,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     resetUndoManager();
   }
 
-  /**
-   * Main constructor.  This has an obnoxious dependency on
-   * GlobalEventNotifier, which is passed through here only for a single
-   * usage in CompoundUndoManager.  TODO: find a better way.
-   * @param notifier used by CompoundUndoManager to announce undoable edits
+  /** Main constructor.  This has an obnoxious dependency on GlobalEventNotifier, which is passed through here only 
+   *  for a single usage in CompoundUndoManager.  TODO: find a better way.
+   *  @param notifier used by CompoundUndoManager to announce undoable edits
    */
   public DefinitionsDocument(GlobalEventNotifier notifier) {
     super();
@@ -158,11 +161,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     resetUndoManager();
   }
 
-  /**
-   * Main constructor.  This has an obnoxious dependency on
-   * GlobalEventNotifier, which is passed through here only for a single
-   * usage in CompoundUndoManager.  TODO: find a better way.
-   * @param notifier used by CompoundUndoManager to announce undoable edits
+  /** Main constructor.  This has an obnoxious dependency on GlobalEventNotifier, which is passed through here only 
+   *  for a single usage in CompoundUndoManager.  TODO: find a better way.
+   *  @param notifier used by CompoundUndoManager to announce undoable edits
    */
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
     super();
@@ -191,16 +192,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _cacheInUse = false;
   }
   
-
   /** This function is for use by the OpenDefinitionsDocument. This will lock the Document. */
   public void aquireWriteLock() {
     // throwErrorHuh();
     writeLock();
   }
   
-  /**
-   * this function is for use by the OpenDefinitionsDocument. This will release the lock to the Document.
-   */
+  /** This function is for use by the OpenDefinitionsDocument. This will release the lock to the Document. */
   public void releaseWriteLock() { writeUnlock(); }
   
   /** This function is for use by the OpenDefinitionsDocument. This will lock the Document.  */
@@ -209,11 +207,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** This function is for use by the OpenDefinitionsDocument. This will release the lock to the Document. */
   public void releaseReadLock() { readUnlock(); }
    
-  
-  /**
-   * sets the OpenDefinitionsDocument that holds this DefinitionsDocument
-   * (the odd can only be set once)
-   * @param odd the OpenDefinitionsDocument to set as this DD's holder
+  /** Sets the OpenDefinitionsDocument that holds this DefinitionsDocument (the odd can only be set once).
+   *  @param odd the OpenDefinitionsDocument to set as this DD's holder
    */
   public void setOpenDefDoc(OpenDefinitionsDocument odd) { if (_odd == null) _odd = odd; }
   
@@ -230,9 +225,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       int length = getLength() - _currentLocation;
       
       //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
-      DocumentEvent evt = new DefaultDocumentEvent(_currentLocation,
-                                                   length,
-                                                   DocumentEvent.EventType.CHANGE);
+      DocumentEvent evt = new DefaultDocumentEvent(_currentLocation, length, DocumentEvent.EventType.CHANGE);
       fireChangedUpdate(evt);
     }
     finally { writeUnlock(); }
@@ -271,9 +264,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    }
 //  }
 //
-  /**
-   * Returns the name of this file, or "(untitled)" if no file.
-   */
+//  /**
+//   * Returns the name of this file, or "(untitled)" if no file.
+//   */
 //  public String getFilenamex() {
 //    String filename = "(Untitled)";
 //    try {
@@ -318,14 +311,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return _getPackageQualifier() + getEnclosingTopLevelClassName(pos);
   }
 
-  /**
-   * Gets an appropriate prefix to fully qualify a class name.
-   * Returns this class's package followed by a dot, or the empty
-   * string if no package name is found.
+  /** Gets an appropriate prefix to fully qualify a class name. Returns this class's package followed by a dot, or the
+   *  empty string if no package name is found.
    */
   protected String _getPackageQualifier() {
     String packageName = "";
-    try { packageName = this.getPackageName(); }
+    try { packageName = getPackageName(); }
     catch (InvalidPackageException e) { 
       /* Couldn't find package, pretend there's none; findbugs requires multi-line formatting of this clause */ 
     }
@@ -341,10 +332,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
   public File getCachedClassFile() { return _classFile; }
 
-  /**
-   * Inserts a string of text into the document.
-   * It turns out that this is not where we should do custom processing
-   * of the insert; that is done in {@link #insertUpdate}.
+  /** Inserts a string of text into the document.  This is not where we do custom processing of the insert; that is
+   *  done in {@link #insertUpdate}.
    */
   public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
     
@@ -427,16 +416,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
     }
   }
-  
-//  /** Initializes the modification state of this document. */
-//  public void initModification() {
-//    writeLock();
-//    try {
-//      _modifiedSinceSave = false;
-//      _undoManager.documentSaved();
-//    }
-//    finally { writeUnlock(); }
-//  }
   
   /** Determines if the document has been modified since the last save.
    *  @return true if the document has been modified
@@ -728,132 +707,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return NO_COMMENT_OFFSET;
   }
 
-//  /** Indents a line in accordance with the rules that DrJava has set up. This is the old version, 
-//   *  which has been replaced by the indent rule decision tree.
-//   */
-//  private void _indentLine() {
-//    try {
-//      // moves us to the end of the line
-//      move(_reduced.getDistToNextNewline());
-//      IndentInfo ii = _reduced.getIndentInformation();
-//      String braceType = ii.braceType;
-//      int distToNewline = ii.distToNewline;
-//      int distToBrace = ii.distToBrace;
-//      int distToPrevNewline = ii.distToPrevNewline;
-//      int tab = 0;
-//      boolean isSecondLine = false;
-//      if (distToNewline == -1) {
-//        distToNewline = _currentLocation;
-//        isSecondLine = true;
-//      }
-//      if (distToPrevNewline == -1)              //only on the first line
-//        tab = 0;
-//      //takes care of the second line
-//      else if (this._currentLocation - distToPrevNewline < 2)
-//        tab = 0;
-//      else if (distToBrace == -1)
-//        tab = _indentSpecialCases(0, distToPrevNewline);
-//      else if (braceType.equals("("))
-//        tab = distToNewline - distToBrace + 1;
-//      else if (braceType.equals("{")) {
-//        tab = getWhiteSpaceBetween(distToNewline, distToBrace) + _indent;
-//        tab = _indentSpecialCases(tab, distToPrevNewline);
-//      }
-//      else if (braceType.equals("["))
-//        tab = distToNewline - distToBrace + 1;
-//      tab(tab, distToPrevNewline);
-//    } catch (BadLocationException e) {
-//      throw  new UnexpectedException(e);
-//    }
-//  }
-
-//  /** Deals with the special cases. If the first character after the previous \n is a } then -2
-//   *  Replaced by indent rule decision tree.
-//   *  @exception BadLocationException
-//   */
-//  private int _indentSpecialCases(int tab, int distToPrevNewline) throws BadLocationException {
-//    //not a special case.
-//    if (distToPrevNewline == -1)
-//      return  tab;
-//    //setup
-//    int start = _reduced.getDistToPreviousNewline(distToPrevNewline + 1);
-//    if (start == -1)
-//      start = 0;
-//    else
-//      start = _currentLocation - start;
-//    String text = this.getText(start, _currentLocation - start);
-//    //case of  }
-//    int length = text.length();
-//    int k = length - distToPrevNewline;
-//    while (k < length && text.charAt(k) == ' ')
-//      k++;
-//    if (k < length && text.charAt(k) == '}')
-//      tab -= _indent;
-//    // if no matching { then let offset be 0.
-//    if (tab < 0)
-//      tab = 0;
-//    //non-normal endings
-//    int i = length - distToPrevNewline - 2;
-//    int distanceMoved = distToPrevNewline + 2;
-//    move(-distToPrevNewline - 2);               //assumed: we are at end of a line.
-//    while (i >= 0 && _isCommentedOrSpace(i, text)) {
-//      i--;
-//      if (i > 0) {              //gaurentees you don't move into document Start.
-//        distanceMoved++;
-//        move(-1);
-//      }
-//    }
-//    move(distanceMoved);        //move the document bac.
-//    if (i >= 0 && !(_normEndings.contains(text.substring(i, i + 1)))) {
-//      int j = 0;
-//      while ((j < length) && (text.charAt(j) == ' '))
-//        j++;
-//      if ((k < length) && (text.charAt(k) == '{')) {
-//        if ((j < length) && (text.charAt(j) == '{'))
-//          tab = j + _indent;
-//        else
-//          tab = j;
-//      }
-//      else
-//        tab = j + _indent;
-//    }
-//    //return tab
-//    return  tab;
-//  }
-
-//  /** Determines if current token is part of a comment OR text.charAt(i) in the given text argument is a space.
-//   *  @param i the index to look at for the space in text
-//   *  @param text a block of text
-//   *  @return true if the conditions are met
-//   * doesn't seem to be used*/
-//  private synchronized boolean _isCommentedOrSpace(int i, String text) {
-//    ReducedToken rt = _reduced.currentToken();
-//    String type = rt.getType();
-//    return  (rt.isCommented() || type.equals("//") || type.equals("")
-//        || (text.charAt(i) == ' '));
-//  }
-
-
-//  /** The function that handles what happens when a tab key is pressed. It is given the size of the leading 
-//   *  whitespace and based on the current indent information, either shrinks or expands that whitespace.
-//   *  @param tab number of indents, i.e., level of nesting
-//   *  @param distToPrevNewline distance to end of previous line
-//   *  @exception BadLocationException
-//   */
-//  void tab(int tab, int distToPrevNewline) throws BadLocationException {
-//    if (distToPrevNewline == -1) distToPrevNewline = _currentLocation;
-//    int currentTab = getWhiteSpaceBetween(distToPrevNewline, 0);
-//    int dist = tab - currentTab;
-//    
-//    if (dist == 0) return;
-//    if (dist > 0) {
-//      String spaces = "";
-//      for (int i = 0; i < dist; i++) { spaces = spaces + " "; }
-//      insertString(_currentLocation - distToPrevNewline, spaces, null);
-//    }
-//    else  remove(_currentLocation - distToPrevNewline, currentTab - tab);
-//  }
-
   /** Goes to a particular line in the document. */
   public void gotoLine(int line) {
 
@@ -929,16 +782,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       
       // Walk backwards from specificed position
       i = text.lastIndexOf(kw, reducedPos);
-      while(i>-1) {
+      while(i >- 1) {
         // Check that this is the beginning of a word
-        if (i>0) {
+        if (i > 0) {
           if (Character.isJavaIdentifierPart(text.charAt(i-1))) {
             // not begining
             i = text.lastIndexOf(kw, i-1);
             continue;  // ignore matching keyword 
           }
         }
-
         // Check that this not just the beginning of a longer word
         if (i+kw.length()<text.length()) {
           if (Character.isJavaIdentifierPart(text.charAt(i+kw.length()))) {
@@ -973,18 +825,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
  
 //  public static boolean log = true;
   
-  /**
-   * Searching backwards finds the name of the enclosing named class or
-   * interface. NB: ignores comments.
+  /** Searching backwards finds the name of the enclosing named class or interface. NB: ignores comments.
    * @param pos Position to start from
-   * @param fullyQualified true to find the fully qualified class name
+   * @param qual true to find the fully qualified class name
    * @return name of the enclosing named class or interface
    */
-  public String getEnclosingClassName(int pos, boolean fullyQualified) throws BadLocationException, ClassNameNotFoundException {    
+  public String getEnclosingClassName(int pos, boolean qual) throws BadLocationException, ClassNameNotFoundException {    
 //    boolean oldLog = log; log = false;
     // Check cache
     StringBuffer keyBuf = new StringBuffer("getEnclosingClassName:").append(pos);
-    keyBuf.append(":").append(fullyQualified);
+    keyBuf.append(":").append(qual);
     String key = keyBuf.toString();
     String cached = (String) _checkCache(key);
     if (cached != null) return cached;
@@ -1000,7 +850,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       int curPos = pos;
       if ((text.charAt(curPos)!='{') && (text.charAt(curPos)!='}')) { ++curPos; }
 
-//      if (oldLog) System.out.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10), Math.min(text.length(), curPos+1))+"`");
+//      if (oldLog) System.out.println("curPos=" + curPos + " `" +
+//        text.substring(Math.max(0,curPos-10), Math.min(text.length(), curPos+1)) + "`");
       
       do {
         curPos = findPrevEnclosingBrace(curPos, '{', '}');
@@ -1025,7 +876,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           }
         }
 //        if (oldLog) System.out.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
-//        if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `"+text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
+//        if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `" +
+//          text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
         while((classPos!=ERROR_INDEX) || (interPos!=ERROR_INDEX) || (newPos!=ERROR_INDEX)) {
           if (newPos!=ERROR_INDEX) {
 //            if (oldLog) System.out.println("\tanonymous inner class! newPos = "+newPos);
@@ -1041,14 +893,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             newPos = ERROR_INDEX;
             // see if there's a ) closer by
             closeParenPos = findPrevNonWSCharPos(curPos);
-//            if (closeParenPos!=ERROR_INDEX) if (oldLog) System.out.println("nonWS before curPos = "+closeParenPos+" `"+text.charAt(closeParenPos)+"`");
+//            if (closeParenPos!=ERROR_INDEX) if (oldLog) System.out.println("nonWS before curPos = " + closeParenPos + 
+//              " `"+text.charAt(closeParenPos)+"`");
             if ((closeParenPos!=ERROR_INDEX) && (text.charAt(closeParenPos)==')')) {
               // yes, find the matching (
               int openParenPos = findPrevEnclosingBrace(closeParenPos, '(', ')');
               if ((openParenPos!=ERROR_INDEX) && (text.charAt(openParenPos)=='(')) {
                 // this might be an inner class
                 newPos = _findPrevKeyword(text, "new", openParenPos);
-//                if (oldLog) System.out.println("\tnew found at "+newPos+", openSquigglyPos="+curPos);
+//                if (oldLog) System.out.println("\tnew found at " + newPos + ", openSquigglyPos=" + curPos);
                 if (_isAnonymousInnerClass(newPos, curPos)) {
                   // yes, anonymous inner class
                 }
@@ -1057,8 +910,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
                 }
               }
             }
-//            if (oldLog) System.out.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
-//            if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `"+text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
+//            if (oldLog) System.out.println("curPos=" +curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
+//            if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `"+
+//              text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
           }
           else {
             // either class or interface found first            
@@ -1096,14 +950,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           // neither class nor interface found
           break;
         }
-      } while(fullyQualified);
+      } while(qual);
     }
     finally { readUnlock(); }
     
     // chop off '$' at the end.
     if (name.length()>0) name = name.substring(0, name.length()-1);
     
-    if (fullyQualified) {
+    if (qual) {
       String pn = getPackageName();
       if ((pn.length()>0) && (name.length()>0)) {
         name = getPackageName() + "." + name;
@@ -1113,12 +967,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return name;
   }
   
-  /**
-   * Returns true if this position is the instantiation of an anonymous inner class,
-   * i.e. "new Identifier(params, params) {".
-   * @param newPos position of "new"
-   * @param openSquigglyPos position of the next '{'
-   * @return true if anonymous inner class instantiation
+  /** Returns true if this position is the instantiation of an anonymous inner class.
+   *  @param newPos position of "new"
+   *  @param openSquigglyPos position of the next '{'
+   *  @return true if anonymous inner class instantiation
    */
   private boolean _isAnonymousInnerClass(int newPos, int openSquigglyPos) throws BadLocationException {
 //    String t = getText(DOCSTART, openSquigglyPos+1);
@@ -1127,7 +979,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //                       t.substring(newPos, openSquigglyPos+1)+"`");
     
     // Check cache
-    StringBuffer keyBuf = new StringBuffer("_getAnonymousInnerClassIndex:").append(newPos).append(':').append(openSquigglyPos);
+    StringBuffer keyBuf = 
+      new StringBuffer("_getAnonymousInnerClassIndex:").append(newPos).append(':').append(openSquigglyPos);
     String key = keyBuf.toString();
     Boolean cached = (Boolean) _checkCache(key);
     if (cached != null) {
@@ -1190,6 +1043,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return cached;
   }
   
+  /** Gets the package name embedded in the text of this document by minimally parsing the document to find the
+   *  package statement.  If package statement is not found or is ill-formed, returns "" as the package name.
+   *  @return The name of package embedded in this document.  If there is no well-formed package statement, 
+   *          returns "" as the package name.
+   */
+  public String getPackageName() {
+    try { return getStrictPackageName(); }
+    catch(InvalidPackageException e) { return ""; }
+  }
+ 
   /**
    * Return the index of the anonymous inner class being instantiated at the specified position.
    * @param position of the opening curly brace of the anonymous inner class
@@ -1278,7 +1141,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  @exception InvalidPackageException if there is some sort of a <TT>package</TT> statement but the defined 
    *             package does not match or exist.
    */
-  public String getPackageName() throws InvalidPackageException {
+  protected String getStrictPackageName() throws InvalidPackageException {
+    
+//    Utilities.show("getPackageName() called on " + this);
     /* Buffer for constructing the package name. */
     StringBuffer buf = new StringBuffer();
     int oldLocation = 0;  // javac requires this bogus initialization

@@ -70,8 +70,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     
   /** Our parent window. */
   private MainFrame _mainFrame;
-  /** The corresponding ODD */
+  /** Our corresponding ODD */
   private final OpenDefinitionsDocument _doc;
+  
   private UndoAction _undoAction;
   private RedoAction _redoAction;
   private boolean testVariable;   //For Tests ONLY
@@ -109,7 +110,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** Updates the highlight if there is any. */
   protected void _updateMatchHighlight() {
     int to = getCaretPosition();
-    int from = getDJDocument().balanceBackward(); //_doc()._reduced.balanceBackward();
+    int from = _doc.balanceBackward(); //_doc()._reduced.balanceBackward();
     if (from > -1) {
       // Found a matching open brace to this close brace
       from = to - from;
@@ -127,7 +128,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       // (getCaretPosition will be the start of the highlight)
       from = to;
 
-      to = getDJDocument().balanceForward();
+      to = _doc.balanceForward();
       if (to > -1) {
         to = to + from;
         _addHighlight(from - 1, to);
@@ -139,7 +140,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   
   /* Returns the text of the line where a matching open brace exists whenever the cursor is at a closing brace */
   private String _matchText(int braceIndex) {
-    DJDocument doc = getDJDocument();
+    DJDocument doc = _doc;
     String docText;
     docText = doc.getText();
    
@@ -383,9 +384,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       public void focusLost(FocusEvent e) {  }
     });
     
-
-    // Start the pane out with the NULL_DOCUMENT so that it doesn't start out with a reference to the defdoc
-    _doc = doc;
+    _doc = doc;  // NOTE: _doc is final
     
     // read the initial selection/scrolling values from the document
     // to be set when the pane is first notified active
@@ -397,8 +396,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     //super.setDocument(NULL_DOCUMENT);
     _resetUndo();
     
-    
-    
     //setFont(new Font("Courier", 0, 12));
     Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);
     setFont(mainFont);
@@ -408,16 +405,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     
     // add actions for indent key
     ourMap = addKeymap(INDENT_KEYMAP_NAME, getKeymap());
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-                                 _indentKeyActionLine);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
-                                 _indentKeyActionTab);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'),
-                                 _indentKeyActionSquiggly);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'),
-                                 _indentKeyActionOpenSquiggly);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(':'),
-                                 _indentKeyActionColon);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), _indentKeyActionLine);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), _indentKeyActionTab);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'), _indentKeyActionSquiggly);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'), _indentKeyActionOpenSquiggly);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(':'), _indentKeyActionColon);
     setKeymap(ourMap);
 
 //    Keymap map = ourMap;
@@ -879,16 +871,16 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   public void notifyActive() {
     super.setDocument(_doc);
     if (_doc.getUndoableEditListeners().length == 0) _resetUndo();
-    int len = getDJDocument().getLength();
-    if (len < _position) {
+    
+    _doc.acquireWriteLock();
+    int len = _doc.getLength();
+    if (len < _position || len < _selEnd) {
       // the document changed since we're set inactive
       //so set selection to be none
       _position = len;
       _selStart = len;
       _selEnd = len;
     }
-
-    _doc.acquireWriteLock();
     try {
       if (_position == _selStart) {
         setCaretPosition(_selEnd);

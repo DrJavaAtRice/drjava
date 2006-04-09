@@ -148,9 +148,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     public void compileStarted() { }
     
     public void compileEnded(File workDir, File[] excludedFiles) {
-      // Only clear interactions if there were no errors
+      // Only clear interactions if there were no errors and unit testing is not in progress
       if ( ((_compilerModel.getNumErrors() == 0) || (_compilerModel.getCompilerErrorModel().hasOnlyWarnings()))
-            && _resetAfterCompile) {
+            && ! _junitModel.isTestInProgress() && _resetAfterCompile) {
         resetInteractions(workDir);  // use same working directory as current interpreter
       }
     }
@@ -230,7 +230,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 //  }
   
 
-  public void junitAll() { _state.junitAll(); }
+//  public void junitAll() { _state.junitAll(); }
   
   /** Sets the class with the project's main method. */
   public void setBuildDirectory(File f) {
@@ -263,58 +263,58 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
 
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
-    public void junitAll() {
-      // Is this code reachable? I don't think so.  MainFrame bypasses it by calling junitProject() on the junit model
-      // instead of junitAll on the global model
-      File dir = getProjectRoot();
-//        ArrayList<String> classNames = new ArrayList<String>();
-      final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter() {
-        public boolean accept(File pathname) {
-          return pathname.isDirectory() || 
-            pathname.getPath().toLowerCase().endsWith(".java") ||
-            pathname.getPath().toLowerCase().endsWith(".dj0") ||
-            pathname.getPath().toLowerCase().endsWith(".dj1") ||
-            pathname.getPath().toLowerCase().endsWith(".dj2");
-        }
-      });
-      ClassAndInterfaceFinder finder;
-      List<String> los = new LinkedList<String>();
-      List<File> lof = new LinkedList<File>();
-      for (File f: files) {
-        finder = new ClassAndInterfaceFinder(f);
-        String classname = finder.getClassName();
-        if (classname.length() > 0) {
-          los.add(classname);
-          lof.add(f);
-        }
-      }
-      List<OpenDefinitionsDocument> lod = getOpenDefinitionsDocuments();
-      for (OpenDefinitionsDocument d: lod) {
-        if (d.isAuxiliaryFile()) {
-          try {
-            File f;
-            String classname = d.getQualifiedClassName();
-            try {
-              f = d.getFile();
-              lof.add(f);
-              los.add(classname);
-            }
-            catch(FileMovedException fme) {
-              // the file's not on disk, but send it in anyways
-              f = fme.getFile();
-              if (f != null) {
-                lof.add(f);
-                los.add(classname);
-              }
-            }
-          }
-          catch(ClassNameNotFoundException e) {
-            // don't add it if we don't have a classname
-          }
-        }
-      }
-      getJUnitModel().junitClasses(los, lof);
-    }
+//    public void junitAll() {
+//      // Is this code reachable? I don't think so.  MainFrame bypasses it by calling junitProject() on the junit model
+//      // instead of junitAll on the global model
+//      File dir = getProjectRoot();
+////        ArrayList<String> classNames = new ArrayList<String>();
+//      final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter() {
+//        public boolean accept(File pathname) {
+//          return pathname.isDirectory() || 
+//            pathname.getPath().toLowerCase().endsWith(".java") ||
+//            pathname.getPath().toLowerCase().endsWith(".dj0") ||
+//            pathname.getPath().toLowerCase().endsWith(".dj1") ||
+//            pathname.getPath().toLowerCase().endsWith(".dj2");
+//        }
+//      });
+//      ClassAndInterfaceFinder finder;
+//      List<String> los = new LinkedList<String>();
+//      List<File> lof = new LinkedList<File>();
+//      for (File f: files) {
+//        finder = new ClassAndInterfaceFinder(f);
+//        String classname = finder.getClassName();
+//        if (classname.length() > 0) {
+//          los.add(classname);
+//          lof.add(f);
+//        }
+//      }
+//      List<OpenDefinitionsDocument> lod = getOpenDefinitionsDocuments();
+//      for (OpenDefinitionsDocument d: lod) {
+//        if (d.isAuxiliaryFile()) {
+//          try {
+//            File f;
+//            String classname = d.getQualifiedClassName();
+//            try {
+//              f = d.getFile();
+//              lof.add(f);
+//              los.add(classname);
+//            }
+//            catch(FileMovedException fme) {
+//              // the file's not on disk, but send it in anyways
+//              f = fme.getFile();
+//              if (f != null) {
+//                lof.add(f);
+//                los.add(classname);
+//              }
+//            }
+//          }
+//          catch(ClassNameNotFoundException e) {
+//            // don't add it if we don't have a classname
+//          }
+//        }
+//      }
+//      getJUnitModel().junitClasses(los, lof);
+//    }
     
     /** Jars all the files in this project */
     public void jarAll() { }
@@ -324,7 +324,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   class FlatFileGroupingState extends AbstractGlobalModel.FlatFileGroupingState {
     
-    public void junitAll() { getJUnitModel().junitAll(); }
+//    public void junitAll() { getJUnitModel().junitAll(); }
     public void jarAll() { }
   }
   
@@ -545,11 +545,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       resetInteractions(getSourceRoot());  
     }
 
-    /** Runs JUnit on the current document. Used to compile all open documents
-     *  before testing but have removed that requirement in order to allow the
-     *  debugging of test cases. If the classes being tested are out of
-     *  sync, a message is displayed.
-     */
+    /** Runs JUnit on the current document.  Requires that all source documents are compiled before proceeding. */
     public void startJUnit() throws ClassNotFoundException, IOException { _junitModel.junit(this); }
 
     /** Generates Javadoc for this document, saving the output to a temporary
@@ -730,12 +726,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       for (File f : cp) {
         try { _interactionsModel.addExtraClassPath(f.toURL()); }
         catch(MalformedURLException murle) {
-          System.out.println("File " + f + " in your extra classpath could not be parsed to a URL, maybe it contains un-URL-encodable characters?");
+          System.out.println("File " + f + " in your extra classpath could not be parsed to a URL; " +
+                             "it may contain un-URL-encodable characters.");
         }
       }
     }
     
-    List<OpenDefinitionsDocument> odds = getProjectDocuments();
+    List<OpenDefinitionsDocument> odds = getAuxiliaryDocuments();
     for (OpenDefinitionsDocument odd: odds) {
       // this forwards directly to InterpreterJVM.addClassPath(String)
       try { _interactionsModel.addProjectFilesClassPath(odd.getSourceRoot().toURL()); }
@@ -754,6 +751,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       catch(MalformedURLException murle) { /* ignore it */ }
       catch(InvalidPackageException e) { /* ignore it */ }
     }
+    
+    // add project source root to projectFilesClassPath.  All files in project tree have this root.
+    
+    try { _interactionsModel.addProjectFilesClassPath(getProjectRoot().toURL()); }
+    catch(MalformedURLException murle) { /* fail silently */ } 
   }
   
 //  private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {

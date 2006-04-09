@@ -201,16 +201,22 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     // opening a document makes it active
     OpenDefinitionsDocument doc1 = openFile(file1);
+    doc1.getLength();  // forces document to be read into memory
     assertEquals("There should be 1 document in the cache", 1, _cache.getNumInCache());
     OpenDefinitionsDocument doc2 = openFile(file2);
+    doc2.getLength();  // forces document to be read into memory
     assertEquals("There should be 2 documents in the cache", 2, _cache.getNumInCache());
     OpenDefinitionsDocument doc3 = openFile(file3);
+    doc3.getLength();  // forces document to be read into memory
     assertEquals("There should be 3 documents in the cache", 3, _cache.getNumInCache());
     OpenDefinitionsDocument doc4 = openFile(file4);
+    doc4.getLength();  // forces document to be read into memory
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     OpenDefinitionsDocument doc5 = openFile(file5);
+    doc5.getLength();  // forces document to be read into memory
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     OpenDefinitionsDocument doc6 = openFile(file6);
+    doc6.getLength();  // forces document to be read into memory
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     
     assertEquals("Wrong Cache Size", 4, _cache.getCacheSize());
@@ -342,22 +348,33 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     // opening a document should set it as active
     OpenDefinitionsDocument doc1 = openFile(file1);
+    doc1.getLength();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc1).isReady());
     assertEquals("There should be 1 documents in the cache", 1, _cache.getNumInCache());
+    
     OpenDefinitionsDocument doc2 = openFile(file2);
+    doc2.getLength();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc2).isReady());
     assertEquals("There should be 2 documents in the cache", 2, _cache.getNumInCache());
+    
     OpenDefinitionsDocument doc3 = openFile(file3);
+    doc3.getLength();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc3).isReady());
     assertEquals("There should be 3 documents in the cache", 3, _cache.getNumInCache());
+    
     OpenDefinitionsDocument doc4 = openFile(file4);
+    doc4.getLength();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc4).isReady());
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
+    
     OpenDefinitionsDocument doc5 = openFile(file5);
+    doc5.getLength();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc5).isReady());
     assertFalse("The document should not start out in the cache", _adapterTable.get(doc1).isReady());
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
+    
     OpenDefinitionsDocument doc6 = openFile(file6);
+    doc6.getLength();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc6).isReady());
     assertFalse("The document should not start out in the cache", _adapterTable.get(doc2).isReady());
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());

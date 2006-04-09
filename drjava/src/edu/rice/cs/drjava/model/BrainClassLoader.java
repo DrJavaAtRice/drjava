@@ -39,7 +39,7 @@ import java.net.URL;
 import edu.rice.cs.drjava.model.repl.WrapperClassLoader;
 
 
-public class BrainClassLoader extends ClassLoader{
+public class BrainClassLoader extends ClassLoader {
   
   ClassLoader projectCL;
   ClassLoader buildCL;
@@ -57,34 +57,25 @@ public class BrainClassLoader extends ClassLoader{
     systemCL = new WrapperClassLoader(this.getClass().getClassLoader().getSystemClassLoader());
   }
   
-  /**
-   * handles getting the resource for loading a class
-   */
+  /** Handles getting the resource for loading a class. */
   public URL getResource(String name) {
     URL resource = projectCL.getResource(name);
-    if (resource != null) {
-      return resource;
-    }
+    if (resource != null) return resource;
+    
     resource = buildCL.getResource(name);
-    if (resource != null) {
-      return resource;
-    }
+    if (resource != null) return resource;
+    
     resource = projectFilesCL.getResource(name);
-    if (resource != null) {
-      return resource;
-    }
+    if (resource != null) return resource;
+    
     resource = externalFilesCL.getResource(name);
-    if (resource != null) {
-      return resource;
-    }
+    if (resource != null) return resource;
+    
     resource = extraCL.getResource(name);
-    if (resource != null) {
-      return resource;
-    }
+    if (resource != null) return resource;
+
     resource = systemCL.getResource(name);
-    if (resource != null) {
-      return resource;
-    }
+    if (resource != null) return resource;
 
     return resource;
   }

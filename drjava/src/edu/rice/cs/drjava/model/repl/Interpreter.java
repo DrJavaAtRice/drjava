@@ -43,8 +43,7 @@ public interface Interpreter {
 
   /** Interprets the given string.
    *  @param s Source code to interpret
-   *  @return The result of the interpretation, or {@link #NO_RESULT} if
-   *          the interpretation had no return value.
+   *  @return The result of the interpretation, or {@link #NO_RESULT} if the interpretation had no return value.
    */
   public Object interpret(String s) throws ExceptionReturnedException;
   public Object parse(String s);

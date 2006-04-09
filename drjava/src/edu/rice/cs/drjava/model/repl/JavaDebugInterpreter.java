@@ -360,25 +360,17 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   }
 
 
-  /**
-   * Sets the class name of "this", parsing out the package name.
-   */
+  /** Sets the class name of "this", parsing out the package name. */
   protected void setClassName(String className) {
     int indexLastDot = className.lastIndexOf(".");
-    if (indexLastDot == -1) {
-      _thisPackageName = "";
-    }
-    else {
-      _thisPackageName = className.substring(0,indexLastDot);
-    }
-    _thisClassName = className.substring(indexLastDot + 1, className.length());
+    if (indexLastDot == -1) _thisPackageName = "";
+    else _thisPackageName = className.substring(0,indexLastDot);
+    _thisClassName = className.substring(indexLastDot + 1);
   }
 
-  /**
-   * Helper method to convert a ThisExpression to a QualifiedName.
-   * Allows us to redefine "this" in a debug interpreter.
-   * @param node ThisExpression
-   * @return corresponding QualifiedName
+  /** Helper method to convert a ThisExpression to a QualifiedName. Allows us to redefine "this" in a debug interpreter.
+   *  @param node ThisExpression
+   *  @return corresponding QualifiedName
    */
   protected QualifiedName _convertThisToName(ThisExpression node) {
     // Can't parametize this List for some reason.

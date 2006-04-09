@@ -590,110 +590,65 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
 
       for (int j = 0; j < comments.length; j++) {
         String curComment = comments[j];
-
         setUp();
-        _defModel.insertString(0,
-                              curComment + "\n\n" +
-                                "package " + curPack +
-                                ";\nclass Foo { int x; }\n",
-                              null);
+        _defModel.insertString(0, curComment + "\n\n" + "package " + curPack + ";\nclass Foo { int x; }\n", null);
 
-        assertEquals("Package name for document with comment " + curComment,
-                     curPack,
-                     _defModel.getPackageName());
+        assertEquals("Package name for document with comment " + curComment, curPack, _defModel.getPackageName());
       }
     }
   }
 
-  /**
-   * Test package-finding on document with a block comment
-   * between parts of package.
-   */
-  public void testPackageNameWeird1()
-    throws BadLocationException, InvalidPackageException
-  {
+  /** Test package-finding on document with a block comment between parts of package. */
+  public void testPackageNameWeird1() throws BadLocationException, InvalidPackageException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava;";
     String normal = "edu.rice.cs.drjava";
     _defModel.insertString(0, weird, null);
 
-    assertEquals("Package name for weird: '" + weird + "'",
-                 normal,
-                 _defModel.getPackageName());
+    assertEquals("Package name for weird: '" + weird + "'", normal, _defModel.getPackageName());
   }
 
-  /**
-   * Test package-finding on document with a line comment between
-   * parts of package.
-   */
-  public void testPackageNameWeird2()
-    throws BadLocationException, InvalidPackageException
-  {
+  /** Test package-finding on document with a line comment between parts of package. */
+  public void testPackageNameWeird2() throws BadLocationException, InvalidPackageException {
     String weird = "package edu . rice //comment!\n.cs.drjava;";
     String normal = "edu.rice.cs.drjava";
     _defModel.insertString(0, weird, null);
 
-    assertEquals("Package name for weird: '" + weird + "'",
-                 normal,
-                 _defModel.getPackageName());
+    assertEquals("Package name for weird: '" + weird + "'", normal, _defModel.getPackageName());
   }
 
-  /**
-   * Puts an otherwise valid package statement after a valid import
-   * declaration.
-   * This should result in seeing no package statement (for the purposes
-   * of getSourceRoot), so the resulting package name should be "".
+  /** Puts an otherwise valid package statement after a valid import declaration. This should result in seeing no 
+   *  package statement (for the purposes of getSourceRoot), so the resulting package name should be "".
    */
-  public void testGetPackageNameWithPackageStatementAfterImport()
-    throws BadLocationException, InvalidPackageException
-  {
+  public void testGetPackageNameWithPackageStatementAfterImport() throws BadLocationException, InvalidPackageException {
     String text = "import java.util.*;\npackage junk;\nclass Foo {}";
     _defModel.insertString(0, text, null);
-    assertEquals("Package name for text with package statement after import",
-                 "",
-                 _defModel.getPackageName());
+    assertEquals("Package name for text with package statement after import", "", _defModel.getPackageName());
   }
 
-  private String _getAllText() throws BadLocationException {
-    return _defModel.getText();
-  }
-  /**
-   * Test class name-finding on document
-   */
-  public void testTopLevelClassName()
-    throws BadLocationException, ClassNameNotFoundException
-  {
+  private String _getAllText() throws BadLocationException { return _defModel.getText(); }
+  
+  /** Tests class name-finding on document. */
+  public void testTopLevelClassName() throws BadLocationException, ClassNameNotFoundException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; class MyClass<T> implements O{";
     String result = "MyClass";
     _defModel.insertString(0, weird, null);
 
-    assertEquals("class name for weird: '" + weird + "'",
-                 result,
-                 _defModel.getFirstTopLevelClassName());
+    assertEquals("class name for weird: '" + weird + "'", result, _defModel.getFirstTopLevelClassName());
   }
 
- /**
-   * Test interface name-finding on document
-   */
-  public void testTopLevelInterfaceName()
-    throws BadLocationException, ClassNameNotFoundException
-  {
+ /** Test interface name-finding on document */
+  public void testTopLevelInterfaceName() throws BadLocationException, ClassNameNotFoundException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
       " interface thisInterface { \n" +
       " class MyClass {";
     String result = "thisInterface";
     _defModel.insertString(0, weird, null);
 
-    assertEquals("class name for interface: '" + weird + "'",
-                 result,
-                 _defModel.getFirstTopLevelClassName());
+    assertEquals("class name for interface: '" + weird + "'", result, _defModel.getFirstTopLevelClassName());
   }
 
- /**
-   * Test class name-finding on document
-   */
-  public void testTopLevelClassNameWComments()
-    throws BadLocationException, ClassNameNotFoundException
-  {
+ /** Test class name-finding on document */
+  public void testTopLevelClassNameWComments() throws BadLocationException, ClassNameNotFoundException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
       "/* class Y */ \n" +
       " /* class Foo \n" +
@@ -706,18 +661,11 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     String result = "MyClass";
     _defModel.insertString(0, weird, null);
 
-    assertEquals("class name for class: '" + weird + "'",
-                 result,
-                 _defModel.getFirstTopLevelClassName());
+    assertEquals("class name for class: '" + weird + "'", result, _defModel.getFirstTopLevelClassName());
   }
 
-  /**
-   * Tests that a keyword with no space following it does not cause
-   * a StringOutOfBoundsException (bug 742226).
-   */
-  public void testTopLevelClassNameNoSpace()
-    throws BadLocationException
-  {
+  /** Tests that a keyword with no space following it does not cause a StringOutOfBoundsException (bug 742226). */
+  public void testTopLevelClassNameNoSpace() throws BadLocationException {
     String c = "class";
     _defModel.insertString(0, c, null);
     try {
