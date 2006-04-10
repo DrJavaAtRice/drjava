@@ -340,7 +340,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         
 //        System.err.println("Directory contains the files: " + Arrays.asList(listing));
         
-        if (listing != null) {
+        if (listing != null) { // listFiles may return null if there's an IO error
           for (File entry : listing) { /* for each class file in the build directory */        
             
 //            System.err.println("Examining file " + entry);

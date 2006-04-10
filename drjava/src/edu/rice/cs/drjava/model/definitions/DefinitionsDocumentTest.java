@@ -1456,6 +1456,41 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "      T t;" + NEWLINE +
     "    }" + NEWLINE +
     "  }" + NEWLINE +
+    "}" + NEWLINE +
+    "abstract class Fee {" + NEWLINE +
+    "  public abstract void feeDo();" + NEWLINE +
+    "  public abstract void feeAct();" + NEWLINE +
+    "  protected String s, t, u;" + NEWLINE +
+    "  " + NEWLINE +
+    "  public static class FeeConc extends Fee {/*Fee$FeeConc*/" + NEWLINE +
+    "    {" + NEWLINE +
+    "      s = \"FeeConc/s\";" + NEWLINE +
+    "    }" + NEWLINE +
+    "    public void feeDo() { System.out.println(\"FeeConc/feeDo\"); }" + NEWLINE +
+    "    {" + NEWLINE +
+    "      t = \"FeeConc/t\";" + NEWLINE +
+    "    }" + NEWLINE +
+    "    public abstract void feeAct() { System.out.println(\"FeeConc/feeAct\"); }" + NEWLINE +
+    "    {" + NEWLINE +
+    "      u = \"FeeConc/u\";" + NEWLINE +
+    "    }" + NEWLINE +
+    "  }" + NEWLINE +
+    "  " + NEWLINE +
+    "  public static void main(String[] args) {" + NEWLINE +
+    "    Fee f = new Fee() {/*Fee$1*/" + NEWLINE +
+    "      {" + NEWLINE +
+    "        s = \"Fee$1/s\";" + NEWLINE +
+    "      }" + NEWLINE +
+    "      public void feeDo() { System.out.println(\"Fee$1/feeDo\"); }" + NEWLINE +
+    "      {" + NEWLINE +
+    "        t = \"Fee$1/t\";" + NEWLINE +
+    "      }" + NEWLINE +
+    "      public abstract void feeAct() { System.out.println(\"Fee$1/feeAct\"); }" + NEWLINE +
+    "      {" + NEWLINE +
+    "        u = \"Fee$1/u\";" + NEWLINE +
+    "      }" + NEWLINE +
+    "    };" + NEWLINE +
+    "  }" + NEWLINE +
     "}/*eof*/" + NEWLINE;
   
   /**
@@ -2006,6 +2041,120 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     substr = "\"Test$8\"";
     exp1   = "Temp.Test$8";
     exp2   = "8";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+    
+    //
+
+    substr = "abstract void feeDo()";
+    exp1   = "Temp.Fee";
+    exp2   = "Fee";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "class FeeConc extends Fee";
+    exp1   = "Temp.Fee";
+    exp2   = "Fee";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "/*Fee$FeeConc*/";
+    exp1   = "Temp.Fee$FeeConc";
+    exp2   = "FeeConc";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"FeeConc/feeDo\"";
+    exp1   = "Temp.Fee$FeeConc";
+    exp2   = "FeeConc";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"FeeConc/feeAct\"";
+    exp1   = "Temp.Fee$FeeConc";
+    exp2   = "FeeConc";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"FeeConc/s\"";
+    exp1   = "Temp.Fee$FeeConc";
+    exp2   = "FeeConc";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+//    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+//    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"FeeConc/t\"";
+    exp1   = "Temp.Fee$FeeConc";
+    exp2   = "FeeConc";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"FeeConc/u\"";
+    exp1   = "Temp.Fee$FeeConc";
+    exp2   = "FeeConc";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "/*Fee$1*/";
+    exp1   = "Temp.Fee$1";
+    exp2   = "1";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"Fee$1/feeDo\"";
+    exp1   = "Temp.Fee$1";
+    exp2   = "1";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"Fee$1/feeAct\"";
+    exp1   = "Temp.Fee$1";
+    exp2   = "1";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"Fee$1/s\"";
+    exp1   = "Temp.Fee$1";
+    exp2   = "1";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+//    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+//    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"Fee$1/t\"";
+    exp1   = "Temp.Fee$1";
+    exp2   = "1";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"Fee$1/u\"";
+    exp1   = "Temp.Fee$1";
+    exp2   = "1";
     act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
     act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
     assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);

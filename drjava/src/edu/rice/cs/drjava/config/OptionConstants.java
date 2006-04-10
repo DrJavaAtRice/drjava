@@ -1096,7 +1096,8 @@ public interface OptionConstants {
   /** Whether to scan class files for auto-completion class names. */
   public static final BooleanOption DIALOG_COMPLETE_SCAN_CLASS_FILES =
     new BooleanOption("dialog.completefile.scan.class.files", Boolean.FALSE);
-  
+
+// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
   /** Whether to perform light-weight parsing. */
   public static final BooleanOption LIGHTWEIGHT_PARSING_ENABLED =
     new BooleanOption("lightweight.parsing.enabled", Boolean.FALSE);

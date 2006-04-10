@@ -228,8 +228,9 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public boolean canAbandonFile();
   
-  /** Saves file at user's discretion before quitting. */
-  public void quitFile();
+  /** Saves file at user's discretion before quitting.
+   *  @return true if quitting should continue, false if the user cancelled */
+  public boolean quitFile();
 
   /** Moves the definitions document to the given line, and returns the resulting character position.
    *  @param line Destination line number. If line exceeds the number of lines in the document, it is interpreted 

@@ -553,12 +553,14 @@ public class JarOptionsDialog extends JFrame {
         };
 
         File[] files = dir.listFiles(classFilter);
-        for (int i = 0; i < files.length; i++) {
-          if (files[i].isDirectory()) {
-            jarFile.addDirectoryRecursive(files[i], files[i].getName(), classFilter);
-          }
-          else {
-            jarFile.addFile(files[i], "", files[i].getName());
+        if (files!=null) { // listFiles may return null if there's an IO error
+          for (int i = 0; i < files.length; i++) {
+            if (files[i].isDirectory()) {
+              jarFile.addDirectoryRecursive(files[i], files[i].getName(), classFilter);
+            }
+            else {
+              jarFile.addFile(files[i], "", files[i].getName());
+            }
           }
         }
 

@@ -161,9 +161,12 @@ public abstract class FileOps {
    */
   private static void getFilesInDir(File d, List<File> acc, boolean recur, FileFilter filter) {
     if (d.isDirectory()) {
-      for (File f: d.listFiles(filter)) {
-        if (f.isDirectory() && recur) getFilesInDir(f, acc, recur, filter);
-        else if (f.isFile()) acc.add(f);
+      File[] files = d.listFiles(filter);
+      if (files!=null) { // listFiles may return null if there's an IO error
+        for (File f: files) {
+          if (f.isDirectory() && recur) getFilesInDir(f, acc, recur, filter);
+          else if (f.isFile()) acc.add(f);
+        }
       }
     }      
     else acc.add(d);
@@ -340,7 +343,9 @@ public abstract class FileOps {
 
     boolean ret = true;
     File[] childFiles = dir.listFiles();
-    for (File f: childFiles) { ret = ret && deleteDirectory(f); }
+    if (childFiles!=null) { // listFiles may return null if there's an IO error
+      for (File f: childFiles) { ret = ret && deleteDirectory(f); }
+    }
     
     // Now we should have an empty directory
     ret = ret && dir.delete();
@@ -361,7 +366,9 @@ public abstract class FileOps {
     //  on the directory itself.
     if (dir.isDirectory()) {
       File[] childFiles = dir.listFiles();
-      for (File f: childFiles) { deleteDirectoryOnExit(f); }
+      if (childFiles!=null) { // listFiles may return null if there's an IO error
+        for (File f: childFiles) { deleteDirectoryOnExit(f); }
+      }
     }
   }
 
@@ -405,19 +412,23 @@ public abstract class FileOps {
     while (! working.empty()) {
       PrefixAndFile current = working.pop();
       File [] subDirectories = current.root.listFiles(directoryFilter);
-      for (File dir: subDirectories) {
-        PrefixAndFile paf;
+      if (subDirectories!=null) { // listFiles may return null if there's an IO error
+        for (File dir: subDirectories) {
+          PrefixAndFile paf;
 //         System.out.println("exploring " + dir);
-        if (current.prefix.equals("")) paf = new PrefixAndFile(dir.getName(), dir);
-        else  paf = new PrefixAndFile(current.prefix + "." + dir.getName(), dir);
-        working.push(paf);
+          if (current.prefix.equals("")) paf = new PrefixAndFile(dir.getName(), dir);
+          else  paf = new PrefixAndFile(current.prefix + "." + dir.getName(), dir);
+          working.push(paf);
+        }
       }
       File [] javaFiles = current.root.listFiles(JAVA_FILE_FILTER);
 
-      //Only add package names if they have java files and are not the root package
-      if (javaFiles.length != 0 && !current.prefix.equals("")) {
-        output.add(current.prefix);
+      if (javaFiles!=null) { // listFiles may return null if there's an IO error
+        //Only add package names if they have java files and are not the root package
+        if (javaFiles.length != 0 && !current.prefix.equals("")) {
+          output.add(current.prefix);
 //         System.out.println("adding " + current.prefix);
+        }
       }
     }
     return output;

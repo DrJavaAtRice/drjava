@@ -235,7 +235,9 @@ public class DefaultJavadocModel implements JavadocModel {
             // But don't do it if we've already done it for this directory.
             defaultRoots.add(sourceRoot);
             File[] javaFiles = sourceRoot.listFiles(FileOps.JAVA_FILE_FILTER);
-            for (File f: javaFiles) { docUnits.add(f.getAbsolutePath());}
+            if (javaFiles!=null) { // listFiles may return null if there's an IO error
+              for (File f: javaFiles) { docUnits.add(f.getAbsolutePath());}
+            }
           }
         }
         else {

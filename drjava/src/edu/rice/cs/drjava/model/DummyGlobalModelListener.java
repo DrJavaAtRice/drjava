@@ -219,8 +219,9 @@ public class DummyGlobalModelListener implements GlobalModelListener {
   /** Called to ask the listener if it is OK to abandon the current document. */
   public boolean canAbandonFile(OpenDefinitionsDocument doc) { return true; }
   
-  /** Called to ask the listener if the document should be saved before quitting. */
-  public void quitFile(OpenDefinitionsDocument doc) { }
+  /** Called to ask the listener if the document should be saved before quitting.
+   *  @return true if quitting should continue, false if the user cancelled */
+  public boolean quitFile(OpenDefinitionsDocument doc) { return true; }
   
   /** Called to ask the listener if it is OK to replace the current document by a newer version on disk. */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc) { return true; }

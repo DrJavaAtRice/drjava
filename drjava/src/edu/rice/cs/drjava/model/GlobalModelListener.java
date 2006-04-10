@@ -70,8 +70,9 @@ public interface GlobalModelListener extends InteractionsListener,
   /** Called to ask the listener if it is OK to abandon the current document. */
   public boolean canAbandonFile(OpenDefinitionsDocument doc);
 
-  /** Called to ask the listener if this document should be saved before quitting. */
-  public void quitFile(OpenDefinitionsDocument doc);
+  /** Called to ask the listener if this document should be saved before quitting.
+   *  @return true if quitting should continue, false if the user cancelled */
+  public boolean quitFile(OpenDefinitionsDocument doc);
   
   /** Called to ask the listener if it is OK to revert the current document to the version saved on disk. */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc);

@@ -785,12 +785,13 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new StringOptionComponent(OptionConstants.JVM_ARGS, "JVM Args for Interactions", this,
                                                  "The command-line arguments to pass to the Interactions JVM."));
 
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 
-                                                  "Perform lightweight parsing", this,
-                                                  "<html>Whether to continuously parse the source file for useful information.<br>" +
-                                                  "Enabling this option might introduce delays when editing files.<html>"));
-    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.DIALOG_LIGHTWEIGHT_PARSING_DELAY, "Light-weight parsing delay in milliseconds", this,
-                                                  "The amount of time DrJava will wait after the last keypress before beginning to parse."));
+// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+//    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 
+//                                                  "Perform lightweight parsing", this,
+//                                                  "<html>Whether to continuously parse the source file for useful information.<br>" +
+//                                                  "Enabling this option might introduce delays when editing files.<html>"));
+//    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.DIALOG_LIGHTWEIGHT_PARSING_DELAY, "Light-weight parsing delay in milliseconds", this,
+//                                                  "The amount of time DrJava will wait after the last keypress before beginning to parse."));
 
     panel.displayComponents();
   }

@@ -90,7 +90,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public boolean canAbandonFile() { throw new UnsupportedOperationException("Dummy method"); }
   
-  public void quitFile() { throw new UnsupportedOperationException("Dummy method"); }
+  public boolean quitFile() { throw new UnsupportedOperationException("Dummy method"); }
   
   public void setCurrentLocation(int location) { throw new UnsupportedOperationException("Dummy method"); }
   

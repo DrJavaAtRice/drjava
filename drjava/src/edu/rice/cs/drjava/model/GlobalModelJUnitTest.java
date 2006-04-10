@@ -481,7 +481,8 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     System.out.println("Untitled file is named: " + untitled.getName());
     
-    _model.closeFileOnQuitHelper(untitled);
+    untitled.quitFile();
+    _model.closeFileWithoutPrompt(untitled);
     
     // set up test listener for compile command; automatically checks that compilation is performed
     JUnitTestListener listener = new JUnitCompileBeforeTestListener();

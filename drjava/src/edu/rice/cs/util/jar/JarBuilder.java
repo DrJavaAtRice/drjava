@@ -152,7 +152,7 @@ public class JarBuilder {
       File[] files = dir.listFiles(filter);
       BufferedInputStream origin = null;
 
-      if( files == null )
+      if( files == null ) // listFiles may return null if there's an IO error
         return true;
       for (int i = 0; i < files.length; i++) {
         if( files[i].isFile() ) {

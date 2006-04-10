@@ -896,7 +896,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       throw new UnexpectedException();
     }
     
-    public void quitFile(OpenDefinitionsDocument doc) {
+    public boolean quitFile(OpenDefinitionsDocument doc) {
       listenerFail("quitFile fired unexpectedly");
       throw new UnexpectedException();
     }

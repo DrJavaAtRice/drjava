@@ -71,30 +71,27 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
                               OpenDefinitionsDocument doc,
                               int offset) throws DebugException {
     super(manager);
+    _exactClassName = null;
+//    try {
+      if (offset >= 0) {
+// getEnclosingClassName is incorrect right now and numbers anonymous inner classes incorrectly
+//        if (doc.getNumberOfLines()<500) {
+//          // only do this on short files
+//          // in long files, getEnclosingClassName might take too long
+//          _exactClassName = doc.getEnclosingClassName(offset, true);
+//        }
+      }
+//    }
+//    catch(ClassNameNotFoundException cnnfe) { /* ignore, we don't need the exact class name */ }
+//    catch(BadLocationException ble) { /* ignore, we don't need the exact class name */ }
     try {
       if (offset >= 0) {
-        _exactClassName = doc.getEnclosingClassName(offset, true);
+        _className = doc.getQualifiedClassName(offset);
       }
-    }
-    catch(ClassNameNotFoundException cnnfe) {
-      _exactClassName = null;
-    }
-    catch(BadLocationException ble) {
-      _exactClassName = null;
-    }
-    try {
-      _className = doc.getQualifiedClassName(offset);
     }
     catch (ClassNameNotFoundException cnnfe) {
-      // Couldn't find class name at offset, use the first class name
-      // found.
-      try {
-        _className = doc.getQualifiedClassName();
-      }
-      catch (ClassNameNotFoundException cnnfe2) {
-        // Still couldn't find a class name, use ""
-        _className = "";
-      }
+      // Still couldn't find a class name, use ""
+      _className = "";
     }
     // System.out.println("Breakpoint added: "+_className+", exact="+_exactClassName);
     

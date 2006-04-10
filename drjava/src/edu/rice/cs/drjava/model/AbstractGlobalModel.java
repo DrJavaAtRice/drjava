@@ -33,6 +33,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
+import edu.rice.cs.util.Log;
+
 import java.awt.Container;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -250,12 +252,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    */
   protected IDocumentNavigator<OpenDefinitionsDocument> _documentNavigator = 
       new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeListNavigator(); 
-
-  /** Light-weight parsing controller. */
-  protected LightWeightParsingControl _parsingControl;
   
-  /** @return the parsing control */
-  public LightWeightParsingControl getParsingControl() { return _parsingControl; }
+// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+//  /** Light-weight parsing controller. */
+//  protected LightWeightParsingControl _parsingControl;
+//  
+//  /** @return the parsing control */
+//  public LightWeightParsingControl getParsingControl() { return _parsingControl; }
   
   // ----- CONSTRUCTORS -----
   
@@ -688,9 +691,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           }
         });
         
-        for (File kid: fs) { cleanHelper(kid); }
+        if (fs!=null) { // listFiles may return null if there's an IO error
+          for (File kid: fs) { cleanHelper(kid); }
+        }
         
-        if (f.listFiles().length == 0)  f.delete();
+        fs = f.listFiles(); // listFiles may return null if there's an IO error
+        if ((fs!=null) && (fs.length == 0))  f.delete();
         
       } else if (f.getName().endsWith(".class")) f.delete();
     }
@@ -712,7 +718,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           }
         });
         
-        for (File kid: fs) { getClassFilesHelper(kid, acc); }
+        if (fs!=null) { // listFiles may return null if there's an IO error
+          for (File kid: fs) { getClassFilesHelper(kid, acc); }
+        }
         
       } else if (f.getName().endsWith(".class")) acc.add(f);
     }    
@@ -1521,13 +1529,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return false;
   }
   
-  /** Similar to closeFileHelper except that saving cannot be cancelled. It is public for testing purposes. */
-  public void closeFileOnQuitHelper(OpenDefinitionsDocument doc) {
-    //    System.err.println("closing " + doc);
-    doc.quitFile();
-    closeFileWithoutPrompt(doc);
-  }
-  
   /** Closes an open definitions document, without prompting to save if the document has been changed.  Returns
    *  whether the file was successfully closed. NOTE: This method should not be called unless it can be 
    *  absolutely known that the document being closed is not the active document. The closeFile() method in 
@@ -1564,26 +1565,45 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Closes all open documents without creating a new empty document.  It cannot be cancelled by the user
    *  because it would leave the current project in an inconsistent state.  Method is public for 
    *  testing purposes.
+   *  @param false if the user cancelled
    */
-  public void closeAllFilesOnQuit() {
+  public boolean closeAllFilesOnQuit() {
     
-    OpenDefinitionsDocument[] docs;
-    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
+    List<OpenDefinitionsDocument> docList;
+    synchronized(_documentsRepos) { docList = new ArrayList<OpenDefinitionsDocument> (_documentsRepos); }
     
-    for (OpenDefinitionsDocument doc : docs) {
-      closeFileOnQuitHelper(doc);  // modifies _documentsRepos
+    // first see if the user wants to cancel on any of them
+    boolean canClose = true;
+    for (OpenDefinitionsDocument doc : docList) {
+      if (!doc.canAbandonFile()) { canClose = false; break; }
     }
+    
+    if  (!canClose) { return false; } // the user did want to cancel
+    
+    // user did not want to cancel, close all of them
+    // All files are being closed, create a new file before starting in order to have 
+    // a potentially active file that is not in the list of closing files.
+    newFile();
+    
+    // Set the active document to the document just after the last document or the document just before the 
+    // first document in docList.  A new file does not appear in docList.
+    _ensureNotActive(docList);
+        
+    // Close the files in docList. 
+    for (OpenDefinitionsDocument doc : docList) { closeFileWithoutPrompt(doc); }  
+    
+    return true;
   }
     
   /** Exits the program.  Quits regardless of whether all documents are successfully closed. */
   public void quit() {
     try {
-      closeAllFilesOnQuit();
+      if (!closeAllFilesOnQuit()) return;
 //    Utilities.show("Closed all files");
       dispose();  // kills the interpreter
+      System.exit(0);
     }
-    catch(Throwable t) { /* do nothing */ }
-    finally { System.exit(0); }
+    catch(Throwable t) { System.exit(0); /* exit anyway */ }
   }
 
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. 
@@ -2684,10 +2704,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Fires the quit(File) event if isModifiedSinceSave() is true.  The quitFile() event asks the user if the
      *  the file should be saved before quitting.
+     *  @return true if quitting should continue, false if the user cancelled
      */
-    public void quitFile() {
-      if (isModifiedSinceSave() || (_file != null && !_file.exists() && _cacheAdapter.isReady()))
-        _notifier.quitFile(this);
+    public boolean quitFile() {
+      if (isModifiedSinceSave() || (_file != null && !_file.exists() && _cacheAdapter.isReady())) {
+        return _notifier.quitFile(this); 
+      } else { return true; }
     }
     
     /** Moves the definitions document to the given line, and returns the resulting character position.

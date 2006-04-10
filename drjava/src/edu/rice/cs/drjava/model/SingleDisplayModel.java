@@ -111,6 +111,7 @@ public interface SingleDisplayModel extends GlobalModel {
   
   public void dispose();
 
-  /** @return the parsing control */
-  public LightWeightParsingControl getParsingControl();
+// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+//  /** @return the parsing control */
+//  public LightWeightParsingControl getParsingControl();
 }

@@ -231,13 +231,16 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-   /** Called to ask the listeners save the file before quitting at the user's option. */
-  public void quitFile(OpenDefinitionsDocument doc) {
+   /** Called to ask the listeners save the file before quitting at the user's option.
+    *  @return true if quitting should continue, false if the user cancelled */
+  public boolean quitFile(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try {
-      for (GlobalModelListener l: _listeners) { l.quitFile(doc); }
+      // if one of the listeners returns false (=user cancelled), abort
+      for (GlobalModelListener l: _listeners) { if (!l.quitFile(doc)) return false; }
     }
     finally { _lock.endRead(); }
+    return true;
   }
 
   /** Called to ask the listeners if it is OK to revert the current document to the version saved on disk. */

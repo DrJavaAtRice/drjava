@@ -2032,24 +2032,25 @@ public class MainFrame extends JFrame {
     // create our model
     _model = new DefaultGlobalModel();
 
-    // The OptionListener for LIGHTWEIGHT_PARSING_ENABLED.
-    OptionListener<Boolean> parsingEnabledListener = new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oce) {
-        if (oce.value) {
-          _model.getParsingControl().addListener(new LightWeightParsingListener() {
-            public void enclosingClassNameUpdated(OpenDefinitionsDocument doc, String old, String updated) {
-              if (doc==_model.getActiveDocument()) { updateFileTitle(); }
-            }
-          });
-        }
-        _model.getParsingControl().reset();
-        _model.getParsingControl().setAutomaticUpdates(oce.value);
-        updateFileTitle();
-      }
-    };
-    DrJava.getConfig().addOptionListener(LIGHTWEIGHT_PARSING_ENABLED, parsingEnabledListener);
-    parsingEnabledListener.optionChanged(new OptionEvent<Boolean>(LIGHTWEIGHT_PARSING_ENABLED, 
-                                                                  DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()));
+// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+//    // The OptionListener for LIGHTWEIGHT_PARSING_ENABLED.
+//    OptionListener<Boolean> parsingEnabledListener = new OptionListener<Boolean>() {
+//      public void optionChanged(OptionEvent<Boolean> oce) {
+//        if (oce.value) {
+//          _model.getParsingControl().addListener(new LightWeightParsingListener() {
+//            public void enclosingClassNameUpdated(OpenDefinitionsDocument doc, String old, String updated) {
+//              if (doc==_model.getActiveDocument()) { updateFileTitle(); }
+//            }
+//          });
+//        }
+//        _model.getParsingControl().reset();
+//        _model.getParsingControl().setAutomaticUpdates(oce.value);
+//        updateFileTitle();
+//      }
+//    };
+//    DrJava.getConfig().addOptionListener(LIGHTWEIGHT_PARSING_ENABLED, parsingEnabledListener);
+//    parsingEnabledListener.optionChanged(new OptionEvent<Boolean>(LIGHTWEIGHT_PARSING_ENABLED, 
+//                                                                  DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()));
     
 //    Utilities.show("Global Model started");
     
@@ -2562,10 +2563,12 @@ public class MainFrame extends JFrame {
     }
     
     String fileTitle = doc.getCompletePath();
-    if (DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()) {
-      String temp = _model.getParsingControl().getEnclosingClassName(doc);
-      if ((temp != null) && (temp.length() > 0)) { fileTitle = fileTitle + " - " + temp; }
-    }
+
+// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+//    if (DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()) {
+//      String temp = _model.getParsingControl().getEnclosingClassName(doc);
+//      if ((temp != null) && (temp.length() > 0)) { fileTitle = fileTitle + " - " + temp; }
+//    }
 
     if (! _fileNameField.getText().equals(fileTitle)) { _fileNameField.setText(fileTitle); }
     
@@ -3385,7 +3388,7 @@ public class MainFrame extends JFrame {
       }
     }
 
-    _closeProject(true);
+    if (!_closeProject(true)) { return; /* if user pressed cancel, do not quit */ }
     
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
@@ -4947,7 +4950,8 @@ public class MainFrame extends JFrame {
     public void updateLocation() {
       DefinitionsPane p = _currentDefPane;
       _currLocationField.setText(p.getCurrentLine() + ":" + p.getCurrentCol() + ")\t");
-      _model.getParsingControl().delay();
+      // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+      // _model.getParsingControl().delay();
     }
   }
   
@@ -6653,8 +6657,8 @@ public class MainFrame extends JFrame {
         case JOptionPane.NO_OPTION:
           if (doc != lastActive) _model.setActiveDocument(lastActive);  // breaks when "if" clause omitted
           return true;
-        case JOptionPane.CLOSED_OPTION:  // never executed
-        case JOptionPane.CANCEL_OPTION:  // never executed if paneOption is JOptionPane.YES_NO_OPTION
+        case JOptionPane.CLOSED_OPTION:
+        case JOptionPane.CANCEL_OPTION:
           return false;
         default:                         // never executed
           throw new RuntimeException("Invalid option: " + rc);
@@ -6662,9 +6666,10 @@ public class MainFrame extends JFrame {
     }
     
     /** Check if the current document has been modified. If it has, ask the user if he would like to save it 
-     *  and save the document if yes.  Does NOT support a cancellation option.
+     *  and save the document if yes.
+     *  @return true if quitting should continue, false if the user cancelled
      */
-    public void quitFile(OpenDefinitionsDocument doc) { _fileSaveHelper(doc, JOptionPane.YES_NO_OPTION); }
+    public boolean quitFile(OpenDefinitionsDocument doc) { return _fileSaveHelper(doc, JOptionPane.YES_NO_CANCEL_OPTION); }
     
     /** Called to ask the listener if it is OK to revert the current document to a newer version saved on file. */
     public boolean shouldRevertFile(OpenDefinitionsDocument doc) {

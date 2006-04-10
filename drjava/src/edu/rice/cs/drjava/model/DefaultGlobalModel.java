@@ -219,7 +219,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     // Perhaps do this in another thread to allow startup to continue...
     _jvm.startInterpreterJVM();
     
-    _parsingControl = new DefaultLightWeightParsingControl(this);
+// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
+//    _parsingControl = new DefaultLightWeightParsingControl(this);
   }
   
 
