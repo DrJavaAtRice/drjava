@@ -849,12 +849,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       String text = getText(DOCSTART, pos+1);
       
       int curPos = pos;
-      if ((text.charAt(curPos)!='{') && (text.charAt(curPos)!='}')) { ++curPos; }
-
-//      if (oldLog) System.out.println("curPos=" + curPos + " `" +
-//        text.substring(Math.max(0,curPos-10), Math.min(text.length(), curPos+1)) + "`");
       
       do {
+        if ((text.charAt(curPos)!='{') || (text.charAt(curPos)!='}')) { ++curPos; }
+        
+//        if (oldLog) System.out.println("curPos=" + curPos + " `" +
+//                                       text.substring(Math.max(0,curPos-10), Math.min(text.length(), curPos+1)) + "`");
+        
         curPos = findPrevEnclosingBrace(curPos, '{', '}');
         if (curPos==ERROR_INDEX) { break; }
         int classPos = _findPrevKeyword(text, "class", curPos);
@@ -877,7 +878,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           }
         }
 //        if (oldLog) System.out.println("curPos="+curPos+" `"+text.substring(Math.max(0,curPos-10),curPos+1)+"`");
-//        if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+" `" +
+//        if (oldLog) System.out.println("\tclass="+classPos+", inter="+interPos+", other="+otherPos+", new="+newPos+" `" +
 //          text.substring(Math.max(0,otherPos-10),otherPos+1)+"`");
         while((classPos!=ERROR_INDEX) || (interPos!=ERROR_INDEX) || (newPos!=ERROR_INDEX)) {
           if (newPos!=ERROR_INDEX) {
@@ -887,6 +888,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             break;
           }
           else if ((otherPos>classPos) && (otherPos>interPos)) {
+            if ((text.charAt(otherPos)!='{') || (text.charAt(otherPos)!='}')) { ++otherPos; }
             curPos = findPrevEnclosingBrace(otherPos, '{', '}');
             classPos = _findPrevKeyword(text, "class", curPos);
             interPos = _findPrevKeyword(text, "interface", curPos);
@@ -935,7 +937,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           if (nameStart==ERROR_INDEX) { throw new ClassNameNotFoundException("Cannot determine enclosing class name"); }
           int nameEnd = nameStart+1;
           while(nameEnd<text.length()) {
-            if (!Character.isJavaIdentifierPart(text.charAt(nameEnd))) {
+            if ((!Character.isJavaIdentifierPart(text.charAt(nameEnd))) && (text.charAt(nameEnd)!='.')) {
               // delimiter found
               break;
             }
@@ -998,7 +1000,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     if (classStart!=ERROR_INDEX) { 
       int classEnd = classStart+1;
       while(classEnd<text.length()) {
-        if (!Character.isJavaIdentifierPart(text.charAt(classEnd))) {
+        if ((!Character.isJavaIdentifierPart(text.charAt(classEnd))) && (text.charAt(classEnd)!='.')) {
           // delimiter found
           break;
         }
@@ -1072,6 +1074,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
 
     // readLock assumed to be held
+    --pos; // move outside the curly brace
     char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=',
       '!','@','#','$','%','^','~','\\','"','`','|'};
     String className = getEnclosingClassName(pos, true);
@@ -1086,7 +1089,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       if (classStart==ERROR_INDEX) { continue; }
       int classEnd = classStart+1;
       while(classEnd<text.length()) {
-        if (!Character.isJavaIdentifierPart(text.charAt(classEnd))) {
+        if ((!Character.isJavaIdentifierPart(text.charAt(classEnd))) && (text.charAt(classEnd)!='.')) {
           // delimiter found
           break;
         }

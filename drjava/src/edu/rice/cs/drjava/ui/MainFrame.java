@@ -4949,7 +4949,7 @@ public class MainFrame extends JFrame {
     
     public void updateLocation() {
       DefinitionsPane p = _currentDefPane;
-      _currLocationField.setText(p.getCurrentLine() + ":" + p.getCurrentCol() + ")\t");
+      _currLocationField.setText(p.getCurrentLine() + ":" + p.getCurrentCol() +"\t"); // + " (offset "+ p.getCaretPosition() +")\t");
       // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
       // _model.getParsingControl().delay();
     }

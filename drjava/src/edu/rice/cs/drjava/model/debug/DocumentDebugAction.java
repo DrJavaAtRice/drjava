@@ -50,14 +50,14 @@ import javax.swing.text.BadLocationException;
  * @version $Id$
  */
 public abstract class DocumentDebugAction<T extends EventRequest> extends DebugAction<T> {
-
+  
   protected String _className;
   protected String _exactClassName;
   protected File _file;
   protected OpenDefinitionsDocument _doc;
   protected int _offset;
-
-
+  
+  
   /**
    * Creates a new DocumentDebugAction.  Automatically tries to create the
    * EventRequest if a ReferenceType can be found, or else adds this object to the
@@ -72,18 +72,17 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
                               int offset) throws DebugException {
     super(manager);
     _exactClassName = null;
-//    try {
+    try {
       if (offset >= 0) {
-// getEnclosingClassName is incorrect right now and numbers anonymous inner classes incorrectly
-//        if (doc.getNumberOfLines()<500) {
-//          // only do this on short files
-//          // in long files, getEnclosingClassName might take too long
-//          _exactClassName = doc.getEnclosingClassName(offset, true);
-//        }
+        if (doc.getNumberOfLines()<500) {
+          // only do this on short files
+          // in long files, getEnclosingClassName might take too long
+          _exactClassName = doc.getEnclosingClassName(offset, true);
+        }
       }
-//    }
-//    catch(ClassNameNotFoundException cnnfe) { /* ignore, we don't need the exact class name */ }
-//    catch(BadLocationException ble) { /* ignore, we don't need the exact class name */ }
+    }
+    catch(ClassNameNotFoundException cnnfe) { /* ignore, we don't need the exact class name */ }
+    catch(BadLocationException ble) { /* ignore, we don't need the exact class name */ }
     try {
       if (offset >= 0) {
         _className = doc.getQualifiedClassName(offset);
@@ -105,28 +104,28 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
     _doc = doc;
     _offset = offset;
   }
-
+  
   /** Returns the class name this DebugAction occurs in. */
   public String getClassName() { return _className; }
-
+  
   /** Returns the file this DebugAction occurs in. */
   public File getFile() {
     return _file;
   }
-
+  
   /**
    * Returns the document this DebugAction occurs in.
    */
   public OpenDefinitionsDocument getDocument() {
     return _doc;
   }
-
+  
   /** @return offset of this debug action. */
   public int getOffset() { return _offset; }
   
   /** @return exact class name, or null if not available. */
   public String getExactClassName() { return _exactClassName; }
-
+  
   /**
    * Creates EventRequests corresponding to this DebugAction, using the
    * given ReferenceTypes.  This is called either from the DebugAction
@@ -145,7 +144,7 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
       return false;
     }
   }
-
+  
   /**
    * This should always be called from the constructor of the subclass.
    * Attempts to create EventRequests on the given ReferenceTypes, and
@@ -166,13 +165,13 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
       }
     }
     //if (_request == null) {
-      // couldn't create the request yet, add to the pending request manager
-
+    // couldn't create the request yet, add to the pending request manager
+    
     // Experiment: always add to pending request, to deal with multpile class loads
     _manager.getPendingRequestManager().addPendingRequest(this);
     //}
   }
-
+  
   /**
    * Creates appropriate EventRequests from the EventRequestManager and
    * stores them in the _requests field.
@@ -181,7 +180,7 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
    * @throws DebugException if the requests could not be created.
    */
   protected abstract void _createRequests(Vector<ReferenceType> refTypes) throws DebugException;
-
+  
   /**
    * Prepares this EventRequest with the current stored values.
    * @param request the EventRequest to prepare

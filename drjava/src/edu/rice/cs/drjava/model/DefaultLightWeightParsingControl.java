@@ -187,6 +187,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
   
   /** Return the last enclosing class name for the specified document, "" if not inside a class, or
    *  null if unknown.
+   *  WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
    *  @param doc the document for which we want the information
    *  @return the enclosing class name
    */

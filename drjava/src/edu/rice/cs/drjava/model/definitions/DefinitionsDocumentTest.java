@@ -1424,6 +1424,39 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "    imp.act();" + NEWLINE +
     "    t1.anon();" + NEWLINE +
     "  }" + NEWLINE +
+    "  public static class Outer {" + NEWLINE +
+    "    public static interface Inner {" + NEWLINE +
+    "      public void innerDo();" + NEWLINE +
+    "    }" + NEWLINE +
+    "    public static interface InnerParam<T> {" + NEWLINE +
+    "      public void innerParam(T t);" + NEWLINE +
+    "    }" + NEWLINE +
+    "    public class Middle<T> {" + NEWLINE +
+    "      T t;" + NEWLINE +
+    "      public abstract class Innerst {" + NEWLINE +
+    "        public abstract void innerstDo();" + NEWLINE +
+    "      }" + NEWLINE +
+    "      " + NEWLINE +
+    "      Innerst i = new Outer.Middle.Innerst() { /*Test$Outer$Middle$1*/" + NEWLINE +
+    "        public void innerstDo() {" + NEWLINE +
+    "          System.out.println(\"Test$Outer$Middle$1\");" + NEWLINE +
+    "        }" + NEWLINE +
+    "      };" + NEWLINE +
+    "    }" + NEWLINE +
+    "  }" + NEWLINE +
+    "  " + NEWLINE +
+    "  public void anonDotTest() {" + NEWLINE +
+    "    Outer.Inner test = new Outer.Inner() { /*Test$9*/" + NEWLINE +
+    "      public void innerDo() {" + NEWLINE +
+    "        System.out.println(\"Test$9\");" + NEWLINE +
+    "      }" + NEWLINE +
+    "    };" + NEWLINE +
+    "    Outer.InnerParam<String> test2 = new Outer.InnerParam<String>() { /*Test$10*/" + NEWLINE +
+    "      public void innerParam(String t) {" + NEWLINE +
+    "        System.out.println(\"Test$10\");" + NEWLINE +
+    "      }" + NEWLINE +
+    "    };" + NEWLINE +
+    "  }" + NEWLINE +
     "}" + NEWLINE +
     "" + NEWLINE +
     "class Foo {" + NEWLINE +
@@ -2045,8 +2078,6 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
     assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
     assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
-    
-    //
 
     substr = "abstract void feeDo()";
     exp1   = "Temp.Fee";
@@ -2093,8 +2124,8 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     exp2   = "FeeConc";
     act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
     act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-//    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
-//    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
 
     substr = "\"FeeConc/t\"";
     exp1   = "Temp.Fee$FeeConc";
@@ -2141,8 +2172,8 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     exp2   = "1";
     act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
     act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
-//    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
-//    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
 
     substr = "\"Fee$1/t\"";
     exp1   = "Temp.Fee$1";
@@ -2155,6 +2186,54 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     substr = "\"Fee$1/u\"";
     exp1   = "Temp.Fee$1";
     exp2   = "1";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "/*Test$Outer$Middle$1*/";
+    exp1   = "Temp.Test$Outer$Middle$1";
+    exp2   = "1";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"Test$Outer$Middle$1\"";
+    exp1   = "Temp.Test$Outer$Middle$1";
+    exp2   = "1";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "/*Test$9*/";
+    exp1   = "Temp.Test$9";
+    exp2   = "9";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"Test$9\"";
+    exp1   = "Temp.Test$9";
+    exp2   = "9";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "/*Test$10*/";
+    exp1   = "Temp.Test$10";
+    exp2   = "10";
+    act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
+    act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
+    assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
+    assertEquals("class name at "+substr+" exp=`"+exp2+"`, act=`"+act2+"`", exp2, act2);
+
+    substr = "\"Test$10\"";
+    exp1   = "Temp.Test$10";
+    exp2   = "10";
     act1   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), true);
     act2   = _defModel.getEnclosingClassName(NESTED_CLASSES_TEXT.indexOf(substr), false);
     assertEquals("class name at "+substr+" exp=`"+exp1+"`, act=`"+act1+"`", exp1, act1);
