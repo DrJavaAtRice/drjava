@@ -858,9 +858,7 @@ public class MainFrame extends JFrame {
     public void actionPerformed(ActionEvent ae) { _selectAll(); }
   };
   
-  /** Shows the find/replace tab. */
-  private Action _findReplaceAction = new AbstractAction("Find/Replace...") {
-    public void actionPerformed(ActionEvent ae) {
+  private void _showFindReplaceTab() {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes(); 
       if (! _findReplace.isDisplayed()) {
@@ -869,19 +867,25 @@ public class MainFrame extends JFrame {
       }
       _findReplace.setVisible(true);
       _tabbedPane.setSelectedComponent(_findReplace);
+  }
+  
+  /** Shows the find/replace tab. */
+  private Action _findReplaceAction = new AbstractAction("Find/Replace...") {
+    public void actionPerformed(ActionEvent ae) {
+      _showFindReplaceTab();
       // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
       SwingUtilities.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
-//      try { Thread.sleep(100); } 
-//      catch(Exception e) { e.printStackTrace(); }
-//      _findReplace.requestFocusInWindow();
-      //_setDividerLocation();
     }
   };
   
   /** Find the next instance of the find word. */
   private Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent ae) {
-      _findReplaceAction.actionPerformed(ae);
+      _showFindReplaceTab();
+      if (!DrJava.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+        // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
+        SwingUtilities.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
+      }
       _findReplace.findNext();
       _currentDefPane.requestFocusInWindow();  
       // atempt to fix intermittent bug where _currentDefPane listens but does not echo and won't undo!
@@ -891,6 +895,11 @@ public class MainFrame extends JFrame {
   /** Does the find next in the opposite direction. If the direction is backward it searches forward. */
   private Action _findPrevAction = new AbstractAction("Find Previous") {
     public void actionPerformed(ActionEvent ae) {
+      _showFindReplaceTab();
+      if (!DrJava.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+        // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
+        SwingUtilities.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
+      }
       _findReplace.findPrevious();
       _currentDefPane.requestFocusInWindow();
     }

@@ -1112,4 +1112,8 @@ public interface OptionConstants {
   /** Whether to save and restore window size and position at startup/shutdown. */
   public static final BooleanOption DIALOG_JAROPTIONS_STORE_POSITION =
     new BooleanOption("dialog.jaroptions.store.position", Boolean.TRUE);
+
+  /** Whether to put the focus in the definitions pane after find/replace. */
+  public static final BooleanOption FIND_REPLACE_FOCUS_IN_DEFPANE =
+    new BooleanOption("find.replace.focus.in.defpane", Boolean.FALSE);
 }

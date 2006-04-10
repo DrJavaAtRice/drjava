@@ -785,6 +785,11 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new StringOptionComponent(OptionConstants.JVM_ARGS, "JVM Args for Interactions", this,
                                                  "The command-line arguments to pass to the Interactions JVM."));
 
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE, 
+                                                  "Put the focus in the definitions pane after find/replace", this,
+                                                  "<html>Whether to put the focus in the definitions pane after doing a find or replace operation.<br>"+
+                                                  "If this is not selected, the focus will be in the Find/Replace pane.</html>"));
+    
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 
 //                                                  "Perform lightweight parsing", this,

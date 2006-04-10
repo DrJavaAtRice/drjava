@@ -644,7 +644,10 @@ class FindReplaceDialog extends TabbedPanel {
         _frame.setStatusMessage(statusMessage.toString());
       }
     }
-    _findField.requestFocusInWindow();
+    
+    if (!DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+      _findField.requestFocusInWindow();
+    }
   }
 
   protected void _close() {
