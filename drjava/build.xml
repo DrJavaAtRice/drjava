@@ -879,7 +879,7 @@
   
   <target name="windows-app" depends="assert-jar-exists, resolve-version-tag">
     <echo message="Creating ${version-tag}.exe" />
-    <concat destfile="${version-tag}.exe">
+    <concat destfile="${version-tag}.exe" binary="yes">
       <filelist dir="${basedir}">
         <!-- TODO: This should probably include WinExecutor.exe and the icon file
              rather than using the generated WinExecutorFor... -->
