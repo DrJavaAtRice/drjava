@@ -1208,8 +1208,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Writes the project profile augmented by usage info to specified file.  Assumes DrJava is in project mode.
    *  @param file where to save the project
    */
-  public void saveProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) 
-    throws IOException {
+  public void saveProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
     
     ProjectProfile builder = new ProjectProfile(file);
     
@@ -1259,7 +1258,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     // add working directory
     File wd = getWorkingDirectory();  // the value of WORKING_DIRECTORY to be stored in the project
-    if (wd != null && bd != FileOption.NULL_FILE) builder.setWorkingDirectory(wd);
+    if (wd != null) builder.setWorkingDirectory(wd);
     
     // add jar main class
     File mainClass = getMainClass();

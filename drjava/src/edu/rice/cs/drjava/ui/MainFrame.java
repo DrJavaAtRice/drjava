@@ -5003,9 +5003,9 @@ public class MainFrame extends JFrame {
         clearStatusMessage();
         
         if (_tabbedPane.getSelectedComponent() == _consoleScroll)
+          // Use SwingUtilities because this action must execute AFTER all pending events in the event queue
           SwingUtilities.invokeLater(new Runnable() { public void run() { _consolePane.requestFocusInWindow(); } });
-          // SwingUtilities used above because this action must execute after all pending events in the event queue */
-        
+          
         // Update error highlights?
         if (_currentDefPane != null) {
           int pos = _currentDefPane.getCaretPosition();
@@ -5849,9 +5849,9 @@ public class MainFrame extends JFrame {
 //            });
           }
           
+          /* The execution of this block of code is deferred using SwingUtilties to fix bug #1243993.  It is not clear 
+           * why this deferral works. */
           SwingUtilities.invokeLater(new Runnable() {  
-          /* The execution of this block of code is deferred to fix bug #1243993.  It is not clear why this deferral
-           * works. */
             public void run() {
               if (shouldHighlight) {
                 _removeThreadLocationHighlight();
@@ -6192,17 +6192,19 @@ public class MainFrame extends JFrame {
       Utilities.invokeLater(new Runnable() {
         public void run() {
 //          try {
-            _compilerErrorPanel.reset(excludedFiles);
-            if (inDebugMode()) {
+          _compilerErrorPanel.reset(excludedFiles);
+          if (inDebugMode()) {
 //              _model.getActiveDocument().checkIfClassFileInSync();
-              _model.refreshActiveDocument();
-              _updateDebugStatus();
-            }
+            
+            _updateDebugStatus();
+          }
 //          }
 //          finally { hourglassOff(); }
-            if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) && (_model.getBuildDirectory()!=null)) {
-              _scanClassFiles();
-            }
+          if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) && 
+              (_model.getBuildDirectory()!=null)) {
+            _scanClassFiles();
+          }
+          _model.refreshActiveDocument();
         }
       });
     }

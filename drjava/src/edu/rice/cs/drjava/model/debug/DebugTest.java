@@ -120,11 +120,11 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     };
     
     // Install listener
-    _model.addListener(resetListener); // interactionStarted, interactionEnded, shutdown, interpreterReady
+    _model.addListener(resetListener); // shutdown, interpreterReady
     _setPendingNotifies(2);
     
     // Use the interpeter so that resetInteractions restarts the slave JVM
-    interpret("2+2");
+//    interpret("2+2");
     
     _model.resetInteractions(FileOption.NULL_FILE);
 

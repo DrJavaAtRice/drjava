@@ -108,10 +108,7 @@ public abstract class SwingWorker {
     }
   }
 
-  /**
-   * Start a thread that will call the <code>construct</code> method
-   * and then exit.
-   */
+  /** Start a thread that will call the <code>construct</code> method and then exit. */
   public SwingWorker() {
     final Runnable doFinished = new Runnable() {
       public void run() { finished(); }
@@ -122,16 +119,12 @@ public abstract class SwingWorker {
         try { setValue(construct()); }
         catch (final RuntimeException e) {
           // Throw the exception in the event dispatching thread.
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() { throw e; }
-          });
+          SwingUtilities.invokeLater(new Runnable() { public void run() { throw e; } });
           throw e;
         }
         catch (final Error e) {
           // Throw the error in the event dispatching thread.
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() { throw e; }
-          });
+          SwingUtilities.invokeLater(new Runnable() { public void run() { throw e; } });
           throw e;
         }
         finally { _threadVar.clear(); }
@@ -144,13 +137,9 @@ public abstract class SwingWorker {
     _threadVar = new ThreadVar(t);
   }
 
-  /**
-   * Start the worker thread.
-   */
+  /** Start the worker thread. */
   public void start() {
     Thread t = _threadVar.get();
-    if (t != null) {
-      t.start();
-    }
+    if (t != null) t.start();
   }
 }

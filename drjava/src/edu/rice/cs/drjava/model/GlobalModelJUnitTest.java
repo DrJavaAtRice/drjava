@@ -479,7 +479,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     OpenDefinitionsDocument untitled = docs.get(0);
     
-    System.out.println("Untitled file is named: " + untitled.getName());
+//    System.out.println("Untitled file is named: " + untitled.getName());
     
     untitled.quitFile();
     _model.closeFileWithoutPrompt(untitled);
