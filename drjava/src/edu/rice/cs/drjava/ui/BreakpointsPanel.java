@@ -235,8 +235,11 @@ public class BreakpointsPanel extends TabbedPanel {
   /** Creates the buttons for controlling the breakpoints. */
   private void _setupButtonPanel() {
     JPanel mainButtons = new JPanel();
+    JPanel emptyPanel = new JPanel();
     JPanel closeButtonPanel = new JPanel(new BorderLayout());
-    mainButtons.setLayout( new GridLayout(0,1));
+    GridBagLayout gbLayout = new GridBagLayout();
+    GridBagConstraints c = new GridBagConstraints();
+    mainButtons.setLayout(gbLayout);
     
     Action enableDisableAction = new AbstractAction("Disable") {
       public void actionPerformed(ActionEvent ae) {
@@ -276,6 +279,25 @@ public class BreakpointsPanel extends TabbedPanel {
     mainButtons.add(_enableDisableButton);
     mainButtons.add(_removeButton);
     mainButtons.add(_removeAllButton);
+    mainButtons.add(emptyPanel);
+    
+    c.fill = GridBagConstraints.HORIZONTAL;
+    c.anchor = GridBagConstraints.NORTH;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.weightx = 1.0;
+    
+    gbLayout.setConstraints(_goToButton, c);
+    gbLayout.setConstraints(_enableDisableButton, c);
+    gbLayout.setConstraints(_removeButton, c);
+    gbLayout.setConstraints(_removeAllButton, c);
+    
+    c.fill = GridBagConstraints.BOTH;
+    c.anchor = GridBagConstraints.SOUTH;
+    c.gridheight = GridBagConstraints.REMAINDER;
+    c.weighty = 1.0;
+    
+    gbLayout.setConstraints(emptyPanel, c);
+    
     _buttonPanel.add(mainButtons, BorderLayout.CENTER);
     _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
   }

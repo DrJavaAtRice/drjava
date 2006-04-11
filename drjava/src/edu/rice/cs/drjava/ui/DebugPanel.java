@@ -400,9 +400,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
   /** Creates the buttons for controlling the debugger. */
   private void _setupButtonPanel() {
     JPanel mainButtons = new JPanel();
+    JPanel emptyPanel = new JPanel();
     JPanel closeButtonPanel = new JPanel(new BorderLayout());
-    mainButtons.setLayout( new GridLayout(0,1));
-
+    GridBagLayout gbLayout = new GridBagLayout();
+    GridBagConstraints c = new GridBagConstraints();
+    mainButtons.setLayout(gbLayout);
+    
     Action resumeAction = new AbstractAction("Resume") {
       public void actionPerformed(ActionEvent ae) {
         try { _frame.debuggerResume(); }
@@ -410,7 +413,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     };
     _resumeButton = new JButton(resumeAction);
-
+    
     Action stepIntoAction = new AbstractAction("Step Into") {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerStep(Debugger.STEP_INTO);
@@ -431,7 +434,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     };
     _stepOutButton = new JButton(stepOutAction);
-
+    
     ActionListener closeListener =
       new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
@@ -446,6 +449,25 @@ public class DebugPanel extends JPanel implements OptionConstants {
     mainButtons.add(_stepIntoButton);
     mainButtons.add(_stepOverButton);
     mainButtons.add(_stepOutButton);
+    mainButtons.add(emptyPanel);
+    
+    c.fill = GridBagConstraints.HORIZONTAL;
+    c.anchor = GridBagConstraints.NORTH;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.weightx = 1.0;
+    
+    gbLayout.setConstraints(_resumeButton, c);
+    gbLayout.setConstraints(_stepIntoButton, c);
+    gbLayout.setConstraints(_stepOverButton, c);
+    gbLayout.setConstraints(_stepOutButton, c);
+    
+    c.fill = GridBagConstraints.BOTH;
+    c.anchor = GridBagConstraints.SOUTH;
+    c.gridheight = GridBagConstraints.REMAINDER;
+    c.weighty = 1.0;
+    
+    gbLayout.setConstraints(emptyPanel, c);
+    
     disableButtons();
     _buttonPanel.add(mainButtons, BorderLayout.CENTER);
     _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
