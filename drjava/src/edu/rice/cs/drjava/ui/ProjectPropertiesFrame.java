@@ -101,7 +101,7 @@ public class ProjectPropertiesFrame extends JFrame {
         boolean successful = true;
         successful = saveSettings();
         if (successful) ProjectPropertiesFrame.this.setVisible(false);
-        _applyButton.setEnabled(false);
+        reset();
       }
     };
     _okButton = new JButton(okAction);
@@ -111,11 +111,9 @@ public class ProjectPropertiesFrame extends JFrame {
         // Always save settings
         saveSettings();
         reset();
-        _applyButton.setEnabled(false);
       }
     };
     _applyButton = new JButton(applyAction);
-    _applyButton.setEnabled(false);
 
     Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed(ActionEvent e) { cancel(); }
@@ -210,14 +208,19 @@ public class ProjectPropertiesFrame extends JFrame {
 
     ClassPathVector cp = _model.getExtraClassPath();
     _extraClassPathList.setValue(cp.asFileVector());
+    _applyButton.setEnabled(false);
   }
 
   /** Caches the settings in the global model */
   public boolean saveSettings() {//throws IOException {
+    boolean projRootChanged = false;
 
     File pr = _projRootSelector.getFileFromField();
     if (_projRootSelector.getFileField().getText().equals("")) pr = null;
-    _model.setProjectRoot(pr);
+    if (!pr.equals(_model.getProjectRoot())) {
+      _model.setProjectRoot(pr);
+      projRootChanged = true;
+    }
 
     File bd = _buildDirSelector.getFileFromField();
     if (_buildDirSelector.getFileField().getText().equals("")) bd = null;
@@ -237,6 +240,11 @@ public class ProjectPropertiesFrame extends JFrame {
     _model.setExtraClassPath(cpv);
 
     //    _mainFrame.saveProject();
+    if (projRootChanged) {
+      try {
+        _model.reloadProject(_mainFrame.getCurrentProject(), _mainFrame.gatherProjectDocInfo());
+      } catch(IOException e) { throw new edu.rice.cs.util.UnexpectedException(e, "I/O error while reloading project"); }
+    }
     return true;
   }
 

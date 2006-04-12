@@ -175,6 +175,11 @@ public interface GlobalModel extends ILoadDocuments {
    */
   public void saveProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
   
+  /**Reloads a project without writing to disk.
+   * @param f project file; does not actually get touched
+   */
+  public void reloadProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
+  
   /** Formats a string pathname for use in the document navigator. */
   public String fixPathForNavigator(String path) throws IOException;
 

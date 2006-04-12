@@ -1002,8 +1002,8 @@ public class MainFrame extends JFrame {
       };
       java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>> strategies =
         new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>>();
-      strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.FragmentStrategy<GoToFileListEntry>());
+      strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.RegExStrategy<GoToFileListEntry>());
       _gotoFileDialog = 
         new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
@@ -1221,8 +1221,8 @@ public class MainFrame extends JFrame {
       };
       java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>> strategies =
         new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>>();
-      strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.FragmentStrategy<GoToFileListEntry>());
+      strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.RegExStrategy<GoToFileListEntry>());
       _completeFileDialog = 
         new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
@@ -3278,7 +3278,7 @@ public class MainFrame extends JFrame {
     try {
       if (file.getName().indexOf(".") == -1) file = new File (file.getAbsolutePath() + ".pjt");
       String fileName = file.getCanonicalPath();
-      _model.saveProject(file, _gatherProjectDocInfo());
+      _model.saveProject(file, gatherProjectDocInfo());
 //      if (!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)) {
 //        _openProjectHelper(file);
 //      }    
@@ -3288,7 +3288,7 @@ public class MainFrame extends JFrame {
     _model.setProjectChanged(false);
   }
   
-  private Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> _gatherProjectDocInfo() {
+  public Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> gatherProjectDocInfo() {
     Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> map =
       new Hashtable<OpenDefinitionsDocument,DocumentInfoGetter>();
     List<OpenDefinitionsDocument> docs = _model.getProjectDocuments();

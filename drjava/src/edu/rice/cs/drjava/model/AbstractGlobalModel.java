@@ -1204,22 +1204,20 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     _loadProject(builder);
   }
-    
   /** Writes the project profile augmented by usage info to specified file.  Assumes DrJava is in project mode.
    *  @param file where to save the project
+   *  @param info
    */
-  public void saveProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
-    
+  public ProjectProfile _makeProjectProfile(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {    
     ProjectProfile builder = new ProjectProfile(file);
     
     // add project root
     File pr = getProjectRoot();
     if (pr != null) builder.setProjectRoot(pr);
     
-    // add opendefinitionsdocument
+    // add opendefinitionsdocument    
     ArrayList<File> srcFileList = new ArrayList<File>();
     LinkedList<File> auxFileList = new LinkedList<File>();
-    
     OpenDefinitionsDocument[] docs;
     
     synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
@@ -1283,16 +1281,35 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     catch(DebugException de) { /* ignore, just don't store watches */ }
     
+    return builder;
+  }
+  
+  /** Writes the project profile augmented by usage info to specified file.  Assumes DrJava is in project mode.
+   *  @param file where to save the project
+   */
+  public void saveProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
+    ProjectProfile builder = _makeProjectProfile(file, info);
+    
     // write to disk
     builder.write();
     
-    // set the state if all went well
-    File[] srcFiles = srcFileList.toArray(new File[srcFileList.size()]);
+    synchronized(_auxiliaryFiles) { 
+      _auxiliaryFiles = new LinkedList<File>();
+      for (File f: builder.getAuxiliaryFiles()) { _auxiliaryFiles.add(f); }
+    }
     
-    synchronized(_auxiliaryFiles) { _auxiliaryFiles = auxFileList;  }
-    
-    setFileGroupingState(makeProjectFileGroupingState(pr, mainClass, bd, wd, file, srcFiles, exCp, createJarFile, 
-                                                      createJarFlags));
+    ClassPathVector exCp = new ClassPathVector();
+    for (File f : builder.getClassPaths()) { exCp.add(f); }
+    setFileGroupingState(makeProjectFileGroupingState(builder.getProjectRoot(), builder.getMainClass(), builder.getBuildDirectory(),
+                                                      builder.getWorkingDirectory(), file, builder.getSourceFiles(), exCp, builder.getCreateJarFile(), 
+                                                      builder.getCreateJarFlags()));
+  }
+  
+  public void reloadProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
+    boolean projChanged = isProjectChanged();
+    ProjectProfile builder = _makeProjectProfile(file, info);
+    _loadProject(builder);
+    setProjectChanged(projChanged);
   }
   
   /** Parses the given project file and loads it int the document navigator and resets interactions pane. Assumes

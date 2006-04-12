@@ -234,6 +234,10 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call saveProject on a Dummy");
   }
   
+  public void reloadProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> ht) throws IOException {
+     throw new UnsupportedOperationException("Tried to call reloadProject on a Dummy");
+  }
+  
   public String fixPathForNavigator(String path) throws IOException {
      throw new UnsupportedOperationException("Tried to call fixPathForNavigator on a Dummy");
   }
