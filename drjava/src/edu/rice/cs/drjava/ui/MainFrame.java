@@ -5276,23 +5276,24 @@ public class MainFrame extends JFrame {
     ErrorCaretListener caretListener = new ErrorCaretListener(doc, pane, this);
     pane.addErrorCaretListener(caretListener);
     
+    // Limiting line numbers to just lines existing in the document.
     doc.addDocumentListener(new DocumentUIListener() {
       public void changedUpdate(DocumentEvent e) {
-        Utilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             revalidateLineNums();
           }
         });
       }
       public void insertUpdate(DocumentEvent e) {
-        Utilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             revalidateLineNums();
           }
         });
       }
       public void removeUpdate(DocumentEvent e) {
-        Utilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             revalidateLineNums();
           }
@@ -5630,10 +5631,8 @@ public class MainFrame extends JFrame {
       JScrollPane sp = _defScrollPanes.get(_model.getActiveDocument());
       if (sp!=null) {
         LineEnumRule ler = (LineEnumRule)sp.getRowHeader().getView();
-        if (ler.getCachedLastLine() != _model.getActiveDocument().getNumberOfLines()) {
-          ler.revalidate();
-          _repaintLineNums();
-        }
+        ler.revalidate();
+        _repaintLineNums();
       }
     }
   }
