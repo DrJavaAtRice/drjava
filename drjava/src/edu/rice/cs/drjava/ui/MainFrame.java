@@ -3225,8 +3225,10 @@ public class MainFrame extends JFrame {
     _closeProject(true);  // supress resetting interactions; it will be done in _model.newProject() below
     _saveChooser.setFileFilter(_projectFilter);
     int rc = _saveChooser.showSaveDialog(this);
-    if (rc == JFileChooser.APPROVE_OPTION) {
+    if (rc == JFileChooser.APPROVE_OPTION) {      
       File pf = _saveChooser.getSelectedFile();  // project file
+      if (pf.exists() && !_verifyOverwrite()) { return; }
+
       String fileName = pf.getName();
       // ensure that saved file has extesion ".pjt"
       if (! fileName.endsWith(".pjt")) {

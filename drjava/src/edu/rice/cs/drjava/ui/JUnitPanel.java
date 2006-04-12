@@ -86,7 +86,7 @@ public class JUnitPanel extends ErrorPanel {
   }
 
   private static final String TEST_OUT_OF_SYNC =
-    "The document(s) being tested has been modified and should be recompiled!\n";
+    "The documents being tested have been modified and should be recompiled!\n";
 
   protected JUnitErrorListPane _errorListPane;
   private int _testCount;
@@ -317,6 +317,30 @@ public class JUnitPanel extends ErrorPanel {
       SwingDocument doc = (SwingDocument) getDocument();
 //      _checkSync(doc);
       _updateWithErrors("test", "failed", doc);
+    }
+    
+    /** Gets the message indicating the number of errors and warnings.*/
+    protected String _getNumErrorsMessage(String failureName, String failureMeaning) {
+      StringBuffer numErrMsg;
+      
+      /** Used for display purposes only */
+      int numCompErrs = getErrorModel().getNumCompErrors();
+      int numWarnings = getErrorModel().getNumWarnings();     
+      
+      if (!getErrorModel().hasOnlyWarnings()) {
+        numErrMsg = new StringBuffer(numCompErrs + " " + failureName);   //failureName = error or test (for compilation and JUnit testing respectively)
+        if (numCompErrs > 1) numErrMsg.append("s");
+        numErrMsg.append(" " + failureMeaning);
+        if (numWarnings > 0) numErrMsg.append(" and " + numWarnings + " warning");        
+      }
+      else  numErrMsg = new StringBuffer(numWarnings + " warning");       
+      
+      if (numWarnings > 1) numErrMsg.append("s");
+      if (numWarnings > 0) numErrMsg.append(" found");
+      
+      numErrMsg.append(":\n");
+      
+      return numErrMsg.toString();
     }
 
     protected void _updateWithErrors(String failureName, String failureMeaning, SwingDocument doc)
