@@ -1473,6 +1473,13 @@ public class MainFrame extends JFrame {
     }
   };
   
+  /** Pops up the DrJava errors dialog. */
+  private Action _errorsAction = new AbstractAction("DrJava Errors") {
+    public void actionPerformed(ActionEvent ae) {
+      DrJavaErrorWindow.singleton().setVisible(true);
+    }
+  };
+  
   /** Switches to next document. */
   private Action _switchToNextAction = new AbstractAction("Next Document") {
     public void actionPerformed(ActionEvent ae) {
@@ -4296,7 +4303,7 @@ public class MainFrame extends JFrame {
     _setUpAction(_helpAction, "Help", "Show documentation on how to use DrJava");
     _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrJava");
     _setUpAction(_aboutAction, "About", "About DrJava");
-    
+    _setUpAction(_errorsAction, "DrJava Errors", "drjavaerror", "Show a window with internal DrJava errors");
   }
   
   private void _setUpAction(Action a, String name, String icon, String shortDesc) {
@@ -4684,6 +4691,7 @@ public class MainFrame extends JFrame {
     _addMenuItem(helpMenu, _helpAction, KEY_HELP);
     _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART);
     _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT);
+    _addMenuItem(helpMenu, _errorsAction, KEY_DRJAVA_ERRORS);
     return helpMenu;
   }
   
@@ -4788,6 +4796,21 @@ public class MainFrame extends JFrame {
     _toolBar.add(_createToolbarButton(_runAction));
     _toolBar.add(_createToolbarButton(_junitAllAction));
     _toolBar.add(_createToolbarButton(_javadocAllAction));
+
+    // DrJava Errors
+    _toolBar.addSeparator();
+    final JButton errorsButton = _createToolbarButton(_errorsAction);
+    errorsButton.setVisible(false);
+    errorsButton.setBackground(DrJava.getConfig().getSetting(DRJAVA_ERRORS_BUTTON_COLOR));
+    DrJavaErrorHandler.setButton(errorsButton);
+    _toolBar.add(errorsButton);
+    /** The OptionListener for DRJAVA_ERRORS_BUTTON_COLOR. */
+    OptionListener<Color> errBtnColorOptionListener = new OptionListener<Color>() {
+      public void optionChanged(OptionEvent<Color> oce) {
+        errorsButton.setBackground(oce.value);
+      }
+    };
+    DrJava.getConfig().addOptionListener(DRJAVA_ERRORS_BUTTON_COLOR, errBtnColorOptionListener);
     
     // Correct the vertical height of the buttons.
     _fixToolbarHeights();

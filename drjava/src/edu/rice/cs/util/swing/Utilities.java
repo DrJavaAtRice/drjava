@@ -45,7 +45,7 @@ import javax.swing.border.Border;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 
-import edu.rice.cs.drjava.ui.AWTExceptionHandler;
+import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
   
 public class Utilities {
   
@@ -86,7 +86,7 @@ public class Utilities {
    *  @param t the Throwable to be back traced.
    */
   public static void showTrace(final Throwable t) { 
-    Utilities.invokeAndWait(new Runnable() { public void run() { new AWTExceptionHandler().handle(t); } } );
+    Utilities.invokeAndWait(new Runnable() { public void run() { new DrJavaErrorHandler().handle(t); } } );
   } 
   
   /** Show a modal debug message box with an OK button when not in TEST_MODE.

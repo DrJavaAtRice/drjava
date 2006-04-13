@@ -705,7 +705,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param cause The Throwable which caused the slave to die.
    */
   public void errorStartingSlave(Throwable cause) throws RemoteException {
-    new edu.rice.cs.drjava.ui.AWTExceptionHandler().handle(cause);
+    new edu.rice.cs.drjava.ui.DrJavaErrorHandler().handle(cause);
   }
   
   /** This method is called by the interpreter JVM if it cannot be exited (likely because of its having a

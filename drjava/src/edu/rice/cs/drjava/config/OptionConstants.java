@@ -115,6 +115,8 @@ public interface OptionConstants {
   /** Color for highlighting thread locations. */
   public static final ColorOption DEBUG_THREAD_COLOR = new ColorOption("debug.thread.color", new Color(100,255,255));
 
+  /** Color for the background of the "DrJava Errors" button. */
+  public static final ColorOption DRJAVA_ERRORS_BUTTON_COLOR = new ColorOption("drjava.errors.button.color", Color.red);
 
   /* ---------- Font Options ---------- */
 
@@ -778,6 +780,10 @@ public interface OptionConstants {
   /** The key binding for the about dialog */
   public static final KeyStrokeOption KEY_ABOUT = 
     new KeyStrokeOption("key.about", KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /** The key binding for the "DrJava Errors" dialog */
+  public static final KeyStrokeOption KEY_DRJAVA_ERRORS = 
+    new KeyStrokeOption("key.drjava.errors", KeyStrokeOption.NULL_KEYSTROKE);
 
   
   /* ---------- Find Replace Options ---------- */

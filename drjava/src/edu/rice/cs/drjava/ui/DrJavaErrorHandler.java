@@ -32,17 +32,58 @@
  END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
-import javax.swing.JFrame;
-/** This class is called everytime an uncaught exception propagates to an awt action.
+
+import javax.swing.JButton;
+import java.util.List;
+import java.util.ArrayList;
+
+/** The handle() method in this class is called everytime an uncaught exception propagates to an AWT action.
+ *  The static log() method can be used to put log entries into the error log but continue execution.
+ *  This does not automatically update the "DrJava Errors" window when new errors occur. In the case of errors,
+ *  we want to minimize the effects on the GUI. If we want to see an updated dialog, we can click on the
+ *  "DrJava Errors" button again.
  *  @version $Id$
  */
-public class AWTExceptionHandler {
-  private static JFrame frame = null;
+public class DrJavaErrorHandler {
+  /** the list of errors */
+  private static ArrayList<Throwable> _errors = new ArrayList<Throwable>();
 
-  public static void setFrame(JFrame f) { frame = f; }
+  /** the button to show */
+  private static JButton _errorsButton;
+  
+  /** Sets the button to show. */
+  public static void setButton(JButton b) { _errorsButton = b; }  
+  
+  /** Gets the button to show. */
+  public static JButton getButton() { return _errorsButton; }  
+  
+  /** Returns a copy of the error list. */
+  public static List<Throwable> getErrors() { return new ArrayList<Throwable>(_errors); }
+  
+  /** Clears the list of errors. */
+  public static void clearErrors() { _errors.clear(); }
 
+  /** Handles an uncaught exception. This gets called automatically by AWT. */
   public void handle(Throwable thrown) {
-    if (frame == null) frame = new JFrame();
-    new UncaughtExceptionWindow(frame, thrown);
+    System.out.println("Unhandled exception: " + thrown);
+    record(thrown);
+  }
+  
+  /** Record the throwable in the errors list. */
+  public static void record(Throwable thrown) {
+    _errors.add(thrown);
+    if (_errorsButton!=null) {
+      _errorsButton.setVisible(true);
+    }
+  }
+  
+  /** Log an unexpected situation. */
+  public static void log(String message) {
+    record(new LoggedCondition(message));
+  }
+  
+  /** The throwable used for logging unexpected situations. */
+  public static class LoggedCondition extends Throwable {
+    public LoggedCondition(String s) { super(s); }
   }
 }

@@ -53,7 +53,8 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.drjava.ui.ClassPathFilter;
-import edu.rice.cs.drjava.ui.AWTExceptionHandler;
+import edu.rice.cs.drjava.ui.DrJavaErrorWindow;
+import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -122,9 +123,9 @@ public class DrJavaRoot {
       
 //      Utilities.showDebug("MainFrame created");
       
-      // Make sure all uncaught exceptions are shown in an AWTExceptionHandler
-      AWTExceptionHandler.setFrame(mf);
-      System.setProperty("sun.awt.exception.handler", "edu.rice.cs.drjava.ui.AWTExceptionHandler");
+      // Make sure all uncaught exceptions are shown in an DrJavaErrorHandler
+      DrJavaErrorWindow.setFrame(mf);
+      System.setProperty("sun.awt.exception.handler", "edu.rice.cs.drjava.ui.DrJavaErrorHandler");
       
       _openCommandLineFiles(mf, _filesToOpen, len);
       
@@ -150,10 +151,10 @@ public class DrJavaRoot {
       if (_showDebugConsole) showDrJavaDebugConsole(mf);
     }
     catch (Throwable t) {
-      // Show any errors to the real System.err and in an AWTExceptionHandler
+      // Show any errors to the real System.err and in an DrJavaErrorHandler
       _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
       t.printStackTrace(_consoleErr);System.out.println("error thrown");
-      new AWTExceptionHandler().handle(t);
+      new DrJavaErrorHandler().handle(t);
     }
   }
 

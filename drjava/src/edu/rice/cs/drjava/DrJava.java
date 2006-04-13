@@ -49,7 +49,7 @@ import javax.swing.SwingUtilities;
 
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.FileOption;
-import edu.rice.cs.drjava.ui.AWTExceptionHandler;
+import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.ClassPathFilter;
 import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
@@ -173,10 +173,10 @@ public class DrJava {
       }
     }
     catch (Throwable t) {
-      // Show any errors to the System.err and in an AWTExceptionHandler
+      // Show any errors to the System.err and in an DrJavaErrorHandler
       System.out.println(t.getClass().getName() + ": " + t.getMessage());
       t.printStackTrace(System.err);System.out.println("error thrown");
-      new AWTExceptionHandler().handle(t);
+      new DrJavaErrorHandler().handle(t);
     }
   }
   

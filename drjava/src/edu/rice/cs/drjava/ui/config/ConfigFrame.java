@@ -535,6 +535,8 @@ public class ConfigFrame extends JFrame {
                                                 "The color for interactions errors in the Interactions Pane.", false, true));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEBUG_MESSAGE_COLOR, "Debug Message Color", this,
                                                 "The color for debugger messages in the Interactions Pane.", false, true));
+    addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DRJAVA_ERRORS_BUTTON_COLOR, "DrJava Errors Button Background Color", this,
+                                                "The background color of the \"Errors\" button used to show internal DrJava errors.", true));
 
     panel.displayComponents();
   }
