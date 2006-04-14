@@ -1097,7 +1097,7 @@ public class MainFrame extends JFrame {
                                                   new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>(),
                                                   list);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    odd.acquireReadLock();
+    odd.readLock();
     String mask = "";
     try {
       int loc = getCurrentDefPane().getCaretPosition();
@@ -1122,7 +1122,7 @@ public class MainFrame extends JFrame {
         pim.setMask(mask);
       }
     }
-    finally { odd.releaseReadLock(); }
+    finally { odd.readUnlock(); }
     
 //    Utilities.show("Matching items are: " + pim.getMatchingItems());
     
@@ -1206,7 +1206,7 @@ public class MainFrame extends JFrame {
               }
             }
             catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
-            finally { odd.releaseWriteLock(); }
+            finally { odd.modifyUnlock(); }
           }
           hourglassOff();
           return null;
@@ -1275,7 +1275,7 @@ public class MainFrame extends JFrame {
                                                   new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>(),
                                                   list);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    odd.acquireWriteLock();
+    odd.modifyLock();
     boolean uniqueMatch = true;
     try {
       String mask = "";
@@ -1335,7 +1335,7 @@ public class MainFrame extends JFrame {
     }
     catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
     finally { 
-      if (uniqueMatch) { odd.releaseWriteLock(); }
+      if (uniqueMatch) { odd.modifyUnlock(); }
     }
   }
   
@@ -1531,13 +1531,13 @@ public class MainFrame extends JFrame {
   private Action _gotoClosingBraceAction =  new AbstractAction("Go to Closing Brace") {
     public void actionPerformed(ActionEvent ae) {
         OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-        odd.acquireReadLock();
+        odd.readLock();
         try {
           int pos = odd.findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
           if (pos!=AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
         }
         catch(BadLocationException ble) { /* just ignore and don't move */ }
-        finally { odd.releaseReadLock(); }
+        finally { odd.readUnlock(); }
     }
   };
   
@@ -1545,13 +1545,13 @@ public class MainFrame extends JFrame {
   private Action _gotoOpeningBraceAction =  new AbstractAction("Go to Opening Brace") {
     public void actionPerformed(ActionEvent ae) {
         OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-        odd.acquireReadLock();
+        odd.readLock();
         try {
           int pos = odd.findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
           if (pos!=AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
         }
         catch(BadLocationException ble) { /* just ignore and don't move */ }
-        finally { odd.releaseReadLock(); }
+        finally { odd.readUnlock(); }
     }
   };
   

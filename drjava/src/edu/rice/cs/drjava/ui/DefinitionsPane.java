@@ -872,7 +872,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     super.setDocument(_doc);
     if (_doc.getUndoableEditListeners().length == 0) _resetUndo();
     
-    _doc.acquireWriteLock();
+    _doc.modifyLock();
     int len = _doc.getLength();
     if (len < _position || len < _selEnd) {
       // the document changed since we're set inactive
@@ -893,7 +893,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         _doc.setCurrentLocation(_selEnd);
       }
     }
-    finally { _doc.releaseWriteLock(); }
+    finally { _doc.modifyUnlock(); }
 //    synchronized(_lock) {  // Why synchronize?  This code now runs in the event thread, but was not in legacy code
     _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
     _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);

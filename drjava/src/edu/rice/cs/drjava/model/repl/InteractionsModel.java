@@ -536,12 +536,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //    Utilities.showDebug("InteractionsModel: interpreterResetting called.  _waitingForFirstInterpreter = " + 
 //      _waitingForFirstInterpreter);
     if (! _waitingForFirstInterpreter) {
-      _document.acquireWriteLock();
+      _document.modifyLock();
       try {
         _document.insertBeforeLastPrompt("Resetting Interactions..." + _newLine, InteractionsDocument.ERROR_STYLE);
         _document.setInProgress(true);
       }
-      finally { _document.releaseWriteLock(); }
+      finally { _document.modifyUnlock(); }
 //      Utilities.showDebug("interpreter resetting in progress");
 
       // Change to a new debug port to avoid conflicts

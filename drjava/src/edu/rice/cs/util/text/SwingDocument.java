@@ -87,9 +87,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
    *  @param condition Object to determine legality of inputs
    */
   public void setEditCondition(DocumentEditCondition condition) {
-    writeLock();
+    modifyLock();
     try { _condition = condition; }
-    finally { writeUnlock(); }
+    finally { modifyUnlock(); }
   }
 
   /** Inserts a string into the document at the given offset and the given named style, if the edit condition 
@@ -100,9 +100,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
    *  @throws EditDocumentException if the offset is illegal
    */
   public void insertText(int offs, String str, String style) {
-    writeLock();
+    modifyLock();
     try { if (_condition.canInsertText(offs)) forceInsertText(offs, str, style); }
-    finally { writeUnlock(); }
+    finally { modifyUnlock(); }
   }
 
   /** Inserts a string into the document at the given offset and the given named style, regardless of the edit 
@@ -124,9 +124,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
    *  which sees a null style name.
    */
   public void insertString(int offs, String str, AttributeSet set) throws BadLocationException {
-    writeLock();  // locking is used to make the test and modification atomic
+    modifyLock();  // locking is used to make the test and modification atomic
     try { if (_condition.canInsertText(offs)) super.insertString(offs, str, set); }
-    finally { writeUnlock(); }
+    finally { modifyUnlock(); }
   }
 
   /** Removes a portion of the document, if the edit condition allows it.
@@ -135,9 +135,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
    *  @throws EditDocumentException if the offset or length are illegal
    */
   public void removeText(int offs, int len) {
-    writeLock();  // locking is used to make the test and modification atomic
+    modifyLock();  // locking is used to make the test and modification atomic
     try { if (_condition.canRemoveText(offs)) forceRemoveText(offs, len); }
-    finally { writeUnlock(); }
+    finally { modifyUnlock(); }
   }
 
   /** Removes a portion of the document, regardless of the edit condition.
@@ -153,9 +153,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
 
   /** Overrides superclass's remove to impose the edit condition. */
   public void remove(int offs, int len) throws BadLocationException {
-    writeLock(); // locking is used to make the test and modification atomic
+    modifyLock(); // locking is used to make the test and modification atomic
     try { if (_condition.canRemoveText(offs))  super.remove(offs, len); }
-    finally { writeUnlock(); }
+    finally { modifyUnlock(); }
   }
 
 //  /** Returns the length of the document. */
@@ -181,10 +181,10 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
   /** Appends given string with specified attributes to end of this document. */
   public void append(String str, AttributeSet set) {
-    writeLock();
+    modifyLock();
     try { insertString(getLength(), str, set); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
-    finally { writeUnlock(); }
+    finally { modifyUnlock(); }
   }
   
   /** Appends given string with specified named style to end of this document. */
@@ -203,16 +203,14 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
   /* Locking operations */
   
-  /** Swing-style readLock(). */
-  public void acquireReadLock() { readLock(); }
+  /* public void readLock() is inherited. */
   
-   /** Swing-style readUnlock(). */
-  public void releaseReadLock() { readUnlock(); }
+  /* public void readUnlock() is inherited. */
 
-    /** Swing-style writeLock(). */
-  public void acquireWriteLock() { writeLock(); }
+  /** Swing-style writeLock().  Must be renamed because inherited writeLock is final. */
+  public void modifyLock() { writeLock(); }
   
-   /** Swing-style writeUnlock(). */
-  public void releaseWriteLock() { writeUnlock(); }
+   /** Swing-style writeUnlock().  Must be renamed because inherited writeUnlock is final.*/
+  public void modifyUnlock() { writeUnlock(); }
 }
 

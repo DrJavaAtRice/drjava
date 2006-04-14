@@ -46,10 +46,10 @@ import java.io.IOException;
  * Tests the FindReplaceMachine.
  * @version $Id$
  */
-public class FindReplaceMachineTest extends DrJavaTestCase{
-  private AbstractDocumentInterface _doc;
-  private AbstractDocumentInterface _docPrev;
-  private AbstractDocumentInterface _docNext;
+public class FindReplaceMachineTest extends DrJavaTestCase {
+  private OpenDefinitionsDocument _doc;
+  private OpenDefinitionsDocument _docPrev;
+  private OpenDefinitionsDocument _docNext;
   private FindReplaceMachine _frm;
   private File _tempDir;
   private static final AbstractGlobalModel _model = new AbstractGlobalModel();
@@ -91,9 +91,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     "\'@\' That was a character, but this is not: @\n" +
     "/*This is a two-lined \n commment*/ This is not a two-lined comment";
 
-  /**
-   * Initializes the document for the tests.
-   */
+  /** Initializes the document for the tests. */
   public void setUp() throws Exception {
     super.setUp();
     String user = System.getProperty("user.name");
@@ -114,42 +112,37 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     super.tearDown();
   }
 
-  private void _initFrm(int pos) {
-    _frm.setStart(pos);
-    _frm.setPosition(pos);
-  }
+  private void _initFrm(int pos) { _frm.setPosition(pos); }
   
   public void testCreateMachineSuccess() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
     _initFrm(4);
+//    System.err.println("testCreateMachineSuccess completed completed");
   }
 
-  /**
-   * disabled.
-   *
-  public void testCreateMachineFail() {
-    // before 0
-    try {
-      _initFrm(-2);
-      System.err.println(_frm.getStartOffset() + " " +
-                         _frm.getCurrentOffset());
-      fail("creating invalid position in constructor");
-    }
-    catch (UnexpectedException e) {
-      // expected: -2 is not a valid offset.
-    }
-
-    // after doc.getLength()
-    try {
-      _initFrm(5);
-      System.out.println(_frm.getStartOffset() + " " +
-                         _frm.getCurrentOffset());
-      fail("creating invalid position in constructor");
-    }
-    catch (UnexpectedException e) {
-      // expected: 5 is larger than document
-    }
-  }*/
+//  public void testCreateMachineFail() {
+//    // before 0
+//    try {
+//      _initFrm(-2);
+//      System.err.println(_frm.getStartOffset() + " " +
+//                         _frm.getCurrentOffset());
+//      fail("creating invalid position in constructor");
+//    }
+//    catch (UnexpectedException e) {
+//      // expected: -2 is not a valid offset.
+//    }
+//
+//    // after doc.getLength()
+//    try {
+//      _initFrm(5);
+//      System.out.println(_frm.getStartOffset() + " " +
+//                         _frm.getCurrentOffset());
+//      fail("creating invalid position in constructor");
+//    }
+//    catch (UnexpectedException e) {
+//      // expected: 5 is larger than document
+//    }
+//  }
 
   public void testFindNextUpdatesCurrent() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
@@ -158,6 +151,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setFindWord("evil");
 
     _testFindNextSucceeds(_frm, CONTINUE, 0, 12);
+//    System.err.println("testFindNextUpdatesCurrent completed completed");
   }
 
   public void testFindNextAndFailIsOnMatch() throws BadLocationException {
@@ -168,6 +162,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _testFindNextSucceeds(_frm, CONTINUE, 0, 12);
     _doc.insertString(9, "-", null);
     assertTrue("no longer on find text", !_frm.isOnMatch());
+//    System.err.println("testFindNextAndFailIsOnMatch completed");
   }
 
   public void testMultipleCallsToFindNext() throws BadLocationException {
@@ -178,6 +173,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _testFindNextSucceeds(_frm, CONTINUE, 0, 12);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 25);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 40);
+//    System.err.println("testMultipleCallsToFindNext completed");
   }
 
   public void testStartFromTopContinue() throws BadLocationException {
@@ -186,18 +182,8 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _assertOffsets(_frm, 5, 5);
     _frm.setFindWord("Hear");
     _testFindNextSucceeds(_frm, CONTINUE, 5, 4);
+//    System.err.println("testStartFromTopContinue completed");
   }
-
-  /**
-   * halting tests are obsolete.  We don't halt anymore. we always wrap.
-   *
-   public void xtestStartFromTopHalt() throws BadLocationException {
-    _doc.insertString(0, EVIL_TEXT, null);
-    _initFrm(5);
-    _assertOffsets(_frm, 5, 5);
-    _frm.setFindWord("Hear");
-    _testFindNextFails(_frm, HALT, 5, 5);
-  }*/
 
   public void testNotInDocument() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
@@ -205,6 +191,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _assertOffsets(_frm, 5, 5);
     _frm.setFindWord("monkey");
     _testFindNextFails(_frm, CONTINUE, 5, 5);
+//    System.err.println("testNotInDocument completed"); 
   }
 
   public void testSimpleReplace() throws BadLocationException {
@@ -216,8 +203,10 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _testFindNextSucceeds(_frm, CONTINUE, 0, 12);
     _frm.replaceCurrent();
     assertEquals("new replaced text", "Hear no monkey, see no evil, speak no evil.", _doc.getText());
+//    System.err.println("testSimpleReplace completed"); 
   }
 
+  /* Test replacing all occurrence of word in a single document. */
   public void testReplaceAllContinue() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
     _initFrm(15);
@@ -226,6 +215,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setReplaceWord("monkey");
     _frm.replaceAll();
     assertEquals("revised text", "Hear no monkey, see no monkey, speak no monkey.", _doc.getText());
+//    System.err.println("testReplaceAllContinue completed"); 
   }
 
   public void testFindNoMatchCase() throws BadLocationException {
@@ -235,6 +225,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setMatchCase(false);
     _frm.setFindWord("eViL");
     _testFindNextSucceeds(_frm, CONTINUE, 0, 12);
+//    System.err.println("testFindNoMatchCase"); 
   }
 
   public void testReplaceAllContinueNoMatchCase() throws BadLocationException {
@@ -246,6 +237,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setMatchCase(false);
     _frm.replaceAll();
     assertEquals("revised text", "Hear no monkey, see no monkey, speak no monkey.", _doc.getText());
+//    System.err.println("testReplaceAllContinueNoMatchCase completed"); 
   }
 
   public void testReplaceAllBackwards() throws BadLocationException {
@@ -257,6 +249,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setSearchBackwards(true);
     _frm.replaceAll();
     assertEquals("backwards replace", "cool cool", _doc.getText());
+//    System.err.println("testReplaceAllBackwards completed"); 
   }
 
   public void testFindMatchWithCaretInMiddle() throws BadLocationException {
@@ -267,6 +260,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setSearchBackwards(false);
     _testFindNextSucceeds(_frm, CONTINUE, 3, 11);
     _testFindNextSucceeds(_frm, CONTINUE, 3, 5);
+//    System.err.println("testFindMatchWithCaretInMiddle completed"); 
   }
 
   public void testFindMatchWithCaretInMiddleBackwards() throws BadLocationException {
@@ -277,11 +271,11 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setSearchBackwards(true);
     _testFindNextSucceeds(_frm, CONTINUE, 8, 0);
     _testFindNextSucceeds(_frm, CONTINUE, 8, 6);
+//    System.err.println("testFindMatchWithCaretInMiddleBackwards completed");
   }
 
-  /**
-   * This tests that a replace all where the replacement action creates a new match
-   * does not replace this new match
+  /** This tests that a replace all where the replacement action creates a new match
+   *  does not replace this new match
    */
   public void testReplaceCreatesMatch() throws BadLocationException {
     _doc.insertString(0, "hhelloello", null);
@@ -292,11 +286,11 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setReplaceWord("");
     _frm.replaceAll();
     assertEquals("replace creates new match", "hello", _doc.getText());
+//    System.err.println("testReplaceCreatesMatch completed");
   }
 
-  /**
-   * This tests that a replace all where the replacement action creates a new match
-   * does not replace this new match
+  /** This tests that a replace all backwards where the replacement action creates a new match
+   *  does not replace this new match
    */
   public void testReplaceCreatesMatchBackwards() throws BadLocationException {
     _doc.insertString(0, "hhelloello", null);
@@ -307,11 +301,10 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setReplaceWord("");
     _frm.replaceAll();
     assertEquals("replace creates new match", "hello", _doc.getText());
+//    System.err.println("testReplaceCreatesMatchBackwards completed");
   }
 
-  /**
-   * This test checks that replacing a word with itself will halt on replace all
-   */
+  /** This test checks that replacing a word with itself will halt on replace all. */
   public void testReplaceAllSameWord() throws BadLocationException {
     _doc.insertString(0, "cool cool", null);
     _initFrm(3);
@@ -320,15 +313,17 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setSearchBackwards(false);
     _frm.setReplaceWord("cool");
     _frm.replaceAll();
+    assertEquals("replace all with the same word", "cool cool", _doc.getText());
+//    System.err.println("Forward part of testReplaceAllSameWord completed");
     _frm.setSearchBackwards(true);
     _frm.replaceAll();
-    assertEquals("replace all with the same word", "cool cool", _doc.getText());
+    assertEquals("replace all backward with the same word", "cool cool", _doc.getText());
+//    System.err.println("testReplaceAllSameWord completed");
   }
 
-  /**
-   * This test checks that a findNext won't find two matches that partially overlap.
-   * This is the current behavior of the FindReplaceMachine, though at some time
-   * in the future someone may want to change it
+  /** This test checks that a findNext won't find two matches that partially overlap.
+   *  This is the current behavior of the FindReplaceMachine, though at some time
+   *  in the future someone may want to change it.
    */
   public void testFindPartialSubstrings() throws BadLocationException {
     _doc.insertString(0, "ooAooAoo", null);
@@ -343,12 +338,12 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setSearchBackwards(true);
     _testFindNextSucceeds(_frm, CONTINUE, 8, 3);
     _testFindNextSucceeds(_frm, CONTINUE, 8, 3);
+//    System.err.println("testFindPartialSubstrings completed");
   }
 
-  /**
-   * This test addresses bug #745714 Searches Repeat When Changing Direction.
-   * The word that was just found should not be found again after toggling
-   * the search backwards flag.
+  /** This test addresses bug #745714 Searches Repeat When Changing Direction.
+   *  The word that was just found should not be found again after toggling
+   *  the search backwards flag.
    */
   public void testSearchesDoNotRepeatWhenChangingDirection() throws BadLocationException {
     _doc.insertString(0, "int int int", null);
@@ -371,12 +366,10 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.positionChanged();
     _frm.setSearchBackwards(true);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 4);
-
+//    System.err.println("testSearchesDoNotRepeatWhenChangingDirection completed");
   }
 
-  /**
-   * This test addresses feature request #784514 Find/Replace in all Open Files.
-   */
+  /** This test addresses feature request #784514 Find/Replace in all Open Files. */
   public void testFindReplaceInAllOpenFiles() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
     _docPrev.insertString(0, EVIL_TEXT_PREV, null);
@@ -397,17 +390,21 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _testFindNextSucceeds(_frm, CONTINUE, 12, 25, _doc);
     _testFindNextSucceeds(_frm, CONTINUE, 12, 40, _doc);
     _testFindNextSucceeds(_frm, CONTINUE, 12, 12, _docNext);
+//    System.err.println("First sequence of global search tests complete");
     _frm.setLastFindWord();
+//    System.err.println("_lastFindWord set to " + _frm.getFindWord());
     _frm.setSearchBackwards(true);
     _testFindNextSucceeds(_frm, CONTINUE, 36, 36, _doc);
     _testFindNextSucceeds(_frm, CONTINUE, 36, 21, _doc);
     _testFindNextSucceeds(_frm, CONTINUE, 36, 8, _doc);
     _testFindNextSucceeds(_frm, CONTINUE, 44, 44, _docPrev);
     _frm.setReplaceWord("monkey");
-    _frm.replaceAll();
+    try { _frm.replaceAll(); }
+    catch(Throwable e) { fail("Threw exception " + e); }
     assertEquals("revised text", "Hear no monkey, see no monkey, speak no monkey.", _doc.getText());
     assertEquals("revised text", "Hear no monkeyprev, see no monkeyprev, speak no monkeyprev.", _docPrev.getText());
     assertEquals("revised text", "Hear no monkeynext, see no monkeynext, speak no monkeynext.", _docNext.getText());
+//    System.err.println("testFindReplaceInAllOpenFiles completed");
   }
 
   public void testFindReplaceInAllOpenFilesWholeWord() throws BadLocationException {
@@ -448,10 +445,12 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     assertEquals("revised text",
                  "Hear monkey evilnext, see monkey evilnext, speak monkey evilnext.",
                  _docNext.getText(0, _docNext.getLength()));
+//    System.err.println("testFindReplaceInAllOpenFilesWholeWord completed");
   }
   
 
   public void testWholeWordSearchOnTestString1() throws BadLocationException {
+//    System.err.println("Running testWholeWordSearchOnTestString1");
     _doc.insertString(0, FIND_WHOLE_WORD_TEST_1, null);
 //        System.err.println(FIND_WHOLE_WORD_TEST_1);
     _initFrm(0);
@@ -478,6 +477,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setSearchBackwards(true);
     _frm.setFindWord("pub");
     _testFindNextFails(_frm, CONTINUE, 0, 163);
+//    System.err.println("testWholeWordSearchOnTestString1 completed");
   }
   
   public void testWholeWordSearchIgnore() throws BadLocationException {
@@ -535,6 +535,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setLastFindWord();
     _frm.setSearchBackwards(true);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 240);
+//    System.err.println("testWholeWordSearchIgnore completed");
   }
   
   public void testAnyOccurrenceSearchIgnore() throws BadLocationException {
@@ -591,46 +592,52 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
     _frm.setLastFindWord();
     _frm.setSearchBackwards(true);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 242);
+//    System.err.println("testAnyOccurrenceSearchIgnore completed");
   }
   
-  private void _testFindNextSucceeds(FindReplaceMachine frm, ContinueCommand cont,
-                                     int start, int found, AbstractDocumentInterface doc)
-  {
-    FindResult fr = frm.findNext();
-    AbstractDocumentInterface d = fr.getDocument();
-    if (frm.getDocument() != d) {
-      // do FindReplaceDialog's _updateMachine
-      frm.setDocument(d);
-      frm.setStart(found);
-      frm.setPosition(found);
-    }
-    Utilities.clearEventQueue();
+  private void _testFindNextSucceeds(FindReplaceMachine frm, ContinueCommand cont, int start, int found, 
+                                     OpenDefinitionsDocument doc) {
+    try {
+      FindResult fr = frm.findNext();
+      OpenDefinitionsDocument d = fr.getDocument();
+      if (frm.getDocument() != d) {
+        // do FindReplaceDialog's _updateMachine
+//        Utilities.show("return doc = " + d + " distinct from current machine doc = " + frm.getDocument());
+        frm.setDocument(d);
+        frm.setPosition(found);
+      }
+      Utilities.clearEventQueue();
 //    assertEquals("documents should equal", doc, frm.getDocument());
-    assertEquals("findNext return value", found, fr.getFoundOffset());
-    _assertOffsets(frm, start, found);
-    assertTrue("on find text", frm.isOnMatch());
+      assertEquals("findNext return value", found, fr.getFoundOffset());
+      _assertOffsets(frm, start, found);
+      assertTrue("on find text", frm.isOnMatch());
+    }
+    catch(Exception e) { fail("Threw exception: " + e); }
   }
 
-  private void _testFindNextSucceeds(FindReplaceMachine frm, ContinueCommand cont,
-                                     int start, int found)
-  {
+  private void _testFindNextSucceeds(FindReplaceMachine frm, ContinueCommand cont, int start, int found) {
+    try {
     int findOffset = frm.findNext().getFoundOffset();
     assertEquals("findNext return value", found, findOffset);
     _assertOffsets(frm, start, found);
     assertTrue("on find text", frm.isOnMatch());
+    }
+    catch(Exception e) { fail("Threw exception: " + e); }
   }
 
   
-  private void _testFindNextFails(FindReplaceMachine frm, ContinueCommand cont,
-                                  int start, int current)
-  {
+  private void _testFindNextFails(FindReplaceMachine frm, ContinueCommand cont, int start, int current) {
+    try {
     int findOffset = frm.findNext().getFoundOffset();
     assertEquals("findNext return value", -1, findOffset);
     _assertOffsets(frm, start, current);
+    }
+    catch(Exception e) { fail("Threw exception: " + e); }
   }
 
   private void _assertOffsets(FindReplaceMachine frm, int start, int current) {
-    assertEquals("start offset", start, frm.getStartOffset());
+//    Utilities.show("_assertOffsets(" +  start + ", " + current + ")");
+//    assertEquals("start offset", start, frm.getStartOffset());
     assertEquals("current offset", current, frm.getCurrentOffset());
   }
   
@@ -644,10 +651,4 @@ public class FindReplaceMachineTest extends DrJavaTestCase{
       return true;
     }
   };
-  
-//   private static ContinueCommand HALT = new ContinueCommand() {
-//     public boolean shouldContinue() {
-//       return false;
-//     }
-//   };
 }

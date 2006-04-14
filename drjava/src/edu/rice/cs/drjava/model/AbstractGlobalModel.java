@@ -1678,7 +1678,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  @param d the current Document
    *  @return the next Document
    */
-  public OpenDefinitionsDocument getNextDocument(AbstractDocumentInterface d) {
+  public OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument d) {
     OpenDefinitionsDocument nextdoc = null; // irrelevant initialization required by javac
 //    try {
       OpenDefinitionsDocument doc = getODDForDocument(d);
@@ -1703,7 +1703,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  @param d the current Document
    *  @return the previous Document
    */
-  public OpenDefinitionsDocument getPrevDocument(AbstractDocumentInterface d) {
+  public OpenDefinitionsDocument getPrevDocument(OpenDefinitionsDocument d) {
     OpenDefinitionsDocument prevdoc = null;  // irrelevant initialization required by javac
 //    try {
       OpenDefinitionsDocument doc = getODDForDocument(d);
@@ -2021,7 +2021,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  This call was formerly called the <code>DefinitionsDocumentHandler</code> but was renamed (2004-Jun-8) to be more
    *  descriptive/intuitive.  (Really? CC)
    */
-  class ConcreteOpenDefDoc implements OpenDefinitionsDocument, AbstractDocumentInterface {
+  class ConcreteOpenDefDoc implements OpenDefinitionsDocument {
     
 //     private boolean _modifiedSinceSave;
     
@@ -2442,9 +2442,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             public void saveTo(OutputStream os) throws IOException {
               DefinitionsDocument dd = getDocument();
               try { 
-                dd.acquireReadLock();  // Technically required, but looks like overkill.
+                dd.readLock();  // Technically required, but looks like overkill.
                 _editorKit.write(os, dd, 0, dd.getLength());
-                dd.releaseReadLock();
+                dd.readUnlock();
 //                Utilities.show("Wrote file containing:\n" + doc.getText());
               } 
               catch (BadLocationException docFailed) { throw new UnexpectedException(docFailed); }
@@ -2549,10 +2549,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       boolean ret = false;
       DefinitionsDocument dd = getDocument();
       try {
-        dd.aquireReadLock();
+        dd.readLock();
         if (_file != null) ret = (_file.lastModified() > _timestamp);
       }
-      finally { dd.releaseReadLock(); }
+      finally { dd.readUnlock(); }
       return ret;
     }
     
@@ -3129,34 +3129,34 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public String getText() {
       DefinitionsDocument doc = getDocument();
-      doc.acquireReadLock();
+      doc.readLock();
       try { return doc.getText(0, doc.getLength()); }
       catch(BadLocationException e) { throw new UnexpectedException(e); }
-      finally { releaseReadLock(); }
+      finally { readUnlock(); }
     }
     
     public void clear() {
       DefinitionsDocument doc = getDocument();
-      doc.acquireWriteLock();
+      doc.modifyLock();
       try { doc.remove(0, doc.getLength()); }
       catch(BadLocationException e) { throw new UnexpectedException(e); }
-      finally { releaseWriteLock(); }
+      finally { modifyUnlock(); }
     }
     
     
     /* Locking operations in DJDocument interface */
     
     /** Swing-style readLock(). */
-    public void acquireReadLock() { getDocument().readLock(); }
+    public void readLock() { getDocument().readLock(); }
     
     /** Swing-style readUnlock(). */
-    public void releaseReadLock() { getDocument().readUnlock(); }
+    public void readUnlock() { getDocument().readUnlock(); }
     
     /** Swing-style writeLock(). */
-    public void acquireWriteLock() { getDocument().acquireWriteLock(); }
+    public void modifyLock() { getDocument().modifyLock(); }
     
     /** Swing-style writeUnlock(). */
-    public void releaseWriteLock() { getDocument().releaseWriteLock(); }
+    public void modifyUnlock() { getDocument().modifyUnlock(); }
     
     /** @return the number of lines in this document. */
     public int getNumberOfLines() { return getDefaultRootElement().getElementIndex(getEndPosition().getOffset()-1); }

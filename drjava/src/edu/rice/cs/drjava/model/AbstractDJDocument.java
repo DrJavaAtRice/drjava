@@ -131,7 +131,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   protected AbstractDJDocument(Indenter indent) { _indenter = indent; }
   
-  //-------- METHODS ---------
+  //-------- METHODS ---------//
+  
+  /* readLock, readUnlock, modifyLock, modifyUnlock are inherited from SwingDocument. */
   
   /** Returns a new indenter. */
   protected abstract Indenter makeNewIndenter(int indentLevel);
@@ -890,7 +892,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     // Begins a compound edit.
     // int key = startCompoundEdit(); // commented out in connection with the FrenchKeyBoard Fix
     
-    writeLock();
+    modifyLock();
     try {
       synchronized(_reduced) {
         if (selStart == selEnd) {  // single line to indent
@@ -911,7 +913,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       }
     }
     catch (Throwable t) { throw new UnexpectedException(t); }
-    finally { writeUnlock(); } 
+    finally { modifyUnlock(); } 
     
     // Ends the compound edit.
     //endCompoundEdit(key);   //Changed to endLastCompoundEdit in connection with the FrenchKeyBoard Fix
@@ -1563,14 +1565,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
     
-    writeLock();
+    modifyLock();
     try {
       synchronized(_reduced) {    // Prevent updates to the reduced model during this change
         clearCache();      // Clear the helper method cache
         super.insertString(offset,str,a);
       }
     }
-    finally { writeUnlock(); }
+    finally { modifyUnlock(); }
   }
   
   /** Removes a block of text from the specified location.  We don't update the reduced model here; that happens
@@ -1578,14 +1580,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public void remove(int offset, int len) throws BadLocationException {
     
-    writeLock();
+    modifyLock();
     try {
       synchronized(_reduced) {
         clearCache();     // Clear the helper method cache
         super.remove(offset, len);
       }
     }
-    finally { writeUnlock(); }  
+    finally { modifyUnlock(); }  
   }
     
   public String getText() {
@@ -1596,10 +1598,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   public void clear() {
-    writeLock();
+    modifyLock();
     try { remove(0, getLength()); }
     catch(BadLocationException e) { throw new UnexpectedException(e); }
-    finally { writeUnlock(); }
+    finally { modifyUnlock(); }
   }
    
   //Two abstract methods to delegate to the undo manager, if one exists.

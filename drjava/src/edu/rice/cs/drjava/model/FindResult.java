@@ -55,10 +55,10 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
  * @version $Id$
  */
 public class FindResult {
-  private AbstractDocumentInterface _document;
+  private OpenDefinitionsDocument _document;
   private int _foundoffset;
   private boolean _wrapped;
-  private boolean _allDocsWrapped;
+  private boolean _allWrapped;
   
   /**
    * Constructor for a FindResult.
@@ -67,15 +67,20 @@ public class FindResult {
    * @param wrapped true if the search wrapped to the beginning (or end) of the document
    * @param allDocsWrapped true if the search wrapped to the start document
    */
-  public FindResult(AbstractDocumentInterface document, int foundoffset, boolean wrapped, boolean allDocsWrapped) {
+  public FindResult(OpenDefinitionsDocument document, int foundoffset, boolean wrapped, boolean allWrapped) {
     _document = document;
     _foundoffset = foundoffset;
     _wrapped = wrapped;
-    _allDocsWrapped = allDocsWrapped;
+    _allWrapped = allWrapped;
+  }
+  
+  /** Intelligible toString method */
+  public String toString() {
+    return "FindResult(" + _document + ", " + _foundoffset + ", " + _wrapped + ", " + _allWrapped + ")";
   }
   
   /** Returns the document where the found instance is located */
-  public AbstractDocumentInterface getDocument() { return _document; }
+  public OpenDefinitionsDocument getDocument() { return _document; }
   
   /** Returns the offset of the instance found */ 
   public int getFoundOffset() { return _foundoffset; }
@@ -83,6 +88,6 @@ public class FindResult {
   /** Returns true if the search wrapped to the beginning (or end) of the document */
   public boolean getWrapped() { return _wrapped; }
   
-  /** Returns true if the search wrapped to the start document */
-  public boolean getAllDocsWrapped() { return _allDocsWrapped; }
+  /** Returns true if the search wrapped to the start document.  TODO: change method name to getAllWrapped. */
+  public boolean getAllDocsWrapped() { return _allWrapped; }
 }

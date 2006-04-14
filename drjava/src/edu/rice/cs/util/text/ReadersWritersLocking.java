@@ -41,15 +41,15 @@ public interface ReadersWritersLocking {
   /* Locking operations */
   
   /** Swing-style readLock(). */
-  public void acquireReadLock();
+  public void readLock();
   
   /** Swing-style readUnlock(). */
-  public void releaseReadLock();
+  public void readUnlock();
   
   /** Swing-style writeLock(). */
-  public void acquireWriteLock();
+  public void modifyLock();
   
   /** Swing-style writeUnlock(). */
-  public void releaseWriteLock();
+  public void modifyUnlock();
 }
 

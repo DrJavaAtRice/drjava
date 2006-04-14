@@ -217,13 +217,13 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
 
   /** Tests that the InteractionsPane cannot be edited before the prompt. */
   public void testCannotEditBeforePrompt() throws EditDocumentException {
-    _doc.acquireWriteLock();
+    _doc.modifyLock();
     int origLength = 0;
     try {
       origLength = _doc.getLength();
       _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
     }
-    finally { _doc.releaseWriteLock(); }
+    finally { _doc.modifyUnlock(); }
     assertEquals("Document should not have changed.", origLength, _doc.getLength());
   }
 

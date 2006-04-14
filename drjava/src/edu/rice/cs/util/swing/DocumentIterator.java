@@ -45,6 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.swing;
 
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;   // TODO: move this class to the model package
+
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 
 /** Used to get the next or previous open document given the current one. */
@@ -53,13 +55,13 @@ public interface DocumentIterator {
    *  @param doc the current document.
    *  @return the next document.
    */
-  AbstractDocumentInterface getNextDocument(AbstractDocumentInterface doc);
+  OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument doc);
   
   /** Gets the previous document.
    *  @param doc the current document.
    *  @return the previous document.
    */
-  AbstractDocumentInterface getPrevDocument(AbstractDocumentInterface doc);
+  OpenDefinitionsDocument getPrevDocument(OpenDefinitionsDocument doc);
   
   /** @return the number of documents being iterated over */
   int getDocumentCount();

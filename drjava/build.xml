@@ -35,6 +35,12 @@
      
      
 <project name="drjava" default="help">
+
+<assertions>
+  <enable />
+</assertions>
+
+
 <!-- TODO:
        clover
        strip-license/relicense
@@ -106,7 +112,7 @@
   
   <!-- By default, clean can fail -->
   <property name="clean-can-fail" value="yes" />
-  
+ 
   <!-- By default, don't append anything extra to the tag -->
   <property name="tag-append" value="" />
   
@@ -511,7 +517,8 @@
   
   <target name="test" depends="test-15" description="Shortcut for 'test-15'">
   </target>
-  
+
+ 
   <target name="test-15" depends="compile-15, assert-15, resolve-java15-tools"
           description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
     <echo message="Running all 5.0 tests matching '${test-spec}' under Java 5.0" />

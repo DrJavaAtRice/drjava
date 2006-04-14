@@ -206,7 +206,7 @@ public class InteractionsDJDocument extends AbstractDJDocument {
     String c = exceptionClass;
     if (c.indexOf('.') != -1) c = c.substring(c.lastIndexOf('.') + 1, c.length());
     
-    writeLock();
+    modifyLock();
     try {
       insertText(getLength(), c + ": " + message + "\n", styleName);
       
@@ -272,6 +272,6 @@ public class InteractionsDJDocument extends AbstractDJDocument {
     }
     catch (IOException ioe) { throw new UnexpectedException(ioe); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-    finally { writeUnlock(); }
+    finally { modifyUnlock(); }
   }  
 }

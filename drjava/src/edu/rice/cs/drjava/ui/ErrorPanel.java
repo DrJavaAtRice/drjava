@@ -207,9 +207,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     SwingDocument doc = (SwingDocument) getErrorListPane().getDocument();
     if (doc instanceof SwingDocument) {
-      doc.acquireWriteLock();
+      doc.modifyLock();
       try { ((SwingDocument)doc).setCharacterAttributes(0, doc.getLength() + 1, set, false); }
-      finally { doc.releaseWriteLock(); }
+      finally { doc.modifyUnlock(); }
     }
   }
   
@@ -763,9 +763,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           SimpleAttributeSet set = new SimpleAttributeSet();
           set.addAttribute(StyleConstants.Foreground, oce.value);
           SwingDocument sdoc = (SwingDocument) doc;
-          sdoc.acquireWriteLock();
+          sdoc.modifyLock();
           try { sdoc.setCharacterAttributes(0, sdoc.getLength(), set, false); }
-          finally { sdoc.releaseWriteLock(); }
+          finally { sdoc.modifyUnlock(); }
         //        ErrorListPane.this.repaint();
         }
       }

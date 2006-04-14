@@ -491,7 +491,7 @@ class FindReplaceDialog extends TabbedPanel {
       private void _updateHelper() {
         Utilities.invokeLater(new Runnable() {
           public void run() {
-            _machine.makeCurrentOffsetStart();
+//            _machine.makeCurrentOffsetStart();
             updateFirstDocInSearch();
             _replaceAction.setEnabled(false);
             _replaceFindNextAction.setEnabled(false);
@@ -590,7 +590,7 @@ class FindReplaceDialog extends TabbedPanel {
       // the string, and a flag indicating whether the end of the document was wrapped around while searching
       // for the string.
       FindResult fr = _machine.findNext();
-      AbstractDocumentInterface doc = fr.getDocument();
+      OpenDefinitionsDocument doc = fr.getDocument();
       OpenDefinitionsDocument matchDoc = _model.getODDForDocument(doc);
       OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
       
@@ -716,7 +716,7 @@ class FindReplaceDialog extends TabbedPanel {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       _machine.setDocument(doc);
       if (_machine.getFirstDoc() == null) _machine.setFirstDoc(doc);
-      _machine.setStart(_defPane.getCaretPosition());
+//      _machine.setStart(_defPane.getCaretPosition());
       _machine.setPosition(_defPane.getCaretPosition());
       _caretChanged = false;
     }
