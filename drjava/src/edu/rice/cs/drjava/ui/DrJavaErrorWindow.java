@@ -87,6 +87,9 @@ public class DrJavaErrorWindow extends JDialog {
   /** Sets the parent frame. */
   public static void setFrame(JFrame f) { _parentFrame = f; _parentChanged = true; }
   
+  /** Gets the parent frame. */
+  public static JFrame getFrame() { return _parentFrame; }
+  
   /** The singleton instance of this dialog. */
   private static DrJavaErrorWindow _singletonInstance;
   
@@ -207,7 +210,7 @@ public class DrJavaErrorWindow extends JDialog {
       _indexLabel.setText("Error "+(_errorIndex+1)+" of "+(_errors.size()));
     }
     else {
-      _errorInfo = new JOptionPane("No errors occurred!",JOptionPane.INFORMATION_MESSAGE,
+      _errorInfo = new JOptionPane(new String[] {"No errors occurred!", " ", " ", " ", " ", " "},JOptionPane.INFORMATION_MESSAGE,
                                        JOptionPane.DEFAULT_OPTION,null,
                                        new Object[0]);
       _stackTrace.setText("");

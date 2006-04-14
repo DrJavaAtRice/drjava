@@ -37,6 +37,9 @@ import javax.swing.JButton;
 import java.util.List;
 import java.util.ArrayList;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+
 /** The handle() method in this class is called everytime an uncaught exception propagates to an AWT action.
  *  The static log() method can be used to put log entries into the error log but continue execution.
  *  This does not automatically update the "DrJava Errors" window when new errors occur. In the case of errors,
@@ -74,6 +77,9 @@ public class DrJavaErrorHandler {
     _errors.add(thrown);
     if (_errorsButton!=null) {
       _errorsButton.setVisible(true);
+    }
+    if ((_errors.size()==1) && (DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue())) {
+      new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown).setVisible(true);
     }
   }
   

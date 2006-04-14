@@ -791,6 +791,11 @@ public class ConfigFrame extends JFrame {
                                                   "Put the focus in the definitions pane after find/replace", this,
                                                   "<html>Whether to put the focus in the definitions pane after doing a find or replace operation.<br>"+
                                                   "If this is not selected, the focus will be in the Find/Replace pane.</html>"));
+
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED, 
+                                                  "Show a notification window when the first DrJava error occurs", this,
+                                                  "<html>Whether to show a notification window when the first DrJava error occurs.<br>"+
+                                                  "If this is disabled, only the \"DrJava Error\" button will appear.</html>"));
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 
