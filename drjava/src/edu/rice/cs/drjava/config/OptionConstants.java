@@ -985,9 +985,9 @@ public interface OptionConstants {
   public static final BooleanOption RESET_CLEAR_CONSOLE =
     new BooleanOption("reset.clear.console", Boolean.TRUE);
 
-  /** Whether to allow the assert keyword in Java 1.4+. */
-  public static final BooleanOption JAVAC_ALLOW_ASSERT =
-    new BooleanOption("javac.allow.assert", Boolean.FALSE);
+  /** Whether to run assert statements in the interactions pane. */
+  public static final BooleanOption RUN_WITH_ASSERT =
+    new BooleanOption("run.with.assert", Boolean.TRUE);
 
   /** Whether to make emacs-style backup files. */
   public static final BooleanOption BACKUP_FILES = new BooleanOption("files.backup", Boolean.TRUE);

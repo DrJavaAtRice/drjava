@@ -50,7 +50,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
   private int _depth;
 
   // Java class patterns for which we may not want events
-  private String[] javaExcludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "com.apple.mrj.*"};
+  private String[] javaExcludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "com.apple.eawt.*", "com.apple.eio.*" };
 
   /**
    * @throws IllegalStateException if the document does not have a file

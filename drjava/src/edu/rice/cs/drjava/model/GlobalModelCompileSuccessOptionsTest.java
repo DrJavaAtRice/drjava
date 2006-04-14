@@ -131,7 +131,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       String version = System.getProperty("java.version");
       if ((version != null) && ("1.4.0".compareTo(version) <= 0)) {
         // Turn on assert support
-        DrJava.getConfig().setSetting(OptionConstants.JAVAC_ALLOW_ASSERT,
+        DrJava.getConfig().setSetting(OptionConstants.RUN_WITH_ASSERT,
                                       Boolean.TRUE);
         
         CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);

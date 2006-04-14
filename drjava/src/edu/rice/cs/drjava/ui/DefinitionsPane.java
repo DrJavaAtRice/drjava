@@ -648,7 +648,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
     /* Go to this file... */
     _popMenu.addSeparator();
-    JMenuItem gotoFileUnderCursorItem = new JMenuItem("Go to File Under Cursor...");
+    JMenuItem gotoFileUnderCursorItem = new JMenuItem("Go to File Under Cursor");
     gotoFileUnderCursorItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
         _doc.setCurrentLocation(getCaretPosition());

@@ -376,7 +376,7 @@ public class MainFrame extends JFrame {
     }
   }
   
-  private Action _jarProjectAction = new AbstractAction("Create Jar File from Project") {
+  private Action _jarProjectAction = new AbstractAction("Create Jar File from Project...") {
     public void actionPerformed(ActionEvent ae) {
       new SwingWorker() {
         public Object construct() {
@@ -440,7 +440,7 @@ public class MainFrame extends JFrame {
   /** Asks user for project file name and and reads the associated files into the file navigator (and places the first
    *  source file in the editor pane)
    */
-  private Action _openProjectAction = new AbstractAction("Open") {
+  private Action _openProjectAction = new AbstractAction("Open...") {
     public void actionPerformed(ActionEvent ae) { _openProject(); }
   };
   
@@ -870,7 +870,7 @@ public class MainFrame extends JFrame {
   }
   
   /** Shows the find/replace tab. */
-  private Action _findReplaceAction = new AbstractAction("Find/Replace...") {
+  private Action _findReplaceAction = new AbstractAction("Find/Replace") {
     public void actionPerformed(ActionEvent ae) {
       _showFindReplaceTab();
       // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
@@ -1159,7 +1159,7 @@ public class MainFrame extends JFrame {
   }
   
   /** Goes to the file specified by the word the cursor is on. */
-  final Action gotoFileUnderCursorAction = new AbstractAction("Go to File Under Cursor...") {
+  final Action gotoFileUnderCursorAction = new AbstractAction("Go to File Under Cursor") {
     public void actionPerformed(ActionEvent ae) {
       _gotoFileUnderCursor();
     }
@@ -1424,7 +1424,7 @@ public class MainFrame extends JFrame {
   }
   
   /** Defines actions that displays the interactions classpath. */
-  private Action _viewInteractionsClassPathAction = new AbstractAction("View Interactions Classpath") {
+  private Action _viewInteractionsClassPathAction = new AbstractAction("View Interactions Classpath...") {
     public void actionPerformed(ActionEvent e) { viewInteractionsClassPath(); }
   };
   
@@ -1649,7 +1649,7 @@ public class MainFrame extends JFrame {
   };
   
   /** Shows the breakpoints tab. */
-  private Action _breakpointsPanelAction = new AbstractAction("Breakpoints...") {
+  private Action _breakpointsPanelAction = new AbstractAction("Breakpoints") {
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes(); 

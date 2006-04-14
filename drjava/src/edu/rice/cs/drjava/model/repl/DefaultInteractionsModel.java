@@ -68,12 +68,12 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
           DefaultGlobalModel.WRITE_DELAY);
     _model = model;
     // Set whether to allow "assert" statements to be run in the remote JVM.
-    Boolean allow = DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT);
+    Boolean allow = DrJava.getConfig().getSetting(OptionConstants.RUN_WITH_ASSERT);
     _jvm.setAllowAssertions(allow.booleanValue());
     
     // Add option listeners  // WHEN ARE THESE EVER REMOVED?
     DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE, _document.getHistoryOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_ALLOW_ASSERT,
+    DrJava.getConfig().addOptionListener(OptionConstants.RUN_WITH_ASSERT,
                                          new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
         _jvm.setAllowAssertions(oce.value.booleanValue());

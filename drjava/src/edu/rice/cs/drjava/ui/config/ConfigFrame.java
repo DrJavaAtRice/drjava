@@ -608,7 +608,7 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DEBUG_STEP_JAVA,
                                                   "Step Into Java Classes", this,
                                                   "<html>Whether the Debugger should step into Java library classes,<br>" +
-                                                  "including java.*, javax.*, sun.*, com.sun.*, and com.apple.mrj.*</html>"));
+                                                  "including java.*, javax.*, sun.*, com.sun.*, com.apple.eawt.*, and com.apple.eio.*</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DEBUG_STEP_INTERPRETER,
                                                   "Step Into Interpreter Classes", this,
                                                   "<html>Whether the Debugger should step into the classes<br>" +
@@ -769,8 +769,8 @@ public class ConfigFrame extends JFrame {
                                                   "<html>Whether to automatically insert a closing comment tag (\"*/\")<br>" +
                                                   "when the enter key is pressed after typing a new block comment<br>" +
                                                   "tag (\"/*\" or \"/**\").</html>"));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this,
-                                                  "<html>Whether to allow the <code>assert</code> keyword when compiling in Java 1.4.</html>"));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.RUN_WITH_ASSERT, "Enable Assert Statement Execution", this,
+                                                  "<html>Whether to execute <code>assert</code> statements in classes running in the interactions pane.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.BACKUP_FILES, "Keep Emacs-style Backup Files", this,
                                                   "<html>Whether DrJava should keep a backup copy of each file that<br>" +
                                                   "the user modifies, saved with a '~' at the end of the filename.</html>"));
@@ -814,21 +814,17 @@ public class ConfigFrame extends JFrame {
   private void _setupCompilerPanel(ConfigPanel panel) {
     addOptionComponent(panel, new LabelComponent("Note: Compiler warnings not shown if compiling any Java language level files", this));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_UNCHECKED_WARNINGS, "Show Unchecked Warnings", this, 
-                                                  "<html>Give more detail for unchecked conversion warnings that are mandated<br>" + 
-                                                  "by the Java Language Specification.</html>"));
+                                                  "<html>Warn about unchecked conversions involving parameterized types.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_DEPRECATION_WARNINGS, "Show Deprecation Warnings", this, 
-                                                  "<html>Show a description of each use or override of a deprecated member or class.</html>"));
+                                                  "<html>Warn about each use or override of a deprecated method, field, or class.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_PATH_WARNINGS, "Show Path Warnings", this, 
-                                                  "<html>Warn about nonexistent path (classpath, sourcepath, etc) directories.</html>"));
+                                                  "<html>Warn about nonexistent members of the classpath and sourcepath.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_SERIAL_WARNINGS, "Show Serial Warnings", this, 
                                                   "<html>Warn about missing <code>serialVersionUID</code> definitions on serializable classes.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_FINALLY_WARNINGS, "Show Finally Warnings", this,
-                                                  "<html>Warn about <code>finally<code> clauses that cannot complete normally.</html>"));
+                                                  "<html>Warn about <code>finally</code> clauses that cannot complete normally.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_FALLTHROUGH_WARNINGS, "Show Fall-Through Warnings", this,
-                                                  "<html>Check <code>switch</code> blocks for fall-through cases and provide a warning message for any that are found.<br>"+
-                                                  "Fall-through cases are cases in a <code>switch</code> block, other than the last case in the block,<br>"+
-                                                  "whose code does not include a <code>break</code> statement, allowing code execution to \"fall through\"<br>"+
-                                                  "from that case to the next case.</html>"));
+                                                  "<html>Warn about <code>switch</code> block cases that fall through to the next case.</html>"));
     panel.displayComponents();
     
   }
