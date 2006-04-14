@@ -107,6 +107,7 @@ public class DrJavaErrorPopup extends JDialog {
     setContentPane(cp);
     cp.add(_errorInfo, BorderLayout.CENTER);
     cp.add(_bottomPanel, BorderLayout.SOUTH);    
+    getRootPane().setDefaultButton(_closeButton);
   }
   
   /* Close the window. */

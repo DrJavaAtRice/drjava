@@ -144,6 +144,7 @@ public class DrJavaErrorWindow extends JDialog {
     cp.add(_errorInfo, BorderLayout.NORTH);
     cp.add(_stackTraceScroll, BorderLayout.CENTER);
     cp.add(_bottomPanel, BorderLayout.SOUTH);    
+    getRootPane().setDefaultButton(_closeButton);
     init();
   }
   
