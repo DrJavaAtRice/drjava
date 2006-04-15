@@ -1547,6 +1547,7 @@ public class MainFrame extends JFrame {
         OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
         odd.readLock();
         try {
+          DrJavaErrorHandler.log("woof!");
           int pos = odd.findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
           if (pos!=AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
         }
@@ -6371,7 +6372,7 @@ public class MainFrame extends JFrame {
                 "index.html" : (className + ".html");
               File index = new File(destDir, fileName);
               URL address = index.getAbsoluteFile().toURL();
-              if (!PlatformFactory.ONLY.openURL(address)) {
+              if (PlatformFactory.ONLY.openURL(address)) {
                 JavadocFrame _javadocFrame = new JavadocFrame(destDir, className, allDocs);
                 _javadocFrame.setVisible(true);
               }

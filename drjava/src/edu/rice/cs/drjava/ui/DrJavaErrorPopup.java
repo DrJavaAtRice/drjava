@@ -97,7 +97,8 @@ public class DrJavaErrorPopup extends JDialog {
     _bottomPanel.add(_keepDisplaying, BorderLayout.WEST);
     _bottomPanel.add(_buttonPanel, BorderLayout.EAST);
 
-    msg[1] = _error.toString();
+    if (_error instanceof DrJavaErrorHandler.LoggedCondition) { msg[1] = "Logged condition: " + _error.getMessage(); }
+    else { msg[1] = _error.toString(); }
     _errorInfo = new JOptionPane(msg,JOptionPane.ERROR_MESSAGE,
                                  JOptionPane.DEFAULT_OPTION,null,
                                  new Object[0]);      

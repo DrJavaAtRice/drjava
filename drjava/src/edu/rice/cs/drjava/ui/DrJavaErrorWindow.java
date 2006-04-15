@@ -34,6 +34,7 @@
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.border.*;
 import java.awt.event.*;
@@ -42,6 +43,7 @@ import java.awt.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 
 /** Displays uncaught exceptions and logged conditions.
  *  This window is not automatically updated when new errors occur. In the case of errors, we want to
@@ -50,9 +52,14 @@ import edu.rice.cs.util.swing.BorderlessScrollPane;
  *  @version $Id$
  */
 public class DrJavaErrorWindow extends JDialog {
+  /** Sourceforge add bug URL */
+  public static final String SF_ADD_BUG_URL = "http://sourceforge.net/tracker/?func=add&group_id=44253&atid=438935/";  
 
+  /** Sourceforge URL */
+  public static final String SF_LINK_NAME = "DrJava's SourceForge page";
+  
   /** information about the error */
-  private JComponent _errorInfo;
+  private JEditorPane _errorInfo;
   /** contains the stack trace */
   private JTextArea _stackTrace;
   /** label with index */
@@ -134,10 +141,9 @@ public class DrJavaErrorWindow extends JDialog {
     _stackTraceScroll = new BorderlessScrollPane(_stackTrace,
                                                  JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                                  JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-    _errorInfo = new JOptionPane("No errors occurred!",JOptionPane.INFORMATION_MESSAGE,
-                                 JOptionPane.DEFAULT_OPTION,null,
-                                 new Object[0]);
-
+    _errorInfo = _errorInfo = new JEditorPane("text/html", HEADER_HTML+NO_ERRORS_HTML);
+    _errorInfo.setEditable(false);
+    _errorInfo.setBackground(getContentPane().getBackground());    
     JPanel cp = new JPanel(new BorderLayout(5,5));
     cp.setBorder(new EmptyBorder(5,5,5,5));
     setContentPane(cp);
@@ -178,9 +184,8 @@ public class DrJavaErrorWindow extends JDialog {
   private void updateErrorInfo() {
     getContentPane().remove(_errorInfo);
     if (_error!=null) {
-      String trace;
+      StringBuilder b = new StringBuilder();
       if (_error instanceof DrJavaErrorHandler.LoggedCondition) {
-        StringBuilder b = new StringBuilder();
         b.append("Logged condition: ");
         b.append(_error.getMessage());
         b.append('\n');
@@ -191,27 +196,77 @@ public class DrJavaErrorWindow extends JDialog {
           b.append(ste);
           b.append('\n');
         }
-        trace = b.toString();
       }
       else {
-        trace = StringOps.getStackTrace(_error);
+        b.append(StringOps.getStackTrace(_error));
         if (_error instanceof UnexpectedException) {
           Throwable t = ((UnexpectedException)_error).getCause();
-          trace = trace + "\nCaused by:\n" + StringOps.getStackTrace(t);
+          b.append("\nCaused by:\n");
+          b.append(StringOps.getStackTrace(t));
         }
       }
-      _stackTrace.setText(trace);
+      
+      b.append("\n\nSystem Properties:\n");
+      java.util.Properties props = System.getProperties();
+      int size = props.size();
+      java.util.Iterator entries = props.entrySet().iterator();
+      while(entries.hasNext()) {
+        java.util.Map.Entry entry = (java.util.Map.Entry)entries.next();
+        b.append(entry.getKey());
+        b.append(" = ");
+        if (entry.getKey().equals("line.separator")) {
+          b.append("\"");
+          String ls = (String)entry.getValue();
+          for(int i=0; i<ls.length(); ++i) {
+            int ch = ls.charAt(i);
+            b.append("\\u");
+            b.append(String.format("%04x", ch));
+          }
+          b.append("\"");
+        }
+        else {
+          b.append(entry.getValue());
+        }
+        b.append("\n");
+      }
+
+      _stackTrace.setText(b.toString());
       _stackTrace.setCaretPosition(0);
-      msg[0] = String.valueOf(_errorCount)+" error"+((_errorCount>1)?"s":"")+" occured!";
-      _errorInfo = new JOptionPane(msg,JOptionPane.ERROR_MESSAGE,
-                                       JOptionPane.DEFAULT_OPTION,null,
-                                       new Object[0]);      
+      
+      b = new StringBuilder();
+      b.append(HEADER_HTML);
+      b.append(_errorCount);
+      b.append(" error");
+      b.append(((_errorCount>1)?"s":""));
+      b.append(" occured!<br>");
+      b.append(ERRORS_FOOTER_HTML);
+      _errorInfo = new JEditorPane("text/html", b.toString());
+      _errorInfo.addHyperlinkListener(new HyperlinkListener() {
+        public void hyperlinkUpdate(HyperlinkEvent e) {
+          if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            try {
+              PlatformFactory.ONLY.openURL(e.getURL());
+            } catch(Exception ex) { /* ignore, just not open web page */ }
+          }
+        }
+      });
+      _errorInfo.setEditable(false);
+      _errorInfo.setBackground(getContentPane().getBackground());
       _indexLabel.setText("Error "+(_errorIndex+1)+" of "+(_errorCount));
     }
     else {
-      _errorInfo = new JOptionPane(new String[] {"No errors occurred!", " ", " ", " ", " ", " "},JOptionPane.INFORMATION_MESSAGE,
-                                       JOptionPane.DEFAULT_OPTION,null,
-                                       new Object[0]);
+      _errorInfo = new JEditorPane("text/html", HEADER_HTML+NO_ERRORS_HTML);
+      _errorInfo.addHyperlinkListener(new HyperlinkListener() {
+        public void hyperlinkUpdate(HyperlinkEvent e) {
+          if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            try {
+              PlatformFactory.ONLY.openURL(e.getURL());
+            } catch(Exception ex) { /* ignore, just not open web page */ }
+          }
+        }
+      });
+      _errorInfo.setEditable(false);
+      _errorInfo.setBackground(getContentPane().getBackground());
       _stackTrace.setText("");
       _indexLabel.setText("");
     }
@@ -280,14 +335,17 @@ public class DrJavaErrorWindow extends JDialog {
   };
 
   /**
-   * Returns the canned message for the user
+   * Canned message for the user.
    */
-  private final String[] msg = {
-    "",
-    "Please submit a bug report containing the system information in the Help>About ",
-    "window and an account of the actions that caused the bug (if known) to",
-    "http://sourceforge.net/projects/drjava.",
-    "You may wish to save all your work and restart DrJava.",
-    "Thanks for your help in making DrJava better!"};
-
+  private final String HEADER_HTML =
+    "<html><font size=\"-1\" face=\"sans-serif, Arial, Helvetica, Geneva\"><b>";
+  private final String ERRORS_FOOTER_HTML = 
+    "Please submit a bug report containing the information below " +
+    "and an account of the actions that caused the bug (if known) to " +
+    "<a href=\"" + SF_ADD_BUG_URL + "\"><b>" + SF_LINK_NAME + "</b></a>.<br>" +
+    "You may wish to save all your work and restart DrJava.<br>" +
+    "Thanks for your help in making DrJava better!</b></font></p></html>";
+  private final String NO_ERRORS_HTML =
+    "No errors occurred!<br>" +
+    "Thanks for using DrJava!</b></font></p></html>";
 }

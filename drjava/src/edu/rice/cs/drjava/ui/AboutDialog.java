@@ -33,6 +33,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
@@ -44,6 +45,7 @@ import java.awt.event.*;
 import java.awt.*;
 
 import java.io.*;
+import java.net.URL;
 import java.util.Map;
 /**
  * About dialog.
@@ -87,6 +89,25 @@ public class AboutDialog extends JDialog implements ActionListener {
     if (drjava != null) {
       drjava.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5),
                                           drjava.getBorder()));
+      drjava.setCursor(new Cursor(Cursor.HAND_CURSOR));
+      final String url = "http://drjava.org/";
+      drjava.setToolTipText(url);
+      drjava.addMouseListener(new MouseListener() {
+        public void mousePressed(MouseEvent e) {
+        }        
+        public void mouseReleased(MouseEvent e) {
+        }        
+        public void mouseEntered(MouseEvent e) {
+        }        
+        public void mouseExited(MouseEvent e) {
+        }        
+        public void mouseClicked(MouseEvent e) {
+          try {
+            PlatformFactory.ONLY.openURL(new URL(url));
+          } catch(Exception ex) { /* ignore, just not open web page */ }
+        }
+      });
+      
       JPanel djPanel = new JPanel(new GridLayout(1,1));
       djPanel.add(drjava);
       djPanel.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5),
@@ -153,8 +174,8 @@ public class AboutDialog extends JDialog implements ActionListener {
 
     // deal with logos now (calibrate size)
     LogoList logos = new LogoList();
-    logos.addLogo(createBorderedLabel(CSLOGO,new EmptyBorder(5,5,5,5)));
-    logos.addLogo(createBorderedLabel(SF,null));
+    logos.addLogo(createBorderedLabel(CSLOGO,new EmptyBorder(5,5,5,5)), "http://compsci.rice.edu/");
+    logos.addLogo(createBorderedLabel(SF,null), "http://sourceforge.net/projects/drjava/");
     logos.resizeLogos();
 
     // add to panel
@@ -163,7 +184,28 @@ public class AboutDialog extends JDialog implements ActionListener {
     logoPanel.add(Box.createHorizontalGlue());
     java.util.Iterator it = logos.iterator();
     while(it.hasNext()) {
-      logoPanel.add((JComponent) it.next());
+      JComponent l = (JComponent) it.next();
+      logoPanel.add(l);
+      l.setCursor(new Cursor(Cursor.HAND_CURSOR));
+      final String url = (String)l.getClientProperty("url");
+      if (url != null) {
+        l.setToolTipText(url);
+        l.addMouseListener(new MouseListener() {
+          public void mousePressed(MouseEvent e) {
+          }        
+          public void mouseReleased(MouseEvent e) {
+          }        
+          public void mouseEntered(MouseEvent e) {
+          }        
+          public void mouseExited(MouseEvent e) {
+          }        
+          public void mouseClicked(MouseEvent e) {
+            try {            
+              PlatformFactory.ONLY.openURL(new URL(url));
+            } catch(Exception ex) { /* ignore, just not open web page */ }          
+          }
+        });
+      }
       logoPanel.add(Box.createHorizontalGlue());
     }
     panel.add(logoPanel,BorderLayout.SOUTH);
@@ -174,12 +216,15 @@ public class AboutDialog extends JDialog implements ActionListener {
   private static class LogoList extends java.util.LinkedList<JPanel> implements Serializable {
     private int width = Integer.MIN_VALUE;
     private int height = Integer.MIN_VALUE;
-    private void addLogo(JPanel logo) {
+    private void addLogo(JPanel logo, String url) {
       if (logo != null) {
         Dimension d = logo.getMinimumSize();
         width = Math.max(width,d.width);
         height = Math.max(height,d.height);
         add(logo);
+        if (url != null) {
+          logo.putClientProperty("url", url);
+        }
       }
     }
 
