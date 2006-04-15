@@ -73,8 +73,8 @@ public class DrJavaErrorWindow extends JDialog {
   private JButton _prevButton;
   /** the button that clears all errors and closes the window */
   private JButton _dismissButton;
-  /** the errors that were passed to this window */
-  private java.util.List<Throwable> _errors;
+  /** the number of errors that had occurred */
+  private int _errorCount;
   /** the currently selected error */
   private Throwable _error;
   /** the currently selected error index */
@@ -158,21 +158,19 @@ public class DrJavaErrorWindow extends JDialog {
   
   /** Initialize the dialog. */
   private void init() {
-    _errors = DrJavaErrorHandler.getErrors();
-    if (_errors.size()>0) {
-      _error = _errors.get(0);
+    _errorCount = DrJavaErrorHandler.getErrorCount();
+    if (_errorCount>0) {
+      _error = DrJavaErrorHandler.getError(0);
       _errorIndex = 0;
-      System.out.println("Errors:");
-      for(Throwable t: _errors) System.out.println("\t"+t);
     }
     else {
       _error = null;
       _errorIndex = -1;
     }
     _prevAction.setEnabled(false);
-    _nextAction.setEnabled(_errors.size()>1);
-    _dismissAction.setEnabled(_errors.size()>0);
-    _copyAction.setEnabled(_errors.size()>0);
+    _nextAction.setEnabled(_errorCount>1);
+    _dismissAction.setEnabled(_errorCount>0);
+    _copyAction.setEnabled(_errorCount>0);
     updateErrorInfo();
   }
 
@@ -204,11 +202,11 @@ public class DrJavaErrorWindow extends JDialog {
       }
       _stackTrace.setText(trace);
       _stackTrace.setCaretPosition(0);
-      msg[0] = String.valueOf(_errors.size())+" error"+((_errors.size()>1)?"s":"")+" occured!";
+      msg[0] = String.valueOf(_errorCount)+" error"+((_errorCount>1)?"s":"")+" occured!";
       _errorInfo = new JOptionPane(msg,JOptionPane.ERROR_MESSAGE,
                                        JOptionPane.DEFAULT_OPTION,null,
                                        new Object[0]);      
-      _indexLabel.setText("Error "+(_errorIndex+1)+" of "+(_errors.size()));
+      _indexLabel.setText("Error "+(_errorIndex+1)+" of "+(_errorCount));
     }
     else {
       _errorInfo = new JOptionPane(new String[] {"No errors occurred!", " ", " ", " ", " ", " "},JOptionPane.INFORMATION_MESSAGE,
@@ -233,9 +231,9 @@ public class DrJavaErrorWindow extends JDialog {
     public void actionPerformed(ActionEvent e) {
       if (_errorIndex>0) {
         --_errorIndex;
-        _error = _errors.get(_errorIndex);
+        _error = DrJavaErrorHandler.getError(_errorIndex);
         if (_errorIndex==0) { setEnabled(false); }
-        if (_errors.size()>1) { _nextAction.setEnabled(true); }
+        if (_errorCount>1) { _nextAction.setEnabled(true); }
         updateErrorInfo();
       }
     }
@@ -244,11 +242,11 @@ public class DrJavaErrorWindow extends JDialog {
   /** Go to the next error. */
   private Action _nextAction = new AbstractAction("Next") {
     public void actionPerformed(ActionEvent e) {
-      if (_errorIndex<_errors.size()-1) {
+      if (_errorIndex<_errorCount-1) {
         ++_errorIndex;
-        _error = _errors.get(_errorIndex);
-        if (_errorIndex==_errors.size()-1) { setEnabled(false); }
-        if (_errors.size()>1) { _prevAction.setEnabled(true); }
+        _error = DrJavaErrorHandler.getError(_errorIndex);
+        if (_errorIndex==_errorCount-1) { setEnabled(false); }
+        if (_errorCount>1) { _prevAction.setEnabled(true); }
         updateErrorInfo();
       }
     }
@@ -258,7 +256,7 @@ public class DrJavaErrorWindow extends JDialog {
   private Action _dismissAction = new AbstractAction("Dismiss") {
     public void actionPerformed(ActionEvent e) {
       DrJavaErrorHandler.clearErrors();
-      _errors.clear();
+      _errorCount = 0;
       _error = null;
       _errorIndex = -1;
       setEnabled(false);

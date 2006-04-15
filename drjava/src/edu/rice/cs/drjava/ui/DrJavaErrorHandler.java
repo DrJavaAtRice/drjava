@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /** The handle() method in this class is called everytime an uncaught exception propagates to an AWT action.
@@ -60,8 +61,18 @@ public class DrJavaErrorHandler {
   /** Gets the button to show. */
   public static JButton getButton() { return _errorsButton; }  
   
-  /** Returns a copy of the error list. */
-  public static List<Throwable> getErrors() { return new ArrayList<Throwable>(_errors); }
+  /** Returns the size of the error list. */
+  public static int getErrorCount() { return _errors.size(); }
+  
+  /** Returns the error with the given index. */
+  public static Throwable getError(int index) {
+    if ((index>=0) && (index<_errors.size())) {
+      return _errors.get(index);
+    }
+    else {
+      return new UnexpectedException("Error in DrJavaErrorHandler");
+    }
+  }
   
   /** Clears the list of errors. */
   public static void clearErrors() { _errors.clear(); }
