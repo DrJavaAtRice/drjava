@@ -56,7 +56,7 @@ public abstract class DebugAction<T extends EventRequest> {
    */
   protected Vector<T> _requests;
   protected int _suspendPolicy = EventRequest.SUSPEND_NONE;
-  protected boolean _enabled = true;
+  protected boolean _isEnabled = true;
   protected int _countFilter = -1;
   protected int _lineNumber = ANY_LINE;
 
@@ -149,18 +149,18 @@ public abstract class DebugAction<T extends EventRequest> {
       request.addCountFilter(_countFilter);
     }
     request.setSuspendPolicy(_suspendPolicy);
-    request.setEnabled(_enabled);
+    request.setEnabled(_isEnabled);
 
     // Add properties
     request.putProperty("debugAction", this);
   }
   
   /** @return true if breakpoint is enabled. */
-  public boolean isEnabled() { return _enabled; }
+  public boolean isEnabled() { return _isEnabled; }
   
   
   /** Enable/disable the breakpoint. */
-  public void setEnabled(boolean enabled) {
-    _enabled = enabled;
+  public void setEnabled(boolean isEnabled) {
+    _isEnabled = isEnabled;
   }
 }

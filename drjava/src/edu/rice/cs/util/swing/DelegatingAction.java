@@ -159,10 +159,10 @@ public class DelegatingAction implements Action {
     }
 
     // create property change notifications
-    Boolean enabled = newDelegatee.isEnabled() ? Boolean.TRUE : Boolean.FALSE;
+    Boolean isEnabled = newDelegatee.isEnabled() ? Boolean.TRUE : Boolean.FALSE;
 
     PropertyChangeEvent enabledEvent
-      =new PropertyChangeEvent(newDelegatee, "enabled", Boolean.FALSE, enabled);
+      =new PropertyChangeEvent(newDelegatee, "enabled", Boolean.FALSE, isEnabled);
 
     PropertyChangeEvent[] events = null;
 

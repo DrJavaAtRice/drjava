@@ -146,7 +146,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** Determines if this definitions document has changed since the last save.
    *  @return true if the document has been modified
    */
-  public boolean isModifiedOnDisk();
+  public boolean modifiedOnDisk();
   
   /** Resets the document to be unmodified. */
   public void resetModification();

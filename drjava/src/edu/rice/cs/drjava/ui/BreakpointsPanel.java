@@ -218,10 +218,10 @@ public class BreakpointsPanel extends TabbedPanel {
      * Overrides the default renderer component to use proper coloring.
      */
     public Component getTreeCellRendererComponent
-      (JTree tree, Object value, boolean selected, boolean expanded,
+      (JTree tree, Object value, boolean isSelected, boolean isExpanded,
        boolean leaf, int row, boolean hasFocus) {
       Component renderer = super.getTreeCellRendererComponent
-        (tree, value, selected, expanded, leaf, row, hasFocus);
+        (tree, value, isSelected, isExpanded, leaf, row, hasFocus);
       
       if (renderer instanceof JComponent) {
         ((JComponent) renderer).setOpaque(false);
@@ -636,11 +636,11 @@ public class BreakpointsPanel extends TabbedPanel {
   
   private class BPTreeUserObj {
     private int _lineNumber;
-    private boolean _enabled;
+    private boolean _isEnabled;
     public int lineNumber() { return _lineNumber; }
-    public boolean isEnabled() { return _enabled; }
-    public void setEnabled(boolean e) { _enabled = e; }
-    public BPTreeUserObj(int l, boolean e) { _lineNumber = l; _enabled = e; }
-    public String toString() { return String.valueOf(_lineNumber) + ((_enabled)?"":" (disabled)"); }
+    public boolean isEnabled() { return _isEnabled; }
+    public void setEnabled(boolean e) { _isEnabled = e; }
+    public BPTreeUserObj(int l, boolean e) { _lineNumber = l; _isEnabled = e; }
+    public String toString() { return String.valueOf(_lineNumber) + ((_isEnabled)?"":" (disabled)"); }
   }
 }

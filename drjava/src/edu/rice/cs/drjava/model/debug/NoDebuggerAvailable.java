@@ -144,7 +144,7 @@ public class NoDebuggerAvailable implements Debugger {
    *  @param enabled true if this breakpoint should be enabled
    */
   public void toggleBreakpoint(OpenDefinitionsDocument doc,
-                               int offset, int lineNum, boolean enabled)
+                               int offset, int lineNum, boolean isEnabled)
     throws DebugException
   {
     throw new IllegalStateException("No debugger is available");

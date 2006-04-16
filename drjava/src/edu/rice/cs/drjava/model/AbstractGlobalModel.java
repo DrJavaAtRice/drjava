@@ -2545,7 +2545,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Determines if the file for this document has been modified since it was loaded.
      *  @return true if the file has been modified
      */
-    public boolean isModifiedOnDisk() {
+    public boolean modifiedOnDisk() {
       boolean ret = false;
       DefinitionsDocument dd = getDocument();
       try {
@@ -2667,7 +2667,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      */
     public boolean revertIfModifiedOnDisk() throws IOException{
       final OpenDefinitionsDocument doc = this;
-      if (isModifiedOnDisk()) {
+      if (modifiedOnDisk()) {
         boolean shouldRevert = _notifier.shouldRevertFile(doc);
         if (shouldRevert) doc.revertFile();
         return shouldRevert;

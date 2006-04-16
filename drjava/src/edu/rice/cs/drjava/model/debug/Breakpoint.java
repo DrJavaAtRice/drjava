@@ -55,13 +55,13 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
    private Position _endPos;
 
   /** @throws DebugException if the document does not have a file */
-  public Breakpoint(OpenDefinitionsDocument doc, int offset, int lineNumber, boolean enabled, JPDADebugger manager)
+  public Breakpoint(OpenDefinitionsDocument doc, int offset, int lineNumber, boolean isEnabled, JPDADebugger manager)
     throws DebugException {
 
     super(manager, doc, offset);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
-    _enabled = enabled;
+    _isEnabled = isEnabled;
 
     try {
       _startPos = doc.createPosition(doc.getLineStartPos(offset));
@@ -76,7 +76,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
       // otherwise breakpoint gets re-set when debugger is enabled
       Vector<ReferenceType> refTypes = _manager.getReferenceTypes(_className, _lineNumber);
       _initializeRequests(refTypes);
-      setEnabled(enabled);
+      setEnabled(isEnabled);
     }
   }
   
@@ -106,7 +106,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
         Location loc = (Location) lines.get(0);
         
         BreakpointRequest request = _manager.getEventRequestManager().createBreakpointRequest(loc);
-        request.setEnabled(_enabled);
+        request.setEnabled(_isEnabled);
         _requests.add(request);
       }
     }
@@ -131,16 +131,16 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
   }
   
   /** Enable/disable the breakpoint. */
-  public void setEnabled(boolean enabled) {
-    boolean old = _enabled;
-    super.setEnabled(enabled);
+  public void setEnabled(boolean isEnabled) {
+    boolean old = _isEnabled;
+    super.setEnabled(isEnabled);
     try {
       for(BreakpointRequest bpr: _requests) {
-        bpr.setEnabled(enabled);
+        bpr.setEnabled(isEnabled);
       }
     }
     catch(VMDisconnectedException vmde) { /* just ignore */ }
-    if (_enabled!=old) _manager._notifier.breakpointChanged(this);
+    if (_isEnabled!=old) _manager._notifier.breakpointChanged(this);
   }
 
   public String toString() {

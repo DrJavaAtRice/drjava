@@ -118,10 +118,10 @@ public class DirectorySelectorComponent extends JPanel {
     this.add(_chooserButton);
   }
 
-  public void setEnabled(boolean enabled) {
-    _fileField.setEnabled(enabled);
-    _chooserButton.setEnabled(enabled);
-    super.setEnabled(enabled);
+  public void setEnabled(boolean isEnabled) {
+    _fileField.setEnabled(isEnabled);
+    _chooserButton.setEnabled(isEnabled);
+    super.setEnabled(isEnabled);
   }
   
   /** Returns the file text field. */

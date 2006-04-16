@@ -885,7 +885,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @param lineNum Line on which to set or remove the breakpoint
    * @param enabled true if this breakpoint should be enabled
    */
-  public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean enabled) 
+  public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
     throws DebugException {
     
     Breakpoint breakpoint = doc.getBreakpointAt(offset);
@@ -896,7 +896,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       }
       else {
         try {
-          setBreakpoint(new Breakpoint (doc, offset, lineNum, enabled, this));
+          setBreakpoint(new Breakpoint (doc, offset, lineNum, isEnabled, this));
         }
         catch(LineNotExecutableException lnee) {
           printMessage(lnee.getMessage());

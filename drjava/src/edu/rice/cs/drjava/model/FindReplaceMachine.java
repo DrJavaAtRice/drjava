@@ -108,7 +108,7 @@ public class FindReplaceMachine {
     if (_isForward == searchBackwards) {
       // If we switch from searching forward to searching backwards or viceversa, isOnMatch is true, and _findword is the
       // same as the _lastFindWord, we know the user just found _findWord, so skip over this match.
-      if (isOnMatch() && _findWord.equals(_lastFindWord)) _skipText = true;
+      if (onMatch() && _findWord.equals(_lastFindWord)) _skipText = true;
       else _skipText = false;
     }
     _isForward = ! searchBackwards;
@@ -163,7 +163,7 @@ public class FindReplaceMachine {
   /** Determine if the machine is on an instance of the find word.
    *  @return true if the current position is right after an instance of the find word.
    */
-  public boolean isOnMatch() {
+  public boolean onMatch() {
     String findWord = _findWord;
     int wordLen, off;
     
@@ -195,7 +195,7 @@ public class FindReplaceMachine {
   /** If we're on a match for the find word, replace it with the replace word. */
   public boolean replaceCurrent() {
 
-    if (! isOnMatch()) return false;
+    if (! onMatch()) return false;
     _doc.modifyLock();
     try {
 //      boolean atStart = false;
@@ -258,7 +258,7 @@ public class FindReplaceMachine {
    */
   private int _replaceAllInCurrentDoc() {
 //    System.err.println("_replaceAllInCurrentDoc() called; _doc = [" + _doc.getText() + "]");
-//    _doc.modifyLock();  // deadlocks because our implementation does not allow a thread with the writeLock to perform a readLock!
+    _doc.modifyLock();
     try {
       if (_isForward) setPosition(0);
       else setPosition(_doc.getLength());
@@ -276,7 +276,7 @@ public class FindReplaceMachine {
       }
       return count;
     }
-    finally { /* _doc.modifyUnlock(); */ }
+    finally { _doc.modifyUnlock(); }
   }
   
   public FindResult findNext() { return findNext(_searchAllDocuments); }
@@ -291,41 +291,50 @@ public class FindReplaceMachine {
    *  @param searchAll whether to search all documents (or just _doc)
    *  @return a FindResult object containing foundOffset and a flag indicating wrapping to the beginning during a search
    */
-  private FindResult findNext(boolean searchAll) {  
- 
-    // If the user just found a match and toggled the "Search Backwards" option, we should skip the matched text.
-    if (_skipText) {  // adjust position (offset)
+  private FindResult findNext(boolean searchAll) {
+    
+    // Find next match, if any, in _doc. 
+    _doc.readLock();
+    FindResult fr;
+    int start;
+    int len;
+    try {
+      
+      // If the user just found a match and toggled the "Search Backwards" option, we should skip the matched text.
+      if (_skipText) {  // adjust position (offset)
 //      System.err.println("Skip text is true!  Last find word = " + _lastFindWord);
-      int wordLen = _lastFindWord.length();
-      if (_isForward) setPosition(getCurrentOffset() + wordLen);
-      else setPosition(getCurrentOffset() - wordLen);
-      positionChanged();
-    }
-    
+        int wordLen = _lastFindWord.length();
+        if (_isForward) setPosition(getCurrentOffset() + wordLen);
+        else setPosition(getCurrentOffset() - wordLen);
+        positionChanged();
+      }
+      
 //    System.err.println("findNext(" + searchAll + ") called with _doc = [" + _doc.getText() + "] and offset = " + _current.getOffset());
-    
-    int offset = getCurrentOffset();
+      
+      int offset = getCurrentOffset();
 //    System.err.println("findNext(" + searchAll + ") called; initial offset is " + offset);
 //    System.err.println("_doc = [" + _doc.getText() + "], _doc.getLength() = " + _doc.getLength());
-    if (_isForward) return _findNext(_doc, offset, _doc.getLength() - offset, searchAll);
-    return _findNext(_doc, 0, offset, searchAll);
-  } 
-
-  /** Finds next match in specified doc and optionally all subsequent docs (if searchAll).  If searching forward, len 
-   *  must be doc.getLength().  If searching backward, start must be 0.  If searchAll, DO NOT execute in-document 
-   *  wrapped search; it must be done by the caller after all other docs are searched. 
-   */ 
-  private FindResult _findNext(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
-//    System.err.println("_findNext([" + doc.getText() + "], " +  start + ", " + len + ", " + searchAll + ")");
-    assert (_isForward && start + len == doc.getLength()) || (! _isForward && start == 0);
-    FindResult fr = _findNextInDoc(doc, start, len, searchAll);
-    if ((fr.getFoundOffset() >= 0) || ! searchAll) return fr;
+      if (_isForward) { 
+        start = offset; 
+        len = _doc.getLength() - offset; 
+      }
+      else { 
+        start = 0; 
+        len = offset; 
+      }
+      fr = _findNextInDoc(_doc, start, len, searchAll);
+    }
+    finally { _doc.readUnlock(); }
+    if ((fr.getFoundOffset() >= 0) || ! searchAll) return fr;  // match found in _doc
     
-    return _findNextInOtherDocs(doc, start, len);
+    // find match in other docs
+    return _findNextInOtherDocs(_doc, start, len);
   }
+
  
   /** Finds next match in specified doc only.  If searching forward, len must be doc.getLength().  If searching backward,
-   *  start must be 0.  If searchAll, suppress executing in-document wrapped search, because it must be deferred.
+   *  start must be 0.  If searchAll, suppress executing in-document wrapped search, because it must be deferred.  Assumes
+   *  readLock is already held.  Note than this method does a wrapped search if specified search fails.
    */
   private FindResult _findNextInDoc(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
     // search from current position to "end" of document ("end" is start if searching backward)
@@ -337,7 +346,8 @@ public class FindReplaceMachine {
   }
   
   /** Helper method for findNext that looks for a match after searching has wrapped off the "end" (start if searching
-   *  backward) of the document. INVARIANT (! _isForward => start = 0) && (_isForward => start + len = doc.getLength()).
+   *  backward) of the document. Assumes readLock is already held!  
+   *  INVARIANT (! _isForward => start = 0) && (_isForward => start + len = doc.getLength()).
    *  @param doc  the document in which search wrapped
    *  @param start location of preceding text segment where search FAILED.  
    *  @param len  length of text segment previously searched
@@ -352,31 +362,28 @@ public class FindReplaceMachine {
 //    System.err.println("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
 //                       doc.getLength() + ", _isForward = " + _isForward);
 
-    doc.readLock();
-    try {
-      if (doc.getLength() == 0) return new FindResult(doc, -1, true, allWrapped);
-      if (_isForward) {
-        newLen = start;
-        newStart = 0;
-      }
-      else {
-        newStart = len;
-        newLen = doc.getLength() - len;
-      }
+    if (doc.getLength() == 0) return new FindResult(doc, -1, true, allWrapped);
+    if (_isForward) {
+      newLen = start;
+      newStart = 0;
+    }
+    else {
+      newStart = len;
+      newLen = doc.getLength() - len;
+    }
 //      System.err.println("Calling _findNextInDocSegment(" + doc.getText() + ", newStart = " + newStart + ", newLen = " + 
 //                     newLen + ", allWrapped = " + allWrapped + ") and _isForward = " + _isForward);
-      return _findNextInDocSegment(doc, newStart, newLen, true, allWrapped);
-    }
-    finally { doc.readUnlock(); }
+    return _findNextInDocSegment(doc, newStart, newLen, true, allWrapped);
   } 
       
       
-  /** Find first valid match withing specified segment of doc, which must be. */  
+  /** Find first valid match withing specified segment of doc.  Assumes readLock is already held. */  
   private FindResult _findNextInDocSegment(OpenDefinitionsDocument doc, int start, int len) {
     return _findNextInDocSegment(doc, start, len, false, false);
   }
   
-  /** Main helper method for findNext... that searches for _findWord inside the specified document segment.
+  /** Main helper method for findNext... that searches for _findWord inside the specified document segment.  Assumes
+   *  readLock is already held!
    *  @param doc document to be searched
    *  @param start the location (offset) of the text segment to be searched 
    *  @param len the length of the text segment to be searched
@@ -398,7 +405,6 @@ public class FindReplaceMachine {
     String findWord = _findWord;       // copy of word being searched (so it can converted to lower case if necessary
     int wordLen = findWord.length();   // length of search key (word being searched fo  
     
-    doc.readLock();
     try { 
       docLen = doc.getLength();
 //      if (wrapped && allWrapped) Utilities.show(start +", " + len + ", " + docLen + ", doc = '" + doc.getText() + "'");
@@ -454,13 +460,12 @@ public class FindReplaceMachine {
       }
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-    finally { doc.readUnlock(); }
     
     // loop fell through; search failed in doc segment
     return new FindResult(doc, -1, wrapped, allWrapped);
   }
   
-  /** Searches all documents following doc for _findWord, cycling through the documents in the direction specified
+  /** Searches all documents following startDoc for _findWord, cycling through the documents in the direction specified
    *  by _isForward. If the search cycles back to doc without finding a match, performs a wrapped search on doc.
    *  @param startDoc  document where searching started and just failed
    *  @param start  location in startDoc of the document segment where search failed.
@@ -482,7 +487,13 @@ public class FindReplaceMachine {
 //      if (_isForward) setPosition(0);
 //      else setPosition(_doc.getLength());
       
-      FindResult fr = _findNextInDocSegment(_doc, 0, _doc.getLength(), false, allWrapped);
+
+      // find next match in _doc
+      _doc.readLock();
+      FindResult fr;
+      try { fr = _findNextInDocSegment(_doc, 0, _doc.getLength(), false, allWrapped); } 
+      finally { _doc.readUnlock(); }
+      
       if (fr.getFoundOffset() >= 0) return fr;
       
 //      System.err.println("Advancing from '" + _doc.getText() + "' to next doc");        
@@ -490,8 +501,10 @@ public class FindReplaceMachine {
 //      System.err.println("Next doc is: '" + _doc.getText() + "'");
     }
     
-    // no valid match found
-    return _findWrapped(startDoc, start, len, true);   // last arg is true because searching all docs has wrapped
+    // No valid match found; perform wrapped search.  _findWrapped assumes readLock is held.
+    startDoc.readLock();
+    try { return _findWrapped(startDoc, start, len, true); }  // last arg is true because searching all docs has wrapped
+    finally { startDoc.readUnlock(); } 
   } 
   
   /** Determines whether the whole find word is found at the input position

@@ -449,7 +449,7 @@ public class ProjectFileParser {
     private String fname = null;
     private Integer offset = null;
     private Integer lineNumber = null;
-    private boolean enabled = false;
+    private boolean isEnabled = false;
     
     private String pathRoot;
     public BreakpointPropertyVisitor(String pr) { pathRoot = pr; }
@@ -459,7 +459,7 @@ public class ProjectFileParser {
       if (name.compareToIgnoreCase("name") == 0) { fname = ProjectFileParser.ONLY.parseFileName(c.getFirst()); }
       else if (name.compareToIgnoreCase("offset") == 0) { offset = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
       else if (name.compareToIgnoreCase("line") == 0) { lineNumber = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
-      else if (name.compareToIgnoreCase("enabled") == 0) { enabled = true; }
+      else if (name.compareToIgnoreCase("enabled") == 0) { isEnabled = true; }
         
       return c.getRest().accept(this);
     }
@@ -474,7 +474,7 @@ public class ProjectFileParser {
           public File getFile() { return f; }
           public int getOffset() { return offset; }
           public int getLineNumber() { return lineNumber; }
-          public boolean isEnabled() { return enabled; }
+          public boolean isEnabled() { return isEnabled; }
         };
       }
       else {
@@ -483,7 +483,7 @@ public class ProjectFileParser {
           public File getFile() { return f; }
           public int getOffset() { return offset; }
           public int getLineNumber() { return lineNumber; }
-          public boolean isEnabled() { return enabled; }
+          public boolean isEnabled() { return isEnabled; }
         };
       }
     }

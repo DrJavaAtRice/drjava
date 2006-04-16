@@ -351,9 +351,9 @@ class FindReplaceDialog extends TabbedPanel {
     _machine.setMatchCase(matchCaseSelected);
     _matchCase.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        boolean selected = (e.getStateChange() == ItemEvent.SELECTED);
-        _machine.setMatchCase(selected);
-        DrJava.getConfig().setSetting(OptionConstants.FIND_MATCH_CASE, selected);
+        boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
+        _machine.setMatchCase(isSelected);
+        DrJava.getConfig().setSetting(OptionConstants.FIND_MATCH_CASE, isSelected);
         _findField.requestFocusInWindow();
       }
     });
@@ -363,9 +363,9 @@ class FindReplaceDialog extends TabbedPanel {
     _machine.setSearchAllDocuments(searchAllSelected);
     _searchAllDocuments.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        boolean selected = (e.getStateChange() == ItemEvent.SELECTED);
-        _machine.setSearchAllDocuments(selected);
-        DrJava.getConfig().setSetting(OptionConstants.FIND_ALL_DOCUMENTS, selected);
+        boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
+        _machine.setSearchAllDocuments(isSelected);
+        DrJava.getConfig().setSetting(OptionConstants.FIND_ALL_DOCUMENTS, isSelected);
         _findField.requestFocusInWindow();
       }
     });
@@ -376,10 +376,10 @@ class FindReplaceDialog extends TabbedPanel {
     else { _machine.setFindAnyOccurrence(); }
     _matchWholeWord.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        boolean selected = (e.getStateChange() == ItemEvent.SELECTED);
-        if (selected) { _machine.setMatchWholeWord(); }
+        boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
+        if (isSelected) { _machine.setMatchWholeWord(); }
         else { _machine.setFindAnyOccurrence(); }
-        DrJava.getConfig().setSetting(OptionConstants.FIND_WHOLE_WORD, selected);
+        DrJava.getConfig().setSetting(OptionConstants.FIND_WHOLE_WORD, isSelected);
         _findField.requestFocusInWindow();
       }
     });
@@ -389,9 +389,9 @@ class FindReplaceDialog extends TabbedPanel {
     _machine.setIgnoreCommentsAndStrings(ignoreCommentsSelected);
     _ignoreCommentsAndStrings.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        boolean selected = (e.getStateChange() == ItemEvent.SELECTED);
-        _machine.setIgnoreCommentsAndStrings(selected);
-        DrJava.getConfig().setSetting(OptionConstants.FIND_NO_COMMENTS_STRINGS, selected);
+        boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
+        _machine.setIgnoreCommentsAndStrings(isSelected);
+        DrJava.getConfig().setSetting(OptionConstants.FIND_NO_COMMENTS_STRINGS, isSelected);
         _findField.requestFocusInWindow();
       }
     });
@@ -547,7 +547,7 @@ class FindReplaceDialog extends TabbedPanel {
       _machine.setFindWord(_findField.getText());
       _machine.setReplaceWord(_replaceField.getText());
       _frame.clearStatusMessage(); // _message.setText(""); // JL
-      if (!_machine.isOnMatch() || _findField.getText().equals("")) {
+      if (!_machine.onMatch() || _findField.getText().equals("")) {
         _replaceAction.setEnabled(false);
         _replaceFindNextAction.setEnabled(false);
         _replaceFindPreviousAction.setEnabled(false);

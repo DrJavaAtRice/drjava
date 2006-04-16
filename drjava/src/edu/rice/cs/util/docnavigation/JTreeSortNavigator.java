@@ -613,10 +613,10 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     /** Rreturns the component for a cell
      *  @param tree
      */
-    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
+    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean isExpanded,
                                                   boolean leaf, int row, boolean hasFocus) {
       
-      super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+      super.getTreeCellRendererComponent(tree, value, sel, isExpanded, leaf, row, hasFocus);
       
       DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
       if (node instanceof RootNode && _rootIcon != null) setIcon(_rootIcon);

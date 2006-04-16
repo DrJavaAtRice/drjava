@@ -110,7 +110,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Specifies if tabs are removed on open and converted to spaces. */
   private static boolean _tabsRemoved = true;
   /** Specifies if the document has been modified since the last save. */
-  private volatile boolean _modifiedSinceSave = false;
+  private volatile boolean _isModifiedSinceSave = false;
   /** Specifies if classFile is in sync with current state of the document */
   private volatile boolean _classFileInSync = false;
   /** Cached location, aides in determining line number. */
@@ -383,11 +383,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     
     modifyLock();
     try {
-    _modifiedSinceSave = _undoManager.isModified();
+    _isModifiedSinceSave = _undoManager.isModified();
 //    System.out.println("DefinitionsDocument: set modified? " + _modifiedSinceSave);
     }
     finally { 
-      if (! _modifiedSinceSave && _odd != null) _odd.documentReset();
+      if (! _isModifiedSinceSave && _odd != null) _odd.documentReset();
       modifyUnlock();
 //    Utilities.showDebug("DefintionsDocument: _modifiedSinceSave = " + _modifiedSinceSave);
     }
@@ -396,8 +396,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    /** Sets the modification state of this document to true and updates the state of the associated _odd. 
     *  Assumes that write lock is already held. */
   private void setModifiedSinceSave() {
-    if (! _modifiedSinceSave) {
-      _modifiedSinceSave = true;
+    if (! _isModifiedSinceSave) {
+      _isModifiedSinceSave = true;
       _classFileInSync = false;
       if (_odd != null) _odd.documentModified();
     }    
@@ -407,7 +407,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public void resetModification() {
     modifyLock();
     try {
-      _modifiedSinceSave = false;
+      _isModifiedSinceSave = false;
       _undoManager.documentSaved();
     }
     finally { 
@@ -422,7 +422,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   public boolean isModifiedSinceSave() {
     readLock();
-    try { return  _modifiedSinceSave; }
+    try { return  _isModifiedSinceSave; }
     finally { readUnlock(); }
   }
   

@@ -161,7 +161,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     _frm.setFindWord("evil");
     _testFindNextSucceeds(_frm, CONTINUE, 0, 12);
     _doc.insertString(9, "-", null);
-    assertTrue("no longer on find text", !_frm.isOnMatch());
+    assertTrue("no longer on find text", !_frm.onMatch());
 //    System.err.println("testFindNextAndFailIsOnMatch completed");
   }
 
@@ -610,7 +610,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //    assertEquals("documents should equal", doc, frm.getDocument());
       assertEquals("findNext return value", found, fr.getFoundOffset());
       _assertOffsets(frm, start, found);
-      assertTrue("on find text", frm.isOnMatch());
+      assertTrue("on find text", frm.onMatch());
     }
     catch(Exception e) { fail("Threw exception: " + e); }
   }
@@ -620,7 +620,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     int findOffset = frm.findNext().getFoundOffset();
     assertEquals("findNext return value", found, findOffset);
     _assertOffsets(frm, start, found);
-    assertTrue("on find text", frm.isOnMatch());
+    assertTrue("on find text", frm.onMatch());
     }
     catch(Exception e) { fail("Threw exception: " + e); }
   }

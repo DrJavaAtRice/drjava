@@ -64,7 +64,7 @@ public class DummyOpenDefDocTest extends DrJavaTestCase {
   public void testProperExceptionThrowing() {
     try {
       DummyOpenDefDoc dummy = new DummyOpenDefDoc();
-      dummy.isModifiedOnDisk();
+      dummy.modifiedOnDisk();
       fail("DummyOpenDefDoc did not throw UnsupportedOperationException");
     }
     catch (UnsupportedOperationException e) {

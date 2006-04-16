@@ -51,7 +51,7 @@ public class Log {
   /**
    * Whether this particular log is enabled in development mode.
    */
-  protected boolean _enabled;
+  protected boolean _isEnabled;
 
   /**
    * The filename of this log.
@@ -68,16 +68,16 @@ public class Log {
    *  @param name File name for the log
    *  @param enabled Whether to actively use this log
    */
-  public Log(String name, boolean enabled) {
+  public Log(String name, boolean isEnabled) {
     _name = name;
-    _enabled = enabled;
+    _isEnabled = isEnabled;
     _init();
   }
 
   /** Creates the log file, if enabled. */
   protected void _init() {
     if (_writer == null) {
-      if (_enabled || ENABLE_ALL) {
+      if (_isEnabled || ENABLE_ALL) {
         try {
           File f = new File(_name);
           FileWriter w = new FileWriter(f.getAbsolutePath(), true);
@@ -97,15 +97,15 @@ public class Log {
    * the code is in development mode.
    * @param enabled Whether to print messages to the log file
    */
-  public void setEnabled(boolean enabled) {
-    _enabled = enabled;
+  public void setEnabled(boolean isEnabled) {
+    _isEnabled = isEnabled;
   }
 
   /**
    * Returns whether this log is currently enabled.
    */
   public boolean isEnabled() {
-    return (_enabled || ENABLE_ALL);
+    return (_isEnabled || ENABLE_ALL);
   }
 
   /**

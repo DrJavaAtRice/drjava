@@ -4606,9 +4606,9 @@ public class MainFrame extends JFrame {
    * Called every time the debug mode checkbox is toggled. The resume and step
    * functions should always be disabled.
    */
-  private void _setDebugMenuItemsEnabled(boolean enabled) {
+  private void _setDebugMenuItemsEnabled(boolean isEnabled) {
     
-    _debuggerEnabledMenuItem.setSelected(enabled);
+    _debuggerEnabledMenuItem.setSelected(isEnabled);
     //_suspendDebugAction.setEnabled(false);
     _resumeDebugAction.setEnabled(false);
     _stepIntoDebugAction.setEnabled(false);

@@ -270,7 +270,7 @@ public class ProjectTest extends DrJavaTestCase {
 
   private DocumentInfoGetter makeGetter(final int sel1, final int sel2, final int scrollv,
                                         final int scrollh, final String fname, final String pack,
-                                        final boolean active, final boolean untitled, final File pf) {
+                                        final boolean active, final boolean isUntitled, final File pf) {
     return new DocumentInfoGetter() {
       public Pair<Integer,Integer> getSelection() { 
         return new Pair<Integer,Integer>(new Integer(sel1),new Integer(sel2)); 
@@ -284,7 +284,7 @@ public class ProjectTest extends DrJavaTestCase {
       }
       public String getPackage() { return pack; }
       public boolean isActive() { return active; }
-      public boolean isUntitled() { return untitled; }
+      public boolean isUntitled() { return isUntitled; }
     };
 
   }

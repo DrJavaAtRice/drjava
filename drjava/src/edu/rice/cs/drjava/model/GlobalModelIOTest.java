@@ -1044,7 +1044,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     tempFile1.setLastModified((new java.util.Date()).getTime());
 
-    assertTrue("modified on disk1", doc.isModifiedOnDisk());
+    assertTrue("modified on disk1", doc.modifiedOnDisk());
     boolean res = doc.revertIfModifiedOnDisk();
     assertTrue("file reverted", res);
 
@@ -1100,7 +1100,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
                  s,
                  FileOps.readFileAsString(tempFile1));
 
-    assertTrue("modified on disk1", doc.isModifiedOnDisk());
+    assertTrue("modified on disk1", doc.modifiedOnDisk());
     boolean reverted = doc.revertIfModifiedOnDisk();
     assertTrue("modified on disk", reverted == false);
     listener.assertShouldRevertFileCount(1);

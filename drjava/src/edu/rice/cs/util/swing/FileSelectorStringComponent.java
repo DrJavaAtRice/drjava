@@ -103,10 +103,10 @@ public class FileSelectorStringComponent extends JPanel {
     this.add(_chooserButton);
   }
 
-  public void setEnabled(boolean enabled) {
-    _textField.setEnabled(enabled);
-    _chooserButton.setEnabled(enabled);
-    super.setEnabled(enabled);
+  public void setEnabled(boolean isEnabled) {
+    _textField.setEnabled(isEnabled);
+    _chooserButton.setEnabled(isEnabled);
+    super.setEnabled(isEnabled);
   }
   
   /** Returns the file text field. */

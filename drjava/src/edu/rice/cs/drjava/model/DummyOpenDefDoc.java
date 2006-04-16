@@ -78,7 +78,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
    
-  public boolean isModifiedOnDisk() { throw new UnsupportedOperationException("Dummy method"); }
+  public boolean modifiedOnDisk() { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean saveFile(FileSaveSelector com) throws IOException {
     throw new UnsupportedOperationException("Dummy method");
