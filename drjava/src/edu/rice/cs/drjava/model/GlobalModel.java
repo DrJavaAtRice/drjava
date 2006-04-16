@@ -430,7 +430,7 @@ public interface GlobalModel extends ILoadDocuments {
   /** A file is in the project if the source root is the same as the project root. This means that project files must
    *  be saved in the source root. (we query the model through the model's state)
    */
-  public boolean isInProjectPath(OpenDefinitionsDocument doc);
+  public boolean inProjectPath(OpenDefinitionsDocument doc);
   
   /** Notifies the project state that the project has been changed. */
   public void setProjectChanged(boolean changed);

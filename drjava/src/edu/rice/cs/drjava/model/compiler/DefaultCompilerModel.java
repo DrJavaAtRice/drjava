@@ -140,7 +140,7 @@ public class DefaultCompilerModel implements CompilerModel {
       List<OpenDefinitionsDocument> projectDocs = new LinkedList<OpenDefinitionsDocument>();
       
       for (OpenDefinitionsDocument doc : defDocs) {
-        if (doc.isInProjectPath() || doc.isAuxiliaryFile()) projectDocs.add(doc);
+        if (doc.inProjectPath() || doc.isAuxiliaryFile()) projectDocs.add(doc);
       }
       defDocs = projectDocs;
     }

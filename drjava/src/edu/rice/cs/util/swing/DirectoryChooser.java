@@ -100,7 +100,7 @@ public class DirectoryChooser extends JFileChooser {
 //    if (root != null && root.exists()) {
 //      setFileView(new FileView() { 
 //                    public Boolean isTraversable(File f) { 
-//                      return Boolean.valueOf(f.isDirectory() && FileOps.isInFileTree(f, root)); 
+//                      return Boolean.valueOf(f.isDirectory() && FileOps.inFileTree(f, root)); 
 //                    }});
 //    }
     
@@ -145,6 +145,6 @@ public class DirectoryChooser extends JFileChooser {
 //  public boolean isTraversable(File f) {
 //    if (_root == null) return super.isTraversable(f);
 //    Utilities.show("isTraversable(" + f + ") called; _root = " + _root);
-//    return f.isDirectory() && FileOps.isInFileTree(f, _root);
+//    return f.isDirectory() && FileOps.inFileTree(f, _root);
 //  }
 }

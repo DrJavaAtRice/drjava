@@ -76,6 +76,6 @@ public class FileChooser extends JFileChooser {
   public boolean isTraversable(File f) {
     if (_root == null) return super.isTraversable(f);
 //    Utilities.show("isTraversable(" + f + ") called; _root = " + _root);
-    return f != null && f.isDirectory() && FileOps.isInFileTree(f, _root);
+    return f != null && f.isDirectory() && FileOps.inFileTree(f, _root);
   }
 }

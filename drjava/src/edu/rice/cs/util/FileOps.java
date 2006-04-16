@@ -67,8 +67,8 @@ public abstract class FileOps {
   };
   
   /** Determines whether the specified file in within the specified file tree. */
-  public static boolean isInFileTree(File f, File root) {
-    if (root == null) return false;
+  public static boolean inFileTree(File f, File root) {
+    if (root == null || f == null) return false;
     try {
       if (! f.isDirectory()) f = f.getParentFile();
       String filePath = f.getCanonicalPath() + File.separator;

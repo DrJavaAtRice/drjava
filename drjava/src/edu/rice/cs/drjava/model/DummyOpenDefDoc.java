@@ -199,8 +199,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public void updateModifiedSinceSave() { throw new UnsupportedOperationException("Dummy method"); }
   public void setFile(File file) { throw new UnsupportedOperationException("Dummy method"); }
   public void close() { } 
-  public boolean isInProjectPath() { return false; }
-  public boolean isInNewProjectPath(File f) { throw new UnsupportedOperationException("Dummy method"); }
+  public boolean inProjectPath() { return false; }
+  public boolean inNewProjectPath(File f) { throw new UnsupportedOperationException("Dummy method"); }
   public boolean inProject() { return false; }
   public boolean isAuxiliaryFile() { return false; }
   public boolean belongsHuh(Document doc) { return false; }

@@ -264,14 +264,14 @@ public class FindReplaceMachine {
       else setPosition(_doc.getLength());
       
       int count = 0;
-      FindResult fr = findNext();  // find next match in current doc   
+      FindResult fr = findNext(false);  // find next match in current doc   
 //      Utilities.show(fr + " returned by call on findNext()");
       
       while (! fr.getWrapped()) {
         replaceCurrent();
         count++;
 //        Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
-        fr = findNext();           // find next match in current doc
+        fr = findNext(false);           // find next match in current doc
 //        Utilities.show("Call on findNext() returned " + fr.toString() + "in doc '" + _doc.getText() + "'");
       }
       return count;

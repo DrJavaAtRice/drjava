@@ -119,10 +119,10 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public boolean undoManagerCanRedo();
   
   /** Determines if this document in the file system tree below the active project root. */
-  public boolean isInProjectPath();
+  public boolean inProjectPath();
   
   /** Determines if this document in the file system tree below the specified root. */
-  public boolean isInNewProjectPath(File root);
+  public boolean inNewProjectPath(File root);
   
   /** @return true if the document's file is a project auxiliary file. */
   public boolean isAuxiliaryFile();

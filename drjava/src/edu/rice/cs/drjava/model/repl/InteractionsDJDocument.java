@@ -182,7 +182,7 @@ public class InteractionsDJDocument extends AbstractDJDocument {
   /** Returns true iff the end of the current interaction is an open comment block
    *  @return true iff the end of the current interaction is an open comment block
    */
-  public boolean isInCommentBlock() {
+  public boolean inCommentBlock() {
     readLock();
     try {
       synchronized(_reduced) {

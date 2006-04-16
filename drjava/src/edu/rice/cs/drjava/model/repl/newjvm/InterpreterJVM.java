@@ -449,7 +449,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   public boolean setActiveInterpreter(String name) {
     _activeInterpreter = getInterpreter(name);
-    return _activeInterpreter.isInProgress();
+    return _activeInterpreter.inProgress();
   }
   
   /** Sets the default interpreter to be active.
@@ -457,7 +457,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   public boolean setToDefaultInterpreter() {
     _activeInterpreter = _defaultInterpreter;
-    return _activeInterpreter.isInProgress();
+    return _activeInterpreter.inProgress();
   }
   
   /** Gets the hashtable containing the named interpreters.  Package private for testing purposes.
@@ -926,7 +926,7 @@ class InterpreterData {
   public Interpreter getInterpreter() { return _interpreter; }
   
   /** Returns whether this interpreter is currently in progress with an interaction. */
-  public boolean isInProgress() { return _inProgress; }
+  public boolean inProgress() { return _inProgress; }
   
   /** Sets whether this interpreter is currently in progress. */
   public void setInProgress(boolean inProgress) { _inProgress = inProgress; }

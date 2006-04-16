@@ -3041,7 +3041,7 @@ public class MainFrame extends JFrame {
     //    l.add(_model.getActiveDocument());
     //    _model.closeFiles(l);
     
-    if ((_model.isProjectActive() && _model.getActiveDocument().isInProjectPath()) ||
+    if ((_model.isProjectActive() && _model.getActiveDocument().inProjectPath()) ||
         _model.getActiveDocument().isAuxiliaryFile()) {
       
       String fileName = null;
@@ -6069,7 +6069,7 @@ public class MainFrame extends JFrame {
         File f = doc.getFile();
         if (! _model.inProject(f)) {
           _recentFileManager.updateOpenFiles(f);
-          if (_model.isInProjectPath(doc)) _model.setProjectChanged(true);
+          if (_model.inProjectPath(doc)) _model.setProjectChanged(true);
         }
       }
       catch (FileMovedException fme) {

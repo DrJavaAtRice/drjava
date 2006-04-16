@@ -439,7 +439,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  project root. this means that project files must be saved at the
    *  source root. (we query the model through the model's state)
    */
-  public boolean isInProjectPath(OpenDefinitionsDocument doc) { return _state.isInProjectPath(doc); }
+  public boolean inProjectPath(OpenDefinitionsDocument doc) { return _state.inProjectPath(doc); }
   
   /** Sets the class with the project's main method. */
   public void setMainClass(File f) {
@@ -575,7 +575,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Determines whether the specified doc in within the project file tree.
      *  No synchronization is required because only immutable data is accessed.
      */
-    public boolean isInProjectPath(OpenDefinitionsDocument doc) {
+    public boolean inProjectPath(OpenDefinitionsDocument doc) {
       if (doc.isUntitled()) return false;
       
       // If the file does not exist, we still want to tell if it's in the correct
@@ -584,13 +584,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File f;
       try { f = doc.getFile(); } 
       catch(FileMovedException fme) { f = fme.getFile(); }
-      return isInProjectPath(f);
+      return inProjectPath(f);
     }
     
     /** Determines whether the specified file in within the project file tree.
      *  No synchronization is required because only immutable data is accessed.
      */
-    public boolean isInProjectPath(File f) { return FileOps.isInFileTree(f, getProjectRoot()); }
+    public boolean inProjectPath(File f) { return FileOps.inFileTree(f, getProjectRoot()); }
     
     /** @return the absolute path to the project file.  Since projectFile is final, no synchronization
      *  is necessary.
@@ -600,7 +600,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean inProject(File f) {
       String path;
       
-      if (f == null || ! isInProjectPath(f)) return false;
+      if (f == null || ! inProjectPath(f)) return false;
       try { 
         path = f.getCanonicalPath();
         return _projFilePaths.contains(path);
@@ -756,8 +756,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return new File(System.getProperty("user.dir"));  // a flat file configuration should have exactly one source root
     }
     public boolean isProjectActive() { return false; }
-    public boolean isInProjectPath(OpenDefinitionsDocument doc) { return false; }
-    public boolean isInProjectPath(File f) { return false; }
+    public boolean inProjectPath(OpenDefinitionsDocument doc) { return false; }
+    public boolean inProjectPath(File f) { return false; }
     public File getProjectFile() { return null; }
     public void setBuildDirectory(File f) { }
     public void setProjectFile(File f) { }
@@ -1116,7 +1116,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       openFiles(new FileOpenSelector() { public File[] getFiles() { return sfiles; } });
       
-      if (ct > 0 && _state.isInProjectPath(dir)) setProjectChanged(true);
+      if (ct > 0 && _state.inProjectPath(dir)) setProjectChanged(true);
     }
   }
   
@@ -1181,7 +1181,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File f = doc.getFile();
       
       if (doc.isUntitled()) extFileList.add(f);
-      else if (FileOps.isInFileTree(f, projectRoot)) {
+      else if (FileOps.inFileTree(f, projectRoot)) {
         DocFile file = new DocFile(f);
         file.setPackage(doc.getPackageName());  // must save _packageName so it is correct when project is loaded
         builder.addSourceFile(file);
@@ -1222,7 +1222,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     for (OpenDefinitionsDocument doc: docs) {
-      if (doc.isInProjectPath()) {
+      if (doc.inProjectPath()) {
         DocumentInfoGetter g = info.get(doc);
         builder.addSourceFile(g);
         srcFileList.add(g.getFile());
@@ -1376,7 +1376,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getSourceBinTitle(), 
         new INavigatorItemFilter<OpenDefinitionsDocument>() {
-          public boolean accept(OpenDefinitionsDocument d) { return d.isInProjectPath(); }
+          public boolean accept(OpenDefinitionsDocument d) { return d.inProjectPath(); }
         }));
     
     l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getAuxiliaryBinTitle(), 
@@ -2236,11 +2236,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      *  project root. this means that project files must be saved at the
      *  source root. (we query the model through the model's state)
      */
-    public boolean isInProjectPath() { return _state.isInProjectPath(this); }
+    public boolean inProjectPath() { return _state.inProjectPath(this); }
     
     /** An open file is in the new project if the source root is the same as the new project root. */
-    public boolean isInNewProjectPath(File projRoot) { 
-      try { return ! isUntitled() && FileOps.isInFileTree(getFile(), projRoot); }
+    public boolean inNewProjectPath(File projRoot) { 
+      try { return ! isUntitled() && FileOps.inFileTree(getFile(), projRoot); }
       catch(FileMovedException e) { return false; }
     }
   
@@ -3221,7 +3221,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     List<OpenDefinitionsDocument> allDocs = getOpenDefinitionsDocuments();
     List<OpenDefinitionsDocument> selectedDocs = new LinkedList<OpenDefinitionsDocument>();
     for (OpenDefinitionsDocument d : allDocs) {
-      if (! d.isInProjectPath() && ! d.isAuxiliaryFile()) selectedDocs.add(d);
+      if (! d.inProjectPath() && ! d.isAuxiliaryFile()) selectedDocs.add(d);
     }
     return selectedDocs;
   }
@@ -3240,7 +3240,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     List<OpenDefinitionsDocument> allDocs = getOpenDefinitionsDocuments();
     List<OpenDefinitionsDocument> projectDocs = new LinkedList<OpenDefinitionsDocument>();
     for (OpenDefinitionsDocument d: allDocs)
-      if (d.isInProjectPath() || d.isAuxiliaryFile()) projectDocs.add(d);
+      if (d.inProjectPath() || d.isAuxiliaryFile()) projectDocs.add(d);
     return projectDocs;
   }
   /* Extracts relative path (from project origin) to parent of file identified by path.  Assumes path does not end in 

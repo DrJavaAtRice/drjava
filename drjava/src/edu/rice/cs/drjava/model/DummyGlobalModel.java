@@ -487,7 +487,7 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call inProject on a Dummy");
   }
 
-  public boolean isInProjectPath(OpenDefinitionsDocument doc) {
+  public boolean inProjectPath(OpenDefinitionsDocument doc) {
      throw new UnsupportedOperationException("Tried to call inProject on a Dummy");
   }
 

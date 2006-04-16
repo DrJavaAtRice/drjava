@@ -114,17 +114,17 @@ public abstract class ReducedToken implements ReducedModelStates {
   /** Indicates whether this brace is commented out.
    *  @return true if the brace is hidden by comments.
    */
-  public boolean isCommented() { return  isInBlockComment() || isInLineComment(); }
+  public boolean isCommented() { return  inBlockComment() || inLineComment(); }
 
   /** Determines whether the current location is inside a block comment.
    *  @return true or false
    */
-  public boolean isInBlockComment() { return  _state == INSIDE_BLOCK_COMMENT; }
+  public boolean inBlockComment() { return  _state == INSIDE_BLOCK_COMMENT; }
 
   /** Determines whether the current location is inside a line comment.
    *  @return true or false
    */
-  public boolean isInLineComment() { return  _state == INSIDE_LINE_COMMENT; }
+  public boolean inLineComment() { return  _state == INSIDE_LINE_COMMENT; }
 
   /** Determines whether the current location is part of a multiple char brace.
    *  @return true or false

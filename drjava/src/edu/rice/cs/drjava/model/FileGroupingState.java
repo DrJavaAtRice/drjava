@@ -53,12 +53,12 @@ public interface FileGroupingState {
   /** @return true if the document is part of the active project (in the project path), or false
    *  if it is not (or the model is not in project mode)
    */
-  public boolean isInProjectPath(OpenDefinitionsDocument doc);
+  public boolean inProjectPath(OpenDefinitionsDocument doc);
   
   /** @return true if the file is part of the active project (in the project path), or false
    *  if it is not (or the model is not in project mode)
    */
-  public boolean isInProjectPath(File f);
+  public boolean inProjectPath(File f);
   
 //  /** junits all files that the state considers "all" (ie, all files in project directory in project mode). */
 //  public void junitAll();
