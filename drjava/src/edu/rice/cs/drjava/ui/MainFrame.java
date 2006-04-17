@@ -332,7 +332,7 @@ public class MainFrame extends JFrame {
     }
     public void actionPerformed(ActionEvent ae) { _moveToAuxiliary(); }
   };
-  private Action _removeAuxiliaryAction = new AbstractAction("Convert to External") {
+  private Action _removeAuxiliaryAction = new AbstractAction("Do Not Include With Project") {
     {
       putValue(Action.SHORT_DESCRIPTION, "Do not open this document next time this project is opened.");
     }
@@ -548,8 +548,9 @@ public class MainFrame extends JFrame {
   
   private Action _saveProjectAsAction = new AbstractAction("Save As...") {
     public void actionPerformed(ActionEvent ae) {
-      _saveProjectAs();  // asks the user for a new project file name; sets _projectFile in global model to this value
-      _saveAll();  // performs a save all operation using this new project file name
+      if (_saveProjectAs()) {  // asks the user for a new project file name; sets _projectFile in global model to this value
+        _saveAll();  // performs a save all operation using this new project file name, but ONLY if the "Save as" was not cancelled
+      }
     }
   };
   
@@ -1545,9 +1546,9 @@ public class MainFrame extends JFrame {
   private Action _gotoOpeningBraceAction =  new AbstractAction("Go to Opening Brace") {
     public void actionPerformed(ActionEvent ae) {
         OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+        if (true) throw new RuntimeException("booh");
         odd.readLock();
         try {
-          DrJavaErrorHandler.log("woof!");
           int pos = odd.findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
           if (pos!=AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
         }
@@ -2514,7 +2515,7 @@ public class MainFrame extends JFrame {
   public void debuggerToggle() {
     // Make sure the debugger is available
     Debugger debugger = _model.getDebugger();
-//    if (!debugger.isAvailable()) return;  // Redundant! This test is the first check made by inDebugMode()
+    if (!debugger.isAvailable()) return;
     
     try { 
       if (inDebugMode()) debugger.shutdown();
@@ -3256,8 +3257,9 @@ public class MainFrame extends JFrame {
   }
 
   /** Pops up the _saveChooser dialog, asks the user for a new project file name, and sets the project file to the 
-   *  specified file.  Nothing is written in the file system; this action is performed by a subsequent _saveAll(). */
-  private void _saveProjectAs() {
+   *  specified file.  Nothing is written in the file system; this action is performed by a subsequent _saveAll().
+   *  @return false if the user canceled the action */
+  private boolean _saveProjectAs() {
     
 //    // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
     _saveChooser.removeChoosableFileFilter(_projectFilter);
@@ -3280,6 +3282,8 @@ public class MainFrame extends JFrame {
         _currentProjFile = file;
       }
     }
+    
+    return (rc == JFileChooser.APPROVE_OPTION);
   }
   
   void _saveProjectHelper(File file) {
@@ -4293,13 +4297,15 @@ public class MainFrame extends JFrame {
     _setUpAction(_showDebugConsoleAction, "Show DrJava Debug Console", "<html>Show a console for debugging DrJava<br>" +
                  "(with \"mainFrame\", \"model\", and \"config\" variables defined)</html>");
     
-    _setUpAction(_toggleDebuggerAction, "Debug Mode", "Enable or disable DrJava's debugger");
-    _setUpAction(_toggleBreakpointAction, "Toggle Breakpoint", "Set or clear a breakpoint on the current line");
-    _setUpAction(_clearAllBreakpointsAction, "Clear Breakpoints", "Clear all breakpoints in all classes");
-    _setUpAction(_resumeDebugAction, "Resume", "Resume the current suspended thread");
-    _setUpAction(_stepIntoDebugAction, "Step Into", "Step into the current line or method call");
-    _setUpAction(_stepOverDebugAction, "Step Over", "Step over the current line or method call");
-    _setUpAction(_stepOutDebugAction, "Step Out", "Step out of the current method");
+    if (_model.getDebugger().isAvailable()) {
+      _setUpAction(_toggleDebuggerAction, "Debug Mode", "Enable or disable DrJava's debugger");
+      _setUpAction(_toggleBreakpointAction, "Toggle Breakpoint", "Set or clear a breakpoint on the current line");
+      _setUpAction(_clearAllBreakpointsAction, "Clear Breakpoints", "Clear all breakpoints in all classes");
+      _setUpAction(_resumeDebugAction, "Resume", "Resume the current suspended thread");
+      _setUpAction(_stepIntoDebugAction, "Step Into", "Step into the current line or method call");
+      _setUpAction(_stepOverDebugAction, "Step Over", "Step over the current line or method call");
+      _setUpAction(_stepOutDebugAction, "Step Out", "Step out of the current method");
+    }
     
     _setUpAction(_helpAction, "Help", "Show documentation on how to use DrJava");
     _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrJava");
@@ -5020,7 +5026,7 @@ public class MainFrame extends JFrame {
     
     _junitErrorPanel = new JUnitPanel(_model, this);
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
-    _breakpointsPanel = new BreakpointsPanel(this);
+    if (_model.getDebugger().isAvailable()) { _breakpointsPanel = new BreakpointsPanel(this); }
     
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
@@ -5055,7 +5061,7 @@ public class MainFrame extends JFrame {
     _tabs.addLast(_junitErrorPanel);
     _tabs.addLast(_javadocErrorPanel);
     _tabs.addLast(_findReplace);
-    _tabs.addLast(_breakpointsPanel);
+    if (_model.getDebugger().isAvailable()) { _tabs.addLast(_breakpointsPanel); }
     
     _interactionsPane.addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = _interactionsContainer; }

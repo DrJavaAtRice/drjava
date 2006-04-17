@@ -207,6 +207,9 @@ public class DrJavaErrorWindow extends JDialog {
       }
       
       b.append("\n\nSystem Properties:\n");
+      b.append("DrJava Version ");
+      b.append(edu.rice.cs.drjava.Version.getBuildTimeString());
+      b.append("\n");
       java.util.Properties props = System.getProperties();
       int size = props.size();
       java.util.Iterator entries = props.entrySet().iterator();
@@ -220,7 +223,8 @@ public class DrJavaErrorWindow extends JDialog {
           for(int i=0; i<ls.length(); ++i) {
             int ch = ls.charAt(i);
             b.append("\\u");
-            b.append(String.format("%04x", ch));
+            String hexString = "0000"+Integer.toHexString(ch);
+            b.append(hexString.substring(hexString.length()-4));
           }
           b.append("\"");
         }
