@@ -56,7 +56,7 @@ public class DrJavaErrorWindow extends JDialog {
   public static final String SF_ADD_BUG_URL = "http://sourceforge.net/tracker/?func=add&group_id=44253&atid=438935/";  
 
   /** Sourceforge URL */
-  public static final String SF_LINK_NAME = "DrJava's SourceForge page";
+  public static final String SF_LINK_NAME = "http://sourceforge.net/projects/drjava";
   
   /** information about the error */
   private JEditorPane _errorInfo;
