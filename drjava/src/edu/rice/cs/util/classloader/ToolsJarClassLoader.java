@@ -35,8 +35,10 @@ package edu.rice.cs.util.classloader;
 
 import java.net.*;
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
@@ -54,32 +56,47 @@ public class ToolsJarClassLoader extends URLClassLoader {
 
   /** Returns an array of possible Files for the tools.jar file. */
   public static File[] getToolsJarFiles(File toolsJar) {
-    String javaHome = System.getProperty("java.home");
-    File home = new File(javaHome);
-    ArrayList<File> files = new ArrayList<File>();
+    File javaHome = FileOps.getCanonicalFile(new File(System.getProperty("java.home")));
     
-    // Check JAVAC_LOCATION
-    if (toolsJar.exists()) files.add(toolsJar);
-
-    // Check $JAVA_HOME/lib/tools.jar
-    File libDir = new File(home, "lib");
-    File jar1 = new File(libDir, "tools.jar");
-    if (jar1.exists()) files.add(jar1);
-
-    // Check $JAVA_HOME/../lib/tools.jar
-    File libDir2 = new File(home.getParentFile(), "lib");
-    File jar2 = new File(libDir2, "tools.jar");
-    if (jar2.exists()) files.add(jar2);
-
-    if (javaHome.toLowerCase().indexOf("program files") != -1) {
-      // Windows: JavaHome is JRE; guess where SDK is
-      File jar3 = new File(getWindowsToolsJar(javaHome));
-      if (jar3.exists()) files.add(jar3);
+    // We must maintain insertion order, so that the first entries have priority;
+    // at the same time, we want to eliminate duplicates so that the same tools.jar file
+    // doesn't show up multiple times.
+    LinkedHashSet<File> javaHomeParents = new LinkedHashSet<File>();
+    javaHomeParents.add(FileOps.getCanonicalFile(new File(javaHome, "..")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File(javaHome, "../..")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/Java/")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Java/")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/java/")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/j2se/")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/local/")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/local/java/")));
+    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/local/j2se/")));
+    
+    LinkedHashSet<File> javaHomes = new LinkedHashSet<File>();
+    javaHomes.add(javaHome);
+    String version = System.getProperty("java.specification.version");
+    final String prefix1 = "j2sdk" + version;
+    final String prefix2 = "jdk" + version;
+    for (File parent : javaHomeParents) {
+      javaHomes.addAll(FileOps.getFilesInDir(parent, false, new FileFilter() {
+        public boolean accept(File f) {
+          String name = f.getName();
+          return name.startsWith(prefix1) || name.startsWith(prefix2);
+        }
+      }));
+    }
+    
+    LinkedHashSet<File> result = new LinkedHashSet<File>();
+    if (toolsJar.exists()) result.add(FileOps.getCanonicalFile(toolsJar));
+    for (File home : javaHomes) {
+      File tools = new File(home, "lib/tools.jar");
+      if (tools.exists()) { result.add(FileOps.getCanonicalFile(toolsJar)); }
     }
 
-    File[] fileArray = new File[files.size()];
-    files.toArray(fileArray);
-    return fileArray;
+    return result.toArray(new File[0]);
   }
   
   /** Returns an array of possible URLs for the tools.jar file. */
@@ -114,33 +131,6 @@ public class ToolsJarClassLoader extends URLClassLoader {
       classPath.append(files[i].getAbsolutePath());
     }
     return classPath.toString();
-  }
-
-  /** Returns a guess for the location of tools.jar based on the default
-   *  installation directory for the Windows Java SDK.  In Windows,
-   *  JAVA_HOME is set to the JRE directory in "Program Files", but tools.jar
-   *  is located in the SDK directory.  Guess is simplistic: only looks on C:.
-   *
-   *  PRECONDITION: javaHome contains "Program Files"
-   *
-   * @param javaHome The current JAVA_HOME System property
-   */
-  public static String getWindowsToolsJar(String javaHome) {
-    if (javaHome.indexOf("Program Files") == -1) return "";
-
-    String prefix = "C:\\j2sdk";
-    String suffix = "\\lib\\tools.jar";
-    int versionIndex;
-
-    if (javaHome.indexOf("JavaSoft") != -1) {
-      prefix = "C:\\jdk";
-      versionIndex = javaHome.indexOf("JRE\\") + 4;
-    }
-    else { versionIndex = javaHome.indexOf("j2re") + 4; }
-    
-    String version = javaHome.substring(versionIndex);
-
-    return prefix + version + suffix;
   }
 
   /** Gets the requested resource, bypassing the parent classloader. */

@@ -176,7 +176,7 @@ public abstract class FileOps {
    *  exception when the file path syntax is incorrect.  It returns the absolute File intead. */
   public static File getCanonicalFile(File f) {
     if (f == null) return f;
-    try { if (f.exists()) return f.getCanonicalFile(); }
+    try { return f.getCanonicalFile(); }
     catch(IOException e) { /* fall through */ }
     return f.getAbsoluteFile();
   }
