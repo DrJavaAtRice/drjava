@@ -58,16 +58,36 @@ public class ToolsJarClassLoader extends URLClassLoader {
   public static File[] getToolsJarFiles(File toolsJar) {
     File javaHome = FileOps.getCanonicalFile(new File(System.getProperty("java.home")));
     
-    // We must maintain insertion order, so that the first entries have priority;
-    // at the same time, we want to eliminate duplicates so that the same tools.jar file
-    // doesn't show up multiple times.
+    /*
+     * javaHomeParents is a set of (attempted) canonical paths that may not exist.
+     * We must maintain insertion order, so that the first entries have priority;
+     * at the same time, we want to eliminate duplicates so that the same tools.jar file
+     * doesn't show up multiple times.
+     */
     LinkedHashSet<File> javaHomeParents = new LinkedHashSet<File>();
     javaHomeParents.add(FileOps.getCanonicalFile(new File(javaHome, "..")));
     javaHomeParents.add(FileOps.getCanonicalFile(new File(javaHome, "../..")));
-    javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/Java/")));
-    javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/")));
-    javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Java/")));
-    javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/")));
+    
+    String winPrograms = System.getenv("ProgramFiles");
+    if (winPrograms != null) {
+      javaHomeParents.add(FileOps.getCanonicalFile(new File(winPrograms, "Java")));
+      javaHomeParents.add(FileOps.getCanonicalFile(new File(winPrograms)));
+    }
+    else {  // in case the environment variables aren't set up properly
+      javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/Java/")));
+      javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/")));
+    }
+
+    String winSystem = System.getenv("SystemDrive");
+    if (winSystem != null) {
+      javaHomeParents.add(FileOps.getCanonicalFile(new File(winSystem, "Java")));
+      javaHomeParents.add(FileOps.getCanonicalFile(new File(winSystem)));
+    }
+    else { // in case the environment variables aren't set up properly
+      javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Java/")));
+      javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/")));
+    }
+    
     javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/")));
     javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/java/")));
     javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/j2se/")));
@@ -75,25 +95,47 @@ public class ToolsJarClassLoader extends URLClassLoader {
     javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/local/java/")));
     javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/local/j2se/")));
     
+    
+    /* javaHomes is a set of potential Java installations.  Each is an existing directory. */
     LinkedHashSet<File> javaHomes = new LinkedHashSet<File>();
-    javaHomes.add(javaHome);
+    
+    try {
+      if (javaHome.isDirectory()) { javaHomes.add(javaHome); }
+    }
+    catch (SecurityException e) { /* ignore */ }
+    
     String version = System.getProperty("java.specification.version");
     final String prefix1 = "j2sdk" + version;
     final String prefix2 = "jdk" + version;
+    FileFilter matchHomes = new FileFilter() {
+      public boolean accept(File f) {
+        return f.isDirectory() && (f.getName().startsWith(prefix1) || f.getName().startsWith(prefix2));
+      }
+    };
     for (File parent : javaHomeParents) {
-      javaHomes.addAll(FileOps.getFilesInDir(parent, false, new FileFilter() {
-        public boolean accept(File f) {
-          String name = f.getName();
-          return name.startsWith(prefix1) || name.startsWith(prefix2);
+      try {
+        File[] files = parent.listFiles(matchHomes);
+        if (files != null) {
+          for (File f : files) { javaHomes.add(f); }
         }
-      }));
+      }
+      catch (SecurityException e) { /* ignore */ }
     }
     
+    /* The result is a set of existing tools.jar files, (attempted) canonicalized */
     LinkedHashSet<File> result = new LinkedHashSet<File>();
-    if (toolsJar.exists()) result.add(FileOps.getCanonicalFile(toolsJar));
+    
+    try {
+      if (toolsJar.isFile()) result.add(FileOps.getCanonicalFile(toolsJar));
+    }
+    catch (SecurityException e) { /* ignore */ }
+    
     for (File home : javaHomes) {
-      File tools = new File(home, "lib/tools.jar");
-      if (tools.exists()) { result.add(FileOps.getCanonicalFile(toolsJar)); }
+      try {
+        File tools = new File(home, "lib/tools.jar");
+        if (tools.isFile()) { result.add(FileOps.getCanonicalFile(tools)); }
+      }
+      catch (SecurityException e) { /* ignore */ }
     }
 
     return result.toArray(new File[0]);

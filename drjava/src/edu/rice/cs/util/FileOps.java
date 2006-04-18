@@ -149,7 +149,14 @@ public abstract class FileOps {
     return list.toArray(new String[list.size()]);
   }
   
-  /** @return an array of Files in the directory specified (not including directories) */
+  /**
+   * List all files (that is, {@code File}s for which {@code isFile()} is {@code true}) matching the provided 
+   * filter in the given directory.
+   * @param d  The directory to search.
+   * @param recur  Whether subdirectories accepted by {@code f} should be recursively searched.  Note that subdirectories
+   *               that <em>aren't</em> accepted by {@code f} will be ignored.
+   * @param f  The filter to apply to contained {@code File}s.
+   * @return  An array of Files in the directory specified; if the directory does not exist, returns an empty list. */
   public static ArrayList<File> getFilesInDir(File d, boolean recur, FileFilter f){
     ArrayList<File> l = new ArrayList<File>();
     getFilesInDir(d, l, recur, f);
@@ -169,15 +176,16 @@ public abstract class FileOps {
         }
       }
     }      
-    else acc.add(d);
   }
   
   /** @return the canonical file equivalent to f.  Identical to f.getCanonicalFile() except it does not throw an 
-   *  exception when the file path syntax is incorrect.  It returns the absolute File intead. */
+   *  exception when the file path syntax is incorrect (or an IOException or SecurityException occurs for any
+   *  other reason).  It returns the absolute File intead. */
   public static File getCanonicalFile(File f) {
     if (f == null) return f;
     try { return f.getCanonicalFile(); }
-    catch(IOException e) { /* fall through */ }
+    catch (IOException e) { /* fall through */ }
+    catch (SecurityException e) { /* fall through */ }
     return f.getAbsoluteFile();
   }
   
