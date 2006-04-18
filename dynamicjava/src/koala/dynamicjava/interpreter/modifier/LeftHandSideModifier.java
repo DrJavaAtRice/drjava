@@ -45,10 +45,10 @@ public abstract class LeftHandSideModifier {
      * Prepares the modifier for modification
      * @return the value of the left hand side
      */
-    public abstract Object prepare(Visitor<Object> v, Context<Object> ctx);
+    public abstract Object prepare(Visitor<Object> v, Context ctx);
 
     /**
      * Sets the value of the underlying left hand side expression
      */
-    public abstract void modify(Context<Object> ctx, Object value);
+    public abstract void modify(Context ctx, Object value);
 }

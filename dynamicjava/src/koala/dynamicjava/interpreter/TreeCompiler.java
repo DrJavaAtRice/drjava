@@ -117,7 +117,7 @@ public class TreeCompiler {
    * @param td the type declaration
    * @param im the importation manager
    */
-  public Class<?> compileTree(Context<Object> ctx, TypeDeclaration td) {
+  public Class<?> compileTree(Context ctx, TypeDeclaration td) {
     ClassFinder cf = new TreeClassFinder(ctx, interpreter, classPool);
     ClassInfo   ci = new TreeClassInfo(td, cf);
     classPool.add(ci.getName(), ci);
@@ -188,7 +188,7 @@ public class TreeCompiler {
     if (td != null) {
       ImportationManager im = (ImportationManager)td.getProperty
         (NodeProperties.IMPORTATION_MANAGER);
-      Context<Object> ctx = new GlobalContext<Object>(interpreter, classInfoLoader);
+      Context ctx = new GlobalContext(interpreter, classInfoLoader);
       im.setClassLoader(classInfoLoader);
       ctx.setImportationManager(im);
       ClassFinder cfinder = new TreeClassFinder(ctx,
@@ -206,7 +206,7 @@ public class TreeCompiler {
       if (td != null) {
         ImportationManager im = (ImportationManager)td.getProperty
           (NodeProperties.IMPORTATION_MANAGER);
-        Context<Object> ctx = new GlobalContext<Object>(interpreter, classInfoLoader);
+        Context ctx = new GlobalContext(interpreter, classInfoLoader);
         im.setClassLoader(classInfoLoader);
         ctx.setImportationManager(im);
         ClassFinder cfinder = new TreeClassFinder(ctx,

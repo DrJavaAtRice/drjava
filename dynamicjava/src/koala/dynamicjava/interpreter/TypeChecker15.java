@@ -41,7 +41,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
  * 
- END_COPYRIGHT_BLOCK*/
+END_COPYRIGHT_BLOCK*/
 
 package koala.dynamicjava.interpreter;
 
@@ -55,7 +55,6 @@ import koala.dynamicjava.interpreter.throwable.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
-import java.lang.reflect.Type;
 
 /**
  * This tree visitor checks the typing rules and loads
@@ -67,34 +66,35 @@ import java.lang.reflect.Type;
 
 public class TypeChecker15 extends AbstractTypeChecker {
   
-  /** Creates a new name visitor
-   *  @param ctx the context
+  /**
+   * Creates a new name visitor
+   * @param ctx the context
    */
-  public TypeChecker15(Context<Type> ctx) { super(ctx); }
-  
-  /** Visits a ForEachStatement
-   *  @param node the node to visit
+  public TypeChecker15(Context ctx) {
+    super(ctx);
+  }
+
+  /**
+   * Visits a ForEachStatement
+   * @param node the node to visit
    */
-  public Type visit(ForEachStatement node){
+  public Class<?> visit(ForEachStatement node){
     // Enter a new scope
     context.enterScope();
     context.define(node.getVars().get(0), null);
     context.define(node.getVars().get(1), null);
     
-    Type paramTypeClass1;
-    Type collTypeClass1;
-    
+    Class<?> paramTypeClass;
+    Class<?> collTypeClass;
+
     FormalParameter param = node.getParameter();
     Expression coll = node.getCollection();
     Node body = node.getBody();
     Class<?> component;
     
-    paramTypeClass1 = param.acceptVisitor(this);
-    collTypeClass1 = coll.acceptVisitor(this);
+    paramTypeClass = param.acceptVisitor(this);
+    collTypeClass = coll.acceptVisitor(this);
     body.acceptVisitor(this);
-    
-    Class<?> paramTypeClass = (Class<?>)paramTypeClass1;
-    Class<?> collTypeClass = (Class<?>)collTypeClass1;
     
     /*for array access */
     /* remember to type check potential unbox/box situations */
@@ -120,15 +120,15 @@ public class TypeChecker15 extends AbstractTypeChecker {
     //---------------------------------------------
     
     node.getBody().acceptVisitor(this);
-    
+
     // Leave the current scope and store the defined variables
     // (a map of String-Class mappings) in the "variables" property
     node.setProperty(NodeProperties.VARIABLES, context.leaveScope());
     
     
-    return null;
+  return null;
   }
-  
+
   /**
    * Does nothing - GenericReferenceType is allowed in 1.5
    * @param node unused
@@ -159,7 +159,7 @@ public class TypeChecker15 extends AbstractTypeChecker {
    */
   protected void staticImportHandler(ImportDeclaration node){
     try {
-      if(node.isStaticImportClass()) 
+    if(node.isStaticImportClass()) 
         context.declareClassStaticImport(node.getName());
       else 
         context.declareMemberStaticImport(node.getName());
@@ -177,9 +177,7 @@ public class TypeChecker15 extends AbstractTypeChecker {
    * @param refType the reference type to box the primitive type to
    * @return the <code>SimpleAllocation</code> that boxes the expression
    */
-  protected SimpleAllocation _box(Expression exp, Type typeRefType) {
-    
-    Class<?> refType = (Class<?>)typeRefType;
+  protected SimpleAllocation _box(Expression exp, Class<?> refType) {
     String refTypeName = refType.getName();
     PrimitiveType primType = _correspondingPrimType(refType);
     
@@ -223,12 +221,9 @@ public class TypeChecker15 extends AbstractTypeChecker {
    * @param type The type of the evaluated expression
    * @return The <code>ObjectMethodCall</code> that unboxes the expression
    */
-  protected ObjectMethodCall _unbox(Expression child, Type type1) {
-    
+  protected ObjectMethodCall _unbox(Expression child, Class<?> type) {
     String methodName = "";
-    Class<?> unboxedType = (Class<?>)type1;
-    Class<?> type = (Class<?>)type1;
-    
+    Class<?> unboxedType = type;
     if (type == Boolean.class) {
       methodName = "booleanValue";
       unboxedType = boolean.class;

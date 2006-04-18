@@ -328,7 +328,7 @@ public class ClassInfoCompiler {
   protected class ConstructorVisitor extends VisitorObject<Object> {
     String          superConstructor;
     String[]        constructorParameters = new String[0];
-    VariableContext<Object> context               = new VariableContext<Object>(importationManager);
+    VariableContext context               = new VariableContext(importationManager);
     
     /**
      * Visits a ConstructorInvocation
@@ -475,8 +475,11 @@ public class ClassInfoCompiler {
      */
     public Object visit(FormalParameter node) {
       ClassInfo ci = (ClassInfo)node.getType().acceptVisitor(this);
-      if (node.isFinal()) context.defineConstant(node.getName(), ci);
-      else context.define(node.getName(), ci);
+      if (node.isFinal()) {
+        context.defineConstant(node.getName(), ci);
+      } else {
+        context.define(node.getName(), ci);
+      }
       return null;
     }
     
@@ -487,7 +490,8 @@ public class ClassInfoCompiler {
     public Object visit(Literal node) {
       // Set the properties of the node
       Class<?> c = node.getType();
-      node.setProperty(NodeProperties.TYPE, (c == null) ? null : new JavaClassInfo(c));
+      node.setProperty(NodeProperties.TYPE,
+                       (c == null) ? null : new JavaClassInfo(c));
       return null;
     }
     

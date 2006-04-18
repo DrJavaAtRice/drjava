@@ -281,7 +281,9 @@ public abstract class Node {
     firePropertyChange(SOURCE_INFO, sourceInfo, sourceInfo = si);
   }
   
-      // Properties support //////////////////////////////////////////////////
+  
+  
+  // Properties support //////////////////////////////////////////////////
   
   /**
    * Sets the value of a property
@@ -305,7 +307,7 @@ public abstract class Node {
    * Returns the defined properties for this node.
    * @return a set of string
    */
-  public Set<String> getProperties() {    // Was raw-type Set, but why,  since Map<String, Object> .keySet() should return Set<String>
+  public Set getProperties() {
     return properties.keySet();
   }
   

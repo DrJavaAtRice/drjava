@@ -30,7 +30,6 @@ package koala.dynamicjava.interpreter;
 
 import java.io.*;
 import java.lang.reflect.*;
-import java.lang.reflect.Type;
 import java.net.*;
 import java.util.*;
 
@@ -85,9 +84,9 @@ public class TreeInterpreter implements Interpreter {
    */
   protected static int nClass;
 
-  protected Context<Type> nameVisitorContext;  
-  protected Context<Type> checkVisitorContext;
-  protected Context<Object> evalVisitorContext;
+  protected Context nameVisitorContext;
+  protected Context checkVisitorContext;
+  protected Context evalVisitorContext;
 
   /**
    * Track the state of calls to 'setAccessible'
@@ -111,11 +110,11 @@ public class TreeInterpreter implements Interpreter {
   public TreeInterpreter(ParserFactory pf, ClassLoader cl) {
     parserFactory       = pf;
     classLoader         = new TreeClassLoader(this, cl);
-    nameVisitorContext  = new GlobalContext<Type>(this);
+    nameVisitorContext  = new GlobalContext(this);
     nameVisitorContext.setAdditionalClassLoaderContainer(classLoader);
-    checkVisitorContext = new GlobalContext<Type>(this);
+    checkVisitorContext = new GlobalContext(this);
     checkVisitorContext.setAdditionalClassLoaderContainer(classLoader);
-    evalVisitorContext  = new GlobalContext<Object>(this);
+    evalVisitorContext  = new GlobalContext(this);
     evalVisitorContext.setAdditionalClassLoaderContainer(classLoader);
   }
 
@@ -180,7 +179,7 @@ public class TreeInterpreter implements Interpreter {
       resultingList = new ArrayList<Node>();
       while (it.hasNext()) {
         Node n = it.next();
-        NameVisitor nv = new NameVisitor(nameVisitorContext, checkVisitorContext);
+        NameVisitor nv = new NameVisitor(nameVisitorContext,checkVisitorContext);
         Node o = n.acceptVisitor(nv);
         if (o != null) n = o;
 
@@ -539,16 +538,16 @@ public class TreeInterpreter implements Interpreter {
     List<Node>              stmts = meth.getBody().getStatements();
     String                   name = meth.getName();
 
-    Context<Object>       context = null;
+    Context               context = null;
 
     if (Modifier.isStatic(md.method.getAccessFlags())) {
       if (md.variables == null) {
         md.importationManager.setClassLoader(classLoader);
 
         // pass 1: names resolution
-        Context<Type> ctx = new StaticContext<Type>(this, c, md.importationManager);
+        Context ctx = new StaticContext(this, c, md.importationManager);
         ctx.setAdditionalClassLoaderContainer(classLoader);
-        NameVisitor nv = new NameVisitor(ctx, checkVisitorContext);
+        NameVisitor nv = new NameVisitor(ctx,checkVisitorContext);
 
         ListIterator<FormalParameter> it1 = mparams.listIterator();
         while (it1.hasNext()) {
@@ -562,7 +561,7 @@ public class TreeInterpreter implements Interpreter {
         }
 
         // pass 2: type checking
-        ctx = new StaticContext<Type>(this, c, md.importationManager);
+        ctx = new StaticContext(this, c, md.importationManager);
         ctx.setAdditionalClassLoaderContainer(classLoader);
         AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(ctx);
 
@@ -589,17 +588,17 @@ public class TreeInterpreter implements Interpreter {
       }
 
       // pass 3: evaluation
-      context = new StaticContext<Object>(this, c, md.variables);
+      context = new StaticContext(this, c, md.variables);
     } else {
       if (md.variables == null) {
         md.importationManager.setClassLoader(classLoader);
 
         // pass 1: names resolution
-        Context<Type> ctx1 = new MethodContext<Type>(this, c, c, md.importationManager);
+        Context ctx1 = new MethodContext(this, c, c, md.importationManager);
         ctx1.setAdditionalClassLoaderContainer(classLoader);
         NameVisitor nv1 = new NameVisitor(ctx1,checkVisitorContext);
 
-        Context<Type> ctx2 = new MethodContext<Type>(this, c, c, md.importationManager);
+        Context ctx2 = new MethodContext(this, c, c, md.importationManager);
         ctx2.setAdditionalClassLoaderContainer(classLoader);
         NameVisitor nv2 = new NameVisitor(ctx2,checkVisitorContext);
 
@@ -611,7 +610,7 @@ public class TreeInterpreter implements Interpreter {
           for (int i = 0; i < cc.length; i++) {
             Object[] cell = cc[i];
             if (!((String)cell[0]).equals("this")) {
-              ctx1.defineConstant((String)cell[0], (Type) cell[1]);  // ?? Is cast to type (Type) OK?
+              ctx1.defineConstant((String)cell[0], cell[1]);
             }
           }
         } catch (Exception e) {
@@ -636,11 +635,11 @@ public class TreeInterpreter implements Interpreter {
         }
 
         // pass 2: type checking
-        ctx1 = new MethodContext<Type>(this, c, c, md.importationManager);
+        ctx1 = new MethodContext(this, c, c, md.importationManager);
         ctx1.setAdditionalClassLoaderContainer(classLoader);
         AbstractTypeChecker tc1 = AbstractTypeChecker.makeTypeChecker(ctx1);
 
-        ctx2 = new MethodContext<Type>(this, c, c, md.importationManager);
+        ctx2 = new MethodContext(this, c, c, md.importationManager);
         ctx2.setAdditionalClassLoaderContainer(classLoader);
         AbstractTypeChecker tc2 = AbstractTypeChecker.makeTypeChecker(ctx2);
 
@@ -649,8 +648,8 @@ public class TreeInterpreter implements Interpreter {
           for (int i = 0; i < cc.length; i++) {
             Object[] cell = cc[i];
             if (!((String)cell[0]).equals("this")) {
-              ctx1.defineConstant((String)cell[0], (Type) cell[1]); // cast to type Type OK ??
-            } 
+              ctx1.defineConstant((String)cell[0], cell[1]);
+            }
           }
         }
 
@@ -683,7 +682,7 @@ public class TreeInterpreter implements Interpreter {
       }
 
       // pass 3: evaluation
-      context = new MethodContext<Object>(this, c, obj, md.variables);
+      context = new MethodContext(this, c, obj, md.variables);
     }
 
     context.setAdditionalClassLoaderContainer(classLoader);
@@ -773,9 +772,9 @@ public class TreeInterpreter implements Interpreter {
     if (cpd.variables == null) {
       cpd.importationManager.setClassLoader(classLoader);
 
-      Context<Type> ctx = new StaticContext<Type>(this, c, cpd.importationManager);
+      Context ctx = new StaticContext(this, c, cpd.importationManager);
       ctx.setAdditionalClassLoaderContainer(classLoader);
-      NameVisitor nv = new NameVisitor(ctx, checkVisitorContext);
+      NameVisitor nv = new NameVisitor(ctx,checkVisitorContext);
       AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(ctx);
 
       // Check the parameters
@@ -804,7 +803,7 @@ public class TreeInterpreter implements Interpreter {
       cpd.variables = ctx.getCurrentScopeVariables();
     }
 
-    Context<Object> ctx = new StaticContext<Object>(this, c, cpd.variables);
+    Context ctx = new StaticContext(this, c, cpd.variables);
     ctx.setAdditionalClassLoaderContainer(classLoader);
 
     // Set the arguments values

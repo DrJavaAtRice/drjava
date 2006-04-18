@@ -30,7 +30,6 @@ package koala.dynamicjava.interpreter;
 
 import java.util.*;
 import java.lang.reflect.*;
-import java.lang.reflect.Type;
 
 import koala.dynamicjava.interpreter.context.*;
 import koala.dynamicjava.interpreter.error.*;
@@ -51,12 +50,12 @@ public class NameVisitor extends VisitorObject<Node> {
   /**
    * The context
    */
-  private Context<Type> context;
+  private Context context;
   
   /**
    * The type checker context
    */
-  private Context<Type> typeCheckerContext;
+  private Context typeCheckerContext;
   
   /**
    * a counter to help define unique variable names
@@ -68,7 +67,7 @@ public class NameVisitor extends VisitorObject<Node> {
    * Creates a new name visitor
    * @param ctx the context
    */
-  public NameVisitor(Context<Type> ctx) {
+  public NameVisitor(Context ctx) {
     context = ctx;
     name_counter = new Integer(0);
   }
@@ -78,7 +77,7 @@ public class NameVisitor extends VisitorObject<Node> {
    * @param ctx the context
    * @param typeCtx the typeChecker Context
    */
-  public NameVisitor(Context<Type> ctx, Context<Type> typeCtx) {
+  public NameVisitor(Context ctx, Context typeCtx) {
     this(ctx);
     typeCheckerContext = typeCtx;
   }
@@ -595,8 +594,8 @@ public class NameVisitor extends VisitorObject<Node> {
         if(args != null) {
           for(int i = 0; i < args.size(); i++) {
             String toParse = args.get(i).toString();
-            params[i]=(Class<?>)(args.get(i).acceptVisitor(tc));      // ADDED CAST HERE!!!!!!!
-          } 
+            params[i]=(args.get(i).acceptVisitor(tc));
+          }
         }
         boolean existsInCurrentScope = false;
         

@@ -116,59 +116,102 @@ public abstract class JVMUtilities {
     stypes.put("void",    "V");
   }
 
-  /** Returns the string that represents internally the given class. */
+  /**
+   * Returns the string that represents internally the given class
+   */
   public static String getName(Class<?> c) {
     String s = types.get(c);
-    if (s != null) return s;
-    return c.getName().replace('.', '/');
+    if (s != null) {
+      return s;
+    } else {
+      return c.getName().replace('.', '/');
+    }
   }
 
-  /** Returns the string that represents internally the given class name. */
+  /**
+   * Returns the string that represents internally the given class name
+   */
   public static String getName(String c) {
     String s = stypes.get(c);
-    if (s != null) return s;
-    if (c.endsWith("[]")) {
-      if (c.endsWith("[][]")) return "[" + getName(c.substring(0, c.length()-2));
-      return "["+ getReturnTypeName(c.substring(0, c.length()-2));
-    } 
-    return c.replace('.', '/');  // What if the array class has more than two dimensions?
+    if (s != null) {
+      return s;
+    } else {
+      if (c.endsWith("[]")) {
+        if (c.endsWith("[][]")) {
+          return "["+getName(c.substring(0, c.length()-2));
+        } else {
+          return "["+getReturnTypeName(c.substring(0, c.length()-2));
+        }
+      } else {
+        return c.replace('.', '/');
+      }
+    }
   }
 
-  /** Returns the string that represents internally the given class */
+  /**
+   * Returns the string that represents internally the given class
+   */
   public static String getReturnTypeName(Class<?> c) {
     String s = types.get(c);
-    if (s != null) return s;
-    return ((c.isArray()) ? c.getName() : "L" + c.getName() + ";").replace('.', '/');
+    if (s != null) {
+      return s;
+    } else {
+      return ((c.isArray()) ?
+                c.getName() : "L" + c.getName() + ";").replace('.', '/');
+    }
   }
 
-  /** Returns the string that represents internally the given class name. */
+  /**
+   * Returns the string that represents internally the given class name
+   */
   public static String getReturnTypeName(String c) {
     String s = stypes.get(c);
-    if (s != null)  return s;
-    if (c.endsWith("[]")) return "["+getReturnTypeName(c.substring(0, c.length()-2));
-    return ((c.startsWith("[")) ? c : "L" + c + ";").replace('.', '/');
+    if (s != null) {
+      return s;
+    } else {
+      if (c.endsWith("[]")) {
+        return "["+getReturnTypeName(c.substring(0, c.length()-2));
+      } else {
+        return ((c.startsWith("[")) ?
+                  c : "L" + c + ";").replace('.', '/');
+      }
+    }
   }
 
-  /** Returns the string that represents internally the given class. */
-  public static String getParameterTypeName(Class c) { return getReturnTypeName(c); }
-
-
-  /** Returns the string that represents internally the given class name.  */
-  public static String getParameterTypeName(String c) { return getReturnTypeName(c); }
-
-  /** Creates a method descriptor
-   *  @param rt the return type name as returned by getReturnTypeName
-   *  @param pt the parameters type names as returned by getParameterTypeName
+  /**
+   * Returns the string that represents internally the given class
    */
-  public static String createMethodDescriptor(String rt, String[] pts) {
-    if (pts != null) {
-      StringBuffer result = new StringBuffer("(");
-      for (String pt: pts) result.append(pt);
-      return result.append(')').append(rt).toString();  // Note: append operation modifies the receiver!
-    } 
-    return rt;
+  public static String getParameterTypeName(Class<?> c) {
+    return getReturnTypeName(c);
   }
 
-  /** No need to create instances of this class */
-  private JVMUtilities() { }
+  /**
+   * Returns the string that represents internally the given class name
+   */
+  public static String getParameterTypeName(String c) {
+    return getReturnTypeName(c);
+  }
+
+  /**
+   * Creates a method descriptor
+   * @param rt the return type name as returned by getReturnTypeName
+   * @param pt the parameters type names as returned by getParameterTypeName
+   */
+  public static String createMethodDescriptor(String rt, String[] pt) {
+    if (pt != null) {
+      String result = "(";
+      for (int i = 0; i < pt.length; i++) {
+        result += pt[i];
+      }
+      return result + ")" + rt;
+    } else {
+      return rt;
+    }
+  }
+
+  /**
+   * No need to create instances of this class
+   */
+  private JVMUtilities() {
+  }
 }

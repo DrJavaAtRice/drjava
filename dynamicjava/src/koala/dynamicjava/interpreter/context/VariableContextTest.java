@@ -6,12 +6,15 @@ import junit.framework.TestCase;
  * Tests the functionality of the VariableContext.
  */
 public class VariableContextTest extends TestCase {
-  VariableContext<Object> _ctx;
+  VariableContext _ctx;
   
-  public void setUp() { _ctx = new VariableContext<Object>(); }
+  public void setUp() { 
+    _ctx = new VariableContext();
+  }
   
-  /** Tests to make sure that the correct bindings are truely
-   *  removed when revert is called
+  /**
+   * Tests to make sure that the correct bindings are truely
+   * removed when revert is called
    */
   public void testRevert() {
     _ctx.define("a", new Integer(1));
@@ -37,6 +40,4 @@ public class VariableContextTest extends TestCase {
     assertFalse("'e' should not exist", _ctx.isDefinedVariable("e"));
     assertFalse("'f' should not exist", _ctx.isDefinedVariable("f"));
   }
-  // We need to test nested scopes to make sure that binding in non-local scope are found
-  
 }

@@ -742,7 +742,7 @@ public class OptionsDialog extends JDialog implements ActionMap {
       Dimension ud = urlChooser.getSize();
       urlChooser.setLocation(fr.x + (fr.width  - ud.width) / 2,
                              fr.y + (fr.height - ud.height) / 2);
-      urlChooser.setVisible(true);
+      urlChooser.show();
     }
   }
 

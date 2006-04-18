@@ -57,7 +57,7 @@ import koala.dynamicjava.util.*;
  * @version 1.4 - 2001/01/28
  */
 
-public class GlobalContext<V> extends VariableContext<V> implements Context<V> {
+public class GlobalContext extends VariableContext implements Context {
   // Constant objects
   protected final static ReferenceType CLASS_TYPE  = new ReferenceType("java.lang.Class");
   protected final static ReferenceType MAP_TYPE    = new ReferenceType("java.util.Map");
@@ -243,7 +243,7 @@ public class GlobalContext<V> extends VariableContext<V> implements Context<V> {
    * @param node the class declaration
    */
   public void defineClass(TypeDeclaration node) {
-    new TreeCompiler(interpreter).compileTree((Context<Object>)this, node); /* Type erasure bites! */
+    new TreeCompiler(interpreter).compileTree(this, node);
   }
 
   /**
@@ -558,7 +558,7 @@ public class GlobalContext<V> extends VariableContext<V> implements Context<V> {
     type.setProperty(TreeClassInfo.ANONYMOUS_DECLARING_CLASS,
                      new JavaClassInfo(Object.class));
 
-    Class<?> cl = new TreeCompiler(interpreter).compileTree((Context<Object>)this, type); /* Type erasure bites! */
+    Class<?> cl = new TreeCompiler(interpreter).compileTree(this, type);
 
     // Update the argument types
     Class<?>[] tmp = new Class<?>[args.length+1];

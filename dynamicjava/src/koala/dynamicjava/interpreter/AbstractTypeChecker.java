@@ -69,7 +69,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
  * 
- END_COPYRIGHT_BLOCK*/
+END_COPYRIGHT_BLOCK*/
 
 package koala.dynamicjava.interpreter;
 
@@ -80,7 +80,6 @@ import koala.dynamicjava.interpreter.context.*;
 import koala.dynamicjava.interpreter.error.*;
 import koala.dynamicjava.interpreter.modifier.*;
 import koala.dynamicjava.interpreter.throwable.*;
-import java.lang.reflect.Type;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
@@ -95,20 +94,30 @@ import koala.dynamicjava.util.*;
  *
  */
 
-public abstract class AbstractTypeChecker extends VisitorObject<Type> {
-  
-  /** The context */
-  protected Context<Type> context;
-  
-  /** Creates a new name visitor
-   *  @param ctx the context
+public abstract class AbstractTypeChecker extends VisitorObject<Class<?>> {
+  /**
+   * The context
    */
-  public AbstractTypeChecker(Context<Type> ctx) { context = ctx; }
+  protected Context context;
+
+  /**
+   * Creates a new name visitor
+   * @param ctx the context
+   */
+  public AbstractTypeChecker(Context ctx) {
+    context = ctx;
+  }
   
-  /** Builds an appropriate type checker object. */
-  public static AbstractTypeChecker makeTypeChecker(Context<Type> ctx) {
-    if (!TigerUtilities.isTigerEnabled()) return new TypeChecker14(ctx);
-    return new TypeChecker15(ctx);
+  /**
+   * Builds an appropriate type checker object
+   */
+  public static AbstractTypeChecker makeTypeChecker(Context ctx) {
+    if(!TigerUtilities.isTigerEnabled()) {
+      return new TypeChecker14(ctx);
+    }
+    else {
+      return new TypeChecker15(ctx);
+    }    
   }
   
   /**
@@ -116,17 +125,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @param node the node to visit
    * @return null
    */
-  public Type visit(PackageDeclaration node) {
+  public Class<?> visit(PackageDeclaration node) {
     context.setCurrentPackage(node.getName());
     return null;
   }
-  
+
   //ImportDeclaration does not currently support static import /**/
   /**
    * Visits an ImportDeclaration
    * @param node the node to visit
    */
-  public Type visit(ImportDeclaration node) {
+  public Class<?> visit(ImportDeclaration node) {
     if(node.isStatic()) {
       staticImportHandler(node);
     }
@@ -150,61 +159,61 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @param node the ImportDeclaration node being checked
    */
   protected abstract void staticImportHandler(ImportDeclaration node);
-  
+
   /**
    * Visits a WhileStatement first by checking the 
    * condition type and unboxing if necessary then by 
    * recurring to its body.
    * @param node the node to visit
    */
-  public Type visit(WhileStatement whileStmt) {
+  public Class<?> visit(WhileStatement whileStmt) {
     // Check the condition
     Expression exp = whileStmt.getCondition();
-    
-    Type type = exp.acceptVisitor(this);
+
+    Class<?> type = exp.acceptVisitor(this);
     if (type != boolean.class && type != Boolean.class) {
       throw new ExecutionError("condition.type", whileStmt);
     }
-    
+
     // Auto unbox: Boolean->boolean
     if (type == Boolean.class) {
       // add method call on expression:
       //   "exp.booleanValue();"
       whileStmt.setCondition(_unbox(exp, type));
     }
-    
+
     whileStmt.getBody().acceptVisitor(this);
     return null;
   }
-  
+
   /**
    * Visits a ForEachStatement
    * @param node the node to visit
    */
-  public abstract Type visit(ForEachStatement node);
-  
+  public abstract Class<?> visit(ForEachStatement node);
+
   /**
    * Visits a ForStatement
    * @param node the node to visit
    */
-  public Type visit(ForStatement node) {
+  public Class<?> visit(ForStatement node) {
     // Enter a new scope
     context.enterScope();
-    
+
     List<Node> l;
     // Check the statements
     if ((l = node.getInitialization()) != null) {
       checkList(l);
     }
-    
+
     Expression cond = node.getCondition();
     if (cond != null) {
-      
-      Type type = cond.acceptVisitor(this);
+
+      Class<?> type = cond.acceptVisitor(this);
       if (type != boolean.class && type != Boolean.class) {
         throw new ExecutionError("condition.type", node);
       }
-      
+
       // Auto unbox: Boolean->boolean
       if (type == Boolean.class) {
         // add method call on expression:
@@ -212,32 +221,32 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         node.setCondition(_unbox(cond, type));
       }
     }
-    
+
     if ((l = node.getUpdate()) != null) {
       checkList(l);
     }
-    
+
     node.getBody().acceptVisitor(this);
-    
+
     // Leave the current scope and store the defined variables
     // (a map of String-Class<?> mappings) in the "variables" property
     node.setProperty(NodeProperties.VARIABLES, context.leaveScope());
     return null;
   }
-  
+
   /**
    * Visits a DoStatement
    * @param node the node to visit
    */
-  public Type visit(DoStatement node) {
+  public Class<?> visit(DoStatement node) {
     node.getBody().acceptVisitor(this);
-    
+
     Expression exp = node.getCondition();
-    Type type = exp.acceptVisitor(this);
+    Class<?> type = exp.acceptVisitor(this);
     if (type != boolean.class && type != Boolean.class) {
       throw new ExecutionError("condition.type", node);
     }
-    
+
     // Auto unbox: Boolean->boolean
     if (type == Boolean.class) {
       // add method call on expression:
@@ -246,21 +255,19 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return null;
   }
-  
+
   /**
    * Visits a SwitchStatement
    * @param node the node to visit
    */
-  public Type visit(SwitchStatement node) {
+  public Class<?> visit(SwitchStatement node) {
     // Visits the components of this node
     Expression exp = node.getSelector();
-    Type c1 = exp.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
-    
+    Class<?> c = exp.acceptVisitor(this);
     if (c != char.class      && c != byte.class && c != short.class && c != int.class  && 
         c != Character.class && c != Byte.class && c != Short.class && c != Integer.class &&
         // (TigerUtilities.isTigerEnabled() && (c.getSuperclass() != Class.forName("java.lang.Enum")))) {
-        !TigerUtilities.isEnum(c)) {
+        !TigerUtilities.isEnum(c) ) {
       node.setProperty(NodeProperties.ERROR_STRINGS,
                        new String[] { c.getName() });
       throw new ExecutionError("selector.type", node);
@@ -277,8 +284,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       sb.acceptVisitor(this);
       exp = sb.getExpression();
       if (exp != null) {
-        Type lc1 = NodeProperties.getType(exp);
-        Class<?> lc = (Class<?>)lc1;
+        Class<?> lc = NodeProperties.getType(exp);
         if (lc != char.class &&  lc != byte.class &&
             lc != short.class && lc != int.class &&
             //  (TigerUtilities.isTigerEnabled() && (lc.getSuperclass() != Class.forName("java.lang.Enum")))) {
@@ -328,12 +334,12 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     
     return null;
   }
-  
+
   /**
    * Visits a SwitchBlock
    * @param node the node to visit
    */
-  public Type visit(SwitchBlock node) {
+  public Class<?> visit(SwitchBlock node) {
     Expression exp = node.getExpression();
     if (exp != null) {
       exp.acceptVisitor(this);
@@ -344,21 +350,21 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return null;
   }
-  
+
   /**
    * Visits a LabeledStatement
    * @param node the node to visit
    */
-  public Type visit(LabeledStatement node) {
+  public Class<?> visit(LabeledStatement node) {
     node.getStatement().acceptVisitor(this);
     return null;
   }
-  
+
   /**
    * Visits a TryStatement
    * @param node the node to visit
    */
-  public Type visit(TryStatement node) {
+  public Class<?> visit(TryStatement node) {
     node.getTryBlock().acceptVisitor(this);
     Iterator<CatchStatement> it = node.getCatchStatements().iterator();
     while (it.hasNext()) {
@@ -370,38 +376,36 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return null;
   }
-  
+
   /**
    * Visits a CatchStatement
    * @param node the node to visit
    */
-  public Type visit(CatchStatement node) {
+  public Class<?> visit(CatchStatement node) {
     // Enter a new scope
     context.enterScope();
-    
-    Type c1 = node.getException().acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
+
+    Class<?> c = node.getException().acceptVisitor(this);
     if (!Throwable.class.isAssignableFrom(c)) {
       node.setProperty(NodeProperties.ERROR_STRINGS,
                        new String[] { c.getName() });
       throw new ExecutionError("catch.type", node);
     }
-    
+
     node.getBlock().acceptVisitor(this);
-    
+
     // Leave the current scope
     context.leaveScope();
     node.setProperty(NodeProperties.TYPE, c);
     return null;
   }
-  
+
   /**
    * Visits a ThrowStatement
    * @param node the node to visit
    */
-  public Type visit(ThrowStatement node) {
-    Type c1 = node.getExpression().acceptVisitor(this);
-    Class<?> c = (Class<?>)c1; 
+  public Class<?> visit(ThrowStatement node) {
+    Class<?> c = node.getExpression().acceptVisitor(this);
     if (!Throwable.class.isAssignableFrom(c)) {
       node.setProperty(NodeProperties.ERROR_STRINGS,
                        new String[] { c.getName() });
@@ -409,28 +413,28 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return null;
   }
-  
+
   /**
    * Visits a ReturnStatement
    * @param node the node to visit
    */
-  public Type visit(ReturnStatement node) {
+  public Class<?> visit(ReturnStatement node) {
     Expression e = node.getExpression();
     if (e != null) {
       e.acceptVisitor(this);
     }
     return null;
   }
-  
+
   /**
    * Visits an IfThenStatement
    * @param node the node to visit
    */
-  public Type visit(IfThenStatement node) {
+  public Class<?> visit(IfThenStatement node) {
     Expression cond = node.getCondition();
     
     // Check the condition
-    Type type = cond.acceptVisitor(this);
+    Class<?> type = cond.acceptVisitor(this);
     if (type != boolean.class && type != Boolean.class) {
       throw new ExecutionError("condition.type", node);
     }
@@ -445,16 +449,16 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     node.getThenStatement().acceptVisitor(this);
     return null;
   }
-  
+
   /**
    * Visits an IfThenElseStatement
    * @param node the node to visit
    */
-  public Type visit(IfThenElseStatement node) {
+  public Class<?> visit(IfThenElseStatement node) {
     Expression cond = node.getCondition();
     
     // Check the condition
-    Type type = cond.acceptVisitor(this);
+    Class<?> type = cond.acceptVisitor(this);
     if (type != boolean.class && type != Boolean.class) {
       throw new ExecutionError("condition.type", node);
     }
@@ -465,21 +469,21 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       //   "cond.booleanValue();"
       node.setCondition(_unbox(cond, type));
     }
-    
+
     node.getThenStatement().acceptVisitor(this);
     node.getElseStatement().acceptVisitor(this);
     return null;
   }
-  
-  /**
+
+    /**
    * Visits an AssertStatement
    * @param node the node to visit
    */
-  public Type visit(AssertStatement node) {
+  public Class<?> visit(AssertStatement node) {
     Expression cond = node.getCondition();
     
     //Check the condition
-    Type type = cond.acceptVisitor(this);
+    Class<?> type = cond.acceptVisitor(this);
     if(type != boolean.class && type != Boolean.class) {
       throw new ExecutionError("condition.type", node);
     }
@@ -494,7 +498,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     //Check the failure string
     Expression failString = node.getFailString();
     if(failString != null) {
-      Type type2 = failString.acceptVisitor(this);
+      Class<?> type2 = failString.acceptVisitor(this);
     }
     return null;
   }
@@ -503,50 +507,53 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * Visits a SynchronizedStatement
    * @param node the node to visit
    */
-  public Type visit(SynchronizedStatement node) {
+  public Class<?> visit(SynchronizedStatement node) {
     // Check the lock
-    Type c1 = node.getLock().acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
-    if (c.isPrimitive()) {
+    if ((node.getLock().acceptVisitor(this)).isPrimitive()) {
       throw new ExecutionError("lock.type", node);
     }
-    
+
     node.getBody().acceptVisitor(this);
     return null;
   }
-  
+
   /**
    * Visits a Literal
    * @param node the node to visit
    */
-  public Type visit(Literal node) {
+  public Class<?> visit(Literal node) {
     // Set the properties of the node
-    Type c = node.getType();
+    Class<?> c = node.getType();
     node.setProperty(NodeProperties.VALUE, node.getValue());
     node.setProperty(NodeProperties.TYPE, c);
     return c;
   }
-  
-  /** Visits a VariableDeclaration
-   *  @param node the node to visit
+
+  /**
+   * Visits a VariableDeclaration
+   * @param node the node to visit
    */
-  public Type visit(VariableDeclaration node) {
+  public Class<?> visit(VariableDeclaration node) {
     // Define the variable
-    Type lc = node.getType().acceptVisitor(this);
-    if (node.isFinal()) context.defineConstant(node.getName(), lc);
-    else context.define(node.getName(), lc);
-    
+    Class<?> lc = node.getType().acceptVisitor(this);
+    if (node.isFinal()) {
+      context.defineConstant(node.getName(), lc);
+    } 
+    else {
+      context.define(node.getName(), lc);
+    }
+
     // Get the type of the initializer
     Expression init = node.getInitializer();
     if (init != null) {
-      Type rc = init.acceptVisitor(this);
+      Class<?> rc = init.acceptVisitor(this);
       Expression exp = checkAssignmentStaticRules(lc, rc, node, init);
       node.setInitializer(exp);
     }
     
     return null;
   }
-  
+
 //  /**
 //   * This method visits a variable declaration without actually defining
 //   * anything in the context.  This method was added to allow other objects
@@ -568,41 +575,40 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
 //      checkAssignmentStaticRules(lc, rc, node, init);
 //    }
 //  }
-  
+
   /**
    * Visits a BlockStatement
    * @param node the node to visit
    */
-  public Type visit(BlockStatement node) {
+  public Class<?> visit(BlockStatement node) {
     // Enter a new scope
     context.enterScope();
-    
+
     // Do the type checking of the nested statements
     checkList(node.getStatements());
-    
+
     // Leave the current scope and store the defined variables
     // (a map of String-Class<?> mappings) in the "variables" property
     node.setProperty(NodeProperties.VARIABLES, context.leaveScope());
-    
+
     return null;
   }
-  
+
   /**
    * Visits an ObjectFieldAccess
    * @param node the node to visit
    */
-  public Type visit(ObjectFieldAccess node) {
+  public Class<?> visit(ObjectFieldAccess node) {
     // Visit the expression
-    Type c1 = node.getExpression().acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
-    
+    Class<?> c = node.getExpression().acceptVisitor(this);
+
     // Load the field object
     if (!c.isArray()) {
       Field f = null;
       try {
         f = context.getField(c, node.getFieldName());
       } catch (Exception e) { throw new CatchedExceptionError(e, node); }
-      
+
       // Set the node properties
       c = f.getType();
       node.setProperty(NodeProperties.FIELD, f);
@@ -622,35 +628,35 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       return int.class;
     }
   }
-  
+
   /**
    * Visits a SuperFieldAccess
    * @param node the node to visit
    */
-  public Type visit(SuperFieldAccess node) {
+  public Class<?> visit(SuperFieldAccess node) {
     Field f = null;
     try {
       f = context.getSuperField(node, node.getFieldName());
     } catch (Exception e) {
       throw new CatchedExceptionError(e, node);
     }
-    
+
     // Set the node properties
     node.setProperty(NodeProperties.FIELD, f);
-    Type c;
+    Class<?> c;
     node.setProperty(NodeProperties.TYPE,  c = f.getType());
     node.setProperty(NodeProperties.MODIFIER, context.getModifier(node));
     return c;
   }
-  
+
   /**
    * Visits a StaticFieldAccess
    * @param node the node to visit
    */
-  public Type visit(StaticFieldAccess node) {
+  public Class<?> visit(StaticFieldAccess node) {
     // Visit the field type
-    Type c1 = node.getFieldType().acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
+    Class<?> c = node.getFieldType().acceptVisitor(this);
+
     // Load the field object
     Field f = null;
     try {
@@ -658,39 +664,36 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     } catch (Exception e) {
       throw new CatchedExceptionError(e, node);
     }
-    
+
     // Set the node properties
     node.setProperty(NodeProperties.FIELD, f);
     node.setProperty(NodeProperties.TYPE,  c = f.getType());
-    
+
     node.setProperty(NodeProperties.MODIFIER, context.getModifier(node));
     return c;
   }
-  
+
   /**
    * Visits an ObjectMethodCall
    * @param node the node to visit
    */
-  public Type visit(ObjectMethodCall node) {
+  public Class<?> visit(ObjectMethodCall node) {
     // Check the receiver
     Expression exp = node.getExpression();
-    Type      c1   = exp.acceptVisitor(this);
-    Class<?>   c   = (Class<?>)c1;
-    String    mn   = node.getMethodName();
-    
-    if (!c.isArray() || c.isArray() && !mn.equals("clone")) {
+    Class<?>      c   = exp.acceptVisitor(this);
+    String     mn  = node.getMethodName();
+
+    if (!c.isArray() || (c.isArray() && !mn.equals("clone"))) {
       // Do the type checking of the arguments
       List<Expression> args = node.getArguments();
-      Class<?>[] cargs = Constants.EMPTY_CLASS_ARRAY;        
+      Class<?>[] cargs = Constants.EMPTY_CLASS_ARRAY;
       if (args != null) {
         cargs = new Class[args.size()];
         Iterator<Expression> it = args.iterator();
         int i  = 0;
         while (it.hasNext()) {
-          cargs[i++] = (Class<?>)it.next().acceptVisitor(this);
+          cargs[i++] = it.next().acceptVisitor(this);
         }
-        
-        
       }
       Method m = null;
       try {
@@ -714,7 +717,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         node.setExpression(expr);
         m = e.getMethod();
       }
-      
+
       // Set the node properties
       node.setProperty(NodeProperties.METHOD, m);
       node.setProperty(NodeProperties.TYPE,   c = m.getReturnType());
@@ -731,7 +734,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       return c;
     }
   }
-  
+
   /**
    * Visits a MethodDeclaration
    * Note: the checkVarArgs here may or may not actually work. The test case in Distinction1415 failed when tiger features
@@ -739,14 +742,15 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * there is another statement throwing a WrongVersionException in this file.
    * @param node the node to visit
    */
-  public Type visit(MethodDeclaration node) {
+  public Class<?> visit(MethodDeclaration node) {
     checkVarArgs(node);
     context.defineFunction(node);
-    
+
     node.setProperty(NodeProperties.TYPE, node.getReturnType().acceptVisitor(this));
     node.setProperty(NodeProperties.FUNCTIONS, context.getFunctions());
-    node.setProperty(NodeProperties.IMPORTATION_MANAGER, context.getImportationManager().clone());
-    
+    node.setProperty(NodeProperties.IMPORTATION_MANAGER,
+                     context.getImportationManager().clone());
+
     context.enterScope();
     checkList(node.getParameters());
     context.leaveScope();
@@ -758,45 +762,45 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @param node - the MethodDeclaration which may or may not contain variable arguments
    */
   protected abstract void checkVarArgs(MethodDeclaration node);
-  
+
   
   /**
    * Visits a FunctionCall
    * @param node the node to visit
    */
-  public Type visit(FunctionCall node) {
+  public Class<?> visit(FunctionCall node) {
     // Do the type checking of the arguments
     List<Expression> args = node.getArguments();
-    Class<?>[] cargs = Constants.EMPTY_CLASS_ARRAY;       //LOOK HERE!!
+    Class<?>[] cargs = Constants.EMPTY_CLASS_ARRAY;
     if (args != null) {
       cargs = new Class[args.size()];
       Iterator<Expression> it = args.iterator();
       int i  = 0;
       while (it.hasNext()) {
-        cargs[i++] = (Class<?>)it.next().acceptVisitor(this);
+        cargs[i++] = it.next().acceptVisitor(this);
       }
     }
-    
     MethodDeclaration f = null;
-    try { f = context.lookupFunction(node.getMethodName(), cargs); } 
-    catch (NoSuchFunctionException e) {
+    try {
+      f = context.lookupFunction(node.getMethodName(), cargs);
+    } catch (NoSuchFunctionException e) {
       String s = node.getMethodName();
       node.setProperty(NodeProperties.ERROR_STRINGS, new String[] { s });
       throw new ExecutionError("no.such.function", node);
     }
-    
+
     // Set the node properties
-    Type c;
+    Class<?> c;
     node.setProperty(NodeProperties.FUNCTION, f);
     node.setProperty(NodeProperties.TYPE,  c = NodeProperties.getType(f));
     return c;
   }
-  
+
   /**
    * Visits a SuperMethodCall
    * @param node the node to visit
    */
-  public Type visit(SuperMethodCall node) {
+  public Class<?> visit(SuperMethodCall node) {
     // Do the type checking of the arguments
     List<Expression> args = node.getArguments();
     Class<?>[] pt = Constants.EMPTY_CLASS_ARRAY;
@@ -805,26 +809,28 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       Iterator<Expression> it = args.iterator();
       int i = 0;
       while (it.hasNext()) {
-        pt[i++] = (Class<?>)it.next().acceptVisitor(this);
+        pt[i++] = it.next().acceptVisitor(this);
       }
     }
-    
     Method m = null;
-    try { m = context.lookupSuperMethod(node, node.getMethodName(), pt); } 
-    catch (Exception e) { throw new CatchedExceptionError(e, node); }
-    
+    try {
+      m = context.lookupSuperMethod(node, node.getMethodName(), pt);
+    } catch (Exception e) {
+      throw new CatchedExceptionError(e, node);
+    }
+
     // Set the node properties
-    Type c;
+    Class<?> c;
     node.setProperty(NodeProperties.METHOD, m);
     node.setProperty(NodeProperties.TYPE,   c = m.getReturnType());
     return c;
   }
-  
+
   /**
    * Visits a StaticMethodCall
    * @param node the node to visit
    */
-  public Type visit(StaticMethodCall node) {
+  public Class<?> visit(StaticMethodCall node) {
     // Do the type checking of the arguments
     List<Expression> args = node.getArguments();
     Class<?>[] cargs = Constants.EMPTY_CLASS_ARRAY;
@@ -833,43 +839,44 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       Iterator<Expression> it = args.iterator();
       int      i  = 0;
       while (it.hasNext()) {
-        cargs[i++] = (Class<?>)it.next().acceptVisitor(this);
+        cargs[i++] = it.next().acceptVisitor(this);
       }
     }
     Method m = null;
     Node   n = node.getMethodType();
-    Type  c1 = n.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
-    
-    try { m = context.lookupMethod(n, node.getMethodName(), cargs); } 
-    catch (NoSuchMethodException e) {
+    Class<?>  c = n.acceptVisitor(this);
+
+    try {
+      m = context.lookupMethod(n, node.getMethodName(), cargs);
+    } catch (NoSuchMethodException e) {
       String s0 = node.getMethodName();
       String s1 = c.getName();
       String sargs = "";
       for (int i = 0; i < cargs.length-1; i++) {
         sargs += cargs[i].getName() + ", ";
       }
-      if (cargs.length > 0) sargs += cargs[cargs.length-1].getName();
-      
+      if (cargs.length > 0) {
+        sargs += cargs[cargs.length-1].getName();
+      }
       node.setProperty(NodeProperties.ERROR_STRINGS, new String[] { s0, s1, sargs });
       throw new ExecutionError("no.such.method.with.args", node);
     }
-    
+
     // Set the node properties
     node.setProperty(NodeProperties.METHOD, m);
     node.setProperty(NodeProperties.TYPE,   c = m.getReturnType());
     return c;
   }
-  
+
   /**
    * Visits a SimpleAssignExpression
    * @param node the node to visit
    */
-  public Type visit(SimpleAssignExpression node) {
+  public Class<?> visit(SimpleAssignExpression node) {
     Expression left  = node.getLeftExpression();
     Expression right = node.getRightExpression();
-    Type rc = right.acceptVisitor(this);
-    
+    Class<?> rc = right.acceptVisitor(this);
+
     // Perhaps is this assignment a variable declaration
     if (left instanceof QualifiedName) {
       String var = ((QualifiedName)left).getRepresentation();
@@ -879,71 +886,71 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     
     // Get the type of the left hand side
-    Type lc = left.acceptVisitor(this);
-    
+    Class<?> lc = left.acceptVisitor(this);
+
     // The left subexpression must be a variable
     if (!left.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("left.expression", node);
     }
-    
+
     // Check the validity of the assignment
     Expression exp = checkAssignmentStaticRules(lc, rc, node, right);
     node.setRightExpression(exp);
-    
+
     node.setProperty(NodeProperties.TYPE, lc);
     return lc;
   }
-  
+
   /**
    * Visits a QualifiedName
    * @param node the node to visit
    */
-  public Type visit(QualifiedName node) {
+  public Class<?> visit(QualifiedName node) {
     String var = node.getRepresentation();
     
     // Set the modifier
-    Type c = context.get(var);    //cast to Class<?>???
+    Class<?> c = (Class<?>) context.get(var);
     node.setProperty(NodeProperties.TYPE, c);
     
     node.setProperty(NodeProperties.MODIFIER, context.getModifier(node));
     return c;
     
   }
-  
+
   /**
    * Visits a SimpleAllocation
    * @param node the node to visit
    */
-  public Type visit(SimpleAllocation node) {
+  public Class<?> visit(SimpleAllocation node) {
     // Check the type to declare
     Node type = node.getCreationType();
-    Type c1  = type.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
-    
+    Class<?> c  = type.acceptVisitor(this);
+
     // Do the type checking of the arguments
     List<Expression> args = node.getArguments();
     Class<?>[] cargs = Constants.EMPTY_CLASS_ARRAY;
-    
+
     if (args != null) {
       cargs = new Class[args.size()];
-      
+
       ListIterator<Expression> it = args.listIterator();
       int i  = 0;
       while (it.hasNext()) {
-        cargs[i++] = (Class<?>)it.next().acceptVisitor(this);
+        cargs[i++] = it.next().acceptVisitor(this);
       }
     }
+
     return context.setProperties(node, c, cargs);
   }
-  
+
   /**
    * Visits a InnerAllocation
    * @param node the node to visit
    */
-  public Type visit(InnerAllocation node) {
+  public Class<?> visit(InnerAllocation node) {
     // Visit the expression
-    Type ec1 = node.getExpression().acceptVisitor(this);
-    Class<?> ec = (Class<?>)ec1;
+    Class<?> ec = node.getExpression().acceptVisitor(this);
+
     // Check the type to declare
     Node type = node.getCreationType();
     if (type instanceof ReferenceType) {
@@ -952,26 +959,23 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     } else {
       throw new ExecutionError("allocation.type", node);
     }
-    Type c1 = type.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
-    Type dc1 = InterpreterUtilities.getDeclaringClass(c);
-    Class<?> dc = (Class<?>)dc1;
-    
+    Class<?> c = type.acceptVisitor(this);
+    Class<?> dc = InterpreterUtilities.getDeclaringClass(c);
+
     // Do the type checking of the arguments
     List<Expression> args = node.getArguments();
     Class<?>[] cargs = null;
-    
-    
+
     if (dc != null && dc.isAssignableFrom(ec)) {
       // Adds an argument if the class to build is an innerclass
       if (args != null) {
         cargs = new Class<?>[args.size() + 1];
-        
+
         cargs[0] = ec;
         ListIterator<Expression> it = args.listIterator();
         int i  = 1;
         while (it.hasNext()) {
-          cargs[i++] = (Class<?>)it.next().acceptVisitor(this);
+          cargs[i++] = it.next().acceptVisitor(this);
         }
       } else {
         cargs = new Class<?>[] { ec };
@@ -980,21 +984,24 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       throw new ExecutionError("allocation.type", node);
     }
     Constructor cons = null;
-    try { cons = context.lookupConstructor(c, cargs); } 
-    catch (Exception e) { throw new CatchedExceptionError(e, node); }
-    
+    try {
+      cons = context.lookupConstructor(c, cargs);
+    } catch (Exception e) {
+      throw new CatchedExceptionError(e, node);
+    }
+
     // Set the properties of this node
     node.setProperty(NodeProperties.TYPE,        c);
     node.setProperty(NodeProperties.CONSTRUCTOR, cons);
-    
+
     return c;
   }
-  
+
   /**
    * Visits a ClassAllocation
    * @param node the node to visit
    */
-  public Type visit(ClassAllocation node) {
+  public Class<?> visit(ClassAllocation node) {
     // If the class allocation is the initializer of a field,
     // it is possible that it has already been visited
     if (node.hasProperty(NodeProperties.TYPE)) {
@@ -1002,35 +1009,33 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     } else {
       // Get the class to allocate
       Node   ctn   = node.getCreationType();
-      Type   ct1   = ctn.acceptVisitor(this);
-      Class<?> ct = (Class<?>)ct1;
+      Class<?>   ct   = ctn.acceptVisitor(this);
       List<Expression>   largs = node.getArguments();
       Class<?>[] args = Constants.EMPTY_CLASS_ARRAY;
-      
+
       if (largs != null) {
         args = new Class[largs.size()];
         Iterator<Expression> it = largs.iterator();
         int i = 0;
         while (it.hasNext()) {
-          args[i++] = (Class<?>)it.next().acceptVisitor(this);
+          args[i++] = it.next().acceptVisitor(this);
         }
       }
       return context.setProperties(node, ct, args, node.getMembers());
     }
   }
-  
+
   /**
    * Visits an ArrayAllocation
    * @param node the node to visit
    */
-  public Type visit(ArrayAllocation node) {
+  public Class<?> visit(ArrayAllocation node) {
     // Do the checking of the size expressions
     ListIterator<Expression> it = node.getSizes().listIterator();
     
     while (it.hasNext()) {
       Expression exp = it.next();
-      Type c1 = exp.acceptVisitor(this);
-      Class<?> c = (Class<?>)c1;
+      Class<?> c = exp.acceptVisitor(this);
       
       // Dimension expression must be of an integral type, but not long
       if (c != char.class      && c != byte.class && c != short.class && c != int.class &&
@@ -1043,57 +1048,56 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         it.set(_unbox(exp, c));
       }
     }
-    
+
     // Type-check the type of the array
-    Type c1 = node.getCreationType().acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
+    Class<?> c = node.getCreationType().acceptVisitor(this);
+
     // Visits the initializer if one
     if (node.getInitialization() != null) {
       node.getInitialization().acceptVisitor(this);
     }
-    
+
     // Set the type properties of this node
-    Type ac = Array.newInstance(c, new int[node.getDimension()]).getClass();
+    Class<?> ac = Array.newInstance(c, new int[node.getDimension()]).getClass();
     node.setProperty(NodeProperties.TYPE, ac);
     node.setProperty(NodeProperties.COMPONENT_TYPE, c);
     return ac;
   }
-  
+
   /**
    * Visits a ArrayInitializer
    * @param node the node to visit
    */
-  public Type visit(ArrayInitializer node) {
+  public Class<?> visit(ArrayInitializer node) {
     node.getElementType().acceptVisitor(this);
-    
+
     checkList(node.getCells());
     return null;
   }
-  
+
   /**
    * Visits an ArrayAccess
    * @param node the node to visit
    */
-  public Type visit(ArrayAccess node) {
+  public Class<?> visit(ArrayAccess node) {
     // Visits the expression on which this array access applies
-    Type c1 = node.getExpression().acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
+    Class<?> c = node.getExpression().acceptVisitor(this);
+
     // Make sure this is an array
     if (!c.isArray()) {
       node.setProperty(NodeProperties.ERROR_STRINGS,
                        new String[] { c.getName() });
       throw new ExecutionError("array.required", node);
     }
-    
+
     // Sets the properties of this node
-    Type result = c.getComponentType();
+    Class<?> result = c.getComponentType();
     node.setProperty(NodeProperties.TYPE, result);
     node.setProperty(NodeProperties.MODIFIER, new ArrayModifier(node));
-    
+
     // Visits the cell number expression
-    Type c2 = node.getCellNumber().acceptVisitor(this);
-    c = (Class<?>)c2;
-    
+    c = node.getCellNumber().acceptVisitor(this);
+
     // The index must be of an integral type, but not a long
     if (c != char.class      && c != byte.class && c != short.class && c != int.class &&
         c != Character.class && c != Byte.class && c != Short.class && c != Integer.class) {
@@ -1107,25 +1111,24 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     
     return result;
   }
-  
+
   /**
    * Visits a PrimitiveType
    * @param node the node to visit
    */
-  public Type visit(PrimitiveType node) {
-    Type c = node.getValue();
+  public Class<?> visit(PrimitiveType node) {
+    Class<?> c = node.getValue();
     node.setProperty(NodeProperties.TYPE, c);
     return c;
   }
-  
+
   /**
    * Visits a ReferenceType
    * @param node the node to visit
    */
-  public Type visit(ReferenceType node) {
-    //System.out.println(node)
+  public Class<?> visit(ReferenceType node) {
     checkGenericReferenceType(node);
-    Type c = null;
+    Class<?> c = null;
     try {
       c = context.lookupClass(node.getRepresentation());
     } 
@@ -1145,53 +1148,51 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    */  
   protected abstract void checkGenericReferenceType(ReferenceType node);
   
-  
+
   /**
    * Visits an ArrayType
    * @param node the node to visit
    */
-  public Type visit(ArrayType node) {
+  public Class<?> visit(ArrayType node) {
     Node eType = node.getElementType();
-    Type c1 = eType.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
-    Type ac = Array.newInstance(c, 0).getClass();
-    
+    Class<?> c = eType.acceptVisitor(this);
+    Class<?> ac = Array.newInstance(c, 0).getClass();
+
     // Set the type property of this node
     node.setProperty(NodeProperties.TYPE, ac);
     return ac;
   }
-  
+
   /**
    * Visits a TypeExpression
    * @param node the node to visit
    */
-  public Type visit(TypeExpression node) {
-    Type c = node.getType().acceptVisitor(this);
+  public Class<?> visit(TypeExpression node) {
+    Class<?> c = node.getType().acceptVisitor(this);
     node.setProperty(NodeProperties.TYPE, Class.class);
     node.setProperty(NodeProperties.VALUE, c);
     return Class.class;
   }
-  
+
   /**
    * Visits a NotExpression
    * @param node the node to visit
    */
-  public Type visit(NotExpression node) {
+  public Class<?> visit(NotExpression node) {
     // Check the type
     Expression exp = node.getExpression();
-    Type c1 = exp.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
-    
+    Class<?> c = exp.acceptVisitor(this);
+
     if (c != boolean.class && c != Boolean.class) {
       throw new ExecutionError("not.expression.type", node);
     }
     node.setProperty(NodeProperties.TYPE, boolean.class);
-    
+
     // Auto-unbox, if necessary
     if (TigerUtilities.isBoxingType(c)) {
       node.setExpression(_unbox(exp, c));
     }
-    
+
     // Compute the expression if it is constant
     if (exp.hasProperty(NodeProperties.VALUE)) {
       if (((Boolean) exp.getProperty(NodeProperties.VALUE)).booleanValue()) {
@@ -1203,17 +1204,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return boolean.class;
   }
-  
+
   /**
    * Visits a ComplementExpression
    * @param node the node to visit
    */
-  public Type visit(ComplementExpression node) {
+  public Class<?> visit(ComplementExpression node) {
     // Check the type
     Expression e = node.getExpression();
-    Type c1 = e.acceptVisitor(this);
-    Type returnType = c1;
-    Class<?> c = (Class<?>)c1;
+    Class<?> c = e.acceptVisitor(this);
+    Class<?> returnType = c;
+
     if (c == char.class      || c == byte.class || c == short.class ||
         c == Character.class || c == Byte.class || c == Short.class) {
       node.setProperty(NodeProperties.TYPE, int.class);
@@ -1231,7 +1232,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     else {
       throw new ExecutionError("complement.expression.type", node);
     }
-    
+
     // Auto-unbox, if necessary
     if (TigerUtilities.isBoxingType(c)) {
       node.setExpression(_unbox(e, c));
@@ -1254,14 +1255,14 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return returnType;
   }
-  
+
   /**
    * Visits a PlusExpression
    * @param node the node to visit
    */
-  public Type visit(PlusExpression node) {
-    Type c1 = visitUnaryOperation(node, "plus.expression.type");
-    Class<?> c = (Class<?>)c1;
+  public Class<?> visit(PlusExpression node) {
+    Class<?> c = visitUnaryOperation(node, "plus.expression.type");
+
     // Compute the expression if it is constant
     Node  n = node.getExpression();
     if (n.hasProperty(NodeProperties.VALUE)) {
@@ -1270,14 +1271,14 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits a MinusExpression
    * @param node the node to visit
    */
-  public Type visit(MinusExpression node) {
-    Type c1 = visitUnaryOperation(node, "minus.expression.type");
-    Class<?> c = (Class<?>)c1;
+  public Class<?> visit(MinusExpression node) {
+    Class<?> c = visitUnaryOperation(node, "minus.expression.type");
+
     // Compute the expression if it is constant
     Node  n = node.getExpression();
     if (n.hasProperty(NodeProperties.VALUE)) {
@@ -1287,46 +1288,46 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits an AddExpression
    * @param node the node to visit
    */
-  public Type visit(AddExpression node) {
+  public Class<?> visit(AddExpression node) {
     // Check the types
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    Type lc = ln.acceptVisitor(this);
-    Type rc = rn.acceptVisitor(this);
-    Type c  = String.class;
-    
+    Class<?> lc = ln.acceptVisitor(this);
+    Class<?> rc = rn.acceptVisitor(this);
+    Class<?> c  = String.class;
+
     if (lc != String.class && rc != String.class) {
       c = visitNumericExpression(node, "addition.type");
     } 
     else {
       node.setProperty(NodeProperties.TYPE, c);
     }
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) && 
         rn.hasProperty(NodeProperties.VALUE)) {
       node.setProperty(NodeProperties.VALUE,
-                       InterpreterUtilities.add((Class<?>)c, ln.getProperty(NodeProperties.VALUE),
+                       InterpreterUtilities.add(c, ln.getProperty(NodeProperties.VALUE),
                                                 rn.getProperty(NodeProperties.VALUE)));
     }
     return c;
   }
-  
+
   /**
    * Visits an AddAssignExpression
    * @param node the node to visit
    */
-  public Type visit(AddAssignExpression node) {
+  public Class<?> visit(AddAssignExpression node) {
     // Check the types
     Node  ln = node.getLeftExpression();
-    Type lc1 = ln.acceptVisitor(this);
-    Type rc1 = node.getRightExpression().acceptVisitor(this);
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
+    Class<?> lc = ln.acceptVisitor(this);
+    Class<?> rc = node.getRightExpression().acceptVisitor(this);
+
     // Do some error checking for null, void, etc.
     if (lc != String.class) {
       if (lc == null          || rc == null          ||
@@ -1338,28 +1339,28 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         throw new ExecutionError("addition.type", node);
       }
     }
-    
+
     // The left subexpression must be a variable
     if (!ln.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("left.expression", node);
     }
-    
+
     // Sets the type property of this node
     node.setProperty(NodeProperties.TYPE, lc);
     return lc;
   }
-  
+
   /**
    * Visits a SubtractExpression
    * @param node the node to visit
    */
-  public Type visit(SubtractExpression node) {
+  public Class<?> visit(SubtractExpression node) {
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
     ln.acceptVisitor(this);
     rn.acceptVisitor(this);
-    Type c1 = visitNumericExpression(node, "subtraction.type");
-    Class<?> c = (Class<?>)c1;
+    Class<?> c = visitNumericExpression(node, "subtraction.type");
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1371,18 +1372,18 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits an SubtractAssignExpression
    * @param node the node to visit
    */
-  public Type visit(SubtractAssignExpression node) {
+  public Class<?> visit(SubtractAssignExpression node) {
     // Check the types
     Node  ln = node.getLeftExpression();
-    Type lc1 = ln.acceptVisitor(this);
-    Type rc1 = node.getRightExpression().acceptVisitor(this);
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
+    Class<?> lc = ln.acceptVisitor(this);
+    Class<?> rc = node.getRightExpression().acceptVisitor(this);
+
+
     // Do some error checking for null, void, etc.
     if (lc == null          || rc == null          ||
         lc == void.class    || rc == void.class    ||
@@ -1392,28 +1393,28 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc)) ) {
       throw new ExecutionError("subtraction.type", node);
     }
-    
+
     // The left subexpression must be a variable
     if (!ln.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("left.expression", node);
     }
-    
+
     // Sets the type property of this node
     node.setProperty(NodeProperties.TYPE, lc);
     return lc;
   }
-  
+
   /**
    * Visits a MultiplyExpression
    * @param node the node to visit
    */
-  public Type visit(MultiplyExpression node) {
+  public Class<?> visit(MultiplyExpression node) {
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
     ln.acceptVisitor(this);
     rn.acceptVisitor(this);
-    Type c1 = visitNumericExpression(node, "multiplication.type");
-    Class<?> c = (Class<?>)c1;
+    Class<?> c = visitNumericExpression(node, "multiplication.type");
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1425,18 +1426,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits an MultiplyAssignExpression
    * @param node the node to visit
    */
-  public Type visit(MultiplyAssignExpression node) {
+  public Class<?> visit(MultiplyAssignExpression node) {
     // Check the types
     Node  ln = node.getLeftExpression();
-    Type lc1 = ln.acceptVisitor(this);
-    Type rc1 = node.getRightExpression().acceptVisitor(this);
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
+    Class<?> lc = ln.acceptVisitor(this);
+    Class<?> rc = node.getRightExpression().acceptVisitor(this);
+
     // Do some error checking for null, void, etc.
     if (lc == null          || rc == null          ||
         lc == void.class    || rc == void.class    ||
@@ -1446,17 +1446,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc)) ) {
       throw new ExecutionError("multiplication.type", node);
     }
-    
+
     // The left subexpression must be a variable
     if (!ln.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("left.expression", node);
     }
-    
+
     // Sets the type property of this node
     node.setProperty(NodeProperties.TYPE, lc);
     return lc;
   }
-  
+
 //  /**
 //   * Visits a DivideExpression
 //   * @param node the node to visit
@@ -1480,44 +1480,42 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
 //    return c;
 //  }
   
-  /**
+    /**
    * Visits a DivideExpression
    * @param node the node to visit
    */
-  public Type visit(DivideExpression node) {
+  public Class<?> visit(DivideExpression node) {
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
     ln.acceptVisitor(this);
     rn.acceptVisitor(this);
-    Type c = visitNumericExpression(node, "division.type");
+    Class<?> c = visitNumericExpression(node, "division.type");
     return c;
   }
-  
+
   /**
    * Visits a RemainderExpression
    * @param node the node to visit
    */
-  public Type visit(RemainderExpression node) {
+  public Class<?> visit(RemainderExpression node) {
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
     ln.acceptVisitor(this);
     rn.acceptVisitor(this);
-    Type c = visitNumericExpression(node, "remainder.type");
+    Class<?> c = visitNumericExpression(node, "remainder.type");
     return c;
   }
   
-  
+
   /**
    * Visits an DivideAssignExpression
    * @param node the node to visit
    */
-  public Type visit(DivideAssignExpression node) {
+  public Class<?> visit(DivideAssignExpression node) {
     // Check the types
     Node  ln = node.getLeftExpression();
-    Type lc1 = ln.acceptVisitor(this);
-    Type rc1 = node.getRightExpression().acceptVisitor(this);
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
+    Class<?> lc = ln.acceptVisitor(this);
+    Class<?> rc = node.getRightExpression().acceptVisitor(this);
 
     // Do some error checking for null, void, etc.
     if (lc == null          || rc == null          ||
@@ -1525,20 +1523,20 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         lc == boolean.class || rc == boolean.class ||
         lc == Boolean.class || rc == Boolean.class ||
         !(lc.isPrimitive()  || TigerUtilities.isBoxingType(lc))  || 
-        !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc))) {
+        !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc)) ) {
       throw new ExecutionError("division.type", node);
     }
-    
+
     // The left subexpression must be a variable
     if (!ln.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("left.expression", node);
     }
-    
+
     // Sets the type property of this node
     node.setProperty(NodeProperties.TYPE, lc);
     return lc;
   }
-  
+
 //  /**
 //   * Visits a RemainderExpression
 //   * @param node the node to visit
@@ -1561,18 +1559,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
 //    }
 //    return c;
 //  }
-  
+
   /**
    * Visits an RemainderAssignExpression
    * @param node the node to visit
    */
-  public Type visit(RemainderAssignExpression node) {
+  public Class<?> visit(RemainderAssignExpression node) {
     // Check the types
     Node  ln = node.getLeftExpression();
-    Type lc1 = ln.acceptVisitor(this);
-    Type rc1 = node.getRightExpression().acceptVisitor(this);
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
+    Class<?> lc = ln.acceptVisitor(this);
+    Class<?> rc = node.getRightExpression().acceptVisitor(this);
+
     // Do some error checking for null, void, etc.
     if (lc == null          || rc == null          ||
         lc == void.class    || rc == void.class    ||
@@ -1582,32 +1579,31 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc)) ) {
       throw new ExecutionError("remainder.type", node);
     }
-    
+
     // The left subexpression must be a variable
     if (!ln.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("left.expression", node);
     }
-    
+
     // Sets the type property of this node
     node.setProperty(NodeProperties.TYPE, lc);
     return lc;
   }
-  
+
   /**
    * Visits an EqualExpression
    * @param node the node to visit
    */
-  public Type visit(EqualExpression node) {
+  public Class<?> visit(EqualExpression node) {
     // Check the types
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    Type lc1 = ln.acceptVisitor(this);
-    Type rc1 = rn.acceptVisitor(this);
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
+    Class<?> lc = ln.acceptVisitor(this);
+    Class<?> rc = rn.acceptVisitor(this);
+
     // Check the equality rules, and un-box
     checkEqualityStaticRules(lc, rc, node);
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1616,29 +1612,28 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
                                                     ln.getProperty(NodeProperties.VALUE),
                                                     rn.getProperty(NodeProperties.VALUE)));
     }
-    
+
     // Set the type property
     node.setProperty(NodeProperties.TYPE, boolean.class);
     
     // Return the type of the expression (always boolean)
     return boolean.class;
   }
-  
+
   /**
    * Visits an NotEqualExpression
    * @param node the node to visit
    */
-  public Type visit(NotEqualExpression node) {
+  public Class<?> visit(NotEqualExpression node) {
     // Check the types
     Node ln = node.getLeftExpression();
     Node rn = node.getRightExpression();
-    Type lc1 = ln.acceptVisitor(this);
-    Type rc1 = rn.acceptVisitor(this);
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
+    Class<?> lc = ln.acceptVisitor(this);
+    Class<?> rc = rn.acceptVisitor(this);
+
     // Check the equality rules, and un-box
     checkEqualityStaticRules(lc, rc, node);
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1647,24 +1642,24 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
                                                        ln.getProperty(NodeProperties.VALUE),
                                                        rn.getProperty(NodeProperties.VALUE)));
     }
-    
+
     // Set the type property
     node.setProperty(NodeProperties.TYPE, boolean.class);
     
     // Return boolean type
     return boolean.class;
   }
-  
+
   /**
    * Visits a LessExpression
    * @param node the node to visit
    */
-  public Type visit(LessExpression node) {
-    Type c = visitRelationalExpression(node);
-    
+  public Class<?> visit(LessExpression node) {
+    Class<?> c = visitRelationalExpression(node);
+
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1675,17 +1670,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits a LessOrEqualExpression
    * @param node the node to visit
    */
-  public Type visit(LessOrEqualExpression node) {
-    Type c = visitRelationalExpression(node);
-    
+  public Class<?> visit(LessOrEqualExpression node) {
+    Class<?> c = visitRelationalExpression(node);
+
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1696,17 +1691,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits a GreaterExpression
    * @param node the node to visit
    */
-  public Type visit(GreaterExpression node) {
-    Type c = visitRelationalExpression(node);
-    
+  public Class<?> visit(GreaterExpression node) {
+    Class<?> c = visitRelationalExpression(node);
+
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1717,17 +1712,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits a GreaterOrEqualExpression
    * @param node the node to visit
    */
-  public Type visit(GreaterOrEqualExpression node) {
-    Type c = visitRelationalExpression(node);
-    
+  public Class<?> visit(GreaterOrEqualExpression node) {
+    Class<?> c = visitRelationalExpression(node);
+
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1738,17 +1733,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits a BitAndExpression
    * @param node the node to visit
    */
-  public Type visit(BitAndExpression node) {
-    Type c1 = visitBitwiseExpression(node);
-    Class<?> c = (Class<?>)c1;
+  public Class<?> visit(BitAndExpression node) {
+    Class<?> c = visitBitwiseExpression(node);
+
     Node ln = node.getLeftExpression();
     Node rn = node.getRightExpression();
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1759,53 +1754,56 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits a BitAndAssignExpression
    * @param node the node to visit
    */
-  public Type visit(BitAndAssignExpression node) {
+  public Class<?> visit(BitAndAssignExpression node) {
     return visitBitwiseAssign(node);
   }
-  
+
   /**
    * Visits a BitOrExpression
    * @param node the node to visit
    */
-  public Type visit(BitOrExpression node) {
-    Type c1 = visitBitwiseExpression(node);
-    Class<?> c = (Class<?>)c1;
+  public Class<?> visit(BitOrExpression node) {
+    Class<?> c = visitBitwiseExpression(node);
+
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
       node.setProperty
         (NodeProperties.VALUE,
-         InterpreterUtilities.bitOr(c, ln.getProperty(NodeProperties.VALUE), rn.getProperty(NodeProperties.VALUE)));
+         InterpreterUtilities.bitOr
+           (c,
+            ln.getProperty(NodeProperties.VALUE),
+            rn.getProperty(NodeProperties.VALUE)));
     }
     return c;
   }
-  
+
   /**
    * Visits a BitOrAssignExpression
    * @param node the node to visit
    */
-  public Type visit(BitOrAssignExpression node) {
+  public Class<?> visit(BitOrAssignExpression node) {
     return visitBitwiseAssign(node);
   }
-  
+
   /**
    * Visits a ExclusiveOrExpression
    * @param node the node to visit
    */
-  public Type visit(ExclusiveOrExpression node) {
-    Type c1 = visitBitwiseExpression(node);
-    Class<?> c = (Class<?>)c1;
+  public Class<?> visit(ExclusiveOrExpression node) {
+    Class<?> c = visitBitwiseExpression(node);
+
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1818,25 +1816,25 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits a ExclusiveOrAssignExpression
    * @param node the node to visit
    */
-  public Type visit(ExclusiveOrAssignExpression node) {
+  public Class<?> visit(ExclusiveOrAssignExpression node) {
     return visitBitwiseAssign(node);
   }
-  
+
   /**
    * Visits a ShiftLeftExpression
    * @param node the node to visit
    */
-  public Type visit(ShiftLeftExpression node) {
-    Type c = visitShiftExpression(node);
-    
+  public Class<?> visit(ShiftLeftExpression node) {
+    Class<?> c = visitShiftExpression(node);
+
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1849,32 +1847,32 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits a ShiftLeftAssignExpression
    * @param node the node to visit
    */
-  public Type visit(ShiftLeftAssignExpression node) {
-    Type c = visitShiftExpression(node);
-    
+  public Class<?> visit(ShiftLeftAssignExpression node) {
+    Class<?> c = visitShiftExpression(node);
+
     // The left subexpression must be a variable
     if (!node.getLeftExpression().hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("shift.left.type", node);
     }
-    
+
     return c;
   }
-  
+
   /**
    * Visits a ShiftRightExpression
    * @param node the node to visit
    */
-  public Type visit(ShiftRightExpression node) {
-    Type c = visitShiftExpression(node);
-    
+  public Class<?> visit(ShiftRightExpression node) {
+    Class<?> c = visitShiftExpression(node);
+
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1887,32 +1885,32 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits a ShiftRightAssignExpression
    * @param node the node to visit
    */
-  public Type visit(ShiftRightAssignExpression node) {
-    Type c = visitShiftExpression(node);
-    
+  public Class<?> visit(ShiftRightAssignExpression node) {
+    Class<?> c = visitShiftExpression(node);
+
     // The left subexpression must be a variable
     if (!node.getLeftExpression().hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("shift.right.type", node);
     }
-    
+
     return c;
   }
-  
+
   /**
    * Visits a UnsignedShiftRightExpression
    * @param node the node to visit
    */
-  public Type visit(UnsignedShiftRightExpression node) {
-    Type c = visitShiftExpression(node);
-    
+  public Class<?> visit(UnsignedShiftRightExpression node) {
+    Class<?> c = visitShiftExpression(node);
+
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -1925,38 +1923,38 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Visits a UnsignedShiftRightAssignExpression
    * @param node the node to visit
    */
-  public Type visit(UnsignedShiftRightAssignExpression node) {
-    Type c = visitShiftExpression(node);
-    
+  public Class<?> visit(UnsignedShiftRightAssignExpression node) {
+    Class<?> c = visitShiftExpression(node);
+
     // The left subexpression must be a variable
     if (!node.getLeftExpression().hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("unsigned.shift.right.type", node);
     }
-    
+
     return c;
   }
-  
+
   /**
    * Visits an AndExpression
    * @param node the node to visit
    */
-  public Type visit(AndExpression node) {
+  public Class<?> visit(AndExpression node) {
     Expression le = node.getLeftExpression();
     Expression re = node.getRightExpression();
-    Type lc = le.acceptVisitor(this);
-    Type rc = re.acceptVisitor(this);
-    
+    Class<?> lc = le.acceptVisitor(this);
+    Class<?> rc = re.acceptVisitor(this);
+
     // Check the types of the operands
     if (!(lc == boolean.class || lc == Boolean.class) || 
         !(rc == boolean.class || rc == Boolean.class) ) {
       throw new ExecutionError("and.type", node);
     }
-    
+
     // Auto-unbox, if necessary
     if (lc == Boolean.class) {
       node.setLeftExpression(_unbox(le, lc));
@@ -1974,28 +1972,28 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
           ((Boolean)re.getProperty(NodeProperties.VALUE)).booleanValue())
            ? Boolean.TRUE : Boolean.FALSE);
     }
-    
+
     // Set the type property
     node.setProperty(NodeProperties.TYPE, boolean.class);
     return boolean.class;
   }
-  
+
   /**
    * Visits an OrExpression
    * @param node the node to visit
    */
-  public Type visit(OrExpression node) {
+  public Class<?> visit(OrExpression node) {
     Expression ln = node.getLeftExpression();
     Expression rn = node.getRightExpression();
-    Type lc = ln.acceptVisitor(this);
-    Type rc = rn.acceptVisitor(this);
-    
+    Class<?> lc = ln.acceptVisitor(this);
+    Class<?> rc = rn.acceptVisitor(this);
+
     // Check the types of the operands
     if (!(lc == boolean.class || lc == Boolean.class) || 
         !(rc == boolean.class || rc == Boolean.class) ) {
       throw new ExecutionError("or.type", node);
     }
-    
+
     // Auto-unbox, if necessary
     if (lc == Boolean.class) {
       node.setLeftExpression(_unbox(ln, lc));
@@ -2003,7 +2001,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     if (rc == Boolean.class) {
       node.setRightExpression(_unbox(rn, rc));
     }
-    
+
     // Compute the expression if it is constant
     if (ln.hasProperty(NodeProperties.VALUE) &&
         rn.hasProperty(NodeProperties.VALUE)) {
@@ -2013,12 +2011,12 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
           ((Boolean)rn.getProperty(NodeProperties.VALUE)).booleanValue())
            ? Boolean.TRUE : Boolean.FALSE);
     }
-    
+
     // Set the type property
     node.setProperty(NodeProperties.TYPE, boolean.class);
     return boolean.class;
   }
-  
+
 //  /**
 //   * Visits a InstanceOfExpression
 //   * @param node the node to visit
@@ -2041,50 +2039,46 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * Visits a InstanceOfExpression
    * @param node the node to visit
    */
-  public Type visit(InstanceOfExpression node) {
+  public Class<?> visit(InstanceOfExpression node) {
     node.getReferenceType().acceptVisitor(this);
-    
+
     // The expression must not have a primitive type
-    Type c1 = node.getExpression().acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
+    Class<?> c = node.getExpression().acceptVisitor(this);
     if ((c != null) && c.isPrimitive()) {
       throw new ExecutionError("left.expression", node);
     }
-    
+
     // Set the type property
     node.setProperty(NodeProperties.TYPE, boolean.class);
     return boolean.class;
   }
-  
+
   /**
    * Visits a ConditionalExpression
    * @param node the node to visit
    */
-  public Type visit(ConditionalExpression node) {
+  public Class<?> visit(ConditionalExpression node) {
     // Get the type of the conidition expression
     Expression condExp = node.getConditionExpression();
-    Type type = condExp.acceptVisitor(this);
+    Class<?> type = condExp.acceptVisitor(this);
     
     // Check the condition
     if (type != boolean.class && type != Boolean.class) {
       throw new ExecutionError("condition.type", node);
     }
-    
+
     // Auto-unbox, if necessary
     if (type == Boolean.class) {
       node.setConditionExpression(_unbox(condExp, type));
     }
-    
+
     // Determine the type of the expression
     Expression exp1 = node.getIfTrueExpression();
     Expression exp2 = node.getIfFalseExpression();
-    Type c1A = exp1.acceptVisitor(this);
-    Type c2B = exp2.acceptVisitor(this);
-    Type ec = null;
-    
-    Class<?> c1 = (Class<?>)c1A;
-    Class<?> c2 = (Class<?>)c2B;
-    
+    Class<?> c1 = exp1.acceptVisitor(this);
+    Class<?> c2 = exp2.acceptVisitor(this);
+    Class<?> ec = null;
+
     // unbox a boxing type, except when the boxing type is 
     // Boolean and the other is not boolean
     if (TigerUtilities.isBoxingType(c1) && c2.isPrimitive()) {
@@ -2184,7 +2178,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       }
     } 
     else if ((c1 == byte.class || c1 == short.class || c1 == char.class) &&
-             exp2.hasProperty(NodeProperties.VALUE) && c2 == int.class) {
+               exp2.hasProperty(NodeProperties.VALUE) && c2 == int.class) {
       Number n = (Number)exp2.getProperty(NodeProperties.VALUE);
       if (c1 == byte.class) {
         if (n.intValue() == n.byteValue()) {
@@ -2214,37 +2208,36 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       ec = int.class;
     }
     node.setProperty(NodeProperties.TYPE, ec);
-    
+
     return ec;
   }
-  
+
   /**
    * Visits a FormalParameter
    * @param node the node to visit
    * @return the class of the parameter
    */
-  public Type visit(FormalParameter node) {
-    Type c = node.getType().acceptVisitor(this);
-    
+  public Class<?> visit(FormalParameter node) {
+    Class<?> c = node.getType().acceptVisitor(this);
+
     if (node.isFinal()) {
       context.defineConstant(node.getName(), c);
     } else {
       context.define(node.getName(), c);
     }
     node.setProperty(NodeProperties.TYPE, c);
-    
+
     return c;
   }
-  
+
   /**
    * Visits a PostIncrement
    * @param node the node to visit
    */
-  public Type visit(PostIncrement node) {
-    
+  public Class<?> visit(PostIncrement node) {
+
     Node exp = node.getExpression();
-    Type c1  = exp.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
+    Class<?> c  = exp.acceptVisitor(this);
     // The type of the subexpression must be numeric
     if (!(c.isPrimitive() || TigerUtilities.isBoxingType(c)) ||
         c == void.class     ||
@@ -2252,24 +2245,24 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         c == Boolean.class) {
       throw new ExecutionError("post.increment.type", node);
     }
-    
+
     // The subexpression must be a variable
     if (!exp.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("post.increment.type", node);
     }
-    
+
     node.setProperty(NodeProperties.TYPE, c);
     return c;
   }
-  
+
   /**
    * Visits a PreIncrement
    * @param node the node to visit
    */
-  public Type visit(PreIncrement node) {
+  public Class<?> visit(PreIncrement node) {
     Node exp = node.getExpression();
-    Type c1  = exp.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
+    Class<?> c  = exp.acceptVisitor(this);
+
     // The type of the subexpression must be numeric
     if (!(c.isPrimitive() || TigerUtilities.isBoxingType(c)) ||
         c == void.class     ||
@@ -2277,24 +2270,24 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         c == Boolean.class) {
       throw new ExecutionError("pre.increment.type", node);
     }
-    
+
     // The subexpression must be a variable
     if (!exp.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("pre.increment.type", node);
     }
-    
+
     node.setProperty(NodeProperties.TYPE, c);
     return c;
   }
-  
+
   /**
    * Visits a PostDecrement
    * @param node the node to visit
    */
-  public Type visit(PostDecrement node) {
+  public Class<?> visit(PostDecrement node) {
     Node exp = node.getExpression();
-    Type c1  = exp.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
+    Class<?> c  = exp.acceptVisitor(this);
+
     // The type of the subexpression must be numeric
     if (!(c.isPrimitive() || TigerUtilities.isBoxingType(c)) ||
         c == void.class     ||
@@ -2302,24 +2295,24 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         c == Boolean.class) {
       throw new ExecutionError("post.decrement.type", node);
     }
-    
+
     // The subexpression must be a variable
     if (!exp.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("post.decrement.type", node);
     }
-    
+
     node.setProperty(NodeProperties.TYPE, c);
     return c;
   }
-  
+
   /**
    * Visits a PreDecrement
    * @param node the node to visit
    */
-  public Type visit(PreDecrement node) {
+  public Class<?> visit(PreDecrement node) {
     Node exp = node.getExpression();
-    Type c1  = exp.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
+    Class<?> c  = exp.acceptVisitor(this);
+
     // The type of the subexpression must be numeric
     if (!(c.isPrimitive() || TigerUtilities.isBoxingType(c)) ||
         c == void.class     ||
@@ -2327,37 +2320,36 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         c == Boolean.class) {
       throw new ExecutionError("pre.decrement.type", node);
     }
-    
+
     // The subexpression must be a variable
     if (!exp.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("pre.decrement.type", node);
     }
-    
+
     node.setProperty(NodeProperties.TYPE, c);
     return c;
   }
-  
+
   /**
    * Visits a CastExpression
    * @param node the node to visit
    */
-  public Type visit(CastExpression node) {
-    Type c = node.getTargetType().acceptVisitor(this);
+  public Class<?> visit(CastExpression node) {
+    Class<?> c = node.getTargetType().acceptVisitor(this);
     checkCastStaticRules(c, node.getExpression().acceptVisitor(this), node);
-    
+
     node.setProperty(NodeProperties.TYPE, c);
     return c;
   }
-  
+
   /**
    * Visits an unary operation.
    */
-  private Type visitUnaryOperation(UnaryExpression node, String s) {
+  private Class<?> visitUnaryOperation(UnaryExpression node, String s) {
     Expression exp = node.getExpression();
-    Type c1 = exp.acceptVisitor(this);
-    Class<?> c = (Class<?>)c1;
-    Type returnType = c;
-    
+    Class<?> c = exp.acceptVisitor(this);
+    Class<?> returnType = c;
+
     if (c == char.class      || c == byte.class || c == short.class || c == int.class ||
         c == Character.class || c == Byte.class || c == Short.class || c == Integer.class) {
       node.setProperty(NodeProperties.TYPE, int.class);
@@ -2386,7 +2378,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     
     return returnType;
   }
-  
+
   /**
    * Visits a numeric expression.
    * This method checks the types on any numeric binary operator
@@ -2397,17 +2389,15 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @return the type of the expression after any numeric promotion or 
    * unboxing has been performed
    */
-  protected Type visitNumericExpression(BinaryExpression node, String s) {
+  protected Class<?> visitNumericExpression(BinaryExpression node, String s) {
     Expression leftExp = node.getLeftExpression();
     Expression rightExp = node.getRightExpression();
     
     // Set the type property of the given node
-    Type lc1 = NodeProperties.getType(leftExp);
-    Type rc1 = NodeProperties.getType(rightExp);
-    Type c  = null;
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
-    
+    Class<?> lc = NodeProperties.getType(leftExp);
+    Class<?> rc = NodeProperties.getType(rightExp);
+    Class<?> c  = null;
+
     // Check to make sure the left and right types are valid
     if (lc == null           || rc == null          ||
         lc == boolean.class  || rc == boolean.class ||
@@ -2416,7 +2406,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         lc == void.class     || rc == void.class) {
       throw new ExecutionError(s, node);
     } 
-    
+
     // Auto-unbox, if necessary
     if (TigerUtilities.isBoxingType(lc)) {
       node.setLeftExpression(_unbox(leftExp, lc));
@@ -2460,11 +2450,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @return The right-hand side of the assignment.  This expression will
    * be the unboxing/boxing of the RHS if necessary.
    */
-  public Expression checkAssignmentStaticRules(Type lc1, Type rc1,
-                                               Node node, Expression v) {
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
-    
+  public Expression checkAssignmentStaticRules(Class<?> lc, Class<?> rc,
+                                                 Node node, Expression v) {
     if (lc != null) {
       if (lc.isPrimitive()) {
         if (lc == boolean.class && rc != boolean.class) {
@@ -2548,13 +2535,12 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       }
       else /* lc is not Primitive */
         if (rc != null) {
-        if (rc.isPrimitive()) {
-          Type boxedRc1 = _correspondingRefClass(rc);
-          Class<?> boxedRc = (Class<?>)boxedRc1;
-          if (lc.isAssignableFrom(boxedRc)) return _box(v,boxedRc);
-          if (TigerUtilities.boxesTo(rc, lc)) return _box(v, lc); /* I think this statement is unnecessary.  Corky 6/19/04 */
-          throw new ExecutionError("assignment.types", node);
-        }
+          if (rc.isPrimitive()) {
+            Class<?> boxedRc = _correspondingRefClass(rc);
+            if (lc.isAssignableFrom(boxedRc)) return _box(v,boxedRc);
+            if (TigerUtilities.boxesTo(rc, lc)) return _box(v, lc); /* I think this statement is unnecessary.  Corky 6/19/04 */
+            throw new ExecutionError("assignment.types", node);
+          }
         if (!lc.isAssignableFrom(rc) && !rc.isAssignableFrom(lc)) { /* I don't know why the second clause appears in this test.  Corky 6/19/04 */
           throw new ExecutionError("assignment.types", node);
         }
@@ -2562,7 +2548,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return v;
   }
-  
+
   /**
    * Checks the typing rules in an equality operation
    * @param lc the class of the left operand
@@ -2573,7 +2559,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
   private void checkEqualityStaticRules(Class<?> lc, Class<?> rc, BinaryExpression n) {
     Expression leftExp = n.getLeftExpression();
     Expression rightExp = n.getRightExpression();
-    
+
     // Auto-unbox, if necessary
     /**
      * We have not decided what the correct semantics
@@ -2591,7 +2577,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         rc = (Class) methodCall.getProperty(NodeProperties.TYPE);
       }
     }
-    
+
     if (lc != rc || lc == void.class) {
       if (lc == void.class    || rc == void.class ||
           lc == boolean.class || rc == boolean.class) {
@@ -2613,7 +2599,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       }
     }
   }
-  
+
   /**
    * Visits a relational expression.  This simply makes sure
    * the types are numerical primitives/boxing types, 
@@ -2622,14 +2608,13 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @param node the relational expression: (> < >= <=)
    * @return the type of the expression: boolean
    */
-  private Type visitRelationalExpression(BinaryExpression node) {
+  private Class<?> visitRelationalExpression(BinaryExpression node) {
     // Check the types
     Expression leftExp = node.getLeftExpression();
     Expression rightExp = node.getRightExpression();
-    Type lc1 = leftExp.acceptVisitor(this);
-    Type rc1 = rightExp.acceptVisitor(this);
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
+    Class<?> lc = leftExp.acceptVisitor(this);
+    Class<?> rc = rightExp.acceptVisitor(this);
+
     if (lc == null          || rc == null           ||
         lc == void.class    || rc == void.class     ||
         lc == boolean.class || rc == boolean.class  ||
@@ -2637,7 +2622,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
         !(rc.isPrimitive()  || TigerUtilities.isBoxingType(rc))) {
       throw new ExecutionError("relational.expression.type", node);
     }
-    
+
     // Auto-unbox, if necessary
     if (TigerUtilities.isBoxingType(lc)) {
       node.setLeftExpression(_unbox(leftExp, lc));
@@ -2650,7 +2635,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     node.setProperty(NodeProperties.TYPE, boolean.class);
     return boolean.class;
   }
-  
+
   /**
    * Visits a bitwise expression.
    * If either the left or right expression is an integral
@@ -2661,15 +2646,13 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @return the type of the expression after unboxing and 
    *         promotion has been executed
    */
-  private Type visitBitwiseExpression(BinaryExpression node) {
+  private Class<?> visitBitwiseExpression(BinaryExpression node) {
     // Check the types
     Expression leftExp = node.getLeftExpression();
     Expression rightExp = node.getRightExpression();
-    Type lc1 = leftExp.acceptVisitor(this);
-    Type rc1 = rightExp.acceptVisitor(this);
-    Type c = null;
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
+    Class<?> lc = leftExp.acceptVisitor(this);
+    Class<?> rc = rightExp.acceptVisitor(this);
+    Class<?> c = null;
     
     boolean intLeft   = TigerUtilities.isIntegralType(lc);
     boolean intRight  = TigerUtilities.isIntegralType(rc);
@@ -2710,38 +2693,37 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Checks a bitwise expression
    */
-  private Type visitBitwiseAssign(BinaryExpression node) {
+  private Class<?> visitBitwiseAssign(BinaryExpression node) {
     // Check the types
     Node  ln = node.getLeftExpression();
-    Type lc1 = ln.acceptVisitor(this);
-    Type rc1 = node.getRightExpression().acceptVisitor(this);
-    
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
+    Class<?> lc = ln.acceptVisitor(this);
+    Class<?> rc = node.getRightExpression().acceptVisitor(this);
+
     if (lc == null           || rc == null             ||
         lc == void.class     || rc == void.class       ||
         lc == float.class    || rc == float.class      ||
         lc == double.class   || rc == double.class     ||
-        ((lc == boolean.class || lc == Boolean.class) ^ (rc == boolean.class || rc == Boolean.class)) ||
+        ((lc == boolean.class || lc == Boolean.class) ^ 
+         (rc == boolean.class || rc == Boolean.class)) ||
         !(lc.isPrimitive() || TigerUtilities.isBoxingType(lc))       || 
         !(rc.isPrimitive() || TigerUtilities.isBoxingType(rc))) {
       throw new ExecutionError("bitwise.expression.type", node);
     }
-    
+
     // The left subexpression must be a variable
     if (!ln.hasProperty(NodeProperties.MODIFIER)) {
       throw new ExecutionError("left.expression", node);
     }
-    
+
     // Sets the type property of this node
     node.setProperty(NodeProperties.TYPE, lc);
     return lc;
   }
-  
+
   /**
    * Visits a shift expression.
    * This method is responsible for unboxing the two operands
@@ -2752,16 +2734,14 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @return the type of the expression after any unboxing or numeric
    * promotion has been successfully executed.
    */
-  private Type visitShiftExpression(BinaryExpression node) {
+  private Class<?> visitShiftExpression(BinaryExpression node) {
     // Check the types
     Expression leftExp = node.getLeftExpression();
     Expression rightExp = node.getRightExpression();
-    Type lc1 = leftExp.acceptVisitor(this);
-    Type rc1 = rightExp.acceptVisitor(this);
-    Type c  = null;
-    Class<?> lc = (Class<?>)lc1;
-    Class<?> rc = (Class<?>)rc1;
-    
+    Class<?> lc = leftExp.acceptVisitor(this);
+    Class<?> rc = rightExp.acceptVisitor(this);
+    Class<?> c  = null;
+
     if (lc == null          || rc == null          ||
         lc == boolean.class || rc == boolean.class ||
         lc == void.class    || rc == void.class    ||
@@ -2790,18 +2770,14 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
     }
     return c;
   }
-  
+
   /**
    * Checks the typing rules in a cast expression
    * @param tc the target class
    * @param ec the expression class
    * @param castExp the entire cast expression that is being type-checked
    */
-  private void checkCastStaticRules(Type tc1, Type ec1, CastExpression castExp) {
-    
-    Class<?> tc = (Class<?>)tc1;
-    Class<?> ec = (Class<?>)ec1;
-    
+  private void checkCastStaticRules(Class<?> tc, Class<?> ec, CastExpression castExp) {
     if (tc != ec) {
       if (tc.isPrimitive()) {
         boolean isBoxingType = TigerUtilities.isBoxingType(ec);
@@ -2820,12 +2796,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       else if (ec != null) {
         if (ec.isArray()) {
           if (tc.isArray()) {
-            Type tec1 = tc.getComponentType();
-            Type eec1 = ec.getComponentType();
-            
-            Class<?> tec = (Class<?>)tec1;
-            Class<?> eec = (Class<?>)eec1;
-            
+            Class<?> tec = tc.getComponentType();
+            Class<?> eec = ec.getComponentType();
             if (tec.isPrimitive() && eec.isPrimitive()) {
               if (tec != eec) {
                 throw new ExecutionError("cast", castExp);
@@ -2843,22 +2815,22 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
           }
         }
         else if (ec.isInterface()) {
-          if (tc.isArray()) {
-            if (!Cloneable.class.isAssignableFrom(ec)) {
-              throw new ExecutionError("cast", castExp);
-            }
-          }
+           if (tc.isArray()) {
+             if (!Cloneable.class.isAssignableFrom(ec)) {
+               throw new ExecutionError("cast", castExp);
+             }
+           }
           else if (!tc.isInterface()) { // ec is an interface, tc is not
             if (isFinal(tc) && !ec.isAssignableFrom(tc)) {
-              throw new ExecutionError("cast", castExp);
+                throw new ExecutionError("cast", castExp);
             }
           }
         } // ec is not an interface type
         else if (tc.isInterface()) { // tc is an interface, ec is not
           if (isFinal(ec) && !tc.isAssignableFrom(ec)) {
-            throw new ExecutionError("cast", castExp);
-          }
-        } // both ec and tc are classes or primitives
+              throw new ExecutionError("cast", castExp);
+            }
+          } // both ec and tc are classes or primitives
         else if (ec.isPrimitive() && TigerUtilities.isBoxingType(tc) && ec != boolean.class) {
           castExp.setExpression(_box(castExp.getExpression(), tc));
         }
@@ -2868,7 +2840,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       }
     }
   }
-  
+
   /**
    * Tests if the class/interface c is final
    */
@@ -2887,7 +2859,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
       it.next().acceptVisitor(this);
     }
   }
-  
+
   
   /**
    * Returns the primitive type that corresponds to the given reference class.
@@ -2930,7 +2902,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @param primClass the primtive class
    * @return the corresponding reference class
    */
-  protected static Type _correspondingRefClass(Class<?> primClass) {
+  protected static Class<?> _correspondingRefClass(Class<?> primClass) {
     if (primClass == boolean.class) {
       return Boolean.class;
     }
@@ -2971,7 +2943,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @param refType the reference type to box the primitive type to
    * @return the <code>SimpleAllocation</code> that boxes the expression
    */
-  protected abstract SimpleAllocation _box(Expression exp, Type refType);
+  protected abstract SimpleAllocation _box(Expression exp, Class<?> refType);
   
   /**
    * If Unboxing is supported, unboxes the given expression by returning the correct
@@ -2981,5 +2953,5 @@ public abstract class AbstractTypeChecker extends VisitorObject<Type> {
    * @param type The type of the evaluated expression
    * @return The <code>ObjectMethodCall</code> that unboxes the expression
    */
-  protected abstract ObjectMethodCall _unbox(Expression child, Type type);
+  protected abstract ObjectMethodCall _unbox(Expression child, Class<?> type);
 }

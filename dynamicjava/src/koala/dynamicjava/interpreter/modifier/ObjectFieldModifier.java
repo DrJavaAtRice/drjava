@@ -38,7 +38,7 @@ import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
 
 /**
- * This interface represents the objects that modify an object field
+ * This interface represents the objets that modify an object field
  *
  * @author Stephane Hillion
  * @version 1.1 - 1999/11/28
@@ -79,7 +79,7 @@ public class ObjectFieldModifier extends LeftHandSideModifier {
   /**
    * Prepares the modifier for modification
    */
-  public Object prepare(Visitor<Object> v, Context<Object> ctx) {
+  public Object prepare(Visitor<Object> v, Context ctx) {
     fields.add(0, fieldObject);
     
     fieldObject = node.getExpression().acceptVisitor(v);
@@ -93,7 +93,7 @@ public class ObjectFieldModifier extends LeftHandSideModifier {
   /**
    * Sets the value of the underlying left hand side expression
    */
-  public void modify(Context<Object> ctx, Object value) {
+  public void modify(Context ctx, Object value) {
     try {
       field.set(fieldObject, value);
     } catch (Exception e) {

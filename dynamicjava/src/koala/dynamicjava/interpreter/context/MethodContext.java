@@ -45,7 +45,7 @@ import koala.dynamicjava.util.*;
  * @version 1.1 - 1999/11/28
  */
 
-public class MethodContext<V> extends StaticContext<V> {
+public class MethodContext extends StaticContext {
   /**
    * The "this" identifier
    */
@@ -58,7 +58,7 @@ public class MethodContext<V> extends StaticContext<V> {
    * @param obj the current object
    * @param im  the importation manager
    */
-  public MethodContext(Interpreter i, Class<?> c, V obj, ImportationManager im) {
+  public MethodContext(Interpreter i, Class<?> c, Object obj, ImportationManager im) {
     super(i, c, im);
     importationManager = im;
 
@@ -75,7 +75,7 @@ public class MethodContext<V> extends StaticContext<V> {
    * @param obj the current object
    * @param fp  the formal parameters
    */
-  public MethodContext(Interpreter i, Class<?> c, V obj, Set<AbstractVariable> fp) {
+  public MethodContext(Interpreter i, Class<?> c, Object obj, Set<AbstractVariable> fp) {
     super(i, c, fp);
 
     List<IdentifierToken> l = new LinkedList<IdentifierToken>();
@@ -356,7 +356,7 @@ public class MethodContext<V> extends StaticContext<V> {
     type.setProperty(TreeClassInfo.ANONYMOUS_DECLARING_CLASS,
                      new JavaClassInfo(declaringClass));
 
-    Class<?> cl = new TreeCompiler(interpreter).compileTree((Context<Object>)this, type); /* Type erasure bites! */
+    Class<?> cl = new TreeCompiler(interpreter).compileTree(this, type);
 
     // Update the argument types
     Class<?>[] tmp = new Class[args.length+2];

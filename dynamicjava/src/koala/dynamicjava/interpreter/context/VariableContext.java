@@ -9,7 +9,7 @@
  * persons to whom the Software is furnished to do so, subject to the
  * following conditions:
  * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.links
+ * in all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -32,7 +32,6 @@ import java.lang.ref.*;
 import java.util.*;
 
 import koala.dynamicjava.util.ImportationManager;
-import koala.dynamicjava.util.UnexpectedException;
 
 /**
  * This class encapsulates the behaviour of Java scopes.
@@ -41,21 +40,21 @@ import koala.dynamicjava.util.UnexpectedException;
  * @version 2.1 - 2000/01/05
  */
 
-public class VariableContext<V> implements SimpleContext<V> {
+public class VariableContext implements SimpleContext {
   /**
    * The scopes
    */
-  protected Link<V> scopes;
+  protected Link scopes;
   
   /**
    * The current scope
    */
-  protected Scope<V> scope;
+  protected Scope scope;
   
   /**
    * The current scope for variables
    */
-  protected Scope<V> cscope;
+  protected Scope cscope;
   
   /**
    * The current importation manager for the context
@@ -119,20 +118,23 @@ public class VariableContext<V> implements SimpleContext<V> {
     }
   }
   
-  /** Defines the given variables */
+  /**
+   * Defines the given variables
+   */
   public void defineVariables(Set<AbstractVariable> vars) {
     Iterator<AbstractVariable> it = vars.iterator();
     while (it.hasNext()) {
-      AbstractVariable v = it.next();  
+      AbstractVariable v = it.next();
       
-      if (! v.within(this)) v.create(this);
-
-      /* do nothing if variable is already defined (Why?) */
+      if (v.get(this) == Scope.NO_SUCH_KEY) {
+        v.set(this, null);
+      }
     }
   }
   
-  /** Leaves the current scope
-   *  @return the set of variable defined in this scope
+  /**
+   * Leaves the current scope
+   * @return the set of variable defined in this scope
    */
   public Set<AbstractVariable> leaveScope() {
     Set<AbstractVariable> result = getCurrentScopeVariables();
@@ -142,11 +144,15 @@ public class VariableContext<V> implements SimpleContext<V> {
     return result;
   }
   
-  /** Returns the current scope variables in a set. */
+  /**
+   * Returns the current scope variables in a set
+   */
   public Set<AbstractVariable> getCurrentScopeVariables() {
     Set<AbstractVariable> result = new HashSet<AbstractVariable>(11);
     Iterator<String> it = scope.keySet().iterator();
-    while (it.hasNext()) result.add(new Variable(it.next()));
+    while (it.hasNext()) {
+      result.add(new Variable(it.next()));
+    }
     it = cscope.keySet().iterator();
     while (it.hasNext()) {
       result.add(new Constant(it.next()));
@@ -154,7 +160,9 @@ public class VariableContext<V> implements SimpleContext<V> {
     return result;
   }
   
-  /** Returns the current scope variables (strings) in a set. */
+  /**
+   * Returns the current scope variables (strings) in a set
+   */
   public Set<String> getCurrentScopeVariableNames() {
     Set<String> result = new HashSet<String>(11);
     Iterator<String> it = scope.keySet().iterator();
@@ -204,15 +212,10 @@ public class VariableContext<V> implements SimpleContext<V> {
    * @param value the value of the entry
    * @exception IllegalStateException if the variable is already defined
    */
-  public void define(String name, V value) {
-    try { 
-      scope.put(name, value);
-      throw new IllegalStateException(name); // name is already defined as variable
+  public void define(String name, Object value) {
+    if (scope.put(name, value) != Scope.NO_SUCH_KEY) {
+      throw new IllegalStateException(name);
     }
-    catch(NoSuchKeyException nske) {
-      /* Shouldn't we confirm that name is not in cscope? */
-    }
-    
   }
   
   /**
@@ -221,20 +224,11 @@ public class VariableContext<V> implements SimpleContext<V> {
    * @param value the value of the entry
    * @exception IllegalStateException if the variable is already defined
    */
-  public void defineConstant(String name, V value) {
-    try {
-      cscope.put(name, value);
-      throw new IllegalStateException(name);  // name is already defined as constant!
+  public void defineConstant(String name, Object value) {
+    if (cscope.put(name, value) != Scope.NO_SUCH_KEY ||
+        scope.contains(name)) {
+      throw new IllegalStateException(name);
     }
-    catch(NoSuchKeyException nske)  {  // name is not defined as constant
-      if (scope.contains(name)) throw new IllegalStateException(name); // Check if a variable exist
-    }
-
-    
-//    if (cscope.put(name, value) != Scope.NO_SUCH_KEY ||
-//        scope.contains(name)) {
-//      throw new IllegalStateException(name);
-//    }
   }
   
   /**
@@ -242,72 +236,61 @@ public class VariableContext<V> implements SimpleContext<V> {
    * @param name  the name of the value to get
    * @exception IllegalStateException if the variable is not defined
    */
-  public V get(String name) {
-    for (Link<V> l = scopes; l != null; l = l.next) {
-      V result;
-      try{
-        result = l.scope.get(name);
-        return result;  // name defined as variable in this scope
-      }
-      catch(NoSuchKeyException nske) {
-        try {
-          result = l.cscope.get(name);
-          return result;  // name defined as constant in this scope
-        }
-        catch(NoSuchKeyException nske2){
-         // name is not defined as variable or constant in this scope
-        }
+  public Object get(String name) {
+    for (Link l = scopes; l != null; l = l.next) {
+      Object result = l.scope.get(name);
+      if (result != Scope.NO_SUCH_KEY ||
+          (result = l.cscope.get(name)) != Scope.NO_SUCH_KEY) {
+        return result;
       }
     }
-    throw new IllegalStateException(name);  // name is not defined in any scope
+    throw new IllegalStateException(name);
   }
   
   /**
    * Sets the value of a defined variable
    * @param name  the name of the entry
    * @param value the value of the entry
-   * @exception IllegalStateException if the variable is not defined or is final (where is finality checked?)
+   * @exception IllegalStateException if the variable is not defined or is final
    */
-  public void set(String name, V value) {
-    for (Link<V> l = scopes; l != null; l = l.next) {
+  public void set(String name, Object value) {
+    for (Link l = scopes; l != null; l = l.next) {
       if (l.scope.contains(name)) {
-        try { 
-          l.scope.put(name, value);
-          return;
-        }
-        catch(NoSuchKeyException e) { /* unreachable because name is a key */ }
+        l.scope.put(name, value);
+        return;
       }
     }
-    throw new IllegalStateException(name);  // name not found
+    throw new IllegalStateException(name);
   }
   
-  /** Sets the value of a constant variable in the current scope
-   *  @param name  the name of the entry
-   *  @param value the value of the entry
+  /**
+   * Sets the value of a constant variable in the current scope
+   * @param name  the name of the entry
+   * @param value the value of the entry
    */
-  public void setConstant(String name, V value) {
-    try { cscope.put(name, value); }
-    catch(NoSuchKeyException e) { /* do nothing */ }
+  public void setConstant(String name, Object value) {
+    cscope.put(name, value);
   }
   
-  /** Sets the value of a variable in the current scope
-   *  @param name  the name of the entry
-   *  @param value the value of the entry
+  /**
+   * Sets the value of a variable in the current scope
+   * @param name  the name of the entry
+   * @param value the value of the entry
    */
-  public void setVariable(String name, V value) {
-    try { scope.put(name, value); }
-    catch(NoSuchKeyException e) { /* do nothing */ }
+  public void setVariable(String name, Object value) {
+    scope.put(name, value);
   }
   
-  /** Creates a map that contains the constants in this context. */
-  public Map<String,V> getConstants() {
-    Map<String,V> result = new HashMap<String, V>(11);
-    for (Link<V> l = scopes; l != null; l = l.next) {
+  /**
+   * Creates a map that contains the constants in this context
+   */
+  public Map<String,Object> getConstants() {
+    Map<String,Object> result = new HashMap<String,Object>(11);
+    for (Link l = scopes; l != null; l = l.next) {
       Iterator<String> it = l.cscope.keySet().iterator();
       while (it.hasNext()) {
         String s = it.next();
-        try { result.put(s, l.cscope.get(s)); }
-        catch(NoSuchKeyException e) { /* cannot be reached because s is a key */ }
+        result.put(s, l.cscope.get(s));
       }
     }
     return result;
@@ -333,40 +316,82 @@ public class VariableContext<V> implements SimpleContext<V> {
   /**
    * To store one scope
    */
-  protected static class Link<V> {
+  protected static class Link {
+    /**
+     * The current scope
+     */
+    public Scope scope = new Scope();
     
-    /** The current scope */
-    public Scope<V> scope = new Scope<V>();
+    /**
+     * The current scope for constants
+     */
+    public Scope cscope = new Scope();
     
-    /** The current scope for constants. */
-    public Scope<V> cscope = new Scope<V>();
+    /**
+     * The next scope
+     */
+    public Link next;
     
-    /** The next scope.  */
-    public Link<V> next;
-    
-    /** Creates a new link. */
-    public Link(Link<V> next) { this.next = next; }
+    /**
+     * Creates a new link
+     */
+    public Link(Link next) {
+      this.next = next;
+    }
   }
   
   /**
    * To manage the creation of scopes and links
    */
-  protected static class LinkFactory<E> {
+  protected static class LinkFactory {
     /**
      * The table size
      */
     protected final static int SIZE = 10;
     
-        /**
+    /**
+     * The table used to recycle the links
+     */
+    protected final static WeakReference[] links = new WeakReference[SIZE];
+    
+    /**
      * Creates a new link
      */
-    public static <V> Link<V> createLink(Link<V> next) {
-      return new Link<V>(next);
+    public static Link createLink(Link next) {
+      /**
+       for (int i = 0; i < SIZE; i++) {
+       WeakReference r = links[i];
+       Link l = null;
+       if (r != null) {
+       l = (Link)r.get();
+       if (l != null) {
+       links[i] = null;
+       l.next = next;
+       return l;
+       } else {
+       links[i] = null;
+       }
+       }
+       }
+       */
+      return new Link(next);
+    }
+    
+    /**
+     * Notifies the factory to recycle the given link
+     */
+    public static void recycle(Link l) {
+      /*
+       l.scope.clear();
+       for (int i = 0; i < SIZE; i++) {
+       if (links[i] == null) {
+       links[i] = new WeakReference(l);
+       return;
+       }
+       }
+       */
     }
   }
-  
-  
-
   
   /**
    * A Scope is a wrapper for a hashtable that maps variable
@@ -377,28 +402,33 @@ public class VariableContext<V> implements SimpleContext<V> {
    * method in order to allow variables to be unmapped from the
    * scope.
    */
-  static class Scope<V> {
-    
-    /** The hashtable that is being wrapped by the Scope object. */
-    protected HashMap<String, V> _table;
+  static class Scope {
+    /**
+     * The hashtable that is being wrapped by the Scope object
+     */
+    protected HashMap<String,Object> _table;
     
     protected LinkedList<String> _addedKeys;
     
-    /* The exception used to notify client code that a key does not exist. */
-    public final static NoSuchKeyException NO_SUCH_KEY = new NoSuchKeyException("Singleton Exception");  
+    /**
+     * The object used to notify that a key do not exists
+     */
+    public final static Object NO_SUCH_KEY = new Object();
     
     public Scope() { 
-      _table = new HashMap<String, V>(11, 0.75f);
+      _table = new HashMap<String,Object>(11,0.75f);
       _addedKeys = new LinkedList<String>();
     }
     
-    /** Gets the value of a variable
-     *  @return the value
-     *  @throws NoSuchKeyException if key is not found
+    /**
+     * Gets the value of a variable
+     * @return the value or NO_SUCH_KEY
      */
-    public V get(String key) throws NoSuchKeyException {
-      if (_table.containsKey(key)) return _table.get(key);
-      else throw NO_SUCH_KEY;
+    public Object get(String key) {
+      if (_table.containsKey(key))
+        return _table.get(key);
+      else
+        return NO_SUCH_KEY;
     }
     
     /**
@@ -413,12 +443,11 @@ public class VariableContext<V> implements SimpleContext<V> {
      * Sets a new value for the given variable
      * @return the old value or NO_SUCH_KEY
      */
-    public V put(String key, V value) throws NoSuchKeyException {
+    public Object put(String key, Object value) {
       boolean wasThere = _table.containsKey(key);
-      V val = _table.put(key,value);
+      Object val = _table.put(key,value);
       _addedKeys.add(key);
-      if (wasThere) return val;
-      throw NO_SUCH_KEY;
+      return (wasThere) ? val : NO_SUCH_KEY;
     }
     
     /**

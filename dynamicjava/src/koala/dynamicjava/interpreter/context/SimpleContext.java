@@ -39,7 +39,7 @@ import java.util.*;
  * @version 1.2 - 2000/01/05
  */
 
-public interface SimpleContext<V> {
+public interface SimpleContext {
   /**
    * Enters a scope
    */
@@ -70,7 +70,7 @@ public interface SimpleContext<V> {
    * Leaves the current scope
    * @return the set of the variables (strings) defined in the current scope
    */
-  Set<AbstractVariable> leaveScope();     //changed to Set<AbstractVariable>, from raw type Set
+  Set leaveScope();
   
   /**
    * Tests whether a variable is defined in this context
@@ -93,7 +93,7 @@ public interface SimpleContext<V> {
    * @param value the value of the entry
    * @exception IllegalStateException if the variable is already defined
    */
-  void define(String name, V value);  //Object to Type
+  void define(String name, Object value);
   
   /**
    * Defines a new constant variable in the current scope
@@ -101,14 +101,14 @@ public interface SimpleContext<V> {
    * @param value the value of the entry
    * @exception IllegalStateException if the variable is already defined
    */
-  void defineConstant(String name, V value); //object to type
+  void defineConstant(String name, Object value);
   
   /**
    * Returns the value of a variable with the given name
    * @param name  the name of the value to get
    * @exception IllegalStateException if the variable is not defined
    */
-  V get(String name);
+  Object get(String name);
   
   /**
    * Sets the value of a defined variable
@@ -116,26 +116,26 @@ public interface SimpleContext<V> {
    * @param value the value of the entry
    * @exception IllegalStateException if the variable is not defined
    */
-  void set(String name, V value);
+  void set(String name, Object value);
   
   /**
    * Defines a new constant variable in the current scope
    * @param name  the name of the new entry
    * @param value the value of the entry
    */
-  void setConstant(String name, V value);
+  void setConstant(String name, Object value);
   
   /**
    * Defines a new variable in the current scope
    * @param name  the name of the new entry
    * @param value the value of the entry
    */
-  void setVariable(String name, V value);
+  void setVariable(String name, Object value);
   
   /**
    * Creates a map that contains the constants in this context
    */
-  Map<String, V> getConstants();    // changed to: Map<String,Object> from raw type Map
+  Map getConstants();
   
   
   /**

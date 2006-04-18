@@ -236,21 +236,22 @@ public class ClassInfoUtilities {
    * @param cl   the inner class 
    * @param name the name of the method
    * @param ac   the arguments classes (possibly not the exact declaring classes)
-   * @pre cl is not null
    */
   public static MethodInfo lookupOuterMethod(ClassInfo cl, String name, ClassInfo[] ac)
     throws NoSuchMethodException {
-    
     boolean   sc = Modifier.isStatic(cl.getModifiers());
-    ClassInfo c  = cl.getDeclaringClass();
-    do {
+    ClassInfo c  = (cl != null) ? cl.getDeclaringClass() : null;
+    while (c != null) {
       sc |= Modifier.isStatic(c.getModifiers());
       try {
         MethodInfo m = lookupMethod(c, name, ac);
-        if (!sc || Modifier.isStatic(m.getModifiers())) return m;
-      } catch (NoSuchMethodException e) { /* This point is reachable! */ }
+        if (!sc || Modifier.isStatic(m.getModifiers())) {
+          return m;
+        }
+      } catch (NoSuchMethodException e) {
+      }
       c = c.getDeclaringClass();
-    } while (c != null); 
+    }
     throw new NoSuchMethodException(name);
   }
   

@@ -53,7 +53,7 @@ public class Main extends JFrame implements ActionMap {
    * The entry point of the program
    */
   public static void main(String[] args) {
-    new Main().setVisible(true);
+    new Main().show();
   }
   
   // The action names
@@ -70,7 +70,7 @@ public class Main extends JFrame implements ActionMap {
   public final static String OPTIONS_ACTION = "OptionsAction";
   public final static String EVAL_ACTION    = "EvalAction";
   public final static String EVAL_S_ACTION  = "EvalSAction";
-//  public final static String STOP_ACTION    = "StopAction";
+  public final static String STOP_ACTION    = "StopAction";
   public final static String REINIT_ACTION  = "ReinitAction";
   public final static String ABOUT_ACTION   = "AboutAction";
   
@@ -144,10 +144,10 @@ public class Main extends JFrame implements ActionMap {
    */
   protected EvalSelectionAction evalSelection = new EvalSelectionAction();
   
-//  /**
-//   * The stop action
-//   */
-//  protected StopAction stopAction = new StopAction();
+  /**
+   * The stop action
+   */
+  protected StopAction stopAction = new StopAction();
   
   /**
    * The current interpreter thread
@@ -241,7 +241,7 @@ public class Main extends JFrame implements ActionMap {
     listeners.put(OPTIONS_ACTION,  new OptionsAction());
     listeners.put(EVAL_ACTION,     evalAction);
     listeners.put(EVAL_S_ACTION,   evalSelection);
-//    listeners.put(STOP_ACTION,     stopAction);
+    listeners.put(STOP_ACTION,     stopAction);
     listeners.put(REINIT_ACTION,   new ReinitAction());
     listeners.put(ABOUT_ACTION,    new AboutAction());
     
@@ -604,7 +604,7 @@ public class Main extends JFrame implements ActionMap {
       Dimension od = options.getSize();
       options.setLocation(fr.x + (fr.width  - od.width) / 2,
                           fr.y + (fr.height - od.height) / 2);
-      options.setVisible(true);
+      options.show();
     }
   }
   
@@ -653,7 +653,7 @@ public class Main extends JFrame implements ActionMap {
       System.setErr(err);
       try {
         isRunning = true;
-//        stopAction.update();
+        stopAction.update();
         evalAction.update();
         evalSelection.update();
         output.append("==> " + interpreter.interpret(reader, "buffer") + "\n");
@@ -668,7 +668,7 @@ public class Main extends JFrame implements ActionMap {
         System.setErr(olderr);
       }
       isRunning = false;
-//      stopAction.update();
+      stopAction.update();
       evalAction.update();
       evalSelection.update();
       
@@ -707,35 +707,35 @@ public class Main extends JFrame implements ActionMap {
     }
   }
   
-//  /**
-//   * To stop the interpreter thread
-//   */
-//  protected class StopAction extends AbstractAction
-//    implements JComponentModifier {
-//    java.util.List<JComponent> components = new LinkedList<JComponent>();
-//    
-//    public void actionPerformed(ActionEvent ev) {
-//      thread.stop();
-//      isRunning = false;
-//      update();
-//      evalAction.update();
-//      evalSelection.update();
-//      status.setMessage("Status.evaluation.stopped");
-//    }
-//    
-//    public void addJComponent(JComponent c) {
-//      components.add(c);
-//      c.setEnabled(false);
-//    }
-//    
-//    protected void update() {
-//      Iterator<JComponent> it = components.iterator();
-//      while (it.hasNext()) {
-//        it.next().setEnabled(isRunning);
-//      }
-//    }
-//  }
-//  
+  /**
+   * To stop the interpreter thread
+   */
+  protected class StopAction extends AbstractAction
+    implements JComponentModifier {
+    java.util.List<JComponent> components = new LinkedList<JComponent>();
+    
+    public void actionPerformed(ActionEvent ev) {
+      thread.stop();
+      isRunning = false;
+      update();
+      evalAction.update();
+      evalSelection.update();
+      status.setMessage("Status.evaluation.stopped");
+    }
+    
+    public void addJComponent(JComponent c) {
+      components.add(c);
+      c.setEnabled(false);
+    }
+    
+    protected void update() {
+      Iterator<JComponent> it = components.iterator();
+      while (it.hasNext()) {
+        it.next().setEnabled(isRunning);
+      }
+    }
+  }
+  
   /**
    * Reinitializes the interpreter
    */

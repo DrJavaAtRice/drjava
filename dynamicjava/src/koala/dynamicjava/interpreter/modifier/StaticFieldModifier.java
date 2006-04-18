@@ -67,7 +67,7 @@ public class StaticFieldModifier extends LeftHandSideModifier {
   /**
    * Prepares the modifier for modification
    */
-  public Object prepare(Visitor<Object> v, Context<Object> ctx) {
+  public Object prepare(Visitor<Object> v, Context ctx) {
     try {
       return field.get(null);
     } catch (Exception e) {
@@ -78,7 +78,7 @@ public class StaticFieldModifier extends LeftHandSideModifier {
   /**
    * Sets the value of the underlying left hand side expression
    */
-  public void modify(Context<Object> ctx, Object value) {
+  public void modify(Context ctx, Object value) {
     try {
       field.set(null, value);
     } catch (Exception e) {
