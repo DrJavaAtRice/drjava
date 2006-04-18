@@ -66,13 +66,13 @@
   </patternset>
 
   <property name="readable-project-name" value="DynamicJava" />
-  <property name="jar-filename" value="dynamicjava.jar" />
-  <property name="jar-base-filename" value="dynamicjava-base.jar" />
+  <property name="jar-15-filename" value="dynamicjava.jar" />
+  <property name="jar-base-15-filename" value="dynamicjava-base.jar" />
   <property name="jar-14-filename" value="dynamicjava-14.jar" />
   <property name="jar-base-14-filename" value="dynamicjava-base-14.jar" />
   <property name="jar-main-class" value="koala.dynamicjava.interpreter.Main" />
-  
   <property name="src-working-dir" value="src/koala/dynamicjava" />
+  <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
 
   <!-- Relative paths to generated sources.  Note: changes to this list should be mirrorred
        in the "Source-generating Targets" section and the "clean" target. -->
@@ -93,6 +93,9 @@
   <!-- By default, delete jar files when cleaning -->
   <property name="delete-jars" value="yes" />
   
+  <!-- By default, clean can fail -->
+  <property name="clean-can-fail" value="yes" />
+ 
   <!-- By default, don't append anything extra to the tag -->
   <property name="tag-append" value="" />
   
@@ -123,8 +126,8 @@
     <echo message="For this build file to function properly, the following environment " />
     <echo message="variables should be defined:" />
     <echo message="JAVACC_HOME: Top-level directory of JavaCC (version 4.0 or later)" />
-    <echo message="JAVA14_HOME: Home folder of the JRE version 1.4" />
-    <echo message="PATH: 'cvs' needs to refer to the CVS executable" />
+    <echo message="JAVA14_HOME: Home folder of the JRE or JDK (aka J2SDK) version 1.4" />
+    <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
     <echo message="" />
     <echo message="Additionally, Ant must be run under Java 5.0 or later.  If that is " />
     <echo message="not the system default, it may be set for Ant by using JAVA_HOME." />
@@ -206,8 +209,46 @@
               value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
   </target>  
 
-  <target name="resolve-cvs-user-name">
-    <input message="Please enter your CVS user name: " addproperty="cvs-user-name" />
+  <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
+       otherwise, the out-of-date target file is deleted (if it exists).  Note that, since
+       properties can only be set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-file-from-file">
+    <dependset>
+      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
+      <targetfilelist dir="${basedir}" files="${generate-file}" />
+    </dependset>
+    <available file="${generate-file}" property="already-generated" />
+  </target>
+
+  <!-- Sets "already-generated" if "generate-file" is more recent than everything in
+       "generate-sourcedir"; otherwise, the out-of-date target file is deleted (if it exists).
+        Note that, since properties can only be set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-file-from-dir">
+    <dependset>
+      <srcfileset dir="${generate-sourcedir}" />
+      <targetfilelist dir="${basedir}" files="${generate-file}" />
+    </dependset>
+    <available file="${generate-file}" property="already-generated" />
+  </target>
+
+  <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
+       than "generate-sourcefile".  Note that, since properties can only be set once, this 
+       should happen underneath an "antcall". -->
+  <target name="check-generate-dir-from-file">
+    <uptodate property="already-generated" targetfile="${generate-dir}" srcfile="${generate-sourcefile}" />
+  </target>
+  
+  <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
+       than everything in "generate-sourcedir".  Note that, since properties can only be 
+       set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-dir-from-dir">
+    <!-- Unfortunately, a bug in uptodate prevents this from working properly,
+         so we just have to equate *existence* with being up to date.
+    <uptodate property="already-generated" targetfile="${generate-dir}" >
+      <srcfiles dir="${generate-sourcedir}" />
+    </uptodate>
+    -->
+    <available file="${generate-dir}" property="already-generated" />
   </target>
 
 
@@ -215,8 +256,8 @@
        Build Target
        ************ -->
   
-  <target name="build" depends="generate-source, compile, test, jar" 
-          description="Shortcut for 'generate-source compile test jar'">
+  <target name="build" depends="test-14-in-15, jar-15" 
+          description="Shortcut for 'test-14-in-15' and 'jar-15'">
   </target>
   
 
@@ -234,7 +275,7 @@
     <echo message="Processing ${version-source}" />
     <copy file="${version-source}" tofile="${version-target}" filtering="yes" />
 
-    <antcall target="generate-parser" inheritall="false">
+    <antcall target="generate-parser">
       <param name="generate-sourcefile" value="${dynamicjava-parser}" />
       <param name="generate-dir" value="${dynamicjava-parser-dir}" />
     </antcall>
@@ -242,7 +283,7 @@
 
   <!-- Assumes that the properties generate-sourcefile and generate-dir have been set, and that 
        already-generated has *not* been set -->  
-  <target name="generate-parser" depends="check-generate-dir" unless="already-generated">
+  <target name="generate-parser" depends="check-generate-dir-from-file" unless="already-generated">
     <echo message="Processing ${generate-sourcefile}" />
     <!-- Unfortunately, dependset doesn't delete nested directories, so we have
          to clean up the empty directories here -->
@@ -267,41 +308,19 @@
              value="java.util.Enumeration&lt;int[]&gt; e = jj_expentries.elements()" />
   </target>
 
-  <target name="check-generate-file">
-    <dependset>
-      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
-      <targetfilelist dir="${basedir}" files="${generate-file}" />
-    </dependset>
-    <condition property="already-generated">
-      <available file="${generate-file}" />
-    </condition>
-  </target>
-
-  <target name="check-generate-dir">
-    <dependset>
-      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
-      <targetfileset dir="${generate-dir}" />
-    </dependset>
-    <!-- We use pathconvert as a hack to find out if dependset did anything -->
-    <pathconvert property="already-generated" pathsep="," setonempty="false">
-      <path>
-        <fileset dir="${basedir}" includes="${generate-dir}/**">
-          <type type="file" />
-        </fileset>
-      </path>
-    </pathconvert>
-  </target>
-
     
   <!-- *******************
        Compilation Targets
        ******************* -->
   
-  <target name="compile" depends="generate-source, do-compile, copy-resources, unjar-libs, retroweave"
-          description="Compile all source files and make them 1.4 compatible (after generating the source)">
+  <target name="compile" depends="compile-15" description="Shortcut for 'compile-15'">
   </target>
   
-  <target name="do-compile" depends="generate-source, assert-15">
+  <target name="compile-15" depends="generate-source, do-compile, copy-resources, unjar-libs"
+          description="Compile all source files (after generating the source)">
+  </target>
+  
+  <target name="do-compile" depends="assert-15, resolve-java15-tools">
     <echo message="Compiling src directory to classes/base and classes/test" />
     <mkdir dir="classes/base" />
     <mkdir dir="classes/test" />
@@ -315,7 +334,6 @@
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base" />
-        <pathelement location="classes/test" />
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
@@ -340,13 +358,14 @@
     </copy>
   </target>
   
-  <target name="check-unjar-libs">
-    <uptodate property="unjarred-libs-uptodate" targetfile="classes/lib">
-      <srcfiles refid="libs" />
-    </uptodate>
+  <target name="unjar-libs">
+    <antcall target="do-unjar-libs">
+      <param name="generate-sourcedir" value="lib" />
+      <param name="generate-dir" value="classes/lib" />
+    </antcall>
   </target>
   
-  <target name="unjar-libs" depends="check-unjar-libs" unless="unjarred-libs-exist">
+  <target name="do-unjar-libs" depends="check-generate-dir-from-dir" unless="already-generated">
     <echo message="Unjarring jar files in the lib directory" />
     <!-- Delete "classes/lib" in case it exists (but is out of date) -->
     <delete dir="classes/lib" />
@@ -357,7 +376,7 @@
     </unjar>
   </target>
   
-  <target name="retroweave" depends="do-compile, unjar-libs, resolve-java14-runtime">
+  <target name="compile-14" depends="compile-15, resolve-java14-runtime">
     <!-- Note: This target, in addition to checking 1.4 compatibility, serves to ensure that there are no dependencies
          on test classes or JUnit classes in the base.  If 1.4 compatibility is no longer needed, a similar dependency
          check should still be done. -->
@@ -414,52 +433,107 @@
   <target name="test" depends="test-15" description="Shortcut for 'test-15'">
   </target>
   
-  <target name="test-15" depends="compile, assert-15"
-          description="Run all tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter the tests">
-    <echo message="Running all tests matching '${test-spec}' under Java 5.0" />
-    <!-- TODO: Experiment with performance under different forkmodes -->
-    <junit printsummary="on" haltonerror="on" haltonfailure="on" fork="on" 
-           maxmemory="256M" dir="${basedir}">
+  <target name="test-15" depends="compile-15, assert-15"
+          description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
+    <echo message="Running all 5.0 tests matching '${test-spec}' under Java 5.0" />
+    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
       </classpath>
-      <formatter type="plain" usefile="false" />
+      <formatter type="brief" usefile="false" />
       <batchtest>
         <fileset dir="classes/test" includes="**/*${test-spec}*Test.class" />
       </batchtest>
     </junit>
+    
   </target>
 
-  <target name="test-14" depends="compile, resolve-java14-exec"
-          description="Run all tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter the tests">
-    <echo message="Running all tests matching '${test-spec}' under Java 1.4" />
-    <!-- TODO: Experiment with performance under different forkmodes -->
-    <junit printsummary="on" haltonerror="on" haltonfailure="on" fork="on" 
-           maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
+  <target name="test-14" depends="compile-14, resolve-java14-exec"
+          description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter">
+    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
+    <echo message="WARNING: 1.4-compatible test classes are (intentionally) not checked for Java 5 API references." />
+    <echo message="If such references exist, these tests will probably fail." />
+    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
-      <formatter type="plain" usefile="false" />
+      <formatter type="brief" usefile="false" />
       <batchtest>
         <fileset dir="classes/test-14" includes="**/*${test-spec}*Test.class" />
       </batchtest>
     </junit>
   </target>
 
+  <target name="test-14-in-15" depends="compile-14, assert-15"
+          description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
+    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
+    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
+      <classpath>
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="classes/test-14" />
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+      </classpath>
+      <formatter type="brief" usefile="false" />
+      <batchtest>
+        <fileset dir="classes/test" includes="**/*${test-spec}*Test.class" />
+      </batchtest>
+    </junit>
+  </target>
+
+
+  <target name="run" depends="run-15" description="Shortcut for 'run-15'">
+  </target>
+  
+  <target name="run-15" depends="compile-15, assert-15"
+          description="Run the DrJava 5.0 classes under Java 5.0 (after compiling)">
+    <echo message="Running the DrJava application (5.0 classes in Java 5.0)" />
+    <java classname="${jar-main-class}" fork="yes" spawn="yes">
+      <classpath>
+        <pathelement location="classes/base" />
+        <pathelement location="classes/lib" />
+      </classpath>
+    </java>
+  </target>
+        
+  <target name="run-14" depends="compile-14, resolve-java14-exec"
+          description="Run the DrJava 1.4 classes under Java 1.4 (after compiling)">
+    <echo message="Running the DrJava application (1.4 classses in Java 1.4)" />
+    <java classname="${jar-main-class}" jvm="${java14-exec}" fork="yes" spawn="yes">
+      <classpath>
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+      </classpath>
+    </java>
+  </target>
+        
+  <target name="run-14-in-15" depends="compile-14, assert-15"
+          description="Run the DrJava 1.4 classes under Java 5.0 (after compiling)">
+    <echo message="Running the DrJava application (1.4 classses in Java 5.0)" />
+    <java classname="${jar-main-class}" fork="yes" spawn="yes">
+      <classpath>
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+      </classpath>
+    </java>
+  </target>
+        
 
   <!-- ***********
        Jar Targets
        *********** -->
        
-  <target name="jar" depends="compile, resolve-version-tag" 
+  <target name="jar" depends="jar-15" description="Shortcut for 'jar-15'" />
+       
+  <target name="jar-15" depends="compile-15, resolve-version-tag" 
           description="Create the jar file with all classes and libs (compiling first)">
-    <jar jarfile="${jar-filename}">
+    <jar jarfile="${jar-15-filename}">
       <manifest>
         <attribute name="Main-Class" value="${jar-main-class}" />
         <attribute name="Built-By" value="${user.name}" />
@@ -470,9 +544,9 @@
     </jar>
   </target>
 
-  <target name="jar-base" depends="compile, resolve-version-tag" 
+  <target name="jar-base-15" depends="compile-15, resolve-version-tag" 
           description="Create the jar file without any support libs (compiling first)">
-    <jar jarfile="${jar-base-filename}">
+    <jar jarfile="${jar-base-15-filename}">
       <manifest>
         <attribute name="Main-Class" value="${jar-main-class}" />
         <attribute name="Built-By" value="${user.name}" />
@@ -482,7 +556,7 @@
     </jar>
   </target>
 
-  <target name="jar-14" depends="compile, resolve-version-tag" 
+  <target name="jar-14" depends="compile-14, resolve-version-tag" 
           description="Create the 1.4 jar file with all classes and libs (compiling first)">
     <jar jarfile="${jar-14-filename}">
       <manifest>
@@ -495,7 +569,7 @@
     </jar>
   </target>
 
-  <target name="jar-base-14" depends="compile, resolve-version-tag" 
+  <target name="jar-base-14" depends="compile-14, resolve-version-tag" 
           description="Create the 1.4 jar file without any support libs (compiling first)">
     <jar jarfile="${jar-base-14-filename}">
       <manifest>
@@ -507,21 +581,25 @@
     </jar>
   </target>
 
-  <!-- ***************
-       Javadoc Targets
-       *************** -->
+  <!-- *********************
+       Documentation Targets
+       ********************* -->
   
-  <target name="javadoc" depends="generate-source, assert-15, check-javadoc, resolve-version-tag" unless="javadocs-exist"
+  <target name="javadoc" depends="generate-source, assert-15, resolve-version-tag"
           description="Generate javadocs from the source folder (generating source first)">
+    <antcall target="do-javadoc">
+      <param name="generate-sourcedir" value="src" />
+      <param name="generate-dir" vallue="docs/javadoc" />
+    </antcall>
+  </target>
+  
+  <target name="do-javadoc" depends="check-generate-dir-from-dir" unless="already-generated">
     <echo message="Generating javadocs" />
-    <!-- Unfortunately, dependset doesn't delete nested directories, so we have
-         to clean up the empty directories here -->
     <delete dir="docs/javadoc" />
     <mkdir dir="docs/javadoc" />
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc"
-             access="protected" Use="yes" Version="yes" Author="yes" Windowtitle="${version tag} API">
+             access="protected" Use="yes" Version="yes" Author="yes" Windowtitle="${version-tag} API">
       <classpath>
-        <pathelement location="${java15-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
       </classpath>
@@ -530,33 +608,19 @@
     </javadoc>
   </target>
 
-  <target name="check-javadoc">
-    <dependset>
-      <srcfileset dir="src" />
-      <targetfileset dir="docs/javadoc" />
-    </dependset>
-    <!-- We use pathconvert as a hack to find out if dependset did anything -->
-    <pathconvert property="javadocs-exist" pathsep="," setonempty="false">
-      <path>
-        <fileset dir="${basedir}" includes="docs/javadoc/**">
-          <type type="file" />
-        </fileset>
-      </path>
-    </pathconvert>
-  </target>
-
   
   <!-- ************
        Clean Target
        ************ -->
        
-  <target name="clean" description="Remove all build products; the result should match the intended CVS contents">
+  <target name="clean" unless="skip-clean"
+          description="Remove all build products; the result should match the intended Subversion contents">
     <echo message="Deleting all build products" />
-    <delete dir="classes" />
-    <delete dir="docs" />
-    <delete dir="${dynamicjava-parser-dir}" />
+    <delete dir="classes" failonerror="${clean-can-fail}" />
+    <delete dir="docs" failonerror="${clean-can-fail}" />
+    <delete dir="${dynamicjava-parser-dir}" failonerror="${clean-can-fail}" />
     
-    <delete>
+    <delete failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
         <patternset refid="test-products" />
       </fileset>
@@ -565,7 +629,7 @@
     <condition property="do-delete-jars">
       <istrue value="${delete-jars}" />
     </condition>
-    <delete includeemptydirs="true">
+    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="${basedir}" defaultexcludes="no">
         <include name="*.jar" if="do-delete-jars" />
         <include name="*.zip" if="do-delete-jars" />
@@ -573,6 +637,7 @@
         <include name="${ant.project.name}-*" />
         <include name="${code-status-target}" />
         <include name="${version-target}" />
+        <include name="src/**/*.class" />
         <!-- We could get rid of backups, but "update" ignores them, so they're okay.
              (doesn't work if defaultexcludes is "yes") -->
         <!-- <include name="**/*~" /> -->
@@ -584,25 +649,25 @@
     
   </target>
 
+
   <!-- ***********
        CVS Targets 
        *********** -->
   
-  <target name="update" depends="clean" description="Reconcile source with the CVS archive">
+  <target name="update-cvs" depends="clean">
     <echo message="Running CVS update ('-q' -- you will only see output for files that don't match)" />
     <!-- TODO: Experiment with the 'compression' option -->
     <cvs command="update -d -P" quiet="true" />
   </target>
-
-
-  <target name="commit" depends="update, build, do-commit, tag" 
-          description="Commit source to the CVS archive (after building)">
+  
+  <target name="commit-cvs" depends="update-cvs, build, do-commit-cvs, tag-cvs">
     <echo message="New version is committed to CVS" />
   </target>
 
-  <target name="do-commit">
-    <antcall target="clean" inheritall="false"> <!-- Clean up after the latest build -->
+  <target name="do-commit-cvs">
+    <antcall target="clean"> <!-- Clean up after the latest build -->
       <param name="delete-jars" value="no" />
+      <param name="clean-can-fail" value="no" />
     </antcall>
     <input message="Please enter a log message for the commit: "
            addproperty="cvs.commit.message" />
@@ -616,9 +681,68 @@
     </cvs>
   </target>
   
-  <target name="tag" depends="resolve-version-tag">
+  <target name="tag-cvs" depends="resolve-version-tag">
     <echo message="Running CVS tag with version ${version-tag}"/>
     <cvs command="tag -c ${version-tag}" reallyquiet="true" />
+  </target>
+
+  
+  <!-- ******************
+       Subversion Targets 
+       ****************** -->
+  
+  <target name="update" depends="clean" description="Reconcile source with the Subversion archive">
+    <echo message="Running Subversion update" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="update" />
+    </exec>
+    <exec executable="svn" failonerror="yes">
+      <arg value="status" />
+    </exec>
+  </target>
+  
+  <target name="commit" depends="update, build" 
+          description="Commit source to the Subversion archive (after building)">
+    <antcall target="clean"> <!-- Clean up after the latest build -->
+      <param name="delete-jars" value="no" />
+      <param name="clean-can-fail" value="no" />
+    </antcall>
+    <exec executable="svn" failonerror="yes">
+      <arg value="status" />
+    </exec>
+    <input message="Please enter a log message for the commit: "
+           addproperty="svn-commit-message" />
+    <echo message="Running Subversion commit" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="commit" />
+      <arg value="-m" />
+      <arg value="${svn-commit-message}" />
+    </exec>
+  </target>
+
+  <target name="tag" depends="resolve-version-tag" 
+          description="Copy the working copy to a new Subversion tag">
+    <echo message="Creating a new Subversion tag with name ${version-tag}"/>
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${basedir}" />
+      <arg value="${svn-repository}/tags/${version-tag}" />
+      <arg value="-m" />
+      <arg value="Created tag ${version-tag}" />
+    </exec>
+  </target>
+  
+  <target name="branch" description="Copy the working copy to a new Subversion branch">
+    <input message="Enter a name for the new branch: "
+           addproperty="svn-branch-name" />
+    <echo message="Creating a new Subversion branch ${svn-branch-name}" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${basedir}" />
+      <arg value="${svn-repository}/branches/${svn-branch-name}" />
+      <arg value="-m" />
+      <arg value="Created branch ${svn-branch-name}" />
+    </exec>
   </target>
 
   
