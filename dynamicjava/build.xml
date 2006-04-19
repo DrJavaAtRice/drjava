@@ -78,6 +78,8 @@
        in the "Source-generating Targets" section and the "clean" target. -->
   <property name="dynamicjava-parser" value="${src-working-dir}/parser/grammar.jj" />
   <property name="dynamicjava-parser-dir" value="${src-working-dir}/parser/impl" />
+  <property name="type-ast" value="${src-working-dir}/interpreter/Type.ast" />
+  <property name="type-ast-dir" value="${src-working-dir}/interpreter/type" />
   <property name="code-status-source" value="${src-working-dir}/CodeStatus.orig" />
   <property name="code-status-target" value="${src-working-dir}/CodeStatus.java" />
   <property name="version-source" value="${src-working-dir}/Version.orig" />
@@ -107,6 +109,9 @@
   
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   
+  <!-- ASTGen task, used to generate Java source representing an AST with visitors from a single .ast file -->
+  <taskdef name="astgen" classpath="lib/buildlib/astgen.jar" classname="edu.rice.cs.astgen.AntTask" />
+
   <!-- Retroweaver task, used to convert Java 1.5 class files to be compatible with an earlier JVM;
        also checks class references to insure that there are no dependencies on 1.5 APIs -->
   <taskdef name="retroweaver" classpath="lib/buildlib/retroweaver-ex.jar" 
@@ -275,6 +280,10 @@
     <echo message="Processing ${version-source}" />
     <copy file="${version-source}" tofile="${version-target}" filtering="yes" />
 
+    <antcall target="generate-ast" inheritall="false">
+      <param name="generate-sourcefile" value="${type-ast}" />
+      <param name="generate-dir" value="${type-ast-dir}" />
+    </antcall>
     <antcall target="generate-parser">
       <param name="generate-sourcefile" value="${dynamicjava-parser}" />
       <param name="generate-dir" value="${dynamicjava-parser-dir}" />
@@ -285,12 +294,9 @@
        already-generated has *not* been set -->  
   <target name="generate-parser" depends="check-generate-dir-from-file" unless="already-generated">
     <echo message="Processing ${generate-sourcefile}" />
-    <!-- Unfortunately, dependset doesn't delete nested directories, so we have
-         to clean up the empty directories here -->
     <delete dir="${generate-dir}" />
     <mkdir dir="${generate-dir}" />
     <javacc target="${generate-sourcefile}" outputdirectory="${generate-dir}" javacchome="${javacc-home}" />
-            
     <!-- Fix problems in generated code that cause compiler warnings -->
     <replace file="${generate-dir}/JavaCharStream.java"
              token="public int getColumn()"
@@ -298,15 +304,17 @@
     <replace file="${generate-dir}/JavaCharStream.java"
              token="public int getLine()"
              value="@Deprecated public int getLine()" />
-    <!-- We want to replace the next two in the parser file, but we don't have easy access to its name,
-         so we just search the whole directory instead -->
-    <replace dir="${generate-dir}"
-             token="java.util.Vector jj_expentries = new java.util.Vector()"
-             value="java.util.Vector&lt;int[]&gt; jj_expentries = new java.util.Vector&lt;int[]&gt;()" />
-    <replace dir="${generate-dir}"
-             token="java.util.Enumeration e = jj_expentries.elements()"
-             value="java.util.Enumeration&lt;int[]&gt; e = jj_expentries.elements()" />
+   </target>
+   
+  <!-- Assumes that the properties generate-sourcefile and generate-dir have been set, and that 
+       already-generated has *not* been set -->  
+  <target name="generate-ast" depends="check-generate-dir-from-file" unless="already-generated">
+    <echo message="Processing ${generate-sourcefile}" />
+    <delete dir="${generate-dir}" />
+    <mkdir dir="${generate-dir}" />
+    <astgen file="${generate-sourcefile}" />
   </target>
+  
 
     
   <!-- *******************
@@ -625,6 +633,7 @@
     <delete dir="classes" failonerror="${clean-can-fail}" />
     <delete dir="docs" failonerror="${clean-can-fail}" />
     <delete dir="${dynamicjava-parser-dir}" failonerror="${clean-can-fail}" />
+    <delete dir="${type-ast-dir}" failonerror="${clean-can-fail}" />
     
     <delete failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
