@@ -197,7 +197,7 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call openFile on a Dummy");
   }
 
-  public OpenDefinitionsDocument openFiles(FileOpenSelector com) throws IOException, OperationCanceledException, 
+  public OpenDefinitionsDocument[] openFiles(FileOpenSelector com) throws IOException, OperationCanceledException, 
     AlreadyOpenException {
     throw new UnsupportedOperationException("Tried to call openFiles on a Dummy");
   }
@@ -507,7 +507,7 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call hasOutOfSyncDocuments on a Dummy");
   }
   
-  public void cleanBuildDirectory() throws FileMovedException, IOException {
+  public void cleanBuildDirectory(){
      throw new UnsupportedOperationException("Tried to call cleanBuildDirectory on a Dummy");
   }
   

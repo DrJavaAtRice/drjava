@@ -405,8 +405,8 @@ public class ReducedModelControl implements BraceReduction {
     TokenList.Iterator cursor = rmc._cursor._copy();
 //    int ct = rmc._tokens.listenerCount();
     curLocation = start;
-    curLength = cursor.current().getSize() - rmc.getBlockOffset();
-    curState = cursor.current().getHighlightState();
+    curLength = !cursor.atEnd() ? cursor.current().getSize() - rmc.getBlockOffset() : start + length;
+    curState = !cursor.atEnd()  ? cursor.current().getHighlightState() : 0;
 
     while ((curLocation + curLength) < (start + length)) {
       cursor.next();

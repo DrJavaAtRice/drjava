@@ -37,6 +37,7 @@ import junit.framework.*;
 import java.io.*;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -400,7 +401,17 @@ public class FileOpsTest extends DrJavaTestCase {
     List<File> res1 = Arrays.asList(new File[] {file1a});
     List<File> res2 = Arrays.asList(new File[] {file1a, file2});
     
-    assertEquals("non-recursive FilesInDir test", res1, FileOps.getFilesInDir(dir1, false, ff));
-    assertEquals("recursive FileInDir test", res2, FileOps.getFilesInDir(dir1, true, ff));
+    List<File> nrfiles = new ArrayList<File>();
+    for(File f : FileOps.getFilesInDir(dir1, false, ff)) {
+      nrfiles.add(f.getCanonicalFile());
+    }
+
+    List<File> rfiles = new ArrayList<File>();
+    for(File f : FileOps.getFilesInDir(dir1, true, ff)) {
+      rfiles.add(f.getCanonicalFile());
+    }
+        
+    assertEquals("non-recursive FilesInDir test", res1, nrfiles);
+    assertEquals("recursive FileInDir test", res2, rfiles);
   }
 }

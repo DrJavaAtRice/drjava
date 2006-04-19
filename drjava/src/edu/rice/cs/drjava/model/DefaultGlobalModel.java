@@ -652,8 +652,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       File classPath = doc.getSourceRoot();
       try {
         if (doc.isAuxiliaryFile())
-          _interactionsModel.addProjectFilesClassPath(classPath.toURI().toURL());
-        else _interactionsModel.addExternalFilesClassPath(classPath.toURI().toURL());
+          _interactionsModel.addProjectFilesClassPath(classPath.toURL());
+        else _interactionsModel.addExternalFilesClassPath(classPath.toURL());
       }
       catch(MalformedURLException murle) {  /* fail silently */ }
     }

@@ -81,6 +81,6 @@ public interface ILoadDocuments {
    *  @exception OperationCanceledException if the open was canceled
    *  @exception AlreadyOpenException if the file is already open
    */
-  public OpenDefinitionsDocument openFiles(FileOpenSelector com) throws IOException, OperationCanceledException, 
+  public OpenDefinitionsDocument[] openFiles(FileOpenSelector com) throws IOException, OperationCanceledException, 
     AlreadyOpenException;
 }

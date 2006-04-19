@@ -38,28 +38,24 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
+import edu.rice.cs.drjava.model.compiler.CompilerModel;
+import edu.rice.cs.drjava.model.debug.Debugger;
+import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
+import edu.rice.cs.drjava.model.junit.JUnitModel;
+import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
+import edu.rice.cs.drjava.model.repl.InteractionsDocument;
+import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
+import edu.rice.cs.drjava.project.DocumentInfoGetter;
+import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.docnavigation.IDocumentNavigator;
+import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
-import edu.rice.cs.util.swing.DocumentIterator;
-import edu.rice.cs.util.docnavigation.IDocumentNavigator;
-
-import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
-import edu.rice.cs.drjava.model.debug.Debugger;
-
-import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
-import edu.rice.cs.drjava.model.repl.InteractionsDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
-import edu.rice.cs.drjava.model.junit.JUnitModel;
-import edu.rice.cs.drjava.model.compiler.CompilerModel;
-import edu.rice.cs.drjava.project.MalformedProjectFileException;
-import edu.rice.cs.drjava.project.DocumentInfoGetter;
 
 /** Handles the bulk of DrJava's program logic.  The UI components interface with the GlobalModel through its 
  *  public methods, and GlobalModel responds via the GlobalModelListener interface.  This removes the dependency 
@@ -172,6 +168,7 @@ public interface GlobalModel extends ILoadDocuments {
   
   /**Writes the project file to disk
    * @param f where to save the project
+   * @param info Extra view-related information that should be included in the project file
    */
   public void saveProject(File f, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) throws IOException;
   
@@ -224,7 +221,7 @@ public interface GlobalModel extends ILoadDocuments {
 
   /** Searches for a file with the given name on the provided paths. Returns null if the file is not found.
    *  @param fileName Name of the source file to look for
-   *  @param paths The directories to search
+   *  @param paths An array of directories to search
    */
   public File getSourceFileFromPaths(String fileName, List<File> paths);
 
@@ -445,7 +442,7 @@ public interface GlobalModel extends ILoadDocuments {
   public boolean hasOutOfSyncDocuments();
   
   /** Cleans the build directory. */
-  public void cleanBuildDirectory() throws FileMovedException, IOException;
+  public void cleanBuildDirectory();
   
   /** @return a list of class files. */
   public List<File> getClassFiles();

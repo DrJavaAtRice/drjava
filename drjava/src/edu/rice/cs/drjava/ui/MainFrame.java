@@ -33,8 +33,6 @@
 
 package edu.rice.cs.drjava.ui;
 
-import javax.swing.JFileChooser;
-import javax.swing.SwingUtilities;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
@@ -76,6 +74,8 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.swing.AsyncTask;
+import edu.rice.cs.util.swing.AsyncTaskLauncher;
 import edu.rice.cs.util.swing.DelegatingAction;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.HighlightManager;
@@ -97,6 +97,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 /** DrJava's main window. */
 public class MainFrame extends JFrame {
   
+
   private static final int INTERACTIONS_TAB = 0;
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
   private static final String DEBUGGER_OUT_OF_SYNC =
@@ -2949,42 +2950,33 @@ public class MainFrame extends JFrame {
       _model.openFiles(openSelector);
     }
     catch (AlreadyOpenException aoe) {
-      OpenDefinitionsDocument openDoc = aoe.getOpenDocument();
-      String fileName;
-      try { fileName = openDoc.getFile().getName(); }
-      catch (IllegalStateException ise) {
-        // Can't happen: this open document must have a file
-        throw new UnexpectedException(ise);
-      }
-      catch (FileMovedException fme) {
-        // File was deleted, but use the same name anyway
-        fileName = fme.getFile().getName();
-      }
-      
-      // Always switch to doc
-      _model.setActiveDocument(openDoc);
-      
-      // Prompt to revert if modified
-      if (openDoc.isModifiedSinceSave()) {
-        String title = "Revert to Saved?";
-        String message = fileName + " is already open and modified.\n" +
-          "Would you like to revert to the version on disk?\n";
-        int choice = JOptionPane.showConfirmDialog(this, message, title, JOptionPane.YES_NO_OPTION);
-        if (choice == JOptionPane.YES_OPTION) _revert();
-      }
-      try {
-        File f = openDoc.getFile();
-        if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
-      }
-      catch (IllegalStateException ise) {
-        // Impossible: saved => has a file
-        throw new UnexpectedException(ise);
-      }
-      catch (FileMovedException fme) {
-        File f = fme.getFile();
-        // Recover, show it in the list anyway
-        if (! _model.inProject(f))
-          _recentFileManager.updateOpenFiles(f);
+      OpenDefinitionsDocument[] openDocs = aoe.getOpenDocuments();
+      for(OpenDefinitionsDocument openDoc : openDocs) {
+        String fileName;
+        try { fileName = openDoc.getFile().getName(); }
+        catch (IllegalStateException ise) {
+          // Can't happen: this open document must have a file
+          throw new UnexpectedException(ise);
+        }
+        catch (FileMovedException fme) {
+          // File was deleted, but use the same name anyway
+          fileName = fme.getFile().getName();
+        }
+        
+        try {
+          File f = openDoc.getFile();
+          if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
+        }
+        catch (IllegalStateException ise) {
+          // Impossible: saved => has a file
+          throw new UnexpectedException(ise);
+        }
+        catch (FileMovedException fme) {
+          File f = fme.getFile();
+          // Recover, show it in the list anyway
+          if (! _model.inProject(f))
+            _recentFileManager.updateOpenFiles(f);
+        }
       }
     }  
     catch (OperationCanceledException oce) { /* do not open file */ }
@@ -3342,6 +3334,10 @@ public class MainFrame extends JFrame {
   }
   
   private void _revert() {
+    _revert(_model.getActiveDocument());
+  }
+  
+  private void _revert(OpenDefinitionsDocument doc) {
     try {
       _model.getActiveDocument().revertFile();
     }
@@ -3584,22 +3580,26 @@ public class MainFrame extends JFrame {
     return true;
   }
   
+//  private void _clean() {
+//    final SwingWorker worker = new SwingWorker() {
+//      public Object construct() {
+//        if (showCleanWarning()) {
+//          try {
+//            hourglassOn();
+//            _model.cleanBuildDirectory();
+//          }
+//          catch (FileMovedException fme) { _showFileMovedError(fme); }
+//          catch (IOException ioe) { _showIOError(ioe); }
+//          finally { hourglassOff(); }
+//        }
+//        return null;
+//      }
+//    };
+//    worker.start();
+//  }
+
   private void _clean() {
-    final SwingWorker worker = new SwingWorker() {
-      public Object construct() {
-        if (showCleanWarning()) {
-          try {
-            hourglassOn();
-            _model.cleanBuildDirectory();
-          }
-          catch (FileMovedException fme) { _showFileMovedError(fme); }
-          catch (IOException ioe) { _showIOError(ioe); }
-          finally { hourglassOff(); }
-        }
-        return null;
-      }
-    };
-    worker.start();
+   _model.cleanBuildDirectory(); // The model performs this as an AsyncTask
   }
 
   /** List with entries for the complete dialog. */
@@ -6019,9 +6019,70 @@ public class MainFrame extends JFrame {
     /* Must be executed in event thread. */
     public void nonCurrThreadDied() { }
   }
+
+
+  /**
+  * @author jlugo
+  * 
+  */
+ private class DJAsyncTaskLauncher extends AsyncTaskLauncher {
+   
+  protected boolean shouldSetEnabled() {
+   return true;
+  }
+
+  protected void setParentContainerEnabled(boolean enabled) {
+   if (enabled) {
+    hourglassOff();
+   } else {
+    hourglassOn();
+   }
+  }
+
+  protected IAsyncProgress createProgressMonitor(final String description, final int min, final int max) {
+    return new IAsyncProgress() {
+      private ProgressMonitor _monitor = new ProgressMonitor(MainFrame.this, description, "", min, max);
+      
+      public void close() { _monitor.close(); }
+      public int  getMaximum() { return _monitor.getMaximum() ; }
+      public int  getMillisToDecideToPopup() { return _monitor.getMillisToDecideToPopup(); }
+      public int  getMillisToPopup() { return  _monitor.getMillisToPopup(); }
+      public int  getMinimum() { return _monitor.getMinimum(); }
+      public String  getNote() { return _monitor.getNote(); }
+      public boolean  isCanceled() { return _monitor.isCanceled(); }
+      public void  setMaximum(int m) { _monitor.setMaximum(m); }
+      public void  setMinimum(int m) { _monitor.setMinimum(m); }
+      public void  setNote(String note) { _monitor.setNote(note); }
+      public void  setProgress(int nv) { _monitor.setProgress(nv); }
+    };
+  }
+ }
   
   /** Inner class to listen to all events in the model. */
-  private class ModelListener implements GlobalModelListener {
+ private class ModelListener implements GlobalModelListener {
+
+   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {
+     new DJAsyncTaskLauncher().executeTask(task, param, showProgress, lockUI);
+   }
+   public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc) {
+     // Always switch to doc
+     _model.setActiveDocument(doc);
+     
+     // Prompt to revert if modified
+     if (doc.isModifiedSinceSave()) {
+       String title = "Revert to Saved?";
+       String message = doc.getFileName() + " is already open and modified.\n" +
+         "Would you like to revert to the version on disk?\n";
+       int choice = JOptionPane.showConfirmDialog(MainFrame.this, message, title, JOptionPane.YES_NO_OPTION);
+       if (choice == JOptionPane.YES_OPTION) {
+         _revert(doc);
+       }
+     }
+   }
+   
+   public void newFileCreated(final OpenDefinitionsDocument doc) {
+     Utilities.invokeLater(new Runnable() { public void run() { _createDefScrollPane(doc); } });
+   }
     
     private int _fnfCount = 0;
     
@@ -6032,10 +6093,6 @@ public class MainFrame extends JFrame {
     public void fileNotFound(File f) {
       _fnfCount++;
       _showFileNotFoundError(new FileNotFoundException("File " + f + " cannot be found"));
-    }
-    
-    public void newFileCreated(final OpenDefinitionsDocument doc) {
-      Utilities.invokeLater(new Runnable() { public void run() { _createDefScrollPane(doc); } });
     }
     
     public void fileSaved(final OpenDefinitionsDocument doc) {
@@ -6067,12 +6124,11 @@ public class MainFrame extends JFrame {
     }
     
     private void _fileOpened(final OpenDefinitionsDocument doc) {
-      
       try {
         File f = doc.getFile();
         if (! _model.inProject(f)) {
           _recentFileManager.updateOpenFiles(f);
-          if (_model.inProjectPath(doc)) _model.setProjectChanged(true);
+
         }
       }
       catch (FileMovedException fme) {

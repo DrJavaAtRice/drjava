@@ -33,10 +33,10 @@
 
 package edu.rice.cs.drjava.model;
 
-import java.util.List;
 import java.io.File;
 import java.io.IOException;
-import edu.rice.cs.drjava.model.FileMovedException;
+import java.util.List;
+
 import edu.rice.cs.util.ClassPathVector;
 
 /** This state pattern is used by the global model to store any information pertaining to the currently open project.  
@@ -137,7 +137,7 @@ public interface FileGroupingState {
   /**
    * cleans the build directory
    */
-  public void cleanBuildDirectory() throws FileMovedException, IOException;
+  public void cleanBuildDirectory();
   
   /** @return a list of class files. */
   public List<File> getClassFiles();

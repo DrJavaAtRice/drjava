@@ -43,6 +43,7 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.swing.AsyncTask;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.EditDocumentInterface;
 
@@ -756,6 +757,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times interactionIncomplete fired", i, interactionIncompleteCount);
     }
 
+    public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {  
+      listenerFail("executeAswyncTask fired unexpectedly");
+    }
+       
+    public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc) {
+      listenerFail("handleAlreadyOpenDocument fired unexpectedly");
+    }
+      
     public void newFileCreated(OpenDefinitionsDocument doc) {
       listenerFail("newFileCreated fired unexpectedly");
     }

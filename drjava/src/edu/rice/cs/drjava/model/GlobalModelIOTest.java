@@ -408,10 +408,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     _model.addListener(listener);
     try {
-      OpenDefinitionsDocument doc = _model.openFiles(new FileSelector(tempFile1,tempFile2));
+      OpenDefinitionsDocument[] docs = _model.openFiles(new FileSelector(tempFile1,tempFile2));
       listener.assertOpenCount(2);
-      assertModified(false, doc);
-      assertContents(BAR_TEXT, doc);
+      assertEquals("Number of docs returned", docs.length, 2);
+      assertModified(false, docs[0]);
+      assertContents(FOO_TEXT, docs[0]);
+      assertModified(false, docs[1]);
+      assertContents(BAR_TEXT, docs[1]);
     }
     catch (AlreadyOpenException aoe) {
       // Should not be open
@@ -487,12 +490,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   /** Attempts to open a non-existent file. */
   public void testOpenMultipleNonexistentFiles() throws IOException {
 
-    OpenDefinitionsDocument doc = null;
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
 
     //TestListener listener = new TestListener();
     TestListener listener = new TestListener() {
-
       public void fileNotFound(File f) { fileNotFoundCount++; }
 
       public void fileOpened(OpenDefinitionsDocument doc) {
@@ -518,9 +519,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     _model.addListener(listener);
 
 
+    OpenDefinitionsDocument[] docs = null;
     try {
-      doc = _model.openFiles(new FileSelector(tempFile1,
-                                              new File("fake-file")));
+      docs = _model.openFiles(new FileSelector(tempFile1, new File("fake-file")));
     }
     catch (FileNotFoundException fnf) {
       fail("FileNotFound exception was not thrown!");
@@ -533,7 +534,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       // Should not be canceled
       fail("Open was unexpectedly canceled!");
     }
-    assertTrue("one file was opened", doc instanceof OpenDefinitionsDocument);
+    assertTrue("one file was opened", docs != null && docs.length == 1);
     listener.assertOpenCount(1);
     listener.assertFileNotFoundCount(1);
   }
@@ -544,11 +545,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    */
   public void testOpenMultipleFilesError() {
 
-    OpenDefinitionsDocument doc = null;
+    OpenDefinitionsDocument[] docs = null;
     //final File tempFile1 = writeToNewTempFile(FOO_TEXT);
 
     try {
-      doc = _model.openFiles(new FileOpenSelector() {
+      docs = _model.openFiles(new FileOpenSelector() {
         public File[] getFiles() {
           return new File[] {null};
         }
@@ -563,7 +564,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     }
 
     try {
-      doc = _model.openFiles(new FileOpenSelector() {
+      docs = _model.openFiles(new FileOpenSelector() {
         public File[] getFiles() {
           return null;
         }
@@ -578,7 +579,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       fail("Unexpectedly exception caught!");
     }
 
-    assertEquals("non-existant file", doc, null);
+    assertTrue("non-existant file", docs == null);
   }
 
   /**

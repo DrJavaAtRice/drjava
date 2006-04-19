@@ -49,12 +49,18 @@ import java.io.File;
 import java.util.List;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.swing.AsyncTask;
 import edu.rice.cs.util.FileOpenSelector;
 
 /** A dummy GlobalModelListener that does nothing. Useful for listening to only a small number of events.
  *  @version $Id$
  */
 public class DummyGlobalModelListener implements GlobalModelListener {
+
+  /** Called when an asynchronous task must be run in the model */
+  public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {  }
+
+  public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc) { }
   
   /** Called when trying to open a file that does not exist. */
   public void fileNotFound(File f) {  }

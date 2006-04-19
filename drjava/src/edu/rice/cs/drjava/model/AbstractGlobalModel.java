@@ -33,38 +33,23 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.util.Log;
-
+import java.awt.Color;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.print.PageFormat;
-import java.awt.print.PrinterJob;
-import java.awt.print.PrinterException;
 import java.awt.print.Pageable;
-import java.awt.Font;
-import java.awt.Color;
-
-import javax.swing.ProgressMonitor;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.UndoableEditListener;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Element;
-import javax.swing.text.Position;
-import javax.swing.text.Segment;
-import javax.swing.text.Style;
-
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -75,29 +60,15 @@ import java.util.ListIterator;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-import edu.rice.cs.util.ClassPathVector;
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.drjava.model.FileSaveSelector;
-import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.OrderedHashSet;
-import edu.rice.cs.util.Pair;
-import edu.rice.cs.util.SRunnable;
-import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.UnexpectedException;
-
-import edu.rice.cs.util.docnavigation.INavigationListener;
-import edu.rice.cs.util.docnavigation.NodeData;
-import edu.rice.cs.util.docnavigation.NodeDataVisitor;
-import edu.rice.cs.util.docnavigation.AWTContainerNavigatorFactory;
-import edu.rice.cs.util.docnavigation.IDocumentNavigator;
-import edu.rice.cs.util.docnavigation.INavigatorItem;
-import edu.rice.cs.util.docnavigation.INavigatorItemFilter;
-import edu.rice.cs.util.docnavigation.JTreeSortNavigator;
-import edu.rice.cs.util.swing.DocumentIterator;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.text.AbstractDocumentInterface;
-import edu.rice.cs.util.text.ConsoleDocument;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
+import javax.swing.text.Position;
+import javax.swing.text.Segment;
+import javax.swing.text.Style;
+import javax.swing.ProgressMonitor;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaRoot;
@@ -105,38 +76,61 @@ import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.drjava.model.print.DrJavaBook;
-
-import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
-import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
-import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
-import edu.rice.cs.drjava.model.debug.Breakpoint;
-import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
-import edu.rice.cs.drjava.model.debug.DebugWatchData;
-import edu.rice.cs.drjava.model.debug.Debugger;
-import edu.rice.cs.drjava.model.debug.DebugException;
-import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
-import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
-import edu.rice.cs.drjava.model.repl.InteractionsDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
-import edu.rice.cs.drjava.model.compiler.CompilerModel;
-import edu.rice.cs.drjava.model.junit.JUnitModel;
-import edu.rice.cs.drjava.project.DocFile;
-import edu.rice.cs.drjava.project.DocumentInfoGetter;
-import edu.rice.cs.drjava.project.MalformedProjectFileException;
-import edu.rice.cs.drjava.project.ProjectProfile;
-import edu.rice.cs.drjava.project.ProjectFileIR;
-import edu.rice.cs.drjava.project.ProjectFileParser;
 import edu.rice.cs.drjava.model.cache.DCacheAdapter;
 import edu.rice.cs.drjava.model.cache.DDReconstructor;
 import edu.rice.cs.drjava.model.cache.DocumentCache;
+import edu.rice.cs.drjava.model.compiler.CompilerModel;
+import edu.rice.cs.drjava.model.debug.Breakpoint;
+import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
+import edu.rice.cs.drjava.model.debug.DebugException;
+import edu.rice.cs.drjava.model.debug.DebugWatchData;
+import edu.rice.cs.drjava.model.debug.Debugger;
+import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
+import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
+import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
+import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
+import edu.rice.cs.drjava.model.junit.JUnitModel;
+import edu.rice.cs.drjava.model.print.DrJavaBook;
+import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
+import edu.rice.cs.drjava.model.repl.InteractionsDocument;
+import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
+import edu.rice.cs.drjava.project.DocFile;
+import edu.rice.cs.drjava.project.DocumentInfoGetter;
+import edu.rice.cs.drjava.project.MalformedProjectFileException;
+import edu.rice.cs.drjava.project.ProjectFileIR;
+import edu.rice.cs.drjava.project.ProjectFileParser;
+import edu.rice.cs.drjava.project.ProjectProfile;
+import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.OrderedHashSet;
+import edu.rice.cs.util.Pair;
+import edu.rice.cs.util.SRunnable;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.docnavigation.AWTContainerNavigatorFactory;
+import edu.rice.cs.util.docnavigation.IDocumentNavigator;
+import edu.rice.cs.util.docnavigation.INavigationListener;
+import edu.rice.cs.util.docnavigation.INavigatorItem;
+import edu.rice.cs.util.docnavigation.INavigatorItemFilter;
+import edu.rice.cs.util.docnavigation.JTreeSortNavigator;
+import edu.rice.cs.util.docnavigation.NodeData;
+import edu.rice.cs.util.docnavigation.NodeDataVisitor;
+import edu.rice.cs.util.swing.AsyncCompletionArgs;
+import edu.rice.cs.util.swing.AsyncTask;
+import edu.rice.cs.util.swing.IAsyncProgress;
+import edu.rice.cs.util.swing.DocumentIterator;
+import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
+import edu.rice.cs.util.text.ConsoleDocument;
 
 /** In simple terms, a DefaultGlobalModel without an interpreter,compiler, junit testing, debugger or javadoc.
  * Basically, has only document handling functionality
@@ -386,8 +380,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   }
   
-  //-------- STATE --------//
-  
+  // ----- STATE -----
   protected FileGroupingState _state;
   /** Delegates the compileAll command to the _state, a FileGroupingState.
    *  Synchronization is handled by the compilerModel.
@@ -518,7 +511,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setProjectChanged(true);
   }
   
-  public void cleanBuildDirectory() throws FileMovedException, IOException {
+  public void cleanBuildDirectory()  {
     _state.cleanBuildDirectory();
   }
   
@@ -530,6 +523,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (index != -1) return classname.substring(0, index);
     else return "";
   }
+  
   
   class ProjectFileGroupingState implements FileGroupingState {
     
@@ -673,33 +667,70 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
-    public void cleanBuildDirectory() throws FileMovedException, IOException{
+    // This only starts the process. It is all done asynchronously.
+    public void cleanBuildDirectory() {
       File dir = this.getBuildDirectory();
-      // clear cached class file of all documents
-      for (OpenDefinitionsDocument doc: _documentsRepos) { doc.setCachedClassFile(null); }
-
-      cleanHelper(dir);
-      if (! dir.exists()) dir.mkdirs();
+      _notifier.executeAsyncTask(_findFilesToCleanTask, dir, false, true);
     }
     
-    private void cleanHelper(File f) {
-      if (f.isDirectory()) {
-        
-        File fs[] = f.listFiles(new FilenameFilter() {
-          public boolean accept(File parent, String name) {
-            return new File(parent, name).isDirectory() || name.endsWith(".class");
-          }
-        });
-        
-        if (fs!=null) { // listFiles may return null if there's an IO error
-          for (File kid: fs) { cleanHelper(kid); }
+    private AsyncTask<File,List<File>> _findFilesToCleanTask = new AsyncTask<File,List<File>>("Find Files to Clean") {
+      private FilenameFilter _filter = new FilenameFilter() {
+        public boolean accept(File parent, String name) {
+          return new File(parent, name).isDirectory() || name.endsWith(".class");
         }
+      };
+      
+      public List<File> runAsync(File buildDir, IAsyncProgress monitor) throws Exception {
+        List<File> accumulator = new LinkedList<File>();
+        helper(buildDir, accumulator); // adds files to the accumulator recursively
+        return accumulator;
+      }
+      public void complete(AsyncCompletionArgs<List<File>> args) {
+        _notifier.executeAsyncTask(_deleteFilesTask, args.getResult(), true, true);
+      }
+      public String getDiscriptionMessage() {
+        return "Finding files to delete...";
+      }
+      private void helper(File file, List<File> accumulator) {
+        if (file.isDirectory()) {
+          File[] children = file.listFiles(_filter);
+          for (File child : children) {
+            helper(child, accumulator);
+            accumulator.add(file);
+          }
+        }
+        else if (file.getName().endsWith(".class")){
+          accumulator.add(file);
+        }
+      }
+    };    
+    
+    private AsyncTask<List<File>,List<File>> _deleteFilesTask = new AsyncTask<List<File>,List<File>>("Delete Files") {
+      public List<File> runAsync(List<File> filesToDelete, IAsyncProgress monitor) throws Exception {
+        List<File> undeletableFiles = new ArrayList<File>();
         
-        fs = f.listFiles(); // listFiles may return null if there's an IO error
-        if ((fs!=null) && (fs.length == 0))  f.delete();
-        
-      } else if (f.getName().endsWith(".class")) f.delete();
-    }
+        monitor.setMinimum(0);
+        monitor.setMaximum(filesToDelete.size());
+        int progress = 1;
+        for(File file : filesToDelete) {
+          if (monitor.isCanceled()) {
+            break;
+          }
+          monitor.setNote(file.getName());
+          boolean could = file.delete();
+          if (!could) undeletableFiles.add(file);
+          monitor.setProgress(progress++);
+        }
+//      if (! dir.exists()) dir.mkdirs(); // TODO: figure out where to put this.
+        return undeletableFiles;
+      }
+      public void complete(AsyncCompletionArgs<List<File>> args) {
+        // TODO: user feedback. Maybe add a method to the notifier to set the status bar text
+      }
+      public String getDiscriptionMessage() {
+        return "Deleting files...";
+      }
+    };
     
     public List<File> getClassFiles() {
       File dir = this.getBuildDirectory();
@@ -781,7 +812,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    public void junitAll() { 
 //      throw new UnsupportedOperationException("AbstractGlobalModel does not support unit tests");
 //    }
-    public void cleanBuildDirectory() throws FileMovedException, IOException { }
+    public void cleanBuildDirectory() { }
     
     public List<File> getClassFiles() { return new LinkedList<File>(); }
     
@@ -1006,26 +1037,28 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   *  @exception OperationCanceledException if the open was canceled
   *  @exception AlreadyOpenException if the file is already open
   */
-  public OpenDefinitionsDocument openFiles(FileOpenSelector com)
+  public OpenDefinitionsDocument[] openFiles(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException {
     
     // Close an untitled, unchanged document if it is the only one open
     boolean closeUntitled = _hasOneEmptyDocument();
     OpenDefinitionsDocument oldDoc = _activeDocument;
 
-    OpenDefinitionsDocument openedDoc = openFilesHelper(com);
-    if (closeUntitled) closeFileHelper(oldDoc);
-    setActiveDocument(openedDoc);
-    return openedDoc;
+    OpenDefinitionsDocument[] openedDocs = openFilesHelper(com);
+    if (openedDocs.length > 0) {
+      if (closeUntitled) closeFileHelper(oldDoc);
+      setActiveDocument(openedDocs[0]);
+    }
+    return openedDocs;
   }
   
-  protected OpenDefinitionsDocument openFilesHelper(FileOpenSelector com)
+  protected OpenDefinitionsDocument[] openFilesHelper(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException {
     
     final File[] files = com.getFiles();
     if (files == null) { throw new IOException("No Files returned from FileSelector"); }
-    OpenDefinitionsDocument doc = _openFiles(files);
-    return doc;
+    OpenDefinitionsDocument[] docs = _openFiles(files);
+    return docs;
   }
   
   // if set to true, and uncommented, the definitions document will
@@ -1034,44 +1067,48 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   //    static boolean SHOW_GETDOC = false; 
   
   /** Opens all the files in the list, and notifies about the last file opened. */
-  private OpenDefinitionsDocument _openFiles(File[] files) 
+  private OpenDefinitionsDocument[] _openFiles(File[] files) 
     throws IOException, OperationCanceledException, AlreadyOpenException {
     
-    AlreadyOpenException storedAOE = null;
-    OpenDefinitionsDocument retDoc = null;
+    ArrayList<OpenDefinitionsDocument> alreadyOpenDocuments = new ArrayList<OpenDefinitionsDocument>();
+    ArrayList<OpenDefinitionsDocument> retDocs = new ArrayList<OpenDefinitionsDocument>();
     
     //        SHOW_GETDOC = true;
     
     LinkedList<File> filesNotFound = new LinkedList<File>();
-    final LinkedList<OpenDefinitionsDocument> filesOpened = new LinkedList<OpenDefinitionsDocument>();
+    LinkedList<OpenDefinitionsDocument> filesOpened = new LinkedList<OpenDefinitionsDocument>();
     for (final File f: files) {
       if (f == null) throw new IOException("File name returned from FileSelector is null");
       try {
+        OpenDefinitionsDocument d = _rawOpenFile(FileOps.getCanonicalFile(f));
         //always return last opened Doc
-        retDoc = _rawOpenFile(f.getCanonicalFile());
-//        Utilities.show("Processed: " + f + " Opened: " + f.getCanonicalFile());
-        filesOpened.add(retDoc);
+        retDocs.add(d);
+        filesOpened.add(d);
       }
       catch (AlreadyOpenException aoe) {
-        retDoc = aoe.getOpenDocument();
-        //Remember the first AOE
-        if (storedAOE == null) storedAOE = aoe;
-      } 
+        OpenDefinitionsDocument d = aoe.getOpenDocument();
+        retDocs.add(d);
+        alreadyOpenDocuments.add(d);
+      }
       catch(FileNotFoundException e) { filesNotFound.add(f); }
     }
     
     for (final OpenDefinitionsDocument d: filesOpened) {
-      addDocToNavigator(d);
-      addDocToClassPath(d);
-      _notifier.fileOpened(d);
+      _completeOpenFile(d); // contains view-related calls
     }
-    
     //        SHOW_GETDOC = false;
     for (File f: filesNotFound) { _notifier.fileNotFound(f); }
     
-    if (storedAOE != null) throw storedAOE;
+    if (!alreadyOpenDocuments.isEmpty()) {
+      for(OpenDefinitionsDocument d : alreadyOpenDocuments) {
+        _notifier.handleAlreadyOpenDocument(d);
+        _notifier.fileOpened(d);
+      }
+    }                                   
     
-    if (retDoc != null) return retDoc;
+    if (retDocs != null) {
+      return retDocs.toArray(new OpenDefinitionsDocument[0]);
+    }
     else {
       //if we didn't open any files, then it's just as if they cancelled it...
       throw new OperationCanceledException();
@@ -1139,7 +1176,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     OpenDefinitionsDocument[] docs;
     synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-//    System.err.println("Saving the files: " + Arrays.toString(docs));
     for (final OpenDefinitionsDocument doc: docs) {
       if (doc.isUntitled() && isProjActive) continue;  // do not force Untitled document to be saved if projectActive()
       aboutToSaveFromSaveAll(doc);
@@ -1215,7 +1251,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     File pr = getProjectRoot();
     if (pr != null) builder.setProjectRoot(pr);
     
-    // add opendefinitionsdocument    
+    // add opendefinitionsdocument
     ArrayList<File> srcFileList = new ArrayList<File>();
     LinkedList<File> auxFileList = new LinkedList<File>();
     OpenDefinitionsDocument[] docs;
@@ -1883,10 +1919,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
   }
 
+
   /** throw new UnsupportedOperationException */
   public void waitForInterpreter() { 
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
+
 
   /** throws new UnsupportedOperationException */
   public ClassPathVector getClassPath() { 
@@ -1957,7 +1995,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument[] docs;
     
     synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) { if (doc.isSourceFile() && doc.isModifiedSinceSave()) return true; }
+    for (OpenDefinitionsDocument doc: docs) { 
+      if (doc.isModifiedSinceSave()) return true;  
+    }
     return false;
   }
   
@@ -1968,7 +2008,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument[] docs;
     
     synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) { if (doc.isUntitled()) return true; }
+    for (OpenDefinitionsDocument doc: docs) { 
+      if (doc.isUntitled()) return true;  
+    }
     return false;
   }
 
@@ -1987,7 +2029,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
 
   /** Searches for a file with the given name on the provided paths. Returns null if the file is not found.
-   *  @param fileName Name of the source file to look for
+   *  @param filename Name of the source file to look for
    *  @param paths An array of directories to search
    *  @return the file if it is found, or null otherwise
    */
@@ -2337,7 +2379,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         
         public void saveDocInfo(DefinitionsDocument doc) {
-          
 // These lines were commented out to fix a memory leak; evidently, the undomanager holds on to the document          
 //          _undo = doc.getUndoManager();
 //          _undoListeners = doc.getUndoableEditListeners();
@@ -2369,7 +2410,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean saveFile(FileSaveSelector com) throws IOException {
 //      System.err.println("saveFile called on " + this);
       // Update value of _packageName since modification flag will be set to false
-      
       if (isUntitled()) return saveFileAs(com);
       
       if (! isModifiedSinceSave()) return true;
@@ -3315,10 +3355,24 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public OpenDefinitionsDocument _openFile(File file) throws IOException, AlreadyOpenException {
     
     OpenDefinitionsDocument doc = _rawOpenFile(file);
-    addDocToNavigator(doc);
-    addDocToClassPath(doc);
-    _notifier.fileOpened(doc);
+    _completeOpenFile(doc);
     return doc;
+  }
+  
+  private void _completeOpenFile(OpenDefinitionsDocument d) {
+      addDocToNavigator(d);
+      addDocToClassPath(d);
+      
+      try {
+        File f = d.getFile();
+        if (!inProject(f) && inProjectPath(d)) {
+          setProjectChanged(true);
+        }
+      } catch(FileMovedException fme) {
+        /** project is not modified in this case */
+      }
+      
+      _notifier.fileOpened(d);
   }
   
   private static class BackUpFileOptionListener implements OptionListener<Boolean> {

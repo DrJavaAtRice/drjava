@@ -522,7 +522,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
       return openFileHelper(fs); 
     }
     public boolean closeFile(OpenDefinitionsDocument doc) { return closeFileHelper(doc); }
-    public OpenDefinitionsDocument openFiles(FileOpenSelector com)
+    public OpenDefinitionsDocument[] openFiles(FileOpenSelector com)
       throws IOException, OperationCanceledException, AlreadyOpenException {
       return openFilesHelper(com); 
     }

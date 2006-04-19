@@ -35,13 +35,11 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.List;
 
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
-
-import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.swing.AsyncTask;
 
 /** Keeps track of all listeners to the model, and has the ability to notify them of some event.
  *  <p>
@@ -68,9 +66,27 @@ import edu.rice.cs.util.swing.Utilities;
 public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     implements GlobalModelListener, Serializable {
 
+ public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.executeAsyncTask(task, param, showProgress, lockUI); } }
+    finally { _lock.endRead(); }
+  }
+  
   public void fileNotFound(File f) {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.fileNotFound(f); } }
+    finally { _lock.endRead(); }
+  }
+  
+  /**
+   * Performs any UI related steps to handle the case in which a file is being opened that
+   * is already open and modified. The two choices are to revert to the copy on disk, or to
+   * keep the current changes.
+   * @return true if the user wishes to revert the document, false to ignore
+   */
+  public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc) {
+    _lock.startRead();
+    try { for(GlobalModelListener l : _listeners) { l.handleAlreadyOpenDocument(doc); } }
     finally { _lock.endRead(); }
   }
   

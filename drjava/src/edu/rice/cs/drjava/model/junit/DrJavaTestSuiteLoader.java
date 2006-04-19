@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.junit;
 
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.ScrollableDialog;
 import junit.runner.*;
 
 /**

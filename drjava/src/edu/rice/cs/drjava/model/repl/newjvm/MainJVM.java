@@ -58,6 +58,7 @@ import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.swing.ScrollableDialog;
 import koala.dynamicjava.parser.wrapper.*;
 
 /** Manages a remote JVM.
