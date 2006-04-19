@@ -26,7 +26,7 @@
  *
  */
 
-package koala.dynamicjava.tree.tiger.generic;
+package koala.dynamicjava.tree.tiger;
 
 import koala.dynamicjava.tree.*;
 
@@ -35,45 +35,55 @@ import java.util.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
- * This class represents the super method call nodes of the syntax tree
+ * This class represents the *inner class* allocation nodes of the syntax tree
  *
  * @author  Stephane Hillion
- * @version 1.0 - 1999/04/24
+ * @version 1.0 - 1999/04/25
  */
 
-public class PolymorphicSuperMethodCall extends SuperMethodCall {
+public class PolymorphicInnerAllocation extends InnerAllocation {
   /**
-   * The type arguments on which this method call applies
+   * The type arguments to pass to the constructor
    */
-  private List<TypeName> _typeArgs;
-
+  private List<TypeName> _typeArguments;
+  
   /**
-   * Creates a new node
-   * @param mn    the method name
-   * @param args  the arguments. null if no arguments.
-   * @param targs the type arguments
-   * @exception IllegalArgumentException if mn is null
+   * Initializes the expression
+   * @param exp   the outer object
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor. null if no arguments.
+   * @param targs the type arguments of the constructor
+   * @exception IllegalArgumentException if exp is null or tp is null
    */
-  public PolymorphicSuperMethodCall(String mn, List<Expression> args, List<TypeName> targs) {
-    this(mn, args, targs, null, 0, 0, 0, 0);
+  public PolymorphicInnerAllocation(Expression exp, TypeName tp, List<Expression> args, List<TypeName> targs) {
+    this(exp, tp, args, targs, null, 0, 0, 0, 0);
   }
   
   /**
-   * Creates a new node
-   * @param mn    the method name
-   * @param args  the arguments. null if no arguments.
-   * @param targs the type arguments
+   * Initializes the expression
+   * @param exp   the outer object
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor. null if no arguments.
+   * @param targs the type arguments of the constructor
    * @param fn    the filename
    * @param bl    the begin line
    * @param bc    the begin column
    * @param el    the end line
    * @param ec    the end column
-   * @exception IllegalArgumentException if mn is null
+   * @exception IllegalArgumentException if exp is null or tp is null
    */
-  public PolymorphicSuperMethodCall(String mn, List<Expression> args, List<TypeName> targs,
+  public PolymorphicInnerAllocation(Expression exp, TypeName tp, List<Expression> args, List<TypeName> targs,
                          String fn, int bl, int bc, int el, int ec) {
-    super(mn, args, fn, bl, bc, el, ec);
-    _typeArgs = targs;
+    super(exp, tp, args, fn, bl, bc, el, ec);
+
+    _typeArguments = targs;
+  }
+  
+  /**
+   * Returns the constructor type arguments.
+   */
+  public List<TypeName> getTypeArguments() {
+    return _typeArguments;
   }
   
   /**
@@ -83,23 +93,10 @@ public class PolymorphicSuperMethodCall extends SuperMethodCall {
   public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visit(this);
   }
-  
-  /**
-   * Implementation of toStringHelper (note that type
-   * arguments share in deciding equality, because the
-   * default equals() in class Node calls toString())
+   /**
+   * Implementation of toString for use in unit testing
    */
-
-  public List<TypeName> getTypeArguments(){ return _typeArgs; }
-
-  public String toStringHelper() {
-//    List<TypeName> tp = getTypeArguments();
-//    String typeArgsStr = "";
-//    if(tp.size()>0)
-//      typeArgsStr = ""+tp.get(0);
-//    for(int i = 1; i < tp.size(); i++)
-//      typeArgsStr = typeArgsStr + " " + tp.get(i);
-
-    return ""+getTypeArguments()+" "+super.toStringHelper();
+  public String toString() {
+    return "("+getClass().getName()+": "+getCreationType()+" "+getExpression()+" "+getArguments()+" "+getTypeArguments()+")";
   }
 }

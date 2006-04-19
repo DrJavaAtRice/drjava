@@ -79,7 +79,6 @@ import java.util.*;
 import koala.dynamicjava.interpreter.context.*;
 import koala.dynamicjava.interpreter.error.*;
 import koala.dynamicjava.interpreter.modifier.*;
-import koala.dynamicjava.interpreter.throwable.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;

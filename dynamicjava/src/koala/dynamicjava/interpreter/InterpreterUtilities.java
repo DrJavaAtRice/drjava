@@ -30,7 +30,7 @@ package koala.dynamicjava.interpreter;
 
 import java.lang.reflect.*;
 
-import koala.dynamicjava.interpreter.throwable.*;
+import koala.dynamicjava.interpreter.error.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.util.*;
 

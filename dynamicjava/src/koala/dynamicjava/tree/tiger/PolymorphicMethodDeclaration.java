@@ -43,7 +43,7 @@
  *
  END_COPYRIGHT_BLOCK*/
 
-package koala.dynamicjava.tree.tiger.generic;
+package koala.dynamicjava.tree.tiger;
 
 import koala.dynamicjava.tree.*;
 
@@ -53,7 +53,7 @@ import java.util.List;
  * This class represents polymorphic method declarations in an AST
  */
 
-public class PolymorphicConstructorDeclaration extends ConstructorDeclaration {
+public class PolymorphicMethodDeclaration extends MethodDeclaration {
   
   
   private TypeParameter[] _typeParameters;
@@ -69,10 +69,9 @@ public class PolymorphicConstructorDeclaration extends ConstructorDeclaration {
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
-  public PolymorphicConstructorDeclaration(int flags, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, 
-                                      ConstructorInvocation eci, List<Node> stmts, TypeParameter[] typeParams) {
-    this(flags, name, params, excepts, eci, stmts, null, 0, 0, 0, 0, typeParams);
+  public PolymorphicMethodDeclaration(int flags, TypeName type, String name,
+                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body, TypeParameter[] typeParams) {
+    this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0, typeParams);
   }
   
   /**
@@ -92,11 +91,10 @@ public class PolymorphicConstructorDeclaration extends ConstructorDeclaration {
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
-  public PolymorphicConstructorDeclaration(int flags, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
-                                      ConstructorInvocation eci, List<Node> stmts,
+  public PolymorphicMethodDeclaration(int flags, TypeName type, String name,
+                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body,
                                       String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
-    super(flags, name, params, excepts, eci, stmts, fn, bl, bc, el, ec);
+    super(flags, type, name, params, excepts, body, fn, bl, bc, el, ec);
     
     _typeParameters = typeParams;
   }

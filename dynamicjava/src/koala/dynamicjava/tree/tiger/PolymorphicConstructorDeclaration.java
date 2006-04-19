@@ -43,51 +43,61 @@
  *
  END_COPYRIGHT_BLOCK*/
 
-package koala.dynamicjava.tree.tiger.generic;
-
+package koala.dynamicjava.tree.tiger;
 
 import koala.dynamicjava.tree.*;
 
 import java.util.List;
 
 /**
- * This class represents a generic class declaration
+ * This class represents polymorphic method declarations in an AST
  */
 
-public class GenericInterfaceDeclaration extends InterfaceDeclaration {
+public class PolymorphicConstructorDeclaration extends ConstructorDeclaration {
+  
   
   private TypeParameter[] _typeParameters;
-  
   /**
-   * Creates a new class declaration
-   * @param flags the access flags
-   * @param name  the name of the class to declare
-   * @param impl  the list of implemented interfaces (List of List of Token). Can be null.
-   * @param body  the list of fields declarations
+   * Creates a new method declaration
+   * @param flags   the access flags
+   * @param type    the return type of this method
+   * @param name    the name of the method to declare
+   * @param params  the parameters list
+   * @param excepts the exception list
+   * @param body    the body statement
    * @param typeParams the type parameters
-   * @exception IllegalArgumentException if name is null or body is null
+   * @exception IllegalArgumentException if name is null or type is null or
+   *            params is null or excepts is null
    */
-  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body, TypeParameter[] typeParams) {
-    this(flags, name, impl, body, null, 0, 0, 0, 0, typeParams);
+  public PolymorphicConstructorDeclaration(int flags, String name,
+                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, 
+                                      ConstructorInvocation eci, List<Node> stmts, TypeParameter[] typeParams) {
+    this(flags, name, params, excepts, eci, stmts, null, 0, 0, 0, 0, typeParams);
   }
   
   /**
-   * Creates a new class declaration
-   * @param flags      the access flags
-   * @param name       the name of the class to declare
-   * @param impl       the list of implemented interfaces (a list of list of Token). Can be null.
-   * @param body       the list of members declarations
-   * @param fn         the filename
-   * @param bl         the begin line
-   * @param bc         the begin column
-   * @param el         the end line
-   * @param ec         the end column
+   * Creates a new method declaration
+   * @param flags   the access flags
+   * @param type    the return type of this method
+   * @param name    the name of the method to declare
+   * @param params  the parameters list
+   * @param excepts the exception list
+   * @param body    the body statement
+   * @param fn      the filename
+   * @param bl      the begin line
+   * @param bc      the begin column
+   * @param el      the end line
+   * @param ec      the end column
    * @param typeParams the type parameters
-   * @exception IllegalArgumentException if name is null or body is null
+   * @exception IllegalArgumentException if name is null or type is null or
+   *            params is null or excepts is null
    */
-  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
-                                     String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
-    super(flags, name, impl, body, fn, bl, bc, el, ec);
+  public PolymorphicConstructorDeclaration(int flags, String name,
+                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
+                                      ConstructorInvocation eci, List<Node> stmts,
+                                      String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
+    super(flags, name, params, excepts, eci, stmts, fn, bl, bc, el, ec);
+    
     _typeParameters = typeParams;
   }
   
@@ -97,7 +107,7 @@ public class GenericInterfaceDeclaration extends InterfaceDeclaration {
     return "("+getClass().getName()+": "+toStringHelper()+")";
   }
   
-  protected String toStringHelper(){
+  public String toStringHelper() {
     TypeParameter[] tp = getTypeParameters();
     String typeParamsS = "";
     if(tp.length>0)

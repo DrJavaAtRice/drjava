@@ -43,67 +43,68 @@
  *
  END_COPYRIGHT_BLOCK*/
 
-package koala.dynamicjava.tree.tiger.generic;
+package koala.dynamicjava.tree.tiger;
+
 
 import koala.dynamicjava.tree.*;
 
-import java.util.*;
+import java.util.List;
 
 /**
- * This class represents polymorphic method declarations in an AST
+ * This class represents a generic class declaration
  */
 
-public class PolymorphicObjectMethodCall extends ObjectMethodCall {
+public class GenericInterfaceDeclaration extends InterfaceDeclaration {
+  
+  private TypeParameter[] _typeParameters;
+  
   /**
-   * The type arguments on which this method call applies
+   * Creates a new class declaration
+   * @param flags the access flags
+   * @param name  the name of the class to declare
+   * @param impl  the list of implemented interfaces (List of List of Token). Can be null.
+   * @param body  the list of fields declarations
+   * @param typeParams the type parameters
+   * @exception IllegalArgumentException if name is null or body is null
    */
-  private List<TypeName> _typeArgs;
-
-  /**
-   * Creates a new node
-   * @param exp   the expression on which this method call applies
-   * @param mn    the field name
-   * @param args  the arguments. Can be null.
-   * @param targs the type arguments
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
-   * @exception IllegalArgumentException if mn is null
-   */
-  public PolymorphicObjectMethodCall(Expression exp, String mn, List<Expression> args, List<TypeName> targs,
-                          String fn, int bl, int bc, int el, int ec) {
-    super(exp, mn, args, fn, bl, bc, el, ec);
-    _typeArgs = targs;
+  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body, TypeParameter[] typeParams) {
+    this(flags, name, impl, body, null, 0, 0, 0, 0, typeParams);
   }
-
+  
   /**
-   * Creates a new node
-   * @param exp   the expression on which this method call applies
-   * @param mn    the field name
-   * @param args  the arguments. Can be null.
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
-   * @exception IllegalArgumentException if mn is null
+   * Creates a new class declaration
+   * @param flags      the access flags
+   * @param name       the name of the class to declare
+   * @param impl       the list of implemented interfaces (a list of list of Token). Can be null.
+   * @param body       the list of members declarations
+   * @param fn         the filename
+   * @param bl         the begin line
+   * @param bc         the begin column
+   * @param el         the end line
+   * @param ec         the end column
+   * @param typeParams the type parameters
+   * @exception IllegalArgumentException if name is null or body is null
    */
-  public PolymorphicObjectMethodCall(Expression exp, String mn, List<Expression> args, List<TypeName> targs) {
-    this(exp, mn, args, targs, null, 0, 0, 0, 0);
+  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
+                                     String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
+    super(flags, name, impl, body, fn, bl, bc, el, ec);
+    _typeParameters = typeParams;
   }
-
-  public List<TypeName> getTypeArguments(){ return _typeArgs; }
-
-  public String toStringHelper() {
-//    List<TypeName> tp = getTypeArguments();
-//    String typeArgsStr = "";
-//    if(tp.size()>0)
-//      typeArgsStr = ""+tp.get(0);
-//    for(int i = 1; i < tp.size(); i++)
-//      typeArgsStr = typeArgsStr + " " + tp.get(i);
-
-    return ""+getTypeArguments()+" "+super.toStringHelper();
+  
+  public TypeParameter[] getTypeParameters(){ return _typeParameters; }
+  
+  public String toString() {
+    return "("+getClass().getName()+": "+toStringHelper()+")";
+  }
+  
+  protected String toStringHelper(){
+    TypeParameter[] tp = getTypeParameters();
+    String typeParamsS = "";
+    if(tp.length>0)
+      typeParamsS = ""+tp[0];
+    for(int i = 1; i < tp.length; i++)
+      typeParamsS = typeParamsS + " " + tp[i];
+    
+    return typeParamsS+" "+super.toStringHelper();
   }
 }

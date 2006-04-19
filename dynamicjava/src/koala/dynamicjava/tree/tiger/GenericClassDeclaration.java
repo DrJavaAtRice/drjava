@@ -43,59 +43,53 @@
  *
  END_COPYRIGHT_BLOCK*/
 
-package koala.dynamicjava.tree.tiger.generic;
+package koala.dynamicjava.tree.tiger;
+
 
 import koala.dynamicjava.tree.*;
 
 import java.util.List;
 
 /**
- * This class represents polymorphic method declarations in an AST
+ * This class represents a generic class declaration
  */
 
-public class PolymorphicMethodDeclaration extends MethodDeclaration {
-  
+public class GenericClassDeclaration extends ClassDeclaration {
   
   private TypeParameter[] _typeParameters;
+  
   /**
-   * Creates a new method declaration
-   * @param flags   the access flags
-   * @param type    the return type of this method
-   * @param name    the name of the method to declare
-   * @param params  the parameters list
-   * @param excepts the exception list
-   * @param body    the body statement
+   * Creates a new class declaration
+   * @param flags the access flags
+   * @param name  the name of the class to declare
+   * @param ext   the tokens that compose the name of the parent class.
+   * @param impl  the list of implemented interfaces (List of List of Token). Can be null.
+   * @param body  the list of fields declarations
    * @param typeParams the type parameters
-   * @exception IllegalArgumentException if name is null or type is null or
-   *            params is null or excepts is null
+   * @exception IllegalArgumentException if name is null or body is null
    */
-  public PolymorphicMethodDeclaration(int flags, TypeName type, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body, TypeParameter[] typeParams) {
-    this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0, typeParams);
+  public GenericClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body, TypeParameter[] typeParams) {
+    this(flags, name, ext, impl, body, null, 0, 0, 0, 0, typeParams);
   }
   
   /**
-   * Creates a new method declaration
-   * @param flags   the access flags
-   * @param type    the return type of this method
-   * @param name    the name of the method to declare
-   * @param params  the parameters list
-   * @param excepts the exception list
-   * @param body    the body statement
-   * @param fn      the filename
-   * @param bl      the begin line
-   * @param bc      the begin column
-   * @param el      the end line
-   * @param ec      the end column
+   * Creates a new class declaration
+   * @param flags      the access flags
+   * @param name       the name of the class to declare
+   * @param ext        the tokens that compose the name of the parent class.
+   * @param impl       the list of implemented interfaces (a list of list of Token). Can be null.
+   * @param body       the list of members declarations
+   * @param fn         the filename
+   * @param bl         the begin line
+   * @param bc         the begin column
+   * @param el         the end line
+   * @param ec         the end column
    * @param typeParams the type parameters
-   * @exception IllegalArgumentException if name is null or type is null or
-   *            params is null or excepts is null
+   * @exception IllegalArgumentException if name is null or body is null
    */
-  public PolymorphicMethodDeclaration(int flags, TypeName type, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body,
-                                      String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
-    super(flags, type, name, params, excepts, body, fn, bl, bc, el, ec);
-    
+  public GenericClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body,
+                                 String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
+    super(flags, name, ext, impl, body, fn, bl, bc, el, ec);
     _typeParameters = typeParams;
   }
   
@@ -105,7 +99,7 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
     return "("+getClass().getName()+": "+toStringHelper()+")";
   }
   
-  public String toStringHelper() {
+  protected String toStringHelper(){
     TypeParameter[] tp = getTypeParameters();
     String typeParamsS = "";
     if(tp.length>0)

@@ -29,7 +29,7 @@
 
 package koala.dynamicjava.util;
 
-import koala.dynamicjava.interpreter.throwable.WrongVersionException;
+import koala.dynamicjava.interpreter.error.WrongVersionException;
 
 import java.lang.reflect.*;
 import java.util.*;

@@ -18,7 +18,7 @@ import koala.dynamicjava.parser.wrapper.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
-import koala.dynamicjava.tree.tiger.generic.*;
+import koala.dynamicjava.tree.tiger.*;
 
 /**
  * This class represents a (interpreted) Java 1.1 language parser

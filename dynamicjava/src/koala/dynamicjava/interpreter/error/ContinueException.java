@@ -26,7 +26,7 @@
  *
  */
 
-package koala.dynamicjava.interpreter.throwable;
+package koala.dynamicjava.interpreter.error;
 
 /**
  * Thrown to indicate that a continue statement has been reached
@@ -47,7 +47,7 @@ public class ContinueException extends RuntimeException {
      * @param m the detail message.
      */
     public ContinueException(String m) {
-	super(m);
+ super(m);
     }
 
     /**
@@ -58,20 +58,20 @@ public class ContinueException extends RuntimeException {
      */
     public ContinueException(String m, String l) {
         super(m);
-	label = l;
+ label = l;
     }
 
     /**
      * Tests whether the statement was labeled
      */
     public boolean isLabeled() {
-	return label != null;
+ return label != null;
     }
 
     /**
      * Returns the label of the statement that thrown the exception
      */
     public String getLabel() {
-	return label;
+ return label;
     }
 }

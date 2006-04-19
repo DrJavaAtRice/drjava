@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package koala.dynamicjava.util;
 
-import koala.dynamicjava.interpreter.throwable.WrongVersionException;
+import koala.dynamicjava.interpreter.error.WrongVersionException;
 
 import junit.framework.TestCase;
 import java.lang.reflect.*;

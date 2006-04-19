@@ -26,9 +26,8 @@
  *
  */
 
-package koala.dynamicjava.interpreter.throwable;
+package koala.dynamicjava.interpreter.error;
 
-import koala.dynamicjava.interpreter.error.*;
 import koala.dynamicjava.tree.*;
 
 /**
@@ -38,51 +37,31 @@ import koala.dynamicjava.tree.*;
  * @version 1.0 - 1999/05/26
  */
 
-public class ReturnException extends ExecutionError {
-  /**
-   * Whether the return has a value
-   * @serial
-   */
-  private boolean withValue;
+public class ThrownException extends ExecutionError {
   
   /**
-   * The returned object
-   * @serial
+   * Constructs an <code>ThrownExceptionError</code> with no detail message. 
    */
-  private Object value;
-  
-  /**
-   * Constructs an <code>ReturnException</code> with a value
-   * @serial
-   */
-  public ReturnException(String s, Node n) {
-    super(s, n);
-    withValue = false;
+  public ThrownException(Throwable e) {
+    super("uncaught.exception");
+    thrown = e;
   }
   
   /**
-   * Constructs an <code>ReturnExceptionError</code> with the specified 
+   * Constructs an <code>ThrownExceptionError</code> with the specified 
    * detail message, filename, line, column and exception.
-   * @param e  the return exception
+   * @param e  the thrown exception
    * @param n  the node in the syntax tree where the error occurs
    */
-  public ReturnException(String s, Object o, Node n) {
-    super(s, n);
-    withValue = true;
-    value = o;
+  public ThrownException(Throwable e, Node n) {
+    super("uncaught.exception", n);
+    thrown = e;
   }
   
   /**
-   * Returns the value returned
+   * Returns the exception that causes this error throwing
    */
-  public Object getValue() {
-    return value;
-  }
-  
-  /**
-   * Whether or not the return statement had a value
-   */
-  public boolean hasValue() {
-    return withValue;
+  public Throwable getException() {
+    return thrown;
   }
 }

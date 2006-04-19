@@ -1,8 +1,9 @@
 
-package koala.dynamicjava.tree;
+package koala.dynamicjava.tree.tiger;
 
 import java.util.*;
 
+import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**

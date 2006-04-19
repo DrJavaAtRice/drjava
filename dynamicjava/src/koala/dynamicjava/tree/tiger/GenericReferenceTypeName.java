@@ -43,7 +43,7 @@
  *
  END_COPYRIGHT_BLOCK*/
 
-package koala.dynamicjava.tree.tiger.generic;
+package koala.dynamicjava.tree.tiger;
 
 
 import koala.dynamicjava.tree.*;

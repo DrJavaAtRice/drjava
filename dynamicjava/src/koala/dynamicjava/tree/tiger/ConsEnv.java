@@ -1,4 +1,4 @@
-package koala.dynamicjava.tree.tiger.generic;
+package koala.dynamicjava.tree.tiger;
 
 import java.util.Map;
 

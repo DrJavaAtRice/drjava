@@ -43,7 +43,7 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package koala.dynamicjava.interpreter.throwable;
+package koala.dynamicjava.interpreter.error;
 
 /**
  * This exception is to be thrown whenever a feature of Java 1.5 is used

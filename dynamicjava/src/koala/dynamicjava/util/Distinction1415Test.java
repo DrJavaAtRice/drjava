@@ -58,7 +58,7 @@ import java.util.List;
 import koala.dynamicjava.parser.wrapper.ParserFactory;
 import koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
 
-import koala.dynamicjava.interpreter.throwable.WrongVersionException;
+import koala.dynamicjava.interpreter.error.WrongVersionException;
 
 
 /**

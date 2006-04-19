@@ -43,64 +43,67 @@
  *
  END_COPYRIGHT_BLOCK*/
 
+package koala.dynamicjava.tree.tiger;
 
-package koala.dynamicjava.tree.tiger.generic;
+import koala.dynamicjava.tree.*;
 
-import koala.dynamicjava.tree.Node;
-import koala.dynamicjava.tree.ReferenceTypeName;
-import koala.dynamicjava.tree.IdentifierToken;
-import koala.dynamicjava.tree.TreeUtilities;
-import koala.dynamicjava.SourceInfo;
-import java.util.List;
+import java.util.*;
 
 /**
- * Class TypeParameter, a component of the DynamicJava composite hierarchy.
- * Note: null is not allowed as a value for any field.
+ * This class represents polymorphic method declarations in an AST
  */
-public class TypeParameter extends ReferenceTypeName {
-  private final ReferenceTypeName _bound;
-  private final List<ReferenceTypeName> _interfaceBounds;
+
+public class PolymorphicObjectMethodCall extends ObjectMethodCall {
+  /**
+   * The type arguments on which this method call applies
+   */
+  private List<TypeName> _typeArgs;
 
   /**
-   * Constructs a TypeParameter.
-   * @throw IllegalArgumentException if any parameter to the constructor is null.
+   * Creates a new node
+   * @param exp   the expression on which this method call applies
+   * @param mn    the field name
+   * @param args  the arguments. Can be null.
+   * @param targs the type arguments
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if mn is null
    */
-  public TypeParameter(SourceInfo in_sourceInfo, List<IdentifierToken> ids, ReferenceTypeName in_bound, List<ReferenceTypeName> in_interfaceBounds) {
-    this(in_sourceInfo, TreeUtilities.listToName(ids), in_bound, in_interfaceBounds);
+  public PolymorphicObjectMethodCall(Expression exp, String mn, List<Expression> args, List<TypeName> targs,
+                          String fn, int bl, int bc, int el, int ec) {
+    super(exp, mn, args, fn, bl, bc, el, ec);
+    _typeArgs = targs;
   }
 
   /**
-   * Constructs a TypeParameter.
-   * @throw IllegalArgumentException if any parameter to the constructor is null.
+   * Creates a new node
+   * @param exp   the expression on which this method call applies
+   * @param mn    the field name
+   * @param args  the arguments. Can be null.
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if mn is null
    */
-  public TypeParameter(SourceInfo in_sourceInfo, String rep, ReferenceTypeName in_bound, List<ReferenceTypeName> in_interfaceBounds) {
-    super(rep, in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(),
-          in_sourceInfo.getStartColumn(), in_sourceInfo.getEndLine(), in_sourceInfo.getEndColumn());
-
-    if (in_bound == null) {
-      throw new IllegalArgumentException("Parameter 'bound' to the TypeParameter constructor was null.");
-    }
-    _bound = in_bound;
-    _interfaceBounds = in_interfaceBounds;
-}
-
-  public ReferenceTypeName getBound() { return _bound; }
-
-  public List<ReferenceTypeName> getInterfaceBounds() { return _interfaceBounds; }
-
-  public String getRepresentation(){
-    return _bound.getRepresentation(); // coerce to bound's type
+  public PolymorphicObjectMethodCall(Expression exp, String mn, List<Expression> args, List<TypeName> targs) {
+    this(exp, mn, args, targs, null, 0, 0, 0, 0);
   }
 
-  public String getName(){
-    return super.getRepresentation();
-  }
+  public List<TypeName> getTypeArguments(){ return _typeArgs; }
 
-  public String toString() {
-    return "("+getClass().getName()+": "+toStringHelper()+")";
-  }
+  public String toStringHelper() {
+//    List<TypeName> tp = getTypeArguments();
+//    String typeArgsStr = "";
+//    if(tp.size()>0)
+//      typeArgsStr = ""+tp.get(0);
+//    for(int i = 1; i < tp.size(); i++)
+//      typeArgsStr = typeArgsStr + " " + tp.get(i);
 
-  protected String toStringHelper() {
-    return getName()+" "+getBound()+" "+getInterfaceBounds();
+    return ""+getTypeArguments()+" "+super.toStringHelper();
   }
 }

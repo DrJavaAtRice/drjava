@@ -26,43 +26,52 @@
  *
  */
 
-package koala.dynamicjava.interpreter.throwable;
-
-import koala.dynamicjava.interpreter.error.*;
-import koala.dynamicjava.tree.*;
+package koala.dynamicjava.interpreter.error;
 
 /**
- * This error is thrown by an interpreted throw statement
+ * Thrown to indicate that a break statement has been reached
  *
- * @author Stephane Hillion
- * @version 1.0 - 1999/05/26
+ * @author  Stephane Hillion
+ * @version 1.0 - 1999/05/23
  */
+public class BreakException extends RuntimeException {
+    /**
+     * The label
+     * @serial
+     */
+    private String label;
 
-public class ThrownException extends ExecutionError {
-  
-  /**
-   * Constructs an <code>ThrownExceptionError</code> with no detail message. 
-   */
-  public ThrownException(Throwable e) {
-    super("uncaught.exception");
-    thrown = e;
-  }
-  
-  /**
-   * Constructs an <code>ThrownExceptionError</code> with the specified 
-   * detail message, filename, line, column and exception.
-   * @param e  the thrown exception
-   * @param n  the node in the syntax tree where the error occurs
-   */
-  public ThrownException(Throwable e, Node n) {
-    super("uncaught.exception", n);
-    thrown = e;
-  }
-  
-  /**
-   * Returns the exception that causes this error throwing
-   */
-  public Throwable getException() {
-    return thrown;
-  }
+    /**
+     * Constructs an <code>BreakException</code> with the 
+     * specified detail message. 
+     * @param m the detail message.
+     */
+    public BreakException(String m) {
+ super(m);
+    }
+
+    /**
+     * Constructs an <code>BreakException</code> with the 
+     * specified detail message and label.
+     * @param m the detail message.
+     * @param l the label
+     */
+    public BreakException(String m, String l) {
+        super(m);
+ label = l;
+    }
+
+    /**
+     * Tests whether the statement was labeled
+     */
+    public boolean isLabeled() {
+ return label != null;
+    }
+
+    /**
+     * Returns the label of the statement that thrown the exception
+     */
+    public String getLabel() {
+ return label;
+    }
 }

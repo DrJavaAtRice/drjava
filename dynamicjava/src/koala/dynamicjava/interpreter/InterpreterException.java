@@ -29,7 +29,6 @@
 package koala.dynamicjava.interpreter;
 
 import koala.dynamicjava.interpreter.error.*;
-import koala.dynamicjava.interpreter.throwable.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.parser.wrapper.*;
 import koala.dynamicjava.util.*;
