@@ -6172,6 +6172,7 @@ public class MainFrame extends JFrame {
         public void run() {
           _disableInteractionsPane();
           _runAction.setEnabled(false);
+          _runProjectAction.setEnabled(false);
         }
       });
     }
@@ -6181,6 +6182,7 @@ public class MainFrame extends JFrame {
         public void run() {
           _enableInteractionsPane();
           _runAction.setEnabled(true);
+          _runProjectAction.setEnabled(true);
         }
       });
     }
@@ -6197,6 +6199,7 @@ public class MainFrame extends JFrame {
       Utilities.invokeLater(new Runnable() {
         public void run() {
           _runAction.setEnabled(! inProgress);
+          _runProjectAction.setEnabled(! inProgress);
           if (inProgress) _disableInteractionsPane();
           else _enableInteractionsPane();
         }
@@ -6437,6 +6440,7 @@ public class MainFrame extends JFrame {
           _junitAction.setEnabled(false);
           _junitAllAction.setEnabled(false);
           _runAction.setEnabled(false);
+          _runProjectAction.setEnabled(false);
           _closeInteractionsScript();
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -6452,6 +6456,7 @@ public class MainFrame extends JFrame {
         public void run() {
           interactionEnded();
           _runAction.setEnabled(true);
+          _runProjectAction.setEnabled(true);
           _junitAction.setEnabled(true);
           _junitAllAction.setEnabled(true);
 // This action should not be enabled until the slave JVM is used          
