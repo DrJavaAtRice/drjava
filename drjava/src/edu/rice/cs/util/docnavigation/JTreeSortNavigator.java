@@ -66,7 +66,9 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   /** The model of the tree. */
   private DefaultTreeModel _model;
    
-  /** The currently selected item.  Maintained by a listener. */
+  /** The currently selected item.  Updated by a listener. It is not volatile because all accessed are protected by 
+   *  explicit synchronization.
+   */
   private NodeData<ItemT> _current;
   
   /** Maps documents to tree nodes. */
@@ -708,7 +710,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     }
   }
   
-  private NodeDataVisitor<ItemT, ItemT> _leafVisitor = new NodeDataVisitor<ItemT, ItemT>() {
+  private final NodeDataVisitor<ItemT, ItemT> _leafVisitor = new NodeDataVisitor<ItemT, ItemT>() {
     public ItemT fileCase(File f){ return null; }
     public ItemT stringCase(String s){ return null; }
     public ItemT itemCase(ItemT ini){ return ini; }

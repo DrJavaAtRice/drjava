@@ -53,7 +53,7 @@ import edu.rice.cs.util.OperationCanceledException;
 public final class CompilerErrorModelTest extends DrJavaTestCase {
   private File[] files;
   private String[] texts;
-  private TestDocGetter getter;
+  private TestDocGetter getter;       // subclass of DummyGlobalModel
   private CompilerError[] errors;
   private CompilerErrorModel model;
   
@@ -89,9 +89,9 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   public void testConstructDoclessErrors() {
     getter = new TestDocGetter();
     errors = new CompilerError[] { 
-      new CompilerError("Test error without File",false),
+      new CompilerError("Test error without File", false),
       new CompilerError("Test warning without File", true),
-      new CompilerError("Test error without File",false) 
+      new CompilerError("Test error without File", false) 
     };
     
     CompilerError[] copy = new CompilerError[errors.length];

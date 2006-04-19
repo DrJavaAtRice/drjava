@@ -37,9 +37,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.util.text.SwingDocument;
-import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.UnexpectedException;
+
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
@@ -48,6 +46,12 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
+
+
+import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.text.SwingDocument;
 
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -576,28 +580,26 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return reducedPos;  
   }
     
-  /**
-   * Searching forward, finds the position of the enclosing squiggly brace.
-   * NB: ignores comments.
-   * @param pos Position to start from
-   * @param opening opening brace character
-   * @param closing closing brace character
-   * @return position of enclosing squiggly brace, or ERROR_INDEX if beginning
-   * of document is reached.
+  /** Searching forward, finds the position of the enclosing squiggly brace. NB: ignores comments.
+   *  @param pos Position to start from
+   *  @param opening opening brace character
+   *  @param closing closing brace character
+   *  @return position of enclosing squiggly brace, or ERROR_INDEX if beginning of document is reached.
    */
   public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     // Check cache
     StringBuffer keyBuf = new StringBuffer("findNextEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
     String key = keyBuf.toString();
     Integer cached = (Integer) _checkCache(key);
+    
     if (cached != null) return cached.intValue();
-
     if (pos>=getLength()-1) { return ERROR_INDEX; }
     
     final char[] delims = {opening, closing};
     int reducedPos = pos;
     int i;  // index of for loop below
     int braceBalance = 0;
+    
     readLock();
     String text = getText();
     try {      
@@ -1242,14 +1244,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return getFirstNonWSCharPos(pos, whitespace, acceptComments);
   }
   
-  /**
-   * Finds the position of the first non-whitespace character after pos.
-   * NB: Skips comments and all whitespace, including newlines
-   * @param pos Position to start from
-   * @param whitespace array of whitespace chars to ignore
-   * @param acceptComments if true, find non-whitespace chars in comments
-   * @return position of first non-whitespace character after pos,
-   * or ERROR_INDEX if end of document is reached
+  /** Finds the position of the first non-whitespace character after pos. NB: Skips comments and all whitespace, 
+   *  including newlines
+   *  @param pos Position to start from
+   *  @param whitespace array of whitespace chars to ignore
+   *  @param acceptComments if true, find non-whitespace chars in comments
+   *  @return position of first non-whitespace character after pos, or ERROR_INDEX if end of document is reached
    */
   public int getFirstNonWSCharPos(int pos, char[] whitespace, boolean acceptComments) throws BadLocationException {
     // Check cache
@@ -1260,55 +1260,64 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     Integer cached = (Integer) _checkCache(key);
     if (cached != null)  return cached.intValue();
     
-    int i = pos;
-    int endPos = getLength();
+    int result = ERROR_INDEX;  // variable used to hold result to be returned
     
-    // Get text from pos to end of document
-    String text = getText(pos, endPos - pos);
-    
-    final int origLocation = _currentLocation;
-    // Move reduced model to location pos
-    _reduced.move(pos - origLocation);
-    int reducedPos = pos;
-    
-    //int iter = 0;
-    
-    // Walk forward from specificed position
-    while (i < endPos) {
+    readLock();
+    try {
       
-      // Check if character is whitespace
-      if (match(text.charAt(i-pos), whitespace)) {
-        i++;
-        continue;
+      int i = pos;
+      int endPos = getLength();
+      
+      // Get text from pos to end of document
+      String text = getText(pos, endPos - pos);
+
+      final int origLocation = _currentLocation;
+      // Move reduced model to location pos
+      synchronized(_reduced) {
+        _reduced.move(pos - origLocation);
+        int reducedPos = pos;
+        
+        //int iter = 0;
+        
+        // Walk forward from specificed position
+        while (i < endPos) {
+          
+          // Check if character is whitespace
+          if (match(text.charAt(i-pos), whitespace)) {
+            i++;
+            continue;
+          }
+          // Found a non whitespace character
+          // Move reduced model to walker's location
+          _reduced.move(i - reducedPos);  // reduced model points to location i
+          reducedPos = i;                 // reduced mdoel points to location reducedPos
+          
+          // Check if non-ws char is within comment and if we want to ignore them.
+          if (! acceptComments &&
+              ((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+               (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)))) {
+            i++;
+            continue;
+          }
+          
+          // Check if non-ws char is part of comment opening market and if we want to ignore them
+          if (! acceptComments && _isStartOfComment(text, i - pos)) {
+            // ith char is first char in comment open market; skip past this marker
+            // and continue searching
+            i = i + 2;
+            continue;
+          }
+      
+          // Return position of matching char
+          break;
+        }
+        _reduced.move(origLocation - reducedPos);
+        
+        result = reducedPos;
+        if (i == endPos) result = ERROR_INDEX;
       }
-      // Found a non whitespace character
-      // Move reduced model to walker's location
-      _reduced.move(i - reducedPos);  // reduced model points to location i
-      reducedPos = i;                 // reduced mdoel points to location reducedPos
-      
-      // Check if non-ws char is within comment and if we want to ignore them.
-      if (! acceptComments &&
-          ((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-           (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)))) {
-        i++;
-        continue;
-      }
-      
-      // Check if non-ws char is part of comment opening market and if we want to ignore them
-      if (! acceptComments && _isStartOfComment(text, i - pos)) {
-        // ith char is first char in comment open market; skip past this marker
-        // and continue searching
-        i = i + 2;
-        continue;
-      }
-      
-      // Return position of matching char
-      break;
     }
-    _reduced.move(origLocation - reducedPos);
-    
-    int result = reducedPos;
-    if (i == endPos) result = ERROR_INDEX;
+    finally { readUnlock(); }
     
     _storeInCache(key, new Integer(result));
     return result;
@@ -1349,10 +1358,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   
-  /**
-   * Returns true if the given position is inside a paren phrase.
-   * @param pos the position we're looking at
-   * @return true if pos is immediately inside parentheses
+  /** Returns true if the given position is inside a paren phrase.
+   *  @param pos the position we're looking at
+   *  @return true if pos is immediately inside parentheses
    */
   public boolean posInParenPhrase(int pos) {
     // Check cache
@@ -1569,7 +1577,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     try {
       synchronized(_reduced) {    // Prevent updates to the reduced model during this change
         clearCache();      // Clear the helper method cache
-        super.insertString(offset,str,a);
+        super.insertString(offset, str, a);
       }
     }
     finally { modifyUnlock(); }
@@ -1578,14 +1586,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Removes a block of text from the specified location.  We don't update the reduced model here; that happens
    *  in {@link #removeUpdate}.
    */
-  public void remove(int offset, int len) throws BadLocationException {
+  public void remove(final int offset, final int len) throws BadLocationException {
     
     modifyLock();
     try {
       synchronized(_reduced) {
         clearCache();     // Clear the helper method cache
         super.remove(offset, len);
-      }
+      };
     }
     finally { modifyUnlock(); }  
   }

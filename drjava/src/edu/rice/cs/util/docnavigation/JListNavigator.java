@@ -69,7 +69,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   protected DefaultListModel _model;
   
   /** The current selection value.  A cached copy of getSelectedValue(). */
-  private ItemT _current = null;
+  private volatile ItemT _current = null;
   
 //  /** The index of _current */
 //  private int _currentIndex = -1;

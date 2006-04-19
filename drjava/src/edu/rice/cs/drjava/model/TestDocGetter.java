@@ -41,7 +41,7 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
-/** Test implementation of IGetDocuments interface. */
+/** Test implementation of the document fetching methods in the GlobalModel interface. */
 public class TestDocGetter extends DummyGlobalModel {
   
   /** Storage for documents and File keys. */

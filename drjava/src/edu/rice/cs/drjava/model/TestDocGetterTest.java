@@ -51,33 +51,24 @@ import java.io.File;
 import java.io.IOException;
 
 
-/**
-* JUnit test class for testing TestDocGetter.
-*
-* @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
-* @version $Id$
-*/
+/** JUnit test class for testing TestDocGetter.
+ *
+ *  @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
+ *  @version $Id$
+ */
 public class TestDocGetterTest extends DrJavaTestCase {
-
-
-    /**
-    * Creates a new empty TestDocGetter instance, calls
-    * getDocumentForFile() with an empty File and ensures it throws
-    * IllegalStateException. 
-    *
-    * @exception IOException if an error occurs
-    */
-    public void testGetDocumentForFile() throws IOException {
-        TestDocGetter testDocGetter = new TestDocGetter(new File[0], new String[0]);
- try {
-     testDocGetter.getDocumentForFile(new File(""));
- }
- catch (IllegalStateException e) {
-     assertTrue(true);
-     return;
- }
- fail("should throw IllegalStateException");
- 
+  
+  /** Creates a new empty TestDocGetter instance, calls getDocumentForFile() with an empty File and ensures it throws
+   *  an IllegalStateException. 
+   *  @exception IOException if an error occurs
+   */
+  public void testGetDocumentForFile() throws IOException {
+    TestDocGetter testDocGetter = new TestDocGetter(new File[0], new String[0]);
+    try { testDocGetter.getDocumentForFile(new File("")); }
+    catch (IllegalStateException e) {
+      assertTrue(true);
+      return;
     }
-
+    fail("should throw IllegalStateException");
+  }
 }
