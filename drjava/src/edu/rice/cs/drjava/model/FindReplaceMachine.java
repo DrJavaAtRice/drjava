@@ -65,6 +65,7 @@ public class FindReplaceMachine {
   private String _lastFindWord;              // Last word found; set to null by FindReplaceDialog if caret is updated
   private boolean _skipText;                 // Whether to skip over the current match if direction is reversed
   private DocumentIterator _docIterator;     // An iterator of open documents; _doc is current
+  private SingleDisplayModel _model;
 
   /** Standard Constructor.
    *  Creates new machine to perform find/replace operations on a particular document starting from a given position.
@@ -75,7 +76,7 @@ public class FindReplaceMachine {
     _skipText = false;
 //    _checkAllDocsWrapped = false;
 //    _allDocsWrapped = false;
-//    _model = model;
+    _model = model;
     _docIterator = docIterator;
     setFindAnyOccurrence();
     setFindWord("");
@@ -240,6 +241,10 @@ public class FindReplaceMachine {
         count += _replaceAllInCurrentDoc();
         _doc = _docIterator.getNextDocument(_doc);
       }
+      
+      // update display (adding "*") in navigatgorPane
+      _model.getDocumentNavigator().repaint();
+      
       return count;
     }
     else return _replaceAllInCurrentDoc();
