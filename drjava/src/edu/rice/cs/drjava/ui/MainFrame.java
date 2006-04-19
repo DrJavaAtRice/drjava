@@ -1385,7 +1385,7 @@ public class MainFrame extends JFrame {
     }
   };
   
-  /* Enables the reset interactions command. */
+  /* Enables the reset interactions command. Not currently used, since this action is NEVER disabled. */
   public void enableResetInteractions() { _resetInteractionsAction.setEnabled(true); }
   
   /** Resets the Interactions pane. */
@@ -1415,13 +1415,10 @@ public class MainFrame extends JFrame {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     
     // Lots of work, so use another thread
-    final SwingWorker worker = new SwingWorker() {
-      public Object construct() {
-        _model.resetInteractions(_model.getWorkingDirectory());
-        return null;
+    new Thread(new Runnable() { 
+      public void run() {_model.resetInteractions(_model.getWorkingDirectory(), true);
       }
-    };
-    worker.start();
+    }).start();
   }
   
   /** Defines actions that displays the interactions classpath. */
@@ -1439,8 +1436,8 @@ public class MainFrame extends JFrame {
     }
     String classPath = cpBuf.toString();
     
-    new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath",
-                               "Current Interpreter Classpath", classPath).show();
+    new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath", "Current Interpreter Classpath", classPath).
+      show();
   }
   
   /** Shows the user documentation. */
@@ -4286,7 +4283,7 @@ public class MainFrame extends JFrame {
     
     //_setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset the Interactions Pane");
-    _resetInteractionsAction.setEnabled(false);
+    _resetInteractionsAction.setEnabled(true);
     
     _setUpAction(_viewInteractionsClassPathAction, "View Interactions Classpath", 
                  "Display the classpath in use by the Interactions Pane");
@@ -6436,7 +6433,7 @@ public class MainFrame extends JFrame {
         public void run() {
           Debugger dm = _model.getDebugger();
 //          if (dm.isAvailable() && dm.isReady()) dm.shutdown();
-          _resetInteractionsAction.setEnabled(false);
+//          _resetInteractionsAction.setEnabled(false);
           _junitAction.setEnabled(false);
           _junitAllAction.setEnabled(false);
           _runAction.setEnabled(false);
@@ -6472,7 +6469,7 @@ public class MainFrame extends JFrame {
       Utilities.invokeLater(command);
     }
     
-    public void slaveJVMUsed() { _resetInteractionsAction.setEnabled(true); }
+    public void slaveJVMUsed() { /* _resetInteractionsAction.setEnabled(true);  */ }
     
     public void consoleReset() { }
     

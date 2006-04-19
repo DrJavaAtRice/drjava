@@ -36,7 +36,9 @@ package edu.rice.cs.util;
 import junit.framework.*;
 import java.io.*;
 
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.DrJavaTestCase;
@@ -372,5 +374,33 @@ public class FileOpsTest extends DrJavaTestCase {
     actual = FileOps.convertToAbsolutePathEntries(input);
     assertEquals("testConvertToAbsolutePathEntries for trailing empty paths failed, input = '" + input + 
                  "', expected = '" + expected + "', actual = '" + actual + "'", expected, actual);
+  }
+  
+  /** Tests getFilesInDir. */
+  public void testGetFiles() throws IOException {
+    File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
+    assertTrue("dir1 exists", dir1.exists());
+    File file1a = File.createTempFile("DrJavaTest-", ".temp", dir1).getCanonicalFile();
+    assertTrue("file1a exists", file1a.exists());
+    File file1b = File.createTempFile("DrJava-", ".temp", dir1).getCanonicalFile();
+    assertTrue("file1b exists", file1b.exists());
+    File dir2 = FileOps.createTempDirectory("DrJavaTestDir-", dir1).getCanonicalFile();
+    assertTrue("dir2 exists", dir2.exists());
+    File file2 = File.createTempFile("DrJavaTest-", ".temp", dir2).getCanonicalFile();
+    assertTrue("file2 exists", file2.exists());
+    
+    FileFilter ff = new FileFilter() {
+        public boolean accept(File f) {
+          if (f.isDirectory()) return true;
+          String name = f.getName();
+          return name.startsWith("DrJavaTest");
+        }
+    };
+    
+    List<File> res1 = Arrays.asList(new File[] {file1a});
+    List<File> res2 = Arrays.asList(new File[] {file1a, file2});
+    
+    assertEquals("non-recursive FilesInDir test", res1, FileOps.getFilesInDir(dir1, false, ff));
+    assertEquals("recursive FileInDir test", res2, FileOps.getFilesInDir(dir1, true, ff));
   }
 }

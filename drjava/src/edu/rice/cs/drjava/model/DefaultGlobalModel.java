@@ -387,14 +387,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     super.dispose();
   }
+  
+  public void resetInteractions(File wd) { resetInteractions(wd, false); }
  
-  /** Clears and resets the interactions pane in working directory wd. Also clears the console if the option is 
-   *  indicated (on by default).  We have to restart the JVM to accomplish the reset.  We previously tried to reset
-   *  interpretation within the exising JVM but bug #576179 pointed out that we must kill all threads that were
-   *  previously running in the interactions JVM, so a restart is essential.
+  /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is 
+   *  indicated (on by default).  The reset operation is suppressed if the existing slave JVM has not been
+   *  used, {@code wd} matches its working directory, and forceResest is false.
    */
-  public void resetInteractions(File wd) {
-    if (! _jvm.slaveJVMUsed() && wd.equals(_interactionsModel.getWorkingDirectory())) {
+  public void resetInteractions(File wd, boolean forceReset) {
+    if (! forceReset & ! _jvm.slaveJVMUsed() && wd.equals(_interactionsModel.getWorkingDirectory())) {
       // eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
 //      Utilities.show("Suppressing resetting of interactions pane");
       _interactionsModel._notifyInterpreterReady(wd);

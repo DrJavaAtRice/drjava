@@ -1466,9 +1466,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().
                            makeListNavigator(getDocumentNavigator()));
     setFileGroupingState(makeFlatFileGroupingState());
-
-    // Reset rather than telling the user to reset. This was a design decision
-    // made by the class Spring 2005 after much debate.
    
     if (! suppressReset) resetInteractions(getWorkingDirectory());
     _notifier.projectClosed();
@@ -1778,8 +1775,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     for (OpenDefinitionsDocument doc: docs) { doc.setIndent(indent); }
   }
 
-  /** A degenerate operation since this has no interactions model. */
+  /** A degenerate operation since this has no slave JVM and no interactions model. */
   public void resetInteractions(File wd) { /* do nothing */ }
+  
+  /** A degenerate operation since this has no slave JVM and no interactions model. */
+  public void resetInteractions(File wd, boolean forceReset) { /* do nothing */ }
 
   /** Resets the console. Fires consoleReset() event. */
   public void resetConsole() {

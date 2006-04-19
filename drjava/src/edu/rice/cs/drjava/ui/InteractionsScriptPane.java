@@ -29,34 +29,31 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
  * WITH THE SOFTWARE.
  * 
- END_COPYRIGHT_BLOCK*/
+ *END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
 import java.awt.*;
 import javax.swing.*;
 
-/**
- * Pane for an interactions script.
- * @version $Id$
+/** Pane for an interactions script.
+ *  @version $Id$
  */
 public class InteractionsScriptPane extends JPanel {
-  /**
-   * Constructs a new pane with the given rows and cols.
-   * @param rows the number of rows
-   * @param cols the number of columns
+  
+  /** Constructs a new pane with the given rows and cols.
+   *  @param rows the number of rows
+   *  @param cols the number of columns
    */
   public InteractionsScriptPane(int rows, int cols) {
     setLayout(new GridLayout(rows, cols));
   }
 
-  /**
-   * Adds the given action to this pane as a button.
-   * @param a the action the button should perform.
+  /** Adds the given action to this pane as a button.
+   *  @param a the action the button should perform.
    */
   public void addButton(Action a) {
     JButton b = new JButton(a);
     add(b);      
   }
-
 }

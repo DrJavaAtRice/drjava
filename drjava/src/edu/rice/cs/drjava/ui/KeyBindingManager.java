@@ -39,12 +39,10 @@ import javax.swing.*;
 import java.util.*;
 import java.awt.event.*;
 
-/**
- * Contains Hashtables that are used in the key-binding process along with
- * methods to build them and access their contents. Performs the
- * assigning of keys to actions, checking for and resolving conflicts, and
- * setting appropriate menu accelerators
- * @version $Id$
+/** Contains Hashtables that are used in the key-binding process along with methods to build them and access their 
+ *  contents. Performs the assigning of keys to actions, checking for and resolving conflicts, and setting appropriate 
+ *  menu accelerators
+ *  @version $Id$
  */
 public class KeyBindingManager {
   
