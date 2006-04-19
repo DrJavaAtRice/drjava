@@ -46,14 +46,14 @@ public class TypeExpression extends PrimaryExpression {
   /**
    * The type represented by this expression
    */
-  private Type type;
+  private TypeName type;
   
   /**
    * Initializes the expression
    * @param t     the type represented by this expression
    * @exception IllegalArgumentException if t is null
    */
-  public TypeExpression(Type t) {
+  public TypeExpression(TypeName t) {
     this(t, null, 0, 0, 0, 0);
   }
   
@@ -67,7 +67,7 @@ public class TypeExpression extends PrimaryExpression {
    * @param ec    the end column
    * @exception IllegalArgumentException if t is null
    */
-  public TypeExpression(Type t, String fn, int bl, int bc, int el, int ec) {
+  public TypeExpression(TypeName t, String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
     if (t == null) throw new IllegalArgumentException("t == null");
@@ -78,7 +78,7 @@ public class TypeExpression extends PrimaryExpression {
   /**
    * Returns the type represented by this expression
    */
-  public Type getType() {
+  public TypeName getType() {
     return type;
   }
   
@@ -86,7 +86,7 @@ public class TypeExpression extends PrimaryExpression {
    * Sets the type
    * @exception IllegalArgumentException if t is null
    */
-  public void setType(ReferenceType t) {
+  public void setType(ReferenceTypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
     
     firePropertyChange(TYPE, type, type = t);

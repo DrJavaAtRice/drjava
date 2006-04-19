@@ -54,9 +54,9 @@ import java.util.List;
  * This class represents a generic reference type
  */
 
-public class GenericReferenceType extends ReferenceType {
+public class GenericReferenceTypeName extends ReferenceTypeName {
   
-  private List<List<? extends Type>> _typeArguments;
+  private List<List<? extends TypeName>> _typeArguments;
   
   /**
    * Initializes the type
@@ -64,7 +64,7 @@ public class GenericReferenceType extends ReferenceType {
    * @param typeArgs the type arguments
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceType(List<IdentifierToken> ids, List<List<? extends Type>> typeArgs) {
+  public GenericReferenceTypeName(List<IdentifierToken> ids, List<List<? extends TypeName>> typeArgs) {
     this(ids, null, 0, 0, 0, 0, typeArgs);
   }
   
@@ -74,7 +74,7 @@ public class GenericReferenceType extends ReferenceType {
    * @param typeArgs the type arguments
    * @exception IllegalArgumentException if rep is null
    */
-  public GenericReferenceType(String rep, List<List<? extends Type>> typeArgs) {
+  public GenericReferenceTypeName(String rep, List<List<? extends TypeName>> typeArgs) {
     this(rep, null, 0, 0, 0, 0, typeArgs);
   }
   
@@ -89,7 +89,7 @@ public class GenericReferenceType extends ReferenceType {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceType(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec, List<List<? extends Type>> typeArgs) {
+  public GenericReferenceTypeName(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec, List<List<? extends TypeName>> typeArgs) {
     super(ids, fn, bl, bc, el, ec);
     
     _typeArguments = typeArgs;
@@ -106,13 +106,13 @@ public class GenericReferenceType extends ReferenceType {
    * @param typeArgs the type arguments
    * @exception IllegalArgumentException if rep is null
    */
-  public GenericReferenceType(String rep, String fn, int bl, int bc, int el, int ec, List<List<? extends Type>> typeArgs) {
+  public GenericReferenceTypeName(String rep, String fn, int bl, int bc, int el, int ec, List<List<? extends TypeName>> typeArgs) {
     super(rep, fn, bl, bc, el, ec);
     
     _typeArguments = typeArgs;
   }
   
-  public List<List<? extends Type>> getTypeArguments(){ return _typeArguments; }
+  public List<List<? extends TypeName>> getTypeArguments(){ return _typeArguments; }
   
   public String toString() {
     return "("+getClass().getName()+": "+toStringHelper()+")";
@@ -120,8 +120,8 @@ public class GenericReferenceType extends ReferenceType {
   
   public String toStringHelper() {
     String typeArgS = "";
-    List<List<? extends Type>> alltas = getTypeArguments();
-    for( List<? extends Type> ta : alltas ){
+    List<List<? extends TypeName>> alltas = getTypeArguments();
+    for( List<? extends TypeName> ta : alltas ){
       if(ta.size()>0)
         typeArgS = ""+ta.get(0);
       for(int i = 1; i < ta.size(); i++)

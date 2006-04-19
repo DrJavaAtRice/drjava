@@ -63,31 +63,31 @@ public class TypeVisitor extends VisitorObject<ClassInfo> {
   }
 
   /**
-   * Visits a PrimitiveType
+   * Visits a PrimitiveTypeName
    * @param node the node to visit
    * @return the representation of the visited type
    */
-  public ClassInfo visit(PrimitiveType node) {
+  public ClassInfo visit(PrimitiveTypeName node) {
     return new JavaClassInfo(node.getValue());
   }
 
   /**
-   * Visits a ReferenceType
+   * Visits a ReferenceTypeName
    * @param node the node to visit
    * @return the representation of the visited type
    * @exception NoClassDefFoundError if the class cannot be loaded
    */
-  public ClassInfo visit(ReferenceType node) {
+  public ClassInfo visit(ReferenceTypeName node) {
     return lookupClass(node.getRepresentation(), context);
   }
 
   /**
-   * Visits a ArrayType
+   * Visits a ArrayTypeName
    * @param node the node to visit
    * @return the representation of the visited type
    * @exception NoClassDefFoundError if the class cannot be loaded
    */
-  public ClassInfo visit(ArrayType node) {
+  public ClassInfo visit(ArrayTypeName node) {
     ClassInfo ci = node.getElementType().acceptVisitor(this);
     return ci.getArrayType();
   }

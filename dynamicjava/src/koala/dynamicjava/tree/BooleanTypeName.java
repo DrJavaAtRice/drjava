@@ -29,17 +29,17 @@
 package koala.dynamicjava.tree;
 
 /**
- * This class represents the char type nodes of the syntax tree
+ * This class represents the boolean type nodes of the syntax tree
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/04/24
  */
 
-public class CharType extends PrimitiveType {
+public class BooleanTypeName extends PrimitiveTypeName {
   /**
    * Initializes the type
    */
-  public CharType() {
+  public BooleanTypeName() {
     this(null, 0, 0, 0, 0);
   }
   
@@ -51,7 +51,8 @@ public class CharType extends PrimitiveType {
    * @param el    the end line
    * @param ec    the end column
    */
-  public CharType(String fn, int bl, int bc, int el, int ec) {
-    super(char.class, fn, bl, bc, el, ec);
+  public BooleanTypeName(String fn, int bl, int bc, int el, int ec) {
+    super(boolean.class, fn, bl, bc, el, ec);
   }
+  
 }

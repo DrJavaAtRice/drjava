@@ -953,8 +953,8 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class<?>> {
 
     // Check the type to declare
     Node type = node.getCreationType();
-    if (type instanceof ReferenceType) {
-      ReferenceType rt = (ReferenceType)type;
+    if (type instanceof ReferenceTypeName) {
+      ReferenceTypeName rt = (ReferenceTypeName)type;
       rt.setRepresentation(ec.getName() + "$" + rt.getRepresentation());
     } else {
       throw new ExecutionError("allocation.type", node);
@@ -1049,7 +1049,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class<?>> {
       }
     }
 
-    // Type-check the type of the array
+    // TypeName-check the type of the array
     Class<?> c = node.getCreationType().acceptVisitor(this);
 
     // Visits the initializer if one
@@ -1113,20 +1113,20 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class<?>> {
   }
 
   /**
-   * Visits a PrimitiveType
+   * Visits a PrimitiveTypeName
    * @param node the node to visit
    */
-  public Class<?> visit(PrimitiveType node) {
+  public Class<?> visit(PrimitiveTypeName node) {
     Class<?> c = node.getValue();
     node.setProperty(NodeProperties.TYPE, c);
     return c;
   }
 
   /**
-   * Visits a ReferenceType
+   * Visits a ReferenceTypeName
    * @param node the node to visit
    */
-  public Class<?> visit(ReferenceType node) {
+  public Class<?> visit(ReferenceTypeName node) {
     checkGenericReferenceType(node);
     Class<?> c = null;
     try {
@@ -1143,17 +1143,17 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class<?>> {
   
   /**
    * If java earlier than 1.5, checks if the node is a 
-   * GenericReferenceType
+   * GenericReferenceTypeName
    * @param node unused
    */  
-  protected abstract void checkGenericReferenceType(ReferenceType node);
+  protected abstract void checkGenericReferenceType(ReferenceTypeName node);
   
 
   /**
-   * Visits an ArrayType
+   * Visits an ArrayTypeName
    * @param node the node to visit
    */
-  public Class<?> visit(ArrayType node) {
+  public Class<?> visit(ArrayTypeName node) {
     Node eType = node.getElementType();
     Class<?> c = eType.acceptVisitor(this);
     Class<?> ac = Array.newInstance(c, 0).getClass();
@@ -2866,30 +2866,30 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class<?>> {
    * @param refType the reference class
    * @return the corresponding primitive type
    */
-  protected static PrimitiveType _correspondingPrimType(Class<?> refClass) {
+  protected static PrimitiveTypeName _correspondingPrimType(Class<?> refClass) {
     if (refClass == Boolean.class) {
-      return new BooleanType();
+      return new BooleanTypeName();
     }
     else if (refClass == Byte.class) {
-      return new ByteType();
+      return new ByteTypeName();
     }
     else if (refClass == Character.class) {
-      return new CharType();
+      return new CharTypeName();
     }
     else if (refClass == Short.class) {
-      return new ShortType();
+      return new ShortTypeName();
     }
     else if (refClass == Integer.class) {
-      return new IntType();
+      return new IntTypeName();
     }
     else if (refClass == Long.class) {
-      return new LongType();
+      return new LongTypeName();
     }
     else if (refClass == Float.class) {
-      return new FloatType();
+      return new FloatTypeName();
     }
     else if (refClass == Double.class) {
-      return new DoubleType();
+      return new DoubleTypeName();
     }
     else {
       throw new RuntimeException("No corresponding primitive type for reference class " + 

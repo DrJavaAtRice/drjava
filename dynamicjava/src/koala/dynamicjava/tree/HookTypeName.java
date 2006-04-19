@@ -6,13 +6,13 @@ import java.util.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
- * This class represents the HookType (?) nodes of the syntax tree
+ * This class represents the HookTypeName (?) nodes of the syntax tree
  *
  */
 
-public class HookType extends ReferenceType {
+public class HookTypeName extends ReferenceTypeName {
   
-  ReferenceType hookedType;
+  ReferenceTypeName hookedType;
   boolean supered;
   
   /**
@@ -20,7 +20,7 @@ public class HookType extends ReferenceType {
    * @param type the hooked type
    * @exception IllegalArgumentException if type is null
    */
-  public HookType(ReferenceType type, boolean supered) {
+  public HookTypeName(ReferenceTypeName type, boolean supered) {
     this(type, supered, null, 0, 0, 0, 0);
   }
 
@@ -34,7 +34,7 @@ public class HookType extends ReferenceType {
    * @param ec    the end column
    * @exception IllegalArgumentException if type is null
    */
-  public HookType(ReferenceType type, boolean _supered, String fn, int bl, int bc, int el, int ec) {
+  public HookTypeName(ReferenceTypeName type, boolean _supered, String fn, int bl, int bc, int el, int ec) {
     super("?", fn, bl, bc, el, ec);
 
     if (type == null) throw new IllegalArgumentException("type == null");

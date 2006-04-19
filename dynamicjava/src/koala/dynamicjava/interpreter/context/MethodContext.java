@@ -257,7 +257,7 @@ public class MethodContext extends StaticContext {
     String                 cname = dname + "$" + classCount++;
     FieldDeclaration       fd;
     ConstructorDeclaration csd;
-    ReferenceType          otype = new ReferenceType(dname);
+    ReferenceTypeName          otype = new ReferenceTypeName(dname);
 
     // Create the reference to the declaring class
     fd = new FieldDeclaration(Modifier.PUBLIC | Modifier.STATIC,
@@ -327,23 +327,23 @@ public class MethodContext extends StaticContext {
     csd = new ConstructorDeclaration(Modifier.PUBLIC,
                                      cname,
                                      params,
-                                     new LinkedList<ReferenceType>(),
+                                     new LinkedList<ReferenceTypeName>(),
                                      ci,
                                      stmts);
     memb.add(csd);
 
     // Set the inheritance clause
-    ReferenceType ext = null;
-    List<ReferenceType> impl = null;
+    ReferenceTypeName ext = null;
+    List<ReferenceTypeName> impl = null;
     if (c.isInterface()) {
-      impl = new LinkedList<ReferenceType>();
+      impl = new LinkedList<ReferenceTypeName>();
       List<IdentifierToken> intf = new LinkedList<IdentifierToken>();
       intf.add(new Identifier(c.getName()));
-      impl.add(new ReferenceType(intf));
+      impl.add(new ReferenceTypeName(intf));
     } else {
       List<IdentifierToken> l = new LinkedList<IdentifierToken>();
       l.add(new Identifier(c.getName()));
-      ext = new ReferenceType(l);
+      ext = new ReferenceTypeName(l);
     }
 
     // Create the class

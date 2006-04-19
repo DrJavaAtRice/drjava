@@ -74,11 +74,11 @@ public class TigerUtilities {
   // java.lang.reflect.Modifier. This way, 
   // the utility can run under 1.4
   
-  static final int BRIDGE     = 0x00000040;
-  static final int VARARGS    = 0x00000080;
-  static final int SYNTHETIC  = 0x00001000;
-  static final int ANNOTATION = 0x00002000;
-  static final int ENUM       = 0x00004000;
+  public static final int BRIDGE     = 0x00000040;
+  public static final int VARARGS    = 0x00000080;
+  public static final int SYNTHETIC  = 0x00001000;
+  public static final int ANNOTATION = 0x00002000;
+  public static final int ENUM       = 0x00004000;
   
   /**
    * The version of the java runtime environment that is in use.
@@ -99,27 +99,9 @@ public class TigerUtilities {
   
   /**
    * Resets _tigerEnabled based upon the version of the runtime environment that is being used.
-   * The isVarArgs method in the interpreter is used since it is a method
-   * that was added in jsr14 and jdk5.0 while the Method class itself has
-   * been there for some time. Attempting to get the isVarArgs method with
-   * reflection will throw an exception if the JSR14/JSR201 features were
-   * not prepended to the bootclasspath while running version 1.4 or earlier.
-   * For this reason, it's a good test for jdk5.0 features.
    */
   public static void resetVersion() {
-    try {
-      //Class.forName("java.lang.Enum");
-//      Class.forName("com.sun.javadoc.ParameterizedType");
-      Integer.valueOf(5);  //This method only exists in jsr14 and java 1.5+ isVarArgs doesnt
-      //java.lang.reflect.Method.class.getMethod("isVarArgs", new Class<?>[]{});
-      _tigerEnabled = true;
-    }
-    catch (Throwable t) {
-      // failed to load java.lang.Enum, so jsr14 v2.0 is not on the boot claspath.
-      // This logic avoids a restart if _usingJSR14v20 with the correct boot classpath.
-      //t.printStackTrace();
-      _tigerEnabled = (VERSION >= 1.5);
-    }    
+    _tigerEnabled = (VERSION > 1.49); // We don't use >= since we're dealing with a float
   }
 
   /**
@@ -146,48 +128,45 @@ public class TigerUtilities {
   }
 
   /**
-   * Uses short circuiting to ensure that if tiger is not enabled, <code>isVarArgs()</code>
-   * will not be called. Returns true if tiger is enabled and <code>m.isVarArgs()</code>  is true
-   * @param m the <code>Method</code> which is being tested with <code>isVarArgs()</code>
-   * @return boolean that is true if tiger is enabled and <code>c.isVarArgs()</code>
+   * @return @{code true} iff m has the vararg modifier set.
    */
   public static boolean isVarArgs(Method m) {
-    return _tigerEnabled && ((m.getModifiers() & VARARGS) != 0);// m.isVarArgs(); use this for some beta versions of 1.5 did not properly support the isVarArgs() method!
+    return _tigerEnabled && ((m.getModifiers() & VARARGS) != 0);
   }
 
   /**
-   * Uses short circuiting to ensure that if tiger is not enabled, <code>isVarArgs()</code>
-   * will not be called.  Returns true if tiger is enabled and <code>c.isVarArgs()</code>  is true
-   * @param c the <code>Constructor</code> which is being tested with <code>isVarArgs()</code>
-   * @return boolean that is true if tiger is enabled and <code>c.isVarArgs()</code>
+   * @return @{code true} iff c has the vararg modifier set.
    */
   public static boolean isVarArgs(Constructor c) {
-    return _tigerEnabled && ((c.getModifiers() & VARARGS) != 0); //c.isVarArgs(); use this for some beta versions of 1.5 did not properly support the isVarArgs() method!
+    return _tigerEnabled && ((c.getModifiers() & VARARGS) != 0);
   }
   
-  public static boolean isBridge(Method m) { return ((m.getModifiers() & BRIDGE) != 0); }
-
   /**
-   * Uses short circuiting to ensure that if tiger is not enabled, <code>isEnum()</code>
-   * will not be called.  Returns true if tiger is enabled and <code>c.isEnum()</code>  is true
-   * @param c the <code>Class</code> which is being tested with <code>isEnum()</code>
-   * @return boolean that is true if tiger is enabled and <code>c.isEnum()</code>
+   * @return @{code true} iff m has the bridge modifier set.
    */
-  public static boolean isEnum(Class<?> c) {
-      //    System.out.println("enabled: "+_tigerEnabled+", "+c+".super: "+c.getSuperclass());
-    return _tigerEnabled && c.getSuperclass()!=null && (c.getSuperclass().getName().equals("java.lang.Enum"));
-    
-    // The following is what it should be.  The reason why this commented is that
-    // setting the ENUM modifier in the EnumDeclaration constructor causes some other
-    // problems when trying to access the elements of the enum using reflection.
-    // return _tigerEnabled && ((c.getModifiers() & ENUM) != 0); 
+  public static boolean isBridge(Method m) { 
+    return _tigerEnabled && ((m.getModifiers() & BRIDGE) != 0);
   }
 
   /**
-   * Uses short circuiting to ensure that if tiger is not enabled, <code>isEnumConstant()</code>
-   * will not be called.  Returns true if tiger is enabled and <code>f.isEnumConstant()</code>  is true
-   * @param f the <code>Field</code> which is being tested with <code>isEnumConstant()</code>
-   * @return boolean that is true if tiger is enabled and <code>f.isEnumConstant()</code>
+   * @return @{code true} iff c has the enum modifier set.
+   */
+  public static boolean isEnum(Class<?> c) {
+    // Since the DynamicJava implementation of EnumDeclaration relies on the presence of constructors,
+    // and the restrictions of the JVM won't allow constructors in classes flagged as ENUM,
+    // we can't use the ENUM modifier flag here.
+    
+    // Note: we use "Class.forName" instead of "Enum.class" to avoid Retroweaver conversion of Enum.class
+    // to its own Enum implementation.
+    try {
+      return _tigerEnabled && (c.getSuperclass() != null) && 
+        (c.getSuperclass().equals(Class.forName("java.lang.Enum")));
+    }
+    catch (ClassNotFoundException e) { return false; }
+  }
+
+  /**
+   * @return @{code true} iff f has the enum modifier set.
    */
   public static boolean isEnumConstant(Field f) {
     return _tigerEnabled && ((f.getModifiers() & ENUM) != 0);
@@ -260,47 +239,7 @@ public class TigerUtilities {
             c == char.class  || c == Character.class ||
             c == short.class || c == Short.class);
   }
-//
-//  /**
-//   * Returns true iff the given primitive class can be boxed
-//   * to the given reference class.
-//   * @param prim - the primitive class being boxed
-//   * @param ref - the reference class being boxed to
-//   * @return true iff the given primitive class can be boxed to the given reference class
-//   */
-//  public static boolean boxesTo(Class<?> prim, Class<?> ref) {
-//    return
-//      (prim == int.class     && (ref == Integer.class   ||
-//                                 ref == Long.class      ||
-//                                 ref == Double.class    ||
-//                                 ref == Float.class))   ||
-//      (prim == long.class    && (ref == Long.class      ||
-//                                 ref == Double.class    ||
-//                                 ref == Float.class))   ||
-//      (prim == byte.class    && (ref == Byte.class      ||
-//                                 ref == Short.class     ||
-//                                 ref == Integer.class   ||
-//                                 ref == Long.class      ||
-//                                 ref == Double.class    ||
-//                                 ref == Float.class))   ||
-//      (prim == char.class    && (ref == Character.class ||
-//                                 ref == Integer.class   ||
-//                                 ref == Long.class      ||
-//                                 ref == Double.class    ||
-//                                 ref == Float.class))   ||
-//      (prim == short.class   && (ref == Short.class     ||
-//                                 ref == Integer.class   ||
-//                                 ref == Long.class      ||
-//                                 ref == Double.class    ||
-//                                 ref == Float.class))   ||
-//      (prim == boolean.class && ref == Boolean.class)   ||
-//      (prim == float.class   && (ref == Float.class     ||
-//                                 ref == Double.class))  ||
-//      (prim == double.class  && ref == Double.class);
-//  }
 
-  //The above was written off of a proposed specification for boxing, but is not the way that it has been set up to work in
-  //Java 1.5. Primitives only box to their corresponding boxing type, not to any widening types, as the above allows
   /**
    * Returns true iff the given primitive class can be boxed
    * to the given reference class.

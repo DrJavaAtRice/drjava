@@ -47,7 +47,7 @@
 package koala.dynamicjava.tree.tiger.generic;
 
 import koala.dynamicjava.tree.Node;
-import koala.dynamicjava.tree.ReferenceType;
+import koala.dynamicjava.tree.ReferenceTypeName;
 import koala.dynamicjava.tree.IdentifierToken;
 import koala.dynamicjava.tree.TreeUtilities;
 import koala.dynamicjava.SourceInfo;
@@ -57,15 +57,15 @@ import java.util.List;
  * Class TypeParameter, a component of the DynamicJava composite hierarchy.
  * Note: null is not allowed as a value for any field.
  */
-public class TypeParameter extends ReferenceType {
-  private final ReferenceType _bound;
-  private final List<ReferenceType> _interfaceBounds;
+public class TypeParameter extends ReferenceTypeName {
+  private final ReferenceTypeName _bound;
+  private final List<ReferenceTypeName> _interfaceBounds;
 
   /**
    * Constructs a TypeParameter.
    * @throw IllegalArgumentException if any parameter to the constructor is null.
    */
-  public TypeParameter(SourceInfo in_sourceInfo, List<IdentifierToken> ids, ReferenceType in_bound, List<ReferenceType> in_interfaceBounds) {
+  public TypeParameter(SourceInfo in_sourceInfo, List<IdentifierToken> ids, ReferenceTypeName in_bound, List<ReferenceTypeName> in_interfaceBounds) {
     this(in_sourceInfo, TreeUtilities.listToName(ids), in_bound, in_interfaceBounds);
   }
 
@@ -73,7 +73,7 @@ public class TypeParameter extends ReferenceType {
    * Constructs a TypeParameter.
    * @throw IllegalArgumentException if any parameter to the constructor is null.
    */
-  public TypeParameter(SourceInfo in_sourceInfo, String rep, ReferenceType in_bound, List<ReferenceType> in_interfaceBounds) {
+  public TypeParameter(SourceInfo in_sourceInfo, String rep, ReferenceTypeName in_bound, List<ReferenceTypeName> in_interfaceBounds) {
     super(rep, in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(),
           in_sourceInfo.getStartColumn(), in_sourceInfo.getEndLine(), in_sourceInfo.getEndColumn());
 
@@ -84,9 +84,9 @@ public class TypeParameter extends ReferenceType {
     _interfaceBounds = in_interfaceBounds;
 }
 
-  public ReferenceType getBound() { return _bound; }
+  public ReferenceTypeName getBound() { return _bound; }
 
-  public List<ReferenceType> getInterfaceBounds() { return _interfaceBounds; }
+  public List<ReferenceTypeName> getInterfaceBounds() { return _interfaceBounds; }
 
   public String getRepresentation(){
     return _bound.getRepresentation(); // coerce to bound's type

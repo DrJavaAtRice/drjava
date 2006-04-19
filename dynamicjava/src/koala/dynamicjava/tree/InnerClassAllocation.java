@@ -60,7 +60,7 @@ public class InnerClassAllocation extends InnerAllocation {
    * @exception IllegalArgumentException if exp is null or memb is null or
    *            tp is null
    */
-  public InnerClassAllocation(Expression exp, Type tp, List<Expression> args, List<Node> memb) {
+  public InnerClassAllocation(Expression exp, TypeName tp, List<Expression> args, List<Node> memb) {
     this(exp, tp, args, memb, null, 0, 0, 0, 0);
   }
   
@@ -78,7 +78,7 @@ public class InnerClassAllocation extends InnerAllocation {
    * @exception IllegalArgumentException if exp is null or memb is null or
    *            tp is null
    */
-  public InnerClassAllocation(Expression exp, Type tp, List<Expression> args, List<Node> memb,
+  public InnerClassAllocation(Expression exp, TypeName tp, List<Expression> args, List<Node> memb,
                               String fn, int bl, int bc, int el, int ec) {
     super(exp, tp, args, fn, bl, bc, el, ec);
     

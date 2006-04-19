@@ -40,7 +40,7 @@ import koala.dynamicjava.util.*;
 
 /**
  * This tree visitor resolves the ambiguity in compound identifiers
- * in a syntax tree; it returns either an Expression or a Reference Type
+ * in a syntax tree; it returns either an Expression or a Reference TypeName
  *
  * @author Stephane Hillion
  * @version 1.1 - 1999/10/18
@@ -73,7 +73,7 @@ public class NameVisitor extends VisitorObject<Node> {
   }
   
   /**
-   * Creates a new name visitor with two context, one that is the default context and one which will be passed to a Type Checker
+   * Creates a new name visitor with two context, one that is the default context and one which will be passed to a TypeName Checker
    * @param ctx the context
    * @param typeCtx the typeChecker Context
    */
@@ -83,8 +83,8 @@ public class NameVisitor extends VisitorObject<Node> {
   }
   
   protected static void rejectReferenceType(Node o, Node n) {
-    if (o instanceof ReferenceType)
-      throw new ExecutionError("Type name used where expression is expected", n);
+    if (o instanceof ReferenceTypeName)
+      throw new ExecutionError("TypeName name used where expression is expected", n);
   }
   
   /**
@@ -546,8 +546,8 @@ public class NameVisitor extends VisitorObject<Node> {
     // Visit the expression
     Node o = node.getExpression().acceptVisitor(this);
     if (o != null) {
-      if (o instanceof ReferenceType) {
-        return new StaticFieldAccess((ReferenceType)o,
+      if (o instanceof ReferenceTypeName) {
+        return new StaticFieldAccess((ReferenceTypeName)o,
                                      node.getFieldName(),
                                      node.getFilename(),
                                      node.getBeginLine(),
@@ -614,7 +614,7 @@ public class NameVisitor extends VisitorObject<Node> {
         
         String representation = context.getQualifiedName(node.getMethodName(),params);
         if (! existsInCurrentScope)
-          o = new ReferenceType(representation);
+          o = new ReferenceTypeName(representation);
       }      
       catch(Exception e){
         //If the class type of one of the parameters can't be found, throws an exception
@@ -633,8 +633,8 @@ public class NameVisitor extends VisitorObject<Node> {
                               node.getEndLine(),
                               node.getEndColumn()
                                 );
-    } else if (o instanceof ReferenceType) {
-      return new StaticMethodCall((ReferenceType)o,
+    } else if (o instanceof ReferenceTypeName) {
+      return new StaticMethodCall((ReferenceTypeName)o,
                                   node.getMethodName(),
                                   node.getArguments(),
                                   node.getFilename(),
@@ -675,7 +675,7 @@ public class NameVisitor extends VisitorObject<Node> {
    * Visits a QualifiedName
    * @param node the node to visit
    * @return a node that depends of the meaning of this name.
-   *         It could be : a QualifiedName, a ReferenceType or a FieldAccess.
+   *         It could be : a QualifiedName, a ReferenceTypeName or a FieldAccess.
    */
   public Node visit(QualifiedName node) {
     List<IdentifierToken>  ids = node.getIdentifiers();
@@ -726,9 +726,9 @@ public class NameVisitor extends VisitorObject<Node> {
       throw new ExecutionError("undefined.class", node);
     }
     
-    // Creates a ReferenceType node
+    // Creates a ReferenceTypeName node
     IdentifierToken t2 = l.get(l.size()-1);
-    ReferenceType rt = new ReferenceType(l,
+    ReferenceTypeName rt = new ReferenceTypeName(l,
                                          node.getFilename(),
                                          t.beginLine(), t.beginColumn(),
                                          t2.endLine(),  t2.endColumn());
@@ -1326,7 +1326,7 @@ public class NameVisitor extends VisitorObject<Node> {
     while (it.hasNext()) {
       Object o = (n = it.next()).acceptVisitor(this);
       if (o != null) {
-        if (o instanceof ReferenceType) {
+        if (o instanceof ReferenceTypeName) {
           throw new ExecutionError("malformed.expression", n);
         }
         it.set((Expression)o);  // This cast is a guess based on documentation  /**/

@@ -56,7 +56,7 @@ public class SimpleAllocation extends Allocation implements ExpressionStatement 
    * @param args  the arguments of the constructor
    * @exception IllegalArgumentException if tp is null
    */
-  public SimpleAllocation(Type tp, List<Expression> args) {
+  public SimpleAllocation(TypeName tp, List<Expression> args) {
     this(tp, args, null, 0, 0, 0, 0);
   }
   
@@ -71,7 +71,7 @@ public class SimpleAllocation extends Allocation implements ExpressionStatement 
    * @param ec    the end column
    * @exception IllegalArgumentException if tp is null
    */
-  public SimpleAllocation(Type tp, List<Expression> args,
+  public SimpleAllocation(TypeName tp, List<Expression> args,
                           String fn, int bl, int bc, int el, int ec) {
     super(tp, fn, bl, bc, el, ec);
     arguments = args;

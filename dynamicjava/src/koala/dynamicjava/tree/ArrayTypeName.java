@@ -37,7 +37,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/24
  */
 
-public class ArrayType extends Type {
+public class ArrayTypeName extends TypeName {
     /**
      * The elementType property name
      */
@@ -46,7 +46,7 @@ public class ArrayType extends Type {
    /**
      * The type of the elements of the arrays represented by this type
      */
-    private Type elementType;
+    private TypeName elementType;
 
     /**
      * Initializes the type
@@ -54,7 +54,7 @@ public class ArrayType extends Type {
      * @param dim   the dimension of the arrays represented by this type (> 0)
      * @exception IllegalArgumentException if et is null or dim < 1
      */
-    public ArrayType(Type et, int dim) {
+    public ArrayTypeName(TypeName et, int dim) {
  this(et, dim, null, 0, 0, 0, 0);
     }
 
@@ -69,19 +69,19 @@ public class ArrayType extends Type {
      * @param ec    the end column
      * @exception IllegalArgumentException if et is null or dim < 1
      */
-    public ArrayType(Type et, int dim, String fn, int bl, int bc, int el, int ec) {
+    public ArrayTypeName(TypeName et, int dim, String fn, int bl, int bc, int el, int ec) {
  super(fn, bl, bc, el, ec);
 
  if (et == null) throw new IllegalArgumentException("et == null");
  if (dim < 1)    throw new IllegalArgumentException("dim < 1");
 
- elementType = (dim > 1) ? new ArrayType(et, dim - 1, fn, bl, bc, el, ec) : et;
+ elementType = (dim > 1) ? new ArrayTypeName(et, dim - 1, fn, bl, bc, el, ec) : et;
     }
 
     /**
      * Returns the type of the elements of the arrays represented by this type
      */
-    public Type getElementType() {
+    public TypeName getElementType() {
  return elementType;
     }
 
@@ -89,7 +89,7 @@ public class ArrayType extends Type {
      * Sets the type of the elements of the arrays represented by this type
      * @exception IllegalArgumentException if t is null
      */
-    public void setElementType(Type t) {
+    public void setElementType(TypeName t) {
  if (t == null) throw new IllegalArgumentException("t == null");
 
  firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);

@@ -39,7 +39,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/24
  */
 
-public class ReferenceType extends Type {
+public class ReferenceTypeName extends TypeName {
   /**
    * The representation property name
    */
@@ -55,7 +55,7 @@ public class ReferenceType extends Type {
    * @param ids   the list of the tokens that compose the type name
    * @exception IllegalArgumentException if ids is null
    */
-  public ReferenceType(List<IdentifierToken> ids) {
+  public ReferenceTypeName(List<IdentifierToken> ids) {
     this(ids, null, 0, 0, 0, 0);
   }
 
@@ -64,7 +64,7 @@ public class ReferenceType extends Type {
    * @param rep   the type name
    * @exception IllegalArgumentException if rep is null
    */
-  public ReferenceType(String rep) {
+  public ReferenceTypeName(String rep) {
     this(rep, null, 0, 0, 0, 0);
   }
 
@@ -78,7 +78,7 @@ public class ReferenceType extends Type {
    * @param ec    the end column
    * @exception IllegalArgumentException if ids is null
    */
-  public ReferenceType(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec) {
+  public ReferenceTypeName(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
     if (ids == null) throw new IllegalArgumentException("ids == null");
@@ -96,7 +96,7 @@ public class ReferenceType extends Type {
    * @param ec    the end column
    * @exception IllegalArgumentException if rep is null
    */
-  public ReferenceType(String rep, String fn, int bl, int bc, int el, int ec) {
+  public ReferenceTypeName(String rep, String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
     if (rep == null) throw new IllegalArgumentException("rep == null");

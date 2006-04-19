@@ -39,15 +39,15 @@ import java.util.*;
 
 public class TreeUtilities {
   /**
-   * Creates Type node from a Class object
+   * Creates TypeName node from a Class object
    * @param c     the class to use
    */
-  public static Type classToType(Class<?> c) {
+  public static TypeName classToType(Class<?> c) {
     return classToType(c, null, 0, 0, 0, 0);
   }
   
   /**
-   * Creates Type node from a Class object
+   * Creates TypeName node from a Class object
    * @param c     the class to use
    * @param fn    the filename
    * @param bl    the begin line
@@ -55,31 +55,31 @@ public class TreeUtilities {
    * @param el    the end line
    * @param ec    the end column
    */
-  public static Type classToType(Class<?> c, String fn, int bl, int bc, int el, int ec) {
-    Type result;
+  public static TypeName classToType(Class<?> c, String fn, int bl, int bc, int el, int ec) {
+    TypeName result;
     if (c == int.class) {
-      result = new IntType(fn, bl, bc, el, ec);
+      result = new IntTypeName(fn, bl, bc, el, ec);
     } else if (c == double.class) {
-      result = new DoubleType(fn, bl, bc, el, ec);
+      result = new DoubleTypeName(fn, bl, bc, el, ec);
     } else if (c == long.class) {
-      result = new LongType(fn, bl, bc, el, ec);
+      result = new LongTypeName(fn, bl, bc, el, ec);
     } else if (c == float.class) {
-      result = new FloatType(fn, bl, bc, el, ec);
+      result = new FloatTypeName(fn, bl, bc, el, ec);
     } else if (c == char.class) {
-      result = new CharType(fn, bl, bc, el, ec);
+      result = new CharTypeName(fn, bl, bc, el, ec);
     } else if (c == byte.class) {
-      result = new ByteType(fn, bl, bc, el, ec);
+      result = new ByteTypeName(fn, bl, bc, el, ec);
     } else if (c == short.class) {
-      result = new ShortType(fn, bl, bc, el, ec);
+      result = new ShortTypeName(fn, bl, bc, el, ec);
     } else if (c == boolean.class) {
-      result = new BooleanType(fn, bl, bc, el, ec);
+      result = new BooleanTypeName(fn, bl, bc, el, ec);
     } else if (c == void.class) {
-      result = new VoidType(fn, bl, bc, el, ec);
+      result = new VoidTypeName(fn, bl, bc, el, ec);
     } else if (c.isArray()) {
-      result = new ArrayType(classToType(c.getComponentType(), fn, bl, bc, el, ec),
+      result = new ArrayTypeName(classToType(c.getComponentType(), fn, bl, bc, el, ec),
                              1, fn, bl, bc, el, ec);
     } else {
-      result = new ReferenceType(c.getName(), fn, bl, bc, el, ec);
+      result = new ReferenceTypeName(c.getName(), fn, bl, bc, el, ec);
     }
     return result;
   }

@@ -68,7 +68,7 @@ public class GenericClassDeclaration extends ClassDeclaration {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericClassDeclaration(int flags, String name, ReferenceType ext, List<? extends ReferenceType> impl, List<Node> body, TypeParameter[] typeParams) {
+  public GenericClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body, TypeParameter[] typeParams) {
     this(flags, name, ext, impl, body, null, 0, 0, 0, 0, typeParams);
   }
   
@@ -87,7 +87,7 @@ public class GenericClassDeclaration extends ClassDeclaration {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericClassDeclaration(int flags, String name, ReferenceType ext, List<? extends ReferenceType> impl, List<Node> body,
+  public GenericClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body,
                                  String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
     super(flags, name, ext, impl, body, fn, bl, bc, el, ec);
     _typeParameters = typeParams;

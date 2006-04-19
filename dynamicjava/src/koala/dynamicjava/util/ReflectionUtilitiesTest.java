@@ -50,6 +50,7 @@ import koala.dynamicjava.interpreter.throwable.WrongVersionException;
 import junit.framework.TestCase;
 import java.lang.reflect.*;
 import java.util.*;
+import reflectionTests.*;
 
 /**
  * Tests the utility methods in the ReflectionUtilities class to
@@ -314,80 +315,4 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     assertEquals("lookup c1.method1", instance.method1(), result);
   }
   
-  /**
-   * This class is created with methods that the tests can look for.
-   * They return numbers so that the result of invoking the returned 
-   * method can be checked against what the VM chooses during runtime.
-   */
-  protected static class TestClass {
-    private int value;
-    
-    // Test with (int,int,int), ambiguous
-    public TestClass(int i, double d, float f) { value = 1; }
-    public TestClass(int i, float f, double d) { value = 2; }
-    // Test with (String,int,int), ambiguous
-    public TestClass(String s, Integer a, int b) { value = 3; }
-    public TestClass(String s, int a, Integer b) { value = 4; }
-    // Test with (Class,int), ambiguous
-    public TestClass(Class<?> c, int... rest) { value = 5; }
-    public TestClass(Class<?> c, int i, int... rest) { value = 6; }
-    // Test with (Method,int), expect 7
-    public TestClass(Method m, Number n) { value = 7; }
-    public TestClass(Method m, Object o) { value = 8; }
-    // Test with (Field,String,String,String), assert found 9
-    public TestClass(Field f, String... msg) { value = 9; }
-    // Test with (boolean, int), expect not found
-    public TestClass(boolean b, Float f) { value = 10; }
-    
-    public TestClass(int i) { value = 11; }
-    public TestClass(Integer i) { value = 12; }
-    
-    public static int test(int x, int y){ return 4; }
-    public static int test(Integer x, Integer y){ return 5; }
-    public static int test(int x, int y, int z){ return 6; }
-    public static int test(int... i){ return 3; }
-   
-    public static int test0(int x) { return 1; }
-    public static int test0(Integer x) { return 2; }
-    
-    public static int test1(double a, int b, float c){ return 1; }
-    public static int test1(float a, int b, double c){ return 2; }
-    
-    public static int test2(int a, int b, int c, int... rest) { return 1; }
-    public static int test2(Integer a, Integer b, Integer c) { return 2; }
-    
-    public static int test3(Integer a, double b) { return 1; }
-    public static int test3(Integer a, long b) { return 2; }
-    
-    public static int test4(Number b) { return 1; }
-    public static int test4(int b) { return 2; }
-    
-    public static int test5(int a, int... rest) { return 1; }
-    public static int test5(int a, int b, int... rest) { return 2; }
-    
-    public static int test6(int a) { return 1; }
-         
-    public static int test7(Number i) { return 1; }
-    public static int test8(Object o) { return 2; }
-    
-    public int value() { return value; }
-  }
-  
-  private interface I1<T extends Comparable<T>> {
-    public T method1();
-    public T method2(int i, T other);
-    public T method3(double d);
-    public T method4(T other);
-  }
-  private static class C1 implements I1<String> {
-    static String M1 = "method1";
-    static String M2 = "method2";
-    static String M3 = "method3";
-    static String M4 = "method4";
-    
-    public String method1() { return M1; }
-    public String method2(int i, String other) { return M2; }
-    public String method3(double d) { return M3; }
-    public String method4(String other) { return M4; }
-  }
 }

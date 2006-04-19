@@ -61,7 +61,7 @@ public class FormalParameter extends Node {
   /**
    * The type of this parameter
    */
-  private Type type;
+  private TypeName type;
   
   /**
    * The name of this parameter
@@ -76,7 +76,7 @@ public class FormalParameter extends Node {
    * @param va    whether paramater is a varargs
    * @exception IllegalArgumentException if t is null or n is null
    */
-  public FormalParameter(boolean f, Type t, String n) {
+  public FormalParameter(boolean f, TypeName t, String n) {
     this(f, t, n, null, 0, 0, 0, 0);
   }
   
@@ -92,7 +92,7 @@ public class FormalParameter extends Node {
    * @param ec    the end column
    * @exception IllegalArgumentException if t is null or n is null
    */
-  public FormalParameter(boolean f, Type t, String n,
+  public FormalParameter(boolean f, TypeName t, String n,
                          String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
@@ -114,7 +114,7 @@ public class FormalParameter extends Node {
   /**
    * Returns the declaring type of this parameter
    */
-  public Type getType() {
+  public TypeName getType() {
     return type;
   }
   
@@ -122,7 +122,7 @@ public class FormalParameter extends Node {
    * Sets the type of this parameter
    * @exception IllegalArgumentException if t is null
    */
-  public void setType(Type t) {
+  public void setType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
     
     firePropertyChange(TYPE, type, type = t);

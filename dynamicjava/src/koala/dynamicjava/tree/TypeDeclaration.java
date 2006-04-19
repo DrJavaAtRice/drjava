@@ -93,7 +93,7 @@ public abstract class TypeDeclaration extends Node {
    * @param ec    the end column
    * @exception IllegalArgumentException if name is null or body is null
    */
-  protected TypeDeclaration(int flags, String name, List<? extends ReferenceType> impl, List<Node> body,
+  protected TypeDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
                             String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
@@ -104,7 +104,7 @@ public abstract class TypeDeclaration extends Node {
     this.name = name;
     if (impl != null) {
       interfaces = new LinkedList<String>();
-      Iterator<? extends ReferenceType> it = impl.iterator();
+      Iterator<? extends ReferenceTypeName> it = impl.iterator();
       while (it.hasNext()) {
         interfaces.add(it.next().getRepresentation());
       }

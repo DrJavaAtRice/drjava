@@ -297,26 +297,26 @@ public class VisitorObject<T> implements Visitor<T> {
   }
   
   /**
-   * Visits a PrimitiveType
+   * Visits a PrimitiveTypeName
    * @param node the node to visit
    */
-  public T visit(PrimitiveType node) {
+  public T visit(PrimitiveTypeName node) {
     return null;
   }
   
   /**
-   * Visits a ReferenceType
+   * Visits a ReferenceTypeName
    * @param node the node to visit
    */
-  public T visit(ReferenceType node) {
+  public T visit(ReferenceTypeName node) {
     return null;
   }
   
   /**
-   * Visits a ArrayType
+   * Visits a ArrayTypeName
    * @param node the node to visit
    */
-  public T visit(ArrayType node) {
+  public T visit(ArrayTypeName node) {
     return null;
   }
   

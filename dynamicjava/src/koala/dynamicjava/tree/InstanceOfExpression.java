@@ -51,7 +51,7 @@ public class InstanceOfExpression extends Expression implements ExpressionContai
   /**
    * The type to check
    */
-  private Type referenceType;
+  private TypeName referenceType;
   
   /**
    * Initializes the expression
@@ -59,7 +59,7 @@ public class InstanceOfExpression extends Expression implements ExpressionContai
    * @param t     the type to check
    * @exception IllegalArgumentException if exp is null or t is null
    */
-  public InstanceOfExpression(Expression exp, Type t) {
+  public InstanceOfExpression(Expression exp, TypeName t) {
     this(exp, t, null, 0, 0, 0, 0);
   }
   
@@ -74,7 +74,7 @@ public class InstanceOfExpression extends Expression implements ExpressionContai
    * @param ec    the end column
    * @exception IllegalArgumentException if exp is null or t is null
    */
-  public InstanceOfExpression(Expression exp, Type t,
+  public InstanceOfExpression(Expression exp, TypeName t,
                               String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
@@ -105,7 +105,7 @@ public class InstanceOfExpression extends Expression implements ExpressionContai
   /**
    * Returns the type to check
    */
-  public Type getReferenceType() {
+  public TypeName getReferenceType() {
     return referenceType;
   }
   
@@ -113,7 +113,7 @@ public class InstanceOfExpression extends Expression implements ExpressionContai
    * Sets the type to check
    * @exception IllegalArgumentException if t is null
    */
-  public void setReferenceType(Type t) {
+  public void setReferenceType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
     
     firePropertyChange(REFERENCE_TYPE, referenceType, referenceType = t);

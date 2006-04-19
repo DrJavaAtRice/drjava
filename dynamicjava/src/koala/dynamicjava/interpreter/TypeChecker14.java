@@ -56,7 +56,7 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
 
-import koala.dynamicjava.tree.tiger.generic.GenericReferenceType;
+import koala.dynamicjava.tree.tiger.generic.GenericReferenceTypeName;
 
 
 
@@ -87,11 +87,11 @@ public class TypeChecker14 extends AbstractTypeChecker {
   }
 
   /**
-   * Checks if the node is of GenericReference Type, which is only allowed in 1.5 or better
+   * Checks if the node is of GenericReference TypeName, which is only allowed in 1.5 or better
    * @param node the node being checked
    */
-  protected void checkGenericReferenceType(ReferenceType node) {
-   if(node instanceof GenericReferenceType)
+  protected void checkGenericReferenceType(ReferenceTypeName node) {
+   if(node instanceof GenericReferenceTypeName)
      throw new WrongVersionException("Generics are not supported before Java 1.5");
   }
 

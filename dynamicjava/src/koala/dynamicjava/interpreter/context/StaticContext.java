@@ -67,7 +67,7 @@ public class StaticContext extends GlobalContext {
     super(i);
     declaringClass     = c;
     importationManager = im;
-    defaultQualifier   = new ReferenceType(c.getName());
+    defaultQualifier   = new ReferenceTypeName(c.getName());
   }
 
   /**
@@ -79,7 +79,7 @@ public class StaticContext extends GlobalContext {
   public StaticContext(Interpreter i, Class<?> c, Set<AbstractVariable> fp) {
     super(i, fp);
     declaringClass   = c;
-    defaultQualifier = new ReferenceType(c.getName());
+    defaultQualifier = new ReferenceTypeName(c.getName());
   }
 
   /**
@@ -123,12 +123,12 @@ public class StaticContext extends GlobalContext {
       String fname = name.image();
       try {
         ReflectionUtilities.getField(declaringClass, fname);
-        return new StaticFieldAccess((ReferenceType)defaultQualifier, fname);
+        return new StaticFieldAccess((ReferenceTypeName)defaultQualifier, fname);
       } catch (Exception e) {
         try {
           Field f = InterpreterUtilities.getOuterField(declaringClass, fname);
           Class<?> c = f.getDeclaringClass();
-          return new StaticFieldAccess(new ReferenceType(c.getName()), fname);
+          return new StaticFieldAccess(new ReferenceTypeName(c.getName()), fname);
         } catch (Exception ex) {
           throw new CatchedExceptionError(ex, node);
         }
@@ -172,7 +172,7 @@ public class StaticContext extends GlobalContext {
       }
       return m;
     } catch (NoSuchMethodException e) {
-      if ((prefix instanceof ReferenceType) && c == declaringClass) {
+      if ((prefix instanceof ReferenceTypeName) && c == declaringClass) {
         m = InterpreterUtilities.lookupOuterMethod(c, mname, params);
         m.setAccessible(true);
         return m;
@@ -258,7 +258,7 @@ public class StaticContext extends GlobalContext {
     fd = new FieldDeclaration(Modifier.PUBLIC | Modifier.STATIC,
                               CLASS_TYPE,
                               "declaring$Class$Reference$0",
-                              new TypeExpression(new ReferenceType(dname)));
+                              new TypeExpression(new ReferenceTypeName(dname)));
     memb.add(fd);
 
     // Add the reference to the final local variables map
@@ -306,23 +306,23 @@ public class StaticContext extends GlobalContext {
     csd = new ConstructorDeclaration(Modifier.PUBLIC,
                                      cname,
                                      params,
-                                     new LinkedList<ReferenceType>(),
+                                     new LinkedList<ReferenceTypeName>(),
                                      ci,
                                      stmts);
     memb.add(csd);
 
     // Set the inheritance
-    ReferenceType ext = null;
-    List<ReferenceType> impl = null;
+    ReferenceTypeName ext = null;
+    List<ReferenceTypeName> impl = null;
     if (c.isInterface()) {
-      impl = new LinkedList<ReferenceType>();
+      impl = new LinkedList<ReferenceTypeName>();
       List<IdentifierToken> intf = new LinkedList<IdentifierToken>();
       intf.add(new Identifier(c.getName()));
-      impl.add(new ReferenceType(intf));
+      impl.add(new ReferenceTypeName(intf));
     } else {
       List<IdentifierToken> l = new LinkedList<IdentifierToken>();
       l.add(new Identifier(c.getName()));
-      ext = new ReferenceType(l);
+      ext = new ReferenceTypeName(l);
     }
 
     // Create the class

@@ -45,7 +45,7 @@ public class PolymorphicInnerAllocation extends InnerAllocation {
   /**
    * The type arguments to pass to the constructor
    */
-  private List<Type> _typeArguments;
+  private List<TypeName> _typeArguments;
   
   /**
    * Initializes the expression
@@ -55,7 +55,7 @@ public class PolymorphicInnerAllocation extends InnerAllocation {
    * @param targs the type arguments of the constructor
    * @exception IllegalArgumentException if exp is null or tp is null
    */
-  public PolymorphicInnerAllocation(Expression exp, Type tp, List<Expression> args, List<Type> targs) {
+  public PolymorphicInnerAllocation(Expression exp, TypeName tp, List<Expression> args, List<TypeName> targs) {
     this(exp, tp, args, targs, null, 0, 0, 0, 0);
   }
   
@@ -72,7 +72,7 @@ public class PolymorphicInnerAllocation extends InnerAllocation {
    * @param ec    the end column
    * @exception IllegalArgumentException if exp is null or tp is null
    */
-  public PolymorphicInnerAllocation(Expression exp, Type tp, List<Expression> args, List<Type> targs,
+  public PolymorphicInnerAllocation(Expression exp, TypeName tp, List<Expression> args, List<TypeName> targs,
                          String fn, int bl, int bc, int el, int ec) {
     super(exp, tp, args, fn, bl, bc, el, ec);
 
@@ -82,7 +82,7 @@ public class PolymorphicInnerAllocation extends InnerAllocation {
   /**
    * Returns the constructor type arguments.
    */
-  public List<Type> getTypeArguments() {
+  public List<TypeName> getTypeArguments() {
     return _typeArguments;
   }
   

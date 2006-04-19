@@ -46,7 +46,7 @@ public class StaticFieldAccess extends FieldAccess {
   /**
    * The type on which this field access applies
    */
-  private ReferenceType fieldType;
+  private ReferenceTypeName fieldType;
   
   /**
    * Creates a new field access node
@@ -54,7 +54,7 @@ public class StaticFieldAccess extends FieldAccess {
    * @param fln   the field name
    * @exception IllegalArgumentException if typ is null or fln is null
    */
-  public StaticFieldAccess(ReferenceType typ, String fln) {
+  public StaticFieldAccess(ReferenceTypeName typ, String fln) {
     this(typ, fln, null, 0, 0, 0, 0);
   }
   
@@ -69,7 +69,7 @@ public class StaticFieldAccess extends FieldAccess {
    * @param ec    the end column
    * @exception IllegalArgumentException if typ is null or fln is null
    */
-  public StaticFieldAccess(ReferenceType typ, String fln,
+  public StaticFieldAccess(ReferenceTypeName typ, String fln,
                            String fn, int bl, int bc, int el, int ec) {
     super(fln, fn, bl, bc, el, ec);
     
@@ -81,7 +81,7 @@ public class StaticFieldAccess extends FieldAccess {
   /**
    * Returns the declaring type of the field
    */
-  public ReferenceType getFieldType() {
+  public ReferenceTypeName getFieldType() {
     return fieldType;
   }
   
@@ -89,7 +89,7 @@ public class StaticFieldAccess extends FieldAccess {
    * Sets the declaring type of the field
    * @exception IllegalArgumentException if t is null
    */
-  public void setFieldType(ReferenceType t) {
+  public void setFieldType(ReferenceTypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
     
     firePropertyChange(FIELD_TYPE, fieldType, fieldType = t);

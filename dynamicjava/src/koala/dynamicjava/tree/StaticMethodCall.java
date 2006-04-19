@@ -48,18 +48,18 @@ public class StaticMethodCall extends MethodCall {
   /**
    * The type on which this method call applies
    */
-  private Type methodType;
+  private TypeName methodType;
 
   /**
-   * Creates a new node. (Note: Type has been changed from ReferenceType so that it can accept an ArrayType as input.
-   * A better solution would be to make ArrayType extend ReferenceType. This would alleviate some problems with
+   * Creates a new node. (Note: TypeName has been changed from ReferenceTypeName so that it can accept an ArrayTypeName as input.
+   * A better solution would be to make ArrayTypeName extend ReferenceTypeName. This would alleviate some problems with
    * static method call being able to take in a primitive type)
    * @param typ   the type on which this method call applies
    * @param mn    the field name
    * @param args  the arguments. Can be null.
    * @exception IllegalArgumentException if typ is null or mn is null
    */
-  public StaticMethodCall(Type typ, String mn, List<Expression> args) {
+  public StaticMethodCall(TypeName typ, String mn, List<Expression> args) {
     this(typ, mn, args, null, 0, 0, 0, 0);
   }
 
@@ -75,7 +75,7 @@ public class StaticMethodCall extends MethodCall {
    * @param ec    the end column
    * @exception IllegalArgumentException if typ is null or mn is null
    */
-  public StaticMethodCall(Type typ, String mn, List<Expression> args,
+  public StaticMethodCall(TypeName typ, String mn, List<Expression> args,
                           String fn, int bl, int bc, int el, int ec) {
     super(mn, args, fn, bl, bc, el, ec);
 
@@ -87,7 +87,7 @@ public class StaticMethodCall extends MethodCall {
   /**
    * Returns the type on which this method call applies
    */
-  public Type getMethodType() {
+  public TypeName getMethodType() {
     return methodType;
   }
 
@@ -95,7 +95,7 @@ public class StaticMethodCall extends MethodCall {
    * Sets the declaring type of the method
    * @exception IllegalArgumentException if t is null
    */
-  public void setMethodType(ReferenceType t) {
+  public void setMethodType(ReferenceTypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
 
     firePropertyChange(METHOD_TYPE, methodType, methodType = t);

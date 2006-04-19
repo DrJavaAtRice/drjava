@@ -69,8 +69,8 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
-  public PolymorphicMethodDeclaration(int flags, Type type, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body, TypeParameter[] typeParams) {
+  public PolymorphicMethodDeclaration(int flags, TypeName type, String name,
+                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body, TypeParameter[] typeParams) {
     this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0, typeParams);
   }
   
@@ -91,8 +91,8 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
-  public PolymorphicMethodDeclaration(int flags, Type type, String name,
-                                      List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body,
+  public PolymorphicMethodDeclaration(int flags, TypeName type, String name,
+                                      List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body,
                                       String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
     super(flags, type, name, params, excepts, body, fn, bl, bc, el, ec);
     

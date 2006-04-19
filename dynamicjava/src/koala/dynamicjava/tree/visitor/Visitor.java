@@ -234,22 +234,22 @@ public interface Visitor<T> {
   T visit(SuperMethodCall node);
   
   /**
-   * Visits a PrimitiveType
+   * Visits a PrimitiveTypeName
    * @param node the node to visit
    */
-  T visit(PrimitiveType node);
+  T visit(PrimitiveTypeName node);
   
   /**
-   * Visits a ReferenceType
+   * Visits a ReferenceTypeName
    * @param node the node to visit
    */
-  T visit(ReferenceType node);
+  T visit(ReferenceTypeName node);
   
   /**
-   * Visits a ArrayType
+   * Visits a ArrayTypeName
    * @param node the node to visit
    */
-  T visit(ArrayType node);
+  T visit(ArrayTypeName node);
   
   /**
    * Visits a TypeExpression

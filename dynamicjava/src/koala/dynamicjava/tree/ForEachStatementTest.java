@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 public class ForEachStatementTest extends TestCase {
   
   /*Instantiate a ForEachStatement*/
-  private Type _type = new LongType();
+  private TypeName _type = new LongTypeName();
   private FormalParameter _formalParam = new FormalParameter(false,_type,"Test Parameter");
   private Expression _typeExpression = new TypeExpression(_type,"test",0,0,0,0);
   private ForEachStatement _testSubject = new ForEachStatement(_formalParam, _typeExpression,_type);

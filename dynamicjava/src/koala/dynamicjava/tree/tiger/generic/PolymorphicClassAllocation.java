@@ -45,7 +45,7 @@ public class PolymorphicClassAllocation extends ClassAllocation {
   /**
    * The type arguments to pass to the constructor
    */
-  private List<Type> _typeArguments;
+  private List<TypeName> _typeArguments;
   
   /**
    * Initializes the expression
@@ -55,7 +55,7 @@ public class PolymorphicClassAllocation extends ClassAllocation {
    * @param targs the type arguments of the constructor
    * @exception IllegalArgumentException if tp is null or memb is null
    */
-  public PolymorphicClassAllocation(Type tp, List<Expression> args, List<Node> memb, List<Type> targs) {
+  public PolymorphicClassAllocation(TypeName tp, List<Expression> args, List<Node> memb, List<TypeName> targs) {
     this(tp, args, memb, targs, null, 0, 0, 0, 0);
   }
   
@@ -72,7 +72,7 @@ public class PolymorphicClassAllocation extends ClassAllocation {
    * @param ec    the end column
    * @exception IllegalArgumentException if tp is null or memb is null
    */
-  public PolymorphicClassAllocation(Type tp, List<Expression> args, List<Node> memb, List<Type> targs,
+  public PolymorphicClassAllocation(TypeName tp, List<Expression> args, List<Node> memb, List<TypeName> targs,
                          String fn, int bl, int bc, int el, int ec) {
     super(tp, args, memb, fn, bl, bc, el, ec);
     
@@ -82,7 +82,7 @@ public class PolymorphicClassAllocation extends ClassAllocation {
   /**
    * Returns the constructor type arguments
    */
-  public List<Type> getTypeArguments() {
+  public List<TypeName> getTypeArguments() {
     return _typeArguments;
   }
   

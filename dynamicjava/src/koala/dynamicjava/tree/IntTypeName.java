@@ -35,11 +35,11 @@ package koala.dynamicjava.tree;
  * @version 1.0 - 1999/04/24
  */
 
-public class IntType extends PrimitiveType {
+public class IntTypeName extends PrimitiveTypeName {
     /**
      * Initializes the type
      */
-    public IntType() {
+    public IntTypeName() {
  this(null, 0, 0, 0, 0);
     }
 
@@ -51,7 +51,7 @@ public class IntType extends PrimitiveType {
      * @param el    the end line
      * @param ec    the end column
      */
-    public IntType(String fn, int bl, int bc, int el, int ec) {
+    public IntTypeName(String fn, int bl, int bc, int el, int ec) {
  super(int.class, fn, bl, bc, el, ec);
     }
   

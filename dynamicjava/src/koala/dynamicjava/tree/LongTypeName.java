@@ -29,30 +29,30 @@
 package koala.dynamicjava.tree;
 
 /**
- * This class represents the byte type nodes of the syntax tree
+ * This class represents the long type nodes of the syntax tree
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/04/24
  */
 
-public class ByteType extends PrimitiveType {
-  /**
-   * Initializes the type
-   */
-  public ByteType() {
-    this(null, 0, 0, 0, 0);
-  }
-  
-  /**
-   * Initializes the type
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
-   */
-  public ByteType(String fn, int bl, int bc, int el, int ec) {
-    super(byte.class, fn, bl, bc, el, ec);
-  }
+public class LongTypeName extends PrimitiveTypeName {
+    /**
+     * Initializes the type
+     */
+    public LongTypeName() {
+ this(null, 0, 0, 0, 0);
+    }
+
+    /**
+     * Initializes the type
+     * @param fn    the filename
+     * @param bl    the begin line
+     * @param bc    the begin column
+     * @param el    the end line
+     * @param ec    the end column
+     */
+    public LongTypeName(String fn, int bl, int bc, int el, int ec) {
+ super(long.class, fn, bl, bc, el, ec);
+    }
   
 }

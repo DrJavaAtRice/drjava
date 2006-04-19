@@ -29,22 +29,30 @@
 package koala.dynamicjava.tree;
 
 /**
- * This class represents the type nodes of the syntax tree
+ * This class represents the double type nodes of the syntax tree
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/04/24
  */
 
-public abstract class Type extends Node {
-  /**
-   * Initializes the type
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
-   */
-  protected Type(String fn, int bl, int bc, int el, int ec) {
-    super(fn, bl, bc, el, ec);
-  }
+public class DoubleTypeName extends PrimitiveTypeName {
+    /**
+     * Initializes the type
+     */
+    public DoubleTypeName() {
+ this(null, 0, 0, 0, 0);
+    }
+
+    /**
+     * Initializes the type
+     * @param fn    the filename
+     * @param bl    the begin line
+     * @param bc    the begin column
+     * @param el    the end line
+     * @param ec    the end column
+     */
+    public DoubleTypeName(String fn, int bl, int bc, int el, int ec) {
+ super(double.class, fn, bl, bc, el, ec);
+    }
+   
 }

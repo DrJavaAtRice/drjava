@@ -90,37 +90,37 @@ public class ParserTest extends TestCase {
   public void testVarArgsFormalParameters() throws ParseException {
     List<FormalParameter> fpList = getFormalParameterList("String... s", true);
     assertEquals("should be 1 parameter", 1, fpList.size());
-    assertEquals("param should be array", ArrayType.class, fpList.get(0).getType().getClass());
-    ArrayType at = (ArrayType)fpList.get(0).getType();
-    assertEquals("param should be a string array", "(koala.dynamicjava.tree.ReferenceType: String)", at.getElementType().toString());
+    assertEquals("param should be array", ArrayTypeName.class, fpList.get(0).getType().getClass());
+    ArrayTypeName at = (ArrayTypeName)fpList.get(0).getType();
+    assertEquals("param should be a string array", "(koala.dynamicjava.tree.ReferenceTypeName: String)", at.getElementType().toString());
     
     fpList = getFormalParameterList("String[] s", false);
     assertEquals("should be 1 parameter", 1, fpList.size());
-    assertEquals("param should be array", ArrayType.class, fpList.get(0).getType().getClass());
-    at = (ArrayType)fpList.get(0).getType();
-    assertEquals("param should be a string array", "(koala.dynamicjava.tree.ReferenceType: String)", at.getElementType().toString());
+    assertEquals("param should be array", ArrayTypeName.class, fpList.get(0).getType().getClass());
+    at = (ArrayTypeName)fpList.get(0).getType();
+    assertEquals("param should be a string array", "(koala.dynamicjava.tree.ReferenceTypeName: String)", at.getElementType().toString());
     
     fpList = getFormalParameterList("", false);
     assertEquals("should be no parameters", 0, fpList.size());
     
     fpList = getFormalParameterList("int i",false);
     assertEquals("should be 1 parameter", 1, fpList.size());
-    assertEquals("param should be int", "(koala.dynamicjava.tree.IntType: int)", fpList.get(0).getType().toString());
+    assertEquals("param should be int", "(koala.dynamicjava.tree.IntTypeName: int)", fpList.get(0).getType().toString());
         
     fpList = getFormalParameterList("int i, String... s", true);
     assertEquals("should be 2 parameters", 2, fpList.size());
-    assertEquals("1st param should be int", "(koala.dynamicjava.tree.IntType: int)", fpList.get(0).getType().toString());
-    assertEquals("2nd param should be array", ArrayType.class, fpList.get(1).getType().getClass());
-    at = (ArrayType)fpList.get(1).getType();
-    assertEquals("param should be a string array", "(koala.dynamicjava.tree.ReferenceType: String)", at.getElementType().toString());
+    assertEquals("1st param should be int", "(koala.dynamicjava.tree.IntTypeName: int)", fpList.get(0).getType().toString());
+    assertEquals("2nd param should be array", ArrayTypeName.class, fpList.get(1).getType().getClass());
+    at = (ArrayTypeName)fpList.get(1).getType();
+    assertEquals("param should be a string array", "(koala.dynamicjava.tree.ReferenceTypeName: String)", at.getElementType().toString());
         
     fpList = getFormalParameterList("int i, int j, String... s", true);
     assertEquals("should be 3 parameters", 3, fpList.size());
-    assertEquals("1st param should be int", "(koala.dynamicjava.tree.IntType: int)", fpList.get(0).getType().toString());
-    assertEquals("2nd param should be int", "(koala.dynamicjava.tree.IntType: int)", fpList.get(1).getType().toString());
-    assertEquals("3rd param should be array", ArrayType.class, fpList.get(2).getType().getClass());
-    at = (ArrayType)fpList.get(2).getType();
-    assertEquals("param should be a string array", "(koala.dynamicjava.tree.ReferenceType: String)", at.getElementType().toString());
+    assertEquals("1st param should be int", "(koala.dynamicjava.tree.IntTypeName: int)", fpList.get(0).getType().toString());
+    assertEquals("2nd param should be int", "(koala.dynamicjava.tree.IntTypeName: int)", fpList.get(1).getType().toString());
+    assertEquals("3rd param should be array", ArrayTypeName.class, fpList.get(2).getType().getClass());
+    at = (ArrayTypeName)fpList.get(2).getType();
+    assertEquals("param should be a string array", "(koala.dynamicjava.tree.ReferenceTypeName: String)", at.getElementType().toString());
         
     try {
       getFormalParameterList("int... i, int... j", true);
@@ -138,7 +138,7 @@ public class ParserTest extends TestCase {
     List<Node> list = parseText("public static void m("+ paramString +") { }");
     assertEquals("list should be singleton", 1, list.size());
     Node n = list.get(0);
-    assertEquals("Type of node", MethodDeclaration.class, n.getClass());
+    assertEquals("TypeName of node", MethodDeclaration.class, n.getClass());
     MethodDeclaration m = (MethodDeclaration)n;
     
     if (isVarArgs)
@@ -154,26 +154,26 @@ public class ParserTest extends TestCase {
     List<Node> list = parseText("int x = Integer.MIN_VALUE");
     assertEquals("List should be of length one", 1, list.size());
     Node n = list.get(0);
-    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+    assertEquals("TypeName of Node", VariableDeclaration.class, n.getClass());
   }
   public void testIntMaxValue() throws ParseException{
     List<Node> list = parseText("int x = Integer.MAX_VALUE");
     assertEquals("List should be of length one", 1, list.size());
     Node n = list.get(0);
-    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+    assertEquals("TypeName of Node", VariableDeclaration.class, n.getClass());
   }
   /* This test is added to reveal the bug reported with number: 1201685 - Interactions pane rejects minimum int */
   public void testSmallestInt() throws ParseException {
     List<Node> list = parseText("int x = -2147483648");
     assertEquals("List should be of length one", 1, list.size());
     Node n = list.get(0);
-    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+    assertEquals("TypeName of Node", VariableDeclaration.class, n.getClass());
   }
   public void testBiggestIntValue() throws ParseException {
     List<Node> list = parseText("int x = 2147483647");
     assertEquals("List should be of length one", 1, list.size());
     Node n = list.get(0);
-    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+    assertEquals("TypeName of Node", VariableDeclaration.class, n.getClass());
   }
   public void testIntTooBig() throws ParseException {
     try{
@@ -200,7 +200,7 @@ public class ParserTest extends TestCase {
     List<Node> list = parseText("long x = Long.MIN_VALUE");
     assertEquals("List should be of length one", 1, list.size());
     Node n = list.get(0);
-    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+    assertEquals("TypeName of Node", VariableDeclaration.class, n.getClass());
   }
   
   /* This test is added to cover the tests where our parser handles the corner cases of dealing with longs */
@@ -208,7 +208,7 @@ public class ParserTest extends TestCase {
     List<Node> list = parseText("long x = -9223372036854775808L");
     assertEquals("List should be of length one", 1, list.size());
     Node n = list.get(0);
-    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+    assertEquals("TypeName of Node", VariableDeclaration.class, n.getClass());
   }
   
   /* This test is added to cover the tests where our parser handles the corner cases of dealing with longs */
@@ -216,7 +216,7 @@ public class ParserTest extends TestCase {
     List<Node> list = parseText("long x = 9223372036854775807L");
     assertEquals("List should be of length one", 1, list.size());
     Node n = list.get(0);
-    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+    assertEquals("TypeName of Node", VariableDeclaration.class, n.getClass());
   }
   
   /* This test is added to cover the tests where our parser handles the corner cases of dealing with longs */
@@ -224,7 +224,7 @@ public class ParserTest extends TestCase {
     List<Node> list = parseText("long x = Long.MAX_VALUE");
     assertEquals("List should be of length one", 1, list.size());
     Node n = list.get(0);
-    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+    assertEquals("TypeName of Node", VariableDeclaration.class, n.getClass());
   }
   public void testLongTooBig() throws ParseException {
     try{

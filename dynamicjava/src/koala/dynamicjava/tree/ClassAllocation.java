@@ -67,7 +67,7 @@ public class ClassAllocation extends Allocation implements ExpressionStatement {
    * @param memb  the members of the class
    * @exception IllegalArgumentException if tp is null or memb is null
    */
-  public ClassAllocation(Type tp, List<Expression> args, List<Node> memb) {
+  public ClassAllocation(TypeName tp, List<Expression> args, List<Node> memb) {
     this(tp, args, memb, null, 0, 0, 0, 0);
   }
   
@@ -83,7 +83,7 @@ public class ClassAllocation extends Allocation implements ExpressionStatement {
    * @param ec    the end column
    * @exception IllegalArgumentException if tp is null or memb is null
    */
-  public ClassAllocation(Type tp, List<Expression> args, List<Node> memb,
+  public ClassAllocation(TypeName tp, List<Expression> args, List<Node> memb,
                          String fn, int bl, int bc, int el, int ec) {
     super(tp, fn, bl, bc, el, ec);
     

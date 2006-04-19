@@ -320,7 +320,7 @@
           description="Compile all source files (after generating the source)">
   </target>
   
-  <target name="do-compile" depends="assert-15, resolve-java15-tools">
+  <target name="do-compile" depends="assert-15">
     <echo message="Compiling src directory to classes/base and classes/test" />
     <mkdir dir="classes/base" />
     <mkdir dir="classes/test" />
@@ -334,6 +334,7 @@
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base" />
+        <pathelement location="testFiles/classes" />
       </classpath>
       <compilerarg value="-Xlint" />
       <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
@@ -414,6 +415,7 @@
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
+        <pathelement location="testFiles/classes" />
       </path>
     </pathconvert>
     <!-- Note: "verifyrefs" is called "refclasspath" in the documentation, but that name is incorrect -->
@@ -442,6 +444,7 @@
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
+        <pathelement location="testFiles/classes" />
       </classpath>
       <formatter type="brief" usefile="false" />
       <batchtest>
@@ -462,6 +465,7 @@
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
+        <pathelement location="testFiles/classes" />
       </classpath>
       <formatter type="brief" usefile="false" />
       <batchtest>
@@ -479,6 +483,7 @@
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
+        <pathelement location="testFiles/classes" />
       </classpath>
       <formatter type="brief" usefile="false" />
       <batchtest>
@@ -602,6 +607,7 @@
       <classpath>
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="testFiles/classes" />
       </classpath>
       <link href="http://java.sun.com/j2se/1.5/docs/api" />
       <link href="http://junit.org/junit/javadoc/3.8.1" />

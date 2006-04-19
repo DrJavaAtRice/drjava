@@ -518,7 +518,7 @@ public class TigerTest extends DynamicJavaTestCase {
       "public void someMethod(int ... i){}";
 
     LinkedList<FormalParameter> params = new LinkedList<FormalParameter>();
-    FormalParameter fp = new FormalParameter(false,new ArrayType(new IntType(),1) ,"i");
+    FormalParameter fp = new FormalParameter(false,new ArrayTypeName(new IntTypeName(),1) ,"i");
     params.add(fp);
     List<Node> statements = new LinkedList<Node>();
     //statements.add(new EmptyStatement());
@@ -526,7 +526,7 @@ public class TigerTest extends DynamicJavaTestCase {
 
     MethodDeclaration md = new MethodDeclaration(
                                                  java.lang.reflect.Modifier.PUBLIC | 0x00000080, // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
-                                                 new VoidType(),"someMethod",params,new LinkedList<ReferenceType>(),body,null, 0, 0, 0, 0);
+                                                 new VoidTypeName(),"someMethod",params,new LinkedList<ReferenceTypeName>(),body,null, 0, 0, 0, 0);
     assertEquals(md, parse(testString).get(0));
   }
 
@@ -684,7 +684,7 @@ public class TigerTest extends DynamicJavaTestCase {
 //    testString =
 //      "public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }";
 //
-//    ReferenceType enumType = new ReferenceType("Suit");
+//    ReferenceTypeName enumType = new ReferenceTypeName("Suit");
 //
 //    List<Expression> args1 = new LinkedList<Expression>();
 //    args1.add(new StringLiteral("\"CLUBS\""));
@@ -744,7 +744,7 @@ public class TigerTest extends DynamicJavaTestCase {
 //    args4.add(new IntegerLiteral("3"));
 //    args4.add(new IntegerLiteral("61"));
 //
-//    ReferenceType enumType = new ReferenceType("Suit");
+//    ReferenceTypeName enumType = new ReferenceTypeName("Suit");
 //    Allocation constantInit1 = new SimpleAllocation(enumType, args1);
 //    Allocation constantInit2 = new SimpleAllocation(enumType, args2);
 //    Allocation constantInit3 = new SimpleAllocation(enumType, args3);
@@ -754,8 +754,8 @@ public class TigerTest extends DynamicJavaTestCase {
 //    List<Node> body = new LinkedList<Node> ();
 //
 //    List<FormalParameter> params = new LinkedList<FormalParameter>();
-//    params.add(new FormalParameter(false, new IntType(), "i"));
-//    body.add(new ConstructorDeclaration(0, "Suit", params, new LinkedList<ReferenceType>(), null, new LinkedList<Node>()));
+//    params.add(new FormalParameter(false, new IntTypeName(), "i"));
+//    body.add(new ConstructorDeclaration(0, "Suit", params, new LinkedList<ReferenceTypeName>(), null, new LinkedList<Node>()));
 //
 //    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "CLUBS",    constantInit1));
 //    body.add(new FieldDeclaration(fieldAccessFlags, enumType, "DIAMONDS", constantInit2));
@@ -808,14 +808,14 @@ public class TigerTest extends DynamicJavaTestCase {
 //    idnt4.add(new Identifier("HEARTS"));
 //    args4.add(new QualifiedName(idnt4));
 //
-//    ReferenceType enumType = new ReferenceType("Suit");
+//    ReferenceTypeName enumType = new ReferenceTypeName("Suit");
 //
 //    List<Node> body1 = new LinkedList<Node>();
 //    List<Node> body2 = new LinkedList<Node>();
 //    List<Node> body3 = new LinkedList<Node>();
 //    List<Node> body4 = new LinkedList<Node>();
-//    MethodDeclaration m =   new MethodDeclaration(0, new VoidType(), "m", new LinkedList<FormalParameter>(), new LinkedList<ReferenceType>(), new BlockStatement(new LinkedList<Node>()));
-//    MethodDeclaration n =   new MethodDeclaration(0, new VoidType(), "n", new LinkedList<FormalParameter>(), new LinkedList<ReferenceType>(), new BlockStatement(new LinkedList<Node>()));
+//    MethodDeclaration m =   new MethodDeclaration(0, new VoidTypeName(), "m", new LinkedList<FormalParameter>(), new LinkedList<ReferenceTypeName>(), new BlockStatement(new LinkedList<Node>()));
+//    MethodDeclaration n =   new MethodDeclaration(0, new VoidTypeName(), "n", new LinkedList<FormalParameter>(), new LinkedList<ReferenceTypeName>(), new BlockStatement(new LinkedList<Node>()));
 //
 //    body1.add(m);
 //    body1.add(n);
@@ -832,10 +832,10 @@ public class TigerTest extends DynamicJavaTestCase {
 //
 //    List<Node> body = new LinkedList<Node>();
 //    List<FormalParameter> params = new LinkedList<FormalParameter>();
-//    params.add(new FormalParameter(false, new IntType(), "i"));
-//    params.add(new FormalParameter(false, new ReferenceType("Suit"), "s"));
-//    body.add(new ConstructorDeclaration(0, "Suit", params, new LinkedList<ReferenceType>(), null, new LinkedList<Node>()));
-//    MethodDeclaration am = new MethodDeclaration(java.lang.reflect.Modifier.ABSTRACT, new VoidType(), "m", new LinkedList<FormalParameter>(), new LinkedList<ReferenceType>(), null);
+//    params.add(new FormalParameter(false, new IntTypeName(), "i"));
+//    params.add(new FormalParameter(false, new ReferenceTypeName("Suit"), "s"));
+//    body.add(new ConstructorDeclaration(0, "Suit", params, new LinkedList<ReferenceTypeName>(), null, new LinkedList<Node>()));
+//    MethodDeclaration am = new MethodDeclaration(java.lang.reflect.Modifier.ABSTRACT, new VoidTypeName(), "m", new LinkedList<FormalParameter>(), new LinkedList<ReferenceTypeName>(), null);
 //    body.add(am);
 //    body.add(n);
 //
@@ -852,7 +852,7 @@ public class TigerTest extends DynamicJavaTestCase {
     testString =
       "public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }";
 
-    ReferenceType enumType = new ReferenceType("Suit");
+    ReferenceTypeName enumType = new ReferenceTypeName("Suit");
 
     int accessFlags = java.lang.reflect.Modifier.PUBLIC;
 
@@ -898,8 +898,8 @@ public class TigerTest extends DynamicJavaTestCase {
     List<Node> decl = new LinkedList<Node> ();
 
     List<FormalParameter> params = new LinkedList<FormalParameter>();
-    params.add(new FormalParameter(false, new IntType(), "i"));
-    decl.add(new ConstructorDeclaration(0, "Suit", params, new LinkedList<ReferenceType>(), null, new LinkedList<Node>()));
+    params.add(new FormalParameter(false, new IntTypeName(), "i"));
+    decl.add(new ConstructorDeclaration(0, "Suit", params, new LinkedList<ReferenceTypeName>(), null, new LinkedList<Node>()));
 
     EnumDeclaration ed = new EnumDeclaration(accessFlags, "Suit", null, new EnumDeclaration.EnumBody(consts, decl));
     assertEquals(ed, parse(testString).get(0));
@@ -939,14 +939,14 @@ public class TigerTest extends DynamicJavaTestCase {
     idnt4.add(new Identifier("HEARTS"));
     args4.add(new QualifiedName(idnt4));
 
-    ReferenceType enumType = new ReferenceType("Suit");
+    ReferenceTypeName enumType = new ReferenceTypeName("Suit");
 
     List<Node> body1 = new LinkedList<Node>();
     List<Node> body2 = new LinkedList<Node>();
     List<Node> body3 = new LinkedList<Node>();
     List<Node> body4 = new LinkedList<Node>();
-    MethodDeclaration m =   new MethodDeclaration(0, new VoidType(), "m", new LinkedList<FormalParameter>(), new LinkedList<ReferenceType>(), new BlockStatement(new LinkedList<Node>()));
-    MethodDeclaration n =   new MethodDeclaration(0, new VoidType(), "n", new LinkedList<FormalParameter>(), new LinkedList<ReferenceType>(), new BlockStatement(new LinkedList<Node>()));
+    MethodDeclaration m =   new MethodDeclaration(0, new VoidTypeName(), "m", new LinkedList<FormalParameter>(), new LinkedList<ReferenceTypeName>(), new BlockStatement(new LinkedList<Node>()));
+    MethodDeclaration n =   new MethodDeclaration(0, new VoidTypeName(), "n", new LinkedList<FormalParameter>(), new LinkedList<ReferenceTypeName>(), new BlockStatement(new LinkedList<Node>()));
 
     body1.add(m);
     body1.add(n);
@@ -964,10 +964,10 @@ public class TigerTest extends DynamicJavaTestCase {
 
     List<Node> decl = new LinkedList<Node>();
     List<FormalParameter> params = new LinkedList<FormalParameter>();
-    params.add(new FormalParameter(false, new IntType(), "i"));
-    params.add(new FormalParameter(false, new ReferenceType("Suit"), "s"));
-    decl.add(new ConstructorDeclaration(0, "Suit", params, new LinkedList<ReferenceType>(), null, new LinkedList<Node>()));
-    MethodDeclaration am = new MethodDeclaration(java.lang.reflect.Modifier.ABSTRACT, new VoidType(), "m", new LinkedList<FormalParameter>(), new LinkedList<ReferenceType>(), null);
+    params.add(new FormalParameter(false, new IntTypeName(), "i"));
+    params.add(new FormalParameter(false, new ReferenceTypeName("Suit"), "s"));
+    decl.add(new ConstructorDeclaration(0, "Suit", params, new LinkedList<ReferenceTypeName>(), null, new LinkedList<Node>()));
+    MethodDeclaration am = new MethodDeclaration(java.lang.reflect.Modifier.ABSTRACT, new VoidTypeName(), "m", new LinkedList<FormalParameter>(), new LinkedList<ReferenceTypeName>(), null);
     decl.add(am);
     decl.add(n);
 

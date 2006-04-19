@@ -49,7 +49,7 @@ public class EnumDeclaration extends ClassDeclaration {
    *              Token). Can be null.
    * @param body  the list of members declarations
    */
-  public EnumDeclaration(int flags, String name, List<? extends ReferenceType> impl, EnumBody body) {
+  public EnumDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, EnumBody body) {
     this(flags, name, impl, body, null, 0, 0, 0, 0);
   }
 
@@ -83,7 +83,7 @@ public class EnumDeclaration extends ClassDeclaration {
    * @param el    the end line
    * @param ec    the end column
    */
-  public EnumDeclaration(int flags, String name, List<? extends ReferenceType> impl, EnumBody body,
+  public EnumDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, EnumBody body,
                           String fn, int bl, int bc, int el, int ec) {
     // the first parameter should be (flags | 0x4000), 
     // but this causes problems when trying to create 
@@ -94,8 +94,8 @@ public class EnumDeclaration extends ClassDeclaration {
     // The only real consequence of this is that Class.isEnum() 
     // will return false, but since dynamicjava uses 
     // TigerUtilities.isEnum(), this doesn't pose too big of a problem.
-    super(flags , 
-          name, new ReferenceType("java.lang.Enum"), impl,
+    super(flags, 
+          name, new ReferenceTypeName("java.lang.Enum"), impl,
       AddValues(name,
         HandleConstructors(name,
           makeEnumBodyDeclarationsFromEnumConsts(name, body)),
@@ -113,8 +113,8 @@ public class EnumDeclaration extends ClassDeclaration {
 
     int accessFlags  = java.lang.reflect.Modifier.PRIVATE | java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.FINAL;
 
-    ReferenceType enumType = new ReferenceType(enumTypeName);
-    Type valuesType = new ArrayType(enumType, 1);
+    ReferenceTypeName enumType = new ReferenceTypeName(enumTypeName);
+    TypeName valuesType = new ArrayTypeName(enumType, 1);
     List<Expression> sizes = new LinkedList<Expression>();
     sizes.add(new IntegerLiteral(String.valueOf(consts_names.length)));
     List<Expression> cells = new LinkedList<Expression>();
@@ -125,13 +125,13 @@ public class EnumDeclaration extends ClassDeclaration {
 
     accessFlags  = java.lang.reflect.Modifier.PUBLIC | java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.FINAL;
     List<FormalParameter> vparams = new LinkedList<FormalParameter>();
-    ///*for testing jlugo code*/vparams.add(new FormalParameter(false, new ReferenceType("String"), "s"));
+    ///*for testing jlugo code*/vparams.add(new FormalParameter(false, new ReferenceTypeName("String"), "s"));
     List<Node> stmts = new LinkedList<Node>();
     stmts.add(new ReturnStatement(new CastExpression(enumType, new ObjectMethodCall(new StaticFieldAccess(enumType, "$VALUES"), "clone", null))));
-    newbody.add(new MethodDeclaration(accessFlags, valuesType, "values", vparams, new LinkedList<ReferenceType>(), new BlockStatement(stmts)));
+    newbody.add(new MethodDeclaration(accessFlags, valuesType, "values", vparams, new LinkedList<ReferenceTypeName>(), new BlockStatement(stmts)));
 
     List<FormalParameter> voparams = new LinkedList<FormalParameter>();
-    voparams.add(new FormalParameter(false, new ReferenceType("String"), "s"));
+    voparams.add(new FormalParameter(false, new ReferenceTypeName("String"), "s"));
     accessFlags  = java.lang.reflect.Modifier.PUBLIC | java.lang.reflect.Modifier.STATIC;
     
     //  for( int i = 0; i < $VALUES.length; i++ )
@@ -140,7 +140,7 @@ public class EnumDeclaration extends ClassDeclaration {
     //  throw new IllegalArgumentException(s);
     List<Node> stmtsOf = new LinkedList<Node>();
     List<Node> init = new LinkedList<Node>();
-    init.add(new VariableDeclaration(false, new IntType(), "i", new IntegerLiteral("0")));
+    init.add(new VariableDeclaration(false, new IntTypeName(), "i", new IntegerLiteral("0")));
     List<IdentifierToken> iIds = new LinkedList<IdentifierToken>();
     iIds.add(new Identifier("i"));
     QualifiedName iId = new QualifiedName(iIds);
@@ -155,8 +155,8 @@ public class EnumDeclaration extends ClassDeclaration {
     args.add(new QualifiedName(sIds));
     IfThenStatement bodyOf = new IfThenStatement(new ObjectMethodCall(new ObjectMethodCall(arrCell, "name", null), "equals", args), new ReturnStatement(arrCell));
     stmtsOf.add(new ForStatement(init, cond, updt, bodyOf));
-    stmtsOf.add(new ThrowStatement(new SimpleAllocation(new ReferenceType("IllegalArgumentException"), args)));
-    newbody.add(new MethodDeclaration(accessFlags, enumType, "valueOf", voparams, new LinkedList<ReferenceType>(), new BlockStatement(stmtsOf)));
+    stmtsOf.add(new ThrowStatement(new SimpleAllocation(new ReferenceTypeName("IllegalArgumentException"), args)));
+    newbody.add(new MethodDeclaration(accessFlags, enumType, "valueOf", voparams, new LinkedList<ReferenceTypeName>(), new BlockStatement(stmtsOf)));
 
     return newbody;
   }
@@ -170,8 +170,8 @@ public class EnumDeclaration extends ClassDeclaration {
     idnt2.add(new Identifier("$2"));
 
     List<FormalParameter> addToConsDeclaration = new LinkedList<FormalParameter>();
-    addToConsDeclaration.add(new FormalParameter(false, new ReferenceType("String"), "$1"));
-    addToConsDeclaration.add(new FormalParameter(false, new IntType(),               "$2"));
+    addToConsDeclaration.add(new FormalParameter(false, new ReferenceTypeName("String"), "$1"));
+    addToConsDeclaration.add(new FormalParameter(false, new IntTypeName(),               "$2"));
 
     List<Expression> args = new LinkedList<Expression>();
     args.add(new QualifiedName(idnt1));
@@ -199,7 +199,7 @@ public class EnumDeclaration extends ClassDeclaration {
 
     if (noConstructor) {
       body.add(new ConstructorDeclaration(java.lang.reflect.Modifier.PRIVATE, name, addToConsDeclaration,
-                                          new LinkedList<ReferenceType>(),
+                                          new LinkedList<ReferenceTypeName>(),
                                           new ConstructorInvocation(null, args, true),
                                           new LinkedList<Node>()));
     }
@@ -249,7 +249,7 @@ public class EnumDeclaration extends ClassDeclaration {
         accessFlags |= java.lang.reflect.Modifier.FINAL;
         accessFlags |= 0x4000; // java.lang.reflect.Modifier.ENUM; /**/ or ACC_ENUM
 
-    ReferenceType enumType = new ReferenceType(enumTypeName);
+    ReferenceTypeName enumType = new ReferenceTypeName(enumTypeName);
 
     Allocation allocExpr = null;
 

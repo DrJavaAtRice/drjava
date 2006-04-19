@@ -81,7 +81,7 @@ public class ParserTest extends TestCase {
     accessFlags |= java.lang.reflect.Modifier.PUBLIC;
     accessFlags |= java.lang.reflect.Modifier.ABSTRACT;
     List<Node> body = new LinkedList<Node>();
-    expectedAST.add(new ClassDeclaration(accessFlags, "Foo", new ReferenceType("Bar"), null, body, null, -1, -1, -1, -1));
+    expectedAST.add(new ClassDeclaration(accessFlags, "Foo", new ReferenceTypeName("Bar"), null, body, null, -1, -1, -1, -1));
     verifyOutput("public abstract class Foo extends Bar{}", expectedAST);
   }
   
@@ -97,20 +97,20 @@ public class ParserTest extends TestCase {
     accessFlags |= java.lang.reflect.Modifier.STATIC;
     accessFlags |= java.lang.reflect.Modifier.PUBLIC;
     List<FormalParameter> params = new LinkedList<FormalParameter>();
-    List<? extends ReferenceType> excepts = new LinkedList<ReferenceType>();
+    List<? extends ReferenceTypeName> excepts = new LinkedList<ReferenceTypeName>();
     List<Node> stmts = new LinkedList<Node>();
     stmts.add(new ReturnStatement(new IntegerLiteral("1")));
     BlockStatement body = new BlockStatement(stmts);
     
-    expectedAST.add(new MethodDeclaration(accessFlags, new IntType(), "getCount", params, excepts, body));
+    expectedAST.add(new MethodDeclaration(accessFlags, new IntTypeName(), "getCount", params, excepts, body));
     
     verifyOutput("static public int getCount(){ return 1; }", expectedAST);
   }
   
   public void testLocalVariableDeclarationList() throws ParseException {
-    VariableDeclaration iVD = new VariableDeclaration(false, new IntType(), "i", new IntegerLiteral("0"));
-    VariableDeclaration jVD = new VariableDeclaration(false, new IntType(), "j", null);
-    VariableDeclaration kVD = new VariableDeclaration(false, new IntType(), "k", new IntegerLiteral("2"));
+    VariableDeclaration iVD = new VariableDeclaration(false, new IntTypeName(), "i", new IntegerLiteral("0"));
+    VariableDeclaration jVD = new VariableDeclaration(false, new IntTypeName(), "j", null);
+    VariableDeclaration kVD = new VariableDeclaration(false, new IntTypeName(), "k", new IntegerLiteral("2"));
   
     expectedAST.add(iVD);
     expectedAST.add(jVD);
@@ -121,7 +121,7 @@ public class ParserTest extends TestCase {
   
   public void testLabeledStatement() throws ParseException {
     
-    expectedAST.add(new LabeledStatement("v", new SimpleAllocation(new ReferenceType("Object"), null)));
+    expectedAST.add(new LabeledStatement("v", new SimpleAllocation(new ReferenceTypeName("Object"), null)));
     
     verifyOutput("v : new Object();", expectedAST);
   } 
@@ -135,7 +135,7 @@ public class ParserTest extends TestCase {
     
     List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
     idnt2.add(new Identifier("v"));
-    stmts.add(new SimpleAssignExpression(new QualifiedName(idnt2),new SimpleAllocation(new ReferenceType("Vector"), null)));
+    stmts.add(new SimpleAssignExpression(new QualifiedName(idnt2),new SimpleAllocation(new ReferenceTypeName("Vector"), null)));
     
     List<IdentifierToken> idnt3  = new LinkedList<IdentifierToken>();
     idnt3.add(new Identifier("i"));
@@ -157,7 +157,7 @@ public class ParserTest extends TestCase {
     
     List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
     idnt2.add(new Identifier("v"));
-    stmts.add(new SimpleAssignExpression(new QualifiedName(idnt2),new SimpleAllocation(new ReferenceType("Vector"), null)));
+    stmts.add(new SimpleAssignExpression(new QualifiedName(idnt2),new SimpleAllocation(new ReferenceTypeName("Vector"), null)));
     
     List<IdentifierToken> idnt3  = new LinkedList<IdentifierToken>();
     idnt3.add(new Identifier("i"));
@@ -185,7 +185,7 @@ public class ParserTest extends TestCase {
   public void testStatementExpression2() throws ParseException {
     List<Expression> args = new LinkedList<Expression> ();
     args.add(new IntegerLiteral("0"));
-    expectedAST.add(new ObjectMethodCall(new SimpleAllocation(new ReferenceType("Integer"), args), "intValue", null, "", -1, -1, -1, -1));
+    expectedAST.add(new ObjectMethodCall(new SimpleAllocation(new ReferenceTypeName("Integer"), args), "intValue", null, "", -1, -1, -1, -1));
     verifyOutput("(new Integer(0)).intValue();", expectedAST);
   }
   
@@ -297,7 +297,7 @@ public class ParserTest extends TestCase {
     args.add(new QualifiedName(idnt2));
     
     List<Node> init = new LinkedList<Node> ();
-    init.add(new VariableDeclaration(false, new IntType(), "i", new IntegerLiteral("0")));
+    init.add(new VariableDeclaration(false, new IntTypeName(), "i", new IntegerLiteral("0")));
     
     List<Node> updt = new LinkedList<Node> ();
     updt.add(new PostIncrement(new QualifiedName(idnt3)));
@@ -330,7 +330,7 @@ public class ParserTest extends TestCase {
   }
   
   public void testThrowStatement() throws ParseException {
-    expectedAST.add(new ThrowStatement(new SimpleAllocation(new ReferenceType("RuntimeException"), null)));
+    expectedAST.add(new ThrowStatement(new SimpleAllocation(new ReferenceTypeName("RuntimeException"), null)));
     verifyOutput("throw new RuntimeException();", expectedAST);
   }
   
@@ -361,7 +361,7 @@ public class ParserTest extends TestCase {
 //  ------
 //  public void testTryStatement() throws ParseException {    
 //    List<Node> stmts = new LinkedList<Node>();
-//    stmts.add(new ThrowStatement(new SimpleAllocation(new ReferenceType("RuntimeException"), null)));
+//    stmts.add(new ThrowStatement(new SimpleAllocation(new ReferenceTypeName("RuntimeException"), null)));
 //
 //    expectedAST.add(new TryStatement(new BlockStatement(stmts),
 //                                     new LinkedList<Node> (),
@@ -373,7 +373,7 @@ public class ParserTest extends TestCase {
   
   public void testTryStatementWithCatchBlock() throws ParseException {
     List<Node> stmts1 = new LinkedList<Node>();
-    stmts1.add(new ThrowStatement(new SimpleAllocation(new ReferenceType("RuntimeException"), null)));
+    stmts1.add(new ThrowStatement(new SimpleAllocation(new ReferenceTypeName("RuntimeException"), null)));
     
     List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
     idnt.add(new Identifier("ioe"));
@@ -384,7 +384,7 @@ public class ParserTest extends TestCase {
     stmts2.add(new ThrowStatement(new QualifiedName(idnt)));
 
     List<CatchStatement> catchSt = new LinkedList<CatchStatement>();
-    catchSt.add(new CatchStatement(new FormalParameter(false, new ReferenceType("IOException"), "ioe"), new BlockStatement(stmts2), "", -1, -1, -1, -1));
+    catchSt.add(new CatchStatement(new FormalParameter(false, new ReferenceTypeName("IOException"), "ioe"), new BlockStatement(stmts2), "", -1, -1, -1, -1));
                 
     expectedAST.add(new TryStatement(new BlockStatement(stmts1),
                                      catchSt,
@@ -405,17 +405,17 @@ public class ParserTest extends TestCase {
     List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
     idnt.add(new Identifier("v"));
     
-    expectedAST.add(new InstanceOfExpression(new QualifiedName(idnt), new ReferenceType("String")));
+    expectedAST.add(new InstanceOfExpression(new QualifiedName(idnt), new ReferenceTypeName("String")));
     verifyOutput( "((v) instanceof String)", expectedAST);
   }
   
   public void testCastExpression() throws ParseException {
-    expectedAST.add(new CastExpression(new ReferenceType("String"), new SimpleAllocation(new ReferenceType("Object"), null)));
+    expectedAST.add(new CastExpression(new ReferenceTypeName("String"), new SimpleAllocation(new ReferenceTypeName("Object"), null)));
     verifyOutput( "((String) (new Object()))", expectedAST);
   }
   
   public void testQualifiedCastExpression() throws ParseException {
-    expectedAST.add(new CastExpression(new ReferenceType("java.lang.String"), new SimpleAllocation(new ReferenceType("java.lang.Object"), null)));
+    expectedAST.add(new CastExpression(new ReferenceTypeName("java.lang.String"), new SimpleAllocation(new ReferenceTypeName("java.lang.Object"), null)));
     verifyOutput( "((java.lang.String) (new java.lang.Object()))", expectedAST);
   }
   
@@ -486,7 +486,7 @@ public class ParserTest extends TestCase {
     List<Expression> sizes = new LinkedList<Expression> ();
     sizes.add(new QualifiedName(idnt));
     
-    expectedAST.add(new ArrayAllocation(new IntType(), new ArrayAllocation.TypeDescriptor(sizes, 1, null, -1, -1)));
+    expectedAST.add(new ArrayAllocation(new IntTypeName(), new ArrayAllocation.TypeDescriptor(sizes, 1, null, -1, -1)));
     
     verifyOutput( "new int[foo]", expectedAST);
   }
@@ -498,7 +498,7 @@ public class ParserTest extends TestCase {
     cells.add(new IntegerLiteral("2"));
     cells.add(new IntegerLiteral("3"));
     
-    expectedAST.add(new ArrayAllocation(new IntType(), new ArrayAllocation.TypeDescriptor(new LinkedList<Expression>(), 1, new ArrayInitializer(cells), -1, -1)));
+    expectedAST.add(new ArrayAllocation(new IntTypeName(), new ArrayAllocation.TypeDescriptor(new LinkedList<Expression>(), 1, new ArrayInitializer(cells), -1, -1)));
 
     verifyOutput( "new int[]{ 0,1,2,3 }", expectedAST);
   }
@@ -507,7 +507,7 @@ public class ParserTest extends TestCase {
     List<Expression> args = new LinkedList<Expression> ();
     args.add(new IntegerLiteral("3"));
     
-    expectedAST.add(new SimpleAllocation(new ReferenceType("C"), args)); 
+    expectedAST.add(new SimpleAllocation(new ReferenceTypeName("C"), args)); 
                                          
     verifyOutput( " new C(3) ", expectedAST);
   }
@@ -519,7 +519,7 @@ public class ParserTest extends TestCase {
     List<Expression> args = new LinkedList<Expression>();
     args.add(new IntegerLiteral("3"));
     
-    expectedAST.add(new InnerAllocation(new QualifiedName(idnt), new ReferenceType("Iterator"), args)); 
+    expectedAST.add(new InnerAllocation(new QualifiedName(idnt), new ReferenceTypeName("Iterator"), args)); 
     verifyOutput( "list.new Iterator(3)", expectedAST);
   }
   
@@ -527,16 +527,16 @@ public class ParserTest extends TestCase {
     List<Node> members = new LinkedList<Node>();
     int accessFlags = 0;
     List<FormalParameter> params = new LinkedList<FormalParameter>();
-    List<? extends ReferenceType> excepts = new LinkedList<ReferenceType>();
+    List<? extends ReferenceTypeName> excepts = new LinkedList<ReferenceTypeName>();
     List<Node> stmts = new LinkedList<Node>();
     List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
     idnt1.add(new Identifier("o"));
     stmts.add(new ObjectMethodCall(new QualifiedName(idnt1), "n", null, "", -1, -1, -1, -1));
     BlockStatement body = new BlockStatement(stmts);
     
-    members.add(new MethodDeclaration(accessFlags, new VoidType(), "m", params, excepts, body));
+    members.add(new MethodDeclaration(accessFlags, new VoidTypeName(), "m", params, excepts, body));
     
-    expectedAST.add(new ClassAllocation(new ReferenceType("C"), null, members)); 
+    expectedAST.add(new ClassAllocation(new ReferenceTypeName("C"), null, members)); 
     verifyOutput(" new C() { void m() { o.n(); } }", expectedAST);
   }
   
@@ -548,7 +548,7 @@ public class ParserTest extends TestCase {
   }
   
   public void testQualifiedNameClassField() throws ParseException {
-    expectedAST.add( new TypeExpression(new ReferenceType("java.awt.event.ActionEvent")));
+    expectedAST.add( new TypeExpression(new ReferenceTypeName("java.awt.event.ActionEvent")));
     verifyOutput("java.awt.event.ActionEvent.class", expectedAST);
   }
   
@@ -583,7 +583,7 @@ public class ParserTest extends TestCase {
   }
   
   public void testDotClass() throws ParseException {
-    expectedAST.add(new TypeExpression(new ReferenceType("List")));
+    expectedAST.add(new TypeExpression(new ReferenceTypeName("List")));
     verifyOutput("List.class", expectedAST);
   }
   
@@ -612,7 +612,7 @@ public class ParserTest extends TestCase {
     ident.add(new Identifier("e"));
     
     List<Expression> args = new LinkedList<Expression>();
-    args.add(new SimpleAllocation(new ReferenceType("Object"), null));
+    args.add(new SimpleAllocation(new ReferenceTypeName("Object"), null));
     args.add(new IntegerLiteral("5"));
     args.add(new BooleanLiteral(false));
     expectedAST.add(new ObjectMethodCall(new QualifiedName(ident),"meth", args, null, -1, -1, -1, -1));
@@ -796,7 +796,7 @@ public class ParserTest extends TestCase {
 //  }
 //
 //  public void testArrayTypeAsTypeArgument() throws Throwable {
-//    Type parsed = getParser("Map<String,String[]>").Type();
+//    TypeName parsed = getParser("Map<String,String[]>").TypeName();
 //
 //    assertEquals(MAP_STRING_TO_STRING_ARRAY, parsed);
 //  }

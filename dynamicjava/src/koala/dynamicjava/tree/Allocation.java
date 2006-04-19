@@ -44,7 +44,7 @@ public abstract class Allocation extends PrimaryExpression {
   /**
    * The creationType
    */
-  private Type creationType;
+  private TypeName creationType;
   
   /**
    * Initializes the expression
@@ -56,7 +56,7 @@ public abstract class Allocation extends PrimaryExpression {
    * @param ec    the end column
    * @exception IllegalArgumentException if tp is null
    */
-  protected Allocation(Type tp, String fn, int bl, int bc, int el, int ec) {
+  protected Allocation(TypeName tp, String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
     if (tp == null) throw new IllegalArgumentException("tp == null");
@@ -67,7 +67,7 @@ public abstract class Allocation extends PrimaryExpression {
   /**
    * Returns the creation type
    */
-  public Type getCreationType() {
+  public TypeName getCreationType() {
     return creationType;
   }
   
@@ -75,7 +75,7 @@ public abstract class Allocation extends PrimaryExpression {
    * Sets the creation type
    * @exception IllegalArgumentException if t is null
    */
-  public void setCreationType(Type t) {
+  public void setCreationType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
     
     firePropertyChange(CREATION_TYPE, creationType, creationType = t);

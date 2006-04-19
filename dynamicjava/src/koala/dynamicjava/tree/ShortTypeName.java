@@ -29,35 +29,30 @@
 package koala.dynamicjava.tree;
 
 /**
- * This class represents the void type nodes of the syntax tree
+ * This class represents the short type nodes of the syntax tree
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/04/24
  */
 
-public class VoidType extends PrimitiveType {
+public class ShortTypeName extends PrimitiveTypeName {
     /**
      * Initializes the type
      */
-    public VoidType() {
+    public ShortTypeName() {
  this(null, 0, 0, 0, 0);
     }
 
     /**
      * Initializes the type
-     * @param fn    the filename
+     * @param fn  the filename
      * @param bl    the begin line
      * @param bc    the begin column
      * @param el    the end line
      * @param ec    the end column
      */
-    public VoidType(String fn, int bl, int bc, int el, int ec) {
- super(void.class, fn, bl, bc, el, ec);
+    public ShortTypeName(String fn, int bl, int bc, int el, int ec) {
+ super(short.class, fn, bl, bc, el, ec);
     }
-      /**
-   * Implementation of toString for use in unit testing
-   */
-  public String toString() {
-    return "("+getClass().getName()+": "+")";
-  }
+  
 }

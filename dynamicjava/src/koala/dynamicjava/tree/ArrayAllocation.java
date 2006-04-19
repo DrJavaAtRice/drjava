@@ -51,7 +51,7 @@ public class ArrayAllocation extends Allocation {
    * @param td    the type descriptor
    * @exception IllegalArgumentException if tp is null or td is null
    */
-  public ArrayAllocation(Type tp, TypeDescriptor td) {
+  public ArrayAllocation(TypeName tp, TypeDescriptor td) {
     this(tp, td, null, 0, 0, 0, 0);
   }
   
@@ -66,7 +66,7 @@ public class ArrayAllocation extends Allocation {
    * @param ec    the end column
    * @exception IllegalArgumentException if tp is null or td is null
    */
-  public ArrayAllocation(Type tp, TypeDescriptor td,
+  public ArrayAllocation(TypeName tp, TypeDescriptor td,
                          String fn, int bl, int bc, int el, int ec) {
     super(tp, fn, bl, bc, el, ec);
     
@@ -156,10 +156,10 @@ public class ArrayAllocation extends Allocation {
     /**
      * Initializes the type descriptor
      */
-    void initialize(Type t) {
+    void initialize(TypeName t) {
       if (initialization != null) {
-        Type et = (dimension > 1)
-          ? new ArrayType(t, dimension - 1,
+        TypeName et = (dimension > 1)
+          ? new ArrayTypeName(t, dimension - 1,
                           t.getFilename(),
                           t.getBeginLine(), t.getBeginColumn(),
                           endLine, endColumn)

@@ -138,7 +138,7 @@ public class Parser {
    * Creates a field declaration
    */
   private FieldDeclaration createFieldDeclaration(ModifierFlags  mf,
-                                                  Type           typ,
+                                                  TypeName           typ,
                                                   Token          name,
                                                   Expression     exp,
                                                   int            dim) {
@@ -165,7 +165,7 @@ public class Parser {
     
     // If the field is an array, create an array type node
     if (dim > 0) {
-      typ = new ArrayType(typ, dim,
+      typ = new ArrayTypeName(typ, dim,
                           filename,
                           typ.getBeginLine(), typ.getBeginColumn(),
                           typ.getEndLine(),   typ.getEndColumn());
@@ -179,7 +179,7 @@ public class Parser {
    * Creates a variable declaration
    */
   private VariableDeclaration createVariableDeclaration(Token          mf,
-                                                        Type           typ,
+                                                        TypeName           typ,
                                                         Token          name,
                                                         Expression     exp,
                                                         int            dim) {
@@ -206,7 +206,7 @@ public class Parser {
     
     // If the variable contains an array, create an array type node
     if (dim > 0) {
-      typ = new ArrayType(typ, dim,
+      typ = new ArrayTypeName(typ, dim,
                           filename,
                           typ.getBeginLine(), typ.getBeginColumn(),
                           typ.getEndLine(),   typ.getEndColumn());
@@ -463,7 +463,7 @@ public class Parser {
     /**
      * The type arguments
      */
-    public List<Type> typeArgs;
+    public List<TypeName> typeArgs;
     
     /**
      * The end line
@@ -481,7 +481,7 @@ public class Parser {
      * @param el    the end line
      * @param ec    the end column
      */
-    public ArgumentsSuffix(List<Expression> args, List<Type> tArgs, int el, int ec) {
+    public ArgumentsSuffix(List<Expression> args, List<TypeName> tArgs, int el, int ec) {
       arguments = args;
       typeArgs = tArgs;
       endLine   = el;
@@ -1202,14 +1202,14 @@ PARSER_END(Parser)
    */
   PackageDeclaration packageDeclaration() :
   {
-    ReferenceType name = null;
+    ReferenceTypeName name = null;
     Token t1, t2;
   }
   {
     try {
       t1="package" [ name=ReferenceTypeName() ] (t2=";" | t2=<EOF>)
       {
-        if(name instanceof GenericReferenceType){
+        if(name instanceof GenericReferenceTypeName){
           _throwParseException("Package names cannot be parameterized.");
         }
         if(name == null) {
@@ -1232,7 +1232,7 @@ PARSER_END(Parser)
    */
   ImportDeclaration importDeclaration() :
   {
-    ReferenceType name = null;
+    ReferenceTypeName name = null;
     Token star = null;
     Token t1, t2;
     Token sttic = null;
@@ -1241,7 +1241,7 @@ PARSER_END(Parser)
     try {
       t1="import" [sttic="static"] [name=ReferenceTypeName()] ["." star="*"] (t2=";" | t2=<EOF>)
       {
-        if(name instanceof GenericReferenceType){
+        if(name instanceof GenericReferenceTypeName){
           _throwParseException("Import names cannot be parameterized.");
         }
         if(name == null) {
@@ -1315,13 +1315,13 @@ PARSER_END(Parser)
     }
   }
   
-  // Production for a ReferenceType ////////////////////////////////////////////////////////
-  ReferenceType ReferenceTypeName() :
+  // Production for a ReferenceTypeName ////////////////////////////////////////////////////////
+  ReferenceTypeName ReferenceTypeName() :
   {
     Token id = null;
     List<IdentifierToken> list = new LinkedList<IdentifierToken>();
-    List<Type> typeArgs = new LinkedList<Type>();
-    List<List<? extends Type>> allTypeArgs = new LinkedList<List<? extends Type>>();
+    List<TypeName> typeArgs = new LinkedList<TypeName>();
+    List<List<? extends TypeName>> allTypeArgs = new LinkedList<List<? extends TypeName>>();
   }
   {
     try{
@@ -1329,13 +1329,13 @@ PARSER_END(Parser)
       {
         list.add(new TreeToken(id));
         allTypeArgs.add( typeArgs );
-        typeArgs = new LinkedList<Type>();
+        typeArgs = new LinkedList<TypeName>();
       }
       ( LOOKAHEAD("." <IDENTIFIER>) "." id=<IDENTIFIER>  [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
          {
         list.add(new TreeToken(id));
         allTypeArgs.add( typeArgs );
-        typeArgs = new LinkedList<Type>();
+        typeArgs = new LinkedList<TypeName>();
       }
       )*
         
@@ -1344,7 +1344,7 @@ PARSER_END(Parser)
         IdentifierToken l  = list.get(list.size()-1);
         boolean Parameterized = false;
         for( int i = 0; i < allTypeArgs.size(); i++ ){
-          List<? extends Type> targs = allTypeArgs.get(i);
+          List<? extends TypeName> targs = allTypeArgs.get(i);
           if(targs.size() > 0) {
             Parameterized = true;
             break;
@@ -1356,13 +1356,13 @@ PARSER_END(Parser)
           } else if(GenericTypesEnv.contains(TreeUtilities.listToName(list))){
             return GenericTypesEnv.lookup(TreeUtilities.listToName(list));
           } else {
-            return new ReferenceType(list,
+            return new ReferenceTypeName(list,
                                      filename,
                                      f.beginLine(), f.beginColumn(),
                                      l.endLine(),   l.endColumn());
           }
         } else {
-          return new GenericReferenceType(list,
+          return new GenericReferenceTypeName(list,
                                           filename,
                                           f.beginLine(), f.beginColumn(),
                                           l.endLine(), l.endColumn(),
@@ -1376,14 +1376,14 @@ PARSER_END(Parser)
   }
   
   /**
-   * Parses a comma separated list of ReferenceType names
-   * @return a list of ReferenceType
-   * @see koala.dynamicjava.tree.ReferenceType
+   * Parses a comma separated list of ReferenceTypeName names
+   * @return a list of ReferenceTypeName
+   * @see koala.dynamicjava.tree.ReferenceTypeName
    */
-  List<? extends ReferenceType> ReferenceTypeNameList() :
+  List<? extends ReferenceTypeName> ReferenceTypeNameList() :
   {
-    List<ReferenceType> list = new LinkedList<ReferenceType>();
-    ReferenceType obj;
+    List<ReferenceTypeName> list = new LinkedList<ReferenceTypeName>();
+    ReferenceTypeName obj;
   }
   {
     obj=ReferenceTypeName()
@@ -1596,8 +1596,8 @@ PARSER_END(Parser)
     Token t;
     Token id;
     TypeParameter[] typeParameters = null;
-    ReferenceType  ext  = null;
-    List<? extends ReferenceType> impl = null;
+    ReferenceTypeName  ext  = null;
+    List<? extends ReferenceTypeName> impl = null;
     ClassBody body;
   }
   {
@@ -1723,7 +1723,7 @@ PARSER_END(Parser)
   List<Node> fieldDeclaration() :
   {
     ModifierFlags mf;
-    Type          typ;
+    TypeName          typ;
     Token         id;
     int           dim  = 0;
     Expression    exp  = null;
@@ -1773,11 +1773,11 @@ PARSER_END(Parser)
     int               bc;
     int               flags = 0;
     TypeParameter[]   typeParameters = null;
-    Type              typ;
+    TypeName              typ;
     Token             id;
     int               dim = 0;
     List<FormalParameter> params;
-    List<? extends ReferenceType> exceptions = new LinkedList<ReferenceType>();
+    List<? extends ReferenceTypeName> exceptions = new LinkedList<ReferenceTypeName>();
     Node              body = null;
   }
   {
@@ -1801,7 +1801,7 @@ PARSER_END(Parser)
             bc = typ.getBeginColumn();
           }
           if (dim > 0) {
-            typ = new ArrayType(typ, dim,
+            typ = new ArrayTypeName(typ, dim,
                                 filename,
                                 typ.getBeginLine(), typ.getBeginColumn(),
                                 typ.getEndLine(),   typ.getEndColumn());
@@ -1875,7 +1875,7 @@ PARSER_END(Parser)
    */
   FormalParameter formalParameter() :
   {
-    Type  typ;
+    TypeName  typ;
     Token id;
     Token f   = null;
     int   dim = 0;
@@ -1886,7 +1886,7 @@ PARSER_END(Parser)
       [ f="final" ] typ=type() id=<IDENTIFIER> ( "[" "]" { dim++; } )*
       {
         if (dim > 0) {
-          typ = new ArrayType(typ, dim,
+          typ = new ArrayTypeName(typ, dim,
                               filename,
                               typ.getBeginLine(), typ.getBeginColumn(),
                               typ.getEndLine(),   typ.getEndColumn());
@@ -1909,7 +1909,7 @@ PARSER_END(Parser)
    */
   FormalParameter varArgsFormalParameter() :
   {
-    Type  typ;
+    TypeName  typ;
     Token id;
     Token f   = null;
   }
@@ -1919,7 +1919,7 @@ PARSER_END(Parser)
       [ f="final" ] typ=type() <VAR_ARGS> id=<IDENTIFIER>
       {
         // convert the type of the formal parameter to be an array
-        typ = new ArrayType(typ, 1,
+        typ = new ArrayTypeName(typ, 1,
                             filename,
                             typ.getBeginLine(), typ.getBeginColumn(),
                             typ.getEndLine(),   typ.getEndColumn());
@@ -1978,7 +1978,7 @@ PARSER_END(Parser)
     Token                 id;
     TypeParameter[]   typeParameters = null;
     List<FormalParameter> params;
-    List<? extends ReferenceType> exceptions = new LinkedList<ReferenceType>();
+    List<? extends ReferenceTypeName> exceptions = new LinkedList<ReferenceTypeName>();
     ConstructorInvocation ci = null;
     List<Node>            stmt;
     List<Node>            stmts = new LinkedList<Node>();
@@ -2039,7 +2039,7 @@ PARSER_END(Parser)
     Token           b, e;
     ArgumentsSuffix args;
     Expression      exp = null;
-    List<Type> typeArgs = new LinkedList<Type>();
+    List<TypeName> typeArgs = new LinkedList<TypeName>();
   }
   {
     try
@@ -2095,7 +2095,7 @@ PARSER_END(Parser)
     Token id;
     Token e;
     TypeParameter[] typeParameters = null;
-    List<? extends ReferenceType> impl = null;
+    List<? extends ReferenceTypeName> impl = null;
     List<Node> list = new LinkedList<Node>();
     List<Node>  decl;
     int   m = 0;
@@ -2203,7 +2203,7 @@ PARSER_END(Parser)
   {
     Token            t, e;
     Token            id;
-    List<? extends ReferenceType> impl = null;
+    List<? extends ReferenceTypeName> impl = null;
     EnumDeclaration.EnumBody   body;
     int   m = 0;
   }
@@ -2428,7 +2428,7 @@ PARSER_END(Parser)
   {
     Token      t    = null;
     Expression init = null;
-    Type       typ;
+    TypeName       typ;
     Token      id;
     int        dim  = 0;
     List<Node>       list = new LinkedList<Node>();
@@ -3316,7 +3316,7 @@ PARSER_END(Parser)
   Expression instanceOfExpression() :
   {
     Expression exp;
-    Type       typ = null;
+    TypeName       typ = null;
   }
   {
     exp=relationalExpression() [ "instanceof" typ=type() ]
@@ -3564,7 +3564,7 @@ PARSER_END(Parser)
    */
   Expression castExpression() :
   {
-    Type       typ;
+    TypeName       typ;
     Token      t;
     Expression exp;
   }
@@ -3655,7 +3655,7 @@ PARSER_END(Parser)
     Expression       pp;
     ExpressionSuffix es;
     List<ExpressionSuffix> list = new LinkedList<ExpressionSuffix>();
-    List<Type> typeArgs = new LinkedList<Type>();
+    List<TypeName> typeArgs = new LinkedList<TypeName>();
   }
   {
     [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments()]
@@ -3695,7 +3695,7 @@ PARSER_END(Parser)
   /**
    * Used internally to parse an expression
    */
-  ExpressionSuffix primarySuffix(List<Type> typeArgs) :
+  ExpressionSuffix primarySuffix(List<TypeName> typeArgs) :
   {
     ExpressionSuffix es;
   }
@@ -3745,10 +3745,10 @@ PARSER_END(Parser)
   Allocation simpleAllocationExpression() :
   {
     Token           t;
-    ReferenceType   rt;
+    ReferenceTypeName   rt;
     ArgumentsSuffix as;
     ClassBody       cb = null;
-    List<Type> typeArgs = new LinkedList<Type>();
+    List<TypeName> typeArgs = new LinkedList<TypeName>();
   }
   {
     
@@ -3820,7 +3820,7 @@ PARSER_END(Parser)
   /**
    * Used internally to parse an expression
    */
-  ArgumentsSuffix arguments(List<Type> typeArgs) :
+  ArgumentsSuffix arguments(List<TypeName> typeArgs) :
   {
     List<Expression> list = null;
     Token t;
@@ -3995,7 +3995,7 @@ PARSER_END(Parser)
    */
   Expression classExpression() :
   {
-    Type  typ;
+    TypeName  typ;
     Token t;
   }
   {
@@ -4015,10 +4015,10 @@ PARSER_END(Parser)
   {
     Token t;
     ArrayAllocation.TypeDescriptor td;
-    Type            pt;
+    TypeName            pt;
     ArgumentsSuffix as;
     ClassBody       cb = null;
-    List<Type> typeArgs = new LinkedList<Type>();
+    List<TypeName> typeArgs = new LinkedList<TypeName>();
   }
   {
     ( LOOKAHEAD(2)
@@ -4106,12 +4106,12 @@ PARSER_END(Parser)
   /**
    * Used internally to parse types
    */
-  Type type() :
+  TypeName type() :
   {
     int   dim = 0;
-    Type  pt  = null;
+    TypeName  pt  = null;
     Token t   = null;
-    Type rt = null;
+    TypeName rt = null;
   }
   {
     ( pt=primitiveType()
@@ -4129,7 +4129,7 @@ PARSER_END(Parser)
       if (dim == 0) {
         return rt;
       } else {
-        return new ArrayType(rt, dim,
+        return new ArrayTypeName(rt, dim,
                              filename,
                              rt.getBeginLine(), rt.getBeginColumn(),
                              t.endLine,         t.endColumn);
@@ -4140,15 +4140,15 @@ PARSER_END(Parser)
   /**
    * Used internally to parse types
    */
-  Type resultType() :
+  TypeName resultType() :
   {
-    Type  typ;
+    TypeName  typ;
     Token t;
   }
   {
     t="void"
     {
-      return new VoidType(filename,
+      return new VoidTypeName(filename,
                           t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
     |
@@ -4161,56 +4161,56 @@ PARSER_END(Parser)
   /**
    * Used internally to parse types
    */
-  Type primitiveType() :
+  TypeName primitiveType() :
   {
     Token t;
   }
   {
     t="boolean"
     {
-      return new BooleanType(filename,
+      return new BooleanTypeName(filename,
                              t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
     |
       t="char"
     {
-      return new CharType(filename,
+      return new CharTypeName(filename,
                           t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
     |
       t="byte"
     {
-      return new ByteType(filename,
+      return new ByteTypeName(filename,
                           t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
     |
       t="short"
     {
-      return new ShortType(filename,
+      return new ShortTypeName(filename,
                            t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
     |
       t="int"
     {
-      return new IntType(filename,
+      return new IntTypeName(filename,
                          t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
     |
       t="long"
     {
-      return new LongType(filename,
+      return new LongTypeName(filename,
                           t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
     |
       t="float"
     {
-      return new FloatType(filename,
+      return new FloatTypeName(filename,
                            t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
     |
       t="double"
     {
-      return new DoubleType(filename,
+      return new DoubleTypeName(filename,
                             t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
   }
@@ -4826,10 +4826,10 @@ PARSER_END(Parser)
   TypeParameter TypeParameter() :
   {
     List<IdentifierToken> name;
-    Type bound = new ReferenceType("Object");
+    TypeName bound = new ReferenceTypeName("Object");
     Token first = getToken(1);
-    List<ReferenceType> interfaceBoundsList = new LinkedList<ReferenceType>();
-    ReferenceType interf;
+    List<ReferenceTypeName> interfaceBoundsList = new LinkedList<ReferenceTypeName>();
+    ReferenceTypeName interf;
   }
   {
     name = name()
@@ -4843,8 +4843,8 @@ PARSER_END(Parser)
     )*
        ]
     {
-      if(bound instanceof ReferenceType){
-        return new TypeParameter(_loc(first), name, (ReferenceType)bound, interfaceBoundsList);
+      if(bound instanceof ReferenceTypeName){
+        return new TypeParameter(_loc(first), name, (ReferenceTypeName)bound, interfaceBoundsList);
       } else {
         throw new ParseException("Primitives are not allowed as bound"+
                                  "types, and array types are temporarily disabled due to a "+
@@ -4853,11 +4853,11 @@ PARSER_END(Parser)
     }
   }
   
-  List<Type> TypeArguments() :
+  List<TypeName> TypeArguments() :
   {
-    List<Type> typeArgs = new LinkedList<Type>();
-    ReferenceType hookedType = new ReferenceType("java.lang.Object");
-    Type temp = new HookType(hookedType, false);
+    List<TypeName> typeArgs = new LinkedList<TypeName>();
+    ReferenceTypeName hookedType = new ReferenceTypeName("java.lang.Object");
+    TypeName temp = new HookTypeName(hookedType, false);
     Token hook = null;
     Token supered = null;
   }
@@ -4871,7 +4871,7 @@ PARSER_END(Parser)
          )
     {
       if(hook!= null)
-        temp = new HookType(hookedType, (supered!=null));
+        temp = new HookTypeName(hookedType, (supered!=null));
       typeArgs.add(temp);
       
     }
@@ -4885,7 +4885,7 @@ PARSER_END(Parser)
         )
        {
       if(hook!= null)
-        temp = new HookType(hookedType, (supered!=null));
+        temp = new HookTypeName(hookedType, (supered!=null));
       typeArgs.add(temp);
     }
     )*

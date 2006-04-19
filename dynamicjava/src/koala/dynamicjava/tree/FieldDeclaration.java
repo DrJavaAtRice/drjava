@@ -66,7 +66,7 @@ public class FieldDeclaration extends Node {
   /**
    * The type of this field
    */
-  private Type type;
+  private TypeName type;
 
   /**
    * The name of this field
@@ -86,7 +86,7 @@ public class FieldDeclaration extends Node {
    * @param init   the initializer. Can be null
    * @exception IllegalArgumentException if name is null or type is null
    */
-  public FieldDeclaration(int flags, Type type, String name, Expression init) {
+  public FieldDeclaration(int flags, TypeName type, String name, Expression init) {
     this(flags, type, name, init, null, 0, 0 ,0 ,0);
   }
 
@@ -103,7 +103,7 @@ public class FieldDeclaration extends Node {
    * @param ec     the end column
    * @exception IllegalArgumentException if name is null or type is null
    */
-  public FieldDeclaration(int flags, Type type, String name, Expression init,
+  public FieldDeclaration(int flags, TypeName type, String name, Expression init,
                           String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
@@ -115,10 +115,10 @@ public class FieldDeclaration extends Node {
     this.name   = name;
     initializer = init;
 
-    if (type instanceof ArrayType) {
+    if (type instanceof ArrayTypeName) {
       if (initializer instanceof ArrayInitializer) {
         ((ArrayInitializer)initializer).setElementType
-          (((ArrayType)type).getElementType());
+          (((ArrayTypeName)type).getElementType());
       }
     }
   }
@@ -140,7 +140,7 @@ public class FieldDeclaration extends Node {
   /**
    * Gets the declared type for this field
    */
-  public Type getType() {
+  public TypeName getType() {
     return type;
   }
 
@@ -148,7 +148,7 @@ public class FieldDeclaration extends Node {
    * Sets the type of this field
    * @exception IllegalArgumentException if t is null
    */
-  public void setType(Type t) {
+  public void setType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
 
     firePropertyChange(TYPE, type, type = t);

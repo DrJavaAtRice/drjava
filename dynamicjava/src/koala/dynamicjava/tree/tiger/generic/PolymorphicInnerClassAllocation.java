@@ -46,7 +46,7 @@ public class PolymorphicInnerClassAllocation extends InnerClassAllocation {
   /**
    * The type arguments of the anonymous class
    */
-  private List<Type> _typeArguments;
+  private List<TypeName> _typeArguments;
   
   /**
    * Initializes the expression
@@ -58,7 +58,7 @@ public class PolymorphicInnerClassAllocation extends InnerClassAllocation {
    * @exception IllegalArgumentException if exp is null or memb is null or
    *            tp is null
    */
-  public PolymorphicInnerClassAllocation(Expression exp, Type tp, List<Expression> args, List<Node> memb, List<Type> targs) {
+  public PolymorphicInnerClassAllocation(Expression exp, TypeName tp, List<Expression> args, List<Node> memb, List<TypeName> targs) {
     this(exp, tp, args, memb, targs, null, 0, 0, 0, 0);
   }
   
@@ -77,7 +77,7 @@ public class PolymorphicInnerClassAllocation extends InnerClassAllocation {
    * @exception IllegalArgumentException if exp is null or memb is null or
    *            tp is null
    */
-  public PolymorphicInnerClassAllocation(Expression exp, Type tp, List<Expression> args, List<Node> memb, List<Type> targs,
+  public PolymorphicInnerClassAllocation(Expression exp, TypeName tp, List<Expression> args, List<Node> memb, List<TypeName> targs,
                               String fn, int bl, int bc, int el, int ec) {
     super(exp, tp, args, memb, fn, bl, bc, el, ec);
     
@@ -85,7 +85,7 @@ public class PolymorphicInnerClassAllocation extends InnerClassAllocation {
   }
   
   /** Returns the type arguments of the anonymous class */
-  public List<Type> getTypeArguments() { return _typeArguments; }
+  public List<TypeName> getTypeArguments() { return _typeArguments; }
   
 //  /**
 //   * Sets the members of the anonymous class

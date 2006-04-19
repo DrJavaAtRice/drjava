@@ -63,7 +63,7 @@ public class InnerAllocation extends Allocation implements ExpressionStatement,
    * @param args  the arguments of the constructor. null if no arguments.
    * @exception IllegalArgumentException if exp is null or tp is null
    */
-  public InnerAllocation(Expression exp, Type tp, List<Expression> args) {
+  public InnerAllocation(Expression exp, TypeName tp, List<Expression> args) {
     this(exp, tp, args, null, 0, 0, 0, 0);
   }
   
@@ -79,7 +79,7 @@ public class InnerAllocation extends Allocation implements ExpressionStatement,
    * @param ec    the end column
    * @exception IllegalArgumentException if exp is null or tp is null
    */
-  public InnerAllocation(Expression exp, Type tp, List<Expression> args,
+  public InnerAllocation(Expression exp, TypeName tp, List<Expression> args,
                          String fn, int bl, int bc, int el, int ec) {
     super(tp, fn, bl, bc, el, ec);
     

@@ -28,31 +28,72 @@
 
 package koala.dynamicjava.tree;
 
+import koala.dynamicjava.tree.visitor.*;
+
 /**
- * This class represents the boolean type nodes of the syntax tree
+ * This class represents the primitive type nodes of the syntax tree
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/04/24
  */
 
-public class BooleanType extends PrimitiveType {
+public abstract class PrimitiveTypeName extends TypeName {
   /**
-   * Initializes the type
+   * The value property name
    */
-  public BooleanType() {
-    this(null, 0, 0, 0, 0);
-  }
+  public final static String VALUE = "value";
+  
+  /**
+   * The value of the node
+   */
+  private Class<?> value;
   
   /**
    * Initializes the type
+   * @param val   the value of this type
    * @param fn    the filename
    * @param bl    the begin line
    * @param bc    the begin column
    * @param el    the end line
    * @param ec    the end column
+   * @exception IllegalArgumentException if val is null
    */
-  public BooleanType(String fn, int bl, int bc, int el, int ec) {
-    super(boolean.class, fn, bl, bc, el, ec);
+  protected PrimitiveTypeName(Class<?> val, String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    
+    if (val == null) throw new IllegalArgumentException("val == null");
+    
+    value = val;
   }
   
+  /**
+   * Returns the value of this node
+   */
+  public Class<?> getValue() {
+    return value;
+  }
+  
+  /**
+   * Sets the value of this node
+   * @exception IllegalArgumentException if c is null
+   */
+  public void setValue(Class<?> c) {
+    if (c == null) throw new IllegalArgumentException("c == null");
+    
+    firePropertyChange(VALUE, value, value = c);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
+     /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toString() {
+    return "("+getClass().getName()+": "+getValue()+")";
+  }
 }

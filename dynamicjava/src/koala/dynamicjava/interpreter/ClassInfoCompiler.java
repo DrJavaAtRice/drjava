@@ -189,10 +189,10 @@ public class ClassInfoCompiler {
       interpreter.registerMethod
         (classFactory.createClassInitializer(),
          new MethodDeclaration(Modifier.PUBLIC,
-                               new VoidType(),
+                               new VoidTypeName(),
                                "<clinit>",
                                new LinkedList<FormalParameter>(),
-                               new LinkedList<ReferenceType>(),
+                               new LinkedList<ReferenceTypeName>(),
                                new BlockStatement(classInitializer)),
          importationManager);
     }
@@ -263,10 +263,10 @@ public class ClassInfoCompiler {
     
     MethodDeclaration md =
       new MethodDeclaration(cd.getAccessFlags(),
-                            new VoidType(),
+                            new VoidTypeName(),
                             "<init>",
                             cd.getParameters(),
-                            new LinkedList<ReferenceType>(),
+                            new LinkedList<ReferenceTypeName>(),
                             new BlockStatement(cd.getStatements()));
     interpreter.registerMethod(sig, md, importationManager);
     
@@ -417,22 +417,22 @@ public class ClassInfoCompiler {
     }
     
     /**
-     * Visits a PrimitiveType
+     * Visits a PrimitiveTypeName
      * @param node the node to visit
      * @return the name of the type
      */
-    public Object visit(PrimitiveType node) {
+    public Object visit(PrimitiveTypeName node) {
       ClassInfo result = new JavaClassInfo(node.getValue());
       node.setProperty(NodeProperties.TYPE, result);
       return result;
     }
     
     /**
-     * Visits a ReferenceType
+     * Visits a ReferenceTypeName
      * @param node the node to visit
      * @return the name of the type
      */
-    public Object visit(ReferenceType node) {
+    public Object visit(ReferenceTypeName node) {
       // Look for the class represented by this node
       ClassInfo c = null;
       String    s = node.getRepresentation();
@@ -448,11 +448,11 @@ public class ClassInfoCompiler {
     }
     
     /**
-     * Visits a ArrayType
+     * Visits a ArrayTypeName
      * @param node the node to visit
      * @return the name of the type
      */
-    public Object visit(ArrayType node) {
+    public Object visit(ArrayTypeName node) {
       Node eType = node.getElementType();
       eType.acceptVisitor(this);
       ClassInfo c = NodeProperties.getClassInfo(eType);
@@ -530,7 +530,7 @@ public class ClassInfoCompiler {
         if (o instanceof Expression) {
           node.setExpression((Expression)o);
         } else {
-          Node result =  new StaticFieldAccess((ReferenceType)o,
+          Node result =  new StaticFieldAccess((ReferenceTypeName)o,
                                                node.getFieldName());
           result.acceptVisitor(this);
           return result;
@@ -614,7 +614,7 @@ public class ClassInfoCompiler {
           if (o instanceof Expression) {
             node.setExpression((Expression)o);
           } else {
-            Node result =  new StaticMethodCall((ReferenceType)o,
+            Node result =  new StaticMethodCall((ReferenceTypeName)o,
                                                 node.getMethodName(),
                                                 node.getArguments(),
                                                 node.getFilename(),
@@ -632,7 +632,7 @@ public class ClassInfoCompiler {
         Identifier t = new Identifier(classInfo.getName());
         List<IdentifierToken> l = new LinkedList<IdentifierToken>();
         l.add(t);
-        ReferenceType rt = new ReferenceType(l);
+        ReferenceTypeName rt = new ReferenceTypeName(l);
         rt.acceptVisitor(this);
         Node result =  new StaticMethodCall(rt,
                                             node.getMethodName(),
@@ -767,7 +767,7 @@ public class ClassInfoCompiler {
      * Visits a QualifiedName
      * @param node the node to visit
      * @return a node that depends of the meaning of this name.
-     *         It could be : a QualifiedName, a ReferenceType or a FieldAccess.
+     *         It could be : a QualifiedName, a ReferenceTypeName or a FieldAccess.
      */
     public Object visit(QualifiedName node) {
       List<IdentifierToken> ids = node.getIdentifiers();
@@ -789,7 +789,7 @@ public class ClassInfoCompiler {
           result = new QualifiedName(l);
         } else {
           result = new StaticFieldAccess
-            (new ReferenceType(classInfo.getName()),
+            (new ReferenceTypeName(classInfo.getName()),
              t.image());
         }
         
@@ -830,9 +830,9 @@ public class ClassInfoCompiler {
         throw new ExecutionError("undefined.class", node);
       }
       
-      // Creates a ReferenceType node
+      // Creates a ReferenceTypeName node
       IdentifierToken t2 = l.get(l.size()-1);
-      ReferenceType rt = new ReferenceType(l,
+      ReferenceTypeName rt = new ReferenceTypeName(l,
                                            node.getFilename(),
                                            t.beginLine(), t.beginColumn(),
                                            t2.endLine(),  t2.endColumn());
@@ -1357,7 +1357,7 @@ public class ClassInfoCompiler {
     public Object visit(ConditionalExpression node) {
       Object o = node.getIfTrueExpression().acceptVisitor(this);
       if (o != null) {
-        if (o instanceof ReferenceType) {
+        if (o instanceof ReferenceTypeName) {
           throw new ExecutionError
             ("malformed.second.operand", node);
         }
@@ -1365,7 +1365,7 @@ public class ClassInfoCompiler {
       }
       o = node.getIfFalseExpression().acceptVisitor(this);
       if (o != null) {
-        if (o instanceof ReferenceType) {
+        if (o instanceof ReferenceTypeName) {
           throw new ExecutionError
             ("malformed.third.operand", node);
         }
@@ -1482,7 +1482,7 @@ public class ClassInfoCompiler {
       // Visit the subexpression
       Object o = node.getExpression().acceptVisitor(this);
       if (o != null) {
-        if (o instanceof ReferenceType) {
+        if (o instanceof ReferenceTypeName) {
           throw new ExecutionError("malformed.expression", node);
         }
         node.setExpression((Expression)o);
@@ -1520,7 +1520,7 @@ public class ClassInfoCompiler {
       // Visit the left expression
       Object o = node.getLeftExpression().acceptVisitor(this);
       if (o != null) {
-        if (o instanceof ReferenceType) {
+        if (o instanceof ReferenceTypeName) {
           throw new ExecutionError("left.operand", node);
         }
         node.setLeftExpression((Expression)o);
@@ -1529,7 +1529,7 @@ public class ClassInfoCompiler {
       // Visit the right expression
       o = node.getRightExpression().acceptVisitor(this);
       if (o != null) {
-        if (o instanceof ReferenceType) {
+        if (o instanceof ReferenceTypeName) {
           throw new ExecutionError("right.operand", node);
         }
         node.setRightExpression((Expression)o);
@@ -1640,7 +1640,7 @@ public class ClassInfoCompiler {
       while (it.hasNext()) {
         Object o = it.next().acceptVisitor(this);
         if (o != null) {
-          if (o instanceof ReferenceType) {
+          if (o instanceof ReferenceTypeName) {
             throw new ExecutionError(s, n);
           }
           it.set((Expression)o);  // cast to Expression is a guess here /**/
@@ -1805,7 +1805,7 @@ public class ClassInfoCompiler {
           
           Expression var = null;
           if (Modifier.isStatic(af)) {
-            ReferenceType typ = new ReferenceType(classInfo.getName());
+            ReferenceTypeName typ = new ReferenceTypeName(classInfo.getName());
             var = new StaticFieldAccess(typ, fn);
           } else {
             Identifier t = new Identifier("this");

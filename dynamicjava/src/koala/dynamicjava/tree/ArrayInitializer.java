@@ -58,7 +58,7 @@ public class ArrayInitializer extends Expression {
   /**
    * The element type
    */
-  private Type elementType;
+  private TypeName elementType;
   
   /**
    * Initializes the expression
@@ -109,7 +109,7 @@ public class ArrayInitializer extends Expression {
    * Returns the element type
    * @exception IllegalStateException if elementType is null
    */
-  public Type getElementType() {
+  public TypeName getElementType() {
     if (elementType == null) throw new IllegalStateException("elementType == null");
     
     return elementType;
@@ -119,12 +119,12 @@ public class ArrayInitializer extends Expression {
    * Sets the element type
    * @exception IllegalArgumentException if t is null
    */
-  public void setElementType(Type t) {
+  public void setElementType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
     
     firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);
-    if (t instanceof ArrayType) {
-      ArrayType at = (ArrayType)t;
+    if (t instanceof ArrayTypeName) {
+      ArrayTypeName at = (ArrayTypeName)t;
       Iterator  it = cells.iterator();
       while (it.hasNext()) {
         Object init = it.next();

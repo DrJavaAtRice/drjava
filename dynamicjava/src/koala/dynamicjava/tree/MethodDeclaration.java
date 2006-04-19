@@ -78,7 +78,7 @@ public class MethodDeclaration extends Node {
   /**
    * The return type of this method
    */
-  private Type returnType;
+  private TypeName returnType;
 
   /**
    * The name of this method
@@ -111,8 +111,8 @@ public class MethodDeclaration extends Node {
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
-  public MethodDeclaration(int flags, Type type, String name,
-                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body) {
+  public MethodDeclaration(int flags, TypeName type, String name,
+                           List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body) {
     this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0);
   }
 
@@ -132,8 +132,8 @@ public class MethodDeclaration extends Node {
    * @exception IllegalArgumentException if name is null or type is null or
    *            params is null or excepts is null
    */
-  public MethodDeclaration(int flags, Type type, String name,
-                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body,
+  public MethodDeclaration(int flags, TypeName type, String name,
+                           List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body,
                            String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
@@ -150,7 +150,7 @@ public class MethodDeclaration extends Node {
 
     exceptions            = new LinkedList<String>();
 
-    ListIterator<? extends ReferenceType> it = excepts.listIterator();
+    ListIterator<? extends ReferenceTypeName> it = excepts.listIterator();
     while (it.hasNext()) {
       exceptions.add(it.next().getRepresentation());
     }
@@ -173,7 +173,7 @@ public class MethodDeclaration extends Node {
   /**
    * Gets the return type of this method
    */
-  public Type getReturnType() {
+  public TypeName getReturnType() {
     return returnType;
   }
 
@@ -181,7 +181,7 @@ public class MethodDeclaration extends Node {
    * Sets the return type of this method
    * @exception IllegalArgumentException if t is null
    */
-  public void setReturnType(Type t) {
+  public void setReturnType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
 
     firePropertyChange(RETURN_TYPE, returnType, returnType = t);

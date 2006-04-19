@@ -29,7 +29,7 @@
 package koala.dynamicjava.interpreter.context;
 
 import java.io.*;
-//import java.lang.reflect.*; //  Broken into All classes imported, to avoid importing the class Type
+//import java.lang.reflect.*; //  Broken into All classes imported, to avoid importing the class TypeName
 import java.lang.reflect.Modifier;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
@@ -59,10 +59,10 @@ import koala.dynamicjava.util.*;
 
 public class GlobalContext extends VariableContext implements Context {
   // Constant objects
-  protected final static ReferenceType CLASS_TYPE  = new ReferenceType("java.lang.Class");
-  protected final static ReferenceType MAP_TYPE    = new ReferenceType("java.util.Map");
-  protected final static ReferenceType OBJECT_TYPE = new ReferenceType("java.lang.Object");
-  protected final static ArrayType OBJECT_ARRAY_ARRAY = new ArrayType(OBJECT_TYPE, 2);
+  protected final static ReferenceTypeName CLASS_TYPE  = new ReferenceTypeName("java.lang.Class");
+  protected final static ReferenceTypeName MAP_TYPE    = new ReferenceTypeName("java.util.Map");
+  protected final static ReferenceTypeName OBJECT_TYPE = new ReferenceTypeName("java.lang.Object");
+  protected final static ArrayTypeName OBJECT_ARRAY_ARRAY = new ArrayTypeName(OBJECT_TYPE, 2);
   protected final static TypeExpression OBJECT_CLASS = new TypeExpression(OBJECT_TYPE);
 
   protected final static String LOCALS_NAME = "local$Variables$Reference$0";
@@ -529,23 +529,23 @@ public class GlobalContext extends VariableContext implements Context {
     csd = new ConstructorDeclaration(Modifier.PUBLIC,
                                      cname,
                                      params,
-                                     new LinkedList<ReferenceType>(),
+                                     new LinkedList<ReferenceTypeName>(),
                                      ci,
                                      stmts);
     memb.add(csd);
 
     // Set the inheritance
-    ReferenceType ext = null;
-    List<ReferenceType> impl = null;
+    ReferenceTypeName ext = null;
+    List<ReferenceTypeName> impl = null;
     if (c.isInterface()) {
-      impl = new LinkedList<ReferenceType>();
+      impl = new LinkedList<ReferenceTypeName>();
       List<IdentifierToken> intf = new LinkedList<IdentifierToken>();
       intf.add(new Identifier(c.getName()));
-      impl.add(new ReferenceType(intf));
+      impl.add(new ReferenceTypeName(intf));
     } else {
       List<IdentifierToken> l = new LinkedList<IdentifierToken>();
       l.add(new Identifier(c.getName()));
-      ext = new ReferenceType(l);
+      ext = new ReferenceTypeName(l);
     }
 
     // Create the class
@@ -585,7 +585,7 @@ public class GlobalContext extends VariableContext implements Context {
     List<Expression> cells = new LinkedList<Expression>();
     ArrayInitializer cell;
 
-    Type tp = new ReferenceType(Object.class.getName());
+    TypeName tp = new ReferenceTypeName(Object.class.getName());
     Map m = getConstants();
     Iterator it = m.keySet().iterator();
     while (it.hasNext()) {
@@ -599,7 +599,7 @@ public class GlobalContext extends VariableContext implements Context {
       cell.setElementType(tp);
       cells.add(cell);
     }
-    tp = new ArrayType(tp, 1);
+    tp = new ArrayTypeName(tp, 1);
     ArrayInitializer ai = new ArrayInitializer(cells);
     ai.setElementType(tp);
     return ai;

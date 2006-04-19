@@ -669,21 +669,21 @@ public class DisplayVisitor extends VisitorObject<Void> {
   }
   
   /**
-   * Visits a PrimitiveType
+   * Visits a PrimitiveTypeName
    * @param node the node to visit
    */
-  public Void visit(PrimitiveType node) {
-    print("l."+node.getBeginLine()+" PrimitiveType <"+node.getValue()+">");
+  public Void visit(PrimitiveTypeName node) {
+    print("l."+node.getBeginLine()+" PrimitiveTypeName <"+node.getValue()+">");
     displayProperties(node);
     return null;
   }
   
   /**
-   * Visits a ReferenceType
+   * Visits a ReferenceTypeName
    * @param node the node to visit
    */
-  public Void visit(ReferenceType node) {
-    print("l."+node.getBeginLine()+" ReferenceType {");
+  public Void visit(ReferenceTypeName node) {
+    print("l."+node.getBeginLine()+" ReferenceTypeName {");
     print("representation:");
     indent();
     print(node.getRepresentation());
@@ -694,11 +694,11 @@ public class DisplayVisitor extends VisitorObject<Void> {
   }
   
   /**
-   * Visits a ArrayType
+   * Visits a ArrayTypeName
    * @param node the node to visit
    */
-  public Void visit(ArrayType node) {
-    print("l."+node.getBeginLine()+" ArrayType {");
+  public Void visit(ArrayTypeName node) {
+    print("l."+node.getBeginLine()+" ArrayTypeName {");
     if (node.getElementType() != null) {
       print("elementType:");
       node.getElementType().acceptVisitor(this);

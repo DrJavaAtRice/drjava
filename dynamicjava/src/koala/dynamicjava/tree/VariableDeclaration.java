@@ -66,7 +66,7 @@ public class VariableDeclaration extends Node {
   /**
    * The type of this variable
    */
-  private Type type;
+  private TypeName type;
   
   /**
    * The name of this variable
@@ -86,7 +86,7 @@ public class VariableDeclaration extends Node {
    * @param init   the initializer
    * @exception IllegalArgumentException if name is null or type is null
    */
-  public VariableDeclaration(boolean fin, Type type, String name, Expression init) {
+  public VariableDeclaration(boolean fin, TypeName type, String name, Expression init) {
     this(fin, type, name, init, null, 0, 0, 0, 0);
   }
   
@@ -103,7 +103,7 @@ public class VariableDeclaration extends Node {
    * @param ec     the end column
    * @exception IllegalArgumentException if name is null or type is null
    */
-  public VariableDeclaration(boolean fin, Type type, String name, Expression init,
+  public VariableDeclaration(boolean fin, TypeName type, String name, Expression init,
                              String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
@@ -115,10 +115,10 @@ public class VariableDeclaration extends Node {
     this.name     = name;
     initializer   = init;
     
-    if (type instanceof ArrayType) {
+    if (type instanceof ArrayTypeName) {
       if (initializer instanceof ArrayInitializer) {
         ((ArrayInitializer)initializer).setElementType
-          (((ArrayType)type).getElementType());
+          (((ArrayTypeName)type).getElementType());
       }
     }
   }
@@ -140,7 +140,7 @@ public class VariableDeclaration extends Node {
   /**
    * Gets the declared type for this variable
    */
-  public Type getType() {
+  public TypeName getType() {
     return type;
   }
   
@@ -148,7 +148,7 @@ public class VariableDeclaration extends Node {
    * Sets the type of this field
    * @exception IllegalArgumentException if t is null
    */
-  public void setType(Type t) {
+  public void setType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
     
     firePropertyChange(TYPE, type, type = t);

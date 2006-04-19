@@ -130,10 +130,10 @@ public class TypeChecker15 extends AbstractTypeChecker {
   }
 
   /**
-   * Does nothing - GenericReferenceType is allowed in 1.5
+   * Does nothing - GenericReferenceTypeName is allowed in 1.5
    * @param node unused
    */  
-  protected void checkGenericReferenceType(ReferenceType node) {
+  protected void checkGenericReferenceType(ReferenceTypeName node) {
     
   }
   
@@ -179,7 +179,7 @@ public class TypeChecker15 extends AbstractTypeChecker {
    */
   protected SimpleAllocation _box(Expression exp, Class<?> refType) {
     String refTypeName = refType.getName();
-    PrimitiveType primType = _correspondingPrimType(refType);
+    PrimitiveTypeName primType = _correspondingPrimType(refType);
     
     Constructor constructor;
     try {
@@ -189,7 +189,7 @@ public class TypeChecker15 extends AbstractTypeChecker {
       throw new RuntimeException("The constructor for " + refTypeName + " not found.");
     }
     
-    ReferenceType ref = new ReferenceType(refTypeName,
+    ReferenceTypeName ref = new ReferenceTypeName(refTypeName,
                                           exp.getFilename(),
                                           exp.getBeginLine(),
                                           exp.getBeginColumn(),

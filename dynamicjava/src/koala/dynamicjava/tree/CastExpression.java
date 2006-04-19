@@ -46,7 +46,7 @@ public class CastExpression extends UnaryExpression {
   /**
    * The target type
    */
-  private Type targetType;
+  private TypeName targetType;
   
   /**
    * Initializes the expression
@@ -54,7 +54,7 @@ public class CastExpression extends UnaryExpression {
    * @param exp   the casted expression
    * @exception IllegalArgumentException if tt is null or exp is null
    */
-  public CastExpression(Type tt, Expression exp) {
+  public CastExpression(TypeName tt, Expression exp) {
     this(tt, exp, null, 0, 0, 0, 0);
   }
   
@@ -69,7 +69,7 @@ public class CastExpression extends UnaryExpression {
    * @param ec    the end column
    * @exception IllegalArgumentException if tt is null or exp is null
    */
-  public CastExpression(Type tt, Expression exp,
+  public CastExpression(TypeName tt, Expression exp,
                         String fn, int bl, int bc, int el, int ec) {
     super(exp, fn, bl, bc, el, ec);
     
@@ -81,7 +81,7 @@ public class CastExpression extends UnaryExpression {
   /**
    * Returns the target type
    */
-  public Type getTargetType() {
+  public TypeName getTargetType() {
     return targetType;
   }
   
@@ -89,7 +89,7 @@ public class CastExpression extends UnaryExpression {
    * Sets the target type
    * @exception IllegalArgumentException if t is null
    */
-  public void setTargetType(Type t) {
+  public void setTargetType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
     
     firePropertyChange(TARGET_TYPE, targetType, targetType = t);

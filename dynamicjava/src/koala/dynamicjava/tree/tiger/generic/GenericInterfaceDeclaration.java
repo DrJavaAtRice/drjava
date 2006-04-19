@@ -67,7 +67,7 @@ public class GenericInterfaceDeclaration extends InterfaceDeclaration {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceType> impl, List<Node> body, TypeParameter[] typeParams) {
+  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body, TypeParameter[] typeParams) {
     this(flags, name, impl, body, null, 0, 0, 0, 0, typeParams);
   }
   
@@ -85,7 +85,7 @@ public class GenericInterfaceDeclaration extends InterfaceDeclaration {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if name is null or body is null
    */
-  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceType> impl, List<Node> body,
+  public GenericInterfaceDeclaration(int flags, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
                                      String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
     super(flags, name, impl, body, fn, bl, bc, el, ec);
     _typeParameters = typeParams;

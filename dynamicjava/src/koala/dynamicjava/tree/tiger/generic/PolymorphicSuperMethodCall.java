@@ -45,7 +45,7 @@ public class PolymorphicSuperMethodCall extends SuperMethodCall {
   /**
    * The type arguments on which this method call applies
    */
-  private List<Type> _typeArgs;
+  private List<TypeName> _typeArgs;
 
   /**
    * Creates a new node
@@ -54,7 +54,7 @@ public class PolymorphicSuperMethodCall extends SuperMethodCall {
    * @param targs the type arguments
    * @exception IllegalArgumentException if mn is null
    */
-  public PolymorphicSuperMethodCall(String mn, List<Expression> args, List<Type> targs) {
+  public PolymorphicSuperMethodCall(String mn, List<Expression> args, List<TypeName> targs) {
     this(mn, args, targs, null, 0, 0, 0, 0);
   }
   
@@ -70,7 +70,7 @@ public class PolymorphicSuperMethodCall extends SuperMethodCall {
    * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
-  public PolymorphicSuperMethodCall(String mn, List<Expression> args, List<Type> targs,
+  public PolymorphicSuperMethodCall(String mn, List<Expression> args, List<TypeName> targs,
                          String fn, int bl, int bc, int el, int ec) {
     super(mn, args, fn, bl, bc, el, ec);
     _typeArgs = targs;
@@ -90,10 +90,10 @@ public class PolymorphicSuperMethodCall extends SuperMethodCall {
    * default equals() in class Node calls toString())
    */
 
-  public List<Type> getTypeArguments(){ return _typeArgs; }
+  public List<TypeName> getTypeArguments(){ return _typeArgs; }
 
   public String toStringHelper() {
-//    List<Type> tp = getTypeArguments();
+//    List<TypeName> tp = getTypeArguments();
 //    String typeArgsStr = "";
 //    if(tp.size()>0)
 //      typeArgsStr = ""+tp.get(0);

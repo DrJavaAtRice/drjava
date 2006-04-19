@@ -348,7 +348,7 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
                                       "  isFinal:\n" +
                                       "    false\n" +
                                       "  type:\n" +
-                                      "    l.1 PrimitiveType <int>\n" +
+                                      "    l.1 PrimitiveTypeName <int>\n" +
                                       "  name:\n" +
                                       "    i\n" +
                                       "  initializer:\n" +
@@ -381,7 +381,7 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
                                       "    isFinal:\n" +
                                       "      false\n" +
                                       "    type:\n" +
-                                      "      l.1 PrimitiveType <int>\n" +
+                                      "      l.1 PrimitiveTypeName <int>\n" +
                                       "    name:\n" +
                                       "      j\n" +
                                       "    initializer:\n" +
@@ -654,7 +654,7 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
                                       "    expression:\n" +
                                       "      l.1 SimpleAllocation {\n" +
                                       "      creationType:\n" +
-                                      "        l.1 ReferenceType {\n" +
+                                      "        l.1 ReferenceTypeName {\n" +
                                       "        representation:\n" +
                                       "          FileNotFoundException\n" +
                                       "        }\n" +
@@ -669,7 +669,7 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
                                       "  exception:\n" +
                                       "    l.1 FormalParameter {\n" +
                                       "    type:\n" +
-                                      "      l.1 ReferenceType {\n" +
+                                      "      l.1 ReferenceTypeName {\n" +
                                       "      representation:\n" +
                                       "        FileNotFoundException\n" +
                                       "      }\n" +
@@ -1015,7 +1015,7 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
                                       "  accessFlags:\n" +
                                       "    2\n" +
                                       "  type:\n" +
-                                      "    l.2 PrimitiveType <int>\n" +
+                                      "    l.2 PrimitiveTypeName <int>\n" +
                                       "  name:\n" +
                                       "    _f1\n" +
                                       "  initializer:\n" +
@@ -1024,7 +1024,7 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
                                       "  accessFlags:\n" +
                                       "    25\n" +
                                       "  type:\n" +
-                                      "    l.4 ReferenceType {\n" +
+                                      "    l.4 ReferenceTypeName {\n" +
                                       "    representation:\n" +
                                       "      Tester\n" +
                                       "    }\n" +
@@ -1033,7 +1033,7 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
                                       "  initializer:\n" +
                                       "    l.4 SimpleAllocation {\n" +
                                       "    creationType:\n" +
-                                      "      l.4 ReferenceType {\n" +
+                                      "      l.4 ReferenceTypeName {\n" +
                                       "      representation:\n" +
                                       "        Tester\n" +
                                       "      }\n" +
@@ -1060,7 +1060,7 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
                                       "  parameters:\n" +
                                       "    l.12 FormalParameter {\n" +
                                       "    type:\n" +
-                                      "      l.12 PrimitiveType <int>\n" +
+                                      "      l.12 PrimitiveTypeName <int>\n" +
                                       "    name:\n" +
                                       "      f1\n" +
                                       "    }\n" +
@@ -1089,7 +1089,7 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
                                       "  accessFlags:\n" +
                                       "    1\n" +
                                       "  returnType:\n" +
-                                      "    l.16 PrimitiveType <int>\n" +
+                                      "    l.16 PrimitiveTypeName <int>\n" +
                                       "  name:\n" +
                                       "    getF1\n" +
                                       "  parameters:\n" +
@@ -1110,13 +1110,13 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
                                       "  accessFlags:\n" +
                                       "    1\n" +
                                       "  returnType:\n" +
-                                      "    l.20 PrimitiveType <void>\n" +
+                                      "    l.20 PrimitiveTypeName <void>\n" +
                                       "  name:\n" +
                                       "    setF1\n" +
                                       "  parameters:\n" +
                                       "    l.20 FormalParameter {\n" +
                                       "    type:\n" +
-                                      "      l.20 PrimitiveType <int>\n" +
+                                      "      l.20 PrimitiveTypeName <int>\n" +
                                       "    name:\n" +
                                       "      f1\n" +
                                       "    }\n" +

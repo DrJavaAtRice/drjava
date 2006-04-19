@@ -148,7 +148,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       exp.setProperty(NodeProperties.TYPE, int.class);
       
       init = new VariableDeclaration(false,
-                                     new IntType(),
+                                     new IntTypeName(),
                                      node.getVars().get(0),
                                      exp);
       
@@ -184,12 +184,12 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       
       
       
-      List<List<? extends koala.dynamicjava.tree.Type>> typeArgs = new LinkedList<List<? extends koala.dynamicjava.tree.Type>>();
-      List<koala.dynamicjava.tree.Type> arg1 = new LinkedList<koala.dynamicjava.tree.Type>();
+      List<List<? extends koala.dynamicjava.tree.TypeName>> typeArgs = new LinkedList<List<? extends koala.dynamicjava.tree.TypeName>>();
+      List<koala.dynamicjava.tree.TypeName> arg1 = new LinkedList<koala.dynamicjava.tree.TypeName>();
       arg1.add(formalparam.getType());
       typeArgs.add(arg1);
       init = new VariableDeclaration(false,
-                                     new GenericReferenceType(ids,typeArgs),
+                                     new GenericReferenceTypeName(ids,typeArgs),
                                      node.getVars().get(0),
                                      exp);
       
@@ -242,7 +242,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
       
       /* since we're finding the length of the array, the dimension is always 1 */
-      ArrayType art = new ArrayType(formalparam.getType(), 1);
+      ArrayTypeName art = new ArrayTypeName(formalparam.getType(), 1);
       
       StaticMethodCall rhs = new StaticMethodCall(art, "getLength", argsToGetLength);
       
@@ -265,7 +265,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       
       
       condition = new LessExpression(lhs, rhs);
-      condition.setProperty(NodeProperties.TYPE,   new BooleanType());
+      condition.setProperty(NodeProperties.TYPE,   new BooleanTypeName());
       
       /* 4-17-04 */
       /* maybe i need to set the type of hte condition node? */
@@ -2265,10 +2265,10 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         }
         
         ArrayInitializer array = new ArrayInitializer(cells);
-        koala.dynamicjava.tree.Type t = fp.getType();
-        if(!(t instanceof ArrayType))
+        koala.dynamicjava.tree.TypeName t = fp.getType();
+        if(!(t instanceof ArrayTypeName))
           throw new IllegalStateException("Varargs method does not have an array type for its final parameter");
-        array.setElementType(((ArrayType)t).getElementType());
+        array.setElementType(((ArrayTypeName)t).getElementType());
         le.add(array);
         node.setArguments(le);
       } 

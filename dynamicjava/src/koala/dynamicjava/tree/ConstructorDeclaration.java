@@ -109,7 +109,7 @@ public class ConstructorDeclaration extends Node {
    *            excepts is null or stmts is null
    */
   public ConstructorDeclaration(int flags, String name,
-                                List<FormalParameter> params, List<? extends ReferenceType> excepts,
+                                List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                 ConstructorInvocation eci, List<Node> stmts) {
     this(flags, name, params, excepts, eci, stmts, null, 0, 0, 0, 0);
   }
@@ -131,7 +131,7 @@ public class ConstructorDeclaration extends Node {
    *            excepts is null or stmts is null
    */
   public ConstructorDeclaration(int flags, String name,
-                                List<FormalParameter> params, List<? extends ReferenceType> excepts,
+                                List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                 ConstructorInvocation eci, List<Node> stmts,
                                 String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
@@ -148,7 +148,7 @@ public class ConstructorDeclaration extends Node {
     statements            = stmts;
     exceptions            = new LinkedList<String>();
 
-    ListIterator<? extends ReferenceType> it = excepts.listIterator();
+    ListIterator<? extends ReferenceTypeName> it = excepts.listIterator();
     while (it.hasNext()) {
       exceptions.add(it.next().getRepresentation());
     }

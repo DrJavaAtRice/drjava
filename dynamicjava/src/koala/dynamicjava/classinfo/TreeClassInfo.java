@@ -510,7 +510,7 @@ public class TreeClassInfo implements ClassInfo {
             // Add a reference to the outer instance
             FieldDeclaration fd;
             fd = new FieldDeclaration(Modifier.PUBLIC,
-                                      new ReferenceType(dc.getName()),
+                                      new ReferenceTypeName(dc.getName()),
                                       "this$" + getNestingLevel(),
                                       null);
             fd.acceptVisitor(this);
@@ -528,7 +528,7 @@ public class TreeClassInfo implements ClassInfo {
             cd = new ConstructorDeclaration(Modifier.PUBLIC,
                                             classTree.getName(),
                                             new LinkedList<FormalParameter>(),
-                                            new LinkedList<ReferenceType>(),
+                                            new LinkedList<ReferenceTypeName>(),
                                             ci,
                                             new LinkedList<Node>());
             cd.acceptVisitor(this);
@@ -584,7 +584,7 @@ public class TreeClassInfo implements ClassInfo {
       ClassInfo dc = getDeclaringClass();
       if (!classTree.hasProperty(TREE_VISITED)) {
         if (dc != null && !Modifier.isStatic(getModifiers())) {
-          ReferenceType t = new ReferenceType(dc.getName());
+          ReferenceTypeName t = new ReferenceTypeName(dc.getName());
           node.getParameters().add(0,
                                    new FormalParameter(false, t, "param$0"));
         }
