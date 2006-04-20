@@ -157,12 +157,10 @@ public abstract class AbstractConsoleController implements Serializable {
     setDefaultFont(f, c);
   }
 
-  /**
-   * Sets the font and color for the document, updating all existing text.
-   * This behavior is only necessary in Mac OS X, since setFont() and
-   * changing the main font works on all other tested platforms.
-   * @param f New font to use.
-   * @param c New color to use.
+  /** Sets the font and color for the document, updating all existing text.  This behavior is only necessary in Mac OS
+   *  X, since setFont() and changing the main font works on all other tested platforms.
+   *  @param f New font to use.
+   *  @param c New color to use.
    */
   public void setDefaultFont(Font f, Color c) {
     if (PlatformFactory.ONLY.isMacPlatform()) {
@@ -193,48 +191,54 @@ public abstract class AbstractConsoleController implements Serializable {
   protected abstract void _setupModel();
 
   /** Ensures that the caret always stays on or after the prompt, so that output is always scrolled to the bottom.
-   * (The prompt is always at the bottom.)
+   *  (The prompt is always at the bottom.)  This listener must not modify the console document itself.  It is given
+   *  read access to the document by Swing when it is run as a listener immediately after a document update.
    */
   class CaretUpdateListener implements DocumentListener {
     public void insertUpdate(final DocumentEvent e) {
-      Utilities.invokeLater(new Runnable() {
+      // Queue an asynchronous task in the event thread to update the document pane
+      Utilities.invokeLater(new Runnable() { 
         public void run() {
           
           ConsoleDocument doc = getConsoleDoc();
-          int caretPos = _pane.getCaretPosition();
-          int promptPos = doc.getPromptPos();
-          int length = doc.getLength();
-          
+          doc.readLock(); // Grab read lock because this code is NOT run as part of document listener!
+          try {
+            int caretPos = _pane.getCaretPosition();
+            int promptPos = doc.getPromptPos();
+            int length = doc.getLength();
+            
 //          System.err.println("insertUpdate called; caretPos = " + caretPos + " docLength = " + length);
-          
-          // Figure out where the prompt was before the update
-          int prevPromptPos = promptPos;
-          if (e.getOffset() < promptPos) {
-            // Insert happened before prompt,
-            //  so previous position was further back
-            prevPromptPos = promptPos - e.getLength();
-          }
-          
-          if (! doc.hasPrompt()) {
+            
+            // Figure out where the prompt was before the update
+            int prevPromptPos = promptPos;
+            if (e.getOffset() < promptPos) {
+              // Insert happened before prompt,
+              //  so previous position was further back
+              prevPromptPos = promptPos - e.getLength();
+            }
+            
+            if (! doc.hasPrompt()) {
 //            System.err.println("Scrolling to end of document");
-            // Scroll to the end of the document, since output has been inserted after the prompt.
-            moveToEnd();
-          }
-          // (Be careful not to move caret during a reset, when the
-          //  prompt pos is temporarily far greater than the length.)
-          else if (promptPos <= length) {
-            if (caretPos < prevPromptPos) {
-              // Caret has fallen behind prompt, so make it catch up so
-              //  the new input is visible.
-              moveToPrompt();
+              // Scroll to the end of the document, since output has been inserted after the prompt.
+              moveToEnd();
             }
-            else {
-              // Caret was on or after prompt, so move it right by the size
-              //  of the insert.
-              int size = promptPos - prevPromptPos;
-              if (size > 0)  moveTo(caretPos + size);
+            // (Be careful not to move caret during a reset, when the
+            //  prompt pos is temporarily far greater than the length.)
+            else if (promptPos <= length) {
+              if (caretPos < prevPromptPos) {
+                // Caret has fallen behind prompt, so make it catch up so
+                //  the new input is visible.
+                moveToPrompt();
+              }
+              else {
+                // Caret was on or after prompt, so move it right by the size
+                //  of the insert.
+                int size = promptPos - prevPromptPos;
+                if (size > 0)  moveTo(caretPos + size);
+              }
             }
           }
+          finally { doc.readUnlock(); }
         }
       });
     }
@@ -245,8 +249,13 @@ public abstract class AbstractConsoleController implements Serializable {
     protected void _ensureLegalCaretPos() {
       Utilities.invokeLater(new Runnable() {
         public void run() { 
-          int length = getConsoleDoc().getLength();
-          if (_pane.getCaretPosition() > length) _pane.setCaretPosition(length);
+          ConsoleDocument doc = getConsoleDoc();
+          doc.readLock();
+          try {
+            int length = doc.getLength();
+            if (_pane.getCaretPosition() > length) _pane.setCaretPosition(length);
+          }
+          finally { doc.readUnlock(); }
         }
       });
     }

@@ -75,27 +75,27 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Reset the document on startup.  Uses a history with configurable size.
    *  @param document the edit document to use for the model
    */
-  public InteractionsDocument(EditDocumentInterface document) { this(document, new History()); }
+  public InteractionsDocument(EditDocumentInterface document, String banner) { this(document, new History(), banner); }
 
   /** Reset the document on startup.  Uses a history with the given
    *  maximum size.  This history will not use the config framework.
    *  @param document EditDocumentInterface to use for the model
    *  @param maxHistorySize Number of commands to remember in the history
    */
-  public InteractionsDocument(EditDocumentInterface document, int maxHistorySize) {
-    this(document, new History(maxHistorySize));
+  public InteractionsDocument(EditDocumentInterface document, int maxHistorySize, String banner) {
+    this(document, new History(maxHistorySize), banner);
   }
   
   /** Creates and resets the interactions document on DrJava startup.  Uses the given history.  
    *  @param document EditDocumentInterface to use for the model
    *  @param history History of commands
    */
-  public InteractionsDocument(EditDocumentInterface document, History history) {
+  public InteractionsDocument(EditDocumentInterface document, History history, String banner) {
     super(document);
     _history = history;
     _hasPrompt = true;
     _prompt = DEFAULT_PROMPT;
-    reset(InteractionsModel.getStartUpBanner());
+    reset(banner);
   }
 
   /** Lets this document know whether an interaction is in progress.

@@ -101,12 +101,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Constructs an InteractionsModel.
    *  @param adapter DocumentAdapter to use in the InteractionsDocument
+   *  @param wd Working directory for the interpreter
    *  @param historySize Number of lines to store in the history
    *  @param writeDelay Number of milliseconds to wait after each println
    */
   public InteractionsModel(EditDocumentInterface adapter, File wd, int historySize, int writeDelay) {
     _writeDelay = writeDelay;
-    _document = new InteractionsDocument(adapter, historySize);
+    _document = new InteractionsDocument(adapter, historySize, getBanner(wd));
     _adapter = adapter;
     _waitingForFirstInterpreter = true;
     _workingDirectory = wd;
@@ -576,16 +577,18 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   protected abstract void _notifyInterpreterResetFailed(Throwable t);
   
-  public synchronized String getBanner() { return _banner; }
+  public String getBanner() { return _banner; }
   
-  public static String getStartUpBanner() { return getBanner(new File(System.getProperty("user.dir"))); }
+  public String getStartUpBanner() { return getBanner(_workingDirectory); }
   
   public static String getBanner(File wd) { return BANNER_PREFIX + "  Working directory is " + wd + '\n'; }
 
-  private synchronized String generateBanner(File wd) {
+  private String generateBanner(File wd) {
     _banner = getBanner(wd);
     return _banner;
   }
+  
+  //TODO: use _workingDirectory field rather than passing wd?
 
   /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady(File wd) {

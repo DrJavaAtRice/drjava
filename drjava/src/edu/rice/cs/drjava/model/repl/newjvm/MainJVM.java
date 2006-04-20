@@ -122,6 +122,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public MainJVM(File wd) {
     super(SLAVE_CLASS_NAME);
+//    Utilities.show("Starting the slave JVM");
     _workDir = wd;
     _waitForQuitThreadName = "Wait for Interactions to Exit Thread";
     _exportMasterThreadName = "Export DrJava to RMI Thread";
@@ -658,8 +659,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     try {
       // _startupClasspath is sent in as the interactions classpath
 //      System.out.println("startup: " + _startupClasspath);
-//      Utilities.showDebug("Calling invokeSlave(" + jvmArgs + ", " + _startupClassPath + ", " + 
-//        _workDir +")");
+//      Utilities.show("Calling invokeSlave(" + jvmArgs + ", " + _startupClassPath + ", " +  _workDir +")");
       invokeSlave(jvmArgsArray, _startupClassPath, _workDir);
       _slaveJVMUsed = false;
     }

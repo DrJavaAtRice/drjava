@@ -51,15 +51,9 @@ public class StringOptionComponent extends OptionComponent<String> {
     _jtf = new JTextField();
     _jtf.setText(_option.format(DrJava.getConfig().getSetting(_option)));
     _jtf.getDocument().addDocumentListener(new DocumentListener() {
-      public void insertUpdate(DocumentEvent e) {
-        notifyChangeListeners();
-      }
-      public void removeUpdate(DocumentEvent e) {
-        notifyChangeListeners();
-      }
-      public void changedUpdate(DocumentEvent e) {
-        notifyChangeListeners();
-      }
+      public void insertUpdate(DocumentEvent e) { notifyChangeListeners(); }
+      public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
+      public void changedUpdate(DocumentEvent e) { notifyChangeListeners(); }
     });
   }
 

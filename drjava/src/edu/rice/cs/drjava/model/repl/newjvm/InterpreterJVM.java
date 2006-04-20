@@ -292,10 +292,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
               //Other exceptions are non lexical/parse related exceptions. These include arithmetic exceptions, 
               //wrong version exceptions, etc.
               
-              _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
-                                                           t.getMessage(),
-                                                           InterpreterJVM.getStackTrace(t),
-                                                           null));
+              _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(), t.getMessage(),
+                                                           InterpreterJVM.getStackTrace(t), null));
             }                                                                                                                                        
           }
           catch (Throwable t) {

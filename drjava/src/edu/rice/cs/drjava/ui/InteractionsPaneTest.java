@@ -363,7 +363,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     
     assertEquals("PromptList after insert should contain 1 element", 1, _pane.getPromptList().size());    
     assertEquals("First prompt should be saved as being at position",
-                 InteractionsModel.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length(),
+                 _model.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length(),
                  (int)_pane.getPromptList().get(0)); //needs cast to prevent ambiguity
     
     _doc.insertPrompt();
@@ -378,10 +378,10 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     
     assertEquals("PromptList after insertion of new prompt should contain 2 elements", 2, _pane.getPromptList().size());
     assertEquals("First prompt should be saved as being at position",
-                 InteractionsModel.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length(),
+                 _model.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length(),
                  _firstPrompt); 
     assertEquals("Second prompt should be saved as being at position",
-                 InteractionsModel.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length() * 2 + 1,
+                 _model.getStartUpBanner().length() + InteractionsDocument.DEFAULT_PROMPT.length() * 2 + 1,
                  _secondPrompt); 
     
     synchronized(_resetLock) { _resetDone = false; }

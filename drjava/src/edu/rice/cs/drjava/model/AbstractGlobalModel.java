@@ -50,6 +50,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -493,7 +494,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return the working directory for the Master JVM (editor and GUI). */
   public File getMasterWorkingDirectory() { 
     File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
-    if (workDir != null && workDir != FileOption.NULL_FILE) return workDir;
+//    Utilities.show("In getMasterWorkingDirectory, workDir = " + workDir);
+    if (workDir != null && workDir != FileOption.NULL_FILE) {
+//      Utilities.show("Returning '" + workDir + "' as master working directory");
+      return workDir;
+    }
     return new File(System.getProperty("user.dir"));
   }
     
@@ -779,7 +784,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getWorkingDirectory() { 
       try { 
         File[] roots = getSourceRootSet();
-//        Utilities.show("source root set is " + Arrays.toString(roots));
         if (roots.length == 0) return getMasterWorkingDirectory();
         return roots[0].getCanonicalFile(); 
       }
@@ -1960,8 +1964,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Utilities.show("Getting sourceRootSet for " + Arrays.toString(docs));
     for (OpenDefinitionsDocument doc: docs) {
       try {
-        File root = doc.getSourceRoot();
-        if (root != null) roots.add(root); // Can't create duplicate entries in a HashSet
+        if (! doc.isUntitled()) {
+          File root = doc.getSourceRoot();
+          if (root != null) roots.add(root); // Can't create duplicate entries in a HashSet
+        }
       }
       catch (InvalidPackageException e) { 
 //        Utilities.show("InvalidPackageException in getSourceRootSet");

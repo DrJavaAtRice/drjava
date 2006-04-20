@@ -73,7 +73,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     
     assertEquals("StylesList before insert should contain 2 pairs", 2, _adapter.getStylesList().size());
     
-    int blen = InteractionsModel.getStartUpBanner().length();
+    int blen = _model.getStartUpBanner().length();
     
     /** Elt1, Elt2 are first two elements pushed on the StylesList stack */
     String styleElt1 = "((0, " + blen + "), object.return.style)";
@@ -120,7 +120,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     synchronized(_restartLock) { _interpreterRestarted = false; }
       
     // Reset the interactions pane, restarting the interpreter
-    File f = new File(System.getProperty("user.dir"));
+    File f = _model.getWorkingDirectory();
     _model.resetInterpreter(f);  
 
     //. Wait until interpreter has restarted

@@ -555,9 +555,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
               continue;  // ignore matching char 
             else {
               // found valid matching char
-              if (text.charAt(i)==closing) {
-                ++braceBalance;
-              }
+              if (text.charAt(i)==closing) ++braceBalance;
               else {
                 if (braceBalance==0) break; // found our opening brace
                 --braceBalance;
