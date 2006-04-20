@@ -2193,13 +2193,26 @@ public class MainFrame extends JFrame {
     _setUpContextMenus();
     
     // add recent file and project manager
-    _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2,
-                                               _fileMenu,
-                                               this,false);
     
-    _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount()-2,
-                                                  _projectMenu,
-                                                  this,true);
+    _recentFileManager = 
+      new RecentFileManager(_fileMenu.getItemCount() - 2,
+                            _fileMenu,
+                            new RecentFileManager.RecentFileAction() {
+                              public void actionPerformed(FileOpenSelector selector) {
+                                open(selector);
+                              }
+                            }, 
+                            OptionConstants.RECENT_FILES);
+                                               
+    _recentProjectManager = 
+      new RecentFileManager(_projectMenu.getItemCount()-2,
+                            _projectMenu,
+                            new RecentFileManager.RecentFileAction() {
+                              public void actionPerformed(FileOpenSelector selector) {
+                                openProject(selector); 
+                              }
+                            }, 
+                            OptionConstants.RECENT_PROJECTS);
     
     // Set frame icon
     setIconImage(getIcon("drjava64.png").getImage());

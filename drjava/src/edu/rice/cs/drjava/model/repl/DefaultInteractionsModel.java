@@ -98,6 +98,14 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     _model.systemErrPrint(s);
   }
 
+  /** Returns a line of text entered by the user at the equivalent of System.in. */
+  public String getConsoleInput() { 
+    String s = super.getConsoleInput();
+    _model.systemInEcho(s);
+    return s; 
+  }
+
+  
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
    *  @param t The Throwable thrown by System.exit
    */

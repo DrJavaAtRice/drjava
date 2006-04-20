@@ -259,6 +259,9 @@ public interface GlobalModel extends ILoadDocuments {
 
   /** Prints System.err to the DrJava console. */
   public void systemErrPrint(String s);
+  
+  /** Prints the given string to the DrJava console as an echo of System.in */
+  public void systemInEcho(String s);
 
   //----------------------------- Interactions -----------------------------//
 

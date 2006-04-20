@@ -1907,13 +1907,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
 
   /** Prints System.out to the DrJava console. */
-  public void systemOutPrint(String s) {
-    _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE);
-  }
+  public void systemOutPrint(String s) {_docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE); }
 
   /** Prints System.err to the DrJava console. */
   public void systemErrPrint(String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_ERR_STYLE); }
 
+  /** Prints the given string to the DrJava console as an echo of System.in */
+  public void systemInEcho(String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_IN_STYLE); }
+  
   /** throws UnsupportedOperationException */
   public void printDebugMessage(String s) {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");

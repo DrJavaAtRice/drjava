@@ -313,6 +313,10 @@ public class DummyGlobalModel implements GlobalModel {
   public void systemErrPrint(String s) {
      throw new UnsupportedOperationException("Tried to call systemErrPrint on a Dummy");
   }
+  
+  public void systemInEcho(String s) { 
+     throw new UnsupportedOperationException("Tried to call systemInEcho on a Dummy");
+  }  
 
   public InteractionsDocument getInteractionsDocument() {
      throw new UnsupportedOperationException("Tried to call getInteractionsDocument on a Dummy");

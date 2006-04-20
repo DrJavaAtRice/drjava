@@ -34,6 +34,7 @@
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.FileOps;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -70,7 +71,7 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
   public void setUp() throws Exception {
     super.setUp();
     _menu = new JMenu();
-    _rfm = new RecentFileManager(0, _menu, null,false);
+    _rfm = new RecentFileManager(0, _menu, null,OptionConstants.RECENT_FILES);
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
   }
