@@ -172,6 +172,7 @@ public class MainFrame extends JFrame {
   private JButton _closeButton;
   private JButton _undoButton;
   private JButton _redoButton;
+  private JButton _runButton;
   private JToolBar _toolBar;
   private JFileChooser _interactionsHistoryChooser;
   
@@ -4228,7 +4229,7 @@ public class MainFrame extends JFrame {
 //    _compileOpenProjectAction.setEnabled(false);
     _compileProjectAction.setEnabled(false);
     
-    _setUpAction(_runProjectAction, "Run", "Run the project's main method");
+    _setUpAction(_runProjectAction, "Run Project", "Run the project's main method");
     _runProjectAction.setEnabled(false);
     
     _setUpAction(_jarProjectAction, "Jar", "Create a jar archive from this project");
@@ -4762,6 +4763,19 @@ public class MainFrame extends JFrame {
     return result;
   }
   
+  /** Removes the button b from the toolbar and creates new button in its place. */
+  public JButton _updateToolbarButton(JButton b, Action a) {
+    final JButton result = _createToolbarButton(a);
+    
+    int index = _toolBar.getComponentIndex(b);
+    _toolBar.remove(b);
+    _toolBar.add(result, index);
+    
+    _fixToolbarHeights();
+
+    return result;
+  }
+  
   /** Sets up the toolbar with several useful buttons.  Most buttons are always enabled, but those that are not are
    *  maintained in fields to allow enabling and disabling.
    */
@@ -4810,7 +4824,7 @@ public class MainFrame extends JFrame {
     // Run, Junit, and JavaDoc
     _toolBar.addSeparator();
     
-    _toolBar.add(_createToolbarButton(_runAction));
+    _toolBar.add(_runButton = _createToolbarButton(_runAction));
     _toolBar.add(_createToolbarButton(_junitAllAction));
     _toolBar.add(_createToolbarButton(_javadocAllAction));
 
@@ -6839,12 +6853,18 @@ public class MainFrame extends JFrame {
           _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
 //      new ScrollableDialog(null, "Closing JUnit Error Panel in MainFrame", "", "").show();
           removeTab(_junitErrorPanel);
+          System.out.println("[1] "+_runButton.getBounds(null));
+          _runButton = _updateToolbarButton(_runButton, _runAction);
+          System.out.println("[2] "+_runButton.getBounds(null));
         }
       });
     }
     
     public void projectOpened(File projectFile, FileOpenSelector files) {
       _setUpContextMenus();
+      System.out.println("[3] "+_runButton.getBounds(null));
+      _runButton = _updateToolbarButton(_runButton, _runProjectAction);
+      System.out.println("[4] "+_runButton.getBounds(null));
       _recentProjectManager.updateOpenFiles(projectFile);
       open(files);
       _openProjectUpdate();
@@ -6857,8 +6877,16 @@ public class MainFrame extends JFrame {
     public void projectRunnableChanged() {
       if (_model.getMainClass() != null && _model.getMainClass().exists()) {
         _runProjectAction.setEnabled(true);
+        System.out.println("[5] "+_runButton.getBounds(null));
+        _runButton = _updateToolbarButton(_runButton, _runProjectAction);
+        System.out.println("[6] "+_runButton.getBounds(null));
       }
-      else _runProjectAction.setEnabled(false);
+      else {
+        _runProjectAction.setEnabled(false);
+        System.out.println("[7] "+_runButton.getBounds(null));
+        _runButton = _updateToolbarButton(_runButton, _runAction);
+        System.out.println("[8] "+_runButton.getBounds(null));
+      }
     }
     
     public void documentNotFound(OpenDefinitionsDocument d, File f) {
