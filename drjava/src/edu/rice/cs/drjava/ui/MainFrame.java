@@ -6853,18 +6853,14 @@ public class MainFrame extends JFrame {
           _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
 //      new ScrollableDialog(null, "Closing JUnit Error Panel in MainFrame", "", "").show();
           removeTab(_junitErrorPanel);
-          System.out.println("[1] "+_runButton.getBounds(null));
           _runButton = _updateToolbarButton(_runButton, _runAction);
-          System.out.println("[2] "+_runButton.getBounds(null));
         }
       });
     }
     
     public void projectOpened(File projectFile, FileOpenSelector files) {
       _setUpContextMenus();
-      System.out.println("[3] "+_runButton.getBounds(null));
       _runButton = _updateToolbarButton(_runButton, _runProjectAction);
-      System.out.println("[4] "+_runButton.getBounds(null));
       _recentProjectManager.updateOpenFiles(projectFile);
       open(files);
       _openProjectUpdate();
@@ -6877,15 +6873,11 @@ public class MainFrame extends JFrame {
     public void projectRunnableChanged() {
       if (_model.getMainClass() != null && _model.getMainClass().exists()) {
         _runProjectAction.setEnabled(true);
-        System.out.println("[5] "+_runButton.getBounds(null));
         _runButton = _updateToolbarButton(_runButton, _runProjectAction);
-        System.out.println("[6] "+_runButton.getBounds(null));
       }
       else {
         _runProjectAction.setEnabled(false);
-        System.out.println("[7] "+_runButton.getBounds(null));
         _runButton = _updateToolbarButton(_runButton, _runAction);
-        System.out.println("[8] "+_runButton.getBounds(null));
       }
     }
     
