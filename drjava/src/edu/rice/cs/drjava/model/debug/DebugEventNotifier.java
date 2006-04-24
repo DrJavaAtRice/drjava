@@ -114,11 +114,11 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   /** Called when a breakpoint is set in a document.  Must be executed in event thread.
    *  @param bp the breakpoint
    */
-  public void breakpointSet(Breakpoint bp) {
+  public void regionAdded(Breakpoint bp) {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) { _listeners.get(i).breakpointSet(bp); }
+      for (int i = 0; i < size; i++) { _listeners.get(i).regionAdded(bp); }
     }
     finally { _lock.endRead(); }
   }
@@ -142,12 +142,12 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   /** Called when a breakpoint is changed during execution. Must be executed in event thread.
    *  @param bp the breakpoint
    */
-  public void breakpointChanged(Breakpoint bp) {
+  public void regionChanged(Breakpoint bp) {
     _lock.startRead();
     try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++) {
-        _listeners.get(i).breakpointChanged(bp);
+        _listeners.get(i).regionChanged(bp);
       }
     }
     finally {
@@ -182,11 +182,11 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   /** Called when a breakpoint is removed from a document.  Must be executed in event thread.
    *  @param bp the breakpoint
    */
-  public void breakpointRemoved(Breakpoint bp) {
+  public void regionRemoved(Breakpoint bp) {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) _listeners.get(i).breakpointRemoved(bp);
+      for (int i = 0; i < size; i++) _listeners.get(i).regionRemoved(bp);
     }
     finally { _lock.endRead(); }
   }

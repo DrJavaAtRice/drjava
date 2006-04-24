@@ -309,7 +309,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
   /** Cleanly shuts down the debugger, without having to wait for a suspended interaction to complete. */
   protected void _shutdownWithoutSuspendedInteraction() throws Exception {
-    _debugger.removeAllBreakpoints();
+    _model.getBreakpointManager().clearRegions();
 
     // Shutdown the debugger
     if (printMessages) printStream.println("Shutting down...");
@@ -323,7 +323,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
   /** Cleanly shuts down the debugger, waiting for a suspended interaction to complete. */
   protected void _shutdownAndWaitForInteractionEnded() throws Exception {
-    _debugger.removeAllBreakpoints();
+    _model.getBreakpointManager().clearRegions();
 
     // Shutdown the debugger
     if (printMessages) printStream.println("Shutting down...");
@@ -398,10 +398,10 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     protected int debuggerStartedCount = 0;
     protected int debuggerShutdownCount = 0;
     protected int threadLocationUpdatedCount = 0;
-    protected int breakpointSetCount = 0;
     protected int breakpointReachedCount = 0;
-    protected int breakpointChangedCount = 0;
-    protected int breakpointRemovedCount = 0;
+    protected int regionAddedCount = 0;
+    protected int regionChangedCount = 0;
+    protected int regionRemovedCount = 0;
     protected int watchSetCount = 0;
     protected int watchRemovedCount = 0;
     protected int stepRequestedCount = 0;
@@ -424,20 +424,20 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       assertEquals("number of times threadLocationUpdated fired", i, threadLocationUpdatedCount);
     }
 
-    public void assertBreakpointSetCount(int i) {
-      assertEquals("number of times breakpointSet fired", i, breakpointSetCount);
-    }
-
     public void assertBreakpointReachedCount(int i) {
       assertEquals("number of times breakpointReached fired", i, breakpointReachedCount);
     }
 
-    public void assertBreakpointChangedCount(int i) {
-      assertEquals("number of times breakpointChanged fired", i, breakpointChangedCount);
+    public void assertRegionAddedCount(int i) {
+      assertEquals("number of times regionAdded fired", i, regionAddedCount);
     }
 
-    public void assertBreakpointRemovedCount(int i) {
-      assertEquals("number of times breakpointRemoved fired", i, breakpointRemovedCount);
+    public void assertRegionChangedCount(int i) {
+      assertEquals("number of times regionChanged fired", i, regionChangedCount);
+    }
+
+    public void assertRegionRemovedCount(int i) {
+      assertEquals("number of times regionRemoved fired", i, regionRemovedCount);
     }
 
     public void assertWatchSetCount(int i) {
@@ -489,13 +489,13 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       fail("threadLocationUpdated fired unexpectedly");
     }
 
-    public void breakpointSet(Breakpoint bp) { fail("breakpointSet fired unexpectedly"); }
-
     public void breakpointReached(Breakpoint bp) { fail("breakpointReached fired unexpectedly"); }
 
-    public void breakpointChanged(Breakpoint bp) { fail("breakpointChanged fired unexpectedly"); }
+    public void regionAdded(Breakpoint bp) { fail("regionAdded fired unexpectedly"); }
 
-    public void breakpointRemoved(Breakpoint bp) { fail("breakpointRemoved fired unexpectedly"); }
+    public void regionChanged(Breakpoint bp) { fail("regionChanged fired unexpectedly"); }
+
+    public void regionRemoved(Breakpoint bp) { fail("regionRemoved fired unexpectedly"); }
 
     public void watchSet(DebugWatchData w) { fail("watchSet fired unexpectedly"); }
 
@@ -541,10 +541,6 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   /** DebugTestListener for all tests setting breakpoints. */
   protected class BreakpointTestListener extends DebugStartAndStopListener {
     public BreakpointTestListener() { }
-    public void breakpointSet(Breakpoint bp) {
-      // Manager's thread: test shouldn't wait
-      breakpointSetCount++;
-    }
     public void breakpointReached(Breakpoint bp) {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
@@ -553,10 +549,16 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
         _notifyLock();
       }
     }
-    public void breakpointRemoved(Breakpoint bp) {
+    public void regionAdded(Breakpoint bp) {
       // Manager's thread: test shouldn't wait
-      breakpointRemovedCount++;
-      if (printEvents) printStream.println("breakpointRemoved " + breakpointRemovedCount);
+      regionAddedCount++;
+    }
+    public void regionRemoved(Breakpoint bp) {
+      // Manager's thread: test shouldn't wait
+      regionRemovedCount++;
+      if (printEvents) { 
+        printStream.println("regionRemoved " + regionRemovedCount);
+      }
     }
 
     public void currThreadSuspended() {

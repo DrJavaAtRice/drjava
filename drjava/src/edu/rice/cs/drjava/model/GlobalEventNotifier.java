@@ -563,5 +563,4 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     try { for (GlobalModelListener l : _listeners) { l.documentNotFound(d,f); } }
     finally { _lock.endRead(); } 
   }
-  
 }

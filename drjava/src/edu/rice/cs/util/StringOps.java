@@ -196,6 +196,21 @@ public abstract class StringOps {
   }
   
   /**
+   * Gets the stack trace of the current code. Does not include this method.
+   * @return the stack trace for the current code
+   */
+  public static String getStackTrace() {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    StackTraceElement[] stes = Thread.currentThread().getStackTrace();
+    int skip = 3;
+    for(StackTraceElement ste: stes) {
+      if (skip>0) { --skip; } else { pw.print("at "); pw.println(ste); }
+    }
+    return sw.toString();
+  }
+  
+  /**
    * Character.isDigit answers <tt>true</tt> to some non-ascii
    * digits.  This one does not.
    */

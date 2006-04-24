@@ -34,6 +34,7 @@
 package edu.rice.cs.drjava.model.debug;
 
 import java.util.Vector;
+import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 import com.sun.jdi.request.StepRequest;
@@ -153,17 +154,6 @@ public interface Debugger {
   *  @param breakpoint The breakpoint to remove.
   */
   public void removeBreakpoint(final Breakpoint breakpoint) throws DebugException;
-
-  /** Removes all the breakpoints from the manager's vector of breakpoints. */
-  public void removeAllBreakpoints() throws DebugException;
-
-  /** Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
-   *  all open documents contain.
-   */
-  public Vector<Breakpoint> getBreakpoints() throws DebugException;
-
-  /** Prints the list of breakpoints in the current session of DrJava, both pending resolved Breakpoints are listed. */
-  public void printBreakpoints() throws DebugException;
 
   /** Returns all currently watched fields and variables. */
   public Vector<DebugWatchData> getWatches() throws DebugException;

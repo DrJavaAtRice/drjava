@@ -311,7 +311,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     _model.closeFile(doc);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointRemovedCount(1);  //fires once
+    debugListener.assertRegionRemovedCount(1);  //fires once
 
     // Shutdown the debugger
     if (printMessages) printStream.println("Shutting down...");

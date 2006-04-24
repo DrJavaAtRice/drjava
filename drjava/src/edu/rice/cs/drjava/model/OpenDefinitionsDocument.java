@@ -282,31 +282,14 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    /** Called when this document is modified so it can notify the cache. */
   public void documentModified();
   
-   /** Called when this document is reset so it can notify the cache. */
+  /** Called when this document is reset so it can notify the cache. */
   public void documentReset();
     
-  /** Returns the Breakpoint in this OpenDefinitionsDocument at the given
-   *  linenumber, or null if one does not exist.
-   *  @param lineNumber the line number of the breakpoint
-   *  @return the Breakpoint at the given lineNumber, or null if it does not exist.
-   */
-  public Breakpoint getBreakpointAt( int lineNumber);
-
-  /** Add the supplied Breakpoint to the hashtable, keyed by its BreakpointRequest
-   *  @param breakpoint the Breakpoint to be inserted into the hashtable
-   */
-  public void addBreakpoint( Breakpoint breakpoint);
-
-  /** Remove the given Breakpoint from the hashtable.
-   *  @param breakpoint the Breakpoint to be removed.
-   */
-  public void removeBreakpoint( Breakpoint breakpoint);
-
-  /** @return a Vector<Breakpoint> containing the Breakpoint objects that this document contains. */
-  public Vector<Breakpoint> getBreakpoints();
-
-  /** Tells the document to remove all breakpoints. */
-  public void clearBreakpoints();
+  /** @return the breakpoint region manager. */
+  public RegionManager<Breakpoint> getBreakpointManager();
+    
+  /** @return the bookmark region manager. */
+  public RegionManager<DocumentRegion> getBookmarkManager();
 
   /** Called when this document is being closed, removing related state from the debug manager. */
   public void removeFromDebugger();
@@ -331,6 +314,11 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   /** @return the number of lines in this document. */
   public int getNumberOfLines();
+  
+  /** Translates an offset into the components text to a line number.
+   *  @param offset the offset >= 0
+   *  @return the line number >= 0 */
+  public int getLineOfOffset(int offset);
   
   /** @return the caret position as set by the view. */
   public int getCaretPosition();

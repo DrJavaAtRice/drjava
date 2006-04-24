@@ -1,9 +1,9 @@
 package edu.rice.cs.util.swing;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.ui.ReverseHighlighter;
 
 import javax.swing.*;
-import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
@@ -30,10 +30,11 @@ public class HighlightManagerTest extends DrJavaTestCase {
     super.setUp();
 
     jtc = new JTextField();
+    jtc.setHighlighter(new ReverseHighlighter());
     
-    p = new DefaultHighlighter.DefaultHighlightPainter(Color.BLACK);
-    p1 = new DefaultHighlighter.DefaultHighlightPainter(Color.RED);
-    p2 = new DefaultHighlighter.DefaultHighlightPainter(Color.BLACK);
+    p = new ReverseHighlighter.DefaultHighlightPainter(Color.BLACK);
+    p1 = new ReverseHighlighter.DefaultFrameHighlightPainter(Color.RED, 2);
+    p2 = new ReverseHighlighter.DefaultHighlightPainter(Color.BLACK);
     
     hm = new HighlightManager(jtc);
     

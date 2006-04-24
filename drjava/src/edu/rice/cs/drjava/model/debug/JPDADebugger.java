@@ -85,9 +85,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /** Manages all event requests in JDI. */
   private EventRequestManager _eventManager;
 
-  /** Vector of all current Breakpoints, with and without EventRequests. */
-  private Vector<Breakpoint> _breakpoints;
-
   /** Vector of all current Watches. */
   private Vector<DebugWatchData> _watches;
 
@@ -123,7 +120,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _model = model;
     _vm = null;
     _eventManager = null;
-    _breakpoints = new Vector<Breakpoint>();
     _watches = new Vector<DebugWatchData>();
     _suspendedThreads = new RandomAccessStack();
     _pendingRequestManager = new PendingRequestManager(this);
@@ -151,6 +147,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    */
   public void addListener(DebugListener listener) {
     _notifier.addListener(listener);
+    _model.getBreakpointManager().addListener(listener);
   }
 
   /** Removes a listener to this JPDADebugger.
@@ -158,6 +155,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    */
   public void removeListener(DebugListener listener) {
     _notifier.removeListener(listener);
+    _model.getBreakpointManager().removeListener(listener);
   }
 
   protected VirtualMachine getVM() { return _vm; }
@@ -236,8 +234,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _model.addListener(_watchListener);
       
       // re-set breakpoints that have already been set
-      Vector<Breakpoint> oldBreakpoints = new Vector<Breakpoint>(_breakpoints);
-      removeAllBreakpoints();
+      Vector<Breakpoint> oldBreakpoints = new Vector<Breakpoint>(_model.getBreakpointManager().getRegions());
+      _model.getBreakpointManager().clearRegions();
       for (int i = 0; i < oldBreakpoints.size(); i++) {
         Breakpoint bp = oldBreakpoints.get(i);        
         setBreakpoint(new Breakpoint(bp.getDocument(), bp.getOffset(), bp.getLineNumber(), bp.isEnabled(), this));
@@ -888,7 +886,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
     throws DebugException {
     
-    Breakpoint breakpoint = doc.getBreakpointAt(offset);
+    Breakpoint breakpoint = _model.getBreakpointManager().getRegionAt(doc, offset);
     
     if (breakpoint == null) {
       if (doc.getLineStartPos(offset) == doc.getLineEndPos(offset)) {
@@ -903,7 +901,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         }
       }
     }
-    else removeBreakpoint(breakpoint);
+    else _model.getBreakpointManager().removeRegion(breakpoint);
   }
 
   /** Sets a breakpoint.
@@ -912,10 +910,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   public synchronized void setBreakpoint(final Breakpoint breakpoint) throws DebugException {
     breakpoint.getDocument().checkIfClassFileInSync();
 
-    _breakpoints.add(breakpoint);
-    breakpoint.getDocument().addBreakpoint(breakpoint);
-
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.breakpointSet(breakpoint); } });
+    _model.getBreakpointManager().addRegion(breakpoint);
   }
 
  /**
@@ -924,8 +919,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   * @param breakpoint The breakpoint to remove.
   */
   public synchronized void removeBreakpoint(final Breakpoint breakpoint) throws DebugException {
-    _breakpoints.remove(breakpoint);
-
     Vector<BreakpointRequest> requests = breakpoint.getRequests();
     if (requests.size() > 0 && _eventManager != null) {
       // Remove all event requests for this breakpoint
@@ -948,16 +941,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
     // Always remove from pending request, since it's always there
     _pendingRequestManager.removePendingRequest(breakpoint);
-    breakpoint.getDocument().removeBreakpoint(breakpoint);
-
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.breakpointRemoved(breakpoint); } });
-  }
-
-  /** Removes all the breakpoints from the manager's vector of breakpoints. */
-  public synchronized void removeAllBreakpoints() throws DebugException {
-    while (_breakpoints.size() > 0) {
-      removeBreakpoint( _breakpoints.get(0));
-    }
   }
 
   /** Called when a breakpoint is reached.  The Breakpoint object itself should be stored in the 
@@ -969,49 +952,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     Object property = request.getProperty("debugAction");
     if ( (property != null) && (property instanceof Breakpoint) ) {
       final Breakpoint breakpoint = (Breakpoint) property;
-      printMessage("Breakpoint hit in class " + breakpoint.getClassName() + "  [line " +
-                   breakpoint.getLineNumber() + "]");
+      printMessage("Breakpoint hit in class " + breakpoint.getClassName() + "  [line " + breakpoint.getLineNumber() + "]");
 
       Utilities.invokeLater(new Runnable() { public void run() { _notifier.breakpointReached(breakpoint); } });
     }
     else {
       // A breakpoint we didn't set??
       _log("Reached a breakpoint without a debugAction property: " + request);
-    }
-  }
-
-  /** Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
-   *  all open documents contain.
-   */
-  public synchronized Vector<Breakpoint> getBreakpoints() throws DebugException {
-    Vector<Breakpoint> sortedBreakpoints = new Vector<Breakpoint>();
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-    for (int i = 0; i < docs.size(); i++) {
-      Vector<Breakpoint> docBreakpoints =
-        docs.get(i).getBreakpoints();
-      for (int j = 0; j < docBreakpoints.size(); j++) {
-        sortedBreakpoints.add(docBreakpoints.get(j));
-      }
-    }
-    return sortedBreakpoints;
-  }
-
-  /**
-   * Prints the list of all breakpoints as a message in DrJava's Interactions
-   * Pane.  Both pending and resolved breakpoints are listed.
-   */
-  public synchronized void printBreakpoints() throws DebugException {
-    Enumeration<Breakpoint> breakpoints = getBreakpoints().elements();
-    if (breakpoints.hasMoreElements()) {
-      printMessage("Breakpoints: ");
-      while (breakpoints.hasMoreElements()) {
-        Breakpoint breakpoint = breakpoints.nextElement();
-        printMessage("  " + breakpoint.getClassName() +
-                                 "  [line " + breakpoint.getLineNumber() + "]");
-      }
-    }
-    else {
-      printMessage("No breakpoints set.");
     }
   }
 
@@ -1212,8 +1159,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    *         there is no such breakpoint.
    */
   public synchronized Breakpoint getBreakpoint(int line, String className) {
-    for (int i = 0; i < _breakpoints.size(); i++) {
-      Breakpoint bp = _breakpoints.get(i);
+    for (int i = 0; i < _model.getBreakpointManager().getRegions().size(); i++) {
+      Breakpoint bp = _model.getBreakpointManager().getRegions().get(i);
       if ((bp.getLineNumber() == line) && (bp.getClassName().equals(className))) {
         return bp;
       }
@@ -2293,11 +2240,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   synchronized void notifyStepRequested() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.stepRequested(); } });
   }
-
-//  /** Class model for notifying listeners of an event. */
-//  protected abstract class EventNotifier {
-//    public abstract void notifyListener(DebugListener l);
-//  }
 
   /** A stack from which you can remove any element, not just the top of the stack
    *  TODO: make a generic Collection extending/replacing Stack.

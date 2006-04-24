@@ -33,6 +33,7 @@
 
 package edu.rice.cs.drjava.model.debug;
 
+import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
@@ -49,7 +50,7 @@ import java.io.*;
 
 /** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest
  */
-public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implements DebugBreakpointData {
+public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implements DebugBreakpointData, DocumentRegion {
 
    private Position _startPos;
    private Position _endPos;
@@ -140,7 +141,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
       }
     }
     catch(VMDisconnectedException vmde) { /* just ignore */ }
-    if (_isEnabled!=old) _manager._notifier.breakpointChanged(this);
+    if (_isEnabled!=old) _manager._notifier.regionChanged(this);
   }
 
   public String toString() {

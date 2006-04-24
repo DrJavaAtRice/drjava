@@ -132,6 +132,7 @@ import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.ReaderWriterLock;
 
 /** In simple terms, a DefaultGlobalModel without an interpreter,compiler, junit testing, debugger or javadoc.
  * Basically, has only document handling functionality
@@ -202,8 +203,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected final DefinitionsEditorKit _editorKit = new DefinitionsEditorKit(_notifier);
   
   /** Collection for storing all OpenDefinitionsDocuments. */
-  protected final OrderedHashSet<OpenDefinitionsDocument> _documentsRepos =
-    new OrderedHashSet<OpenDefinitionsDocument>();
+  protected final OrderedHashSet<OpenDefinitionsDocument> _documentsRepos = new OrderedHashSet<OpenDefinitionsDocument>();
   
   // ---- Input/Output Document Fields ----
   
@@ -247,6 +247,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    */
   protected IDocumentNavigator<OpenDefinitionsDocument> _documentNavigator = 
       new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeListNavigator(); 
+
+  /** Manager for breakpoint regions. */
+  protected ConcreteRegionManager<Breakpoint> _breakpointManager;
+  
+  /** @return manager for breakpoint regions. */
+  public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
+  
+  /** Manager for bookmark regions. */
+  protected ConcreteRegionManager<DocumentRegion> _bookmarkManager;
+  
+  /** @return manager for bookmark regions. */
+  public RegionManager<DocumentRegion> getBookmarkManager() { return _bookmarkManager; }
   
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //  /** Light-weight parsing controller. */
@@ -272,7 +284,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   private void _init() {
-    
+    _breakpointManager = new ConcreteRegionManager<Breakpoint>() {
+      public boolean changeRegionHelper(Breakpoint oldBP, Breakpoint newBP) {
+        // override helper so the enabled flag is copied
+        if (oldBP.isEnabled()!=newBP.isEnabled()) {
+          oldBP.setEnabled(newBP.isEnabled());
+          return true;
+        }
+        return false;
+      }
+    };
+    _bookmarkManager = new ConcreteRegionManager<DocumentRegion>();
+
     /** This visitor is invoked by the DocumentNavigator to update _activeDocument among other things */
     final NodeDataVisitor<OpenDefinitionsDocument, Boolean> _gainVisitor = new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
       public Boolean itemCase(OpenDefinitionsDocument doc) {
@@ -1310,16 +1333,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (createJarFlags != 0) builder.setCreateJarFlags(createJarFlags);
     
     // add breakpoints and watches
-    try {
-      ArrayList<DebugBreakpointData> l = new ArrayList<DebugBreakpointData>();
-      for(Breakpoint bp: getDebugger().getBreakpoints()) { l.add(bp); }
-      builder.setBreakpoints(l);
-    }
-    catch(DebugException de) { /* ignore, just don't store breakpoints */ }
+    ArrayList<DebugBreakpointData> l = new ArrayList<DebugBreakpointData>();
+    for(Breakpoint bp: getBreakpointManager().getRegions()) { l.add(bp); }
+    builder.setBreakpoints(l);
     try {
       builder.setWatches(getDebugger().getWatches());
     }
     catch(DebugException de) { /* ignore, just don't store watches */ }
+    
+    // add bookmarks
+    builder.setBookmarks(getBookmarkManager().getRegions());
     
     return builder;
   }
@@ -1381,12 +1404,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     int createJarFlags = ir.getCreateJarFlags();
     
     // set breakpoints
-    try { getDebugger().removeAllBreakpoints(); }
-    catch(DebugException de) { /* ignore, just don't remove old breakpoints */ }
+    getBreakpointManager().clearRegions();
     for (DebugBreakpointData dbd: ir.getBreakpoints()) {
       try { 
         getDebugger().toggleBreakpoint(getDocumentForFile(dbd.getFile()), dbd.getOffset(), dbd.getLineNumber(), 
-                                           dbd.isEnabled()); 
+                                       dbd.isEnabled()); 
       }
       catch(DebugException de) { /* ignore, just don't add breakpoint */ }
     }
@@ -1397,6 +1419,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     for (DebugWatchData dwd: ir.getWatches()) {
       try { getDebugger().addWatch(dwd.getName()); }
       catch(DebugException de) { /* ignore, just don't add watch */ }
+    }
+    
+    // set bookmarks
+    getBookmarkManager().clearRegions();
+    for (final DocumentRegion bm: ir.getBookmarks()) {
+      final OpenDefinitionsDocument odd = getDocumentForFile(bm.getFile());
+      getBookmarkManager().addRegion(new DocumentRegion() {
+          public OpenDefinitionsDocument getDocument() { return odd; }
+          public File getFile() throws FileMovedException { return odd.getFile(); }
+          public int getStartOffset() { return bm.getStartOffset(); }
+          public int getEndOffset() { return bm.getEndOffset(); }
+      });
     }
     
     final String projfilepath = projectRoot.getCanonicalPath();
@@ -1596,16 +1630,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     if (! found) return false;
         
-    // remove breakpoints for this file
-    Debugger dbg = getDebugger();
-    if (dbg.isAvailable()) {
-      Vector<Breakpoint> bps = new Vector<Breakpoint>(doc.getBreakpoints());
-      for (int i = 0; i < bps.size(); i++) {
-        Breakpoint bp = bps.get(i);
-        try { dbg.removeBreakpoint(bp); }
-        catch(DebugException de) { /* ignore */ }
-      }
-    }
+    // remove breakpoints and bookmarks for this file
+    doc.getBreakpointManager().clearRegions();
+    doc.getBookmarkManager().clearRegions();
     
     Utilities.invokeLater(new SRunnable() { 
       public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread
@@ -1871,16 +1898,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Registers OptionListeners.  Factored out code from the two constructor. */
   private void _registerOptionListeners() {
 //    // Listen to any relevant config options
-//    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH,
-//                                         new ExtraClasspathOptionListener());
+//    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
 
-    DrJava.getConfig().addOptionListener(BACKUP_FILES,
-                                         new BackUpFileOptionListener());
+    DrJava.getConfig().addOptionListener(BACKUP_FILES, new BackUpFileOptionListener());
     Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
     FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue());
 
-//    DrJava.getConfig().addOptionListener(ALLOW_PRIVATE_ACCESS,
-//                                         new OptionListener<Boolean>() {
+//    DrJava.getConfig().addOptionListener(ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
 //      public void optionChanged(OptionEvent<Boolean> oce) {
 //        getInteractionsModel().setPrivateAccessible(oce.value.booleanValue());
 //      }
@@ -2063,6 +2087,152 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void jarAll() { _state.jarAll(); }
   
   private static volatile int ID_COUNTER = 0; /* Seed for assigning id numbers to OpenDefinitionsDocuments */
+  
+  // ---------- ConcreteRegionManager inner class -------
+  /** Simple region manager for the entire model. */
+  static class ConcreteRegionManager<R extends DocumentRegion> extends EventNotifier<RegionManagerListener<R>> implements RegionManager<R> {
+    /** Vector of regions. */
+    protected volatile Vector<R> _regions = new Vector<R>();
+    
+    /** Returns the region in this manager at the given offset, or null if one does not exist.
+     *  @param odd the document
+     *  @param offset the offset in the document
+     *  @return the DocumentRegion at the given line number, or null if it does not exist.
+     */
+    public R getRegionAt(OpenDefinitionsDocument odd, int offset) {
+      for (R r: _regions) {
+        if ((r.getDocument().equals(odd)) && (offset >= r.getStartOffset()) && (offset <= r.getEndOffset())) return r;
+      }
+      return null;
+    }
+    
+    /** Get the DocumentRegion that is stored in this RegionsTreePanel overlapping the area for the given document,
+     *  or null if it doesn't exist.
+     *  @param odd the document
+     *  @param startOffset the start offset
+     *  @param endOffset the end offset
+     *  @return the DocumentRegion or null
+     */
+    public R getRegionOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
+      for(R r: _regions) {        
+        if (!(r.getDocument().equals(odd))) { continue; }
+        
+        if (((r.getStartOffset()>=startOffset) && (r.getEndOffset()<=endOffset)) || // r contained in startOffset-endOffset
+            ((r.getStartOffset()<=startOffset) && (r.getEndOffset()>=endOffset)) || // startOffset-endOffset contained in r
+            ((r.getStartOffset()>=startOffset) && (r.getStartOffset()<=endOffset)) || // r starts within startOffset-endOffset
+            ((r.getEndOffset()>=startOffset) && (r.getEndOffset()<=endOffset))) { // r ends within startOffset-endOffset
+          // already there
+          return r;
+        }
+      }
+      
+      // not found
+      return null;
+    }
+    
+    /** Add the supplied DocumentRegion to the manager.
+     *  @param region the DocumentRegion to be inserted into the manager
+     */
+    public void addRegion(final R region) {
+      boolean added = false;
+      for (int i=0; i< _regions.size();i++) {
+        DocumentRegion r = _regions.get(i);
+        int oldStart = r.getStartOffset();
+        int newStart = region.getStartOffset();
+        
+        if ( newStart < oldStart) {
+          // Starts before, add here
+          _regions.add(i, region);
+          added = true;
+          break;
+        }
+        if ( newStart == oldStart) {
+          // Starts at the same place
+          int oldEnd = r.getEndOffset();
+          int newEnd = region.getEndOffset();
+          
+          if ( newEnd < oldEnd) {
+            // Ends before, add here
+            _regions.add(i, region);
+            added = true;
+            break;
+          }
+        }
+      }
+      if (!added) { _regions.add(region); }
+          
+      // notify
+      Utilities.invokeLater(new Runnable() { public void run() {
+        _lock.startRead();
+        try {
+          for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); }
+        } finally { _lock.endRead(); }
+      } });
+    }
+    
+    /** Remove the given DocumentRegion from the manager.
+     *  @param region the DocumentRegion to be removed.
+     */
+    public void removeRegion(final R region) {
+      _regions.remove(region);
+
+      // notify
+      Utilities.invokeLater(new Runnable() { public void run() { 
+        _lock.startRead();
+        try {
+          for (RegionManagerListener<R> l: _listeners) { l.regionRemoved(region); }
+        } finally { _lock.endRead(); }
+      } });
+    }
+    
+    /** @return a Vector<R> containing the DocumentRegion objects in this mangager. */
+    public Vector<R> getRegions() { return _regions; }
+    
+    /** Tells the manager to remove all regions. */
+    public void clearRegions() {
+      while(_regions.size()>0) { removeRegion(_regions.get(0)); }
+    }
+    
+    /** Helper method to actually copy data from newRegion into oldRegion, and returns true if a change was made.
+     *  However, since the basic DocumentRegion does not contain any additional data, this is a no-op, but
+     *  this method should be overridden, e.g. for use with Breakpoint.
+     *  @param oldRegion the region to find and change
+     *  @param newRegion a region with data to copy into the old region
+     *  @return true if a change was made (here always false) */
+    public boolean changeRegionHelper(R oldRegion, R newRegion) {
+      return false;
+    }
+    
+    /** Uses changeRegionHelper to copy data from newRegion into oldRegion, if oldRegion is found, and returns true
+     *  if a change was actually made.
+     *  @param oldRegion the region to find and change
+     *  @param newRegion a region with data to copy into the old region
+     *  @return true if a change was made */
+    public boolean changeRegion(R oldRegion, R newRegion) {
+      int index = _regions.indexOf(oldRegion);
+      if (index<0) { return false; }
+      final R r = _regions.get(index);
+      boolean changed = changeRegionHelper(r, newRegion);
+      if (changed) {
+        Utilities.invokeLater(new Runnable() { public void run() { 
+          // notify
+          _lock.startRead();
+          try {
+            for (RegionManagerListener<R> l: _listeners) { l.regionChanged(r); }
+          } finally { _lock.endRead(); }            
+        } });
+      }
+      return changed;
+    }
+    
+    /** Removes all listeners from this notifier.  */
+    public void removeAllListeners() {
+      throw new UnsupportedOperationException("ConcreteRegionManager does not support removing all listeners");
+      // this would be a potentially dangerous thing to do, as it would also remove the listeners that the subsets
+      // have installed
+    }
+  }
+  
   // ---------- ConcreteOpenDefDoc inner class ----------
 
   /** A wrapper around a DefinitionsDocument or potential DefinitionsDocument (if it has been kicked out of the cache)
@@ -2071,6 +2241,150 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  descriptive/intuitive.  (Really? CC)
    */
   class ConcreteOpenDefDoc implements OpenDefinitionsDocument {
+    protected class SubsetRegionManager<R extends DocumentRegion> extends EventNotifier<RegionManagerListener<R>> implements RegionManager<R> {
+      /** The region manager it is a subset of. */
+      private RegionManager<R> _superSetManager;
+      
+      /** Creates a subset region manager that only sees the regions in this document. */
+      public SubsetRegionManager(RegionManager<R> ssm) { _superSetManager = ssm; }
+      
+      /** Returns the region in this manager at the given offset, or null if one does not exist.
+       *  @param odd the document
+       *  @param offset the offset in the document
+       *  @return the DocumentRegion at the given line number, or null if it does not exist.
+       */
+      public R getRegionAt(OpenDefinitionsDocument odd, int offset) {
+        return _superSetManager.getRegionAt(odd, offset);
+      }
+      
+      /** Get the DocumentRegion that is stored in this RegionsTreePanel overlapping the area for the given document,
+       *  or null if it doesn't exist.
+       *  @param odd the document
+       *  @param startOffset the start offset
+       *  @param endOffset the end offset
+       *  @return the DocumentRegion or null
+       */
+      public R getRegionOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
+        return _superSetManager.getRegionOverlapping(odd, startOffset, endOffset);
+      }
+      
+      /** Add the supplied DocumentRegion to the manager.
+       *  @param region the DocumentRegion to be inserted into the manager
+       */
+      public void addRegion(R region) {
+        _superSetManager.addRegion(region);
+      }
+      
+      /** Remove the given DocumentRegion from the manager.
+       *  @param region the DocumentRegion to be removed.
+       */
+      public void removeRegion(R region) {
+        _superSetManager.removeRegion(region);
+      }
+      
+      /** @return a Vector<R> containing the DocumentRegion objects corresponding ONLY to this document. */
+      public Vector<R> getRegions() {
+        Vector<R> accum = new Vector<R>();
+        Vector<R> regions = _superSetManager.getRegions();
+        for (R r: regions) {
+          if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { accum.add(r); }
+        }
+        return accum;
+      }
+      
+      /** Tells the manager to remove all regions corresponding ONLY to this document. */
+      public void clearRegions() {
+        Vector<R> regions = getRegions();
+        for (R r: regions) {
+          _superSetManager.removeRegion(r);
+        }
+      }
+      
+      /** Helper method to actually copy data from newRegion into oldRegion, and returns true if a change was made.
+       *  However, since the basic DocumentRegion does not contain any additional data, this is a no-op, but
+       *  this method should be overridden, e.g. for use with Breakpoint.
+       *  @param oldRegion the region to find and change
+       *  @param newRegion a region with data to copy into the old region
+       *  @return true if a change was made (here always false) */
+      public boolean changeRegionHelper(R oldRegion, R newRegion) {
+        return _superSetManager.changeRegionHelper(oldRegion, newRegion);
+      }
+      
+      /** Uses changeRegionHelper to copy data from newRegion into oldRegion, if oldRegion is found, and returns true
+       *  if a change was actually made.
+       *  @param oldRegion the region to find and change
+       *  @param newRegion a region with data to copy into the old region
+       *  @return true if a change was made */
+      public boolean changeRegion(R oldRegion, R newRegion) {
+        return _superSetManager.changeRegionHelper(oldRegion, newRegion);
+      }
+      
+      /** A decorator to a RegionManagerListener that filters out everything but regions belonging to this document. */
+      private class FilteredRegionManagerListener<R extends DocumentRegion> implements RegionManagerListener<R> {
+        private RegionManagerListener<R> _decoree;
+        public FilteredRegionManagerListener(RegionManagerListener<R> d) { _decoree = d; }
+        public RegionManagerListener<R> getDecoree() { return _decoree; }
+        public void regionAdded(R r)   { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionAdded(r); } }
+        public void regionChanged(R r) { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionChanged(r); } }
+        public void regionRemoved(R r) { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionRemoved(r); } }
+      }
+
+      /** All filtered listeners that are listening to this subset. Accesses to this collection are protected by the 
+       *  ReaderWriterLock. The collection must be synchronized, since multiple readers could access it at once.
+       */
+      protected final LinkedList<FilteredRegionManagerListener<R>> _filters = new LinkedList<FilteredRegionManagerListener<R>>();
+    
+      /** Provides synchronization primitives for solving the readers/writers problem.  In EventNotifier, adding and 
+       *  removing listeners are considered write operations, and all notifications are considered read operations. Multiple 
+       *  reads can occur simultaneously, but only one write can occur at a time, and no reads can occur during a write.
+       */
+      protected final ReaderWriterLock _lock = new ReaderWriterLock();
+    
+      /** Adds a listener to the notifier.
+       *  @param listener a listener that reacts on events
+       */
+      public void addListener(RegionManagerListener<R> listener) {
+        FilteredRegionManagerListener<R> filter = new FilteredRegionManagerListener<R>(listener);
+        _lock.startWrite();
+        try { _filters.add(filter); }
+        finally {
+          _lock.endWrite();
+          _superSetManager.addListener(filter);
+        }
+      }
+    
+      /** Removes a listener from the notifier.
+       *  @param listener a listener that reacts on events
+       */
+      public void removeListener(RegionManagerListener<R> listener) {
+        _lock.startWrite();
+        try {
+          for (FilteredRegionManagerListener<R> filter: _filters) {
+            if (filter.getDecoree().equals(listener)) {
+              _listeners.remove(filter);
+              _superSetManager.removeListener(filter);
+            }
+          }
+        }
+        finally {
+          _lock.endWrite();
+        }
+      }
+    
+      /** Removes all listeners from this notifier.  */
+      public void removeAllListeners() {
+        _lock.startWrite();
+        try {
+          for (FilteredRegionManagerListener<R> filter: _filters) {
+            _listeners.remove(filter);
+            _superSetManager.removeListener(filter);
+          }
+        }
+        finally {
+          _lock.endWrite();
+        }
+      }
+    }
     
 //     private boolean _modifiedSinceSave;
     
@@ -2091,7 +2405,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     private volatile DCacheAdapter _cacheAdapter;
     
-    protected volatile Vector<Breakpoint> _breakpoints;
+    /** Manager for bookmark regions. */
+    protected SubsetRegionManager<Breakpoint> _breakpointManager;
+    
+    /** Manager for bookmark regions. */
+    protected SubsetRegionManager<DocumentRegion> _bookmarkManager;
     
     private volatile int _initVScroll;
     private volatile int _initHScroll;
@@ -2131,7 +2449,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _cacheAdapter = _cache.register(this, ddr);
       } catch(IllegalStateException e) { throw new UnexpectedException(e); }
 
-      _breakpoints = new Vector<Breakpoint>();
+      _breakpointManager = new SubsetRegionManager<Breakpoint>(AbstractGlobalModel.this.getBreakpointManager());
+      _bookmarkManager = new SubsetRegionManager<DocumentRegion>(AbstractGlobalModel.this.getBookmarkManager());
     }
     
     //------------ Getters and Setters -------------//
@@ -2813,31 +3132,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      *         the matching brace.
      */
     public int balanceForward() { return getDocument().balanceForward(); }
-
-    /** throws UnsupportedOperationException */
-    public Breakpoint getBreakpointAt(int offset) {
-      throw new UnsupportedOperationException("AbstractGlobalModel does not support debugger");
-    }
-
-    /** throws UnsupportedOperationException */
-    public void addBreakpoint( Breakpoint breakpoint) {
-      throw new UnsupportedOperationException("AbstractGlobalModel does not support debugger");
-    }
     
-    /** throws UnsupportedOperationException */
-    public void removeBreakpoint(Breakpoint breakpoint) {
-      throw new UnsupportedOperationException("AbstractGlobalModel does not support debugger");
-    }
+    /** @return the breakpoint region manager. */
+    public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
     
-    /** throws UnsupportedOperationException */
-    public Vector<Breakpoint> getBreakpoints() {
-      throw new UnsupportedOperationException("AbstractGlobalModel does not support debugger");
-    }
-    
-    /** throws UnsupportedOperationException */
-    public void clearBreakpoints() { 
-      throw new UnsupportedOperationException("AbstractGlobalModel does not support debugger");
-    }
+    /** @return the bookmark region manager. */
+    public RegionManager<DocumentRegion> getBookmarkManager() { return _bookmarkManager; }
     
    /** throws UnsupportedOperationException */
     public void removeFromDebugger() { /* do nothing because it is called in methods in this class */ }    
@@ -3206,7 +3506,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void modifyUnlock() { getDocument().modifyUnlock(); }
     
     /** @return the number of lines in this document. */
-    public int getNumberOfLines() { return getDefaultRootElement().getElementIndex(getEndPosition().getOffset()-1); }
+    public int getNumberOfLines() { return getLineOfOffset(getEndPosition().getOffset()-1); }
+    
+    /** Translates an offset into the components text to a line number.
+     *  @param offset the offset >= 0
+     *  @return the line number >= 0 */
+    public int getLineOfOffset(int offset) {
+      return getDefaultRootElement().getElementIndex(offset);
+    }
   } /* End of ConcreteOpenDefDoc */
 
   private static class TrivialFSS implements FileSaveSelector {

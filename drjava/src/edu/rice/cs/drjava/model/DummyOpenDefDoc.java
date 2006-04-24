@@ -138,8 +138,10 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   public void removeFromDebugger() { throw new UnsupportedOperationException("Dummy method"); }
-  
-  public void removeBreakpoint(Breakpoint breakpoint) { throw new UnsupportedOperationException("Dummy method"); }
+
+  public RegionManager<Breakpoint> getBreakpointManager() { throw new UnsupportedOperationException("Dummy method"); }
+
+  public RegionManager<DocumentRegion> getBookmarkManager() { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean isUntitled() { throw new UnsupportedOperationException("Dummy method"); }
   
@@ -149,16 +151,10 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public Breakpoint getBreakpointAt(int lineNumber) { throw new UnsupportedOperationException("Dummy method"); }
-  
   public String getFileName() { throw new UnsupportedOperationException("Dummy method"); }
   public String getCanonicalPath() { throw new UnsupportedOperationException("Dummy method"); }
   public String getCompletePath() { throw new UnsupportedOperationException("Dummy method"); }
   public String getName() { return getFileName(); }
-  
-  public void addBreakpoint(Breakpoint breakpoint) { throw new UnsupportedOperationException("Dummy method"); }
-  
-  public Vector<Breakpoint> getBreakpoints() { throw new UnsupportedOperationException("Dummy method"); }
  
   public void startJUnit() throws ClassNotFoundException, IOException {
     throw new UnsupportedOperationException("Dummy method");
@@ -176,8 +172,6 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
 
-  public void clearBreakpoints() { throw new UnsupportedOperationException("Dummy method"); }
-  
   public boolean saveFileAs(FileSaveSelector com) throws IOException {
     throw new UnsupportedOperationException("Dummy method");
   }
@@ -418,6 +412,12 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /** @return the number of lines in this document. */
   public int getNumberOfLines() { return 0; }
   
+  /** Translates an offset into the components text to a line number.
+   *  @param offset the offset >= 0
+   *  @return the line number >= 0
+   *  @exception BadLocationException thrown if the offset is less than zero or greater than the document length. */
+  public int getLineOfOffset(int offset) { throw new UnsupportedOperationException("Dummy method"); }
+ 
   /** @return the caret position as set by the view. */
   public int getCaretPosition() { return 0; }
 }

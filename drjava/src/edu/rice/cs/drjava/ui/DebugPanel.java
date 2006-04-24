@@ -582,41 +582,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
   /** Listens to events from the debug manager to keep the panel updated. */
   class DebugPanelListener implements DebugListener {
-    
-    /** Called when debugger mode has been enabled. Must be executed in event thread. */
-    public void debuggerStarted() { }
-
-    /** Called when debugger mode has been disabled. Must be executed in event thread. */
-    public void debuggerShutdown() { }
-
-    /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
-     *  displayed.  Must be executed only in the event thread.
-     *  @param doc Document to display
-     *  @param lineNumber Line to display or highlight
-     *  @param shouldHighlight true iff the line should be highlighted.
-     */
-    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
-
-    /** Called when a breakpoint is set in a document. Must be executed in event thread. */
-    public void breakpointSet(final Breakpoint bp) { }
-
-    /**
-     * Called when a breakpoint is reached during execution. */
-    public void breakpointReached(final Breakpoint bp) { }
-
-    /**
-     * Called when a breakpoint is changed. */
-    public void breakpointChanged(final Breakpoint bp) { }
-
-    /** Called when a breakpoint is removed from a document. */
-    public void breakpointRemoved(final Breakpoint bp) { }
-
-    public void watchSet(final DebugWatchData w) { }
-    public void watchRemoved(final DebugWatchData w) { }
-
-    /** Called when a step is requested on the current thread. */
-    public void stepRequested() { }
-
     /** Called when the current thread is suspended. */
     public void currThreadSuspended() {
       // Only change GUI from event-dispatching thread
@@ -647,6 +612,17 @@ public class DebugPanel extends JPanel implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Utilities.invokeLater(new Runnable() { public void run() { updateData(); } });
     }
+    
+    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
+    public void debuggerStarted() { }
+    public void debuggerShutdown() { }
+    public void breakpointReached(final Breakpoint bp) { }
+    public void watchSet(final DebugWatchData w) { }
+    public void watchRemoved(final DebugWatchData w) { }
+    public void stepRequested() { }
+    public void regionAdded(Breakpoint r) { }
+    public void regionChanged(Breakpoint r) { }
+    public void regionRemoved(Breakpoint r) { }
   }
 
 

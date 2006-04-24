@@ -106,6 +106,9 @@ public interface OptionConstants {
   /** Color for highlighting errors and test failures. */
   public static final ColorOption COMPILER_ERROR_COLOR = new ColorOption("compiler.error.color", Color.yellow);
 
+  /** Color for highlighting bookmarks. */
+  public static final ColorOption BOOKMARK_COLOR = new ColorOption("bookmark.color", Color.green);
+
   /** Color for highlighting breakpoints. */
   public static final ColorOption DEBUG_BREAKPOINT_COLOR = new ColorOption("debug.breakpoint.color", Color.red);
 
@@ -769,6 +772,14 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
     new KeyStrokeOption("key.debug.clear.all.breakpoints", KeyStrokeOption.NULL_KEYSTROKE);
 
+  /** The key binding for toggling a bookmark. */
+  public static final KeyStrokeOption KEY_BOOKMARKS_TOGGLE =
+    new KeyStrokeOption("key.bookmarks.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_M, mask));
+
+  /** The key binding for displaying the bookmarks panel. */
+  public static final KeyStrokeOption KEY_BOOKMARKS_PANEL =
+    new KeyStrokeOption("key.bookmarks.panel", KeyStroke.getKeyStroke(KeyEvent.VK_M, mask | InputEvent.SHIFT_MASK));
+  
   /** The key binding for help */
   public static final KeyStrokeOption KEY_HELP =
     new KeyStrokeOption("key.help", KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));

@@ -513,7 +513,7 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
   public void testDocumentPaneMemoryLeak()  throws InterruptedException, java.io.IOException{
     _finalCount = 0;
     _finalDocCount = 0;
-    
+    Utilities.clearEventQueue();
     
     FinalizationListener<DefinitionsPane> fl = new FinalizationListener<DefinitionsPane>() {
       public void finalized(FinalizationEvent<DefinitionsPane> e) {
@@ -557,7 +557,8 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
     System.runFinalization();
 //    System.out.println("Current: " + _frame.getCurrentDefPane().hashCode());
     
-
+//    System.out.println("Foo");
+//    System.in.read();
     assertEquals("all the defdocs should have been garbage collected", 6, _finalDocCount);
     assertEquals("all the panes should have been garbage collected", 6, _finalCount);
 //    System.err.println("_finalCount = " + _finalCount);

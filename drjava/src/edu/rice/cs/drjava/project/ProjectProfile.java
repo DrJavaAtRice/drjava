@@ -46,6 +46,7 @@ import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugException;
@@ -80,6 +81,7 @@ public class ProjectProfile implements ProjectFileIR {
   
   private int _createJarFlags = 0;
   
+  private List<DocumentRegion> _bookmarks = new ArrayList<DocumentRegion>();
   private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
   private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
   
@@ -134,6 +136,9 @@ public class ProjectProfile implements ProjectFileIR {
   /** @return the output file used in the "Create Jar" dialog. */
   public int getCreateJarFlags() { return _createJarFlags; }
   
+  /** @return an array of the bookmarks in this project. */
+  public DocumentRegion[] getBookmarks() { return _bookmarks.toArray(new DocumentRegion[_bookmarks.size()]); }
+  
   /** @return an array of the breakpoints in this project. */
   public DebugBreakpointData[] getBreakpoints() { return _breakpoints.toArray(new DebugBreakpointData[_breakpoints.size()]); }
   
@@ -183,8 +188,9 @@ public class ProjectProfile implements ProjectFileIR {
   public void setCreateJarFile(File createJarFile) { _createJarFile = createJarFile; }
   public void setCreateJarFlags(int createJarFlags) { _createJarFlags = createJarFlags; }
   
-  public void setBreakpoints(List<DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
-  public void setWatches(List<DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
+  public void setBookmarks(List<? extends DocumentRegion> bms) { _bookmarks = new ArrayList<DocumentRegion>(bms); }
+  public void setBreakpoints(List<? extends DebugBreakpointData> bps) { _breakpoints = new ArrayList<DebugBreakpointData>(bps); }
+  public void setWatches(List<? extends DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
   
   /** This method writes what information has been passed to this builder so far to disk in s-expression format. */
   public void write() throws IOException {
@@ -299,6 +305,14 @@ public class ProjectProfile implements ProjectFileIR {
     }
     else fw.write("\n;; no watches");
 
+    // write bookmarks
+    if (!_bookmarks.isEmpty()) {
+      fw.write("\n(bookmarks");
+      for(DocumentRegion bm: _bookmarks) { fw.write("\n" + encodeBookmarkRelative(bm, "  ")); }
+      fw.write(")"); // close the bookmarks expression
+    }
+    else fw.write("\n;; no bookmarks");
+
     fw.close();
   }
   
@@ -400,7 +414,6 @@ public class ProjectProfile implements ProjectFileIR {
   /** This encodes a breakpoint relative to _projectRoot.
    *  @param bp the breakpoint to encode
    *  @param prefix the indent level to place the s-expression at
-   *  @param relative whether the file containing the breakpoint should be made relative to the project path
    *  @return the s-expression syntax to describe the given breakpoint.
    */
   private String encodeBreakpointRelative(DebugBreakpointData bp, String prefix) throws IOException {
@@ -430,6 +443,28 @@ public class ProjectProfile implements ProjectFileIR {
     String ret = "";
 
     ret += prefix + "(watch " + convertToLiteral(w.getName()) + ")";
+    
+    return ret;
+  }
+
+  /** This encodes a bookmark relative to _projectRoot.
+   *  @param bm the bookmark to encode
+   *  @param prefix the indent level to place the s-expression at
+   *  @return the s-expression syntax to describe the given breakpoint.
+   */
+  private String encodeBookmarkRelative(DocumentRegion bp, String prefix) throws IOException {
+    String ret = "";
+    String path = makeRelativeTo(bp.getDocument().getFile(), _projectRoot).getPath();
+    
+    path = replace(path,File.separator,"/");
+    ret += prefix + "(bookmark (name " + convertToLiteral(path) + ")";
+    
+    int startOffset = bp.getStartOffset();
+    int endOffset = bp.getEndOffset();
+    ret += "\n" + prefix + "      ";
+    ret += "(start " + startOffset + ")";
+    ret += "(end " + endOffset + ")";
+    ret += ")"; // close the bookmarks expression
     
     return ret;
   }

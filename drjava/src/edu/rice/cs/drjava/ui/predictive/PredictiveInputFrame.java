@@ -695,7 +695,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   }
   
   /** Select the strategy for matching. */
-  private void selectStrategy() {
+  public void selectStrategy() {
     _currentStrategy = _strategies.get(_strategyBox.getSelectedIndex());
     removeListener();
     _pim.setStrategy(_currentStrategy);

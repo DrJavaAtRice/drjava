@@ -103,6 +103,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     _keymap = addKeymap(keymapName, getKeymap());
 
     setCaretPosition(doc.getLength());
+    setHighlighter(new ReverseHighlighter());
     _highlightManager = new HighlightManager(this);
     
     if (CodeStatus.DEVELOPMENT) {

@@ -41,6 +41,7 @@ import java.util.List;
 
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.debug.Debugger;
+import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
@@ -62,6 +63,7 @@ import edu.rice.cs.util.text.ConsoleDocument;
  *  on the UI for the logical flow of the program's features.  With the current implementation, we can finally test 
  *  the compile an unit testing functionality of DrJava, along with many other things.  An ongoing refactoring effort 
  *  will be moving many GlobalModel functions into more specific sub-interfaces for particular behaviors:
+ * 
  *  @see DefaultGlobalModel
  *  @see ILoadDocuments
  *  @see CompilerModel
@@ -105,6 +107,12 @@ public interface GlobalModel extends ILoadDocuments {
   public IDocumentNavigator<OpenDefinitionsDocument> getDocumentNavigator();
    
   public void setDocumentNavigator(IDocumentNavigator<OpenDefinitionsDocument> newnav);
+  
+  /** @return manager for breakpoint regions. */
+  public RegionManager<Breakpoint> getBreakpointManager();
+  
+  /** @return manager for breakpoint regions. */
+  public RegionManager<DocumentRegion> getBookmarkManager();
   
 //  //---------------------------- Interpreter --------------------------------//
 //  /** Updates the security manager in DrJava. */

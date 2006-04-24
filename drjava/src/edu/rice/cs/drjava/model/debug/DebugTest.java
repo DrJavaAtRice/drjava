@@ -276,7 +276,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _debugger.toggleBreakpoint(doc,index,16,true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(2);
+    debugListener.assertRegionAddedCount(2);
 
     // Run the main method, hitting breakpoints
     synchronized(_notifierLock) {
@@ -360,7 +360,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4,true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(1);
+    debugListener.assertRegionAddedCount(1);
 
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -386,7 +386,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9, true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(2);
+    debugListener.assertRegionAddedCount(2);
 
     // Resume until next breakpoint
     synchronized(_notifierLock) {
@@ -449,7 +449,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Bar Line 1"),8,true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(1);
+    debugListener.assertRegionAddedCount(1);
 
     // Run the baz() method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -510,7 +510,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4,true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(1);
+    debugListener.assertRegionAddedCount(1);
 
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -636,7 +636,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4,true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(1);
+    debugListener.assertRegionAddedCount(1);
 
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -712,7 +712,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), 4,true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(1);
+    debugListener.assertRegionAddedCount(1);
 
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {

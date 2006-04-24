@@ -56,6 +56,8 @@ import java.text.SimpleDateFormat;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.sexp.*;
+import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugException;
@@ -83,6 +85,7 @@ public class ProjectFileParser {
   private String _srcFileBase;
   
   BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
+  BookmarkListVisitor bookmarkListVisitor = new BookmarkListVisitor();
   
   private ProjectFileParser() { }
   
@@ -188,6 +191,10 @@ public class ProjectFileParser {
     else if (name.compareToIgnoreCase("watches") == 0) {
       List<DebugWatchData> sList = exp.getRest().accept(WatchListVisitor.ONLY);
       pfir.setWatches(sList);
+    }
+    else if (name.compareToIgnoreCase("bookmarks") == 0) {
+       List<DocumentRegion> bmList = exp.getRest().accept(bookmarkListVisitor);
+       pfir.setBookmarks(bmList);
     }
   } 
   
@@ -484,6 +491,80 @@ public class ProjectFileParser {
           public int getOffset() { return offset; }
           public int getLineNumber() { return lineNumber; }
           public boolean isEnabled() { return isEnabled; }
+        };
+      }
+    }
+  }
+  
+  // === bookmarks ===
+  
+  /** Parses out a list of bookmark nodes. */
+  private class BookmarkListVisitor implements SEListVisitor<List<DocumentRegion>> {
+    public List<DocumentRegion> forEmpty(Empty e) { return new ArrayList<DocumentRegion>(); }
+    public List<DocumentRegion> forCons(Cons c) {
+      List<DocumentRegion> list = c.getRest().accept(this);
+      DocumentRegion tmp = ProjectFileParser.ONLY.parseBookmark(c.getFirst(), _srcFileBase);
+      list.add(0, tmp); // add to the end
+      return list;
+    }
+  };
+    
+  /** Parses out the labeled node (a non-empty list) into a bookmark. The node must have the "bookmark" label on it.
+   *  @param s the non-empty list expression
+   *  @return the bookmark described by this s-expression
+   */
+  DocumentRegion parseBookmark(SExp s, String pathRoot) {
+    String name = s.accept(NameVisitor.ONLY);
+    if (name.compareToIgnoreCase("bookmark") != 0)
+      throw new PrivateProjectException("Expected a bookmark tag, found: " + name);
+    if (! (s instanceof Cons))
+      throw new PrivateProjectException("Expected a labeled node, found a label: " + name);
+    SEList c = ((Cons)s).getRest(); // get parameter list
+    
+    BookmarkPropertyVisitor v = new BookmarkPropertyVisitor(pathRoot);
+    return c.accept(v);
+  }
+  
+  
+  /** Traverses the list of expressions found after "bookmark" tag and returns the DocumentRegion
+   *  described by those properties. */
+  private static class BookmarkPropertyVisitor implements SEListVisitor<DocumentRegion> {
+    private String fname = null;
+    private Integer startOffset = null;
+    private Integer endOffset = null;
+    
+    private String pathRoot;
+    public BookmarkPropertyVisitor(String pr) { pathRoot = pr; }
+    
+    public DocumentRegion forCons(Cons c) {
+      String name = c.getFirst().accept(NameVisitor.ONLY); 
+      if (name.compareToIgnoreCase("name") == 0) { fname = ProjectFileParser.ONLY.parseFileName(c.getFirst()); }
+      else if (name.compareToIgnoreCase("start") == 0) { startOffset = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
+      else if (name.compareToIgnoreCase("end") == 0) { endOffset = ProjectFileParser.ONLY.parseInt(c.getFirst()); }
+        
+      return c.getRest().accept(this);
+    }
+    
+    public DocumentRegion forEmpty(Empty c) {
+      if ((fname == null) || (startOffset == null) || (endOffset == null)) {
+        throw new PrivateProjectException("Bookmark information incomplete, need name, start offset and end offset");
+      }
+      if (pathRoot == null || new File(fname).isAbsolute()) {
+        final File f = new File(fname);
+        return new DocumentRegion() {
+          public OpenDefinitionsDocument getDocument() { return null; }
+          public File getFile() { return f; }
+          public int getStartOffset() { return startOffset; }
+          public int getEndOffset() { return endOffset; }
+        };
+      }
+      else {
+        final File f = new File(pathRoot, fname);
+        return new DocumentRegion() {
+          public OpenDefinitionsDocument getDocument() { return null; }
+          public File getFile() { return f; }
+          public int getStartOffset() { return startOffset; }
+          public int getEndOffset() { return endOffset; }
         };
       }
     }

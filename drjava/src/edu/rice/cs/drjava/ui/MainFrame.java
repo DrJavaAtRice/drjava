@@ -143,7 +143,8 @@ public class MainFrame extends JFrame {
   private JavadocErrorPanel _javadocErrorPanel;
   private FindReplaceDialog _findReplace;
   private BreakpointsPanel _breakpointsPanel;
-  private LinkedList<TabbedPanel> _tabs;
+  private BookmarksPanel _bookmarksPanel;
+  public LinkedList<TabbedPanel> _tabs;
   
   private Component _lastFocusOwner;
   /**
@@ -186,15 +187,6 @@ public class MainFrame extends JFrame {
   private JMenu _languageLevelMenu;
   private JMenu _helpMenu;
   private JMenuItem _debuggerEnabledMenuItem;
-//  private JMenuItem _runDebuggerMenuItem;
-//  private JMenuItem _resumeDebugMenuItem;
-//  private JMenuItem _stepIntoDebugMenuItem;
-//  private JMenuItem _stepOverDebugMenuItem;
-//  private JMenuItem _stepOutDebugMenuItem;
-//  private JMenuItem _suspendDebugMenuItem;
-//  private JMenuItem _toggleBreakpointMenuItem;
-//  private JMenuItem _printBreakpointsMenuItem;
-//  private JMenuItem _clearAllBreakpointsMenuItem;
   
   // Popup menus
   private JPopupMenu _navPanePopupMenu;
@@ -230,8 +222,8 @@ public class MainFrame extends JFrame {
    */
   private HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
   
-  /** Table to map breakpoints to their corresponding highlight objects. */
-  private java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo> _breakpointHighlights;
+  /** Table to map DocumentRegions (breakpoints, bookmarks) to their corresponding highlight objects. */
+  private java.util.Hashtable<DocumentRegion, HighlightManager.HighlightInfo> _documentRegionHighlights;
   
   /** Whether to display a prompt message before quitting. */
   private boolean _promptBeforeQuit;
@@ -1331,6 +1323,7 @@ public class MainFrame extends JFrame {
         }       
         initCompleteFileDialog();
         _completeFileDialog.setModel(true, pim); // ignore case
+        _completeFileDialog.selectStrategy();
         if (currentEntry != null) _completeFileDialog.setCurrentItem(currentEntry);
         hourglassOn();
         _completeFileDialog.setVisible(true);
@@ -1545,7 +1538,6 @@ public class MainFrame extends JFrame {
   private Action _gotoOpeningBraceAction =  new AbstractAction("Go to Opening Brace") {
     public void actionPerformed(ActionEvent ae) {
         OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-        if (true) throw new RuntimeException("booh");
         odd.readLock();
         try {
           int pos = odd.findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
@@ -1656,7 +1648,6 @@ public class MainFrame extends JFrame {
         _mainSplit.resetToPreferredSizes(); 
       if (! _breakpointsPanel.isDisplayed()) {
         showTab(_breakpointsPanel);
-        _breakpointsPanel.beginListeningTo(_currentDefPane);
       }
       _breakpointsPanel.setVisible(true);
       _tabbedPane.setSelectedComponent(_breakpointsPanel);
@@ -1664,6 +1655,62 @@ public class MainFrame extends JFrame {
       SwingUtilities.invokeLater(new Runnable() { public void run() { _breakpointsPanel.requestFocusInWindow(); } });
     }
   };
+
+  /** Shows the bookmarks tab. */
+  private Action _bookmarksPanelAction = new AbstractAction("Bookmarks") {
+    public void actionPerformed(ActionEvent ae) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes(); 
+      if (! _bookmarksPanel.isDisplayed()) {
+        showTab(_bookmarksPanel);
+      }
+      _bookmarksPanel.setVisible(true);
+      _tabbedPane.setSelectedComponent(_bookmarksPanel);
+      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
+      SwingUtilities.invokeLater(new Runnable() { public void run() { _bookmarksPanel.requestFocusInWindow(); } });
+    }
+  };
+  
+  /** Toggles a bookmark. */
+  private Action _toggleBookmarkAction = new AbstractAction("Toggle Bookmark") {
+    public void actionPerformed(ActionEvent ae) {
+      toggleBookmark();
+    }
+  };
+
+  /** Toggle a bookmark. */
+  public void toggleBookmark() {
+    final OpenDefinitionsDocument doc = _model.getActiveDocument();
+    int startSel = _currentDefPane.getSelectionStart();
+    int endSel = _currentDefPane.getSelectionEnd();
+    doc.readLock();
+    try {
+      if (startSel>endSel) { int temp = startSel; startSel = endSel; endSel = temp; }
+      else if (startSel==endSel) {
+        // nothing selected
+        endSel = doc.getLineEndPos(startSel);
+        startSel = doc.getLineStartPos(startSel);
+      }
+      DocumentRegion r = _model.getBookmarkManager().getRegionOverlapping(doc, startSel, endSel);
+      if (r==null) {
+        final Position startPos = doc.createPosition(startSel);
+        final Position endPos = doc.createPosition(endSel);
+        _model.getBookmarkManager().addRegion(new DocumentRegion() {
+          public OpenDefinitionsDocument getDocument() { return doc; }
+          public File getFile() throws FileMovedException { return doc.getFile(); }
+          public int getStartOffset() { return startPos.getOffset(); }
+          public int getEndOffset() { return endPos.getOffset(); }
+        });
+      }
+      else {
+        _model.getBookmarkManager().removeRegion(r);
+      }
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+    finally { doc.readUnlock(); }
+  }
   
   /** Cuts from the caret to the end of the current line to the clipboard. */
   protected Action _cutLineAction = new AbstractAction("Cut Line") {
@@ -2380,8 +2427,8 @@ public class MainFrame extends JFrame {
       }
     });
     
-    // Initialize breakpoint highlights hashtable, for easy removal of highlights
-    _breakpointHighlights = new java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
+    // Initialize DocumentRegion highlights hashtable, for easy removal of highlights
+    _documentRegionHighlights = new java.util.Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
     
     // Set cached frames and dialogs to null until they are created
     _configFrame = null;
@@ -3989,10 +4036,7 @@ public class MainFrame extends JFrame {
   
   /** Clears all breakpoints from the debugger. */
   void debuggerClearAllBreakpoints() {
-    try { _model.getDebugger().removeAllBreakpoints(); }
-    catch (DebugException de) {
-      _showError(de, "Debugger Error", "Could not remove all breakpoints.");
-    }
+    _model.getBreakpointManager().clearRegions();
   }
   
   void _showFileMovedError(FileMovedException fme) {
@@ -4550,6 +4594,10 @@ public class MainFrame extends JFrame {
     if (DrJava.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
       toolsMenu.add(_showDebugConsoleAction);
     }
+
+    toolsMenu.addSeparator();
+    _addMenuItem(toolsMenu, _bookmarksPanelAction, KEY_BOOKMARKS_PANEL);
+    _addMenuItem(toolsMenu, _toggleBookmarkAction, KEY_BOOKMARKS_TOGGLE);
     
     // Add the menus to the menu bar
     return toolsMenu;
@@ -5050,7 +5098,55 @@ public class MainFrame extends JFrame {
     
     _junitErrorPanel = new JUnitPanel(_model, this);
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
-    if (_model.getDebugger().isAvailable()) { _breakpointsPanel = new BreakpointsPanel(this); }
+    if (_model.getDebugger().isAvailable()) {
+      _breakpointsPanel = new BreakpointsPanel(this);
+      // hook highlighting listener to breakpoint manager
+      _model.getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
+        /* Called when a breakpoint is added. Must be executed in event thread. */
+        public void regionAdded(final Breakpoint bp) {
+          DefinitionsPane bpPane = getDefPaneGivenODD(bp.getDocument());
+          _documentRegionHighlights.
+            put(bp, bpPane.getHighlightManager().
+                  addHighlight(bp.getStartOffset(), bp.getEndOffset(), 
+                               bp.isEnabled() ? DefinitionsPane.BREAKPOINT_PAINTER
+                                 : DefinitionsPane.DISABLED_BREAKPOINT_PAINTER));
+          _updateDebugStatus();
+        }
+        
+        /** Called when a breakpoint is changed. Must execute in event thread. */
+        public void regionChanged(Breakpoint bp) { 
+          regionRemoved(bp);
+          regionAdded(bp);
+        }
+        
+        /** Called when a breakpoint is removed. Must be executed in event thread. */
+        public void regionRemoved(final Breakpoint bp) {      
+          HighlightManager.HighlightInfo highlight = _documentRegionHighlights.get(bp);
+          if (highlight != null) highlight.remove();
+          _documentRegionHighlights.remove(bp);
+        }
+      });
+    }
+
+    _bookmarksPanel = new BookmarksPanel(this);
+    // hook highlighting listener to bookmark manager
+    _model.getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() {      
+      public void regionAdded(DocumentRegion r) {
+        DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
+        _documentRegionHighlights.
+          put(r, bpPane.getHighlightManager().
+                addHighlight(r.getStartOffset(), r.getEndOffset(), DefinitionsPane.BOOKMARK_PAINTER));
+      }
+      public void regionChanged(DocumentRegion r) { 
+        regionRemoved(r);
+        regionAdded(r);
+      }
+      public void regionRemoved(DocumentRegion r) {
+        HighlightManager.HighlightInfo highlight = _documentRegionHighlights.get(r);
+        if (highlight != null) highlight.remove();
+        _documentRegionHighlights.remove(r);
+      }
+    });
     
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
@@ -5086,6 +5182,7 @@ public class MainFrame extends JFrame {
     _tabs.addLast(_javadocErrorPanel);
     _tabs.addLast(_findReplace);
     if (_model.getDebugger().isAvailable()) { _tabs.addLast(_breakpointsPanel); }
+    _tabs.addLast(_bookmarksPanel);
     
     _interactionsPane.addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = _interactionsContainer; }
@@ -5334,27 +5431,18 @@ public class MainFrame extends JFrame {
     
     // Limiting line numbers to just lines existing in the document.
     doc.addDocumentListener(new DocumentUIListener() {
-      public void changedUpdate(DocumentEvent e) {
+      private void updateUI() {
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             revalidateLineNums();
+            if ((_breakpointsPanel!=null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
+            if ((_bookmarksPanel!=null) && (_bookmarksPanel.isDisplayed())) { _bookmarksPanel.repaint(); }
           }
         });
       }
-      public void insertUpdate(DocumentEvent e) {
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            revalidateLineNums();
-          }
-        });
-      }
-      public void removeUpdate(DocumentEvent e) {
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            revalidateLineNums();
-          }
-        });
-      }
+      public void changedUpdate(DocumentEvent e) { updateUI(); }
+      public void insertUpdate(DocumentEvent e) { updateUI(); }
+      public void removeUpdate(DocumentEvent e) { updateUI(); }
     });
     
     // add a listener to update line and column.
@@ -5836,15 +5924,82 @@ public class MainFrame extends JFrame {
     }
   }
   
+  /** Called when a specific document and line should be displayed. Must be executed only in the event thread.
+   *  @param doc Document to display
+   *  @param lineNumber Line to display or highlight
+   *  @param shouldHighlight true iff the line should be highlighted.
+   */
+  public void scrollToDocumentAndLine(final OpenDefinitionsDocument doc, final int lineNumber, final boolean shouldHighlight) {
+//    Utilities.invokeLater(new Runnable() {
+//    public void run() {
+    // This listener is used when the document to display is
+    // not the active document. In this case, when setActiveDocument
+    // is called, the document won't yet have positive size and we
+    // don't want to scroll to a line until it does, so we wait
+    // for a call to setSize.
+    
+//    ActionListener setSizeListener = new ActionListener() {
+//      public void actionPerformed(ActionEvent ae) {
+//        Utilities.showDebug("custon setSizeListener called in MainFrame with event " + ae);
+//        _currentDefPane.centerViewOnLine(lineNumber);
+//        _currentDefPane.requestFocusInWindow();
+//      }
+//    };
+//    _currentDefPane.addSetSizeListener(setSizeListener);
+    
+    if (!_model.getActiveDocument().equals(doc)) _model.setActiveDocument(doc);
+    else _model.refreshActiveDocument();
+    
+    // this block occurs if the documents is already open and as such
+    // has a positive size
+    if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {
+//      SwingUtilities.invokeLater(new Runnable() {  
+//        public void run() {
+//          Utilities.showDebug("Getting ready to reset defintions pane");
+          _currentDefPane.centerViewOnLine(lineNumber);
+          _currentDefPane.requestFocusInWindow();
+//        }
+//      });
+    }
+    
+    /* The execution of this block of code is deferred using SwingUtilties to fix bug #1243993.  It is not clear 
+     * why this deferral works. */
+    SwingUtilities.invokeLater(new Runnable() {  
+      public void run() {
+        if (shouldHighlight) {
+          _removeThreadLocationHighlight();
+          int startOffset = doc.getOffset(lineNumber);
+          if (startOffset > -1) {
+            int endOffset = doc.getLineEndPos(startOffset);
+            if (endOffset > -1) {
+              _currentThreadLocationHighlight =
+                _currentDefPane.getHighlightManager().
+                addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
+            }
+          }
+        }
+        
+        if (doc.isModifiedSinceSave() && !_currentDefPane.hasWarnedAboutModified()) {
+          
+          _showDebuggingModifiedFileWarning();
+          
+          //no need to update flag, because previous method call will do it
+          //_hasWarnedAboutModified = true;
+        }
+        if (shouldHighlight) {
+          // Give the interactions pane focus so we can debug
+          _interactionsPane.requestFocusInWindow();
+          showTab(_interactionsPane);
+        }
+        _updateDebugStatus();
+      }
+    });
+//      }
+//    });
+  }
+  
   /** Listens to events from the debugger. */
   private class UIDebugListener implements DebugListener {
-    
-    /* This field is used by threadLocationUpdated. We want to call centerViewOnLine the second time setSize is 
-     * called on _currentDefPane if it is a new definitions pane. This actually centers the correct line instead 
-     * of having it appear at the top of the screen. There ought to be a cleaner way to do this...
-     */
-//    private boolean _firstCallFromSetSize;
-    
     /* Must be executed in evevt thread.*/
     public void debuggerStarted() { showDebugger(); }
     
@@ -5852,136 +6007,9 @@ public class MainFrame extends JFrame {
     public void debuggerShutdown() {
       _disableStepTimer();
       
-//      // Only change GUI from event-dispatching thread
-//      Runnable command = new Runnable() {
-//        public void run() {
-          hideDebugger();
-          _removeThreadLocationHighlight();
-//        }
-//      };
-//      Utilities.invokeLater(command);
+      hideDebugger();
+      _removeThreadLocationHighlight();
     }
-    
-    public void currThreadSet(DebugThreadData dtd) { }
-    
-    /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
-     *  displayed.  Must be executed only in the event thread.
-     *  @param doc Document to display
-     *  @param lineNumber Line to display or highlight
-     *  @param shouldHighlight true iff the line should be highlighted.
-     */
-    public void threadLocationUpdated(final OpenDefinitionsDocument doc, final int lineNumber,
-                                      final boolean shouldHighlight) {
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
-          // This listener is used when the document to display is
-          // not the active document. In this case, when setActiveDocument
-          // is called, the document won't yet have positive size and we
-          // don't want to scroll to a line until it does, so we wait
-          // for a call to setSize.
-          
-//          ActionListener setSizeListener = new ActionListener() {
-//            public void actionPerformed(ActionEvent ae) {
-//              Utilities.showDebug("custon setSizeListener called in MainFrame with event " + ae);
-//              _currentDefPane.centerViewOnLine(lineNumber);
-//              _currentDefPane.requestFocusInWindow();
-//            }
-//          };
-//          _currentDefPane.addSetSizeListener(setSizeListener);
-          
-          if (!_model.getActiveDocument().equals(doc)) _model.setActiveDocument(doc);
-          else _model.refreshActiveDocument();
-          
-          // this block occurs if the documents is already open and as such
-          // has a positive size
-          if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {
-//            SwingUtilities.invokeLater(new Runnable() {  
-//              public void run() {
-//                Utilities.showDebug("Getting ready to reset defintions pane");
-                _currentDefPane.centerViewOnLine(lineNumber);
-                _currentDefPane.requestFocusInWindow();
-//              }
-//            });
-          }
-          
-          /* The execution of this block of code is deferred using SwingUtilties to fix bug #1243993.  It is not clear 
-           * why this deferral works. */
-          SwingUtilities.invokeLater(new Runnable() {  
-            public void run() {
-              if (shouldHighlight) {
-                _removeThreadLocationHighlight();
-                int startOffset = doc.getOffset(lineNumber);
-                if (startOffset > -1) {
-                  int endOffset = doc.getLineEndPos(startOffset);
-                  if (endOffset > -1) {
-                    _currentThreadLocationHighlight =
-                      _currentDefPane.getHighlightManager().
-                      addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
-                  }
-                }
-              }
-              
-              if (doc.isModifiedSinceSave() && !_currentDefPane.hasWarnedAboutModified()) {
-                
-                _showDebuggingModifiedFileWarning();
-                
-                //no need to update flag, because previous method call will do it
-                //_hasWarnedAboutModified = true;
-              }
-              if (shouldHighlight) {
-                // Give the interactions pane focus so we can debug
-                _interactionsPane.requestFocusInWindow();
-                showTab(_interactionsPane);
-              }
-              _updateDebugStatus();
-            }
-          });
-//        }
-//      });
-    }
-                            
-    /* Must be executed in event thread. */
-    public void breakpointSet(final Breakpoint bp) {
-//      // Only change GUI from event-dispatching thread
-//      Runnable command = new Runnable() {
-//        public void run() {
-          DefinitionsPane bpPane = getDefPaneGivenODD(bp.getDocument());
-          _breakpointHighlights.
-            put(bp, bpPane.getHighlightManager().
-                    addHighlight(bp.getStartOffset(), bp.getEndOffset(), 
-                                 bp.isEnabled() ? DefinitionsPane.BREAKPOINT_PAINTER
-                                                : DefinitionsPane.DISABLED_BREAKPOINT_PAINTER));
-          _updateDebugStatus();
-//        }
-//      };
-//      Utilities.invokeLater(command);
-    }
-    
-    /** Called when a breakpoint is reached. Must execute in event thread. */
-    public void breakpointReached(Breakpoint bp) { 
-      /* The following commented-out code was added to address bug #1238994 which it appeared to fix.  But subsequent
-       * moving of debugger event code into event thread appears to make it unnecessary.
-       * TODO: figure out how to write a unit test to test for this bug. */
-//      _model.getDebugger().scrollToSource(bp);     
-//      _currentDefPane.notifyActive();
-    }
-    
-    /** Called when a breakpoint is changed. Must execute in event thread. */
-    public void breakpointChanged(Breakpoint bp) { 
-      breakpointRemoved(bp);
-      breakpointSet(bp);
-    }
-    
-    /* Must be executed in event thread. */
-    public void breakpointRemoved(final Breakpoint bp) {
-      
-      HighlightManager.HighlightInfo highlight = _breakpointHighlights.get(bp);
-      if (highlight != null) highlight.remove();
-      _breakpointHighlights.remove(bp);
-    }
-    
-    public void watchSet(final DebugWatchData w) { }
-    public void watchRemoved(final DebugWatchData w) { }
     
     /** Called when a step is requested on the current thread.  Must be executed in event thread. */
     public void stepRequested() {
@@ -6003,50 +6031,53 @@ public class MainFrame extends JFrame {
     
     /* Must be executed in the event thread. */
     public void currThreadResumed() {
-      // Only change GUI from event-dispatching thread
-//      Runnable command = new Runnable() {
-//        public void run() {
           _setThreadDependentDebugMenuItems(false);
           _removeThreadLocationHighlight();
-//        }
-//      };
-//      Utilities.invokeLater(command);
-    }
+    }    
     
-    /* Must be executed in event thread. */
-    public void threadStarted() { }
+    /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
+     *  displayed.  Must be executed only in the event thread.
+     *  @param doc Document to display
+     *  @param lineNumber Line to display or highlight
+     *  @param shouldHighlight true iff the line should be highlighted.
+     */
+    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
+      scrollToDocumentAndLine(doc, lineNumber, shouldHighlight);
+    }
     
     /* Must be executed in event thread. */
     public void currThreadDied() {
       _disableStepTimer();
       
-//      Runnable command = new Runnable() {
-//        public void run() {
-          if (inDebugMode()) {
-            try {
-              if (!_model.getDebugger().hasSuspendedThreads()) {
-                // no more suspended threads, resume default debugger state
-                // all thread dependent debug menu items are disabled
-                _setThreadDependentDebugMenuItems(false);
-                _removeThreadLocationHighlight();
-                // Make sure we're at the prompt
-                // (This should really be fixed in InteractionsController, not here.)
-                _interactionsController.moveToPrompt(); // there are no suspended threads, bring back prompt
-              }
-            }
-            catch (DebugException de) {
-              _showError(de, "Debugger Error", "Error with a thread in the debugger.");
-            }
+      if (inDebugMode()) {
+        try {
+          if (!_model.getDebugger().hasSuspendedThreads()) {
+            // no more suspended threads, resume default debugger state
+            // all thread dependent debug menu items are disabled
+            _setThreadDependentDebugMenuItems(false);
+            _removeThreadLocationHighlight();
+            // Make sure we're at the prompt
+            // (This should really be fixed in InteractionsController, not here.)
+            _interactionsController.moveToPrompt(); // there are no suspended threads, bring back prompt
           }
-//        }
-//      };
-//      Utilities.invokeLater(command);
+        }
+        catch (DebugException de) {
+          _showError(de, "Debugger Error", "Error with a thread in the debugger.");
+        }
+      }
     }
     
-    /* Must be executed in event thread. */
+                            
+    public void currThreadSet(DebugThreadData dtd) { }
+    public void regionAdded(final Breakpoint bp) { }
+    public void breakpointReached(Breakpoint bp) { }
+    public void regionChanged(Breakpoint bp) {  }
+    public void regionRemoved(final Breakpoint bp) { }    
+    public void watchSet(final DebugWatchData w) { }
+    public void watchRemoved(final DebugWatchData w) { }
+    public void threadStarted() { }
     public void nonCurrThreadDied() { }
   }
-
 
   /**
   * @author jlugo
@@ -6164,10 +6195,10 @@ public class MainFrame extends JFrame {
         if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
       }
     }
-    
+
     /** NOTE: Makes certain that this action occurs in the event dispatching thread */
-    public void fileClosed(final OpenDefinitionsDocument doc) {
-      Utilities.invokeLater(new Runnable() { public void run() { _fileClosed(doc); } });
+    public void fileClosed(final OpenDefinitionsDocument doc) {      
+      Utilities.invokeLater(new Runnable() {public void run() { _fileClosed(doc); } });
     }
     
     /** Does the work of closing a file */
@@ -6902,7 +6933,7 @@ public class MainFrame extends JFrame {
 // The following line was commented out because it breaks when a user want to close but not save a deleted file      
 //      else throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");  // misnamed exception
     }
-  }
+  } // End of ModelListener class
   
   public JViewport getDefViewport() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();

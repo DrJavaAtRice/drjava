@@ -482,7 +482,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    *  but was renamed (2004-Jun-8) to be more descriptive/intuitive.
    */
   class ConcreteOpenDefDoc extends AbstractGlobalModel.ConcreteOpenDefDoc {
-   
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.
      *  @param f file describing DefinitionsDocument to manage
      */
@@ -559,78 +558,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // Use the model's classpath, and use the EventNotifier as the listener
       _javadocModel.javadocDocument(this, saver, getClassPath().toString());
     }
-    
-    /** Returns the first Breakpoint in this OpenDefinitionsDocument whose region includes the given offset, or null
-     *  if one does not exist.
-     *  @param offset an offset at which to search for a breakpoint
-     *  @return the Breakpoint at the given lineNumber, or null if it does not exist.
-     */
-    public Breakpoint getBreakpointAt(int offset) {
-      //return _breakpoints.get(new Integer(lineNumber));
 
-      for (int i = 0; i < _breakpoints.size(); i++) {
-        Breakpoint bp = _breakpoints.get(i);
-        if (offset >= bp.getStartOffset() && offset <= bp.getEndOffset()) return bp;
-      }
-      return null;
-    }
-
-    /** Inserts the given Breakpoint into the list, sorted by region
-     *  @param breakpoint the Breakpoint to be inserted
-     */
-    public void addBreakpoint(Breakpoint breakpoint) {
-      //_breakpoints.put( new Integer(breakpoint.getLineNumber()), breakpoint);
-
-      for (int i=0; i< _breakpoints.size();i++) {
-        Breakpoint bp = _breakpoints.get(i);
-        int oldStart = bp.getStartOffset();
-        int newStart = breakpoint.getStartOffset();
-        
-        if ( newStart < oldStart) {
-          // Starts before, add here
-          _breakpoints.add(i, breakpoint);
-          return;
-        }
-        if ( newStart == oldStart) {
-          // Starts at the same place
-          int oldEnd = bp.getEndOffset();
-          int newEnd = breakpoint.getEndOffset();
-          
-          if ( newEnd < oldEnd) {
-            // Ends before, add here
-            _breakpoints.add(i, breakpoint);
-            return;
-          }
-        }
-      }
-      _breakpoints.add(breakpoint);
-    }
-    
-    /** Remove the given Breakpoint from our list (but not the debug manager)
-     *  @param breakpoint the Breakpoint to be removed.
-     */
-    public void removeBreakpoint(Breakpoint breakpoint) { _breakpoints.remove(breakpoint); }
-    
-    /** Returns a Vector<Breakpoint> that contains all of the Breakpoint objects in this document. */
-    public Vector<Breakpoint> getBreakpoints() { return _breakpoints; }
-    
-    /** Tells the document to remove all breakpoints (without removing themfrom the debug manager). */
-    public void clearBreakpoints() { _breakpoints.clear(); }
-    
     /** Called to indicate the document is being closed, so to remove all related state from the debug manager. */
     public void removeFromDebugger() {
-      if (_debugger.isAvailable() && (_debugger.isReady())) {
-        try {
-          while (_breakpoints.size() > 0) {
-            _debugger.removeBreakpoint(_breakpoints.get(0));
-          }
-        }
-        catch (DebugException de) {
-          // Shouldn't happen if debugger is active
-          throw new UnexpectedException(de);
-        }
+      while (getBreakpointManager().getRegions().size() > 0) {
+        Breakpoint bp = getBreakpointManager().getRegions().get(0);
+        getBreakpointManager().removeRegion(bp);
       }
-      else clearBreakpoints();
     }
   } /* End of ConcreteOpenDefDoc */
   
@@ -669,28 +603,35 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     try {
       _debugger = new JPDADebugger(this);
       _jvm.setDebugModel((JPDADebugger) _debugger);
-      
+
       // add listener to set the project file to "changed" when a breakpoint or watch is added, removed, or changed
+      getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
+        public void regionAdded(final Breakpoint bp) { setProjectChanged(true); }
+        public void regionChanged(final Breakpoint bp) { setProjectChanged(true); }
+        public void regionRemoved(final Breakpoint bp) { 
+          try {
+            getDebugger().removeBreakpoint(bp);
+          } catch(DebugException de) { /* just ignore it */ }
+          setProjectChanged(true);
+          }
+      });
+      getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() {
+        public void regionAdded(DocumentRegion r) { setProjectChanged(true); }
+        public void regionChanged(DocumentRegion r) { setProjectChanged(true); }
+        public void regionRemoved(DocumentRegion r) { setProjectChanged(true); }
+      });
+      
       _debugger.addListener(new DebugListener() {
+        public void watchSet(final DebugWatchData w) { setProjectChanged(true); }
+        public void watchRemoved(final DebugWatchData w) { setProjectChanged(true); }    
+        
+        public void regionAdded(final Breakpoint bp) { }
+        public void regionChanged(final Breakpoint bp) { }
+        public void regionRemoved(final Breakpoint bp) { }
         public void debuggerStarted() { }
         public void debuggerShutdown() { }
         public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
-        public void breakpointSet(final Breakpoint bp) {
-          setProjectChanged(true);
-        }
         public void breakpointReached(final Breakpoint bp) { }
-        public void breakpointChanged(final Breakpoint bp) {
-          setProjectChanged(true);
-        }    
-        public void breakpointRemoved(final Breakpoint bp) {
-          setProjectChanged(true);
-        }    
-        public void watchSet(final DebugWatchData w) {
-          setProjectChanged(true);
-        }
-        public void watchRemoved(final DebugWatchData w) {
-          setProjectChanged(true);
-        }    
         public void stepRequested() { }
         public void currThreadSuspended() { }
         public void currThreadResumed() { }

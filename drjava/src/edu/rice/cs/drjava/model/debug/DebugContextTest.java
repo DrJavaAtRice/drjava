@@ -82,7 +82,7 @@ public final class DebugContextTest extends DebugTestCase {
     // Close file so it won't be in source root set
     _model.closeFile(doc);
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointRemovedCount(1);
+    debugListener.assertRegionRemovedCount(1);
 
     // Step to next line
     synchronized(_notifierLock) {
@@ -127,7 +127,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"), 14,true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(1);
+    debugListener.assertRegionAddedCount(1);
 
     // Run the baz() method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -152,7 +152,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9,true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(2);
+    debugListener.assertRegionAddedCount(2);
 
     // Step to next line
     synchronized(_notifierLock) {
@@ -228,7 +228,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();\n"), 4,true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(2);
+    debugListener.assertRegionAddedCount(2);
 
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -300,7 +300,7 @@ public final class DebugContextTest extends DebugTestCase {
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointRemovedCount(2);  //fires (no waiting)
+    debugListener.assertRegionRemovedCount(2);  //fires (no waiting)
 
     // Shutdown the debugger
     if (printMessages) printStream.println("Shutting down...");
@@ -330,7 +330,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"), 4,true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(1);
+    debugListener.assertRegionAddedCount(1);
 
     // Run the main method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -429,7 +429,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("System.out.println(\"localVar = \" + localVar);"), 32, true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(2);
+    debugListener.assertRegionAddedCount(2);
 
     // Run an inner method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -620,7 +620,7 @@ public final class DebugContextTest extends DebugTestCase {
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointRemovedCount(2);  //fires (no waiting)
+    debugListener.assertRegionRemovedCount(2);  //fires (no waiting)
 
     // Shut down
     _shutdownAndWaitForInteractionEnded();
@@ -647,7 +647,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.toggleBreakpoint(doc, index, 14, true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(1);
+    debugListener.assertRegionAddedCount(1);
 
     // Run an inner method, hitting breakpoint
     synchronized(_notifierLock) {
@@ -713,7 +713,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.toggleBreakpoint(doc, index, 7, true);
     
     Utilities.clearEventQueue();
-    debugListener.assertBreakpointSetCount(1);
+    debugListener.assertRegionAddedCount(1);
 
     // Run the main method, hitting breakpoint
     synchronized(_notifierLock) {

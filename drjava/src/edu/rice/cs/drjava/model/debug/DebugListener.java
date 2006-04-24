@@ -45,13 +45,15 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
+import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /** Any class which wants to listen to events fired by the Debugger should implement this interface and use Debugger's
  *  addDebugListener() method.
  *  @version $Id$
  */
-public interface DebugListener {
+public interface DebugListener extends RegionManagerListener<Breakpoint> {
   
   /** Called when debugger mode has been enabled. Must be executed in event thread. */
   public void debuggerStarted();
@@ -67,25 +69,10 @@ public interface DebugListener {
    */
   public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight);  
   
-  /** Called when a breakpoint is set in a document.  Must be executed in event thread.
-   *  @param bp the breakpoint
-   */
-  public void breakpointSet(Breakpoint bp);
-  
   /** Called when a breakpoint is reached during execution.
    *  @param bp the breakpoint
    */
   public void breakpointReached(Breakpoint bp);
-  
-  /** Called when a breakpoint is changed.
-   *  @param bp the breakpoint
-   */
-  public void breakpointChanged(Breakpoint bp);
-  
-  /** Called when a breakpoint is removed from a document.  Must be executed in event thread.
-   *  @param bp the previous breakpoint data
-   */
-  public void breakpointRemoved(Breakpoint bp);
 
   /** Called when a watch is set.  Must be executed in event thread.
    *  @param w the watch
@@ -119,4 +106,9 @@ public interface DebugListener {
    *  @param thread the thread that was set as current
    */
   public void currThreadSet(DebugThreadData thread);
+  
+  // from RegionManagerListener<Breakpoint>:
+  // public void regionAdded(Breakpoint r);
+  // public void regionChanged(Breakpoint r);
+  // public void regionRemoved(Breakpoint r);
 }

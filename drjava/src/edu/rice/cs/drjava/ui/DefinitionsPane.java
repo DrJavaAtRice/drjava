@@ -92,17 +92,21 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** Our current compiler error matching highlight. */
   private HighlightManager.HighlightInfo _errorHighlightTag = null;
 
+  /** Highlight painter for bookmarks. */
+  static ReverseHighlighter.DefaultFrameHighlightPainter BOOKMARK_PAINTER =
+    new ReverseHighlighter.DefaultFrameHighlightPainter(DrJava.getConfig().getSetting(BOOKMARK_COLOR), 2);
+
   /** Highlight painter for breakpoints. */
-  static DefaultHighlighter.DefaultHighlightPainter BREAKPOINT_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
+  static ReverseHighlighter.DefaultHighlightPainter BREAKPOINT_PAINTER =
+    new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
 
   /** Highlight painter for disabled breakpoints. */
-  static DefaultHighlighter.DefaultHighlightPainter DISABLED_BREAKPOINT_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
+  static ReverseHighlighter.DefaultHighlightPainter DISABLED_BREAKPOINT_PAINTER =
+    new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
 
   /** Highlight painter for thread's current location. */
-  static DefaultHighlighter.DefaultHighlightPainter THREAD_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
+  static ReverseHighlighter.DefaultHighlightPainter THREAD_PAINTER =
+    new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
 
   /** The name of the keymap added to the super class (saved so it can be removed). */
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
@@ -174,7 +178,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The OptionListener for DEFINITIONS_MATCH_COLOR. */
   private class MatchColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      MATCH_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+      MATCH_PAINTER = new ReverseHighlighter.DefaultHighlightPainter(oce.value);
       if (_matchHighlight != null) {
         int start = _matchHighlight.getStartOffset();
         int end = _matchHighlight.getEndOffset();
@@ -187,7 +191,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The OptionListener for COMPILER_ERROR_COLOR. */
   private class ErrorColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      ERROR_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+      ERROR_PAINTER = new ReverseHighlighter.DefaultHighlightPainter(oce.value);
       if (_errorHighlightTag != null) {
         int start = _errorHighlightTag.getStartOffset();
         int end = _errorHighlightTag.getEndOffset();
@@ -197,24 +201,32 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
+  /** The OptionListener for BOOKMARK_COLOR. */
+  private static class BookmarkColorOptionListener implements OptionListener<Color> {
+    public void optionChanged(OptionEvent<Color> oce) {
+      BOOKMARK_PAINTER = new ReverseHighlighter.DefaultFrameHighlightPainter(oce.value, BOOKMARK_PAINTER.getThickness());
+    }
+  }
+
   /** The OptionListener for DEBUG_BREAKPOINT_COLOR. */
   private static class BreakpointColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      BREAKPOINT_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+      BREAKPOINT_PAINTER = new ReverseHighlighter.DefaultHighlightPainter(oce.value);
     }
   }
 
   /** The OptionListener for DEBUG_BREAKPOINT_DISABLED_COLOR. */
   private static class DisabledBreakpointColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      DISABLED_BREAKPOINT_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+      DISABLED_BREAKPOINT_PAINTER = 
+        new ReverseHighlighter.DefaultHighlightPainter(oce.value);
     }
   }
 
   /** The OptionListener for DEBUG_THREAD_COLOR. */
   private static class ThreadColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      THREAD_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+      THREAD_PAINTER = new ReverseHighlighter.DefaultHighlightPainter(oce.value);
     }
   }
 
@@ -451,6 +463,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.COMPILER_ERROR_COLOR, temp);
     _colorOptionListeners.add(pair);
     DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, temp);
+
+    temp = new BookmarkColorOptionListener();
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.BOOKMARK_COLOR, temp);
+    _colorOptionListeners.add(pair);
+    DrJava.getConfig().addOptionListener( OptionConstants.BOOKMARK_COLOR, temp);
     
     temp = new BreakpointColorOptionListener();
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, temp);
@@ -479,7 +496,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     //Add listener to components that can bring up popup menus.
     _popupMenuMA = new PopupMenuMouseAdapter();
     this.addMouseListener( _popupMenuMA );
-
+    this.setHighlighter(new ReverseHighlighter());
     _highlightManager = new HighlightManager(this);
 
     int rate = this.getCaret().getBlinkRate();
@@ -656,6 +673,20 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       }
     });
     _popMenu.add(gotoFileUnderCursorItem);
+
+    /* Toggle bookmark */
+    JMenuItem toggleBookmarkItem = new JMenuItem("Toggle Bookmark");
+    toggleBookmarkItem.addActionListener ( new AbstractAction() {
+      public void actionPerformed( ActionEvent ae) {
+        if (getSelectionStart()==getSelectionEnd()) {
+          // nothing selected
+          // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
+          setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
+        }
+        _mainFrame.toggleBookmark();
+      }
+    });
+    _popMenu.add(toggleBookmarkItem);
       
     if (_mainFrame.getModel().getDebugger().isAvailable()) {
       _popMenu.addSeparator();
@@ -795,18 +826,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _hasWarnedAboutModified = hasWarned;
   }
 
-  public void addBreakpointHighlight( Breakpoint bp ) {
-    /*
-     int lineStart = getStartPosFromLineNumber(bp.getLineNumber());
-     int lineEnd = _doc.getLineEndPos(lineStart);
+  public void addBreakpointHighlight( Breakpoint bp ) { }
 
-     _highlightManager.addHighlight(lineStart, lineEnd, _breakpointHighlighter);
-     */
-  }
-
-  public void removeBreakpointHighlight( Breakpoint bp) {
-
-  }
+  public void removeBreakpointHighlight( Breakpoint bp) { }
   
 //  /** Reset undo machinery on setDocument. */
 //  private void setDocument(OpenDefinitionsDocument doc) {
