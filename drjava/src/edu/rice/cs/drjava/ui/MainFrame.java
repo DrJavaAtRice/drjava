@@ -222,8 +222,11 @@ public class MainFrame extends JFrame {
    */
   private HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
   
-  /** Table to map DocumentRegions (breakpoints, bookmarks) to their corresponding highlight objects. */
-  private java.util.Hashtable<DocumentRegion, HighlightManager.HighlightInfo> _documentRegionHighlights;
+  /** Table to map breakpoints to their corresponding highlight objects. */
+  private java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo> _documentBreakpointHighlights;
+  
+  /** Table to map bookmarks to their corresponding highlight objects. */
+  private java.util.Hashtable<DocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
   
   /** Whether to display a prompt message before quitting. */
   private boolean _promptBeforeQuit;
@@ -2427,8 +2430,9 @@ public class MainFrame extends JFrame {
       }
     });
     
-    // Initialize DocumentRegion highlights hashtable, for easy removal of highlights
-    _documentRegionHighlights = new java.util.Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
+    // Initialize DocumentRegion highlights hashtables, for easy removal of highlights
+    _documentBreakpointHighlights = new java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
+    _documentBookmarkHighlights = new java.util.Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
     
     // Set cached frames and dialogs to null until they are created
     _configFrame = null;
@@ -2445,6 +2449,25 @@ public class MainFrame extends JFrame {
     // Platform-specific UI setup.
     PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
     setUpKeys();
+  }
+  
+  /** Set a new painters for existing breakpoint highlights. */
+  void refreshBreakpointHighlightPainter() {
+    for(java.util.Map.Entry<Breakpoint,HighlightManager.HighlightInfo> pair: _documentBreakpointHighlights.entrySet()) {
+      if (pair.getKey().isEnabled()) {
+        pair.getValue().refresh(DefinitionsPane.BREAKPOINT_PAINTER);
+      }
+      else {
+        pair.getValue().refresh(DefinitionsPane.DISABLED_BREAKPOINT_PAINTER);
+      }
+    }
+  }
+  
+  /** Set new painter for existing bookmark highlights. */
+  void refreshBookmarkHighlightPainter() {
+    for(HighlightManager.HighlightInfo hi: _documentBookmarkHighlights.values()) {
+      hi.refresh(DefinitionsPane.BOOKMARK_PAINTER);
+    }
   }
   
   private DirectoryChooser makeFolderChooser(File workDir) {
@@ -5105,7 +5128,7 @@ public class MainFrame extends JFrame {
         /* Called when a breakpoint is added. Must be executed in event thread. */
         public void regionAdded(final Breakpoint bp) {
           DefinitionsPane bpPane = getDefPaneGivenODD(bp.getDocument());
-          _documentRegionHighlights.
+          _documentBreakpointHighlights.
             put(bp, bpPane.getHighlightManager().
                   addHighlight(bp.getStartOffset(), bp.getEndOffset(), 
                                bp.isEnabled() ? DefinitionsPane.BREAKPOINT_PAINTER
@@ -5121,9 +5144,9 @@ public class MainFrame extends JFrame {
         
         /** Called when a breakpoint is removed. Must be executed in event thread. */
         public void regionRemoved(final Breakpoint bp) {      
-          HighlightManager.HighlightInfo highlight = _documentRegionHighlights.get(bp);
+          HighlightManager.HighlightInfo highlight = _documentBreakpointHighlights.get(bp);
           if (highlight != null) highlight.remove();
-          _documentRegionHighlights.remove(bp);
+          _documentBreakpointHighlights.remove(bp);
         }
       });
     }
@@ -5133,7 +5156,7 @@ public class MainFrame extends JFrame {
     _model.getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() {      
       public void regionAdded(DocumentRegion r) {
         DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
-        _documentRegionHighlights.
+        _documentBookmarkHighlights.
           put(r, bpPane.getHighlightManager().
                 addHighlight(r.getStartOffset(), r.getEndOffset(), DefinitionsPane.BOOKMARK_PAINTER));
       }
@@ -5142,9 +5165,9 @@ public class MainFrame extends JFrame {
         regionAdded(r);
       }
       public void regionRemoved(DocumentRegion r) {
-        HighlightManager.HighlightInfo highlight = _documentRegionHighlights.get(r);
+        HighlightManager.HighlightInfo highlight = _documentBookmarkHighlights.get(r);
         if (highlight != null) highlight.remove();
-        _documentRegionHighlights.remove(r);
+        _documentBookmarkHighlights.remove(r);
       }
     });
     

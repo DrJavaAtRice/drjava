@@ -93,8 +93,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private HighlightManager.HighlightInfo _errorHighlightTag = null;
 
   /** Highlight painter for bookmarks. */
-  static ReverseHighlighter.DefaultFrameHighlightPainter BOOKMARK_PAINTER =
-    new ReverseHighlighter.DefaultFrameHighlightPainter(DrJava.getConfig().getSetting(BOOKMARK_COLOR), 2);
+  static ReverseHighlighter.DefaultUnderlineHighlightPainter BOOKMARK_PAINTER =
+    new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(BOOKMARK_COLOR), 3);
 
   /** Highlight painter for breakpoints. */
   static ReverseHighlighter.DefaultHighlightPainter BREAKPOINT_PAINTER =
@@ -202,24 +202,26 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /** The OptionListener for BOOKMARK_COLOR. */
-  private static class BookmarkColorOptionListener implements OptionListener<Color> {
+  private class BookmarkColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      BOOKMARK_PAINTER = new ReverseHighlighter.DefaultFrameHighlightPainter(oce.value, BOOKMARK_PAINTER.getThickness());
+      BOOKMARK_PAINTER = new ReverseHighlighter.DefaultUnderlineHighlightPainter(oce.value, BOOKMARK_PAINTER.getThickness());
+      _mainFrame.refreshBookmarkHighlightPainter();
     }
   }
 
   /** The OptionListener for DEBUG_BREAKPOINT_COLOR. */
-  private static class BreakpointColorOptionListener implements OptionListener<Color> {
+  private class BreakpointColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       BREAKPOINT_PAINTER = new ReverseHighlighter.DefaultHighlightPainter(oce.value);
+      _mainFrame.refreshBreakpointHighlightPainter();
     }
   }
 
   /** The OptionListener for DEBUG_BREAKPOINT_DISABLED_COLOR. */
-  private static class DisabledBreakpointColorOptionListener implements OptionListener<Color> {
+  private class DisabledBreakpointColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      DISABLED_BREAKPOINT_PAINTER = 
-        new ReverseHighlighter.DefaultHighlightPainter(oce.value);
+      DISABLED_BREAKPOINT_PAINTER =  new ReverseHighlighter.DefaultHighlightPainter(oce.value);
+      _mainFrame.refreshBreakpointHighlightPainter();
     }
   }
 

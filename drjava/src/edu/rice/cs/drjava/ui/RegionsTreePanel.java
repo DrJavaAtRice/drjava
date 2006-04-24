@@ -338,7 +338,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
           else if (((RegionTreeUserObj)lineNumber.getUserObject()).lineNumber() > lnr) {
             
             // else, add to the list
-            DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(new RegionTreeUserObj<R>(r));
+            DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
             _regTreeModel.insertNodeInto(newRegion, doc, doc.getIndex(lineNumber));
             
             // Make sure this node is visible
@@ -350,7 +350,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
         if (done) { break; }
         
         // if none are greater, add at the end
-        DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(new RegionTreeUserObj<R>(r));
+        DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
         _regTreeModel.insertNodeInto(newRegion, doc, doc.getChildCount());
         
         // Make sure this node is visible
@@ -363,7 +363,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     if (!done) {
       // No matching document node was found, so create one
       _regTreeModel.insertNodeInto(regDocNode, _regionRootNode, _regionRootNode.getChildCount());
-      DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(new RegionTreeUserObj<R>(r));
+      DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
       _regTreeModel.insertNodeInto(newRegion, regDocNode, regDocNode.getChildCount());
       
       // Make visible
@@ -477,6 +477,12 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     }
   }
   
+  /** Factory method to create user objects put in the tree.
+   *  If subclasses extend RegionTreeUserObj, they need to override this method. */
+  protected RegionTreeUserObj<R> makeRegionTreeUserObj(R r) {
+    return new RegionTreeUserObj<R>(r);
+  }
+  
   protected class RegionTree extends JTree {
     public RegionTree(DefaultTreeModel s) {
       super(s);
@@ -493,8 +499,9 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     }
   }
   
+  /** Class that gets put into the tree. The toString() method determines what's displayed in the three. */
   protected static class RegionTreeUserObj<R extends DocumentRegion> {
-    private R _region;
+    protected R _region;
     public int lineNumber() { return _region.getDocument().getLineOfOffset(_region.getStartOffset())+1; }
     public R region() { return _region; }
     public RegionTreeUserObj(R r) { _region = r; }
@@ -504,9 +511,9 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
       try {
         sb.append(lineNumber());
         try {
+          sb.append(": ");
           int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
-          String text = ": " + _region.getDocument().getText(_region.getStartOffset(), length).trim();
-          sb.append(text);
+          sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
         } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
       } finally { _region.getDocument().readUnlock(); }
       return sb.toString();

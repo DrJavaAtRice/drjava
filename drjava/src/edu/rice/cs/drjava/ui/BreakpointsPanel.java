@@ -239,4 +239,37 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
       });
     }
   }
+  
+  
+  /** Factory method to create user objects put in the tree.
+   *  If subclasses extend RegionTreeUserObj, they need to override this method. */
+  protected RegionTreeUserObj<Breakpoint> makeRegionTreeUserObj(Breakpoint bp) {
+    return new BreakpointRegionTreeUserObj(bp);
+  }
+
+  /** Class that gets put into the tree. The toString() method determines what's displayed in the three. */
+  protected static class BreakpointRegionTreeUserObj extends RegionTreeUserObj<Breakpoint> {
+    public BreakpointRegionTreeUserObj (Breakpoint bp) { super(bp); }
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      _region.getDocument().readLock();
+      try {
+        sb.append(lineNumber());
+        try {
+          if (!_region.isEnabled()) { sb.append(" (disabled)"); }
+          sb.append(": ");
+          int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
+          sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
+        } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
+      } finally { _region.getDocument().readUnlock(); }
+      return sb.toString();
+    }
+    public boolean equals(Object other) {
+      BreakpointRegionTreeUserObj o = (BreakpointRegionTreeUserObj)other;
+      return (o.region().getDocument().equals(region().getDocument())) &&
+        (o.region().getStartOffset()==region().getStartOffset()) &&
+        (o.region().getEndOffset()==region().getEndOffset()) &&
+        (o.region().isEnabled()==region().isEnabled());
+    }
+  }
 }

@@ -99,10 +99,10 @@ public class ReverseHighlighter extends DefaultHighlighter {
     i.p0 = doc.createPosition(p0);
     i.p1 = doc.createPosition(p1);
     int insertPos = 0;
-    if (!(p instanceof DefaultFrameHighlightPainter)) {
-      // insert non-frame painters after the frame painters
+    if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
+      // insert solid painters after the frame and underline painters
       for(HighlightInfo hli: highlights) {
-        if (!(hli.painter instanceof DefaultFrameHighlightPainter)) {
+        if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
           break;
         }
         ++insertPos;
@@ -327,8 +327,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   private SafeDamager safeDamager = new SafeDamager();
   
   /**
-   * Simple highlight painter that fills a highlighted area with
-   * a solid color.
+   * Simple highlight painter that draws a rectangular box around text.
    */
   public static class DefaultFrameHighlightPainter extends LayeredHighlighter.LayerPainter {
     
@@ -459,6 +458,146 @@ public class ReverseHighlighter extends DefaultHighlighter {
           Rectangle r = (shape instanceof Rectangle) ?
             (Rectangle)shape : shape.getBounds();
           drawRectThick(g, r.x, r.y, r.width, r.height, thickness);
+          return r;
+        } catch (BadLocationException e) {
+          // can't render
+        }
+      }
+      // Only if exception
+      return null;
+    }
+    
+    private Color color;
+    private int thickness;
+  }
+  
+  
+  /**
+   * Simple highlight painter that underlines text.
+   */
+  public static class DefaultUnderlineHighlightPainter extends LayeredHighlighter.LayerPainter {
+    
+    /**
+     * Constructs a new highlight painter. If <code>c</code> is null,
+     * the JTextComponent will be queried for its selection color.
+     *
+     * @param c the color for the highlight
+     * @param t the thickness in pixels
+     */
+    public DefaultUnderlineHighlightPainter(Color c, int t) {
+      color = c;
+      thickness = t;
+    }
+    
+    /**
+     * Returns the color of the highlight.
+     *
+     * @return the color
+     */
+    public Color getColor() {
+      return color;
+    }
+    
+    /** @return thickness in pixels */
+    public int getThickness() { return thickness; }
+    
+    // --- HighlightPainter methods ---------------------------------------
+    
+    private void drawUnderline(Graphics g, int x, int y, int width, int height, int thick) {
+      g.fillRect(x, y+height-thick, width, thick);
+    }
+    
+    /**
+     * Paints a highlight.
+     *
+     * @param g the graphics context
+     * @param offs0 the starting model offset >= 0
+     * @param offs1 the ending model offset >= offs1
+     * @param bounds the bounding box for the highlight
+     * @param c the editor
+     */
+    public void paint(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c) {
+      Rectangle alloc = bounds.getBounds();
+      try {
+        // --- determine locations ---
+        TextUI mapper = c.getUI();
+        Rectangle p0 = mapper.modelToView(c, offs0);
+        Rectangle p1 = mapper.modelToView(c, offs1);
+        
+        // --- render ---
+        Color color = getColor();
+        
+        if (color == null) {
+          g.setColor(c.getSelectionColor());
+        }
+        else {
+          g.setColor(color);
+        }
+        if (p0.y == p1.y) {
+          // same line, render a rectangle
+          Rectangle r = p0.union(p1);
+          drawUnderline(g, r.x, r.y, r.width, r.height, thickness);
+        } else {
+          // different lines
+          int p0ToMarginWidth = alloc.x + alloc.width - p0.x;
+          drawUnderline(g, p0.x, p0.y, p0ToMarginWidth, p0.height, thickness);
+          if ((p0.y + p0.height) != p1.y) {
+            drawUnderline(g, alloc.x, p0.y + p0.height, alloc.width, 
+                       p1.y - (p0.y + p0.height), thickness);
+          }
+          drawUnderline(g, alloc.x, p1.y, (p1.x - alloc.x), p1.height, thickness);
+        }
+      } catch (BadLocationException e) {
+        // can't render
+      }
+    }
+    
+    // --- LayerPainter methods ----------------------------
+    /**
+     * Paints a portion of a highlight.
+     *
+     * @param g the graphics context
+     * @param offs0 the starting model offset >= 0
+     * @param offs1 the ending model offset >= offs1
+     * @param bounds the bounding box of the view, which is not
+     *        necessarily the region to paint.
+     * @param c the editor
+     * @param view View painting for
+     * @return region drawing occured in
+     */
+    public Shape paintLayer(Graphics g, int offs0, int offs1,
+                            Shape bounds, JTextComponent c, View view) {
+      Color color = getColor();
+      
+      if (color == null) {
+        g.setColor(c.getSelectionColor());
+      }
+      else {
+        g.setColor(color);
+      }
+      if (offs0 == view.getStartOffset() &&
+          offs1 == view.getEndOffset()) {
+        // Contained in view, can just use bounds.
+        Rectangle alloc;
+        if (bounds instanceof Rectangle) {
+          alloc = (Rectangle)bounds;
+        }
+        else {
+          alloc = bounds.getBounds();
+        }
+        drawUnderline(g, alloc.x, alloc.y, alloc.width, alloc.height, thickness);
+        return alloc;
+      }
+      else {
+        // Should only render part of View.
+        try {
+          // --- determine locations ---
+          Shape shape = view.modelToView(offs0, Position.Bias.Forward,
+                                         offs1,Position.Bias.Backward,
+                                         bounds);
+          Rectangle r = (shape instanceof Rectangle) ?
+            (Rectangle)shape : shape.getBounds();
+          drawUnderline(g, r.x, r.y, r.width, r.height, thickness);
           return r;
         } catch (BadLocationException e) {
           // can't render
