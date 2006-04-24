@@ -47,6 +47,7 @@ import java.awt.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
+import edu.rice.cs.util.Lambda;
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.drjava.model.debug.*;
@@ -230,8 +231,12 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   protected void enableDisableBreakpoint() {
     final Breakpoint r = getSelectedRegion();
     if (r != null) {
-      r.setEnabled(!(r.isEnabled()));
-      updateButtons();
+      _model.getBreakpointManager().changeRegion(r, new Lambda<Object, Breakpoint>() {
+        public Object apply(Breakpoint bp) {
+          bp.setEnabled(!bp.isEnabled());
+          return null;
+        }
+      });
     }
   }
 }

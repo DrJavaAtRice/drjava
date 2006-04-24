@@ -71,6 +71,7 @@ import javax.swing.text.Segment;
 import javax.swing.text.Style;
 import javax.swing.ProgressMonitor;
 
+import edu.rice.cs.util.Lambda;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.config.FileOption;
@@ -2192,37 +2193,22 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void clearRegions() {
       while(_regions.size()>0) { removeRegion(_regions.get(0)); }
     }
-    
-    /** Helper method to actually copy data from newRegion into oldRegion, and returns true if a change was made.
-     *  However, since the basic DocumentRegion does not contain any additional data, this is a no-op, but
-     *  this method should be overridden, e.g. for use with Breakpoint.
-     *  @param oldRegion the region to find and change
-     *  @param newRegion a region with data to copy into the old region
-     *  @return true if a change was made (here always false) */
-    public boolean changeRegionHelper(R oldRegion, R newRegion) {
-      return false;
-    }
-    
-    /** Uses changeRegionHelper to copy data from newRegion into oldRegion, if oldRegion is found, and returns true
-     *  if a change was actually made.
-     *  @param oldRegion the region to find and change
-     *  @param newRegion a region with data to copy into the old region
-     *  @return true if a change was made */
-    public boolean changeRegion(R oldRegion, R newRegion) {
-      int index = _regions.indexOf(oldRegion);
-      if (index<0) { return false; }
+
+    /** Apply the given command to the specified region to change it.
+     *  @param region the region to find and change
+     *  @param cmd command that mutates the region. */
+    public void changeRegion(R region, Lambda<Object,R> cmd) {
+      int index = _regions.indexOf(region);
+      if (index<0) { return; }
       final R r = _regions.get(index);
-      boolean changed = changeRegionHelper(r, newRegion);
-      if (changed) {
-        Utilities.invokeLater(new Runnable() { public void run() { 
-          // notify
-          _lock.startRead();
-          try {
-            for (RegionManagerListener<R> l: _listeners) { l.regionChanged(r); }
-          } finally { _lock.endRead(); }            
-        } });
-      }
-      return changed;
+      cmd.apply(r);
+      Utilities.invokeLater(new Runnable() { public void run() { 
+        // notify
+        _lock.startRead();
+        try {
+          for (RegionManagerListener<R> l: _listeners) { l.regionChanged(r); }
+        } finally { _lock.endRead(); }            
+      } });
     }
     
     /** Removes all listeners from this notifier.  */
@@ -2300,23 +2286,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
       }
       
-      /** Helper method to actually copy data from newRegion into oldRegion, and returns true if a change was made.
-       *  However, since the basic DocumentRegion does not contain any additional data, this is a no-op, but
-       *  this method should be overridden, e.g. for use with Breakpoint.
-       *  @param oldRegion the region to find and change
-       *  @param newRegion a region with data to copy into the old region
-       *  @return true if a change was made (here always false) */
-      public boolean changeRegionHelper(R oldRegion, R newRegion) {
-        return _superSetManager.changeRegionHelper(oldRegion, newRegion);
-      }
-      
-      /** Uses changeRegionHelper to copy data from newRegion into oldRegion, if oldRegion is found, and returns true
-       *  if a change was actually made.
-       *  @param oldRegion the region to find and change
-       *  @param newRegion a region with data to copy into the old region
-       *  @return true if a change was made */
-      public boolean changeRegion(R oldRegion, R newRegion) {
-        return _superSetManager.changeRegionHelper(oldRegion, newRegion);
+      /** Apply the given command to the specified region to change it.
+       *  @param region the region to find and change
+       *  @param cmd command that mutates the region. */
+      public void changeRegion(R region, Lambda<Object,R> cmd) {
+        _superSetManager.changeRegion(region, cmd);
       }
       
       /** A decorator to a RegionManagerListener that filters out everything but regions belonging to this document. */

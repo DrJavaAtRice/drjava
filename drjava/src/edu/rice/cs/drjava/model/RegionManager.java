@@ -33,7 +33,7 @@
 
 package edu.rice.cs.drjava.model;
 
-
+import edu.rice.cs.util.Lambda;
 import java.util.Vector;
 
 /**
@@ -68,20 +68,10 @@ public interface RegionManager<R extends DocumentRegion> {
    */
   public void removeRegion(R region);
 
-  /** Helper method to actually copy data from newRegion into oldRegion, and returns true if a change was made.
-   *  However, since the basic DocumentRegion does not contain any additional data, this is a no-op, but
-   *  this method should be overridden, e.g. for use with Breakpoint.
-   *  @param oldRegion the region to find and change
-   *  @param newRegion a region with data to copy into the old region
-   *  @return true if a change was made (here always false) */
-  public boolean changeRegionHelper(R oldRegion, R newRegion);
-
-  /** Uses changeRegionHelper to copy data from newRegion into oldRegion, if oldRegion is found, and returns true
-   *  if a change was actually made.
-   *  @param oldRegion the region to find and change
-   *  @param newRegion a region with data to copy into the old region
-   *  @return true if a change was made */
-  public boolean changeRegion(R oldRegion, R newRegion);
+  /** Apply the given command to the specified region to change it.
+   *  @param region the region to find and change
+   *  @param cmd command that mutates the region. */
+  public void changeRegion(R region, Lambda<Object,R> cmd);
 
   /** @return a Vector<R> containing the DocumentRegion objects in this mangager. */
   public Vector<R> getRegions();
