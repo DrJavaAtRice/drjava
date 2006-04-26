@@ -102,7 +102,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
     if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
       // insert solid painters after the frame and underline painters
       for(HighlightInfo hli: highlights) {
-        if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
+        if ((!(hli.getPainter() instanceof DefaultFrameHighlightPainter)) && 
+            (!(hli.getPainter() instanceof DefaultUnderlineHighlightPainter))) {
           break;
         }
         ++insertPos;

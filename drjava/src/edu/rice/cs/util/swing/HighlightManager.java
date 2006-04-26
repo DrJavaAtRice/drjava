@@ -109,10 +109,6 @@ public class HighlightManager {
         if (searchResult > 1) {
           lineStack.remove(newLite);
         }
-
-        HighlightInfo liteOnTop = lineStack.peek();
-        _component.getHighlighter().removeHighlight( liteOnTop.getHighlightTag() );
-
       }
       else {
         //add a new Stack to the empty place in the hashtable
@@ -188,24 +184,11 @@ public class HighlightManager {
         HighlightInfo liteToRemove = lineStack.pop();
         _component.getHighlighter().removeHighlight(liteToRemove.getHighlightTag());
         //System.out.println("Removed highlight @ "+startOffset);
-
-        if (!lineStack.isEmpty()) {
-          HighlightInfo liteOnTop = lineStack.peek();
-          try {
-            Object highlightTag = _component.getHighlighter().addHighlight(liteOnTop.getStartOffset(),
-                                                                liteOnTop.getEndOffset(),
-                                                                liteOnTop.getPainter());
-            liteOnTop.setHighlightTag(highlightTag);
-          }
-          catch (BadLocationException ble) {
-            throw new UnexpectedException(ble);
-          }
-        }
-
       }
       else if (searchResult > 1) {
         //System.out.println("Removing old instance...");
         lineStack.remove(newLite);
+        _component.getHighlighter().removeHighlight(newLite.getHighlightTag());
       }
 
       if (lineStack.isEmpty()) {

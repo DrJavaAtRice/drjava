@@ -5947,56 +5947,40 @@ public class MainFrame extends JFrame {
     }
   }
   
-  /** Called when a specific document and line should be displayed. Must be executed only in the event thread.
+  /** Called when a specific document and offset should be displayed. Must be executed only in the event thread.
    *  @param doc Document to display
-   *  @param lineNumber Line to display or highlight
+   *  @param offset Offset to display
    *  @param shouldHighlight true iff the line should be highlighted.
    */
-  public void scrollToDocumentAndLine(final OpenDefinitionsDocument doc, final int lineNumber, final boolean shouldHighlight) {
-//    Utilities.invokeLater(new Runnable() {
-//    public void run() {
-    // This listener is used when the document to display is
-    // not the active document. In this case, when setActiveDocument
-    // is called, the document won't yet have positive size and we
-    // don't want to scroll to a line until it does, so we wait
-    // for a call to setSize.
-    
-//    ActionListener setSizeListener = new ActionListener() {
-//      public void actionPerformed(ActionEvent ae) {
-//        Utilities.showDebug("custon setSizeListener called in MainFrame with event " + ae);
-//        _currentDefPane.centerViewOnLine(lineNumber);
-//        _currentDefPane.requestFocusInWindow();
-//      }
-//    };
-//    _currentDefPane.addSetSizeListener(setSizeListener);
-    
+  public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, final boolean shouldHighlight) {
     if (!_model.getActiveDocument().equals(doc)) _model.setActiveDocument(doc);
     else _model.refreshActiveDocument();
     
-    // this block occurs if the documents is already open and as such
-    // has a positive size
-    if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {
-//      SwingUtilities.invokeLater(new Runnable() {  
-//        public void run() {
-//          Utilities.showDebug("Getting ready to reset defintions pane");
-          _currentDefPane.centerViewOnLine(lineNumber);
-          _currentDefPane.requestFocusInWindow();
-//        }
-//      });
-    }
-    
-    /* The execution of this block of code is deferred using SwingUtilties to fix bug #1243993.  It is not clear 
-     * why this deferral works. */
     SwingUtilities.invokeLater(new Runnable() {  
       public void run() {
+        // get the line number after the switch of documents was made
+        int lineNumber = doc.getLineOfOffset(offset)+1;
+        
+        // this block occurs if the documents is already open and as such
+        // has a positive size
+        if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {      
+          _currentDefPane.centerViewOnOffset(offset);
+          _currentDefPane.requestFocusInWindow();
+        }
+        
+        /* The execution of this block of code is deferred using SwingUtilties to fix bug #1243993.
+         * It is not clear why this deferral works.
+         * Comment by mgricken: Probably because the _currentDefPane hasn't been created yet for
+         * a new document. That's why I had to move the code above into this Runnable. If this
+         * method was called for a yet unseen document, the document would be switched, but the cursor
+         * would not be positioned correctly. */
         if (shouldHighlight) {
           _removeThreadLocationHighlight();
           int startOffset = doc.getOffset(lineNumber);
           if (startOffset > -1) {
             int endOffset = doc.getLineEndPos(startOffset);
             if (endOffset > -1) {
-              _currentThreadLocationHighlight =
-                _currentDefPane.getHighlightManager().
+              _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().
                 addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
             }
           }
@@ -6017,8 +6001,6 @@ public class MainFrame extends JFrame {
         _updateDebugStatus();
       }
     });
-//      }
-//    });
   }
   
   /** Listens to events from the debugger. */
@@ -6065,7 +6047,7 @@ public class MainFrame extends JFrame {
      *  @param shouldHighlight true iff the line should be highlighted.
      */
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
-      scrollToDocumentAndLine(doc, lineNumber, shouldHighlight);
+      scrollToDocumentAndOffset(doc, doc.getOffset(lineNumber), shouldHighlight);
     }
     
     /* Must be executed in event thread. */

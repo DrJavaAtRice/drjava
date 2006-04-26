@@ -293,7 +293,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   protected void goToRegion() {
     R r = getSelectedRegion();
     if (r != null) {
-      _frame.scrollToDocumentAndLine(r.getDocument(), r.getDocument().getLineOfOffset(r.getStartOffset())+1, false);
+      _frame.scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false);
     }
   }
     
