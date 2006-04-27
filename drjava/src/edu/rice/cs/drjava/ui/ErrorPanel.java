@@ -42,6 +42,7 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 //import edu.rice.cs.drjava.model.DefaultDJDocument;
 import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
+import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
@@ -54,6 +55,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.border.EmptyBorder;
+import java.awt.datatransfer.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -237,7 +239,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
    * A pane to show compiler errors. It acts a bit like a listbox (clicking
    * selects an item) but items can each wrap, etc.
    */
-  public abstract class ErrorListPane extends JEditorPane {
+  public abstract class ErrorListPane extends JEditorPane implements ClipboardOwner {
+    /** The custom keymap for the error list pane. */
+    protected Keymap _keymap;
     
     /**
      * Index into _errorListPositions of the currently selected error.
@@ -281,7 +285,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     public ErrorListPane() {
 //      // If we set this pane to be of type text/rtf, it wraps based on words
 //      // as opposed to based on characters.
- 
+      
       setContentType("text/rtf");
       setDocument(new SwingDocument());
       setHighlighter(new ReverseHighlighter());
@@ -338,7 +342,77 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           }
         }
       });
-    }     
+      
+      _keymap = addKeymap("ERRORLIST_KEYMAP", getKeymap());
+      
+      addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
+      addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
+      addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
+      DrJava.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<KeyStroke>() {
+        public void optionChanged(OptionEvent<KeyStroke> oe) {
+          addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
+        }
+      });
+      DrJava.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<KeyStroke>() {
+        public void optionChanged(OptionEvent<KeyStroke> oe) {
+          addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
+        }
+      });
+      DrJava.getConfig().addOptionListener(OptionConstants.KEY_PASTE_FROM_HISTORY, new OptionListener<KeyStroke>() {
+        public void optionChanged(OptionEvent<KeyStroke> oe) {
+          addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
+        }
+      });
+    } 
+    
+    
+    /** Assigns the given keystroke to the given action in this pane.
+     *  @param stroke keystroke that triggers the action
+     *  @param action Action to perform
+     */
+    public void addActionForKeyStroke(KeyStroke stroke, Action action) {
+      // we don't want multiple keys bound to the same action
+      KeyStroke[] keys = _keymap.getKeyStrokesForAction(action);
+      if (keys != null) {
+        for (int i = 0; i < keys.length; i++) {
+          _keymap.removeKeyStrokeBinding(keys[i]);
+        }
+      }
+      _keymap.addActionForKeyStroke(stroke, action);
+      setKeymap(_keymap);
+    }
+    
+    /** We lost ownership of what we put in the clipboard. */
+    public void lostOwnership(Clipboard clipboard, Transferable contents) {
+      // ignore
+    }
+
+    /** Default cut action. */
+    Action cutAction = new DefaultEditorKit.CutAction() {
+      public void actionPerformed(ActionEvent e) {
+        if (getSelectedText()!=null) {
+          super.actionPerformed(e);
+          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
+          if ((s!=null) && (s.length()!=0)) { ClipboardHistoryModel.singleton().put(s); }
+        }
+      }
+    };
+    
+    /** Default copy action. */
+    Action copyAction = new DefaultEditorKit.CopyAction() {
+      public void actionPerformed(ActionEvent e) {
+        if (getSelectedText()!=null) {
+          super.actionPerformed(e);
+          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
+          if ((s!=null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
+        }
+      }
+    };
+    
+    /** No-op paste action. */
+    Action pasteAction = new DefaultEditorKit.PasteAction() {
+      public void actionPerformed(ActionEvent e) { }
+    };
     
     /**
      * Returns true if the errors should be highlighted in the source

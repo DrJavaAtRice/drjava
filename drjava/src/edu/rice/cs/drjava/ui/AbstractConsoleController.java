@@ -52,6 +52,7 @@ import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.platform.PlatformFactory;
+import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 
 /** Abstract class to handle hooking up a console document with its pane.
  *  @version $Id$
@@ -289,7 +290,42 @@ public abstract class AbstractConsoleController implements Serializable {
                                     selectToEndAction);
      }
     });
+    
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<KeyStroke>() {
+      public void optionChanged(OptionEvent<KeyStroke> oe) {
+        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
+     }
+    });
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<KeyStroke>() {
+      public void optionChanged(OptionEvent<KeyStroke> oe) {
+        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
+     }
+    });
   }
+  
+  /** Default cut action. */
+  Action cutAction = new DefaultEditorKit.CutAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (_pane.getSelectedText()!=null) {
+        super.actionPerformed(e);
+        String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(_pane);
+        if ((s!=null) && (s.length()!=0)) { ClipboardHistoryModel.singleton().put(s); }
+      }
+    }
+  };
+  
+  /** Default copy action. */
+  Action copyAction = new DefaultEditorKit.CopyAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (_pane.getSelectedText()!=null) {
+        super.actionPerformed(e);
+        String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(_pane);
+        if ((s!=null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
+      }
+    }
+  };
 
   /** Accessor method for the InteractionsDJDocument. */
   public InteractionsDJDocument getDocumentAdapter() { return _adapter; }

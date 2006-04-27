@@ -39,6 +39,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import java.awt.datatransfer.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -46,6 +47,7 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FindReplaceMachine;
 import edu.rice.cs.drjava.model.FindResult;
+import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.Utilities;
@@ -58,7 +60,7 @@ import edu.rice.cs.util.UnexpectedException;
  *  (Used to be a dialog box, hence the name. We should fix this.)
  *  @version $Id$
  */
-class FindReplaceDialog extends TabbedPanel {
+class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
 
   private JButton _findNextButton;
   private JButton _findPreviousButton;
@@ -281,9 +283,13 @@ class FindReplaceDialog extends TabbedPanel {
     findIM.put(enter, "Do Find");
     findIM.put(ctrlEnter, "Insert Newline");
     findIM.put(ctrlTab, "Insert Tab");
+    findIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), "Cut");
+    findIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), "Copy");
     replaceIM.put(enter, "Insert Newline");
     replaceIM.put(ctrlEnter, "Insert Newline");
     replaceIM.put(ctrlTab, "Insert Tab");
+    replaceIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), "Cut");
+    replaceIM.put(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), "Copy");
     
     Action insertTabAction = new DefaultEditorKit.InsertTabAction();
     ActionMap findAM = _findField.getActionMap();
@@ -291,8 +297,12 @@ class FindReplaceDialog extends TabbedPanel {
     findAM.put("Do Find", _doFindAction);
     findAM.put("Insert Newline", _standardNewlineAction);
     findAM.put("Insert Tab", insertTabAction);
+    findAM.put("Cut", cutAction);
+    findAM.put("Copy", copyAction);
     replaceAM.put("Insert Newline", _standardNewlineAction);
     replaceAM.put("Insert Tab", insertTabAction);
+    replaceAM.put("Cut", cutAction);
+    replaceAM.put("Copy", copyAction);
     
     // Setup color listeners.
     new ForegroundColorListener(_findField);
@@ -798,7 +808,39 @@ class FindReplaceDialog extends TabbedPanel {
 //      
 //    }
 //  };
+    
+  /** We lost ownership of what we put in the clipboard. */
+  public void lostOwnership(Clipboard clipboard, Transferable contents) {
+    // ignore
+  }
   
+  /** Default cut action. */
+  Action cutAction = new DefaultEditorKit.CutAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (e.getSource() instanceof JTextComponent) {
+        JTextComponent tc = (JTextComponent)e.getSource();
+        if (tc.getSelectedText()!=null) {
+          super.actionPerformed(e);
+          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(FindReplaceDialog.this);
+          if ((s!=null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
+        }
+      }
+    }
+  };
+  
+  /** Default copy action. */
+  Action copyAction = new DefaultEditorKit.CopyAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (e.getSource() instanceof JTextComponent) {
+        JTextComponent tc = (JTextComponent)e.getSource();
+        if (tc.getSelectedText()!=null) {
+          super.actionPerformed(e);
+          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(FindReplaceDialog.this);
+          if ((s!=null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
+        }
+      }
+    }
+  };  
   
   /***************** METHODS FOR TESTING PURPOSES ONLY  ***********************/
   public DefinitionsPane getDefPane() { return _defPane; }

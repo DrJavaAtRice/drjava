@@ -445,6 +445,15 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WINDOW_STORE_POSITION,
                                                   "Save Main Window Position", this,
                                                   "Whether to save and restore the size and position of the main window."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_CLIPBOARD_HISTORY_STORE_POSITION,
+                                                  "Save \"Clipboard History\" Dialog Position", this,
+                                                  "Whether to save and restore the size and position of the \"Clipboard History\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) { _mainFrame.resetClipboardHistoryDialogPosition(); }
+    }, "Reset \"Clipboard History\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.CLIPBOARD_HISTORY_SIZE,
+                                                  "Size of Clipboard History", this,
+                                                  "Determines how many entries are kept in the clipboard history."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_STORE_POSITION,
                                                   "Save \"Go to File\" Dialog Position", this,
                                                   "Whether to save and restore the size and position of the \"Go to File\" dialog."));

@@ -345,6 +345,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _isClosingAllDocs = false;
     _ensureNotEmpty();
     setActiveFirstDocument();
+    
+    // setup option listener for clipboard history
+    OptionListener<Integer> clipboardHistorySizeListener = new OptionListener<Integer>() {
+      public void optionChanged(OptionEvent<Integer> oce) {
+        ClipboardHistoryModel.singleton().resize(oce.value);
+      }
+    };
+    DrJava.getConfig().addOptionListener(CLIPBOARD_HISTORY_SIZE, clipboardHistorySizeListener);
+    clipboardHistorySizeListener.optionChanged(new OptionEvent<Integer>(CLIPBOARD_HISTORY_SIZE, 
+                                                                        DrJava.getConfig().getSetting(CLIPBOARD_HISTORY_SIZE).intValue()));
   }
   
   /** Returns a source root given a package and filename. */

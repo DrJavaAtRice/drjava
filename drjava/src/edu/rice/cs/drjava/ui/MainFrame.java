@@ -52,6 +52,7 @@ import java.util.Vector;
 import java.util.Enumeration;
 import java.net.URL;
 import java.net.MalformedURLException;
+import java.awt.datatransfer.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaRoot;
@@ -69,6 +70,8 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
+import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
+import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
@@ -95,7 +98,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 /** DrJava's main window. */
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements ClipboardOwner {
   
 
   private static final int INTERACTIONS_TAB = 0;
@@ -764,6 +767,10 @@ public class MainFrame extends JFrame {
     public void actionPerformed(ActionEvent e) {
       Component c = MainFrame.this.getFocusOwner();
       super.actionPerformed(e);
+      if (_currentDefPane.hasFocus() && (_currentDefPane.getSelectedText()!=null)) {
+        String s = Utilities.getClipboardSelection(c);
+        if ((s!=null) && (s.length()!=0)) { ClipboardHistoryModel.singleton().put(s); }
+      }
       if (c != null) c.requestFocusInWindow();
     }
   };
@@ -773,9 +780,18 @@ public class MainFrame extends JFrame {
     public void actionPerformed(ActionEvent e) {
       Component c = MainFrame.this.getFocusOwner();
       super.actionPerformed(e);
+      if (_currentDefPane.hasFocus() && (_currentDefPane.getSelectedText()!=null)) {
+        String s = Utilities.getClipboardSelection(c);
+        if ((s!=null) && (s.length()!=0)) { ClipboardHistoryModel.singleton().put(s); }
+      }
       if (c != null) c.requestFocusInWindow();
     }
   };
+  
+  /** We lost ownership of what we put in the clipboard. */
+  public void lostOwnership(Clipboard clipboard, Transferable contents) {
+    // ignore
+  }
   
   /** Default paste action.  Returns focus to the correct pane. */
   Action pasteAction = new DefaultEditorKit.PasteAction() {
@@ -792,6 +808,57 @@ public class MainFrame extends JFrame {
       else super.actionPerformed(e);
       
       if (c != null) c.requestFocusInWindow();      
+    }
+  };
+  
+  /** Reset the position of the "Clipboard History" dialog. */
+  public void resetClipboardHistoryDialogPosition() {
+    if (DrJava.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_CLIPBOARD_HISTORY_STATE, "default");
+    }
+  }
+  
+  /** The "Clipboard History" dialog. */
+  private ClipboardHistoryFrame _clipboardHistoryDialog = null;
+  
+  /** Asks the user for a file name and goes there. */
+  private Action _pasteHistoryAction = new AbstractAction("Paste from History...") {
+    public void actionPerformed(final ActionEvent ae) {
+      final ClipboardHistoryFrame.CloseAction cancelAction = new ClipboardHistoryFrame.CloseAction() {
+        public Object apply(String s) {
+          // "Clipboard History" dialog position and size.
+          if ((DrJava.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue())
+                && (_clipboardHistoryDialog != null) && (_clipboardHistoryDialog.getFrameState() != null)) {
+            DrJava.getConfig().setSetting(DIALOG_CLIPBOARD_HISTORY_STATE, (_clipboardHistoryDialog.getFrameState().toString()));
+          }
+          else {
+            // Reset to defaults to restore pristine behavior.
+            DrJava.getConfig().setSetting(DIALOG_CLIPBOARD_HISTORY_STATE, DIALOG_CLIPBOARD_HISTORY_STATE.getDefault());
+          }
+          return null;
+        }
+      };
+      ClipboardHistoryFrame.CloseAction okAction = new ClipboardHistoryFrame.CloseAction() {
+        public Object apply(String s) {
+          cancelAction.apply(null);
+          
+          StringSelection ssel = new StringSelection(s);
+          Clipboard cb = MainFrame.this.getToolkit().getSystemClipboard();
+          if (cb!=null) {
+            cb.setContents(ssel, MainFrame.this);
+            pasteAction.actionPerformed(ae);
+          }
+          return null;
+        }
+      };
+      
+      _clipboardHistoryDialog = new ClipboardHistoryFrame(MainFrame.this, 
+                                                          "Clipboard History", ClipboardHistoryModel.singleton(),
+                                                          okAction, cancelAction);
+      if (DrJava.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue()) {
+        _clipboardHistoryDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STATE));
+      }
+      _clipboardHistoryDialog.setVisible(true);
     }
   };
   
@@ -2448,7 +2515,7 @@ public class MainFrame extends JFrame {
     
     // Platform-specific UI setup.
     PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
-    setUpKeys();
+    setUpKeys();    
   }
   
   /** Set a new painters for existing breakpoint highlights. */
@@ -4328,11 +4395,13 @@ public class MainFrame extends JFrame {
     _setUpAction(cutAction, "Cut", "Cut selected text to the clipboard");
     _setUpAction(copyAction, "Copy", "Copy selected text to the clipboard");
     _setUpAction(pasteAction, "Paste", "Paste text from the clipboard");
+    _setUpAction(_pasteHistoryAction, "Paste from History", "Paste text from the clipboard history");
     _setUpAction(_selectAllAction, "Select All", "Select all text");
     
     cutAction.putValue(Action.NAME, "Cut");
     copyAction.putValue(Action.NAME, "Copy");
     pasteAction.putValue(Action.NAME, "Paste");
+    _pasteHistoryAction.putValue(Action.NAME, "Paste from History");
     
     _setUpAction(_indentLinesAction, "Indent Lines", "Indent all selected lines");
     _setUpAction(_commentLinesAction, "Comment Lines", "Comment out all selected lines");
@@ -4540,6 +4609,7 @@ public class MainFrame extends JFrame {
     _addMenuItem(editMenu, cutAction, KEY_CUT);
     _addMenuItem(editMenu, copyAction, KEY_COPY);
     _addMenuItem(editMenu, pasteAction, KEY_PASTE);
+    _addMenuItem(editMenu, _pasteHistoryAction, KEY_PASTE_FROM_HISTORY);
     _addMenuItem(editMenu, _selectAllAction, KEY_SELECT_ALL);
     
     // Indent lines, comment lines

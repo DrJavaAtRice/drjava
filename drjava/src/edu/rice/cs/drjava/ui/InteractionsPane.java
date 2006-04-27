@@ -37,6 +37,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.datatransfer.*;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -52,7 +53,7 @@ import edu.rice.cs.drjava.model.repl.*;
 /** The view component for repl interaction.
  *  @version $Id$
  */
-public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants {
+public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants, ClipboardOwner {
 
   /** The custom keymap for the interactions pane. */
   protected Keymap _keymap;
@@ -119,6 +120,11 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
       OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
       DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaTemp);
     }
+  }
+  
+  /** We lost ownership of what we put in the clipboard. */
+  public void lostOwnership(Clipboard clipboard, Transferable contents) {
+    // ignore
   }
 
   public void processKeyEvent(KeyEvent e) { super.processKeyEvent(e); }

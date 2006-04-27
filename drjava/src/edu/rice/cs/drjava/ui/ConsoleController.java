@@ -38,8 +38,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Event;
+import javax.swing.text.DefaultEditorKit;
 import java.io.Serializable;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.swing.Utilities;
@@ -147,7 +150,13 @@ public class ConsoleController extends AbstractConsoleController implements Seri
                                 moveUpDownAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
                                 moveUpDownAction);
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
   }
+      
+  /** No-op paste action. */
+  Action pasteAction = new DefaultEditorKit.PasteAction() {
+    public void actionPerformed(ActionEvent e) { }
+  };
 
   AbstractAction enterAction = new EnterAction();
   private class EnterAction extends AbstractAction implements Serializable {

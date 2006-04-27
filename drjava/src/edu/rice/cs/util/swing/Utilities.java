@@ -41,6 +41,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.Border;
+import java.awt.datatransfer.*;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
@@ -169,5 +170,26 @@ public class Utilities {
       setSize(Math.max(xs,350), Math.max(ys, 250));
       setLocationRelativeTo(comp);
     }
+  }
+  
+  /** @return a string with the current clipboard selection, or null if not available. */
+  public static String getClipboardSelection(Component c) {
+      Clipboard cb = c.getToolkit().getSystemClipboard();
+      if (cb==null) return null;
+      Transferable t = cb.getContents(null);
+      if (t==null) return null;
+      String s = null;
+      try {
+        java.io.Reader r = DataFlavor.stringFlavor.getReaderForText(t);
+        int ch;
+        StringBuilder sb = new StringBuilder();
+        while ((ch=r.read())!=-1) {
+          sb.append((char)ch);
+        }
+        s = sb.toString();
+      }
+      catch(UnsupportedFlavorException ufe) { /* ignore, return null */ }
+      catch(java.io.IOException ioe) { /* ignore, return null */ }
+      return s;
   }
 }

@@ -387,6 +387,12 @@ public interface OptionConstants {
     new KeyStrokeOption("key.paste",
                         KeyStroke.getKeyStroke(KeyEvent.VK_V, mask));
   /**
+   * The key binding for pasting from history
+   */
+  public static final KeyStrokeOption KEY_PASTE_FROM_HISTORY =
+    new KeyStrokeOption("key.paste.from.history",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_V , mask | InputEvent.SHIFT_MASK));
+  /**
    * The key binding for selecting all text
    */
   public static final KeyStrokeOption KEY_SELECT_ALL =
@@ -1089,6 +1095,17 @@ public interface OptionConstants {
 
   /** The command-line arguments to be passed to the interpreter jvm. */
   public static final StringOption JVM_ARGS = new StringOption("jvm.args", "");
+
+  /** The last state of the "Clipboard History" dialog. */
+  public static final StringOption DIALOG_CLIPBOARD_HISTORY_STATE = new StringOption("dialog.clipboard.history.state", "default");
+
+  /** Whether to save and restore window size and position at startup/shutdown. */
+  public static final BooleanOption DIALOG_CLIPBOARD_HISTORY_STORE_POSITION =
+    new BooleanOption("dialog.clipboardhistory.store.position", Boolean.TRUE);
+
+  /** How many entries are kept in the clipboard history. */
+  public static final NonNegativeIntegerOption CLIPBOARD_HISTORY_SIZE =
+    new NonNegativeIntegerOption("clipboardhistory.store.size", 10);
 
   /** The last state of the "Go to File" dialog. */
   public static final StringOption DIALOG_GOTOFILE_STATE = new StringOption("dialog.gotofile.state", "default");
