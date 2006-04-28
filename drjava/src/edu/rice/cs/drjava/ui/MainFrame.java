@@ -177,6 +177,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private JButton _undoButton;
   private JButton _redoButton;
   private JButton _runButton;
+  private JButton _junitButton;
   private JToolBar _toolBar;
   private JFileChooser _interactionsHistoryChooser;
   
@@ -350,7 +351,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) { _newProject(); }
   };
   
-  private AbstractAction _runProjectAction = new AbstractAction("Run Main Document") {
+  private AbstractAction _runProjectAction = new AbstractAction("Run Main Document of Project") {
     public void actionPerformed(ActionEvent ae) { _runProject(); }
   };
   
@@ -704,7 +705,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   };
   
   /** Runs JUnit over all open JUnit tests in the project directory. */
-  private AbstractAction _junitOpenProjectFilesAction = new AbstractAction("Test Project") {
+  private AbstractAction _junitProjectAction = new AbstractAction("Test Project") {
     public void actionPerformed(ActionEvent e) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
       _junitProject();
@@ -3002,13 +3003,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _saveProjectAsAction.setEnabled(true);
       _projectPropertiesAction.setEnabled(true);
 //      _junitProjectAction.setEnabled(true);
-      _junitOpenProjectFilesAction.setEnabled(true);
+      _junitProjectAction.setEnabled(true);
 //      _compileOpenProjectAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
       _jarProjectAction.setEnabled(true);
       if (_model.getBuildDirectory() != null) _cleanAction.setEnabled(true);
       _resetNavigatorPane();
-      _compileButton.setToolTipText("<html>Compile all documents in the project.<br>External files are excluded.</html>");
+//      _compileButton.setToolTipText("<html>Compile all documents in the project.source tree<br>Auxiliary and external files are excluded.</html>");
     }
   }
   
@@ -3056,12 +3057,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _projectPropertiesAction.setEnabled(false);
 //      _junitProjectAction.setEnabled(false);
       _jarProjectAction.setEnabled(false);
-      _junitOpenProjectFilesAction.setEnabled(false);
+      _junitProjectAction.setEnabled(false);
 //      _compileOpenProjectAction.setEnabled(false);
       _compileProjectAction.setEnabled(false);
       _setUpContextMenus();
       _currentProjFile = null;
-      _compileButton.setToolTipText("Compile all open documents");
+//      _compileButton.setToolTipText("Compile all open documents");
       return true;
     }
     else return false;  // Project closing cancelled in _checkProjectClose dialog
@@ -3676,7 +3677,19 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //    update(getGraphics()); 
   }
   
-  private void _compileProject() { _compileAll(); }
+  private void _compileProject() { 
+    _cleanUpForCompile();
+//    new Thread("Compile All") {
+//      public void run() {
+    hourglassOn();
+    try { _model.getCompilerModel().compileProject(); }
+    catch (FileMovedException fme) { _showFileMovedError(fme); }
+    catch (IOException ioe) { _showIOError(ioe); }
+    finally { hourglassOff();}
+//      }
+//    }.start();
+//    update(getGraphics()); 
+  }
   
   private void _compileAll() {
     _cleanUpForCompile();
@@ -3880,17 +3893,25 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }.start();
   }
   
-  private void _junitProject() { _junitAll(); }
+  /** Tests the documents in the project source tree. Assumes that DrJava is in project mode. */
+  private void _junitProject() { 
+     new Thread("Running Junit Tests") {
+      public void run() {
+        _disableJUnitActions();
+        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
+        try { _model.getJUnitModel().junitProject(); } 
+        catch(UnexpectedException e) { _junitInterrupted(e); }
+      }
+    }.start();
+  }
   
+  /** Tests all open documents. */
   private void _junitAll() {
     new Thread("Running Junit Tests") {
       public void run() {
         _disableJUnitActions();
         hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-        try {
-          if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
-          else _model.getJUnitModel().junitAll();
-        } 
+        try { _model.getJUnitModel().junitAll(); } 
         catch(UnexpectedException e) { _junitInterrupted(e); }
       }
     }.start();
@@ -3943,7 +3964,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     //_junitFolderActionEnabled = _junitFolderAction.isEnabled();
     //_junitAllActionEnabled = _junitAllAction.isEnabled();
     //_junitActionEnabled = _junitAction.isEnabled();
-    //_junitOpenProjectFilesActionEnabled = _junitOpenProjectFilesAction.isEnabled();
+    //_junitProjectActionEnabled = _junitProjectAction.isEnabled();
     //_cleanActionEnabled = _cleanAction.isEnabled();
     //_projectPropertiesActionEnabled = _projectPropertiesAction.isEnabled();
     //_runProjectActionEnabled = _runProjectAction.isEnabled();
@@ -3954,7 +3975,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     //_junitFolderAction.setEnabled(false);
     //_junitAllAction.setEnabled(false);
     //_junitAction.setEnabled(false);
-    //_junitOpenProjectFilesAction.setEnabled(false);
+    //_junitProjectAction.setEnabled(false);
     //_cleanAction.setEnabled(false);
     //_projectPropertiesAction.setEnabled(false);
     //_runProjectAction.setEnabled(false);
@@ -3965,8 +3986,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _junitFolderAction = _junit_junitFolderDecoratedAction = new DecoratedAction(_junitFolderAction, false);
     _junitAllAction = _junit_junitAllDecoratedAction = new DecoratedAction(_junitAllAction, false);
     _junitAction = _junit_junitDecoratedAction = new DecoratedAction(_junitAction, false);
-    _junitOpenProjectFilesAction = _junit_junitOpenProjectFilesDecoratedAction = 
-      new DecoratedAction(_junitOpenProjectFilesAction, false);
+    _junitProjectAction = _junit_junitOpenProjectFilesDecoratedAction = new DecoratedAction(_junitProjectAction, false);
     _cleanAction = _junit_cleanDecoratedAction = new DecoratedAction(_cleanAction, false);
     _projectPropertiesAction = _junit_projectPropertiesDecoratedAction = new DecoratedAction(_projectPropertiesAction, false);
     _runProjectAction = _junit_runProjectDecoratedAction = new DecoratedAction(_runProjectAction, false);
@@ -3980,7 +4000,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //    _junitFolderAction.setEnabled(_junitFolderActionEnabled);
 //    _junitAllAction.setEnabled(_junitAllActionEnabled);
 //    _junitAction.setEnabled(_junitActionEnabled);
-//    _junitOpenProjectFilesAction.setEnabled(_junitOpenProjectFilesActionEnabled);
+//    _junitProjectAction.setEnabled(_junitProjectActionEnabled);
 //    //_junitProjectAction.setEnabled(_junitProjectActionEnabled);
 //    _cleanAction.setEnabled(_cleanActionEnabled);
 //    _projectPropertiesAction.setEnabled(_projectPropertiesActionEnabled);
@@ -3992,7 +4012,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _junitFolderAction = _junit_junitFolderDecoratedAction.getUpdatedDecoree();
     _junitAllAction = _junit_junitAllDecoratedAction.getUpdatedDecoree();
     _junitAction = _junit_junitDecoratedAction.getUpdatedDecoree();
-    _junitOpenProjectFilesAction = _junit_junitOpenProjectFilesDecoratedAction.getUpdatedDecoree();
+    _junitProjectAction = _junit_junitOpenProjectFilesDecoratedAction.getUpdatedDecoree();
     _cleanAction = _junit_cleanDecoratedAction.getUpdatedDecoree();
     _projectPropertiesAction = _junit_projectPropertiesDecoratedAction.getUpdatedDecoree();
     _runProjectAction = _junit_runProjectDecoratedAction.getUpdatedDecoree();
@@ -4355,11 +4375,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
 //    _setUpAction(_junitProjectAction, "Test", "Test", "Test the current project");
 //    _junitProjectAction.setEnabled(false);    
-    _setUpAction(_junitOpenProjectFilesAction, "Test", "Test Project");
-    _junitOpenProjectFilesAction.setEnabled(false);
+    _setUpAction(_junitProjectAction, "Test Project", "Test the documents in the project source tree");
+    _junitProjectAction.setEnabled(false);
     
 //    _setUpAction(_compileOpenProjectAction, "Compile", "Compile", "Compile the open project documents");
-    _setUpAction(_compileProjectAction, "Compile", "Compile", "Compile the current project");
+    _setUpAction(_compileProjectAction, "Compile Project", "Compile the documents in the project source tree");
 //    _compileOpenProjectAction.setEnabled(false);
     _compileProjectAction.setEnabled(false);
     
@@ -4373,8 +4393,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     _setUpAction(_cleanAction, "Clean", "Clean Build directory");
     _cleanAction.setEnabled(false);
-    _setUpAction(_compileAction, "Compile", "Compile the current document");
-    _setUpAction(_compileAllAction, "Compile All", "CompileAll", "Compile all open documents");
+    _setUpAction(_compileAction, "Compile Current Document", "Compile the current document");
+    _setUpAction(_compileAllAction, "Compile", "Compile all open documents");
     _setUpAction(_printDefDocAction, "Print", "Print the current main document");
     _setUpAction(_printConsoleAction, "Print", "Print the Console pane");
     _setUpAction(_printInteractionsAction, "Print", "Print the Interactions pane");
@@ -4718,8 +4738,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //    projectMenu.add(_compileOpenProjectAction);
     projectMenu.add(_compileProjectAction);
     projectMenu.add(_jarProjectAction);
-    _addMenuItem(projectMenu, _runProjectAction, KEY_RUN_MAIN);
-    projectMenu.add(_junitOpenProjectFilesAction);
+    projectMenu.add(_runProjectAction);
+    projectMenu.add(_junitProjectAction);
 //    projectMenu.add(_junitProjectAction);
     
     projectMenu.addSeparator();
@@ -4869,9 +4889,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
     else {
       ret = new UnfocusableButton(icon);
-      if (useText) {
-        ret.setText((String) a.getValue(Action.DEFAULT));
-      }
+      if (useText) ret.setText((String) a.getValue(Action.DEFAULT));
     }
     ret.setEnabled(false);
     ret.addActionListener(a);
@@ -4957,8 +4975,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     // Compile, reset, abort
     _toolBar.addSeparator();
-    _compileButton = _createToolbarButton(_compileAllAction);
-    _toolBar.add(_compileButton);
+    _toolBar.add(_compileButton = _createToolbarButton(_compileAllAction));
     _toolBar.add(_createToolbarButton(_resetInteractionsAction));
     //_toolBar.add(_createToolbarButton(_abortInteractionAction));
     
@@ -4966,7 +4983,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _toolBar.addSeparator();
     
     _toolBar.add(_runButton = _createToolbarButton(_runAction));
-    _toolBar.add(_createToolbarButton(_junitAllAction));
+    _toolBar.add(_junitButton = _createToolbarButton(_junitAllAction));
     _toolBar.add(_createToolbarButton(_javadocAllAction));
 
     // DrJava Errors
@@ -5324,11 +5341,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _navPanePopupMenuForRoot.add(_saveProjectAction);
     _navPanePopupMenuForRoot.add(_closeProjectAction);
     _navPanePopupMenuForRoot.addSeparator();
-//    _navPanePopupMenuForRoot.add(_compileOpenProjectAction);
     _navPanePopupMenuForRoot.add(_compileProjectAction);
     _navPanePopupMenuForRoot.add(_runProjectAction);
-    _navPanePopupMenuForRoot.add(_junitOpenProjectFilesAction);
-//    _navPanePopupMenuForRoot.add(_junitProjectAction);
+    _navPanePopupMenuForRoot.add(_junitProjectAction);
     _navPanePopupMenuForRoot.addSeparator();
     _navPanePopupMenuForRoot.add(_projectPropertiesAction);
     
@@ -6960,6 +6975,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //      new ScrollableDialog(null, "Closing JUnit Error Panel in MainFrame", "", "").show();
           removeTab(_junitErrorPanel);
           _runButton = _updateToolbarButton(_runButton, _runAction);
+          _compileButton = _updateToolbarButton(_compileButton, _compileAllAction);
+          _junitButton = _updateToolbarButton(_junitButton, _junitAllAction);
         }
       });
     }
@@ -6967,6 +6984,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void projectOpened(File projectFile, FileOpenSelector files) {
       _setUpContextMenus();
       _runButton = _updateToolbarButton(_runButton, _runProjectAction);
+      _compileButton = _updateToolbarButton(_compileButton, _compileProjectAction);
+      _junitButton = _updateToolbarButton(_junitButton, _junitProjectAction);
       _recentProjectManager.updateOpenFiles(projectFile);
       open(files);
       _openProjectUpdate();

@@ -221,7 +221,6 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
       toReturn &= ((to >= prompt && from >= prompt) || (to <= prompt && from <= prompt));      
     }
     return toReturn;
-    
   }
   
   /** Indent the given selection, for the given reason, in the current document.

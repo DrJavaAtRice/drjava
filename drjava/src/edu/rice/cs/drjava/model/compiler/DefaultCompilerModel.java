@@ -53,6 +53,8 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.UnexpectedException;
+
 
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
@@ -117,8 +119,7 @@ public class DefaultCompilerModel implements CompilerModel {
 
 
   /** Compiles all open documents, after ensuring that all are saved.  If drjava is in project mode when this method is
-   *  called, only the project files are saved.  We do not require external files (files not belonging to the project) 
-   *  to be saved before we compile the files.  In project mode, we perform the compilation with the specified build 
+   *  called, only the project files are saved.  In project mode, we perform the compilation with the specified build 
    *  directory if defined in the project state.<p>
    *  This method formerly only compiled documents which were out of sync with their class file, as a performance 
    *  optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
@@ -128,50 +129,33 @@ public class DefaultCompilerModel implements CompilerModel {
    */
   public void compileAll() throws IOException {
     
-    boolean isProjActive = _model.isProjectActive();
-    
     List<OpenDefinitionsDocument> defDocs = _model.getOpenDefinitionsDocuments();
     
 //    System.err.println("Docs to compile: " + defDocs);
     
-    if (isProjActive) {
-      // If we're in project mode, filter out only the documents that are in the project and leave 
-      // out the external files.
-      List<OpenDefinitionsDocument> projectDocs = new LinkedList<OpenDefinitionsDocument>();
-      
-      for (OpenDefinitionsDocument doc : defDocs) {
-        if (doc.inProjectPath() || doc.isAuxiliaryFile()) projectDocs.add(doc);
-      }
-      defDocs = projectDocs;
-    }
     compile(defDocs);
   }
   
-//  //TODO: compileAll(roots,files), compile(docs), and compile(doc) contain very similar code;
-//  //  they should be refactored into one core routine and three adaptations (instantiations?)
-//  
-//  /** Compiles all files with the specified source root set.  
-//   *  @param sourceRootSet a list of source roots
-//   *  @param filesToCompile a list of files to compile
-//   */
-//  public void compileAll(List<File> sourceRootSet, List<File> filesToCompile) throws IOException {
-// 
-//    List<OpenDefinitionsDocument> defDocs;
-//    
-//    defDocs = _model.getOpenDefinitionsDocuments(); 
-//    
-////    System.err.println("Docs to compile: " + defDocs);
-//    
-//    // Only compile if all are saved
-//    if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
-//    
-//    // Check for modified project files, in case they didn't save when prompted. If any files haven't been saved
-//    // after we told our listeners to do so, don't proceed with the rest of the compile.
-//    if (_hasModifiedFiles(defDocs)) return;
-//    
-//    // Get sourceroots and all files
-//    _rawCompile(sourceRootSet.toArray(new File[0]), filesToCompile.toArray(new File[0]), new File[0]);
-//  }
+   /** Compiles all documents in the project source tree, after ensuring that all are saved.  Assumes drjava is in 
+    *  project mode.  We perform the compilation with the specified build directory if defined in the project state.<p>
+    *  Since unmodified files can depend on modified files, we always compile all source files.in the source tree</p>
+    *  @throws IOException if a filesystem-related problem prevents compilation
+    */
+  public void compileProject() throws IOException {
+    
+    if (! _model.isProjectActive()) 
+      throw new UnexpectedException("compileProject invoked when DrJava is not in project mode");
+    
+    List<OpenDefinitionsDocument> defDocs = _model.getOpenDefinitionsDocuments();
+  
+    List<OpenDefinitionsDocument> projectDocs = new LinkedList<OpenDefinitionsDocument>();
+      
+    for (OpenDefinitionsDocument doc : defDocs) {
+      if (doc.inProjectPath()) projectDocs.add(doc);
+    }
+     
+    compile(projectDocs);
+  }
   
   /** Compiles all documents in the specified list of OpenDefinitionsDocuments. */
   public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {

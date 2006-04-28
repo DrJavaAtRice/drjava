@@ -149,14 +149,13 @@ public abstract class FileOps {
     return list.toArray(new String[list.size()]);
   }
   
-  /**
-   * List all files (that is, {@code File}s for which {@code isFile()} is {@code true}) matching the provided 
-   * filter in the given directory.
-   * @param d  The directory to search.
-   * @param recur  Whether subdirectories accepted by {@code f} should be recursively searched.  Note that subdirectories
-   *               that <em>aren't</em> accepted by {@code f} will be ignored.
-   * @param f  The filter to apply to contained {@code File}s.
-   * @return  An array of Files in the directory specified; if the directory does not exist, returns an empty list. */
+  /** List all files (that is, {@code File}s for which {@code isFile()} is {@code true}) matching the provided filter in
+   *  the given directory.
+   *  @param d  The directory to search.
+   *  @param recur  Whether subdirectories accepted by {@code f} should be recursively searched.  Note that 
+   *         subdirectories that <em>aren't</em> accepted by {@code f} will be ignored.
+   *  @param f  The filter to apply to contained {@code File}s.
+   *  @return  An array of Files in the directory specified; if the directory does not exist, returns an empty list. */
   public static ArrayList<File> getFilesInDir(File d, boolean recur, FileFilter f){
     ArrayList<File> l = new ArrayList<File>();
     getFilesInDir(d, l, recur, f);

@@ -159,7 +159,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
     
     for (OpenDefinitionsDocument doc : _model.getOpenDefinitionsDocuments()) { 
-      if (doc.inProjectPath() || doc.isAuxiliaryFile())  lod.add(doc);
+      if (doc.inProjectPath())  lod.add(doc);
     }
     junitDocs(lod);
   }
