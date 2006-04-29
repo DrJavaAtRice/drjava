@@ -1166,9 +1166,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (dir.isDirectory()) {
       files = FileOps.getFilesInDir(dir, rec, new FileFilter() {
         public boolean accept(File f) { 
-          return /* f.isDirectory() ||
-            f.isFile() && */ 
-            f.getName().endsWith(DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+          return  f.isDirectory() || (f.isFile() && 
+            f.getName().endsWith(DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]));
         }
       });
       
