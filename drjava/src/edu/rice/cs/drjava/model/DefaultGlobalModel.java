@@ -387,6 +387,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     super.dispose();
   }
+
+  /** Disposes of external resources. Kills the slave JVM. */
+  public void disposeExternalResources() {
+    // Kill the interpreter
+    _jvm.killInterpreter(null);
+  }
   
   public void resetInteractions(File wd) { resetInteractions(wd, false); }
  

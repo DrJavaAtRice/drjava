@@ -1652,9 +1652,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return true;
   }
   
-  /** Closes all open documents without creating a new empty document.  It cannot be cancelled by the user
-   *  because it would leave the current project in an inconsistent state.  Method is public for 
-   *  testing purposes.
+  /** Closes all open documents.  This operation can be cancelled by the user since it
+   *  checks if all files can be abandoned BEFORE it actually modifies the project state.
    *  @param false if the user cancelled
    */
   public boolean closeAllFilesOnQuit() {
@@ -1684,14 +1683,26 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     return true;
   }
-    
+  
   /** Exits the program.  Quits regardless of whether all documents are successfully closed. */
   public void quit() {
     try {
       if (!closeAllFilesOnQuit()) return;
 //    Utilities.show("Closed all files");
-      dispose();  // kills the interpreter
-      System.exit(0);
+      disposeExternalResources();  // kills the interpreter
+      
+      // [ 1478796 ] DrJava Does Not Shut Down With Project Open
+      // On HP tc1100 and Toshiba Portege tablet PCs, there appears to be a problem in a
+      // shutdown hook, presumably the RMI shutdown hook.
+      // Shutdown hooks get executed in Runtime.exit (to which System.exit delegates), and
+      // if a shutdown hook does not complete, the VM does not shut down.
+      // The difference between Runtime.halt and Runtime.exit is that Runtime.exit runs
+      // the shutdown hooks and the finalizers (if Runtime.runFinalizersOnExit(true)
+      // has been called); then it calls Runtime.halt.
+      // By using Runtime.halt, we do not execute any finalizers or shutdown hooks;
+      // however it does not seem like we need them.      
+//      System.exit(0);
+      Runtime.getRuntime().halt(0);
     }
     catch(Throwable t) { System.exit(0); /* exit anyway */ }
   }
@@ -1699,7 +1710,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. 
    *  This version does not kill the interpreter. */
   public void dispose() {
-    
     _notifier.removeAllListeners();
 //    Utilities.show("All listeners removed");
     synchronized(_documentsRepos) { _documentsRepos.clear(); }
@@ -1708,7 +1718,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public void run() { _documentNavigator.clear(); }  // this operation must run in event thread
     });
   }
-
+  
+  /** Disposes of external resources. This is a no op in AbstractGlobalModel. */
+  public void disposeExternalResources() {
+    // no op
+  }
   
   //----------------------- Specified by IGetDocuments -----------------------//
 

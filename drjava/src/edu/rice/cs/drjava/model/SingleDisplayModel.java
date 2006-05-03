@@ -110,6 +110,9 @@ public interface SingleDisplayModel extends GlobalModel {
   public void jarAll();
   
   public void dispose();
+  
+  /** Disposes of external resources, e.g. other VMs. */
+  public void disposeExternalResources();
 
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //  /** @return the parsing control */

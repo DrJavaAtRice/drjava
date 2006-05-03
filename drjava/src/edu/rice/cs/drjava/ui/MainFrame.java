@@ -3558,7 +3558,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 
     // tried passing false here. seemed to help with bug
     // [ 1478796 ] DrJava Does Not Shut Down With Project Open
-    // on Compaq tc1100 tablet PCs, but did not help in all cases
+    // on HP tc1100 and Toshiba Portege tablet PCs, but did not help in all cases
     if (!_closeProject(true)) { return; /* if user pressed cancel, do not quit */ }
     
     _recentFileManager.saveRecentFiles();
