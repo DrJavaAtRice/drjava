@@ -200,14 +200,17 @@ public abstract class StringOps {
    * @return the stack trace for the current code
    */
   public static String getStackTrace() {
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-    StackTraceElement[] stes = Thread.currentThread().getStackTrace();
-    int skip = 3;
-    for(StackTraceElement ste: stes) {
-      if (skip>0) { --skip; } else { pw.print("at "); pw.println(ste); }
+    try { throw new Exception(); } // Thread.getStackTrace() might be more efficient, but is new in Java 5.0
+    catch (Exception e) {
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      StackTraceElement[] stes = e.getStackTrace();
+      int skip = 1;
+      for(StackTraceElement ste: stes) {
+        if (skip>0) { --skip; } else { pw.print("at "); pw.println(ste); }
+      }
+      return sw.toString();
     }
-    return sw.toString();
   }
   
   /**

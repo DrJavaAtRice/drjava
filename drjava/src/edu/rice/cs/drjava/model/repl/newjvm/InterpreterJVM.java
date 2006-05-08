@@ -418,7 +418,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   InterpreterData getInterpreter(String name) {
     InterpreterData interpreter = _interpreters.get(name);
-    
     if (interpreter != null) return interpreter;
     else throw new IllegalArgumentException("Interpreter '" + name + "' does not exist.");
   }
@@ -440,6 +439,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       throw new IllegalArgumentException("Interpreter '" + name + "' is not a JavaInterpreter.");
     }
   }
+  
   
   /** Sets the current interpreter to be the one specified by the given name
    *  @param name the unique name of the interpreter to set active

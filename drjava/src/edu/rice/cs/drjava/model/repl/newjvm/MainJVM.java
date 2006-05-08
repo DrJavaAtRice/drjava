@@ -547,9 +547,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public boolean setActiveInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
     if (!_restart) return false;
-    
     ensureInterpreterConnected();
-    
     try {
       boolean result = _interpreterJVM().setActiveInterpreter(name);
       _currentInterpreterName = name;

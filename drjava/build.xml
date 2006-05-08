@@ -126,7 +126,7 @@
   
   <!-- Retroweaver task, used to convert Java 1.5 class files to be compatible with an earlier JVM;
        also checks class references to insure that there are no dependencies on 1.5 APIs -->
-  <taskdef name="retroweaver" classpath="lib/buildlib/retroweaver-ex.jar" 
+  <taskdef name="retroweaver" classpath="lib/buildlib/retroweaver-all-1.2.3.jar" 
            classname="com.rc.retroweaver.ant.RetroWeaverTask" />
         
   <!-- Clover tasks, used to generate test coverage reports -->
@@ -468,7 +468,7 @@
     
     <!-- Convert lib classes -->
     <mkdir dir="classes/lib-14" />
-    <retroweaver srcdir="classes/lib" destdir="classes/lib-14" version="1.4" failonerror="true" />
+    <retroweaver srcdir="classes/lib" destdir="classes/lib-14" target="1.4" verify="no" />
     <copy todir="classes/lib-14">
       <fileset dir="classes/lib" excludes="**/*.class" />
     </copy>
@@ -483,9 +483,8 @@
         <pathelement location="classes/lib-14" />
       </path>
     </pathconvert>
-    <!-- Note: "verifyrefs" is called "refclasspath" in the documentation, but that name is incorrect -->
-    <retroweaver srcdir="classes/base" destdir="classes/base-14" version="1.4" failonerror="true" 
-                 verifyrefs="${retroweaver-base-classpath}" />
+    <retroweaver srcdir="classes/base" destdir="classes/base-14" target="1.4" verify="yes"
+                 classpath="${retroweaver-base-classpath}" />
     <copy todir="classes/base-14">
       <fileset dir="classes/base" excludes="**/*.class" />
     </copy>
@@ -497,13 +496,13 @@
         <pathelement location="${java14-runtime}" />
         <pathelement location="${java14-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
+        <pathelement location="classes/test-14" />
       </path>
     </pathconvert>
     <!-- We do not check references here, thus allowing 1.5 references in test classes -->
-    <retroweaver srcdir="classes/test" destdir="classes/test-14" version="1.4" failonerror="true" />
+    <retroweaver srcdir="classes/test" destdir="classes/test-14" target="1.4" verify="no" />
     <copy todir="classes/test-14">
       <fileset dir="classes/test" excludes="**/*.class" />
     </copy>
@@ -571,7 +570,7 @@
       </classpath>
       <formatter type="brief" usefile="false" />
       <batchtest>
-        <fileset dir="classes/test" includes="**/*${test-spec}*Test.class" />
+        <fileset dir="classes/test-14" includes="**/*${test-spec}*Test.class" />
       </batchtest>
     </junit>
   </target>

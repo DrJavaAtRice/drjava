@@ -57,7 +57,7 @@ public class History implements OptionConstants, Serializable {
   public static final String INTERACTION_SEPARATOR = "//End of Interaction//";
 
   // Not final because it may be updated by config
-  private int MAX_SIZE;
+  private int _maxSize;
 
   /** Version flag at the beginning of saved history file format
    *  If this is not present in a saved history, it is assumed to be the original format.
@@ -84,9 +84,9 @@ public class History implements OptionConstants, Serializable {
    *  @param maxSize Number of lines to remember in the history.
    */
   public History(int maxSize) {
-    MAX_SIZE = maxSize;
-    // Sanity check on MAX_SIZE
-    if (MAX_SIZE < 0) MAX_SIZE = 0;
+    _maxSize = maxSize;
+    // Sanity check on _maxSize
+    if (_maxSize < 0) _maxSize = 0;
   }
 
   /** Adds an item to the history and moves the cursor to point to the place after it.
@@ -97,18 +97,14 @@ public class History implements OptionConstants, Serializable {
    *  Thus, to access the newly inserted item, you must movePrevious first.
    */
   public void add(String item) {
-
     // for consistency in saved History files, WILL save sequential duplicate entries
     if (item.trim().length() > 0) {
-      //if (_vector.isEmpty() || ! _vector.lastElement().equals(item)) {
       _vector.add(item);
-
-        // If adding the new element has filled _vector to beyond max
-        // capacity, spill the oldest element out of the History.
-      if (_vector.size() > MAX_SIZE) {
+      // If adding the new element has filled _vector to beyond max
+      // capacity, spill the oldest element out of the History.
+      if (_vector.size() > _maxSize) {
         _vector.remove(0);
-        }
-      //}
+      }
       moveEnd();
       _editedEntries.clear();
     }
@@ -251,7 +247,7 @@ public class History implements OptionConstants, Serializable {
 
       moveEnd();
     }
-    MAX_SIZE = newSize;
+    _maxSize = newSize;
   }
   
   /** The OptionListener for HISTORY_MAX_SIZE */

@@ -57,6 +57,7 @@ import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.StringOps;
 
 /**
  * Panel for displaying regions in a tree sorted by class name and line number.
@@ -204,10 +205,10 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
             
             // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
             String s = doc.getText(startOffset, endOffset-startOffset);
-            s = s.replace("<", "&lt;");
-            s = s.replace(">", "&gt;");
-            s = s.replace(System.getProperty("line.separator"),"<br>");
-            s = s.replace("\n","<br>");
+            s = StringOps.replace(s, "<", "&lt;");
+            s = StringOps.replace(s, ">", "&gt;");
+            s = StringOps.replace(s, System.getProperty("line.separator"),"<br>");
+            s = StringOps.replace(s, "\n","<br>");
             tooltip = "<html><pre>"+s+"</pre></html>";
           }
           catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }

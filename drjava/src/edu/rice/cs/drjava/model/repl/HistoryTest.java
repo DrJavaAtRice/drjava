@@ -56,10 +56,10 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
    */
   public void setUp() throws Exception {
     super.setUp();
+    DrJava.getConfig().resetToDefaults();
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
     _history = new History();
-    DrJava.getConfig().resetToDefaults();
   }
 
   /**
@@ -114,7 +114,6 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
    * Ensures that Histories are bound to 500 entries.
    */
   public void testHistoryIsBounded() {
-
     int maxLength = 500;
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(maxLength));
 
@@ -133,7 +132,6 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
   /** Tests that the history size can be updated, both through the config framework and the setMaxSize method.
    */
   public void testLiveUpdateOfHistoryMaxSize() {
-
     int maxLength = 20;
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(20));
     
