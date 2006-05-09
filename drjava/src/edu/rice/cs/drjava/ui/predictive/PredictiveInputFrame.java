@@ -340,7 +340,10 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    *  @return text in text field
    */
   public String getText() {
-    if (_force) return _pim.getCurrentItem().toString();
+    if (_force) {
+      Object item = _matchList.getSelectedValue();
+      return (item==null)?"":item.toString();
+    }
     return _textField.getText();
   }
 
@@ -349,7 +352,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    */
   public T getItem() {
     if (!_force && _pim.getMatchingItems().size() == 0) return null;
-    return _pim.getCurrentItem();
+    @SuppressWarnings("unchecked") T item = (T)_matchList.getSelectedValue();
+    return item;
   }
 
   /** Initialize the frame.
@@ -671,7 +675,10 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   /** Update the information. */
   private void updateInfo() {
     if (_info==null) return;
-    if (_matchList.getModel().getSize()>0)  _infoLabel.setText("Path:   " + _info.apply(_pim.getCurrentItem()));
+    if (_matchList.getModel().getSize()>0) {
+      @SuppressWarnings("unchecked") T item = (T)_matchList.getSelectedValue();
+      _infoLabel.setText("Path:   " + _info.apply(item));
+    }
     else _infoLabel.setText("No file selected");
   }
   

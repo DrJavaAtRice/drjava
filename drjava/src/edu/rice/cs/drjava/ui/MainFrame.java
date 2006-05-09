@@ -1230,6 +1230,254 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _gotoFileUnderCursor();
     }
   };
+  
+
+  /**
+   * Wrapper class for the "Open Javadoc" dialog list entries.
+   * Provides the ability to have the same class name in there multiple times in different packages.
+   */
+  private static class OpenJavadocListEntry implements Comparable<OpenJavadocListEntry> {
+    private final String str, fullStr;
+    private final URL url;
+    public OpenJavadocListEntry(String s, String full, URL u) {
+      str = s;
+      fullStr = full;
+      url = u;
+    }
+    public String toString() { return str; }
+    public String getFullString() { return fullStr; }
+    public URL getURL() { return url; }
+    public int compareTo(OpenJavadocListEntry other) {
+      return str.toLowerCase().compareTo(other.str.toLowerCase());
+    }
+    public boolean equals(Object other) {
+      if (!(other instanceof OpenJavadocListEntry)) return false;
+      return fullStr.equals(((OpenJavadocListEntry)other).fullStr);
+    }
+    public int hashCode() {
+      return fullStr.hashCode();
+    }
+  }  
+
+  /** Reset the position of the "Open Javadoc" dialog. */
+  public void resetOpenJavadocDialogPosition() {
+    initOpenJavadocDialog();
+    _openJavadocDialog.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_OPENJAVADOC_STATE, "default");
+    }
+  }
+  
+  /** Initialize dialog if necessary. */
+  void initOpenJavadocDialog() {
+    if (_openJavadocDialog==null) {
+      PredictiveInputFrame.InfoSupplier<OpenJavadocListEntry> info = 
+        new PredictiveInputFrame.InfoSupplier<OpenJavadocListEntry>() {
+        public String apply(OpenJavadocListEntry entry) {
+          return entry.getFullString();
+        }
+      };
+      PredictiveInputFrame.CloseAction<OpenJavadocListEntry> okAction = 
+        new PredictiveInputFrame.CloseAction<OpenJavadocListEntry>() {
+        public Object apply(PredictiveInputFrame<OpenJavadocListEntry> p) {
+          if (p.getItem()!=null) {
+            PlatformFactory.ONLY.openURL(p.getItem().getURL());
+          }
+          hourglassOff();
+          return null;
+        }
+      };
+      PredictiveInputFrame.CloseAction<OpenJavadocListEntry> cancelAction = 
+        new PredictiveInputFrame.CloseAction<OpenJavadocListEntry>() {
+        public Object apply(PredictiveInputFrame<OpenJavadocListEntry> p) {
+          hourglassOff();
+          return null;
+        }
+      };
+      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<OpenJavadocListEntry>> strategies =
+        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<OpenJavadocListEntry>>();
+      strategies.add(new PredictiveInputModel.FragmentStrategy<OpenJavadocListEntry>());
+      strategies.add(new PredictiveInputModel.PrefixStrategy<OpenJavadocListEntry>());
+      strategies.add(new PredictiveInputModel.RegExStrategy<OpenJavadocListEntry>());
+      _openJavadocDialog = 
+        new PredictiveInputFrame<OpenJavadocListEntry>(MainFrame.this,
+                                                       "Open Javadoc",
+                                                       true, // force
+                                                       true, // ignore case
+                                                       info,
+                                                       strategies,
+                                                       okAction,
+                                                       cancelAction,
+                                                       new OpenJavadocListEntry("dummy", "dummy", null)); 
+      // putting one dummy entry in the list; it will be changed later anyway
+      
+      if (DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue()) {
+        _openJavadocDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STATE));
+      }
+      generateOpenJavadocList();
+    }
+  }
+  
+  /** Generate Javadoc class list. */
+  void generateOpenJavadocList() {
+    if (_openJavadocList==null) {
+      // generate list
+      _openJavadocList = new ArrayList<OpenJavadocListEntry>();
+      String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+      String base = "";
+      if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
+        base = DrJava.getConfig().getSetting(JAVADOC_1_3_LINK);
+      }
+      else if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
+        base = DrJava.getConfig().getSetting(JAVADOC_1_4_LINK);
+      }
+      else if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
+        base = DrJava.getConfig().getSetting(JAVADOC_1_5_LINK);
+      }
+      else {
+        // no valid Javadoc URL
+        return;
+      }
+      // TODO: put this in an AsyncTask
+      try {
+        URL url = new URL(base + "/allclasses-frame.html");
+        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+        String line = br.readLine();
+        while(line!=null) {
+          final String aText = "<a href=\"";
+          int aPos = line.toLowerCase().indexOf(aText);
+          int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
+          if ((aPos>=0) && (aEndPos>=0)) {
+            String link = line.substring(aPos+aText.length(), aEndPos);
+            String fullClassName = link.replace('/', '.');
+            String simpleClassName = fullClassName;
+            int lastDot = fullClassName.lastIndexOf('.');
+            if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot+1); }
+            try {
+              _openJavadocList.add(new OpenJavadocListEntry(simpleClassName, fullClassName, new URL(base + "/" + link + ".html")));
+            }
+            catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
+          }
+          line = br.readLine();
+        }
+      }
+      catch(IOException ioe) { /* ignore, we'll just have an empty list */ }
+    }
+  }
+
+  /** The "Open Javadoc" dialog instance. */
+  PredictiveInputFrame<OpenJavadocListEntry> _openJavadocDialog = null;
+  
+  /** The list of Java API classes. */
+  List<OpenJavadocListEntry> _openJavadocList = null;
+ 
+  /** Asks the user for a file name and goes there. */
+  private Action _openJavadocAction = new AbstractAction("Open Javadoc...") {
+    public void actionPerformed(ActionEvent ae) {
+      initOpenJavadocDialog();     
+      _openJavadocDialog.setItems(true, _openJavadocList); // ignore case
+      hourglassOn();
+      _openJavadocDialog.setVisible(true);
+    }
+  };
+   
+  /** Opens the Javadoc specified by the word the cursor is on. */
+  void _openJavadocUnderCursor() {
+//    Utilities.show("Calling openJavadocUnderCursor()");
+    generateOpenJavadocList();
+    PredictiveInputModel<OpenJavadocListEntry> pim =
+      new PredictiveInputModel<OpenJavadocListEntry>(true,
+                                                     new PredictiveInputModel.PrefixStrategy<OpenJavadocListEntry>(),
+                                                     _openJavadocList);
+    OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+    odd.readLock();
+    String mask = "";
+    try {
+      int loc = getCurrentDefPane().getCaretPosition();
+      String s = odd.getText();
+      // find start
+      int start = loc;
+      while(start>0) {
+        if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+        --start;
+      }
+      while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+        ++start;
+      }
+      // find end
+      int end = loc-1;
+      while(end<s.length()-1) {
+        if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
+        ++end;
+      }
+      if ((start>=0) && (end<s.length())) {
+        mask = s.substring(start, end+1);
+        pim.setMask(mask);
+      }
+    }
+    finally { odd.readUnlock(); }
+    
+//    Utilities.show("Matching items are: " + pim.getMatchingItems());
+    
+    if (pim.getMatchingItems().size() == 1) {
+      // exactly one match, go to file
+      if (pim.getCurrentItem() != null) {
+        PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
+      }
+    }
+    else {
+      // try appending ".java" and see if it's unique
+      pim.extendMask(".java");
+      if (pim.getMatchingItems().size() == 1) {
+        // exactly one match with ".java" appended, go to file
+        if (pim.getCurrentItem() != null) {
+          PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
+        }
+      }
+      else {
+        // not exactly one match
+        pim.setMask(mask);
+        OpenJavadocListEntry foundItem = null;
+        int found = 0;
+        if (pim.getMatchingItems().size() == 0) {
+          // if there are no matches, shorten the mask until there is at least one
+          mask = pim.getMask();
+          while(mask.length()>0) {
+            mask = mask.substring(0, mask.length()-1);
+            pim.setMask(mask);
+            if (pim.getMatchingItems().size()>0) { break; }
+          }
+        }
+        else {
+          // there are several matches, see if there is an exact match
+          for(OpenJavadocListEntry e: pim.getMatchingItems()) {
+            if (e.toString().equalsIgnoreCase(mask)) {
+              ++found;
+              foundItem = e;
+            }
+          }
+        }
+        if (found==1) {
+          // open unique item and return
+          PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
+        }
+        else {
+          initOpenJavadocDialog();
+          _openJavadocDialog.setModel(true, pim); // ignore case
+          hourglassOn();
+          _openJavadocDialog.setVisible(true);
+        }
+      }
+    }
+  }
+  
+  /** Open Javadoc page specified by the word the cursor is on. */
+  final Action _openJavadocUnderCursorAction = new AbstractAction("Open Javadoc Under Cursor") {
+    public void actionPerformed(ActionEvent ae) {
+      _openJavadocUnderCursor();
+    }
+  };
+
 
   /** Reset the position of the "Complete File" dialog. */
   public void resetCompleteFileDialogPosition() {
@@ -2497,6 +2745,45 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         _model.getJUnitModel().setForceTestSuffix(oce.value.booleanValue());
       }
     });
+      
+    // The OptionListener for JAVADOC_LINK_VERSION.
+    OptionListener<String> choiceOptionListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        _openJavadocList = null;
+        _openJavadocAction.setEnabled(!oce.value.equals(JAVADOC_NONE_TEXT));
+        _openJavadocUnderCursorAction.setEnabled(!oce.value.equals(JAVADOC_NONE_TEXT));
+      }
+    };
+    DrJava.getConfig().addOptionListener(JAVADOC_LINK_VERSION, choiceOptionListener);
+    
+    // The OptionListener for JAVADOC_XXX_LINK.
+    OptionListener<String> link13OptionListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+        if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
+          _openJavadocList = null;
+        }
+      }
+    };
+    DrJava.getConfig().addOptionListener(JAVADOC_1_3_LINK, link13OptionListener);
+    OptionListener<String> link14OptionListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+        if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
+          _openJavadocList = null;
+        }
+      }
+    };
+    DrJava.getConfig().addOptionListener(JAVADOC_1_4_LINK, link14OptionListener);
+    OptionListener<String> link15OptionListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+        if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
+          _openJavadocList = null;
+        }
+      }
+    };
+    DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
     
     // Initialize DocumentRegion highlights hashtables, for easy removal of highlights
     _documentBreakpointHighlights = new java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
@@ -3606,6 +3893,16 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       config.setSetting(DIALOG_GOTOFILE_STATE, DIALOG_GOTOFILE_STATE.getDefault());
     }
     
+    // "Open Javadoc" dialog position and size.
+    if ((DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue())
+          && (_openJavadocDialog != null) && (_openJavadocDialog.getFrameState() != null)) {
+      config.setSetting(DIALOG_OPENJAVADOC_STATE, (_openJavadocDialog.getFrameState().toString()));
+    }
+    else {
+      // Reset to defaults to restore pristine behavior.
+      config.setSetting(DIALOG_OPENJAVADOC_STATE, DIALOG_OPENJAVADOC_STATE.getDefault());
+    }    
+    
     // "Complete File" dialog position and size.
     if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_FILE_STORE_POSITION).booleanValue())
           && (_completeFileDialog != null) && (_completeFileDialog.getFrameState() != null)) {
@@ -4448,6 +4745,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
     _setUpAction(_runAction, "Run", "Run the main method of the current document");
     
+    _setUpAction(_openJavadocAction, "Open Javadoc...", "Open the Javadoc page for a class");
+    _setUpAction(_openJavadocUnderCursorAction, "Open Javadoc Under Cursor", "Open Javadoc for Class Under Cursor");
+    
     _setUpAction(_executeHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
     _setUpAction(_loadHistoryScriptAction, "Load History as Script", 
                  "Load a history from a file as a series of interactions");
@@ -4682,6 +4982,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _addMenuItem(toolsMenu, _junitAction, KEY_TEST);
     _addMenuItem(toolsMenu, _javadocAllAction, KEY_JAVADOC_ALL);
     _addMenuItem(toolsMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT);
+    toolsMenu.addSeparator();
+    
+    // Open Javadoc
+    _addMenuItem(toolsMenu, _openJavadocAction, KEY_OPEN_JAVADOC);
+    _addMenuItem(toolsMenu, _openJavadocUnderCursorAction, KEY_OPEN_JAVADOC_UNDER_CURSOR);    
     toolsMenu.addSeparator();
     
     // Run

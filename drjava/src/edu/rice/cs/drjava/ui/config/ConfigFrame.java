@@ -482,6 +482,12 @@ public class ConfigFrame extends JFrame {
         _mainFrame.resetJarOptionsDialogPosition();
       }
     }, "Reset \"Create Jar File from Project\" Dialog Position", this, "This resets the dialog position to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
+                                                  "Save \"Open Javadoc\" Dialog Position", this,
+                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) { _mainFrame.resetOpenJavadocDialogPosition(); }
+    }, "Reset \"Open Javadoc\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     panel.displayComponents();
   }
 

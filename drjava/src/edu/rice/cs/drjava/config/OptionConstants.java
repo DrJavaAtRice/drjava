@@ -438,6 +438,20 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
 
   /**
+   * The key binding for open Javadoc.
+   */
+  public static final KeyStrokeOption KEY_OPEN_JAVADOC =
+    new KeyStrokeOption("key.open.javadoc",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, KeyEvent.SHIFT_MASK));
+
+  /**
+   * The key binding for open Javadoc under cursor.
+   */
+  public static final KeyStrokeOption KEY_OPEN_JAVADOC_UNDER_CURSOR =
+    new KeyStrokeOption("key.open.javadoc.under.cursor",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, mask));
+
+  /**
    * The key binding for complete file.
    */
   public static final KeyStrokeOption KEY_COMPLETE_FILE =
@@ -1113,6 +1127,13 @@ public interface OptionConstants {
   /** Whether to save and restore window size and position at startup/shutdown. */
   public static final BooleanOption DIALOG_GOTOFILE_STORE_POSITION =
     new BooleanOption("dialog.gotofile.store.position", Boolean.TRUE);
+
+  /** The last state of the "Open Javadoc" dialog. */
+  public static final StringOption DIALOG_OPENJAVADOC_STATE = new StringOption("dialog.openjavadoc.state", "default");
+
+  /** Whether to save and restore window size and position at startup/shutdown. */
+  public static final BooleanOption DIALOG_OPENJAVADOC_STORE_POSITION =
+    new BooleanOption("dialog.openjavadoc.store.position", Boolean.TRUE);
 
   /**
    * Whether to also list files with fully qualified paths.
