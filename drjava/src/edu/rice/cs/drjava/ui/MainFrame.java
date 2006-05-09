@@ -1301,7 +1301,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       strategies.add(new PredictiveInputModel.RegExStrategy<OpenJavadocListEntry>());
       _openJavadocDialog = 
         new PredictiveInputFrame<OpenJavadocListEntry>(MainFrame.this,
-                                                       "Open Javadoc",
+                                                       "Open Java API Javadoc Webpage",
                                                        true, // force
                                                        true, // ignore case
                                                        info,
@@ -1372,7 +1372,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   List<OpenJavadocListEntry> _openJavadocList = null;
  
   /** Asks the user for a file name and goes there. */
-  private Action _openJavadocAction = new AbstractAction("Open Javadoc...") {
+  private Action _openJavadocAction = new AbstractAction("Open Java API Javadoc...") {
     public void actionPerformed(ActionEvent ae) {
       initOpenJavadocDialog();     
       _openJavadocDialog.setItems(true, _openJavadocList); // ignore case
@@ -1472,25 +1472,24 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Open Javadoc page specified by the word the cursor is on. */
-  final Action _openJavadocUnderCursorAction = new AbstractAction("Open Javadoc Under Cursor") {
+  final Action _openJavadocUnderCursorAction = new AbstractAction("Open Java API Javadoc for Word Under Cursor") {
     public void actionPerformed(ActionEvent ae) {
       _openJavadocUnderCursor();
     }
   };
 
-
-  /** Reset the position of the "Complete File" dialog. */
-  public void resetCompleteFileDialogPosition() {
-    initCompleteFileDialog();
-    _completeFileDialog.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_FILE_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_COMPLETE_FILE_STATE, "default");
+  /** Reset the position of the "Complete Word" dialog. */
+  public void resetCompleteWordDialogPosition() {
+    initCompleteWordDialog();
+    _completeWordDialog.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_COMPLETE_WORD_STATE, "default");
     }
   }
   
   /** Initialize dialog if necessary. */
-  void initCompleteFileDialog() {
-    if (_completeFileDialog==null) {
+  void initCompleteWordDialog() {
+    if (_completeWordDialog==null) {
       PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
           if (p.getItem()!=null) {
@@ -1538,9 +1537,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       strategies.add(new PredictiveInputModel.FragmentStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.RegExStrategy<GoToFileListEntry>());
-      _completeFileDialog = 
+      _completeWordDialog = 
         new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
-                                                    "Auto-Complete File",
+                                                    "Auto-Complete Word",
                                                     true, // force
                                                     true, // ignore case
                                                     null,
@@ -1550,17 +1549,17 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                     new GoToFileListEntry(null, "dummy")); 
       // putting one dummy entry in the list; it will be changed later anyway
       
-      if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_FILE_STORE_POSITION).booleanValue()) {
-        _completeFileDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_COMPLETE_FILE_STATE));
+      if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue()) {
+        _completeWordDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STATE));
       }      
     }
   }
 
-  /** The "Complete File" dialog instance. */
-  PredictiveInputFrame<GoToFileListEntry> _completeFileDialog = null;
+  /** The "Complete Word" dialog instance. */
+  PredictiveInputFrame<GoToFileListEntry> _completeWordDialog = null;
    
-  /** Complete the file specified by the word the cursor is on. */
-  void _completeFileUnderCursor() {
+  /** Complete the word the cursor is on. */
+  void _completeWordUnderCursor() {
     List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     if ((docs==null) || (docs.size() == 0)) return; // do nothing
     
@@ -1640,12 +1639,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             if (pim.getMatchingItems().size()>0) { break; }
           }
         }       
-        initCompleteFileDialog();
-        _completeFileDialog.setModel(true, pim); // ignore case
-        _completeFileDialog.selectStrategy();
-        if (currentEntry != null) _completeFileDialog.setCurrentItem(currentEntry);
+        initCompleteWordDialog();
+        _completeWordDialog.setModel(true, pim); // ignore case
+        _completeWordDialog.selectStrategy();
+        if (currentEntry != null) _completeWordDialog.setCurrentItem(currentEntry);
         hourglassOn();
-        _completeFileDialog.setVisible(true);
+        _completeWordDialog.setVisible(true);
       }
     }
     catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
@@ -1654,10 +1653,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   }
   
-  /** Auto-completes file specified by the word the cursor is on. */
-  final Action completeFileUnderCursorAction = new AbstractAction("Auto-Complete File Under Cursor...") {
+  /** Auto-completes word the cursor is on. */
+  final Action completeWordUnderCursorAction = new AbstractAction("Auto-Complete Word Under Cursor...") {
     public void actionPerformed(ActionEvent ae) {
-      _completeFileUnderCursor();
+      _completeWordUnderCursor();
     }
   };
 
@@ -3903,14 +3902,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       config.setSetting(DIALOG_OPENJAVADOC_STATE, DIALOG_OPENJAVADOC_STATE.getDefault());
     }    
     
-    // "Complete File" dialog position and size.
-    if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_FILE_STORE_POSITION).booleanValue())
-          && (_completeFileDialog != null) && (_completeFileDialog.getFrameState() != null)) {
-      config.setSetting(DIALOG_COMPLETE_FILE_STATE, (_completeFileDialog.getFrameState().toString()));
+    // "Complete Word" dialog position and size.
+    if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue())
+          && (_completeWordDialog != null) && (_completeWordDialog.getFrameState() != null)) {
+      config.setSetting(DIALOG_COMPLETE_WORD_STATE, (_completeWordDialog.getFrameState().toString()));
     }
     else {
       // Reset to defaults to restore pristine behavior.
-      config.setSetting(DIALOG_COMPLETE_FILE_STATE, DIALOG_COMPLETE_FILE_STATE.getDefault());
+      config.setSetting(DIALOG_COMPLETE_WORD_STATE, DIALOG_COMPLETE_WORD_STATE.getDefault());
     }
         
     // "Create Jar from Project" dialog position and size.   
@@ -4727,15 +4726,25 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _setUpAction(_commentLinesAction, "Comment Lines", "Comment out all selected lines");
     _setUpAction(_uncommentLinesAction, "Uncomment Lines", "Uncomment all selected lines");
     
+    _setUpAction(completeWordUnderCursorAction, "Auto-Complete Word Under Cursor...",
+                 "Auto-complete the word the cursor is currently located on");
+    _setUpAction(_bookmarksPanelAction, "Bookmarks", "Display the bookmarks panel");
+    _setUpAction(_toggleBookmarkAction, "Toggle Bookmark", "Toggle the bookmark at the current cursor location");
+    
     _setUpAction(_findReplaceAction, "Find", "Find or replace text in the document");
     _setUpAction(_findNextAction, "Find Next", "Repeats the last find");
     _setUpAction(_findPrevAction, "Find Previous", "Repeats the last find in the opposite direction");
     _setUpAction(_gotoLineAction, "Go to line", "Go to a line number in the document");
+    _setUpAction(_gotoFileAction, "Go to File", "Go to a file specified by its name");
+    _setUpAction(gotoFileUnderCursorAction, "Go to File Under Cursor",
+                 "Go to the file specified by the word the cursor is located on");
     
     _setUpAction(_switchToPrevAction, "Back", "Switch to the previous document");
     _setUpAction(_switchToNextAction, "Forward", "Switch to the next document");
     _setUpAction(_switchToPreviousPaneAction, "Previous Pane", "Switch focus to the previous pane");
     _setUpAction(_switchToNextPaneAction, "Next Pane", "Switch focus to the next pane");
+    _setUpAction(_gotoOpeningBraceAction, "Go to Opening Brace", "Go th the opening brace of the block enclosing the cursor");
+    _setUpAction(_gotoClosingBraceAction, "Go to Closing Brace", "Go th the closing brace of the block enclosing the cursor");
     
     _setUpAction(_editPreferencesAction, "Preferences", "Edit configurable settings in DrJava");
     
@@ -4745,8 +4754,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
     _setUpAction(_runAction, "Run", "Run the main method of the current document");
     
-    _setUpAction(_openJavadocAction, "Open Javadoc...", "Open the Javadoc page for a class");
-    _setUpAction(_openJavadocUnderCursorAction, "Open Javadoc Under Cursor", "Open Javadoc for Class Under Cursor");
+    _setUpAction(_openJavadocAction, "Open Java API Javadoc...", "Open the Java API Javadoc webpage for a class");
+    _setUpAction(_openJavadocUnderCursorAction, "Open Java API Javadoc for Word Under Cursor", "Open the Java API "+
+                 "Javadoc webpage for the word under the cursor");
     
     _setUpAction(_executeHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
     _setUpAction(_loadHistoryScriptAction, "Load History as Script", 
@@ -4775,6 +4785,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _setUpAction(_stepIntoDebugAction, "Step Into", "Step into the current line or method call");
       _setUpAction(_stepOverDebugAction, "Step Over", "Step over the current line or method call");
       _setUpAction(_stepOutDebugAction, "Step Out", "Step out of the current method");
+      _setUpAction(_breakpointsPanelAction, "Breakpoints", "Display the breakpoints panel");
     }
     
     _setUpAction(_helpAction, "Help", "Show documentation on how to use DrJava");
@@ -4942,7 +4953,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     editItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
     _addMenuItem(editMenu, _commentLinesAction, KEY_COMMENT_LINES);
     _addMenuItem(editMenu, _uncommentLinesAction, KEY_UNCOMMENT_LINES);
-    _addMenuItem(editMenu, completeFileUnderCursorAction, KEY_COMPLETE_FILE);
+    _addMenuItem(editMenu, completeWordUnderCursorAction, KEY_COMPLETE_FILE);
     
     // Find/replace, goto
     editMenu.addSeparator();

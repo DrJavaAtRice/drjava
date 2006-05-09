@@ -1142,15 +1142,15 @@ public interface OptionConstants {
     new BooleanOption("dialog.gotofile.fully.qualified", Boolean.FALSE);
 
   /** The last state of the "Complete File" dialog. */
-  public static final StringOption DIALOG_COMPLETE_FILE_STATE = new StringOption("dialog.completefile.state", "default");
+  public static final StringOption DIALOG_COMPLETE_WORD_STATE = new StringOption("dialog.completeword.state", "default");
 
   /** Whether to save and restore window size and position at startup/shutdown. */
-  public static final BooleanOption DIALOG_COMPLETE_FILE_STORE_POSITION =
-    new BooleanOption("dialog.completefile.store.position", Boolean.TRUE);
+  public static final BooleanOption DIALOG_COMPLETE_WORD_STORE_POSITION =
+    new BooleanOption("dialog.completeword.store.position", Boolean.TRUE);
   
   /** Whether to scan class files for auto-completion class names. */
   public static final BooleanOption DIALOG_COMPLETE_SCAN_CLASS_FILES =
-    new BooleanOption("dialog.completefile.scan.class.files", Boolean.FALSE);
+    new BooleanOption("dialog.completeword.scan.class.files", Boolean.FALSE);
 
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
   /** Whether to perform light-weight parsing. */
