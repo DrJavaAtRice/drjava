@@ -1472,7 +1472,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Open Javadoc page specified by the word the cursor is on. */
-  final Action _openJavadocUnderCursorAction = new AbstractAction("Open Java API Javadoc for Word Under Cursor") {
+  final Action _openJavadocUnderCursorAction = new AbstractAction("Open Java API Javadoc for Word Under Cursor...") {
     public void actionPerformed(ActionEvent ae) {
       _openJavadocUnderCursor();
     }
@@ -1654,7 +1654,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Auto-completes word the cursor is on. */
-  final Action completeWordUnderCursorAction = new AbstractAction("Auto-Complete Word Under Cursor...") {
+  final Action completeWordUnderCursorAction = new AbstractAction("Auto-Complete Word Under Cursor") {
     public void actionPerformed(ActionEvent ae) {
       _completeWordUnderCursor();
     }
@@ -1891,7 +1891,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Calls the ConfigFrame to edit preferences */
-  private Action _editPreferencesAction = new AbstractAction("Preferences ...") {
+  private Action _editPreferencesAction = new AbstractAction("Preferences...") {
     public void actionPerformed(ActionEvent ae) {
       // Create frame if we haven't yet
       if (_configFrame == null) {
@@ -4726,7 +4726,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _setUpAction(_commentLinesAction, "Comment Lines", "Comment out all selected lines");
     _setUpAction(_uncommentLinesAction, "Uncomment Lines", "Uncomment all selected lines");
     
-    _setUpAction(completeWordUnderCursorAction, "Auto-Complete Word Under Cursor...",
+    _setUpAction(completeWordUnderCursorAction, "Auto-Complete Word Under Cursor",
                  "Auto-complete the word the cursor is currently located on");
     _setUpAction(_bookmarksPanelAction, "Bookmarks", "Display the bookmarks panel");
     _setUpAction(_toggleBookmarkAction, "Toggle Bookmark", "Toggle the bookmark at the current cursor location");
@@ -4754,9 +4754,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
     _setUpAction(_runAction, "Run", "Run the main method of the current document");
     
-    _setUpAction(_openJavadocAction, "Open Java API Javadoc...", "Open the Java API Javadoc webpage for a class");
-    _setUpAction(_openJavadocUnderCursorAction, "Open Java API Javadoc for Word Under Cursor", "Open the Java API "+
-                 "Javadoc webpage for the word under the cursor");
+    _setUpAction(_openJavadocAction, "Open Java API Javadoc...", "Open the Java API Javadoc Web page for a class");
+    _setUpAction(_openJavadocUnderCursorAction, "Open Java API Javadoc for Word Under Cursor...", "Open the Java API "+
+                 "Javadoc Web page for the word under the cursor");
     
     _setUpAction(_executeHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
     _setUpAction(_loadHistoryScriptAction, "Load History as Script", 
