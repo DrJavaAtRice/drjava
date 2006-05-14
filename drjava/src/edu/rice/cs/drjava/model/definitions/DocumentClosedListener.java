@@ -33,25 +33,8 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
-
-/**
- * This listener can be added to DefinitionsDocuments, and will be fired when
- * the document is closing
- */
+/** This listener can be added to DefinitionsDocuments, and will be fired when the document is closing. */
 public interface DocumentClosedListener{
   /** Called when the DefinitionsDocument is closing. */
   public void close();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

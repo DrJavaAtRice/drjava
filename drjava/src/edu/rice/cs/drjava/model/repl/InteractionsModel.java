@@ -150,7 +150,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     synchronized(_interpreterLock) {
       // Don't start a new interaction while one is in progress
       if (_document.inProgress()) return;
-
+      
       String text = _document.getCurrentInteraction();
       String toEval = text.trim();
       if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
@@ -461,9 +461,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
 
   /** Signifies that the most recent interpretation completed successfully, returning no value. */
-  public void replReturnedVoid() {
-    _interactionIsOver();
-  }
+  public void replReturnedVoid() { _interactionIsOver(); }
 
   /** Signifies that the most recent interpretation completed successfully, returning a value.
    *
@@ -537,12 +535,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //    Utilities.showDebug("InteractionsModel: interpreterResetting called.  _waitingForFirstInterpreter = " + 
 //      _waitingForFirstInterpreter);
     if (! _waitingForFirstInterpreter) {
-      _document.modifyLock();
+      _document.acquireWriteLock();
       try {
         _document.insertBeforeLastPrompt("Resetting Interactions..." + _newLine, InteractionsDocument.ERROR_STYLE);
         _document.setInProgress(true);
       }
-      finally { _document.modifyUnlock(); }
+      finally { _document.releaseWriteLock(); }
 //      Utilities.showDebug("interpreter resetting in progress");
 
       // Change to a new debug port to avoid conflicts

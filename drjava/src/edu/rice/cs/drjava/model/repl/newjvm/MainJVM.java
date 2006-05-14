@@ -70,7 +70,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   public static final String DEFAULT_INTERPRETER_NAME = "DEFAULT";
   
-  private Log _log = new Log("MainJVMLog", false);
+  private static Log _log = new Log("MainJVMLog", true);
   
   /** Working directory for slave JVM */
   private volatile File _workDir;
@@ -248,6 +248,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public void interpretResult(InterpretResult result) throws RemoteException {
     //     try {
     _log.logTime("main.interp result: " + result);
+    
     result.apply(getResultHandler());
     //      }
     //      catch (Throwable t) {

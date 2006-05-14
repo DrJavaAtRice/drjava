@@ -40,6 +40,7 @@ import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -49,17 +50,14 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-/**
- * Test I/O functions of the global model.
- *
- * @version $Id$
+/** Test I/O functions of the global model.
+ *  @version $Id$
  */
-public final class GlobalModelIOTest extends GlobalModelTestCase
-  implements OptionConstants {
-  /**
-   * Creates a new document, modifies it, and then does the same
-   * with a second document, ensuring that the changes are separate.
-   */
+public final class GlobalModelIOTest extends GlobalModelTestCase implements OptionConstants {
+  
+  private static Log _log = new Log("GlobalModelIOTestLog.txt", true);
+  
+  /** Creates a new document, modifies it, and then does the same with a second document, checking for inteference. */
   public void testMultipleFiles() throws BadLocationException {
     assertNumOpenDocs(1);
 
@@ -79,12 +77,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertModified(true, doc2);
     assertContents(FOO_TEXT, doc1);
     assertContents(BAR_TEXT, doc2);
+    
+    _log.log("testMultipleFiles completed");
   }
 
-  /**
-   * Opens several documents and ensures that the array
-   * returned by the model is correct and in the right order.
-   */
+  /** Opens several documents and ensures that the array returned by the model is correct and in the right order. */
   public void testMultipleFilesArray() throws BadLocationException {
     OpenDefinitionsDocument doc1, doc2, doc3;
     doc1 = setupDocument(FOO_TEXT);
@@ -98,12 +95,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertEquals("document 1", doc1, docs.get(1));
     assertEquals("document 2", doc2, docs.get(2));
     assertEquals("document 3", doc3, docs.get(3));
+    
+    _log.log("testMultipleFilesArray completed");
   }
 
-
-  /**
-   * Ensures closing documents works correctly.
-   */
+  /** Ensures closing documents works correctly. */
   public void testCloseMultipleFiles() throws BadLocationException {
     assertNumOpenDocs(1);
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
@@ -122,19 +118,18 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertNumOpenDocs(1);
     docs = _model.getOpenDefinitionsDocuments();
     assertEquals("size of document array", 1, docs.size());
+    
+    _log.log("testCloseMultipleFiles completed");
   }
 
 
-  /**
-   * Creates a new document, modifies it, then allows it
-   * to be closed, ignoring the changes made.
-   */
+  /** Creates a new document, modifies it, then allows it to be closed, ignoring the changes made. */
   public void testCloseFileAllowAbandon() throws BadLocationException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     // Try to close and check for proper events
     TestListener listener = new TestListener() {
-      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
+      public synchronized boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return true; // yes allow the abandon
       }
@@ -148,30 +143,29 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     _model.addListener(listener);
     _model.closeFile(doc);
     listener.assertCloseCount(1);
+    
+    _log.log("testCloseFileAllowAbandon completed");
   }
 
-  /**
-   * Creates a new document, modifies it, but disallows a call to
-   * close it without saving changes.
-   */
+  /** Creates a new document, modifies it, but disallows a call to close it without saving changes. */
   public void testCloseFileDisallowAbandon() throws BadLocationException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     TestListener listener = new TestListener() {
-      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
+      public synchronized boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return false; // no, don't abandon our document!!!
       }
 
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        closeCount++;
-      }
+      public synchronized void fileClosed(OpenDefinitionsDocument doc) { closeCount++; }
     };
 
     _model.addListener(listener);
     _model.closeFile(doc);
     listener.assertAbandonCount(1);
     listener.assertCloseCount(0);
+    
+    _log.log("testCloseFileDisallowAbandon completed");
   }
 
   /** Opens a file. */
@@ -188,7 +182,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
         }
         try {
           assertEquals("file to open", tempFile.getCanonicalFile(), file.getCanonicalFile());
-          openCount++;
+          synchronized(this) { openCount++; }
         }
         catch (IOException ioe) { fail("could not get canonical file"); }
       }
@@ -215,11 +209,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       // Should not be canceled
       fail("Open was unexpectedly canceled!");
     }
+    
+    _log.log("testOpenRealFile completed");
   }
 
-  /**
-   * Initiates a file open, but cancels.
-   */
+  /** Initiates a file open, but cancels. */
   public void testCancelOpenFile() throws BadLocationException, IOException {
 
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
@@ -231,9 +225,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
         return true; // yes allow the abandon
       }
 
-      public void fileOpened(OpenDefinitionsDocument doc) {
-        openCount++;
-      }
+      public void fileOpened(OpenDefinitionsDocument doc) { openCount++; }
       
       public void fileClosed(OpenDefinitionsDocument doc) {
         /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
@@ -263,8 +255,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       assertModified(true, doc);
       assertContents(FOO_TEXT, doc);
     }
+    
+    _log.log("testCancelOpenFile completed");
   }
-
 
   /** Attempts to open a non-existent file. */
   public void testOpenNonexistentFile() throws IOException {
@@ -289,6 +282,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     }
 
     assertEquals("non-existant file", doc, null);
+    
+    _log.log("testOpenNonexistentFile completed");
   }
 
   /** Attempts to reopen an already open file. */
@@ -370,7 +365,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       // Should not be canceled
       fail("Open was unexpectedly canceled!");
     }
-
+    _log.log("testReopenFile completed");
   }
 
   /** Opens multiple files. */
@@ -429,15 +424,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertEquals("size of document array", 2, docs.size());
     assertContents(FOO_TEXT, docs.get(0));
     assertContents(BAR_TEXT, docs.get(1));
+    
+    _log.log("testOpenMultipleFiles completed");
 
   }
 
-  /**
-   * Initiates a file open, but cancels.
-   */
-  public void testCancelOpenMultipleFiles()
-    throws BadLocationException, IOException
-  {
+  /** Initiates a file open, but cancels. */
+  public void testCancelOpenMultipleFiles() throws BadLocationException, IOException {
 
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
@@ -449,9 +442,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
         return true; // yes allow the abandon
       }
 
-      public void fileOpened(OpenDefinitionsDocument doc) {
-        openCount++;
-      }
+      public void fileOpened(OpenDefinitionsDocument doc) { openCount++; }
       
       public void fileClosed(OpenDefinitionsDocument doc) {
         /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
@@ -485,6 +476,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       assertModified(true, doc2);
       assertContents(BAR_TEXT, doc2);
     }
+    
+    _log.log("testCancelOpenMultipleFiles completed");
   }
 
   /** Attempts to open a non-existent file. */
@@ -537,12 +530,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertTrue("one file was opened", docs != null && docs.length == 1);
     listener.assertOpenCount(1);
     listener.assertFileNotFoundCount(1);
+    
+    _log.log("testOpenMultipleNonexistentFiles completed");
   }
 
-  /**
-   * Error checking for openening multiple files
-   * checks for null and an array w/null
-   */
+  /** Error checking for openening multiple files checks for null and an array w/null. */
   public void testOpenMultipleFilesError() {
 
     OpenDefinitionsDocument[] docs = null;
@@ -572,23 +564,18 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
       fail("IO exception was not thrown!");
     }
-    catch (IOException e) {
-      // As we hoped, the file was not found
-    }
-    catch (Exception e) {
-      fail("Unexpectedly exception caught!");
-    }
+    catch (IOException e) { /* As we hoped, the file was not found. */ }
+    catch (Exception e) { fail("Unexpectedly exception caught!"); }
 
-    assertTrue("non-existant file", docs == null);
+    assertTrue("non-existent file", docs == null);
+    
+    _log.log("testOpenMultipleFilesError completed");
   }
 
-  /**
-   * Force a file to be opened with getDocumentforFile
-   */
-  public void testForceFileOpen()
-    throws BadLocationException, IOException, OperationCanceledException,
-    AlreadyOpenException
-  {
+  /** Force a file to be opened with getDocumentforFile. */
+  public void testForceFileOpen() throws BadLocationException, IOException, OperationCanceledException,
+    AlreadyOpenException {
+    
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     final File tempFile2 = writeToNewTempFile(BAR_TEXT);
     // don't catch and fail!
@@ -596,10 +583,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
         try { doc.getFile(); }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        catch (FileMovedException fme) { fail("file does not exist"); /* We know file should exist */ }
         openCount++;
       }
       
@@ -637,9 +621,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     _model.addListener(new TestListener());
 
     boolean saved = doc.saveFile(new CancelingSelector());
-    assertTrue("doc should not have been saved", !saved);
+    assertTrue("doc should not have been saved", ! saved);
     assertModified(true, doc);
     assertContents(FOO_TEXT, doc);
+    
+    _log.log("testForceFileOpen completed");
   }
 
   /** Makes a first save of the current document. */
@@ -675,6 +661,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertEquals("contents of saved file",
                  FOO_TEXT,
                  FileOps.readFileAsString(file));
+    
+    _log.log("testRealSaveFirstSave completed");
   }
 
   /** Saves a file already saved and overwrites its contents. */
@@ -744,17 +732,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     /* Set the config back to the original option */
     DrJava.getConfig().setSetting(BACKUP_FILES, backupStatus);
+    
+    _log.log("testSaveAlreadySaved completed");
   }
 
-  /**
-   * First we save the document with FOO_TEXT.
-   * Then we tell it to save over the old text, but pass in a CancelingSelector
-   * to cancel if we are asked for a new file name. This should not happen
-   * since the file is already saved.
+  /** Saves the document with FOO_TEXT and then saves over the old text, passing in a CancelingSelector
+   *  to cancel if we are asked for a new file name.  Confirms that no cancellation happens (since the
+   *  file is already saved.
    */
-  public void testCancelSaveAlreadySaved()
-    throws BadLocationException, IOException
-  {
+  public void testCancelSaveAlreadySaved() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
 
@@ -762,18 +748,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     doc.saveFile(new FileSelector(file));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
-    assertEquals("contents of saved file",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file));
 
     TestListener listener = new TestListener() {
       public void fileSaved(OpenDefinitionsDocument doc) {
         File f = null;
         try { f = doc.getFile(); }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        catch (FileMovedException fme) { fail("file does not exist");  /* We know file should exist */ }
         try {
           assertEquals("saved file", file.getCanonicalFile(), f.getCanonicalFile());
           saveCount++;
@@ -795,17 +776,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertModified(false, doc);
     assertContents(BAR_TEXT, doc);
 
-    assertEquals("contents of saved file",
-                 BAR_TEXT,
-                 FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", BAR_TEXT, FileOps.readFileAsString(file));
+    
+    _log.log("testCancelSaveAlreadySaved completed");
   }
 
-  /**
-   * Make sure that saveAs doesn't save if we cancel!
-   */
-  public void testCancelSaveAsAlreadySaved()
-    throws BadLocationException, IOException
-  {
+  /** Make sure that saveAs doesn't save if we cancel! */
+  public void testCancelSaveAsAlreadySaved() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
 
@@ -813,9 +790,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     doc.saveFile(new FileSelector(file));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
-    assertEquals("contents of saved file",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file));
 
     // No events better be fired!
     _model.addListener(new TestListener());
@@ -825,17 +800,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     doc.saveFileAs(new CancelingSelector());
 
-    assertEquals("contents of saved file",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file));
+    
+    _log.log("testCancelSaveAsAlreadySaved completed");
   }
 
-  /**
-   * Make sure that saveAs saves to a different file.
-   */
-  public void testSaveAsAlreadySaved()
-    throws BadLocationException, IOException
-  {
+  /** Ensures that saveAs saves to a different file. */
+  public void testSaveAsAlreadySaved() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file1 = tempFile();
     final File file2 = tempFile();
@@ -844,19 +815,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     doc.saveFile(new FileSelector(file1));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
-    assertEquals("contents of saved file",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(file1));
+    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file1));
 
     // Make sure we save now to the new file name
     TestListener listener = new TestListener() {
       public void fileSaved(OpenDefinitionsDocument doc) {
         File f = null;
         try { f = doc.getFile(); }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        catch (FileMovedException fme) { fail("file does not exist");   /* We know file should exist */ }
         try {
           assertEquals("saved file", file2.getCanonicalFile(), f.getCanonicalFile());
           saveCount++;
@@ -875,6 +841,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertEquals("contents of saved file1", FOO_TEXT, FileOps.readFileAsString(file1));
 
     assertEquals("contents of saved file2", BAR_TEXT, FileOps.readFileAsString(file2));
+    
+    _log.log("testSaveAsAlreadySaved completed");
   }
 
   public void testSaveAsExistsForOverwrite() throws BadLocationException, IOException {
@@ -885,9 +853,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       doc.saveFileAs(new WarningFileSelector(file1));
       fail("Did not ask to verify overwrite as expected");
     }
-    catch (OverwriteException e1) {
-      // good behavior for file saving...
-    }
+    catch (OverwriteException e1) { /* Good behavior for file saving ... */ }
+    
+    _log.log("testSaveAsExistsForOverwrite completed");
   }
 
   public void testSaveAsExistsAndOpen() throws BadLocationException, IOException {
@@ -907,16 +875,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       doc2.saveFileAs(new WarningFileSelector(file1));
       fail("Did not warn of open file as expected");
     }
-    catch (OpenWarningException e) {
-      // good behavior for file saving...
-    }
+    catch (OpenWarningException e) { /* Good behavior for file saving ... */ }
+    
+    _log.log("testSaveAsExistsAndOpen completed");
   }
 
 
-  /**
-   * Make sure that all open files are saved in appropriate order,
-   * ie, even with BAR file as active document, save all should
-   * first prompt to save FOO, then BAR.
+  /** Ensures that all open files are saved in appropriate order, i.e., even with BAR file as active document, save all
+   *  should first prompt to save FOO, then BAR.
    */
   public void testSaveAllSaveCorrectFiles()
     throws BadLocationException, IOException {
@@ -935,34 +901,24 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     _model.saveAllFiles(fs); // this should save the files as file1,file2,file3 respectively
 
-    assertEquals("contents of saved file1",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(file1));
-    assertEquals("contents of saved file2",
-                 BAR_TEXT,
-                 FileOps.readFileAsString(file2));
-    assertEquals("contents of saved file3",
-                 "third document contents",
-                 FileOps.readFileAsString(file3));
+    assertEquals("contents of saved file1", FOO_TEXT, FileOps.readFileAsString(file1));
+    assertEquals("contents of saved file2", BAR_TEXT, FileOps.readFileAsString(file2));
+    assertEquals("contents of saved file3", "third document contents", FileOps.readFileAsString(file3));
+    
+    _log.log("testSaveAllSaveCorrectFiles completed");
   }
-  /**
-   * Force a file to be opened with getDocumentforFile
-   */
-  public void testRevertFile()
-    throws BadLocationException, IOException, OperationCanceledException,
-    AlreadyOpenException
-  {
+  
+  /** Forces a file to be opened with getDocumentforFile. */
+  public void testRevertFile() throws BadLocationException, IOException, OperationCanceledException,
+    AlreadyOpenException {
+    
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     // don't catch and fail!
-
 
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
         try { assertTrue("Source file should exist", doc.getFile() != null); }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        catch (FileMovedException fme) { fail("file does not exist");  /* We know file should exist. */ }
         openCount++;
       }
       public void fileClosed(OpenDefinitionsDocument doc) {
@@ -970,9 +926,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 //        assertTrue(doc.isUntitled());
 //        assertFalse(doc.isModifiedSinceSave());
       }
-      public void fileReverted(OpenDefinitionsDocument doc) {
-        fileRevertedCount++;
-      }
+      public void fileReverted(OpenDefinitionsDocument doc) { fileRevertedCount++; }
     };
 
     _model.addListener(listener);
@@ -995,13 +949,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     }
     assertEquals("doc NOT reverted",doc.isModifiedSinceSave(), true);
     assertContents(BAR_TEXT, doc);
+    
+    _log.log("testRevertFile completed");
   }
 
 
-  public void testModifiedByOther()
-    throws BadLocationException, IOException, OperationCanceledException,
-    AlreadyOpenException, InterruptedException
-  {
+  public void testModifiedByOther() throws BadLocationException, IOException, OperationCanceledException,
+    AlreadyOpenException, InterruptedException {
+    
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     // don't catch and fail!
 
@@ -1012,9 +967,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 //        assertTrue(doc.isUntitled());
 //        assertFalse(doc.isModifiedSinceSave());
       }
-      public void fileReverted(OpenDefinitionsDocument doc) {
-        fileRevertedCount++;
-      }
+      public void fileReverted(OpenDefinitionsDocument doc) { fileRevertedCount++; }
       public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
         shouldRevertFileCount++;
         return true;
@@ -1030,18 +983,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     doc.revertIfModifiedOnDisk();
 
-
     listener.assertShouldRevertFileCount(0);
     listener.assertFileRevertedCount(0);
-    synchronized(tempFile1) {
-      tempFile1.wait(2000);
-    }
+    synchronized(tempFile1) { tempFile1.wait(2000); }
 
     String s = "THIS IS ONLY A TEST";
     FileOps.writeStringToFile(tempFile1, s);
-    assertEquals("contents of saved file",
-                 s,
-                 FileOps.readFileAsString(tempFile1));
+    assertEquals("contents of saved file", s, FileOps.readFileAsString(tempFile1));
 
     tempFile1.setLastModified((new java.util.Date()).getTime());
 
@@ -1053,12 +1001,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     listener.assertShouldRevertFileCount(1);
     listener.assertFileRevertedCount(1);
     assertContents(s,doc);
+    
+    _log.log("testModifiedByOther completed");
   }
 
-  public void testModifiedByOtherFalse()
-    throws BadLocationException, IOException, OperationCanceledException,
-    AlreadyOpenException, InterruptedException
-  {
+  public void testModifiedByOtherFalse() throws BadLocationException, IOException, OperationCanceledException,
+    AlreadyOpenException, InterruptedException {
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     // don't catch and fail!
 
@@ -1107,30 +1055,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     listener.assertShouldRevertFileCount(1);
     listener.assertFileRevertedCount(0);
     assertContents(FOO_TEXT, doc);
+    
+    
+    _log.log("testModifiedByOtherFalse completed");
   }
 
-  /**
-   * Interprets some statements, saves the history, clears the history, then loads
-   * the history.
-   */
-  public void testSaveClearAndLoadHistory()
-      throws EditDocumentException, IOException
-  {
+  /** Interprets some statements, saves the history, clears the history, then loads  the history. */
+  public void testSaveClearAndLoadHistory() throws EditDocumentException, IOException, InterruptedException {
     String newLine = System.getProperty("line.separator");
-    TestListener listener = new TestListener() {
-      public void interactionStarted() {
-        synchronized(this) {
-          interactionStartCount++;
-        }
-      }
-      public void interactionEnded() {
-        synchronized(this) {
-          interactionEndCount++;
-          // stops threads from waiting
-          this.notify();
-        }
-      }
-    };
+    InteractionListener listener = new InteractionListener();
 
     _model.addListener(listener);
     File f = tempFile();
@@ -1140,36 +1073,21 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     String s3 = "int y;" + newLine + "int z;";
     listener.assertInteractionStartCount(0);
     listener.assertInteractionEndCount(0);
+    
     interpretIgnoreResult(s1);
-    // wait for interpret to finish
-    while (listener.interactionEndCount == 0) {
-      synchronized(listener) {
-        try { listener.wait(); }  // TODO: move the while loop inside synchronized
-        catch (InterruptedException ie) {
-          throw new UnexpectedException(ie);
-        }
-      }
-    }
+    listener.waitInteractionDone();
+    
     listener.assertInteractionEndCount(1);
     listener.assertInteractionStartCount(1);
+    
+    listener.logInteractionStart();
     interpretIgnoreResult(s2);
-    while (listener.interactionEndCount == 1) {
-      synchronized(listener) {
-        try { listener.wait(); }  // TODO: move the while loop inside synchronized
-        catch (InterruptedException ie) {
-          throw new UnexpectedException(ie);
-        }
-      }
-    }
+    listener.waitInteractionDone();
+    
+    listener.logInteractionStart();
     interpretIgnoreResult(s3);
-    while (listener.interactionEndCount == 2) {
-      synchronized(listener) {
-        try { listener.wait(); }  // TODO: move the while loop inside synchronized
-        catch (InterruptedException ie) {
-          throw new UnexpectedException(ie);
-        }
-      }
-    }
+    listener.waitInteractionDone();
+   
     // check that the history contains the correct value
     assertEquals("History and getHistoryAsString should be the same.",
                  s1 + newLine + s2 + newLine + s3 + newLine,
@@ -1189,19 +1107,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
                  FileOps.readFileAsString(f));
 
     _model.clearHistory();
-    // check that the history is clear
-    assertEquals("History is not clear",
-                 "",
-                 _model.getHistoryAsString());
+    // confirm that the history is clear
+    assertEquals("History is not clear", "", _model.getHistoryAsString());
+    
+    listener.logInteractionStart();
     _model.loadHistory(fs);
-    while (listener.interactionEndCount == 3) {
-      synchronized(listener) {
-        try { listener.wait(); }  // TODO: move the while loop inside synchronized
-        catch (InterruptedException ie) {
-          throw new UnexpectedException(ie);
-        }
-      }
-    }
+   listener.waitInteractionDone();
+   
     // check that output of loaded history is correct
     ConsoleDocument con = _model.getConsoleDocument();
     assertEquals("Output of loaded history is not correct",
@@ -1210,28 +1122,19 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     listener.assertInteractionStartCount(4);
     listener.assertInteractionEndCount(4);
     _model.removeListener(listener);
+    
+    
+    _log.log("testSaveClearAndLoadHistory completed");
   }
 
   /**
    * Loads two history files, one whose statements end in semicolons, and one whose statements do not.
    * Makes sure that it doesn't matter.
    */
-  public void testLoadHistoryWithAndWithoutSemicolons() throws IOException, EditDocumentException {
-    TestListener listener = new TestListener() {
-      public void interactionStarted() {
-        synchronized(this) {
-          interactionStartCount++;
-        }
-      }
-      public void interactionEnded() {
-        synchronized(this) {
-          interactionEndCount++;
-          // stops threads from waiting
-          this.notify();
-        }
-      }
-    };
-
+  public void testLoadHistoryWithAndWithoutSemicolons() throws IOException, EditDocumentException, 
+    InterruptedException {
+    
+    InteractionListener listener = new InteractionListener();
     _model.addListener(listener);
     File f1 = tempFile(1);
     File f2 = tempFile(2);
@@ -1246,33 +1149,23 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     listener.assertInteractionStartCount(0);
     _model.loadHistory(fs1);
-    while (listener.interactionEndCount == 0) {
-      synchronized(listener) {
-        try { listener.wait(); }  // TODO: move the while loop inside synchronized
-        catch (InterruptedException ie) {
-          throw new UnexpectedException(ie);
-        }
-      }
-    }
+    listener.waitInteractionDone();
+
+    listener.logInteractionStart();
     _model.loadHistory(fs2);
-    while (listener.interactionEndCount < 2) {
-      synchronized(listener) {
-        try { listener.wait(); }  // TODO: move the while loop inside synchronized
-        catch (InterruptedException ie) {
-          throw new UnexpectedException(ie);
-        }
-      }
-    }
+    listener.waitInteractionDone();
+    
     // check that output of loaded history is correct
     ConsoleDocument con = _model.getConsoleDocument();
-    assertEquals("Output of loaded history is not correct: " +
-                 con.getDocText(0, con.getLength()).trim(),
-                 "x = 5"+System.getProperty("line.separator")+"x = 5",
+    assertEquals("Output of loaded history is not correct: " + con.getDocText(0, con.getLength()).trim(),
+                 "x = 5" + System.getProperty("line.separator") + "x = 5",
                  con.getDocText(0, con.getLength()).trim());
+    
+    
+    _log.log("testLoadHistoryWithAndWithoutSemicolons completed");
   }
 
-  /**
-   * Test for the possibility that the file has been moved or deleted
+  /** Test for the possibility that the file has been moved or deleted
    *  since it was last referenced
    */
   public void testFileMovedWhenTriedToSave()
@@ -1300,33 +1193,33 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     assertModified(true, doc);
     assertContents(BAR_TEXT, doc);
+    
+    
+    _log.log("testFileMovedWhenTriedToSave completed");
   }
 
-  /**
-   * Tests that input can be written to and read from the console correctly.
-   */
+  /** Tests that input can be written to and read from the console correctly. */
   public void testConsoleInput() throws EditDocumentException {
     _model.getInteractionsModel().setInputListener(new InputListener() {
       int n = 0;
       public String getConsoleInput() {
         n++;
-        if (n > 1) {
-          throw new IllegalStateException("Input should only be requested once!");
-        }
+        if (n > 1) throw new IllegalStateException("Input should only be requested once!");
         return "input\n";
       }
     });
 
     String result = interpret("System.in.read()");
-    String expected = /* DefaultInteractionsModel.INPUT_REQUIRED_MESSAGE + */
-      String.valueOf((int)'i');
-    assertEquals("read() should prompt for input and return the first byte of \"input\"",
-                 expected, result);
+    String expected = /* DefaultInteractionsModel.INPUT_REQUIRED_MESSAGE + */  String.valueOf((int)'i');
+    assertEquals("read() should prompt for input and return the first byte of \"input\"", expected, result);
 
     interpret("import java.io.*;");
     interpret("br = new BufferedReader(new InputStreamReader(System.in))");
     result = interpret("br.readLine()");
     assertEquals("readLine() should return the rest of \"input\" without prompting for input",
                  "\"nput\"", result);
+    
+    
+    _log.log("testConsoleInput completed");
   }
 }

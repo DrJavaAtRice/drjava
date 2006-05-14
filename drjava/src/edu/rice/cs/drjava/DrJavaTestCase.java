@@ -36,42 +36,30 @@ package edu.rice.cs.drjava;
 import junit.framework.TestCase;
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Test case class for all DrJava test cases. DrJava test cases should extend
- * this class, potentially override setUp() and tearDown(), but make sure to
- * invoke super.setUp() and super.tearDown() appropriately. That ensures that
- * the system is correctly initialized for every test.
+/** Test case class for all DrJava test cases. DrJava test cases should extend this class, potentially override setUp()
+ *  and tearDown(), but make sure to invoke super.setUp() and super.tearDown() appropriately. That ensures that the 
+ *  system is correctly initialized for every test.
  */
 public class DrJavaTestCase extends TestCase {
-  /**
-   * Create a new DrJava test case.
-   */
-  public DrJavaTestCase() {
-    super();
-  }
+  
+  /** Create a new DrJava test case. */
+  public DrJavaTestCase() { super(); }
 
-  /**
-   * Create a new DrJava test case.
-   * @param name name of the test case
+  /** Create a new DrJava test case.
+   *  @param name name of the test case
    */
-  public DrJavaTestCase(String name) {
-    super(name);
-  }
+  public DrJavaTestCase(String name) { super(name); }
 
-  /**
-   * Set up for every test.
-   * @throws Exception
+  /** Set up for every test.
+   *  @throws Exception
    */
   protected void setUp() throws Exception {
     super.setUp();
     Utilities.TextAreaMessageDialog.TEST_MODE = true;
   }
 
-  /**
-   * Clean up for every test case.
-   * @throws Exception
+  /** Clean up for every test case.
+   *  @throws Exception
    */
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
+  protected void tearDown() throws Exception { super.tearDown(); }
 }

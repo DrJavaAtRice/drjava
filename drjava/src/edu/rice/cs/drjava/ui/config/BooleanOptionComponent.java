@@ -70,9 +70,7 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
     _jcb = new JCheckBox();
     _jcb.setText(text);
     _jcb.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        notifyChangeListeners();
-      }
+      public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
     });
     
     _jcb.setSelected(DrJava.getConfig().getSetting(_option).booleanValue());

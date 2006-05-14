@@ -875,13 +875,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
-  /**
-   * Toggles whether a breakpoint is set at the given line in the given
-   * document.
-   * @param doc Document in which to set or remove the breakpoint
-   * @param offset Start offset on the line to set the breakpoint
-   * @param lineNum Line on which to set or remove the breakpoint
-   * @param enabled true if this breakpoint should be enabled
+  /** Toggles whether a breakpoint is set at the given line in the given document.
+   *  @param doc Document in which to set or remove the breakpoint
+   *  @param offset Start offset on the line to set the breakpoint
+   *  @param lineNum Line on which to set or remove the breakpoint
+   *  @param enabled true if this breakpoint should be enabled
    */
   public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
     throws DebugException {
@@ -893,12 +891,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         printMessage("Cannot set a breakpoint on an empty line.");
       }
       else {
-        try {
-          setBreakpoint(new Breakpoint (doc, offset, lineNum, isEnabled, this));
-        }
-        catch(LineNotExecutableException lnee) {
-          printMessage(lnee.getMessage());
-        }
+        try { setBreakpoint(new Breakpoint (doc, offset, lineNum, isEnabled, this)); }
+        catch(LineNotExecutableException lnee) { printMessage(lnee.getMessage()); }
       }
     }
     else _model.getBreakpointManager().removeRegion(breakpoint);
@@ -913,10 +907,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _model.getBreakpointManager().addRegion(breakpoint);
   }
 
- /**
-  * Removes a breakpoint.
-  * Called from toggleBreakpoint -- even with BPs that are not active.
-  * @param breakpoint The breakpoint to remove.
+ /** Removes a breakpoint. Called from toggleBreakpoint -- even with BPs that are not active.
+  *  @param breakpoint The breakpoint to remove.
   */
   public synchronized void removeBreakpoint(final Breakpoint breakpoint) throws DebugException {
     Vector<BreakpointRequest> requests = breakpoint.getRequests();
@@ -1771,8 +1763,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       if (printMessages) {
         printStream.println("setting active interpreter");
       }
-      _model.getInteractionsModel().setActiveInterpreter(interpreterName,
-                                                         prompt);
+      _model.getInteractionsModel().setActiveInterpreter(interpreterName, prompt);
       if (printMessages) {
         printStream.println("got active interpreter");
       }

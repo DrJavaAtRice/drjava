@@ -38,18 +38,24 @@ package edu.rice.cs.util.text;
  *  write locking operations are protected not public.*/
 public interface ReadersWritersLocking {
   
+  /** Unlocked and write lock states.  A positive lock state indicates the number of threads holding read locks. */
+  public static final int UNLOCKED = 0;
+  public static final int MODIFYLOCKED = -1;
+  
   /* Locking operations */
   
-  /** Swing-style readLock(). */
-  public void readLock();
+  /** Swing-style acquireReadLock(). */
+  public void acquireReadLock();
   
-  /** Swing-style readUnlock(). */
-  public void readUnlock();
+  /** Swing-style releaseReadLock(). */
+  public void releaseReadLock();
   
   /** Swing-style writeLock(). */
-  public void modifyLock();
+  public void acquireWriteLock();
   
   /** Swing-style writeUnlock(). */
-  public void modifyUnlock();
+  public void releaseWriteLock();
+  
+  public int getLockState();
 }
 

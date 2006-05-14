@@ -37,10 +37,9 @@ import java.io.*;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests to ensure that compilation interacts with files correctly.
+/** Tests to ensure that compilation interacts with files correctly.
  *
- * @version $Id$
+ *  @version $Id$
  */
 public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   
@@ -60,6 +59,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertTrue("should not be in sync before compile", ! doc.checkIfClassFileInSync());
     assertTrue("The state of all open documents should be out of sync", _model.hasOutOfSyncDocuments());
     doc.startCompile();
+    listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
@@ -85,10 +85,9 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   /** Ensure that renaming a file makes it out of sync with its class file.
    *  Doesn't reset interactions because no interpretations are performed.
    */
-  public void testClassFileSynchronizationAfterRename()
-    throws BadLocationException, IOException, IllegalStateException,
-    InterruptedException
-  {
+  public void testClassFileSynchronizationAfterRename() throws BadLocationException, IOException, IllegalStateException,
+    InterruptedException {
+    
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(2);
@@ -102,6 +101,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertTrue("should not be in sync before compile",
                !doc.checkIfClassFileInSync());
     doc.startCompile();
+    listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
@@ -134,7 +134,6 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
       //compile should never have begun because the file was not where it was expected
       // to be on disk.
     }
-
     assertCompileErrorsPresent("compile should succeed", false);
 
     // Make sure .class exists

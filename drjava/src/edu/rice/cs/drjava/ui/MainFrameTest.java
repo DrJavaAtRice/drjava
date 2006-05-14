@@ -66,47 +66,63 @@ import edu.rice.cs.util.swing.Utilities;
  */
 public final class MainFrameTest extends MultiThreadedTestCase {
 
-  private MainFrame _frame;
+  private volatile MainFrame _frame;
 
   /** A temporary directory */
-  private File _tempDir;
+  private volatile File _tempDir;
   
-  /* Flag and lock for signalling when compilation is done. */
-  protected boolean _compileDone;
-  protected Object _compileLock = new Object();
+  /* Flag and lock for signalling when file has been opened and active document changed. */
+  protected volatile boolean _openDone;
+  protected final Object _openLock = new Object();
   
   /* Flag and lock for signalling when file has been closed. */
-  protected boolean _closeDone;
-  protected Object _closeLock = new Object();
-
-//  private Log _log = new Log("MainFrameTestLog.txt", true);
+  protected volatile boolean _closeDone;
+  protected final Object _closeLock = new Object();
   
+  /* Flag and lock for signalling when compilation is done. */
+  protected volatile boolean _compileDone;
+  protected final Object _compileLock = new Object();
+
+  private static Log _log = new Log("MainFrameTestLog.txt", true);
+ 
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
-    Utilities.invokeAndWait(new Runnable() { public void run() { _frame = new MainFrame(); }});
-    _frame.pack();
+    _log.log("super.setUp() for next test completed");
+//    Utilities.invokeAndWait(new Runnable() { 
+//      public void run() { 
+        _frame  = new MainFrame();
+        _log.log("new MainFrame() for next test completed");
+        _frame.pack();
+//      }
+//    });
+    _log.log("setUp complete for next test");
   }
 
   public void tearDown() throws Exception {
-    _frame.dispose();
-    _frame = null;
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        _frame.dispose();
+        _frame = null;
+      }
+    });
     super.tearDown();
   }
 
+  JButton _but;
   /** Tests that the returned JButton of <code>createManualToolbarButton</code>:
    *  1. Is disabled upon return.
    *  2. Inherits the tooltip of the Action parameter <code>a</code>.
    */
   public void testCreateManualToolbarButton() {
-    Action a = new AbstractAction("Test Action") { public void actionPerformed(ActionEvent ae) { } };
+    final Action a = new AbstractAction("Test Action") { public void actionPerformed(ActionEvent ae) { } };
     
     a.putValue(Action.SHORT_DESCRIPTION, "test tooltip");
-    JButton b = _frame._createManualToolbarButton(a);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _but = _frame._createManualToolbarButton(a); } });
 
-    assertTrue("Returned JButton is enabled.", ! b.isEnabled());
-    assertEquals("Tooltip text not set.", "test tooltip", b.getToolTipText());
-//    _log.log("testCreateManualToobarButton completed");
+    assertTrue("Returned JButton is enabled.", ! _but.isEnabled());
+    assertEquals("Tooltip text not set.", "test tooltip", _but.getToolTipText());
+    _log.log("testCreateManualToobarButton completed");
   }
 
   /** Tests that the current location of a document is equal to the caret location after documents are switched. */
@@ -119,6 +135,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         pane.setCaretPosition(3); // not thread-safe!
       }
     }); 
+    Utilities.clearEventQueue();  // Empty the event queue of any asynchronous tasks
       
     assertEquals("Location of old doc before switch", 3, doc.getCurrentLocation());
       
@@ -144,7 +161,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     curDoc = curPane.getOpenDefDocument();//.getDocument();
     assertEquals("Current document is old document", oldDoc, curDoc);
     assertEquals("Location of old document", 3, curDoc.getCurrentLocation());
-//    _log.log("testDocLocationAfterSwitch completed");
+    _log.log("testDocLocationAfterSwitch completed");
   }
 
   /**
@@ -244,14 +261,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     int origLength = doc.getLength();
     doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Document should not have changed.", origLength, doc.getLength());
-//    _log.log("testCorrectInteractionsDocument completed");
+    _log.log("testCorrectInteractionsDocument completed");
   }
 
   /**
    * Tests that undoing/redoing a multi-line indent will restore
    * the caret position.
    */
-  public void testMultilineIndentAfterScroll() throws BadLocationException {
+  public void testMultilineIndentAfterScroll() throws BadLocationException, InterruptedException {
     String text =
       "public class stuff {\n" +
       "private int _int;\n" +
@@ -281,13 +298,15 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         pane.setCaretPosition(0);
-        pane.endCompoundEdit(); } 
+        pane.endCompoundEdit(); 
+      } 
     });
     
     assertEquals("Should have inserted correctly.", text, doc.getText());
     
     doc.indentLines(0, doc.getLength());
     assertEquals("Should have indented.", indented, doc.getText());
+    
     oldPos = pane.getCaretPosition();
 //    System.err.println("Old position is: " + oldPos);
 
@@ -296,11 +315,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         pane.setCaretPosition(newPos);
 //        System.err.println("New position is: " + pane.getCaretPosition());
       }
-    });
-    doc.getUndoManager().undo();  
-    // Moving this statement inside the invokeAndWait above breaks "Undo should have restored ..."  Why?
+    }); 
+    
+    // Moving this two statement to the event thread breaks "Undo should have restored ..."  Why?
+    doc.getUndoManager().undo();
+    
     assertEquals("Should have undone.", text, doc.getText());
-    Utilities.clearEventQueue();
     
     int rePos = pane.getCaretPosition();
 //    System.err.println("Restored position is: " + rePos);
@@ -314,8 +334,11 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     });
     assertEquals("redo",indented, doc.getText());
     assertEquals("redo restores caret position", oldPos, pane.getCaretPosition());
-//    _log.log("testMultilineIndentAfterScroll completed");
+    _log.log("testMultilineIndentAfterScroll completed");
   }
+  
+  JScrollPane _pane1, _pane2;
+  DefinitionsPane _defPane1, _defPane2;
 
   /** Ensure that a document's editable status is set appropriately throughout the compile process.  Since the behavior
    *  is interesting only when the model changes its active document, that's what this test looks most like.
@@ -323,32 +346,42 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testGlassPaneEditableState() {
     SingleDisplayModel model = _frame.getModel();
 
-    OpenDefinitionsDocument doc1 = model.newFile();
-    OpenDefinitionsDocument doc2 = model.newFile();
+    final OpenDefinitionsDocument doc1 = model.newFile();
+    final OpenDefinitionsDocument doc2 = model.newFile();
 
     // doc2 is now active
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() {
 
-    JScrollPane pane1 = _frame._createDefScrollPane(doc1);
-    JScrollPane pane2 = _frame._createDefScrollPane(doc2);
-
-    DefinitionsPane defPane1 = (DefinitionsPane) pane1.getViewport().getView();
-    DefinitionsPane defPane2 = (DefinitionsPane) pane2.getViewport().getView();
-
-    _frame._switchDefScrollPane();
-    assertTrue("Start: defPane1",defPane1.isEditable());
-    assertTrue("Start: defPane2",defPane2.isEditable());
-    _frame.hourglassOn();
-    assertTrue("Glass on: defPane1",defPane1.isEditable());
-    assertTrue("Glass on: defPane2",(!defPane2.isEditable()));
+        _pane1 = _frame._createDefScrollPane(doc1);
+        _pane2 = _frame._createDefScrollPane(doc2);
+        
+        _defPane1 = (DefinitionsPane) _pane1.getViewport().getView();
+        _defPane2 = (DefinitionsPane) _pane2.getViewport().getView();
+        
+        _frame._switchDefScrollPane();
+      }
+    });
+    
+    Utilities.clearEventQueue(); // Execute all pending asynchronous tasks;
+    
+    assertTrue("Start: defPane1", _defPane1.isEditable());
+    assertTrue("Start: defPane2", _defPane2.isEditable());
+    Utilities.invokeAndWait(new Runnable() { public void run() { _frame.hourglassOn(); } });
+    
+    assertTrue("Glass on: defPane1", _defPane1.isEditable());
+    assertTrue("Glass on: defPane2",(! _defPane2.isEditable()));
     model.setActiveDocument(doc1);
     
-    _frame._switchDefScrollPane();
-    assertTrue("Doc Switch: defPane1",(! defPane1.isEditable()));
-    assertTrue("Doc Switch: defPane2",defPane2.isEditable());
-    _frame.hourglassOff();
-    assertTrue("End: defPane1",defPane1.isEditable());
-    assertTrue("End: defPane2",defPane2.isEditable());
-//    _log.log("testGlassPaneEditableState completed");
+    Utilities.invokeAndWait(new Runnable() { public void run() { _frame._switchDefScrollPane(); } });
+    
+    assertTrue("Doc Switch: defPane1",(! _defPane1.isEditable()));
+    assertTrue("Doc Switch: defPane2", _defPane2.isEditable());
+    Utilities.invokeAndWait(new Runnable() { public void run() { _frame.hourglassOff(); } });
+    
+    assertTrue("End: defPane1", _defPane1.isEditable());
+    assertTrue("End: defPane2", _defPane2.isEditable());
+    _log.log("testGlassPaneEditableState completed");
   }
 
   private KeyEvent makeFindKeyEvent(Component c, long when) {
@@ -359,26 +392,34 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testGlassPaneHidesKeyEvents() {
     SingleDisplayModel model = _frame.getModel();
 
-    OpenDefinitionsDocument doc1 = model.newFile();
-    OpenDefinitionsDocument doc2 = model.newFile();
+    final OpenDefinitionsDocument doc1 = model.newFile();
+    final OpenDefinitionsDocument doc2 = model.newFile();
 
     // doc2 is now active
-
-    JScrollPane pane1 = _frame._createDefScrollPane(doc1);
-    JScrollPane pane2 = _frame._createDefScrollPane(doc2);
-
-    DefinitionsPane defPane1 = (DefinitionsPane) pane1.getViewport().getView();
-    DefinitionsPane defPane2 = (DefinitionsPane) pane2.getViewport().getView();
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() {
+        _pane1 = _frame._createDefScrollPane(doc1);
+        _pane2 = _frame._createDefScrollPane(doc2);
+        _defPane1 = (DefinitionsPane) _pane1.getViewport().getView();
+        _defPane2 = (DefinitionsPane) _pane2.getViewport().getView();
+        
+        _frame.hourglassOn();
+        
+        _defPane1.processKeyEvent(makeFindKeyEvent(_defPane1, 70));
+      }
+    });
     
-    _frame.hourglassOn();
-
-    defPane1.processKeyEvent(makeFindKeyEvent(defPane1, 70));
-    assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
-    _frame.getInteractionsPane().processKeyEvent(makeFindKeyEvent(_frame.getInteractionsPane(), 0));
-    assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
+    assertTrue("the find replace dialog should not come up", ! _frame.getFindReplaceDialog().isDisplayed());
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        _frame.getInteractionsPane().processKeyEvent(makeFindKeyEvent(_frame.getInteractionsPane(), 0));
+      }
+    });
+    
+    assertTrue("the find replace dialog should not come up", ! _frame.getFindReplaceDialog().isDisplayed());
 
     _frame.hourglassOff();
-//    _log.log("testGlassPaneHidesKeyEvents completed");
+    _log.log("testGlassPaneHidesKeyEvents completed");
   }
 
   
@@ -414,7 +455,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     });                
     
     assertTrue("the save button should not be enabled after opening a document", !_frame.saveEnabledHuh());
-//    _log.log("testSaveButtonEnabled completed");
+    _log.log("testSaveButtonEnabled completed");
   }
   
   /** A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
@@ -428,8 +469,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      *  the username and create the temporary directory. Only sticky part is deciding where to put it, in FileOps 
      *  maybe?
      */
+    
+    _log.log("Starting testingDancingUIFileOpened");
+    
+    final GlobalModel _model = _frame.getModel();
+    
      String user = System.getProperty("user.name");
      _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+
      File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
      String forceOpenClass1_string =
        "public class ForceOpenClass1 {\n" +
@@ -459,8 +506,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      forceOpenClass1_file.deleteOnExit();
      forceOpenClass2_file.deleteOnExit();
      forceOpenClass3_file.deleteOnExit();
+     
+     _log.log("DancingUIFileOpened Set Up");
 
      //_frame.setVisible(true);
+     
+     // set up listeners and signal flags
      
      final ComponentAdapter listener = new ComponentAdapter() {
        public void componentResized(ComponentEvent event) {
@@ -468,35 +519,69 @@ public final class MainFrameTest extends MultiThreadedTestCase {
          fail("testDancingUI: Open Documents List danced!");
        }
      };
+     final SingleDisplayModelFileOpenedListener openListener = new SingleDisplayModelFileOpenedListener();
      final SingleDisplayModelCompileListener compileListener = new SingleDisplayModelCompileListener();
+     
+     _openDone = false;
 
-//     try {
-       Utilities.invokeLater(new Runnable() { public void run() {
-         _frame.pack();
-         _frame.open(new FileOpenSelector() {
+     Utilities.invokeAndWait(new Runnable() { 
+      public void run() {
+//       _frame.setVisible(true);
+        _frame.pack();
+        _frame.addComponentListenerToOpenDocumentsList(listener);
+      }
+     });
+     
+     _model.addListener(openListener);
+     
+     _log.log("opening file");
+     
+     Utilities.invokeLater(new Runnable() {
+       public void run() {
+        _frame.open(new FileOpenSelector() {
            public File[] getFiles() {
              File[] return_me = new File[1];
              return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
              return return_me;
            }
          });
-         _frame.getModel().addListener(compileListener);
-         _frame.addComponentListenerToOpenDocumentsList(listener);
-         _compileDone = false;
+       }
+     });
+     
+     /* wait until file has been open and active document changed. */
+     synchronized(_openLock) {
+       try { while (! _openDone) _openLock.wait(); }
+       catch(InterruptedException e) { fail(e.toString()); }
+     }
+     
+     _model.removeListener(openListener);
+     
+     _log.log("File opened");
+     
+     _compileDone = false;
+     _model.addListener(compileListener);
+     
+     // save and compile the new file asynchronously
+     
+     Utilities.invokeLater(new Runnable() { 
+       public void run() { 
+         _log.log("saving all files");
+         _frame._saveAll();
+         _log.log("invoking compileAll action");
          _frame.getCompileAllButton().doClick();
-       }});
-//     }
-//     catch(InterruptedException e) { fail(e.toString()); }
+       }
+     });
 
      synchronized(_compileLock) {
        try { while (! _compileDone) _compileLock.wait(); }
        catch(InterruptedException e) { fail(e.toString()); }
      }
+     _log.log("File saved and compiled");
      
      if (! FileOps.deleteDirectory(_tempDir))
        System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
    
-//     _log.log("testDancingUIFileOpened completed");
+     _log.log("testDancingUIFileOpened completed");
   }
 
   /** A Test to guarantee that the Dancing UI bug will not rear its ugly head again. Basically, add a component listener
@@ -531,12 +616,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     };
     final SingleDisplayModelFileClosedListener closeListener = new SingleDisplayModelFileClosedListener();
     
-    try {
-      Utilities.invokeAndWait(new Runnable() { public void run() {
+    _closeDone = false;
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() {
 //       _frame.setVisible(true);
         _frame.pack();
         _frame.addComponentListenerToOpenDocumentsList(listener);
-        
         _frame.open(new FileOpenSelector() {
           public File[] getFiles() {
             File[] return_me = new File[1];
@@ -544,16 +629,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
             return return_me;
           }
         });
-        
         _frame.getModel().addListener(closeListener);
-        _closeDone = false;
-        
-        _frame.getCloseButton().doClick();
-      }});
-    }
-    catch(UnexpectedException e) { fail(e.toString()); }
+      }
+    });
+           
+    /* Asynchronously close the file */
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { _frame.getCloseButton().doClick(); }
+    });
     
-//    _log.log("Waiting for file closing");
+    _log.log("Waiting for file closing");
     
     synchronized(_closeLock) {
       try { while (! _closeDone) _closeLock.wait(); }
@@ -564,12 +649,11 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                          "\nDo it by hand.\n");
     }
-//    _log.log("testDancingUIClosed completed");
+    _log.log("testDancingUIClosed completed");
   }
 
   /** A CompileListener for SingleDisplayModel (instead of GlobalModel) */
-  class SingleDisplayModelCompileListener extends GlobalModelTestCase.TestListener
-    implements GlobalModelListener {
+  class SingleDisplayModelCompileListener extends GlobalModelTestCase.TestListener implements GlobalModelListener {
 
     public void compileStarted() { }
 
@@ -584,10 +668,25 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     public void fileOpened(OpenDefinitionsDocument doc) { }
     public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   }
+  
+   /** A FileClosedListener for SingleDisplayModel (instead of GlobalModel) */
+  class SingleDisplayModelFileOpenedListener extends GlobalModelTestCase.TestListener implements GlobalModelListener {
+    
+    public void fileClosed(OpenDefinitionsDocument doc) { }
+
+    public void fileOpened(OpenDefinitionsDocument doc) { }
+  
+    public void newFileCreated(OpenDefinitionsDocument doc) { }
+    public void activeDocumentChanged(OpenDefinitionsDocument doc) { 
+        synchronized(_openLock) {
+        _openDone = true;
+        _openLock.notify();
+      }
+    }
+  }
 
   /** A FileClosedListener for SingleDisplayModel (instead of GlobalModel) */
-  class SingleDisplayModelFileClosedListener extends GlobalModelTestCase.TestListener
-    implements GlobalModelListener {
+  class SingleDisplayModelFileClosedListener extends GlobalModelTestCase.TestListener implements GlobalModelListener {
 
     public void fileClosed(OpenDefinitionsDocument doc) {
       synchronized(_closeLock) {
@@ -628,9 +727,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       public void run() {
         _frame.pack();
         _frame.open(new FileOpenSelector() {
-          public File[] getFiles() {
-              return new File[] { goto1_file, goto2_file };
-          }
+          public File[] getFiles() { return new File[] { goto1_file, goto2_file }; }
         });
       }
     });
@@ -649,7 +746,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         });
       }});
     
-    
+    Utilities.clearEventQueue();
     SingleDisplayModel model = _frame.getModel();
     OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
     OpenDefinitionsDocument goto2_doc = model.getDocumentForFile(goto2_file);
@@ -659,12 +756,18 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() {
       public void run() { _frame._gotoFileUnderCursor(); }
     });
+    
+    Utilities.clearEventQueue();
     assertEquals("Incorrect active document; did not go to?", goto2_doc, model.getActiveDocument());
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() { _frame._gotoFileUnderCursor(); }
     });
+    
+    Utilities.clearEventQueue();
     assertEquals("Incorrect active document; did not go to?", goto1_doc, model.getActiveDocument());
+    
+    _log.log("gotoFileUnderCursor completed");
   }
   
   /** Tests that "go to file under cursor" works if unique after appending ".java" */
@@ -693,6 +796,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       }
     });
     
+    Utilities.clearEventQueue();
+    
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         _frame.initGotoFileDialog();
@@ -706,6 +811,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
           public void windowOpened(WindowEvent e) { throw new RuntimeException("Should not open _gotoFileDialog"); }
         });
       }});
+     
+    Utilities.clearEventQueue();
     
     SingleDisplayModel model = _frame.getModel();
     OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
@@ -716,12 +823,19 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() {
       public void run() { _frame._gotoFileUnderCursor(); }
     });
+    
+    Utilities.clearEventQueue();
+    
     assertEquals("Incorrect active document; did not go to?", goto2_doc, model.getActiveDocument());
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() { _frame._gotoFileUnderCursor(); }
     });
+    
+    Utilities.clearEventQueue();
     assertEquals("Incorrect active document; did not go to?", goto1_doc, model.getActiveDocument());
+    
+    _log.log("gotoFileUnderCursorAppendJava completed");
   }
   
   /** Tests that "go to file under cursor" displays the dialog if choice is not unique */
@@ -764,6 +878,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         });
       }
     });
+    
+    Utilities.clearEventQueue();
                             
     SingleDisplayModel model = _frame.getModel();
     OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
@@ -774,8 +890,15 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     
     Utilities.invokeAndWait(new Runnable() { public void run() { _frame._gotoFileUnderCursor(); } });                    
     Utilities.clearEventQueue();  // wait for any asynchronous actions to complete
-                            
+    
+    
+     /* The following test was commented out before test following it was.  It presumably fails even if
+      * the "MainFrame.this.isVisible()" test mentioned below is removed from _gotoFileUnderCursor */
 //    assertEquals("Did not activate _gotoFileDialog", 1, count[0]);
-    assertEquals("Did not open _gotoFileDialog", 1, count[1]);
+    /* The following test was commented out after suppressing this display when _frame is not visible.  If it is 
+     * uncommented, then the "MainFrame.this.isVisible()" test in _gotoFileDialog must be removed. */
+//    assertEquals("Did not open _gotoFileDialog", 1, count[1]);
+    
+    _log.log("gotoFileUnderCursorShowDialog completed");
   }
 }

@@ -53,9 +53,9 @@ import java.util.List;
 /** Test functions of Project Facility working through the main frame and model. */
 public final class ProjectMenuTest extends MultiThreadedTestCase {
 
-  private MainFrame _frame;
+  private volatile MainFrame _frame;
   
-  private SingleDisplayModel _model;
+  private volatile SingleDisplayModel _model;
   
   /** Temporary files */
   private File _base;
@@ -111,8 +111,12 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     
     FileOps.writeStringToFile(_projFile, _projFileText);
 
-    _frame = new MainFrame();
-    _frame.pack();
+//    Utilities.invokeAndWait(new Runnable() { 
+//      public void run() { 
+        _frame = new MainFrame();
+        _frame.pack();
+//      }
+//    });
 
     _model = _frame.getModel();
   }

@@ -38,6 +38,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -49,26 +50,33 @@ import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.util.Date;
 
-/**
- * Tests the Definitions Pane
- * @version $Id$
+/** Tests the Definitions Pane
+ *  @version $Id$
  */
 public final class DefinitionsPaneTest extends DrJavaTestCase {
   
-  private MainFrame _frame;
+  private volatile MainFrame _frame;
   
-  /**
-   * Setup method for each JUnit test case.
-   */
+  private static Log _log = new Log("DefinitionsPaneTestLog.txt", true);
+  
+  /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
-    DrJava.getConfig().resetToDefaults();
-    _frame = new MainFrame();
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        DrJava.getConfig().resetToDefaults();
+        _frame = new MainFrame(); 
+      } 
+    });
   }
   
   public void tearDown() throws Exception {
-    _frame.dispose();
-    _frame = null;
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        _frame.dispose();
+        _frame = null;
+      }
+    });
     super.tearDown();
   }
   
@@ -85,67 +93,67 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
    * feature request 683300.
    */
   public void testShiftBackspace() throws BadLocationException {
-    DefinitionsPane definitions = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
+//    _log.log("Starting testShiftBackSpace");
+    final DefinitionsPane definitions = _frame.getCurrentDefPane();
+    final OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
     _assertDocumentEmpty(doc, "before testing");
-    doc.insertString(0, "test", null);
     
-    definitions.setCaretPosition(4);
-    int shiftBackspaceCode =
-      OptionConstants.KEY_DELETE_PREVIOUS.getDefault().getKeyCode();
-    // The following is the sequence of key events for shift+backspace
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_PRESSED,
-                                             (new Date()).getTime(),
-                                             InputEvent.SHIFT_MASK,
-                                             shiftBackspaceCode,
-                                             KeyEvent.CHAR_UNDEFINED));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_RELEASED,
-                                             (new Date()).getTime(),
-                                             InputEvent.SHIFT_MASK,
-                                             shiftBackspaceCode,
-                                             KeyEvent.CHAR_UNDEFINED));
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        doc.append("test", null);
+        definitions.setCaretPosition(4);
+    
+        int shiftBackspaceCode = OptionConstants.KEY_DELETE_PREVIOUS.getDefault().getKeyCode();
+        
+        // The following is the sequence of key events for shift+backspace
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
+                                                 InputEvent.SHIFT_MASK, shiftBackspaceCode, KeyEvent.CHAR_UNDEFINED));
+        _log.log("first key event processed");
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
+                                                 InputEvent.SHIFT_MASK, shiftBackspaceCode, KeyEvent.CHAR_UNDEFINED));
+        _log.log("second key event processed");
+      }
+    });
     _assertDocumentContents(doc, "tes", "Did not delete on shift+backspace");
     
+    _log.log("Halfway through testShiftBackspace");
     
-    int shiftDeleteCode =
-      OptionConstants.KEY_DELETE_NEXT.getDefault().getKeyCode();
-    definitions.setCaretPosition(1);
-    // The following is the sequence of key events for shift+delete
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_PRESSED,
-                                             (new Date()).getTime(),
-                                             InputEvent.SHIFT_MASK,
-                                             shiftDeleteCode,
-                                             KeyEvent.CHAR_UNDEFINED));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_RELEASED,
-                                             (new Date()).getTime(),
-                                             InputEvent.SHIFT_MASK,
-                                             shiftDeleteCode,
-                                             KeyEvent.CHAR_UNDEFINED));
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        int shiftDeleteCode =
+          OptionConstants.KEY_DELETE_NEXT.getDefault().getKeyCode();
+        definitions.setCaretPosition(1);
+        // The following is the sequence of key events for shift+delete
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(), InputEvent.SHIFT_MASK,
+                                                 shiftDeleteCode, KeyEvent.CHAR_UNDEFINED));
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(), InputEvent.SHIFT_MASK,
+                                                 shiftDeleteCode, KeyEvent.CHAR_UNDEFINED));
+      }
+    });
+    
     _assertDocumentContents(doc, "ts", "Did not delete on shift+delete");
+    _log.log("testShiftBackSpace completed");
   }
 
   
-  /**
-   * Tests that typing a brace in a string/comment does not cause an indent.
-   */
+  /** Tests that typing a brace in a string/comment does not cause an indent. */
   public void testTypeBraceNotInCode() throws BadLocationException {
-    DefinitionsPane definitions = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
+    final DefinitionsPane definitions = _frame.getCurrentDefPane();
+    final OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
     _assertDocumentEmpty(doc, "before testing");
-    doc.insertString(0, "  \"", null);
     
-    definitions.setCaretPosition(3);
-    // The following is the sequence of key events for a left brace
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_TYPED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_UNDEFINED, '{'));
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        doc.append("  \"", null);
+        definitions.setCaretPosition(3);
+        // The following is the sequence of key events for a left brace
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_TYPED, (new Date()).getTime(), 0, 
+                                                 KeyEvent.VK_UNDEFINED, '{'));
+      }
+    });
+        
     _assertDocumentContents(doc, "  \"{", "Brace should not indent in a string");
+    _log.log("testTypeBraceNotIncode completed");
   }
   
   /**
@@ -188,35 +196,67 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
    * Reveals bug 676586
    */
   public void testMetaKeyPress() throws BadLocationException {
-    DefinitionsPane definitions = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
+    final DefinitionsPane definitions = _frame.getCurrentDefPane();
+    final OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
     _assertDocumentEmpty(doc, "point 0");
-    // The following is the sequence of key events that happen when the user presses Meta-a
-    definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
-                                             InputEvent.META_MASK, KeyEvent.VK_META, KeyEvent.CHAR_UNDEFINED));
+    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        // The following is the sequence of key events that happen when the user presses Meta-a
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
+                                                 InputEvent.META_MASK, KeyEvent.VK_META, KeyEvent.CHAR_UNDEFINED));
+      }
+    });
+        
     _assertDocumentEmpty(doc, "point 1");
-    definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
-                                             InputEvent.META_MASK, KeyEvent.VK_W, KeyEvent.CHAR_UNDEFINED));
+    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
+                                                 InputEvent.META_MASK, KeyEvent.VK_W, KeyEvent.CHAR_UNDEFINED));
+      }
+    });
+    
     _assertDocumentEmpty(doc, "point 2");
-    definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_TYPED, (new Date()).getTime(),
-                                             InputEvent.META_MASK, KeyEvent.VK_UNDEFINED, 'w'));
+        
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_TYPED, (new Date()).getTime(),
+                                                 InputEvent.META_MASK, KeyEvent.VK_UNDEFINED, 'w'));
+        
+      }
+    });
+    
     _assertDocumentEmpty(doc, "point 3");
-    definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
-                                             InputEvent.META_MASK, KeyEvent.VK_W, KeyEvent.CHAR_UNDEFINED));
+    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
+                                                 InputEvent.META_MASK, KeyEvent.VK_W, KeyEvent.CHAR_UNDEFINED));
+        
+      }
+    });
+    
     _assertDocumentEmpty(doc, "point 4");
-    definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
-                                             0, KeyEvent.VK_META, KeyEvent.CHAR_UNDEFINED));
+    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
+                                                 0, KeyEvent.VK_META, KeyEvent.CHAR_UNDEFINED));
+      }
+    });
+    
     _assertDocumentEmpty(doc, "point 5");
+    
+    _log.log("testMetaKeyPress completed");
   }
   
-  /**
-   * tests that undoing/redoing a multi-line comment/uncomment will restore
-   * the caret position
-   */
+  /** Tests that undoing/redoing a multi-line comment/uncomment will restore the caret position */
   public void testMultilineCommentOrUncommentAfterScroll() throws BadLocationException {
-    DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDefDocument();
-    String text =
+    
+    final DefinitionsPane pane = _frame.getCurrentDefPane();
+    final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
+    final String text =
       "public class stuff {\n" +
       "  private int _int;\n" +
       "  private Bar _bar;\n" +
@@ -234,183 +274,190 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
       "//  }\n" +
       "//}\n";
     
-    int newPos = 20;
+    final int newPos = 20;
     
-    doc.insertString(0, text, null);
-    assertEquals("insertion",text, doc.getText());
+    // The following statement hung when run in the main test thread.  There must be a pending access to doc in a
+    // task on the event queue that sometimes has not yet executed.
+    
+    Utilities.invokeAndWait(new Runnable() { public void run() { doc.append(text, null); } });
+    
+    assertEquals("insertion", text, doc.getText());
     
     // Need to do this here since the commentLines action in MainFrame usually takes care of this.  
     // I can't run the test here because I'm not sure how to select the text so that we can comment it.
-    pane.endCompoundEdit();
-    doc.commentLines(0,doc.getLength());
+
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.endCompoundEdit(); } });
+     
+    doc.acquireWriteLock();
+    try { doc.commentLines(0, doc.getLength()); }
+    finally { doc.releaseWriteLock(); }
+    
     //    pane.endCompoundEdit();
-    assertEquals("commenting",commented, doc.getText());
+    assertEquals("commenting", commented, doc.getText());
+    
     int oldPos = pane.getCaretPosition();
-    pane.setCaretPosition(newPos);
-    doc.getUndoManager().undo();
-    assertEquals("undo commenting",text, doc.getText(0,doc.getLength()));
+    
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.setCaretPosition(newPos); } });
+    
+    doc.getUndoManager().undo();  
+    assertEquals("undo commenting", text, doc.getText());
     assertEquals("undoing commenting restores caret position", oldPos, pane.getCaretPosition());
-    pane.setCaretPosition(newPos);
+    
+    // Perturb the caret position and redo
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.setCaretPosition(newPos); } });
     doc.getUndoManager().redo();
-    assertEquals("redo commenting",commented, doc.getText(0,doc.getLength()));
+    assertEquals("redo commenting", commented, doc.getText());
     assertEquals("redoing commenting restores caret position", oldPos, pane.getCaretPosition());
     
     // Need to do this here since the commentLines action in MainFrame usually takes care of this.  
     // I can't simulate a keystroke here because I'm not sure how to select the text so that we can comment it.
-    pane.endCompoundEdit();    
-    doc.uncommentLines(0,doc.getLength());
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.endCompoundEdit(); } });
+    
+    doc.acquireWriteLock();
+    try { doc.uncommentLines(0, doc.getLength()); }
+    finally { doc.releaseWriteLock(); }
+    
     //    pane.endCompoundEdit();
-    assertEquals("uncommenting",text, doc.getText(0,doc.getLength()));
-    oldPos = pane.getCaretPosition();
-    pane.setCaretPosition(newPos);
+    assertEquals("uncommenting", text, doc.getText());
+    
+    oldPos = pane.getCaretPosition();  // executing this method call outside of the event thread is borderline
+    
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.setCaretPosition(newPos);  } });
     doc.getUndoManager().undo();
-    assertEquals("undo uncommenting",commented, doc.getText(0,doc.getLength()));
+    
+    assertEquals("undo uncommenting", commented, doc.getText());
     assertEquals("undoing uncommenting restores caret position", oldPos, pane.getCaretPosition());
-    pane.setCaretPosition(newPos);
+    
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.setCaretPosition(newPos); } });
     doc.getUndoManager().redo();
-    assertEquals("redo uncommenting",text, doc.getText(0,doc.getLength()));
+    assertEquals("redo uncommenting",text, doc.getText());
     assertEquals("redoing uncommenting restores caret position", oldPos, pane.getCaretPosition());
+    
+    _log.log("testMultiLineCommentOrUncommentAfterScroll completed");
   }
   
-  protected void _assertDocumentEmpty(DJDocument doc, String message) throws BadLocationException {
+  protected void _assertDocumentEmpty(DJDocument doc, String message) {
     _assertDocumentContents(doc, "", message);
   }
   
-  protected void _assertDocumentContents(DJDocument doc, String contents, String message)
-    throws BadLocationException {
+  protected void _assertDocumentContents(DJDocument doc, String contents, String message) {
     assertEquals(message, contents, doc.getText());
   }
   
   public void testGranularUndo() throws BadLocationException {
-    DefinitionsPane definitions = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
+    final DefinitionsPane definitions = _frame.getCurrentDefPane();
+    final OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
     //    doc.addUndoableEditListener(doc.getUndoManager());
     
     // 1
-    assertEquals("Should start out empty.", "",
-                 doc.getText());
+    assertEquals("Should start out empty.", "",  doc.getText());
     
     // Type in consecutive characters and see if they are all undone at once.
     // Type 'a'
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_PRESSED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_A, KeyEvent.CHAR_UNDEFINED));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_TYPED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_UNDEFINED, 'a'));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_RELEASED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_A, KeyEvent.CHAR_UNDEFINED));
-    definitions.setCaretPosition(doc.getLength());
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(), 0,
+                                                 KeyEvent.VK_A, KeyEvent.CHAR_UNDEFINED));
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_TYPED, (new Date()).getTime(), 0,
+                                                 KeyEvent.VK_UNDEFINED, 'a'));
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(), 0,
+                                                 KeyEvent.VK_A, KeyEvent.CHAR_UNDEFINED));
+        definitions.setCaretPosition(doc.getLength());
+        
+        // Type '!'
+        definitions.processKeyEvent(new KeyEvent(definitions,
+                                                 KeyEvent.KEY_PRESSED,
+                                                 (new Date()).getTime(),
+                                                 0,
+                                                 KeyEvent.VK_EXCLAMATION_MARK, KeyEvent.CHAR_UNDEFINED));
+        definitions.processKeyEvent(new KeyEvent(definitions,
+                                                 KeyEvent.KEY_TYPED,
+                                                 (new Date()).getTime(),
+                                                 0,
+                                                 KeyEvent.VK_UNDEFINED, '!'));
+        definitions.processKeyEvent(new KeyEvent(definitions,
+                                                 KeyEvent.KEY_RELEASED,
+                                                 (new Date()).getTime(),
+                                                 0,
+                                                 KeyEvent.VK_EXCLAMATION_MARK, KeyEvent.CHAR_UNDEFINED));
+        definitions.setCaretPosition(doc.getLength());
+        
+        // Type 'B'
+        definitions.processKeyEvent(new KeyEvent(definitions,
+                                                 KeyEvent.KEY_PRESSED,
+                                                 (new Date()).getTime(),
+                                                 InputEvent.SHIFT_MASK,
+                                                 KeyEvent.VK_B, KeyEvent.CHAR_UNDEFINED));
+        definitions.processKeyEvent(new KeyEvent(definitions,
+                                                 KeyEvent.KEY_TYPED,
+                                                 (new Date()).getTime(),
+                                                 0,
+                                                 KeyEvent.VK_UNDEFINED, 'B'));
+        definitions.processKeyEvent(new KeyEvent(definitions,
+                                                 KeyEvent.KEY_RELEASED,
+                                                 (new Date()).getTime(),
+                                                 InputEvent.SHIFT_MASK,
+                                                 KeyEvent.VK_B, KeyEvent.CHAR_UNDEFINED));
+        definitions.setCaretPosition(doc.getLength());
+        
+        // Type '9'
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(), 0,
+                                                 KeyEvent.VK_9, KeyEvent.CHAR_UNDEFINED));
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_TYPED, (new Date()).getTime(), 0,
+                                                 KeyEvent.VK_UNDEFINED, '9'));
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(), 0,
+                                                 KeyEvent.VK_9, KeyEvent.CHAR_UNDEFINED));
+        definitions.setCaretPosition(doc.getLength());
+      } 
+    });
     
-    // Type '!'
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_PRESSED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_EXCLAMATION_MARK, KeyEvent.CHAR_UNDEFINED));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_TYPED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_UNDEFINED, '!'));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_RELEASED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_EXCLAMATION_MARK, KeyEvent.CHAR_UNDEFINED));
-    definitions.setCaretPosition(doc.getLength());
-    
-    // Type 'B'
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_PRESSED,
-                                             (new Date()).getTime(),
-                                             InputEvent.SHIFT_MASK,
-                                             KeyEvent.VK_B, KeyEvent.CHAR_UNDEFINED));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_TYPED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_UNDEFINED, 'B'));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_RELEASED,
-                                             (new Date()).getTime(),
-                                             InputEvent.SHIFT_MASK,
-                                             KeyEvent.VK_B, KeyEvent.CHAR_UNDEFINED));
-    definitions.setCaretPosition(doc.getLength());
-    
-    // Type '9'
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_PRESSED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_9, KeyEvent.CHAR_UNDEFINED));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_TYPED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_UNDEFINED, '9'));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_RELEASED,
-                                             (new Date()).getTime(),
-                                             0,
-                                             KeyEvent.VK_9, KeyEvent.CHAR_UNDEFINED));
-    definitions.setCaretPosition(doc.getLength());
-    assertEquals("The text should have been inserted", "a!B9",
-                 doc.getText());
+    assertEquals("The text should have been inserted", "a!B9",  doc.getText());
     
     // Call the undoAction in MainFrame through the KeyBindingManager.
     final KeyStroke ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
     final Action a = KeyBindingManager.Singleton.get(ks);
     
-    final KeyEvent e = new KeyEvent(definitions,
-                                    KeyEvent.KEY_PRESSED,
-                                    0,
-                                    ks.getModifiers(),
-                                    ks.getKeyCode(),
+    final KeyEvent e = new KeyEvent(definitions, KeyEvent.KEY_PRESSED, 0, ks.getModifiers(), ks.getKeyCode(),
                                     KeyEvent.CHAR_UNDEFINED);
-    definitions.processKeyEvent(e);
-    //                              ks.getKeyChar());
-    // Performs the action a
-    //    SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
-    //    doc.getUndoManager().undo();
-    assertEquals("Should have undone correctly.", "",
-                 doc.getText());
+    
+    Utilities.invokeAndWait(new Runnable() { public void run() { definitions.processKeyEvent(e); } });
+  
+    assertEquals("Should have undone correctly.", "", doc.getText());
     
     // 2
     /* Test bug #905405 Undo Alt+Anything Causes Exception */
     
-    // Type 'Alt-B'
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_PRESSED,
-                                             (new Date()).getTime(),
-                                             InputEvent.ALT_MASK,
-                                             KeyEvent.VK_Q, KeyEvent.CHAR_UNDEFINED));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_TYPED,
-                                             (new Date()).getTime(),
-                                             InputEvent.ALT_MASK,
-                                             KeyEvent.VK_UNDEFINED, 'Q'));
-    definitions.processKeyEvent(new KeyEvent(definitions,
-                                             KeyEvent.KEY_RELEASED,
-                                             (new Date()).getTime(),
-                                             InputEvent.ALT_MASK,
-                                             KeyEvent.VK_Q, KeyEvent.CHAR_UNDEFINED));
+    // What does the following code test?  There are no assertions!  -- Corky 5/9/06
     
-    /*
-     * If the bug is not fixed in DefinitionsPane.processKeyEvent, this test
-     * will not fail because the exception is thrown in another thread.
-     * However, the stack trace will get printed onto the console.  I don't
-     * know how to fix this problem in case someone unfixes the bug.
-     */
-    SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
+    // Type 'Alt-B'
+     Utilities.invokeAndWait(new Runnable() {
+       public void run() {
+         definitions.processKeyEvent(new KeyEvent(definitions,
+                                                  KeyEvent.KEY_PRESSED,
+                                                  (new Date()).getTime(),
+                                                  InputEvent.ALT_MASK,
+                                                  KeyEvent.VK_Q, KeyEvent.CHAR_UNDEFINED));
+         definitions.processKeyEvent(new KeyEvent(definitions,
+                                                  KeyEvent.KEY_TYPED,
+                                                  (new Date()).getTime(),
+                                                  InputEvent.ALT_MASK,
+                                                  KeyEvent.VK_UNDEFINED, 'Q'));
+         definitions.processKeyEvent(new KeyEvent(definitions,
+                                                  KeyEvent.KEY_RELEASED,
+                                                  (new Date()).getTime(),
+                                                  InputEvent.ALT_MASK,
+                                                  KeyEvent.VK_Q, KeyEvent.CHAR_UNDEFINED));
+         
+         /*
+          * If the bug is not fixed in DefinitionsPane.processKeyEvent, this test
+          * will not fail because the exception is thrown in another thread.
+          * However, the stack trace will get printed onto the console.  I don't
+          * know how to fix this problem in case someone unfixes the bug.
+          */
+         SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
     //    definitions.setCaretPosition(doc.getLength());
+       }
+     });
     
     
     // 2
@@ -480,6 +527,8 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
      //    doc.getUndoManager().undo();
      assertEquals("Should have undone correctly.", "a",
      doc.getText());*/
+     
+     _log.log("testGranularUndo completed");
   }
   
   
@@ -505,15 +554,18 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
     
     assertTrue("pane2 should have an open definitions document", doc2 instanceof OpenDefinitionsDocument);
     assertTrue("pane1 should have an open definitions document", doc1 instanceof OpenDefinitionsDocument);
+    
+    _log.log("testActiveAndInactive completed");
   }
   
   
   private int _finalCount;
   private int _finalDocCount;
+  
   public void testDocumentPaneMemoryLeak()  throws InterruptedException, java.io.IOException{
     _finalCount = 0;
     _finalDocCount = 0;
-    Utilities.clearEventQueue();
+    Utilities.clearEventQueue();  // Why are we clearing the event queue here?
     
     FinalizationListener<DefinitionsPane> fl = new FinalizationListener<DefinitionsPane>() {
       public void finalized(FinalizationEvent<DefinitionsPane> e) {
@@ -551,6 +603,9 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
     // all the panes have a listener, so lets close all files
     
     _model.closeAllFiles();
+    
+    // make sure that the event queue is empty (can we explicity test this condition?)
+    Utilities.clearEventQueue();
     Utilities.clearEventQueue();
     
     System.gc();
@@ -562,7 +617,8 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
     assertEquals("all the defdocs should have been garbage collected", 6, _finalDocCount);
     assertEquals("all the panes should have been garbage collected", 6, _finalCount);
 //    System.err.println("_finalCount = " + _finalCount);
-
+    
+    _log.log("testDocumentPaneMemoryLeak completed");
   }
   
   // This testcase checks that we do no longer discard Alt keys that would be used to make the {,},[,] chars that the french keyboards has.
@@ -571,125 +627,151 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
   // These lines were added to the DefinitionsPane.java file.
   public void testFrenchKeyStrokes() throws IOException, InterruptedException {
     
-    DefinitionsPane pane = _frame.getCurrentDefPane(); // pane is NOT null.     Document doc = _frame.getCurrentDefPane.getDJDocument()
+    final DefinitionsPane pane = _frame.getCurrentDefPane(); // pane is NOT null.
     //KeyEvent ke = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, InputEvent.ALT_MASK, KeyEvent.VK_UNDEFINED, '{'); 
-    KeyEvent ke = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, 0, KeyEvent.VK_UNDEFINED, 'T'); 
-    pane.processKeyEvent(ke);
+    final KeyEvent ke1 = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, 0, KeyEvent.VK_UNDEFINED, 'T'); 
+    
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.processKeyEvent(ke1); } });
     assertFalse("The KeyEvent for pressing \"T\" should not involve an Alt Key if this fails we are in trouble!", pane.checkAltKey());
     
-    ke = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, InputEvent.ALT_MASK, KeyEvent.VK_UNDEFINED, '{'); 
-    pane.processKeyEvent(ke);
+    final KeyEvent ke2 = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, InputEvent.ALT_MASK, KeyEvent.VK_UNDEFINED, '{'); 
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.processKeyEvent(ke2); } });
     assertTrue("Alt should have been registered and allowed to pass!", pane.checkAltKey());
     
-    ke = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, InputEvent.ALT_MASK, KeyEvent.VK_UNDEFINED, '}'); 
-    pane.processKeyEvent(ke);
+    final KeyEvent ke3 = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, InputEvent.ALT_MASK, KeyEvent.VK_UNDEFINED, '}'); 
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.processKeyEvent(ke3); } });
     assertTrue("Alt should have been registered and allowed to pass!", pane.checkAltKey());
     
     
-    ke = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, InputEvent.ALT_MASK, KeyEvent.VK_UNDEFINED, '['); 
-    pane.processKeyEvent(ke);
+    final KeyEvent ke4 = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, InputEvent.ALT_MASK, KeyEvent.VK_UNDEFINED, '['); 
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.processKeyEvent(ke4); } });
     assertTrue("Alt should have been registered and allowed to pass!", pane.checkAltKey());
     
-    ke = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, InputEvent.ALT_MASK, KeyEvent.VK_UNDEFINED, ']'); 
-    pane.processKeyEvent(ke);
+    final KeyEvent ke5 = new KeyEvent(pane, KeyEvent.KEY_TYPED, 0, InputEvent.ALT_MASK, KeyEvent.VK_UNDEFINED, ']'); 
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.processKeyEvent(ke5);  } });
     assertTrue("Alt should have been registered and allowed to pass!", pane.checkAltKey());
+    
+    _log.log("testFrenchKeyStrokes completed");
   } 
-
-
-
 
 /* We had several problems with the backspace deleting 2 chars instead of one.
  * Recently the problem reoccured in Java version 1.4, but not in 1.5
  * This shows that we clearly needs a test for this.
  */
-  public void testBackspace() throws BadLocationException {
-    DefinitionsPane definitions = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
+  public void testBackspace() {
+    final DefinitionsPane definitions = _frame.getCurrentDefPane();
+    final OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
     _assertDocumentEmpty(doc, "before testing");
-    doc.insertString(0, "test", null);
+
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        doc.append("test", null);
+        definitions.setCaretPosition(4);
+        int backspaceCode = KeyEvent.VK_BACK_SPACE;
+        // The following is the sequence of key events for backspace
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(), 0, 
+                                                 backspaceCode, KeyEvent.CHAR_UNDEFINED));
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(), 0,
+                                                 backspaceCode, KeyEvent.CHAR_UNDEFINED));
+        definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_TYPED, (new Date()).getTime(), 0,
+                                                 KeyEvent.VK_UNDEFINED, '\b'));
+      }
+    });
     
-    definitions.setCaretPosition(4);
-    int backspaceCode = KeyEvent.VK_BACK_SPACE;
-     // The following is the sequence of key events for backspace
-     definitions.processKeyEvent(new KeyEvent(definitions,
-                                              KeyEvent.KEY_PRESSED,
-                                              (new Date()).getTime(),
-                                              0,
-                                              backspaceCode,
-                                              KeyEvent.CHAR_UNDEFINED));
-     definitions.processKeyEvent(new KeyEvent(definitions,
-                                              KeyEvent.KEY_RELEASED,
-                                              (new Date()).getTime(),
-                                              0,
-                                              backspaceCode,
-                                              KeyEvent.CHAR_UNDEFINED));
-     definitions.processKeyEvent(new KeyEvent(definitions,
-                                              KeyEvent.KEY_TYPED,
-                                              (new Date()).getTime(),
-                                              0,
-                                              KeyEvent.VK_UNDEFINED,
-                                              '\b'));
-     _assertDocumentContents(doc, "tes", "Deleting with Backspace went wrong");
+    _assertDocumentContents(doc, "tes", "Deleting with Backspace went wrong");
+    
+    _log.log("testBackSpace completed");
   }
   
+  private volatile String _result;
   
   /** Tests the functionality that allows brace matching that displays the line matched in the status bar */
   public void testMatchBraceText() {
-    try{
-      DefinitionsPane definitions = _frame.getCurrentDefPane();
-      OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
-      _assertDocumentEmpty(doc, "before testing");
-      doc.insertString(0, 
-                       "{\n" +
-                       "public class Foo {\n" + //21
-                       "  private int whatev\n" + //42
-                       "  private void _method()\n" + //67
-                       "  {\n" + //71
-                       "     do stuff\n" + //85
-                       "     new Object() {\n" + //105
-                       "         }\n" + //116
-                       "  }\n" +
-                       "}" +
-                       "}"
-                         , null);
-      
-      String fileName = doc.getCompletePath();
-      
-      definitions.setCaretPosition(4);
-      assertEquals("Should display the document path", fileName, _frame.getFileNameField());
-      definitions.setCaretPosition(115);
-      assertEquals("Should display the line matched", "Matches:      new Object() {", _frame.getFileNameField());
-      definitions.setCaretPosition(102);
-      assertEquals("Should display the document matched", fileName, _frame.getFileNameField());
-      definitions.setCaretPosition(119);
-      assertEquals("Should display the line matched", "Matches:   private void _method()...{", _frame.getFileNameField());
-      definitions.setCaretPosition(121);
-      assertEquals("Should display the line matched", "Matches: public class Foo {", _frame.getFileNameField());
-      definitions.setCaretPosition(122);
-      assertEquals("Should display only one brace when matching an open brace that is the first character in a line",
-                   "Matches: {", _frame.getFileNameField());
-    }
-    catch (BadLocationException e) {throw new UnexpectedException(e);}
-  }
 
+    final DefinitionsPane definitions = _frame.getCurrentDefPane();
+    final OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
+    Utilities.clearEventQueue();
+    
+    _assertDocumentEmpty(doc, "before testing");
+    
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        doc.append( 
+                   "{\n" +
+                   "public class Foo {\n" + //21
+                   "  private int whatev\n" + //42
+                   "  private void _method()\n" + //67
+                   "  {\n" + //71
+                   "     do stuff\n" + //85
+                   "     new Object() {\n" + //105
+                   "         }\n" + //116
+                   "  }\n" +
+                   "}" +
+                   "}"
+                     , null);
+        
+        definitions.setCaretPosition(4); 
+        _result = _frame.getFileNameField();
+      } 
+    });
+    
+    /* Ensure that DocumentListeners complete. */
+    Utilities.clearEventQueue(); 
+    
+    final String fileName = doc.getCompletePath();
+
+    assertEquals("Should display the document path", fileName, _result);
+    
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        definitions.setCaretPosition(115); 
+        _result = _frame.getFileNameField();
+      } 
+    });
+    assertEquals("Should display the line matched", "Matches:      new Object() {", _result);
+    
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        definitions.setCaretPosition(102);
+        _result = _frame.getFileNameField();
+      } 
+    });
+    assertEquals("Should display the document matched", fileName, _result);
+    
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        definitions.setCaretPosition(119); 
+        _result = _frame.getFileNameField();
+      } 
+    });
+    assertEquals("Should display the line matched", "Matches:   private void _method()...{", _result);
+    
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        definitions.setCaretPosition(121); 
+        _result = _frame.getFileNameField();
+      } 
+    });
+    assertEquals("Should display the line matched", "Matches: public class Foo {", _frame.getFileNameField());
+    
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        definitions.setCaretPosition(122);
+        _result = _frame.getFileNameField();
+      } 
+    });
+    assertEquals("Should display only one brace when matching an open brace that is the first character in a line",
+                 "Matches: {", _result);
+    
+    _log.log("testMatchBraceTest completed");
+  }
 
   class KeyTestListener implements KeyListener {
     
-    public void keyPressed(KeyEvent e) {
-      DefinitionsPaneTest.fail("Unexpected keypress " + e);
-    }
-    
-    public void keyReleased(KeyEvent e) {
-      DefinitionsPaneTest.fail("Unexpected keyrelease " + e);
-    }
-    
-    public void keyTyped(KeyEvent e) {
-      DefinitionsPaneTest.fail("Unexpected keytyped " + e);
-    }
-    
-    public boolean done() {
-      return true;
-    }
+    public void keyPressed(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keypress " + e); }
+    public void keyReleased(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keyrelease " + e); }
+    public void keyTyped(KeyEvent e) { DefinitionsPaneTest.fail("Unexpected keytyped " + e);  }
+    public boolean done() { return true; }
   }
 }
 

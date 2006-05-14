@@ -36,9 +36,7 @@ package edu.rice.cs.drjava.model;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import junit.framework.*;
 
-/** 
- * Tests for MultiThreadedTestCase.
- */
+/** Tests for MultiThreadedTestCase. */
 public class MultiThreadedTestCaseTest extends DrJavaTestCase {
   public MultiThreadedTestCaseTest() { super(); }
   public MultiThreadedTestCaseTest(String name) { super(name); }
@@ -57,17 +55,12 @@ public class MultiThreadedTestCaseTest extends DrJavaTestCase {
     }
   }
   
-  
-  /**
-   * Uncaught exception in spawned thread.
-   */
+  /** Uncaught exception in spawned thread. */
   public void testUncaught() {
     TestResult tr = new Uncaught().run();
     assertEquals(1, tr.runCount());
     assertEquals(1, tr.failureCount());
   }    
   
-  public static void main(String[] args) {
-    (new MultiThreadedTestCaseTest()).testUncaught();
-  }
+  public static void main(String[] args) { (new MultiThreadedTestCaseTest()).testUncaught(); }
 }

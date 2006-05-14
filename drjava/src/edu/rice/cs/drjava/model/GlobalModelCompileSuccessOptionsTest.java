@@ -1,4 +1,4 @@
-/*BEGIN_COPYRIGHT_BLOCK
+ /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is part of DrJava.  Download the current version of this project:
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
@@ -52,6 +52,8 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /**
  * Tests to ensure that compilation succeeds when expected.
  * 
@@ -77,7 +79,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     doc2.saveFile(new FileSelector(file2));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
-    doc.startCompile();
+    listener.compile(doc);
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
@@ -85,7 +87,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     _model.removeListener(listener);
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
     _model.addListener(listener2);
-    doc2.startCompile();
+    listener2.compile(doc2);
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }    
@@ -118,7 +120,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       _model.addListener(listener);
       
       // This is a CompileShouldFailListener, so we don't need to wait.
-      doc.startCompile();
+      listener.compile(doc);
       
       assertCompileErrorsPresent(_name(), true);
       listener.checkCompileOccurred();
@@ -136,7 +138,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
         
         CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener(false);
         _model.addListener(listener2);
-        doc.startCompile();
+        listener2.compile(doc);
         if (_model.getCompilerModel().getNumErrors() > 0) {
           fail("compile failed: " + getCompilerErrorString());
         }
@@ -173,6 +175,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
       _model.addListener(listener);
       _model.getCompilerModel().compileAll();
+      Utilities.clearEventQueue();
       if (_model.getCompilerModel().getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
       }

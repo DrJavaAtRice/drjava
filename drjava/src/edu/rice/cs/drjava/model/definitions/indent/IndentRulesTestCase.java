@@ -58,7 +58,7 @@ import javax.swing.text.BadLocationException;
  */
 public abstract class IndentRulesTestCase extends DrJavaTestCase {
 
-  protected AbstractDJDocument _doc;
+  protected volatile AbstractDJDocument _doc;
 //  private String _indent;
  // private GlobalEventNotifier _notifier;
 

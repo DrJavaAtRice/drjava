@@ -76,33 +76,25 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     _noneButton = new JRadioButton(NONE);
     _noneButton.setActionCommand(NONE);
     _noneButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        notifyChangeListeners();
-      }
+      public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
     });
     
     _textButton = new JRadioButton(TEXT_ONLY);
     _textButton.setActionCommand(TEXT_ONLY);
     _textButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        notifyChangeListeners();
-      }
+      public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
     });
 
     _iconsButton = new JRadioButton(ICONS_ONLY);
     _iconsButton.setActionCommand(ICONS_ONLY);
     _iconsButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        notifyChangeListeners();
-      }
+      public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
     });
 
     _textAndIconsButton = new JRadioButton(TEXT_AND_ICONS);
     _textAndIconsButton.setActionCommand(TEXT_AND_ICONS);
     _textAndIconsButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        notifyChangeListeners();
-      }
+      public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
     });
 
     resetToCurrent();

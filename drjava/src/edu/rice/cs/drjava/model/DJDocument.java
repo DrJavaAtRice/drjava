@@ -346,15 +346,15 @@ public interface DJDocument extends StyledDocument, AbstractDocumentInterface {
   
   /* Locking operations */
   
-  /** Swing-style readLock(). */
-  public void readLock();
+  /** Swing-style acquireReadLock(). */
+  public void acquireReadLock();
   
-  /** Swing-style readUnlock(). */
-  public void readUnlock();
+  /** Swing-style releaseReadLock(). */
+  public void releaseReadLock();
 
   /** Swing-style writeLock(). */
-  public void modifyLock();
+  public void acquireWriteLock();
   
   /** Swing-style writeUnlock(). */
-  public void modifyUnlock();
+  public void releaseWriteLock();
 }

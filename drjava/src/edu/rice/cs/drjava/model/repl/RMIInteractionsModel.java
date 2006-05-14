@@ -153,7 +153,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    *  @param inProgress whether the interpreter is currently in progress
    *  @param updatePrompt whether or not the interpreter has changed
    */
-  protected void _updateDocument(String prompt, boolean inProgress, boolean updatePrompt) {
+  private void _updateDocument(String prompt, boolean inProgress, boolean updatePrompt) {
     if (updatePrompt) {
       _document.setPrompt(prompt);
       _document.insertNewLine(_document.getLength());

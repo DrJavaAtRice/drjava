@@ -202,7 +202,7 @@ public abstract class AbstractConsoleController implements Serializable {
         public void run() {
           
           ConsoleDocument doc = getConsoleDoc();
-          doc.readLock(); // Grab read lock because this code is NOT run as part of document listener!
+          doc.acquireReadLock(); // Grab read lock because this code is NOT run as part of document listener!
           try {
             int caretPos = _pane.getCaretPosition();
             int promptPos = doc.getPromptPos();
@@ -239,7 +239,7 @@ public abstract class AbstractConsoleController implements Serializable {
               }
             }
           }
-          finally { doc.readUnlock(); }
+          finally { doc.releaseReadLock(); }
         }
       });
     }
@@ -251,12 +251,12 @@ public abstract class AbstractConsoleController implements Serializable {
       Utilities.invokeLater(new Runnable() {
         public void run() { 
           ConsoleDocument doc = getConsoleDoc();
-          doc.readLock();
+          doc.acquireReadLock();
           try {
             int length = doc.getLength();
             if (_pane.getCaretPosition() > length) _pane.setCaretPosition(length);
           }
-          finally { doc.readUnlock(); }
+          finally { doc.releaseReadLock(); }
         }
       });
     }

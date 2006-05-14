@@ -252,7 +252,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     public BreakpointRegionTreeUserObj (Breakpoint bp) { super(bp); }
     public String toString() {
       StringBuilder sb = new StringBuilder();
-      _region.getDocument().readLock();
+      _region.getDocument().acquireReadLock();
       try {
         sb.append(lineNumber());
         try {
@@ -261,7 +261,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
           int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
           sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
         } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
-      } finally { _region.getDocument().readUnlock(); }
+      } finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();
     }
     public boolean equals(Object other) {

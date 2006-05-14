@@ -48,8 +48,7 @@ import javax.swing.filechooser.FileFilter;
  *
  *  @version $Id$
  */
-public class FileOptionComponent extends OptionComponent<File>
-  implements OptionConstants {
+public class FileOptionComponent extends OptionComponent<File> implements OptionConstants {
 
 //  private JButton _button;
 //  private JTextField _jtf;

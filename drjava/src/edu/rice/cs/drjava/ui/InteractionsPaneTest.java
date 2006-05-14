@@ -54,11 +54,11 @@ import edu.rice.cs.util.CompletionMonitor;
  */
 public final class InteractionsPaneTest extends DrJavaTestCase {
 
-  protected InteractionsDJDocument _adapter;
-  protected InteractionsModel _model;
-  protected InteractionsDocument _doc;
-  protected InteractionsPane _pane;
-  protected InteractionsController _controller;
+  protected volatile InteractionsDJDocument _adapter;
+  protected volatile InteractionsModel _model;
+  protected volatile InteractionsDocument _doc;
+  protected volatile InteractionsPane _pane;
+  protected volatile InteractionsController _controller;
 
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
@@ -78,11 +78,11 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   }
 
   public void tearDown() throws Exception {
-    _controller = null;
-    _doc = null;
-    _model = null;
-    _pane = null;
-    _adapter = null;
+//    _controller = null;
+//    _doc = null;
+//    _model = null;
+//    _pane = null;
+//    _adapter = null;
     super.tearDown();
   }
 
@@ -217,13 +217,13 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
 
   /** Tests that the InteractionsPane cannot be edited before the prompt. */
   public void testCannotEditBeforePrompt() throws EditDocumentException {
-    _doc.modifyLock();
+    _doc.acquireWriteLock();
     int origLength = 0;
     try {
       origLength = _doc.getLength();
       _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
     }
-    finally { _doc.modifyUnlock(); }
+    finally { _doc.releaseWriteLock(); }
     assertEquals("Document should not have changed.", origLength, _doc.getLength());
   }
 
@@ -329,37 +329,31 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   }
   
   /** Fields used in a closure in testPromptList */
-  private int _firstPrompt, _secondPrompt, _size;
-  private boolean _resetDone;
+  private volatile int _firstPrompt, _secondPrompt, _size;
+  private volatile boolean _resetDone;
   
   public void testPromptListClearedOnReset() throws Exception {
     // Can't use the fields declared in setUp - it doesn't use a real InteractionsModel
-    MainFrame mf = new MainFrame();
-    
+    final MainFrame _mf = new MainFrame();
     final Object _resetLock = new Object();
     
     Utilities.clearEventQueue();
-    GlobalModel gm = mf.getModel();
-    _controller = mf.getInteractionsController();
+    GlobalModel gm = _mf.getModel();
+    _controller = _mf.getInteractionsController();
     _model = gm.getInteractionsModel();
     _adapter = gm.getSwingInteractionsDocument();
     _doc = gm.getInteractionsDocument();
-    _pane = mf.getInteractionsPane();
+    _pane = _mf.getInteractionsPane();
     
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() { _pane.resetPrompts(); }
-    });
+    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.resetPrompts(); } });
 
 //    System.err.println(_pane.getPromptList());
     assertEquals("PromptList before insert should contain 0 elements", 0, _pane.getPromptList().size());
         
     // Insert some text 
-    
     _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);
     
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() { _pane.setCaretPosition(_doc.getLength()); }
-    });
+    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(_doc.getLength()); } });
     
     assertEquals("PromptList after insert should contain 1 element", 1, _pane.getPromptList().size());    
     assertEquals("First prompt should be saved as being at position",

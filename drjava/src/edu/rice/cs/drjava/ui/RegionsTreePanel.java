@@ -196,7 +196,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
           @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>)(node.getUserObject())).region();
           
           OpenDefinitionsDocument doc = r.getDocument();
-          doc.readLock();
+          doc.acquireReadLock();
           try {
             int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
             int startOffset = r.getStartOffset();
@@ -212,7 +212,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
             tooltip = "<html><pre>"+s+"</pre></html>";
           }
           catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }
-          finally { doc.readUnlock(); }
+          finally { doc.releaseReadLock(); }
         }
       }
       setToolTipText(tooltip);
@@ -508,7 +508,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     public RegionTreeUserObj(R r) { _region = r; }
     public String toString() {
       StringBuilder sb = new StringBuilder();
-      _region.getDocument().readLock();
+      _region.getDocument().acquireReadLock();
       try {
         sb.append(lineNumber());
         try {
@@ -516,7 +516,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
           int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
           sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
         } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
-      } finally { _region.getDocument().readUnlock(); }
+      } finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();
     }
     public boolean equals(Object other) {

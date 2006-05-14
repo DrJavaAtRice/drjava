@@ -49,9 +49,7 @@ import java.util.EventListener;
 
 public interface FileSelectionListener extends EventListener {
   
-  /**
-   * called when a new file/directory was selected by the caller
-   */
+  /** Called when a new file/directory was selected by the caller. */
   void valueChanged(FileSelectionEvent e);
   
 }

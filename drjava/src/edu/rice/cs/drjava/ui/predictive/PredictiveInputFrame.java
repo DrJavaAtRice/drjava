@@ -45,6 +45,7 @@ import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Frame with predictive string input based on a list of strings. */
 public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFrame {
@@ -717,11 +718,15 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   private class PredictiveInputListener implements CaretListener, DocumentListener {
     public void insertUpdate(DocumentEvent e) {
 //      System.out.println("insertUpdate fired!");
-      removeListener();
-      _pim.setMask(_textField.getText());
-      updateExtensionLabel();
-      updateList();
-      addListener();
+      Utilities.invokeLater(new Runnable() {
+        public void run() { 
+          removeListener();
+          _pim.setMask(_textField.getText());
+          updateExtensionLabel();
+          updateList();
+          addListener();
+        }
+      });
     }
 
     public void removeUpdate(DocumentEvent e) {

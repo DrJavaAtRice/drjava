@@ -107,7 +107,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   final MainJVM _jvm = new MainJVM(getWorkingDirectory());
   
   /** Interface between the InteractionsDocument and the JavaInterpreter, which runs in a separate JVM. */
-  protected DefaultInteractionsModel _interactionsModel;
+  protected final DefaultInteractionsModel _interactionsModel;
   
   /** Core listener attached to interactions model */
   protected InteractionsListener _interactionsListener = new InteractionsListener() {
@@ -164,7 +164,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   private final CompilerModel _compilerModel = new DefaultCompilerModel(this);
   
   /** Whether or not to reset the interactions JVM after compiling.  Should only be false in test cases. */
-  private boolean _resetAfterCompile = true;
+  private volatile boolean _resetAfterCompile = true;
   
   /* JUnit Fields */
   
@@ -174,12 +174,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /* Javadoc Fields */
   
   /** Manages all Javadoc functionality. */
-  protected JavadocModel _javadocModel = new DefaultJavadocModel(this);
+  protected final JavadocModel _javadocModel = new DefaultJavadocModel(this);
   
   /* Debugger Fields */
   
   /** Interface to the integrated debugger.  If unavailable, set NoDebuggerAvailable.ONLY. */
-  private Debugger _debugger = NoDebuggerAvailable.ONLY;
+  private volatile Debugger _debugger = NoDebuggerAvailable.ONLY;
   
   /* CONSTRUCTORS */
   
@@ -365,9 +365,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public DefaultInteractionsModel getInteractionsModel() { return _interactionsModel; }
   
   /** @return InteractionsDJDocument in use by the InteractionsDocument. */
-  public InteractionsDJDocument getSwingInteractionsDocument() {
-    return _interactionsDocument;
-  }
+  public InteractionsDJDocument getSwingInteractionsDocument() { return _interactionsDocument; }
   
   public InteractionsDocument getInteractionsDocument() { return _interactionsModel.getDocument(); }
   
@@ -499,7 +497,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     /** Starting compiling this document.  Used only for unit testing */
     public void startCompile() throws IOException { _compilerModel.compile(ConcreteOpenDefDoc.this); }
     
-    private InteractionsListener _runMain;
+    private volatile InteractionsListener _runMain;
 
     /** Runs the main method in this document in the interactions pane after resetting interactions with the source
      *  root for this document as the working directory.  Warns the use if the class files for the doucment are not 
@@ -524,7 +522,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       _runMain = new DummyGlobalModelListener() {
         public void interpreterReady(File wd) {
           // Restart debugger if it was previously enabled and is now off
-          if (wasDebuggerEnabled && (!getDebugger().isReady())) {
+          if (wasDebuggerEnabled && (! getDebugger().isReady())) {
             try { getDebugger().startup(); } catch(DebugException de) { /* ignore, continue without debugger */ }
           }
           
@@ -537,7 +535,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           _notifier.runStarted(ConcreteOpenDefDoc.this);
           SwingUtilities.invokeLater(new Runnable() {
             public void run() { 
-              /* Remove _runMain listener AFTER this interpreterReady listener completes and DROPS it readLock on
+              /* Remove _runMain listener AFTER this interpreterReady listener completes and DROPS it acquireReadLock on
                * _interactionsModel._notifier. */
               _interactionsModel.removeListener(_runMain);
             }
@@ -681,17 +679,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       }
     }
     
-    List<OpenDefinitionsDocument> odds = getAuxiliaryDocuments();
-    for (OpenDefinitionsDocument odd: odds) {
+    for (OpenDefinitionsDocument odd: getAuxiliaryDocuments()) {
       // this forwards directly to InterpreterJVM.addClassPath(String)
       try { _interactionsModel.addProjectFilesClassPath(odd.getSourceRoot().toURL()); }
       catch(MalformedURLException murle) { /* fail silently */ }
       catch(InvalidPackageException e) {  /* ignore it */ }
     }
     
-    odds = getNonProjectDocuments();
-//    Utilities.show(odds.toString());
-    for (OpenDefinitionsDocument odd: odds) {
+    for (OpenDefinitionsDocument odd: getNonProjectDocuments()) {
       // this forwards directly to InterpreterJVM.addClassPath(String)
       try { 
         File sourceRoot = odd.getSourceRoot();

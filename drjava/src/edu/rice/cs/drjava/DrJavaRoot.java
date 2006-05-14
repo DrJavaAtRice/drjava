@@ -95,67 +95,79 @@ public class DrJavaRoot {
 
   /** Properties file used by the configuration object. Defaults to ".drjava" in the user's home directory. */
   private static File _propertiesFile = new File(System.getProperty("user.home"), ".drjava");
-
-
-  public static void main(String[] _filesToOpen) {
+  
+  public static void main(final String[] filesToOpen) {
     
 //    Utilities.show("DrJavaRoot started with _filesToOpen = " + Arrays.toString(_filesToOpen));
     
-    boolean _showDebugConsole = false;
-    int len = _filesToOpen.length;
-    if (len > 0 && _filesToOpen[len - 1] == System.getProperty("path.separator")) {
-      _showDebugConsole = true;
+    boolean debugConsole = false;
+    int len = filesToOpen.length;
+    if (len > 0 && filesToOpen[len - 1] == System.getProperty("path.separator")) {
+      debugConsole = true;
       len--;
     }
+    
+    final int numFiles = len;
+    final boolean showDebugConsole = debugConsole;
       
-    // files to open held in _filesToOpen[0:len] which may be an initial segment of _filesToOpen
-    try {
-      String configLAFName = DrJava.getConfig().getSetting(LOOK_AND_FEEL);
-      String currLAFName = UIManager.getLookAndFeel().getClass().getName();
-      if (! configLAFName.equals(currLAFName)) UIManager.setLookAndFeel(configLAFName);
-      
-      // The MainFrame *must* be constructed after the compiler setup process has
-      // occurred; otherwise, the list of compilers in the UI will be wrong.
-      
+    /* files to open held in filesToOpen[0:numFiles-1] which may be an initial segment of filesToOpen */
+    
+    /* In some unit test cases, creating a MainFrame in the main thread generated index out of bounds exceptions.  It appear that this
+     * creation process generates some swing events that are processed by the event thread.  Hence we need to create the MainFrame in
+     * the event thread.
+     */
+//    Utilities.invokeAndWait(new Runnable() {
+//      public void run() {
+        try {
+          String configLAFName = DrJava.getConfig().getSetting(LOOK_AND_FEEL);
+          String currLAFName = UIManager.getLookAndFeel().getClass().getName();
+          if (! configLAFName.equals(currLAFName)) UIManager.setLookAndFeel(configLAFName);
+          
+          // The MainFrame *must* be constructed after the compiler setup process has
+          // occurred; otherwise, the list of compilers in the UI will be wrong.
+          
 //      Utilities.showDebug("Creating MainFrame");
-      
-      final MainFrame mf = new MainFrame();
-      
+          
+          final MainFrame mf = new MainFrame();
+          
 //      Utilities.showDebug("MainFrame created");
-      
-      // Make sure all uncaught exceptions are shown in an DrJavaErrorHandler
-      DrJavaErrorWindow.setFrame(mf);
-      System.setProperty("sun.awt.exception.handler", "edu.rice.cs.drjava.ui.DrJavaErrorHandler");
-      
-      _openCommandLineFiles(mf, _filesToOpen, len);
-      
-      /* This call on invokeLater only runs in the main thread, so we use SwingUtilities rather than Utilities.
-       * We use invokeLater here ensure all files have finished loading and added to the fileview before the MainFrame
-       * is set visible.  When this was not done, we occasionally encountered a NullPointerExceptio on startup when 
-       * specifying a file (ex: java -jar drjava.jar somefile.java)
-       */
-      SwingUtilities.invokeLater(new Runnable(){ public void run(){mf.setVisible(true);}});
-      
-      // redirect stdout to DrJava's console
-      System.setOut(new PrintStream(new OutputStreamRedirector() {
-        public void print(String s) { mf.getModel().systemOutPrint(s); }
-      }));
-      
-      // redirect stderr to DrJava's console
-      System.setErr(new PrintStream(new OutputStreamRedirector() {
-        public void print(String s) { mf.getModel().systemErrPrint(s); }
-      }));
-      
+          
+          // Make sure all uncaught exceptions are shown in an DrJavaErrorHandler
+          DrJavaErrorWindow.setFrame(mf);
+          System.setProperty("sun.awt.exception.handler", "edu.rice.cs.drjava.ui.DrJavaErrorHandler");
+          
+          _openCommandLineFiles(mf, filesToOpen, numFiles);
+          
+          /* This call on invokeLater only runs in the main thread, so we use SwingUtilities rather than Utilities.
+           * We use invokeLater here ensure all files have finished loading and added to the fileview before the MainFrame
+           * is set visible.  When this was not done, we occasionally encountered a NullPointerExceptio on startup when 
+           * specifying a file (ex: java -jar drjava.jar somefile.java)
+           */
+          SwingUtilities.invokeLater(new Runnable(){ public void run(){ mf.setVisible(true); } });
+          
+          // redirect stdout to DrJava's console
+          System.setOut(new PrintStream(new OutputStreamRedirector() {
+            public void print(String s) { mf.getModel().systemOutPrint(s); }
+          }));
+          
+          // redirect stderr to DrJava's console
+          System.setErr(new PrintStream(new OutputStreamRedirector() {
+            public void print(String s) { mf.getModel().systemErrPrint(s); }
+          }));
+          
 //      Utilities.showDebug("showDebugConsole flag = " + _showDebugConsole);
-      // Show debug console if enabled
-      if (_showDebugConsole) showDrJavaDebugConsole(mf);
-    }
-    catch (Throwable t) {
-      // Show any errors to the real System.err and in an DrJavaErrorHandler
-      _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
-      t.printStackTrace(_consoleErr);System.out.println("error thrown");
-      new DrJavaErrorHandler().handle(t);
-    }
+          // Show debug console if enabled
+          if (showDebugConsole) showDrJavaDebugConsole(mf);
+        }
+        catch (Throwable t) {
+          // Show any errors to the real System.err and in an DrJavaErrorHandler
+          _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
+          t.printStackTrace(_consoleErr);
+          System.out.println("error thrown");
+          new DrJavaErrorHandler().handle(t);
+        }
+//      }
+//    });
   }
 
   /** Handle the list of files specified on the command line.  Feature request #509701.

@@ -64,10 +64,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Check fields and status
     assertTrue("Debug Manager should be ready", _debugger.isReady());
-    assertNotNull("EventRequestManager should not be null after startup",
-                  _debugger.getEventRequestManager());
-    assertNotNull("PendingRequestManager should not be null after startup",
-                  _debugger.getPendingRequestManager());
+    assertNotNull("EventRequestManager should not be null after startup", _debugger.getEventRequestManager());
+    assertNotNull("PendingRequestManager should not be null after startup", _debugger.getPendingRequestManager());
 
     // Shutdown the debugger
     synchronized(_notifierLock) {
@@ -175,9 +173,9 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Set two breakpoints
     int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
-    _debugger.toggleBreakpoint(doc,index,11,true);
+    _debugger.toggleBreakpoint(doc,index, 11, true);
     index = MONKEY_CLASS.indexOf("System.out.println(\"James likes bananas!\");");
-    _debugger.toggleBreakpoint(doc,index,17,true);
+    _debugger.toggleBreakpoint(doc,index, 17, true);
 
     // Run the main() method, hitting both breakpoints in different threads
     synchronized(_notifierLock) {
@@ -257,17 +255,14 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _debugger.removeListener(debugListener);
   }*/
 
-  /**
-   * Tests that breakpoints behave correctly for multiple threads
-   */
+  /** Tests that breakpoints behave correctly for multiple threads. */
   public synchronized void testMultiThreadedBreakpointsAndStep() throws Exception {
     if (printMessages) System.out.println("----testMultiThreadedBreakpointsAndStep----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
     _debugger.addListener(debugListener);
 
     // Start up
-    OpenDefinitionsDocument doc = _startupDebugger("Monkey.java",
-                                                   MONKEY_CLASS);
+    OpenDefinitionsDocument doc = _startupDebugger("Monkey.java", MONKEY_CLASS);
 
     // Set breakpoints
     int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");

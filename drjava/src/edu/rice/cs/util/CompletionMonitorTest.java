@@ -52,14 +52,10 @@ public class CompletionMonitorTest extends TestCase {
         public void run() {
           synchronized(_lock) {
             try {
-              // This is an 'if' rather than a 'while'
-              // because we do not want to wait beyond
-              // _timeout milliseconds if the target
-              // fails to complete
+              // This is an 'if' rather than a 'while' because we do not want to wait beyond
+              // _timeout milliseconds if the target fails to complete
               
-              if (!_targetComplete) {
-                _lock.wait(_timeout);
-              }
+              if (!_targetComplete) _lock.wait(_timeout);
             }
             catch(InterruptedException e) {
               // Do nothing if interrupted. simply go to the finally block

@@ -147,11 +147,13 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
+    
     doc.startCompile();
+    listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) fail("compile failed: " + getCompilerErrorString());
     listener.checkCompileOccurred();
     
-    _runJUnit(doc);
+    listener.runJUnit(doc);
     
     listener.assertJUnitStartCount(1);
     // Clear document so we can make sure it's written to after startJUnit
@@ -211,7 +213,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    _model.addListener(listener2);
 
     listener.assertClassFileErrorCount(0);
-    _runJUnit(doc2);
+    listener.runJUnit(doc2);
+    listener.waitJUnitDone();
+    
     double version = Double.valueOf(System.getProperty("java.specification.version"));
     if (version < 1.5) listener.assertClassFileErrorCount(1);
     else 
@@ -235,14 +239,16 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
-    Utilities.clearEventQueue();
+    
+
     doc.startCompile();
+    listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
     listener.checkCompileOccurred();
     
-    _runJUnit(doc);
+    listener.runJUnit(doc);
     
     listener.assertJUnitStartCount(1);
 
@@ -266,6 +272,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     final File file2 = new File(_tempDir, "TestTwo.java");
     doc1.saveFile(new FileSelector(file1));
     doc2.saveFile(new FileSelector(file2));
+    
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     _model.getCompilerModel().compileAll();
@@ -273,7 +280,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //        doc2.startCompile();
     
     
-    _runJUnit(doc1);
+    listener.waitCompileDone();
+    listener.runJUnit(doc1);
     
     listener.assertJUnitStartCount(1);
     
@@ -288,7 +296,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
     
-    _runJUnit(doc2);
+    listener.runJUnit(doc2);
+    
     
     listener.assertJUnitStartCount(2);
     

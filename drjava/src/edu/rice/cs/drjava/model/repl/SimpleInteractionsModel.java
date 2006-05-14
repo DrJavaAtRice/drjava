@@ -89,9 +89,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
                                       InterpreterJVM.getStackTrace(t),
                                       InteractionsDocument.DEFAULT_STYLE);
     }
-    finally {
-      _interactionIsOver();
-    }
+    finally { _interactionIsOver(); }
   }
 
   /**

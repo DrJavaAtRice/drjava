@@ -62,21 +62,21 @@ public class ConfigFrame extends JFrame {
   private static final int FRAME_WIDTH = 750;
   private static final int FRAME_HEIGHT = 500;
 
-  private MainFrame _mainFrame;
+  private final MainFrame _mainFrame;
 
 //  private JSplitPane _splitPane;
-  private JTree _tree;
-  private DefaultTreeModel _treeModel;
-  private PanelTreeNode _rootNode;
+  private final JTree _tree;
+  private final DefaultTreeModel _treeModel;
+  private final PanelTreeNode _rootNode;
 
-  private JButton _okButton;
-  private JButton _applyButton;
-  private JButton _cancelButton;
-//  private JButton _saveSettingsButton;
-  private JPanel _mainPanel;
-  private JFileChooser _fileOptionChooser;
-  private JFileChooser _browserChooser;
-  private DirectoryChooser _dirChooser;
+  private final JButton _okButton;
+  private final JButton _applyButton;
+  private final JButton _cancelButton;
+//  private final JButton _saveSettingsButton;
+  private final JPanel _mainPanel;
+  private final JFileChooser _fileOptionChooser;
+  private final JFileChooser _browserChooser;
+  private final DirectoryChooser _dirChooser;
   
   private OptionComponent.ChangeListener _changeListener = new OptionComponent.ChangeListener() {
     public Object apply(Object oc) {
@@ -91,26 +91,67 @@ public class ConfigFrame extends JFrame {
     super("Preferences");
 
     _mainFrame = frame;
+    
+    Action applyAction = new AbstractAction("Apply") {
+      public void actionPerformed(ActionEvent e) {
+        // Always save settings
+        try {
+//          _mainFrame.enableResetInteractions();
+          saveSettings(); 
+          _applyButton.setEnabled(false); 
+          
+        }
+        catch (IOException ioe) {
+        }
+      }
+    };
+
+    _applyButton = new JButton(applyAction);
+    _applyButton.setEnabled(false);
+    
+    Action okAction = new AbstractAction("OK") {
+      public void actionPerformed(ActionEvent e) {
+        // Always apply and save settings
+        boolean successful = true;
+        try {
+//          _mainFrame.enableResetInteractions();
+          successful = saveSettings();
+        }
+        catch (IOException ioe) {
+          // oh well...
+        }
+        if (successful) _applyButton.setEnabled(false);
+        ConfigFrame.this.setVisible(false);
+      }
+    };
+    _okButton = new JButton(okAction);
+
+
+    Action cancelAction = new AbstractAction("Cancel") {
+      public void actionPerformed(ActionEvent e) {
+        cancel();
+      }
+    };
+    _cancelButton = new JButton(cancelAction);
+
 
     File workDir = _getWorkDir();
     _fileOptionChooser = new JFileChooser(workDir);
-    _fileOptionChooser.setDialogTitle("Select");
-    _fileOptionChooser.setApproveButtonText("Select");
-    _fileOptionChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-    _fileOptionChooser.setFileFilter(ClassPathFilter.ONLY);
 
     _browserChooser = new JFileChooser(workDir);
-    _browserChooser.setDialogTitle("Select Web Browser");
-    _browserChooser.setApproveButtonText("Select");
-    _browserChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    
 
     _dirChooser = new DirectoryChooser(this);
-    _dirChooser.setSelectedFile(_getWorkDir());
-    _dirChooser.setDialogTitle("Select");
-    _dirChooser.setApproveButtonText("Select");
-    _dirChooser.setMultiSelectionEnabled(false);
+  
     
-    _createTree();
+    /* Create tree and initialize tree. */
+    _rootNode = new PanelTreeNode("Preferences");
+    _treeModel = new DefaultTreeModel(_rootNode);
+    _tree = new JTree(_treeModel);
+    
+    _initTree();
+    
+    /* Create Panels. */
     _createPanels();
 
     _mainPanel= new JPanel();
@@ -136,64 +177,6 @@ public class ConfigFrame extends JFrame {
     treePanel.add(treeScroll, BorderLayout.CENTER);
     cp.add(treePanel, BorderLayout.WEST);
     cp.add(_mainPanel, BorderLayout.CENTER);
-    /*
-    _splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                                treeScroll,
-                                _mainPanel);
-    cp.add(_splitPane, BorderLayout.CENTER);
-    */
-
-    Action okAction = new AbstractAction("OK") {
-      public void actionPerformed(ActionEvent e) {
-        // Always apply and save settings
-        boolean successful = true;
-        try {
-//          _mainFrame.enableResetInteractions();
-          successful = saveSettings();
-        }
-        catch (IOException ioe) {
-          // oh well...
-        }
-        if (successful) {
-          _applyButton.setEnabled(false);
-        }
-        ConfigFrame.this.setVisible(false);
-      }
-    };
-    _okButton = new JButton(okAction);
-
-    Action applyAction = new AbstractAction("Apply") {
-      public void actionPerformed(ActionEvent e) {
-        // Always save settings
-        try {
-//          _mainFrame.enableResetInteractions();
-          saveSettings(); 
-          _applyButton.setEnabled(false); 
-  
-        }
-        catch (IOException ioe) {
-        }
-      }
-    };
-    _applyButton = new JButton(applyAction);
-    _applyButton.setEnabled(false);
-
-    Action cancelAction = new AbstractAction("Cancel") {
-      public void actionPerformed(ActionEvent e) {
-        cancel();
-      }
-    };
-    _cancelButton = new JButton(cancelAction);
-
-    /* Now always saves settings...
-    _saveSettingsButton = new JButton("Save Settings");
-    _saveSettingsButton.setToolTipText("Save all settings to disk for future sessions.");
-    _saveSettingsButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        saveSettings();
-      }
-    });
-    */
 
     // Add buttons
     JPanel bottom = new JPanel();
@@ -220,12 +203,7 @@ public class ConfigFrame extends JFrame {
 
     this.setSize(frameSize);
     this.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
-//    int width = getWidth() / 4;
-//    System.out.println("width: " + getWidth());
-//    System.out.println("width for divider: " + width);
-//    _splitPane.setDividerLocation(width);
-//    _mainPanel.setPreferredSize(new Dimension(getWidth() - width,
-//                                              _splitPane.getHeight()));
+
     addWindowListener(new WindowAdapter() {
       public void windowClosing(java.awt.event.WindowEvent e) { cancel(); }
     });
@@ -234,6 +212,32 @@ public class ConfigFrame extends JFrame {
     _tree.expandRow(0);
     _tree.expandRow(1);
     _tree.expandRow(2);
+  }
+  
+  /** Performs deferred initialization.  Only runs in the event thread.  Some of this code occasionally generated swing
+   *  exceptions  when run in themain thread as part of MainFrame construction prior to making MainFrame visible. */
+  public void setUp() {
+    
+    /* Set up _fileOptionChooser, _browserChooser, and _dirChooser.  The line _dirChooser.setSelectedFile(...) caused
+     * java.lang.ArrayIndexOutOfBoundsException within swing code in a JUnit test setUp() routine that constructed a
+     * a MainFrame.
+     */
+
+    _fileOptionChooser.setDialogTitle("Select");
+    _fileOptionChooser.setApproveButtonText("Select");
+    _fileOptionChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    _fileOptionChooser.setFileFilter(ClassPathFilter.ONLY);
+    
+    _browserChooser.setDialogTitle("Select Web Browser");
+    _browserChooser.setApproveButtonText("Select");
+    _browserChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    
+    _dirChooser.setSelectedFile(_getWorkDir());
+    _dirChooser.setDialogTitle("Select");
+    _dirChooser.setApproveButtonText("Select");
+    _dirChooser.setMultiSelectionEnabled(false);
+
+    
   }
 
   /** Returns the current master working directory, or the user's current directory if none is set. 20040213 Changed default 
@@ -293,11 +297,7 @@ public class ConfigFrame extends JFrame {
   }
 
   /** Creates the JTree to display preferences categories. */
-  private void _createTree() {
-
-    _rootNode = new PanelTreeNode("Preferences");
-    _treeModel = new DefaultTreeModel(_rootNode);
-    _tree = new JTree(_treeModel);
+  private void _initTree() {
     _tree.setEditable(false);
     _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     _tree.setShowsRootHandles(true);
@@ -348,14 +348,9 @@ public class ConfigFrame extends JFrame {
    * @param t the title of this panel
    * @return this tree node
    */
-  private PanelTreeNode _createPanel(String t) {
-    return _createPanel(t, _rootNode);
-  }
+  private PanelTreeNode _createPanel(String t) { return _createPanel(t, _rootNode); }
 
-
-  /**
-   * Creates all of the panels contained within the frame.
-   */
+  /** Creates all of the panels contained within the frame. */
   private void _createPanels() {
 
     PanelTreeNode resourceLocNode = _createPanel("Resource Locations");

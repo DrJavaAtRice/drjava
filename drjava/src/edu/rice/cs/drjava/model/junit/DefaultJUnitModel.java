@@ -205,7 +205,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {
 //    new ScrollableDialog(null, "junit(" + doc + ") called in DefaultJunitModel", "", "").show();
     File testFile;
-    try { testFile = doc.getFile(); 
+    try { 
+      testFile = doc.getFile(); 
       if (testFile == null) {  // document is untitiled: abort unit testing and return
         nonTestCase(false);
         return;

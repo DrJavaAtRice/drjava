@@ -65,11 +65,8 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
 //  private static final String BEAT_1 = "void beat(Horse dead,\n";
 //  private static final String BEAT_2 = "          Stick pipe)\n";
 
-  /**
-   * Tests indent that increases the size of the tab when the
-   * cursor is at the start of the line.  When the cursor is in the
-   * whitespace before the first word on a line, indent always
-   * moves the cursor up to the beginning of the first non-whitespace
+  /** Tests that an indent increases the size of the tab when the cursor is at the start of the line.  If the cursor is
+   *  in the whitespace before the first word on a line, indent always moves the cursor up to the beginning of the first non-whitespace
    * character.
    * @throws BadLocationException
    */
@@ -89,8 +86,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    *  The cursor stays in the same place.
    *  @throws BadLocationException
    */
-  public void testIndentGrowTabAtMiddle()
-      throws BadLocationException, OperationCanceledException {
+  public void testIndentGrowTabAtMiddle() throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     
     openDoc.insertString(0, FOO_EX_1, null);
@@ -102,14 +98,11 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertLocation(FOO_EX_1.length() + 6, openDoc);
   }
 
-  /**
-   * Tests indent that increases the size of the tab when the
-   * cursor is at the end of the line.  The cursor stays in the
-   * same place.
-   * @throws BadLocationException
+  /** Tests that an indent increases the size of the tab when the cursor is at the end of the line.  The cursor stays
+   *  in the same place.
+   *  @throws BadLocationException
    */
-  public void testIndentGrowTabAtEnd()
-      throws BadLocationException, OperationCanceledException {
+  public void testIndentGrowTabAtEnd() throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
     
     openDoc.insertString(0, FOO_EX_1, null);
@@ -121,16 +114,12 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertLocation(openDoc.getLength() - 1, openDoc);
   }
 
-  /**
-   * Tests indent that increases the size of the tab when the
-   * cursor is at the start of the line.  When the cursor is in the
-   * whitespace before the first word on a line, indent always
-   * moves the cursor up to the beginning of the first non-whitespace
-   * character.
-   * @throws BadLocationException
+  /** Tests that an indent increases the size of the tab when the cursor is at the start of the line.  If the cursor
+   *  is in  whitespace before the first word on a line, an indent moves the cursor to the beginning of the first 
+   *  non-whitespace character.
+   *  @throws BadLocationException
    */
-  public void testIndentShrinkTabAtStart()
-      throws BadLocationException, OperationCanceledException{
+  public void testIndentShrinkTabAtStart() throws BadLocationException, OperationCanceledException{
     OpenDefinitionsDocument openDoc = _getOpenDoc();
 
     openDoc.insertString(0, FOO_EX_1, null);
@@ -142,14 +131,11 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertLocation(FOO_EX_1.length() + 2, openDoc);
   }
 
-  /**
-   * Tests indent that increases the size of the tab when the
-   * cursor is in the middle of the line.  The cursor stays in the
-   * same place.
-   * @throws BadLocationException
+  /** Tests that an indent increases the size of the tab when the cursor is in the middle of the line.  The cursor stays
+   *  in the same place.
+   *  @throws BadLocationException
    */
-  public void testIndentShrinkTabAtMiddle()
-      throws BadLocationException, OperationCanceledException {
+  public void testIndentShrinkTabAtMiddle() throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
 
     openDoc.insertString(0, FOO_EX_1, null);
@@ -161,11 +147,9 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertLocation(FOO_EX_1.length() + 4, openDoc);
   }
 
-  /**
-   * Tests indent that increases the size of the tab when the
-   * cursor is at the end of the line.  The cursor stays in the
-   * same place.
-   * @throws BadLocationException
+  /** Tests that an indent increases the size of the tab when the cursor is at the end of the line.  The cursor stays
+   *  in the same place.
+   *  @throws BadLocationException
    */
   public void testIndentShrinkTabAtEnd()
       throws BadLocationException, OperationCanceledException {
@@ -180,13 +164,10 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertLocation(openDoc.getLength() - 1, openDoc);
   }
 
-  /**
-   * Do an indent that should match up with the indent on the line above.
-   * The cursor is at the start of the line.
+  /** Tests that an indent matches up with the indent on the line above. The cursor is at the start of the line.
    * @exception BadLocationException
    */
-  public void testIndentSameAsLineAboveAtStart()
-      throws BadLocationException, OperationCanceledException {
+  public void testIndentSameAsLineAboveAtStart() throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
 
     openDoc.insertString(0, FOO_EX_2, null);
@@ -198,13 +179,10 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertLocation(FOO_EX_2.length(), openDoc);
   }
 
-  /**
-   * Do an indent that should match up with the indent on the line above.
-   * The cursor is at the end of the line.
-   * @exception BadLocationException
+  /** Tests that an indent matches up with the indent on the line above. The cursor is at the end of the line.
+   *  @exception BadLocationException
    */
-  public void testIndentSameAsLineAboveAtEnd()
-      throws BadLocationException, OperationCanceledException {
+  public void testIndentSameAsLineAboveAtEnd() throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
 
     openDoc.insertString(0, FOO_EX_2, null);
@@ -221,8 +199,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * The cursor is at the start of the line.
    * @exception BadLocationException
    */
-  public void testIndentInsideParenAtStart()
-      throws BadLocationException, OperationCanceledException {
+  public void testIndentInsideParenAtStart() throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
 
     openDoc.insertString(0, BAR_CALL_1, null);
@@ -234,13 +211,10 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertLocation(BAR_CALL_1.length() + 4, openDoc);
   }
 
-  /**
-   * Do an indent that follows the behavior in line with parentheses.
-   * The cursor is at the end of the line.
-   * @exception BadLocationException
+  /** Do an indent that follows the behavior in line with parentheses. The cursor is at the end of the line.
+   *  @exception BadLocationException
    */
-  public void testIndentInsideParenAtEnd()
-      throws BadLocationException, OperationCanceledException {
+  public void testIndentInsideParenAtEnd() throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
 
     openDoc.insertString(0, BAR_CALL_1, null);
@@ -252,11 +226,8 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertLocation(openDoc.getLength() - 1, openDoc);
   }
 
-  /**
-   * Indent does nothing to change the document when everything is in place.
-   */
-  public void testIndentDoesNothing()
-      throws BadLocationException, OperationCanceledException {
+  /** Indent does nothing to change the document when everything is in place. */
+  public void testIndentDoesNothing() throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
 
     openDoc.insertString(0, FOO_EX_2 + FOO_EX_2, null);
@@ -302,9 +273,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
 //    _assertLocation(openDoc.getLength(), openDoc);
 //  }
 
-  /**
-   * Get the only open definitions document.
-   */
+  /** Get the only open definitions document. */
   private OpenDefinitionsDocument _getOpenDoc() {
     _assertNumOpenDocs(1);
     OpenDefinitionsDocument doc = _model.newFile();

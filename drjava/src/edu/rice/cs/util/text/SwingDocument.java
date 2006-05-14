@@ -34,6 +34,7 @@
 package edu.rice.cs.util.text;
 
 import edu.rice.cs.util.UnexpectedException;
+import static edu.rice.cs.util.text.AbstractDocumentInterface.*;
 
 import java.awt.print.Pageable;
 
@@ -49,6 +50,9 @@ import java.util.Hashtable;
  *  @version $Id$
  */
 public class SwingDocument extends DefaultStyledDocument implements EditDocumentInterface, AbstractDocumentInterface {
+  
+  /** The lock state.  See ReadersWritersLocking interface for documentation. */
+  private volatile int _lockState = UNLOCKED;
   
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;
@@ -87,9 +91,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
    *  @param condition Object to determine legality of inputs
    */
   public void setEditCondition(DocumentEditCondition condition) {
-    modifyLock();
+    acquireWriteLock();
     try { _condition = condition; }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Inserts a string into the document at the given offset and the given named style, if the edit condition 
@@ -100,9 +104,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
    *  @throws EditDocumentException if the offset is illegal
    */
   public void insertText(int offs, String str, String style) {
-    modifyLock();
+    acquireWriteLock();
     try { if (_condition.canInsertText(offs)) forceInsertText(offs, str, style); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Inserts a string into the document at the given offset and the given named style, regardless of the edit 
@@ -124,9 +128,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
    *  which sees a null style name.
    */
   public void insertString(int offs, String str, AttributeSet set) throws BadLocationException {
-    modifyLock();  // locking is used to make the test and modification atomic
+    acquireWriteLock();  // locking is used to make the test and modification atomic
     try { if (_condition.canInsertText(offs)) super.insertString(offs, str, set); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Removes a portion of the document, if the edit condition allows it.
@@ -135,9 +139,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
    *  @throws EditDocumentException if the offset or length are illegal
    */
   public void removeText(int offs, int len) {
-    modifyLock();  // locking is used to make the test and modification atomic
+    acquireWriteLock();  // locking is used to make the test and modification atomic
     try { if (_condition.canRemoveText(offs)) forceRemoveText(offs, len); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Removes a portion of the document, regardless of the edit condition.
@@ -153,9 +157,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
 
   /** Overrides superclass's remove to impose the edit condition. */
   public void remove(int offs, int len) throws BadLocationException {
-    modifyLock(); // locking is used to make the test and modification atomic
+    acquireWriteLock(); // locking is used to make the test and modification atomic
     try { if (_condition.canRemoveText(offs))  super.remove(offs, len); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
 //  /** Returns the length of the document. */
@@ -173,18 +177,18 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
   /** Returns entire text of this document. */
   public String getText() {
-    readLock();
+    acquireReadLock();
     try { return getText(0, getLength()); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
-    finally { readUnlock(); }
+    finally { releaseReadLock(); }
   }
   
   /** Appends given string with specified attributes to end of this document. */
   public void append(String str, AttributeSet set) {
-    modifyLock();
+    acquireWriteLock();
     try { insertString(getLength(), str, set); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
   
   /** Appends given string with specified named style to end of this document. */
@@ -203,14 +207,30 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
   /* Locking operations */
   
-  /* public void readLock() is inherited. */
-  
-  /* public void readUnlock() is inherited. */
+  /* Swing-style readLock(). Must be renamed because inherited writeLock is final. */
+  public synchronized void acquireReadLock() {
+    _lockState++;
+    readLock();
+  }
+   
+  /* Swing-style readUnlock(). Must be renamed because inherited writeLock is final. */
+  public synchronized void releaseReadLock() {
+    readUnlock();
+    _lockState--;
+  }
 
   /** Swing-style writeLock().  Must be renamed because inherited writeLock is final. */
-  public void modifyLock() { writeLock(); }
+  public synchronized void acquireWriteLock() { 
+    _lockState = MODIFYLOCKED;
+    writeLock(); 
+  }
   
    /** Swing-style writeUnlock().  Must be renamed because inherited writeUnlock is final.*/
-  public void modifyUnlock() { writeUnlock(); }
+  public void releaseWriteLock() { 
+    writeUnlock();
+    _lockState = UNLOCKED;
+  }
+  
+  public int getLockState() { return _lockState; }
 }
 

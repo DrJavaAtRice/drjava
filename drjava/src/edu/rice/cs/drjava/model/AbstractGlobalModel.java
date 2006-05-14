@@ -152,9 +152,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   // ----- FIELDS -----
   
-  /** A list of files that are auxiliary files to the currently open project.  
+  /** A list of files that are auxiliary files to the currently open project.  All accesses to this variable must be synchronized.
    *  TODO: make part of FileGroupingState. */
-  protected LinkedList<File> _auxiliaryFiles = new LinkedList<File>();
+  private LinkedList<File> _auxiliaryFiles = new LinkedList<File>();
   
   /** Adds a document to the list of auxiliary files.  The LinkedList class is not thread safe, so
    *  the add operation is synchronized.
@@ -214,11 +214,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** The document adapter used in the console document. */
   protected final InteractionsDJDocument _consoleDocAdapter;
   
-  /** Indicates whether the model is currently trying to close all documents, and thus that a new one should not be 
-   *  created, and whether or not to update the navigator
-   */
-  protected boolean _isClosingAllDocs;
-  
   /** A lock object to prevent print calls to System.out or System.err from flooding the JVM, ensuring the UI 
    *  remains responsive.
    */
@@ -230,33 +225,33 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public static final int WRITE_DELAY = 5;
   
   /** A PageFormat object for printing to paper. */
-  protected PageFormat _pageFormat = new PageFormat();
+  protected volatile PageFormat _pageFormat = new PageFormat();
   
   /** The active document pointer, which will never be null once the constructor is done.
    *  Maintained by the _gainVisitor with a navigation listener.
    */
-  private OpenDefinitionsDocument _activeDocument;
+  private volatile OpenDefinitionsDocument _activeDocument;
   
   /** A pointer to the active directory, which is not necessarily the parent of the active document
    *  The user may click on a folder component in the navigation pane and that will set this field without
    *  setting the active document.  It is used by the newFile method to place new files into the active directory.
    */
-  private File _activeDirectory;
+  private volatile File _activeDirectory;
    
   /** The abstract container which contains views of open documents and allows user to navigate document focus among
    *  this collection of open documents
    */
-  protected IDocumentNavigator<OpenDefinitionsDocument> _documentNavigator = 
+  protected volatile IDocumentNavigator<OpenDefinitionsDocument> _documentNavigator = 
       new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeListNavigator(); 
 
   /** Manager for breakpoint regions. */
-  protected ConcreteRegionManager<Breakpoint> _breakpointManager;
+  protected final ConcreteRegionManager<Breakpoint> _breakpointManager;
   
   /** @return manager for breakpoint regions. */
   public RegionManager<Breakpoint> getBreakpointManager() { return _breakpointManager; }
   
   /** Manager for bookmark regions. */
-  protected ConcreteRegionManager<DocumentRegion> _bookmarkManager;
+  protected final ConcreteRegionManager<DocumentRegion> _bookmarkManager;
   
   /** @return manager for bookmark regions. */
   public RegionManager<DocumentRegion> getBookmarkManager() { return _bookmarkManager; }
@@ -277,6 +272,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _consoleDocAdapter = new InteractionsDJDocument();
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
     
+    _bookmarkManager = new ConcreteRegionManager<DocumentRegion>();
+    
+    _breakpointManager = new ConcreteRegionManager<Breakpoint>() {
+      public boolean changeRegionHelper(final Breakpoint oldBP, final Breakpoint newBP) {
+        // override helper so the enabled flag is copied
+        if (oldBP.isEnabled() != newBP.isEnabled()) {
+          oldBP.setEnabled(newBP.isEnabled());
+          return true;
+        }
+        return false;
+      }
+    };
+    
     _registerOptionListeners();
         
     setFileGroupingState(makeFlatFileGroupingState());
@@ -285,17 +293,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   private void _init() {
-    _breakpointManager = new ConcreteRegionManager<Breakpoint>() {
-      public boolean changeRegionHelper(Breakpoint oldBP, Breakpoint newBP) {
-        // override helper so the enabled flag is copied
-        if (oldBP.isEnabled()!=newBP.isEnabled()) {
-          oldBP.setEnabled(newBP.isEnabled());
-          return true;
-        }
-        return false;
-      }
-    };
-    _bookmarkManager = new ConcreteRegionManager<DocumentRegion>();
 
     /** This visitor is invoked by the DocumentNavigator to update _activeDocument among other things */
     final NodeDataVisitor<OpenDefinitionsDocument, Boolean> _gainVisitor = new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
@@ -304,8 +301,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document
         
 //        Utilities.showDebug("Setting the active doc done");
-        File oldDir = _activeDirectory;  // _activeDirectory can be null
-        File dir = doc.getParentDirectory();  // dir can be null
+        final File oldDir = _activeDirectory;  // _activeDirectory can be null
+        final File dir = doc.getParentDirectory();  // dir can be null
         if (dir != null && ! dir.equals(oldDir)) { 
         /* If the file is in External or Auxiliary Files then then we do not want to change our project directory
          * to something outside the project. ?? */
@@ -342,7 +339,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public void focusLost(FocusEvent e) { }
     });
     
-    _isClosingAllDocs = false;
     _ensureNotEmpty();
     setActiveFirstDocument();
     
@@ -416,7 +412,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   // ----- STATE -----
-  protected FileGroupingState _state;
+  protected volatile FileGroupingState _state;
   /** Delegates the compileAll command to the _state, a FileGroupingState.
    *  Synchronization is handled by the compilerModel.
    */
@@ -566,16 +562,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   class ProjectFileGroupingState implements FileGroupingState {
     
-    File _projRoot;
-    File _mainFile;
-    File _buildDir;
-    File _workDir;
-    File _projectFile;
+    volatile File _projRoot;
+    volatile File _mainFile;
+    volatile File _buildDir;
+    volatile File _workDir;
+    volatile File _projectFile;
     final File[] projectFiles;
-    ClassPathVector _projExtraClassPath;
+    volatile ClassPathVector _projExtraClassPath;
     private boolean _isProjectChanged = false;
-    File _createJarFile;
-    int _createJarFlags;
+    volatile File _createJarFile;
+    volatile int _createJarFlags;
     
     //private ArrayList<File> _auxFiles = new ArrayList<File>();
     
@@ -947,7 +943,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return doc;
   }
 
-  
   /** Creates a new document, adds it to the list of open documents, and sets it to be active.
    *  @return The new open document
    */
@@ -2252,7 +2247,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   class ConcreteOpenDefDoc implements OpenDefinitionsDocument {
     protected class SubsetRegionManager<R extends DocumentRegion> extends EventNotifier<RegionManagerListener<R>> implements RegionManager<R> {
       /** The region manager it is a subset of. */
-      private RegionManager<R> _superSetManager;
+      private volatile RegionManager<R> _superSetManager;
       
       /** Creates a subset region manager that only sees the regions in this document. */
       public SubsetRegionManager(RegionManager<R> ssm) { _superSetManager = ssm; }
@@ -2280,16 +2275,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       /** Add the supplied DocumentRegion to the manager.
        *  @param region the DocumentRegion to be inserted into the manager
        */
-      public void addRegion(R region) {
-        _superSetManager.addRegion(region);
-      }
+      public void addRegion(R region) { _superSetManager.addRegion(region); }
       
       /** Remove the given DocumentRegion from the manager.
        *  @param region the DocumentRegion to be removed.
        */
-      public void removeRegion(R region) {
-        _superSetManager.removeRegion(region);
-      }
+      public void removeRegion(R region) { _superSetManager.removeRegion(region); }
       
       /** @return a Vector<R> containing the DocumentRegion objects corresponding ONLY to this document. */
       public Vector<R> getRegions() {
@@ -2363,9 +2354,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             }
           }
         }
-        finally {
-          _lock.endWrite();
-        }
+        finally { _lock.endWrite(); }
       }
     
       /** Removes all listeners from this notifier.  */
@@ -2377,9 +2366,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             _superSetManager.removeListener(filter);
           }
         }
-        finally {
-          _lock.endWrite();
-        }
+        finally { _lock.endWrite(); }
       }
     }
     
@@ -2389,7 +2376,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private volatile long _timestamp;
     
     /** Caret position, as set by the view. */
-    private int _caretPosition;
+    private volatile int _caretPosition;
     
     /** The folder containing this document */
     private volatile File _parentDir; 
@@ -2403,10 +2390,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private volatile DCacheAdapter _cacheAdapter;
     
     /** Manager for bookmark regions. */
-    protected SubsetRegionManager<Breakpoint> _breakpointManager;
+    protected volatile SubsetRegionManager<Breakpoint> _breakpointManager;
     
     /** Manager for bookmark regions. */
-    protected SubsetRegionManager<DocumentRegion> _bookmarkManager;
+    protected volatile SubsetRegionManager<DocumentRegion> _bookmarkManager;
     
     private volatile int _initVScroll;
     private volatile int _initHScroll;
@@ -2805,9 +2792,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             public void saveTo(OutputStream os) throws IOException {
               DefinitionsDocument dd = getDocument();
               try { 
-                dd.readLock();  // Technically required, but looks like overkill.
+                dd.acquireReadLock();  // Technically required, but looks like overkill.
                 _editorKit.write(os, dd, 0, dd.getLength());
-                dd.readUnlock();
+                dd.releaseReadLock();
 //                Utilities.show("Wrote file containing:\n" + doc.getText());
               } 
               catch (BadLocationException docFailed) { throw new UnexpectedException(docFailed); }
@@ -2912,10 +2899,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       boolean ret = false;
       DefinitionsDocument dd = getDocument();
       try {
-        dd.readLock();
+        dd.acquireReadLock();
         if (_file != null) ret = (_file.lastModified() > _timestamp);
       }
-      finally { dd.readUnlock(); }
+      finally { dd.releaseReadLock(); }
       return ret;
     }
     
@@ -3473,34 +3460,36 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public String getText() {
       DefinitionsDocument doc = getDocument();
-      doc.readLock();
+      doc.acquireReadLock();
       try { return doc.getText(0, doc.getLength()); }
       catch(BadLocationException e) { throw new UnexpectedException(e); }
-      finally { readUnlock(); }
+      finally { releaseReadLock(); }
     }
     
     public void clear() {
       DefinitionsDocument doc = getDocument();
-      doc.modifyLock();
+      doc.acquireWriteLock();
       try { doc.remove(0, doc.getLength()); }
       catch(BadLocationException e) { throw new UnexpectedException(e); }
-      finally { modifyUnlock(); }
+      finally { releaseWriteLock(); }
     }
     
     
     /* Locking operations in DJDocument interface */
     
     /** Swing-style readLock(). */
-    public void readLock() { getDocument().readLock(); }
+    public void acquireReadLock() { getDocument().acquireReadLock(); }
     
-    /** Swing-style readUnlock(). */
-    public void readUnlock() { getDocument().readUnlock(); }
+    /** Swing-style readUlLock(). */
+    public void releaseReadLock() { getDocument().releaseReadLock(); }
     
     /** Swing-style writeLock(). */
-    public void modifyLock() { getDocument().modifyLock(); }
+    public void acquireWriteLock() { getDocument().acquireWriteLock(); }
     
     /** Swing-style writeUnlock(). */
-    public void modifyUnlock() { getDocument().modifyUnlock(); }
+    public void releaseWriteLock() { getDocument().releaseWriteLock(); }
+    
+    public int getLockState() { return getDocument().getLockState(); }
     
     /** @return the number of lines in this document. */
     public int getNumberOfLines() { return getLineOfOffset(getEndPosition().getOffset()-1); }
@@ -3696,7 +3685,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //----------------------- SingleDisplay Methods -----------------------//
 
   /** Returns the currently active document. */
-  public OpenDefinitionsDocument getActiveDocument() {return  _activeDocument; }
+  public OpenDefinitionsDocument getActiveDocument() { return  _activeDocument; }
   
   
   /** Sets the currently active document by updating the selection model.
@@ -3751,7 +3740,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
   /** Creates a new document if there are currently no documents open. */
   private void _ensureNotEmpty() {
-    if ((!_isClosingAllDocs) && (getOpenDefinitionsDocumentsSize() == 0)) newFile(getMasterWorkingDirectory());
+    if (getOpenDefinitionsDocumentsSize() == 0) newFile(getMasterWorkingDirectory());
   }
   
   /** Makes sure that none of the documents in the list are active. 

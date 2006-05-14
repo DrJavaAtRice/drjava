@@ -398,16 +398,18 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public void clear() { throw new UnsupportedOperationException("Dummy method"); }
  
   /** Swing-style readLock(). */
-  public void readLock() { throw new UnsupportedOperationException("Dummy method"); }
+  public void acquireReadLock() { throw new UnsupportedOperationException("Dummy method"); }
   
-   /** Swing-style readUnlock(). */
-  public void readUnlock() { throw new UnsupportedOperationException("Dummy method"); }
+  /** Swing-style readUnLock(). */
+  public void releaseReadLock() { throw new UnsupportedOperationException("Dummy method"); }
 
-    /** Swing-style writeLock(). */
-  public void modifyLock() { throw new UnsupportedOperationException("Dummy method"); }
+  /** Swing-style writeLock(). */
+  public void acquireWriteLock() { throw new UnsupportedOperationException("Dummy method"); }
   
-   /** Swing-style writeUnlock(). */
-  public void modifyUnlock() { throw new UnsupportedOperationException("Dummy method"); }
+  /** Swing-style writeUnlock(). */
+  public void releaseWriteLock() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  public int getLockState() { throw new UnsupportedOperationException("Dummy method"); }
   
   /** @return the number of lines in this document. */
   public int getNumberOfLines() { return 0; }

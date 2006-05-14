@@ -103,9 +103,9 @@ public class ConsoleDocument implements EditDocumentInterface {
    *  @param prompt String to use for the prompt.
    */
   public void setPrompt(String prompt) { 
-    modifyLock();
+    acquireWriteLock();
     _prompt = prompt;
-    modifyUnlock();
+    releaseWriteLock();
   }
 
   /** Gets the object which determines whether an insert/remove edit should be applied based on the inputs.
@@ -126,35 +126,35 @@ public class ConsoleDocument implements EditDocumentInterface {
    *  @param newPos the new position.
    */
   public void setPromptPos(int newPos) { 
-    readLock();
+    acquireReadLock();
     _promptPos = newPos; 
-    readUnlock();
+    releaseReadLock();
   }
 
   /** Sets a runnable action to use as a beep.
    *  @param beep Runnable beep command
    */
   public void setBeep(Runnable beep) { 
-    readLock();
+    acquireReadLock();
     _beep = beep; 
-    readUnlock();
+    releaseReadLock();
   }
 
   /** Resets the document to a clean state. */
   public void reset(String banner) {
-    modifyLock();
+    acquireWriteLock();
     try {
       forceRemoveText(0, _document.getLength());
       forceInsertText(0, banner, DEFAULT_STYLE);
       _promptPos = 0;
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Prints a prompt for a new input. */
   public void insertPrompt() {
-    modifyLock();
+    acquireWriteLock();
     try {
 //      append(_prompt, DEFAULT_STYLE);  // need forceAppend!
 //      _promptPos = _document.getLength();
@@ -165,17 +165,17 @@ public class ConsoleDocument implements EditDocumentInterface {
        
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e);  }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Disables the prompt in this document. */
   public void disablePrompt() {
-    modifyLock();
+    acquireWriteLock();
     try {
     _hasPrompt = false;
     _promptPos = _document.getLength();
     }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Inserts a new line at the given position.
@@ -183,7 +183,7 @@ public class ConsoleDocument implements EditDocumentInterface {
    */
   public void insertNewLine(int pos) {
     // Correct the position if necessary
-    modifyLock();
+    acquireWriteLock();
     try {
       int len = _document.getLength();
       if (pos > len)  pos = len;
@@ -193,17 +193,17 @@ public class ConsoleDocument implements EditDocumentInterface {
       insertText(pos, newLine, DEFAULT_STYLE);
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Gets the position immediately before the prompt, or the doc length if there is no prompt. */
   public int getPositionBeforePrompt() {
-    readLock();
+    acquireReadLock();
     try {
       if (_hasPrompt) return _promptPos - _prompt.length();
       return _document.getLength();
     }
-    finally { readUnlock(); }
+    finally { releaseReadLock(); }
   }
 
   /** Inserts the given string with the given attributes just before the most recent prompt.
@@ -211,7 +211,7 @@ public class ConsoleDocument implements EditDocumentInterface {
    *  @param style name of style to format the string
    */
   public void insertBeforeLastPrompt(String text, String style) {
-    modifyLock();
+    acquireWriteLock();
     try {
       int pos = getPositionBeforePrompt();
       _promptPos += text.length();
@@ -219,7 +219,7 @@ public class ConsoleDocument implements EditDocumentInterface {
       _document.forceInsertText(pos, text, style);
     }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Inserts a string into the document at the given offset and named style, if the edit condition allows it.
@@ -229,7 +229,7 @@ public class ConsoleDocument implements EditDocumentInterface {
    *  @throws EditDocumentException if the offset is illegal
    */
   public void insertText(int offs, String str, String style) throws EditDocumentException {
-    modifyLock();
+    acquireWriteLock();
     try {
       if (offs < _promptPos) _beep.run();
       else {
@@ -237,7 +237,7 @@ public class ConsoleDocument implements EditDocumentInterface {
         _document.insertText(offs, str, style);
       }
     }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
   
   /** Appends a string to this in the given named style, if the edit condition allows it.
@@ -246,13 +246,13 @@ public class ConsoleDocument implements EditDocumentInterface {
    *  @throws EditDocumentException if the offset is illegal
    */
   public void append(String str, String style) throws EditDocumentException {
-    modifyLock();
+    acquireWriteLock();
     try {
       int offs = _document.getLength();
       _addToStyleLists(offs, str, style);
       _document.insertText(offs, str, style);
     }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
   
   /** Inserts a string into the document at the given offset and the given named style, regardless of the edit 
@@ -263,12 +263,12 @@ public class ConsoleDocument implements EditDocumentInterface {
    *  @throws EditDocumentException if the offset is illegal
    */
   public void forceInsertText(int offs, String str, String style) throws EditDocumentException {
-    modifyLock();
+    acquireWriteLock();
     try {
       _addToStyleLists(offs, str, style);
       _document.forceInsertText(offs, str, style);
     }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
   
   private void _addToStyleLists(int offs, String str, String style) {
@@ -282,12 +282,12 @@ public class ConsoleDocument implements EditDocumentInterface {
    *  @throws EditDocumentException if the offset or length are illegal
    */
   public void removeText(int offs, int len) throws EditDocumentException {
-    modifyLock();
+    acquireWriteLock();
     try {
       if (offs < _promptPos) _beep.run();
       else _document.removeText(offs, len);
     }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Removes a portion of the document, regardless of the edit condition.
@@ -315,23 +315,23 @@ public class ConsoleDocument implements EditDocumentInterface {
    *  @throws EditDocumentException if the offset or length are illegal
    */
   public String getText() {
-    modifyLock();
+    acquireWriteLock();
     try {
       return _document.getDocText(0, getLength());
     }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
   
   /** Returns the string that the user has entered at the current prompt.
    *  May contain newline characters.
    */
   public String getCurrentInput() {
-    readLock();
+    acquireReadLock();
     try {
       try { return getDocText(_promptPos, _document.getLength() - _promptPos); }
       catch (EditDocumentException e) { throw new UnexpectedException(e); }
     }
-    finally { readUnlock(); }
+    finally { releaseReadLock(); }
   }
 
   /** Clears the current input text. */
@@ -339,13 +339,13 @@ public class ConsoleDocument implements EditDocumentInterface {
 
   /** Removes the text from the current prompt to the end of the document. */
   protected void _clearCurrentInputText() {
-    modifyLock();
+    acquireWriteLock();
     try {
       // Delete old value of current line
       removeText(_promptPos, _document.getLength() - _promptPos);
     }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
   
   /* Returns the default style for a "console" document. */
@@ -388,15 +388,17 @@ public class ConsoleDocument implements EditDocumentInterface {
   
   /* Locking operations */
   
-  /** Swing-style readLock(). */
-  public void readLock() { _document.readLock(); }
+  /** Swing-style acquireReadLock(). */
+  public void acquireReadLock() { _document.acquireReadLock(); }
   
-  /** Swing-style readUnlock(). */
-  public void readUnlock() { _document.readUnlock(); }
+  /** Swing-style releaseReadLock(). */
+  public void releaseReadLock() { _document.releaseReadLock(); }
   
   /** Swing-style writeLock(). */
-  public void modifyLock() { _document.modifyLock(); }
+  public void acquireWriteLock() { _document.acquireWriteLock(); }
   
   /** Swing-style writeUnlock(). */
-  public void modifyUnlock() { _document.modifyUnlock(); }
+  public void releaseWriteLock() { _document.releaseWriteLock(); }
+  
+  public int getLockState() { return _document.getLockState(); }
 }

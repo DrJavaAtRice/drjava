@@ -192,20 +192,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _cacheInUse = false;
   }
   
-  
-  /* readLock, readUnlock, modifyLock, modifyUnlock are inherited from AbstractDJDocument. */
- 
-//  /** This function is for use by the OpenDefinitionsDocument. This will lock the Document. */
-//  public void modifyLock() { writeLock(); }
-//  
-//  /** This function is for use by the OpenDefinitionsDocument. This will release the lock to the Document. */
-//  public void modifyUnlock() { writeUnlock(); }
-//  
-//  /** This function is for use by the OpenDefinitionsDocument. This will lock the Document.  */
-//  public void readLock() { super.readLock(); }
-//  
-//  /** This function is for use by the OpenDefinitionsDocument. This will release the lock to the Document. */
-//  public void readUnlock() { super.readUnlock(); }
+  /* acquireReadLock, releaseReadLock, acquireWriteLock, releaseWriteLock are inherited from AbstractDJDocument. */
    
   /** Sets the OpenDefinitionsDocument that holds this DefinitionsDocument (the odd can only be set once).
    *  @param odd the OpenDefinitionsDocument to set as this DD's holder
@@ -220,7 +207,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   protected void _styleChanged() {    
-    modifyLock();
+    acquireWriteLock();
     try {
       int length = getLength() - _currentLocation;
       
@@ -228,7 +215,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       DocumentEvent evt = new DefaultDocumentEvent(_currentLocation, length, DocumentEvent.EventType.CHANGE);
       fireChangedUpdate(evt);
     }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   } 
   
   
@@ -342,13 +329,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     // the document contains no tabs, but we want to allow the user
     // to override this functionality.
     
-    modifyLock();
+    acquireWriteLock();
     try {
       if (_tabsRemoved) str = _removeTabs(str);
       setModifiedSinceSave();
       super.insertString(offset, str, a);
     }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
   
   
@@ -359,12 +346,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     
     if (len == 0) return;
     
-    modifyLock();
+    acquireWriteLock();
     try {
       setModifiedSinceSave();
       super.remove(offset, len);
     }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }
 
   /** Given a String, return a new String will all tabs converted to spaces.  Each tab is converted 
@@ -381,14 +368,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  an undo or redo is performed. */
   public void updateModifiedSinceSave() {
     
-    modifyLock();
+    acquireWriteLock();
     try {
     _isModifiedSinceSave = _undoManager.isModified();
 //    System.out.println("DefinitionsDocument: set modified? " + _modifiedSinceSave);
     }
     finally { 
       if (! _isModifiedSinceSave && _odd != null) _odd.documentReset();
-      modifyUnlock();
+      releaseWriteLock();
 //    Utilities.showDebug("DefintionsDocument: _modifiedSinceSave = " + _modifiedSinceSave);
     }
   }
@@ -405,14 +392,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Resets the modification state of this document.  Used after a document has been saved or reverted. */
   public void resetModification() {
-    modifyLock();
+    acquireWriteLock();
     try {
       _isModifiedSinceSave = false;
       _undoManager.documentSaved();
     }
     finally { 
       if (_odd != null) _odd.documentReset();  // null test required for some unit tests
-      modifyUnlock(); 
+      releaseWriteLock(); 
 
     }
   }
@@ -421,9 +408,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  @return true if the document has been modified
    */
   public boolean isModifiedSinceSave() {
-    readLock();
+    acquireReadLock();
     try { return  _isModifiedSinceSave; }
-    finally { readUnlock(); }
+    finally { releaseReadLock(); }
   }
   
   /** Return the current column of the cursor position. Uses a 0 based index. */
@@ -534,7 +521,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
     int toReturn = selEnd;
     if (selStart == selEnd) {
-      modifyLock();
+      acquireWriteLock();
       try {     
         synchronized(_reduced) {
           setCurrentLocation(selStart);
@@ -546,7 +533,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
       }
       catch (BadLocationException e) { throw new UnexpectedException(e); }
-      finally { modifyUnlock(); }
+      finally { releaseWriteLock(); }
     }
     else toReturn = _commentBlock(selStart, selEnd);   
     _undoManager.endLastCompoundEdit();  //Changed from endCompoundEdit(key) for FrenchKeyBoardFix
@@ -562,7 +549,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   private int _commentBlock(final int start, final int end) {
     int afterCommentEnd = end;
-    modifyLock();
+    acquireWriteLock();
     try {
       // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc doing the
       // indentLine calls.
@@ -590,7 +577,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
     } 
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
     return afterCommentEnd;
   }
 
@@ -613,7 +600,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
     int toReturn = selEnd;
     if (selStart == selEnd) {
-      modifyLock();
+      acquireWriteLock();
       try {
         synchronized(_reduced) {
           setCurrentLocation(selStart);
@@ -626,7 +613,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
       }
       catch (BadLocationException e) { throw new UnexpectedException(e); }
-      finally { modifyUnlock(); }
+      finally { releaseWriteLock(); }
     }
     else  toReturn = _uncommentBlock(selStart, selEnd);
     //_undoManager.endCompoundEdit(key); //Commented out for FrenchKeyBoardFix, Replaced with endLastCompoundEdit();
@@ -641,7 +628,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   private int _uncommentBlock(final int start, final int end) {
     int afterUncommentEnd = end;
-    modifyLock();
+    acquireWriteLock();
     try {
       // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc
       // doing the indentLine calls.
@@ -668,7 +655,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
     return afterUncommentEnd;
   }
 
@@ -714,7 +701,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     if (line < 0) return;
     int actualLine =1;
     
-    readLock();
+    acquireReadLock();
     int len = getLength();
     try {
       synchronized(_reduced) {
@@ -731,11 +718,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         _cachedNextLineLoc = getLineEndPos(_currentLocation);
       }
     }
-    finally { readUnlock(); }
+    finally { releaseReadLock(); }
   }  
   
   private int _findNextOpenSquiggly(String text, int pos) throws BadLocationException {
-    // readLock assumed to be held,
+    // acquireReadLock assumed to be held,
     int i;
     int reducedPos = pos;
     
@@ -771,7 +758,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   private int _findPrevKeyword(String text, String kw, int pos) throws BadLocationException {
-    // readLock assumed to be held,
+    // acquireReadLock assumed to be held,
     int i;
     int reducedPos = pos;
     
@@ -844,7 +831,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       '!','@','#','$','%','^','~','\\','"','`','|'};
     String name = "";
 
-    readLock();
+    acquireReadLock();
     try {
       String text = getText(DOCSTART, pos+1);
       
@@ -955,7 +942,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
       } while(qual);
     }
-    finally { readUnlock(); }
+    finally { releaseReadLock(); }
     
     // chop off '$' at the end.
     if (name.length()>0) name = name.substring(0, name.length()-1);
@@ -991,7 +978,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       return cached;
     }
 
-    // readLock assumed to be held
+    // acquireReadLock assumed to be held
     cached = false;
     String text = getText(DOCSTART, openSquigglyPos+1);
     int origNewPos = newPos;
@@ -1073,7 +1060,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       return cached.intValue();
     }
 
-    // readLock assumed to be held
+    // acquireReadLock assumed to be held
     --pos; // move outside the curly brace
     char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=',
       '!','@','#','$','%','^','~','\\','"','`','|'};
@@ -1152,7 +1139,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     StringBuffer buf = new StringBuffer();
     int oldLocation = 0;  // javac requires this bogus initialization
     
-    readLock();
+    acquireReadLock();
     try {
       final String text = getText();
       final int docLength = text.length();
@@ -1228,7 +1215,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
       }
     }
-    finally { readUnlock(); }
+    finally { releaseReadLock(); }
   }
 
   /** Returns the name of the class or interface enclosing the caret position at the top level.
@@ -1236,7 +1223,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  @throws ClassNameNotFoundException if no enclosing class found
    */
   public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
-    readLock();
+    acquireReadLock();
     synchronized(_reduced) {
       int oldLocation = _currentLocation;
       try {
@@ -1275,7 +1262,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       finally { 
         setCurrentLocation(oldLocation);
-        readUnlock();
+        releaseReadLock();
       }
     }
   }
@@ -1292,7 +1279,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   // note: need to update this to work with pos
   public String getNextTopLevelClassName(int startPos, int endPos) throws ClassNameNotFoundException {
 
-    readLock();
+    acquireReadLock();
     synchronized(_reduced) {
       int oldLocation = _currentLocation;
       
@@ -1347,7 +1334,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       finally { 
         setCurrentLocation(oldLocation);
-        readUnlock();
+        releaseReadLock();
       }
     }
   }
@@ -1361,7 +1348,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   private int _findKeywordAtToplevel(String keyword, String text, int textOffset) {
     
-    readLock();
+    acquireReadLock();
     synchronized(_reduced) {
       int oldLocation = _currentLocation;
       int index = 0;
@@ -1394,7 +1381,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         setCurrentLocation(oldLocation);
         return index;
       }
-      finally { readUnlock(); }
+      finally { releaseReadLock(); }
     }
   }
   

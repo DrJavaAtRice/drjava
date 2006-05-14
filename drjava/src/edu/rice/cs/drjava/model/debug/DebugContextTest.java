@@ -49,12 +49,12 @@ public final class DebugContextTest extends DebugTestCase {
   /** Tests that the sourcepath config option properly adds files to the search directories. */
   public void testDebugSourcepath() throws Exception {
     if (printMessages) printStream.println("----testDebugSourcePath----");
-    StepTestListener debugListener = new StepTestListener();
+    final StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
 
     // Start up
-    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
-    Vector<File> path = new Vector<File>();
+    final OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
+    final Vector<File> path = new Vector<File>();
     path.addElement(_tempDir);  // directory where doc's file is saved
 
     // Add a breakpoint
@@ -96,7 +96,11 @@ public final class DebugContextTest extends DebugTestCase {
 
     synchronized(_debugger) {
       // Add _tempDir to our sourcepath
-      DrJava.getConfig().setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
+      Utilities.invokeAndWait(new Runnable() { 
+        public void run() { 
+          DrJava.getConfig().setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
+        }
+      });
     }
 
     // Step to next line
@@ -117,7 +121,7 @@ public final class DebugContextTest extends DebugTestCase {
   /** Tests that breakpoints behave correctly in non-public classes. */
   public synchronized void testBreakpointsAndStepsInNonPublicClasses() throws Exception {
     if (printMessages) printStream.println("----testBreakpointsAndStepsInNonPublicClasses----");
-    StepTestListener debugListener = new StepTestListener();
+    final StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
 
     // Start up

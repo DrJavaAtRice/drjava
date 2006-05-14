@@ -93,13 +93,13 @@ import java.util.LinkedList;
  */
 public class ReaderWriterLock {
   /** The number of readers currently reading. */
-  private int _numActiveReaders = 0;
+  private volatile int _numActiveReaders = 0;
   /** The number of writers currently writing (ie. 0 or 1). */
-  private int _numActiveWriters = 0;
+  private volatile int _numActiveWriters = 0;
   /** The number of readers waiting to read. */
-  private int _numWaitingReaders = 0;
+  private volatile int _numWaitingReaders = 0;
   /** The number of writers waiting to write. */
-  private int _numWaitingWriters = 0;
+  private volatile int _numWaitingWriters = 0;
   
   /**
    * Queue of all waiting reader and writer threads.  The front of the queue
@@ -154,14 +154,10 @@ public class ReaderWriterLock {
     _runningThreads.add(Thread.currentThread());
   }
   
-  /**
-   * Must be called by each reader thread after it is finished reading.  The
-   * calling method must <i>not</i> be synchronized.
+  /** Must be called by each reader thread after it is finished reading.  The calling method must <i>not</i> be 
+   *  synchronized. This method wakes up a waiting writer if there are no remaining reader threads actively reading.
    * 
-   * This method wakes up a waiting writer if there are no remaining reader
-   * threads actively reading.
-   * 
-   * @throws IllegalStateException if the thread is already a reader or writer
+   *  @throws IllegalStateException if the thread is already a reader or writer
    */
   public synchronized void endRead() {
     if (_numActiveReaders == 0) {
@@ -187,15 +183,11 @@ public class ReaderWriterLock {
   }
   
   
-  /**
-   * Must be called by each writer thread before starting to write.  The calling
-   * method must <i>not</i> be synchronized.
+  /** Must be called by each writer thread before starting to write.  The calling method must <i>not</i> be 
+   *  synchronized. This method blocks the writer if there are any active readers or writers, and prevents any new 
+   *  readers from starting to read until this writer gets a chance to write.
    * 
-   * This method blocks the writer if there are any active readers or writers,
-   * and prevents any new readers from starting to read until this writer gets
-   * a chance to write.
-   * 
-   * @throws IllegalStateException if the thread is already a reader or writer
+   *  @throws IllegalStateException if the thread is already a reader or writer
    */
   public synchronized void startWrite() {
     // Make sure this thread isn't already reading or writing.
@@ -228,15 +220,11 @@ public class ReaderWriterLock {
     _runningThreads.add(Thread.currentThread());
   }
   
-  /**
-   * Must be called by each writer thread after it is finished writing.  The
-   * calling method must <i>not</i> be synchronized.
+  /** Must be called by each writer thread after it is finished writing.  The calling method must <i>not</i> be 
+   *  synchronized. This method wakes up any waiting readers and writers.  If there are waiting readers, they read 
+   *  before the next writer, but any new readers (after this call) wait until the next waiting writer writes.
    * 
-   * This method wakes up any waiting readers and writers.  If there are waiting
-   * readers, they get a chance to read before the next writer, but any new
-   * readers (after this call) must wait until the next waiting writer writes.
-   * 
-   * @throws IllegalStateException if the thread is already a reader or writer
+   *  @throws IllegalStateException if the thread is already a reader or writer
    */
   public synchronized void endWrite() {
     if (_numActiveWriters != 1) {
@@ -258,10 +246,7 @@ public class ReaderWriterLock {
     _wakeFrontGroupOfWaitQueue();
   }
   
-
-  /**
-   * Checks if the current thread is already a reader.
-   */
+  /** Checks if the current thread is already a reader. */
   private boolean _alreadyReading() {
     // If the current thread is active, and there are active readers, then
     //  the current thread must be a reader and not a writer.
@@ -270,11 +255,9 @@ public class ReaderWriterLock {
       
   }
 
-  /**
-   * Ensures that the current thread is not already considered a reader
-   * or writer.  This prevents the deadlock which would occur if a reader
-   * thread tries to write (or vice versa).
-   * @throws IllegalStateException if the thread is already a reader or writer
+  /** Ensures that the current thread is not already considered a reader or writer.  This prevents the deadlock which 
+   *  would occur if a reader thread tries to write (or vice versa).
+   *  @throws IllegalStateException if the thread is already a reader or writer
    */
   private void _ensureNotAlreadyRunning() {
     if (_runningThreads.contains(Thread.currentThread())) {
@@ -283,11 +266,9 @@ public class ReaderWriterLock {
     }
   }
   
-  /**
-   * Ensures that the current thread is not already considered a reader
-   * or writer.  This prevents the deadlock which would occur if a reader
-   * thread tries to write (or vice versa).
-   * @throws IllegalStateException if the thread is already a reader or writer
+  /**  Ensures that the current thread is not already considered a reader or writer.  This prevents the deadlock which 
+   *   would occur if a reader thread tries to write (or vice versa).
+   *   @throws IllegalStateException if the thread is already a reader or writer
    */
   private void _ensureAlreadyRunning() {
     if (!_runningThreads.contains(Thread.currentThread())) {
@@ -295,10 +276,7 @@ public class ReaderWriterLock {
     }
   }
   
-  /**
-   * Wakes up either the writer or all sequential readers before a writer
-   * at the front of the waitQueue.
-   */
+  /** Wakes up either the writer or all sequential readers before a writer at the front of the waitQueue. */
   private synchronized void _wakeFrontGroupOfWaitQueue() {
     if (!_waitQueue.isEmpty()) {
       // Wake, whether it's a reader or writer
@@ -322,34 +300,27 @@ public class ReaderWriterLock {
   }
   
   
-  /**
-   * Represents a thread waiting to either read or write.  Instances of this
-   * class are placed in a queue to enforce the correct order when allowing
-   * new threads to read or write.  The waiting thread must call wait() on
-   * this object, allowing it to be notified when it reaches the front of
-   * the queue.  This object will remain on the queue until the thread
-   * completes its read or write, allowing us to check for and prevent deadlock
-   * if the same thread tries to both read and write at the same time.
+  /** Represents a thread waiting to either read or write.  Instances of this class are placed in a queue to enforce
+   *  the correct order when allowing new threads to read or write.  The waiting thread must call wait() on this object,
+   *  allowing it to be notified when it reaches the front of the queue.  This object will remain on the queue until the
+   *  thread completes its read or write, allowing us to check for and prevent deadlock if the same thread tries to both 
+   *  read and write at the same time.
    */
   public abstract class ReaderWriterThread {
-    private boolean _isWaiting = true;
+    private volatile boolean _isWaiting = true;
     /** Returns whether this ReaderWriter is a writer. */
     public abstract boolean isWriter();
     /** Returns whether this ReaderWriter is a reader. */
     public abstract boolean isReader();
     
-    /**
-     * Causes this ReaderWriterThread to wait until stopWaiting is called.
-     * While it's waiting, it is on the waitQueue.
+    /** Causes this ReaderWriterThread to wait until stopWaiting is called. While it's waiting, it is on the waitQueue.
      */
     public void startWaiting() {
       synchronized (ReaderWriterLock.this) {
         _isWaiting = true;
         _waitQueue.addLast(this);
         while (_isWaiting) {
-          try {
-            ReaderWriterLock.this.wait();
-          }
+          try { ReaderWriterLock.this.wait(); }
           catch (InterruptedException e) {
             // loop checks if we still need to wait...
           }
@@ -357,9 +328,7 @@ public class ReaderWriterLock {
       }
     }
     
-    /**
-     * Wakes up this ReaderWriterThread, removing it from the waitQueue.
-     */
+    /** Wakes up this ReaderWriterThread, removing it from the waitQueue. */
     public void stopWaiting() {
       synchronized (ReaderWriterLock.this) {
         _isWaiting = false;
@@ -369,19 +338,13 @@ public class ReaderWriterLock {
     }
   }
   
-  /**
-   * Object representing a reader thread which is waiting for read access
-   * on the queue of waiting threads.
-   */
+  /** Object representing a reader thread which is waiting for read access on the queue of waiting threads. */
   public class Reader extends ReaderWriterThread {
     public boolean isReader() { return true; }
     public boolean isWriter() { return false; }
   }
   
-  /**
-   * Object representing a writer thread which is waiting for write access
-   * on the queue of waiting threads.
-   */
+  /** Object representing a writer thread which is waiting for write access on the queue of waiting threads. */
   public class Writer extends ReaderWriterThread {
     public boolean isReader() { return false; }
     public boolean isWriter() { return true; }

@@ -46,8 +46,7 @@ public class VectorClassnameOptionComponent extends VectorOptionComponent<String
   /**
    * Constructor that allows for a tooltip description.
    */
-  public VectorClassnameOptionComponent(VectorOption<String> opt, String text,
-                                        Frame parent, String description) {
+  public VectorClassnameOptionComponent(VectorOption<String> opt, String text, Frame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }
@@ -56,7 +55,10 @@ public class VectorClassnameOptionComponent extends VectorOptionComponent<String
     return new AbstractAction("Add") {
       public void actionPerformed(ActionEvent e) {
         String input = JOptionPane.showInputDialog(_parent, "Please enter the class name:");
-        if (input != null && !input.equals("")) { _listModel.addElement(input); notifyChangeListeners(); }
+        if (input != null && !input.equals("")) { 
+          _listModel.addElement(input); 
+          notifyChangeListeners(); 
+        }
       }
     };
   }

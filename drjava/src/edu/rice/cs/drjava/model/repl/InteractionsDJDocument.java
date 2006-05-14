@@ -183,7 +183,7 @@ public class InteractionsDJDocument extends AbstractDJDocument {
    *  @return true iff the end of the current interaction is an open comment block
    */
   public boolean inCommentBlock() {
-    readLock();
+    acquireReadLock();
     try {
       synchronized(_reduced) {
         resetReducedModelLocation();
@@ -192,7 +192,7 @@ public class InteractionsDJDocument extends AbstractDJDocument {
         return toReturn;
       }
     }
-    finally { readUnlock(); }
+    finally { releaseReadLock(); }
   }
   
   /** Inserts the given exception data into the document with the given style.
@@ -206,7 +206,7 @@ public class InteractionsDJDocument extends AbstractDJDocument {
     String c = exceptionClass;
     if (c.indexOf('.') != -1) c = c.substring(c.lastIndexOf('.') + 1, c.length());
     
-    modifyLock();
+    acquireWriteLock();
     try {
       insertText(getLength(), c + ": " + message + "\n", styleName);
       
@@ -272,6 +272,6 @@ public class InteractionsDJDocument extends AbstractDJDocument {
     }
     catch (IOException ioe) { throw new UnexpectedException(ioe); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-    finally { modifyUnlock(); }
+    finally { releaseWriteLock(); }
   }  
 }

@@ -43,6 +43,7 @@ import edu.rice.cs.util.swing.FileChooser;
 import edu.rice.cs.util.swing.FileSelectorStringComponent;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.StreamRedirectThread;
 
@@ -447,15 +448,10 @@ public class JarOptionsDialog extends JFrame {
         }
     };
     _mainClassField.getTextField().getDocument().addDocumentListener(new DocumentListener() {
-      public void insertUpdate(DocumentEvent e) {
-        _okButton.setEnabled(true);
-      }
-      public void removeUpdate(DocumentEvent e) {
-        _okButton.setEnabled(true);
-      }
-      public void changedUpdate(DocumentEvent e) {
-        _okButton.setEnabled(true);
-      }
+      public void insertUpdate(DocumentEvent e) { setEnabled(); }
+      public void removeUpdate(DocumentEvent e) { setEnabled(); }
+      public void changedUpdate(DocumentEvent e) { setEnabled(); }
+      private void setEnabled() { Utilities.invokeLater(new Runnable() { public void run() { _okButton.setEnabled(true); } }); }
     });
     JPanel p = new JPanel();
     p.setLayout(new BorderLayout());

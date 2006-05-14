@@ -190,8 +190,8 @@ public class DocumentCache {
       }
     }
     
-    /** Checks whether the document is in the cache. 
-     *  @return if the document is resident in the cache.
+    /** Checks whether the document is resident (in the cache or modified). 
+     *  @return if the document is resident.
      */
     public boolean isReady() { synchronized (_cacheLock) { return _doc != null; } }
   

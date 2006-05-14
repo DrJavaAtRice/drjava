@@ -103,10 +103,16 @@ public final class CommandLineTest extends DrJavaTestCase {
    */
   public CommandLineTest(String name) {
     super(name);
-    /* Creating a MainFrame() is costly.  Peforming this operation here achives more overlap with file I/O than 
+    
+    /* Creating a MainFrame() is costly.  Peforming this operation here achieves more overlap with file I/O than 
      * doing it in setUp() */
-    DrJava._initConfig();
-    _mf = new MainFrame();  
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        DrJava._initConfig();
+        _mf = new MainFrame(); 
+      } 
+    });
+    
     try {
       f1 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
       f1.deleteOnExit();

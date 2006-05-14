@@ -146,9 +146,9 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
 
   /** Called after JUnit is finished running tests. */
   public void junitEnded() {
-//    new ScrollableDialog(null, "Ready to grab readLock for junitListener queue in junitEnded" + _listeners, "", "").show();
+//    new ScrollableDialog(null, "Ready to grab acquireReadLock for junitListener queue in junitEnded" + _listeners, "", "").show();
     _lock.startRead();
-//     new ScrollableDialog(null, "Grabbed readLock for junitListener queue in junitEnded" + _listeners, "", "").show();
+//     new ScrollableDialog(null, "Grabbed acquireReadLock for junitListener queue in junitEnded" + _listeners, "", "").show();
     try { for(JUnitListener jul : _listeners) { jul.junitEnded(); } }
     finally { _lock.endRead(); }
   }

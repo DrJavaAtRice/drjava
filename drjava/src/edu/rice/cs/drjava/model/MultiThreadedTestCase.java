@@ -44,7 +44,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   public MultiThreadedTestCase(String name) { super(name); }  
   
   /** Flag to keep track of whether or not a test failed in another thread (not the testing thread). */
-  protected static boolean _testFailed = false;
+  protected volatile static boolean _testFailed = false;
 
   /** Initialize test state to not failed. */
   public void setUp() throws Exception {
@@ -71,50 +71,42 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     fail(s);
   }
   
-  /**
-   * Join with a thread, i.e. continue only after that thread has terminated.
-   * If the join is interrupted, an UnexpectedException is thrown.
-   * @param t thread to join with
+  /** Join with a thread, i.e. continue only after that thread has terminated.  If the join is interrupted, an 
+   *  UnexpectedException is thrown.
+   *  @param t thread to join with
    */
   public static void join(Thread t) {
-    try {
-      t.join();
-    }
+    try { t.join(); }
     catch(InterruptedException e) {
       throw new edu.rice.cs.util.UnexpectedException(e, "Thread.join was unexpectedly interrupted.");
     }
   }
   
-  /**
-   * Wait for a notify or notifyAll.
-   * If the wait is interrupted, an UnexpectedException is thrown.
-   * @param o object to wait for
+  /**  Wait for a notify or notifyAll. If the wait is interrupted, an UnexpectedException is thrown.
+   *   @param o object to wait for
    */
   public static void wait(Object o) {
-    try {
-      o.wait();
-    }
+    try { o.wait(); }
     catch(InterruptedException e) {
       e.printStackTrace();
       throw new edu.rice.cs.util.UnexpectedException(e, "Thread.wait was unexpectedly interrupted.");
     }
   }
   
-  /**
-   * Class that stores exceptions thrown in other threads so they can be rethrown in the main thread.
-   * AssertionFailedErrors thrown in other threads do not count as AssertionFailedErrors in the
-   * main class, i.e. if an assertion fails in a thread that is not the main thread, the unit test will not fail!
+  /** Class that stores exceptions thrown in other threads so they can be rethrown in the main thread.
+   *  AssertionFailedErrors thrown in other threads do not count as AssertionFailedErrors in the
+   *  main class, i.e. if an assertion fails in a thread that is not the main thread, the unit test will not fail!
    */
   private static class ExceptionHandler implements java.lang.Thread.UncaughtExceptionHandler {
     
     /** Stored throwable, or null if nothing stored. */
-    private Throwable _e = null;
+    private volatile Throwable _e = null;
     
     /** Stored thread that threw or null if none. */
-    private java.lang.Thread _t = null;
+    private volatile java.lang.Thread _t = null;
     
     /**  Thread that spawns the other threads. */
-    private java.lang.Thread _mainThread = java.lang.Thread.currentThread();
+    private volatile java.lang.Thread _mainThread = java.lang.Thread.currentThread();
     
     /** Gets called if an uncaught exception occurs in a thread.
      *  @param t the thread
@@ -138,12 +130,8 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     /** Rethrow the exception, if one was stored. */
     public void rethrow() {
       if (exceptionOccurred()) {
-        if (_e instanceof Error) {
-          throw (Error)_e;
-        }
-        if (_e instanceof RuntimeException) {
-          throw (RuntimeException)_e;
-        }
+        if (_e instanceof Error)  throw (Error)_e;
+        if (_e instanceof RuntimeException) throw (RuntimeException)_e;
         else {
           // avoid checked exceptions
           throw new AssertionFailedError("Exception in thread "+_t+": "+_e);
@@ -151,38 +139,22 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
       }            
     }
     
-    /**
-     * Returns true if an exception has occurred.
-     * @return true if exception has occurred
+    /** Returns true if an exception has occurred.
+     *  @return true if exception has occurred
      */
-    public boolean exceptionOccurred() {
-      return (_e != null);
-    }
+    public boolean exceptionOccurred() { return (_e != null); }
     
-    public Throwable getException() {
-      return _e;
-    }
+    public Throwable getException() { return _e; }
     
-    public java.lang.Thread getThread() {
-      return _t;
-    }
+    public java.lang.Thread getThread() { return _t; }
     
-    /**
-     * Set the thread that spawns the other threads.
-     */
-    public void setMainThread(java.lang.Thread mainThread) {
-      _mainThread = mainThread;
-    }
+    /** Set the thread that spawns the other threads. */
+    public void setMainThread(java.lang.Thread mainThread) { _mainThread = mainThread; }
     
-    /**
-     * Singleton constructor.
-     */
-    private ExceptionHandler() {      
-    }
+    /** Singleton constructor. */
+    private ExceptionHandler() { }
     
-    /**
-     * Singleton instance.
-     */
+    /** Singleton instance. */
     public static final ExceptionHandler ONLY = new ExceptionHandler();
   }
 }

@@ -1143,18 +1143,16 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
 
     // Insert a test string into the document
     _defModel.insertString(0, text, null);
-    assertEquals("Should have inserted the text properly.", text,
-                 _defModel.getText());
+    assertEquals("Should have inserted the text properly.", text, _defModel.getText());
 
     // Indent the lines, so as to trigger a nested compound edit
     undoManager.startCompoundEdit();
+
     _defModel.indentLines(0, _defModel.getLength());
-    assertEquals("Should have indented correctly.", indented,
-                 _defModel.getText());
+    assertEquals("Should have indented correctly.", indented,  _defModel.getText());
 
     undoManager.undo();
-    assertEquals("Should have undone correctly.", "",
-                 _defModel.getText());
+    assertEquals("Should have undone correctly.", "",  _defModel.getText());
 
     // 2
 
@@ -1238,8 +1236,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     // Indent the lines, so as to trigger a nested compound edit
     undoManager.startCompoundEdit();
     _defModel.indentLines(0, _defModel.getLength());
-    assertEquals("Should have indented correctly.", indented,
-                 _defModel.getText());
+    assertEquals("Should have indented correctly.", indented, _defModel.getText());
 
     // We've taken out this part of the test because of our change to
     // undo where we close the nearest open compound edit upon undo-ing,
@@ -1258,8 +1255,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     // End the compound edit and undo
 //    _defModel.getUndoManager().endCompoundEdit(key);
     _defModel.getUndoManager().undo();
-    assertEquals("Should have undone the indenting and inserting.", "",
-                 _defModel.getText());
+    assertEquals("Should have undone the indenting and inserting.", "", _defModel.getText());
   }
 
   /**

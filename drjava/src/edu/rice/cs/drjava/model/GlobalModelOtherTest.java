@@ -41,6 +41,7 @@ import java.util.Vector;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -48,6 +49,9 @@ import edu.rice.cs.util.swing.Utilities;
  *  @version $Id$
  */
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
+  
+//  public static Log _log = new Log("GlobalModelOtherTestLog.txt", false);
+  
   private static final String FOO_CLASS =
     "package bar;\n" +
     "public class Foo {\n" +
@@ -55,14 +59,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     "    System.out.println(\"Foo\");\n" +
     "  }\n" +
     "}\n";
-  
-  private boolean _resetDone = false;
-  private final Object _resetDoneLock = new Object();
-  
-//  private boolean _interactionDone = false;
-  private final Object _interactionDoneLock = new Object();
-  
-//  private Log _log = new Log("GlobalModelOtherTestLog.txt", true);
 
   /** Tests that the undoableEditHappened event is fired if the undo manager is in use. */
   public void testUndoEventsOccur() throws BadLocationException {
@@ -70,16 +66,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Have to add an undoable edit listener for Undo to work
     doc.addUndoableEditListener(new UndoableEditListener() {
-      public void undoableEditHappened(UndoableEditEvent e) {
-        doc.getUndoManager().addEdit(e.getEdit());
-      }
+      public void undoableEditHappened(UndoableEditEvent e) { doc.getUndoManager().addEdit(e.getEdit()); }
     });
 
-    TestListener listener = new TestListener() {
-      public void undoableEditHappened() {
-        undoableEditCount++;
-      }
-    };
+    TestListener listener = new TestListener() { public void undoableEditHappened() { undoableEditCount++; } };
+    
     _model.addListener(listener);
     changeDocumentText("test", doc);
     
@@ -88,59 +79,24 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     listener.assertUndoableEditCount(1);
 //    Utilities.showDebug("testUndoEvents finished");
     
-//    _log.log("testUndoEvents() completed");
+//    _log.log("testUndoEventsOccur() completed");
   }
 
   /** Checks that System.exit is handled appropriately from interactions pane. */
   public void testExitInteractions() throws EditDocumentException, InterruptedException{
-    TestListener listener = new TestListener() {
-      public void interactionStarted() {
-//        Utilities.showDebug("GlobalModelOtherTest: interaction Started");
-        interactionStartCount++;
-      }
+    InteractionListener listener = new InteractionListener() {
 
-      public void interpreterExited(int status) {
-//        Utilities.showDebug("GlobalModelOtherTest: interpreterExited");
-//        assertInteractionStartCount(1);
-//        assertInterpreterResettingCount(0);
-        interpreterExitedCount++;
-//        Utilities.showDebug("GlobalModelOtherTest: interpreterExitedCount = " + interpreterExitedCount);
-        lastExitStatus = status;
-      }
-
-      public void interpreterResetting() {
-//        assertInteractionStartCount(1);
-//        assertInterpreterExitedCount(1);
-//        assertInterpreterReadyCount(0);
-        interpreterResettingCount++;
-//        Utilities.showDebug("GlobalModelOtherTest: interpreterResetting");
-      }
-
-      public void interpreterReady(File wd) {
-//        Utilities.showDebug("GlobalModelOtherTest: interpreterReady");
-        synchronized(_resetDoneLock) {
-//          assertInteractionStartCount(1);
-//          assertInterpreterExitedCount(1);
-//          assertInterpreterResettingCount(1);
-          interpreterReadyCount++;
-//          Utilities.showDebug("GlobalModelOtherTest: notifying resetDone");
-          _resetDone = true;
-          _resetDoneLock.notify();
-        }
-      }
-      
 //      public void consoleReset() { consoleResetCount++; }
     };
 
     _model.addListener(listener);
-    _resetDone = false;
-    synchronized(_resetDoneLock) {
-//      Utilities.showDebug("GlobalModelOtherTest: interpreting System.exit(23)");
-      interpretIgnoreResult("System.exit(23);");
-//      _model.resetInteractions();
-//      Utilities.showDebug("GlobalModelOtherTest: waiting on resetDone");
-      while (! _resetDone) { _resetDoneLock.wait(); }
-    }
+
+    listener.logInteractionStart();
+    interpretIgnoreResult("System.exit(23);"); 
+    listener.waitInteractionDone();
+    listener.waitResetDone();
+    Utilities.clearEventQueue();
+      
     _model.removeListener(listener);
 
 //    listener.assertConsoleResetCount(0);
@@ -148,8 +104,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     listener.assertInterpreterResettingCount(1);
     listener.assertInterpreterReadyCount(1);
     listener.assertInterpreterExitedCount(1);
-    assertEquals("exit status", 23, listener.lastExitStatus);
-//    Utilities.showDebug("GlobalModelOtherTest: exitInteractions finished");
+    assertEquals("exit status", 23, listener.getLastExitStatus());
+
 //    _log.log("testExitInteractions() completed");
   }
 
@@ -166,51 +122,27 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     IOException {
     
     doCompile(setupDocument(FOO_TEXT), tempFile());
-    final String beforeAbort = interpret("DrJavaTestFoo.class.getName()");
+    
+    Utilities.clearEventQueue();
+
+    final String beforeAbort = interpret("DrJavaTestFoo.class.getName()"); /* interpret("17"); */
+    
     assertEquals("\"DrJavaTestFoo\"", beforeAbort);
+    
+    Utilities.clearEventQueue();
 
-    TestListener listener = new TestListener() {
-      public void interactionStarted() {
-        interactionStartCount++;
-      }
-
-      public void interactionEnded() {
-        // this can only happen on the second interpretation!
-//        assertInteractionStartCount(2);
-        interactionEndCount++;
-      }
-
-      public void interpreterResetting() {
-//        assertInteractionStartCount(1);
-//        assertInterpreterExitedCount(0);
-//        assertInterpreterReadyCount(0);
-        interpreterResettingCount++;
-      }
-
-      public void interpreterReady(File wd) {
-        synchronized(_resetDoneLock) {
-//          assertInteractionStartCount(1);
-//          assertInterpreterExitedCount(0);
-//          assertInterpreterResettingCount(1);
-          interpreterReadyCount++;
-          _resetDone = true;
-          _resetDoneLock.notify();
-        }
-      }
-
-      public void consoleReset() { consoleResetCount++; }
-    };
+    InteractionListener listener = new InteractionListener();
 
     _model.addListener(listener);
-    _resetDone = false;
-    synchronized(_resetDoneLock) {
-      interpretIgnoreResult("while (true) {}");
-      
-      Utilities.clearEventQueue();
-      listener.assertInteractionStartCount(1);
-      _model.resetInteractions(FileOption.NULL_FILE);
-      _resetDoneLock.wait();
-    }
+    listener.logInteractionStart();
+    interpretIgnoreResult("while (true) {}");
+    
+    listener.assertInteractionStartCount(1);
+    _model.resetInteractions(FileOption.NULL_FILE);
+    listener.waitResetDone();
+    
+    Utilities.clearEventQueue();
+
     listener.assertInterpreterResettingCount(1);
     listener.assertInterpreterReadyCount(1);
     listener.assertInterpreterExitedCount(0);
@@ -222,6 +154,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // make sure we can still see class foo
     final String afterAbort = interpret("DrJavaTestFoo.class.getName()");
+    Utilities.clearEventQueue();
     assertEquals("\"DrJavaTestFoo\"", afterAbort);
 //    _log.log("testInteractionAbort() completed");
   }
@@ -229,31 +162,27 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   /** Checks that reset console works. */
   public void testResetConsole() throws EditDocumentException, InterruptedException {
     //System.err.println("Entering testResetConsole");
-    TestListener listener = new TestListener() {
-      public void interactionStarted() { }
-      public void interactionEnded() {
-        synchronized(_interactionDoneLock) {
-          interactionEndCount++;
-//          _interactionDone = true;
-          _interactionDoneLock.notify();
-        }
-      }
-
-      public void consoleReset() { consoleResetCount++; }
-    };
+    InteractionListener listener = new InteractionListener();
 
     _model.addListener(listener);
+    
+    listener.logInteractionStart();
 
     _model.resetConsole();
+    Utilities.clearEventQueue();
+    
     assertEquals("Length of console text", 0, _model.getConsoleDocument().getLength());
 
     listener.assertConsoleResetCount(1);
-//    _interactionDone = false;
-    synchronized(_interactionDoneLock) {
-      interpretIgnoreResult("System.out.print(\"a\");");
-      _interactionDoneLock.wait();  // notified on interactionEnded
-    }
-
+    
+    listener.logInteractionStart();    // only resets the interactionDone and resetDone flags
+    listener.resetConsoleResetCount(); // resets the resetConsoleCount in the listener
+    
+    interpretIgnoreResult("System.out.print(\"a\");");
+    listener.waitInteractionDone();
+    
+    Utilities.clearEventQueue();
+    
     assertEquals("Length of console text", 1, _model.getConsoleDocument().getLength());
 
     _model.resetConsole();
@@ -261,7 +190,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     Utilities.clearEventQueue();
     assertEquals("Length of console text", 0, _model.getConsoleDocument().getLength());
 
-    listener.assertConsoleResetCount(2);
+    listener.assertConsoleResetCount(1);
 //    _log.log("testResetConsole() completed");
   }
 
@@ -404,8 +333,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Save the footext to DrJavaTestFoo.java in the subdirectory
     File fooFile = new File(subdir, "DrJavaTestFoo.java");
-    OpenDefinitionsDocument doc =
-      setupDocument("package a.b.c;\n" + FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument("package a.b.c;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
 //    System.err.println("Package name is: " + _model.getPackageName());
 
@@ -583,18 +511,15 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     Utilities.clearEventQueue();
     _model.resetInteractionsClassPath();
-//    System.err.println("Classpath = " + _model.getClasspath());
 
     result = interpret("new DrJavaTestFoo().getClass().getName()");
 
     // Now it should be on the classpath
     assertEquals("interactions result", "\"DrJavaTestFoo\"", result);
-//    System.err.println("Result2 is: " + result);
 
     // Rename directory back to clean up
     tempDir = new File(tempPath + "a");
     boolean renamed = tempDir.renameTo(new File(tempPath));
-//    System.out.println("Renaming of " + tempPath + "a yielded " + renamed);
     
 //    _log.log("testInteractionsLiveUpdateClasspath() completed");
   }

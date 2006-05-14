@@ -67,10 +67,10 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   static ReverseHighlighter.DefaultHighlightPainter ERROR_PAINTER =
     new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
-  protected HighlightManager _highlightManager;
+  protected volatile HighlightManager _highlightManager;
   
   /** Looks for changes in the caret position to see if a paren/brace/bracket highlight is needed. */
-  protected CaretListener _matchListener = new CaretListener() {
+  protected final CaretListener _matchListener = new CaretListener() {
     
     /** Checks caret position to see if it needs to set or remove a highlight from the document. When the cursor
      *  is immediately right of ')', '}', or ']', it highlights up to the matching open paren/brace/bracket.
@@ -90,7 +90,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   };
   
   /** Our current paren/brace/bracket matching highlight. */
-  protected HighlightManager.HighlightInfo _matchHighlight = null;
+  protected volatile HighlightManager.HighlightInfo _matchHighlight = null;
   
   protected final SwingDocument NULL_DOCUMENT = new SwingDocument();
   
@@ -137,7 +137,6 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   public int getScrollableUnitIncrement(Rectangle visibleRectangle, int orientation, int direction) {
     return (int) (visibleRectangle.getHeight() * SCROLL_UNIT);
   }
-  
   
   /** What is this for?  The override does not nothing! */ 
   public void moveCaretPosition(int pos) { super.moveCaretPosition(pos); }

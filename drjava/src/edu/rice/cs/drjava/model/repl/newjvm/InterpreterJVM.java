@@ -77,7 +77,7 @@ import koala.dynamicjava.parser.*;
  */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
   
-  private static final boolean printMessages = false;
+  private static final boolean printMessages = true;
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
   
@@ -145,7 +145,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
 //    edu.rice.cs.drjava.DrJava.disableSecurityManager();
 //  }
   
-  private static final Log _log = new Log("IntJVMLog", false);
+  private static final Log _log = new Log("IntJVMLog", true);
   private static void _dialog(String s) {
     //javax.swing.JOptionPane.showMessageDialog(null, s);
     _log.logTime(s);
@@ -155,13 +155,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   protected void handleStart(MasterRemote mainJVM) {
     //_dialog("handleStart");
     _mainJVM = (MainJVMRemoteI) mainJVM;
-    
-//    // install special SecurityManager that blocks interpreted code from doing System.exit(...)
-//    try { enableSecurityManager(); }
-//    catch(RemoteException re) {
-//       _log.logTime("PreventExitSecurityManager: " + re.toString());
-//       throw new IllegalStateException("Slave JVM cannot install special SecurityManager.\n" + re);
-//    }
     
     // redirect stdin
     System.setIn(new InputStreamRedirector() {
@@ -215,8 +208,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     //_dialog("interpreter JVM started");
   }
-  
-  
+
   /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVM via 
    *  the interpretResult method.
    *  @param s Source code to interpret.

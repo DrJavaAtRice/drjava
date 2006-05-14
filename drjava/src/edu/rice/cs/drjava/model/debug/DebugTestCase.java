@@ -45,7 +45,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
   protected final boolean printEvents = false;
   protected final boolean printMessages = false;
-  protected PrintStream printStream = System.out; 
+  protected final PrintStream printStream = System.err; 
   /*
   {
     try { printStream = new PrintStream(new FileOutputStream("log.txt", true), true); }
@@ -53,10 +53,10 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   }
   */
 
-  protected int _pendingNotifies = 0;
-  protected Object _notifierLock = new Object();
+  protected volatile int _pendingNotifies = 0;
+  protected final Object _notifierLock = new Object();
 
-  protected JPDADebugger _debugger;
+  protected volatile JPDADebugger _debugger;
 
   protected static final String DEBUG_CLASS =
     /*  1 */ "class DrJavaDebugClass {\n" +
@@ -395,22 +395,22 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
   /** Listens to events from the debugger to ensure that they happen at the correct times. */
   protected class DebugTestListener implements DebugListener {
-    protected int debuggerStartedCount = 0;
-    protected int debuggerShutdownCount = 0;
-    protected int threadLocationUpdatedCount = 0;
-    protected int breakpointReachedCount = 0;
-    protected int regionAddedCount = 0;
-    protected int regionChangedCount = 0;
-    protected int regionRemovedCount = 0;
-    protected int watchSetCount = 0;
-    protected int watchRemovedCount = 0;
-    protected int stepRequestedCount = 0;
-    protected int currThreadSuspendedCount = 0;
-    protected int currThreadResumedCount = 0;
-    protected int threadStartedCount = 0;
-    protected int currThreadDiedCount = 0;
-    protected int currThreadSetCount = 0;
-    protected int nonCurrThreadDiedCount = 0;
+    protected volatile int debuggerStartedCount = 0;
+    protected volatile int debuggerShutdownCount = 0;
+    protected volatile int threadLocationUpdatedCount = 0;
+    protected volatile int breakpointReachedCount = 0;
+    protected volatile int regionAddedCount = 0;
+    protected volatile int regionChangedCount = 0;
+    protected volatile int regionRemovedCount = 0;
+    protected volatile int watchSetCount = 0;
+    protected volatile int watchRemovedCount = 0;
+    protected volatile int stepRequestedCount = 0;
+    protected volatile int currThreadSuspendedCount = 0;
+    protected volatile int currThreadResumedCount = 0;
+    protected volatile int threadStartedCount = 0;
+    protected volatile int currThreadDiedCount = 0;
+    protected volatile int currThreadSetCount = 0;
+    protected volatile int nonCurrThreadDiedCount = 0;
 
     public void assertDebuggerStartedCount(int i) {
       assertEquals("number of times debuggerStarted fired", i, debuggerStartedCount);

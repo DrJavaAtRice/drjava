@@ -42,9 +42,9 @@ import edu.rice.cs.drjava.DrJavaTestCase;
  * @version $Id$
  */
 public abstract class BraceReductionTestCase extends DrJavaTestCase {
-  protected ReducedModelControl model0;
-  protected ReducedModelControl model1;
-  protected ReducedModelControl model2;
+  protected volatile ReducedModelControl model0;
+  protected volatile ReducedModelControl model1;
+  protected volatile ReducedModelControl model2;
 
   /**
    * Sets up the reduced model controls before each test.

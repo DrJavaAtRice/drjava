@@ -47,7 +47,7 @@ import java.rmi.RemoteException;
  */
 public class IntegratedMasterSlaveTest extends DrJavaTestCase {
   
-  private MasterImpl _testMaster = new MasterImpl();
+  private final MasterImpl _testMaster = new MasterImpl();
  
   public void testItAll() throws Exception {
     // run a couple of times. each one forks its own jvm so not
@@ -63,13 +63,13 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
   private class MasterImpl extends AbstractMasterJVM implements MasterI {
     
     /** Lock for accessing shared test fields. */
-    private Object _testLock = new Object();
+    private final Object _testLock = new Object();
 
-    private char _letter;
-    private boolean _justQuit;
-    private boolean _connected; // false until slave is created and connected
+    private volatile char _letter;
+    private volatile boolean _justQuit;
+    private volatile boolean _connected; // false until slave is created and connected
     
-    private String _currentTest = "";
+    private volatile String _currentTest = "";
 
     public MasterImpl() { super(IntegratedMasterSlaveTest.class.getName() + "$CounterSlave"); }
 
@@ -191,8 +191,8 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
    *  </DL>
    */
   public static class CounterSlave extends AbstractSlaveJVM implements SlaveI {
-    private int _counter = 0;
-    private MasterI _master = null;
+    private volatile int _counter = 0;
+    private volatile MasterI _master = null;
 
     public int getNumber() { return _counter++; }
 

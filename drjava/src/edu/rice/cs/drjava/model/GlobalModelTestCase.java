@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.model;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
+import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.OperationCanceledException;
@@ -52,53 +53,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.regex.*;
 
-/**
- * Base class for tests over the {@link GlobalModel}.
+/** Base class for tests over the {@link GlobalModel}.
  *
- * This class provides a number of convenience methods for testing the
- * GlobalModel. It also contains a model instance (reset in {@link #setUp}
- * and a temporary directory that's created per test invocation (and
- * subsequently cleaned in {@link #tearDown}. This reduces the burden
- * for such file management stuff in the test cases themselves.
+ *  This class provides a number of convenience methods for testing the GlobalModel. It also contains a model instance 
+ *  (reset in {@link #setUp} and a temporary directory that's created per test invocation (and subsequently cleaned in
+ *  {@link #tearDown}. This reduces the burden for such file management stuff in the test cases themselves.
  *
- * @version $Id$
+ *  @version $Id$
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
-  protected DefaultGlobalModel _model;
-  protected File _tempDir;
-  
-  protected volatile boolean _junitDone;
-  protected final Object _junitLock = new Object();
-  
-  protected void _logJUnitStart() { _junitDone = false; }
-  
-  protected void _runJUnit(OpenDefinitionsDocument doc) throws IOException, ClassNotFoundException, 
-    InterruptedException {
-//    Utilities.showDebug("Starting JUnit");
-    _logJUnitStart();
-//    System.err.println("Starting JUnit on " + doc);
-    doc.startJUnit();
-//    System.err.println("JUnit Started on " + doc);
-    _waitJUnitDone();
-  }
-  
-  protected void _runJUnit() throws IOException, ClassNotFoundException, InterruptedException {  
-    _logJUnitStart();
-//    System.err.println("Starting JUnit");
-    _model.getJUnitModel().junitAll();
-    _waitJUnitDone();
-  }
-   
-  protected void _waitJUnitDone() throws InterruptedException {
-    synchronized(_junitLock) {
-      while (!_junitDone) {
-//        System.err.println("Waiting for JUnit to complete");
-        _junitLock.wait();
-      }
-    }
-  }
-  
+  protected volatile DefaultGlobalModel _model;
+  protected volatile File _tempDir;
+
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
   protected static final String BAZ_TEXT = "class DrJavaTestBaz extends DrJavaTestFoo { public static int x = 3; }";
@@ -121,11 +88,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
   public void setUp() throws Exception {
     super.setUp();
+    _model = new TestGlobalModel();
     DrJava.getConfig().resetToDefaults();
-    createModel();
-    _model.setResetAfterCompile(false);
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    // Wait until model has connected to slave JVM
+    _model._jvm.ensureInterpreterConnected();
+    _model.setResetAfterCompile(false);
+
 //    FileOps.deleteDirectoryOnExit(_tempDir);
 //    _model.getOpenDefinitionsDocuments().get(0).saveFile(new FileSelector(new File(_tempDir, "blank document")));
 //    super.setUp();
@@ -141,16 +111,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model = null;
 
     super.tearDown();
-  }
-
-  /** Instantiates the GlobalModel to be used in the test cases. */
-  protected void createModel() {
-    //_model = new DefaultGlobalModel(_originalModel);
-    _model = new TestGlobalModel();
-
-    // Wait until it has connected
-    _model._jvm.ensureInterpreterConnected();
-    // Wait until all pending events have finished
   }
 
   /** Clear all old text and insert the given text. */
@@ -247,29 +207,33 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *  @param doc Document containing the code to be compiled
    *  @param file File to save the class in
    */
-  protected void doCompile(OpenDefinitionsDocument doc, File file) throws IOException, 
-    InterruptedException {
+  protected void doCompile(OpenDefinitionsDocument doc, File file) throws IOException,  InterruptedException {
     doc.saveFile(new FileSelector(file));
 
-    // Perform a mindless interpretation to force interactions to reset.
-    //  (only to simplify this method)
-    try { interpret("2+2"); }
-    catch (EditDocumentException e) {
-      throw new UnexpectedException(e);
-    }
-
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
+    // Perform a mindless interpretation to force interactions to reset (only to simplify this method)
+    try { interpret("0"); }
+    catch (EditDocumentException e) { throw new UnexpectedException(e); }
+    Utilities.clearEventQueue();
+    
     _model.setResetAfterCompile(true);
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.addListener(listener);
-    synchronized(listener) {
-      doc.startCompile();
-      if (_model.getCompilerModel().getNumErrors() > 0) {
-        fail("compile failed: " + getCompilerErrorString());
-      }
-      while (listener.notDone()) listener.wait();
+    
+    listener.logCompileStart();
+
+    doc.startCompile();
+    Utilities.clearEventQueue();
+    
+    if (_model.getCompilerModel().getNumErrors() > 0) {
+      fail("compile failed: " + getCompilerErrorString());
     }
+    listener.waitCompileDone();
+
     listener.checkCompileOccurred();
     assertCompileErrorsPresent(false);
+    
+    listener.waitResetDone();
+    Utilities.clearEventQueue();
     _model.removeListener(listener);
   }
 
@@ -283,69 +247,59 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   /** Puts the given input into the interactions document and then interprets it, returning the result that was put
    *  into the interactions document. This assumes the interactions document is in a state with no text after the 
-   *  prompt. To be sure this is the case, you can reset interactions first.
+   *  prompt. To be sure this is the case, you can reset interactions first.  This method provides its own listener
+   *  to synchronized with the completion of the interaction.
    *
    *  @param input text to interpret
    *  @return The output from this interpretation, in String form, as it was printed to the interactions document.
    */
   protected String interpret(String input) throws EditDocumentException {
+    
     InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.insertText(interactionsDoc.getLength(), input, InteractionsDocument.DEFAULT_STYLE);
+    Utilities.clearEventQueue();
+    
+    interactionsDoc.setInProgress(false);  // for some reason, the inProgress state can be true when interpret is invoked
+    interactionsDoc.append(input, InteractionsDocument.DEFAULT_STYLE);
+    
+    Utilities.clearEventQueue();
 
     // skip the right length for the newline
-    int newLineLen = System.getProperty("line.separator").length();
+    final int newLineLen = System.getProperty("line.separator").length();
     final int resultsStartLocation = interactionsDoc.getLength() + newLineLen;
 
-    TestListener listener = new TestListener() {
-      public void interactionStarted() { interactionStartCount++; }
-
-      public void interactionEnded() {
-        assertInteractionStartCount(1);
-
-        synchronized(this) {
-          interactionEndCount++;
-          this.notify();
-        }
-      }
-
-    };
+    InteractionListener listener = new InteractionListener();
 
     _model.addListener(listener);
+    listener.logInteractionStart();
     try {
-      synchronized(listener) {
-        _model.interpretCurrentInteraction();
-        listener.wait();  // TODO: fix this naked wait which depends on being executed before interpreter finishes!
-        
- /**///In previous versions of 1.5.0-beta compiler, several tests hang right here, because 
- /////in DebugContextTest and JavaDebugInterpreterTest, the files that were being tested, 
- /////for example, MonkeyStuff.java, was being compiled without the -g flag, so debugging was 
- /////impossible. This happened because of a bug in the 1.5 compiler, which is now fixed in the new
- /////version.
-      }
+      _model.interpretCurrentInteraction();
+      listener.waitInteractionDone();
     }
-    catch (InterruptedException ie) {
-      throw new UnexpectedException(ie);
-    }
+    catch (InterruptedException ie) { throw new UnexpectedException(ie); }
+    Utilities.clearEventQueue();
     _model.removeListener(listener);
+    
     listener.assertInteractionStartCount(1);
     listener.assertInteractionEndCount(1);
 
     // skip the right length for the newline
-    final int resultsEndLocation = interactionsDoc.getLength() - newLineLen -
-                                   interactionsDoc.getPrompt().length();
-
-    final int resultsLen = resultsEndLocation - resultsStartLocation;
-    //System.out.println("resultsStartLoc = " + resultsStartLocation + " resultsEndLocation = " + resultsEndLocation);
-    // There was no output from this interaction
-    if (resultsLen <= 0)
-      return "";
-    return interactionsDoc.getDocText(resultsStartLocation, resultsLen);
+    interactionsDoc.acquireReadLock();
+    try {
+      final int resultsEndLocation = interactionsDoc.getLength() - newLineLen - interactionsDoc.getPrompt().length();
+      
+      final int resultsLen = resultsEndLocation - resultsStartLocation;
+      //System.out.println("resultsStartLoc = " + resultsStartLocation + " resultsEndLocation = " + resultsEndLocation);
+      // There was no output from this interaction
+      if (resultsLen <= 0) return "";
+      return interactionsDoc.getDocText(resultsStartLocation, resultsLen);
+    }
+    finally { interactionsDoc.releaseReadLock(); }
   }
 
+  /** Appends the input string to the interactions pane and interprets it. */
   protected void interpretIgnoreResult(String input) throws EditDocumentException {
-    EditDocumentInterface interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.insertText(interactionsDoc.getLength(), input, InteractionsDocument.DEFAULT_STYLE);
-
+    InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
+    interactionsDoc.append(input, InteractionsDocument.DEFAULT_STYLE);
     _model.interpretCurrentInteraction();
   }
 
@@ -355,13 +309,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   /** Asserts that the given string does not exist in the Interactions Document. */
-  protected void assertInteractionsDoesNotContain(String text)
-    throws EditDocumentException {
+  protected void assertInteractionsDoesNotContain(String text) throws EditDocumentException {
     _assertInteractionContainsHelper(text, false);
   }
 
-  private void _assertInteractionContainsHelper(String text, boolean shouldContain)
-    throws EditDocumentException {
+  private void _assertInteractionContainsHelper(String text, boolean shouldContain) throws EditDocumentException {
 
     String interactText = getInteractionsText();
     int contains = interactText.lastIndexOf(text);
@@ -385,8 +337,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _assertInteractionMatchesHelper(regex, false);
   }
   
-  private void _assertInteractionMatchesHelper(String regex, boolean shouldMatch)
-    throws EditDocumentException {
+  private void _assertInteractionMatchesHelper(String regex, boolean shouldMatch) throws EditDocumentException {
 
     String interactText = getInteractionsText();
     boolean matches = Pattern.compile(regex, Pattern.MULTILINE|Pattern.DOTALL).matcher(interactText).matches();
@@ -401,16 +352,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   /** Returns the current contents of the interactions document */
   protected String getInteractionsText() throws EditDocumentException {
-    EditDocumentInterface doc = _model.getInteractionsDocument();
-    return doc.getDocText(0, doc.getLength());
+    InteractionsDocument doc = _model.getInteractionsDocument();
+    return doc.getText();
   }
 
-
-
   protected void assertNumOpenDocs(int num) {
-    assertEquals("number of open documents",
-                 num,
-                 _model.getOpenDefinitionsDocuments().size());
+    assertEquals("number of open documents", num, _model.getOpenDefinitionsDocuments().size());
   }
 
   protected void assertModified(boolean b, OpenDefinitionsDocument doc) {
@@ -449,7 +396,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   public static class FileMovedWarningException extends RuntimeException{ }
 
   public static class WarningFileSelector implements FileOpenSelector, FileSaveSelector {
-    private File _file;
+    private volatile File _file;
     public WarningFileSelector(File f) { _file = f; }
     public File getFile() throws OperationCanceledException { return _file; }
     public File[] getFiles() throws OperationCanceledException { return new File[] {_file}; }
@@ -467,33 +414,27 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
 
   public static class FileSelector implements FileOpenSelector, FileSaveSelector {
-    private File _file, _file2;
-    public FileSelector(File f) { _file = f; }
+    private volatile File _file1, _file2;
+    public FileSelector(File f) { _file1 = f; }
     public FileSelector(File f1, File f2) {
-      _file = f1;
+      _file1 = f1;
       _file2 = f2;
     }
 
-    public File getFile() throws OperationCanceledException { return _file; }
+    public File getFile() throws OperationCanceledException { return _file1; }
     
     public File[] getFiles() throws OperationCanceledException {
-      if (_file2 != null) return new File[] {_file, _file2};
-      else return new File[] {_file};
+      if (_file2 != null) return new File[] {_file1, _file2};
+      else return new File[] {_file1};
     }
     public boolean warnFileOpen(File f) { return true; }
     public boolean verifyOverwrite() { return true; }
-    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
-      return true;
-    }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
   }
 
   public static class CancelingSelector implements FileOpenSelector, FileSaveSelector {
-    public File getFile() throws OperationCanceledException {
-      throw new OperationCanceledException();
-    }
-    public File[] getFiles() throws OperationCanceledException {
-      throw new OperationCanceledException();
-    }
+    public File getFile() throws OperationCanceledException { throw new OperationCanceledException(); }
+    public File[] getFiles() throws OperationCanceledException { throw new OperationCanceledException(); }
     public boolean warnFileOpen(File f) { return true; }
     public boolean verifyOverwrite() {return true; }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {  return true; }
@@ -504,52 +445,53 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
   public static class TestListener implements GlobalModelListener {
     /** Remembers when this listener was created. */
-    protected Exception _startupTrace;
-    protected int fileNotFoundCount;
-    protected int newCount;
-    protected int openCount;
-    protected int closeCount;
-    protected int saveCount;
-    protected int canAbandonCount;
-    protected int quitFileCount;
-    protected int classFileErrorCount;
-    protected int compileStartCount;
-    protected int compileEndCount;
-    protected int runStartCount;
-    protected int junitStartCount;
-    protected int junitSuiteStartedCount;
-    protected int junitTestStartedCount;
-    protected int junitTestEndedCount;
-    protected int junitEndCount;
-    protected int interactionStartCount;
-    protected int interactionEndCount;
-    protected int interactionErrorCount;
-    protected int interpreterResettingCount;
-    protected int interpreterReadyCount;
-    protected int interpreterExitedCount;
-    protected int interpreterResetFailedCount;
-    protected int interpreterChangedCount;
+    protected volatile Exception _startupTrace;
+    
+    protected volatile int fileNotFoundCount;
+    protected volatile int newCount;
+    protected volatile int openCount;
+    protected volatile int closeCount;
+    protected volatile int saveCount;
+    protected volatile int canAbandonCount;
+    protected volatile int quitFileCount;
+    protected volatile int classFileErrorCount;
+    protected volatile int compileStartCount;
+    protected volatile int compileEndCount;
+    protected volatile int runStartCount;
+    protected volatile int junitStartCount;
+    protected volatile int junitSuiteStartedCount;
+    protected volatile int junitTestStartedCount;
+    protected volatile int junitTestEndedCount;
+    protected volatile int junitEndCount;
+    protected volatile int interactionStartCount;
+    protected volatile int interactionEndCount;
+    protected volatile int interactionErrorCount;
+    protected volatile int interpreterResettingCount;
+    protected volatile int interpreterReadyCount;
+    protected volatile int interpreterExitedCount;
+    protected volatile int interpreterResetFailedCount;
+    protected volatile int interpreterChangedCount;
     //protected int interactionCaretPositionChangedCount;
-    protected int consoleResetCount;
-    protected int saveBeforeCompileCount;
+    protected volatile int consoleResetCount;
+    protected volatile int saveBeforeCompileCount;
     //protected int saveBeforeRunCount;
-    protected int compileBeforeJUnitCount;
-    protected int saveBeforeJavadocCount;
+    protected volatile int compileBeforeJUnitCount;
+    protected volatile int saveBeforeJavadocCount;
     //protected int saveBeforeDebugCount;
-    protected int nonTestCaseCount;
-    protected int lastExitStatus;
-    protected int fileRevertedCount;
-    protected int shouldRevertFileCount;
-    protected int undoableEditCount;
-    protected int interactionIncompleteCount;
-    protected int filePathContainsPoundCount;
+    protected volatile int nonTestCaseCount;
+    protected volatile int lastExitStatus;
+    protected volatile int fileRevertedCount;
+    protected volatile int shouldRevertFileCount;
+    protected volatile int undoableEditCount;
+    protected volatile int interactionIncompleteCount;
+    protected volatile int filePathContainsPoundCount;
 
     public TestListener() {
       _startupTrace = new Exception();
       resetCounts();
     }
 
-    public void resetCounts() {
+    public synchronized void resetCounts() {
       fileNotFoundCount = 0;
       newCount = 0;
       openCount = 0;
@@ -601,8 +543,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     /** Appends the stack trace from the listener's creation to the end of the given failure message. */
     public void listenerFail(String message) {
-      String header = "\nTestListener creation stack trace:\n" +
-        StringOps.getStackTrace(_startupTrace);
+      String header = "\nTestListener creation stack trace:\n" + StringOps.getStackTrace(_startupTrace);
       MultiThreadedTestCase.listenerFail(message + header);
     }
 
@@ -777,128 +718,59 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
        listenerFail("fileOpened fired unexpectedly");  
     }
 
-    public void fileClosed(OpenDefinitionsDocument doc) {
-      listenerFail("fileClosed fired unexpectedly");
-    }
-
-    public void fileSaved(OpenDefinitionsDocument doc) {
-      listenerFail("fileSaved fired unexpectedly");
-    }
-
-    public void fileReverted(OpenDefinitionsDocument doc) {
-      listenerFail("fileReverted fired unexpectedly");
-    }
+    public void fileClosed(OpenDefinitionsDocument doc) { listenerFail("fileClosed fired unexpectedly"); }
+    public void fileSaved(OpenDefinitionsDocument doc) { listenerFail("fileSaved fired unexpectedly"); }
+    public void fileReverted(OpenDefinitionsDocument doc) { listenerFail("fileReverted fired unexpectedly"); }
+    public void undoableEditHappened() { listenerFail("undoableEditHappened fired unexpectedly"); }
+    public void saveBeforeCompile() { listenerFail("saveBeforeCompile fired unexpectedly"); }
     
-    public void undoableEditHappened() {
-      listenerFail("undoableEditHappened fired unexpectedly");
-    }
-    
-    public void saveBeforeCompile() {
-      listenerFail("saveBeforeCompile fired unexpectedly");
-    }
-
-    public void junitStarted() {
-      listenerFail("junitStarted fired unexpectedly");
-    }
-
-    public void junitClassesStarted() {
-      listenerFail("junitAllStarted fired unexpectedly");
-    }
-
-    public void junitSuiteStarted(int numTests) {
-      listenerFail("junitSuiteStarted fired unexpectedly");
-    }
-
-    public void junitTestStarted(String name) {
-      listenerFail("junitTestStarted fired unexpectedly");
-    }
-
+    public void junitStarted() { listenerFail("junitStarted fired unexpectedly"); }
+    public void junitClassesStarted() { listenerFail("junitAllStarted fired unexpectedly"); }
+    public void junitSuiteStarted(int numTests) { listenerFail("junitSuiteStarted fired unexpectedly"); }
+    public void junitTestStarted(String name) { listenerFail("junitTestStarted fired unexpectedly"); }
     public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
       listenerFail("junitTestEnded fired unexpectedly");
     }
-
-    public void junitEnded() {
-      listenerFail("junitEnded fired unexpectedly");
-    }
-
-    public void javadocStarted() {
-      listenerFail("javadocStarted fired unexpectedly");
-    }
-
+    public void junitEnded() { listenerFail("junitEnded fired unexpectedly"); }
+    
+    public void javadocStarted() { listenerFail("javadocStarted fired unexpectedly"); }
     public void javadocEnded(boolean success, File destDir, boolean allDocs) {
       listenerFail("javadocEnded fired unexpectedly");
     }
 
-    public void interactionStarted() {
-      listenerFail("interactionStarted fired unexpectedly");
-    }
-
-    public void interactionEnded() {
-      listenerFail("interactionEnded fired unexpectedly");
-    }
-
+    public void interactionStarted() { listenerFail("interactionStarted fired unexpectedly"); }
+    public void interactionEnded() { listenerFail("interactionEnded fired unexpectedly"); }
     public void interactionErrorOccurred(int offset, int length) {
       listenerFail("interpreterErrorOccurred fired unexpectedly");
     }
 
-    public void interpreterChanged(boolean inProgress) {
-      listenerFail("interpreterChanged fired unexpectedly");
-    }
+    public void interpreterChanged(boolean inProgress) { listenerFail("interpreterChanged fired unexpectedly"); }
 
 //    /**Not used */
 //    public void interactionCaretPositionChanged(int pos) {
 //      listenerFail("interactionCaretPosition fired unexpectedly");
 //    }
 
-    public void compileStarted() {
-      listenerFail("compileStarted fired unexpectedly");
-    }
+    public void compileStarted() { listenerFail("compileStarted fired unexpectedly"); }
+    public void compileEnded(File workDir, File[] excludedFiles) { listenerFail("compileEnded fired unexpectedly"); }
+    
+    public void runStarted(OpenDefinitionsDocument doc) { listenerFail("runStarted fired unexpectedly"); }
+    
+    public void interpreterResetting() { listenerFail("interactionsResetting fired unexpectedly"); }
 
-    public void compileEnded(File workDir, File[] excludedFiles) {
-      listenerFail("compileEnded fired unexpectedly");
-    }
-
-    public void runStarted(OpenDefinitionsDocument doc) {
-      listenerFail("runStarted fired unexpectedly");
-    }
-
-    public void interpreterResetting() {
-      listenerFail("interactionsResetting fired unexpectedly");
-    }
-
-    public void interpreterReady(File wd) {
-      listenerFail("interactionsReset fired unexpectedly");
-    }
-
+    public void interpreterReady(File wd) { listenerFail("interactionsReset fired unexpectedly");  }
     public void interpreterExited(int status) {
       listenerFail("interpreterExited(" + status + ") fired unexpectedly");
     }
+    public void interpreterResetFailed(Throwable t) { listenerFail("interpreterResetFailed fired unexpectedly"); }
+    public void slaveJVMUsed() { /* not directly tested; ignore it */ }
+    public void consoleReset() { listenerFail("consoleReset fired unexpectedly"); }
+    public void saveUntitled() { listenerFail("saveUntitled fired unexpectedly"); }
+    
+    public void compileBeforeJUnit(CompilerListener cl) { compileBeforeJUnitCount++; }
 
-    public void interpreterResetFailed(Throwable t) {
-      listenerFail("interpreterResetFailed fired unexpectedly");
-    }
-    
-    public void slaveJVMUsed() { /* ignore it */ }
-    
-    public void consoleReset() {
-      listenerFail("consoleReset fired unexpectedly");
-    }
-
-    public void saveUntitled() {
-      listenerFail("saveUntitled fired unexpectedly");
-    }
-    
-    public void compileBeforeJUnit(CompilerListener cl) {
-      compileBeforeJUnitCount++;
-    }
-
-    public void saveBeforeJavadoc() {
-      listenerFail("saveBeforeJavadoc fired unexpectedly");
-    }
-    
-    public void nonTestCase(boolean isTestAll) {
-      listenerFail("nonTestCase fired unexpectedly");
-    }
+    public void saveBeforeJavadoc() { listenerFail("saveBeforeJavadoc fired unexpectedly"); }
+    public void nonTestCase(boolean isTestAll) { listenerFail("nonTestCase fired unexpectedly"); }
 
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {
       listenerFail("canAbandonFile fired unexpectedly");
@@ -919,46 +791,123 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       throw new UnexpectedException();
     }
 
-    public void interactionIncomplete() {
-      listenerFail("interactionIncomplete fired unexpectedly");
-    }
-
-    public void filePathContainsPound() {
-      listenerFail("filePathContainsPound fired unexpectedly");
-    }
+    public void interactionIncomplete() { listenerFail("interactionIncomplete fired unexpectedly"); }
+    public void filePathContainsPound() { listenerFail("filePathContainsPound fired unexpectedly"); }
     
     public void documentNotFound(OpenDefinitionsDocument d, File f) {
       listenerFail("documentNotFound fired unexpectedly");
     }
     
     public void activeDocumentChanged(OpenDefinitionsDocument active) {
-      // listenerFail("activeDocumentChanged fired unexpectedly"); // this event is not tested !!
+      /* this event is not dircectly tested */
     }
     
-    public void focusOnDefinitionsPane() {
-      // listenerFail("focusOnDefinitionsPane fired unexpectedly"); // this event is not tested !!
-    }
+    public void focusOnDefinitionsPane() {  /* this event is not dircectly tested */ }
   }
-
+  
+  public static class InteractionListener extends TestListener {
+    private volatile boolean _interactionDone = false;       // records when the interaction is done
+    private final Object _interactionLock = new Object();           // lock for _interactionDone
+    
+    private volatile boolean _resetDone = false;       // records when the interaction is done
+    private final Object _resetLock = new Object();           // lock for _interactionDone
+    
+    private volatile int _lastExitStatus = -1;
+    
+    /** Relying on the default constructor. */
+    
+    public synchronized void interactionStarted() { interactionStartCount++; }
+    
+    public void interactionEnded() {
+//        assertInteractionStartCount(1);
+      
+      synchronized(this) { interactionEndCount++; }
+      synchronized(_interactionLock) { 
+        _interactionDone = true;
+        _interactionLock.notify(); 
+      }
+    }
+    
+    public void interpreterExited(int status) {
+//        Utilities.showDebug("GlobalModelOtherTest: interpreterExited");
+//        assertInteractionStartCount(1);
+//        assertInterpreterResettingCount(0);
+      synchronized(this) { 
+        interpreterExitedCount++;
+        _lastExitStatus = status;
+      }
+      synchronized(_interactionLock) { 
+        _interactionDone = true;
+        _interactionLock.notify(); 
+      }
+    }
+    
+    public void interpreterResetting() {
+      assertInterpreterResettingCount(0);
+      assertInterpreterReadyCount(0);
+      synchronized(this) { interpreterResettingCount++; }
+    }
+    
+    public void interpreterReady(File wd) {
+//        Utilities.showDebug("GlobalModelOtherTest: interpreterReady");
+      synchronized(this) { interpreterReadyCount++; }
+      synchronized(_resetLock) {
+//          assertInteractionStartCount(1);
+//          assertInterpreterExitedCount(1);
+//          assertInterpreterResettingCount(1);
+//          Utilities.showDebug("GlobalModelOtherTest: notifying resetDone");
+        _resetDone = true;
+        _resetLock.notify();
+      }
+    }
+    
+    public void consoleReset() {
+      assertConsoleResetCount(0);
+//        assertCompileStartCount(1);
+//        assertCompileEndCount(1);
+      // don't care whether interactions or console are reset first
+      synchronized(this) { consoleResetCount++; }
+    }
+    
+    public void resetConsoleResetCount() { consoleResetCount = 0; }
+    
+    public void logInteractionStart() {
+      _interactionDone = false;
+      _resetDone = false;
+    }
+    
+    public void waitInteractionDone() throws InterruptedException {
+      synchronized(_interactionLock) { while (! _interactionDone) _interactionLock.wait(); }
+    }
+    
+    public void waitResetDone() throws InterruptedException {
+      synchronized(_resetLock) { while (! _resetDone)  _resetLock.wait(); }
+    }
+    
+    public int getLastExitStatus() { return _lastExitStatus; }
+  };
   
   
-  /** If users expect the Interactions to be reset after a compilation, they must synchronize on this listener 
+  /** If users expect the Interactions to be reset after a compilation, they must execute waitReset
    *  when compiling, then wait() on it. The interactionsReset() method will notify().
    */
-  public static class CompileShouldSucceedListener extends TestListener {
-    private boolean _expectReset;
+  public static class CompileShouldSucceedListener extends InteractionListener {
+    private volatile boolean _expectReset;
     
-    private boolean _interactionsNotYetReset = true;  // records when interactions pane is reset
-
-    /** Reset after a compilation.
+    private volatile boolean _compileDone = false;        // records when compilaton is done
+    private final Object _compileLock = new Object();     // lock for _compileDone
+    
+    /** Forces reset after a compilation.
      *  @param expectReset Whether to listen for interactions being
      */
     public CompileShouldSucceedListener(boolean expectReset) { _expectReset = expectReset; }
     
     public CompileShouldSucceedListener() { this(false); }
     
-    public boolean notDone() { return _interactionsNotYetReset; }
-
+//    public boolean notDone() { return ! _interactionsReset; }
+    
+    public void newFileCreated(OpenDefinitionsDocument doc) { /* ingore this operation */ }
+    
     public void compileStarted() {
 //      Utilities.showDebug("compileStarted called in CSSListener");
       assertCompileStartCount(0);
@@ -966,9 +915,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertInterpreterResettingCount(0);
       assertInterpreterReadyCount(0);
       assertConsoleResetCount(0);
-      compileStartCount++;
+      synchronized(this) { compileStartCount++; }
     }
-
+    
     public void compileEnded(File workDir, File[] excludedFiles) {
 //      Utilities.showDebug("compileEnded called in CSSListener");
       assertCompileEndCount(0);
@@ -976,81 +925,134 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertInterpreterResettingCount(0);
       assertInterpreterReadyCount(0);
       assertConsoleResetCount(0);
-      compileEndCount++;
-    }
-
-    public void interpreterResetting() {
-      assertInterpreterResettingCount(0);
-      assertInterpreterReadyCount(0);
-      assertCompileStartCount(1);
-      assertCompileEndCount(1);
-      // don't care whether interactions or console are reset first
-      interpreterResettingCount++;
-    }
-
-    public void interpreterReady(File wd) {
-      synchronized(this) {
-        assertInterpreterResettingCount(1);
-        assertInterpreterReadyCount(0);
-        assertCompileStartCount(1);
-        assertCompileEndCount(1);
-        // don't care whether interactions or console are reset first
-        interpreterReadyCount++;
-        _interactionsNotYetReset = false;
-//        System.err.println("Interactions has been reset.");
-        notify();
+      synchronized(this) { compileEndCount++; }
+      synchronized(_compileLock) {
+        _compileDone = true;
+        _compileLock.notify();
       }
     }
-
-    public void consoleReset() {
-      assertConsoleResetCount(0);
-      assertCompileStartCount(1);
-      assertCompileEndCount(1);
-      // don't care whether interactions or console are reset first
-      consoleResetCount++;
-    }
-
+    
     public void checkCompileOccurred() {
       assertCompileEndCount(1);
       assertCompileStartCount(1);
-      if (_expectReset) {
-        assertInterpreterResettingCount(1);
-        assertInterpreterReadyCount(1);
-      }
-      else {
-        assertInterpreterResettingCount(0);
-        assertInterpreterReadyCount(0);
-      }
-
+//      if (_expectReset) {
+//        assertInterpreterResettingCount(1);
+//        assertInterpreterReadyCount(1);
+//      }
+//      else {
+//        assertInterpreterResettingCount(0);
+//        assertInterpreterReadyCount(0);
+//      }
+      
       // Note: console is no longer reset after a compile
       //assertConsoleResetCount(1);
     }
+    
+    public void logCompileStart() { 
+      logInteractionStart();
+      _compileDone = false; 
+    }
+    
+    public void compile(OpenDefinitionsDocument doc) throws IOException, InterruptedException {
+      logCompileStart();
+      doc.startCompile();
+      waitCompileDone();
+    }
+    
+    public void waitCompileDone() throws InterruptedException {
+      synchronized(_compileLock) {
+        while (! _compileDone) {
+//        System.err.println("Waiting for JUnit to complete");
+          _compileLock.wait();
+        }
+      }
+    }
   }
-
+  
   /** A model listener for situations expecting a compilation to fail. */
   public static class CompileShouldFailListener extends TestListener {
+    
+    private volatile boolean _compileDone = false;        // records when compilaton is done
+    private final Object _compileLock = new Object();     // lock for _compileDone
+    
     public void compileStarted() {
       assertCompileStartCount(0);
       assertCompileEndCount(0);
-      compileStartCount++;
+      synchronized(this) { compileStartCount++; }
     }
-
+    
     public void compileEnded(File workDir, File[] excludedFiles) {
+//      Utilities.showDebug("compileEnded called in CSSListener");
       assertCompileEndCount(0);
       assertCompileStartCount(1);
-      compileEndCount++;
+      assertInterpreterResettingCount(0);
+      assertInterpreterReadyCount(0);
+      assertConsoleResetCount(0);
+      synchronized(this) { compileEndCount++; }
+      synchronized(_compileLock) {
+        _compileDone = true;
+        _compileLock.notify();
+      }
     }
-
+    
     public void checkCompileOccurred() {
       assertCompileEndCount(1);
       assertCompileStartCount(1);
     }
+    
+    public void logCompileStart() {  _compileDone = false; }
+    
+    public void waitCompileDone() throws InterruptedException {
+      synchronized(_compileLock) {
+        while (! _compileDone) {
+//        System.err.println("Waiting for JUnit to complete");
+          _compileLock.wait();
+        }
+      }
+    }
+    
+    public void compile(OpenDefinitionsDocument doc) throws IOException, InterruptedException {
+      logCompileStart();
+      doc.startCompile();
+      waitCompileDone();
+    }
   }
   
-
-  public class JUnitTestListener extends CompileShouldSucceedListener {
+  public static class JUnitTestListener extends CompileShouldSucceedListener {
+    
+    protected volatile boolean _junitDone = false;
+    protected final Object _junitLock = new Object();
+    
+    public void logJUnitStart() { 
+      logCompileStart();
+      _junitDone = false; 
+    }
+    
+    /** Runs JUnit on doc to completion. */
+    public void runJUnit(OpenDefinitionsDocument doc) throws IOException, ClassNotFoundException, 
+      InterruptedException {
+      logJUnitStart();
+//    System.err.println("Starting JUnit on " + doc);
+      doc.startJUnit();
+//    System.err.println("JUnit Started on " + doc);
+      waitJUnitDone();
+    }
+    
+    public void runJUnit(JUnitModel jm) throws IOException, ClassNotFoundException, InterruptedException {  
+      logJUnitStart();
+//    System.err.println("Starting JUnit");
+      jm.junitAll();
+      waitJUnitDone();
+    }
+    
+    public void waitJUnitDone() throws InterruptedException {
+      synchronized(_junitLock) {
+        while (!_junitDone) { _junitLock.wait(); }
+      }
+    }
+    
     // handle System.out's separately but default to outer class's printMessage value
-    protected boolean printMessages = GlobalModelJUnitTest.printMessages;
+    protected volatile boolean printMessages = GlobalModelJUnitTest.printMessages;
     /** Construct JUnitTestListener without resetting interactions */
     public JUnitTestListener() { this(false, false);  }
     public JUnitTestListener(boolean shouldResetAfterCompile) {  this(shouldResetAfterCompile, false); }
@@ -1064,27 +1066,27 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     public void junitStarted() {
       if (printMessages) System.out.println("listener.junitStarted");
-      junitStartCount++;
+      synchronized(this) { junitStartCount++; }
     }
     public void junitSuiteStarted(int numTests) {
       if (printMessages) System.out.println("listener.junitSuiteStarted, numTests = "+numTests);
       assertJUnitStartCount(1);
-      junitSuiteStartedCount++;
+      synchronized(this) { junitSuiteStartedCount++; }
     }
     public void junitTestStarted(String name) {
       if (printMessages) System.out.println("  listener.junitTestStarted, " + name);
-      junitTestStartedCount++;
+      synchronized(this) { junitTestStartedCount++; }
     }
     public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
       if (printMessages) System.out.println("  listener.junitTestEnded, name = " + name + " succ = " + wasSuccessful + 
                                             " err = " + causedError);
-      junitTestEndedCount++;
+      synchronized(this) { junitTestEndedCount++; }
       assertEquals("junitTestEndedCount should be same as junitTestStartedCount", junitTestEndedCount, 
                    junitTestStartedCount);
     }
     public void nonTestCase(boolean isTestAll) {
       if (printMessages) System.out.println("listener.nonTestCase, isTestAll=" + isTestAll);
-      nonTestCaseCount++;
+      synchronized(this) { nonTestCaseCount++; }
       synchronized(_junitLock) {
         _junitDone = true;
         _junitLock.notify();
@@ -1098,10 +1100,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         _junitLock.notify();
       }
     }
-    public synchronized void junitEnded() {
+    public void junitEnded() {
       //assertJUnitSuiteStartedCount(1);
       if (printMessages) System.out.println("junitEnded event!");
-      junitEndCount++;
+      synchronized(this) { junitEndCount++; }
       synchronized(_junitLock) {
 //        System.err.println("JUnit successfully completed");
         _junitDone = true;
@@ -1110,13 +1112,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
   }
   
-  /** This listener must be dynamic because it references _junitDone and _junitLock */
-  public class JUnitNonTestListener extends JUnitTestListener {
-    private boolean _shouldBeTestAll;
+  /** Listener class for failing JUnit invocation. */
+  public static class JUnitNonTestListener extends JUnitTestListener {
+    private volatile boolean _shouldBeTestAll;
     public JUnitNonTestListener() {  this(false); }
     public JUnitNonTestListener(boolean shouldBeTestAll) { _shouldBeTestAll = shouldBeTestAll; }
     public void nonTestCase(boolean isTestAll) {
-      nonTestCaseCount++;
+      synchronized(this) { nonTestCaseCount++; }
       assertEquals("Non test case heard the wrong value for test current/test all", _shouldBeTestAll, isTestAll);
 //      Utilities.show("synchronizing on _junitLock");
       synchronized(_junitLock) {
@@ -1124,10 +1126,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         _junitDone = true;
         _junitLock.notify();
       }
-//      Utilities.show("synchronization complete");
     }
   }
-
+  
   /* A variant of DefaultGlobalModel used only for testing purposes.  This variant
    * does not change the working directory when resetting interactions.  This test class and its
    * descendants were written before the distinction between getWorkingDirectoru and getMasterDirectory.

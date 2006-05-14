@@ -69,19 +69,19 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private static DefinitionsEditorKit EDITOR_KIT;
     
   /** Our parent window. */
-  private MainFrame _mainFrame;
+  private final MainFrame _mainFrame;
   /** Our corresponding ODD */
   private final OpenDefinitionsDocument _doc;
   
-  private UndoAction _undoAction;
-  private RedoAction _redoAction;
-  private boolean testVariable;   //For Tests ONLY
+  private volatile UndoAction _undoAction;
+  private volatile RedoAction _redoAction;
+  private volatile boolean testVariable;   //For Tests ONLY
 //  private Document _defdoc;
   
   /** Flag used to determine if the user has already been warned about debugging when the document within 
    *  this defpane has been modified since its last save.
    */
-  private boolean _hasWarnedAboutModified = false;
+  private volatile boolean _hasWarnedAboutModified = false;
 
 //  /** Used by the centering source mechanism to ensure paints */
 //  private boolean _updatePending = false;
@@ -376,12 +376,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** Tells us whether we currently are in the middle of a CompoundEdit for regular keystrokes.
    *  Helps us with granular undo.
    */
-  private boolean _inCompoundEdit = false;
-  private int _compoundEditKey;
+  private volatile boolean _inCompoundEdit = false;
+  private volatile int _compoundEditKey;
 
 
   /** Our keymap containing key bindings.  Takes precedence over the default map. */
-  Keymap ourMap;
+  final Keymap ourMap;
   
   /** Standard Constructor.  Sets up all the defaults.
    *  @param mf the parent window
@@ -896,7 +896,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     super.setDocument(_doc);
     if (_doc.getUndoableEditListeners().length == 0) _resetUndo();
     
-    _doc.modifyLock();
+    _doc.acquireWriteLock();
     int len = _doc.getLength();
     if (len < _position || len < _selEnd) {
       // the document changed since we're set inactive
@@ -917,7 +917,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         _doc.setCurrentLocation(_selEnd);
       }
     }
-    finally { _doc.modifyUnlock(); }
+    finally { _doc.releaseWriteLock(); }
 //    synchronized(_lock) {  // Why synchronize?  This code now runs in the event thread, but was not in legacy code
     _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
     _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
@@ -1241,54 +1241,25 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /**
-   * Wrapper for UndoableEdit that pairs UndoableEdits with their
-   * caret positions
-   */
+  /** Wrapper for UndoableEdit that pairs UndoableEdits with their caret positions */
   private class UndoWithPosition implements UndoableEdit {
-    private UndoableEdit _undo;
-    private int _pos;
+    private final UndoableEdit _undo;
+    private final int _pos;
 
     public UndoWithPosition(UndoableEdit undo, int pos) {
       _undo = undo;
       _pos = pos;
     }
 
-    public int getPosition() {
-      return _pos;
-    }
-
-    public boolean addEdit(UndoableEdit ue) {
-      return _undo.addEdit(ue);
-    }
-
-    public boolean canRedo() {
-      return _undo.canRedo();
-    }
-
-    public boolean canUndo() {
-      return _undo.canUndo();
-    }
-
-    public void die() {
-      _undo.die();
-    }
-
-    public String getPresentationName() {
-      return _undo.getPresentationName();
-    }
-
-    public String getUndoPresentationName() {
-      return _undo.getUndoPresentationName();
-    }
-
-    public String getRedoPresentationName() {
-      return _undo.getRedoPresentationName();
-    }
-
-    public boolean isSignificant() {
-      return _undo.isSignificant();
-    }
+    public int getPosition() { return _pos;  }
+    public boolean addEdit(UndoableEdit ue) { return _undo.addEdit(ue); }
+    public boolean canRedo() { return _undo.canRedo(); }
+    public boolean canUndo() { return _undo.canUndo(); }
+    public void die() { _undo.die(); }
+    public String getPresentationName() { return _undo.getPresentationName(); }
+    public String getUndoPresentationName() { return _undo.getUndoPresentationName(); }
+    public String getRedoPresentationName() { return _undo.getRedoPresentationName(); }
+    public boolean isSignificant() { return _undo.isSignificant(); }
 
     public void redo() {
       _undo.redo();
@@ -1302,8 +1273,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _undo.undo();
     }
   }
-  
-  
   
   /** This list of listeners to notify when we are finalized */
   private List<FinalizationListener<DefinitionsPane>> _finalizationListeners = 
@@ -1329,8 +1298,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   protected void finalize() {
     FinalizationEvent<DefinitionsPane> fe = new FinalizationEvent<DefinitionsPane>(this);
-    for (FinalizationListener<DefinitionsPane> fl: _finalizationListeners) {
-      fl.finalized(fe);
-    }
+    for (FinalizationListener<DefinitionsPane> fl: _finalizationListeners) fl.finalized(fe);
   }
 }
