@@ -145,7 +145,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
 //    edu.rice.cs.drjava.DrJava.disableSecurityManager();
 //  }
   
-  private static final Log _log = new Log("IntJVMLog", true);
+  private static final Log _log = new Log("IntJVMLog", false);
   private static void _dialog(String s) {
     //javax.swing.JOptionPane.showMessageDialog(null, s);
     _log.logTime(s);

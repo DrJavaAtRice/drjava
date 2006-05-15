@@ -136,6 +136,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(listener);
     listener.logInteractionStart();
     interpretIgnoreResult("while (true) {}");
+    Utilities.clearEventQueue();
     
     listener.assertInteractionStartCount(1);
     _model.resetInteractions(FileOption.NULL_FILE);

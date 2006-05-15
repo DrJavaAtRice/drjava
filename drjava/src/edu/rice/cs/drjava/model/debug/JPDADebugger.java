@@ -181,13 +181,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    */
   public boolean isAvailable() { return true; }
 
-  /** Returns whether the debugger is currently in an active debugging
-   *  session.  This method will return false if the debugger has not
-   *  been initialized through startup().
-   */
+  /** Returns whether the debugger is currently enabled. */
   public boolean isReady() { return _vm != null; }
-  
-  public boolean inDebugMode() { return isReady(); }
   
   /** Ensures that debugger is active.  Should be called by every public method in the debugger except for startup().
    *  @throws IllegalStateException if debugger is not active
@@ -888,11 +883,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     
     if (breakpoint == null) {
       if (doc.getLineStartPos(offset) == doc.getLineEndPos(offset)) {
-        printMessage("Cannot set a breakpoint on an empty line.");
+        Utilities.show("Cannot set a breakpoint on an empty line.");
       }
       else {
         try { setBreakpoint(new Breakpoint (doc, offset, lineNum, isEnabled, this)); }
-        catch(LineNotExecutableException lnee) { printMessage(lnee.getMessage()); }
+        catch(LineNotExecutableException lnee) { Utilities.show(lnee.getMessage()); }
       }
     }
     else _model.getBreakpointManager().removeRegion(breakpoint);

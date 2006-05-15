@@ -1971,6 +1971,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Toggle a bookmark. */
   public void toggleBookmark() {
     final OpenDefinitionsDocument doc = _model.getActiveDocument();
+    
     int startSel = _currentDefPane.getSelectionStart();
     int endSel = _currentDefPane.getSelectionEnd();
     doc.acquireReadLock();
@@ -2965,7 +2966,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     if (!debugger.isAvailable()) return;
     
     try { 
-      if (inDebugMode()) debugger.shutdown();
+      if (isDebuggerReady()) debugger.shutdown();
       else {
         // Turn on debugger
         hourglassOn();
@@ -3124,7 +3125,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             OpenDefinitionsDocument doc = _model.getActiveDocument();
             if (doc.isModifiedSinceSave()) {
               _saveAction.setEnabled(true);
-              if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+              if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
                 _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
               updateFileTitle();
             }
@@ -3135,7 +3136,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         Utilities.invokeLater(new Runnable() {
           public void run() {
             _saveAction.setEnabled(true);
-            if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+            if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
               _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
             updateFileTitle();
           }
@@ -3145,7 +3146,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         Utilities.invokeLater(new Runnable() {
           public void run() {
             _saveAction.setEnabled(true);
-            if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+            if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
               _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
             updateFileTitle();
           }
@@ -3939,7 +3940,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     config.setSetting(DOC_LIST_WIDTH, new Integer(_docSplitPane.getDividerLocation()));
   }
   
-  private void _cleanUpForCompile() { if (inDebugMode()) _model.getDebugger().shutdown(); }
+  private void _cleanUpForCompile() { if (isDebuggerReady()) _model.getDebugger().shutdown(); }
   
   private void _compile() {
     _cleanUpForCompile();
@@ -4327,13 +4328,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //   * Suspends the current execution of the debugger
 //   */
 //  private void debuggerSuspend() throws DebugException {
-//    if (inDebugMode())
+//    if (isDebuggerReady())
 //      _model.getDebugger().suspend();
 //  }
   
   /** Resumes the debugger's current execution. */
   void debuggerResume() throws DebugException {
-    if (inDebugMode()) {
+    if (isDebuggerReady()) {
       _model.getDebugger().resume();
       _removeThreadLocationHighlight();
     }
@@ -4341,7 +4342,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Steps in the debugger. */
   void debuggerStep(int flag) {
-    if (inDebugMode()) {
+    if (isDebuggerReady()) {
       try { _model.getDebugger().step(flag); }
       catch (IllegalStateException ise) {
         // This may happen if the user if stepping very frequently,
@@ -4373,7 +4374,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       }
       
       boolean isModified = doc.isModifiedSinceSave();
-      if (isModified  && !_currentDefPane.hasWarnedAboutModified() &&
+      if (isDebuggerReady() && isModified  && !_currentDefPane.hasWarnedAboutModified() &&
           DrJava.getConfig().getSetting(WARN_BREAKPOINT_OUT_OF_SYNC).booleanValue()) {
         String message =
           "This document has been modified and may be out of sync\n" +
@@ -4397,7 +4398,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             if (dialog.getCheckBoxValue()) {
                 DrJava.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
             }
-            break;
+            return;
             
           case JOptionPane.CANCEL_OPTION:
           case JOptionPane.CLOSED_OPTION:
@@ -4424,7 +4425,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
 //  /** Adds a watch to a given variable or field. */
 //  void debuggerAddWatch() {
-//    if (inDebugMode()) {
+//    if (isDebuggerReady()) {
 //      //final String field;
 //      OpenDefinitionsDocument doc = _model.getActiveDocument();
 //      final JDialog getFieldDialog = new JDialog(this, "Choose Field to be Watched", true);
@@ -4511,31 +4512,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                  "Could not read the '.drjava' configuration file\n" +
                  "in your home directory.  Starting with default\n" +
                  "values instead.\n\n" + "The problem was:\n");
-    }
-  }
-  
-  /** Shows a brief warning to the user, to inform the user that the file he is debugging has been modified 
-   *  since its last save and should probably be saved and recompiled. Does not actually save or recompile for 
-   *  the user.
-   */
-  private void _showDebuggingModifiedFileWarning() {
-    if (DrJava.getConfig().getSetting(WARN_DEBUG_MODIFIED_FILE).booleanValue()) {
-      String msg =
-        "This document has been modified since its last save and\n" +
-        "may be out of sync with the debugger. It is suggested that\n" +
-        "you save and recompile before continuing to debug in order\n" +
-        "to avoid any unexpected errors.";
-      String title = "Debugging modified file!";
-      
-      ConfirmCheckBoxDialog dialog =
-        new ConfirmCheckBoxDialog(MainFrame.this, title, msg,
-                                  "Do not show this message again",
-                                  JOptionPane.WARNING_MESSAGE,
-                                  JOptionPane.DEFAULT_OPTION);
-      if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue())
-        DrJava.getConfig().setSetting(WARN_DEBUG_MODIFIED_FILE, Boolean.FALSE);
-      
-      _currentDefPane.hasWarnedAboutModified(true);
     }
   }
   
@@ -6167,7 +6143,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  Must be executed in event thread.
    */
   private void _updateDebugStatus() {
-    if (! inDebugMode()) return;
+    if (! isDebuggerReady()) return;
     
     // if the document is untitled, don't show that it is out of sync since it can't be debugged anyway
     if (_model.getActiveDocument().isUntitled() || _model.getActiveDocument().getClassFileInSync()) {
@@ -6203,7 +6179,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     Runnable command = new Runnable() {
       public void run() {
         /*
-         if (inDebugMode()) {
+         if (isDebuggerReady()) {
          _disableStepTimer();
          Debugger manager = _model.getDebugger();
          manager.clearCurrentStepRequest();
@@ -6279,6 +6255,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param doc Document to display
    *  @param offset Offset to display
    *  @param shouldHighlight true iff the line should be highlighted.
+   *  @param shouldWarn about modifications?
    */
   public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, final boolean shouldHighlight) {
     if (!_model.getActiveDocument().equals(doc)) _model.setActiveDocument(doc);
@@ -6313,14 +6290,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             }
           }
         }
-        
-        if (doc.isModifiedSinceSave() && !_currentDefPane.hasWarnedAboutModified()) {
-          
-          _showDebuggingModifiedFileWarning();
-          
-          //no need to update flag, because previous method call will do it
-          //_hasWarnedAboutModified = true;
-        }
+
         if (shouldHighlight) {
           // Give the interactions pane focus so we can debug
           _interactionsPane.requestFocusInWindow();
@@ -6382,7 +6352,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void currThreadDied() {
       _disableStepTimer();
       
-      if (inDebugMode()) {
+      if (isDebuggerReady()) {
         try {
           if (!_model.getDebugger().hasSuspendedThreads()) {
             // no more suspended threads, resume default debugger state
@@ -6665,7 +6635,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         public void run() {
 //          try {
           _compilerErrorPanel.reset(excludedFiles);
-          if (inDebugMode()) {
+          if (isDebuggerReady()) {
 //              _model.getActiveDocument().checkIfClassFileInSync();
             
             _updateDebugStatus();
@@ -6880,6 +6850,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //          _resetInteractionsAction.setEnabled(false);
           _junitAction.setEnabled(false);
           _junitAllAction.setEnabled(false);
+          _junitProjectAction.setEnabled(false);
           _runAction.setEnabled(false);
           _runProjectAction.setEnabled(false);
           _closeInteractionsScript();
@@ -6900,6 +6871,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           _runProjectAction.setEnabled(true);
           _junitAction.setEnabled(true);
           _junitAllAction.setEnabled(true);
+          _junitProjectAction.setEnabled(true);
 // This action should not be enabled until the slave JVM is used          
 //          _resetInteractionsAction.setEnabled(true);
           if (_showDebugger) {
@@ -7064,6 +7036,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             showTab(_junitErrorPanel);
             _junitAction.setEnabled(true);
             _junitAllAction.setEnabled(true);
+            _junitProjectAction.setEnabled(true);
             _junitErrorPanel.reset();
           }
           finally { 
@@ -7091,6 +7064,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           showTab(_junitErrorPanel);
           _junitAction.setEnabled(true);
           _junitAllAction.setEnabled(true);
+          _junitProjectAction.setEnabled(true);
           _junitErrorPanel.reset();
         }});
     }
@@ -7220,7 +7194,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     public void projectOpened(File projectFile, FileOpenSelector files) {
       _setUpContextMenus();
-      _runButton = _updateToolbarButton(_runButton, _runProjectAction);
+      projectRunnableChanged();
       _compileButton = _updateToolbarButton(_compileButton, _compileProjectAction);
       _junitButton = _updateToolbarButton(_junitButton, _junitProjectAction);
       _recentProjectManager.updateOpenFiles(projectFile);
@@ -7373,7 +7347,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     });
   }
       
-  boolean inDebugMode() { return _showDebugger &&  _model.getDebugger().isReady(); }
+  boolean isDebuggerReady() { return _showDebugger &&  _model.getDebugger().isReady(); }
   
   /** Return the find replace dialog.
    *  Package protected for use in tests

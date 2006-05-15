@@ -57,7 +57,7 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
   
   private volatile MainFrame _frame;
   
-  private static Log _log = new Log("DefinitionsPaneTestLog.txt", true);
+  private static Log _log = new Log("DefinitionsPaneTestLog.txt", false);
   
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {

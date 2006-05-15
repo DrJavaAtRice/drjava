@@ -72,12 +72,9 @@ public interface Debugger {
   /** Disconnects the debugger from the Interactions JVM and cleans up any state. */
   public void shutdown();
 
-  /** Returns the status of the debugger. */
+  /** Returns whether the debugger is enabled. */
   public boolean isReady();
   
-  /** Returns whether debugger is available and ready. */
-  public boolean inDebugMode();
-
 //  /** Suspends execution of the thread referenced by d */
 //  public void suspend(DebugThreadData d) throws DebugException;
 

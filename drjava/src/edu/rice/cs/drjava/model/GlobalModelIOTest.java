@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
  */
 public final class GlobalModelIOTest extends GlobalModelTestCase implements OptionConstants {
   
-  private static Log _log = new Log("GlobalModelIOTestLog.txt", true);
+  private static Log _log = new Log("GlobalModelIOTestLog.txt", false);
   
   /** Creates a new document, modifies it, and then does the same with a second document, checking for inteference. */
   public void testMultipleFiles() throws BadLocationException {

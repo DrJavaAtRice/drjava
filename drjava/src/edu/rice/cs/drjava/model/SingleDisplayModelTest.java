@@ -48,7 +48,7 @@ import edu.rice.cs.util.OperationCanceledException;
  */
 public class SingleDisplayModelTest extends GlobalModelTestCase {
 
-  private static Log _log = new Log("SingleDisplayModelTestLog.txt", true);
+  private static Log _log = new Log("SingleDisplayModelTestLog.txt", false);
 
   /** Get the instance of the SingleDisplayModel.*/
   private DefaultGlobalModel getSDModel() { return  _model; }

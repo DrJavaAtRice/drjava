@@ -62,8 +62,6 @@ public class NoDebuggerAvailable implements Debugger {
 
   /** Returns the status of the debugger. */
   public boolean isReady() { return false; }
-  
-  public boolean inDebugMode() { return false; }
 
   /** Suspends execution of the currently. */
   public void suspend(DebugThreadData d) { }
