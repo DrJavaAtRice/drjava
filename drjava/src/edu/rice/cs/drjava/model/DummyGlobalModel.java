@@ -177,11 +177,15 @@ public class DummyGlobalModel implements GlobalModel {
   }
 
   public RegionManager<Breakpoint> getBreakpointManager() {
-    throw new UnsupportedOperationException("Tried to call getDebugger on a Dummy");
+    throw new UnsupportedOperationException("Tried to call getBreakpointManager on a Dummy");
   }
   
   public RegionManager<DocumentRegion> getBookmarkManager() {
-    throw new UnsupportedOperationException("Tried to call getDebugger on a Dummy");
+    throw new UnsupportedOperationException("Tried to call getBookmarkManager on a Dummy");
+  }
+  
+  public RegionManager<DocumentRegion> getFindResultsManager() {
+    throw new UnsupportedOperationException("Tried to call getFindResultsManager on a Dummy");
   }
   
   public IDocumentNavigator<OpenDefinitionsDocument> getDocumentNavigator() {

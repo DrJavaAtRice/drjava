@@ -256,6 +256,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return manager for bookmark regions. */
   public RegionManager<DocumentRegion> getBookmarkManager() { return _bookmarkManager; }
   
+  /** Manager for find result regions. */
+  protected final ConcreteRegionManager<DocumentRegion> _findResultsManager;
+  
+  /** @return manager for find result regions. */
+  public RegionManager<DocumentRegion> getFindResultsManager() { return _findResultsManager; }
+  
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //  /** Light-weight parsing controller. */
 //  protected LightWeightParsingControl _parsingControl;
@@ -273,6 +279,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
     
     _bookmarkManager = new ConcreteRegionManager<DocumentRegion>();
+    _findResultsManager = new ConcreteRegionManager<DocumentRegion>();
     
     _breakpointManager = new ConcreteRegionManager<Breakpoint>() {
       public boolean changeRegionHelper(final Breakpoint oldBP, final Breakpoint newBP) {
@@ -1638,6 +1645,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // remove breakpoints and bookmarks for this file
     doc.getBreakpointManager().clearRegions();
     doc.getBookmarkManager().clearRegions();
+    doc.getFindResultsManager().clearRegions();
     
     Utilities.invokeLater(new SRunnable() { 
       public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread
@@ -2395,6 +2403,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Manager for bookmark regions. */
     protected volatile SubsetRegionManager<DocumentRegion> _bookmarkManager;
     
+    /** Manager for find result regions. */
+    protected volatile SubsetRegionManager<DocumentRegion> _findResultsManager;
+    
     private volatile int _initVScroll;
     private volatile int _initHScroll;
     private volatile int _initSelStart;
@@ -2435,6 +2446,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
       _breakpointManager = new SubsetRegionManager<Breakpoint>(AbstractGlobalModel.this.getBreakpointManager());
       _bookmarkManager = new SubsetRegionManager<DocumentRegion>(AbstractGlobalModel.this.getBookmarkManager());
+      _findResultsManager = new SubsetRegionManager<DocumentRegion>(AbstractGlobalModel.this.getFindResultsManager());
     }
     
     //------------ Getters and Setters -------------//
@@ -3122,6 +3134,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** @return the bookmark region manager. */
     public RegionManager<DocumentRegion> getBookmarkManager() { return _bookmarkManager; }
+    
+    /** @return the find result region manager. */
+    public RegionManager<DocumentRegion> getFindResultsManager() { return _findResultsManager; }
     
    /** throws UnsupportedOperationException */
     public void removeFromDebugger() { /* do nothing because it is called in methods in this class */ }    

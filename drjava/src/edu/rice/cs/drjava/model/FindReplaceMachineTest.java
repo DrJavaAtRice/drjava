@@ -601,7 +601,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
       FindResult fr = frm.findNext();
       OpenDefinitionsDocument d = fr.getDocument();
       if (frm.getDocument() != d) {
-        // do FindReplaceDialog's _updateMachine
+        // do FindReplacePanel's _updateMachine
 //        Utilities.show("return doc = " + d + " distinct from current machine doc = " + frm.getDocument());
         frm.setDocument(d);
         frm.setPosition(found);

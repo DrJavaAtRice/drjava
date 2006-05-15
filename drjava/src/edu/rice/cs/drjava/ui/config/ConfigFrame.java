@@ -531,6 +531,8 @@ public class ConfigFrame extends JFrame {
                                                 "The color for compiler error highlights in the Definitions Pane.", true));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.BOOKMARK_COLOR, "Bookmark Color", this,
                                                 "The color for bookmarks in the Definitions Pane.", true));
+    addOptionComponent(panel, new ColorOptionComponent(OptionConstants.FIND_RESULTS_COLOR, "Find Results Color", this,
+                                                "The color for highlighting find results in the Definitions Pane.", true));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEBUG_BREAKPOINT_COLOR, "Debugger Breakpoint Color", this,
                                                 "The color for breakpoints in the Definitions Pane.", true));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, "Disabled Debugger Breakpoint Color", this,

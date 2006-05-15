@@ -290,6 +290,9 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
     
   /** @return the bookmark region manager. */
   public RegionManager<DocumentRegion> getBookmarkManager();
+    
+  /** @return the find result region manager. */
+  public RegionManager<DocumentRegion> getFindResultsManager();
 
   /** Called when this document is being closed, removing related state from the debug manager. */
   public void removeFromDebugger();

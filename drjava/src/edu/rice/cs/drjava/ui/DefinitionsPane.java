@@ -96,6 +96,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   static ReverseHighlighter.DefaultUnderlineHighlightPainter BOOKMARK_PAINTER =
     new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(BOOKMARK_COLOR), 3);
 
+  /** Highlight painter for find results. */
+  static ReverseHighlighter.DefaultUnderlineHighlightPainter FIND_RESULTS_PAINTER =
+    new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(FIND_RESULTS_COLOR), 3);
+
   /** Highlight painter for breakpoints. */
   static ReverseHighlighter.DefaultHighlightPainter BREAKPOINT_PAINTER =
     new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
@@ -206,6 +210,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     public void optionChanged(OptionEvent<Color> oce) {
       BOOKMARK_PAINTER = new ReverseHighlighter.DefaultUnderlineHighlightPainter(oce.value, BOOKMARK_PAINTER.getThickness());
       _mainFrame.refreshBookmarkHighlightPainter();
+    }
+  }
+
+  /** The OptionListener for FIND_RESULTS_COLOR. */
+  private class FindResultsColorOptionListener implements OptionListener<Color> {
+    public void optionChanged(OptionEvent<Color> oce) {
+      FIND_RESULTS_PAINTER = new ReverseHighlighter.DefaultUnderlineHighlightPainter(oce.value, FIND_RESULTS_PAINTER.getThickness());
+      _mainFrame.refreshFindResultsHighlightPainter();
     }
   }
 
@@ -470,6 +482,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.BOOKMARK_COLOR, temp);
     _colorOptionListeners.add(pair);
     DrJava.getConfig().addOptionListener( OptionConstants.BOOKMARK_COLOR, temp);
+
+    temp = new FindResultsColorOptionListener();
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLOR, temp);
+    _colorOptionListeners.add(pair);
+    DrJava.getConfig().addOptionListener( OptionConstants.FIND_RESULTS_COLOR, temp);
     
     temp = new BreakpointColorOptionListener();
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, temp);

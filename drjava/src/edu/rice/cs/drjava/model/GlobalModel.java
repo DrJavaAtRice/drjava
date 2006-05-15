@@ -111,8 +111,11 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return manager for breakpoint regions. */
   public RegionManager<Breakpoint> getBreakpointManager();
   
-  /** @return manager for breakpoint regions. */
+  /** @return manager for bookmark regions. */
   public RegionManager<DocumentRegion> getBookmarkManager();
+  
+  /** @return manager for find result regions. */
+  public RegionManager<DocumentRegion> getFindResultsManager();
   
 //  //---------------------------- Interpreter --------------------------------//
 //  /** Updates the security manager in DrJava. */

@@ -142,6 +142,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public RegionManager<Breakpoint> getBreakpointManager() { throw new UnsupportedOperationException("Dummy method"); }
 
   public RegionManager<DocumentRegion> getBookmarkManager() { throw new UnsupportedOperationException("Dummy method"); }
+
+  public RegionManager<DocumentRegion> getFindResultsManager() { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean isUntitled() { throw new UnsupportedOperationException("Dummy method"); }
   

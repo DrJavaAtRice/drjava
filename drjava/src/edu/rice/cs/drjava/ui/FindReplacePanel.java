@@ -40,6 +40,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import java.awt.datatransfer.*;
+import java.io.File;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -48,22 +49,24 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FindReplaceMachine;
 import edu.rice.cs.drjava.model.FindResult;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
+import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.FileMovedException;
 
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.UnexpectedException;
-
+import edu.rice.cs.util.Lambda;
 
 /** The tabbed panel that handles requests for finding and replacing text.
- *  (Used to be a dialog box, hence the name. We should fix this.)
  *  @version $Id$
  */
-class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
+class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
   private JButton _findNextButton;
   private JButton _findPreviousButton;
+  private JButton _findAllButton;
   private JButton _replaceButton;
   private JButton _replaceFindNextButton;
   private JButton _replaceFindPreviousButton;
@@ -106,6 +109,47 @@ class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
   
   private Action _findPreviousAction =  new AbstractAction("Find Previous") {
     public void actionPerformed(ActionEvent e) { findPrevious(); }
+  };
+  
+  private Action _findAllAction =  new AbstractAction("Find All") {
+    public void actionPerformed(ActionEvent e) {
+      if (_findField.getText().length()>0) {
+        _updateMachine();
+        _machine.setFindWord(_findField.getText());
+        _machine.setReplaceWord(_replaceField.getText());
+        _frame.clearStatusMessage();
+        OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
+        int count = _machine.processAll(new Lambda<Void, FindResult>() {
+          public Void apply(FindResult fr) {
+            final OpenDefinitionsDocument doc = _model.getODDForDocument(fr.getDocument());
+            doc.acquireReadLock();
+            try {
+              int endSel = fr.getFoundOffset();
+              int startSel = endSel-_findField.getText().length();
+              final Position startPos = doc.createPosition(startSel);
+              final Position endPos = doc.createPosition(endSel);
+              _model.getFindResultsManager().addRegion(new DocumentRegion() {
+                public OpenDefinitionsDocument getDocument() { return doc; }
+                public File getFile() throws FileMovedException { return doc.getFile(); }
+                public int getStartOffset() { return startPos.getOffset(); }
+                public int getEndOffset() { return endPos.getOffset(); }
+              });
+            }
+            catch (BadLocationException ble) {
+              throw new UnexpectedException(ble);
+            }
+            finally { doc.releaseReadLock(); }
+            return null;
+          }
+        });
+        _model.setActiveDocument(startDoc);
+        Toolkit.getDefaultToolkit().beep();
+        _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
+        if (count>0) {
+          _frame._findResultsPanelAction.actionPerformed(e);
+        }
+      }
+    }
   };
   
   private Action _doFindAction = new AbstractAction("Do Find") {
@@ -242,7 +286,7 @@ class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
    *  @param frame the overall enclosing window
    *  @param model the model containing the documents to search
    */
-  public FindReplaceDialog(MainFrame frame, SingleDisplayModel model) {
+  public FindReplacePanel(MainFrame frame, SingleDisplayModel model) {
     super(frame, "Find/Replace");
     _model = model;
     _machine = new FindReplaceMachine(_model, _model.getDocumentIterator());
@@ -252,6 +296,7 @@ class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
     /********* Button Initialization ********/
     _findNextButton = new JButton(_findNextAction);
     _findPreviousButton = new JButton(_findPreviousAction);
+    _findAllButton = new JButton(_findAllAction);
     _replaceButton = new JButton(_replaceAction);
     _replaceFindNextButton = new JButton(_replaceFindNextAction);
     _replaceFindPreviousButton = new JButton(_replaceFindPreviousAction);
@@ -349,6 +394,7 @@ class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
     buttons.setLayout(new GridLayout(1,0,5,0));
     buttons.add(_findNextButton);
     buttons.add(_findPreviousButton);
+    buttons.add(_findAllButton);
     buttons.add(_replaceFindNextButton);
     buttons.add(_replaceFindPreviousButton);
     buttons.add(_replaceButton);
@@ -575,7 +621,7 @@ class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
       _frame.clearStatusMessage();
     }
     else
-      throw new UnexpectedException(new RuntimeException("FindReplaceDialog should not be listening to anything"));
+      throw new UnexpectedException(new RuntimeException("FindReplacePanel should not be listening to anything"));
   }
 
   /** Called from MainFrame upon closing this Dialog or changes in the active document */
@@ -591,6 +637,79 @@ class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
   /** Abstracted out since this is called from find and replace/find. */
   private void _doFind() {
     if (_findField.getText().length() > 0) {
+      _updateMachine();
+      _machine.setFindWord(_findField.getText());
+      _machine.setReplaceWord(_replaceField.getText());
+      _frame.clearStatusMessage(); // _message.setText(""); // JL
+      
+      // FindResult contains the document that the result was found in, offset to the next occurrence of 
+      // the string, and a flag indicating whether the end of the document was wrapped around while searching
+      // for the string.
+      FindResult fr = _machine.findNext();
+      OpenDefinitionsDocument doc = fr.getDocument();
+      OpenDefinitionsDocument matchDoc = _model.getODDForDocument(doc);
+      OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
+      
+      final int pos = fr.getFoundOffset();
+      
+      // If there actually *is* a match, then switch active documents. otherwise don't
+      if (pos != -1) { // found a match
+        Caret c = _defPane.getCaret();
+        c.setDot(c.getDot());
+        
+        if (! matchDoc.equals(openDoc)) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+        else _model.refreshActiveDocument();  // in a wraparound search, the unmodified active document may have been kicked out of the cache!
+        
+        _defPane.setCaretPosition(pos);
+        _caretChanged = true;
+        _updateMachine();
+      }
+      else {  // If searching all documents, the current document may have been kicked out of the cache
+        _model.refreshActiveDocument();
+      }
+      
+      if (fr.getWrapped() && !_machine.getSearchAllDocuments()) {
+        Toolkit.getDefaultToolkit().beep();
+        if (!_machine.getSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
+        else  _frame.setStatusMessage("Search wrapped to end.");
+      }
+      
+      if (fr.getAllDocsWrapped() && _machine.getSearchAllDocuments()) {
+        Toolkit.getDefaultToolkit().beep();
+        _frame.setStatusMessage("Search wrapped around all documents.");
+      }
+      
+      if (pos >= 0) {  // defer executing this code until after active document switch (if any) is complete
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            _selectFoundItem();
+            _replaceAction.setEnabled(true);
+            _replaceFindNextAction.setEnabled(true);
+            _replaceFindPreviousAction.setEnabled(true);
+            _machine.setLastFindWord();
+          }});
+      }
+      // else the entire document was searched and no instance of the string
+      // was found. display at most 50 characters of the non-found string
+      else {
+        Toolkit.getDefaultToolkit().beep();
+        StringBuffer statusMessage = new StringBuffer("Search text \"");
+        if (_machine.getFindWord().length() <= 50) statusMessage.append(_machine.getFindWord());
+        else statusMessage.append(_machine.getFindWord().substring(0, 49) + "...");
+        statusMessage.append("\" not found.");
+        _frame.setStatusMessage(statusMessage.toString());
+      }
+    }
+    
+    if (!DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+      _findField.requestFocusInWindow();
+    }
+  }
+
+  private void _doFindAll() {
+    if (_findField.getText().length() > 0) {
+      _model.getFindResultsManager().clearRegions();
+      
       _updateMachine();
       _machine.setFindWord(_findField.getText());
       _machine.setReplaceWord(_replaceField.getText());
@@ -792,7 +911,7 @@ class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
 //    public boolean shouldContinue() {
 //      String text = "The search has reached the end of the document.\n" +
 //        "Continue searching from the start?";
-//      int rc = JOptionPane.showConfirmDialog(FindReplaceDialog.this,
+//      int rc = JOptionPane.showConfirmDialog(FindReplacePanel.this,
 //                                             text,
 //                                             "Continue search?",
 //                                             JOptionPane.YES_NO_OPTION);
@@ -821,7 +940,7 @@ class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
         JTextComponent tc = (JTextComponent)e.getSource();
         if (tc.getSelectedText()!=null) {
           super.actionPerformed(e);
-          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(FindReplaceDialog.this);
+          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(FindReplacePanel.this);
           if ((s!=null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
         }
       }
@@ -835,7 +954,7 @@ class FindReplaceDialog extends TabbedPanel implements ClipboardOwner {
         JTextComponent tc = (JTextComponent)e.getSource();
         if (tc.getSelectedText()!=null) {
           super.actionPerformed(e);
-          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(FindReplaceDialog.this);
+          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(FindReplacePanel.this);
           if ((s!=null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
         }
       }

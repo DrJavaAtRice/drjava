@@ -39,6 +39,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
+import edu.rice.cs.util.Lambda;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
@@ -50,7 +51,7 @@ public class FindReplaceMachine {
   
   // TODO: is _start still used in any way that matters?
   
-  /* Visible machine state; manipulated directly or indirectly by FindReplaceDialog. */
+  /* Visible machine state; manipulated directly or indirectly by FindReplacePanel. */
   private OpenDefinitionsDocument _doc;      // Current search document 
   private OpenDefinitionsDocument _firstDoc; // First document where searching started (when searching all documents)
   private Position _current;                 // Position of the cursor in _doc when machine is stopped
@@ -62,7 +63,7 @@ public class FindReplaceMachine {
   private boolean _searchAllDocuments;       // Whether to search all documents (or just the current document)
   private boolean _isForward;                // Whether search direction is forward (false means backward)
   private boolean _ignoreCommentsAndStrings; // Whether to ignore matches in comments and strings
-  private String _lastFindWord;              // Last word found; set to null by FindReplaceDialog if caret is updated
+  private String _lastFindWord;              // Last word found; set to null by FindReplacePanel if caret is updated
   private boolean _skipText;                 // Whether to skip over the current match if direction is reversed
   private DocumentIterator _docIterator;     // An iterator of open documents; _doc is current
   private SingleDisplayModel _model;
@@ -278,6 +279,66 @@ public class FindReplaceMachine {
 //        Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
         fr = findNext(false);           // find next match in current doc
 //        Utilities.show("Call on findNext() returned " + fr.toString() + "in doc '" + _doc.getText() + "'");
+      }
+      return count;
+    }
+    finally { _doc.releaseWriteLock(); }
+  }
+  
+
+  /** Processes all occurences of the find word with the replace word in the current document or in all documents
+   *  depending the value of the machine register _searchAllDocuments.
+   *  @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+   *  @return the number of processed occurrences
+   */
+  public int processAll(Lambda<Void, FindResult> findAction) { return processAll(findAction, _searchAllDocuments); }
+  
+  /** Processes all occurences of the find word with the replace word in the current document of in all documents
+   *  depending the value of the flag searchAll. 
+   *  @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+   *  @return the number of replacements
+   */
+  private int processAll(Lambda<Void, FindResult> findAction, boolean searchAll) {
+    if (searchAll) {
+      OpenDefinitionsDocument startDoc = _doc;
+      int count = 0;           // the number of replacements done so farr
+      int n = _docIterator.getDocumentCount();
+      for (int i = 0; i < n; i++) {
+        // process all in the rest of the documents
+        count += _processAllInCurrentDoc(findAction);
+        _doc = _docIterator.getNextDocument(_doc);
+      }
+      
+      // update display (perhaps adding "*") in navigatgorPane
+      _model.getDocumentNavigator().repaint();
+      
+      return count;
+    }
+    else return _processAllInCurrentDoc(findAction);
+  }
+  
+  /** Processes all occurences of _findWord in _doc. Never processes other documents.  Starts at
+   *  the beginning or the end of the document (depending on find direction).  This convention ensures that matches 
+   *  created by string replacement will not be replaced as in the following example:<p>
+   *    findString:    "hello"<br>
+   *    replaceString: "e"<br>
+   *    document text: "hhellollo"<p>
+   *  @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+   *  @return the number of replacements
+   */
+  private int _processAllInCurrentDoc(Lambda<Void, FindResult> findAction) {
+    _doc.acquireWriteLock();
+    try {
+      if (_isForward) setPosition(0);
+      else setPosition(_doc.getLength());
+      
+      int count = 0;
+      FindResult fr = findNext(false);  // find next match in current doc   
+      
+      while (! fr.getWrapped()) {
+        findAction.apply(fr);
+        count++;
+        fr = findNext(false);           // find next match in current doc
       }
       return count;
     }
