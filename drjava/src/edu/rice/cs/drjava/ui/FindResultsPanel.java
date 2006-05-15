@@ -34,7 +34,7 @@
 package edu.rice.cs.drjava.ui;
 
 import java.util.Vector;
-
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import javax.swing.*;
@@ -61,6 +61,7 @@ import edu.rice.cs.util.UnexpectedException;
  */
 public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
   protected JButton _goToButton;
+  protected JButton _bookmarkButton;
   protected JButton _removeButton;
   protected JButton _removeAllButton;
   
@@ -93,9 +94,16 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
     };
     _goToButton = new JButton(goToAction);
 
+    Action bookmarkAction = new AbstractAction("Bookmark") {
+      public void actionPerformed(ActionEvent ae) {
+        _bookmark();
+      }
+    };
+    _bookmarkButton = new JButton(bookmarkAction);
+
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
-        _model.getFindResultsManager().removeRegion(getSelectedRegion());
+        _remove();
       }
     };
     _removeButton = new JButton(removeAction);
@@ -109,19 +117,39 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
     
     JButton[] buts = new JButton[] { 
       _goToButton, 
+        _bookmarkButton,
         _removeButton,
         _removeAllButton
     };
     
     return buts;
   }
+  
+  /** Turn the selected regions into bookmarks. */
+  private void _bookmark() {
+    for (DocumentRegion r: getSelectedRegions()) {
+      DocumentRegion bookmark = _model.getBookmarkManager().getRegionOverlapping(r.getDocument(),
+                                                                                 r.getStartOffset(),
+                                                                                 r.getEndOffset());
+      if (bookmark==null) {
+        _model.getBookmarkManager().addRegion(r);
+      }
+    }
+  }
+  
+  /** Remove the selected regions. */
+  private void _remove() {
+    for (DocumentRegion r: getSelectedRegions()) {
+      _model.getFindResultsManager().removeRegion(r);
+    }
+  }
 
   /** Update button state and text. */
   protected void updateButtons() {
-    DocumentRegion reg = getSelectedRegion();
-    boolean enable = (reg != null);
-    _goToButton.setEnabled(enable);
-    _removeButton.setEnabled(enable);
+    ArrayList<DocumentRegion> regs = getSelectedRegions();
+    _goToButton.setEnabled(regs.size()==1);
+    _bookmarkButton.setEnabled(regs.size()>0);
+    _removeButton.setEnabled(regs.size()>0);
     _removeAllButton.setEnabled((_regionRootNode!=null) && (_regionRootNode.getDepth()>0));
   }
   
@@ -134,9 +162,15 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
         }
       },
         
+        new AbstractAction("Bookmark") {
+          public void actionPerformed(ActionEvent e) {
+            _bookmark();
+          }
+        },
+        
         new AbstractAction("Remove") {
           public void actionPerformed(ActionEvent e) {
-            _model.getFindResultsManager().removeRegion(getSelectedRegion());
+            _remove();
           }
         }
     };

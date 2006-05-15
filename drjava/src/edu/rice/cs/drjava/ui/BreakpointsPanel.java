@@ -34,7 +34,7 @@
 package edu.rice.cs.drjava.ui;
 
 import java.util.Vector;
-
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import javax.swing.*;
@@ -161,7 +161,9 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
 
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
-        _model.getBreakpointManager().removeRegion(getSelectedRegion());
+        for (Breakpoint bp: getSelectedRegions()) {
+          _model.getBreakpointManager().removeRegion(bp);
+        }
       }
     };
     _removeButton = new JButton(removeAction);
@@ -185,13 +187,13 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
 
   /** Update button state and text. */
   protected void updateButtons() {
-    Breakpoint r = getSelectedRegion();
-    boolean enable = (r != null);
-    _goToButton.setEnabled(enable);
-    _enableDisableButton.setEnabled(enable && (r instanceof Breakpoint));
-    _removeButton.setEnabled(enable);
-    if (enable && (r instanceof Breakpoint)) {
-      if (((Breakpoint)r).isEnabled()) {
+    ArrayList<Breakpoint> regs = getSelectedRegions();
+    _goToButton.setEnabled(regs.size()==1);
+    _removeButton.setEnabled(regs.size()>0);
+    _removeAllButton.setEnabled((_regionRootNode!=null) && (_regionRootNode.getDepth()>0));
+    _enableDisableButton.setEnabled(regs.size()>0);
+    if ((regs.size()>0) && (regs.get(0) instanceof Breakpoint)) {
+      if (((Breakpoint)regs.get(0)).isEnabled()) {
         _enableDisableButton.setText("Disable");
       }
       else {
@@ -212,7 +214,9 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         
         new AbstractAction("Remove") {
           public void actionPerformed(ActionEvent e) {
-            _model.getBreakpointManager().removeRegion(getSelectedRegion());
+            for (Breakpoint bp: getSelectedRegions()) {
+              _model.getBreakpointManager().removeRegion(bp);
+            }
           }
         }
     };
@@ -221,22 +225,25 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   
   /** Go to region. */
   protected void goToRegion() {
-    Breakpoint r = getSelectedRegion();
-    if (r != null) {
-      _debugger.scrollToSource(r);
+    ArrayList<Breakpoint> bps = getSelectedRegions();
+    if (bps.size() == 1) {
+      _debugger.scrollToSource(bps.get(0));
     }
   }
   
   /** Toggle breakpoint's enable/disable flag. */
   protected void enableDisableBreakpoint() {
-    final Breakpoint r = getSelectedRegion();
-    if (r != null) {
-      _model.getBreakpointManager().changeRegion(r, new Lambda<Object, Breakpoint>() {
-        public Object apply(Breakpoint bp) {
-          bp.setEnabled(!bp.isEnabled());
-          return null;
-        }
-      });
+    final ArrayList<Breakpoint> bps = getSelectedRegions();
+    if (bps.size()>0) {
+      final boolean newState = !bps.get(0).isEnabled();
+      for (Breakpoint bp: bps) {
+        _model.getBreakpointManager().changeRegion(bp, new Lambda<Object, Breakpoint>() {
+          public Object apply(Breakpoint bp) {
+            bp.setEnabled(newState);
+            return null;
+          }
+        });
+      }
     }
   }
   

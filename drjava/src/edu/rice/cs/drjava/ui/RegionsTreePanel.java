@@ -34,6 +34,7 @@
 package edu.rice.cs.drjava.ui;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Enumeration;
 import java.io.*;
@@ -131,7 +132,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     _regTreeModel = new DefaultTreeModel(_regionRootNode);
     _regTree = new RegionTree(_regTreeModel);
     _regTree.setEditable(false);
-    _regTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    _regTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
     _regTree.setShowsRootHandles(true);
     _regTree.setRootVisible(false);
     _regTree.putClientProperty("JTree.lineStyle", "Angled");
@@ -275,26 +276,29 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     }
   }
   
-  /** Gets the currently selected region in the region tree, or null if the selected node is a classname and not a region.
-   *  @return the current region in the tree
+  /** Gets the currently selected regions in the region tree, or an empty array if no regions are selected.
+   *  @return list of selected regions in the tree
    */
-  protected R getSelectedRegion() {
-    TreePath path = _regTree.getSelectionPath();
-    if (path == null || path.getPathCount() != 3) {
-      return null;
+  protected ArrayList<R> getSelectedRegions() {
+    ArrayList<R> regs = new ArrayList<R>();
+    TreePath[] paths = _regTree.getSelectionPaths();
+    if (paths!=null) {
+      for (TreePath path: paths) {
+        if (path != null && path.getPathCount() == 3) {
+          DefaultMutableTreeNode lineNode = (DefaultMutableTreeNode)path.getLastPathComponent();
+          @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>) lineNode.getUserObject()).region();
+          regs.add(r);
+        }
+      }
     }
-    else {
-      DefaultMutableTreeNode lineNode = (DefaultMutableTreeNode)path.getLastPathComponent();
-      @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>) lineNode.getUserObject()).region();
-      return r;
-    }
+    return regs;
   }
   
   /** Go to region. */
   protected void goToRegion() {
-    R r = getSelectedRegion();
-    if (r != null) {
-      _frame.scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false);
+    ArrayList<R> r = getSelectedRegions();
+    if (r.size() == 1) {
+      _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), false);
     }
   }
     

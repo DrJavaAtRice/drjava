@@ -34,7 +34,7 @@
 package edu.rice.cs.drjava.ui;
 
 import java.util.Vector;
-
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import javax.swing.*;
@@ -95,7 +95,9 @@ public class BookmarksPanel extends RegionsTreePanel<DocumentRegion> {
 
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
-        _model.getBookmarkManager().removeRegion(getSelectedRegion());
+        for (DocumentRegion r: getSelectedRegions()) {
+          _model.getBookmarkManager().removeRegion(r);
+        }
       }
     };
     _removeButton = new JButton(removeAction);
@@ -118,10 +120,9 @@ public class BookmarksPanel extends RegionsTreePanel<DocumentRegion> {
 
   /** Update button state and text. */
   protected void updateButtons() {
-    DocumentRegion reg = getSelectedRegion();
-    boolean enable = (reg != null);
-    _goToButton.setEnabled(enable);
-    _removeButton.setEnabled(enable);
+    ArrayList<DocumentRegion> regs = getSelectedRegions();
+    _goToButton.setEnabled(regs.size()==1);
+    _removeButton.setEnabled(regs.size()>0);
     _removeAllButton.setEnabled((_regionRootNode!=null) && (_regionRootNode.getDepth()>0));
   }
   
@@ -136,7 +137,9 @@ public class BookmarksPanel extends RegionsTreePanel<DocumentRegion> {
         
         new AbstractAction("Remove") {
           public void actionPerformed(ActionEvent e) {
-            _model.getBookmarkManager().removeRegion(getSelectedRegion());
+            for (DocumentRegion r: getSelectedRegions()) {
+              _model.getBookmarkManager().removeRegion(r);
+            }
           }
         }
     };
