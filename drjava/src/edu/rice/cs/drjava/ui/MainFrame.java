@@ -5962,7 +5962,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   public DefinitionsPane getDefPaneGivenODD(OpenDefinitionsDocument doc) {
     JScrollPane scroll = _defScrollPanes.get(doc);
     if (scroll == null) {
-      scroll = _createDefScrollPane(doc);
+      throw new UnexpectedException(new Exception("Region set in a closed document."));
     }
     
     DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();

@@ -41,6 +41,7 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import java.awt.datatransfer.*;
 import java.io.File;
+import java.util.LinkedList;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -112,42 +113,56 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   };
   
   private Action _findAllAction =  new AbstractAction("Find All") {
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
       if (_findField.getText().length()>0) {
+        _model.getFindResultsManager().clearRegions();
         _updateMachine();
         _machine.setFindWord(_findField.getText());
         _machine.setReplaceWord(_replaceField.getText());
         _frame.clearStatusMessage();
-        OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
-        int count = _machine.processAll(new Lambda<Void, FindResult>() {
-          public Void apply(FindResult fr) {
-            final OpenDefinitionsDocument doc = _model.getODDForDocument(fr.getDocument());
-            doc.acquireReadLock();
-            try {
-              int endSel = fr.getFoundOffset();
-              int startSel = endSel-_findField.getText().length();
-              final Position startPos = doc.createPosition(startSel);
-              final Position endPos = doc.createPosition(endSel);
-              _model.getFindResultsManager().addRegion(new DocumentRegion() {
-                public OpenDefinitionsDocument getDocument() { return doc; }
-                public File getFile() throws FileMovedException { return doc.getFile(); }
-                public int getStartOffset() { return startPos.getOffset(); }
-                public int getEndOffset() { return endPos.getOffset(); }
-              });
-            }
-            catch (BadLocationException ble) {
-              throw new UnexpectedException(ble);
-            }
-            finally { doc.releaseReadLock(); }
+        final OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
+        final LinkedList<FindResult> results = new LinkedList<FindResult>();
+        final int count = _machine.processAll(new Lambda<Void, FindResult>() {
+          public Void apply(final FindResult fr) {
+            results.add(fr);
             return null;
           }
         });
-        _model.setActiveDocument(startDoc);
-        Toolkit.getDefaultToolkit().beep();
-        _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
-        if (count>0) {
-          _frame._findResultsPanelAction.actionPerformed(e);
+
+        for (FindResult fr: results) {
+          if (!_model.getActiveDocument().equals(fr.getDocument())) _model.setActiveDocument(fr.getDocument());
+          else _model.refreshActiveDocument();
+          
+          final OpenDefinitionsDocument doc = _defPane.getOpenDefDocument();
+          doc.acquireReadLock();
+          try {
+            int endSel = fr.getFoundOffset();
+            int startSel = endSel-_findField.getText().length();
+            final Position startPos = doc.createPosition(startSel);
+            final Position endPos = doc.createPosition(endSel);
+            _model.getFindResultsManager().addRegion(new DocumentRegion() {
+              public OpenDefinitionsDocument getDocument() { return doc; }
+              public File getFile() throws FileMovedException { return doc.getFile(); }
+              public int getStartOffset() { return startPos.getOffset(); }
+              public int getEndOffset() { return endPos.getOffset(); }
+            });
+          }
+          catch (BadLocationException ble) {
+            throw new UnexpectedException(ble);
+          }
+          finally { doc.releaseReadLock(); }
         }
+
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            _model.setActiveDocument(startDoc);
+            Toolkit.getDefaultToolkit().beep();
+            _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
+            if (count>0) {
+              _frame._findResultsPanelAction.actionPerformed(e);
+            }
+          }
+        });
       }
     }
   };
@@ -637,79 +652,6 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Abstracted out since this is called from find and replace/find. */
   private void _doFind() {
     if (_findField.getText().length() > 0) {
-      _updateMachine();
-      _machine.setFindWord(_findField.getText());
-      _machine.setReplaceWord(_replaceField.getText());
-      _frame.clearStatusMessage(); // _message.setText(""); // JL
-      
-      // FindResult contains the document that the result was found in, offset to the next occurrence of 
-      // the string, and a flag indicating whether the end of the document was wrapped around while searching
-      // for the string.
-      FindResult fr = _machine.findNext();
-      OpenDefinitionsDocument doc = fr.getDocument();
-      OpenDefinitionsDocument matchDoc = _model.getODDForDocument(doc);
-      OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
-      
-      final int pos = fr.getFoundOffset();
-      
-      // If there actually *is* a match, then switch active documents. otherwise don't
-      if (pos != -1) { // found a match
-        Caret c = _defPane.getCaret();
-        c.setDot(c.getDot());
-        
-        if (! matchDoc.equals(openDoc)) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
-        else _model.refreshActiveDocument();  // in a wraparound search, the unmodified active document may have been kicked out of the cache!
-        
-        _defPane.setCaretPosition(pos);
-        _caretChanged = true;
-        _updateMachine();
-      }
-      else {  // If searching all documents, the current document may have been kicked out of the cache
-        _model.refreshActiveDocument();
-      }
-      
-      if (fr.getWrapped() && !_machine.getSearchAllDocuments()) {
-        Toolkit.getDefaultToolkit().beep();
-        if (!_machine.getSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
-        else  _frame.setStatusMessage("Search wrapped to end.");
-      }
-      
-      if (fr.getAllDocsWrapped() && _machine.getSearchAllDocuments()) {
-        Toolkit.getDefaultToolkit().beep();
-        _frame.setStatusMessage("Search wrapped around all documents.");
-      }
-      
-      if (pos >= 0) {  // defer executing this code until after active document switch (if any) is complete
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            _selectFoundItem();
-            _replaceAction.setEnabled(true);
-            _replaceFindNextAction.setEnabled(true);
-            _replaceFindPreviousAction.setEnabled(true);
-            _machine.setLastFindWord();
-          }});
-      }
-      // else the entire document was searched and no instance of the string
-      // was found. display at most 50 characters of the non-found string
-      else {
-        Toolkit.getDefaultToolkit().beep();
-        StringBuffer statusMessage = new StringBuffer("Search text \"");
-        if (_machine.getFindWord().length() <= 50) statusMessage.append(_machine.getFindWord());
-        else statusMessage.append(_machine.getFindWord().substring(0, 49) + "...");
-        statusMessage.append("\" not found.");
-        _frame.setStatusMessage(statusMessage.toString());
-      }
-    }
-    
-    if (!DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
-      _findField.requestFocusInWindow();
-    }
-  }
-
-  private void _doFindAll() {
-    if (_findField.getText().length() > 0) {
-      _model.getFindResultsManager().clearRegions();
-      
       _updateMachine();
       _machine.setFindWord(_findField.getText());
       _machine.setReplaceWord(_replaceField.getText());

@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.ui;
 import java.util.Vector;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.io.File;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -50,6 +51,7 @@ import javax.swing.text.Position;
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
@@ -127,12 +129,17 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
   
   /** Turn the selected regions into bookmarks. */
   private void _bookmark() {
-    for (DocumentRegion r: getSelectedRegions()) {
+    for (final DocumentRegion r: getSelectedRegions()) {
       DocumentRegion bookmark = _model.getBookmarkManager().getRegionOverlapping(r.getDocument(),
                                                                                  r.getStartOffset(),
                                                                                  r.getEndOffset());
       if (bookmark==null) {
-        _model.getBookmarkManager().addRegion(r);
+        _model.getBookmarkManager().addRegion(new DocumentRegion() {
+          public OpenDefinitionsDocument getDocument() { return r.getDocument(); }
+          public File getFile() throws FileMovedException { return r.getDocument().getFile(); }
+          public int getStartOffset() { return r.getStartOffset(); }
+          public int getEndOffset() { return r.getEndOffset(); }
+        });
       }
     }
   }
