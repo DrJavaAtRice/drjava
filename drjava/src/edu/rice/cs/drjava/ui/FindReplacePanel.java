@@ -489,13 +489,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     JPanel _lowerCheckPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     _lowerCheckPanel.add(_matchWholeWord); 
     _lowerCheckPanel.add(_ignoreCommentsAndStrings);
-    _lowerCheckPanel.setMaximumSize(new Dimension(1000, 40));
+    _lowerCheckPanel.setMaximumSize(new Dimension(200, 40));
 
     JPanel _matchCaseAndAllDocsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     _matchCase.setPreferredSize(_matchWholeWord.getPreferredSize());
     _matchCaseAndAllDocsPanel.add(_matchCase);
     _matchCaseAndAllDocsPanel.add(_searchAllDocuments);
-    _matchCaseAndAllDocsPanel.setMaximumSize(new Dimension(1000, 40));
+    _matchCaseAndAllDocsPanel.setMaximumSize(new Dimension(200, 40));
 
     BorderlessScrollPane _findPane = new BorderlessScrollPane(_findField);
     BorderlessScrollPane _replacePane = new BorderlessScrollPane(_replaceField);
@@ -505,12 +505,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     JPanel findPanel = new JPanel(new BorderLayout(5,5));
     findPanel.add(findLabelPanel, BorderLayout.WEST);
     findPanel.add(_findPane, BorderLayout.CENTER);
-//    findPanel.add(Box.createVerticalGlue());
     
     JPanel replacePanel = new JPanel(new BorderLayout(5,5));
     replacePanel.add(replaceLabelPanel, BorderLayout.WEST);
     replacePanel.add(_replacePane, BorderLayout.CENTER);
-//    replacePanel.add(Box.createVerticalGlue());
         
     /******** Set up the Panel containing the Text Fields ********/
     JPanel leftPanel = new JPanel(new GridLayout(1,2,5,5));
@@ -518,11 +516,28 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     leftPanel.add(replacePanel);
 
     /******** Set up the Panel containing both rows of checkboxes ********/
-    Box optionsPanel = new Box(BoxLayout.Y_AXIS);
+    GridBagLayout gbLayout = new GridBagLayout();
+    GridBagConstraints c = new GridBagConstraints();
+    JPanel emptyPanel = new JPanel();
+    JPanel optionsPanel = new JPanel(gbLayout);
+    optionsPanel.setLayout(gbLayout);
     optionsPanel.add(_matchCaseAndAllDocsPanel);
     optionsPanel.add(_lowerCheckPanel);
-    optionsPanel.add(Box.createGlue());
-
+    optionsPanel.add(emptyPanel);
+    
+    c.fill = GridBagConstraints.HORIZONTAL;
+    c.anchor = GridBagConstraints.NORTH;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.weightx = 1.0;
+    gbLayout.setConstraints(_matchCaseAndAllDocsPanel, c);
+    gbLayout.setConstraints(_lowerCheckPanel, c);
+    
+    c.fill = GridBagConstraints.BOTH;
+    c.anchor = GridBagConstraints.SOUTH;
+    c.gridheight = GridBagConstraints.REMAINDER;
+    c.weighty = 1.0;
+    
+    gbLayout.setConstraints(emptyPanel, c);
 
     /******** Set up the Panel containing the two above main panels ********/
     JPanel midPanel = new JPanel(new BorderLayout(5,5));
@@ -542,10 +557,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     newPanel.add(buttons);
     newPanel.add(Box.createVerticalStrut(5));
     
-    this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-    this.add(Box.createHorizontalStrut(5));
     this.add(newPanel);
-
     
     /******** Document, Focus and Key Listeners ********/
     
