@@ -108,16 +108,17 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
             while ((!found) && (documents.hasMoreElements())) {
               DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
               if (doc.getUserObject().equals(regDocNode.getUserObject())) {
-                // Find the correct line number node for this breakpoint
-                Enumeration lineNumbers = doc.children();
-                while (lineNumbers.hasMoreElements()) {
-                  DefaultMutableTreeNode lineNumber = (DefaultMutableTreeNode)lineNumbers.nextElement();
-                  @SuppressWarnings("unchecked") RegionTreeUserObj<Breakpoint> uo = (RegionTreeUserObj<Breakpoint>)lineNumber.getUserObject();
-                  if (uo.lineNumber()==(bp.getDocument().getLineOfOffset(bp.getStartOffset())+1)) {
+                // Find the correct line start offset node for this breakpoint
+                Enumeration existingRegions = doc.children();
+                while (existingRegions.hasMoreElements()) {
+                  DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
+                  @SuppressWarnings("unchecked") RegionTreeUserObj<Breakpoint> uo =
+                    (RegionTreeUserObj<Breakpoint>)existing.getUserObject();
+                  if (uo.region().getStartOffset()==bp.getStartOffset()) {
                     Breakpoint r = (Breakpoint) uo.region();
                     if (r instanceof Breakpoint) {
                       ((Breakpoint)r).setEnabled(bp.isEnabled());
-                      ((DefaultTreeModel)_regTree.getModel()).nodeChanged(lineNumber);
+                      ((DefaultTreeModel)_regTree.getModel()).nodeChanged(existing);
                       found = true;
                       break;
                     }
@@ -144,7 +145,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   }
   
   /** Creates the buttons for controlling the regions. Should be overridden. */
-  protected JButton[] makeButtons() {    
+  protected JComponent[] makeButtons() {    
     Action goToAction = new AbstractAction("Go to") {
       public void actionPerformed(ActionEvent ae) {
         goToRegion();
@@ -175,7 +176,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     };
     _removeAllButton = new JButton(removeAllAction);
     
-    JButton[] buts = new JButton[] { 
+    JComponent[] buts = new JComponent[] { 
       _enableDisableButton,
         _goToButton, 
         _removeButton,

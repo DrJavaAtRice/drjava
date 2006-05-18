@@ -222,8 +222,8 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   }
 
   /** Creates the buttons for controlling the regions. Should be overridden. */
-  protected JButton[] makeButtons() {        
-    return new JButton[0];    
+  protected JComponent[] makeButtons() {        
+    return new JComponent[0];    
   }
   
   /** Creates the buttons for controlling the regions. */
@@ -235,10 +235,10 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     GridBagConstraints c = new GridBagConstraints();
     mainButtons.setLayout(gbLayout);
     
-    JButton[] buts = makeButtons();
+    JComponent[] buts = makeButtons();
 
     closeButtonPanel.add(_closeButton, BorderLayout.NORTH);    
-    for (JButton b: buts) { mainButtons.add(b); }
+    for (JComponent b: buts) { mainButtons.add(b); }
     mainButtons.add(emptyPanel);
     
     c.fill = GridBagConstraints.HORIZONTAL;
@@ -246,7 +246,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.weightx = 1.0;
 
-    for (JButton b: buts) { gbLayout.setConstraints(b, c); }
+    for (JComponent b: buts) { gbLayout.setConstraints(b, c); }
     
     c.fill = GridBagConstraints.BOTH;
     c.anchor = GridBagConstraints.SOUTH;
@@ -325,26 +325,26 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
       if (doc.getUserObject().equals(regDocNode.getUserObject())) {
         
         // Create a new region in this node
-        // Sort regions by line number.
+        // Sort regions by start offset.
         // Raw type here due to Swing's use of raw types.
-        Enumeration lineNumbers = doc.children();
-        while (lineNumbers.hasMoreElements()) {
-          DefaultMutableTreeNode lineNumber = (DefaultMutableTreeNode)lineNumbers.nextElement();
+        Enumeration existingRegions = doc.children();
+        while (existingRegions.hasMoreElements()) {
+          DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
           
-          // if line number of indexed regions is less than new region, continue
-          int lnr = r.getDocument().getLineOfOffset(r.getStartOffset())+1;
-          if (((RegionTreeUserObj)lineNumber.getUserObject()).lineNumber() == lnr) {
+          // if start offset of indexed regions is less than new region, continue
+          int ofs = r.getStartOffset();
+          if (((RegionTreeUserObj)existing.getUserObject()).region().getStartOffset() == ofs) {
             // don't add, already there
             // just make sure this node is visible
-            _regTree.scrollPathToVisible(new TreePath(lineNumber));
+            _regTree.scrollPathToVisible(new TreePath(existing));
             done = true;
             break;
           }
-          else if (((RegionTreeUserObj)lineNumber.getUserObject()).lineNumber() > lnr) {
+          else if (((RegionTreeUserObj)existing.getUserObject()).region().getStartOffset() > ofs) {
             
             // else, add to the list
             DefaultMutableTreeNode newRegion = new DefaultMutableTreeNode(makeRegionTreeUserObj(r));
-            _regTreeModel.insertNodeInto(newRegion, doc, doc.getIndex(lineNumber));
+            _regTreeModel.insertNodeInto(newRegion, doc, doc.getIndex(existing));
             
             // Make sure this node is visible
             _regTree.scrollPathToVisible(new TreePath(newRegion.getPath()));
@@ -402,12 +402,12 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
         while ((!found) && (documents.hasMoreElements())) {
           DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
           if (doc.getUserObject().equals(regDocNode.getUserObject())) {
-            // Find the correct line number node for this breakpoint
-            Enumeration lineNumbers = doc.children();
-            while (lineNumbers.hasMoreElements()) {
-              DefaultMutableTreeNode lineNumber = (DefaultMutableTreeNode)lineNumbers.nextElement();
-              if (((RegionTreeUserObj)lineNumber.getUserObject()).lineNumber()==(r.getDocument().getLineOfOffset(r.getStartOffset())+1)) {
-                _regTreeModel.removeNodeFromParent(lineNumber);
+            // Find the correct start offset node for this breakpoint
+            Enumeration existingRegions = doc.children();
+            while (existingRegions.hasMoreElements()) {
+              DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
+              if (((RegionTreeUserObj)existing.getUserObject()).region().getStartOffset()==r.getStartOffset()) {
+                _regTreeModel.removeNodeFromParent(existing);
                 // notify
                 if (doc.getChildCount() == 0) {
                   // this document has no more breakpoints, remove it
@@ -447,9 +447,9 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
           DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
           if (doc.getUserObject().equals(regDocNode.getUserObject())) {
             while(doc.getChildCount()>0) {
-              DefaultMutableTreeNode lineNumber = (DefaultMutableTreeNode)doc.getFirstChild();
-              @SuppressWarnings("unchecked") R r = (R) ((RegionTreeUserObj<R>)lineNumber.getUserObject()).region();
-              _regTreeModel.removeNodeFromParent(lineNumber);
+              DefaultMutableTreeNode existing = (DefaultMutableTreeNode)doc.getFirstChild();
+              @SuppressWarnings("unchecked") R r = (R) ((RegionTreeUserObj<R>)existing.getUserObject()).region();
+              _regTreeModel.removeNodeFromParent(existing);
             }
             _regTreeModel.removeNodeFromParent(doc);
           }

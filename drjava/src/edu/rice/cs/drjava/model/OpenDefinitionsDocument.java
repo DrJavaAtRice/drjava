@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.model;
 
 
 import java.util.Vector;
+import java.util.List;
 import java.io.*;
 import java.awt.print.*;
 import javax.swing.event.DocumentListener;
@@ -291,8 +292,16 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** @return the bookmark region manager. */
   public RegionManager<DocumentRegion> getBookmarkManager();
     
-  /** @return the find result region manager. */
-  public RegionManager<DocumentRegion> getFindResultsManager();
+  /** @return managers for find result regions. */
+  public List<RegionManager<DocumentRegion>> getFindResultsManagers();
+  
+  /** Add a region manager for find results to this document.
+   *  @param rm the global model's region manager */
+  public void addFindResultsManager(RegionManager<DocumentRegion> rm);
+  
+  /** Remove a manager for find results from this document.
+   *  @param rm the global model's region manager. */
+  public void removeFindResultsManager(RegionManager<DocumentRegion> rm);
 
   /** Called when this document is being closed, removing related state from the debug manager. */
   public void removeFromDebugger();

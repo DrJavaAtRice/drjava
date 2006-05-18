@@ -256,11 +256,40 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return manager for bookmark regions. */
   public RegionManager<DocumentRegion> getBookmarkManager() { return _bookmarkManager; }
   
-  /** Manager for find result regions. */
-  protected final ConcreteRegionManager<DocumentRegion> _findResultsManager;
+  /** Managers for find result regions. */
+  protected final LinkedList<RegionManager<DocumentRegion>> _findResultsManagers;
   
   /** @return manager for find result regions. */
-  public RegionManager<DocumentRegion> getFindResultsManager() { return _findResultsManager; }
+  public List<RegionManager<DocumentRegion>> getFindResultsManagers() {
+    return new LinkedList<RegionManager<DocumentRegion>>(_findResultsManagers);
+  }
+  
+  /** @return new manager for find result regions. */
+  public RegionManager<DocumentRegion> createFindResultsManager() {
+    ConcreteRegionManager<DocumentRegion> rm = new ConcreteRegionManager<DocumentRegion>();
+    _findResultsManagers.add(rm);
+    
+    // install new manager in all documents
+    synchronized(_documentsRepos) {
+      OpenDefinitionsDocument[] docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]);
+      for (final OpenDefinitionsDocument doc: docs) {
+        doc.addFindResultsManager(rm);
+      }
+    }
+    return rm;
+  }
+  
+  /** Dispose a manager for find result regions. */
+  public void disposeFindResultsManager(RegionManager<DocumentRegion> rm) {
+    // remove manager from all documents
+    synchronized(_documentsRepos) {
+      OpenDefinitionsDocument[] docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]);
+      for (final OpenDefinitionsDocument doc: docs) {
+        doc.removeFindResultsManager(rm);
+      }
+    }
+    _findResultsManagers.remove(rm);
+  }
   
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //  /** Light-weight parsing controller. */
@@ -279,7 +308,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
     
     _bookmarkManager = new ConcreteRegionManager<DocumentRegion>();
-    _findResultsManager = new ConcreteRegionManager<DocumentRegion>();
+    _findResultsManagers = new LinkedList<RegionManager<DocumentRegion>>();
     
     _breakpointManager = new ConcreteRegionManager<Breakpoint>() {
       public boolean changeRegionHelper(final Breakpoint oldBP, final Breakpoint newBP) {
@@ -1645,7 +1674,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // remove breakpoints and bookmarks for this file
     doc.getBreakpointManager().clearRegions();
     doc.getBookmarkManager().clearRegions();
-    doc.getFindResultsManager().clearRegions();
+    for (RegionManager<DocumentRegion> rm: doc.getFindResultsManagers()) {
+      rm.clearRegions();
+    }
     
     Utilities.invokeLater(new SRunnable() { 
       public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread
@@ -2260,6 +2291,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       /** Creates a subset region manager that only sees the regions in this document. */
       public SubsetRegionManager(RegionManager<R> ssm) { _superSetManager = ssm; }
       
+      /** @returns the superset manager. */
+      public RegionManager<R> getSuperSetManager() { return _superSetManager; }
+      
       /** Returns the region in this manager at the given offset, or null if one does not exist.
        *  @param odd the document
        *  @param offset the offset in the document
@@ -2404,7 +2438,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     protected volatile SubsetRegionManager<DocumentRegion> _bookmarkManager;
     
     /** Manager for find result regions. */
-    protected volatile SubsetRegionManager<DocumentRegion> _findResultsManager;
+    protected volatile LinkedList<SubsetRegionManager<DocumentRegion>> _findResultsManagers;
     
     private volatile int _initVScroll;
     private volatile int _initHScroll;
@@ -2446,7 +2480,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
       _breakpointManager = new SubsetRegionManager<Breakpoint>(AbstractGlobalModel.this.getBreakpointManager());
       _bookmarkManager = new SubsetRegionManager<DocumentRegion>(AbstractGlobalModel.this.getBookmarkManager());
-      _findResultsManager = new SubsetRegionManager<DocumentRegion>(AbstractGlobalModel.this.getFindResultsManager());
+      _findResultsManagers = new LinkedList<SubsetRegionManager<DocumentRegion>>();
+      for (RegionManager<DocumentRegion> rm: AbstractGlobalModel.this.getFindResultsManagers()) {
+        addFindResultsManager(rm);
+      }
     }
     
     //------------ Getters and Setters -------------//
@@ -3135,8 +3172,29 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** @return the bookmark region manager. */
     public RegionManager<DocumentRegion> getBookmarkManager() { return _bookmarkManager; }
     
-    /** @return the find result region manager. */
-    public RegionManager<DocumentRegion> getFindResultsManager() { return _findResultsManager; }
+    /** @return the find result region managers. */
+    public List<RegionManager<DocumentRegion>> getFindResultsManagers() {
+      LinkedList<RegionManager<DocumentRegion>> newList = new LinkedList<RegionManager<DocumentRegion>>();
+      for (SubsetRegionManager<DocumentRegion> rm: _findResultsManagers) { newList.add(rm); }
+      return newList;
+    }
+    
+    /** Add a region manager for find results to this document.
+     *  @param rm the global model's region manager */
+    public void addFindResultsManager(RegionManager<DocumentRegion> rm) {
+      _findResultsManagers.add(new SubsetRegionManager<DocumentRegion>(rm));
+    }
+    
+    /** Remove a manager for find results from this document.
+     *  @param rm the global model's region manager. */
+    public void removeFindResultsManager(RegionManager<DocumentRegion> rm) {
+      for (SubsetRegionManager<DocumentRegion> ssrm: _findResultsManagers) {
+        if (ssrm.getSuperSetManager().equals(rm)) {
+          _findResultsManagers.remove(ssrm);
+          break;
+        }
+      }
+    }
     
    /** throws UnsupportedOperationException */
     public void removeFromDebugger() { /* do nothing because it is called in methods in this class */ }    

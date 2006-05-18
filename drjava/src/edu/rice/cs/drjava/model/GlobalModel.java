@@ -114,8 +114,14 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return manager for bookmark regions. */
   public RegionManager<DocumentRegion> getBookmarkManager();
   
-  /** @return manager for find result regions. */
-  public RegionManager<DocumentRegion> getFindResultsManager();
+  /** @return managers for find result regions. */
+  public List<RegionManager<DocumentRegion>> getFindResultsManagers();
+  
+  /** @return new manager for find result regions. */
+  public RegionManager<DocumentRegion> createFindResultsManager();
+  
+  /** Dispose a manager for find result regions. */
+  public void disposeFindResultsManager(RegionManager<DocumentRegion> rm);
   
 //  //---------------------------- Interpreter --------------------------------//
 //  /** Updates the security manager in DrJava. */

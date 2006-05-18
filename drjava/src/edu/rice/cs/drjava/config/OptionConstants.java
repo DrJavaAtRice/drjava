@@ -110,7 +110,17 @@ public interface OptionConstants {
   public static final ColorOption BOOKMARK_COLOR = new ColorOption("bookmark.color", Color.green);
 
   /** Color for highlighting find results. */
-  public static final ColorOption FIND_RESULTS_COLOR = new ColorOption("find.results.color", new Color(0xFF, 0x99, 0x33));
+  public static final ColorOption FIND_RESULTS_COLOR1 = new ColorOption("find.results.color1", new Color(0xFF, 0x99, 0x33));
+  public static final ColorOption FIND_RESULTS_COLOR2 = new ColorOption("find.results.color2", new Color(0x30, 0xC9, 0x96));
+  public static final ColorOption FIND_RESULTS_COLOR3 = new ColorOption("find.results.color3", new Color(0x30, 0xFC, 0xFC));
+  public static final ColorOption FIND_RESULTS_COLOR4 = new ColorOption("find.results.color4", new Color(0xFF, 0x66, 0xCC));
+  
+  public static final ColorOption[] FIND_RESULTS_COLORS = new ColorOption[] {
+    FIND_RESULTS_COLOR1,
+      FIND_RESULTS_COLOR2,
+      FIND_RESULTS_COLOR3,
+      FIND_RESULTS_COLOR4
+  };
 
   /** Color for highlighting breakpoints. */
   public static final ColorOption DEBUG_BREAKPOINT_COLOR = new ColorOption("debug.breakpoint.color", Color.red);
@@ -802,10 +812,6 @@ public interface OptionConstants {
   /** The key binding for displaying the bookmarks panel. */
   public static final KeyStrokeOption KEY_BOOKMARKS_PANEL =
     new KeyStrokeOption("key.bookmarks.panel", KeyStroke.getKeyStroke(KeyEvent.VK_M, mask | InputEvent.SHIFT_MASK));
-
-  /** The key binding for displaying the find results panel. */
-  public static final KeyStrokeOption KEY_FIND_RESULTS_PANEL =
-    new KeyStrokeOption("key.find.results.panel", KeyStroke.getKeyStroke(KeyEvent.VK_F, mask | InputEvent.SHIFT_MASK));
   
   /** The key binding for help */
   public static final KeyStrokeOption KEY_HELP =

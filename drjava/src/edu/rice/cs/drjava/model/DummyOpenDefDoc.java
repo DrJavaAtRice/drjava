@@ -143,8 +143,18 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
 
   public RegionManager<DocumentRegion> getBookmarkManager() { throw new UnsupportedOperationException("Dummy method"); }
 
-  public RegionManager<DocumentRegion> getFindResultsManager() { throw new UnsupportedOperationException("Dummy method"); }
-  
+  public List<RegionManager<DocumentRegion>> getFindResultsManagers() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+
+  public void addFindResultsManager(RegionManager<DocumentRegion> rm) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+    
+  public void removeFindResultsManager(RegionManager<DocumentRegion> rm) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+
   public boolean isUntitled() { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean isSourceFile() { throw new UnsupportedOperationException("Dummy method"); }

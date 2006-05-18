@@ -144,7 +144,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private final FindReplacePanel _findReplace;
   private final BreakpointsPanel _breakpointsPanel;
   private final BookmarksPanel _bookmarksPanel;
-  private final FindResultsPanel _findResultsPanel;
+  private final LinkedList<Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>>> _findResults =
+    new LinkedList<Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>>>();
   
   private volatile boolean _showDebugger;  // whether the supporting context is debugger capable
   
@@ -227,13 +228,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private volatile HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
   
   /** Table to map breakpoints to their corresponding highlight objects. */
-  private final java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo> _documentBreakpointHighlights;
+  private final Hashtable<Breakpoint, HighlightManager.HighlightInfo> _documentBreakpointHighlights;
   
   /** Table to map bookmarks to their corresponding highlight objects. */
-  private final java.util.Hashtable<DocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
-  
-  /** Table to map find results to their corresponding highlight objects. */
-  private final java.util.Hashtable<DocumentRegion, HighlightManager.HighlightInfo> _documentFindResultsHighlights;
+  private final Hashtable<DocumentRegion, HighlightManager.HighlightInfo> _documentBookmarkHighlights;
   
   /** Whether to display a prompt message before quitting. */
   private volatile boolean _promptBeforeQuit;
@@ -758,7 +756,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent e) {
       Component c = MainFrame.this.getFocusOwner();
       super.actionPerformed(e);
-      if (_currentDefPane.hasFocus() && (_currentDefPane.getSelectedText()!=null)) {
+      if (_currentDefPane.hasFocus()) {
         String s = Utilities.getClipboardSelection(c);
         if ((s!=null) && (s.length()!=0)) { ClipboardHistoryModel.singleton().put(s); }
       }
@@ -1296,7 +1294,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   void generateOpenJavadocList() {
     if (_openJavadocList==null) {
       // generate list
-      _openJavadocList = new ArrayList<OpenJavadocListEntry>();
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
       String base = "";
       if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
@@ -1314,6 +1311,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       }
       // TODO: put this in an AsyncTask
       try {
+        _openJavadocList = new ArrayList<OpenJavadocListEntry>();
         URL url = new URL(base + "/allclasses-frame.html");
         BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
         String line = br.readLine();
@@ -1335,7 +1333,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           line = br.readLine();
         }
       }
-      catch(IOException ioe) { /* ignore, we'll just have an empty list */ }
+      catch(IOException ioe) { /* ignore, we'll just have an incomplete list */ }
+      if (_openJavadocList.size()==0) { _openJavadocList = null; }
     }
   }
 
@@ -1359,6 +1358,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   void _openJavadocUnderCursor() {
 //    Utilities.show("Calling openJavadocUnderCursor()");
     generateOpenJavadocList();
+    if (_openJavadocList==null) {
+      Utilities.show("Cannot load Java API class list. No network connectivity?");
+      return;
+    }
     PredictiveInputModel<OpenJavadocListEntry> pim =
       new PredictiveInputModel<OpenJavadocListEntry>(true,
                                                      new PredictiveInputModel.PrefixStrategy<OpenJavadocListEntry>(),
@@ -1960,7 +1963,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       }
       _bookmarksPanel.setVisible(true);
       _tabbedPane.setSelectedComponent(_bookmarksPanel);
-      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
+      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _bookmarksPanel has been selected
       SwingUtilities.invokeLater(new Runnable() { public void run() { _bookmarksPanel.requestFocusInWindow(); } });
     }
   };
@@ -2007,19 +2010,55 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     finally { doc.releaseReadLock(); }
   }
 
-  /** Shows the find results tab. */
-  final Action _findResultsPanelAction = new AbstractAction("Find Results") {
-    public void actionPerformed(ActionEvent ae) {
-      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
-        _mainSplit.resetToPreferredSizes(); 
-      if (! _findResultsPanel.isDisplayed()) {
-        showTab(_findResultsPanel);
+  /** Create a new find results tab.
+   *  @param rm the region manager that will contain the regions
+   *  @param title the title for the panel
+   *  @return new find results tab. */
+  public FindResultsPanel createFindResultsPanel(final RegionManager<DocumentRegion> rm, String title) {
+    final FindResultsPanel panel = new FindResultsPanel(this, rm, title);
+    final Hashtable<DocumentRegion, HighlightManager.HighlightInfo> highlights =
+      new Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
+    Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>> pair =
+      new Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>>(panel, highlights);
+    _findResults.add(pair);
+    
+    // hook highlighting listener to find results manager
+    rm.addListener(new RegionManagerListener<DocumentRegion>() {      
+      public void regionAdded(DocumentRegion r) {
+        DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
+        highlights.put(r, bpPane.getHighlightManager().
+                         addHighlight(r.getStartOffset(), r.getEndOffset(), panel.getSelectedPainter()));
       }
-      _bookmarksPanel.setVisible(true);
-      _tabbedPane.setSelectedComponent(_findResultsPanel);
-      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
-      SwingUtilities.invokeLater(new Runnable() { public void run() { _findResultsPanel.requestFocusInWindow(); } });
+      public void regionChanged(DocumentRegion r) { 
+        regionRemoved(r);
+        regionAdded(r);
+      }
+      public void regionRemoved(DocumentRegion r) {
+        HighlightManager.HighlightInfo highlight = highlights.get(r);
+        if (highlight != null) highlight.remove();
+        highlights.remove(r);
+      }
+    });
+    
+    _tabs.addLast(panel);
+    panel.getMainPanel().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) { _lastFocusOwner = panel; }
+    });
+    
+    return panel;
+  }
+  
+  /** Shows a find results tab. */
+  public void showFindResultsPanel(final FindResultsPanel panel) {
+    if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+      _mainSplit.resetToPreferredSizes(); 
+    if (! panel.isDisplayed()) {
+      showTab(panel);
     }
+    panel.setVisible(true);
+    _tabbedPane.setSelectedComponent(panel);
+    // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
+    SwingUtilities.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
   };
   
   /** Cuts from the caret to the end of the current line to the clipboard. */
@@ -2419,7 +2458,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
     
     _bookmarksPanel = new BookmarksPanel(this);
-    _findResultsPanel = new FindResultsPanel(this);
 
     // Initialize the status bar
     _setUpStatusBar();
@@ -2811,9 +2849,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
     
     // Initialize DocumentRegion highlights hashtables, for easy removal of highlights
-    _documentBreakpointHighlights = new java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
-    _documentBookmarkHighlights = new java.util.Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
-    _documentFindResultsHighlights = new java.util.Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
+    _documentBreakpointHighlights = new Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
+    _documentBookmarkHighlights = new Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
     
     // Initialize cached frames and dialogs 
     _configFrame = new ConfigFrame(this);
@@ -2859,9 +2896,15 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Set new painter for existing find results highlights. */
-  void refreshFindResultsHighlightPainter() {
-    for(HighlightManager.HighlightInfo hi: _documentFindResultsHighlights.values()) {
-      hi.refresh(DefinitionsPane.FIND_RESULTS_PAINTER);
+  void refreshFindResultsHighlightPainter(FindResultsPanel panel, 
+                                          ReverseHighlighter.DefaultUnderlineHighlightPainter painter) {
+    for(Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
+      if (pair.getFirst()==panel) {
+        Hashtable<DocumentRegion, HighlightManager.HighlightInfo> highlights = pair.getSecond();
+        for(HighlightManager.HighlightInfo hi: highlights.values()) {
+          hi.refresh(painter);
+        }
+      }
     }
   }
   
@@ -4741,7 +4784,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _setUpAction(_findReplaceAction, "Find", "Find or replace text in the document");
     _setUpAction(_findNextAction, "Find Next", "Repeats the last find");
     _setUpAction(_findPrevAction, "Find Previous", "Repeats the last find in the opposite direction");
-    _setUpAction(_findResultsPanelAction, "Find Results", "Display the find results panel");
     _setUpAction(_gotoLineAction, "Go to line", "Go to a line number in the document");
     _setUpAction(_gotoFileAction, "Go to File", "Go to a file specified by its name");
     _setUpAction(gotoFileUnderCursorAction, "Go to File Under Cursor",
@@ -4953,7 +4995,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
     _addMenuItem(editMenu, _findNextAction, KEY_FIND_NEXT);
     _addMenuItem(editMenu, _findPrevAction, KEY_FIND_PREV);
-    _addMenuItem(editMenu, _findResultsPanelAction, KEY_FIND_RESULTS_PANEL);
     _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
     _addMenuItem(editMenu, _gotoFileAction, KEY_GOTO_FILE);
     _addMenuItem(editMenu, gotoFileUnderCursorAction, KEY_GOTO_FILE_UNDER_CURSOR);
@@ -5540,25 +5581,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       }
     });
 
-    // hook highlighting listener to find results manager
-    _model.getFindResultsManager().addListener(new RegionManagerListener<DocumentRegion>() {      
-      public void regionAdded(DocumentRegion r) {
-        DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
-        _documentFindResultsHighlights.
-          put(r, bpPane.getHighlightManager().
-                addHighlight(r.getStartOffset(), r.getEndOffset(), DefinitionsPane.FIND_RESULTS_PAINTER));
-      }
-      public void regionChanged(DocumentRegion r) { 
-        regionRemoved(r);
-        regionAdded(r);
-      }
-      public void regionRemoved(DocumentRegion r) {
-        HighlightManager.HighlightInfo highlight = _documentFindResultsHighlights.get(r);
-        if (highlight != null) highlight.remove();
-        _documentFindResultsHighlights.remove(r);
-      }
-    });
-    
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {
 //        Utilities.showDebug("MainFrame.stateChanged called with event");
@@ -5589,7 +5611,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _tabs.addLast(_junitErrorPanel);
     _tabs.addLast(_javadocErrorPanel);
     _tabs.addLast(_findReplace);
-    _tabs.addLast(_findResultsPanel);
     if (_showDebugger) { _tabs.addLast(_breakpointsPanel); }
     _tabs.addLast(_bookmarksPanel);
     
@@ -5610,6 +5631,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     });
     _findReplace.getFindField().addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = _findReplace; }
+    });
+    if (_showDebugger) {
+      _breakpointsPanel.getMainPanel().addFocusListener(new FocusAdapter() {
+        public void focusGained(FocusEvent e) { _lastFocusOwner = _breakpointsPanel; }
+      });
+    }
+    _bookmarksPanel.getMainPanel().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) { _lastFocusOwner = _bookmarksPanel; }
     });
     
     // Show compiler output pane by default
@@ -5828,7 +5857,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             revalidateLineNums();
             if ((_breakpointsPanel!=null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
             if ((_bookmarksPanel!=null) && (_bookmarksPanel.isDisplayed())) { _bookmarksPanel.repaint(); }
-            if ((_findResultsPanel!=null) && (_findResultsPanel.isDisplayed())) { _findResultsPanel.repaint(); }
+            for(Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
+              FindResultsPanel panel = pair.getFirst();
+              if ((panel!=null) && (panel.isDisplayed())) { panel.repaint(); }
+            }
           }
         });
       }

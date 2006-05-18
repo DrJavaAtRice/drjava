@@ -85,7 +85,7 @@ public class BookmarksPanel extends RegionsTreePanel<DocumentRegion> {
   }
   
   /** Creates the buttons for controlling the regions. Should be overridden. */
-  protected JButton[] makeButtons() {    
+  protected JComponent[] makeButtons() {    
     Action goToAction = new AbstractAction("Go to") {
       public void actionPerformed(ActionEvent ae) {
         goToRegion();
@@ -109,7 +109,7 @@ public class BookmarksPanel extends RegionsTreePanel<DocumentRegion> {
     };
     _removeAllButton = new JButton(removeAllAction);
     
-    JButton[] buts = new JButton[] { 
+    JComponent[] buts = new JComponent[] { 
       _goToButton, 
         _removeButton,
         _removeAllButton

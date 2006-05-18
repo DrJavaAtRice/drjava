@@ -51,6 +51,7 @@ import edu.rice.cs.drjava.model.FindReplaceMachine;
 import edu.rice.cs.drjava.model.FindResult;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.FileMovedException;
 
 import edu.rice.cs.util.swing.BorderlessScrollPane;
@@ -115,9 +116,16 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   private Action _findAllAction =  new AbstractAction("Find All") {
     public void actionPerformed(final ActionEvent e) {
       if (_findField.getText().length()>0) {
-        _model.getFindResultsManager().clearRegions();
+        String searchStr = _findField.getText();
+        String title = searchStr;
+        if (title.length()>10) { title = title.substring(0,10)+"..."; }
+        title = "Find: "+title;
+        
+        final RegionManager<DocumentRegion> rm = _model.createFindResultsManager();
+        final FindResultsPanel panel = _frame.createFindResultsPanel(rm, title);
+        
         _updateMachine();
-        _machine.setFindWord(_findField.getText());
+        _machine.setFindWord(searchStr);
         _machine.setReplaceWord(_replaceField.getText());
         _frame.clearStatusMessage();
         final OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
@@ -140,7 +148,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             int startSel = endSel-_findField.getText().length();
             final Position startPos = doc.createPosition(startSel);
             final Position endPos = doc.createPosition(endSel);
-            _model.getFindResultsManager().addRegion(new DocumentRegion() {
+            rm.addRegion(new DocumentRegion() {
               public OpenDefinitionsDocument getDocument() { return doc; }
               public File getFile() throws FileMovedException { return doc.getFile(); }
               public int getStartOffset() { return startPos.getOffset(); }
@@ -159,7 +167,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             Toolkit.getDefaultToolkit().beep();
             _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
             if (count>0) {
-              _frame._findResultsPanelAction.actionPerformed(e);
+              _frame.showFindResultsPanel(panel);
             }
           }
         });

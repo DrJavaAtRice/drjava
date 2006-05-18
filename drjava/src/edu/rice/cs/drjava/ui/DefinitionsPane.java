@@ -97,8 +97,20 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(BOOKMARK_COLOR), 3);
 
   /** Highlight painter for find results. */
-  static ReverseHighlighter.DefaultUnderlineHighlightPainter FIND_RESULTS_PAINTER =
-    new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(FIND_RESULTS_COLOR), 3);
+  static ReverseHighlighter.DefaultUnderlineHighlightPainter[] FIND_RESULTS_PAINTERS;
+  
+  static {
+    FIND_RESULTS_PAINTERS = new ReverseHighlighter.DefaultUnderlineHighlightPainter[FIND_RESULTS_COLORS.length+1];
+    for(int i=0; i<FIND_RESULTS_COLORS.length; ++i) {
+      FIND_RESULTS_PAINTERS[i] =
+        new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(FIND_RESULTS_COLORS[i]), 3);
+    }
+    FIND_RESULTS_PAINTERS[FIND_RESULTS_COLORS.length] =
+        new ReverseHighlighter.DefaultUnderlineHighlightPainter(Color.WHITE, 0);
+  }
+  
+  /** How many find result panels are using the highlight painters. */
+  static int[] FIND_RESULTS_PAINTERS_USAGE = new int[FIND_RESULTS_COLORS.length];
 
   /** Highlight painter for breakpoints. */
   static ReverseHighlighter.DefaultHighlightPainter BREAKPOINT_PAINTER =
@@ -215,9 +227,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** The OptionListener for FIND_RESULTS_COLOR. */
   private class FindResultsColorOptionListener implements OptionListener<Color> {
+    private int _index;
+    public FindResultsColorOptionListener(int i) { _index = i; }
     public void optionChanged(OptionEvent<Color> oce) {
-      FIND_RESULTS_PAINTER = new ReverseHighlighter.DefaultUnderlineHighlightPainter(oce.value, FIND_RESULTS_PAINTER.getThickness());
-      _mainFrame.refreshFindResultsHighlightPainter();
+      FIND_RESULTS_PAINTERS[_index] =
+        new ReverseHighlighter.DefaultUnderlineHighlightPainter(oce.value, FIND_RESULTS_PAINTERS[_index].getThickness());
     }
   }
 
@@ -483,10 +497,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _colorOptionListeners.add(pair);
     DrJava.getConfig().addOptionListener( OptionConstants.BOOKMARK_COLOR, temp);
 
-    temp = new FindResultsColorOptionListener();
-    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLOR, temp);
-    _colorOptionListeners.add(pair);
-    DrJava.getConfig().addOptionListener( OptionConstants.FIND_RESULTS_COLOR, temp);
+    for(int i=0; i<FIND_RESULTS_COLORS.length; ++i) {
+      temp = new FindResultsColorOptionListener(i);
+      pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLORS[i], temp);
+      _colorOptionListeners.add(pair);
+      DrJava.getConfig().addOptionListener( OptionConstants.FIND_RESULTS_COLORS[i], temp);
+    }
     
     temp = new BreakpointColorOptionListener();
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, temp);
