@@ -90,7 +90,9 @@ public class DrJavaErrorHandler {
       _errorsButton.setVisible(true);
     }
     if ((_errors.size()==1) && (DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue())) {
-      new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown).setVisible(true);
+      DrJavaErrorPopup popup = new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown);
+      MainFrame.setPopupLoc(popup);
+      popup.setVisible(true);
     }
   }
   

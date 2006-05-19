@@ -179,7 +179,7 @@ public class ClipboardHistoryFrame extends JFrame {
       int xs = (int)parentDim.getWidth()/3;
       int ys = (int)parentDim.getHeight()/4;
       setSize(Math.max(xs,400), Math.max(ys, 400));
-      setLocationRelativeTo(_owner);
+      MainFrame.setPopupLoc(this, _owner);
     }
   }
 
@@ -305,7 +305,7 @@ public class ClipboardHistoryFrame extends JFrame {
     int xs = (int)parentDim.getWidth()/3;
     int ys = (int)parentDim.getHeight()/4;
     setSize(Math.max(xs,400), Math.max(ys, 300));
-    setLocationRelativeTo(_owner);
+    MainFrame.setPopupLoc(this, _owner);
 
     updateView();
   }

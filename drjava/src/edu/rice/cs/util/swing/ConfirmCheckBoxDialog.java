@@ -33,6 +33,7 @@
 
 package edu.rice.cs.util.swing;
 
+import edu.rice.cs.drjava.ui.MainFrame;
 import javax.swing.*;
 
 /**
@@ -104,7 +105,9 @@ public class ConfirmCheckBoxDialog {
    *  @return the JOptionPane result of showing the dialog.
    */
   public int show() {
+    MainFrame.setPopupLoc(_dialog);
     _dialog.setVisible(true);
+
     Object val = _optionPane.getValue();
     if (val == null || !(val instanceof Integer)) {
       return JOptionPane.CLOSED_OPTION;

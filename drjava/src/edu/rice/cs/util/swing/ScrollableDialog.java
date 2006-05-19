@@ -45,6 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.swing;
 
+import edu.rice.cs.drjava.ui.MainFrame;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -102,7 +103,6 @@ public class ScrollableDialog implements Serializable {
     
     // Arrange the dialog
     _dialog.setSize(width, height);
-    _dialog.setLocationRelativeTo(parent);
     
     // Add components
     JScrollPane textScroll = 
@@ -154,6 +154,7 @@ public class ScrollableDialog implements Serializable {
   
   /** Shows this dialog. */
   public void show() {
+    MainFrame.setPopupLoc(_dialog);
     _dialog.setVisible(true);
   }
 }

@@ -121,7 +121,7 @@ public class ConfigFrame extends JFrame {
           // oh well...
         }
         if (successful) _applyButton.setEnabled(false);
-        ConfigFrame.this.setVisible(false);
+        ConfigFrame.this.setVisible(true);
       }
     };
     _okButton = new JButton(okAction);
@@ -194,15 +194,8 @@ public class ConfigFrame extends JFrame {
 
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
-    // suggested from zaq@nosi.com, to keep the frame on the screen!
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Dimension frameSize = this.getSize();
 
-    if (frameSize.height > screenSize.height) frameSize.height = screenSize.height;
-    if (frameSize.width > screenSize.width) frameSize.width = screenSize.width;
-
-    this.setSize(frameSize);
-    this.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
+    MainFrame.setPopupLoc(this);
 
     addWindowListener(new WindowAdapter() {
       public void windowClosing(java.awt.event.WindowEvent e) { cancel(); }

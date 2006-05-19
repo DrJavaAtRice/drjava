@@ -250,16 +250,7 @@ public class HTMLFrame extends JFrame {
 
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
-    // suggested from zaq@nosi.com, to keep the frame on the screen!
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Dimension frameSize = this.getSize();
-
-    if (frameSize.height > screenSize.height) frameSize.height = screenSize.height;
-    
-    if (frameSize.width > screenSize.width) frameSize.width = screenSize.width;
-
-    setSize(frameSize);
-    setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
+    MainFrame.setPopupLoc(this);
   }
 
   /** Hides the navigation panel on the left.  Cannot currently be undone. */

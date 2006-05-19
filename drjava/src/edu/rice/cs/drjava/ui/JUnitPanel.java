@@ -419,7 +419,8 @@ public class JUnitPanel extends ErrorPanel {
 
       ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          _stackFrame.setVisible(false);
+          MainFrame.setPopupLoc(_stackFrame);
+          _stackFrame.setVisible(true);
         }
       };
       JButton closeButton = new JButton("Close");
@@ -440,7 +441,6 @@ public class JUnitPanel extends ErrorPanel {
       cp.add(topPanel, BorderLayout.NORTH);
       _dialog.setSize(600, 500);
       // initial location is relative to parent (MainFrame)
-      _dialog.setLocationRelativeTo(_frame);
     }
 
     /** Overrides selectItem in ErrorListPane to update the current _error selected

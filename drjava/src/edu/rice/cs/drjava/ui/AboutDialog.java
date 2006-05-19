@@ -75,10 +75,9 @@ public class AboutDialog extends JDialog implements ActionListener {
   public void setVisible(boolean vis) {
     if (vis) {
       // suggested from zaq@nosi.com, to keep the frame on the screen!
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      Dimension frameSize = this.getSize();
-      this.setLocation((screenSize.width - frameSize.width) / 2,
-                       (screenSize.height - frameSize.height) / 2);
+      //Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      //Dimension frameSize = this.getSize();
+      MainFrame.setPopupLoc(this);
     }
     super.setVisible(vis);
   }

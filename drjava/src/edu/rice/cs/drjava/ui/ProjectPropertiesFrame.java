@@ -61,8 +61,8 @@ import javax.swing.filechooser.FileFilter;
 /** A frame for setting Project Preferences */
 public class ProjectPropertiesFrame extends JFrame {
 
-  private static final int FRAME_WIDTH = 500;
-  private static final int FRAME_HEIGHT = 315;
+  private static final int FRAME_WIDTH = 503;
+  private static final int FRAME_HEIGHT = 318;
 
   private MainFrame _mainFrame;      
   private SingleDisplayModel _model; 
@@ -161,15 +161,7 @@ public class ProjectPropertiesFrame extends JFrame {
 
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
-    // suggested from zaq@nosi.com, to keep the frame on the screen!
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Dimension frameSize = this.getSize();
-
-    if (frameSize.height > screenSize.height) frameSize.height = screenSize.height;
-    if (frameSize.width > screenSize.width) frameSize.width = screenSize.width;
-
-    this.setSize(frameSize);
-    this.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
+    MainFrame.setPopupLoc(this);
 
     addWindowListener(new WindowAdapter() { 
       public void windowClosing(java.awt.event.WindowEvent e) { cancel(); } 

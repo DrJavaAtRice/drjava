@@ -33,6 +33,7 @@
 
 package edu.rice.cs.drjava.ui.predictive;
 
+import edu.rice.cs.drjava.ui.MainFrame;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.JTextComponent;
@@ -270,7 +271,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       int xs = (int)parentDim.getWidth()/3;
       int ys = (int)parentDim.getHeight()/4;
       setSize(Math.max(xs,400), Math.max(ys, 300));
-      setLocationRelativeTo(_owner);
+      MainFrame.setPopupLoc(this, _owner);
       _currentStrategy = _strategies.get(0);
       _strategyBox.setSelectedIndex(0);
       selectStrategy();
@@ -617,7 +618,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     int xs = (int)parentDim.getWidth()/3;
     int ys = (int)parentDim.getHeight()/4;
     setSize(Math.max(xs,400), Math.max(ys, 300));
-    setLocationRelativeTo(_owner);
+    MainFrame.setPopupLoc(this, _owner);
 
     removeListener();
     updateTextField();
@@ -633,9 +634,12 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     _owner.setEnabled(!b);
     super.setVisible(b);
     if (b) {
+      MainFrame.setPopupLoc(this);
+      
       _textField.requestFocus();
     }
     else {
+      
       _owner.toFront();
     }
   }

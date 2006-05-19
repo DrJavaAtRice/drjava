@@ -33,6 +33,7 @@
 
 package edu.rice.cs.drjava.ui.config;
 
+import edu.rice.cs.drjava.ui.MainFrame;
 import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
@@ -267,7 +268,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
       panel.add(_actionLabel);
       panel.add(_cancelAndOKPanel);
       this.setSize((int)_instructionLabel.getPreferredSize().getWidth() + 30, DIALOG_HEIGHT);
-      centerOnScreen();
+      //centerOnScreen();
       this.pack();
     }
 
@@ -281,17 +282,8 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
       _inputField.setText(_option.format(_currentKeyStroke));
       //this.setLocation(frame.getLocation());
       this.setSize((int)_instructionLabel.getPreferredSize().getWidth() + 30, DIALOG_HEIGHT);
-      centerOnScreen();
-      super.setVisible(true);
-    }
-
-    private void centerOnScreen() {
-
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      Dimension dialogSize = this.getSize();
-      // Set to the new correct size and location
-      this.setLocation((screenSize.width - dialogSize.width) / 2,
-                       (screenSize.height - dialogSize.height) / 2);
+      MainFrame.setPopupLoc(this);
+      this.setVisible(true);
     }
 
     /**

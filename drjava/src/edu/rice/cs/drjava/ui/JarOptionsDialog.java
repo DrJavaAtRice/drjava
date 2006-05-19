@@ -156,7 +156,7 @@ public class JarOptionsDialog extends JFrame {
       setLocation(_lastState.getLocation());
     }
     else {
-      setLocationRelativeTo(_mainFrame);
+      MainFrame.setPopupLoc(this, _mainFrame);
     }
     validate();
   }
@@ -168,14 +168,13 @@ public class JarOptionsDialog extends JFrame {
       super(title);
       _parent = parent;
       setSize(350, 150);
-      setLocationRelativeTo(parent);
+      MainFrame.setPopupLoc(this, parent);
       JLabel waitLabel = new JLabel(label, SwingConstants.CENTER);
       getRootPane().setLayout(new BorderLayout());
       getRootPane().add(waitLabel, BorderLayout.CENTER);
     }
     public void setVisible(boolean vis) {
-      setLocation((int)(_parent.getLocation().getX() + (_parent.getSize().width - getSize().width)/2),
-                  (int)(_parent.getLocation().getY() + (_parent.getSize().height - getSize().height)/2));
+      MainFrame.setPopupLoc(this, _parent);
       super.setVisible(vis);
     }
   }
@@ -295,7 +294,7 @@ public class JarOptionsDialog extends JFrame {
     super.setResizable(false);
     pack();
     
-    setLocationRelativeTo(_mainFrame);
+    MainFrame.setPopupLoc(this, _mainFrame);
 
     _processingFrame = new ProcessingFrame(this, "Creating Jar File", "Processing, please wait.");
   }

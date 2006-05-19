@@ -33,6 +33,7 @@
 
 package edu.rice.cs.util.swing;
 
+import edu.rice.cs.drjava.ui.MainFrame;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -202,6 +203,7 @@ public class PopupConsole implements Serializable {
       commandLock.notifyAll();  // signal that console is ready to accept input
     }
     
+    MainFrame.setPopupLoc(dialog);
     dialog.setVisible(true);
     dialog.dispose();
     
@@ -269,7 +271,7 @@ public class PopupConsole implements Serializable {
     
     buttonPanel.setSize(500, 100);
     dialog.setSize(500, 100);
-    dialog.setLocationRelativeTo(parentFrame);
+    
     return dialog;
   }
   

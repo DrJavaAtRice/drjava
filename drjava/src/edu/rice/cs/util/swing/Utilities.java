@@ -36,6 +36,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.swing;
 
+import edu.rice.cs.drjava.ui.MainFrame;
 import java.awt.EventQueue;
 import java.awt.*;
 import java.awt.event.*;
@@ -128,6 +129,7 @@ public class Utilities {
       else {
         Frame frame = JOptionPane.getFrameForComponent(comp);
         TextAreaMessageDialog dialog = new TextAreaMessageDialog(frame, comp, title, message);
+        MainFrame.setPopupLoc(dialog);
         dialog.setVisible(true);
       }
     }

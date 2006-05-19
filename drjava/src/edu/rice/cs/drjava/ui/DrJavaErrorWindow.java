@@ -114,7 +114,6 @@ public class DrJavaErrorWindow extends JDialog {
     super(_parentFrame, "DrJava Errors");
 
     this.setSize(600,400);
-    setLocationRelativeTo(_parentFrame);
 
     // If we set this pane to be of type text/rtf, it wraps based on words
     // as opposed to based on characters.

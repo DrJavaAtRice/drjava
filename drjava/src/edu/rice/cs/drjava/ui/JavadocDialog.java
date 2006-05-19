@@ -130,6 +130,7 @@ public class JavadocDialog implements DirectorySelector {
       _checkBox.setSelected(true);
 
       // Prompt the user
+      MainFrame.setPopupLoc(_dialog);
       _dialog.setVisible(true);
 
       // Get result

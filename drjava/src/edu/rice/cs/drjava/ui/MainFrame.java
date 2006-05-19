@@ -1756,13 +1756,17 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) {
       // Create dialog if we haven't yet
 //      if (_aboutDialog == null) _aboutDialog = new AboutDialog(MainFrame.this);
+      Point p = MainFrame.this.getLocation();
       _aboutDialog.setVisible(true);
+      //_aboutDialog.setLocation(p.x+(MainFrame.this.getWidth()-_aboutDialog.getWidth())/2, p.y+(MainFrame.this.getHeight()-_aboutDialog.getHeight())/2);
+      
     }
   };
   
   /** Pops up the DrJava errors dialog. */
   private final Action _errorsAction = new AbstractAction("DrJava Errors") {
     public void actionPerformed(ActionEvent ae) {
+      setPopupLoc(DrJavaErrorWindow.singleton());
       DrJavaErrorWindow.singleton().setVisible(true);
     }
   };
@@ -1876,6 +1880,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //        _configFrame = new ConfigFrame(MainFrame.this);
 //      }
       _configFrame.setUp();
+      setPopupLoc(_configFrame);
       _configFrame.setVisible(true);
       _configFrame.toFront();
     }
@@ -7576,4 +7581,58 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private class LastFocusListener extends FocusAdapter {
     public void focusGained(FocusEvent e) { _lastFocusOwner = e.getComponent(); }
   };
+  
+  
+  /**
+   * Wrapper for setPopupLoc(Window, Component) that uses the window's owner as the owner
+   * to center the popup on.
+   * @param popup the Popup window
+   */
+  public static void setPopupLoc(Window popup) {
+    MainFrame.setPopupLoc(popup, popup.getOwner());
+  }
+  
+  /**
+   * Sets the location of the popup in a consistant way.
+   * If the popup has an owner, the popup is centered over the owner.
+   * If the popup has no owner(owner == null), the popup is centered over the first monitor.
+   * In either case, the popup is moved and scaled if any part of it is not on the screen.
+   * This method should be called for all popups to maintain consistancy.
+   * @param popup the popup window
+   * @param owner the parent component for the popup
+   */
+  public static void setPopupLoc(Window popup, Component owner) {
+    // suggested from zaq@nosi.com, to keep the frame on the screen!
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    Dimension frameSize = popup.getSize();
+
+    if (frameSize.height > screenSize.height) frameSize.height = screenSize.height;
+    if (frameSize.width > screenSize.width) frameSize.width = screenSize.width;
+
+    popup.setSize(frameSize);
+    
+    Point loc;
+    if(owner == null) {
+      //for multi-monitor support
+      //Question: do we want it to popup on the first monitor always?
+      GraphicsDevice[] dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+      Rectangle rec = dev[0].getDefaultConfiguration().getBounds();
+      loc = new Point(rec.x + (rec.width - popup.getWidth()) / 2, rec.y + (rec.height - popup.getHeight()) / 2);
+    }
+    else {
+      Point ownerLoc = owner.getLocation();
+      loc = new Point(ownerLoc.x + (owner.getWidth() - popup.getWidth()) / 2, ownerLoc.y + (owner.getHeight() - popup.getHeight()) / 2);
+    }
+    
+    if(loc.x < 0)
+      loc.x = 0;
+    if(loc.x + popup.getWidth() > screenSize.width)
+      loc.x = screenSize.width - popup.getWidth();
+    if(loc.y < 0)
+      loc.y = 0;
+    if(loc.y + popup.getHeight() > screenSize.height)
+      loc.y = screenSize.height - popup.getHeight();
+    
+    popup.setLocation(loc);
+  }
 }

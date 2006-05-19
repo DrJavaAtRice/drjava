@@ -75,7 +75,6 @@ public class DrJavaErrorPopup extends JDialog {
     _error = error;
 
     this.setSize(500,150);
-    setLocationRelativeTo(_parentFrame);
 
     // If we set this pane to be of type text/rtf, it wraps based on words
     // as opposed to based on characters.
@@ -122,6 +121,7 @@ public class DrJavaErrorPopup extends JDialog {
   private Action _moreAction = new AbstractAction("More Information") {
     public void actionPerformed(ActionEvent e) {
       _closeAction.actionPerformed(e);
+      MainFrame.setPopupLoc(DrJavaErrorWindow.singleton());
       DrJavaErrorWindow.singleton().setVisible(true);
     }
   };
