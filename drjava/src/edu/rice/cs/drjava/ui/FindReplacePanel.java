@@ -145,7 +145,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           doc.acquireReadLock();
           try {
             int endSel = fr.getFoundOffset();
-            int startSel = endSel-_findField.getText().length();
+            int startSel = endSel-_machine.getFindWord().length();
             final Position startPos = doc.createPosition(startSel);
             final Position endPos = doc.createPosition(endSel);
             rm.addRegion(new DocumentRegion() {
