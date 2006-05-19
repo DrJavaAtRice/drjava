@@ -226,12 +226,8 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
           }
           catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }
           finally { doc.releaseReadLock(); }
-          JLabel label = new JLabel(node.getUserObject().toString());
-          if (renderer instanceof JLabel) {
-            label.setFont(((JLabel)renderer).getFont());
-          }
-          label.setToolTipText(tooltip);
-          renderer = label;          
+          setText(node.getUserObject().toString());
+          renderer = this;
         }
       }
       setToolTipText(tooltip);
