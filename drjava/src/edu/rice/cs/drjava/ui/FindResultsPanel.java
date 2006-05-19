@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.Pair;
+import edu.rice.cs.util.StringOps;
 
 /**
  * Panel for displaying find results.
@@ -301,14 +302,36 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
       StringBuilder sb = new StringBuilder();
       _region.getDocument().acquireReadLock();
       try {
+        sb.append("<html>");
         sb.append(lineNumber());
         try {
           sb.append(": ");
           int endSel = _region.getDocument().getLineEndPos(_region.getEndOffset());
           int startSel = _region.getDocument().getLineStartPos(_region.getStartOffset());
-          
           int length = Math.min(120, endSel-startSel);
-          sb.append(_region.getDocument().getText(startSel, length).trim());
+          
+          // this highlights the actual region in red
+          int startRed = _region.getStartOffset() - startSel;
+          int endRed = _region.getEndOffset() - startSel;
+          String s = _region.getDocument().getText(startSel, length);
+          for(int i=0; i<s.length(); ++i) {
+            if (!Character.isWhitespace(s.charAt(i))) {
+              break;
+            }
+            --startRed;
+            --endRed;
+          }
+          s = s.trim();
+          if (startRed<0) { startRed = 0; }
+          if (startRed>s.length()) { startRed = s.length(); }
+          if (endRed<startRed) { endRed = startRed; }
+          if (endRed>s.length()) { endRed = s.length(); }
+          sb.append(StringOps.encodeHTML(s.substring(0, startRed)));
+          sb.append("<font color=#ff0000>");
+          sb.append(StringOps.encodeHTML(s.substring(startRed, endRed)));
+          sb.append("</font>");
+          sb.append(StringOps.encodeHTML(s.substring(endRed)));
+          sb.append("</html>");
         } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
       } finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();

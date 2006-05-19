@@ -476,4 +476,20 @@ public abstract class StringOps {
     buf.append("]");
     return buf.toString();
   }
+
+  /**
+   * Encode &, <, > and newlines as HTML entities.
+   * @param s string to encode
+   * @return encoded string
+   */
+  public static String encodeHTML(String s) {
+    s = StringOps.replace(s, "&", "&amp;");
+    s = StringOps.replace(s, "<", "&lt;");
+    s = StringOps.replace(s, ">", "&gt;");
+    s = StringOps.replace(s, System.getProperty("line.separator"),"<br>");
+    s = StringOps.replace(s, "\n","<br>");
+    return s;
+  }
+
+
 }

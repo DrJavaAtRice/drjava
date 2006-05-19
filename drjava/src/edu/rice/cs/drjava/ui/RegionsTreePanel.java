@@ -200,27 +200,45 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
           doc.acquireReadLock();
           try {
             int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
-            int startOffset = r.getStartOffset();
-            int endOffset = doc.getOffset(lnr+6);
+            int startOffset = doc.getOffset(lnr-3);
+            if (startOffset<0) { startOffset = 0; }
+            int endOffset = doc.getOffset(lnr+3);
             if (endOffset<0) { endOffset = doc.getLength()-1; }
             
             // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
             String s = doc.getText(startOffset, endOffset-startOffset);
-            s = StringOps.replace(s, "<", "&lt;");
-            s = StringOps.replace(s, ">", "&gt;");
-            s = StringOps.replace(s, System.getProperty("line.separator"),"<br>");
-            s = StringOps.replace(s, "\n","<br>");
+            
+            // this highlights the actual region in red
+            int rStart = r.getStartOffset()-startOffset;
+            if (rStart<0) { rStart = 0; }
+            int rEnd = r.getEndOffset()-startOffset;
+            if (rEnd>s.length()) { rEnd = s.length(); }
+            if ((rStart<=s.length()) && (rEnd>=rStart)) {
+              String t1 = StringOps.encodeHTML(s.substring(0,rStart));
+              String t2 = StringOps.encodeHTML(s.substring(rStart,rEnd));
+              String t3 = StringOps.encodeHTML(s.substring(rEnd));
+              s = t1 + "<font color=#ff0000>" + t2 + "</font>" + t3;
+            }
+            else {
+              s = StringOps.encodeHTML(s);
+            }
             tooltip = "<html><pre>"+s+"</pre></html>";
           }
           catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }
           finally { doc.releaseReadLock(); }
+          JLabel label = new JLabel(node.getUserObject().toString());
+          if (renderer instanceof JLabel) {
+            label.setFont(((JLabel)renderer).getFont());
+          }
+          label.setToolTipText(tooltip);
+          renderer = label;          
         }
       }
       setToolTipText(tooltip);
       return renderer;
     }
   }
-
+  
   /** Creates the buttons for controlling the regions. Should be overridden. */
   protected JComponent[] makeButtons() {        
     return new JComponent[0];    
