@@ -138,7 +138,8 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
         l.setHorizontalAlignment(JLabel.CENTER);
         renderer = l;
       }
-      renderer.setPreferredSize(preferredSize);
+      // Taken out because this is a 1.5 method; not sure if it's necessary
+      //renderer.setPreferredSize(preferredSize);
       return renderer;
     }
     

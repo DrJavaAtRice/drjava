@@ -40,6 +40,7 @@ import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.StringOps;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
@@ -155,14 +156,13 @@ public class FindReplaceMachine {
   /** Change the word being sought.
    *  @param word the new word to seek
    */
-  public void setFindWord(String word) {
-    _findWord = word.replace(System.getProperty("line.separator"),"\n");
+  public void setFindWord(String word) { _findWord = StringOps.replace(word, System.getProperty("line.separator"),"\n");
   }
 
   /** Change the replacing word.
    *  @param word the new replacing word
    */
-  public void setReplaceWord(String word) { _replaceWord = word.replace(System.getProperty("line.separator"),"\n"); }
+  public void setReplaceWord(String word) { _replaceWord = StringOps.replace(word, System.getProperty("line.separator"),"\n"); }
 
   /** Determine if the machine is on an instance of the find word.
    *  @return true if the current position is right after an instance of the find word.
