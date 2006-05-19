@@ -169,6 +169,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             if (count>0) {
               _frame.showFindResultsPanel(panel);
             }
+            else {
+              panel._close();
+            }
           }
         });
       }

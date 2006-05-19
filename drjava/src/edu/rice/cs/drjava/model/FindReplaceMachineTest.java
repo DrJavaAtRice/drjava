@@ -72,6 +72,9 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
       "                this.bar();\n" +
       "        }\n" +
       "}";
+
+  private static final String FIND_MULTI_LINE_SEARCH_STR =
+      "{" + System.getProperty("line.separator");
   
   private static final String IGNORE_TEXT =
     //edge cases (each require special code to take care of it)
@@ -447,7 +450,20 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
                  _docNext.getText(0, _docNext.getLength()));
 //    System.err.println("testFindReplaceInAllOpenFilesWholeWord completed");
   }
+
   
+  public void testFindMultiLine() throws BadLocationException {
+//    System.err.println("testFindMultiLine");
+    _doc.insertString(0, FIND_WHOLE_WORD_TEST_1, null);
+//        System.err.println(FIND_WHOLE_WORD_TEST_1);
+    _initFrm(0);
+    _frm.setFindWord(FIND_MULTI_LINE_SEARCH_STR);
+    _frm.setSearchBackwards(false);
+
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 19);
+//    System.err.println("testFindMultiLine completed");
+  }
+
 
   public void testWholeWordSearchOnTestString1() throws BadLocationException {
 //    System.err.println("Running testWholeWordSearchOnTestString1");

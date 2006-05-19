@@ -155,12 +155,14 @@ public class FindReplaceMachine {
   /** Change the word being sought.
    *  @param word the new word to seek
    */
-  public void setFindWord(String word) { _findWord = word; }
+  public void setFindWord(String word) {
+    _findWord = word.replace(System.getProperty("line.separator"),"\n");
+  }
 
   /** Change the replacing word.
    *  @param word the new replacing word
    */
-  public void setReplaceWord(String word) { _replaceWord = word; }
+  public void setReplaceWord(String word) { _replaceWord = word.replace(System.getProperty("line.separator"),"\n"); }
 
   /** Determine if the machine is on an instance of the find word.
    *  @return true if the current position is right after an instance of the find word.
@@ -494,7 +496,6 @@ public class FindReplaceMachine {
         // Find next match in text
         int foundOffset = _isForward ? text.indexOf(findWord) : text.lastIndexOf(findWord);
         if (foundOffset < 0) break;  // no valid match in this document
-        
         int foundLocation = start + foundOffset;
         int matchLocation;
         
@@ -521,7 +522,7 @@ public class FindReplaceMachine {
         _current = doc.createPosition(matchLocation);   
         
 //        System.err.println("Returning result = " + new FindResult(doc, matchLocation, wrapped, allWrapped));
-        
+
         return new FindResult(doc, matchLocation, wrapped, allWrapped);  // return valid match
       }
     }

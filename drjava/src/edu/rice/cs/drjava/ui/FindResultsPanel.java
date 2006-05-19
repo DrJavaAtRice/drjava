@@ -276,7 +276,7 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
   }
   
   /** Close the pane. */
-  protected void _close() {
+  public void _close() {
     super._close();
     _regionManager.clearRegions();
     _model.disposeFindResultsManager(_regionManager);
