@@ -40,8 +40,8 @@
       <para>You can download the newest releases of DrJava as a <filename>.jar</filename> file from our home page, <ulink url="http://drjava.org">http://drjava.org</ulink>, or directly from our <ulink url="http://sourceforge.net/project/showfiles.php?group_id=44253">Project Filelist</ulink> page on SourceForge.</para>
       
       <formalpara>
- <title>Stable and Development Releases</title>
- <para>We make a distinction between Stable and Development releases of DrJava.  All releases must pass our rigorous suite of unit tests and should be safe to use, but we have found that a period of beta-testing can be helpful for finding additional bugs.  Any large new features go through a beta-testing period before being included in Stable releases, ensuring these releases are safe for all users.  Our Development releases contain newer features that are under development.  We believe these releases are also ready to use, but they have not been widely beta-tested, so some users may prefer to use only Stable releases.</para>
+ <title>Stable, Beta and Development Releases</title>
+ <para>We make a distinction between Stable, Beta and Development releases of DrJava.  All releases must pass our rigorous suite of unit tests and should be safe to use, but we have found that a period of beta-testing can be helpful for finding additional bugs.  Any large new features are first released as a Beta release and go through a beta-testing period before being included in Stable releases, ensuring these releases are safe for all users.  Our Development releases contain newer features that are under development.  We believe these releases are also ready to use, but they have not been widely beta-tested, so some users may prefer to use Beta or Stable releases, or perhaps only Stable releases.</para>
       </formalpara>
     </section>
 
@@ -53,7 +53,7 @@
  <arg choice='opt'>-config [CONFIG_FILE]</arg>
  <arg choice='opt' rep='repeat'>filename.java</arg>
       </cmdsynopsis>
-      <para>Replace DATE-TIME with the appropriate value for your version of DrJava.  The "config" argument is optional and allows you to specify a custom configuration file, rather than the <filename>.drjava</filename> file stored in your home directory.</para>
+      <para>Replace DATE-TIME with the appropriate value for your version of DrJava, e.g. <command>java -jar drjava-20060420-1406.jar</command>.  The "config" argument is optional and allows you to specify a custom configuration file, rather than the <filename>.drjava</filename> file stored in your home directory.</para>
 
       <formalpara>
         <title>Running DrJava on Mac OS X</title>
@@ -155,7 +155,7 @@ OTHER DEALINGS WITH THE SOFTWARE.
   <!-- Chapter: Editing Programs -->
   <chapter id="editing">
     <title>Editing Programs</title>
-    <para>DrJava's core component is an editor for writing Java source code.  Like most text editors, it supports a wide range of editing features such as "Find/Replace" and "Goto Line", while also providing more advanced features like syntax coloring, automatic indentation, and brace matching.</para>
+    <para>DrJava's core component is an editor for writing Java source code.  Like most text editors, it supports a wide range of editing features such as "Find/Replace", "Go to Line", "Go to File", while also providing more advanced features like syntax coloring, automatic indentation, brace matching, and even a limited notion of auto-completion.</para>
 
     <section id="edit-defpane">
       <title>Definitions Pane</title>
@@ -185,8 +185,19 @@ OTHER DEALINGS WITH THE SOFTWARE.
 
       <formalpara>
  <title>Context Menu</title>
- <para>The Definitions Pane has a context menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful features such as cut, copy, and paste, as well as indenting, commenting, and setting breakpoints in the debugger.</para>
+ <para>The Definitions Pane has a context menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful features such as cut, copy, and paste, as well as indenting, commenting, and setting breakpoints and bookmarks.</para>
       </formalpara>
+
+      <formalpara>
+ <title>Auto-Completion</title>
+ <para>DrJava supports a very limited notion of auto-completion that is nonetheless useful. This feature is accessible as "Auto-Complete Word Under Cursor" in the Edit menu, and it is also bound to the keyboard shortcut <keycode>Ctrl-Shift-Space</keycode> by default. When invoked, DrJava will look at the word to the left of the cursor and attempt to auto-complete it, based on a list of documents currently open. If there is no unique auto-completion match, DrJava displays a <link linkend="predictive-input">predictive input dialog</link> with the auto-completion candidates.</para></formalpara>
+ <para>When a project is open, DrJava can also be configured to scan all class files after a compile to obtain the auto-completion information (see <link linkend="configuration">Configuring DrJava</link>). With that option set, DrJava can auto-complete the names of all classes in your project, even those of inner classes.</para>
+ <para>Please note that auto-completion currently only works for class names, is limited to user class names (i.e. it does not auto-complete Java API class names), and completely ignores all context except for the word to the left of the cursor (i.e. it may generate code that does not compile).</para>
+
+      <formalpara>
+ <title>Clipboard History</title>
+ <para>Any text you copy or cut out of DrJava documents will be placed in the clipboard history, and the last 10 entries are kept (that number is configurable, see <link linkend="configuration">Configuring DrJava</link>). To access one of the entries in the history, use the "Paste from History" command in the Edit menu or press <keycode>Ctrl+Shift+V</keycode>. In the dialog that opens up, you can browse the history and select the entry to paste. In addition to inserting the text at the cursor, the selected entry will also be moved to the top of the clipboard history, and will therefore subsequently be available with the regular paste command.</para></formalpara>
+    <para>The clipboard history is a great tool to minimize scrolling and document switching: Instead of going back and forth several times, you can just "copy, copy, copy" several pieces of code in a row, then go to another place in the code and do "paste, paste from history, paste from history".</para>
     </section>
 
     <section id="edit-multiple">
@@ -206,13 +217,26 @@ OTHER DEALINGS WITH THE SOFTWARE.
 
       <formalpara>
  <title>Find/Replace</title>
- <para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).  To search for a term, type it in the Find text field and click "Find Next" or "Find Previous" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next" or "Find Previous", and then click "Replace".  The "Replace/Find Next", "Replace/FindPrevious"  and "Replace All" buttons help to speed up this process.  There are also four checkboxes to customize each search: "Match Case","Search All Documents", "Whole Word", and "No Comments/Strings".  Unchecking the first box will return case-insensitive results, checking the second box will tell DrJava to search through all of the open documents in sequence, checking the third box will ignore partial matches (i.e. it will ignore "hello" if the search text is "lo"), and checking the last box ignores instances found within comments and strings .  Note that if "Search All Documents" is enabled, the search will not wrap to the beginning of the current document until all other documents have first been searched.
-A recent feature is the ability to search across more than one line of text. For detailed instructions on its usage, see the "Find and Replace" section in the Quickstart documents under the Help menu.</para>
+ <para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).</para></formalpara>
+ <para>To search for a term, type it in the Find text field and click "Find Next" or "Find Previous" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next" or "Find Previous", and then click "Replace".  The "Replace/Find Next", "Replace/FindPrevious"  and "Replace All" buttons help to speed up this process.</para>
+ <para>The "Find All" button accumulates all occurrences and displays them in a new, separate pane labeled "Find: word", where "word" is replaced with the search string. You can keep as many "Find All" panes open as you like. The panes keep the occurrences sorted by document and line number and allow you to jump to the source location with the "Go to" button, bookmark an occurrence using the "Bookmark" button, or to remove an occurrence from the list with the "Remove" button. Occurrences can also be underlined with different colors to make them easier to find in the Definitions pane.</para>
+ <para>There are also four checkboxes to customize each search: "Match Case","Search All Documents", "Whole Word", and "No Comments/Strings".  Unchecking the first box will return case-insensitive results, checking the second box will tell DrJava to search through all of the open documents in sequence, checking the third box will ignore partial matches (i.e. it will ignore "hello" if the search text is "lo"), and checking the last box ignores instances found within comments and strings.</para>
+ <para>Note that if "Search All Documents" is enabled, the search will not wrap to the beginning of the current document until all other documents have first been searched.
+DrJava can also search across more than one line of text (i.e. the search string can include line breaks). For detailed instructions on its usage, see the "Find and Replace" section in the Quickstart documents under the Help menu.</para>
+
+      <formalpara>
+ <title>Go to Line</title>
+ <para>Selecting "Go to Line" from the Edit Menu (or hitting <keycode>Ctrl+G</keycode>) will display a dialog allowing you to scroll to a particular line number.</para>
       </formalpara>
 
       <formalpara>
- <title>Goto Line</title>
- <para>Selecting "Goto Line" from the Edit Menu (or hitting <keycode>Ctrl+G</keycode>) will display a dialog allowing you to scroll to a particular line number.</para>
+ <title>Go to File</title>
+ <para>With the "Go to File" dialog from the Edit Menu (or hitting <keycode>Ctrl+Shift+G</keycode>), you can quickly jump to another file. It will open a <link linkend="predictive-input">predictive input dialog</link>, ask you to type the name of the document, and quickly narrow down the list of candidates. You can then use the cursor keys and <keycode>Enter</keycode> to select the file you want to view.</para>
+      </formalpara>
+
+      <formalpara>
+ <title>Go to File Under Cursor</title>
+ <para>"Go to File Under Cursor", also in the Edit Menu and bound to the shortcut <keycode>F6</keycode>), is a special form of "Go to File": It considers the word the cursor is currently on and uses it as a starting point for your search. If there is a unique match, DrJava will open that file immediately; otherwise, this feature behaves just like "Go to File".</para>
       </formalpara>
 
       <formalpara>
@@ -227,7 +251,25 @@ A recent feature is the ability to search across more than one line of text. For
 
       <para>All line numbers can also be displayed in the left margin of the Definitions Pane, using the "Show All Line Numbers" option in the "Display Options" section of the Preferences window.  The line number font can be changed in the "Fonts" section.  (See <link linkend="configuration">Configuring DrJava</link>.)</para>
 
+      <formalpara>
+ <title>Bookmarks</title>
+ <para>DrJava allows you to bookmark places in your code that you deem important. If you have a project open, the bookmarks even get saved to and loaded from the project file. By pressing <keycode>Ctrl-Shift-M</keycode> or using the "Bookmarks" item in the Tools menu, you can display the list of bookmarks in the "Bookmarks" pane. The bookmarks are sorted by document and line number.</para></formalpara>
+ <para>With the <keycode>Ctrl-M</keycode> keyboard shortcut or the "Toggle Bookmark" items from the Tools menu or the Definition pane's context menu, you can add and remove bookmarks. If no text is selected, "Toggle Bookmark" will add or remove a bookmark for the entire line the cursor is on. If text is selected, the selected text is bookmarked.</para>
+ <para>By selecting a bookmark in the "Bookmarks" pane and pressing the "Go to" button, you can jump to the location associated with the bookmark. You can also select one or more bookmarks and remove them with the "Remove" button, or clear the entire list with the "Remove All" button.</para>
+
     </section>
+
+    <section id="predictive-input">
+      <title>Predictive Input Dialogs</title>
+      <para>DrJava uses "predictive input dialogs" in several places, e.g. in the "Go to File" and "Open Java API Javadoc" features. This type of dialog presents you a list of candidates and allows you to quickly select one of them based on its name.</para>
+      <para>The top portion of the dialog displays a list of candidates that match your current choice. The text field below allows you to enter text to narrow down the list. On the bottom, there is an "OK" button to accept the current selection, a "Cancel" button to leave the dialog, and a drop-down box to choose the way candidates are selected. Matching is always done case-insensitively.</para>
+      <formalpara><title>Fragments</title>
+      <para>With this matching strategy, you can enter word fragments separated by spaces, and the list will display all the items that contain all the fragments. Example: If you enter "foo bar", the items "FooBar" and "SomeFooMooBar" will be displayed, but "Foo" or "FumBar" will not.</para></formalpara>
+      <formalpara><title>Prefix</title>
+      <para>With this strategy, only items that begin with the text entered will be displayed in the list. If you enter "foo", the items "Foo" and "FooBar" will be displayed, but "BarFoo" will not.</para></formalpara>
+      <formalpara><title>RegEx</title>
+      <para>This matching strategy allows you to enter Perl-style regular expressions (as implemented by the java.util.regex package), and the list will contain all the items that match the regular expression. As an example, the regular expression ".*" will display all items, while "[a-m].*" will display all that begin with the letters 'A' through 'M'.</para></formalpara>
+   </section>
 
   </chapter>
   
@@ -266,6 +308,10 @@ A recent feature is the ability to search across more than one line of text. For
       <title>Running a Project</title>
       <para>To run the main method of a project, select "Run Main Document" under the Project menu. This option is only available if you have specified a file containing the project's main method in the "Project Properties" dialog in the Project menu.</para>
      </formalpara>
+     <formalpara>
+      <title>Create Jar File from Project</title>
+      <para>You can create a jar file that contains the project's source code, its compiled class files, or both by selecting "Create Jar File from Project" in the Project menu. This will display a dialog that allows you to specify the jar file's location and what gets put into it. If you are placing class files into the jar file, you can make the jar file executable by selecting "Make executable" and entering the main class.</para></formalpara>
+      <para>Note that you can only put class files into the jar file if you have specified a build directory in the <link linkend="project-properties">Project Properties</link> and have recently compiled the project.</para>
     </section>
     <section id="tree-view">
      <title>Tree View</title>
@@ -290,25 +336,36 @@ A recent feature is the ability to search across more than one line of text. For
       </para>
      </formalpara>
      <formalpara>
-      <title>Auxiliary Files</title>
-      <para>Auxiliary Files are files that are located outside of the project directory and are explicitly added to the project. Auxiliary Files are compiled and tested when the project is compiled or tested. Also, the list of Auxiliary Files is saved to the project file when the project is saved.
-            Auxiliary Files will also be automatically opened when the project is opened. Only a file in External Files can be moved to the Auxiliary Files branch.</para>
+      <title>Included External Files</title>
+      <para>Included External Files are files that are located outside of the project's root directory and are explicitly added to the project. Included External Files are compiled and tested when the project is compiled or tested. Also, the list of Included External Files is saved to the project file when the project is saved.
+            Included External Files will also be automatically opened when the project is opened. Only a file in External Files can be moved to the Included External Files branch.</para>
      </formalpara>
-     <para>To add an External File to the Auxiliary Files branch, right click the filename in the External Files list and select the "Move To Auxiliary" option.
-           To remove a file from Auxiliary Files, right click the filename and select the "Move To External" option.
+     <para>To add an External File to the Included External Files branch, right click the filename in the External Files list and select the "Include With Project" option.
+           To remove a file from the Included External Files, right click the filename and select the "Do Not Include With Project" option.
      </para>
     </section>
   
   <section id="project-properties">
   <title>Project Properties</title>
   <formalpara>
-  <title>Built directory</title>
-  <para>The project facility allows the user to set a built directory where class files will be compiled. This gives the user the freedom to have separate source file and built file directories. To set a project's built directory, open a project, then select "Project Properties" in the project menu.</para>
+   <title>Project Root</title>
+   <para>The project root specifies the directory that corresponds to the default package of the project. All project files should be located in this directory or one of its subdirectories.</para>
   </formalpara>
-  <para>To clean the built directory, open the Project Menu and click "Clean Built Directory." This will remove all .class files and empty directories in the built directory.</para>
   <formalpara>
-  <title>Main document</title>
-  <para>Additionally, the project facility allows the user to specify a "Main Document" file for your project. When "Run Main Document" is then selected in the Project menu, the main method of the "Main Document" file specified will be executed.</para>
+  <title>Build Directory</title>
+  <para>The project facility allows the user to set a build directory where class files will be compiled. This gives the user the ability to separate source and class files. This setting is required for the "Clean Build Directory" and "Create Jar from Project" features to work correctly.</para>
+  </formalpara>
+  <para>To clean the build directory, open the Project Menu and click "Clean Build Directory." This will remove all .class files and empty directories in the build directory.</para>
+  <formalpara>
+   <title>Working Directory</title>
+   <para>The working directory corresponds to "current" directory of the project, i.e. <command>new File(".")</command> or <command>System.getProperty("user.dir")</command>.</para></formalpara>
+  <formalpara>
+  <title>Main Document</title>
+  <para>The project facility allows the user to specify a "Main Document" file for your project. When the "Run Project" button is pressed or the "Run Main Document of Project" is then selected in the Project menu, the main method of the "Main Document" file specified will be executed. If no "Main Document" is specified, the "Run Main Document of Project" item will not be available, and the "Run Project" button is replaced by the "Run" button that runs the main method of the current document.</para>
+  </formalpara>
+  <formalpara>
+   <title>Extra Classpath</title>
+   <para>In the "Extra Classpath" area, you may add additional directories or jar files to the project's classpath.</para>
   </formalpara>
   </section>
   
@@ -354,6 +411,8 @@ Welcome to DrJava.
     <programlisting>java MyClass arg1 arg2</programlisting>
     <para>Note that this feature does not support passing special flags or arguments to the JVM itself, as is supported on the command line.</para>
     <para>Another shortcut for this feature is the "Run Document's Main Method" command, which can be found in both the Tools menu and the context menu of the document list.  This command will simply insert the appropriate <literal>"java MyClass"</literal> text into the Interactions Pane to run the current class's main method.</para>
+
+    <para>DrJava also displays either a "Run Project" or a "Run" button in its toolbar, depending on whether you have specified a "Main Document" for the project or not, respectively. "Run Project" will run the main method of the project's "Main Document", while "Run" while execute the main method of the currently open document.</para>
 
     <formalpara>
       <title>Keyboard Shortcuts</title>
@@ -668,9 +727,15 @@ learning tool.</para>
 
     <section id="debug-breakpoints">
       <title>Breakpoints</title>
-      <para>Once DrJava is in Debug Mode, you can set a breakpoint on almost any line of code in a source file in the Definitions Pane, using either the "Toggle Breakpoint on Current Line" command in the Debugger menu or the "Toggle Breakpoint" command on the context (right-click) menu in the Definitions Pane.  When a breakpoint is set, the line will be highlighted in red and an entry will appear in the Breakpoints tab of the Debug Panel.  A breakpoint is reached when a method is called in the Interactions Pane and the control flow reaches a line of code where a breakpoint has been set.  When this happens, DrJava highlights the line in bright blue and prints a message to the Interactions Pane.  DrJava then displays a new prompt in the Interactions Pane, allowing you to interact with the suspended program until it is resumed (see <link linkend="debug-interactions">Interactions at a Breakpoint</link>).</para>
+      <para>You can set a breakpoint on almost any line of code in a source file in the Definitions Pane, using either the "Toggle Breakpoint on Current Line" command in the Debugger menu, the "Toggle Breakpoint" command on the context (right-click) menu in the Definitions Pane, or by pressing <keycode>Ctrl+B</keycode>.  When a breakpoint is set, the line will be highlighted in red and an entry will appear in the "Breakpoints" panel, which can be displayed using the "Breakpoints" command in the Debugger menu, or by pressing <keycode>Ctrl+Shift+B</keycode>. When a method is called in the Interactions Pane and the control flow reaches a line of code where a breakpoint has been set, DrJava suspends the execution of the program, highlights the line in bright blue and prints a message to the Interactions Pane.  DrJava then displays a new prompt in the Interactions Pane, allowing you to interact with the suspended program until it is resumed (see <link linkend="debug-interactions">Interactions at a Breakpoint</link>). Breakpoints are considered part of a project and are therefore saved to and loaded from a project file.</para>
 
       <para>When setting breakpoints, it is important to remember that only lines with actual executable code can be used.  Blank lines and comments will never trigger a breakpoint, even if the line is highlighted in red.  (Note that we do not yet support breakpoints on method contracts either, although this will be supported in a later version of DrJava.)</para>
+
+      <formalpara>
+       <title>Breakpoints Panel</title>
+       <para>The "Breakpoints" panel can be displayed using the "Breakpoints" command in the Debugger menu, or by pressing <keycode>Ctrl+Shift+B</keycode>. It lists all breakpoints that have been set in the currently open documents, sorted by document and line number. There are several buttons on the right side of the panel that help you manage the breakpoints:</para></formalpara>
+       <para>You can select one or more breakpoints and press the "Enable" or "Disable" button to enable or disable the selected breakpoints. When a breakpoint is disabled, it remains set, but the program will not be suspended when the breakpoint is reached. This is useful if you may need the breakpoint again later, but want the program to ignore it right now.</para>
+       <para>If you select exactly one breakpoint, you can use the "Go to" button to jump to the location associated with the breakpoint.</para>      <para>With the "Remove" button, you can remove one or more breakpoints that you have selected. You may also clear the entire list using the "Remove All" button.</para>
 
       <formalpara>
  <title>Debugging JUnit Tests</title>
@@ -713,11 +778,11 @@ learning tool.</para>
 
     <section id="debug-panel">
       <title>Debug Panel</title>
-      <para>The Debug Panel appears when Debug Mode is on, with several informational tabs and buttons.  DrJava displays all current breakpoints in a tree organized by document in the Breakpoints tab, and it displays currently watched fields and variables with their values in a table in the Watches tab.  The Stack tab displays the current stack trace any time a method has been suspended, and the Threads tab shows all current threads along with their status at that point in time.  Most of these tabs provide context (right-click) menus for easy access to related commands, such as scrolling to a breakpoint or a line in a stack frame, or resuming a suspended thread.</para>
+      <para>The Debug Panel appears when Debug Mode is on, with several informational tabs and buttons.  DrJava displays currently watched fields and variables with their values in a table in the Watches tab.  The Stack tab displays the current stack trace any time a method has been suspended, and the Threads tab shows all current threads along with their status at that point in time.  Most of these tabs provide context (right-click) menus for easy access to related commands, such as scrolling to a line in a stack frame, or resuming a suspended thread.</para>
 
       <formalpara>
  <title>Watching Fields and Variables</title>
- <para>You can watch the values of class fields and local variables by entering the field or variable name into a row in the Watches table.  Any time a method is suspended (eg. after a breakpoint or step), the current value of the field or variable (if any) is displayed.  Watches can be removed from the table by deleting the name and pressing Enter.  You cannot enter expressions that need to be evaluated into the watch table.  For example, "s.length" is not a valid watch entry.  Type expressions like these into the Interactions Pane to see their values.</para>
+ <para>You can watch the values of class fields and local variables by entering the field or variable name into a row in the Watches table.  Any time a method is suspended (e.g. after a breakpoint or step), the current value of the field or variable (if any) is displayed.  Watches can be removed from the table by deleting the name and pressing Enter.  You cannot enter expressions that need to be evaluated into the watch table.  For example, "s.length" is not a valid watch entry.  Type expressions like these into the Interactions Pane to see their values.</para>
       </formalpara>
     </section>
   </chapter>
@@ -806,6 +871,13 @@ public class Student {
       <para>You can configure many aspects of how Javadoc files are generated.  Most prominent is the ability to hide fields and methods below a particular access level (eg. <literal>public</literal> or <literal>protected</literal>).  By default, no private fields or methods are shown.  Other options include specifying a URL to link to the Java library API (which defaults to Sun's own website), specifying a default destination directory for all Javadoc files, and specifying any custom parameters to pass to the Javadoc tool itself.  Finally, for programs with many nested packages (folders), DrJava provides an option to always generate Javadoc for all packages in the program, rather than just the sub-packages of the open documents.</para>
     </formalpara>    
 
+    </section>
+
+    <section id="java-api-javadoc">
+ <title>Java API Javadoc</title>
+ <para>If you have access to the Java API javadoc pages, DrJava allows you to quickly open a javadoc page for a class: With the "Open Java API Javadoc" item in the Tools menu (bound to <keycode>Shift+F6</keycode>), you can open a <link linkend="predictive-input">predictive input dialog</link> populated with all Java API classes. After you have selected a class, DrJava will try to open the corresponding javadoc page in a browser.</para>
+ <para>The "Open Java API Javadoc for Word Under Cursor" feature, also in the Tools menu and bound to <keycode>Ctrl+Shift+F6</keycode>, looks at the word the cursor is on and uses it as a starting point for the search. If there is a unique match, then DrJava will open the javadoc page immediately; otherwise this feature works just like "Open Java API Javadoc".</para>
+ <para>Note that this feature requires access to the Java API javadoc pages, e.g. on the internet. DrJava will use the version and location set in the "Javadoc" portion of the "Preferences" dialog (see <link linkend="configuration">Configuring DrJava</link>) and access that location the first time this feature is used during a DrJava session. You can use Java API javadoc pages on your local system by entering a URL beginning with "file://" followed by the directory the allclasses-frame.html file is in. You may also have to set the right values for the "Web Browser" and "Web Browser Command" settings in the "Resource Locations" portion of the "Preferences" dialog.</para>
     </section>
 
   </chapter>
@@ -935,7 +1007,36 @@ public class Student {
      <para>Whether to save the position and size of the DrJava window between sessions.</para>
    </listitem>
  </varlistentry>
- 
+  
+ <varlistentry>
+   <term>Save "xxx" Dialog Postion (several choices for "xxx": <varname>dialog.clipboardhistory.store.position = true</varname>, <varname>dialog.gotofile.store.position = true</varname>, <varname>dialog.openjavadoc.store.position = true</varname>, <varname>dialog.completeword.store.position = true</varname>, <varname>dialog.jaroptions.store.position = true</varname>)</term>
+   <listitem>
+     <para>Whether to save the position and size of the indicated dialog between DrJava sessions.</para>
+   </listitem>
+ </varlistentry>
+  
+ <varlistentry>
+   <term>Reset "xxx" Dialog Postion and Size (several choices for "xxx")</term>
+   <listitem>
+     <para>By pressing this button, you can reset the position and size of the indicated dialog to its default value. This is useful if the dialog somehow appeared outside the screen and is not accessible, e.g. when switching from a dual-screen computer to a single-screen computer.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Size of Clipboard History (<varname>clipboardhistory.store.size = 10</varname>)</term>
+   <listitem>
+     <para>How many entries are saved in the clipboard history.</para>
+   </listitem>
+ </varlistentry>
+
+
+ <varlistentry>
+   <term>Scan Class Files For Auto-Completion After Each Compile (<varname>dialog.completeword.scan.class.files = false</varname>)</term>
+   <listitem>
+     <para>When this option is enabled, a project is open, and a build directory has been set, DrJava will scan all class files after each compile and add their names to the auto-completion list. This allows DrJava to auto-complete the class names of all user classes, not just the names of the open document. This option requires additional disk accesses and therefore slows down compiles.</para>
+   </listitem>
+ </varlistentry>
+
       </variablelist>
 
 
@@ -1063,9 +1164,30 @@ public class Student {
  </varlistentry>
 
  <varlistentry>
+   <term>Bookmark Color (<varname>bookmark.color = #00FF00</varname>)</term>
+   <listitem>
+     <para>Used as the highlight color for bookmarks.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Find Results Color 1/2/3/4 (<varname>find.results.color1 = #FF9933</varname>, <varname>find.results.color2 = #30C996</varname>, <varname>find.results.color3 = #30FCFC</varname>, <varname>find.results.color4 = #FF66CC</varname>)</term>
+   <listitem>
+     <para>Used as the highlight color for find results.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
    <term>Debugger Breakpoint Color (<varname>debug.breakpoint.color = #FF0000</varname>)</term>
    <listitem>
-     <para>Used as the highlight color for breakpoints set from the debugger.</para>
+     <para>Used as the highlight color for breakpoints.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Disabled Debugger Breakpoint Color (<varname>debug.breakpoint.disabled.color = #800000</varname>)</term>
+   <listitem>
+     <para>Used as the highlight color for disabled breakpoints.</para>
    </listitem>
  </varlistentry>
 
@@ -1108,6 +1230,13 @@ public class Student {
    <term>Debug Message Color (<varname>debug.message.color = #0000B2</varname>)</term>
    <listitem>
      <para>Used as the color for text displayed by the debugger.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>DrJava Errors Button Background Color (<varname>rjava.errors.button.color = #FF0000</varname>)</term>
+   <listitem>
+     <para>Used as background color for the "DrJava Errors" button that is displayed in case of an internal DrJava error.</para>
    </listitem>
  </varlistentry>
 
@@ -1235,6 +1364,7 @@ public class Student {
    <term>Java Version for Javadoc Links (<varname>javadoc.link.version = (JDK Version)</varname>)</term>
    <listitem>
      <para>Specifies which URL to use when generating links to Java library classes.  Legal values are "1.3", "1.4", and "none" if no links to Java library classes are desired.  (This option defaults to the version of the user's JDK.)</para>
+     <para>This setting also controls which of the URLs below is used for the <link linkend="java-api-javadoc">"Open Java API Javadoc"</link> feature.</para>
    </listitem>
  </varlistentry>
 
@@ -1318,10 +1448,24 @@ public class Student {
    </listitem>
  </varlistentry>
 
+ <varlistentry>
+   <term>Prompt Before Cleaning Build Directory (<varname>prompt.before.clean = true</varname>)</term>
+   <listitem>
+     <para>Whether to display a confirmation message before cleaning the build directory of a project.</para>
+   </listitem>
+ </varlistentry>
+
         <varlistentry>
    <term>Automatically Save Before Compiling (<varname>save.before.compile = false</varname>)</term>
    <listitem>
      <para>Whether to automatically save all files each time a Compile command is chosen.</para>
+   </listitem>
+ </varlistentry>
+
+        <varlistentry>
+   <term>Automatically Compile Before Testing (<varname>compile.before.junit = false</varname>)</term>
+   <listitem>
+     <para>Whether to automatically compile before running JUnit tests.</para>
    </listitem>
  </varlistentry>
 
@@ -1353,6 +1497,19 @@ public class Student {
    </listitem>
  </varlistentry>
 
+        <varlistentry>
+   <term>Warn if File's Path Contains a '#' Symbol (<varname>warn.path.contains.pound = true</varname>)</term>
+   <listitem>
+     <para>Whether DrJava should warn the user if the file being saved has a path that contains a '#' symbol. Users cannot use such files in the Interactions Pane because of a bug in Java.</para>
+   </listitem>
+ </varlistentry>
+
+        <varlistentry>
+   <term>Show a notification window when the first DrJava error occurs (<varname>dialog.drjava.error.popup.enabled = true</varname>)</term>
+   <listitem>
+     <para>Whether to show a popup dialog when the first internal DrJava error occurs. If this option is not selected, DrJava will try to continue quietly and only display the "DrJava Errors" button (See <link linkend="drjava-errors">DrJava Errors</link>).</para>
+   </listitem>
+ </varlistentry>
       </variablelist>
 
       
@@ -1373,7 +1530,7 @@ public class Student {
  <varlistentry>
    <term>Working Directory (<varname>working.directory = ""</varname>)</term>
    <listitem>
-     <para>Specifies the default directory for DrJava to use when starting up.  The open and save dialogs will start here, rather than in the user's current directory, if this option is set.  The Interactions classpath will also include this directory.</para>
+     <para>Specifies the "current" directory for the Interactions pane, i.e. <command>new File(".")</command> or <command>System.getProperty("user.dir")</command> when not in project mode (when a project is open, this setting is superseded by the "Working Directory" setting in the <link linkend="project-properties">Project Properties</link>). The open and save dialogs will start here if this option is set. The Interactions classpath will also include this directory.</para>
    </listitem>
  </varlistentry>
  
@@ -1434,6 +1591,12 @@ public class Student {
    </listitem>
  </varlistentry>
    
+  <varlistentry>
+   <term>Require test classes in projects to end in "Test" (<varname>force.test.suffix = false</varname>)</term>
+   <listitem>
+     <para>Whether to require that JUnit test classes in projects end in "Test". If this is enabled, classes that do not end in "Test" will not be considered JUnit tests when in project mode.</para>
+   </listitem>
+ </varlistentry>
 
   <varlistentry>
    <term>JVM Args (<varname>jvm.args = ""</varname>)</term>
@@ -1441,7 +1604,14 @@ public class Student {
      <para>Command line arguments used when creating the InterpreterJVM.  This is an advanced option because if you use invalid arguments, the InterpreterJVM may not start up successfully.  If this happens, remove the value stored in Preferences.</para>
    </listitem>
   </varlistentry>
- 
+
+  <varlistentry>
+   <term>Put the focus in the definitions pane after find/replace (<varname>find.replace.focus.in.defpane = false</varname>)</term>
+   <listitem>
+     <para>Whether to put the focus in the Definitions pane after using find/replace. If this option is not enabled, the focus will remain in the Find/Replace pane.</para>
+   </listitem>
+ </varlistentry>
+
       </variablelist>
       
     </section>      
@@ -1535,6 +1705,44 @@ public class Student {
 
       </orderedlist>
     </section>
+  </appendix>
+
+
+  <!-- ---- Appendix: DrJava Errors ---- -->
+  <appendix id="drjava-errors">
+    <title>DrJava Errors</title>
+    <para>Even though we try hard, it is an unfortunate reality that DrJava contains errors. This appendix describes how DrJava will most likely react in case of an error, and how you can help improve DrJava if you encounter an error.</para>
+
+    <formalpara><title>How DrJava Reacts</title>
+    <para>When an internal DrJava error occurs, DrJava puts information about the error in a list and displays a "DrJava Errors" toolbar button that is normally hidden. You can view this list by clicking on that button or by selecting the "DrJava Errors" command in the Help menu.</para></formalpara>
+    <para>In the "DrJava Errors" dialog, you can use the "Previous" and "Next" buttons to browse the list of errors, or press the "Copy This Error" button to copy the information about the currently displayed error to the clipboard. This information is useful to us in finding the cause of the error. The "Dismiss" button clears the list of errors,  hides the "DrJava Errors" button, and closes the window. The "Close" button leaves the list as it is and only closes the window.</para>
+    <para>Optionally, DrJava may also display a popup notification window when the first error occurs. You may disable this popup under "Notifications" in the Preferences window (see <link linkend="configuration">Configuring DrJava</link>). In most cases, an internal DrJava error will not be fatal, and most likely you will be able to continue working even without restarting DrJava. Therefore, DrJava does not display this popup for every error, but only when the list of errors is empty, and then an error occurs. This is to inform you that DrJava might be unstable now.</para>
+    <para>The popup window contains a "Close" button to close the window and continue working, and a "More Information" button that will open up the "DrJava Errors" dialog. It also provides a checkbox labeled "Keep showing this notification" that allows you to disable the popup; disabling this checkbox does the same as disabling the "Show a notification window when the first DrJava error occurs" option in the Preferences window (see <link linkend="configuration">Configuring DrJava</link>).</para>
+
+    <formalpara><title>Submitting a Bug Report</title>
+    <para>If you encounter an error, we would be thrilled if you helped us improve DrJava by submitting a bug report on our SourceForge site at <ulink url="http://sourceforge.net/projects/drjava/">http://sourceforge.net/projects/drjava/</ulink></para></formalpara>
+    <para>To submit a bug report, please follow these instructions:</para>
+
+   <orderedlist>
+     <listitem><para>Point your favorite browser to the URL above.</para></listitem>
+     <listitem><para>Click on the link labeled "Bugs" (it's in the long row of links: "Summary | Admin | Home Page | Tracker | Bugs | ...").</para></listitem>
+     <listitem><para>Optional: If you have the time, please browse through the list of bugs to see if the error you encountered has already been reported.</para></listitem>
+     <listitem><para>Click on the link labeled "Submit New" (it's on the left, below the long row of links).</para></listitem>
+     <listitem><para>Optional: If you have a SourceForge account, please log in before submitting the bug report. This is not necessary, but it enables us to communicate with you if we need more information.</para></listitem>
+     <listitem><para>Please enter a short description in the "Summary" field, and a more detailed description that includes the information from the "DrJava Errors" window in the "Detailed Description" field. Try to be as specific as you can. Here's a list of questions you might want to consider in your description:</para>
+       <itemizedlist>
+         <listitem><para>What operating system are you using?</para></listitem>
+         <listitem><para>What version of the Java JDK are you using (1.4.2, 1.5.0, etc.)? Do you have multiple versions of the JDK (or maybe the JRE) installed? </para></listitem>
+         <listitem><para>Did you have a project open, or where you using just a bunch of files not part of a project?</para></listitem>
+         <listitem><para>What were you doing just before the error occurred? Were you compiling, saving a file, debugging, using find/replace, etc.?</para></listitem>
+         <listitem><para>What happened after the error occurred? Could you continue with your work, or was it so bad that you had to quit DrJava?</para></listitem>
+       </itemizedlist>
+     </listitem>
+     <listitem><para>Press the "Submit" button on the bottom of the page</para></listitem>
+   </orderedlist>
+
+   <para>That's it! Thank you for helping us make DrJava better!</para>
+
   </appendix>
 
   <!-- ---- Appendix: Indenting Files from the Command Line ---- -->
