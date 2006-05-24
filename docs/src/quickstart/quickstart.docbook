@@ -250,6 +250,15 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	<listitem><formalpara>
 	<title>Find Previous:</title> <para>Finds the previous instance. Switches the label of the Find box to "Find Prev", indicating the direction of the next search. </para>
 	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Find All:</title> <para>Find all occurrences of the search string. This opens a new "Find: word" pane, where "word" is replaced with the search string. In this pane, view all found instances and jump to their locations in the text. You can have as many "Find All" panes as you like open concurrently. The "Find All" tool also automatically underlines the occurrences. In the screenshot below, the user searched for the word "System":
+        <mediaobject>
+       		<imageobject>
+       		<imagedata fileref="FindAll.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject></para>
+	</formalpara></listitem>
 	
 	<listitem><formalpara>
 	<title>Replace/Find Next:</title> <para> Replaces the current instance with your replace text and then finds the next instance. Switches the label of the Find box to "Find Next", indicating the direction of the next search </para>
@@ -330,7 +339,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
     <section id="thedebuger">
       <title>The Debugger</title>
-      <para>The debugger allows you to step through the execution of a program and stop at any point you choose so that you can track down bugs in your code.  What makes our debugger an unusually powerful tool is that it allows you to modify the values of fields and variables <emphasis>while debugging!</emphasis>.  First, we will explain a little bit about how the debugger works in general, and then we will explain how you can use the Interactions Pane to modify field and variable values during runtime and thus more quickly zero in on problems in your code.</para>
+      <para>The debugger allows you to step through the execution of a program and stop at any point you choose so that you can track down bugs in your code.  What makes our debugger an unusually powerful tool is that it allows you to modify the values of fields and variables <emphasis>while debugging</emphasis>!  First, we will explain a little bit about how the debugger works in general, and then we will explain how you can use the Interactions Pane to modify field and variable values during runtime and thus more quickly zero in on problems in your code.</para>
 
 	<para>To enable the debugger, select "Debugger, Debug Mode".  This will launch the debug panel in the lower part of DrJava, right above the Interactions Pane.</para>
 
@@ -342,7 +351,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<formalpara>
 	   <title>Debug Panel:</title>
-		<para>The Debug Panel has four tabs to help you track control flow in your program.  These tabs are labeled Watches, Breakpoints, Stack, and Threads.</para>
+		<para>The Debug Panel has three tabs to help you track control flow in your program.  These tabs are labeled Watches, Stack, and Threads.</para>
 	</formalpara>
 
 	<itemizedlist mark=opencircle>
@@ -352,18 +361,6 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	<mediaobject>
        		<imageobject>
        		<imagedata fileref="VariableWatch2.jpg" format="jpg" scale=50 scalefit="1">
-       		</imageobject>
-     	</mediaobject>
-	</listitem>
-
-	<listitem><formalpara>
-		<title>Breakpoints:</title>
-		<para> This is a tree displaying the files that contain breakpoints and the corresponding line numbers.  Double-click a breakpoint in the tree to center the screen on the corresponding code.  Right-click on a breakpoint to scroll to it or to remove it. </para>
-		</formalpara>
-
-	<mediaobject>
-       		<imageobject>
-       		<imagedata fileref="BreakpointWatch.jpg" format="jpg" scale=50 scalefit="1">
        		</imageobject>
      	</mediaobject>
 	</listitem>
@@ -393,8 +390,20 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</listitem>
 	</itemizedlist>
 	
+<formalpara><title>Breakpoints</title>
+        <para>Another important part of the debugger is the breakpoints panel. Even when the debugger is not enabled, you can set breakpoints using the <keycode>Ctrl+B</keycode> shortcut or by selecting the "Toggle Breakpoint" command from the Debugger menu or the context menu. This will highlight the current line in red, and the debugger will stop the running program when it reaches this line. To remove a breakpoint again, place the cursor on the same line and press <keycode>Ctrl+B</keycode> again.</para></formalpara>
+        <para>To view all the breakpoints you have set and to navigate between them, you can open the Breakpoints Panel by pressing <keycode>Ctrl+Shift+B</keycode> or selecting the "Breakpoints" command from the Debugger menu. In this panel, all currently set breakpoints are listed, sorted by document and line number. To move the cursor to the location of a breakpoint, double-click on one of the entries in the Breakpoints panel, or select it and press the "Go to" button.</para>
+        <para>You can also select one or more breakpoints and use the "Enable" or "Disable" button to temporarily enable or disable the selected breakpoints. If a breakpoint is disabled, it remains set, but the program will not stop there. This is useful if you may need a breakpoint again later, but want it ignored right now.</para>
+        <para>With the "Remove" button, you can remove one or more selected breakpoints. The "Remove All" button clears the entire list of breakpoints.</para>
+        <para>Breakpoints are considered part of a project and are therefore saved to and restored from a project file.</para>
+
+ 	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="BreakpointsPanel.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
 	</section>
- 
+
 <section id="usingDebugger">
 <title>Using the Debugger:</title>
   <para>To use the debugger, you must first set a <emphasis>breakpoint</emphasis> on the line(s) of code on which you want execution to stop.  To do this, right click on the line of code that you want the breakpoint on and select Toggle Breakpoint from the menu.</para>
@@ -412,7 +421,15 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
        		</imageobject>
      	</mediaobject>
 
-<para>Once you have set the breakpoint(s), enter a statement in the Interactions Pane that will run the method containing the breakpoint(s).  Once execution reaches a breakpoint, it will halt, awaiting input from you.  </para>
+<para>Once you have set the breakpoint(s), enable the debugger by pressing <keycode>Ctrl+D</keycode> or invoking the "Debug Mode" command of the Debugger menu.</para>
+
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="EnableDebugMode.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+<para>Now enter a statement in the Interactions Pane that will run the method containing the breakpoint(s).  Once execution reaches a breakpoint, it will halt, awaiting input from you.  </para>
 
 	<mediaobject>
        		<imageobject>
@@ -597,7 +614,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<section id="project-running">
 	<title>Running a Project</title>
-	<para>To run the main method of a project, select "Project, Run Main Document."  This will load the class specified as the project's main method in Project Properties, and run its main method.  If you have not specified the file to load in Project Properties, this option is grayed out</para>
+	<para>To run the main method of a project, select "Project, Run Main Document."  This will load the class specified as the project's main document in Project Properties, and run its main method.  If you have not specified the file to load in Project Properties, this option is grayed out</para>
 	
 
 	<mediaobject>
@@ -605,6 +622,8 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
      	<imagedata fileref="ProjectRunMainDocument.jpg" format="jpg" scale=50 scalefit="1">
        	</imageobject>
      	</mediaobject>
+
+        <para>If you have configured a main document, then DrJava will also show a "Run Project" toolbar button. If you have not specified a file as main document, a "Run" button is shown instead that runs the main method of the currently shown document.</para>
 	
 	</section>
 
@@ -625,13 +644,28 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	<para>The Project Properties dialog box allows you to set two optional properties to better utilize the project facility.  To access the Project Properties dialog, select "Project, Project Properties".</para>
 
 	<formalpara>
+		<title>Project Root:</title>
+		<para>This is the directory where the source files are located. It corresponds to the default package of your project. If no directory is entered, the directory containing the project file is assumed.</para>
+	</formalpara>
+
+	<formalpara>
 		<title>Build Directory:</title>
 		<para>Set this if you want your compiled files to be compiled to a directory other than the source directory.  This is often useful if your project is large or you want to be able to clean the build directory (see the option on the Project menu).</para>
+	</formalpara>
+
+	<formalpara>
+		<title>Working Directory:</title>
+		<para>DrJava will use this directory as "current" directory for the Interactions pane and the user program.</para>
 	</formalpara>
 
 	<formalpara>	
 		<title>Main Document:</title>
 		<para>This allows you to specify the class that holds the main method for the project.  When this is set, you can use "Project, Run Main Document" to launch the program.</para>
+	</formalpara>
+
+	<formalpara>	
+		<title>Extra Classpath:</title>
+		<para>In this section you can list directories or JAR files that should be included on the classpath while you are working with this project. The classes added this way are available both in the Interactions pane and when compiling.</para>
 	</formalpara>
 
 	<mediaobject>
@@ -663,11 +697,6 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	<title>Tools.jar Location:</title> 
 		<para>The directory of your tools.jar file which has the compiler and debugger. This file is usually created during the installation of the Java JDK.</para>
 	</formalpara></listitem>
-
-	<listitem><formalpara>
-	<title>JSR-14 and JSR-14 Collections Path:</title>
-	<para>The JSR-14 jar is the location of the JSR14 compiler, while the JSR-14 Collections path is a collection of the generified collection classes, such as Vector<?>.  If you are not using the JSR14 compiler, you can just leave these blank.</para>
-	</formalpara></listitem>
 	
 	<listitem><formalpara>
 	<title>Extra Classpath:</title>
@@ -681,6 +710,15 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
        		<imagedata fileref="ResourceLocation.jpg" format="jpg" scale=50 scalefit="1">
        		</imageobject>
      	</mediaobject>	
+
+        <para>Older versions of DrJava also had the following options:</para>
+
+	<itemizedlist>
+	<listitem><formalpara>
+	<title>JSR-14 and JSR-14 Collections Path:</title>
+	<para>The JSR-14 jar is the location of the JSR14 compiler, while the JSR-14 Collections path is a collection of the generified collection classes, such as Vector<?>.  If you are not using the JSR14 compiler, you can just leave these blank.</para>
+	</formalpara></listitem>
+	</itemizedlist>
 
 	</section>
 
@@ -705,9 +743,35 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</formalpara></listitem>
 
 	<listitem><formalpara>
-		<title>Window Size and Position:</title>
+		<title>Save Window Size and Position:</title>
 		<para>Check this if you want the size and position of the main DrJava window to be saved on exit.</para>
 	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Save "xxx"Dialog Position:</title>
+		<para>Check this if you want the size and position of the "xxx" dialog to be saved on exit (different choices for "xxx").</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Reset "xxx" Dialog Position and Size:</title>
+		<para>Press this button to reset the size and position of the "xxx" dialog (different choices for "xxx"). This can be useful if the dialog was displayed outside the screen for some reason and is not accessible.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Size of Clipboard History:</title>
+		<para>DrJava puts all text that you copy or cut out of text in a <keycode>Ctrl+Shift+V</keycode>, you can show the entries of the history and paste one of its items. This setting determines the size of the history.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Display Fully-Qualified Class Names in "Go to File" Dialog:</title>
+		<para>If this option is checked, the "Go to File" dialog displays both the simple and the fully-qualified class name (i.e. both MyClass and foo.bar.MyClass). This sometimes makes navigation easier, but it may increase the time it takes to display the "Go to File" dialog.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Scan Class Files For Auto-Completion After Each Compile:</title>
+		<para>DrJava can auto-complete the names of user classes. If this option is checked, DrJava will scan all class files that were created after each compile to obtain the names, even of inner classes. IF this option is not checked, DrJava can only auto-complete the names of the documents that are open. Selecting this option slows down compiles.</para>
+	</formalpara></listitem>
+
 	</itemizedlist>
 
 		<mediaobject>
@@ -837,8 +901,9 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 	<listitem><formalpara>
 		<title>Java Version for Javadoc Links and URL:</title>
-		<para>Set the version to whatever version of java your code relies on, and maek sure the corresponding URL is set appropriately.  Because most Javadoc documentation references library files in the Java API, it is important to specify which version of the API to link to.  </para>
-	</formalpara></listitem>
+		<para>Set the version to whatever version of java your code relies on, and maek sure the corresponding URL is set appropriately.  Because most Javadoc documentation references library files in the Java API, it is important to specify which version of the API to link to.</para></formalpara>
+                <para>This option also controls which URL is used to access the Javadoc pages for the Java API.</para>
+	</listitem>
 
 	<listitem><formalpara>
 		<title>Default Desination Directory:</title>
@@ -939,11 +1004,17 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 		</formalpara></listitem>
 	
 		<listitem><formalpara>
-			<title>JVM Args for Interactions</title> 
-			<para>Allows you to pass arguments to the JVM that controls the Interactions Pane.</para>
+			<title>Put the focus in the definitions pane after find/replace.</title> 
+			<para>If this option is checked, the focus will be put in the definitions pane after using "Find". If this is not checked, then the focus will remain in the Find/Replace tab.</para>
 		</formalpara></listitem>
 		</itemizedlist>
 	</listitem>
+
+	
+		<listitem><formalpara>
+			<title>JVM Args for Interactions</title> 
+			<para>Allows you to pass arguments to the JVM that controls the Interactions Pane.</para>
+		</formalpara></listitem>
 	</itemizedlist>
 
 		<mediaobject>
