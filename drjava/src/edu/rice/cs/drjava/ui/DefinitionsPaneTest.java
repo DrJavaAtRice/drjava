@@ -610,6 +610,8 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
     
     System.gc();
     System.runFinalization();
+    System.gc();
+    System.runFinalization();
 //    System.out.println("Current: " + _frame.getCurrentDefPane().hashCode());
     
 //    System.out.println("Foo");

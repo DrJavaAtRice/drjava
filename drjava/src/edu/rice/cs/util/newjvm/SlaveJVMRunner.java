@@ -116,7 +116,7 @@ public final class SlaveJVMRunner {
         //get the classloader
         IRemoteClassLoader remoteLoader = null;
         FileInputStream fstream = new FileInputStream(args[2]);
-        ObjectInputStream ostream = new ObjectInputStream(fstream);
+        ObjectInputStream ostream = new ObjectInputStream(new BufferedInputStream(fstream));
         _log.log("Slave JVM reading remote loader object");
         remoteLoader = (IRemoteClassLoader) ostream.readObject();
         _log.log("remote loader read");
@@ -130,7 +130,7 @@ public final class SlaveJVMRunner {
       // get the master remote
       _log.log("Slave JVM reading the remote master object");
       FileInputStream fstream = new FileInputStream(args[0]);
-      ObjectInputStream ostream = new ObjectInputStream(fstream);
+      ObjectInputStream ostream = new ObjectInputStream(new BufferedInputStream(fstream));
       MasterRemote master = (MasterRemote) ostream.readObject();
       _log.log("remote master read");
       fstream.close();
@@ -143,8 +143,8 @@ public final class SlaveJVMRunner {
         
         // Must export slave object to RMI so we can pass stub to the master
         _log.log("Slave JVM creaing RMI stub for slave class instance " + slave);
-        SlaveRemote stub = (SlaveRemote) UnicastRemoteObject.exportObject(slave);  // What does this do?
-        _log.log("stub for slave class exported");
+        SlaveRemote stub = (SlaveRemote) UnicastRemoteObject.exportObject(slave);  
+        _log.log("Exported stub " + stub + " for " + slaveClass);
         
         // Debug: check that the IP address is 127.0.0.1
         //javax.swing.JOptionPane.showMessageDialog(null, stub.toString());

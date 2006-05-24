@@ -155,141 +155,139 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       
       _startupInProgress = true;
       _stub = null;
-      
-      /**********************************************
-       * First, we we export ourselves to a file... *
-       **********************************************/
-      
-      Thread t = new Thread(_exportMasterThreadName) {
-        public void run() {
-          _log.log(AbstractMasterJVM.this + " starting creation of RMI stub for AbstractMasterJVM");
-          try { _stub = UnicastRemoteObject.exportObject(AbstractMasterJVM.this); }
-          
-          // Debug: check that the IP address is 127.0.0.1
-          // javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
-          
-          catch (RemoteException re) {
-            // javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
-            throw new UnexpectedException(re);  // should never happen
-          }
-          synchronized(_exportLock) { _exportLock.notify(); }
-        }
-      };
-      
-      t.start();
-      synchronized(_exportLock) {
-        try {
-          while (_stub == null) { 
-            _log.log("invokeSlave thread in " + this + " waiting for creation of AbstractMasterJVM RMI stub to complete");
-            _exportLock.wait(); 
-          } 
-        }
-        catch (InterruptedException ie) { throw new UnexpectedException(ie); }  // should never happen
-      }
-      
-      _log.log(this + " completed creation of RMI stub for AbstractMasterJVM");
-      _stubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
-      _stubFile.deleteOnExit();
-    
-      // serialize stub to _stubFile
-      FileOutputStream fstream = new FileOutputStream(_stubFile);
-      ObjectOutputStream ostream = new ObjectOutputStream(fstream);
-      ostream.writeObject(_stub);
-      ostream.flush();
-      fstream.close();
-      ostream.close();
-      
-      _log.log(this + " completed writing RMI stub for AbstractMasterJVM to a file");
-      
-      /***********************************************************************************
-       * Done exporting ourselves to a file ...  Now let's export our classloader        *
-       * This will be used to handle classloading requests from the slave jvm.           *
-       ***********************************************************************************/
-      
-      final RemoteClassLoader _classLoader = new RemoteClassLoader(getClass().getClassLoader());
-      _classLoaderStub = null;
-      t = new Thread(_exportMasterThreadName) {
-        public void run() {
-          _log.log(AbstractMasterJVM.this + " starting creation of RMI stub for RemoteClassLoader");
-          try {  _classLoaderStub = UnicastRemoteObject.exportObject(_classLoader); }
-          
-          // Debug: check that the IP address is 127.0.0.1
-          //javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
-          
-          catch (RemoteException re) {
-            //javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
-            throw new UnexpectedException(re);  // should never happen
-          }
-          synchronized(_exportLock) { _exportLock.notify(); }
-        }
-      };
-      
-      t.start();
-      synchronized(_exportLock) {
-        try { 
-          while (_classLoaderStub == null) { 
-            _log.log("invokeSlave thread in " + this + " waiting for creation of RemoteClassLoader RMI stub to complete");
-            _exportLock.wait(); 
-          } 
-        }
-        catch (InterruptedException ie) { throw new UnexpectedException(ie); }  // should never happen
-      }
-      
-      _log.log(this + " completed creation of RMI stub for RemoteClassLoader");
-      _classLoaderStubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
-      _classLoaderStubFile.deleteOnExit();
-      // serialize stub to _stubFile
-      fstream = new FileOutputStream(_classLoaderStubFile);
-      ostream = new ObjectOutputStream(fstream);
-      ostream.writeObject(_classLoaderStub);
-      ostream.flush();
-      fstream.close();
-      ostream.close();
-      
-      _log.log(this + " completed writing RMI stub for RemoteClassLoader to a file");
-        
-      String[] args = 
-        new String[] { _stubFile.getAbsolutePath(), _slaveClassName, _classLoaderStubFile.getAbsolutePath() };
-      
-      /* Create the slave JVM. */  
-      _log.log(this + " is starting a slave JVM");
-      final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs, workDir);
-      
-      // Start a thread to wait for the slave to die.  When it dies, delegate what to do (restart?) to subclass
-      Thread restartThread = new Thread(_waitForQuitThreadName) {
-        public void run() {
-          _log.log(this + "has started a Slave monitor thread waiting on process " + process);
-          try {
-            int status = process.waitFor();
-            _log.log("Process " + process + " died under control of " + AbstractMasterJVM.this + " with status " + status);
-            synchronized(_masterJVMLock) {
-              if (_startupInProgress) {
-                _log.log("Process " + process + " died while starting up");
-                /* If we get here, the process died without registering. (This might be the case if something was wrong
-                 * with the classpath, or if the new JVM couldn't acquire a port for debugging.)  Proper behavior in 
-                 * this case is unclear, so we'll let our subclasses decide.  By default, we print a stack trace and 
-                 * do not proceed, to avoid going into a loop. */
-                slaveQuitDuringStartup(status);
-              }
-              _slave = null;
-              final boolean masterWithdrawn = UnicastRemoteObject.unexportObject(AbstractMasterJVM.this, true);
-              final boolean loaderWithdrawn = UnicastRemoteObject.unexportObject(_classLoader, true);
-              if (! masterWithdrawn || ! loaderWithdrawn) {
-                _log.log("unexport step failed in " + AbstractMasterJVM.this);
-                throw new UnexpectedException("remote objects exported by Master JVM could not be withdrawn!");
-              }
-              
-              _log.log(AbstractMasterJVM.this + " calling handleSlaveQuit(" + status + ")");
-              handleSlaveQuit(status);
-            }
-          }
-          catch (NoSuchObjectException e) { throw new UnexpectedException(e); }
-          catch (InterruptedException ie) { throw new UnexpectedException(ie); }
-        }
-      };
-      _log.log(this + " is starting a slave monitor thread to detect when the Slave JVM dies");
-      restartThread.start();
     }
+    /**********************************************
+     * First, we we export ourselves to a file... *
+     **********************************************/
+    
+//      Thread t = new Thread(_exportMasterThreadName) {
+//        public void run() {
+    _log.log(AbstractMasterJVM.this + " starting creation of RMI stub for AbstractMasterJVM");
+    try { _stub = UnicastRemoteObject.exportObject(AbstractMasterJVM.this); }
+    
+    // Debug: check that the IP address is 127.0.0.1
+    // javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
+    
+    catch (RemoteException re) {
+      // javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
+      throw new UnexpectedException(re);  // should never happen
+    }
+//          synchronized(_exportLock) { _exportLock.notify(); }
+//        }
+//      };
+    
+//      t.start();
+//      synchronized(_exportLock) {
+//        try {
+//          while (_stub == null) { 
+//            _log.log("invokeSlave thread in " + this + " waiting for creation of AbstractMasterJVM RMI stub to complete");
+//            _exportLock.wait(); 
+//          } 
+//        }
+//        catch (InterruptedException ie) { throw new UnexpectedException(ie); }  // should never happen
+    
+    _log.log(this + " completed creation of RMI stub for AbstractMasterJVM");
+    _stubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
+    _stubFile.deleteOnExit();
+    
+    // serialize stub to _stubFile
+    FileOutputStream fstream = new FileOutputStream(_stubFile);
+    ObjectOutputStream ostream = new ObjectOutputStream(fstream);
+    ostream.writeObject(_stub);
+    ostream.flush();
+    fstream.close();
+//      ostream.close();
+    
+    _log.log(this + " completed writing RMI stub for AbstractMasterJVM to a file");
+    
+    /***********************************************************************************
+     * Done exporting ourselves to a file ...  Now let's export our classloader        *
+     * This will be used to handle classloading requests from the slave jvm.           *
+     ***********************************************************************************/
+    
+    final RemoteClassLoader _classLoader = new RemoteClassLoader(getClass().getClassLoader());
+    _classLoaderStub = null;
+//      t = new Thread(_exportMasterThreadName) {
+//        public void run() {
+    _log.log(AbstractMasterJVM.this + " starting creation of RMI stub for RemoteClassLoader");
+    try {  _classLoaderStub = UnicastRemoteObject.exportObject(_classLoader); }
+    
+    // Debug: check that the IP address is 127.0.0.1
+    //javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
+    
+    catch (RemoteException re) {
+      //javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
+      throw new UnexpectedException(re);  // should never happen
+    }
+//          synchronized(_exportLock) { _exportLock.notify(); }
+//        }
+//      };
+    
+//      t.start();
+//      synchronized(_exportLock) {
+//        try { 
+//          while (_classLoaderStub == null) { 
+//            _log.log("invokeSlave thread in " + this + " waiting for creation of RemoteClassLoader RMI stub to complete");
+//            _exportLock.wait(); 
+//          } 
+//        }
+//        catch (InterruptedException ie) { throw new UnexpectedException(ie); }  // should never happen
+//      }
+    
+    _log.log(this + " completed creation of RMI stub for RemoteClassLoader");
+    _classLoaderStubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
+    _classLoaderStubFile.deleteOnExit();
+    // serialize stub to _classLoaderStubFile
+    fstream = new FileOutputStream(_classLoaderStubFile);
+    ostream = new ObjectOutputStream(fstream);
+    ostream.writeObject(_classLoaderStub);
+    ostream.flush();
+    fstream.close();
+    ostream.close();
+    
+    _log.log(this + " completed writing RMI stub for RemoteClassLoader to a file");
+    
+    String[] args = 
+      new String[] { _stubFile.getAbsolutePath(), _slaveClassName, _classLoaderStubFile.getAbsolutePath() };
+    
+    /* Create the slave JVM. */  
+    _log.log(this + " is starting a slave JVM");
+    final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs, workDir);
+    
+    // Start a thread to wait for the slave to die.  When it dies, delegate what to do (restart?) to subclass
+    Thread restartThread = new Thread(_waitForQuitThreadName) {
+      public void run() {
+        _log.log(this + "has started a Slave monitor thread waiting on process " + process);
+        try {
+          int status = process.waitFor();
+          _log.log("Process " + process + " died under control of " + AbstractMasterJVM.this + " with status " + status);
+          synchronized(_masterJVMLock) {
+            if (_startupInProgress) {
+              _log.log("Process " + process + " died while starting up");
+              /* If we get here, the process died without registering. (This might be the case if something was wrong
+               * with the classpath, or if the new JVM couldn't acquire a port for debugging.)  Proper behavior in 
+               * this case is unclear, so we'll let our subclasses decide.  By default, we print a stack trace and 
+               * do not proceed, to avoid going into a loop. */
+              slaveQuitDuringStartup(status);
+            }
+            _slave = null;
+            final boolean masterWithdrawn = UnicastRemoteObject.unexportObject(AbstractMasterJVM.this, true);
+            final boolean loaderWithdrawn = UnicastRemoteObject.unexportObject(_classLoader, true);
+            if (! masterWithdrawn || ! loaderWithdrawn) {
+              _log.log("unexport step failed in " + AbstractMasterJVM.this);
+              throw new UnexpectedException("remote objects exported by Master JVM could not be withdrawn!");
+            }
+            
+            _log.log(AbstractMasterJVM.this + " calling handleSlaveQuit(" + status + ")");
+            handleSlaveQuit(status);
+          }
+        }
+        catch (NoSuchObjectException e) { throw new UnexpectedException(e); }
+        catch (InterruptedException ie) { throw new UnexpectedException(ie); }
+      }
+    };
+    _log.log(this + " is starting a slave monitor thread to detect when the Slave JVM dies");
+    restartThread.start();
   }
   
   /** Action to take if the slave JVM quits before registering.  Assumes _masterJVMLock is held.

@@ -34,9 +34,12 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.newjvm;
 
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
 //import edu.rice.cs.util.PreventExitSecurityManager;
 
 import java.rmi.*;
+import java.rmi.server.UnicastRemoteObject;
+
 //import edu.rice.cs.util.PreventExitSecurityManager;
 
 /** A partial implementation of a {@link SlaveRemote} that provides the quit functionality and that also periodically 
@@ -57,6 +60,14 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
   private final Object _slaveJVMLock = new Object();
   private volatile boolean _slaveExited = false;
   
+  private void shutdown() {
+    try { UnicastRemoteObject.unexportObject(this, true); }
+    catch(NoSuchObjectException e) { throw new UnexpectedException(e); }  // should never happen
+   _log.log(AbstractSlaveJVM.this + " calling System.exit(0)");
+
+    System.exit(0);
+  }
+  
   /** Quits the slave JVM, calling {@link #beforeQuit} before it does. */
   public final synchronized void quit() {
     _log.log(this + ".quit() called");
@@ -69,15 +80,15 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
     Thread t = new Thread(_quitSlaveThreadName) {
       public void run() {
         try {
-          // wait for parent thread to exit 
+          // wait for parent RMI calling thread to exit 
           synchronized(_slaveJVMLock) { 
             while (! _slaveExited) {
               _log.log("Waiting for " + AbstractSlaveJVM.this + ".quit() to exit");
               _slaveJVMLock.wait(); 
             }
           }
-          _log.log(AbstractSlaveJVM.this + " calling System.exit(0)");
-          System.exit(0);
+          Thread.sleep(100);  // This is kluge to allow the parent RMI calling thread to exit
+          shutdown();
         }
         catch (Throwable th) { 
           _log.log(this + ".quit() failed!");
@@ -87,11 +98,11 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
     };
 
     t.start();
+    _log.log(this + ".quit() RMI call exited");
     synchronized(_slaveJVMLock) { 
       _slaveExited = true; 
       _slaveJVMLock.notify();
     }
-    _log.log(this + ".quit() RMI call exited");
   }
 
   /** This method is called just before the JVM is quit.  It can be overridden to provide cleanup code, etc. */
