@@ -121,7 +121,7 @@ public class ConfigFrame extends JFrame {
           // oh well...
         }
         if (successful) _applyButton.setEnabled(false);
-        ConfigFrame.this.setVisible(true);
+        ConfigFrame.this.setVisible(false);
       }
     };
     _okButton = new JButton(okAction);

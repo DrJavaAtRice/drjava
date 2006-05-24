@@ -74,9 +74,6 @@ public class DrJava {
   /** Pause time for displaying DrJava banner on startup (in milliseconds) */
   private static final int PAUSE_TIME = 2000;
   
-//  /** This field is only used in the instance of this class in the Interpreter JVM. */
-//  private static PreventExitSecurityManager _manager = null;
-  
   private static ArrayList<String> _filesToOpen = new ArrayList<String>();
   private static ArrayList<String> _jmvArgs = new ArrayList<String>();
 

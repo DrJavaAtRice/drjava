@@ -39,28 +39,19 @@ import java.io.*;
 import java.net.*;
 import java.util.zip.*;
 
-
-/**
- * A custom classloader for use in running test cases.
- * this will load all classes for the test case. 
+/** A custom classloader for use in running test cases. this will load all classes for the test case.  This loader also
+ *  provides an excludes list. any class that matches  an entry in the list will be loaded by the system class loader
+ *  instead.
  * 
- * this loader also provides an excludes list. any class that matches
- * an entry in the list will be loaded by the system class loader
- * instead.
+ *  This class extends junit.runner.TestCaseClassLoader. however, since the junit version kept all non public code as private, we
+ *  had to duplicate the class to add the features we need.
  * 
- * This class extends junit.runner.TestCaseClassLoader. however,
- * since the junit version kept all non public code as private, we
- * had to duplicate the class to add the features we need.
+ *  getResource and getResourceAsStream will not defer to the system class loader, as the junit version does, but instead will use
+ *  the custom internal classpath to get resources.
  * 
- * getResource and getResourceAsStream will not defer to the system
- * class loader, as the junit version does, but instead will use
- * the custom internal classpath to get resources.
+ *  This allows this class to be used an a remote classloader to test cases that spawn multiple jvms. 
  * 
- * This allows this class to be used an a remote classloader to test
- * cases that spawn multiple jvms. 
- * 
- * @see edu.rice.cs.util.newjvm.CustomSystemClassLoader CustomSystemClassLoader for details on
- * using remote class loaders
+ *  @see edu.rice.cs.util.newjvm.CustomSystemClassLoader for details on using remote class loaders.
  */
 
 
@@ -126,11 +117,8 @@ public final class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
     return false; 
   }
   
-  /**
-   * loads the class
-   * 1st. checks if the class is already loaded
-   * 2nd. checks if it should be loaded by system
-   * 3rd. try to load the class myself
+  /** Loads the class. 1st. checks if the class is already loaded. 2nd. checks if it should be loaded by system.
+   *  3rd. try to load the class myself
    */
   public synchronized Class<?> loadClass(String name, boolean resolve)
     throws ClassNotFoundException {

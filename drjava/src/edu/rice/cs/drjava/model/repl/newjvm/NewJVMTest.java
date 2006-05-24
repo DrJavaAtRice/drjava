@@ -35,6 +35,10 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
+
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
+
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -45,9 +49,9 @@ import java.rmi.RemoteException;
  *  @version $Id$
  */
 public final class NewJVMTest extends DrJavaTestCase {
-  private final boolean printMessages = false;
+  private static final Log _log  = new Log("MasterSlave.txt", true);
   
-  private static TestJVMExtension _jvm;
+  private static volatile TestJVMExtension _jvm;
   
   /* Lock used to prevent interpreter transactions from interfering with one another. */
   private final static Object _testLock = new Object();
@@ -74,7 +78,7 @@ public final class NewJVMTest extends DrJavaTestCase {
 
 
   public void testPrintln() throws Throwable {
-    if (printMessages) System.out.println("----testPrintln-----");
+    _log.log("NewJVMTest.testPrintln executing");
     synchronized(_testLock) {
       _jvm.interpret("System.err.print(\"err\");");
       _testLock.wait(); // wait for println
@@ -103,7 +107,7 @@ public final class NewJVMTest extends DrJavaTestCase {
   }
 
   public void testReturnConstant() throws Throwable {
-    if (printMessages) System.out.println("----testReturnConstant-----");
+   _log.log("NewJVMTest.testReturnConstant executing");
     synchronized(_testLock) {
       _jvm.interpret("5");
       _testLock.wait();
@@ -112,7 +116,7 @@ public final class NewJVMTest extends DrJavaTestCase {
   }
 
   public void testWorksAfterRestartConstant() throws Throwable {
-    if (printMessages) System.out.println("----testWorksAfterRestartConstant-----");
+    _log.log("NewJVMTest.testWorksAfterRestartConstant executing");
 
     // Check that a constant is returned
     synchronized(_testLock) {
@@ -137,18 +141,16 @@ public final class NewJVMTest extends DrJavaTestCase {
 
 
   public void testThrowRuntimeException() throws Throwable {
-    if (printMessages) System.out.println("----testThrowRuntimeException-----");
+    _log.log("NewJVMTest.testThrowRuntimeException executing");
     synchronized(_testLock) {
       _jvm.interpret("throw new RuntimeException();");
       _testLock.wait();
-      assertEquals("exception class",
-                   "java.lang.RuntimeException",
-                   _jvm.exceptionClassBuf);
+      assertEquals("exception class", "java.lang.RuntimeException", _jvm.exceptionClassBuf);
     }
   }
 
   public void testToStringThrowsRuntimeException() throws Throwable {
-    if (printMessages) System.out.println("----testToStringThrowsRuntimeException-----");
+    _log.log("NewJVMTest.testToStringThrowsRuntimeException executing");
     synchronized(_testLock) {
       _jvm.interpret(
         "class A { public String toString() { throw new RuntimeException(); } };" +
@@ -160,7 +162,7 @@ public final class NewJVMTest extends DrJavaTestCase {
   }
 
   public void testThrowNPE() throws Throwable {
-    if (printMessages) System.out.println("----testThrowNPE-----");
+    _log.log("NewJVMTest.testThrowNPE executing");
     synchronized(_testLock) {
       _jvm.interpret("throw new NullPointerException();");
 
@@ -175,7 +177,7 @@ public final class NewJVMTest extends DrJavaTestCase {
   }
 
   public void testStackTraceEmptyTrace() throws Throwable {
-    if (printMessages) System.out.println("----testStackTraceEmptyTrace-----");
+    _log.log("NewJVMTest.testStackTraceEmptyTrace executing");
     synchronized(_testLock) {
       _jvm.interpret("null.toString()");
 
@@ -260,20 +262,20 @@ public final class NewJVMTest extends DrJavaTestCase {
   }
 
   private static class TestJVMExtension extends MainJVM {
-    public String outBuf;
-    public String errBuf;
-    public String returnBuf;
-    public String exceptionClassBuf;
-    public String exceptionMsgBuf;
-    public String exceptionTraceBuf;
-    public String syntaxErrorMsgBuf;
-    public int syntaxErrorStartRow;
-    public int syntaxErrorStartCol;
-    public int syntaxErrorEndRow;
-    public int syntaxErrorEndCol;
-    public boolean voidReturnFlag;
+    public volatile String outBuf;
+    public volatile String errBuf;
+    public volatile String returnBuf;
+    public volatile String exceptionClassBuf;
+    public volatile String exceptionMsgBuf;
+    public volatile String exceptionTraceBuf;
+    public volatile String syntaxErrorMsgBuf;
+    public volatile int syntaxErrorStartRow;
+    public volatile int syntaxErrorStartCol;
+    public volatile int syntaxErrorEndRow;
+    public volatile int syntaxErrorEndCol;
+    public volatile boolean voidReturnFlag;
 
-    private InterpretResultVisitor<Object> _testHandler;
+    private volatile InterpretResultVisitor<Object> _testHandler;
 
     public TestJVMExtension() {
       super(null);
@@ -328,7 +330,7 @@ public final class NewJVMTest extends DrJavaTestCase {
       public Object forVoidResult(VoidResult that) {
         synchronized(_testLock) {
           voidReturnFlag = true;
-          //System.out.println("notify void");
+          _log.log("NewJVMTest: void returned by interpretResult callback");
           _testLock.notify();
           return null;
         }
@@ -336,7 +338,7 @@ public final class NewJVMTest extends DrJavaTestCase {
       public Object forValueResult(ValueResult that) {
         synchronized(_testLock) {
           returnBuf = that.getValueStr();
-          //System.out.println("notify returned");
+          _log.log("NewJVMTest: " + returnBuf + " returned by interpretResult callback");
           _testLock.notify();
           return null;
         }
@@ -365,7 +367,10 @@ public final class NewJVMTest extends DrJavaTestCase {
           return null;
         }
       }
-
+      
+      public Object forInterpreterBusy(InterpreterBusy that) {
+        throw new UnexpectedException("MainJVM.interpret called when interpreter was busy!");
+      }
     }
   }
 }

@@ -40,21 +40,16 @@ import java.util.StringTokenizer;
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
-/**
- * The breakpoint object which has references to its OpenDefinitionsDocument and its
- * StepRequest
- */
+/** The breakpoint object which has references to its OpenDefinitionsDocument and its StepRequest */
 public class Step extends DebugAction<StepRequest> implements OptionConstants {
-  private ThreadReference _thread;
-  private int _size;
-  private int _depth;
+  private final ThreadReference _thread;
+  private final int _size;
+  private final int _depth;
 
   // Java class patterns for which we may not want events
-  private String[] javaExcludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "com.apple.eawt.*", "com.apple.eio.*" };
+  private final String[] _javaExcludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "com.apple.eawt.*", "com.apple.eio.*" };
 
-  /**
-   * @throws IllegalStateException if the document does not have a file
-   */
+  /** @throws IllegalStateException if the document does not have a file */
   public Step(JPDADebugger manager, int size, int depth)
     throws DebugException, IllegalStateException {
      super (manager);
@@ -84,8 +79,8 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
     StepRequest request = _manager.getEventRequestManager().
       createStepRequest(_thread, _size, _depth);
     if (!stepJava) {
-      for (int i=0; i < javaExcludes.length; i++) {
-        request.addClassExclusionFilter(javaExcludes[i]);
+      for (int i=0; i < _javaExcludes.length; i++) {
+        request.addClassExclusionFilter(_javaExcludes[i]);
       }
     }
     if (!stepInterpreter) {
@@ -105,7 +100,5 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
     _requests.add(request);
   }
 
-  public String toString() {
-    return "Step[thread: " + _thread +  "]";
-  }
+  public String toString() { return "Step[thread: " + _thread +  "]"; }
 }

@@ -62,12 +62,17 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
 
   private class MasterImpl extends AbstractMasterJVM implements MasterI {
     
-    /** Lock for accessing shared test fields. */
-    private final Object _testLock = new Object();
-
+    /** Field and lock used to signal slave quit events. */
+    private volatile boolean _justQuit;                     // true after slave quits
+    private final Object _quitLock = new Object();
+    
+    /** Field and lock used to signal slave connected events. */
+    private volatile boolean _connected;                    // true when slave is connected
+    private final Object _connectedLock = new Object();
+    
+    /** Field and lock used to signal letter change events. */
     private volatile char _letter;
-    private volatile boolean _justQuit;
-    private volatile boolean _connected; // false until slave is created and connected
+    private final Object _letterLock = new Object();
     
     private volatile String _currentTest = "";
 
@@ -82,11 +87,9 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
 //      Utilities.show("ImmediateQuitTest started");
       
       _currentTest = "runImmediateQuitTest";
-      synchronized (_testLock) { 
-        _justQuit = false; 
-        _connected = false;
-        _letter = 'a';  // this needs to be reset because the slave is going to check it!
-      }
+      _justQuit = false; 
+      _connected = false;
+      _letter = 'a';  // this needs to be reset because the slave is going to check it!
 
       invokeSlave(new String[]{"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"}, FileOption.NULL_FILE);
 
@@ -98,10 +101,10 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
 //      Utilities.show("slave quit");     
 
       // now we just wait for the quit to process
-      synchronized(_testLock) { 
-        while (! _justQuit) _testLock.wait(); 
-        _currentTest = "";  // If we get here, it worked as expected.
-      }
+      synchronized(_quitLock) { while (! _justQuit) _quitLock.wait(); }
+      
+      _currentTest = "";  // If we get here, it worked as expected.
+
                      
 //      Utilities.show("ImmediateQuitTest finished");
       
@@ -110,21 +113,19 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
 
     public void runTestSequence() throws Exception {
       
-      synchronized (_testLock) {
-        _currentTest = "runTestSequence";
-        _justQuit = false;
-        _connected = false;
-        _letter = 'a';
-      }
-      
+      _currentTest = "runTestSequence";
+      _justQuit = false;
+      _connected = false;
+      _letter = 'a';
+
       invokeSlave(new String[] {"-Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"}, FileOption.NULL_FILE);           
 
-      synchronized (_testLock) { while (! _connected) _testLock.wait();  }
+      synchronized (_connectedLock) { while (! _connected) _connectedLock.wait();  }
 
       ((SlaveI)getSlave()).startLetterTest();
 
       // now, wait until five getletter calls passed; after fifth call letter is 'f' due to the ++
-      synchronized(_testLock) { while (_letter != 'f') { _testLock.wait(); } }
+      synchronized(_letterLock) { while (_letter != 'f') { _letterLock.wait(); } }
 
       for (int i = 0; i < 7; i++) {
         int value = ((SlaveI) getSlave()).getNumber();
@@ -132,28 +133,28 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
       }
 
       quitSlave();
-      synchronized(_testLock) { while (! _justQuit) _testLock.wait(); } // for quit to finish
+      synchronized(_quitLock) { while (! _justQuit) _quitLock.wait(); } // for quit to finish
       _currentTest = "";
     }
 
     public char getLetter() {
-      synchronized(_testLock) {
+      synchronized(_letterLock) {
         char ret = _letter;
         _letter++;
-        _testLock.notify();
+        _letterLock.notify();
         return ret;
       }
     }
 
-    protected synchronized void handleSlaveConnected() {
+    protected void handleSlaveConnected() {
       SlaveI slave = (SlaveI) getSlave();
       assertTrue("slave is set", slave != null);
       assertTrue("startup not in progress", ! isStartupInProgress());
       // getLetter should have never been called.
       assertEquals("letter value", 'a', _letter);
-      synchronized(_testLock) { 
+      synchronized(_connectedLock) { 
         _connected = true;
-        _testLock.notify(); 
+        _connectedLock.notify(); 
       }
     }
 
@@ -167,9 +168,9 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
       assertTrue("startup not in progress", ! isStartupInProgress());
 
       // alert test method that quit occurred.
-      synchronized(_testLock) {
-        _testLock.notify();
+      synchronized(_quitLock) {
         _justQuit = true;
+        _quitLock.notify();
       }
     }
 
@@ -194,7 +195,7 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     private volatile int _counter = 0;
     private volatile MasterI _master = null;
 
-    public int getNumber() { return _counter++; }
+    public synchronized int getNumber() { return _counter++; }
 
     protected void handleStart(MasterRemote m) { _master = (MasterI) m; }
 

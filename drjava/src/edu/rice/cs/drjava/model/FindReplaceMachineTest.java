@@ -42,9 +42,8 @@ import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Tests the FindReplaceMachine.
- * @version $Id$
+/** Tests the FindReplaceMachine.
+ *  @version $Id$
  */
 public class FindReplaceMachineTest extends DrJavaTestCase {
   private OpenDefinitionsDocument _doc;

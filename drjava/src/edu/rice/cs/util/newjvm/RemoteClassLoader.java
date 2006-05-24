@@ -48,31 +48,20 @@ package edu.rice.cs.util.newjvm;
 import java.rmi.*;
 import java.net.URL;
 
-/**
- * defines a classloader that can be used across jvm's
- */
-public class RemoteClassLoader extends ClassLoader implements IRemoteClassLoader{
+/** Defines a classloader that can be used across jvm's. */
+public class RemoteClassLoader extends ClassLoader implements IRemoteClassLoader {
 
   /** @param c the "parent" classloader. This loader will be used to load any remote requests.  */
-  public RemoteClassLoader(ClassLoader c){
-    super(c);
-  }
+  public RemoteClassLoader(ClassLoader c){ super(c); }
   
-  /**
-   * handles a request to load a remote class
-   */
+  /** Handles a request to load a remote class. */
   public Class<?> loadRemoteClass(String name) throws ClassNotFoundException, RemoteException{
     return getParent().loadClass(name);
   }
   
-  /**
-   * handles a request to get a remote resource
-   */
+  /** Handles a request to get a remote resource. */
   public URL getRemoteResource(String name) throws ClassNotFoundException, RemoteException{
     return getParent().getResource(name);
   }
 }
-
-
-
 

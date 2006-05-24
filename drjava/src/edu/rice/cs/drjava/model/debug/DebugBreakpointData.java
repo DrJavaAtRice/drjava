@@ -35,9 +35,7 @@ package edu.rice.cs.drjava.model.debug;
 
 import java.io.File;
 
-/**
- * Interface for breakpoint data.
- */
+/** Interface for breakpoint data. */
 public interface DebugBreakpointData {
   /** @return the file the breakpoint is in. */
   public File getFile();

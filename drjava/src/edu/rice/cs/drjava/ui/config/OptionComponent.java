@@ -161,7 +161,10 @@ public abstract class OptionComponent<T> implements Serializable {
   /** Notify all change listeners of a change. */
   protected void notifyChangeListeners() { 
     Utilities.invokeLater(new Runnable() {
-      public void run() { for(ChangeListener l: _changeListeners)  l.apply(this); }
+      public void run() { 
+        // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
+        ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
+        for (ChangeListener l: listeners)  l.apply(this); }
     });
   }
   

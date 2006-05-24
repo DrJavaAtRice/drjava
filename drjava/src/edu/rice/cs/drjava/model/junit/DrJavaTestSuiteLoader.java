@@ -49,10 +49,8 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.ScrollableDialog;
 import junit.runner.*;
 
-/**
- * Loads test cases from the DrJava classpath.
- *
- * @version $Id$
+/** Loads test cases from the DrJava classpath.
+ *  @version $Id$
  */
 public class DrJavaTestSuiteLoader implements TestSuiteLoader, OptionConstants {
   

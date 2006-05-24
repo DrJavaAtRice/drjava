@@ -1674,9 +1674,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // remove breakpoints and bookmarks for this file
     doc.getBreakpointManager().clearRegions();
     doc.getBookmarkManager().clearRegions();
-    for (RegionManager<DocumentRegion> rm: doc.getFindResultsManagers()) {
-      rm.clearRegions();
-    }
+    for (RegionManager<DocumentRegion> rm: doc.getFindResultsManagers())  rm.clearRegions();
     
     Utilities.invokeLater(new SRunnable() { 
       public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread

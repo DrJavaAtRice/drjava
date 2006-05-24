@@ -60,33 +60,20 @@ public class ExceptionResult implements InterpretResult {
   public ExceptionResult(final String exceptionClass,
                          final String exceptionMessage,
                          final String stackTrace,
-                         final String specialMessage)
-  {
+                         final String specialMessage) {
+    
     _exceptionClass = exceptionClass;
     _exceptionMessage = exceptionMessage;
     _stackTrace = stackTrace;
     _specialMessage = specialMessage;
   }
 
-  public String getExceptionClass() {
-    return _exceptionClass;
-  }
-
-  public String getExceptionMessage() {
-    return _exceptionMessage;
-  }
-
-  public String getStackTrace() {
-    return _stackTrace;
-  }
+  public String getExceptionClass() { return _exceptionClass; }
+  public String getExceptionMessage() { return _exceptionMessage; }
+  public String getStackTrace() { return _stackTrace; }
+  public String getSpecialMessage() { return _specialMessage; }
   
-  public String getSpecialMessage() {
-    return _specialMessage;
-  }
-
-  public <T> T apply(InterpretResultVisitor<T> v) {
-    return v.forExceptionResult(this);
-  }
+  public <T> T apply(InterpretResultVisitor<T> v) { return v.forExceptionResult(this); }
 
   public String toString() { return "(exception: " + _exceptionClass + ")"; }
 }

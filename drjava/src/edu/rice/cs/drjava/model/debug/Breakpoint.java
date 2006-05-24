@@ -48,12 +48,11 @@ import com.sun.jdi.request.*;
 
 import java.io.*;
 
-/** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest
- */
+/** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest. */
 public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implements DebugBreakpointData, DocumentRegion {
 
-   private Position _startPos;
-   private Position _endPos;
+   private volatile Position _startPos;
+   private volatile Position _endPos;
 
   /** @throws DebugException if the document does not have a file */
   public Breakpoint(OpenDefinitionsDocument doc, int offset, int lineNumber, boolean isEnabled, JPDADebugger manager)
@@ -72,7 +71,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
       throw new UnexpectedException(ble);
     }
 
-    if ((_manager!=null) && (_manager.isReady())) {
+    if ((_manager != null) && (_manager.isReady())) {
       // the debugger is on, so initialize now
       // otherwise breakpoint gets re-set when debugger is enabled
       Vector<ReferenceType> refTypes = _manager.getReferenceTypes(_className, _lineNumber);

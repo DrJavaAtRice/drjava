@@ -33,6 +33,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
+import edu.rice.cs.util.Log;
 //import edu.rice.cs.util.PreventExitSecurityManager;
 
 import java.rmi.*;
@@ -44,18 +45,21 @@ import java.rmi.*;
  */
 public abstract class AbstractSlaveJVM implements SlaveRemote {
   public static final int CHECK_MAIN_VM_ALIVE_MINUTES = 1;
+  
+  private static final Log _log  = new Log("MasterSlave.txt", false);
 
   /** Name of the thread to quit the slave. */
-  protected String _quitSlaveThreadName = "Quit SlaveJVM Thread";
+  protected volatile String _quitSlaveThreadName = "Quit SlaveJVM Thread";
 
   /** Name of the thread to periodically poll the master. */
-  protected String _pollMasterThreadName = "Poll MasterJVM Thread";
+  protected volatile String _pollMasterThreadName = "Poll MasterJVM Thread";
 
-  private Object _slaveJVMLock = new Object();
-  private boolean _slaveExited = false;
+  private final Object _slaveJVMLock = new Object();
+  private volatile boolean _slaveExited = false;
   
   /** Quits the slave JVM, calling {@link #beforeQuit} before it does. */
-  public final void quit() {
+  public final synchronized void quit() {
+    _log.log(this + ".quit() called");
     beforeQuit();
     
     _slaveExited = false;
@@ -66,18 +70,17 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
       public void run() {
         try {
           // wait for parent thread to exit 
-          synchronized(_slaveJVMLock) { while (! _slaveExited) _slaveJVMLock.wait(); }
-//          SecurityManager mgr = System.getSecurityManager();
-//          Utilities.showDebug("Got the security manager. mgr = " + mgr);
-//          if (mgr instanceof PreventExitSecurityManager) {
-//            PreventExitSecurityManager pemgr = (PreventExitSecurityManager) System.getSecurityManager();
-//            pemgr.exitVM(0);
-//          }
-//          else 
+          synchronized(_slaveJVMLock) { 
+            while (! _slaveExited) {
+              _log.log("Waiting for " + AbstractSlaveJVM.this + ".quit() to exit");
+              _slaveJVMLock.wait(); 
+            }
+          }
+          _log.log(AbstractSlaveJVM.this + " calling System.exit(0)");
           System.exit(0);
         }
         catch (Throwable th) { 
-//          Utilities.showDebug("Quit failed");
+          _log.log(this + ".quit() failed!");
           quitFailed(th); 
         }
       }
@@ -87,7 +90,8 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
     synchronized(_slaveJVMLock) { 
       _slaveExited = true; 
       _slaveJVMLock.notify();
-    } 
+    }
+    _log.log(this + ".quit() RMI call exited");
   }
 
   /** This method is called just before the JVM is quit.  It can be overridden to provide cleanup code, etc. */
@@ -96,21 +100,23 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
   /** This method is called if the interpreterJVM cannot be exited (likely because of a unexpected security manager.) */
   protected void quitFailed(Throwable th) { }
 
-  /** Starts background thread to periodically poll the master JVM and automatically quit if it's dead.
-   *  It delegates the actual start to {@link #handleStart}.
+  /** Starts background thread to periodically poll the master JVM and automatically quit if it's dead.  Unsynchronized
+   *  because 
+   *  (i)   it is assumed that this method is only called once;
+   *  (ii)  this method does not depend on any mutable state in this (which constrains {@link #handleStart}); and
+   *  (iii) this method (and perhaps {@link #handleStart}) perform remote calls on master.
+   *  This method delegates the actual start to {@link #handleStart}.
    */
   public final void start(final MasterRemote master) throws RemoteException {
     Thread thread = new Thread(_pollMasterThreadName) {
-      public void run() {
+      public void run() { // Note: this method is NOT synchronized; it runs in a different thread.
 //        PreventExitSecurityManager.activate();
         while (true) {
           try { Thread.sleep(CHECK_MAIN_VM_ALIVE_MINUTES*60*1000); }
           catch (InterruptedException ie) { }
-
+          _log.log(this + " polling " + master + " to confirm Master JVM is still alive");
           try { master.checkStillAlive(); }
-          catch (RemoteException re) {
-            quit(); // not there anymore. quit!
-          }
+          catch (RemoteException re) { quit(); }  // Master JVM is defunct. Quit! */
         }
       }
     };

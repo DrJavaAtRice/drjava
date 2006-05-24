@@ -50,62 +50,47 @@ import edu.rice.cs.util.FileOps;
 import java.io.*;
 import java.net.URL;
 
-/**
- * defines a classloader that can be used to override a system classloader via commandline
+/** A classloader that can be used to override a system classloader via commandline
  * <br>
- * example jvm argument: "java -Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"
+ * Example jvm argument: "java -Djava.system.class.loader=edu.rice.cs.util.newjvm.CustomSystemClassLoader"
  * <br>
- * <br>
- * this class will forward all calls to the default system class loader until a setMasterRemote() is called.
- * then all classes that cannot be loaded locally will try to be loaded using the master remote loader.
- * if the master remote loader cannot load the class, then a ClassNotFoundException is thrown.
+ * This class will forward all calls to the default system class loader until a setMasterRemote() is called.  Then all
+ * classes that cannot be loaded locally will be loaded using the master remote loader.  If the master remote loader 
+ * cannot load the class, then a ClassNotFoundException is thrown.
  * 
  */
-public class CustomSystemClassLoader extends ClassLoader{
-  /**
-   * the remote classloader to use if we cannot load
-   * the class locally
-   */
+public class CustomSystemClassLoader extends ClassLoader {
+  
+  /** Tthe remote classloader to use if we cannot load the class locally */
   IRemoteClassLoader _master;
   
-  /**
-   * standard constructor
-   * @param c the default system classloader
+  /** Standard constructor
+   *  @param c the default system classloader
    */
   public CustomSystemClassLoader(ClassLoader c){
     super(c);
     _master = null;
   }
   
-  /**
-   * sets the remote class loader
-   */
-  public void setMasterRemote(IRemoteClassLoader m){
-    _master = m;
-  }
+  /** Sets the remote class loader */
+  public void setMasterRemote(IRemoteClassLoader m){ _master = m; }
   
-  
-  /**
-   * try to load a class
-   * if the class is already loaded, or is a system class, load it locally.
-   * otherwise, if the class cannot be found, try to load the class remotely
-   * if we fail, throw a classnotfoundexception
+  /** Try to load a class.  If the class is already loaded, or is a system class, load it locally.  Otherwise, if the
+   *  class cannot be found, try to load the class remotely. If we fail, throw a classnotfoundexception.
    */
   public Class<?> loadClass(String name) throws ClassNotFoundException{
     Class c;
     // check if i already loaded it
     c = findLoadedClass(name);
-    if (c!= null) {
-      return c;
-    }
+    if (c != null) return c;
+
     // try to load locally
     try{
       String fileName = name.replace('.', '/') + ".class";
       URL resource = getParent().getResource(fileName); // only dependency on newLoader!
-      if (resource == null) {
-        throw new ClassNotFoundException("Resource not found: " + fileName);
-      }
-      else if(fileName.startsWith("edu/rice/cs/util/newjvm/SlaveJVMRunner.class")){
+      if (resource == null)  throw new ClassNotFoundException("Resource not found: " + fileName);
+
+      else if (fileName.startsWith("edu/rice/cs/util/newjvm/SlaveJVMRunner.class")) {
         byte[] data = FileOps.readStreamAsBytes(resource.openStream());
         try { return defineClass(name, data, 0, data.length); }
         catch (Error t) { throw t; }

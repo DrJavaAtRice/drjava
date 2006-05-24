@@ -83,19 +83,19 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   protected volatile boolean _compileDone;
   protected final Object _compileLock = new Object();
 
-  private static Log _log = new Log("MainFrameTestLog.txt", false);
+  private final static Log _log = new Log("MainFrameTest.txt", false);
  
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
     _log.log("super.setUp() for next test completed");
-//    Utilities.invokeAndWait(new Runnable() { 
-//      public void run() { 
-        _frame  = new MainFrame();
-        _log.log("new MainFrame() for next test completed");
-        _frame.pack();
-//      }
-//    });
+
+    _frame  = new MainFrame();
+    _log.log("new MainFrame() for next test completed");
+    
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() {  _frame.pack(); }
+    });
     _log.log("setUp complete for next test");
   }
 
@@ -130,11 +130,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     final DefinitionsPane pane = _frame.getCurrentDefPane();
     OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     doc.insertString(0, "abcd", null);
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() {
-        pane.setCaretPosition(3); // not thread-safe!
-      }
-    }); 
+    Utilities.invokeAndWait(new Runnable() { public void run() { pane.setCaretPosition(3); } }); 
     Utilities.clearEventQueue();  // Empty the event queue of any asynchronous tasks
       
     assertEquals("Location of old doc before switch", 3, doc.getCurrentLocation());
@@ -249,11 +245,13 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    */
   public void testCorrectInteractionsDocument() throws EditDocumentException {
     InteractionsPane pane = _frame.getInteractionsPane();
-    SingleDisplayModel model = _frame.getModel();
+    final SingleDisplayModel model = _frame.getModel();
     InteractionsDJDocument doc = model.getSwingInteractionsDocument();
 
     // Make the test silent
-    model.getInteractionsModel().getDocument().setBeep(new TestBeep());
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { model.getInteractionsModel().getDocument().setBeep(new TestBeep()); }
+    });
 
     // Test for strict == equality
     assertTrue("UI's int. doc. should equals Model's int. doc.", pane.getDocument() == doc);
@@ -264,10 +262,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("testCorrectInteractionsDocument completed");
   }
 
-  /**
-   * Tests that undoing/redoing a multi-line indent will restore
-   * the caret position.
-   */
+  /** Tests that undoing/redoing a multi-line indent will restore the caret position. */
   public void testMultilineIndentAfterScroll() throws BadLocationException, InterruptedException {
     String text =
       "public class stuff {\n" +
@@ -294,7 +289,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(2));
-    doc.insertString(0, text, null);
+    doc.append(text, null);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         pane.setCaretPosition(0);
@@ -304,7 +299,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     
     assertEquals("Should have inserted correctly.", text, doc.getText());
     
-    doc.indentLines(0, doc.getLength());
+    doc.indentLines(0, doc.getLength()); // should be enclosed in  write lock/unlock brackets
+    
     assertEquals("Should have indented.", indented, doc.getText());
     
     oldPos = pane.getCaretPosition();

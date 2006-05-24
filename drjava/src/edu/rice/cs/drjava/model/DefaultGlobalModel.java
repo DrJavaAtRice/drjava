@@ -75,6 +75,7 @@ import edu.rice.cs.drjava.model.debug.DebugListener;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugThreadData;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
+import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
@@ -104,7 +105,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   protected final InteractionsDJDocument _interactionsDocument;
   
   /** RMI interface to the Interactions JVM. */
-  final MainJVM _jvm = new MainJVM(getWorkingDirectory());
+  final MainJVM _jvm; 
   
   /** Interface between the InteractionsDocument and the JavaInterpreter, which runs in a separate JVM. */
   protected final DefaultInteractionsModel _interactionsModel;
@@ -161,7 +162,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   // ---- Compiler Fields ----
   
   /** CompilerModel manages all compiler functionality. */
-  private final CompilerModel _compilerModel = new DefaultCompilerModel(this);
+  private final CompilerModel _compilerModel;
   
   /** Whether or not to reset the interactions JVM after compiling.  Should only be false in test cases. */
   private volatile boolean _resetAfterCompile = true;
@@ -169,12 +170,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /* JUnit Fields */
   
   /** JUnitModel manages all JUnit functionality. */
-  private final DefaultJUnitModel _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
+  private final DefaultJUnitModel _junitModel;
   
   /* Javadoc Fields */
   
   /** Manages all Javadoc functionality. */
-  protected final JavadocModel _javadocModel = new DefaultJavadocModel(this);
+  protected final JavadocModel _javadocModel;
   
   /* Debugger Fields */
   
@@ -187,6 +188,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public DefaultGlobalModel() {
     super();
 //    Utilities.show("DefaultGlobalModel super call performed");
+    _jvm = new MainJVM(getWorkingDirectory());
+    _compilerModel = new DefaultCompilerModel(this);
+    _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
+    _javadocModel = new DefaultJavadocModel(this);
     _interactionsDocument = new InteractionsDJDocument();
 
     _interactionsModel = new DefaultInteractionsModel(this, _jvm, _interactionsDocument, getWorkingDirectory());
@@ -195,10 +200,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _jvm.setJUnitModel(_junitModel);
     
     _jvm.setOptionArgs(DrJava.getConfig().getSetting(JVM_ARGS));
+    
     DrJava.getConfig().addOptionListener(JVM_ARGS, new OptionListener<String>() {
-      public void optionChanged(OptionEvent<String> oe) {
-        _jvm.setOptionArgs(oe.value);
-      }
+      public void optionChanged(OptionEvent<String> oe) { _jvm.setOptionArgs(oe.value); }
     }); 
 
     _createDebugger();
@@ -216,7 +220,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     //      This is obnoxiously order-dependent, but it works for now.
     _compilerModel.addListener(_clearInteractionsListener);
     
-    // Perhaps do this in another thread to allow startup to continue...
+    // Note: starting the JVM in another thread does not appear to improve performance
     _jvm.startInterpreterJVM();
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
@@ -382,7 +386,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public void dispose() {
     // Kill the interpreter
     _jvm.killInterpreter(null);
-    
     super.dispose();
   }
 
@@ -519,7 +522,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       
       final boolean wasDebuggerEnabled = getDebugger().isReady();
       
-      _runMain = new DummyGlobalModelListener() {
+      _runMain = new DummyInteractionsListener() {
         public void interpreterReady(File wd) {
           // Restart debugger if it was previously enabled and is now off
           if (wasDebuggerEnabled && (! getDebugger().isReady())) {

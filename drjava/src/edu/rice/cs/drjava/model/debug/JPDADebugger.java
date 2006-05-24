@@ -34,14 +34,14 @@
 package edu.rice.cs.drjava.model.debug;
 
 import java.io.*;
-import java.util.List;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Stack;
 import java.util.StringTokenizer;
-
-import java.util.Enumeration;
 import java.util.Vector;
 
 // DrJava stuff
@@ -50,9 +50,10 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
+import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
+import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.DummyGlobalModelListener;
 import edu.rice.cs.util.Log;
 
 import com.sun.jdi.*;
@@ -73,42 +74,42 @@ import javax.swing.SwingUtilities;
  */
 public class JPDADebugger implements Debugger, DebugModelCallback {
   private static final boolean printMessages = false;
-  protected final PrintStream printStream = System.out;
+  private final PrintStream printStream = System.out;
   private static final int OBJECT_COLLECTED_TRIES = 5;
 
   /** Reference to DrJava's model. */
-  private DefaultGlobalModel _model;
+  private volatile DefaultGlobalModel _model;
 
   /** VirtualMachine of the interactions JVM. */
   private volatile VirtualMachine _vm;
 
   /** Manages all event requests in JDI. */
-  private EventRequestManager _eventManager;
+  private volatile EventRequestManager _eventManager;
 
   /** Vector of all current Watches. */
-  private Vector<DebugWatchData> _watches;
+  private final Vector<DebugWatchData> _watches = new Vector<DebugWatchData>();
 
   /** Keeps track of any DebugActions whose classes have not yet been loaded, so that EventRequests can be created when the correct
    * ClassPrepareEvent occurs.
    */
-  private PendingRequestManager _pendingRequestManager;
+  private final PendingRequestManager _pendingRequestManager = new PendingRequestManager(this);
 
   /** Provides a way for the JPDADebugger to communicate with the view. */
   final DebugEventNotifier _notifier = new DebugEventNotifier();
 
   /** The running ThreadReference that we are debugging. */
-  private ThreadReference _runningThread;
+  private volatile ThreadReference _runningThread;
 
   /** Storage for all the threads suspended by this debugger. The "current" thread is the top one on the stack. */
-  private RandomAccessStack _suspendedThreads;
+  private volatile RandomAccessStack _suspendedThreads;
 
   /** A handle to the interpreterJVM that we need so we can populate the environment. */
-  private ObjectReference _interpreterJVM;
+  private volatile ObjectReference _interpreterJVM;
 
-  private GlobalModelListener _watchListener;
+  private volatile InteractionsListener _watchListener;
 
   /** If not null, this field holds an error caught by the EventHandlerThread. */
-  private Throwable _eventHandlerError;
+  private volatile Throwable _eventHandlerError;
 
   /** A log for recording messages in a file. */
   private final Log _log;
@@ -120,9 +121,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _model = model;
     _vm = null;
     _eventManager = null;
-    _watches = new Vector<DebugWatchData>();
+    
     _suspendedThreads = new RandomAccessStack();
-    _pendingRequestManager = new PendingRequestManager(this);
     _runningThread = null;
     _interpreterJVM = null;
     _eventHandlerError = null;
@@ -130,14 +130,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
     // TO DO: Replace this with an InteractionsListener,
     //  since we really can't talk about SingleDisplayModel here!
-    _watchListener = new DummyGlobalModelListener() {
+    _watchListener = new DummyInteractionsListener() {
       public void interactionEnded() {
-        try {
-          _updateWatches();
-        }
-        catch(DebugException de) {
-          _log("couldn't update watches", de);
-        }
+        try { _updateWatches(); }
+        catch(DebugException de) { _log("couldn't update watches", de); }
       }
     };
   }
@@ -158,26 +154,22 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _model.getBreakpointManager().removeListener(listener);
   }
 
-  protected VirtualMachine getVM() { return _vm; }
+  /** Accessor for the _vm field.  Called from DocumentDebugAction and this. */
+  VirtualMachine getVM() { return _vm; }
 
   /** Logs any unexpected behavior that occurs (but which should not cause DrJava to abort).
    *  @param message message to print to the log
    */
-  protected void _log(String message) {
-    _log.logTime(message);
-  }
+  private void _log(String message) { _log.log(message); }
 
   /** Logs any unexpected behavior that occurs (but which should not cause DrJava to abort).
    *  @param message message to print to the log
    *  @param t Exception or Error being logged
    */
-  protected void _log(String message, Throwable t) {
-    _log.logTime(message, t);
-  }
+  private void _log(String message, Throwable t) { _log.log(message, t); }
 
-  /** Returns whether the debugger can be used in this copy of DrJava.
-   *  This does not indicate whether it is ready to be used, which is
-   *  indicated by isReady().
+  /** Returns whether the debugger is available in this copy of DrJava.  This method does not indicate whether the 
+   *  debugger is ready to be used, which is indicated by isReady().
    */
   public boolean isAvailable() { return true; }
 
@@ -185,11 +177,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   public boolean isReady() { return _vm != null; }
   
   /** Ensures that debugger is active.  Should be called by every public method in the debugger except for startup().
+   *  Assumes lock is already held.
    *  @throws IllegalStateException if debugger is not active
    *  @throws DebugException if an exception was detected in the EventHandlerThread
    */
-  protected synchronized void _ensureReady() throws DebugException {
-    if (!isReady()) throw new IllegalStateException("Debugger is not active.");
+  private void _ensureReady() throws DebugException {
+    if (! isReady()) throw new IllegalStateException("Debugger is not active.");
     
     if (_eventHandlerError != null) {
       Throwable t = _eventHandlerError;
@@ -199,10 +192,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   }
 
   /** Records that an error occurred in the EventHandlerThread. The next call to _ensureReady() will fail, indicating
-   *  that the error occurred.
+   *  that the error occurred.  Not private because EventHandlerThread accesses it.
    *  @param t Error occurring in the EventHandlerThread
    */
-  synchronized void eventHandlerError(Throwable t) {
+  void eventHandlerError(Throwable t) {
     _log("Error in EventHandlerThread: " + t);
     _eventHandlerError = t;
   }
@@ -226,7 +219,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       // Listen for events from JPDA in a new thread
       EventHandlerThread eventHandler = new EventHandlerThread(this, _vm);
       eventHandler.start();
-      _model.addListener(_watchListener);
+      _model.getInteractionsModel().addListener(_watchListener);
       
       // re-set breakpoints that have already been set
       Vector<Breakpoint> oldBreakpoints = new Vector<Breakpoint>(_model.getBreakpointManager().getRegions());
@@ -242,9 +235,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       throw new IllegalStateException("Debugger has already been started.");
   }
 
-  /** Handles the details of attaching to the interpreterJVM. */
+  /** Handles the details of attaching to the interpreterJVM. Assume lock is already held. */
   private void _attachToVM() throws DebugException {
-    // Blocks until the interpreter has registered if hasn't already
+    // Blocks until the interpreter has registered if hasn't already.  Blocks all synchronized methods in this class.
     _model.waitForInterpreter();
 
     // Get the connector
@@ -271,11 +264,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _interpreterJVM = _getInterpreterJVMRef();
   }
 
-  /**
-   * Returns an attaching connector to use for connecting to the
-   * interpreter JVM.
-   */
-  protected AttachingConnector _getAttachingConnector()
+  /** Returns an attaching connector to use for connecting to the interpreter JVM.  Assumes lock is already held. */
+  private AttachingConnector _getAttachingConnector()
     throws DebugException {
     VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
     List<AttachingConnector> connectors = vmm.attachingConnectors();  // Warning expected; Connector not yet generified.
@@ -287,12 +277,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     return connector;
   }
 
-  /**
-   * Returns an ObjectReference to the singleton instance of
-   * the InterpreterJVM class in the virtual machine being debugged.
-   * This is used to mainupulate interpreters at breakpoints.
+  /** Returns an ObjectReference to the singleton instance of the InterpreterJVM class in the virtual machine being 
+   *  debugged. This is used to mainupulate interpreters at breakpoints.  Assumes lock is already held.
    */
-  protected ObjectReference _getInterpreterJVMRef()
+  private ObjectReference _getInterpreterJVMRef()
     throws DebugException {
     String className = "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
     List<ReferenceType> referenceTypes = _vm.classesByName(className);  // Added parameterization <ReferenceType>. JDK 1.5 will eliminate this warning
@@ -310,7 +298,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    */
   public synchronized void shutdown() {
     if (isReady()) {
-      Runnable command = new Runnable() { public void run() { _model.removeListener(_watchListener); } };
+      Runnable command = new Runnable() { public void run() { _model.getInteractionsModel().removeListener(_watchListener); } };
       
       /* Use SwingUtilities.invokeLater rather than Utilities.invokeLater because we want to defer executing this
        * code after pending events (that may involve the _watchListener) */
@@ -328,9 +316,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         _suspendedThreads = new RandomAccessStack();
         _eventManager = null;
         _runningThread = null;
-        try {
-          _updateWatches();
-        }
+        try { _updateWatches(); }
         catch (DebugException de) {
           // Couldn't remove breakpoints/watches
           _log("Could not remove breakpoints/watches or update watches: " + de);
@@ -341,10 +327,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
 
   /** Returns the current EventRequestManager from JDI, or null if startup() has not been called. */
-  synchronized EventRequestManager getEventRequestManager() { return _eventManager; }
+  EventRequestManager getEventRequestManager() { return _eventManager; }
 
   /** Returns the pending request manager used by the debugger. */
-  synchronized PendingRequestManager getPendingRequestManager() { return _pendingRequestManager; }
+  PendingRequestManager getPendingRequestManager() { return _pendingRequestManager; }
 
   /**
    * Sets the debugger's currently active thread.
@@ -359,14 +345,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @throws IllegalArgumentException if thread is not suspended.
    */
   synchronized boolean setCurrentThread(ThreadReference thread) {
-    if (!thread.isSuspended()) {
-      throw new IllegalArgumentException("Thread must be suspended to set " +
-                                         "as current.  Given: " + thread);
+    if (! thread.isSuspended()) {
+      throw new IllegalArgumentException("Thread must be suspended to set as current.  Given: " + thread);
     }
 
     try {
-      if ((_suspendedThreads.isEmpty() || 
-           !_suspendedThreads.contains(thread.uniqueID())) && (thread.frameCount() > 0)) {
+      if ((_suspendedThreads.isEmpty() || !_suspendedThreads.contains(thread.uniqueID())) &&
+          (thread.frameCount() > 0)) {
         _suspendedThreads.push(thread);
         return true;
       }
@@ -379,16 +364,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
-  /**
-   * Sets the notion of current thread to the one contained in threadData.
-   * The thread must be suspended.
-   * (Note: the intention is for this method to suspend the thread if
-   * necessary, but this is not yet implemented.  The catch is that any
-   * manually suspended threads won't cooperate with the debug interpreters;
-   * the thread must be suspended by a breakpoint or step.)
-   * @param threadData Thread to set as current
-   * @throws IllegalStateException if debugger is not ready
-   * @throws IllegalArgumentException if threadData is null or not suspended
+  /** Sets the notion of current thread to the one contained in threadData.  The thread must be suspended. (Note: the
+   *  intention is for this method to suspend the thread if necessary, but this is not yet implemented.  The catch is
+   *  that any manually suspended threads won't cooperate with the debug interpreters; the thread must be suspended by
+   *  a breakpoint or step.)
+   *  @param threadData Thread to set as current
+   *  @throws IllegalStateException if debugger is not ready
+   *  @throws IllegalArgumentException if threadData is null or not suspended
    */
   public synchronized void setCurrentThread(DebugThreadData threadData) throws DebugException {
     _ensureReady();
@@ -411,9 +393,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
     // if we switch to a currently suspended thread, we need to remove
     // it from the stack and put it on the top
-    if (_suspendedThreads.contains(threadRef.uniqueID())) {
-      _suspendedThreads.remove(threadRef.uniqueID());
-    }
+    if (_suspendedThreads.contains(threadRef.uniqueID())) _suspendedThreads.remove(threadRef.uniqueID());
+
     if (!threadRef.isSuspended()) {
       throw new IllegalArgumentException("Given thread must be suspended.");
 //       threadRef.suspend();
@@ -441,8 +422,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
     try {
       if (threadRef.frameCount() <= 0) {
-        printMessage(threadRef.name() +
-                     " could not be suspended since it has no stackframes.");
+        printMessage(threadRef.name() + " could not be suspended since it has no stackframes.");
         resume();
         return;
       }
@@ -457,68 +437,48 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     printMessage("The current thread has changed.");
   }
 
-  /**
-   * Returns the currently selected thread for the debugger.
-   */
-  synchronized ThreadReference getCurrentThread() {
+  /** Returns the currently selected thread for the debugger.  */
+  ThreadReference getCurrentThread() {
     // Current thread is the top one on the stack
     return _suspendedThreads.peek();
   }
 
-  /**
-   * Returns the suspended thread at the current index of the stack.
-   * @param i index into the stack of suspended threads
+  /** Returns the suspended thread at the current index of the stack.
+   *  @param i index into the stack of suspended threads
    */
-  synchronized ThreadReference getThreadAt(int i) {
-    return _suspendedThreads.peekAt(i);
-  }
+  ThreadReference getThreadAt(int i) { return _suspendedThreads.peekAt(i); }
 
-  /**
-   * Returns the running thread currently tracked by the debugger.
-   */
-  synchronized ThreadReference getCurrentRunningThread() {
-    return _runningThread;
-  }
+  /** Returns the running thread currently tracked by the debugger. */
+  ThreadReference getCurrentRunningThread() { return _runningThread; }
 
-  /**
-   * Returns whether the debugger currently has any suspended threads.
-   */
+  /** Returns whether the debugger currently has any suspended threads. */
   public synchronized boolean hasSuspendedThreads() throws DebugException {
     if (!isReady()) return false;
     return _suspendedThreads.size() > 0;
   }
 
-
-  /**
-   * Returns whether the debugger's current thread is suspended.
-   */
+  /** Returns whether the debugger's current thread is suspended. */
   public synchronized boolean isCurrentThreadSuspended() throws DebugException {
     if (!isReady()) return false;
     return hasSuspendedThreads() && !hasRunningThread();
   }
 
-  /**
-   * Returns whether the thread the debugger is tracking is now running.
-   */
+  /** Returns whether the thread the debugger is tracking is now running. */
   public synchronized boolean hasRunningThread() throws DebugException {
     if (!isReady()) return false;
     return _runningThread != null;
   }
 
-  /**
-   * Returns a Vector with all the loaded ReferenceTypes for the given class
-   * name (empty if the class could not be found).  Makes no attempt to load
-   * the class if it is not already loaded.
-   * <p>
-   * If custom class loaders are in use, multiple copies of the class may
-   * be loaded, so all are returned.
+  /** Returns a Vector with all the loaded ReferenceTypes for the given class name (empty if the class could not be 
+   *  found).  Makes no attempt to load the class if it is not already loaded.
+   *  <p>
+   *  If custom class loaders are in use, multiple copies of the class may be loaded, so all are returned.
    */
-  synchronized Vector<ReferenceType> getReferenceTypes(String className) {
+  Vector<ReferenceType> getReferenceTypes(String className) {
     return getReferenceTypes(className, DebugAction.ANY_LINE);
   }
 
-  /**
-   * Returns a Vector with the loaded ReferenceTypes for the given class name
+  /** Returns a Vector with the loaded ReferenceTypes for the given class name
    * (empty if the class could not be found).  Makes no attempt to load the
    * class if it is not already loaded.  If the lineNumber is not
    * DebugAction.ANY_LINE, this method ensures that the returned ReferenceTypes
@@ -528,13 +488,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * If custom class loaders are in use, multiple copies of the class
    * may be loaded, so all are returned.
    */
-  synchronized Vector<ReferenceType> getReferenceTypes(String className,
-                                                       int lineNumber) {
+  synchronized Vector<ReferenceType> getReferenceTypes(String className, int lineNumber) {
     // Get all classes that match this name
     List<ReferenceType> classes;
-    try {
-      classes = _vm.classesByName(className);  // Added parameterization <ReferenceType> to classes. JDK 1.5 will eliminate this type warning
-    }
+    
+    try { classes = _vm.classesByName(className); }
     catch (VMDisconnectedException vmde) {
       // We're quitting, return empty Vector.
       return new Vector<ReferenceType>();
@@ -589,14 +547,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     return refTypes;
   }
 
-  /**
-   * @return The thread in the virtual machine with name d.uniqueID()
-   * @throws NoSuchElementException if the thread could not be found
+  /** Assumes lock is already held.
+   *  @return The thread in the virtual machine with name d.uniqueID()
+   *  @throws NoSuchElementException if the thread could not be found
    */
-  protected ThreadReference _getThreadFromDebugThreadData(DebugThreadData d)
-    throws NoSuchElementException
-  {
-    List<ThreadReference> threads = _vm.allThreads(); // Added parameterization <ThreadReference>. JDK 1.5 will eliminate this type warning
+  private ThreadReference _getThreadFromDebugThreadData(DebugThreadData d) throws NoSuchElementException {
+    List<ThreadReference> threads = _vm.allThreads(); 
     Iterator<ThreadReference> iterator = threads.iterator();
     while (iterator.hasNext()) {
       ThreadReference threadRef = iterator.next();
@@ -605,8 +561,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       }
     }
     // Thread not found
-    throw new NoSuchElementException("Thread " + d.getName() +
-                                     " not found in virtual machine!");
+    throw new NoSuchElementException("Thread " + d.getName() + " not found in virtual machine!");
   }
 
   /**
@@ -648,56 +603,35 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _runningThread = null;
   }*/
 
-  /**
-   * Resumes the thread currently being debugged without
-   * removing the debug interpreter or switching to the
-   * next suspended thread.
+  /** Resumes the thread currently being debugged without removing the debug interpreter or switching to the next 
+   *  suspended thread.  Assumes lock is already held.
    */
-  protected synchronized void _resumeFromStep()
-    throws DebugException
-  {
-    _resumeHelper(true);
-  }
+  private void _resumeFromStep() throws DebugException { _resumeHelper(true); }
 
-  /**
-   * Resumes the thread currently being debugged, copying back all variables
-   * from the current debug interpreter.
-   */
+  /** Resumes the thread currently being debugged, copying back all variables from the current debug interpreter. */
   public synchronized void resume() throws DebugException {
     _ensureReady();
     _resumeHelper(false);
   }
 
-  /**
-   * Resumes execution of the currently suspended thread.
-   * @param fromStep Whether to copy back the variables from
-   * the current debug interpreter and switch to the next
-   * suspended thread.
+  /** Resumes execution of the currently suspended thread.  Assumes lock is already held.
+   *  @param fromStep Whether to copy back the variables from the current debug interpreter and switch to the next
+   *  suspended thread.
    */
-  protected synchronized void _resumeHelper(boolean fromStep)
-    throws DebugException
-  {
+  private void _resumeHelper(boolean fromStep) throws DebugException {
     try {
       ThreadReference thread = _suspendedThreads.pop();
 
-      if (printMessages) {
-        printStream.println("In resumeThread()");
-      }
+      if (printMessages) printStream.println("In resumeThread()");
       _resumeThread(thread, fromStep);
     }
-    catch (NoSuchElementException e) {
-      throw new DebugException("No thread to resume.");
-    }
+    catch (NoSuchElementException e) { throw new DebugException("No thread to resume."); }
   }
 
-  /**
-   * Resumes the given thread, copying back any variables from its
-   * associated debug interpreter.
+  /** Resumes the given thread, copying back any variables from its associated debug interpreter.
    * @param threadData Thread to resume
    */
-  public synchronized void resume(DebugThreadData threadData)
-    throws DebugException
-  {
+  public synchronized void resume(DebugThreadData threadData) throws DebugException {
     _ensureReady();
     ThreadReference thread = _suspendedThreads.remove(threadData.getUniqueID());
     _resumeThread(thread, false);
@@ -734,21 +668,15 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _removeCurrentDebugInterpreter(fromStep);
       currThreadResumed();
     }
-    catch(DebugException e) {  //??
-      throw new UnexpectedException(e);
-    }
+    catch(DebugException e) { throw new UnexpectedException(e); }
 
     // Must resume the correct number of times
-    for (int i=suspendCount; i>0; i--) {
-      thread.resume();
-    }
+    for (int i=suspendCount; i>0; i--) thread.resume();
 
     // Notify listeners of a resume
 
     // Switch to next suspended thread, if any
-    if (!fromStep && !_suspendedThreads.isEmpty()) {
-      _switchToSuspendedThread();
-    }
+    if (! fromStep && ! _suspendedThreads.isEmpty()) _switchToSuspendedThread();
   }
 
   /**
@@ -762,15 +690,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _stepHelper(flag, true);
   }
 
-  /**
-   * Performs a step in the currently suspended thread, only
-   * generating a step event if shouldNotify if true.
-   * @param flag The type of step to perform (see step())
-   * @param shouldNotify Whether to generate a step event
+  /** Performs a step in the currently suspended thread, only generating a step event if shouldNotify if true.  Assumes
+   *  that lock is already held.
+   *  @param flag The type of step to perform (see step())
+   *  @param shouldNotify Whether to generate a step event
    */
-  private synchronized void _stepHelper(int flag, boolean shouldNotify)
-    throws DebugException
-  {
+  private void _stepHelper(int flag, boolean shouldNotify) throws DebugException {
     if (_suspendedThreads.size() <= 0 || _runningThread != null) {
       throw new IllegalStateException("Cannot step if the current thread is not suspended.");
     }
@@ -959,9 +884,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Returns a list of all threads being tracked by the debugger.
    * Does not return any threads known to be dead.
    */
-  public synchronized Vector<DebugThreadData> getCurrentThreadData()
-    throws DebugException
-  {
+  public synchronized Vector<DebugThreadData> getCurrentThreadData() throws DebugException {
     _ensureReady();
     List<ThreadReference> listThreads; // Add parameterization <ThreadReference> to listThreads.
     try {
@@ -1096,9 +1019,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @param stackData Stack data containing location to display
    * @throws DebugException if current thread is not suspended
    */
-  public synchronized void scrollToSource(DebugStackData stackData)
-    throws DebugException
-  {
+  public synchronized void scrollToSource(DebugStackData stackData) throws DebugException {
     _ensureReady();
     if (_runningThread != null) {
       throw new DebugException("Cannot scroll to source unless thread is suspended.");
@@ -1264,9 +1185,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
-  /**
-   * Updates the stored value of each watched field and variable.
-   */
+  /** Updates the stored value of each watched field and variable. */
   private synchronized void _updateWatches() throws DebugException {
     if (!isReady()) { return; }
       
@@ -1274,9 +1193,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       // Not suspended, get values in interpreter
       for (int i = 0; i < _watches.size(); i++) {
         DebugWatchData currWatch = _watches.get(i);
-        if (!_getWatchFromInterpreter(currWatch)) {
-          currWatch.hideValueAndType();
-        }
+        if (!_getWatchFromInterpreter(currWatch)) currWatch.hideValueAndType();
       }
       return;
 //      for (int i = 0; i < _watches.size(); i++) {
@@ -1291,8 +1208,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       List<StackFrame> frames;
       ThreadReference thread = _suspendedThreads.peek();
       if (thread.frameCount() <= 0 ) {
-        printMessage("Could not update watch values. The current thread " +
-                     "had no stack frames.");
+        printMessage("Could not update watch values. The current thread had no stack frames.");
         return;
       }
       frames = thread.frames(); // JDK 1.5 will eliminate this warning
@@ -1867,20 +1783,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
-  /**
-   * Calls the real switchToSuspendedThread, telling it to updateWatches.
-   * This is what is usually called.
-   */
-  private void _switchToSuspendedThread() throws DebugException {
-    _switchToSuspendedThread(true);
-  }
+  /** Calls the real switchToSuspendedThread, telling it to updateWatches. This is what is usually called. */
+  private void _switchToSuspendedThread() throws DebugException { _switchToSuspendedThread(true); }
 
-  /**
-   * Performs the bookkeeping to switch to the suspened thread on the
-   * top of the _suspendedThreads stack.
-   * @param updateWatches this is false if the current file does not have
-   * debug information. This prevents the default interpreter's watch values
-   * from being shown.
+  /** Performs the bookkeeping to switch to the suspened thread on the top of the _suspendedThreads stack.
+   *  @param updateWatches this is false if the current file does not have debug information. This prevents the default
+   *  interpreter's watch values from being shown.
    */
   private void _switchToSuspendedThread(boolean updateWatches) throws DebugException {
     if (printMessages) {
@@ -2094,7 +2002,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
-  protected void _copyVariablesFromInterpreter() throws DebugException {
+  /** Assumes lock is already held. */
+  private void _copyVariablesFromInterpreter() throws DebugException {
     try {
       // copy variables values out of interpreter's environment and
       // into the relevant stack frame
@@ -2115,13 +2024,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
-  /**
-   * This method is called to remove all of the debug interpreters upon shutting
-   * down.
-   */
+  /** Removes all of the debug interpreters as part of shutting down.  Assumes lock is already held. */
   private void _removeAllDebugInterpreters() {
-    DefaultInteractionsModel interactionsModel =
-      _model.getInteractionsModel();
+    DefaultInteractionsModel interactionsModel = _model.getInteractionsModel();
     String oldInterpreterName;
     if (_runningThread != null) {
       oldInterpreterName = _getUniqueThreadName(_runningThread);
@@ -2206,130 +2111,89 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.currThreadDied(); } });
   }
 
-  synchronized void nonCurrThreadDied() { 
+  void nonCurrThreadDied() { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.nonCurrThreadDied(); } }); 
   }
 
   /** Notifies all listeners that the debugger has shut down. updateThreads is set to true if the threads and stack 
    *  tables need to be updated, false if there are no suspended threads
    */
-  synchronized void notifyDebuggerShutdown() {
+  void notifyDebuggerShutdown() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.debuggerShutdown(); } });
   }
 
   /** Notifies all listeners that the debugger has started. */
-  synchronized void notifyDebuggerStarted() {
+  void notifyDebuggerStarted() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.debuggerStarted(); } });
   }
 
   /** Notifies all listeners that a step has been requested. */
-  synchronized void notifyStepRequested() {
+  void notifyStepRequested() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.stepRequested(); } });
   }
 
-  /** A stack from which you can remove any element, not just the top of the stack
+  /** A thread-safe stack from which you can remove any element, not just the top of the stack.  All synchronization is 
+   *  performed on the wrapped vector.
    *  TODO: make a generic Collection extending/replacing Stack.
    */
-  protected static class RandomAccessStack {
-    private Vector<ThreadReference> _data = new Vector<ThreadReference>();
+  private static class RandomAccessStack extends Stack<ThreadReference> {
 
-    public synchronized void push(ThreadReference t) {
-      _data.add(0, t);
-    }
-
-    public synchronized ThreadReference peek() throws NoSuchElementException {
-      try {
-        return _data.get(0);
-      }
-      catch(ArrayIndexOutOfBoundsException e) {
-        throw new NoSuchElementException("Cannot peek at the top of an empty RandomAccessStack!");
-      }
-    }
-
-    public synchronized ThreadReference peekAt(int i) throws NoSuchElementException {
-      try {
-        return _data.get(i);
-      }
-      catch(ArrayIndexOutOfBoundsException e) {
-        throw new NoSuchElementException("Cannot peek at element " + i + " of this stack!");
-      }
-    }
-
-    public synchronized ThreadReference remove(long id) throws NoSuchElementException{
-      for(int i = 0; i < _data.size(); i++) {
-        if ( _data.get(i).uniqueID() == id ) {
-          ThreadReference t = _data.get(i);
-          _data.remove(i);
-          return t;
+    public ThreadReference peekAt(int i) { return get(i); }
+      
+    public ThreadReference remove(long id) throws NoSuchElementException {
+      synchronized(this) {
+        for (int i = 0; i < size(); i++) {
+          if (get(i).uniqueID() == id) {
+            ThreadReference t = get(i);
+            remove(i);
+            return t;
+          }
         }
       }
 
       throw new NoSuchElementException("Thread " + id + " not found in debugger suspended threads stack!");
     }
 
-    public synchronized ThreadReference pop() throws NoSuchElementException{
-      try {
-        ThreadReference t = _data.get(0);
-        _data.remove(0);
-        return t;
-      }
-      catch (ArrayIndexOutOfBoundsException e) {
-        throw new NoSuchElementException("Cannot pop from an empty RandomAccessStack!");
-      }
-    }
-
     public synchronized boolean contains(long id) {
-      for(int i = 0; i < _data.size(); i++) {
-        if ( _data.get(i).uniqueID() == id ) {
-          return true;
-        }
+      for(int i = 0; i < size(); i++) {
+        if (get(i).uniqueID() == id) return true;
       }
-
       return false;
     }
 
-    public int size() {
-      return _data.size();
-    }
-
-    public boolean isEmpty() {
-      return size() == 0;
-    }
+    public boolean isEmpty() { return empty(); }
   }
 
-  /**
-   * This class tries to filter out system threads.
-   * It is currently not used.
-   *
-  class SystemThreadsFilter{
-    private HashMap<String,Boolean> _filterThese;
-
-    public SystemThreadsFilter(List threads) {
-      _filterThese = new HashMap<String,Boolean>();
-      Iterator iterator = threads.iterator();
-      String temp = null;
-
-      while(iterator.hasNext()) {
-        temp = ((ThreadReference)iterator.next()).name();
-        _filterThese.put(temp, Boolean.TRUE);
-      }
-    }
-
-    public List filter(List list) {
-      LinkedList retList = new LinkedList();
-      String temp = null;
-      ThreadReference tempThreadRef = null;
-      Iterator iterator = list.iterator();
-
-      while(iterator.hasNext()) {
-        tempThreadRef = (ThreadReference)iterator.next();
-        temp = tempThreadRef.name();
-        if ( _filterThese.get(temp) == null ) {
-          retList.add(tempThreadRef);
-        }
-      }
-
-      return retList;
-    }
-  }*/
+//  /** This class tries to filter out system threads. It is currently unused. */
+//  class SystemThreadsFilter{
+//    private HashMap<String,Boolean> _filterThese;
+//
+//    public SystemThreadsFilter(List threads) {
+//      _filterThese = new HashMap<String,Boolean>();
+//      Iterator iterator = threads.iterator();
+//      String temp = null;
+//
+//      while(iterator.hasNext()) {
+//        temp = ((ThreadReference)iterator.next()).name();
+//        _filterThese.put(temp, Boolean.TRUE);
+//      }
+//    }
+//
+//    public List filter(List list) {
+//      LinkedList retList = new LinkedList();
+//      String temp = null;
+//      ThreadReference tempThreadRef = null;
+//      Iterator iterator = list.iterator();
+//
+//      while(iterator.hasNext()) {
+//        tempThreadRef = (ThreadReference)iterator.next();
+//        temp = tempThreadRef.name();
+//        if ( _filterThese.get(temp) == null ) {
+//          retList.add(tempThreadRef);
+//        }
+//      }
+//
+//      return retList;
+//    }
+//  }
 }

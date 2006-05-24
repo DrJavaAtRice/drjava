@@ -2429,8 +2429,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     // create our model
     _model = new DefaultGlobalModel();
-    
-        
+
     _showDebugger = _model.getDebugger().isAvailable();
     _findReplace = new FindReplacePanel(this, _model);
  
@@ -2913,12 +2912,18 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   }
   
-  private DirectoryChooser makeFolderChooser(File workDir) {
-    DirectoryChooser dc = new DirectoryChooser(this);
-    dc.setSelectedFile(workDir);
-    dc.setApproveButtonText("Select");
-    dc.setDialogTitle("Open Folder");
-    dc.setAccessory(_openRecursiveCheckBox);
+  private DirectoryChooser makeFolderChooser(final File workDir) {
+    final DirectoryChooser dc = new DirectoryChooser(this);
+    /* The following code fragement was moved to the event thread because setSelectedFile occasionally generates an 
+     * ArrayOutOfBoundsException otherwise. */
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        dc.setSelectedFile(workDir);
+        dc.setApproveButtonText("Select");
+        dc.setDialogTitle("Open Folder");
+        dc.setAccessory(_openRecursiveCheckBox);
+      }
+    });
     return dc;
   }
 //  
@@ -3124,12 +3129,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    */
   public File[] getOpenFiles(JFileChooser jfc) throws OperationCanceledException {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
-    File selection = jfc.getSelectedFile();
-    if (selection != null) { // necessary for OS X?
-      jfc.setSelectedFile(selection.getParentFile());
-      jfc.setSelectedFile(selection);
-      jfc.setSelectedFile(null);
-    }
+//    File selection = jfc.getSelectedFile();
+//    if (selection != null) { // necessary for OS X?
+//      jfc.setSelectedFile(selection.getParentFile());
+//      jfc.setSelectedFile(selection);
+//      jfc.setSelectedFile(null);
+//    }
     int rc = jfc.showOpenDialog(this);
     return getChosenFiles(jfc, rc);
   }
@@ -3137,12 +3142,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Prompt the user to select a place to save the current document. */
   public File getSaveFile(JFileChooser jfc) throws OperationCanceledException {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
-    File selection = jfc.getSelectedFile();//_saveChooser.getSelectedFile();
-    if (selection != null) {
-      jfc.setSelectedFile(selection.getParentFile());
-      jfc.setSelectedFile(selection);
-      jfc.setSelectedFile(null);
-    }
+//    File selection = jfc.getSelectedFile();//_saveChooser.getSelectedFile();
+//    if (selection != null) {
+//      jfc.setSelectedFile(selection.getParentFile());
+//      jfc.setSelectedFile(selection);
+//      jfc.setSelectedFile(null);
+//    }
     
     OpenDefinitionsDocument active = _model.getActiveDocument();
     
@@ -3932,7 +3937,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     // tried passing false here. seemed to help with bug
     // [ 1478796 ] DrJava Does Not Shut Down With Project Open
     // on HP tc1100 and Toshiba Portege tablet PCs, but did not help in all cases
-    if (!_closeProject(true)) { return; /* if user pressed cancel, do not quit */ }
+    if (! _closeProject(true)) { return; /* if user pressed cancel, do not quit */ }
     
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
@@ -3941,7 +3946,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     // Save recent files, but only if there wasn't a problem at startup
     // (Don't want to overwrite a custom config file with a simple typo.)
-    if (!DrJava.getConfig().hadStartupException()) {
+    if (! DrJava.getConfig().hadStartupException()) {
       try { DrJava.getConfig().saveConfiguration(); }
       catch (IOException ioe) { _showIOError(ioe); }
     }

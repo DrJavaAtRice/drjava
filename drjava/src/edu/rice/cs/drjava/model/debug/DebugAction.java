@@ -36,65 +36,45 @@ package edu.rice.cs.drjava.model.debug;
 import com.sun.jdi.request.*;
 import java.util.Vector;
 
-/**
- * Keeps track of information about any request to the debugger, such
- * as Breakpoints.
- * @version $Id$
+/** Keeps track of information about any request to the debugger, such as Breakpoints.
+ *  @version $Id$
  */
 public abstract class DebugAction<T extends EventRequest> {
   public static final int ANY_LINE = -1;
 
-  protected JPDADebugger _manager;
+  protected final JPDADebugger _manager;
 
   // Request fields
 
-  /**
-   * Vector of EventRequests.  There might be more than one, since
-   * there can be multiple reference types for one class.  They all
-   * share the same attributes, though, so the other fields don't
-   * need to be vectors.
+  /** Vector of EventRequests.  There might be more than one, since there can be multiple reference types for one class.
+   *  They all share the same attributes, though, so the other fields don't need to be vectors.
    */
-  protected Vector<T> _requests;
-  protected int _suspendPolicy = EventRequest.SUSPEND_NONE;
-  protected boolean _isEnabled = true;
-  protected int _countFilter = -1;
-  protected int _lineNumber = ANY_LINE;
+  protected final Vector<T> _requests;
+  protected volatile int _suspendPolicy = EventRequest.SUSPEND_NONE;
+  protected volatile boolean _isEnabled = true;
+  protected volatile int _countFilter = -1;
+  protected volatile int _lineNumber = ANY_LINE;
 
-  /**
-   * Creates a new DebugAction.  Automatically tries to create the EventRequest
-   * if a ReferenceType can be found, or else adds this object to the
-   * PendingRequestManager. Any subclass should automatically call
-   * _initializeRequest in its constructor.
-   * @param manager JPDADebugger in charge
+  /** Creates a new DebugAction.  Automatically tries to create the EventRequest if a ReferenceType can be found, or 
+   *  else adds this object to the PendingRequestManager. Any subclass should automatically call _initializeRequest 
+   *  in its constructor.
+   *  @param manager JPDADebugger in charge
    */
   public DebugAction(JPDADebugger manager) {
     _manager = manager;
     _requests = new Vector<T>();
   }
 
-  /**
-   * Returns the EventRequest corresponding to this DebugAction, if it has
-   * been created, null otherwise.
-   */
-  public Vector<T> getRequests() {
-    return _requests;
-  }
+  /** Returns the EventRequest corresponding to this DebugAction, if it has been created, null otherwise. */
+  public Vector<T> getRequests() { return _requests; }
 
-  /**
-   * Returns the line number this DebugAction occurs on
-   */
-  public int getLineNumber() {
-    return _lineNumber;
-  }
+  /** Returns the line number this DebugAction occurs on */
+  public int getLineNumber() { return _lineNumber; }
 
-  /**
-   * Creates an EventRequest corresponding to this DebugAction, using the
-   * given ReferenceType.  This is called either from the DebugAction
-   * constructor or the PendingRequestManager, depending on when the
-   * ReferenceType becomes available. This DebugAction must be an
-   * instance of DocumentDebugAction since a ReferenceType is being
-   * used.
-   * @return true if the EventRequest is successfully created
+  /** Creates an EventRequest corresponding to this DebugAction, using the given ReferenceType.  This is called either
+   *  from the DebugAction constructor or the PendingRequestManager, depending on when the ReferenceType becomes 
+   *  available. This DebugAction must be an instance of DocumentDebugAction since a ReferenceType is being used.
+   *  @return true if the EventRequest is successfully created
    */
   //public abstract boolean createRequests(ReferenceType rt) throws DebugException;
 
@@ -104,14 +84,11 @@ public abstract class DebugAction<T extends EventRequest> {
       _prepareRequests(_requests);
       return true;
     }
-    else {
-      return false;
-    }
+    else return false;
   }
 
-  /**
-   * This should always be called from the constructor of the subclass. Tries
-   * to create all applicable EventRequests for this DebugAction.
+  /** This should always be called from the constructor of the subclass. Tries to create all applicable EventRequests
+   *  for this DebugAction.
    */
   protected void _initializeRequests() throws DebugException {
     createRequests();
@@ -120,16 +97,13 @@ public abstract class DebugAction<T extends EventRequest> {
     }
   }
 
-  /**
-   * Creates an appropriate EventRequest from the EventRequestManager and
-   * stores it in the _request field.
-   * @throws DebugException if the request could not be created.
+  /** Creates an appropriate EventRequest from the EventRequestManager and stores it in the _request field.
+   *  @throws DebugException if the request could not be created.
    */
   protected void _createRequests() throws DebugException { }
 
-  /**
-   * Prepares all relevant EventRequests with the current stored values.
-   * @param requests the EventRequests to prepare
+  /** Prepares all relevant EventRequests with the current stored values.
+   *  @param requests the EventRequests to prepare
    */
   protected void _prepareRequests(Vector<T> requests) {
     for (int i=0; i < requests.size(); i++) {
@@ -137,9 +111,8 @@ public abstract class DebugAction<T extends EventRequest> {
     }
   }
 
-  /**
-   * Prepares this EventRequest with the current stored values.
-   * @param request the EventRequest to prepare
+  /** Prepares this EventRequest with the current stored values.
+   *  @param request the EventRequest to prepare
    */
   protected void _prepareRequest(T request) {
     // the request must be disabled to be edited
@@ -160,7 +133,5 @@ public abstract class DebugAction<T extends EventRequest> {
   
   
   /** Enable/disable the breakpoint. */
-  public void setEnabled(boolean isEnabled) {
-    _isEnabled = isEnabled;
-  }
+  public void setEnabled(boolean isEnabled) { _isEnabled = isEnabled; }
 }

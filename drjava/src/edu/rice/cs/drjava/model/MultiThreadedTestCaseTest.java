@@ -46,9 +46,7 @@ public class MultiThreadedTestCaseTest extends DrJavaTestCase {
     public Uncaught(String name) { super(name); }
     public void testUncaught() {
       Thread t = new Thread(new Runnable() {
-        public void run() {
-          throw new RuntimeException();
-        }
+        public void run() { throw new RuntimeException(); }
       });
       t.start();
       join(t);

@@ -44,10 +44,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
 
-/**
- * Test functions of RecentFileManager.
- *
- * @version $Id$
+/** Test functions of RecentFileManager.
+ *  @version $Id$
  */
 public final class RecentFileManagerTest extends DrJavaTestCase {
 
@@ -57,21 +55,16 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
   private JMenu _menu;
   protected File _tempDir;
 
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
+  /** Creates a test suite for JUnit to run.
+   *  @return a test suite based on the methods in this class
    */
-  public static Test suite() {
-    return  new TestSuite(RecentFileManagerTest.class);
-  }
+  public static Test suite() { return  new TestSuite(RecentFileManagerTest.class); }
 
-  /**
-   * Setup method for each JUnit test case.
-   */
+  /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
     _menu = new JMenu();
-    _rfm = new RecentFileManager(0, _menu, null,OptionConstants.RECENT_FILES);
+    _rfm = new RecentFileManager(0, _menu, null, OptionConstants.RECENT_FILES);
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
   }
@@ -84,31 +77,22 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     super.tearDown();
   }
 
-  /**
-   * Create a new temporary file in _tempDir.  Calls with the same
-   * int will return the same filename, while calls with different
-   * ints will return different filenames.
+  /** Create a new temporary file in _tempDir.  Calls with the same int will return the same filename, while calls with
+   *  different ints will return different filenames.
    */
   protected File tempFile() throws IOException {
     return File.createTempFile("DrJava-test", ".java", _tempDir).getCanonicalFile();
   }
 
-  /**
-   * Creates a new temporary file and writes the given text to it.
-   * The File object for the new file is returned.
-   */
+  /** Creates a new temporary file and writes the given text to it. The File object for the new file is returned. */
   protected File writeToNewTempFile(String text) throws IOException {
     File temp = tempFile();
     FileOps.writeStringToFile(temp, text);
     return temp;
   }
 
-  /**
-   * Tests that the size of the recent files list doesn't get bigger than
-   * the maximum size.
-   */
+  /** Tests that the size of the recent files list doesn't get bigger than the maximum size. */
   public void testAddMoreThanMaxSize() throws IOException {
-
 
     final File tempFile = writeToNewTempFile(BAR_TEXT);
     final File tempFile2 = writeToNewTempFile(FOO_TEXT);
@@ -117,15 +101,10 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     _rfm.updateOpenFiles(tempFile2);
     Vector<File> vector = _rfm.getFileVector();
     assertEquals("number of recent files", 1, vector.size());
-    assertEquals("text of recent file",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(vector.get(0)));
+    assertEquals("text of recent file", FOO_TEXT, FileOps.readFileAsString(vector.get(0)));
   }
 
-  /**
-   * Tests that the size of the recent files list is reduced in response to a
-   * decrease in max size.
-   */
+  /** Tests that the size of the recent files list is reduced in response to a decrease in max size. */
   public void testShrinksToMaxSize() throws IOException {
 
     final File tempFile = writeToNewTempFile(BAR_TEXT);
@@ -136,25 +115,16 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     _rfm.updateOpenFiles(tempFile2);
     Vector<File> vector = _rfm.getFileVector();
     assertEquals("number of recent files", 2, vector.size());
-    assertEquals("text of most-recent file",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(vector.get(0)));
-    assertEquals("text of second-most recent file",
-                 BAR_TEXT,
-                 FileOps.readFileAsString(vector.get(1)));
+    assertEquals("text of most-recent file", FOO_TEXT, FileOps.readFileAsString(vector.get(0)));
+    assertEquals("text of second-most recent file", BAR_TEXT, FileOps.readFileAsString(vector.get(1)));
     _rfm.updateMax(1);
     _rfm.numberItems();
     vector = _rfm.getFileVector();
     assertEquals("number of recent files", 1, vector.size());
-    assertEquals("text of recent file",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(vector.get(0)));
-
+    assertEquals("text of recent file", FOO_TEXT, FileOps.readFileAsString(vector.get(0)));
   }
 
-  /**
-   * Tests that files are removed correctly from the list.
-   */
+  /** Tests that files are removed correctly from the list. */
   public void testRemoveFile() throws Exception {
     // Open two files
     final File tempFile = writeToNewTempFile(BAR_TEXT);
@@ -180,10 +150,7 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     assertEquals("number of recent files", 0, vector.size());
   }
 
-  /**
-   * Tests that the list is re-ordered correctly after a file is
-   * re-opened, even if it has a different path.
-   */
+  /** Tests that the list is re-ordered correctly after a file is re-opened, even if it has a different path. */
   public void testReopenFiles() throws Exception {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
     final File tempFile2 = writeToNewTempFile(FOO_TEXT);
@@ -200,9 +167,7 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     vector = _rfm.getFileVector();
     assertEquals("tempFile2 should be at top", vector.get(0), tempFile2);
 
-
-    // Re-open tempFile with a different path
-    //  eg. /tmp/MyFile -> /tmp/./MyFile
+    // Re-open tempFile with a different path, e.g. /tmp/MyFile -> /tmp/./MyFile
     File parent = tempFile.getParentFile();
     String dotSlash = "." + System.getProperty("file.separator");
     parent = new File(parent, dotSlash);
@@ -215,15 +180,11 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     assertTrue("should not contain tempFile", !(vector.contains(tempFile)));
   }
 
-  /**
-   * Verifies that the presentation names for the directory filter are correct.
-   */
+  /** Verifies that the presentation names for the directory filter are correct. */
   public void testDirectoryFilterDescription() {
     DirectoryFilter f = new DirectoryFilter();
-    assertEquals("Should have the correct description.",
-                 "Directories", f.getDescription());
+    assertEquals("Should have the correct description.", "Directories", f.getDescription());
     f = new DirectoryFilter("Other directories");
-    assertEquals("Should have allowed an alternate description.",
-                 "Other directories", f.getDescription());
+    assertEquals("Should have allowed an alternate description.", "Other directories", f.getDescription());
   }
 }

@@ -51,10 +51,13 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.debug.DebugModelCallback;
-import edu.rice.cs.util.Log;
-import edu.rice.cs.util.ClassPathVector;
-import edu.rice.cs.util.StringOps;
+
 import edu.rice.cs.util.ArgumentTokenizer;
+import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.UnexpectedException;
+
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
@@ -70,7 +73,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   public static final String DEFAULT_INTERPRETER_NAME = "DEFAULT";
   
-  private static Log _log = new Log("MainJVMLog", false);
+//  private static Log _log = new Log("MainJVMLog", true);
   
   /** Working directory for slave JVM */
   private volatile File _workDir;
@@ -142,9 +145,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     int lastIndex = 0;
     _startupClassPathVector = new ClassPathVector();
     while (index != -1) {
-      try{
-        _startupClassPathVector.add(new File(_startupClassPath.substring(lastIndex, index)).toURL());
-      }
+      try { _startupClassPathVector.add(new File(_startupClassPath.substring(lastIndex, index)).toURL()); }
       catch(MalformedURLException murle) {
         // just don't add bad classpath entry
       }
@@ -153,9 +154,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     // Get the last entry
     index = _startupClassPath.length();
-    try{
-      _startupClassPathVector.add(new File(_startupClassPath.substring(lastIndex, index)).toURL());
-    }
+    try { _startupClassPathVector.add(new File(_startupClassPath.substring(lastIndex, index)).toURL()); }
     catch(MalformedURLException murle) {
       // fail silently if the classpath entry is bad
     }
@@ -182,9 +181,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Sets the extra (optional) arguments to be passed to the interpreter.
    *  @param argString the arguments as they would be typed at the command-line
    */
-  public void setOptionArgs(String argString) {
-    _optionArgs = ArgumentTokenizer.tokenize(argString);
-  }
+  public void setOptionArgs(String argString) { _optionArgs = ArgumentTokenizer.tokenize(argString); }
   
   /** Interprets string s in slave JVM.  No masterJVMLock synchronization because reading _restart is the only
    *  access.to master JVM state. */
@@ -197,7 +194,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // Spawn thread on InterpreterJVM side
     //  (will receive result in the interpretResult(...) method)
     try {
-      _log.logTime("main.interp: " + s);
+      _log.log(this + ".interpret(" + s + ")");
       _slaveJVMUsed = true;
       _interactionsModel.slaveJVMUsed();
       _interpreterJVM().interpret(s);
@@ -205,7 +202,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (java.rmi.UnmarshalException ume) {
       // Could not receive result from interpret; system probably exited.
       // We will silently fail and let the interpreter restart.
-      _log.logTime("main.interp: UnmarshalException, so interpreter is dead:\n" + ume);
+      _log.log(this + ".interpret threw UnmarshalException, so interpreter is dead:\n" + ume);
     }
     catch (RemoteException re) { _threwException(re); }
   }
@@ -234,7 +231,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     if (! _restart) return null;
     
     ensureInterpreterConnected();
-    
+      
     try { return _interpreterJVM().getVariableClassName(var); }
     catch (RemoteException re) {
       _threwException(re);
@@ -246,16 +243,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param result The result of the interpretation
    */
   public void interpretResult(InterpretResult result) throws RemoteException {
-    //     try {
-    _log.logTime("main.interp result: " + result);
-    
-    result.apply(getResultHandler());
-    //      }
-    //      catch (Throwable t) {
-    //        _log.logTime("EXCEPTION in interpretResult: " + t.toString());
-    //      }
+    try {
+      _log.log(this + ".interpretResult(" + result + ")");
+      
+      result.apply(getResultHandler());
+    }
+    catch (Throwable t) {
+      _log.log(this + "interpretResult threw " + t.toString());
+    }
   }
-  
   
   /**
    * Adds a single path to the Interpreter's class path.
@@ -330,7 +326,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       
       try {
         Vector<String> strClassPath = new Vector<String>(_interpreterJVM().getAugmentedClassPath());
-        ClassPathVector classPath = new ClassPathVector(strClassPath.size()+_startupClassPathVector.size());
+        ClassPathVector classPath = new ClassPathVector(strClassPath.size() + _startupClassPathVector.size());
         
         for(String s : strClassPath) { 
           classPath.add(s); // automatically converted to URL
@@ -371,7 +367,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     if (! _restart) return;
     
     ensureInterpreterConnected();
-    
+
     try { _interpreterJVM().setShowMessageOnResetFailure(show); }
     catch (RemoteException re) { _threwException(re); }
   }
@@ -520,7 +516,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
     
     try { _interpreterJVM().addDebugInterpreter(name, className); }
-    
     catch (RemoteException re) { _threwException(re); }
   }
   
@@ -549,6 +544,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // silently fail if disabled. see killInterpreter docs for details.
     if (!_restart) return false;
     ensureInterpreterConnected();
+    
     try {
       boolean result = _interpreterJVM().setActiveInterpreter(name);
       _currentInterpreterName = name;
@@ -576,7 +572,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       return result;
     }
     catch (ConnectIOException ce) {
-      _log.logTime("Could not connect to the interpreterJVM after killing it", ce);
+      _log.log(this + "could not connect to the interpreterJVM after killing it.  Threw " + ce);
       return false;
     }
     catch (RemoteException re) {
@@ -585,7 +581,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
   }
 
-  
   /** Accesses the cached current interpreter name. */
   public String getCurrentInterpreterName() { return _currentInterpreterName; }
   
@@ -598,18 +593,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
   public void killInterpreter(File wd) {
     synchronized(_masterJVMLock) {
-      try {
 //        Utilities.showDebug("MainJVM: killInterpreter called with working directory = " + wd);
         _workDir = wd;
         _restart = (wd != null);
         _cleanlyRestarting = true;
         if (_restart) _interactionsModel.interpreterResetting();
-        quitSlave();  // new slave JVM is restarted by call on startInterpreterJVM on death of current slave
       }
-      catch (ConnectException ce) {
-        _log.logTime("Could not connect to the interpreterJVM while trying to kill it", ce);
-      }
-      catch (RemoteException re) { _threwException(re); }
+    /* Dropped lock before making remote call. */
+    try { quitSlave(); } // new slave JVM is restarted by call on startInterpreterJVM on death of current slave
+    catch (RemoteException e) {
+      _log.log(this + "could not connect to the interpreterJVM while trying to kill it.  Threw " + e);
     }
   }
   
@@ -617,18 +610,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param classPath Classpath for the interpreter JVM
    */
   public void setStartupClassPath(String classPath) {
-    synchronized(_masterJVMLock) {
-      _startupClassPath = classPath;
-      _parseStartupClassPath();
-    }
+    _startupClassPath = classPath;
+    _parseStartupClassPath();
   }
   
   /** Starts the interpreter if it's not running already. */
   public void startInterpreterJVM() {
-//    Utilities.show("MainJVM: startInterpreterJVM() called");
-    synchronized(_masterJVMLock) {  // synch is probably overkill
-      if (isStartupInProgress() || isInterpreterRunning())  return;
-    }
+    _log.log(this + ".startInterpreterJVM() called");
+//    synchronized(_masterJVMLock) {  // synch is unnecessary
+    if (isStartupInProgress() || isInterpreterRunning())  return;  // These predicates simply check volatile boolean flags
+//    }
     // Pass assertion and debug port information as JVM arguments
     ArrayList<String> jvmArgs = new ArrayList<String>();
     if (allowAssertions())  jvmArgs.add("-ea");
@@ -638,7 +629,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     //      jvmArgs.add("-Duser.dir=" + workDir.getAbsolutePath());
     //    }
     int debugPort = getDebugPort();
-    _log.logTime("starting with debug port: " + debugPort);
+    _log.log("Main JVM starting with debug port: " + debugPort);
     if (debugPort > -1) {
       jvmArgs.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + debugPort);
       jvmArgs.add("-Xdebug");
@@ -677,7 +668,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //      " _cleanlyRestarting = " + _cleanlyRestarting);
     if (_restart) {
       // We have already fired this event if we are cleanly restarting
-      if (!_cleanlyRestarting) _interactionsModel.interpreterResetting();
+      if (! _cleanlyRestarting) _interactionsModel.interpreterResetting();
 //      Utilities.showDebug("MainJVM: calling startInterpreterJVM()");
       startInterpreterJVM();
     }
@@ -686,7 +677,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _cleanlyRestarting = false;
   }
   
-  /** Action to take if the slave JVM quits before registering.
+  /** Action to take if the slave JVM quits before registering.  Assumes _masterJVMLock is held.
    *  @param status Status code of the JVM
    */
   protected void slaveQuitDuringStartup(int status) {
@@ -696,6 +687,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     String msg = "Interpreter JVM exited before registering, status: " + status;
     IllegalStateException e = new IllegalStateException(msg);
+    _log.log("Slave quit during startup. Throwing " + e);
     _interactionsModel.interpreterResetFailed(e);
     _cleanlyRestarting = false;
     throw e;
@@ -708,22 +700,19 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     new edu.rice.cs.drjava.ui.DrJavaErrorHandler().handle(cause);
   }
   
-  /** This method is called by the interpreter JVM if it cannot be exited (likely because of its having a
-   *  security manager)
+  /** This method is called by the interpreter JVM if it cannot be exited.
    *  @param th The Throwable thrown by System.exit
    */
   public void quitFailed(Throwable th) throws RemoteException {
-    synchronized(_masterJVMLock) {
-      _interactionsModel.interpreterResetFailed(th);
-      _cleanlyRestarting = false;
-    }
+    _interactionsModel.interpreterResetFailed(th);
+    _cleanlyRestarting = false;
   }
   
   
   /** Returns whether a JVM is currently starting.  This override widens the visibility of the method. */
   public boolean isStartupInProgress() { return super.isStartupInProgress(); }
   
-  /** Called when the Interpreter JVM connects to us after being started. */
+  /** Called when Interpreter JVM connects to us after being started. Assumes that _masterJVMLock is already held. */
   protected void handleSlaveConnected() {
     // we reset the enabled flag since, unless told otherwise via
     // killInterpreter(false), we want to automatically respawn
@@ -738,13 +727,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _interactionsModel.interpreterReady(_workDir);
     _junitModel.junitJVMReady();
     
-    _log.logTime("thread in connected: " + Thread.currentThread());
+    _log.log("Main JVM Thread for slave connection is: " + Thread.currentThread());
     
-    synchronized(_interpreterLock) {
-      // notify a thread that is waiting in ensureInterpreterConnected
-      _interpreterLock.notify();
-    }
+    // notify a thread that is waiting in ensureInterpreterConnected
+    synchronized(_interpreterLock) { _interpreterLock.notify(); }
   }
+
   
   /** Returns the visitor to handle an InterpretResult. */
   protected InterpretResultVisitor<Object> getResultHandler() { return _handler; }
@@ -785,6 +773,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** If an interpreter has not registered itself, this method will block until one does.*/
   public void ensureInterpreterConnected() {
+//    _log.log("ensureInterpreterConnected called by Main JVM");
     try {
       synchronized(_interpreterLock) {
         /* Now we silently fail if interpreter is disabled instead of throwing an exception. This situation
@@ -794,13 +783,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         //throw new IllegalStateException("Interpreter is disabled");
         //}
         while (_interpreterJVM() == null) {
-          //_log.logTime("interpreter is null, waiting for it to register");
+//          _log.log("interpreter is null in Main JVM, waiting for it to register");
           _interpreterLock.wait();
         }
-        //_log.logTime("interpreter registered; moving on");
+//        _log.log("interpreter registered in Main JVM; moving on");
       }
     }
-    catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
+    catch (InterruptedException ie) { throw new UnexpectedException(ie); }
   }
   
   /**
@@ -849,6 +838,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       _interactionsModel.replReturnedSyntaxError(that.getErrorMessage(), that.getInteraction(), that.getStartRow(),
                                                  that.getStartCol(), that.getEndRow(), that.getEndCol() );
       return null;
+    }
+    
+    public Object forInterpreterBusy(InterpreterBusy that) {
+      throw new UnexpectedException("MainJVM.interpret() called when InterpreterJVM was busy!");
     }
   }
   

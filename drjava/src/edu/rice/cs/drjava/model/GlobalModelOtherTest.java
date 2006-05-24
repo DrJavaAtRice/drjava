@@ -127,6 +127,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     final String beforeAbort = interpret("DrJavaTestFoo.class.getName()"); /* interpret("17"); */
     
+    GlobalModelTestCase._log.log("Completed initial interpret call");
+    
     assertEquals("\"DrJavaTestFoo\"", beforeAbort);
     
     Utilities.clearEventQueue();
@@ -135,10 +137,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     _model.addListener(listener);
     listener.logInteractionStart();
+    GlobalModelTestCase._log.log("Starting infinite loop");
     interpretIgnoreResult("while (true) {}");
     Utilities.clearEventQueue();
     
     listener.assertInteractionStartCount(1);
+    
+    GlobalModelTestCase._log.log("Resetting interactions");
     _model.resetInteractions(FileOption.NULL_FILE);
     listener.waitResetDone();
     

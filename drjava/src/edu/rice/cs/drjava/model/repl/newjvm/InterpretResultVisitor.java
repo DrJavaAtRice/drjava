@@ -55,4 +55,5 @@ public interface InterpretResultVisitor<T> {
   public T forValueResult(ValueResult that);
   public T forExceptionResult(ExceptionResult that);
   public T forSyntaxErrorResult(SyntaxErrorResult that);
+  public T forInterpreterBusy(InterpreterBusy that);
 }

@@ -38,8 +38,8 @@ import java.io.File;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.DummyGlobalModelListener;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
@@ -379,7 +379,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
                  _secondPrompt); 
     
     synchronized(_resetLock) { _resetDone = false; }
-    _model.addListener(new DummyGlobalModelListener() {
+    _model.addListener(new DummyInteractionsListener() {
       public void interpreterReady(File wd) {
         synchronized(_resetLock) {
           _resetDone = true;

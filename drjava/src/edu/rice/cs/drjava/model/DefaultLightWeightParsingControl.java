@@ -78,7 +78,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
   /** Thread group for the updater. */
   private ThreadGroup _updaterThreadGroup = new ThreadGroup("Light-weight parsing updater thread group") {
     public void uncaughtException(Thread t, Throwable e) {
-      _log.logTime("Uncaught exception in updater; disabled for rest of session", e);
+      _log.log("Uncaught exception in updater; disabled for rest of session", e);
       new edu.rice.cs.drjava.ui.DrJavaErrorHandler().handle(e);
     }
   };
@@ -88,7 +88,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
     public void run() {
       while(true) { // this is ok, it's a daemon thread and will die when all other threads have died
         while (!_running) {
-          _log.logTime("Waiting...");
+          _log.log("Waiting...");
           try {
             synchronized(_restart) {
               if (!_running) {
@@ -132,7 +132,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
   
   /** Perform light-weight parsing. */
   public synchronized void update(final OpenDefinitionsDocument doc) {
-    _log.logTime("Update for "+doc);
+    _log.log("Update for "+doc);
     try {
       _lastUpdates.put(doc, System.currentTimeMillis());
       final String old = _enclosingClassNames.get(doc);
@@ -154,7 +154,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
   /** Start or stop automatic updates.
    *  @param true to start or false to stop automatic updates */
   public void setAutomaticUpdates(boolean b) {
-    _log.logTime("setAutomaticUpdates("+b+")");
+    _log.log("setAutomaticUpdates("+b+")");
     _running = b;
     if (b) {
       delay();

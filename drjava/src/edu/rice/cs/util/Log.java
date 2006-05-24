@@ -48,19 +48,13 @@ import java.util.Date;
 public class Log {
   public static final boolean ENABLE_ALL = false;
 
-  /**
-   * Whether this particular log is enabled in development mode.
-   */
+  /** Whether this particular log is enabled in development mode. */
   protected boolean _isEnabled;
 
-  /**
-   * The filename of this log.
-   */
+  /** The filename of this log. */
   protected String _name;
 
-  /**
-   * PrintWriter to print messages to a file.
-   */
+  /** PrintWriter to print messages to a file. */
   protected PrintWriter _writer;
 
   /** Creates a new Log with the given name.  If enabled is true, a file is created in the current directory 
@@ -83,7 +77,7 @@ public class Log {
           FileWriter w = new FileWriter(f.getAbsolutePath(), true);
           _writer = new PrintWriter(w);
 
-          logTime("Log '" + _name + "' opened: " + (new Date()));
+          log("Log '" + _name + "' opened: " + (new Date()));
         }
         catch (IOException ioe) {
           throw new RuntimeException("Could not create log: " + ioe);
@@ -92,59 +86,40 @@ public class Log {
     }
   }
 
-  /**
-   * Sets whether this log is enabled.  Only has an effect if
-   * the code is in development mode.
-   * @param enabled Whether to print messages to the log file
+  /** Sets whether this log is enabled.  Only has an effect if the code is in development mode.
+   *  @param enabled Whether to print messages to the log file
    */
-  public void setEnabled(boolean isEnabled) {
-    _isEnabled = isEnabled;
-  }
+  public void setEnabled(boolean isEnabled) { _isEnabled = isEnabled; }
 
-  /**
-   * Returns whether this log is currently enabled.
-   */
+  /** Returns whether this log is currently enabled. */
   public boolean isEnabled() {
     return (_isEnabled || ENABLE_ALL);
   }
 
-  /**
-   * Prints a message to the log, if enabled.
-   * @param message Message to print.
+  /** Prints a message to the log, if enabled.
+   *  @param message Message to print.
    */
   public synchronized void log(String message) {
     if (isEnabled()) {
       if (_writer == null) {
         _init();
       }
-      _writer.println(message);
+      _writer.println((new Date()) + ": " + message);
       _writer.flush();
     }
   }
 
-  /**
-   * Prints a time stamped message to the log, if enabled.
-   * @param message Message to print
+ 
+  /** Prints a message and exception stack trace to the log, if enabled.
+   *  @param s Message to print
+   *  @param t Throwable to log
    */
-  public synchronized void logTime(String message) {
-    if (isEnabled()) {
-      long t = System.currentTimeMillis();
-      log(t + ": " + message);
-    }
-  }
-
-  /**
-   * Prints a time stamped message and exception stack trace
-   * to the log, if enabled.
-   * @param s Message to print
-   * @param t Throwable to log
-   */
-  public synchronized void logTime(String s, Throwable t) {
+  public synchronized void log(String s, Throwable t) {
     if (isEnabled()) {
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);
       t.printStackTrace(pw);
-      logTime(s + "\n" + sw.toString());
+      log(s + "\n" + sw.toString());
     }
   }
 }

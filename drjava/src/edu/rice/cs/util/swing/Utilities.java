@@ -117,7 +117,7 @@ public class Utilities {
   public static class TextAreaMessageDialog extends JDialog {
     
     /** True if the program is run in non-interactive test mode. */
-    public static boolean TEST_MODE = false;
+    public static volatile boolean TEST_MODE = false;
 
     /** Show the initialized dialog.
      *  @param comp parent component, or null

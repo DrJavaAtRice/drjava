@@ -43,18 +43,53 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util.newjvm;
+package edu.rice.cs.drjava.model.repl;
 
-import java.rmi.*;
-import java.net.URL;
+import java.io.File;
 
-/** Defines an interface for a classloader that can be used across jvm's */
-public interface IRemoteClassLoader extends Remote {
-
-  /** Loads the class using the remote classloader that implements this interface. */
-  public Class<?> loadRemoteClass(String name) throws ClassNotFoundException, RemoteException;
+/** A dummy InteractionsListener that does nothing.
+ *  @version $Id: InteractionsListener.java 3808 2006-04-19 19:28:49Z jon-lugo $
+ */
+public class DummyInteractionsListener implements InteractionsListener {
   
-  /** Gets the resource from the master jvm. */
-  public URL getRemoteResource(String name) throws ClassNotFoundException, RemoteException;
+  /** Called after an interaction is started by the GlobalModel.  */
+  public void interactionStarted() { }
+
+  /** Called when an interaction has finished running. */
+  public void interactionEnded() { }
+  
+  /** Called when the interactions window generates a syntax error.
+   *  @param offset the error's offset into the InteractionsDocument
+   *  @param length the length of the error
+   */
+  public void interactionErrorOccurred(int offset, int length) { }
+
+  /** Called when the interactionsJVM has begun resetting. */
+  public void interpreterResetting() { }
+  
+  /** Called when the interactions window is reset. */
+  public void interpreterReady(File wd) { }
+
+  /** Called when the interactions JVM was closed by System.exit
+   *  or by being aborted. Immediately after this the interactions
+   *  will be reset.
+   * @param status the exit code
+   */
+  public void interpreterExited(int status) { }
+  
+  /** Called if the interpreter reset failed. (Subclasses must maintain listeners.) */
+  public void interpreterResetFailed(Throwable t) { }
+  
+  /** Called when the active interpreter is changed.
+   *  @param inProgress Whether the new interpreter is currently processing an interaction (i.e. whether an 
+   *  interactionEnded event will be fired)
+   */
+  public void interpreterChanged(boolean inProgress) { }
+
+  /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
+  public void interactionIncomplete() { }
+  
+  /** Called when the slave JVM is used for interpretation or unit testing. */
+  public void slaveJVMUsed() { }
 }
 

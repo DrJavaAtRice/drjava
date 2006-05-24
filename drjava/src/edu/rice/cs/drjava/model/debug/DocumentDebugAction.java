@@ -44,17 +44,15 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import javax.swing.text.BadLocationException;
 
-/**
- * Superclasses all DebugActions that are associated with specific
- * OpenDefinitionsDocuments.
- * @version $Id$
+/** Superclasses all DebugActions that are associated with specific OpenDefinitionsDocuments.
+ *  @version $Id$
  */
 public abstract class DocumentDebugAction<T extends EventRequest> extends DebugAction<T> {
   
-  protected String _className;
-  protected String _exactClassName;
-  protected File _file;
-  protected OpenDefinitionsDocument _doc;
+  protected volatile String _className;
+  protected volatile String _exactClassName;
+  protected volatile File _file;
+  protected volatile OpenDefinitionsDocument _doc;
   protected int _offset;
   
   
@@ -67,9 +65,7 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
    * @param doc Document this action corresponds to
    * @param offset Offset into the document that the action affects
    */
-  public DocumentDebugAction (JPDADebugger manager,
-                              OpenDefinitionsDocument doc,
-                              int offset) throws DebugException {
+  public DocumentDebugAction (JPDADebugger manager, OpenDefinitionsDocument doc, int offset) throws DebugException {
     super(manager);
     _exactClassName = null;
     try {
@@ -109,16 +105,10 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   public String getClassName() { return _className; }
   
   /** Returns the file this DebugAction occurs in. */
-  public File getFile() {
-    return _file;
-  }
+  public File getFile() { return _file; }
   
-  /**
-   * Returns the document this DebugAction occurs in.
-   */
-  public OpenDefinitionsDocument getDocument() {
-    return _doc;
-  }
+  /** Returns the document this DebugAction occurs in. */
+  public OpenDefinitionsDocument getDocument() { return _doc; }
   
   /** @return offset of this debug action. */
   public int getOffset() { return _offset; }
@@ -126,13 +116,10 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   /** @return exact class name, or null if not available. */
   public String getExactClassName() { return _exactClassName; }
   
-  /**
-   * Creates EventRequests corresponding to this DebugAction, using the
-   * given ReferenceTypes.  This is called either from the DebugAction
-   * constructor or the PendingRequestManager, depending on when the
-   * ReferenceTypes become available.  (There may be multiple reference
-   * types for the same class if a custom class loader is used.)
-   * @return true if the EventRequest is successfully created
+  /** Creates EventRequests corresponding to this DebugAction, using the given ReferenceTypes.  This is called either 
+   *  from the DebugAction constructor or the PendingRequestManager, depending on when the ReferenceTypes become 
+   *  available.  (There may be multiple reference types for the same class if a custom class loader is used.)
+   *  @return true if the EventRequest is successfully created
    */
   public boolean createRequests(Vector<ReferenceType> refTypes) throws DebugException {
     _createRequests(refTypes);
@@ -140,21 +127,15 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
       _prepareRequests(_requests);
       return true;
     }
-    else {
-      return false;
-    }
+    else return false;
   }
   
-  /**
-   * This should always be called from the constructor of the subclass.
-   * Attempts to create EventRequests on the given ReferenceTypes, and
-   * also adds this action to the pending request manager (so identical
-   * classes loaded in the future will also have this action).
+  /** This should always be called from the constructor of the subclass.  Attempts to create EventRequests on the 
+   *  given ReferenceTypes, and also adds this action to the pending request manager (so identical classes loaded
+   *  in the future will also have this action).
    */
   protected void _initializeRequests(Vector<ReferenceType> refTypes) throws DebugException {
-    if (refTypes.size() > 0) {
-      createRequests(refTypes);
-    }
+    if (refTypes.size() > 0) createRequests(refTypes);
     else {
       if (_exactClassName!=null) {
         List<ReferenceType> referenceTypes = _manager.getVM().classesByName(_exactClassName);
@@ -172,18 +153,15 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
     //}
   }
   
-  /**
-   * Creates appropriate EventRequests from the EventRequestManager and
-   * stores them in the _requests field.
-   * @param refTypes All (identical) ReferenceTypes to which this action
-   * applies.  (There may be multiple if a custom class loader is in use.)
-   * @throws DebugException if the requests could not be created.
+  /** Creates appropriate EventRequests from the EventRequestManager and stores them in the _requests field.
+   *  @param refTypes All (identical) ReferenceTypes to which this action applies.  (There may be multiple if a custom
+   *         class loader is in use.)
+   *  @throws DebugException if the requests could not be created.
    */
   protected abstract void _createRequests(Vector<ReferenceType> refTypes) throws DebugException;
   
-  /**
-   * Prepares this EventRequest with the current stored values.
-   * @param request the EventRequest to prepare
+  /** Prepares this EventRequest with the current stored values.
+   *  @param request the EventRequest to prepare
    */
   protected void _prepareRequest(T request) {
     super._prepareRequest(request);

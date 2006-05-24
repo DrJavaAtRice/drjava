@@ -41,24 +41,22 @@ import com.sun.jdi.request.*;
 import java.util.*;
 import java.io.*;
 
-/**
- * A thread which listens and responds to events from JPDA when the debugger
- * has attached to another JVM.
- * @version $Id$
+/** A thread that listens and responds to events from JPDA when the debugger has attached to another JVM.
+ *  @version $Id$
  */
 public class EventHandlerThread extends Thread {
 
   /** Debugger to which this class reports events. */
-  protected final JPDADebugger _debugger;
+  private final JPDADebugger _debugger;
 
   /** JPDA reference to the VirtualMachine generating the events. */
-  protected final VirtualMachine _vm;
+  private final VirtualMachine _vm;
 
   /** Whether this event handler is currently connected to the JPDA VirtualMachine. */
-  private boolean _connected;
+  private volatile boolean _connected;
 
   /** A log for recording messages in a file. */
-  protected final Log _log;
+  private final Log _log;
 
   /** Creates a new EventHandlerThread to listen to events from the given debugger and virtual machine.  Calling
    *  this Thread's start() method causes it to begin listenting.
@@ -73,27 +71,18 @@ public class EventHandlerThread extends Thread {
     _log = new Log("EventHandlerThreadLog", false);
   }
 
-  /**
-   * Logs any unexpected behavior that occurs (but which should not
-   * cause DrJava to abort).
-   * @param message message to print to the log
+  /** Logs any unexpected behavior that occurs (but which should not cause DrJava to abort).
+   *  @param message message to print to the log
    */
-  protected void _log(String message) {
-    _log.logTime(message);
-  }
+  private void _log(String message) { _log.log(message); }
 
-  /**
-   * Logs any unexpected behavior that occurs (but which should not
-   * cause DrJava to abort).
-   * @param message message to print to the log
-   * @param t Exception or Error being logged
+  /** Logs any unexpected behavior that occurs (but which should not cause DrJava to abort).
+   *  @param message message to print to the log
+   *  @param t Exception or Error being logged
    */
-  protected void _log(String message, Throwable t) {
-    _log.logTime(message, t);
-  }
+  private void _log(String message, Throwable t) { _log.log(message, t); }
 
-  /** Main functionality of this thread.  Continually consumes events from the VM's event queue until it is 
-   *  disconnected.*/
+  /** Continually consumes events from the VM's event queue until it is disconnected.*/
   public void run() {
     _debugger.notifyDebuggerStarted();
 
@@ -136,7 +125,7 @@ public class EventHandlerThread extends Thread {
   /** Processes a given event from JPDA. A visitor approach would be much better for this, but Sun's Event class 
    *  doesn't have an appropriate visit() method.
    */
-  public void handleEvent(Event e) throws DebugException {
+  private void handleEvent(Event e) throws DebugException {
 //    Utilities.showDebug("EventHandler.handleEvent(" + e + ") called");
     _log("handling event: " + e);
 
@@ -155,20 +144,18 @@ public class EventHandlerThread extends Thread {
   }
 
   /** Returns whether the given thread is both suspended and has stack frames. */
-  protected boolean _isSuspendedWithFrames(ThreadReference thread) throws DebugException {
-    try {
-      return thread.isSuspended() && thread.frameCount() > 0;
-    }
+  private boolean _isSuspendedWithFrames(ThreadReference thread) throws DebugException {
+    
+    try { return thread.isSuspended() && thread.frameCount() > 0; }
     catch (IncompatibleThreadStateException itse) {
-      throw new DebugException("Could not count frames on a suspended thread: " +
-                               itse);
+      throw new DebugException("Could not count frames on a suspended thread: " + itse);
     }
   }
 
   /** Responds to a breakpoint event.
    *  @param e breakpoint event from JPDA
    */
-  protected void _handleBreakpointEvent(BreakpointEvent e) throws DebugException {
+  private void _handleBreakpointEvent(BreakpointEvent e) throws DebugException {
     synchronized(_debugger) {
       if (_isSuspendedWithFrames(e.thread()) && _debugger.setCurrentThread(e.thread())) {
 //        Utilities.showDebug("EventHandlerThread._handleBreakpointEvent(" + e + ") called");
@@ -182,13 +169,11 @@ public class EventHandlerThread extends Thread {
   /** Responds to a step event.
    *  @param e step event from JPDA
    */
-  protected void _handleStepEvent(StepEvent e) throws DebugException {
+  private void _handleStepEvent(StepEvent e) throws DebugException {
     synchronized(_debugger) {
       if (_isSuspendedWithFrames(e.thread()) && _debugger.setCurrentThread(e.thread())) {
-        _debugger.printMessage("Stepped to " +
-                               e.location().declaringType().name() + "." +
-                               e.location().method().name() + "(...)  [line " +
-                               e.location().lineNumber() + "]");
+        _debugger.printMessage("Stepped to " + e.location().declaringType().name() + "." + e.location().method().name()
+                                 + "(...)  [line " + e.location().lineNumber() + "]");
         _debugger.currThreadSuspended();
 //        _debugger.scrollToSource(e);
       }
@@ -201,7 +186,7 @@ public class EventHandlerThread extends Thread {
 //   *  This event is not currently expected in DrJava.
 //   *  @param e modification watchpoint event from JPDA
 //   */
-//  protected void _handleModificationWatchpointEvent(ModificationWatchpointEvent e) {
+//  private void _handleModificationWatchpointEvent(ModificationWatchpointEvent e) {
 //    _debugger.printMessage("ModificationWatchpointEvent occured ");
 //    _debugger.printMessage("Field: " + e.field() + " Value: " +
 //                          e.valueToBe() +"]");
@@ -212,7 +197,7 @@ public class EventHandlerThread extends Thread {
    *  @param e class prepare event from JPDA
    *  @throws DebugException if actions performed on the prepared class fail
    */
-  protected void _handleClassPrepareEvent(ClassPrepareEvent e) throws DebugException {
+  private void _handleClassPrepareEvent(ClassPrepareEvent e) throws DebugException {
     synchronized(_debugger) {
       _debugger.getPendingRequestManager().classPrepared(e);
       // resume this thread which was suspended because its
@@ -221,19 +206,15 @@ public class EventHandlerThread extends Thread {
     }
   }
 
-  /**
-   * Responds to a thread start event.
-   * @param e thread start event from JPDA
+  /** Responds to a thread start event.
+   *  @param e thread start event from JPDA
    */
-  protected void _handleThreadStartEvent(ThreadStartEvent e) {
-    synchronized(_debugger) { _debugger.threadStarted(); }
-  }
+  private void _handleThreadStartEvent(ThreadStartEvent e) { synchronized(_debugger) { _debugger.threadStarted(); } }
 
-  /**
-   * Reponds to a thread death event.
-   * @param e thread death event from JPDA
+  /** Reponds to a thread death event.
+   *  @param e thread death event from JPDA
    */
-  protected void _handleThreadDeathEvent(ThreadDeathEvent e) throws DebugException {
+  private void _handleThreadDeathEvent(ThreadDeathEvent e) throws DebugException {
     // no need to check if there are suspended threads on the stack
     // because all that logic should be in the debugger
     synchronized(_debugger) {
@@ -254,36 +235,28 @@ public class EventHandlerThread extends Thread {
         }
         _debugger.currThreadDied();
       }
-      else
-        _debugger.nonCurrThreadDied();
+      else _debugger.nonCurrThreadDied();
     }
 
     // Thread is suspended on death, so resume it now.
     e.thread().resume();
   }
 
-  /**
-   * Responds if the virtual machine being debugged dies.
-   * @param e virtual machine death event from JPDA
+  /** Responds if the virtual machine being debugged dies.
+   *  @param e virtual machine death event from JPDA
    */
-  protected void _handleVMDeathEvent(VMDeathEvent e) throws DebugException {
-    _cleanUp(e);
-  }
+  private void _handleVMDeathEvent(VMDeathEvent e) throws DebugException { _cleanUp(e); }
 
   /**
    * Responds if the virtual machine being debugged disconnects.
    * @param e virtual machine disconnect event from JPDA
    */
-  protected void _handleVMDisconnectEvent(VMDisconnectEvent e) throws DebugException {
-    _cleanUp(e);
-  }
+  private void _handleVMDisconnectEvent(VMDisconnectEvent e) throws DebugException { _cleanUp(e); }
 
-  /**
-   * Cleans up the state after the virtual machine being debugged
-   * dies or disconnects.
+  /** Cleans up the state after the virtual machine being debugged  dies or disconnects.
    * @param e JPDA event indicating the debugging session has ended
    */
-  protected void _cleanUp(Event e) throws DebugException {
+  private void _cleanUp(Event e) throws DebugException {
     synchronized(_debugger) {
       _connected = false;
       if (_debugger.isReady()) {
@@ -294,9 +267,9 @@ public class EventHandlerThread extends Thread {
     }
   }
 
-  /** Responds if a VMDisconnectedException occurs while dealing with another event.  We need to flush the event
+  /** Responds when a VMDisconnectedException occurs while dealing with another event.  We need to flush the event
    *  queue, dealing only with exit events (VMDeath, VMDisconnect) so that we terminate correctly. */
-  synchronized void handleDisconnectedException() throws DebugException {
+  private void handleDisconnectedException() throws DebugException {
     EventQueue queue = _vm.eventQueue();
     while (_connected) {
       try {

@@ -57,7 +57,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   /** If any test failed, print a message saying that some test failed in another thread (not the testing thread). */
   public void tearDown() throws Exception {
     ExceptionHandler.ONLY.rethrow();
-    if ( _testFailed ) fail("test failed in another thread");
+    if (_testFailed) fail("test failed in another thread");
     super.tearDown();
   }
 

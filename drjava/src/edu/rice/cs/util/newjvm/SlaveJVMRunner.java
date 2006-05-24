@@ -48,7 +48,10 @@ package edu.rice.cs.util.newjvm;
 import java.io.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.RemoteException;
+
+import java.util.Arrays;
   
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.ScrollableDialog;
 //import edu.rice.cs.util.PreventExitSecurityManager;
@@ -69,8 +72,7 @@ import edu.rice.cs.util.swing.ScrollableDialog;
  */
 public final class SlaveJVMRunner {
 
-  /**
-   * Whether Swing dialogs should be displayed with diagnostic
+  /** Whether Swing dialogs should be displayed with diagnostic
    * information if the slave is unable to register or contact the
    * main JVM.  If false, the information will be printed to (the
    * usually invisible) System.err.
@@ -82,31 +84,27 @@ public final class SlaveJVMRunner {
    */
   public static final boolean SHOW_DEBUG_DIALOGS = false;
   
+  protected static final Log _log  = new Log("MasterSlave.txt", false);
+  
   /** Private constructor to prevent instantiation. */
   private SlaveJVMRunner() { }
 
   private static SlaveRemote _getInstance(Class clazz) throws Exception {
-    try {
-      return (SlaveRemote) clazz.getField("ONLY").get(null);
-    }
-    catch (Throwable t) {
-      return (SlaveRemote) clazz.newInstance();
-    }
+    try { return (SlaveRemote) clazz.getField("ONLY").get(null); }
+    catch (Throwable t) { return (SlaveRemote) clazz.newInstance();  }
   }
 
-  
-  /**
-   * The main method for invoking a slave JVM.
+  /** The main method for invoking a slave JVM.
    * 
-   * @param args Command-line parameters, of which there must be two or three.
-   * The first is the absolute path to the file containing the serialized
-   * MasterRemote stub, and the second is the fully-qualified class name
-   * of the slave JVM implementation class.
-   * the third parameter is optional. it is a file containing the serialized
-   * IRemoteClassLoader to use as the remote classloader. this will only work
-   * if the system classloader has been set to a CustomSystemClassLoader
+   *  @param args Command-line parameters, of which there must be two or three. The first is the absolute path to the 
+   *         file containing the serialized MasterRemote stub, and the second is the fully-qualified class name of the
+   *         slave JVM implementation class. The third parameter is optional. It is a file containing the serialized
+   *         IRemoteClassLoader to use as the remote classloader. this will only work if the system classloader has been
+   *         set to a CustomSystemClassLoader
    */
   public static void main(String[] args) {
+    
+    _log.log("Slave JVM has started with args " + Arrays.toString(args));
     try {
       // Make sure RMI doesn't use an IP address that might change
       System.setProperty("java.rmi.server.hostname", "127.0.0.1");
@@ -116,40 +114,53 @@ public final class SlaveJVMRunner {
       // if we have a remote classloader to use
       if (args.length == 3) {
         //get the classloader
-        IRemoteClassLoader remote = null;
+        IRemoteClassLoader remoteLoader = null;
         FileInputStream fstream = new FileInputStream(args[2]);
         ObjectInputStream ostream = new ObjectInputStream(fstream);
-        remote = (IRemoteClassLoader) ostream.readObject();
+        _log.log("Slave JVM reading remote loader object");
+        remoteLoader = (IRemoteClassLoader) ostream.readObject();
+        _log.log("remote loader read");
         if (ClassLoader.getSystemClassLoader() instanceof CustomSystemClassLoader) {
           CustomSystemClassLoader loader = (CustomSystemClassLoader) ClassLoader.getSystemClassLoader();
-          loader.setMasterRemote(remote);
+          loader.setMasterRemote(remoteLoader);
         }
+        _log.log("remote loader installed");
       }
 
       // get the master remote
+      _log.log("Slave JVM reading the remote master object");
       FileInputStream fstream = new FileInputStream(args[0]);
       ObjectInputStream ostream = new ObjectInputStream(fstream);
-      MasterRemote remote = (MasterRemote) ostream.readObject();
+      MasterRemote master = (MasterRemote) ostream.readObject();
+      _log.log("remote master read");
+      fstream.close();
+      ostream.close();
       
       try {
         Class slaveClass = Class.forName(args[1]);
+        _log.log("Slave JVM creating singleton instance of slave class " + args[1]);
         SlaveRemote slave = _getInstance(slaveClass);
         
         // Must export slave object to RMI so we can pass stub to the master
-        SlaveRemote stub = (SlaveRemote) UnicastRemoteObject.exportObject(slave);
+        _log.log("Slave JVM creaing RMI stub for slave class instance " + slave);
+        SlaveRemote stub = (SlaveRemote) UnicastRemoteObject.exportObject(slave);  // What does this do?
+        _log.log("stub for slave class exported");
         
         // Debug: check that the IP address is 127.0.0.1
         //javax.swing.JOptionPane.showMessageDialog(null, stub.toString());
 
         // start the slave and then notify the master
-        slave.start(remote);
-        remote.registerSlave(slave);
+        _log.log("Slave JVM invoking the method start(" + master + ") in the Slave JVM class");
+        slave.start(master);
+        _log.log("Slave JVM invoking the method registerSlave(" + slave + ") in the Master JVM");
+        master.registerSlave(slave);
       }
       catch (Throwable t) {
         // Couldn't instantiate the slave.
+        _log.log("Slave JVM could not intstantiate slave class and will exit");
         try {
           // Try to show the error properly, through the master
-          remote.errorStartingSlave(t);
+          master.errorStartingSlave(t);
         }
         catch (RemoteException re) {
           // Couldn't show the error properly, so use another approach

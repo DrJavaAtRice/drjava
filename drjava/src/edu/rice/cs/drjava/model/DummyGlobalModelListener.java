@@ -48,14 +48,16 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.util.List;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
+import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.AsyncTask;
 import edu.rice.cs.util.FileOpenSelector;
 
 /** A dummy GlobalModelListener that does nothing. Useful for listening to only a small number of events.
+ *  Not currently used.
  *  @version $Id$
  */
-public class DummyGlobalModelListener implements GlobalModelListener {
+public class DummyGlobalModelListener extends DummyInteractionsListener implements GlobalModelListener {
 
   /** Called when an asynchronous task must be run in the model */
   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {  }
@@ -143,50 +145,6 @@ public class DummyGlobalModelListener implements GlobalModelListener {
   
   /** Called after JUnit is finished running tests. */
   public void junitEnded() { }
-
-  //---------------------- InteractionsListener Methods ----------------------//
-  
-  /** Called after an interaction is started by the GlobalModel.  */
-  public void interactionStarted() { }
-
-  /** Called when an interaction has finished running. */
-  public void interactionEnded() { }
-  
-  /** Called when the interactions window generates a syntax error.
-   *  @param offset the error's offset into the InteractionsDocument
-   *  @param length the length of the error
-   */
-  public void interactionErrorOccurred(int offset, int length) { }
-
-  /** Called when the interactionsJVM has begun resetting. */
-  public void interpreterResetting() { }
-  
-  /** Called when the interactions window is reset. */
-  public void interpreterReady(File wd) { }
-
-  /** Called when the interactions JVM was closed by System.exit
-   *  or by being aborted. Immediately after this the interactions
-   *  will be reset.
-   * @param status the exit code
-   */
-  public void interpreterExited(int status) { }
-  
-  /** Called if the interpreter reset failed. (Subclasses must maintain listeners.) */
-  public void interpreterResetFailed(Throwable t) { }
-  
-  /** Called when the active interpreter is changed.
-   *  @param inProgress Whether the new interpreter is currently processing an interaction (i.e. whether an 
-   *  interactionEnded event will be fired)
-   */
-  public void interpreterChanged(boolean inProgress) { }
-
-  /** Called when enter was typed in the interactions pane but the interaction was incomplete. */
-  public void interactionIncomplete() { }
-  
-  /** Called when the slave JVM is used for interpretation or unit testing. */
-  public void slaveJVMUsed() { }
-
-  //-------------------- End InteractionsListener Methods --------------------//
   
   /** Called when the console window is reset. */
   public void consoleReset() { }

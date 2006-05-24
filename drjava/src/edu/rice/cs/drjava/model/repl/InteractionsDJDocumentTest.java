@@ -34,7 +34,6 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.drjava.model.DummyGlobalModelListener;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.ui.InteractionsPane;
 import edu.rice.cs.drjava.ui.MainFrame;
@@ -105,9 +104,9 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     
     /* Reset interactions and wait until it completes */
 
-    InteractionsListener restartCommand = new DummyGlobalModelListener() {
+    InteractionsListener restartCommand = new DummyInteractionsListener() {
       public void interpreterReady(File wd) {
-        synchronized (_restartLock) {
+        synchronized(_restartLock) {
           _interpreterRestarted = true;
           _restartLock.notify();
         }

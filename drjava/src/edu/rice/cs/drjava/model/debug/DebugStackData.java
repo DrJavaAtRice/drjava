@@ -52,8 +52,8 @@ import com.sun.jdi.*;
  * @version $Id$
  */
 public class DebugStackData {
-  private String _method;
-  private int _line;
+  private volatile String _method;
+  private volatile int _line;
   
   /**
    * Object for keeping track of a stack frame.
@@ -71,14 +71,10 @@ public class DebugStackData {
   /**
    * Returns the name of the method at this frame of the stack.
    */
-  public String getMethod() {
-    return _method;
-  }
+  public String getMethod() { return _method; }
   
   /**
    * Returns the line number of this frame of the stack.
    */
-  public int getLine() {
-    return _line;
-  }
+  public int getLine() { return _line; }
 }

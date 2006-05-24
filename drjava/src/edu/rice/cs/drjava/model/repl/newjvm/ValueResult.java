@@ -60,17 +60,9 @@ public class ValueResult implements InterpretResult {
     _style = style;
   }
     
-  public String getValueStr() {
-    return _valueStr;
-  }
-  
-  public String getStyle() {
-    return _style;
-  }
-
-  public <T> T apply(InterpretResultVisitor<T> v) {
-    return v.forValueResult(this);
-  }
+  public String getValueStr() { return _valueStr; }
+  public String getStyle() { return _style; }
+  public <T> T apply(InterpretResultVisitor<T> v) { return v.forValueResult(this); }
 
   public String toString() { return "(value: " + _valueStr + "; style: " + _style + ")"; }
 }

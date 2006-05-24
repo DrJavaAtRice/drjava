@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
  */
 public final class GlobalModelIOTest extends GlobalModelTestCase implements OptionConstants {
   
-  private static Log _log = new Log("GlobalModelIOTestLog.txt", false);
+  private static final Log _log = new Log("GlobalModelIOTestLog.txt", false);
   
   /** Creates a new document, modifies it, and then does the same with a second document, checking for inteference. */
   public void testMultipleFiles() throws BadLocationException {
@@ -128,21 +128,18 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     // Try to close and check for proper events
-    TestListener listener = new TestListener() {
+    TestListener listener = new TestIOListener() {
       public synchronized boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return true; // yes allow the abandon
-      }
-
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        assertAbandonCount(1);
-        closeCount++;
       }
     };
 
     _model.addListener(listener);
     _model.closeFile(doc);
-    listener.assertCloseCount(1);
+    listener.assertAbandonCount(1);
+    listener.assertCloseCount(1);  // closed one document
+    listener.assertOpenCount(0);
     
     _log.log("testCloseFileAllowAbandon completed");
   }
@@ -151,19 +148,18 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   public void testCloseFileDisallowAbandon() throws BadLocationException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
-    TestListener listener = new TestListener() {
+    TestListener listener = new TestIOListener() {
       public synchronized boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return false; // no, don't abandon our document!!!
       }
-
-      public synchronized void fileClosed(OpenDefinitionsDocument doc) { closeCount++; }
     };
 
     _model.addListener(listener);
     _model.closeFile(doc);
     listener.assertAbandonCount(1);
     listener.assertCloseCount(0);
+    listener.assertOpenCount(0);
     
     _log.log("testCloseFileDisallowAbandon completed");
   }
@@ -172,32 +168,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   public void testOpenRealFile() throws BadLocationException, IOException {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
 
-    TestListener listener = new TestListener() {
-      public void fileOpened(OpenDefinitionsDocument doc) {
-        File file = null;
-        try { file = doc.getFile(); }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
-        try {
-          assertEquals("file to open", tempFile.getCanonicalFile(), file.getCanonicalFile());
-          synchronized(this) { openCount++; }
-        }
-        catch (IOException ioe) { fail("could not get canonical file"); }
-      }
-      
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
-//        assertTrue(doc.isUntitled());
-//        assertFalse(doc.isModifiedSinceSave());
-      }
-    };
+    TestListener listener = new TestFileIOListener(tempFile); 
 
     _model.addListener(listener);
     try {
       OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile));
       listener.assertOpenCount(1);
+      listener.assertCloseCount(1);  // Untitled document is closed when doc is opened
       assertModified(false, doc);
       assertContents(BAR_TEXT, doc);
     }
@@ -219,18 +196,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     assertNumOpenDocs(2);
 
-    TestListener listener = new TestListener() {
-      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
+    TestListener listener = new TestIOListener() {
+      public synchronized boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return true; // yes allow the abandon
-      }
-
-      public void fileOpened(OpenDefinitionsDocument doc) { openCount++; }
-      
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
-//        assertTrue(doc.isUntitled());
-//        assertFalse(doc.isModifiedSinceSave());
       }
     };
 
@@ -249,6 +218,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     finally {
       assertNumOpenDocs(2);
       listener.assertOpenCount(0);
+      listener.assertCloseCount(0);
 
       List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
       doc = docs.get(1);
@@ -290,35 +260,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   public void testReopenFile() throws BadLocationException, IOException {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
 
-    TestListener listener = new TestListener() {
-      public void fileOpened(OpenDefinitionsDocument doc) {
-        File file = null;
-        try { file = doc.getFile(); }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
-        try {
-          assertEquals("file to open", tempFile.getCanonicalPath(),
-                       file.getCanonicalPath());
-        }
-        catch (IOException ioe) {
-          throw new UnexpectedException(ioe);
-        }
-        openCount++;
-      }
-      
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
-//        assertTrue(doc.isUntitled());
-//        assertFalse(doc.isModifiedSinceSave());
-      }
-    };
+    TestListener listener = new TestFileIOListener(tempFile);
 
     _model.addListener(listener);
     try {
       OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile));
       listener.assertOpenCount(1);
+      listener.assertCloseCount(1);  //  Untitled document closed when doc is opened
       assertModified(false, doc);
       assertContents(BAR_TEXT, doc);
     }
@@ -340,6 +288,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     catch (AlreadyOpenException aoe) {
       // Should not be open
       listener.assertOpenCount(1);
+      listener.assertCloseCount(1);  
     }
     catch (OperationCanceledException oce) {
       // Should not be canceled
@@ -373,38 +322,23 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     final File tempFile2 = writeToNewTempFile(BAR_TEXT);
 
-    TestListener listener = new TestListener() {
+    TestListener listener = new TestIOListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
+        super.fileOpened(doc);
         File file = null;
         try { file = doc.getFile(); }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
-
-        try {
-          if (tempFile1.equals(file)) {
-            assertEquals("file to open", tempFile1.getCanonicalFile(), file.getCanonicalFile());
-          } else {
-            assertEquals("file to open", tempFile2.getCanonicalFile(), file.getCanonicalFile());
-          }
-          openCount++;
-        }
-        catch (IOException ioe) {
-          fail("could not get canonical file");
-        }
-      }
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
-//        assertTrue(doc.isUntitled());
-//        assertFalse(doc.isModifiedSinceSave());
+        catch (FileMovedException fme) { fail("file does not exist"); } // We know file should exist
+        if (tempFile1.equals(file))
+          assertEquals("file to open", FileOps.getCanonicalFile(tempFile1), FileOps.getCanonicalFile(file));
+        else assertEquals("file to open", FileOps.getCanonicalFile(tempFile2), FileOps.getCanonicalFile(file));
       }
     };
 
     _model.addListener(listener);
     try {
-      OpenDefinitionsDocument[] docs = _model.openFiles(new FileSelector(tempFile1,tempFile2));
+      OpenDefinitionsDocument[] docs = _model.openFiles(new FileSelector(tempFile1, tempFile2));
       listener.assertOpenCount(2);
+      listener.assertCloseCount(1);  // closed Untitled document
       assertEquals("Number of docs returned", docs.length, 2);
       assertModified(false, docs[0]);
       assertContents(FOO_TEXT, docs[0]);
@@ -436,18 +370,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     assertNumOpenDocs(3);
 
-    TestListener listener = new TestListener() {
-      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
+    TestListener listener = new TestIOListener() {
+      public synchronized boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return true; // yes allow the abandon
-      }
-
-      public void fileOpened(OpenDefinitionsDocument doc) { openCount++; }
-      
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
-//        assertTrue(doc.isUntitled());
-//        assertFalse(doc.isModifiedSinceSave());
       }
     };
 
@@ -466,6 +392,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     finally {
       assertNumOpenDocs(3);
       listener.assertOpenCount(0);
+      listener.assertCloseCount(0);
 
       List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
       doc1 = docs.get(1);
@@ -486,49 +413,20 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
 
     //TestListener listener = new TestListener();
-    TestListener listener = new TestListener() {
-      public void fileNotFound(File f) { fileNotFoundCount++; }
-
-      public void fileOpened(OpenDefinitionsDocument doc) {
-        File file = null;
-        try { file = doc.getFile(); }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
-        try {
-          assertEquals("file to open", tempFile1.getCanonicalFile(), file.getCanonicalFile());
-          openCount++;
-        }
-        catch (IOException ioe) { fail("could not get canonical file"); }
-      }
-      
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
-//        assertTrue(doc.isUntitled());
-//        assertFalse(doc.isModifiedSinceSave());
-      }
+    TestListener listener = new TestFileIOListener(tempFile1) {
+      public synchronized void fileNotFound(File f) { fileNotFoundCount++; }
     };
+
     _model.addListener(listener);
 
-
     OpenDefinitionsDocument[] docs = null;
-    try {
-      docs = _model.openFiles(new FileSelector(tempFile1, new File("fake-file")));
-    }
-    catch (FileNotFoundException fnf) {
-      fail("FileNotFound exception was not thrown!");
-    }
-    catch (AlreadyOpenException aoe) {
-      // Should not be open
-      fail("File was already open!");
-    }
-    catch (OperationCanceledException oce) {
-      // Should not be canceled
-      fail("Open was unexpectedly canceled!");
-    }
+    try { docs = _model.openFiles(new FileSelector(tempFile1, new File("fake-file"))); }
+    catch (FileNotFoundException fnf) { fail("FileNotFound exception was not thrown!"); }  // Should not have moved
+    catch (AlreadyOpenException aoe) { fail("File was already open!"); }                   // Should not be open
+    catch (OperationCanceledException oce) { fail("Open was unexpectedly canceled!"); }    // Should not be canceled
     assertTrue("one file was opened", docs != null && docs.length == 1);
     listener.assertOpenCount(1);
+    listener.assertCloseCount(1);  // closed Untitled document
     listener.assertFileNotFoundCount(1);
     
     _log.log("testOpenMultipleNonexistentFiles completed");
@@ -542,29 +440,21 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
 
     try {
       docs = _model.openFiles(new FileOpenSelector() {
-        public File[] getFiles() {
-          return new File[] {null};
-        }
+        public File[] getFiles() { return new File[] {null}; }
       });
       fail("IO exception was not thrown!");
     }
-    catch (IOException e) {
-      // As we hoped, the file was not found
-    }
-    catch (Exception e) {
-      fail("Unexpectedly exception caught!");
-    }
+    catch (IOException e) {  /* As we expected, the file was not found */ }
+    catch (Exception e) { fail("Unexpectedly exception caught!"); }
 
     try {
       docs = _model.openFiles(new FileOpenSelector() {
-        public File[] getFiles() {
-          return null;
-        }
+        public File[] getFiles() { return null; }
       });
 
       fail("IO exception was not thrown!");
     }
-    catch (IOException e) { /* As we hoped, the file was not found. */ }
+    catch (IOException e) { /* As we expected, the file was not found. */ }
     catch (Exception e) { fail("Unexpectedly exception caught!"); }
 
     assertTrue("non-existent file", docs == null);
@@ -580,36 +470,27 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final File tempFile2 = writeToNewTempFile(BAR_TEXT);
     // don't catch and fail!
 
-    TestListener listener = new TestListener() {
-      public void fileOpened(OpenDefinitionsDocument doc) {
-        try { doc.getFile(); }
-        catch (FileMovedException fme) { fail("file does not exist"); /* We know file should exist */ }
-        openCount++;
-      }
-      
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
-//        assertTrue(doc.isUntitled());
-//        assertFalse(doc.isModifiedSinceSave());
-      }
-    };
+    TestListener listener = new TestIOListener();
 
     _model.addListener(listener);
     // Open file 1
     OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile1));
     listener.assertOpenCount(1);
+    listener.assertCloseCount(1);  // closed Untitled document
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
 
     // Get file 1
     OpenDefinitionsDocument doc1 = _model.getDocumentForFile(tempFile1);
     listener.assertOpenCount(1);
+    listener.assertCloseCount(1);   // closed Untitled document
     assertEquals("opened document", doc, doc1);
     assertContents(FOO_TEXT, doc1);
 
     // Get file 2, forcing it to be opened
     OpenDefinitionsDocument doc2 = _model.getDocumentForFile(tempFile2);
     listener.assertOpenCount(2);
+    listener.assertCloseCount(1);  // closed Untitled document
     assertContents(BAR_TEXT, doc2);
   }
 
@@ -637,17 +518,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       public void fileSaved(OpenDefinitionsDocument doc) {
         File f = null;
         try { f = doc.getFile(); }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        catch (FileMovedException fme) { fail("file does not exist"); }   // We know file should exist
         try {
           assertEquals("saved file name", file.getCanonicalFile(), f.getCanonicalFile());
-          saveCount++;
+          synchronized(this) { saveCount++; }
         }
-        catch (IOException ioe) {
-          fail("could not get canonical file");
-        }
+        catch (IOException ioe) { fail("could not get canonical file"); }
       }
     };
 
@@ -658,9 +534,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
 
-    assertEquals("contents of saved file",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file));
     
     _log.log("testRealSaveFirstSave completed");
   }
@@ -678,22 +552,17 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     doc.saveFile(new FileSelector(file));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
-    assertEquals("contents of saved file",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file));
 
     // Listener to use on future saves
     TestListener listener = new TestListener() {
       public void fileSaved(OpenDefinitionsDocument doc) {
         File f = null;
         try { f = doc.getFile(); }
-        catch (FileMovedException fme) {
-          // We know file should exist
-          fail("file does not exist");
-        }
+        catch (FileMovedException fme) { fail("file does not exist"); }   // We know file should exist
         try {
           assertEquals("saved file", file.getCanonicalFile(), f.getCanonicalFile());
-          saveCount++;
+          synchronized(this) { saveCount++; }
         }
         catch (IOException ioe) { fail("could not get canonical file"); }
       }
@@ -757,7 +626,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         catch (FileMovedException fme) { fail("file does not exist");  /* We know file should exist */ }
         try {
           assertEquals("saved file", file.getCanonicalFile(), f.getCanonicalFile());
-          saveCount++;
+          synchronized(this) { saveCount++; }
         }
         catch (IOException ioe) { fail("could not get canonical file"); }
       }
@@ -825,7 +694,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         catch (FileMovedException fme) { fail("file does not exist");   /* We know file should exist */ }
         try {
           assertEquals("saved file", file2.getCanonicalFile(), f.getCanonicalFile());
-          saveCount++;
+          synchronized(this) { saveCount++; }
         }
         catch (IOException ioe) { fail("could not get canonical file"); }
       }
@@ -915,24 +784,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     // don't catch and fail!
 
-    TestListener listener = new TestListener() {
-      public void fileOpened(OpenDefinitionsDocument doc) {
-        try { assertTrue("Source file should exist", doc.getFile() != null); }
-        catch (FileMovedException fme) { fail("file does not exist");  /* We know file should exist. */ }
-        openCount++;
-      }
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
-//        assertTrue(doc.isUntitled());
-//        assertFalse(doc.isModifiedSinceSave());
-      }
-      public void fileReverted(OpenDefinitionsDocument doc) { fileRevertedCount++; }
-    };
-
+    TestListener listener = new TestIOListener();
+      
     _model.addListener(listener);
     // Open file 1
     OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile1));
     listener.assertOpenCount(1);
+    listener.assertCloseCount(1);  // closed Untitled document
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
 
@@ -960,15 +818,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     // don't catch and fail!
 
-    TestListener listener = new TestListener() {
-      public void fileOpened(OpenDefinitionsDocument doc) { }
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
-//        assertTrue(doc.isUntitled());
-//        assertFalse(doc.isModifiedSinceSave());
-      }
-      public void fileReverted(OpenDefinitionsDocument doc) { fileRevertedCount++; }
-      public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
+    TestListener listener = new TestIOListener() {
+      public synchronized void fileReverted(OpenDefinitionsDocument doc) { fileRevertedCount++; }
+      public synchronized boolean shouldRevertFile(OpenDefinitionsDocument doc) {
         shouldRevertFileCount++;
         return true;
       }
@@ -1010,19 +862,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final File tempFile1 = writeToNewTempFile(FOO_TEXT);
     // don't catch and fail!
 
-    TestListener listener = new TestListener() {
-      public void fileOpened(OpenDefinitionsDocument doc) { }
-      
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
-//        assertTrue(doc.isUntitled());
-//        assertFalse(doc.isModifiedSinceSave());
-      }
-
-      public void fileReverted(OpenDefinitionsDocument doc) {
-        fileRevertedCount++;
-      }
-      public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
+    final TestListener listener = new TestIOListener() {
+      public synchronized void fileReverted(OpenDefinitionsDocument doc) { fileRevertedCount++; }
+      public synchronized boolean shouldRevertFile(OpenDefinitionsDocument doc) {
         shouldRevertFileCount++;
         return false;
       }
@@ -1039,15 +881,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     listener.assertShouldRevertFileCount(0);
     listener.assertFileRevertedCount(0);
 
-    synchronized(tempFile1) {
-      tempFile1.wait(2000);
-    }
+    synchronized(tempFile1) { tempFile1.wait(2000); }
 
     String s = "THIS IS ONLY A TEST";
     FileOps.writeStringToFile(tempFile1, s);
-    assertEquals("contents of saved file",
-                 s,
-                 FileOps.readFileAsString(tempFile1));
+    assertEquals("contents of saved file", s, FileOps.readFileAsString(tempFile1));
 
     assertTrue("modified on disk1", doc.modifiedOnDisk());
     boolean reverted = doc.revertIfModifiedOnDisk();
@@ -1221,5 +1059,22 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     
     _log.log("testConsoleInput completed");
+  }
+  
+  class TestIOListener extends TestListener {
+    public synchronized void fileOpened(OpenDefinitionsDocument doc) {  openCount++; } 
+    public synchronized void fileClosed(OpenDefinitionsDocument doc) { closeCount++; } 
+  }
+  
+  class TestFileIOListener extends TestIOListener {
+    File _expected;
+    TestFileIOListener(File f) { _expected = f; }
+    public void fileOpened(OpenDefinitionsDocument doc) {
+      super.fileOpened(doc);
+      File file = null;
+      try { file = doc.getFile(); }
+      catch (FileMovedException fme) { fail("file does not exist"); }     // We know file should exist
+      assertEquals("file to open", FileOps.getCanonicalFile(_expected), FileOps.getCanonicalFile(file));
+    }
   }
 }

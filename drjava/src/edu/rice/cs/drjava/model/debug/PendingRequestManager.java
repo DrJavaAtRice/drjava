@@ -43,11 +43,9 @@ import java.util.Vector;
 
 import java.io.*;
 
-/**
- * Keeps track of DocumentDebugActions that are waiting to be resolved when the
- * classes they corresponed to are prepared.  (Only DocumentDebugActions have
- * reference types which can be prepared.)
- * @version $Id$
+/** Keeps track of DocumentDebugActions that are waiting to be resolved when the classes they corresponed to are 
+ *  prepared.  (Only DocumentDebugActions have reference types which can be prepared.)
+ *  @version $Id$
  */
 
 public class PendingRequestManager {
@@ -59,8 +57,7 @@ public class PendingRequestManager {
     _pendingActions = new Hashtable<String, Vector<DocumentDebugAction<?>>>();
   }
 
-  /**
-   * Called if a breakpoint is set before its class is prepared
+  /** Called if a breakpoint is set before its class is prepared
    * @param action The DebugAction that is pending
    */
   public void addPendingRequest (DocumentDebugAction<?> action) {
@@ -99,11 +96,10 @@ public class PendingRequestManager {
     }
   }
 
-  /**
-   * Recursively look through all nested types to see if the line number exists.
-   * @param lineNumber line number to look for
-   * @param rt reference type to start at
-   * @return true if line number is found
+  /** Recursively look through all nested types to see if the line number exists.
+   *  @param lineNumber line number to look for
+   *  @param rt reference type to start at
+   *  @return true if line number is found
    */
   private boolean recursiveFindLineNumber(int lineNumber, ReferenceType rt) {
     try {
