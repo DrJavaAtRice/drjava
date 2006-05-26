@@ -558,6 +558,20 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
         addListener();
       }
     });
+    _matchList.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent evt) {
+        if (evt.getClickCount() == 2) {
+          removeListener();
+          int i = _matchList.locationToIndex(evt.getPoint());
+          _matchList.setSelectedIndex(i);
+          _matchList.ensureIndexIsVisible(i);
+          _pim.setCurrentItem(_pim.getMatchingItems().get(i));
+          updateInfo();
+          addListener();
+          okButtonPressed();
+        }
+      }
+    });
     
     // put everything together
     Container contentPane = getContentPane();
