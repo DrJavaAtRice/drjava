@@ -33,7 +33,6 @@
 
 package edu.rice.cs.drjava.ui.predictive;
 
-import edu.rice.cs.drjava.ui.MainFrame;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.JTextComponent;
@@ -271,7 +270,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       int xs = (int)parentDim.getWidth()/3;
       int ys = (int)parentDim.getHeight()/4;
       setSize(Math.max(xs,400), Math.max(ys, 300));
-      MainFrame.setPopupLoc(this, _owner);
+      setLocationRelativeTo(_owner);
       _currentStrategy = _strategies.get(0);
       _strategyBox.setSelectedIndex(0);
       selectStrategy();
@@ -558,20 +557,6 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
         addListener();
       }
     });
-    _matchList.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent evt) {
-        if (evt.getClickCount() == 2) {
-          removeListener();
-          int i = _matchList.locationToIndex(evt.getPoint());
-          _matchList.setSelectedIndex(i);
-          _matchList.ensureIndexIsVisible(i);
-          _pim.setCurrentItem(_pim.getMatchingItems().get(i));
-          updateInfo();
-          addListener();
-          okButtonPressed();
-        }
-      }
-    });
     
     // put everything together
     Container contentPane = getContentPane();
@@ -632,7 +617,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     int xs = (int)parentDim.getWidth()/3;
     int ys = (int)parentDim.getHeight()/4;
     setSize(Math.max(xs,400), Math.max(ys, 300));
-    MainFrame.setPopupLoc(this, _owner);
+    setLocationRelativeTo(_owner);
 
     removeListener();
     updateTextField();
@@ -640,20 +625,26 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     updateList();
   }
   
+  /**
+   * Enable or disable owner. Can be overridden to toggle the hourglass, etc.
+   * @param b whether the owner should be enabled (true) or disabled
+   */
+  public void setOwnerEnabled(boolean b) {
+    // do nothing by default
+  }
+  
   /** Validates before changing visibility,
    *  @param b true if frame should be shown, false if it should be hidden.
    */
   public void setVisible(boolean b) {
     validate();
-    _owner.setEnabled(!b);
     super.setVisible(b);
     if (b) {
-      MainFrame.setPopupLoc(this);
-      
+      setOwnerEnabled(false);
       _textField.requestFocus();
     }
     else {
-      
+      setOwnerEnabled(true);
       _owner.toFront();
     }
   }
@@ -766,46 +757,5 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     }
 
     public void caretUpdate(CaretEvent e) { }
-  }
-
-  public static void main(String[] args) {
-    Frame frame = JOptionPane.getFrameForComponent(null);
-    InfoSupplier<String> info = new InfoSupplier<String>() {
-      public String apply(String t) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(t);
-        sb.append("\nLength = ");
-        sb.append(t.length());
-        sb.append("\nHashcode = ");
-        sb.append(t.hashCode());
-        for(int i=0;i<5;++i) {
-          sb.append("\n"+t);
-        }
-        return sb.toString();
-      }
-    };
-    CloseAction<String> okAction = new CloseAction<String>() {
-      public Object apply(PredictiveInputFrame<String> p) {
-        System.out.println("User pressed Ok");
-        System.out.println("Text = "+p.getText());
-        System.out.println("Item = "+p.getItem());
-        return null;
-      }
-    };
-    CloseAction<String> cancelAction = new CloseAction<String>() {
-      public Object apply(PredictiveInputFrame<String> p) {
-        System.out.println("User pressed Cancel");
-        return null;
-      }
-    };
-    java.util.ArrayList<PredictiveInputModel.MatchingStrategy<String>> strategies =
-      new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<String>>();
-    strategies.add(new PredictiveInputModel.PrefixStrategy<String>());
-    strategies.add(new PredictiveInputModel.FragmentStrategy<String>());
-    strategies.add(new PredictiveInputModel.RegExStrategy<String>());
-    PredictiveInputFrame<String> pif = 
-      new PredictiveInputFrame<String>(frame, "Go to file", true, true, info, strategies, okAction, cancelAction,
-                                       "AboutDialog.java", "FileOps.java", "FileOpsTest.java", "Utilities.java");
-    pif.setVisible(true);
   }
 }

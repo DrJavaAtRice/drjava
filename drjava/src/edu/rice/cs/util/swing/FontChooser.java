@@ -101,7 +101,7 @@ public class FontChooser extends JDialog {
     FontChooser fd = new FontChooser(parent, font);
     fd.setTitle(title);
     
-    MainFrame.setPopupLoc(fd);
+    MainFrame.setPopupLoc(fd, parent);
     fd.setVisible(true);
 
     Font chosenFont = null;

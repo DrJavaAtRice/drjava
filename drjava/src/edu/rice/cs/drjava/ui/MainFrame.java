@@ -364,7 +364,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Reset the position of the "Create Jar from Project" dialog. */
   public void resetJarOptionsDialogPosition() {
-    initJarOptionsDialog();
     _jarOptionsDialog.setFrameState("default");
     if (DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue()) {
       DrJava.getConfig().setSetting(DIALOG_JAROPTIONS_STATE, "default");
@@ -375,7 +374,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) {
       new SwingWorker() {
         public Object construct() {
-          initJarOptionsDialog();
           _jarOptionsDialog.setVisible(true);
           return null;
         }
@@ -1049,7 +1047,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                     strategies,
                                                     okAction,
                                                     cancelAction,
-                                                    new GoToFileListEntry(null, "dummy")); 
+                                                    new GoToFileListEntry(null, "dummy")) {
+        public void setOwnerEnabled(boolean b) {
+          if (b) { hourglassOff(); } else { hourglassOn(); }
+        }
+      }; 
       // putting one dummy entry in the list; it will be changed later anyway
       
       if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
@@ -1280,7 +1282,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                        strategies,
                                                        okAction,
                                                        cancelAction,
-                                                       new OpenJavadocListEntry("dummy", "dummy", null)); 
+                                                       new OpenJavadocListEntry("dummy", "dummy", null)) {
+        public void setOwnerEnabled(boolean b) {
+          if (b) { hourglassOff(); } else { hourglassOn(); }
+        }
+      }; 
       // putting one dummy entry in the list; it will be changed later anyway
       
       if (DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue()) {
@@ -1523,7 +1529,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                     strategies,
                                                     okAction,
                                                     cancelAction,
-                                                    new GoToFileListEntry(null, "dummy")); 
+                                                    new GoToFileListEntry(null, "dummy")) {
+        public void setOwnerEnabled(boolean b) {
+          if (b) { hourglassOff(); } else { hourglassOn(); }
+        }
+      }; 
       // putting one dummy entry in the list; it will be changed later anyway
       
       if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue()) {
@@ -2863,6 +2873,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _quickStartFrame = new QuickStartFrame();
     _interactionsScriptController = null;
     _jarOptionsDialog = new JarOptionsDialog(MainFrame.this);
+    initJarOptionsDialog();
 //    _projectPropertiesFrame = null;
     
     // If any errors occurred while parsing config file, show them
@@ -7593,8 +7604,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    * to center the popup on.
    * @param popup the Popup window
    */
-  public static void setPopupLoc(Window popup) {
-    MainFrame.setPopupLoc(popup, popup.getOwner());
+  public void setPopupLoc(Window popup) {
+    MainFrame.setPopupLoc(popup, (popup.getOwner()!=null)?popup.getOwner():this);
   }
   
   /**
@@ -7607,37 +7618,69 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    * @param owner the parent component for the popup
    */
   public static void setPopupLoc(Window popup, Component owner) {
-    // suggested from zaq@nosi.com, to keep the frame on the screen!
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    Rectangle frameRect = popup.getBounds();
+    
+    Point ownerLoc = null;
+    Dimension ownerSize = null;
+    if(owner!=null) {
+      ownerLoc = owner.getLocation();
+      ownerSize = owner.getSize();
+    }
+    else {
+      //for multi-monitor support
+      //Question: do we want it to popup on the first monitor always?
+      GraphicsDevice[] dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+      Rectangle rec = dev[0].getDefaultConfiguration().getBounds();
+      ownerLoc = rec.getLocation();
+      ownerSize = rec.getSize();
+    }
+    
+    // center it on owner
+    Point loc = new Point(ownerLoc.x + (ownerSize.width - frameRect.width) / 2,
+                          ownerLoc.y + (ownerSize.height - frameRect.height) / 2);
+    frameRect.setLocation(loc);
+    
+    // now find the GraphicsConfiguration the popup is on
+    GraphicsConfiguration gcBest = null;
+    int gcBestArea = -1;
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gs = ge.getScreenDevices();
+    for (GraphicsDevice gd: gs) {
+      GraphicsConfiguration gc = gd.getDefaultConfiguration();
+      Rectangle isect = frameRect.intersection(gc.getBounds());
+      int gcArea = isect.width*isect.height;
+      if (gcArea>gcBestArea) {
+        gcBest = gc;
+        gcBestArea = gcArea;
+      }
+    }
+    
+    // make it fit on the screen
+    Rectangle screenRect = gcBest.getBounds();
+    Dimension screenSize = screenRect.getSize();
     Dimension frameSize = popup.getSize();
 
     if (frameSize.height > screenSize.height) frameSize.height = screenSize.height;
     if (frameSize.width > screenSize.width) frameSize.width = screenSize.width;
 
-    popup.setSize(frameSize);
+    frameRect.setSize(frameSize);
     
-    Point loc;
-    if(owner == null) {
-      //for multi-monitor support
-      //Question: do we want it to popup on the first monitor always?
-      GraphicsDevice[] dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
-      Rectangle rec = dev[0].getDefaultConfiguration().getBounds();
-      loc = new Point(rec.x + (rec.width - popup.getWidth()) / 2, rec.y + (rec.height - popup.getHeight()) / 2);
-    }
-    else {
-      Point ownerLoc = owner.getLocation();
-      loc = new Point(ownerLoc.x + (owner.getWidth() - popup.getWidth()) / 2, ownerLoc.y + (owner.getHeight() - popup.getHeight()) / 2);
-    }
+    // center it on owner again
+    loc = new Point(ownerLoc.x + (ownerSize.width - frameRect.width) / 2,
+                          ownerLoc.y + (ownerSize.height - frameRect.height) / 2);
+    frameRect.setLocation(loc);
     
-    if(loc.x < 0)
-      loc.x = 0;
-    if(loc.x + popup.getWidth() > screenSize.width)
-      loc.x = screenSize.width - popup.getWidth();
-    if(loc.y < 0)
-      loc.y = 0;
-    if(loc.y + popup.getHeight() > screenSize.height)
-      loc.y = screenSize.height - popup.getHeight();
-    
-    popup.setLocation(loc);
+    // now fit it on the screen
+    if(frameRect.x < screenRect.x)
+      frameRect.x = screenRect.x;
+    if(frameRect.x + frameRect.width > screenRect.x + screenRect.width)
+      frameRect.x = screenRect.x + screenRect.width - frameRect.width;
+    if(frameRect.y < screenRect.y)
+      frameRect.y = screenRect.y;
+    if(frameRect.y + frameRect.height > screenRect.y + screenRect.height)
+      frameRect.y = screenRect.y + screenRect.height - frameRect.height;
+
+    popup.setSize(frameRect.getSize());
+    popup.setLocation(frameRect.getLocation());
   }
 }

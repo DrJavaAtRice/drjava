@@ -250,7 +250,7 @@ public class HTMLFrame extends JFrame {
 
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
-    MainFrame.setPopupLoc(this);
+    MainFrame.setPopupLoc(this, null);
   }
 
   /** Hides the navigation panel on the left.  Cannot currently be undone. */

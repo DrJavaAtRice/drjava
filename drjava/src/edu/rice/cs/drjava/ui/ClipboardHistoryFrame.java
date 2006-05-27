@@ -124,7 +124,7 @@ public class ClipboardHistoryFrame extends JFrame {
   private FrameState _lastState = null;
   
   /** Owner frame. */
-  private Frame _owner;
+  private MainFrame _mainFrame;
   
   /** Close actions for ok and cancel button. */
   private CloseAction _okAction, _cancelAction;
@@ -136,11 +136,11 @@ public class ClipboardHistoryFrame extends JFrame {
    *  @param okAction the action to perform when OK is clicked
    *  @param okAction the action to perform when Cancel is clicked
    */
-  public ClipboardHistoryFrame(Frame owner, String title, ClipboardHistoryModel chm,
+  public ClipboardHistoryFrame(MainFrame owner, String title, ClipboardHistoryModel chm,
                                CloseAction okAction, CloseAction cancelAction) {
     super(title);
     _chm = chm;
-    _owner = owner;
+    _mainFrame = owner;
     _okAction = okAction;
     _cancelAction = cancelAction;
     init();
@@ -175,11 +175,11 @@ public class ClipboardHistoryFrame extends JFrame {
       validate();
     }
     else {
-      Dimension parentDim = (_owner!=null)?(_owner.getSize()):getToolkit().getScreenSize();
+      Dimension parentDim = (_mainFrame!=null)?(_mainFrame.getSize()):getToolkit().getScreenSize();
       int xs = (int)parentDim.getWidth()/3;
       int ys = (int)parentDim.getHeight()/4;
       setSize(Math.max(xs,400), Math.max(ys, 400));
-      MainFrame.setPopupLoc(this, _owner);
+      MainFrame.setPopupLoc(this, _mainFrame);
     }
   }
 
@@ -301,11 +301,11 @@ public class ClipboardHistoryFrame extends JFrame {
     c.weighty = 0.0;
     contentPane.add(buttonPanel, c);
 
-    Dimension parentDim = (_owner!=null)?(_owner.getSize()):getToolkit().getScreenSize();
+    Dimension parentDim = (_mainFrame!=null)?(_mainFrame.getSize()):getToolkit().getScreenSize();
     int xs = (int)parentDim.getWidth()/3;
     int ys = (int)parentDim.getHeight()/4;
     setSize(Math.max(xs,400), Math.max(ys, 300));
-    MainFrame.setPopupLoc(this, _owner);
+    MainFrame.setPopupLoc(this, _mainFrame);
 
     updateView();
   }
@@ -315,14 +315,15 @@ public class ClipboardHistoryFrame extends JFrame {
    */
   public void setVisible(boolean b) {
     validate();
-    _owner.setEnabled(!b);
     super.setVisible(b);
     if (b) {
+      _mainFrame.hourglassOn();
       updateView();
       _historyList.requestFocus();
     }
     else {
-      _owner.toFront();
+      _mainFrame.hourglassOff();
+      _mainFrame.toFront();
     }
   }
 
@@ -400,46 +401,5 @@ public class ClipboardHistoryFrame extends JFrame {
       if ((o==null) || !(o instanceof ListItem)) return false;
       return full.equals(((ListItem)o).full);
     }
-  }
-
-  public static void main(String[] args) {
-    Frame frame = JOptionPane.getFrameForComponent(null);
-    
-    final ClipboardHistoryModel chm = ClipboardHistoryModel.singleton();
-    chm.resize(5);
-    chm.put("foo");
-    chm.put("private void okButtonPressed() {\n"+
-            "    if (_historyList.getModel().getSize()>0) {\n"+
-            "      _buttonPressed = JOptionPane.OK_OPTION;\n"+
-            "      String s = _historyList.getModel().getElementAt(_historyList.getSelectedIndex()).toString();\n"+
-            "      _chm.put(s);\n"+
-            "      System.out.println(\"Selected: \"+s);\n"+
-            "    }\n"+
-            "    else {\n"+
-            "      _buttonPressed = JOptionPane.CANCEL_OPTION;\n"+
-            "      Toolkit.getDefaultToolkit().beep();\n"+
-            "    }\n"+
-            "    _lastState = new FrameState(ClipboardHistoryFrame.this);\n"+
-            "    setVisible(false);\n"+
-            "  }");
-    chm.put("fee");
-    chm.put("foo");
-    
-    System.out.println(edu.rice.cs.util.StringOps.toString(chm.getStrings().toArray()));
-    
-    ClipboardHistoryFrame chf = new ClipboardHistoryFrame(frame, "Clipboard History", chm,
-                                                          new CloseAction() {
-      public Object apply(String s) {
-        System.out.println("Selected: s");
-        System.out.println(edu.rice.cs.util.StringOps.toString(chm.getStrings().toArray()));
-        return null;
-      }
-    }, new CloseAction() {
-      public Object apply(String s) {
-        System.out.println("Cancelled");
-        return null;
-      }
-    });
-    chf.setVisible(true);
   }
 }

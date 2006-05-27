@@ -198,7 +198,6 @@ public class FileSelectorStringComponent extends JPanel {
       _chooser.setCurrentDirectory(f);
       _chooser.setSelectedFile(f);
     }
-    
     int returnValue = _chooser.showDialog(_parent, null);
     if (returnValue == FileChooser.APPROVE_OPTION) {
       File chosen = _chooser.getSelectedFile();

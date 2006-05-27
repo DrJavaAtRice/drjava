@@ -294,9 +294,7 @@ public class JarOptionsDialog extends JFrame {
     super.setResizable(false);
     pack();
     
-    MainFrame.setPopupLoc(this, _mainFrame);
-
-    _processingFrame = new ProcessingFrame(this, "Creating Jar File", "Processing, please wait.");
+    MainFrame.setPopupLoc(this, _mainFrame);    
   }
 
   /** Make the options panel. 
@@ -528,6 +526,7 @@ public class JarOptionsDialog extends JFrame {
     }
 
     setEnabled(false);
+    _processingFrame = new ProcessingFrame(this, "Creating Jar File", "Processing, please wait.");
     _processingFrame.setVisible(true);
     SwingWorker worker = new SwingWorker() {
       boolean _success = false;
@@ -655,6 +654,7 @@ public class JarOptionsDialog extends JFrame {
       }
       public void finished() {
         _processingFrame.setVisible(false);
+        _processingFrame.dispose();
         JarOptionsDialog.this.setEnabled(true);
         if (_success) {
           if (_makeExecutable.isSelected()) {
@@ -736,12 +736,17 @@ public class JarOptionsDialog extends JFrame {
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
     validate();
-    _mainFrame.setEnabled(!vis);
     if (vis) {
+      _mainFrame.hourglassOn();
       ProcessingFrame pf = new ProcessingFrame(this, "Checking class files", "Processing, please wait.");
       pf.setVisible(true);
       _loadSettings();
       pf.setVisible(false);
+      pf.dispose();
+    }
+    else {
+      _mainFrame.hourglassOff();
+      _mainFrame.toFront();
     }
     super.setVisible(vis);
   }  

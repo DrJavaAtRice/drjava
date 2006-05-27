@@ -154,7 +154,7 @@ public class ScrollableDialog implements Serializable {
   
   /** Shows this dialog. */
   public void show() {
-    MainFrame.setPopupLoc(_dialog);
+    MainFrame.setPopupLoc(_dialog, _dialog.getOwner());
     _dialog.setVisible(true);
   }
 }

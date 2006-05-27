@@ -104,7 +104,7 @@ public final class SlaveJVMRunner {
    */
   public static void main(String[] args) {
     
-    _log.log("Slave JVM has started with args " + Arrays.toString(args));
+    _log.log("Slave JVM has started with args " + edu.rice.cs.util.StringOps.toString(args));
     try {
       // Make sure RMI doesn't use an IP address that might change
       System.setProperty("java.rmi.server.hostname", "127.0.0.1");

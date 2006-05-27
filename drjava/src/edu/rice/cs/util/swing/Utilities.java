@@ -129,7 +129,7 @@ public class Utilities {
       else {
         Frame frame = JOptionPane.getFrameForComponent(comp);
         TextAreaMessageDialog dialog = new TextAreaMessageDialog(frame, comp, title, message);
-        MainFrame.setPopupLoc(dialog);
+        MainFrame.setPopupLoc(dialog, frame);
         dialog.setVisible(true);
       }
     }

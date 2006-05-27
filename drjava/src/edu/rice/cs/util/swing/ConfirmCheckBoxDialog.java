@@ -105,7 +105,7 @@ public class ConfirmCheckBoxDialog {
    *  @return the JOptionPane result of showing the dialog.
    */
   public int show() {
-    MainFrame.setPopupLoc(_dialog);
+    MainFrame.setPopupLoc(_dialog, _dialog.getOwner());
     _dialog.setVisible(true);
 
     Object val = _optionPane.getValue();

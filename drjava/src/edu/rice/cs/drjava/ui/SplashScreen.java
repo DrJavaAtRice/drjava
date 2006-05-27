@@ -34,8 +34,7 @@
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
-import java.awt.Toolkit;
-import java.awt.Dimension;
+import java.awt.*;
 
 /**
  * A splash screen window to be displayed as DrJava is first starting up.
@@ -53,9 +52,14 @@ public class SplashScreen extends JWindow {
     _icon = MainFrame.getIcon(SPLASH_ICON);
     getContentPane().add(new JLabel(_icon, SwingConstants.CENTER));
     setSize(_icon.getIconWidth(), _icon.getIconHeight());
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    //for multi-monitor support
+    //Question: do we want it to popup on the first monitor always?
+    GraphicsDevice[] dev = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+    Rectangle rec = dev[0].getDefaultConfiguration().getBounds();
+    Point ownerLoc = rec.getLocation();
+    Dimension ownerSize = rec.getSize();
     Dimension frameSize = getSize();
-    setLocation((screenSize.width - frameSize.width) / 2,
-                (screenSize.height - frameSize.height) / 2);
+    setLocation(ownerLoc.x + (ownerSize.width - frameSize.width) / 2,
+                ownerLoc.y + (ownerSize.height - frameSize.height) / 2);
   }
 }

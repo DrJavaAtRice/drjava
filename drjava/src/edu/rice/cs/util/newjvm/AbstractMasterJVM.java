@@ -146,7 +146,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    */
   protected final void invokeSlave(String[] jvmArgs, String cp, File workDir) throws IOException, RemoteException {
     
-    _log.log(this + ".invokeSlave(" + Arrays.toString(jvmArgs) + ", " + cp + ", " + workDir + ") called");
+    _log.log(this + ".invokeSlave(" + edu.rice.cs.util.StringOps.toString(jvmArgs) + ", " + cp + ", " + workDir + ") called");
     
     synchronized(_masterJVMLock) {
       

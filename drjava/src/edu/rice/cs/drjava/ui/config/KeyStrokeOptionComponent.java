@@ -282,7 +282,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
       _inputField.setText(_option.format(_currentKeyStroke));
       //this.setLocation(frame.getLocation());
       this.setSize((int)_instructionLabel.getPreferredSize().getWidth() + 30, DIALOG_HEIGHT);
-      MainFrame.setPopupLoc(this);
+      MainFrame.setPopupLoc(this, getOwner());
       this.setVisible(true);
     }
 

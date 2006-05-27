@@ -203,7 +203,7 @@ public class PopupConsole implements Serializable {
       commandLock.notifyAll();  // signal that console is ready to accept input
     }
     
-    MainFrame.setPopupLoc(dialog);
+    MainFrame.setPopupLoc(dialog, parentFrame);
     dialog.setVisible(true);
     dialog.dispose();
     

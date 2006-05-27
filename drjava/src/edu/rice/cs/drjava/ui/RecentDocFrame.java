@@ -280,7 +280,7 @@ public class RecentDocFrame extends JWindow {
   
   /** Centers the frame in the screen. */
   private void centerH() {
-    MainFrame.setPopupLoc(this);
+    MainFrame.setPopupLoc(this, _frame);
   }
   
   /** Centers the frame in the screen. */

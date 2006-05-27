@@ -195,7 +195,7 @@ public class ConfigFrame extends JFrame {
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
 
-    MainFrame.setPopupLoc(this);
+    _mainFrame.setPopupLoc(this);
 
     addWindowListener(new WindowAdapter() {
       public void windowClosing(java.awt.event.WindowEvent e) { cancel(); }

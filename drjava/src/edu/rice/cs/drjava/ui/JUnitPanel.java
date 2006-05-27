@@ -419,7 +419,7 @@ public class JUnitPanel extends ErrorPanel {
 
       ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          MainFrame.setPopupLoc(_stackFrame);
+          _frame.setPopupLoc(_stackFrame);
           _stackFrame.setVisible(true);
         }
       };

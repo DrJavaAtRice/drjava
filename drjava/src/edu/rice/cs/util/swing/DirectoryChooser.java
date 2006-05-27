@@ -127,6 +127,9 @@ public class DirectoryChooser extends JFileChooser {
     return showDialog(_owner, null);  // null means leave the approve button text unchanged
   }
   
+  /** Set the owner of this DirectoryChooser. */
+  public void setOwner(Component owner) { _owner = owner; }
+  
   /** Shows the dialog with the same selection as the last time the dialog was shown. If this is the first time it is
    *  shown, then the root is selected.
    */

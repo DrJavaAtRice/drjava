@@ -97,6 +97,7 @@ public class JavadocDialog implements DirectorySelector {
                                   JOptionPane.QUESTION_MESSAGE,
                                   JOptionPane.OK_CANCEL_OPTION);
     _dialog = _optionPane.createDialog(_frame, "Select Javadoc Destination");
+    chooser.setOwner(_dialog);
   }
 
 
@@ -130,7 +131,7 @@ public class JavadocDialog implements DirectorySelector {
       _checkBox.setSelected(true);
 
       // Prompt the user
-      MainFrame.setPopupLoc(_dialog);
+      MainFrame.setPopupLoc(_dialog, _frame);
       _dialog.setVisible(true);
 
       // Get result
