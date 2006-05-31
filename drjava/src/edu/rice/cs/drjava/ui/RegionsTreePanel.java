@@ -142,6 +142,13 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
         updateButtons();
       }
     });
+    _regTree.addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+          goToRegion();
+        }
+      } 
+    });
     
     // Region tree cell renderer
     dtcr = new RegionRenderer();
