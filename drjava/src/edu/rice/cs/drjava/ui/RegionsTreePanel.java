@@ -145,7 +145,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     _regTree.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          goToRegion();
+          performDefaultAction();
         }
       } 
     });
@@ -240,6 +240,10 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
       setToolTipText(tooltip);
       return renderer;
     }
+  }
+  
+  /** Action performed when the Enter key is pressed. Should be overridden. */
+  protected void performDefaultAction() {
   }
   
   /** Creates the buttons for controlling the regions. Should be overridden. */

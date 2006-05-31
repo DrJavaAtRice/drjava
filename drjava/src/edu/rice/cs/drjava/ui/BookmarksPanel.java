@@ -84,6 +84,11 @@ public class BookmarksPanel extends RegionsTreePanel<DocumentRegion> {
     });
   }
   
+  /** Action performed when the Enter key is pressed. Should be overridden. */
+  protected void performDefaultAction() {
+    goToRegion();
+  }
+  
   /** Creates the buttons for controlling the regions. Should be overridden. */
   protected JComponent[] makeButtons() {    
     Action goToAction = new AbstractAction("Go to") {
