@@ -81,7 +81,7 @@ public class ProjectTest extends DrJavaTestCase {
       "   (file (name \"src/sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"src/sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\")(active))\n" +
+      "   (file (name \"src/sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"src/sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date
@@ -145,7 +145,7 @@ public class ProjectTest extends DrJavaTestCase {
       "   (file (name \"sexp/Atom.java\")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/BoolAtom.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/Cons.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
-      "   (file (name \"sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\")(active))\n" +
+      "   (file (name \"sexp/Empty.java\")(select 24 28)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/Lexer.java\")(select 0 0)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/NumberAtom.java\")(select 12 12)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name \"sexp/SEList.java\")(select 0 0)))\n" + // doesn't have mod date

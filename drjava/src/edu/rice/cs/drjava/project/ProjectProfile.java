@@ -218,7 +218,18 @@ public class ProjectProfile implements ProjectFileIR {
      * of the project file. */
     if (!_sourceFiles.isEmpty()) {
       fw.write("\n(source-files");
-      for(DocFile df: _sourceFiles) { fw.write("\n" + encodeDocFileRelative(df, "  ")); }
+      DocFile active = null;
+      for(DocFile df: _sourceFiles) {
+        if(df.isActive()) {
+          active = df;
+          fw.write("\n" + encodeDocFileRelative(df, "  "));
+          break; //Assert that there is only one active document in the project
+        }
+      }
+      for(DocFile df: _sourceFiles) { 
+        if(df != active)
+          fw.write("\n" + encodeDocFileRelative(df, "  "));
+      }
       fw.write(")"); // close the source expression
     }
     else fw.write("\n;; no source files");
@@ -372,10 +383,10 @@ public class ProjectProfile implements ProjectFileIR {
     
     Pair<Integer,Integer> p1 = df.getSelection();
     Pair<Integer,Integer> p2 = df.getScroll();
-    boolean active = df.isActive();
+    //boolean active = false; //df.isActive();
     long modDate = df.lastModified();
     // Add prefix to the next line if any tags exist
-    if (p1 != null || p2 != null || active)  ret += "\n" + prefix + "      ";
+    if (p1 != null || p2 != null /*|| active */)  ret += "\n" + prefix + "      ";
 
     // The next three tags go on the same line (if they exist)
     if (p1 != null) ret += "(select " + p1.getFirst() + " " + p1.getSecond() + ")";
@@ -387,7 +398,7 @@ public class ProjectProfile implements ProjectFileIR {
       ret += "(mod-date " + convertToLiteral(s) + ")";
     }
     
-    if (active) ret += "(active)";
+    //if (active) ret += "(active)"; //Active document is first on list
     
     // the next tag goes on the next line if at all
     String pack = df.getPackage();

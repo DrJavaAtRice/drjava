@@ -7355,9 +7355,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   public void removeTab(final Component c) {
     Utilities.invokeLater(new Runnable() {
       public void run() {  
+        if(_tabbedPane.getTabCount() > 1) {
+          if(_tabbedPane.getSelectedIndex() == _tabbedPane.getTabCount() - 1)
+            _tabbedPane.setSelectedIndex(_tabbedPane.getSelectedIndex() - 1);
+          else
+            _tabbedPane.setSelectedIndex(_tabbedPane.getSelectedIndex() + 1);
         _tabbedPane.remove(c);
         ((TabbedPanel)c).setDisplayed(false);
-        _tabbedPane.setSelectedIndex(0);
+        }
         _currentDefPane.requestFocusInWindow();
       }
     });

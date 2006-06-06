@@ -106,7 +106,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     _projFileText =
       ";; DrJava project file.  Written with build: 20040623-1933\n" +
       "(source ;; comment\n" +
-      "   (file (name \"src/test1.java\")(select 32 32)(active))" +
+      "   (file (name \"src/test1.java\")(select 32 32))" +
       "   (file (name \"src/test2.java\")(select 32 32)))";
     
     FileOps.writeStringToFile(_projFile, _projFileText);
