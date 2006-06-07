@@ -45,23 +45,57 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
-import java.rmi.*;
 import java.net.URL;
+import java.rmi.*;
+import java.rmi.server.*;
+
+import edu.rice.cs.util.Log;
+
 
 /** Defines a classloader that can be used across jvm's. */
 public class RemoteClassLoader extends ClassLoader implements IRemoteClassLoader {
-
+  
+  private final Log _log = new Log("MasterSlave.txt", false);
+  
   /** @param c the "parent" classloader. This loader will be used to load any remote requests.  */
-  public RemoteClassLoader(ClassLoader c){ super(c); }
+  public RemoteClassLoader(ClassLoader c) { 
+    super(c); 
+    _log.log(this + " constructed");
+  }
   
   /** Handles a request to load a remote class. */
-  public Class<?> loadRemoteClass(String name) throws ClassNotFoundException, RemoteException{
+  public Class<?> loadRemoteClass(String name) throws ClassNotFoundException, RemoteException {
     return getParent().loadClass(name);
   }
   
   /** Handles a request to get a remote resource. */
-  public URL getRemoteResource(String name) throws ClassNotFoundException, RemoteException{
+  public URL getRemoteResource(String name) throws ClassNotFoundException, RemoteException {
     return getParent().getResource(name);
   }
+  
+  /** Overridden to support same semantics as UnicastRemoteObject */
+  public boolean equals(Object o) {
+    if (o.getClass() == getClass())  // o belongs to same class as this
+      return o == this;
+    if (o instanceof RemoteStub) {
+      try {
+        Remote stub = RemoteObject.toStub(this);
+        return stub.equals(o);
+      } 
+      catch (NoSuchObjectException nsoe) { /* ignore */ }
+    }
+    return false;
+  }
+  
+  /** Overridden to support same semantics as UnicastRemoteObject */
+  public int hashCode() {
+    try {
+      Remote stub = RemoteObject.toStub(this);
+      return stub.hashCode();
+    }
+    catch (NoSuchObjectException nsoe) { /* ignore */ }
+    return super.hashCode();
+  }
 }
+
 

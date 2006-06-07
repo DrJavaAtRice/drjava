@@ -33,6 +33,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
+import edu.rice.cs.util.Log;
+
 import java.rmi.*;
 
 /** The remote interface for a master JVM.

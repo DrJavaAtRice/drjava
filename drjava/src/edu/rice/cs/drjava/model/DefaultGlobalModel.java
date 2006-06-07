@@ -43,6 +43,8 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.rmi.RemoteException;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -385,7 +387,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
     // Kill the interpreter
-    _jvm.killInterpreter(null);
+    _jvm.killInterpreter(null); 
+    try { _jvm.dispose(); }
+    catch(RemoteException e) { /* ignore */ }
     super.dispose();
   }
 

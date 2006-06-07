@@ -34,23 +34,29 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
-
 import edu.rice.cs.drjava.model.FileSaveSelector;
+
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.URL;
+
+import java.rmi.RemoteException;
 
 /** Tests the functionality of an InteractionsModel.
  *  @version $Id$
  */
 public final class InteractionsModelTest extends DrJavaTestCase {
+  
+  private static Log _log = new Log("InteractionsModel.txt", false);
   protected InteractionsDJDocument _adapter;
   protected InteractionsModel _model;
   
@@ -60,7 +66,9 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _model = new TestInteractionsModel(_adapter);
   }
 
-  public void tearDown() throws Exception {
+    public void tearDown() throws Exception {
+    // dispose the the AbstractMasterJVM supervising the MainJVM if it exists
+    if (_model instanceof IncompleteInputInteractionsModel) ((IncompleteInputInteractionsModel) _model).dispose();
     _model = null;
     _adapter = null;
     super.tearDown();
@@ -75,8 +83,8 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertTrue(_model instanceof TestInteractionsModel);
     TestInteractionsModel model = (TestInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
-    doc.reset("");
-    doc.insertText(doc.getLength(), typed, InteractionsDocument.DEFAULT_STYLE);
+    doc.reset("This is a test");
+    doc.append(typed, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     assertEquals("processed output should match expected", expected, model.toEval);
   }
@@ -87,15 +95,13 @@ public final class InteractionsModelTest extends DrJavaTestCase {
    *  @param expected the expected main class call
    */
   protected void _assertMainTransformation(String typed, String expected) {
-    assertEquals("main transformation should match expected",
-                 expected, TestInteractionsModel._testClassCall(typed));
+    assertEquals("main transformation should match expected", expected, TestInteractionsModel._testClassCall(typed));
   }
-
 
   /** Tests that the correct text is returned when interpreting. */
   public void testInterpretCurrentInteraction() throws EditDocumentException {
     assertTrue(_model instanceof TestInteractionsModel);
-    TestInteractionsModel model = (TestInteractionsModel)_model;
+    TestInteractionsModel model = (TestInteractionsModel) _model;
     String code = "int x = 3;";
     InteractionsDocument doc = model.getDocument();
     model.interpretCurrentInteraction();
@@ -104,47 +110,49 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     assertEquals("string being interpreted", "", model.toEval);
 
     // Insert text and evaluate
-    doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
+    doc.append(code, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     // pretend the call completed
     model.replReturnedVoid();
     assertEquals("string being interpreted", code, model.toEval);
   }
 
-  public void testInterpretCurrentInteractionWithIncompleteInput() throws EditDocumentException {
+  // Why do we create a new model (and slave JVM) for each of this trivial tests?
+  public void testInterpretCurrentInteractionWithIncompleteInput() throws EditDocumentException, InterruptedException {
+    _log.log("testInterpretCurrentInteractionWithIncompleteInput started");
     _model = new IncompleteInputInteractionsModel(_adapter);   // override the one initialized in setUp()
     assertReplThrewContinuationException("void m() {");
-    _model = new IncompleteInputInteractionsModel(_adapter);
     assertReplThrewContinuationException("void m() {;");
-    _model = new IncompleteInputInteractionsModel(_adapter);
     assertReplThrewContinuationException("1+");
-    _model = new IncompleteInputInteractionsModel(_adapter);
     assertReplThrewContinuationException("(1+2");
-    _model = new IncompleteInputInteractionsModel(_adapter);
     assertReplThrewSyntaxException("(1+2;");
-    _model = new IncompleteInputInteractionsModel(_adapter);
     assertReplThrewContinuationException("for (;;");
   }
 
-  protected void assertReplThrewContinuationException(String code) throws EditDocumentException {
+  protected void assertReplThrewContinuationException(String code) throws EditDocumentException, InterruptedException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
-    IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
+    IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel) _model;
     InteractionsDocument doc = model.getDocument();
-    doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
+    doc.reset("This is a test");
+    doc.append(code, InteractionsDocument.DEFAULT_STYLE);
+    model._logInteractionStart();
     model.interpretCurrentInteraction();
-    try { Thread.sleep(5000); } catch(InterruptedException ie) { }; // allow for the exception to be generated!
+    _log.log("Waiting for InteractionDone()");
+    model._waitInteractionDone();
     assertTrue("Code '"+code+"' should generate a continuation exception but not a syntax exception",
                (model.isContinuationException() == true) && (model.isSyntaxException() == false));
   }
 
-  protected void assertReplThrewSyntaxException(String code) throws EditDocumentException {
+  protected void assertReplThrewSyntaxException(String code) throws EditDocumentException, InterruptedException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
-    doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
+    doc.reset("This is a test");
+    doc.append(code, InteractionsDocument.DEFAULT_STYLE);
+    model._logInteractionStart();
     model.interpretCurrentInteraction();
-    try { Thread.sleep(5000); } catch(InterruptedException ie) { }; // allow for the exception to be generated!
-    assertTrue("Code '"+code+"' should generate a syntax exception but not a continuation exception",
+    model._waitInteractionDone();
+    assertTrue("Code '" + code +  "' should generate a syntax exception but not a continuation exception",
                (model.isSyntaxException() == true) && (model.isContinuationException() == false));
   }
 
@@ -441,7 +449,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     }
   }
 
-  /** A generic InteractionsModel for testing purposes. */
+  /** A generic InteractionsModel for testing purposes.  (Used here and in InteractionsPaneTest.) */
   public static class TestInteractionsModel extends InteractionsModel {
     String toEval = null;
     String addedClass = null;
@@ -482,10 +490,22 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     protected void _notifySlaveJVMUsed() { }
     public ConsoleDocument getConsoleDocument() { return null; }
   }
-
-  public static class IncompleteInputInteractionsModel extends RMIInteractionsModel {
-    boolean continuationException;
+  
+  /** This test model includes a slave JVM, just like a DefaultGlobalModel.  It must be disposed before it is
+   *  deallocated to kill the slave JVM.   TODO: the mutation in this class is disgusting -- Corky  2 June 06.
+   */
+  private static class IncompleteInputInteractionsModel extends RMIInteractionsModel {
+    boolean continuationException;  // This appears to be the negation of syntaxException making it redundant!
     boolean syntaxException;
+    
+    private volatile boolean _interactionDone = false;
+    private final Object _interactionLock = new Object();
+    
+    public void _logInteractionStart() { _interactionDone = false; }
+    
+    public void _waitInteractionDone() throws InterruptedException { 
+      synchronized(_interactionLock) { while (! _interactionDone) _interactionLock.wait(); }
+    }
 
     /** Constructs a new IncompleteInputInteractionsModel. */
     public IncompleteInputInteractionsModel(InteractionsDJDocument adapter) {
@@ -498,50 +518,78 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     }
     
     protected void _notifyInteractionStarted() { }
-    protected void _notifyInteractionEnded() { }
+    protected void _notifyInteractionEnded() { 
+      _log.log("_notifyInteractionEnded called.");
+      synchronized (_interactionLock) {
+        _interactionDone = true;
+        _interactionLock.notify();
+      }
+    }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
     protected void _notifyInterpreterExited(int status) { }
     protected void _notifyInterpreterResetting() { }
     protected void _notifyInterpreterResetFailed(Throwable t) { }
     public void _notifyInterpreterReady(File wd) { }
     protected void _interpreterResetFailed(Throwable t) { }
-    protected void _notifyInteractionIncomplete() { }
+    protected void _notifyInteractionIncomplete() { _notifyInteractionEnded(); }
     protected void _notifyInterpreterChanged(boolean inProgress) { }
     protected void _notifySlaveJVMUsed() { }
+    
+    public void dispose() throws RemoteException { _jvm.dispose(); }
     
     public ConsoleDocument getConsoleDocument() { return null; }
 
     public void replThrewException(String exceptionClass, String message, String stackTrace, String shortMessage) {
+      _log.log("replThrewException called");
       if (shortMessage != null) {
         if (shortMessage.endsWith("<EOF>\"")) {
           continuationException = true;
           syntaxException = false;
+          _interactionIsOver();
           return;
         }
       }
       syntaxException = true;
       continuationException = false;
+      _interactionIsOver();
     }
 
     public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol, int endRow,
                                         int endCol) {
-      if (errorMessage!=null) {
+      _log.log("replReturnedSyntaxError called");
+      if (errorMessage != null) {
         if (errorMessage.endsWith("<EOF>\"")) {
           continuationException = true;
           syntaxException = false;
+          _interactionIsOver();
           return;
         }
       }
       syntaxException = true;
       continuationException = false;
+      _interactionIsOver();
     }
 
-    public boolean isContinuationException() {
-      return continuationException;
-    }
-
-    public boolean isSyntaxException() {
-      return syntaxException;
-    }
+    public boolean isContinuationException() { return continuationException; }
+    public boolean isSyntaxException() { return syntaxException; }
   }
+  
+//  public class TestInteractionsListener extends DummyInteractionsListener {
+//    private volatile boolean _interactionDone = false;       // records when the interaction is done
+//    private final Object _interactionLock = new Object();    // lock for _interactionDone
+//    
+//    /** Relying on the default constructor. */
+//    
+//    public void interactionEnded() {
+//      synchronized(_interactionLock) { 
+//        _interactionDone = true;
+//        _interactionLock.notify(); 
+//      }
+//    }
+//    public void logInteractionStart() { _interactionDone = false; }
+//    
+//    public void waitInteractionDone() throws InterruptedException {
+//      synchronized(_interactionLock) { while (! _interactionDone) _interactionLock.wait(); }
+//    }
+//  }
 }

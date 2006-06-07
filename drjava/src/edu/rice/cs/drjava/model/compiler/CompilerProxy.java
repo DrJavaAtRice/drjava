@@ -38,6 +38,7 @@ import java.io.File;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.classloader.StickyClassLoader;
 import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
@@ -48,6 +49,8 @@ import edu.rice.cs.drjava.config.FileOption;
 public class CompilerProxy implements CompilerInterface {
   
   public static final String VERSION = System.getProperty("java.specification.version");
+  
+  private static final Log _log = new Log("Compiler.txt", false);
   
   /** The actual compiler interface. If it's null, we couldn't load it. */
   private CompilerInterface _realCompiler = null;
@@ -81,12 +84,16 @@ public class CompilerProxy implements CompilerInterface {
 
   private void _recreateCompiler() {
     
+    _log.log(this + "._recreateCompiler() called");
+    
     StickyClassLoader loader = new StickyClassLoader(_newLoader, getClass().getClassLoader(), _useOldLoader);
     
     try {
       Class<?> c = loader.loadClass(_className);
-//      Utilities.show("Class " + c + " loaded");
+      _log.log("Class " + c + " loaded");
       _realCompiler = CompilerRegistry.createCompiler(c);
+      
+      _log.log("_realCompiler set to " + _realCompiler);
       
       _realCompiler.setBuildDirectory(_buildDir);
       
@@ -98,9 +105,12 @@ public class CompilerProxy implements CompilerInterface {
       _realCompiler.setAllowAssertions(allowAssertions);
       
       String compilerClass = _realCompiler.getClass().getName();
-//      Utilities.show("Compiler created with name " + compilerClass);
+      _log.log("Compiler created with name " + compilerClass);
     }
-    catch (Throwable t) {  /* don't do anything. realCompiler stays null. */ }
+    catch (Throwable t) { 
+      _log.log(this + "._recreateCompiler() threw exception " + t);
+    /* don't do anything. realCompiler stays null. */ 
+    }
     
   }
 
@@ -112,7 +122,7 @@ public class CompilerProxy implements CompilerInterface {
    */
   public CompilerError[] compile(File sourceRoot, File[] files) {
     _recreateCompiler();
-//    DrJava.consoleOut().println("realCompiler is " + _realCompiler.getClass());
+    _log.log("realCompiler is " + _realCompiler.getClass());
     CompilerError[] ret =  _realCompiler.compile(sourceRoot, files);
 
     return ret;
@@ -125,7 +135,7 @@ public class CompilerProxy implements CompilerInterface {
    *  @return Array of errors that occurred. If no errors, should be zero length array (not null).
    */
   public CompilerError[] compile(File[] sourceRoots, File[] files) {
-//    DrJava.consoleErr().println("proxy to compile: " + files[0]);
+    _log.log("proxy to compile: " + files[0]);
 
 //    DrJava.consoleOut().println("-- In CompilerProxy: SourceRoots:");
 //    for (int i = 0 ; i < sourceRoots.length; i ++) {
@@ -133,7 +143,7 @@ public class CompilerProxy implements CompilerInterface {
 //    }
 
     _recreateCompiler();
-//    DrJava.consoleOut().println("realCompiler is " + _realCompiler.getClass());
+    _log.log("realCompiler is " + _realCompiler.getClass());
     CompilerError[] ret =  _realCompiler.compile(sourceRoots, files);
 
     return ret;
@@ -144,7 +154,7 @@ public class CompilerProxy implements CompilerInterface {
    *  the {@link #compile} method should not fail due to class not being found.
    */
   public boolean isAvailable() {
-//    Utilities.show("CompilerProxy.isAvailable() called for " + getClass() + " real compiler = " + _realCompiler);
+    _log.log("CompilerProxy.isAvailable() called for " + getClass() + " _realCompiler = " + _realCompiler);
     if (_realCompiler == null) return false;
     else return _realCompiler.isAvailable();
   }

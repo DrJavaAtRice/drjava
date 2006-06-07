@@ -77,29 +77,11 @@ public final class CompilerRegistryTest extends DrJavaTestCase {
     super.tearDown();
   }
 
-//  /** Test that the default compilers are available and what we expect. This requires the environment (CLASSPATH) to
-//   *  have these compilers available. This is OK though, since the build environment needs them!
-//   *
-//   *  This test is now commented out because it put too must restriction on the developer's build environment. It 
-//   *  required them to have all the compilers available, which they may not. Oh well. These matters of configuration 
-//   *  are really hard to test nicely.
-//   */
-//
-//  public void testExpectedDefaultCompilers() {
-//    CompilerInterface[] compilers = _registry.getAvailableCompilers();
-//
-//    assertEquals("Number of available compilers vs. number of default compilers",
-//                 _defaultCompilers.length,
-//                 compilers.length);
-//
-//    for (int i = 0; i < compilers.length; i++) {
-//      assertEquals("Name of available compiler #" + i + " is the same as the " +
-//                     "name of the corresponding default compiler",
-//                   _defaultCompilers[i],
-//                   compilers[i].getClass().getName());
-//    }
-//  }
-
+  /** Confirm that one of the compiler interfaces corresponding CompilerProxy.VERSION can be loaded. */
+  public void testAtLeastOneCompiler() {
+    assertTrue("At least one version " + CompilerProxy.VERSION + " should be available",
+                 _allAvailableCompilers.length > 0);
+  }
 
   /** Tests that list of available compilers effectively is restricted when the class is not available.
    *  Here this is done by limiting the available compilers one at a time.
@@ -131,68 +113,43 @@ public final class CompilerRegistryTest extends DrJavaTestCase {
                  compilers[0]);
 
     assertEquals("Active compiler",  NoCompilerAvailable.ONLY, _registry.getActiveCompiler());
-    
-    /* The following test is commented out because DrJava uses the ToolsJarLoader to look for a compiler in the plausible
-     * locations.  The ONLY way to force it not to find a compiler would be to move tools.jar to a nonstandard location in
-     * the build environment which is a terrible idea.
-     */   
-//    assertEquals("DrJava.java should not see an available compiler", false, DrJava.hasAvailableCompiler());
   }
   
   /** Tests that DrJava.java can see whether CompilerRegistry has an available compiler. */
   public void testAvailableCompilerSeenByDrJava() {
-    assertEquals("DrJava.java should agree with CompilerRegistry",
+    assertEquals("DrJava.java should have an available copmiler",
                  _registry.getActiveCompiler() != NoCompilerAvailable.ONLY,
                  DrJava.hasAvailableCompiler());
   }
 
-  /**
-   * Tests that {@link CompilerRegistry#setActiveCompiler} and
-   * {@link CompilerRegistry#getActiveCompiler} work.
-   */
+  /** Tests that {@link CompilerRegistry#setActiveCompiler} and {@link CompilerRegistry#getActiveCompiler} work. */
   public void testActiveCompilerAllAvailable() {
     CompilerInterface[] compilers = _registry.getAvailableCompilers();
 
-    assertEquals("active compiler before any setActive",
-                 compilers[0],
-                 _registry.getActiveCompiler());
+    assertEquals("active compiler before any setActive", compilers[0], _registry.getActiveCompiler());
 
     for (int i = 0; i < compilers.length; i++) {
-      // TODO: deal with the problem that sometimes not all compilers avail!
-      //if (compilers[i].isAvailable()) {
-        _registry.setActiveCompiler(compilers[i]);
-        assertEquals("active compiler after setActive",
-                     compilers[i],
-                     _registry.getActiveCompiler());
-      //}
+      _registry.setActiveCompiler(compilers[i]);
+      assertEquals("active compiler after setActive", compilers[i], _registry.getActiveCompiler());
     }
   }
 
-  /**
-   * Returns the list of available compilers after disabling one of them.
-   * This method includes checks for the correctness of the list
-   * after disabling one.
+  /** Returns the list of available compilers after disabling one of them.  This method includes checks for the 
+   *  correctness of the list after disabling one.
    *
-   * @param i Index of default compiler to disable.
+   *  @param i Index of default compiler to disable.
    */
   private CompilerInterface[] _getCompilersAfterDisablingOne(int i) {
     return _getCompilersAfterDisablingSome(new int[] { i });
   }
 
-  /**
-   * Returns the list of available compilers after disabling some of them.
-   * This method includes checks for the correctness of the list
-   * after disabling them.
-   *
-   * @param indices Array of ints signifying which of the default compilers
-   *                to disable.
+  /** Returns the list of available compilers after disabling some of them.  This method includes checks for the 
+   *  correctness of the list after disabling them.
+   *  @param indices Array of ints signifying which of the default compilers to disable.
    */
   private CompilerInterface[] _getCompilersAfterDisablingSome(int[] indices) {
     LimitingClassLoader loader = new LimitingClassLoader(_oldBaseLoader);
     _registry.setBaseClassLoader(loader);
-    //for (int j = 0; j < _allAvailableCompilers.length; j++) {
-    //  System.out.println("all available compilers: " + _allAvailableCompilers[j].getClass().getName());
-    //}
 
     for (int i = 0; i < indices.length; i++) {
       //System.out.println("restricting compiler: " + _allAvailableCompilers[indices[i]].getClass().getName());
@@ -200,15 +157,6 @@ public final class CompilerRegistryTest extends DrJavaTestCase {
     }
 
     CompilerInterface[] compilers = _registry.getAvailableCompilers();
-    //for (int j = 0; j < compilers.length; j++) {
-    //  System.out.println("available compiler: " + compilers[j].getClass().getName());
-    //}
-    
-    // NOTE: 03.28.2004 We don't know how to check this since making the change 
-    // to only display one compiler of each type.  JH & NH
-//    assertEquals("Number of available compilers",
-//                 _allAvailableCompilers.length - indices.length,
-//                 compilers.length);
 
     int indicesIndex = 0;
 
@@ -230,9 +178,7 @@ public final class CompilerRegistryTest extends DrJavaTestCase {
     return compilers;
   }
 
-  /**
-   * Ensure that the active compiler in the registry cannot be set to null.
-   */
+  /** Ensure that the active compiler in the registry cannot be set to null. */
   public void testCannotSetCompilerToNull() {
     try {
       _registry.setActiveCompiler(null);

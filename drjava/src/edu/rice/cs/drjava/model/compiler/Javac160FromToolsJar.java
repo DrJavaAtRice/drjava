@@ -35,13 +35,11 @@ package edu.rice.cs.drjava.model.compiler;
 
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 
-/** A compiler interface to find Javac (1.5.0+) in the tools.jar file.
+/** A compiler interface to find Javac (1.6.0) in the tools.jar file.
  *  @version $Id$
  */
 public class Javac160FromToolsJar extends CompilerProxy {
   public static final CompilerInterface ONLY = new Javac160FromToolsJar();
-  
-  private static final String VERSION = System.getProperty("java.specification.version");
 
   /** Private constructor due to singleton. */
   private Javac160FromToolsJar() {

@@ -49,58 +49,66 @@ import java.util.Arrays;
 public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   implements MasterRemote/*<SlaveType>*/ {
   
-  protected static final Log _log  = new Log("MasterSlave.txt", false);
+  protected static final Log _log  = new Log("MasterSlave.txt", true);
   
   /** Name for the thread that waits for the slave to exit. */
   protected volatile String _waitForQuitThreadName = "Wait for SlaveJVM Exit Thread";
   
-  /** Name for the thread that exports the MasterJVM to RMI. */
-  protected volatile String _exportMasterThreadName = "Export MasterJVM Thread";
+//  /** Name for the thread that exports the MasterJVM to RMI. */
+//  protected volatile String _exportMasterThreadName = "Export MasterJVM Thread";
   
-  /** Lock for accessing the critical state of this AbstractMasterJVM.  */
+  /** Lock for accessing the critical state of this AbstractMasterJVM including _monitorThread.  */
   protected final Object _masterJVMLock = new Object();
   
   private static final String RUNNER = SlaveJVMRunner.class.getName();
   
   /** The slave JVM remote stub if it's connected; null if not connected. */
-  private volatile SlaveRemote _slave = null;
+  private volatile SlaveRemote _slave;
 
-  /** Is slave JVM in the progress of starting up? */
+  /** Is slave JVM in the process of starting up?  INVARIANT: _startupInProgess => _slave == null. */
   private volatile boolean _startupInProgress = false;
 
-  /** This flag is set when a quit request is issued before the slave has even finished starting up. 
-   *  In that case, immediately after starting up, we quit it.
+ /** This flag is set when a quit request is issued before the slave has finished starting up. 
+   * In that case, immediately after starting up, we quit it. INVARIANT: _quitOnStartUp => _startupInProgress 
    */
   private volatile boolean _quitOnStartup = false;
   
-  /** Lock used in exporting this object to a file and loading it in the slaveJVM; protects stub variables. */
-  final static Object _exportLock = new Object();
-
+//  /** Lock used in exporting this object to a file and loading it in the slaveJVM; protects stub variables. */
+//  final static Object Lock = new Object();
+  
   /** The current remote stub for this main JVM object. This field is null except between the time the slave
    *  JVM is first invoked and the time the slave registers itself.
    */
-  private volatile Remote _stub;
+  private volatile MasterRemote _masterStub = null;
   
   /** The file containing the serialized remote stub. This field is null except between the time the slave
    *  JVM is first invoked and the time the slave registers itself.
    */
-  private volatile File _stubFile;
+  private volatile File _masterStubFile;
   
-  /** The remote class loader object used by the Slave JVM to load classes. */
-  private volatile RemoteClassLoader _classLoader;
-
-  /** The current remote stub for this main JVM's classloader. This field is null except between the time 
-   *  the slave JVM is first invoked and the time the slave registers itself.
-   */
-  private volatile Remote _classLoaderStub;
-
-  /** The file containing the serialized remote classloader stub. This field is null except between the 
-   *  time the slave JVM is first invoked and the time the slave registers itself.
-   */
-  volatile File _classLoaderStubFile;
+//  /** The current remote stub for this main JVM's classloader. This field is null except between the time 
+//   *  the slave JVM is first invoked and the time the slave registers itself.
+//   */
+//  private volatile IRemoteClassLoader _classLoaderStub;
+//  
+//  /** The file containing the serialized remote classloader stub. This field is null except between the 
+//   *  time the slave JVM is first invoked and the time the slave registers itself.
+//   */
+//  volatile File _classLoaderStubFile;
+//  
+//  /** The remote class loader for _slave. */
+//  volatile RemoteClassLoader _classLoader;
   
   /** The fully-qualified name of the slave JVM class. */
   private final String _slaveClassName;
+  
+  /** The thread monitoring the Slave JVM, waiting for it to terminate.  This feature inhibits the creation
+   *  of more than one Slave JVM corresponding to "this" 
+   */
+  private volatile Thread _monitorThread;
+  
+//  /** The lock used to protect _monitorThread. */
+//  private final Object _monitorLock = new Object();
 
   /** Sets up the master JVM object, but does not actually invoke the slave JVM.
    *  @param slaveClassName The fully-qualified class name of the class to start up in the second JVM. This 
@@ -109,6 +117,10 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    */
   protected AbstractMasterJVM(String slaveClassName) {
     _slaveClassName = slaveClassName;
+    _slave = null;
+    _monitorThread = null;
+    
+    _log.log(this + " CREATED");
     
     // Make sure RMI doesn't use an IP address that might change
     System.setProperty("java.rmi.server.hostname", "127.0.0.1");
@@ -144,152 +156,94 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    *  @param cp Classpath to use when starting the JVM
    *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
    */
-  protected final void invokeSlave(String[] jvmArgs, String cp, File workDir) throws IOException, RemoteException {
+  protected final void invokeSlave(final String[] jvmArgs, final String cp, final File workDir) throws IOException, 
+    RemoteException {
     
-    _log.log(this + ".invokeSlave(" + edu.rice.cs.util.StringOps.toString(jvmArgs) + ", " + cp + ", " + workDir + ") called");
-    
-    synchronized(_masterJVMLock) {
+    synchronized(_masterJVMLock) { // synchronization prelude only lets one thread at a time execute the sequel
       
-      if (_startupInProgress) throw new IllegalStateException("startup is in progress in invokeSlave");      
-      if (_slave != null) throw new IllegalStateException("slave non-null in invoke: " + _slave);
-      
+      try { while (_startupInProgress || _monitorThread != null) _masterJVMLock.wait(); }
+      catch(InterruptedException e) { throw new UnexpectedException(e); }
       _startupInProgress = true;
-      _stub = null;
     }
-    /**********************************************
-     * First, we we export ourselves to a file... *
-     **********************************************/
     
-//      Thread t = new Thread(_exportMasterThreadName) {
-//        public void run() {
-    _log.log(AbstractMasterJVM.this + " starting creation of RMI stub for AbstractMasterJVM");
-    try { _stub = UnicastRemoteObject.exportObject(AbstractMasterJVM.this); }
+    _log.log(this + ".invokeSlave(...) called");
+    assert (_slave != null);
     
-    // Debug: check that the IP address is 127.0.0.1
-    // javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
-    
-    catch (RemoteException re) {
-      // javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
-      throw new UnexpectedException(re);  // should never happen
+    /******************************************************************************************************
+     * First, we we export ourselves to a file, if it has not already been done on a previous invocation. *
+     *****************************************************************************************************/
+
+    if (_masterStub == null) {
+      try { _masterStub = (MasterRemote) UnicastRemoteObject.exportObject(this); }
+      catch (RemoteException re) {
+        javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
+        _log.log(this + " threw " + re);
+        throw new UnexpectedException(re);  // should never happen
+      }
+      _log.log(this + " EXPORTed Master JVM");
+      
+      _masterStubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
+      _masterStubFile.deleteOnExit();
+      
+      // serialize stub to _masterStubFile
+      FileOutputStream fstream = new FileOutputStream(_masterStubFile);
+      ObjectOutputStream ostream = new ObjectOutputStream(fstream);
+      ostream.writeObject(_masterStub);
+      ostream.flush();
+      fstream.close();
+      ostream.close();
     }
-//          synchronized(_exportLock) { _exportLock.notify(); }
-//        }
-//      };
     
-//      t.start();
-//      synchronized(_exportLock) {
-//        try {
-//          while (_stub == null) { 
-//            _log.log("invokeSlave thread in " + this + " waiting for creation of AbstractMasterJVM RMI stub to complete");
-//            _exportLock.wait(); 
-//          } 
-//        }
-//        catch (InterruptedException ie) { throw new UnexpectedException(ie); }  // should never happen
-    
-    _log.log(this + " completed creation of RMI stub for AbstractMasterJVM");
-    _stubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
-    _stubFile.deleteOnExit();
-    
-    // serialize stub to _stubFile
-    FileOutputStream fstream = new FileOutputStream(_stubFile);
-    ObjectOutputStream ostream = new ObjectOutputStream(fstream);
-    ostream.writeObject(_stub);
-    ostream.flush();
-    fstream.close();
-//      ostream.close();
-    
-    _log.log(this + " completed writing RMI stub for AbstractMasterJVM to a file");
-    
-    /***********************************************************************************
-     * Done exporting ourselves to a file ...  Now let's export our classloader        *
-     * This will be used to handle classloading requests from the slave jvm.           *
-     ***********************************************************************************/
-    
-    final RemoteClassLoader _classLoader = new RemoteClassLoader(getClass().getClassLoader());
-    _classLoaderStub = null;
-//      t = new Thread(_exportMasterThreadName) {
-//        public void run() {
-    _log.log(AbstractMasterJVM.this + " starting creation of RMI stub for RemoteClassLoader");
-    try {  _classLoaderStub = UnicastRemoteObject.exportObject(_classLoader); }
-    
-    // Debug: check that the IP address is 127.0.0.1
-    //javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
-    
-    catch (RemoteException re) {
-      //javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
-      throw new UnexpectedException(re);  // should never happen
-    }
-//          synchronized(_exportLock) { _exportLock.notify(); }
-//        }
-//      };
-    
-//      t.start();
-//      synchronized(_exportLock) {
-//        try { 
-//          while (_classLoaderStub == null) { 
-//            _log.log("invokeSlave thread in " + this + " waiting for creation of RemoteClassLoader RMI stub to complete");
-//            _exportLock.wait(); 
-//          } 
-//        }
-//        catch (InterruptedException ie) { throw new UnexpectedException(ie); }  // should never happen
-//      }
-    
-    _log.log(this + " completed creation of RMI stub for RemoteClassLoader");
-    _classLoaderStubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
-    _classLoaderStubFile.deleteOnExit();
-    // serialize stub to _classLoaderStubFile
-    fstream = new FileOutputStream(_classLoaderStubFile);
-    ostream = new ObjectOutputStream(fstream);
-    ostream.writeObject(_classLoaderStub);
-    ostream.flush();
-    fstream.close();
-    ostream.close();
-    
-    _log.log(this + " completed writing RMI stub for RemoteClassLoader to a file");
-    
-    String[] args = 
-      new String[] { _stubFile.getAbsolutePath(), _slaveClassName, _classLoaderStubFile.getAbsolutePath() };
-    
-    /* Create the slave JVM. */  
-    _log.log(this + " is starting a slave JVM");
-    final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs, workDir);
+    final String[] args = 
+      new String[] { _masterStubFile.getAbsolutePath(), _slaveClassName };
     
     // Start a thread to wait for the slave to die.  When it dies, delegate what to do (restart?) to subclass
-    Thread restartThread = new Thread(_waitForQuitThreadName) {
+    _monitorThread = new Thread(_waitForQuitThreadName) {
       public void run() {
-        _log.log(this + "has started a Slave monitor thread waiting on process " + process);
-        try {
+        try { /* Create the slave JVM. */ 
+          
+          _log.log(AbstractMasterJVM.this + " is STARTING a Slave JVM with args " + Arrays.toString(args));
+          
+          final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs, workDir);
+          _log.log(AbstractMasterJVM.this + " CREATED Slave JVM process " + process + " with " + asString());
+          
           int status = process.waitFor();
-          _log.log("Process " + process + " died under control of " + AbstractMasterJVM.this + " with status " + status);
+          _log.log(process + " DIED under control of " + asString() + " with status " + status);
           synchronized(_masterJVMLock) {
             if (_startupInProgress) {
               _log.log("Process " + process + " died while starting up");
-              /* If we get here, the process died without registering. (This might be the case if something was wrong
-               * with the classpath, or if the new JVM couldn't acquire a port for debugging.)  Proper behavior in 
-               * this case is unclear, so we'll let our subclasses decide.  By default, we print a stack trace and 
-               * do not proceed, to avoid going into a loop. */
+              /* If we get here, the process died without registering.  One possible cause is the intermittent funky 3 minute
+               * pause in readObject in RUNNER.  Other possible causes are errors in the classpath or the absence of a 
+               * debug port.  Proper behavior in this case is unclear, so we'll let our subclasses decide. */
               slaveQuitDuringStartup(status);
             }
-            _slave = null;
-            final boolean masterWithdrawn = UnicastRemoteObject.unexportObject(AbstractMasterJVM.this, true);
-            final boolean loaderWithdrawn = UnicastRemoteObject.unexportObject(_classLoader, true);
-            if (! masterWithdrawn || ! loaderWithdrawn) {
-              _log.log("unexport step failed in " + AbstractMasterJVM.this);
-              throw new UnexpectedException("remote objects exported by Master JVM could not be withdrawn!");
+            if (_slave != null) { // Slave JVM quit spontaneously
+              _slave = null; 
             }
-            
-            _log.log(AbstractMasterJVM.this + " calling handleSlaveQuit(" + status + ")");
-            handleSlaveQuit(status);
+            _monitorThread = null;
+            _masterJVMLock.notifyAll();  // signal that Slave JVM died to any thread waiting for _monitorThread == null
           }
+            
+//          _log.log(asString() + " calling handleSlaveQuit(" + status + ")");
+          handleSlaveQuit(status);
+
         }
-        catch (NoSuchObjectException e) { throw new UnexpectedException(e); }
-        catch (InterruptedException ie) { throw new UnexpectedException(ie); }
+        catch(NoSuchObjectException e) { throw new UnexpectedException(e); }
+        catch(InterruptedException e) { throw new UnexpectedException(e); }
+        catch(IOException e) { throw new UnexpectedException(e); }
       }
+      private String asString() { return "MonitorThread@" + Integer.toHexString(hashCode()); }
     };
-    _log.log(this + " is starting a slave monitor thread to detect when the Slave JVM dies");
-    restartThread.start();
+//    _log.log(this + " is starting a slave monitor thread to detect when the Slave JVM dies");
+    _monitorThread.start();
   }
   
+  /** Waits until no slave JVM is running under control of "this" */
+  public void waitSlaveDone() {
+    try { synchronized(_masterJVMLock) { while (_monitorThread != null) _masterJVMLock.wait(); }}
+    catch(InterruptedException e) { throw new UnexpectedException(e); } 
+  }
+    
   /** Action to take if the slave JVM quits before registering.  Assumes _masterJVMLock is held.
    *  @param status Status code of the JVM
    */
@@ -297,8 +251,10 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     // Reset Master JVM state (in case invokeSlave is called again on this object)
     _startupInProgress = false;
     _quitOnStartup = false;
-    String msg = "SlaveJVM quit before registering!  Status: " + status;
-    throw new IllegalStateException(msg);
+    _monitorThread = null;
+//    _masterJVMLock.notify();
+//    String msg = "SlaveJVM quit before registering!  Status: " + status;  
+//    throw new IllegalStateException(msg);
   }
   
   /** Called if the slave JVM dies before it is able to register.
@@ -312,47 +268,68 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   /* Records the identity and status of the Slave JVM in the Master JVM */
   public void registerSlave(SlaveRemote slave) throws RemoteException {
     _log.log(this + " registering Slave " + slave);
+    
+    boolean quitSlavePending;  // flag used to move quitSlave() call out of synchronized block
+    
     synchronized(_masterJVMLock) {
       _slave = slave;
       _startupInProgress = false;
-      _stubFile.delete();
-      _stub = null;
-      _classLoaderStub = null;
-      _classLoaderStubFile.delete();
       
       _log.log(this + " calling handleSlaveConnected()");
       
       handleSlaveConnected();
       
+      quitSlavePending = _quitOnStartup;
       if (_quitOnStartup) {
         // quitSlave was called before the slave registered, so we now act on the deferred quit request.
         _quitOnStartup = false;
-        quitSlave();
       }
+    }
+    if (quitSlavePending) {
+      _log.log(this + " Executing deferred quitSlave() that was called during startup");
+      quitSlave();  // not synchronized; _slave may be null when this code executes
     }
   }
   
-  /** Quits slave JVM.
+  /** Withdraws RMI exports for this. */
+  public void dispose() throws RemoteException {
+    SlaveRemote dyingSlave;
+    synchronized(_masterJVMLock) {
+      _masterStub = null;
+      if (_monitorThread != null) _monitorThread = null;
+      dyingSlave = _slave;  // save value of _slave in case it is not null
+      _slave = null;
+      
+      // Withdraw RMI exports (Note that classLoader is distinct for each call on invokeSlave)
+      // Slave in process of starting will die because master is inaccessible.
+      _log.log(this + ".dispose() UNEXPORTing " + this);
+      UnicastRemoteObject.unexportObject(this, true);
+    }
+    if (dyingSlave != null) dyingSlave.quit();  // unsynchronized; may hasten the death of dyingSlave
+  }
+  
+  /** Quits slave JVM.  On exit, _slave == null.  _quitOnStartup may be true
    *  @throws IllegalStateException if no slave JVM is connected
    */
   protected final void quitSlave() throws RemoteException {
-    _log.log(this + ".quitSlave() called");
+    SlaveRemote dyingSlave;
     synchronized(_masterJVMLock) {
-      if (isStartupInProgress())
-        /* There is a slave to be quit, but we don't have a handle to it yet. Instead we set this flag, which makes it
-         * quit immediately after it registers in registerSlave. */
+      if (isStartupInProgress()) {
+        /* There is a slave to be quit, but _slave == null, so we cannot contact it yet. Instead we set _quitOnStartup
+         * and tell the slave to quit when it registers in registerSlave. */
         _quitOnStartup = true;
-      
+        return;
+      }
       else if (_slave == null)  {
-        System.out.println("Slave JVM quit operation invoked when no slave running");
         _log.log(this + " called quitSlave() when no slave was running");
-//        throw new IllegalStateException("tried to quit when no slave running and startup not in progress");
+        return;
       }
       else {
-        _slave.quit();
-        _slave = null;  // Remove reference to Slave JVM
+        dyingSlave = _slave;
+        _slave = null;
       }
     }
+    dyingSlave.quit();  // remote operation is not synchronized!
   }
   
   /** Returns slave remote instance, or null if not connected. */

@@ -44,14 +44,9 @@ public class JavacFromToolsJar extends CompilerProxy {
 
   /** Private constructor due to singleton. */
   private JavacFromToolsJar() {
-    super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
-          new ToolsJarClassLoader());
+    super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler", new ToolsJarClassLoader());
   }
 
-  /**
-   * Returns the name of this compiler, appropriate to show to the user.
-   */
-  public String getName() {
-    return super.getName() + " (tools.jar)";
-  }
+  /** Returns the name of this compiler, appropriate to show to the user. */
+  public String getName() { return super.getName() + " (tools.jar)"; }
 }

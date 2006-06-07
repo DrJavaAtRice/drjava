@@ -1737,29 +1737,44 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return true;
   }
  
-  /** Exits the program.  Quits regardless of whether all documents are successfully closed. */
-  public void quit() {
+  
+  
+  /** Exits the program. */
+  public void quit() { quit(false); }
+  
+  /** Exits the program.  If force is true, quits regardless of whether all documents are successfully closed. 
+   *  This functionality is not available via the user interface, but it should be. */
+  public void quit(boolean force) {
     try {
-      if (!closeAllFilesOnQuit()) return;
+      if (!force && !closeAllFilesOnQuit()) return;
 //    Utilities.show("Closed all files");
-      disposeExternalResources();  // kills the interpreter
+//      disposeExternalResources();  // kills the interpreter
+      dispose(); // in instances of DefaultGlobalModel, kills the interpreter
       
-      // [ 1478796 ] DrJava Does Not Shut Down With Project Open
-      // On HP tc1100 and Toshiba Portege tablet PCs, there appears to be a problem in a
-      // shutdown hook, presumably the RMI shutdown hook.
-      // Shutdown hooks get executed in Runtime.exit (to which System.exit delegates), and
-      // if a shutdown hook does not complete, the VM does not shut down.
-      // The difference between Runtime.halt and Runtime.exit is that Runtime.exit runs
-      // the shutdown hooks and the finalizers (if Runtime.runFinalizersOnExit(true)
-      // has been called); then it calls Runtime.halt.
-      // By using Runtime.halt, we do not execute any finalizers or shutdown hooks;
-      // however it does not seem like we need them.      
-//      System.exit(0);
-      Runtime.getRuntime().halt(0);
+      /* [ 1478796 ] DrJava Does Not Shut Down With Project Open. On HP tc1100 and Toshiba Portege tablet PCs, there
+       * appears to be a problem in a shutdown hook, presumably the RMI shutdown hook. Shutdown hooks get executed in 
+       * Runtime.exit (to which System.exit delegates), and if a shutdown hook does not complete, the VM does not shut
+       * down.  The difference between Runtime.halt and Runtime.exit is that Runtime.exit runs the shutdown hooks and
+       * the finalizers (if Runtime.runFinalizersOnExit(true) has been called); then it calls Runtime.halt.  The RMI 
+       * hooks are potentially important in running unit test that repeatedly start and stop DrJava, so we only invoke
+       * Runtime.halt if our attempt to exit times out.
+       */
+      
+      shutdown();
     }
-    catch(Throwable t) { System.exit(0); /* exit anyway */ }
+    catch(Throwable t) { shutdown(); /* force exit anyway */ }
   }
-
+  
+  /* Terminates DrJava via System.exit with Runtime.halt as a backup if the former gets hung up. */
+  private void shutdown() {
+    Thread terminator = new Thread(new Runnable() { public void run() { System.exit(0); } }, "DrJava Exit");
+    terminator.start();
+    try { Thread.sleep(2000); } // sleep for two seconds to allow the terminator thread to terminate DrJava
+    catch(InterruptedException e) { /* proceed */ }
+//    _log.log("In " + this + " System.exit(0) timed out, so Runtime.halt(0) is being used instead");
+    Runtime.getRuntime().halt(0);  // force DrJava to exit if it still alive
+  }
+    
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests.
    *  This version does not kill the interpreter. */
   public void dispose() {

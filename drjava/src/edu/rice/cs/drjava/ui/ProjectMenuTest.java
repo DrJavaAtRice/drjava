@@ -192,8 +192,8 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
 //    System.err.println(Arrays.toString(aux));
     assertEquals("Number of saved src files", 2, src.length);
     assertEquals("Number of saved aux files", 1, aux.length);
-    assertEquals("wrong name for _file2", _file2.getCanonicalPath(), src[0].getCanonicalPath()); // assumes reverse order
-    assertEquals("Wrong name for _file1", _file1.getCanonicalPath(), src[1].getCanonicalPath());
+    assertEquals("wrong name for _file2", _file2.getCanonicalPath(), src[1].getCanonicalPath()); // assumes same (not reverse) order
+    assertEquals("Wrong name for _file1", _file1.getCanonicalPath(), src[0].getCanonicalPath());
     assertEquals("Wrong aux file", _auxFile.getCanonicalPath(), aux[0].getCanonicalPath());
   }
   

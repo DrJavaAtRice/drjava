@@ -35,6 +35,7 @@ package edu.rice.cs.util;
 
 import java.io.*;
 
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -109,7 +110,18 @@ public class Log {
     }
   }
 
- 
+  /** Prints a message and exception stack trace to the log, if enabled.
+   *  @param s Message to print
+   *  @param t Throwable to log
+   */
+  public synchronized void log(String s, StackTraceElement[] trace) {
+    if (isEnabled()) {
+      StringBuilder traceImage = new StringBuilder();
+      for (StackTraceElement e: trace) traceImage.append("\n" + e.toString()); 
+      log(s + traceImage.toString());
+    }
+  }
+  
   /** Prints a message and exception stack trace to the log, if enabled.
    *  @param s Message to print
    *  @param t Throwable to log

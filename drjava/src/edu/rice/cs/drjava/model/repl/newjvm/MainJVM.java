@@ -128,7 +128,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //    Utilities.show("Starting the slave JVM");
     _workDir = wd;
     _waitForQuitThreadName = "Wait for Interactions to Exit Thread";
-    _exportMasterThreadName = "Export DrJava to RMI Thread";
+//    _exportMasterThreadName = "Export DrJava to RMI Thread";
     
     _interactionsModel = new DummyInteractionsModel();
     _junitModel = new DummyJUnitModel();
@@ -681,16 +681,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param status Status code of the JVM
    */
   protected void slaveQuitDuringStartup(int status) {
+    super.slaveQuitDuringStartup(status);
     // The slave JVM is not enabled after this.
-//    Utilities.showDebug("slaveQuitDuringStartup!");
-    _restart = false;
+//    _restart = false;
     
     String msg = "Interpreter JVM exited before registering, status: " + status;
     IllegalStateException e = new IllegalStateException(msg);
-    _log.log("Slave quit during startup. Throwing " + e);
-    _interactionsModel.interpreterResetFailed(e);
-    _cleanlyRestarting = false;
-    throw e;
+    new edu.rice.cs.drjava.ui.DrJavaErrorHandler().handle(e);
   }
   
   /** Called if the slave JVM dies before it is able to register.
@@ -707,7 +704,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _interactionsModel.interpreterResetFailed(th);
     _cleanlyRestarting = false;
   }
-  
   
   /** Returns whether a JVM is currently starting.  This override widens the visibility of the method. */
   public boolean isStartupInProgress() { return super.isStartupInProgress(); }

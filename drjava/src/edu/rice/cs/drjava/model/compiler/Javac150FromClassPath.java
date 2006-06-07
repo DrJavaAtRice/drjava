@@ -42,8 +42,6 @@ public class Javac150FromClassPath extends CompilerProxy {
   
   public static final CompilerInterface ONLY = new Javac150FromClassPath();
 
-  private static final String VERSION = System.getProperty("java.specification.version");
-
   /** Private constructor due to singleton. */
   private Javac150FromClassPath() {
     super("edu.rice.cs.drjava.model.compiler.Javac150Compiler", Javac150FromClassPath.class.getClassLoader());

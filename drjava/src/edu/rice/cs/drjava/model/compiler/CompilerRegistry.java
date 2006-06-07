@@ -35,6 +35,9 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.util.LinkedList;
 import java.lang.reflect.Field;
+
+import edu.rice.cs.util.Log;
+
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
@@ -48,14 +51,14 @@ public class CompilerRegistry {
   /* classes that load and adapt various compilers */
   
   public static final String[] JAVA_16_COMPILERS = {
-    // javac 1.6
+    // javac 1.6 "compiler interfaces"
     "edu.rice.cs.drjava.model.compiler.Javac160FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.Javac160FromClasspath",
     "edu.rice.cs.drjava.model.compiler.Javac160FromToolsJar"
   };
   
   public static final String[] JAVA_15_COMPILERS = {
-    // javac 1.5
+    // javac 1.5 "compiler interfaces"
     "edu.rice.cs.drjava.model.compiler.Javac150FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.Javac150FromClasspath",
     "edu.rice.cs.drjava.model.compiler.Javac150FromToolsJar"
@@ -63,13 +66,13 @@ public class CompilerRegistry {
 
   /** A subset of DEFAULT_COMPILERS that support Raw (non-generic) Java. */
   public static final String[] JAVA_14_COMPILERS = {
-    // javac 1.4
+    // javac 1.4 "compiler interfaces"
     "edu.rice.cs.drjava.model.compiler.Javac141FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.Javac141FromClasspath",
     "edu.rice.cs.drjava.model.compiler.Javac141FromToolsJar"
   };
 
-  /** The list of compiler interfaces that are distributed with DrJava. */
+  /** The list of compiler loading classes that are distributed with DrJava. */
   static final String[][] DEFAULT_COMPILERS = {
     // javac 1.6 
     JAVA_16_COMPILERS,
@@ -81,16 +84,30 @@ public class CompilerRegistry {
     
   /** Singleton instance. */
   public static final CompilerRegistry ONLY = new CompilerRegistry();
+  
+  private final static Log _log = new Log("Compiler.txt", false);
 
   /** Class loader to use to fetch compiler classes. */
-  private ClassLoader _baseClassLoader;
+  private volatile ClassLoader _baseClassLoader;
+  
+  /** The candidate compilers give the version of Java being executed */
+  private final String[] _candidateCompilers;
 
   /** The active compiler. Must never be null. */
   private CompilerInterface _activeCompiler = NoCompilerAvailable.ONLY;
 
   /** Private constructor due to singleton. */
-  private CompilerRegistry() { _baseClassLoader = getClass().getClassLoader(); }
-
+  private CompilerRegistry() { 
+    _baseClassLoader = getClass().getClassLoader(); 
+    
+    String version = CompilerProxy.VERSION; // version of executing JVM: 1.4, 1.5, 1.6
+    
+    if (version.equals("1.4")) _candidateCompilers = JAVA_14_COMPILERS;
+    else if (version.equals("1.5")) _candidateCompilers = JAVA_15_COMPILERS;
+    else if (version.equals("1.6")) _candidateCompilers = JAVA_16_COMPILERS;
+    else _candidateCompilers = null;
+  }
+    
   /** Sets the base class loader used to load compiler classes. */
   public void setBaseClassLoader(ClassLoader l) { _baseClassLoader = l; }
 
@@ -105,22 +122,15 @@ public class CompilerRegistry {
   public CompilerInterface[] getAvailableCompilers() {
     LinkedList<CompilerInterface> availableCompilers = new LinkedList<CompilerInterface>();
     
-    String[] candidateCompilers = null;
-    
-    String version = CompilerProxy.VERSION; // version of executing JVM: 1.4, 1.5, 1.6
-    
-    if (version.equals("1.4")) candidateCompilers = JAVA_14_COMPILERS;
-    else if (version.equals("1.5")) candidateCompilers = JAVA_15_COMPILERS;
-    else if (version.equals("1.6")) candidateCompilers = JAVA_16_COMPILERS;
-    else throw new 
-      UnexpectedException("Java specification version " + version + "is not supported.  Must be 1.4, 1.5, or 1.6");
+    if (_candidateCompilers == null) throw new 
+      UnexpectedException("Java specification version " + CompilerProxy.VERSION + "is not supported.  Must be 1.4, 1.5, or 1.6");
 
-    for (String name : candidateCompilers) {
-//      DrJava.consoleOut().print("REGISTRY:  Checking compiler: " + name + ": ");
-      try { if (_createCompiler(name, availableCompilers)) break; }
+    for (String name : _candidateCompilers) {
+      _log.log("CompilerRegistry.getAvailableCompilers is checking compiler: " + name);
+      try { if (_createCompiler(name, availableCompilers)) continue; }
       catch (Throwable t) {
         // This compiler didn't load. Keep on going.
-//        DrJava.consoleOut().println("failed to load:");
+        _log.log("Compiler " + name + " failed to load:");
         //t.printStackTrace(DrJava.consoleOut());
         //System.err.println();
       }
@@ -128,13 +138,16 @@ public class CompilerRegistry {
 
     if (availableCompilers.size() == 0) availableCompilers.add(NoCompilerAvailable.ONLY);
     
+   _log.log("CompilerRegistry.getAvailableCompilers() returning " + availableCompilers);
+    
     return availableCompilers.toArray(new CompilerInterface[availableCompilers.size()]);
   }
 
   private boolean _createCompiler(String name, LinkedList<CompilerInterface> availableCompilers) throws Throwable {
+    _log.log("CompilerRegistry._createCompiler(" + name + ", " + availableCompilers +") called");
     CompilerInterface compiler = _instantiateCompiler(name);
     if (compiler.isAvailable()) {
-      //DrJava.consoleOut().println("ok.");
+      _log.log("Compiler " + this + " is available: added to compile list");
 
       // can't use getActiveCompiler() because it will call back to
       // getAvailableCompilers, forming an infinite recursion!!
@@ -146,8 +159,10 @@ public class CompilerRegistry {
       availableCompilers.add(compiler);
       return true;
     }
-    else return false;
-      //DrJava.consoleOut().println("not available.");
+    else {
+      _log.log("Compiler " + this + " is NOT available.");
+      return false;
+    }
   }
 
   public boolean isNoCompilerAvailable() { return getActiveCompiler() == NoCompilerAvailable.ONLY; }
@@ -181,30 +196,31 @@ public class CompilerRegistry {
   }
 
   /** Instantiate the given compiler.
-   *
-   *  @param name Fully qualified class name of compiler to instantiate. This class must implement 
-   *    {@link CompilerInterface}.
-   *
+   *  @param name Full class name of compiler to instantiate. This class must implement {@link CompilerInterface}.
    *  @return Instance of {@link CompilerInterface}. This will either be the value of the .ONLY field of the class
    *    (if it exists and is an implementation of CompilerInterface) or a new instance of the given class.
-   *
    *  @throws Throwable If the compiler does not load, some type of exception will be thrown. Which particular one 
    *    depends on how it failed.  It is non-recoverable; the exception is thrown just to indicate failure.
    */
   private CompilerInterface _instantiateCompiler(String name) throws Throwable {
+    _log.log("CompilerRegistry._instantiateCompiler using class loader " + _baseClassLoader + " to load " + name);
     Class<?> clazz = _baseClassLoader.loadClass(name);
-//    Utilities.show("Loaded compiler named " + name + " with class name " + clazz);
+    _log.log("Loaded compiler named " + name + " with class name " + clazz);
     return createCompiler(clazz);
   }
 
   public static CompilerInterface createCompiler(Class clazz) throws Throwable {
     try {
+      _log.log("CompilerRegistry.createCompiler(" + clazz + ") called");
       Field field = clazz.getField("ONLY");
+      _log.log(clazz + ".ONLY = " + field);
       Object val = field.get(null);  // null is passed to get since it's a static field
+      _log.log("createCompiler(" + clazz + ") returning " + val);
       return (CompilerInterface) val;
     }
     catch (Throwable t) {
-      //t.printStackTrace(DrJava.consoleErr());
+      // Not a compiler provided by ToolsJarClassLoader
+      _log.log("createCompiler threw exception " + t);
       return (CompilerInterface) clazz.newInstance();
     }
   }

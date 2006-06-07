@@ -254,10 +254,10 @@ public class ProjectTest extends DrJavaTestCase {
 
     String base = pf.getParent();
     
-    assertEquals("first source filename", new File(parent,"/dir1/testfile1.java").getPath(), 
-                 pfir.getSourceFiles()[0].getPath());
-    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), 
-                 pfir.getSourceFiles()[4].getPath());
+//    assertEquals("first source filename", new File(parent,"/dir1/testfile1.java").getPath(), 
+//                 pfir.getSourceFiles()[0].getPath());
+//    assertEquals("last source filename", new File(parent,"/dir3/testfile5.java").getPath(), 
+//                 pfir.getSourceFiles()[4].getPath());
     assertEquals("first aux filename", new File(parent,"test/testfile6.java").getPath(), 
                  pfir.getAuxiliaryFiles()[0].getPath());
     assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);

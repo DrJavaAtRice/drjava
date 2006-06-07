@@ -52,9 +52,7 @@ public class Javac150FromSetLocation extends CompilerProxy implements OptionCons
   // To implement #523222, we had to make this not a singleton,
   // to allow it to re-determine the location of the compiler multiple times.
 //  public static final CompilerInterface ONLY = new JavacFromSetLocation();
-  
-  private static final String VERSION = System.getProperty("java.specification.version");
-
+ 
   /** Private constructor due to singleton. */
   public Javac150FromSetLocation() {
     super("edu.rice.cs.drjava.model.compiler.Javac150Compiler", _getClassLoader());

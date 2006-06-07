@@ -56,8 +56,7 @@ public class JavacFromSetLocation extends CompilerProxy
 
     /** Private constructor due to singleton. */
     public JavacFromSetLocation() {
-        super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler",
-              _getClassLoader());
+        super("edu.rice.cs.drjava.model.compiler.JavacGJCompiler", _getClassLoader());
     }
 
     private static ClassLoader _getClassLoader() {
