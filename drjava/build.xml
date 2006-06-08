@@ -81,7 +81,7 @@
   </patternset>
   
   <patternset id="rmi-test-classes">
-    <include name="edu/rice/cs/util/newjvm/IntegratedMasterSlaveTest$MasterImpl.class" />
+    <include name="edu/rice/cs/util/newjvm/IntegratedMasterSlaveTest$TestMasterJVM.class" />
     <include name="edu/rice/cs/util/newjvm/IntegratedMasterSlaveTest$CounterSlave.class" />
   </patternset>
   
