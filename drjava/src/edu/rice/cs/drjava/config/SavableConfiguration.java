@@ -64,35 +64,36 @@ public class SavableConfiguration extends Configuration {
    * Values equal to their defaults are not written to disk.
    */
   public void saveConfiguration(OutputStream os, String header) throws IOException {
-    OutputStreamWriter osw = new OutputStreamWriter(os);
+    Writer w = new BufferedWriter(new OutputStreamWriter(os));
     Iterator<OptionParser<?>> keys = map.keys();
     //Properties p = new Properties();
-    String tmpString;
-    StringBuffer buff;
-    OptionParser<?> key;
+//    String tmpString;
+//    StringBuffer buff;
+//    OptionParser<?> key;
     
     // Write the header
     Date date = new Date();
-    osw.write((int)'#');
-    osw.write(header, 0, header.length());
-    osw.write((int)'\n');
-    osw.write((int)'#');
-    osw.write(date.toString(), 0, date.toString().length());
-    osw.write((int)'\n');
+    w.write((int)'#');
+    w.write(header, 0, header.length());
+    w.write((int)'\n');
+    w.write((int)'#');
+    w.write(date.toString(), 0, date.toString().length());
+    w.write((int)'\n');
 
     // Write each option
     while (keys.hasNext()) {
-      key = keys.next();
+      
+      OptionParser<?> key = keys.next();
 
       if (!key.getDefault().equals(map.getOption(key))) {
 
         // Write name
-        tmpString = key.getName();
-        osw.write(tmpString, 0, tmpString.length());
+        String tmpString = key.getName();
+        w.write(tmpString, 0, tmpString.length());
 
         // Write equals sign
         tmpString = " = ";
-        osw.write(tmpString, 0, 3);
+        w.write(tmpString, 0, 3);
 
         // Write value
         tmpString = map.getString(key);
@@ -101,18 +102,18 @@ public class SavableConfiguration extends Configuration {
         int pos;
         while (index < tmpString.length() &&
                ((pos = tmpString.indexOf('\\', index)) >= 0)) {
-          buff = new StringBuffer(tmpString);
+          StringBuffer buff = new StringBuffer(tmpString);  // should use StringBuilder, but not 1.4 compatible
           buff.insert(pos, '\\');
           index = pos + 2;
           tmpString = buff.toString();
         }
-        osw.write(tmpString, 0, tmpString.length());
-        osw.write((int)'\n');
+        w.write(tmpString, 0, tmpString.length());
+        w.write((int)'\n');
 
         // p.setProperty(key.getName(),map.getString(key));
       }
     }
-    osw.close();
+    w.close();
     //p.store(os,header)
   }
 }

@@ -152,12 +152,8 @@ public class JarOptionsDialog extends JFrame {
   public void setFrameState(String s) {
     try { _lastState = new FrameState(s); }
     catch(IllegalArgumentException e) { _lastState = null; }
-    if (_lastState!=null) {
-      setLocation(_lastState.getLocation());
-    }
-    else {
-      MainFrame.setPopupLoc(this, _mainFrame);
-    }
+    if (_lastState!=null) setLocation(_lastState.getLocation());
+    else MainFrame.setPopupLoc(this, _mainFrame);
     validate();
   }
   
@@ -703,7 +699,7 @@ public class JarOptionsDialog extends JFrame {
              }
           }
           else {
-            JOptionPane.showMessageDialog(JarOptionsDialog.this,"Jar file successfully written to '"+_jarFileSelector.getFileFromField().getName()+"'", "Jar Creation Successful", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(JarOptionsDialog.this, "Jar file successfully written to '" + _jarFileSelector.getFileFromField().getName() + "'", "Jar Creation Successful", JOptionPane.INFORMATION_MESSAGE);
             JarOptionsDialog.this.setVisible(false);
           }
         }

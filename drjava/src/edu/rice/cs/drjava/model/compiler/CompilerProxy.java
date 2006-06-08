@@ -50,7 +50,7 @@ public class CompilerProxy implements CompilerInterface {
   
   public static final String VERSION = System.getProperty("java.specification.version");
   
-  private static final Log _log = new Log("Compiler.txt", false);
+  private static final Log _log = new Log("CompilerTest.txt", false);
   
   /** The actual compiler interface. If it's null, we couldn't load it. */
   private CompilerInterface _realCompiler = null;

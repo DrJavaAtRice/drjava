@@ -50,7 +50,7 @@ import edu.rice.cs.util.swing.Utilities;
  */
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   
-//  public static Log _log = new Log("GlobalModelOtherTestLog.txt", false);
+  //  _log is inherited from GlobalModelTestCase
   
   private static final String FOO_CLASS =
     "package bar;\n" +

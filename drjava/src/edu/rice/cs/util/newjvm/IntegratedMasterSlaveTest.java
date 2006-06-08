@@ -46,7 +46,7 @@ import java.rmi.RemoteException;
  */
 public class IntegratedMasterSlaveTest extends DrJavaTestCase {
   
-  private static Log _log = new Log("MasterSlave.txt", true);
+  private static Log _log = new Log("MasterSlave.txt", false);
   
   final TestMasterJVM _testMaster = new TestMasterJVM(); // JUnit ensures separate copy for each test
  

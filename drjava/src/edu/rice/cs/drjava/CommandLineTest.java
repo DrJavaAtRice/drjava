@@ -37,6 +37,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -56,62 +57,61 @@ public final class CommandLineTest extends DrJavaTestCase {
   private MainFrame _mf;
 
   /** Files that exist, and the filenames that represent them. */
-  private final File f1;
-  private final String f1_name;
-  private final String f1_contents;
-  private final File f2;
-  private final String f2_name;
-  private final String f2_contents;
-  private final File f3;
-  private final String f3_name;
-  private final String f3_contents;
-  private final File f4;
-  private final String f4_name;
-  private final String f4_contents;
-  private final File f5;
-  private final String f5_name;
-  private final String f5_contents;
-  private final File f6;
-  private final String f6_name;
-  private final String f6_contents;
-  private final File f7;
-  private final String f7_name;
-  private final String f7_contents;
-  private final File f8;
-  private final String f8_name;
-  private final String f8_contents;
+  private volatile File f1;
+  private volatile String f1_name;
+  private volatile String f1_contents;
+  private volatile File f2;
+  private volatile String f2_name;
+  private volatile String f2_contents;
+  private volatile File f3;
+  private volatile String f3_name;
+  private volatile String f3_contents;
+  private volatile File f4;
+  private volatile String f4_name;
+  private volatile String f4_contents;
+  private volatile File f5;
+  private volatile String f5_name;
+  private volatile String f5_contents;
+  private volatile File f6;
+  private volatile String f6_name;
+  private volatile String f6_contents;
+  private volatile File f7;
+  private volatile String f7_name;
+  private volatile String f7_contents;
+  private volatile File f8;
+  private volatile String f8_name;
+  private volatile String f8_contents;
 
   
   /** Files that do not exist (constructor deletes them), and their filenames. */
-  private final File nof1;
-  private final File nof2;
-  private final File nof3;
-  private final File nof4;
-  private final File nof5;
-  private final String nof1_name;
-  private final String nof2_name;
-  private final String nof3_name;
-  private final String nof4_name;
-  private final String nof5_name;
+  private volatile File nof1;
+  private volatile File nof2;
+  private volatile File nof3;
+  private volatile File nof4;
+  private volatile File nof5;
+  private volatile String nof1_name;
+  private volatile String nof2_name;
+  private volatile String nof3_name;
+  private volatile String nof4_name;
+  private volatile String nof5_name;
   
-  
-//  private Log _log = new Log("CommandLineTestLog.txt", true);
+  private Log _log = new Log("CommandLineTest.txt", false);
 
   /** Constructor.  Sets up test files for us to use: (i) three files that exist and can be opened; (ii) three
    *  files that don't exist
    *  @param name the name of the test case
    */
-  public CommandLineTest(String name) {
-    super(name);
+  public CommandLineTest(String name) { super(name); }
     
-    /* Creating a MainFrame() is costly.  Peforming this operation here achieves more overlap with file I/O than 
-     * doing it in setUp() */
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        DrJava._initConfig();
-        _mf = new MainFrame(); 
-      } 
-    });
+  public void setUp() throws Exception {
+    super.setUp();
+    
+    _log.log("INVOKing DrJava._initConfig() for " + this);
+    DrJava._initConfig();
+    
+    _log.log("CREATing a MainFrame for " + this);
+    _mf = new MainFrame(); 
+    _log.log("created a MainFrame for " + this + "; stating file setup");
     
     try {
       f1 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
@@ -186,15 +186,13 @@ public final class CommandLineTest extends DrJavaTestCase {
       nof5 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
       nof5_name = nof5.getAbsolutePath();
       nof5.delete();
+      
+      _log.log("File initialization (setUp) is complete");
     }
     catch (IOException e) {
       System.out.print("createTempFile failed.  This should not happen.");
       throw new RuntimeException(e.toString());
     }
-  }
-
-  public void setUp() throws Exception {
-    super.setUp();
   }
 
   public void tearDown() throws Exception {
@@ -212,7 +210,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     assertEquals("Only one document?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertTrue("Is new document untitled?", doc.isUntitled());
-//    _log.log("testNone() completed");
+    _log.log("testNone() completed");
   }
 
   /** Open one file on the command line.  Should (obviously) open that file. */
@@ -229,7 +227,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     assertEquals("Correct length of file?", f1_contents.length(), doc.getLength());
 //    _log.log("Ready to perform getText operation");
     assertEquals("Do the contents match?", f1_contents, doc.getText(0,f1_contents.length()));
-//    _log.log("testOpenOne completed");
+    _log.log("testOpenOne completed");
   }
 
   /** A nonexistent file.  Should open a new, untitled document. */
@@ -242,7 +240,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     assertEquals("Exactly one document?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertTrue("Is document untitled?", doc.isUntitled());
-//    _log.log("testNE completed");
+    _log.log("testNE completed");
   }
 
   /** Many files on the command line.  Should open all of them, displaying the last one. */
@@ -268,7 +266,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     assertEquals("Do the contents of file 3 match?", f3_contents, doc3.getText(0,f3_contents.length()));
 
     assertEquals("Is the last document the active one?", doc3, _mf.getModel().getActiveDocument());
-//    _log.log("testOpenMany completed");
+    _log.log("testOpenMany completed");
   }
 
   /** Supplying both valid and invalid filenames on the command line. Should open only the valid ones. */
@@ -297,7 +295,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     assertEquals("Do the contents of file 3 match?", f6_contents, doc3.getText(0,f6_contents.length()));
 
     assertEquals("Is the last document the active one?", doc3, _mf.getModel().getActiveDocument());
-//    _log.log("testMixed completed");
+    _log.log("testMixed completed");
   }
 
   /** Test duplicate files. */
@@ -341,7 +339,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     try { checkFile(relativeFile, funnyName); }
     catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
     finally { FileOps.deleteDirectoryOnExit(newDirectory); }
-//    _log.log("testRelativePath completed");
+    _log.log("testRelativePath completed");
   }
 
   /** Tests paths with "." and ".." in them.  Windows will blow up if you use one in a JFileChooser without
@@ -364,7 +362,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     }
     catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
     finally { FileOps.deleteDirectoryOnExit(newDirectory); }
-//    _log.log("testDotPaths completed");
+    _log.log("testDotPaths completed");
   }
 
   /** Helper for testRelativeFile and testDotPaths. */

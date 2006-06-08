@@ -112,7 +112,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private volatile Throwable _eventHandlerError;
 
   /** A log for recording messages in a file. */
-  private final Log _log;
+  private static final Log _log = new Log("DebuggerTest", false);
 
   /** Builds a new JPDADebugger to debug code in the Interactions JVM, using the JPDA/JDI interfaces.
    *  Does not actually connect to the interpreterJVM until startup().
@@ -126,8 +126,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _runningThread = null;
     _interpreterJVM = null;
     _eventHandlerError = null;
-    _log = new Log("DebuggerLog", false);
-
+    
     // TO DO: Replace this with an InteractionsListener,
     //  since we really can't talk about SingleDisplayModel here!
     _watchListener = new DummyInteractionsListener() {

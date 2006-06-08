@@ -51,6 +51,9 @@ import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
   
 public class Utilities {
   
+  /** True if the program is run in non-interactive test mode. */
+  public static volatile boolean TEST_MODE = false;
+  
   /** Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
    *  event thread to be run asynchronously after all events already on the queue have been processed.
    */
@@ -115,9 +118,6 @@ public class Utilities {
   
   /** Message dialog with a word-wrapping text area that allows copy & paste. */
   public static class TextAreaMessageDialog extends JDialog {
-    
-    /** True if the program is run in non-interactive test mode. */
-    public static volatile boolean TEST_MODE = false;
 
     /** Show the initialized dialog.
      *  @param comp parent component, or null

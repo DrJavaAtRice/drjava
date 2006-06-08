@@ -53,7 +53,7 @@ import edu.rice.cs.util.swing.Utilities;
  */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   
-  private static Log _log = new Log("GlobalModelJUnitTestLog.txt", false);
+  // _log inherited from GlobalModelTestCase
   
   /** Whether or not to print debugging output. */
   static final boolean printMessages = false;

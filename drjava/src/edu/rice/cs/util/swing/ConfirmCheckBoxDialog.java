@@ -45,49 +45,38 @@ public class ConfirmCheckBoxDialog {
   private JOptionPane _optionPane;
   private JCheckBox _checkBox;
 
-  /**
-   * Instantiates a new confirm dialog with default checkbox text.
-   * @param parent the parent frame
-   * @param title the title of the dialog
-   * @param message the stuff to display in the body of the dialog.
-   *                For a simple message, should be a String,
-   *                or can be an Object[] including Strings and Components to
-   *                display in the body of the dialog.
+  /** Instantiates a new confirm dialog with default checkbox text.
+   *  @param parent the parent frame
+   *  @param title the title of the dialog
+   *  @param message the stuff to display in the body of the dialog. For a simple message, it should be a String; it can
+   *         also be an Object[] including Strings and Components to display in the body of the dialog.
    */
   public ConfirmCheckBoxDialog(JFrame parent, String title, Object message) {
     this(parent, title, message, "Do not show this message again");
   }
 
-  /**
-   * Instantiates a new confirm dialog with Yes/No as the options.
-   * @param parent the parent frame
-   * @param title the title of the dialog
-   * @param checkBoxText the text to display with the checkbox
-   * @param message the stuff to display in the body of the dialog.
-   *                For a simple message, should be a String,
-   *                or can be an Object[] including Strings and Components to
-   *                display in the body of the dialog.
+  /** Instantiates a new confirm dialog with Yes/No as the options.
+   *  @param parent the parent frame
+   *  @param title the title of the dialog
+   *  @param message the stuff to display in the body of the dialog. For a simple message, it should be a String; it can
+   *         also be an Object[] including Strings and Components to display in the body of the dialog.
+   *  @param checkBoxText the text to display with the checkbox
    */
-  public ConfirmCheckBoxDialog(JFrame parent, String title,
-                               Object message, String checkBoxText) {
-    this(parent, title, message, checkBoxText, JOptionPane.QUESTION_MESSAGE,
-         JOptionPane.YES_NO_OPTION);
-  }
+  public ConfirmCheckBoxDialog(JFrame parent, String title, Object message, String checkBoxText) {
+    this(parent, title, message, checkBoxText, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION); }
 
-  /**
-   * Instantiates a new confirm dialog.
-   * @param parent the parent frame
-   * @param title the title of the dialog
-   * @param message the stuff to display in the body of the dialog.
-   *                For a simple message, should be a String,
-   *                or can be an Object[] including Strings and Components to
-   *                display in the body of the dialog.
-   * @param checkBoxText the text to display with the checkbox
-   * @param messageType the JOptionPane message type
-   * @param optionType the JOptionPane option type
+ /** Instantiates a new confirm dialog with Yes/No as the options.
+   *  @param parent the parent frame
+   *  @param title the title of the dialog
+   *  @param checkBoxText the text to display with the checkbox
+   *  @param message the stuff to display in the body of the dialog. For a simple message, it should be a String; it can
+   *         also be an Object[] including Strings and Components to display in the body of the dialog.
+   *  @param checkBoxText the text to display with the checkbox
+   *  @param messageType the JOptionPane message type
+   *  @param optionType the JOptionPane option type
    */
-  public ConfirmCheckBoxDialog(JFrame parent, String title, Object message,
-                               String checkBoxText, int messageType, int optionType) {
+  public ConfirmCheckBoxDialog(JFrame parent, String title, Object message, String checkBoxText, int messageType, 
+                               int optionType) {
     _optionPane = new JOptionPane(message, messageType, optionType);
     JPanel checkBoxPane = new JPanel();
     checkBoxPane.add(_initCheckBox(checkBoxText));

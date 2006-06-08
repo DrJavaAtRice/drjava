@@ -47,9 +47,8 @@ import java.util.Vector;
  */
 public class ConfigPanel extends JPanel {
 
-  //protected JLabel _title;
-  protected String _title;
-  protected Vector<OptionComponent> _components;
+  protected final String _title;
+  protected final Vector<OptionComponent> _components;
 
   /** Constructor for this ConfigPanel
    *  @param title the title for this panel
@@ -60,21 +59,15 @@ public class ConfigPanel extends JPanel {
     _components = new Vector<OptionComponent>();
   }
 
-  public String getTitle() {
-    //return _title.getText();
-    return _title;
-  }
+  public String getTitle() { return _title; }
 
   /** The method for adding new OptionComponents to this ConfigPanel
    *  @param oc the OptionComponent to be added
    */
-  public void addComponent( OptionComponent oc) {
-    _components.add(oc);
-  }
+  public void addComponent( OptionComponent oc) { _components.add(oc); }
 
   public void displayComponents() {
     this.setLayout(new BorderLayout());
-    //this.add(_title, BorderLayout.NORTH);
 
     JPanel panel = new JPanel();  // sits in scrollpane and compresses layout
     panel.setLayout(new BorderLayout());

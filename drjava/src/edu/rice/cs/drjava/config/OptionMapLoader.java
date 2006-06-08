@@ -77,20 +77,13 @@ public class OptionMapLoader implements OptionConstants {
   /** Default OptionMapLoader. */
   public static final OptionMapLoader DEFAULT = new OptionMapLoader(DEFAULT_STRINGS);
 
-  /**
-   * creates an OptionMapLoader from a given input stream.
-   * does not maintain a reference to this input stream after
-   * Constructor creates
-   * @param is the input stream to read.
+  /** Creates an OptionMapLoader from a given input stream.  Does not maintain a reference to this input stream.
+   *  @param is the input stream to read.
    */
   public OptionMapLoader(InputStream is) throws IOException {
     this(new Properties(DEFAULT_STRINGS));
-    try {
-      prop.load(is);
-    }
-    finally {
-      is.close();
-    }
+    try { prop.load(is); }
+    finally { is.close(); }
   }
 
   private final Properties prop;

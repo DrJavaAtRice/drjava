@@ -56,7 +56,7 @@ public class EventHandlerThread extends Thread {
   private volatile boolean _connected;
 
   /** A log for recording messages in a file. */
-  private final Log _log;
+  private static final Log _log = new Log("EventTest", false);
 
   /** Creates a new EventHandlerThread to listen to events from the given debugger and virtual machine.  Calling
    *  this Thread's start() method causes it to begin listenting.
@@ -68,7 +68,6 @@ public class EventHandlerThread extends Thread {
     _debugger = debugger;
     _vm = vm;
     _connected = true;
-    _log = new Log("EventHandlerThreadLog", false);
   }
 
   /** Logs any unexpected behavior that occurs (but which should not cause DrJava to abort).

@@ -61,9 +61,9 @@ import edu.rice.cs.util.swing.Utilities;
  *  @version $Id$
  */
 public abstract class OptionComponent<T> implements Serializable {
-  protected Option<T> _option;
-  protected JLabel _label;
-  protected Frame _parent;
+  protected final Option<T> _option;
+  protected final JLabel _label;
+  protected final Frame _parent;
     
   public OptionComponent(Option<T> option, String labelText, Frame parent) {
     _option = option;

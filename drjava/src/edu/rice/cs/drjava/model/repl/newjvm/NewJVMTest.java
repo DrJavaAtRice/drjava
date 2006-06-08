@@ -49,7 +49,7 @@ import java.rmi.RemoteException;
  *  @version $Id$
  */
 public final class NewJVMTest extends DrJavaTestCase {
-  private static final Log _log  = new Log("MasterSlave.txt", true);
+  private static final Log _log  = new Log("MasterSlave.txt", false);
   
   private static volatile TestJVMExtension _jvm;
   

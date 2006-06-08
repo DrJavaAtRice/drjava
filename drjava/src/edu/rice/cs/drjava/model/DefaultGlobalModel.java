@@ -57,6 +57,7 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.newjvm.AbstractMasterJVM;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -189,8 +190,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
     super();
+    AbstractMasterJVM._log.log(this + " has called contstructor for DefaultGlobal Model");
 //    Utilities.show("DefaultGlobalModel super call performed");
     _jvm = new MainJVM(getWorkingDirectory());
+    AbstractMasterJVM._log.log(this + " has created a new MainJVM");
     _compilerModel = new DefaultCompilerModel(this);
     _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
     _javadocModel = new DefaultJavadocModel(this);
@@ -214,8 +217,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _compilerModel.addListener(_notifier);
     _junitModel.addListener(_notifier);
     _javadocModel.addListener(_notifier);
-    
-//    Utilities.show("Notifier chaining done");
         
     // Listen to compiler to clear interactions appropriately.
     // XXX: The tests need this to be registered after _notifier, sadly.
@@ -223,6 +224,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _compilerModel.addListener(_clearInteractionsListener);
     
     // Note: starting the JVM in another thread does not appear to improve performance
+//    AbstractMasterJVM._log.log("Starting the interpreter in " + this);
     _jvm.startInterpreterJVM();
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
@@ -257,115 +259,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _notifier.projectBuildDirChanged();
     setProjectChanged(true);
   }
-  
-  protected FileGroupingState 
-    makeProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
-    return new ProjectFileGroupingState(pr, main, bd, wd, project, files, cp, cjf, cjflags);
-  }
-  
-  class ProjectFileGroupingState extends AbstractGlobalModel.ProjectFileGroupingState {
-      
-    ProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
-      super(pr, main, bd, wd, project, files, cp, cjf, cjflags);
-    }
-
-    // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
-//    public void junitAll() {
-//      // Is this code reachable? I don't think so.  MainFrame bypasses it by calling junitProject() on the junit model
-//      // instead of junitAll on the global model
-//      File dir = getProjectRoot();
-////        ArrayList<String> classNames = new ArrayList<String>();
-//      final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter() {
-//        public boolean accept(File pathname) {
-//          return pathname.isDirectory() || 
-//            pathname.getPath().toLowerCase().endsWith(".java") ||
-//            pathname.getPath().toLowerCase().endsWith(".dj0") ||
-//            pathname.getPath().toLowerCase().endsWith(".dj1") ||
-//            pathname.getPath().toLowerCase().endsWith(".dj2");
-//        }
-//      });
-//      ClassAndInterfaceFinder finder;
-//      List<String> los = new LinkedList<String>();
-//      List<File> lof = new LinkedList<File>();
-//      for (File f: files) {
-//        finder = new ClassAndInterfaceFinder(f);
-//        String classname = finder.getClassName();
-//        if (classname.length() > 0) {
-//          los.add(classname);
-//          lof.add(f);
-//        }
-//      }
-//      List<OpenDefinitionsDocument> lod = getOpenDefinitionsDocuments();
-//      for (OpenDefinitionsDocument d: lod) {
-//        if (d.isAuxiliaryFile()) {
-//          try {
-//            File f;
-//            String classname = d.getQualifiedClassName();
-//            try {
-//              f = d.getFile();
-//              lof.add(f);
-//              los.add(classname);
-//            }
-//            catch(FileMovedException fme) {
-//              // the file's not on disk, but send it in anyways
-//              f = fme.getFile();
-//              if (f != null) {
-//                lof.add(f);
-//                los.add(classname);
-//              }
-//            }
-//          }
-//          catch(ClassNameNotFoundException e) {
-//            // don't add it if we don't have a classname
-//          }
-//        }
-//      }
-//      getJUnitModel().junitClasses(los, lof);
-//    }
-    
-    /** Jars all the files in this project */
-    public void jarAll() { }
-  }
-  
-  protected FileGroupingState makeFlatFileGroupingState() { return new FlatFileGroupingState(); }
-  
-  class FlatFileGroupingState extends AbstractGlobalModel.FlatFileGroupingState {
-    
-//    public void junitAll() { getJUnitModel().junitAll(); }
-    public void jarAll() { }
-  }
-  
-  /** Gives the title of the source bin for the navigator.
-   *  @return The text used for the source bin in the tree navigator
-   */
-  public String getSourceBinTitle() { return "[ Source Files ]"; }
-  
-  /** Gives the title of the external files bin for the navigator
-   *  @return The text used for the external files bin in the tree navigator.
-   */
-  public String getExternalBinTitle() { return "[ External Files ]"; }
-  
-  /** Gives the title of the aux files bin for the navigator.
-   *  @return The text used for the aux files bin in the tree navigator.
-   */
-  public String getAuxiliaryBinTitle() { return "[ Included External Files ]"; }
-  
+ 
   // ----- METHODS -----
-  
-//  /** Add a listener to this global model.
-//   *  @param listener a listener that reacts on events generated by the GlobalModel.
-//   */
-//  public void addListener(GlobalModelListener listener) { _notifier.addListener(listener); }
-//  
-//  /** Remove a listener from this global model.
-//   *  @param listener a listener that reacts on events generated by the GlobalModel
-//   *  This method is synchronized using the readers/writers event protocol incorporated in EventNotifier<T>.
-//   */
-//  public void removeListener(GlobalModelListener listener) { _notifier.removeListener(listener); }
-//  
-//  // getter methods for the private fields
-//  
-//  public DefinitionsEditorKit getEditorKit() { return _editorKit; }
   
   /** @return the interactions model. */
   public DefaultInteractionsModel getInteractionsModel() { return _interactionsModel; }

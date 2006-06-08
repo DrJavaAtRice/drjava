@@ -56,7 +56,7 @@ import java.rmi.RemoteException;
  */
 public final class InteractionsModelTest extends DrJavaTestCase {
   
-  private static Log _log = new Log("InteractionsModel.txt", false);
+  private static Log _log = new Log("InteractionsModelTest.txt", false);
   protected InteractionsDJDocument _adapter;
   protected InteractionsModel _model;
   

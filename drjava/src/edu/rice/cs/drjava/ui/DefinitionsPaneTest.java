@@ -57,17 +57,17 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
   
   private volatile MainFrame _frame;
   
-  private static Log _log = new Log("DefinitionsPaneTestLog.txt", false);
+  private static Log _log = new Log("DefinitionsPaneTest.txt", false);
   
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
+//    Utilities.invokeAndWait(new Runnable() { 
+//      public void run() { 
         DrJava.getConfig().resetToDefaults();
         _frame = new MainFrame(); 
-      } 
-    });
+//      } 
+//    });
   }
   
   public void tearDown() throws Exception {

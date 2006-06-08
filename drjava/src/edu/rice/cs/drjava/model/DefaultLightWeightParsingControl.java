@@ -73,7 +73,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
   private LinkedList<LightWeightParsingListener> _listeners = new LinkedList<LightWeightParsingListener>();
   
   /** Log file. */
-  private Log _log = new Log("DefaultLightWeightParsingControl", false);
+  private static final Log _log = new Log("LightWeightParsing", false);
   
   /** Thread group for the updater. */
   private ThreadGroup _updaterThreadGroup = new ThreadGroup("Light-weight parsing updater thread group") {

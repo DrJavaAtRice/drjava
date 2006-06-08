@@ -73,7 +73,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   public static final String DEFAULT_INTERPRETER_NAME = "DEFAULT";
   
-//  private static Log _log = new Log("MainJVMLog", true);
+  // _log is inherited from AbstractMasterJVM
   
   /** Working directory for slave JVM */
   private volatile File _workDir;
@@ -136,7 +136,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _startupClassPath = System.getProperty("java.class.path");
     _parseStartupClassPath();
     _optionArgs = new ArrayList<String>();
-    //startInterpreterJVM();
   }
   
   private void _parseStartupClassPath() {
@@ -679,12 +678,17 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Action to take if the slave JVM quits before registering.  Assumes _masterJVMLock is held.
    *  @param status Status code of the JVM
+   *  TODO: revise the unit tests that kill the slave prematurely (by making them wait until the
+   *  slave registers) and remove the TEST_MODE escape.
    */
   protected void slaveQuitDuringStartup(int status) {
     super.slaveQuitDuringStartup(status);
-    // The slave JVM is not enabled after this.
+    if (Utilities.TEST_MODE) return;  // Some tests kill the slave immediately after it starts.
+
+//    // The slave JVM is not enabled after this.
 //    _restart = false;
     
+    // Signal that an internal error occurred
     String msg = "Interpreter JVM exited before registering, status: " + status;
     IllegalStateException e = new IllegalStateException(msg);
     new edu.rice.cs.drjava.ui.DrJavaErrorHandler().handle(e);

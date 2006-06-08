@@ -87,11 +87,9 @@ public final class SlaveJVMRunner {
    */
   public static final boolean SHOW_DEBUG_DIALOGS = false;
   
-  protected static final Log _log  = new Log("MasterSlave.txt", true);
+  protected static final Log _log  = new Log("MasterSlave.txt", false);
   
   private static final long RMI_TIMEOUT = 5000L;
-  
-  private static volatile IRemoteClassLoader _remoteLoader;
   
   private static Thread _main;
  
@@ -110,9 +108,7 @@ public final class SlaveJVMRunner {
    * 
    *  @param args Command-line parameters, of which there must be two or three. The first is the absolute path to the 
    *         file containing the serialized MasterRemote stub, and the second is the fully-qualified class name of the
-   *         slave JVM implementation class. The third parameter is optional. It is a file containing the serialized
-   *         IRemoteClassLoader to use as the remote classloader. this will only work if the system classloader has been
-   *         set to a CustomSystemClassLoader
+   *         slave JVM implementation class.
    */
   public synchronized static void main(String[] args) {
     try {
@@ -135,7 +131,7 @@ public final class SlaveJVMRunner {
       
 /* The following code currently breaks unit tests (and perhaps DrJava) when it detects the hanging
  * of readObject(...).  It can be commented back if the calling code is revised to handle this form
- * of exit. */
+ * of exit.  Before code can be commented in, variable masterRemote must be converted to field _masterRemote. */
       
 //      Thread timeout = new Thread("RMI Timeout Thread") {
 //        public void run() {
@@ -144,7 +140,7 @@ public final class SlaveJVMRunner {
 //          try { synchronized(lock) { lock.wait(RMI_TIMEOUT); } }
 //          catch(InterruptedException e) { throw new UnexpectedException(e); }
 //          // Abort starting this slave JVM if readObject has hung
-//          if (_remoteLoader == null) {
+//          if (_masterRemote == null) {
 //            StackTraceElement[] trace = Thread.getAllStackTraces().get(_main);
 //            _log.log("DUMP of hung deserializing thread:", trace);
 //            System.exit(9);
@@ -205,42 +201,6 @@ public final class SlaveJVMRunner {
       System.exit(2);
     }
   }
-  
-//  /** Reads the stubfile for the remote loader, and sets the remote loader of the current class loader
-//   *  (assuming it is a CustomClassLoader) to the remote loader.
-//   */
-//  private static void _installRemoteLoader(String filename) {
-//    try {
-//      _log.log("Class loader for SlaveJVMRunner class is " + SlaveJVMRunner.class.getClassLoader());
-//      
-//      // Initialize _remoteLoader
-//      _remoteLoader = null;
-//      
-//      // Get the remote classloader
-//      final FileInputStream fstream  = new FileInputStream(filename);
-//      final ObjectInputStream ostream = new ObjectInputStream(new BufferedInputStream(fstream));
-//      
-//      _log.log("Slave JVM reading remote loader object from file " + filename + " with " + 
-//               fstream.getChannel().size() + " bytes");
-//      
-//      _remoteLoader = (IRemoteClassLoader) ostream.readObject();
-//      _log.log("Slave JVM completed reading " + _remoteLoader);
-//      
-//      if (ClassLoader.getSystemClassLoader() instanceof CustomSystemClassLoader) {
-//        CustomSystemClassLoader loader = (CustomSystemClassLoader) ClassLoader.getSystemClassLoader();
-//        loader.setMasterRemote(_remoteLoader);
-//        _log.log("remote LOADER installed");
-//      }
-//      fstream.close();
-//      ostream.close();
-//    }
-//    catch(Exception e) { // IOException, ClassNotFoundException
-//      // There's no master to display the error, so we'll do it ourselves
-//      _showErrorMessage("Could not set up the Slave JVM.", e);
-//      _log.log("Could not set up the Slave JVM. Calling System.exit(2) in response to: " + e);
-//      System.exit(2);
-//    }
-//  }
 
   /** Displays a graphical error message to notify the user of a problem encountered while starting the slave JVM.
    *  @param cause A message indicating where the error took place.
@@ -253,6 +213,6 @@ public final class SlaveJVMRunner {
     _log.log("ERROR in Slave JVM Runner: " + cause + "; threw " + t);
 
     if (SHOW_DEBUG_DIALOGS) new ScrollableDialog(null, "Error", "Error details:", msg).show();
-    else if (! Utilities.TextAreaMessageDialog.TEST_MODE) System.out.println(msg);
+    else if (! Utilities.TEST_MODE) System.out.println(msg);
   }
 }

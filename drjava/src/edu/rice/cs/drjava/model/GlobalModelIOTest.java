@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
  */
 public final class GlobalModelIOTest extends GlobalModelTestCase implements OptionConstants {
   
-  private static final Log _log = new Log("GlobalModelIOTestLog.txt", false);
+  // _log is inherited from GlobalModelTestCase
   
   /** Creates a new document, modifies it, and then does the same with a second document, checking for inteference. */
   public void testMultipleFiles() throws BadLocationException {
@@ -78,7 +78,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertContents(FOO_TEXT, doc1);
     assertContents(BAR_TEXT, doc2);
     
-    _log.log("testMultipleFiles completed");
+    _log.log(this + ".testMultipleFiles() completed");
   }
 
   /** Opens several documents and ensures that the array returned by the model is correct and in the right order. */
@@ -96,7 +96,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertEquals("document 2", doc2, docs.get(2));
     assertEquals("document 3", doc3, docs.get(3));
     
-    _log.log("testMultipleFilesArray completed");
+    _log.log(this + ".testMultipleFilesArray() completed");
   }
 
   /** Ensures closing documents works correctly. */
@@ -119,7 +119,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     docs = _model.getOpenDefinitionsDocuments();
     assertEquals("size of document array", 1, docs.size());
     
-    _log.log("testCloseMultipleFiles completed");
+    _log.log(this + ".testCloseMultipleFiles() completed");
   }
 
 

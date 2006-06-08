@@ -529,11 +529,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Return the create jar flags for the project. If not in project mode, returns 0. */
   public int getCreateJarFlags() { return _state.getCreateJarFlags(); }
  
-//  /** throws UnsupportedOperationException */
-//  public void junitAll() {
-//    throw new UnsupportedOperationException("AbstractGlobalDocument does not support unit testing");
-//  }
- 
    /** @return the root of the project sourc tree (assuming one exists). */
   public File getProjectRoot() { return _state.getProjectRoot(); }
     
@@ -828,17 +823,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }    
     
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
-    //throws UnsupportedOperationException
-//    public void junitAll() {
-//      throw new UnsupportedOperationException("AbstractGlobalModel does not support JUnit testing");
-//    }
-
-    public void jarAll() {
-      throw new UnsupportedOperationException("AbstractGlobaModel does not support jarring");
-    }
     
     public ClassPathVector getExtraClassPath() { return _projExtraClassPath; }
-    
     public void setExtraClassPath(ClassPathVector cp) { _projExtraClassPath = cp; }
   }
  
@@ -878,19 +864,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setProjectChanged(boolean changed) { /* Do nothing  */  }
     public boolean isAuxiliaryFile(File f) { return false; }
     
-    //throws UnsupportedOperationException
-//    public void junitAll() {
-//      throw new UnsupportedOperationException("AbstractGlobalModel does not support unit tests");
-//    }
     public void cleanBuildDirectory() { }
     
     public List<File> getClassFiles() { return new LinkedList<File>(); }
-    
-    /** Jars all the open files.
-     throws UnsupportedOperationException */
-    public void jarAll() {
-      throw new UnsupportedOperationException("AbstractGlobalModel does not support jarring");
-    }
   }
  
   /** Gives the title of the source bin for the navigator.
@@ -2174,10 +2150,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     File f = new File(root + System.getProperty("file.separator") + fileName);
     return f.exists() ? f : null;
   }
-
-  /** Jar the current documents or the current project  */
-  public void jarAll() { _state.jarAll(); }
- 
+  
   private static volatile int ID_COUNTER = 0; /* Seed for assigning id numbers to OpenDefinitionsDocuments */
  
   // ---------- ConcreteRegionManager inner class -------

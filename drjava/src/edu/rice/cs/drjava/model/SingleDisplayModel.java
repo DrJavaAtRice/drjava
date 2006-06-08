@@ -106,8 +106,6 @@ public interface SingleDisplayModel extends GlobalModel {
   public boolean closeFiles(List<OpenDefinitionsDocument> docList);  
   
   public void setActiveFirstDocument();
-
-  public void jarAll();
   
   public void dispose();
   

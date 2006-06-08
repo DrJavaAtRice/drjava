@@ -143,11 +143,6 @@ public interface FileGroupingState {
   public List<File> getClassFiles();
   
   /**
-   * Jars all the open documents or the current project
-   */
-  public void jarAll();
-  
-  /**
    * Returns a collection of classpath entries specific to the current project.
    * @return the project's extra classpath
    */

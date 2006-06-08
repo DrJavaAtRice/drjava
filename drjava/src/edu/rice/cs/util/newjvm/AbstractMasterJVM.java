@@ -49,7 +49,7 @@ import java.util.Arrays;
 public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   implements MasterRemote/*<SlaveType>*/ {
   
-  protected static final Log _log  = new Log("MasterSlave.txt", true);
+  public static final Log _log  = new Log("MasterSlave.txt", false);
   
   /** Name for the thread that waits for the slave to exit. */
   protected volatile String _waitForQuitThreadName = "Wait for SlaveJVM Exit Thread";
@@ -85,19 +85,6 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    *  JVM is first invoked and the time the slave registers itself.
    */
   private volatile File _masterStubFile;
-  
-//  /** The current remote stub for this main JVM's classloader. This field is null except between the time 
-//   *  the slave JVM is first invoked and the time the slave registers itself.
-//   */
-//  private volatile IRemoteClassLoader _classLoaderStub;
-//  
-//  /** The file containing the serialized remote classloader stub. This field is null except between the 
-//   *  time the slave JVM is first invoked and the time the slave registers itself.
-//   */
-//  volatile File _classLoaderStubFile;
-//  
-//  /** The remote class loader for _slave. */
-//  volatile RemoteClassLoader _classLoader;
   
   /** The fully-qualified name of the slave JVM class. */
   private final String _slaveClassName;
@@ -252,9 +239,6 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     _startupInProgress = false;
     _quitOnStartup = false;
     _monitorThread = null;
-//    _masterJVMLock.notify();
-//    String msg = "SlaveJVM quit before registering!  Status: " + status;  
-//    throw new IllegalStateException(msg);
   }
   
   /** Called if the slave JVM dies before it is able to register.
@@ -300,7 +284,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       dyingSlave = _slave;  // save value of _slave in case it is not null
       _slave = null;
       
-      // Withdraw RMI exports (Note that classLoader is distinct for each call on invokeSlave)
+      // Withdraw RMI exports
       // Slave in process of starting will die because master is inaccessible.
       _log.log(this + ".dispose() UNEXPORTing " + this);
       UnicastRemoteObject.unexportObject(this, true);

@@ -51,7 +51,7 @@ public class ExecJVMTest extends DrJavaTestCase {
    */
   public void setUp() throws Exception {
     super.setUp();
-//    edu.rice.cs.util.swing.Utilities.TextAreaMessageDialog.TEST_MODE = true;  // already done in super call!
+//    edu.rice.cs.util.swing.Utilities.TEST_MODE = true;  // already done in super call!
   }
 
   public void testExecFileCreator() throws IOException, InterruptedException {

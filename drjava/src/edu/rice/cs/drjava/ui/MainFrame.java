@@ -1110,7 +1110,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         _gotoFileDialog.setCurrentItem(currentEntry);
       }
       hourglassOn();
-      /* if (!  Utilities.TextAreaMessageDialog.TEST_MODE) */ 
+      /* if (!  Utilities.TEST_MODE) */ 
       _gotoFileDialog.setVisible(true);
     }
   };
@@ -2429,7 +2429,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Creates the main window, and shows it. */
   public MainFrame() {
     
-    // Cache the config object, since we use it a zillion times.
+    // Cache the config object, since we use it many, many times.
     final Configuration config = DrJava.getConfig();
    
     // Platform-specific UI setup.
@@ -3400,17 +3400,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //      _compileButton.setToolTipText("<html>Compile all documents in the project.source tree<br>Auxiliary and external files are excluded.</html>");
     }
   }
-  
-  /** Jars all of the files in a project together. */
-  /*  private void _jarProject() {
-   final SwingWorker worker = new SwingWorker() {
-   public Object construct() {
-   _model.jarAll();
-   return null;
-   }
-   };
-   worker.start();
-   }*/
   
   /** Closes project when DrJava is not in the process of quitting.
    *   @return true if the project is closed, false if cancelled.
@@ -6918,8 +6907,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     public void interpreterExited(final int status) {
       // Only show prompt if option is set and not in TEST_MODE
-      if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue() && 
-          ! Utilities.TextAreaMessageDialog.TEST_MODE) {
+      if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue() && ! Utilities.TEST_MODE) {
         // Show the dialog in a Swing thread, so Interactions can
         // start resetting right away.
         Runnable command = new Runnable() {

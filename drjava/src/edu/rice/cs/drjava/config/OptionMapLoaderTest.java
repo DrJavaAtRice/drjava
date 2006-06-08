@@ -53,18 +53,12 @@ import edu.rice.cs.drjava.DrJavaTestCase;
  * Tests the OptionMapLoader.
  * @version $Id$
  */
-public final class OptionMapLoaderTest extends DrJavaTestCase
-  implements OptionConstants
-{
+public final class OptionMapLoaderTest extends DrJavaTestCase implements OptionConstants {
   
-  public OptionMapLoaderTest(String s) {
-    super(s);
-  }
+  public OptionMapLoaderTest(String s) { super(s); }
   
   public static class StringInputStream extends ByteArrayInputStream {
-    public StringInputStream(String s) {
-      super(s.getBytes());
-    }
+    public StringInputStream(String s) { super(s.getBytes()); }
   }
   
   /** an artificially created properties "file" **/

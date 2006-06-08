@@ -77,7 +77,6 @@
   <patternset id="rmi-base-classes">
     <include name="edu/rice/cs/drjava/model/repl/newjvm/InterpreterJVM.class" />
     <include name="edu/rice/cs/drjava/model/repl/newjvm/MainJVM.class" />
-    <include name="edu/rice/cs/util/newjvm/RemoteClassLoader.class" />
   </patternset>
   
   <patternset id="rmi-test-classes">

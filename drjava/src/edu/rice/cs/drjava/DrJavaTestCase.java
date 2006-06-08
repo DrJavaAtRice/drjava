@@ -55,7 +55,7 @@ public class DrJavaTestCase extends TestCase {
    */
   protected void setUp() throws Exception {
     super.setUp();
-    Utilities.TextAreaMessageDialog.TEST_MODE = true;
+    Utilities.TEST_MODE = true;
   }
 
   /** Clean up for every test case.

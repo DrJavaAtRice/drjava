@@ -55,8 +55,8 @@ import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 import edu.rice.cs.util.newjvm.ExecJVM;
 
-/** Startup class for DrJava.  The main method reads the .drjava file (creating one if none exists) to get the
- *  critical information required to start the main JVM for DrJava: 
+/** Startup class for DrJava consisting entirely of static members.  The main method reads the .drjava file (creating 
+ *  one if none exists) to get the critical information required to start the main JVM for DrJava: 
  *  (i) the location of tools.jar in the Java JDK installed on this machine (so DrJava can invoke the javac compiler
  *      stored in tools.jar)
  *  (ii) the argument string for invoking the main JVM (notably -X options used to determine maximum heap size, etc.)
@@ -74,23 +74,23 @@ public class DrJava {
   /** Pause time for displaying DrJava banner on startup (in milliseconds) */
   private static final int PAUSE_TIME = 2000;
   
-  private static ArrayList<String> _filesToOpen = new ArrayList<String>();
-  private static ArrayList<String> _jmvArgs = new ArrayList<String>();
+  private static final ArrayList<String> _filesToOpen = new ArrayList<String>();
+  private static final ArrayList<String> _jmvArgs = new ArrayList<String>();
 
-  private static boolean _showDebugConsole = false;
+  private static volatile boolean _showDebugConsole = false;
   
   /* Config objects can't be public static final, since we have to delay construction until we know the 
    * config file's location.  (Might be specified on command line.) Instead, use accessor methods to 
    * prevent others from assigning new values. */
 
   /** Properties file used by the configuration object. Defaults to ".drjava" in the user's home directory. */
-  private static File _propertiesFile = new File(System.getProperty("user.home"), ".drjava");
+  private static volatile File _propertiesFile = new File(System.getProperty("user.home"), ".drjava");
   
   /** Configuration object with all customized and default values.  Initialized from _propertiesFile.  */
-  private static FileConfiguration _config = _initConfig();
+  private static volatile FileConfiguration _config = _initConfig();
   
-  private static ToolsJarClassLoader _toolsLoader = new ToolsJarClassLoader(getConfig().getSetting(JAVAC_LOCATION));
-  private static ClassLoader _thisLoader = DrJava.class.getClassLoader();
+  private static final ToolsJarClassLoader _toolsLoader = new ToolsJarClassLoader(getConfig().getSetting(JAVAC_LOCATION));
+  private static final ClassLoader _thisLoader = DrJava.class.getClassLoader();
 
   /** Returns the properties file used by the configuration object. */
   public static File getPropertiesFile() { return _propertiesFile; }
@@ -185,7 +185,7 @@ public class DrJava {
     // Loop through arguments looking for known options
     int firstFile = 0;
     int len = args.length;
-    _filesToOpen = new ArrayList<String>();
+    _filesToOpen.clear();
     
     for (int i = 0; i < len; i++) {
       String arg = args[i];
@@ -351,18 +351,13 @@ public class DrJava {
     
     FileConfiguration config;
 
-    try {
-      _propertiesFile.createNewFile();
-      // be nice and ensure a config file if there isn't one
-    }
-    catch (IOException e) {
-      // IOException occurred, continue without a real file
-    }
+    try { _propertiesFile.createNewFile(); }               // be nice and ensure a config file if there isn't one
+    catch (IOException e) { /* IOException occurred, continue without a real file */ }
+    
     config = new FileConfiguration(_propertiesFile);
     try { config.loadConfiguration(); }
     catch (Exception e) {
-      // problem parsing the config file.
-      // Use defaults and remember what happened (for the UI)
+      // Problem parsing the config file.  Use defaults and remember what happened (for the UI).
       config.resetToDefaults();
       config.storeStartupException(e);
     }

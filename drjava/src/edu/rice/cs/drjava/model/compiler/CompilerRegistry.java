@@ -85,7 +85,7 @@ public class CompilerRegistry {
   /** Singleton instance. */
   public static final CompilerRegistry ONLY = new CompilerRegistry();
   
-  private final static Log _log = new Log("Compiler.txt", false);
+  private final static Log _log = new Log("CompilerTest.txt", false);
 
   /** Class loader to use to fetch compiler classes. */
   private volatile ClassLoader _baseClassLoader;
