@@ -152,44 +152,44 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   // ----- FIELDS -----
  
-  /** A list of files that are auxiliary files to the currently open project.  All accesses to this variable must be synchronized.
-   *  TODO: make part of FileGroupingState. */
-  private LinkedList<File> _auxiliaryFiles = new LinkedList<File>();
+//  /** A list of files that are auxiliary files to the currently open project.  All accesses to this variable must be synchronized.
+//   *  TODO: make part of FileGroupingState. */
+//  private LinkedList<File> _auxiliaryFiles = new LinkedList<File>();
  
   /** Adds a document to the list of auxiliary files.  The LinkedList class is not thread safe, so
    *  the add operation is synchronized.
    */
-  public void addAuxiliaryFile(OpenDefinitionsDocument doc) {
-    if (! doc.inProject()) {
-      File f;
-      
-      try { f = doc.getFile(); }
-      catch(FileMovedException fme) { f = fme.getFile(); }
-      
-      synchronized(_auxiliaryFiles) { _auxiliaryFiles.add(f); }
-      setProjectChanged(true);
-    }
-  }
+  public void addAuxiliaryFile(OpenDefinitionsDocument doc) { _state.addAuxFile(doc.getRawFile()); }
+//    if (! doc.inProject()) {
+//      File f;
+//      
+//      try { f = doc.getFile(); }
+//      catch(FileMovedException fme) { f = fme.getFile(); }
+//      
+//      synchronized(_auxiliaryFiles) { _auxiliaryFiles.add(f); }
+//      setProjectChanged(true);
+//    }
+//  }
  
   /** Removes a document from the list of auxiliary files.  The LinkedList class is not thread safe, so
    *  operations on _auxiliaryFiles are synchronized.
    */
-  public void removeAuxiliaryFile(OpenDefinitionsDocument doc) {
-    File file = doc.getRawFile();
-    if (file == null) return;  // Should never happen unless doc is Untitled.
-    String path = FileOps.getCanonicalPath(file);
-    
-    synchronized(_auxiliaryFiles) {
-      ListIterator<File> it = _auxiliaryFiles.listIterator();
-      while (it.hasNext()) {
-        if (path.equals (FileOps.getCanonicalPath(it.next()))) {
-          it.remove();
-          setProjectChanged(true);
-          break;
-        }
-      }
-    }
-  }
+  public void removeAuxiliaryFile(OpenDefinitionsDocument doc) { _state.remAuxFile(doc.getRawFile()); }
+//    File file = doc.getRawFile();
+//    if (file == null) return;  // Should never happen unless doc is Untitled.
+//    String path = FileOps.getCanonicalPath(file);
+//    
+//    synchronized(_auxiliaryFiles) {
+//      ListIterator<File> it = _auxiliaryFiles.listIterator();
+//      while (it.hasNext()) {
+//        if (path.equals (FileOps.getCanonicalPath(it.next()))) {
+//          it.remove();
+//          setProjectChanged(true);
+//          break;
+//        }
+//      }
+//    }
+//  }
  
   /** Keeps track of all listeners to the model, and has the ability to notify them of some event.  Originally used
    *  a Command Pattern style, but this has been replaced by having EventNotifier directly implement all listener
@@ -466,8 +466,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
  
   protected FileGroupingState
-    makeProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
-    return new ProjectFileGroupingState(pr, main, bd, wd, project, files, cp, cjf, cjflags);
+    makeProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, ClassPathVector cp, File cjf, int cjflags) {
+    return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, cp, cjf, cjflags);
   }
  
   /** Notifies the project state that the project has been changed. */
@@ -598,32 +598,32 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     volatile File _buildDir;
     volatile File _workDir;
     volatile File _projectFile;
-    final File[] projectFiles;
+    final File[] _projectFiles;
+    volatile File[] _auxFiles;
     volatile ClassPathVector _projExtraClassPath;
     private boolean _isProjectChanged = false;
     volatile File _createJarFile;
     volatile int _createJarFlags;
     
-    //private ArrayList<File> _auxFiles = new ArrayList<File>();
-    
     HashSet<String> _projFilePaths = new HashSet<String>();
     
     /** Degenerate constructor for a new project; only the file project name is known. */
     ProjectFileGroupingState(File project) {
-      this(project.getParentFile(), null, null, null, project, new File[0], new ClassPathVector(), null, 0);
+      this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new ClassPathVector(), null, 0);
     }
     
-    ProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] files, ClassPathVector cp, File cjf, int cjflags) {
+    ProjectFileGroupingState(File pr, File main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, ClassPathVector cp, File cjf, int cjflags) {
       _projRoot = pr;
 //      System.err.println("Project root initialized to " + pr);
       _mainFile = main;
       _buildDir = bd;
       _workDir = wd;
       _projectFile = project;
-      projectFiles = files;
+      _projectFiles = srcFiles;
+      _auxFiles = auxFiles;
       _projExtraClassPath = cp;
       
-      if (projectFiles != null) try {  for (File file : projectFiles) { _projFilePaths.add( file.getCanonicalPath()); } }
+      if (_projectFiles != null) try {  for (File file : _projectFiles) { _projFilePaths.add( file.getCanonicalPath()); } }
       catch(IOException e) { /*do nothing */ }
       
       _createJarFile = cjf;
@@ -668,7 +668,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       catch(IOException ioe) { return false; }
     }
     
-    public File[] getProjectFiles() { return projectFiles; }
+    public File[] getProjectFiles() { return _projectFiles; }
     
     public File getProjectRoot() {
       if (_projRoot == null || _projRoot.equals( FileOption.NULL_FILE)) return _projectFile.getParentFile();
@@ -694,6 +694,36 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setProjectRoot(File f) {
       _projRoot = f;
 //      System.err.println("Project root set to " + f);
+    }
+    
+    /** Adds File f to end of _auxFiles array. */
+    public void addAuxFile(File f) {
+      int n = _auxFiles.length;
+      File[] newAuxFiles = new File[n + 1];
+      System.arraycopy(_auxFiles, 0, newAuxFiles, 0, n);  // newAuxFiles[0:n-1] = _auxFiles[0:n-1]
+      newAuxFiles[n] = f;
+      _auxFiles = newAuxFiles;
+    }
+    
+    /** Removes File f from _auxFiles array. Assumes that f is a member of _auxFiles.  If f is not found, throws an 
+     *  UnexpectedException. */
+    public void remAuxFile(File file) {
+      int newLen = _auxFiles.length - 1;
+      File[] newAuxFiles = new File[newLen];
+      try {
+        int j = 0;
+        for (File f: _auxFiles) {
+          if (! f.equals(file)) {
+            newAuxFiles[j] = file;
+            j++;
+          }
+        }
+        if (j < newLen) throw new IllegalStateException("auxFiles list contain two copies of " + file);
+        _auxFiles = newAuxFiles;
+      }
+      catch(Exception e) { // negative array size or index out of bounds
+        throw new UnexpectedException(e);
+      }
     }
     
     public void setBuildDirectory(File f) { _buildDir = f; }
@@ -724,8 +754,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try { path = f.getCanonicalPath();}
       catch(IOException ioe) { return false; }
       
-      synchronized(_auxiliaryFiles) {
-        for (File file : _auxiliaryFiles) {
+      synchronized(_auxFiles) {
+        for (File file : _auxFiles) {
           try { if (file.getCanonicalPath().equals(path)) return true; }
           catch(IOException ioe) { /* ignore file */ }
         }
@@ -849,6 +879,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setBuildDirectory(File f) { }
     public void setProjectFile(File f) { }
     public void setProjectRoot(File f) { }
+    public void addAuxFile(File f) { }
+    public void remAuxFile(File f) { }
     public void setWorkingDirectory(File f) { }
     public File[] getProjectFiles() { return null; }
     public boolean inProject(File f) { return false; }
@@ -1276,8 +1308,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       else /* doc is external file */ extFileList.add(f);
     }
     
-    DocFile[] srcFiles = srcFileList.toArray(new DocFile[srcFileList.size()]);
-    DocFile[] extFiles = extFileList.toArray(new DocFile[extFileList.size()]);
+//    DocFile[] srcFiles = srcFileList.toArray(new DocFile[srcFileList.size()]);
+//    DocFile[] extFiles = extFileList.toArray(new DocFile[extFileList.size()]);
     
     // write to disk
     builder.write();
@@ -1373,16 +1405,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // write to disk
     builder.write();
     
-    synchronized(_auxiliaryFiles) {
-      _auxiliaryFiles = new LinkedList<File>();
-      for (File f: builder.getAuxiliaryFiles()) { _auxiliaryFiles.add(f); }
-    }
+//    synchronized(_auxiliaryFiles) {
+//      _auxiliaryFiles = new LinkedList<File>();
+//      for (File f: builder.getAuxiliaryFiles()) { _auxiliaryFiles.add(f); }
+//    }
     
     ClassPathVector exCp = new ClassPathVector();
     for (File f : builder.getClassPaths()) { exCp.add(f); }
-    setFileGroupingState(makeProjectFileGroupingState(builder.getProjectRoot(), builder.getMainClass (), builder.getBuildDirectory(),
-                                                      builder.getWorkingDirectory(), file, builder.getSourceFiles(), exCp, builder.getCreateJarFile(),
-                                                      builder.getCreateJarFlags()));
+    setFileGroupingState(makeProjectFileGroupingState(builder.getProjectRoot(), builder.getMainClass (), 
+                                                      builder.getBuildDirectory(), builder.getWorkingDirectory(), file,
+                                                      builder.getSourceFiles(), builder.getAuxiliaryFiles(), exCp, 
+                                                      builder.getCreateJarFile(), builder.getCreateJarFlags()));
   }
  
   public void reloadProject(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
@@ -1487,10 +1520,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     setDocumentNavigator(newNav);
     
-    synchronized(_auxiliaryFiles) {
-      _auxiliaryFiles.clear();
-      for (File file: auxFiles) { _auxiliaryFiles.add(file); }
-    }
+//    synchronized(_auxiliaryFiles) {
+//      _auxiliaryFiles.clear();
+//      for (File file: auxFiles) { _auxiliaryFiles.add(file); }
+//    }
     
     ClassPathVector extraClassPaths = new ClassPathVector();
     for (File f : projectClassPaths) { extraClassPaths.add(f); }
@@ -1498,7 +1531,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Utilities.show("Project Root loaded into grouping state is " + projRoot);
     
     setFileGroupingState(makeProjectFileGroupingState(projectRoot, mainClass, buildDir, workDir, projectFile, srcFiles,
-                                                      extraClassPaths, createJarFile, createJarFlags));
+                                                      auxFiles, extraClassPaths, createJarFile, createJarFlags));
     
     resetInteractions(getWorkingDirectory());  // Shutdown debugger and reset interactions pane in new working directory
     

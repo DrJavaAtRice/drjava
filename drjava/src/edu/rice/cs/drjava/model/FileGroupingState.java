@@ -79,6 +79,13 @@ public interface FileGroupingState {
   /** Sets the current project root. */
   public void setProjectRoot(File f);
   
+  /** Adds file to list of auxiliary files in project */
+  public void addAuxFile(File f);
+ 
+  /** Removes file to list of auxiliary files in project.  Throws an UnexpectedException if auxFiles does not contain 
+   *  exactly one instance of f.*/
+  public void remAuxFile(File f);
+  
   /** Returns the directory in which to put the class files after compilation
    *  @return null if no build directory is specified
    */
@@ -124,33 +131,24 @@ public interface FileGroupingState {
   /** @return true if the file is a project auxiliary file */
   public boolean isAuxiliaryFile(File f);
   
-  /**
-   * Returns true if in project mode and the current project file has changed
-   */
+  /** Returns true if in project mode and the current project file has changed. */
   public boolean isProjectChanged();
   
-  /**
-   * Sets that the project state is no longer a snapshot of the open project.
-   */
+  /** Sets that the project state is no longer a snapshot of the open project. */
   public void setProjectChanged(boolean changed); 
 
-  /**
-   * cleans the build directory
-   */
+  /** Cleans the build directory. */
   public void cleanBuildDirectory();
   
   /** @return a list of class files. */
   public List<File> getClassFiles();
   
-  /**
-   * Returns a collection of classpath entries specific to the current project.
-   * @return the project's extra classpath
+  /** Returns a collection of classpath entries specific to the current project.
+   *  @return the project's extra classpath
    */
   public ClassPathVector getExtraClassPath();
   
-  /**
-   * Sets the list of project-specific classpath entries.
-   */
+  /** Sets the list of project-specific classpath entries. */
   public void setExtraClassPath(ClassPathVector cp);
   
 }
