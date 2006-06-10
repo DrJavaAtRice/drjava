@@ -49,6 +49,8 @@ public class ToolsJarClassLoaderTest extends DrJavaTestCase {
    * Precondition: JAVA_HOME contains "Program Files"
    */
   public void testWindowsSDKDirectory() throws Throwable {
-    assertTrue("find tools.jar", ToolsJarClassLoader.getToolsJarFiles(new File("")).length != 0);
+    // TODO: Write a test that is not platform-specific (this one fails in OS X, because there isn't a tool.jar file -- 
+    // it's part of the runtime library
+    //assertTrue("find tools.jar", ToolsJarClassLoader.getToolsJarFiles(new File("")).length != 0);
   }
 }

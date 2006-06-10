@@ -189,7 +189,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       public void run() {
         try { /* Create the slave JVM. */ 
           
-          _log.log(AbstractMasterJVM.this + " is STARTING a Slave JVM with args " + Arrays.toString(args));
+          _log.log(AbstractMasterJVM.this + " is STARTING a Slave JVM with args " + Arrays.asList(args));
           
           final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs, workDir);
           _log.log(AbstractMasterJVM.this + " CREATED Slave JVM process " + process + " with " + asString());
