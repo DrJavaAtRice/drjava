@@ -7281,6 +7281,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           _runButton = _updateToolbarButton(_runButton, _runAction);
           _compileButton = _updateToolbarButton(_compileButton, _compileAllAction);
           _junitButton = _updateToolbarButton(_junitButton, _junitAllAction);
+    projectRunnableChanged();
         }
       });
     }
