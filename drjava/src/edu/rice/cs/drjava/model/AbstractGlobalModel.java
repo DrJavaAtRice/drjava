@@ -1664,7 +1664,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (docList.size() == 0) return true;
     
     /* Force the user to save or discard all modified files in docList */
-    for (OpenDefinitionsDocument doc : docList) { if (!(doc.getLength() == 0) && !doc.canAbandonFile()) return false; }
+    for (OpenDefinitionsDocument doc : docList) { if (!(doc.getFileName().compareTo("(Untitled)") == 0 && doc.getLength() == 0) && !doc.canAbandonFile()) return false; }
     
     // If all files are being closed, create a new file before starTing in order to have
     // a potentially active file that is not in the list of closing files.
@@ -1726,7 +1726,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // first see if the user wants to cancel on any of them
     boolean canClose = true;
     for (OpenDefinitionsDocument doc : docList) {
-      if (!(doc.getLength() == 0) && !doc.canAbandonFile()) { canClose = false; break; }
+      if (!(doc.getFileName().compareTo("(Untitled)") == 0 && doc.getLength() == 0) && !doc.canAbandonFile()) { canClose = false; break; }
     }
     
     if  (!canClose) { return false; } // the user did want to cancel
