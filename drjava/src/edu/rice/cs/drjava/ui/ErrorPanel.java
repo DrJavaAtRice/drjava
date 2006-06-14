@@ -207,13 +207,12 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     getErrorListPane().setFont(f);
     
-    SwingDocument doc = (SwingDocument) getErrorListPane().getDocument();
-    if (doc instanceof SwingDocument) {
-      doc.acquireWriteLock();
-      try { ((SwingDocument)doc).setCharacterAttributes(0, doc.getLength() + 1, set, false); }
-      finally { doc.releaseWriteLock(); }
-    }
+    SwingDocument doc = getErrorListPane().getSwingDocument();
+    doc.acquireWriteLock();
+    try { doc.setCharacterAttributes(0, doc.getLength() + 1, set, false); }
+    finally { doc.releaseWriteLock(); }
   }
+
   
   /** Updates all document styles with the attributes contained in newSet.
    *  @param newSet Style containing new attributes to use.
@@ -235,17 +234,12 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
    */
   abstract protected CompilerErrorModel getErrorModel();
   
-  /**
-   * A pane to show compiler errors. It acts a bit like a listbox (clicking
-   * selects an item) but items can each wrap, etc.
-   */
+  /** Pane to show compiler errors. Similar to a listbox (clicking selects an item) but items can each wrap, etc. */
   public abstract class ErrorListPane extends JEditorPane implements ClipboardOwner {
     /** The custom keymap for the error list pane. */
     protected Keymap _keymap;
     
-    /**
-     * Index into _errorListPositions of the currently selected error.
-     */
+    /** Index into _errorListPositions of the currently selected error. */
     private int _selectedIndex;
     
     /**
@@ -255,9 +249,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      */
     protected Position[] _errorListPositions;
     
-    /**
-     * Table mapping Positions in the error list to CompilerErrors.
-     */
+    /** Table mapping Positions in the error list to CompilerErrors. */
     protected final Hashtable<Position, CompilerError> _errorTable = new Hashtable<Position, CompilerError>();
     
     // when we create a highlight we get back a tag we can use to remove it
@@ -266,9 +258,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     private HighlightManager _highlightManager = new HighlightManager(this);
     
     protected MouseAdapter defaultMouseListener = new MouseAdapter() {
-      public void mousePressed(MouseEvent e) {
-        selectNothing();
-      }
+      public void mousePressed(MouseEvent e) { selectNothing(); }
       public void mouseReleased(MouseEvent e) {
         CompilerError error = _errorAtPoint(e.getPoint());
         
@@ -363,8 +353,15 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
         }
       });
-    } 
+    }
     
+    /** Gets the SwingDocument associated with this ErrorListPane.  The inherited getDocument method must be preserved
+     *  because the ErrorListPane constructor uses it fetch a Document that is NOT a SwingDocument.  ErrorListPane 
+     *  immediately sets the Document corresponding to this JEditorPane to a SwingDocument and strictly maintains it as 
+     *  a SwingDocument, but the JEditorPane constructor binds its document to a PlainDocument and uses getDocument 
+     *  before ErrorListPane can set this field to a SwingDocument.
+     */
+    public SwingDocument getSwingDocument() { return (SwingDocument) getDocument(); }
     
     /** Assigns the given keystroke to the given action in this pane.
      *  @param stroke keystroke that triggers the action
@@ -414,9 +411,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       public void actionPerformed(ActionEvent e) { }
     };
     
-    /**
-     * Returns true if the errors should be highlighted in the source
-     * @return the status of the JCheckBox _showHighlightsCheckBox
+    /** Returns true if the errors should be highlighted in the source
+     *  @return the status of the JCheckBox _showHighlightsCheckBox
      */
     public boolean shouldShowHighlightsInSource() { return _showHighlightsCheckBox.isSelected(); }
     
@@ -520,9 +516,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         return "-------------\n** Warning **\n-------------\n";
       return "";
     }
-    
-    
-    
+        
     /** Used to show that the last compile was unsuccessful.*/
     protected void _updateWithErrors(String failureName, String failureMeaning, SwingDocument doc)
       throws BadLocationException {
@@ -799,9 +793,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     }
     
     
-    /**
-     * Another interface to switchToError.
-     * @param index Index into the array of positions in the CompilerErrorListPane
+    /** Another interface to switchToError.
+     *  @param index Index into the array of positions in the CompilerErrorListPane
      */
     void switchToError(int index) {
       if ((index >= 0) && (index < _errorListPositions.length)) {
@@ -811,9 +804,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }
     }
     
-    /**
-     * The OptionListener for compiler COMPILER_ERROR_COLOR
-     */
+    /** The OptionListener for compiler COMPILER_ERROR_COLOR */
     private class CompilerErrorColorOptionListener implements OptionListener<Color> {
       
       public void optionChanged(OptionEvent<Color> oce) {
@@ -824,31 +815,24 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }
     }
     
-    /**
-     * The OptionListener for compiler DEFINITIONS_NORMAL_COLOR
-     */
+    /** The OptionListener for compiler DEFINITIONS_NORMAL_COLOR */
     private class ForegroundColorListener implements OptionListener<Color> {
       public void optionChanged(OptionEvent<Color> oce) {
         StyleConstants.setForeground(NORMAL_ATTRIBUTES, oce.value);
         StyleConstants.setForeground(BOLD_ATTRIBUTES, oce.value);
         
         // Re-attribute the existing text with the new color.
-        Document doc = getErrorListPane().getDocument();
-        if (doc instanceof SwingDocument) {
-          SimpleAttributeSet set = new SimpleAttributeSet();
-          set.addAttribute(StyleConstants.Foreground, oce.value);
-          SwingDocument sdoc = (SwingDocument) doc;
-          sdoc.acquireWriteLock();
-          try { sdoc.setCharacterAttributes(0, sdoc.getLength(), set, false); }
-          finally { sdoc.releaseWriteLock(); }
+        SwingDocument doc = getErrorListPane().getSwingDocument();
+        SimpleAttributeSet set = new SimpleAttributeSet();
+        set.addAttribute(StyleConstants.Foreground, oce.value);
+        doc.acquireWriteLock();
+        try { doc.setCharacterAttributes(0, doc.getLength(), set, false); }
+        finally { doc.releaseWriteLock(); }
         //        ErrorListPane.this.repaint();
-        }
       }
     }
     
-    /**
-     * The OptionListener for compiler DEFINITIONS_BACKGROUND_COLOR
-     */
+    /** The OptionListener for compiler DEFINITIONS_BACKGROUND_COLOR. */
     private class BackgroundColorListener implements OptionListener<Color> {
       public void optionChanged(OptionEvent<Color> oce) {
         setBackground(oce.value);

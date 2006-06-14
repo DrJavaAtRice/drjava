@@ -51,23 +51,18 @@ public abstract class ArgumentTokenizer {
   private static final int SINGLE_QUOTE_STATE = 2;
   private static final int DOUBLE_QUOTE_STATE = 3;
 
-  /**
-   * Convenience method redirects to tokenize(arguments, false).
-   * Tokenizes the given String into individual argument Strings.
-   * @param arguments A String containing one or more command-line style
-   * arguments to be tokenized.
-   * @return A list of parsed and properly escaped arguments.
+  /** Tokenizes the given String into String tokens
+   *  @param arguments A String containing one or more command-line style arguments to be tokenized.
+   *  @return A list of parsed and properly escaped arguments.
    */
   public static List<String> tokenize(String arguments) {
     return tokenize(arguments, false);
   }
 
-  /**
-   * Tokenizes the given String into individual argument Strings.
-   * @param arguments A String containing one or more command-line style
-   * arguments to be tokenized.
-   * @param stringify whether or not to include escape special characters
-   * @return A list of parsed and properly escaped arguments.
+  /** Tokenizes the given String into String tokens.
+   *  @param arguments A String containing one or more command-line style arguments to be tokenized.
+   *  @param stringify whether or not to include escape special characters
+   *  @return A list of parsed and properly escaped arguments.
    */
   public static List<String> tokenize(String arguments, boolean stringify) {
 

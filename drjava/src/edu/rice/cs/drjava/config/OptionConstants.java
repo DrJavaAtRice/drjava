@@ -110,10 +110,14 @@ public interface OptionConstants {
   public static final ColorOption BOOKMARK_COLOR = new ColorOption("bookmark.color", Color.green);
 
   /** Color for highlighting find results. */
-  public static final ColorOption FIND_RESULTS_COLOR1 = new ColorOption("find.results.color1", new Color(0xFF, 0x99, 0x33));
-  public static final ColorOption FIND_RESULTS_COLOR2 = new ColorOption("find.results.color2", new Color(0x30, 0xC9, 0x96));
-  public static final ColorOption FIND_RESULTS_COLOR3 = new ColorOption("find.results.color3", new Color(0x30, 0xFC, 0xFC));
-  public static final ColorOption FIND_RESULTS_COLOR4 = new ColorOption("find.results.color4", new Color(0xFF, 0x66, 0xCC));
+  public static final ColorOption FIND_RESULTS_COLOR1 = 
+    new ColorOption("find.results.color1", new Color(0xFF, 0x99, 0x33));
+  public static final ColorOption FIND_RESULTS_COLOR2 = 
+    new ColorOption("find.results.color2", new Color(0x30, 0xC9, 0x96));
+  public static final ColorOption FIND_RESULTS_COLOR3 = 
+    new ColorOption("find.results.color3", new Color(0x30, 0xFC, 0xFC));
+  public static final ColorOption FIND_RESULTS_COLOR4 = 
+    new ColorOption("find.results.color4", new Color(0xFF, 0x66, 0xCC));
   
   public static final ColorOption[] FIND_RESULTS_COLORS = new ColorOption[] {
     FIND_RESULTS_COLOR1,
@@ -126,7 +130,8 @@ public interface OptionConstants {
   public static final ColorOption DEBUG_BREAKPOINT_COLOR = new ColorOption("debug.breakpoint.color", Color.red);
 
   /** Color for highlighting disabled breakpoints. */
-  public static final ColorOption DEBUG_BREAKPOINT_DISABLED_COLOR = new ColorOption("debug.breakpoint.disabled.color", new Color(128,0,0));
+  public static final ColorOption DEBUG_BREAKPOINT_DISABLED_COLOR = 
+    new ColorOption("debug.breakpoint.disabled.color", new Color(128,0,0));
 
   /** Color for highlighting thread locations. */
   public static final ColorOption DEBUG_THREAD_COLOR = new ColorOption("debug.thread.color", new Color(100,255,255));
@@ -1119,9 +1124,12 @@ public interface OptionConstants {
 
   /** The directory in use by the user upon the previous quit. */
   public static final FileOption LAST_DIRECTORY = new FileOption("last.dir", FileOption.NULL_FILE);
+  
+  /** The command-line arguments to be passed to the Master JVM. */
+  public static final StringOption MASTER_JVM_ARGS = new StringOption("master.jvm.args", "");
 
-  /** The command-line arguments to be passed to the interpreter jvm. */
-  public static final StringOption JVM_ARGS = new StringOption("jvm.args", "");
+  /** The command-line arguments to be passed to the Slave JVM. */
+  public static final StringOption SLAVE_JVM_ARGS = new StringOption("slave.jvm.args", "");
 
   /** The last state of the "Clipboard History" dialog. */
   public static final StringOption DIALOG_CLIPBOARD_HISTORY_STATE = new StringOption("dialog.clipboard.history.state", "default");

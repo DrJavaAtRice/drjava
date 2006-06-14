@@ -428,7 +428,7 @@ public class ProjectFileParser {
     public List<DebugBreakpointData> forEmpty(Empty e) { return new ArrayList<DebugBreakpointData>(); }
     public List<DebugBreakpointData> forCons(Cons c) {
       List<DebugBreakpointData> list = c.getRest().accept(this);
-      DebugBreakpointData tmp = (DebugBreakpointData) ProjectFileParser.ONLY.parseBreakpoint(c.getFirst(), _srcFileBase);
+      DebugBreakpointData tmp = ProjectFileParser.ONLY.parseBreakpoint(c.getFirst(), _srcFileBase);
       list.add(0, tmp); // add to the end
       return list;
     }

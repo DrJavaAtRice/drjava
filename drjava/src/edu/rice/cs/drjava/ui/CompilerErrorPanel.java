@@ -176,9 +176,9 @@ public class CompilerErrorPanel extends ErrorPanel {
         StringBuffer msgBuffer = 
           new StringBuffer("Compilation completed.  The following files were not compiled:\n");
         for (File f: _excludedFiles) {
-          if (f!=null) { msgBuffer.append("  ").append(f).append('\n'); } // do not print files from untitled docs
+          if (f != null) { msgBuffer.append("  ").append(f).append('\n'); } // do not print files from untitled docs
         }
-        doc.insertString(0, msgBuffer.toString(), NORMAL_ATTRIBUTES);
+        doc.append(msgBuffer.toString(), NORMAL_ATTRIBUTES);
       }
 
       String failureName = "error";
@@ -194,9 +194,7 @@ public class CompilerErrorPanel extends ErrorPanel {
       
       SwingDocument doc = new SwingDocument();
        
-      try {
-        doc.insertString(0, "Compilation in progress, please wait...", NORMAL_ATTRIBUTES);
-      }
+      try { doc.insertString(0, "Compilation in progress, please wait...", NORMAL_ATTRIBUTES); }
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       
       setDocument(doc);

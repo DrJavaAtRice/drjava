@@ -50,6 +50,8 @@ import java.util.*;
 
 import edu.rice.cs.drjava.config.FileOption;
 
+import edu.rice.cs.util.Log;
+
 /** A class to provide some convenient file operations as static methods.
  *  It's abstract to prevent (useless) instantiation, though it can be subclassed
  *  to provide convenient namespace importation of its methods.
@@ -57,6 +59,8 @@ import edu.rice.cs.drjava.config.FileOption;
  *  @version $Id$
  */
 public abstract class FileOps {
+  
+  private static Log _log = new Log("FileOpsTest.txt", true);
   
   /** Special File object corresponding to a dummy file. Simliar to FileOption.NULL_FILE but exists() returns false. */
   public static final File NONEXISTENT_FILE = new File("") {
@@ -318,8 +322,10 @@ public abstract class FileOps {
     return createTempDirectory(name, null);
   }
 
-  /** Create a new temporary directory. The directory will be deleted on exit, if empty.
-   *  (To delete it recursively on exit, use deleteDirectoryOnExit.)
+  /** Create a new temporary directory. The directory will be deleted on exit, if it only contains temp files and temp
+   *  directories created after it.  (To delete it on exit regardless of contents, call deleteDirectoryOnExit after
+   *  constructing the file tree rooted at this directory.  Note that createTempDirectory(..) is not much more helpful 
+   *  than mkdir() in this context (other than generating a new temp file name) because cleanup is a manual process.)
    *  @param name Non-unique portion of the name of the directory to create.
    *  @param parent Parent directory to contain the new directory
    *  @return File representing the directory that was created.
@@ -365,18 +371,21 @@ public abstract class FileOps {
    *             directory, it will still be deleted.
    */
   public static void deleteDirectoryOnExit(final File dir) {
-    // Delete this on exit, whether it's a directory or file
-    dir.deleteOnExit();
 
-    // If it's a directory, visit its children.
-    //  For some reason, this has to be done after calling deleteOnExit
-    //  on the directory itself.
+    // Delete this on exit, whether it's a directory or file
+    _log.log("Deleting file/directory " + dir + " on exit");
+    dir.deleteOnExit(); 
+    
+    // If it's a directory, visit its children.  This recursive walk has to be done AFTER calling deleteOnExit
+    //  on the directory itself because Java closes the list of files to deleted on exit in reverse order.
     if (dir.isDirectory()) {
       File[] childFiles = dir.listFiles();
-      if (childFiles!=null) { // listFiles may return null if there's an IO error
+      if (childFiles != null) { // listFiles may return null if there's an IO error
         for (File f: childFiles) { deleteDirectoryOnExit(f); }
       }
     }
+
+  
   }
 
   /** This function starts from the given directory and finds all  packages within that directory

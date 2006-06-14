@@ -322,24 +322,10 @@ public class ConfigFrame extends JFrame {
 
     return ptNode;
   }
-  /**
-   * Creates an individual panel, adds it to the JTree and the list of panels, and
-   *  returns the tree node.
-   * @param t the title of this panel
-   * @param parent the parent tree node
-   * @return this tree node
-   */
-//  private PanelTreeNode _createPanel(ConfigPanel c, PanelTreeNode parent) {
-//    PanelTreeNode ptNode = new PanelTreeNode(c);
-//    parent.add(ptNode);
-//
-//    return ptNode;
-//  }
-  /**
-   * Creates an individual panel, adds it to the JTree and the list of panels, and
-   *  returns the tree node. Adds to the root node.
-   * @param t the title of this panel
-   * @return this tree node
+
+  /** Creates an individual panel, adds it to the JTree and the list of panels, and returns the tree node. Adds to the root node.
+   *  @param t the title of this panel
+   *  @return this tree node
    */
   private PanelTreeNode _createPanel(String t) { return _createPanel(t, _rootNode); }
 
@@ -764,21 +750,25 @@ public class ConfigFrame extends JFrame {
 
   /** Adds all of the components for the Miscellaneous panel of the preferences window. */
   private void _setupMiscPanel(ConfigPanel panel) {
+    /* Dialog box options */
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.INDENT_LEVEL,
                                                   "Indent Level", this,
                                                   "The number of spaces to use for each level of indentation."));
-    
     addOptionComponent(panel, new DirectoryOptionComponent(OptionConstants.WORKING_DIRECTORY,
                                                     "Working Directory", this,
                                                     "The working directory for the DrJava editor and GUI interface.",
                                                     _dirChooser));
-
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this,
                                                   "The number of interactions to remember in the history."));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this,
                                                   "<html>The number of files to remember in<br>" +
                                                   "the recently used files list in the File menu.</html>"));
-
+    addOptionComponent(panel, new StringOptionComponent(OptionConstants.MASTER_JVM_ARGS, "JVM Args for Main JVM", this,
+                                                 "The command-line arguments to pass to the Main JVM."));
+    addOptionComponent(panel, new StringOptionComponent(OptionConstants.SLAVE_JVM_ARGS, "JVM Args for Interactions JVM", this,
+                                                 "The command-line arguments to pass to the Interactions JVM."));
+    
+    /* Check box options */
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.AUTO_CLOSE_COMMENTS, "Automatically Close Block Comments", this,
                                                   "<html>Whether to automatically insert a closing comment tag (\"*/\")<br>" +
                                                   "when the enter key is pressed after typing a new block comment<br>" +
@@ -797,10 +787,6 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.FORCE_TEST_SUFFIX, 
                                                   "Require test classes in projects to end in \"Test\"", this,
                                                   "Whether to force test classes in projects to end in \"Test\"."));
-
-    addOptionComponent(panel, new StringOptionComponent(OptionConstants.JVM_ARGS, "JVM Args for Interactions", this,
-                                                 "The command-line arguments to pass to the Interactions JVM."));
-
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE, 
                                                   "Put the focus in the definitions pane after find/replace", this,
                                                   "<html>Whether to put the focus in the definitions pane after doing a find or replace operation.<br>"+

@@ -204,12 +204,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _jvm.setInteractionsModel(_interactionsModel);
     _jvm.setJUnitModel(_junitModel);
     
-    _jvm.setOptionArgs(DrJava.getConfig().getSetting(JVM_ARGS));
+    _jvm.setOptionArgs(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
     
-    DrJava.getConfig().addOptionListener(JVM_ARGS, new OptionListener<String>() {
+    DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) { _jvm.setOptionArgs(oe.value); }
     }); 
-
+    
     _createDebugger();
         
     // Chain notifiers so that all events also go to GlobalModelListeners.

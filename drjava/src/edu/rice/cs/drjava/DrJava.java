@@ -33,8 +33,7 @@
 
 package edu.rice.cs.drjava;
 
-import static edu.rice.cs.drjava.config.OptionConstants.JAVAC_LOCATION;
-import static edu.rice.cs.drjava.config.OptionConstants.WORKING_DIRECTORY;
+import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +41,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -52,6 +52,8 @@ import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.ClassPathFilter;
 import edu.rice.cs.drjava.ui.SplashScreen;
+import edu.rice.cs.util.ArgumentTokenizer;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 import edu.rice.cs.util.newjvm.ExecJVM;
 
@@ -65,6 +67,7 @@ import edu.rice.cs.util.newjvm.ExecJVM;
  */
 public class DrJava {
   
+  private static Log _log = new Log("DrJava.txt", true);
   
   /** Class to probe to see if the debugger is available */
   public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
@@ -74,8 +77,10 @@ public class DrJava {
   /** Pause time for displaying DrJava banner on startup (in milliseconds) */
   private static final int PAUSE_TIME = 2000;
   
+  private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx128M";
+  
   private static final ArrayList<String> _filesToOpen = new ArrayList<String>();
-  private static final ArrayList<String> _jmvArgs = new ArrayList<String>();
+  private static final ArrayList<String> _jvmArgs = new ArrayList<String>();
 
   private static volatile boolean _showDebugConsole = false;
   
@@ -130,15 +135,7 @@ public class DrJava {
         String pathSep = System.getProperty("path.separator");
         String classPath = edu.rice.cs.util.FileOps.convertToAbsolutePathEntries(System.getProperty("java.class.path"));
         
-/* The following has been subsumed by toolsFromConfig argument passed to getToolsJarClassPath */        
-//        // Add tools.jar from preferences if specified
-//        classPath += pathSep;
-//        File toolsFromConfig = getConfig().getSetting(JAVAC_LOCATION);
-//        if (toolsFromConfig != FileOption.NULL_FILE) {
-//          classPath += toolsFromConfig.getAbsolutePath() + pathSep;
-//        }
-        
-        // Fall back on guesses from ToolsJarClassLoader
+        // Include both the javac location stored in .drjava prefences and the path proposed by ToolsJarClassLoader 
         File toolsFromConfig = getConfig().getSetting(JAVAC_LOCATION);
         classPath += pathSep + ToolsJarClassLoader.getToolsJarClassPath(toolsFromConfig);
         
@@ -148,7 +145,7 @@ public class DrJava {
         // Add the string pathSep to _filesToOpen if _showDebugConsole is true
         if (_showDebugConsole) _filesToOpen.add(pathSep);  // THIS IS A KLUDGE TO PASS THIS BOOLEAN FLAG TO DrJava
         
-        String[] jvmArgs = _jmvArgs.toArray(new String[0]);
+        String[] jvmArgs = _jvmArgs.toArray(new String[0]);
         String[] classArgs = _filesToOpen.toArray(new String[0]);
         
         // Run a new copy of DrJava and exit
@@ -181,6 +178,7 @@ public class DrJava {
    *  @return true if DrJava should load, false if not
    */
   static boolean handleCommandLineArgs(String[] args) {
+    boolean heapSizeGiven = false;  // indicates whether args includes an argument of the form -Xmx<number>
     
     // Loop through arguments looking for known options
     int firstFile = 0;
@@ -195,13 +193,16 @@ public class DrJava {
           // config option is missing file name; should we generate an error?
           return true;
         }
-        
         // arg.length > i+1 implying args list incudes config file name and perhaps files to open
         setPropertiesFile(args[i + 1]);
         firstFile = i + 2;
         _config = _initConfig();  // read specified .djrava file into _config
       }
-      else if ((arg.length() > 1) && (arg.substring(0,2).equals("-X"))) _jmvArgs.add(arg); 
+      
+      else if ((arg.length() > 1) && (arg.substring(0,2).equals("-X"))) {
+        if (arg.substring(0,4).equals("-Xmx")) heapSizeGiven = true;
+        _jvmArgs.add(arg); 
+      }
       
       else if (arg.equals("-debugConsole")) _showDebugConsole = true;
       
@@ -214,6 +215,14 @@ public class DrJava {
         break;
       }
     }
+    
+    String jvmArgString = getConfig().getSetting(MASTER_JVM_ARGS);
+    List<String> jvmArgs = ArgumentTokenizer.tokenize(jvmArgString);
+    if (jvmArgs != null && jvmArgs.size() != 0) _jvmArgs.addAll(jvmArgs);
+    
+    if (! heapSizeGiven && ! jvmArgString.contains("-Xmx")) _jvmArgs.add(DEFAULT_MAX_HEAP_SIZE_ARG);
+        
+    _log.log("_jvmArgs = " + _jvmArgs);
 
     // Open the remaining args as filenames
 

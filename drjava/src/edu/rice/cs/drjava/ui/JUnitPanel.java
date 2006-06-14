@@ -314,7 +314,7 @@ public class JUnitPanel extends ErrorPanel {
     /** Used to show that testing was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
-      SwingDocument doc = (SwingDocument) getDocument();
+      SwingDocument doc = getSwingDocument();
 //      _checkSync(doc);
       _updateWithErrors("test", "failed", doc);
     }

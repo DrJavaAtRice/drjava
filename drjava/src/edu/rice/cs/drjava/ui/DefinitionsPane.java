@@ -185,7 +185,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       returnText.append("{");
       
       int lastNewLineIndex = returnText.lastIndexOf("\n");
-      return returnText.toString().substring(lastNewLineIndex+1);
+      return returnText.substring(lastNewLineIndex+1);
     }
     else //not a curly brace
       return null;     

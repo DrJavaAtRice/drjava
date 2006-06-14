@@ -473,7 +473,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
           if (doc.getUserObject().equals(regDocNode.getUserObject())) {
             while(doc.getChildCount()>0) {
               DefaultMutableTreeNode existing = (DefaultMutableTreeNode)doc.getFirstChild();
-              @SuppressWarnings("unchecked") R r = (R) ((RegionTreeUserObj<R>)existing.getUserObject()).region();
+              @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>)existing.getUserObject()).region();
               _regTreeModel.removeNodeFromParent(existing);
             }
             _regTreeModel.removeNodeFromParent(doc);

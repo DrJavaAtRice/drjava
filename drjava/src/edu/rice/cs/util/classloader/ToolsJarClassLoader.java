@@ -99,9 +99,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
     /* javaHomes is a set of potential Java installations.  Each is an existing directory. */
     LinkedHashSet<File> javaHomes = new LinkedHashSet<File>();
     
-    try {
-      if (javaHome.isDirectory()) { javaHomes.add(javaHome); }
-    }
+    try { if (javaHome.isDirectory()) { javaHomes.add(javaHome); } }
     catch (SecurityException e) { /* ignore */ }
     
     String version = System.getProperty("java.specification.version");
@@ -115,9 +113,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
     for (File parent : javaHomeParents) {
       try {
         File[] files = parent.listFiles(matchHomes);
-        if (files != null) {
-          for (File f : files) { javaHomes.add(f); }
-        }
+        if (files != null) { for (File f : files) javaHomes.add(f); }
       }
       catch (SecurityException e) { /* ignore */ }
     }
@@ -125,9 +121,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
     /* The result is a set of existing tools.jar files, (attempted) canonicalized */
     LinkedHashSet<File> result = new LinkedHashSet<File>();
     
-    try {
-      if (toolsJar.isFile()) result.add(FileOps.getCanonicalFile(toolsJar));
-    }
+    try { if (toolsJar.isFile()) result.add(FileOps.getCanonicalFile(toolsJar)); }
     catch (SecurityException e) { /* ignore */ }
     
     for (File home : javaHomes) {

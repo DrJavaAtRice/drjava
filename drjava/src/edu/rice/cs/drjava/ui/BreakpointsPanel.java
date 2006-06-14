@@ -115,13 +115,11 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
                   @SuppressWarnings("unchecked") RegionTreeUserObj<Breakpoint> uo =
                     (RegionTreeUserObj<Breakpoint>)existing.getUserObject();
                   if (uo.region().getStartOffset()==bp.getStartOffset()) {
-                    Breakpoint r = (Breakpoint) uo.region();
-                    if (r instanceof Breakpoint) {
-                      ((Breakpoint)r).setEnabled(bp.isEnabled());
-                      ((DefaultTreeModel)_regTree.getModel()).nodeChanged(existing);
-                      found = true;
-                      break;
-                    }
+                    Breakpoint r = uo.region();
+                    r.setEnabled(bp.isEnabled());
+                    ((DefaultTreeModel)_regTree.getModel()).nodeChanged(existing);
+                    found = true;
+                    break;
                   }
                 }
               }
@@ -194,35 +192,27 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   /** Update button state and text. */
   protected void updateButtons() {
     ArrayList<Breakpoint> regs = getSelectedRegions();
-    _goToButton.setEnabled(regs.size()==1);
-    _removeButton.setEnabled(regs.size()>0);
-    _removeAllButton.setEnabled((_regionRootNode!=null) && (_regionRootNode.getDepth()>0));
+    _goToButton.setEnabled(regs.size() == 1);
+    _removeButton.setEnabled(regs.size() > 0);
+    _removeAllButton.setEnabled(_regionRootNode != null && _regionRootNode.getDepth() > 0);
     _enableDisableButton.setEnabled(regs.size()>0);
-    if ((regs.size()>0) && (regs.get(0) instanceof Breakpoint)) {
-      if (((Breakpoint)regs.get(0)).isEnabled()) {
-        _enableDisableButton.setText("Disable");
-      }
-      else {
-        _enableDisableButton.setText("Enable");
-      }
+    if (regs.size() > 0) {
+      if (regs.get(0).isEnabled()) _enableDisableButton.setText("Disable");
+      else _enableDisableButton.setText("Enable");
     }
-    _removeAllButton.setEnabled((_regionRootNode!=null) && (_regionRootNode.getDepth()>0));
+    _removeAllButton.setEnabled(_regionRootNode != null && _regionRootNode.getDepth() > 0);
   }
   
   /** Makes the popup menu actions. Should be overridden if additional actions besides "Go to" and "Remove" are added. */
   protected AbstractAction[] makePopupMenuActions() {
     AbstractAction[] acts = new AbstractAction[] {
       new AbstractAction("Go to") {
-        public void actionPerformed(ActionEvent e) {
-          goToRegion();
-        }
+        public void actionPerformed(ActionEvent e) { goToRegion(); }
       },
         
         new AbstractAction("Remove") {
           public void actionPerformed(ActionEvent e) {
-            for (Breakpoint bp: getSelectedRegions()) {
-              _model.getBreakpointManager().removeRegion(bp);
-            }
+            for (Breakpoint bp: getSelectedRegions()) _model.getBreakpointManager().removeRegion(bp);
           }
         }
     };

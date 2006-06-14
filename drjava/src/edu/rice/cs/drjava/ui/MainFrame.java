@@ -2797,15 +2797,30 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     });
     
    
-    config.addOptionListener(JVM_ARGS, new OptionListener<String>() {
+    config.addOptionListener(SLAVE_JVM_ARGS, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) {
         if (!oe.value.equals("")) {
           int result = JOptionPane.
             showConfirmDialog(_configFrame,
-                              "Specifying JVM Args is an advanced option. Invalid arguments may cause the\n" +
-                              "Interactions Pane to stop working.\n" + "Are you sure you want to set this option?\n" +
+                              "Specifying Interations JVM Args is an advanced option. Invalid arguments may cause\n" +
+                              "the Interactions Pane to stop working.\n" + "Are you sure you want to set this option?\n" +
                               "(You will have to reset the interactions pane before changes take effect.)",
-                              "Confirm JVM Arguments", JOptionPane.YES_NO_OPTION);
+                              "Confirm Interactions JVM Arguments", JOptionPane.YES_NO_OPTION);
+          if (result!=JOptionPane.YES_OPTION) config.setSetting(oe.option, "");
+        }
+      }
+    });
+    
+    config.addOptionListener(MASTER_JVM_ARGS, new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oe) {
+        if (!oe.value.equals("")) {
+          int result = JOptionPane.
+            showConfirmDialog(_configFrame,
+                              "Specifying Main JVM Args is an advanced option. Invalid arguments may cause\n" +
+                              "DrJava to fail on startup.  You may need to edit or delete your .drjava preferences file\n" +
+                              "to recover.\n Are you sure you want to set this option?\n" +
+                              "(You will have to restart Drjava before changes take effect.)",
+                              "Confirm Main JVM Arguments", JOptionPane.YES_NO_OPTION);
           if (result!=JOptionPane.YES_OPTION) config.setSetting(oe.option, "");
         }
       }

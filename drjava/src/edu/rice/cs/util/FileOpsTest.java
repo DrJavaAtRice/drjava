@@ -46,12 +46,11 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.FileOps;
 
-/**
- * Test cases for {@link FileOps}.
- *
- * @version $Id$
+/** Test cases for {@link FileOps}.
+ *  @version $Id$
  */
 public class FileOpsTest extends DrJavaTestCase {
+  private static final Log _log = new Log("FileOpsTest.txt", true);
   public static final String TEXT = "hi, dude.";
   public static final String PREFIX = "prefix";
   public static final String SUFFIX = ".suffix";
@@ -60,8 +59,7 @@ public class FileOpsTest extends DrJavaTestCase {
     File dir = FileOps.createTempDirectory(PREFIX);
     try {
       assertTrue("createTempDirectory result is a directory", dir.isDirectory());
-      assertTrue("temp directory has correct prefix",
-                 dir.getName().startsWith(PREFIX));
+      assertTrue("temp directory has correct prefix", dir.getName().startsWith(PREFIX));
     }
     finally { assertTrue("delete directory", dir.delete()); }
   }
@@ -154,8 +152,7 @@ public class FileOpsTest extends DrJavaTestCase {
                  FileOps.readFileAsString(backup));
 
 
-    /* Now see what happens when saving fails and we were not making a backup
-     * Nothing should change. */
+    /* Now see what happens when saving fails and we were not making a backup.  Nothing should change. */
     try {
       FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
         public void saveTo(OutputStream os) throws IOException {
@@ -190,8 +187,7 @@ public class FileOpsTest extends DrJavaTestCase {
     assertEquals("failed save5 w backup", "version 3",
                  FileOps.readFileAsString(writeTo));
 
-    // Make sure that the backup file no longer exists since it was
-    // copied over the original
+    // Make sure that the backup file no longer exists since it was copied over the original
     try {
       FileOps.readFileAsString(backup);
       fail("The backup file should no longer exist.");
@@ -202,9 +198,7 @@ public class FileOpsTest extends DrJavaTestCase {
     writeTo.setReadOnly();
     try {
       FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
-        public boolean shouldBackup () {
-          return true;
-        }
+        public boolean shouldBackup () { return true; }
         public void saveTo(OutputStream os) throws IOException {
           String output =  "version 6";
           os.write(output.getBytes());
@@ -264,31 +258,36 @@ public class FileOpsTest extends DrJavaTestCase {
 
   /** Tests that non-empty directories can be deleted on exit. */
   public void testDeleteDirectoryOnExit() throws IOException, InterruptedException {
-    // Create files:
-    //  /tmp/DrJavaTestTempDir#/
-    //   DrJavaTest-#.tmp
-    //   TempDir#/
-    //     DrJavaTest-#.tmp
-    File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
+  
+    File tempDir = FileOps.createTempDirectory("DrJavaTestTempDir");
+    assertTrue("tempDir exists", tempDir.exists());
+    File dir1 = new File(tempDir, "dir1");
+    dir1.mkdir();
     assertTrue("dir1 exists", dir1.exists());
-    File file1 = File.createTempFile("DrJavaTest-", ".temp", dir1).getCanonicalFile();
+    assertTrue("dir1 is directory", dir1.isDirectory());
+    File file1 = new File(dir1, "file1");
+    file1.createNewFile();  // Should always succeed because dir1 was just created
     assertTrue("file1 exists", file1.exists());
-    File dir2 = FileOps.createTempDirectory("TempDir", dir1).getCanonicalFile();
+    File dir2 = new File(dir1, "dir2");
+    dir2.mkdir();
     assertTrue("dir2 exists", dir2.exists());
-    File file2 = File.createTempFile("DrJavaTest-", ".temp", dir2).getCanonicalFile();
+    assertTrue("dir2 is directory", dir1.isDirectory());
+    File file2 = new File(dir2, "file2");
+    file2.createNewFile();
     assertTrue("file2 exists", file2.exists());
 
     String className = "edu.rice.cs.util.FileOpsTest";
-    String[] args = new String[] { dir1.getAbsolutePath() };
+    String[] args = new String[] {dir1.getAbsolutePath() };  // args = {<Fully qualified name of dir1>}
 
     Process process = ExecJVM.runJVMPropagateClassPath(className, args, FileOption.NULL_FILE);
     int status = process.waitFor();
     assertEquals("Delete on exit test exited with an error!", 0, status);
 
-    assertTrue("dir1 should be deleted", !dir1.exists());
-    assertTrue("file1 should be deleted", !file1.exists());
-    assertTrue("dir2 should be deleted", !dir2.exists());
-    assertTrue("file2 should be deleted", !file2.exists());
+    assertTrue("dir1 should be deleted", ! dir1.exists());
+    assertTrue("file1 should be deleted", ! file1.exists());
+    assertTrue("dir2 should be deleted", ! dir2.exists());
+    assertTrue("file2 should be deleted", ! file2.exists());
+    /* If this test passes, tempDir should be deleted when the this JVM exits. */
   }
 
   public void testSplitFile() {
@@ -340,9 +339,7 @@ public class FileOpsTest extends DrJavaTestCase {
     if (args.length != 1) System.exit(1);
 
     File dir = new File(args[0]);
-   
     if (! dir.exists()) System.exit(2);
-
     FileOps.deleteDirectoryOnExit(dir);
 
     // OK, exit cleanly

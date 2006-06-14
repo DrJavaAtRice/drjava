@@ -34,7 +34,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     // PENDING(prinz) - should cull ranges not visible
     int len = highlights.size();
     for (int i = 0; i < len; i++) {
-      HighlightInfo info = (HighlightInfo) highlights.elementAt(i);
+      HighlightInfo info = highlights.elementAt(i);
       if (!(info instanceof LayeredHighlightInfo)) {
         // Avoid allocing unless we need it.
         Rectangle a = component.getBounds();
@@ -44,8 +44,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
         a.width -= insets.left + insets.right;
         a.height -= insets.top + insets.bottom;
         for (; i < len; i++) {
-          info = (HighlightInfo)highlights.elementAt(i);
-          if (!(info instanceof LayeredHighlightInfo)) {
+          info = highlights.elementAt(i);
+          if (! (info instanceof LayeredHighlightInfo)) {
             Highlighter.HighlightPainter p = info.getPainter();
             p.paint(g, info.getStartOffset(), info.getEndOffset(),
                     a, component);
@@ -148,7 +148,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
         int p0 = -1;
         int p1 = -1;
         for (int i = 0; i < len; i++) {
-          HighlightInfo hi = (HighlightInfo)highlights.elementAt(i);
+          HighlightInfo hi = highlights.elementAt(i);
           if (hi instanceof LayeredHighlightInfo) {
             LayeredHighlightInfo info = (LayeredHighlightInfo)hi;
             minX = Math.min(minX, info.x);
@@ -184,7 +184,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
         int p0 = Integer.MAX_VALUE;
         int p1 = 0;
         for (int i = 0; i < len; i++) {
-          HighlightInfo info = (HighlightInfo) highlights.elementAt(i);
+          HighlightInfo info = highlights.elementAt(i);
           p0 = Math.min(p0, info.p0.getOffset());
           p1 = Math.max(p1, info.p1.getOffset());
         }
@@ -690,33 +690,24 @@ public class ReverseHighlighter extends DefaultHighlighter {
   }
 
   
-  /**
-   * This class invokes <code>mapper.damageRange</code> in
-   * EventDispatchThread. The only one instance per Highlighter
-   * is cretaed. When a number of ranges should be damaged
-   * it collects them into queue and damages
-   * them in consecutive order in <code>run</code>
-   * call.
+  /** This class invokes <code>mapper.damageRange</code> in EventDispatchThread. The only one instance per Highlighter
+   *  is cretaed. When a number of ranges should be damaged it collects them into queue and damages them in consecutive
+   *  order in <code>run</code> call.
    */
   class SafeDamager implements Runnable {
     private Vector<Position> p0 = new Vector<Position>(10);
     private Vector<Position> p1 = new Vector<Position>(10);
     private Document lastDoc = null;
     
-    /**
-     * Executes range(s) damage and cleans range queue.
-     */
+    /** Executes range(s) damage and cleans range queue. */
     public synchronized void run() {
       if (component != null) {
         TextUI mapper = component.getUI();
         if (mapper != null && lastDoc == component.getDocument()) {
-          // the Document should be the same to properly
-          // display highlights
+          // the Document should be the same to properly display highlights
           int len = p0.size();
           for (int i = 0; i < len; i++){
-            mapper.damageRange(component,
-                               ((Position)p0.get(i)).getOffset(),
-                               ((Position)p1.get(i)).getOffset());
+            mapper.damageRange(component, p0.get(i).getOffset(), p1.get(i).getOffset());
           }
         }
       }
