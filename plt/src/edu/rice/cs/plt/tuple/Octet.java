@@ -20,6 +20,10 @@ public class Octet<T1, T2, T3, T4, T5, T6, T7, T8> extends Septet<T1, T2, T3, T4
              _sixth + ", " + _seventh + ", " + _eighth + ")";
   }
   
+  /**
+   * @return  {@code true} iff {@code this} is of the same class as {@code o}, and each
+   *          corresponding element is equal (according to {@code equals})
+   */
   public boolean equals(Object o) {
     if (this == o) { return true; }
     else if (! getClass().equals(o.getClass())) { return false; }
@@ -38,9 +42,16 @@ public class Octet<T1, T2, T3, T4, T5, T6, T7, T8> extends Septet<T1, T2, T3, T4
   }
   
   protected int generateHashCode() {
-    return _first.hashCode() ^ (_second.hashCode() << 1) ^ (_third.hashCode() << 2) ^ 
-           (_fourth.hashCode() << 3) ^ (_fifth.hashCode() << 4) ^ (_sixth.hashCode() << 5) ^ 
-           (_seventh.hashCode() << 6) ^ (_eighth.hashCode() << 7);
+    return 
+      _first.hashCode() ^ 
+      (_second.hashCode() << 1) ^ 
+      (_third.hashCode() << 2) ^ 
+      (_fourth.hashCode() << 3) ^ 
+      (_fifth.hashCode() << 4) ^ 
+      (_sixth.hashCode() << 5) ^ 
+      (_seventh.hashCode() << 6) ^ 
+      (_eighth.hashCode() << 7) ^ 
+      getClass().hashCode();
   }
   
   /** Call the constructor (allows the type arguments to be inferred) */

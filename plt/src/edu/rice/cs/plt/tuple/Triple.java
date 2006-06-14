@@ -19,6 +19,10 @@ public class Triple<T1, T2, T3> extends Pair<T1, T2> {
     return "(" + _first + ", " + _second + ", " + _third + ")";
   }
   
+  /**
+   * @return  {@code true} iff {@code this} is of the same class as {@code o}, and each
+   *          corresponding element is equal (according to {@code equals})
+   */
   public boolean equals(Object o) {
     if (this == o) { return true; }
     else if (! getClass().equals(o.getClass())) { return false; }
@@ -32,7 +36,11 @@ public class Triple<T1, T2, T3> extends Pair<T1, T2> {
   }
   
   protected int generateHashCode() {
-    return _first.hashCode() ^ (_second.hashCode() << 1) ^ (_third.hashCode() << 2);
+    return 
+      _first.hashCode() ^ 
+      (_second.hashCode() << 1) ^ 
+      (_third.hashCode() << 2) ^
+      getClass().hashCode();
   }
   
   /** Call the constructor (allows the type arguments to be inferred) */

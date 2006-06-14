@@ -12,9 +12,14 @@
  * <li>{@code equals} and {@code hashCode} defined in terms of the tuple elements</li>
  * </ul></p>
  * 
+ * <p>Each n-tuple class also has an identity-based subclass (such as 
+ * {@link edu.rice.cs.plt.tuple.IdentityTriple} that defines {@code equals} and {@code hashCode}
+ * in terms of their elements identity ({@code ==}) instead of equality ({@code equals}).</p>
+ *
  * <p>To simplify operations that interact with tuples, each n-tuple class is a subclass
  * of the (n-1)-tuple class.  So, for example, a {@code Triple} variable can refer to
  * any tuple that supports the {@code first}, {@code second}, and {@code third} methods, 
  * including a {@code Quad}.</p>
+ * 
  */
 package edu.rice.cs.plt.tuple;

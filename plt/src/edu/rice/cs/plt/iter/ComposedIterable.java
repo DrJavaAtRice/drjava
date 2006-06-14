@@ -1,7 +1,7 @@
 package edu.rice.cs.plt.iter;
 
 import edu.rice.cs.plt.lambda.Thunk;
-import edu.rice.cs.plt.lambda.LiteralThunk;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 
 /**
  * Defines an iterable by composing two other iterables (or a value with an iterable).
@@ -22,7 +22,7 @@ public class ComposedIterable<T> extends AbstractIterable<T> implements SizedIte
     if (IterUtil.isFixed(i1)) {
       if (IterUtil.isFixed(i2)) {
         _fixed = true;
-        _size = LiteralThunk.make(IterUtil.sizeOf(_i1) + IterUtil.sizeOf(_i2));
+        _size = LambdaUtil.valueThunk(IterUtil.sizeOf(_i1) + IterUtil.sizeOf(_i2));
       }
       else {
         _fixed = false;

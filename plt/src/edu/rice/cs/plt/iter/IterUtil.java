@@ -3,6 +3,7 @@ package edu.rice.cs.plt.iter;
 import java.util.*;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.tuple.*;
+import edu.rice.cs.plt.recur.RecurUtil;
 
 /**
  * A collection of static methods operating on iterables.
@@ -48,7 +49,8 @@ public class IterUtil {
   
   /** 
    * @return  A string representation of the given iterable, matching the {@link Collection}
-   *          conventions (results like {@code "[foo, bar, baz]"})
+   *          conventions (results like {@code "[foo, bar, baz]"}); invokes 
+   *          {@link RecurUtil#safeToString(Object)} on each element
    */
   public static String toString(Iterable<?> iter) {
     StringBuilder result = new StringBuilder();
@@ -57,7 +59,7 @@ public class IterUtil {
     for (Object obj : iter) {
       if (first) { first = false; }
       else { result.append(", "); }
-      result.append(obj);
+      result.append(RecurUtil.safeToString(obj));
     }
     result.append("]");
     return result.toString();
@@ -77,13 +79,14 @@ public class IterUtil {
   /**
    * @return  A hash code computed by xoring shifted copies of each element's hash code;
    *          the result is consistent with {@link #isEqual}, but may not be consistent with
-   *          the input's {@code equals} and {@code hashCode} methods
+   *          the input's {@code equals} and {@code hashCode} methods; invokes 
+   *          {@code RecurUtil#safeHashCode(Object)} on each element
    */
   public static int hashCode(Iterable<?> iter) {
     int result = Iterable.class.hashCode();
     int shift = 0;
-    // So that values in long lists don't get ignored, we mask shift to be <= 16
-    for (Object obj : iter) { result ^= obj.hashCode() << (shift & 0x1111); shift++; }
+    // So that values in long lists don't get ignored, we mask shift to be < 16
+    for (Object obj : iter) { result ^= obj.hashCode() << (shift & 0xF); shift++; }
     return result;
   }
   

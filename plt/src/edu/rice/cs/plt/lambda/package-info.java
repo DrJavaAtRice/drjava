@@ -13,6 +13,7 @@
  * such as {@link edu.rice.cs.plt.lambda.LazyThunk} and {@link edu.rice.cs.plt.lambda.Box}, and 
  * some interfaces provide static constants for typical instances (such as the {@code TRUE} 
  * predicate).  The {@link edu.rice.cs.plt.lambda.LambdaUtil} class defines static methods that 
- * act on lambdas, allowing composition, currying, negation, conversion between types, etc.</p>
+ * define and act on lambdas, allowing easy null-valued and literal-valued lambda creation, 
+ * composition, currying, negation, conjunction, disjunction, conversion between types, etc.</p>
  */
 package edu.rice.cs.plt.lambda;

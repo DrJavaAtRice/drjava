@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.lambda;
 
+import edu.rice.cs.plt.recur.RecurUtil;
+
 /** An arbitrary binary predicate for values of type T1 and T2 */
 public interface Predicate2<T1, T2> extends Lambda2<T1, T2, Boolean> {
   public Boolean value(T1 arg1, T2 arg2);
@@ -15,8 +17,8 @@ public interface Predicate2<T1, T2> extends Lambda2<T1, T2, Boolean> {
   };
   
   /**
-   * A predicate that returns {@code true} iff the arguments are both {@code null}, or
-   * both non-null and {@code arg1.equals(arg2)}
+   * A predicate that evaluates to {@link RecurUtil#safeEquals(Object, Object)}
+   * applied to the arguments
    */
   public static final Predicate2<Object, Object> EQUAL = new Predicate2<Object, Object>() {
     public Boolean value(Object arg1, Object arg2) {
@@ -27,10 +29,10 @@ public interface Predicate2<T1, T2> extends Lambda2<T1, T2, Boolean> {
   };
   
   /**
-   * A predicate that returns {@code true} iff one argument is {@code null} and the other
-   * is not, or both are non-null and {@code !arg1.equals(arg2)}
+   * A predicate that evaluates to the opposite of {@link RecurUtil#safeEquals(Object, Object)}
+   * applied to the arguments
    */
-  public static final Predicate2<Object, Object> NOT_EQUAL = LambdaUtil.negate(EQUAL);
+  public static final Predicate2<Object, Object> NOT_EQUAL = LambdaUtil.negate2(EQUAL);
   
   /** A predicate that returns {@code true} iff {@code arg1 == arg2} */
   public static final Predicate2<Object, Object> IDENTICAL = new Predicate2<Object, Object>() {
@@ -38,6 +40,6 @@ public interface Predicate2<T1, T2> extends Lambda2<T1, T2, Boolean> {
   };
   
   /** A predicate that returns {@code true} iff {@code arg1 != arg2} */
-  public static final Predicate2<Object, Object> NOT_IDENTICAL = LambdaUtil.negate(IDENTICAL);
+  public static final Predicate2<Object, Object> NOT_IDENTICAL = LambdaUtil.negate2(IDENTICAL);
 
 }

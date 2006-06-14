@@ -3,14 +3,7 @@ package edu.rice.cs.plt.lambda;
 import junit.framework.TestCase;
 
 /**
- * Tests for the LambdaUtil methods.  The following are too trivial to test -- the
- * fact that the compile (and type-check) means that they are very likely correct:<ul>
- * <li>{@code identity}</li>
- * <li>{@code nullThunk}</li>
- * <li>{@code nullLambda}</li>
- * <li>{@code nullLambda2}</li>
- * <li>{@code nullLambda3}</li>
- * <li>{@code nullLambda4}</li>
+ * Tests for the LambdaUtil methods
  */
 public class LambdaUtilTest extends TestCase {
   
@@ -76,9 +69,9 @@ public class LambdaUtilTest extends TestCase {
   }
   
   public void testCompose() {
-    Thunk<String> numToString1 = LambdaUtil.compose(LiteralThunk.make(23), Lambda.TO_STRING);
+    Thunk<String> numToString1 = LambdaUtil.compose(LambdaUtil.valueThunk(23), Lambda.TO_STRING);
     assertEquals("23", numToString1.value());
-    Thunk<String> numToString2 = LambdaUtil.compose(LiteralThunk.make(22.5f), Lambda.TO_STRING);
+    Thunk<String> numToString2 = LambdaUtil.compose(LambdaUtil.valueThunk(22.5f), Lambda.TO_STRING);
     assertEquals("22.5", numToString2.value());
     
     Lambda<Integer, Integer> plus5Times2 = LambdaUtil.compose(plus5, times2);
