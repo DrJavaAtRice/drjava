@@ -42,20 +42,14 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.Locale;
 
-/**
- * Class according to the JUnit protocol. Tests
- * the proper functionality of the class KeyStrokeOption.
- * @version $Id$
+/** Class according to the JUnit protocol. Tests the proper functionality of the class KeyStrokeOption.
+ *  @version $Id$
  */
-public final class KeyStrokeOptionTest extends DrJavaTestCase
-{
-  /**
-   * @param name The name of this test case.
-   */
+public final class KeyStrokeOptionTest extends DrJavaTestCase {
+  /** @param name The name of this test case. */
   public KeyStrokeOptionTest(String name) { super(name); }
 
-  public void testGetName()
-  {
+  public void testGetName() {
     KeyStrokeOption io1 = new KeyStrokeOption("indent_size",null);
     KeyStrokeOption io2 = new KeyStrokeOption("max_files",null);
 
@@ -63,28 +57,20 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase
     assertEquals("max_files",   io2.getName());
   }
 
-  public void testParse()
-  {
+  public void testParse() {
     KeyStrokeOption io = new KeyStrokeOption("max_files",null);
-    assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
-                                        InputEvent.CTRL_MASK),
+    assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK),
                  io.parse("ctrl ENTER"));
     assertEquals(KeyStrokeOption.NULL_KEYSTROKE,
                  io.parse("<none>"));
-    assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_NUM_LOCK,
-                                        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK,
-                                        true),
+    assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_NUM_LOCK, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, true),
                  io.parse("alt shift released NUM_LOCK"));
-    assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
-                                        InputEvent.ALT_MASK | InputEvent.SHIFT_MASK,
-                                        false),
+    assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, false),
                  io.parse("alt shift COMMA"));
     assertEquals(KeyStroke.getKeyStroke('%'),
                  io.parse("typed %"));
-    // behaves correctly in 1.3, but the test will not work for some reason
-    /*assertEquals(KeyStroke.getKeyStroke(new Character('%'),
-     InputEvent.ALT_MASK | InputEvent.CTRL_MASK),
-     io.parse("ctrl alt typed %"));*/
+    assertEquals(KeyStroke.getKeyStroke(new Character('%'), InputEvent.ALT_MASK | InputEvent.CTRL_MASK),
+                 io.parse("ctrl alt typed %"));
 
     try { io.parse("true"); fail(); }
     catch (IllegalArgumentException e) { }
@@ -99,86 +85,62 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase
     catch (IllegalArgumentException e) { }
   }
 
-  /**
-   * Test the format method by comparing a KeyStroke object to itself after it
-   * has been formatted to a string and parsed back into a KeyStroke object.
-   * We cannot compare strings because format always puts the modifiers in the
-   * same order which could be a different order than the user specifies.
+  /** Test the format method by comparing a KeyStroke object to itself after it has been formatted to a string and 
+   *  parsed back into a KeyStroke object.  We cannot compare strings because format always puts the modifiers in the
+   *  same order which could be a different order than the user specifies.
    */
-  public void testFormat()
-  {
+  public void testFormat() {
     KeyStrokeOption io = new KeyStrokeOption("max_files",null);
-    KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
-                                          InputEvent.ALT_MASK | InputEvent.META_MASK);
+    KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.ALT_MASK | InputEvent.META_MASK);
     assertEquals(ks, io.parse(io.format(ks)));
-    ks = KeyStroke.getKeyStroke(KeyEvent.VK_NUMBER_SIGN,
-                                InputEvent.ALT_MASK | InputEvent.CTRL_MASK);
+    ks = KeyStroke.getKeyStroke(KeyEvent.VK_NUMBER_SIGN, InputEvent.ALT_MASK | InputEvent.CTRL_MASK);
     assertEquals(ks, io.parse(io.format(ks)));
-    // behaves correctly in 1.3, but the test will not work for some reason
-    /*ks = KeyStroke.getKeyStroke(new Character('!'),
-     InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK);
-     assertEquals(ks, io.parse(io.format(ks)));*/
+   
+    ks = KeyStroke.getKeyStroke(new Character('!'), InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK);
+    assertEquals(ks, io.parse(io.format(ks)));
     ks = KeyStroke.getKeyStroke('!');
     assertEquals(ks, io.parse(io.format(ks)));
-    ks = KeyStroke.getKeyStroke(KeyEvent.VK_F10,
-                                InputEvent.ALT_MASK | InputEvent.SHIFT_MASK,
-                                true);
+    ks = KeyStroke.getKeyStroke(KeyEvent.VK_F10, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK, true);
     assertEquals(ks, io.parse(io.format(ks)));
   }
 
-  /**
-   * Tests that key strokes are output in a parseable format
-   * even in foreign locales.
-   * The test must be run in a separate JVM, because once the locale
-   * is set, it cannot be set back.  (If someone can figure out how
-   * to effectively set it back, feel free to remove this hack!)
+  /** Tests that key strokes are output in a parseable format even in foreign locales.  The test must be run in a 
+   *  separate JVM, because once the locale is set, it cannot be set back.  (If someone can figure out how
+   *  to effectively set it back, feel free to remove this hack!)
    */
-  public void testLocaleSpecificFormat()
-    throws IOException, InterruptedException
-  {
+  public void testLocaleSpecificFormat() throws IOException, InterruptedException {
     String className = "edu.rice.cs.drjava.config.KeyStrokeOptionTest";
     String[] args = new String[0];
 
     Process process = ExecJVM.runJVMPropagateClassPath(className, args, FileOption.NULL_FILE);
     int status = process.waitFor();
-    assertEquals("Local specific keystroke test failed!",
-                 0, status);
+    assertEquals("Local specific keystroke test failed!", 0, status);
   }
 
-  /**
-   * Main method to be called by testLocalSpecificFormat.  Runs in
-   * a new JVM so as not to affect the locale of other tests.
+  /** Main method to be called by testLocalSpecificFormat.  Runs in a new JVM so as not to affect the locale of other
+   *  tests.
    */
   public static void main(String[] args) {
     // Set to German, which has different words for ctrl and shift
     Locale.setDefault(Locale.GERMAN);
 
     KeyStrokeOption io = new KeyStrokeOption("test",null);
-    KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_A,
-                                          InputEvent.ALT_MASK |
-                                          InputEvent.CTRL_MASK |
-                                          InputEvent.SHIFT_MASK |
-                                          InputEvent.META_MASK);
+    KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.ALT_MASK | InputEvent.CTRL_MASK |
+                                          InputEvent.SHIFT_MASK | InputEvent.META_MASK);
     String s = io.format(ks);
     // Test alt/option
-    if ((s.indexOf("alt") == -1) && (s.indexOf("option") == -1)) {
-      System.exit(1);
-    }
+    if ((s.indexOf("alt") == -1) && (s.indexOf("option") == -1)) System.exit(1);
+
     // Test ctrl
-    if (s.indexOf("ctrl") == -1) {
-      System.exit(2);
-    }
+    if (s.indexOf("ctrl") == -1) System.exit(2);
+    
     // Test shift
-    if (s.indexOf("shift") == -1) {
-      System.exit(3);
-    }
+    if (s.indexOf("shift") == -1) System.exit(3);
+
     // Test meta
-    if ((s.indexOf("meta") == -1) && (s.indexOf("command") == -1)) {
-      System.exit(4);
-    }
+    if ((s.indexOf("meta") == -1) && (s.indexOf("command") == -1)) System.exit(4);
 
     // Ok, so exit cleanly
     System.exit(0);
   }
-
 }

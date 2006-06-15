@@ -5,7 +5,7 @@
  *
  * DrJava Open Source License
  * 
- * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
+ * Copyright (C) 2001-2006 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
  * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
  * 
@@ -33,30 +33,24 @@
 
 package edu.rice.cs.drjava.config;
 
-/**
- * Class representing all configuration options with values of type String.
- * @version $Id$
+/** Class representing all configuration options with values of type String.
+ *  @version $Id$
  */
-public class StringOption extends Option<String>
-{
+public class StringOption extends Option<String> {
   /** @param key The name of this Option. */
   public StringOption(String key, String def) { super(key, def); }
 
 
-  // The following 2 methods are NOP's. The method
-  // format() is defined here to avoid the unnecessary
-  // call to toString() in the default format() method.
+  /* The following 2 methods are NOP's. The method format() is defined here to avoid the unnecessary call to toString()
+   * in the default format() method. */
 
-
-  /**
-   * @param s The String to be parsed.
-   * @return "s", no actual parsing is performed.
+  /** @param s The String to be parsed.
+   *  @return "s", no actual parsing is performed.
    */
   public String parse(String s) { return s; }
 
-  /**
-   * @param s The String to be formatted.
-   * @return "s", no actual formatting is performed.
+  /** @param s The String to be formatted.
+   *  @return "s", no actual formatting is performed.
    */
   public String format(String s) { return s; }
 }

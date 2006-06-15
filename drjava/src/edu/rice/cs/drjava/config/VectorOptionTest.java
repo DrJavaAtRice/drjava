@@ -38,11 +38,8 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import java.util.Vector;
 
 
-/**
- * Class according to the JUnit protocol.
- * Tests the proper functionality of the class
- * VectorOption.
- * @version $Id$
+/** Class according to the JUnit protocol.  Tests the proper functionality of the class VectorOption.
+ *  @version $Id$
  */
 public final class VectorOptionTest extends DrJavaTestCase {
   private VectorOption<Integer> _ivo;
