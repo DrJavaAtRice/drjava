@@ -220,7 +220,7 @@ public class DrJava {
     List<String> jvmArgs = ArgumentTokenizer.tokenize(jvmArgString);
     if (jvmArgs != null && jvmArgs.size() != 0) _jvmArgs.addAll(jvmArgs);
     
-    if (! heapSizeGiven && ! jvmArgString.contains("-Xmx")) _jvmArgs.add(DEFAULT_MAX_HEAP_SIZE_ARG);
+    if (! heapSizeGiven && jvmArgString.indexOf("-Xmx")==0) _jvmArgs.add(DEFAULT_MAX_HEAP_SIZE_ARG);
         
     _log.log("_jvmArgs = " + _jvmArgs);
 

@@ -105,6 +105,13 @@
   
   <!-- By default, don't filter tests on anything -->
   <property name="test-spec" value="" />
+  <property name="test-list" value="" />
+
+  <!-- By default, perform the test once -->
+  <property name="test-repeat" value="1" />
+
+  <!-- By default, time out after a day -->
+  <property name="test-timeout" value="1440" />
   
   <!-- By default, delete jar files when cleaning -->
   <property name="delete-jars" value="yes" />
@@ -131,6 +138,10 @@
   <!-- Clover tasks, used to generate test coverage reports -->
   <taskdef resource="clovertasks" classpath="lib/buildlib/clover.jar" />
 
+  <!-- Ant-Contrib additional ANT tasks -->
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="lib/buildlib/ant-contrib.jar"/>
+        
+  <taskdef name="for" classname="net.sf.antcontrib.logic.For" classpath="lib/buildlib/ant-contrib.jar" onerror="report"/>
                  
   <!-- ***********
        Help Target
@@ -153,6 +164,35 @@
     <echo message="CLASSPATH will be ignored -- classes on the system classpath will " />
     <echo message="not be visible during the build process.  To run JUnit tests," />
     <echo message="a copy of junit.jar should be installed in the Ant lib directory." />
+    <echo message="" />
+    <echo message="For the test, test-15, test-14, and test-14-in-15 targets, the" />
+    <echo message="tests to run can be filtered using the -Dtest-spec=... and" />
+    <echo message="-Dtest-list=... command line parameters." />
+    <echo message="" />
+    <echo message="-Dtest-spec=... includes all test files whose names end with" />
+    <echo message="&quot;Test.class&quot; and contain the characters specified after" />
+    <echo message="the = sign." />
+    <echo message="" />
+    <echo message="-Dtest-list=... includes all tests files listed after the = sign." />
+    <echo message="Multiple files can be specified by as a space-separated list" />
+    <echo message="surrounded by quotation marks." />
+    <echo message="" />
+    <echo message="If neither -Dtest-spec=... nor -Dtest-list=... is specified, all" />
+    <echo message="test files ending with &quot;Test.class&quot; are included." />
+    <echo message="" />
+    <echo message="Examples:" />
+    <echo message="ant test -Dtest-spec=Project" />
+    <echo message="ant test -Dtest-list=&quot;edu/rice/cs/drjava/ui/ProjectMenuTest.class edu/rice/cs/drjava/ui/MainFrameTest.class&quot;" />
+    <echo message="ant test -Dtest-spec=Global -Dtest-list=&quot;edu/rice/cs/drjava/ui/ProjectMenuTest.class&quot;" />
+    <echo message="" />
+    <echo message="Using -Dtest-repeat=&quot;...&quot;, a test can be repeated several" />
+    <echo message="times. The number is controlled by the number of items in the" />
+    <echo message="comma-separated list: -Dtest-repeat=&quot;1,2,3&quot; repeats the" />
+    <echo message="tests three times." />
+    <echo message="" />
+    <echo message="With -Dtest-timeout=..., the timeout duration can be specified" />
+    <echo message="in minutes: -Dtest-timeout=5 aborts the tests after 5 minutes," />
+    <echo message="and the task will fail." />
   </target>
   
   
@@ -516,62 +556,225 @@
   <target name="test" depends="test-15" description="Shortcut for 'test-15'">
   </target>
 
- 
   <target name="test-15" depends="compile-15, assert-15, resolve-java15-tools"
-          description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
-    <echo message="Running all 5.0 tests matching '${test-spec}' under Java 5.0" />
-    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
-      <classpath>
-        <pathelement location="${java15-tools}" />
-        <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="classes/test" />
-        <pathelement location="classes/base" />
-        <pathelement location="classes/lib" />
-      </classpath>
-      <formatter type="brief" usefile="false" />
-      <batchtest>
-        <fileset dir="classes/test" includes="**/*${test-spec}*Test.class" />
-      </batchtest>
-    </junit>
-    
+          description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... and -Dtest-list=... to filter">
+    <if>
+      <and>
+        <not>
+          <equals arg1="${test-spec}" arg2=""/>
+        </not>
+	<equals arg1="${test-list}" arg2=""/>
+      </and>
+      <then>
+        <echo message="Running all 5.0 tests matching '${test-spec}' under Java 5.0"/>
+        <property name="use-test-spec" value="true"/>
+      </then>
+
+      <elseif>
+        <and>
+          <not>
+            <equals arg1="${test-list}" arg2=""/>
+          </not>
+	  <equals arg1="${test-spec}" arg2=""/>
+        </and>
+        <then>
+          <echo message="Running the 5.0 tests '${test-list}' under Java 5.0"/>
+          <property name="use-test-list" value="true"/>
+        </then>
+      </elseif>
+
+      <elseif>
+        <and>
+          <not>
+            <equals arg1="${test-spec}" arg2=""/>
+          </not>
+          <not>
+            <equals arg1="${test-list}" arg2=""/>
+          </not>
+        </and>
+        <then>
+          <echo message="Running the 5.0 tests '${test-list}' and those matching '${test-spec}' under Java 5.0"/>
+          <property name="use-test-spec" value="true"/>
+          <property name="use-test-list" value="true"/>
+        </then>
+      </elseif>
+
+      <else>
+        <echo message="Running all 5.0 tests under Java 5.0."/>
+        <property name="use-test-all" value="true"/>
+      </else>
+    </if>
+
+    <for list="${test-repeat}" param="iteration">
+      <sequential>
+        <limit maxwait="${test-timeout}" maxwaitunit="minute" failonerror="true">
+          <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
+            <classpath>
+              <pathelement location="${java15-tools}" />
+              <pathelement location="lib/buildlib/junit.jar" />
+              <pathelement location="classes/test" />
+              <pathelement location="classes/base" />
+              <pathelement location="classes/lib" />
+            </classpath>
+            <formatter type="brief" usefile="false" />
+            <batchtest>
+              <fileset dir="classes/test" includes="${test-list}">
+	        <include name="**/*Test.class" if="use-test-all"/>
+                <include name="**/*${test-spec}*Test.class" if="use-test-spec"/>
+              </fileset>
+            </batchtest>
+          </junit>
+        </limit>
+      </sequential>
+    </for>  
   </target>
 
   <target name="test-14" depends="compile-14, resolve-java14-exec, resolve-java14-tools"
-          description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter">
-    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
+          description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... and -Dtest-list=... to filter">
+    <if>
+      <and>
+        <not>
+          <equals arg1="${test-spec}" arg2=""/>
+        </not>
+	<equals arg1="${test-list}" arg2=""/>
+      </and>
+      <then>
+        <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0"/>
+        <property name="use-test-spec" value="true"/>
+      </then>
+
+      <elseif>
+        <and>
+          <not>
+            <equals arg1="${test-list}" arg2=""/>
+          </not>
+	  <equals arg1="${test-spec}" arg2=""/>
+        </and>
+        <then>
+          <echo message="Running the 1.4 tests '${test-list}' under Java 1.4"/>
+          <property name="use-test-list" value="true"/>
+        </then>
+      </elseif>
+
+      <elseif>
+        <and>
+          <not>
+            <equals arg1="${test-spec}" arg2=""/>
+          </not>
+          <not>
+            <equals arg1="${test-list}" arg2=""/>
+          </not>
+        </and>
+        <then>
+          <echo message="Running the 1.4 tests '${test-list}' and those matching '${test-spec}' under Java 1.4"/>
+          <property name="use-test-spec" value="true"/>
+          <property name="use-test-list" value="true"/>
+        </then>
+      </elseif>
+
+      <else>
+        <echo message="Running all 1.4 tests under Java 1.4."/>
+        <property name="use-test-all" value="true"/>
+      </else>
+    </if>
+
     <echo message="WARNING: 1.4-compatible test classes are (intentionally) not checked for Java 5 API references." />
     <echo message="If such references exist, these tests will probably fail." />
-    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
-      <classpath>
-        <pathelement location="${java14-tools}" />
-        <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="classes/test-14" />
-        <pathelement location="classes/base-14" />
-        <pathelement location="classes/lib-14" />
-      </classpath>
-      <formatter type="brief" usefile="false" />
-      <batchtest>
-        <fileset dir="classes/test-14" includes="**/*${test-spec}*Test.class" />
-      </batchtest>
-    </junit>
+
+    <for list="${test-repeat}" param="iteration">
+      <sequential>
+        <limit maxwait="${test-timeout}" maxwaitunit="minute" failonerror="true">
+          <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
+            <classpath>
+              <pathelement location="${java14-tools}" />
+              <pathelement location="lib/buildlib/junit.jar" />
+              <pathelement location="classes/test-14" />
+              <pathelement location="classes/base-14" />
+              <pathelement location="classes/lib-14" />
+            </classpath>
+            <formatter type="brief" usefile="false" />
+            <batchtest>
+              <fileset dir="classes/test-14" includes="${test-list}">
+                <include name="**/*Test.class" if="use-test-all"/>
+                <include name="**/*${test-spec}*Test.class" if="use-test-spec"/>
+              </fileset>
+            </batchtest>
+          </junit>
+        </limit>
+      </sequential>
+    </for>
   </target>
 
   <target name="test-14-in-15" depends="compile-14, assert-15, resolve-java15-tools"
-          description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
-    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
-    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
-      <classpath>
-        <pathelement location="${java15-tools}" />
-        <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="classes/test-14" />
-        <pathelement location="classes/base-14" />
-        <pathelement location="classes/lib-14" />
-      </classpath>
-      <formatter type="brief" usefile="false" />
-      <batchtest>
-        <fileset dir="classes/test-14" includes="**/*${test-spec}*Test.class" />
-      </batchtest>
-    </junit>
+          description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... and -Dtest-list=... to filter">
+    <if>
+      <and>
+        <not>
+          <equals arg1="${test-spec}" arg2=""/>
+        </not>
+	<equals arg1="${test-list}" arg2=""/>
+      </and>
+      <then>
+        <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0"/>
+        <property name="use-test-spec" value="true"/>
+      </then>
+
+      <elseif>
+        <and>
+          <not>
+            <equals arg1="${test-list}" arg2=""/>
+          </not>
+	  <equals arg1="${test-spec}" arg2=""/>
+        </and>
+        <then>
+          <echo message="Running the 1.4 tests '${test-list}' under Java 5.0"/>
+          <property name="use-test-list" value="true"/>
+        </then>
+      </elseif>
+
+      <elseif>
+        <and>
+          <not>
+            <equals arg1="${test-spec}" arg2=""/>
+          </not>
+          <not>
+            <equals arg1="${test-list}" arg2=""/>
+          </not>
+        </and>
+        <then>
+          <echo message="Running the 1.4 tests '${test-list}' and those matching '${test-spec}' under Java 5.0"/>
+          <property name="use-test-spec" value="true"/>
+          <property name="use-test-list" value="true"/>
+        </then>
+      </elseif>
+
+      <else>
+        <echo message="Running all 1.4 tests under Java 5.0."/>
+        <property name="use-test-all" value="true"/>
+      </else>
+    </if>
+    <for list="${test-repeat}" param="iteration">
+      <sequential>
+        <limit maxwait="${test-timeout}" maxwaitunit="minute" failonerror="true">
+          <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
+            <classpath>
+              <pathelement location="${java15-tools}" />
+              <pathelement location="lib/buildlib/junit.jar" />
+              <pathelement location="classes/test-14" />
+              <pathelement location="classes/base-14" />
+              <pathelement location="classes/lib-14" />
+            </classpath>
+            <formatter type="brief" usefile="false" />
+            <batchtest>
+              <fileset dir="classes/test-14" includes="${test-list}">
+      	  <include name="**/*Test.class" if="use-test-all"/>
+      	  <include name="**/*${test-spec}*Test.class" if="use-test-spec"/>
+      	</fileset>
+            </batchtest>
+          </junit>
+        </limit>
+      </sequential>
+    </for>
   </target>
 
 
