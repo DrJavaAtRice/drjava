@@ -160,7 +160,7 @@ public abstract class FileOps {
    *         subdirectories that <em>aren't</em> accepted by {@code f} will be ignored.
    *  @param f  The filter to apply to contained {@code File}s.
    *  @return  An array of Files in the directory specified; if the directory does not exist, returns an empty list. */
-  public static ArrayList<File> getFilesInDir(File d, boolean recur, FileFilter f){
+  public static ArrayList<File> getFilesInDir(File d, boolean recur, FileFilter f) {
     ArrayList<File> l = new ArrayList<File>();
     getFilesInDir(d, l, recur, f);
     return l;
@@ -172,7 +172,7 @@ public abstract class FileOps {
   private static void getFilesInDir(File d, List<File> acc, boolean recur, FileFilter filter) {
     if (d.isDirectory()) {
       File[] files = d.listFiles(filter);
-      if (files!=null) { // listFiles may return null if there's an IO error
+      if (files != null) { // listFiles may return null if there's an IO error
         for (File f: files) {
           if (f.isDirectory() && recur) getFilesInDir(f, acc, recur, filter);
           else if (f.isFile()) acc.add(f);

@@ -40,6 +40,8 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.DrJavaTestCase;
@@ -395,15 +397,15 @@ public class FileOpsTest extends DrJavaTestCase {
         }
     };
     
-    List<File> res1 = Arrays.asList(new File[] {file1a});
-    List<File> res2 = Arrays.asList(new File[] {file1a, file2});
+    Set<File> res1 = new TreeSet<File>(Arrays.asList(new File[] {file1a}));
+    Set<File> res2 = new TreeSet<File>(Arrays.asList(new File[] {file1a, file2}));
     
-    List<File> nrfiles = new ArrayList<File>();
+    Set<File> nrfiles = new TreeSet<File>();
     for(File f : FileOps.getFilesInDir(dir1, false, ff)) {
       nrfiles.add(f.getCanonicalFile());
     }
 
-    List<File> rfiles = new ArrayList<File>();
+    Set<File> rfiles = new TreeSet<File>();
     for(File f : FileOps.getFilesInDir(dir1, true, ff)) {
       rfiles.add(f.getCanonicalFile());
     }
