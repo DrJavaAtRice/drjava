@@ -194,4 +194,15 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
    
    /** The standard swing repaint() method. */
    public void repaint();
+   
+   /** Marks the next selection change as model-initiated (true) or user-initiated (false; default). */
+   public void setNextChangeModelInitiated(boolean b);
+  
+   /** @return whether the next selection change is model-initiated (true) or user-initiated (false). */
+   public boolean isNextChangeModelInitiated();
+   
+   /** The name of the client property that determines whether a change is model- or user-initiated. */
+   public static final String MODEL_INITIATED_PROPERTY_NAME = "ModelInitiated";
+   
+//   public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("browser.txt", true);
 }

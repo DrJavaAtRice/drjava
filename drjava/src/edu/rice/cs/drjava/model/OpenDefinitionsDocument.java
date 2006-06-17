@@ -302,6 +302,9 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** Remove a manager for find results from this document.
    *  @param rm the global model's region manager. */
   public void removeFindResultsManager(RegionManager<DocumentRegion> rm);
+  
+  /** @return manager for browser history regions. */
+  public RegionManager<DocumentRegion> getBrowserHistoryManager();
 
   /** Called when this document is being closed, removing related state from the debug manager. */
   public void removeFromDebugger();

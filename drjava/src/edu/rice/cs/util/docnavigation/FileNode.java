@@ -56,7 +56,7 @@ public class FileNode<ItemT extends INavigatorItem> extends InnerNode<File, Item
   
   public File getData(){ return (File) super.getUserObject(); }
   
-  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v) { return v.fileCase(getData()); }
+  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p) { return v.fileCase(getData(), p); }
   
   public String toString() {
     try {

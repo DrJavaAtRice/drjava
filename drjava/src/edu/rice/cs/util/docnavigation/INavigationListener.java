@@ -54,11 +54,13 @@ package edu.rice.cs.util.docnavigation;
 public interface INavigationListener<ItemT extends INavigatorItem> {
   /** Runs when an item in a navigator is selected
    *  @param dat the NodeData data wrapper for the data in the newly selected node of the navigator
+   *  @param modelInitiated whether the change was initated by the model (true) or by the user (false)
    */
-  public void gainedSelection(NodeData<? extends ItemT> dat);
+  public void gainedSelection(NodeData<? extends ItemT> dat, boolean modelInitiated);
   
   /** Runs when an item in a navigator is unselected
    *  @param dat the NodeData data wrapper for the data in the new deselected node of the navigator
+   *  @param modelInitiated whether the change was initated by the model (true) or by the user (false)
    */
-  public void lostSelection(NodeData<? extends ItemT> dat);
+  public void lostSelection(NodeData<? extends ItemT> dat, boolean modelInitiated);
 }

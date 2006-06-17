@@ -291,6 +291,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _findResultsManagers.remove(rm);
   }
  
+  /** Manager for browser history regions. */
+  protected final ConcreteRegionManager<DocumentRegion> _browserHistoryManager;
+  
+  /** @return manager for browser history regions. */
+  public RegionManager<DocumentRegion> getBrowserHistoryManager() { return _browserHistoryManager; }
+  
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //  /** Light-weight parsing controller. */
 //  protected LightWeightParsingControl _parsingControl;
@@ -309,6 +315,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     _bookmarkManager = new ConcreteRegionManager<DocumentRegion>();
     _findResultsManagers = new LinkedList<RegionManager<DocumentRegion>>();
+    _browserHistoryManager = new ConcreteRegionManager<DocumentRegion>();
     
     _breakpointManager = new ConcreteRegionManager<Breakpoint>() {
       public boolean changeRegionHelper(final Breakpoint oldBP, final Breakpoint newBP) {
@@ -332,9 +339,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
     /** This visitor is invoked by the DocumentNavigator to update _activeDocument among other things */
     final NodeDataVisitor<OpenDefinitionsDocument, Boolean> _gainVisitor = new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
-      public Boolean itemCase(OpenDefinitionsDocument doc) {
+      public Boolean itemCase(OpenDefinitionsDocument doc, Object... p) {
+        Boolean modelInitiated = (Boolean)p[0];
+//        if (!modelInitiated) {
+//          IDocumentNavigator.LOG.log("_gainVisitor; modelInitiated = false");
+//        }
         OpenDefinitionsDocument oldDoc = AbstractGlobalModel.this.getActiveDocument();
+        if (!modelInitiated) { addToBrowserHistory(); }
         _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document
+        if (!modelInitiated) { addToBrowserHistory(); }
         
 //        Utilities.showDebug("Setting the active doc done");
         final File oldDir = _activeDirectory;  // _activeDirectory can be null
@@ -347,7 +360,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         return Boolean.valueOf(true);
       }
-      public Boolean fileCase(File f) {
+      public Boolean fileCase(File f, Object... p) {
         if (! f.isAbsolute()) { // should never happen because all file names are canonicalized
           File root = _state.getProjectFile().getParentFile().getAbsoluteFile();
           f = new File(root, f.getPath());
@@ -356,14 +369,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _notifier.currentDirectoryChanged(f);
         return Boolean.valueOf(true);
       }
-      public Boolean stringCase(String s) { return Boolean.valueOf(false); }
+      public Boolean stringCase(String s, Object... p) { return Boolean.valueOf(false); }
     };
     
     _documentNavigator.addNavigationListener(new INavigationListener<OpenDefinitionsDocument>() {
-      public void gainedSelection(NodeData<? extends OpenDefinitionsDocument> dat) { dat.execute(_gainVisitor); }
-      public void lostSelection(NodeData<? extends OpenDefinitionsDocument> dat) {
-      // not important, only one document selected at a time
-      }
+      public void gainedSelection(NodeData<? extends OpenDefinitionsDocument> dat, boolean modelInitiated) {
+        dat.execute(_gainVisitor, modelInitiated); }
+      public void lostSelection(NodeData<? extends OpenDefinitionsDocument> dat, boolean modelInitiated) {
+        /* not important, only one document selected at a time */ }
     });
     
     _documentNavigator.addFocusListener(new FocusListener() {
@@ -385,8 +398,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     };
     DrJava.getConfig().addOptionListener(CLIPBOARD_HISTORY_SIZE, clipboardHistorySizeListener);
-    clipboardHistorySizeListener.optionChanged(new OptionEvent<Integer>(CLIPBOARD_HISTORY_SIZE,
-                                                                        DrJava.getConfig().getSetting(CLIPBOARD_HISTORY_SIZE).intValue()));
+    ClipboardHistoryModel.singleton().resize(DrJava.getConfig().getSetting(CLIPBOARD_HISTORY_SIZE).intValue());
+    
+    // setup option listener for browser history
+    OptionListener<Integer> browserHistoryMaxSizeListener = new OptionListener<Integer>() {
+      public void optionChanged(OptionEvent<Integer> oce) {
+        AbstractGlobalModel.this.getBrowserHistoryManager().setMaximumSize(oce.value);
+      }
+    };
+    DrJava.getConfig().addOptionListener(BROWSER_HISTORY_MAX_SIZE, browserHistoryMaxSizeListener);
+    getBrowserHistoryManager().setMaximumSize(DrJava.getConfig().getSetting(BROWSER_HISTORY_MAX_SIZE).intValue());
   }
  
   /** Returns a source root given a package and filename. */
@@ -993,6 +1014,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public OpenDefinitionsDocument newFile() {
     File dir = _activeDirectory;
     if (dir == null) dir = getMasterWorkingDirectory();
+//    addToBrowserHistory();
     OpenDefinitionsDocument doc = newFile(dir);
     setActiveDocument(doc);
     return doc;
@@ -1078,6 +1100,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument openedDoc = openFileHelper(com);
     if (closeUntitled) closeFileHelper(oldDoc);
 //    Utilities.showDebug("DrJava has opened" + openedDoc + " and is setting it active");
+//    addToBrowserHistory();
     setActiveDocument(openedDoc);
     setProjectChanged(true);
 //    Utilities.showDebug("active doc set; openFile returning");
@@ -1124,6 +1147,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument[] openedDocs = openFilesHelper(com);
     if (openedDocs.length > 0) {
       if (closeUntitled) closeFileHelper(oldDoc);
+//      addToBrowserHistory();
       setActiveDocument(openedDocs[0]);
     }
     return openedDocs;
@@ -1453,6 +1477,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     final File createJarFile  = ir.getCreateJarFile ();
     int createJarFlags = ir.getCreateJarFlags();
     
+    // clear browser history
+    getBrowserHistoryManager().clearRegions();
+    
     // set breakpoints
     getBreakpointManager().clearRegions();
     for (DebugBreakpointData dbd: ir.getBreakpoints()) {
@@ -1475,12 +1502,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     getBookmarkManager().clearRegions();
     for (final DocumentRegion bm: ir.getBookmarks ()) {
       final OpenDefinitionsDocument odd = getDocumentForFile(bm.getFile());
-      getBookmarkManager().addRegion(new DocumentRegion() {
-          public OpenDefinitionsDocument getDocument() { return odd; }
-          public File getFile() throws FileMovedException { return odd.getFile(); }
-          public int getStartOffset() { return bm.getStartOffset(); }
-          public int getEndOffset() { return bm.getEndOffset (); }
-      });
+      getBookmarkManager().addRegion(new SimpleDocumentRegion(odd, odd.getFile(), bm.getStartOffset(), bm.getEndOffset()));
     }
     
     final String projfilepath = projectRoot.getCanonicalPath();
@@ -1580,8 +1602,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     });
     
     //Set active document from project file
-//    if(active != null) //TEMP
+//    if(active != null) { //TEMP
 //      setActiveDocument(projDocs.get(projDocs.size() - 1));
+//    }
     //OpenDefinitionsDocument.getCanonicalPath()
     //search for active document within opendefdocs
 //    Utilities.show("Setting Active Document...");
@@ -1620,7 +1643,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  user will know which is being saved.
    */
   public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc) {
-    if ( doc.isUntitled()) setActiveDocument(doc);
+    if ( doc.isUntitled()) {
+      setActiveDocument(doc);
+    }
   }
  
   /** Closes an open definitions document, prompting to save if the document has been changed.  Returns whether
@@ -1701,10 +1726,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     if (! found) return false;
         
-    // remove breakpoints and bookmarks for this file
+    // remove regions for this file
     doc.getBreakpointManager().clearRegions();
     doc.getBookmarkManager().clearRegions();
     for (RegionManager<DocumentRegion> rm: doc.getFindResultsManagers())  rm.clearRegions();
+    doc.getBrowserHistoryManager().clearRegions();
     
     Utilities.invokeLater (new SRunnable() {
       public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread
@@ -2191,6 +2217,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   static class ConcreteRegionManager<R extends DocumentRegion> extends EventNotifier<RegionManagerListener<R>> implements RegionManager<R> {
     /** Vector of regions. */
     protected volatile Vector<R> _regions = new Vector<R>();
+    protected volatile R _current = null;
+    protected volatile int _maxSize;
+    
+    /**
+     * Create a new ConcreteRegionManager with the specified maximum size.
+     * @param size maximum number of regions that can be stored in this manager.
+     */
+    public ConcreteRegionManager(int size) { _maxSize = size; }
+    
+    /** Create a new ConcreteRegionManager without maximum size. */
+    public ConcreteRegionManager() { this(0); }
     
     /** Returns the region in this manager at the given offset, or null if one does not exist.
      *  @param odd the document
@@ -2228,52 +2265,109 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return null;
     }
     
+    /** @return the index of the region in the vector, or -1 if not found. Uses ==. */
+    protected int getIndexOf(R region) {
+      int index = 0;
+      for (R r: _regions) {
+        if (region==r) { return index; }
+        else { ++index; }
+      }
+      return -1;
+    }
+    
     /** Add the supplied DocumentRegion to the manager.
      *  @param region the DocumentRegion to be inserted into the manager
+     *  @param index the index at which the DocumentRegion was inserted
      */
     public void addRegion(final R region) {
-      boolean added = false;
-      for (int i=0; i< _regions.size();i++) {
-        DocumentRegion r = _regions.get(i);
-        int oldStart = r.getStartOffset();
-        int newStart = region.getStartOffset ();
-        
-        if ( newStart < oldStart) {
-          // Starts before, add here
-          _regions.add(i, region);
-          added = true;
-          break;
+      int index = getIndexOf(_current);
+      // only add if current, previous, and next are not already the region; prevents trivial duplicates
+      if (!region.equals(_current) && 
+          ((index==_regions.size()-1) || (!region.equals(_regions.get(index+1)))) &&
+          ((index<=0) || (!region.equals(_regions.get(index-1))))) {
+        if ((_current!=null) && (index>=0)) {
+          _regions.add(index+1, region);
         }
-        if ( newStart == oldStart) {
-          // Starts at the same place
-          int oldEnd = r.getEndOffset();
-          int newEnd = region.getEndOffset();
-          
-          if ( newEnd < oldEnd) {
-            // Ends before, add here
-            _regions.add(i, region);
-            added = true;
-            break;
+        else {
+          _regions.add(region);
+        }
+        
+        _current = region;
+        final int regionIndex = getIndexOf(region);
+        final String stackTrace = StringOps.getStackTrace();
+        
+        // notify
+        Utilities.invokeLater(new Runnable() { public void run() {
+          _lock.startRead();
+          try {
+            for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region, regionIndex); }
+          } finally { _lock.endRead(); }
+        } });
+        
+        // remove region if necessary
+        shrinkManager();
+      }
+      else {
+        // if next was the region to be added, make that the current region
+        if ((index<_regions.size()-1) && (region.equals(_regions.get(index+1)))) {
+          nextCurrentRegion();
+        }
+        // if previous was the region to be added, make that the current region
+        else if ((index>0) && (region.equals(_regions.get(index-1)))) {
+          prevCurrentRegion();
+        }
+      }
+    }
+    
+    /** Remove regions more recent than the current region. */
+    protected void removeMoreRecentThanCurrent() {
+      if (_current!=null) {
+        int index = getIndexOf(_current);
+        while ((index>=0) && (index<_regions.size()-1)) {
+          removeRegion(_regions.lastElement());
+        }
+      }
+    }
+    
+    /** Remove regions if there are more than the maximum number allowed. */
+    protected void shrinkManager() {
+      if (_maxSize>0) {
+        while(_regions.size()>_maxSize) {
+          int index = getIndexOf(_current);
+          if (index<=_regions.size()/2) {
+            // in first half, remove last element
+            removeRegion(_regions.lastElement());
+          }
+          else {
+            // in second half, remove first element
+            removeRegion(_regions.firstElement());
           }
         }
       }
-      if (!added) { _regions.add(region); }
-          
-      // notify
-      Utilities.invokeLater (new Runnable() { public void run() {
-        _lock.startRead();
-        try {
-          for (RegionManagerListener<R> l: _listeners) { l.regionAdded(region); }
-        } finally { _lock.endRead(); }
-      } });
     }
     
     /** Remove the given DocumentRegion from the manager.
      *  @param region the DocumentRegion to be removed.
      */
-    public void removeRegion(final R region) {
-      _regions.remove(region);
-
+    public void removeRegion(final R region) {      
+      // if we're removing the current region, select a more recent region, if available
+      // if a more recent region is not available, select a less recent region, if available
+      // if a less recent region is not available either, set to null
+      final R cur = _current; // so we can verify if _current got changed
+      if (region==cur) {
+        if (nextCurrentRegion().equals(cur)) {
+          if (prevCurrentRegion().equals(cur)) {
+            _current = null;
+          }
+        }
+      }
+      for(int i=0;i<_regions.size();++i) {
+        if (region==_regions.get(i)) {
+          _regions.remove(i);
+          break;
+        }
+      }
+      
       // notify
       Utilities.invokeLater(new Runnable() { public void run() {
         _lock.startRead();
@@ -2288,14 +2382,100 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Tells the manager to remove all regions. */
     public void clearRegions() {
+      _current = null;
       while(_regions.size()>0) { removeRegion(_regions.get(0)); }
+    }
+    
+    /** @return the current region or null if none selected */
+    public R getCurrentRegion() {
+      if (!_regions.contains(_current)) {
+        _current = null;
+      }
+      return _current;
+    }
+    
+    /** @return the index of the current region or -1 if none selected */
+    public int getCurrentRegionIndex() {
+      if (_current!=null) {
+        return getIndexOf(_current);
+      }
+      else {
+        return -1;
+      }
+    }
+    
+    /** @return true if the current region is the first in the list, i.e. prevCurrentRegion is without effect */
+    public boolean isCurrentRegionFirst() {
+      return (getIndexOf(_current)==0);
+    }
+    
+    /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
+    public boolean isCurrentRegionLast() {
+      return (getIndexOf(_current)==_regions.size()-1);
+    }
+
+    /** Set the current region. 
+     *  @param region new current region */
+    public void setCurrentRegion(R region) {
+      if (!_regions.contains(_current)) {
+        _current = null;
+      }
+      _current = region;
+    }
+    
+    /** Make the region that is more recent the current region.
+     *  @return new current region */
+    public R nextCurrentRegion() {
+      if (_current!=null) {
+        int index = getIndexOf(_current);
+        if (index+1 < _regions.size()) {
+          _current = _regions.get(index+1);
+        }
+      }
+      else {
+        _current = _regions.lastElement();
+      }
+      return _current;
+    }
+    
+    /** Make the region that is less recent the current region.
+     *  @return new current region */
+    public R prevCurrentRegion() {
+      if (_current!=null) {
+        int index = getIndexOf(_current);
+        if (index-1 >= 0) {
+          _current = _regions.get(index-1);
+        }
+      }
+      else {
+        _current = _regions.lastElement();
+      }
+      return _current;
+    }
+    
+    /**
+     * Set the maximum number of regions that can be stored in this manager.
+     * If the maximum capacity has been reached and another region is added, the region at the end farther
+     * away from the insertion location will be discarded.
+     * @param size maximum number of regions, or 0 if no maximum
+     */
+    public void setMaximumSize(int size) {
+      _maxSize = size;
+      
+      // remove regions if necessary
+      shrinkManager();
+    }
+    
+    /** @return the maximum number of regions that can be stored in this manager. */
+    public int getMaximumSize() {
+      return _maxSize;
     }
 
     /** Apply the given command to the specified region to change it.
      *  @param region the region to find and change
      *  @param cmd command that mutates the region. */
     public void changeRegion(R region, Lambda<Object,R> cmd) {
-      int index = _regions.indexOf(region);
+      final int index = getIndexOf(region);
       if (index<0) { return; }
       final R r = _regions.get(index);
       cmd.apply(r);
@@ -2303,7 +2483,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         // notify
         _lock.startRead();
         try {
-          for (RegionManagerListener<R> l: _listeners) { l.regionChanged(r); }
+          for (RegionManagerListener<R> l: _listeners) { l.regionChanged(r, index); }
         } finally { _lock.endRead(); }            
       } });
     }
@@ -2314,8 +2494,29 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       // this would be a potentially dangerous thing to do, as it would also remove the listeners that the subsets
       // have installed
     }
+  } 
+  
+  /** Add the current location to the browser history. */
+  public synchronized void addToBrowserHistory() {
+    final OpenDefinitionsDocument doc = getActiveDocument();
+    
+    if (doc!=null) {
+      doc.acquireReadLock();
+      try {
+        final Position startPos = doc.createPosition(doc.getCaretPosition());
+        final Position endPos = doc.createPosition(doc.getLineEndPos(doc.getCaretPosition()));
+        getBrowserHistoryManager().addRegion(new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset()));
+      }
+      catch (FileMovedException fme) {
+        throw new UnexpectedException(fme);
+      }
+      catch (BadLocationException ble) {
+        throw new UnexpectedException(ble);
+      }
+      finally { doc.releaseReadLock(); }
+    }
   }
- 
+  
   // ---------- ConcreteOpenDefDoc inner class ----------
 
   /** A wrapper around a DefinitionsDocument or potential DefinitionsDocument (if it has been kicked out of the cache)
@@ -2394,8 +2595,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         private RegionManagerListener<R> _decoree;
         public FilteredRegionManagerListener(RegionManagerListener<R> d) { _decoree = d; }
         public RegionManagerListener<R> getDecoree() { return _decoree; }
-        public void regionAdded(R r)   { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionAdded(r); } }
-        public void regionChanged(R r) { if ( r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionChanged(r); } }
+        public void regionAdded(R r, int index) { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionAdded(r, index); } }
+        public void regionChanged(R r, int index) { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionChanged(r, index); } }
         public void regionRemoved(R r) { if (r.getDocument().equals(ConcreteOpenDefDoc.this)) { _decoree.regionRemoved(r); } }
       }
 
@@ -2450,6 +2651,66 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         finally { _lock.endWrite(); }
       }
+      
+      /** @return the current region or null if none selected */
+      public R getCurrentRegion() {
+        // TODO
+        throw new UnsupportedOperationException("SubsetRegionManager.getCurrentRegion not supported");
+      }
+      
+      /** @return the index of the current region or -1 if none selected */
+      public int getCurrentRegionIndex() {
+        // TODO
+        throw new UnsupportedOperationException("SubsetRegionManager.getCurrentRegionIndex not supported");
+      }
+      
+      /** Set the current region. 
+       *  @param region new current region */
+      public void setCurrentRegion(R region) {
+        // TODO
+        throw new UnsupportedOperationException("SubsetRegionManager.setCurrentRegion not supported");
+      }
+      
+      /** Make the region that is more recent the current region.
+       *  @return new current region */
+      public R nextCurrentRegion() {
+        // TODO
+        throw new UnsupportedOperationException("SubsetRegionManager.nextCurrentRegion not supported");        
+      }
+      
+      /** Make the region that is less recent the current region.
+       *  @return new current region */
+      public R prevCurrentRegion() {
+        // TODO
+        throw new UnsupportedOperationException("SubsetRegionManager.prevCurrentRegion not supported");        
+      }
+      
+      /** @return true if the current region is the first in the list, i.e. prevCurrentRegion is without effect */
+      public boolean isCurrentRegionFirst() {
+        // TODO
+        throw new UnsupportedOperationException("SubsetRegionManager.isCurrentRegionFirst not supported");        
+      }
+      
+      /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
+      public boolean isCurrentRegionLast() {
+        // TODO
+        throw new UnsupportedOperationException("SubsetRegionManager.isCurrentRegionLast not supported");        
+      }
+      
+      /**
+       * Set the maximum number of regions that can be stored in this manager.
+       * If the maximum capacity has been reached and another region is added, the region at the end farther
+       * away from the insertion location will be discarded.
+       * @param size maximum number of regions, or 0 if no maximum
+       */
+      public void setMaximumSize(int size) {
+        throw new UnsupportedOperationException("SubsetRegionManager.setMaximumSize not supported");
+      }
+      
+      /** @return the maximum number of regions that can be stored in this manager. */
+      public int getMaximumSize() {
+        throw new UnsupportedOperationException("SubsetRegionManager.getMaximumSize not supported");
+      }
     }
     
 //     private boolean _modifiedSinceSave;
@@ -2479,6 +2740,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Manager for find result regions. */
     protected volatile LinkedList<SubsetRegionManager<DocumentRegion>> _findResultsManagers;
+    
+    /** Manager for browser history regions. */
+    protected volatile SubsetRegionManager<DocumentRegion> _browserHistoryManager;
     
     private volatile int _initVScroll;
     private volatile int _initHScroll;
@@ -2519,11 +2783,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       } catch(IllegalStateException e) { throw new UnexpectedException(e); }
 
       _breakpointManager = new SubsetRegionManager<Breakpoint>(AbstractGlobalModel.this.getBreakpointManager());
-      _bookmarkManager = new SubsetRegionManager<DocumentRegion>( AbstractGlobalModel.this.getBookmarkManager());
+      _bookmarkManager = new SubsetRegionManager<DocumentRegion>(AbstractGlobalModel.this.getBookmarkManager());
       _findResultsManagers = new LinkedList<SubsetRegionManager<DocumentRegion>>();
       for (RegionManager<DocumentRegion> rm: AbstractGlobalModel.this.getFindResultsManagers ()) {
         addFindResultsManager(rm);
       }
+      _browserHistoryManager = new SubsetRegionManager<DocumentRegion>(AbstractGlobalModel.this.getBrowserHistoryManager());
     }
     
     //------------ Getters and Setters -------------//
@@ -3236,9 +3501,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
-   /** throws UnsupportedOperationException */
-    public void removeFromDebugger() { /* do nothing because it is called in methods in this class */ }    
+    /** @return manager for browser history regions for this document. */
+    public RegionManager<DocumentRegion> getBrowserHistoryManager() { return _browserHistoryManager; }
     
+    /** throws UnsupportedOperationException */
+    public void removeFromDebugger() { /* do nothing because it is called in methods in this class */ }        
 
     /** Finds the root directory of the source file.
      *  @param packageName Package name, already fetched from the document
@@ -3817,7 +4084,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     try {
       Utilities.invokeAndWait(new SRunnable() {  
-        public void run() { _documentNavigator.setActiveDoc(doc); }
+        public void run() {
+          _documentNavigator.setNextChangeModelInitiated(true);
+          _documentNavigator.setActiveDoc(doc);
+        }
       });
     }
     catch(Exception e) { throw new UnexpectedException(e); }
@@ -3892,7 +4162,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
  
   private void _setActiveDoc(INavigatorItem idoc) {
-    synchronized (this) { _activeDocument = (OpenDefinitionsDocument) idoc; }
+    synchronized (this) {
+      _activeDocument = (OpenDefinitionsDocument) idoc;
+    }
     refreshActiveDocument();
   }
  

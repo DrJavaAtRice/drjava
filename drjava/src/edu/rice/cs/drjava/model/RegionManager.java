@@ -78,6 +78,41 @@ public interface RegionManager<R extends DocumentRegion> {
 
   /** Tells the manager to remove all regions. */
   public void clearRegions();
+  
+  /** @return the current region or null if none selected */
+  public R getCurrentRegion();
+  
+  /** @return the index of the current region or -1 if none selected */
+  public int getCurrentRegionIndex();
+  
+  /** @return true if the current region is the first in the list, i.e. prevCurrentRegion is without effect */
+  public boolean isCurrentRegionFirst();
+  
+  /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
+  public boolean isCurrentRegionLast();
+  
+  /** Set the current region. 
+   *  @param region new current region */
+  public void setCurrentRegion(R region);
+  
+  /** Make the region that is more recent the current region.
+   *  @return new current region */
+  public R nextCurrentRegion();
+  
+  /** Make the region that is less recent the current region.
+   *  @return new current region */
+  public R prevCurrentRegion();
+  
+  /**
+   * Set the maximum number of regions that can be stored in this manager.
+   * If the maximum capacity has been reached and another region is added, the region at the end farther
+   * away from the insertion location will be discarded.
+   * @param size maximum number of regions, or 0 if no maximum
+   */
+  public void setMaximumSize(int size);
+  
+  /** @return the maximum number of regions that can be stored in this manager. */
+  public int getMaximumSize();
 
   /** Adds a listener to the notifier.
    *  @param listener a listener that reacts on events

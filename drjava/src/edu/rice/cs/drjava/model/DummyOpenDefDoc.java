@@ -154,6 +154,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public void removeFindResultsManager(RegionManager<DocumentRegion> rm) {
     throw new UnsupportedOperationException("Dummy method");
   }
+  
+  public RegionManager<DocumentRegion> getBrowserHistoryManager() { throw new UnsupportedOperationException("Dummy method"); }
 
   public boolean isUntitled() { throw new UnsupportedOperationException("Dummy method"); }
   

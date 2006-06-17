@@ -123,6 +123,12 @@ public interface GlobalModel extends ILoadDocuments {
   /** Dispose a manager for find result regions. */
   public void disposeFindResultsManager(RegionManager<DocumentRegion> rm);
   
+  /** @return manager for browser history regions. */
+  public RegionManager<DocumentRegion> getBrowserHistoryManager();
+
+  /** Add the current location to the browser history. */
+  public void addToBrowserHistory();
+  
 //  //---------------------------- Interpreter --------------------------------//
 //  /** Updates the security manager in DrJava. */
 //  public void enableSecurityManager();

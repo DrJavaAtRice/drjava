@@ -93,6 +93,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
     assertSame("getFirst test", i1, tree.getFirst());
     assertSame("getLast test", i4, tree.getLast());
     
+    tree.setNextChangeModelInitiated(true);
     tree.setActiveDoc(i1);
     assertSame("getCurrent test", i1, tree.getCurrent());
     assertSame("getNext test 1", i2, tree.getNext(i1));

@@ -51,7 +51,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.util.*;
 import edu.rice.cs.util.swing.Utilities;
-//import edu.rice.cs.drjava.ui.RightClickMouseAdapter;
+//import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 /** This class is an extension of JList that adds data shadowing the model embedded in a JList.
  *  Since all changes to the model (except for the selected item!) must go through this interface,
@@ -100,18 +100,19 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
             if (!e.getValueIsAdjusting() && !_model.isEmpty()) {
               @SuppressWarnings("unchecked") final ItemT newItem = (ItemT) getSelectedValue();
 //              final int newIndex = getSelectedIndex();
-              if (_current != newItem) {
-                final ItemT oldItem = _current;
+              if (_current != newItem) {                                
+                final ItemT oldItem = _current;                                
                 NodeData<ItemT> oldData = new NodeData<ItemT>() {
-                  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v) { return v.itemCase(oldItem); }
+                  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p) { return v.itemCase(oldItem, p); }
                 };
                 NodeData<ItemT> newData = new NodeData<ItemT>() {
-                  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v) { return v.itemCase(newItem); }
+                  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p) { return v.itemCase(newItem, p); }
                 };
                 for(INavigationListener<? super ItemT> listener: navListeners) {
-                  if (oldItem != null) listener.lostSelection(oldData);
-                  if (newItem != null) listener.gainedSelection(newData);
+                  if (oldItem != null) listener.lostSelection(oldData, isNextChangeModelInitiated());
+                  if (newItem != null) listener.gainedSelection(newData, isNextChangeModelInitiated());
                 }
+                setNextChangeModelInitiated(false);
                 _current = newItem;
 //                _currentIndex = newIndex;
               }
@@ -363,5 +364,15 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
 //      repaint();  // appears to be required to repaint the text for this list item; inconsistent with JTree analog
       return this;
     }
+  }
+  
+  /** Marks the next selection change as model-initiated (true) or user-initiated (false; default). */
+  public void setNextChangeModelInitiated(boolean b) {
+    putClientProperty(MODEL_INITIATED_PROPERTY_NAME, b?Boolean.TRUE:null);
+  }
+  
+  /** @return whether the next selection change is model-initiated (true) or user-initiated (false). */
+  public boolean isNextChangeModelInitiated() {
+    return getClientProperty(MODEL_INITIATED_PROPERTY_NAME)!=null;
   }
 }

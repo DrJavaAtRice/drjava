@@ -755,7 +755,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           // switch to correct def pane and move caret to error position
 //          Utilities.showDebug("active document being set to " + doc + " in ErrorPanel.switchToError");
           
-          if (! prevDoc.equals(doc)) model.setActiveDocument(doc);
+          if (! prevDoc.equals(doc)) {
+            model.addToBrowserHistory();
+            model.setActiveDocument(doc);
+          }
           else model.refreshActiveDocument();
           
 //          Utilities.showDebug("setting active document has completed");

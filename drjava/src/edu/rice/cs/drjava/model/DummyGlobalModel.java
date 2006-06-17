@@ -196,6 +196,14 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call disposeFindResultsManager on a Dummy");
   }
   
+  public RegionManager<DocumentRegion> getBrowserHistoryManager() {
+    throw new UnsupportedOperationException("Tried to call getBookmarkManager on a Dummy");
+  }
+  
+  public void addToBrowserHistory() {
+    throw new UnsupportedOperationException("Tried to call getBookmarkManager on a Dummy");
+  }
+  
   public IDocumentNavigator<OpenDefinitionsDocument> getDocumentNavigator() {
     throw new UnsupportedOperationException("Tried to call getDocumentNavigator on a Dummy");
   }

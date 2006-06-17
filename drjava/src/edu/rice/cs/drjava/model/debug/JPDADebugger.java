@@ -55,6 +55,7 @@ import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.Lambda;
 
 import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
@@ -794,6 +795,20 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
+  /**
+   * Enable or disable the specified breakpoint.
+   * @param breakpoint breakpoint to change
+   * @param enabled true to enable, false to disable
+   */
+  public synchronized void notifyBreakpointChange(Breakpoint breakpoint) {
+    _model.getBreakpointManager().changeRegion(breakpoint, new Lambda<Object, Breakpoint>() {
+      public Object apply(Breakpoint bp) {
+        // change has already been made, just notify all listeners
+        return null;
+      }
+    });
+  }
+  
   /** Toggles whether a breakpoint is set at the given line in the given document.
    *  @param doc Document in which to set or remove the breakpoint
    *  @param offset Start offset on the line to set the breakpoint

@@ -57,6 +57,7 @@ import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.sexp.*;
 import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.SimpleDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
@@ -549,24 +550,14 @@ public class ProjectFileParser {
       if ((fname == null) || (startOffset == null) || (endOffset == null)) {
         throw new PrivateProjectException("Bookmark information incomplete, need name, start offset and end offset");
       }
+      File f;
       if (pathRoot == null || new File(fname).isAbsolute()) {
-        final File f = new File(fname);
-        return new DocumentRegion() {
-          public OpenDefinitionsDocument getDocument() { return null; }
-          public File getFile() { return f; }
-          public int getStartOffset() { return startOffset; }
-          public int getEndOffset() { return endOffset; }
-        };
+        f = new File(fname);
       }
       else {
-        final File f = new File(pathRoot, fname);
-        return new DocumentRegion() {
-          public OpenDefinitionsDocument getDocument() { return null; }
-          public File getFile() { return f; }
-          public int getStartOffset() { return startOffset; }
-          public int getEndOffset() { return endOffset; }
-        };
+        f = new File(pathRoot, fname);
       }
+      return new SimpleDocumentRegion(null, f, startOffset, endOffset);
     }
   }
   

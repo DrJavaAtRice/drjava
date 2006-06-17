@@ -47,6 +47,7 @@ import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.HighlightManager;
+import edu.rice.cs.util.swing.RightClickMouseAdapter;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;

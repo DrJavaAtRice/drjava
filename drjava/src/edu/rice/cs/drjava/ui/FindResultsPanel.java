@@ -55,6 +55,7 @@ import javax.swing.border.MatteBorder;
 
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.SimpleDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.RegionManager;
@@ -92,12 +93,12 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
     super(frame, title);
     _regionManager = rm;
     _regionManager.addListener(new RegionManagerListener<DocumentRegion>() {      
-      public void regionAdded(DocumentRegion r) {
+      public void regionAdded(DocumentRegion r, int index) {
         addRegion(r);
       }
-      public void regionChanged(DocumentRegion r) { 
+      public void regionChanged(DocumentRegion r, int index) { 
         regionRemoved(r);
-        regionAdded(r);
+        regionAdded(r, index);
       }
       public void regionRemoved(DocumentRegion r) {
         removeRegion(r);
@@ -227,14 +228,19 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
                                                                                  r.getStartOffset(),
                                                                                  r.getEndOffset());
       if (bookmark==null) {
-        _model.getBookmarkManager().addRegion(new DocumentRegion() {
-          public OpenDefinitionsDocument getDocument() { return r.getDocument(); }
-          public File getFile() throws FileMovedException { return r.getDocument().getFile(); }
-          public int getStartOffset() { return r.getStartOffset(); }
-          public int getEndOffset() { return r.getEndOffset(); }
-        });
+        try {
+          _model.getBookmarkManager().addRegion(new SimpleDocumentRegion(r.getDocument(), r.getDocument().getFile(), r.getStartOffset(), r.getEndOffset()));
+        }
+        catch (FileMovedException fme) {
+          throw new UnexpectedException(fme);
+        }
       }
     }
+  }
+  
+  /** Action performed when the Enter key is pressed. Should be overridden. */
+  protected void performDefaultAction() {
+    goToRegion();
   }
   
   /** Remove the selected regions. */

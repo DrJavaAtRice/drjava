@@ -792,6 +792,10 @@ public class ConfigFrame extends JFrame {
                                                   "<html>Whether to put the focus in the definitions pane after doing a find or replace operation.<br>"+
                                                   "If this is not selected, the focus will be in the Find/Replace pane.</html>"));
     
+    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.BROWSER_HISTORY_MAX_SIZE,
+                                                         "Maximum Size of Browser History", this,
+                                                         "Determines how many entries are kept in the browser history."));
+    
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 
 //                                                  "Perform lightweight parsing", this,

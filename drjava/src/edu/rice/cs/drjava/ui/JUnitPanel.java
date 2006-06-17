@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.text.SwingDocument;
-
+import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

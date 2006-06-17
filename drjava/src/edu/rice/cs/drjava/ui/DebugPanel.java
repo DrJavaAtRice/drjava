@@ -48,6 +48,7 @@ import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 /**
  * Panel for displaying the debugger input and output in MainFrame.  This
@@ -620,8 +621,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public void watchSet(final DebugWatchData w) { }
     public void watchRemoved(final DebugWatchData w) { }
     public void stepRequested() { }
-    public void regionAdded(Breakpoint r) { }
-    public void regionChanged(Breakpoint r) { }
+    public void regionAdded(Breakpoint r, int index) { }
+    public void regionChanged(Breakpoint r, int index) { }
     public void regionRemoved(Breakpoint r) { }
   }
 

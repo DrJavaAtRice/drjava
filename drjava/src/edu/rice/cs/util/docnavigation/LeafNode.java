@@ -58,6 +58,6 @@ public class LeafNode<ItemT extends INavigatorItem> extends DefaultMutableTreeNo
     @SuppressWarnings("unchecked") ItemT result = (ItemT) super.getUserObject();
     return result;
   }
-  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v) { return v.itemCase(getData()); }
+  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p) { return v.itemCase(getData(), p); }
   public String toString() { return _rep; }
 }

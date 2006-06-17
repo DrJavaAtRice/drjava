@@ -101,12 +101,13 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
 
   /** Called when a breakpoint is set in a document.  Must be executed in event thread.
    *  @param bp the breakpoint
+   *  @param index the index at which it was added
    */
-  public void regionAdded(Breakpoint bp) {
+  public void regionAdded(Breakpoint bp, int index) {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) { _listeners.get(i).regionAdded(bp); }
+      for (int i = 0; i < size; i++) { _listeners.get(i).regionAdded(bp, index); }
     }
     finally { _lock.endRead(); }
   }
@@ -129,13 +130,14 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
 
   /** Called when a breakpoint is changed during execution. Must be executed in event thread.
    *  @param bp the breakpoint
+   *  @param index the index at which it was changed
    */
-  public void regionChanged(Breakpoint bp) {
+  public void regionChanged(Breakpoint bp, int index) {
     _lock.startRead();
     try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++) {
-        _listeners.get(i).regionChanged(bp);
+        _listeners.get(i).regionChanged(bp, index);
       }
     }
     finally {

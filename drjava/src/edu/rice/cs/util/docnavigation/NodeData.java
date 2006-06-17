@@ -49,7 +49,10 @@ package edu.rice.cs.util.docnavigation;
  *  the visitor pattern.
  */
 public interface NodeData<ItemT extends INavigatorItem> {
-  
-  <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v);
-  
+  /**
+   * Execute the specified visitor, passing a variable number of parameters.
+   * @param v visitor to execute
+   * @param p parameters as varargs
+   */
+  <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p);  
 }

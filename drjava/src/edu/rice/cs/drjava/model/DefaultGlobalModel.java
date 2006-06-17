@@ -512,8 +512,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 
       // add listener to set the project file to "changed" when a breakpoint or watch is added, removed, or changed
       getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
-        public void regionAdded(final Breakpoint bp) { setProjectChanged(true); }
-        public void regionChanged(final Breakpoint bp) { setProjectChanged(true); }
+        public void regionAdded(final Breakpoint bp, int index) { setProjectChanged(true); }
+        public void regionChanged(final Breakpoint bp, int index) { setProjectChanged(true); }
         public void regionRemoved(final Breakpoint bp) { 
           try {
             getDebugger().removeBreakpoint(bp);
@@ -522,8 +522,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           }
       });
       getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() {
-        public void regionAdded(DocumentRegion r) { setProjectChanged(true); }
-        public void regionChanged(DocumentRegion r) { setProjectChanged(true); }
+        public void regionAdded(DocumentRegion r, int index) { setProjectChanged(true); }
+        public void regionChanged(DocumentRegion r, int index) { setProjectChanged(true); }
         public void regionRemoved(DocumentRegion r) { setProjectChanged(true); }
       });
       
@@ -531,8 +531,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         public void watchSet(final DebugWatchData w) { setProjectChanged(true); }
         public void watchRemoved(final DebugWatchData w) { setProjectChanged(true); }    
         
-        public void regionAdded(final Breakpoint bp) { }
-        public void regionChanged(final Breakpoint bp) { }
+        public void regionAdded(final Breakpoint bp, int index) { }
+        public void regionChanged(final Breakpoint bp, int index) { }
         public void regionRemoved(final Breakpoint bp) { }
         public void debuggerStarted() { }
         public void debuggerShutdown() { }

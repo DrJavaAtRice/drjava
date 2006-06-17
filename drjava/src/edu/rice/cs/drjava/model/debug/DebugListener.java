@@ -108,7 +108,7 @@ public interface DebugListener extends RegionManagerListener<Breakpoint> {
   public void currThreadSet(DebugThreadData thread);
   
   // from RegionManagerListener<Breakpoint>:
-  // public void regionAdded(Breakpoint r);
-  // public void regionChanged(Breakpoint r);
+  // public void regionAdded(Breakpoint r, int index);
+  // public void regionChanged(Breakpoint r, int index);
   // public void regionRemoved(Breakpoint r);
 }

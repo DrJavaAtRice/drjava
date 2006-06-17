@@ -540,6 +540,20 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, mask|InputEvent.SHIFT_MASK));
 
   /**
+   * The key binding for jumping to the next location in the browser history
+   */
+  public static final KeyStrokeOption KEY_BROWSE_FORWARD =
+    new KeyStrokeOption("key.browse.forward",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_MASK));
+
+  /**
+   * The key binding for jumping to the previous location in the browser history
+   */
+  public static final KeyStrokeOption KEY_BROWSE_BACK =
+    new KeyStrokeOption("key.browse.back",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK));
+
+  /**
    * The key binding for openning the preferences dialog
    */
   public static final KeyStrokeOption KEY_PREFERENCES =
@@ -1155,6 +1169,10 @@ public interface OptionConstants {
   /** Whether to save and restore window size and position at startup/shutdown. */
   public static final BooleanOption DIALOG_OPENJAVADOC_STORE_POSITION =
     new BooleanOption("dialog.openjavadoc.store.position", Boolean.TRUE);
+
+  /** Number of entries in the browser history (0 for unlimited). */
+  public static final NonNegativeIntegerOption BROWSER_HISTORY_MAX_SIZE =
+    new NonNegativeIntegerOption("browser.history.max.size", new Integer(50));
 
   /**
    * Whether to also list files with fully qualified paths.

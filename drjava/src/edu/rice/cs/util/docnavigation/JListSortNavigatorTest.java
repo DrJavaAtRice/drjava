@@ -78,6 +78,7 @@ public class JListSortNavigatorTest extends DrJavaTestCase {
     assertSame("getFirst test", i1, list.getFirst());
     assertSame("getLast test", i4, list.getLast());
     
+    list.setNextChangeModelInitiated(true);
     list.setActiveDoc(i1);
     
     Utilities.clearEventQueue();

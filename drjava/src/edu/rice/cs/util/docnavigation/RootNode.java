@@ -55,5 +55,11 @@ class RootNode<ItemT extends INavigatorItem> extends DefaultMutableTreeNode impl
   public void setData(File f) { super.setUserObject(f); }
   public File getData() { return (File) super.getUserObject(); }
   public String toString() { return getData().toString(); }
-  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v) { return v.fileCase(getData()); }
+
+  /**
+   * Execute the specified visitor, passing a variable number of parameters.
+   * @param v visitor to execute
+   * @param p parameters as varargs
+   */
+  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v, Object... p) { return v.fileCase(getData(), p); }
 }

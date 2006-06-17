@@ -59,6 +59,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 /**
  * Panel for displaying regions in a tree sorted by class name and line number.
@@ -109,6 +110,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     _buttonPanel = new JPanel(new BorderLayout());
     _setupButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
+    updateButtons();
     
     // Setup the color listeners.
     _setColors(_regTree);
@@ -427,7 +429,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
         while ((!found) && (documents.hasMoreElements())) {
           DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
           if (doc.getUserObject().equals(regDocNode.getUserObject())) {
-            // Find the correct start offset node for this breakpoint
+            // Find the correct start offset node for this region
             Enumeration existingRegions = doc.children();
             while (existingRegions.hasMoreElements()) {
               DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
@@ -435,7 +437,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
                 _regTreeModel.removeNodeFromParent(existing);
                 // notify
                 if (doc.getChildCount() == 0) {
-                  // this document has no more breakpoints, remove it
+                  // this document has no more regions, remove it
                   _regTreeModel.removeNodeFromParent(doc);
                 }
                 found = true;
@@ -502,7 +504,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     public void mousePressed(MouseEvent e) {
       super.mousePressed(e);
       if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-        goToRegion();
+        performDefaultAction();
       }
     }
   }

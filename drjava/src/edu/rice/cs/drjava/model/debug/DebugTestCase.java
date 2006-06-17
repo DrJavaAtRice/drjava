@@ -45,7 +45,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
   protected final boolean printEvents = false;
   protected final boolean printMessages = false;
-  protected final PrintStream printStream = System.err; 
+  protected PrintStream printStream = System.err; 
   /*
   {
     try { printStream = new PrintStream(new FileOutputStream("log.txt", true), true); }
@@ -491,9 +491,9 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
     public void breakpointReached(Breakpoint bp) { fail("breakpointReached fired unexpectedly"); }
 
-    public void regionAdded(Breakpoint bp) { fail("regionAdded fired unexpectedly"); }
+    public void regionAdded(Breakpoint bp, int index) { fail("regionAdded fired unexpectedly"); }
 
-    public void regionChanged(Breakpoint bp) { fail("regionChanged fired unexpectedly"); }
+    public void regionChanged(Breakpoint bp, int index) { fail("regionChanged fired unexpectedly"); }
 
     public void regionRemoved(Breakpoint bp) { fail("regionRemoved fired unexpectedly"); }
 
@@ -549,7 +549,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
         _notifyLock();
       }
     }
-    public void regionAdded(Breakpoint bp) {
+    public void regionAdded(Breakpoint bp, int index) {
       // Manager's thread: test shouldn't wait
       regionAddedCount++;
     }

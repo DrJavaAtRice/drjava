@@ -598,11 +598,13 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       @SuppressWarnings("unchecked") NodeData<ItemT> newSelection = (NodeData<ItemT>) treeNode;
       if (_current != newSelection) {
         for(INavigationListener<? super ItemT> listener : navListeners) {
-          listener.lostSelection(_current);
-          listener.gainedSelection(newSelection);
+          listener.lostSelection(_current, isNextChangeModelInitiated());
+          listener.gainedSelection(newSelection, isNextChangeModelInitiated());
         }
         _current = newSelection;
       }
+
+      setNextChangeModelInitiated(false);
     }
   }
   
@@ -711,9 +713,9 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   private final NodeDataVisitor<ItemT, ItemT> _leafVisitor = new NodeDataVisitor<ItemT, ItemT>() {
-    public ItemT fileCase(File f){ return null; }
-    public ItemT stringCase(String s){ return null; }
-    public ItemT itemCase(ItemT ini){ return ini; }
+    public ItemT fileCase(File f, Object... p){ return null; }
+    public ItemT stringCase(String s, Object... p){ return null; }
+    public ItemT itemCase(ItemT ini, Object... p){ return ini; }
   };
   
   /** @return true if the INavigatorItem is in the selected group. */
@@ -841,6 +843,16 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
         setActiveDoc(ini);
       }
     }
+  }  
+  
+  /** Marks the next selection change as model-initiated (true) or user-initiated (false; default). */
+  public void setNextChangeModelInitiated(boolean b) {
+    putClientProperty(MODEL_INITIATED_PROPERTY_NAME, b?Boolean.TRUE:null);
+  }
+  
+  /** @return whether the next selection change is model-initiated (true) or user-initiated (false). */
+  public boolean isNextChangeModelInitiated() {
+    return getClientProperty(MODEL_INITIATED_PROPERTY_NAME)!=null;
   }
   
 //  /** Unnecessary since "modified" mark is added by the cell renderer */

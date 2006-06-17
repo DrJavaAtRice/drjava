@@ -140,7 +140,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
       }
     }
     catch(VMDisconnectedException vmde) { /* just ignore */ }
-    if (_isEnabled!=old) _manager._notifier.regionChanged(this);
+    if (_isEnabled!=old) _manager.notifyBreakpointChange(this);
   }
 
   public String toString() {

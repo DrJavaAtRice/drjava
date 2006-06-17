@@ -51,6 +51,7 @@ import edu.rice.cs.drjava.model.FindReplaceMachine;
 import edu.rice.cs.drjava.model.FindResult;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.SimpleDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.FileMovedException;
 
@@ -138,7 +139,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         });
 
         for (FindResult fr: results) {
-          if (!_model.getActiveDocument().equals(fr.getDocument())) _model.setActiveDocument(fr.getDocument());
+          if (!_model.getActiveDocument().equals(fr.getDocument())) {
+            _model.setActiveDocument(fr.getDocument());
+          }
           else _model.refreshActiveDocument();
           
           final OpenDefinitionsDocument doc = _defPane.getOpenDefDocument();
@@ -148,12 +151,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             int startSel = endSel-_machine.getFindWord().length();
             final Position startPos = doc.createPosition(startSel);
             final Position endPos = doc.createPosition(endSel);
-            rm.addRegion(new DocumentRegion() {
-              public OpenDefinitionsDocument getDocument() { return doc; }
-              public File getFile() throws FileMovedException { return doc.getFile(); }
-              public int getStartOffset() { return startPos.getOffset(); }
-              public int getEndOffset() { return endPos.getOffset(); }
-            });
+            rm.addRegion(new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset()));
+          }
+          catch (FileMovedException fme) {
+            throw new UnexpectedException(fme);
           }
           catch (BadLocationException ble) {
             throw new UnexpectedException(ble);
@@ -675,6 +676,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Abstracted out since this is called from find and replace/find. */
   private void _doFind() {
     if (_findField.getText().length() > 0) {
+      _model.addToBrowserHistory();
+
       _updateMachine();
       _machine.setFindWord(_findField.getText());
       _machine.setReplaceWord(_replaceField.getText());
@@ -695,7 +698,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         Caret c = _defPane.getCaret();
         c.setDot(c.getDot());
         
-        if (! matchDoc.equals(openDoc)) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+        if (! matchDoc.equals(openDoc)) {
+          _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+        }
         else _model.refreshActiveDocument();  // in a wraparound search, the unmodified active document may have been kicked out of the cache!
         
         _defPane.setCaretPosition(pos);
@@ -725,6 +730,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             _replaceFindNextAction.setEnabled(true);
             _replaceFindPreviousAction.setEnabled(true);
             _machine.setLastFindWord();
+            _model.addToBrowserHistory();
           }});
       }
       // else the entire document was searched and no instance of the string

@@ -31,42 +31,51 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.ui;
+package edu.rice.cs.drjava.model;
 
-import java.awt.event.*;
+import java.io.File;
 
 /**
- * Abstract mouse listener that supports showing a popup menu.
- * If subclasses override mousePressed() or mouseReleased(), they should
- * first call the superclass method so that the popup will be shown correctly.
- * Because of platform differences, we must check for popup trigger both
- * when the mouse is pressed and when it is released.
+ * Class for a simple document region.
+ * @version $Id$
  */
-public abstract class RightClickMouseAdapter extends MouseAdapter {
-  /**
-   * Performs the action when the popup trigger is received.
-   * Generally shows a popup context menu.
-   * @param e the MouseEvent that is a popup trigger
-   */
-  protected abstract void _popupAction(MouseEvent e);
-
-  /**
-   * Signals that the mouse has been pressed.
-   * @param e the MouseEvent that just occurred
-   */
-  public void mousePressed(MouseEvent e) {
-    if (e.isPopupTrigger()) {
-      _popupAction(e);
-    }
+public class SimpleDocumentRegion implements DocumentRegion {
+  protected final OpenDefinitionsDocument _doc;
+  protected final File _file;
+  protected final int _startOffset;
+  protected final int _endOffset;
+  
+  /** Create a new simple document region. */
+  public SimpleDocumentRegion(OpenDefinitionsDocument doc, File file, int so, int eo) {
+    _doc = doc;
+    _file = file;
+    _startOffset = so;
+    _endOffset = eo;
   }
+  
+  /** @return the document, or null if it hasn't been established yet */
+  public OpenDefinitionsDocument getDocument() { return _doc; }
 
-  /**
-   * Signals that the mouse has been released.
-   * @param e the MouseEvent that just occurred
-   */
-  public void mouseReleased(MouseEvent e) {
-    if (e.isPopupTrigger()) {
-      _popupAction(e);
-    }
+  /** @return the file */
+  public File getFile() { return _file; }
+
+  /** @return the start offset */
+  public int getStartOffset() { return _startOffset; }
+
+  /** @return the end offset */
+  public int getEndOffset() { return _endOffset; }
+  
+  /** @return true if the specified region is equal to this one. */
+  public boolean equals(Object other) {
+    if (!(other instanceof SimpleDocumentRegion) || (other==null)) return false;
+    SimpleDocumentRegion o = (SimpleDocumentRegion)other;
+    return ((((_doc==null) && (o._doc==null)) || (_doc.equals(o._doc))) &&
+            (((_file==null) && (o._file==null)) || (_file.equals(o._file))) &&
+            (_startOffset == o._startOffset) &&
+            (_endOffset == o._endOffset));
+  }
+  
+  public String toString() {
+    return ((_doc!=null)?_doc.toString():"null") + " "+_startOffset+" .. "+_endOffset;
   }
 }
