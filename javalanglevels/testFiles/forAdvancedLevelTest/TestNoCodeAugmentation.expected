@@ -1,0 +1,29 @@
+//This class makes sure that even though there is no code augmentation done at
+//the Advanced Level, the default constructor can still be used.
+class TestNoCodeAugmentation extends AParentClass {
+  int i;
+  
+  static final CrazyClass c = new CrazyClass();
+  
+  void myMethod() {
+    System.out.println(c.copyOfMe.i);
+  }
+}
+
+class AParentClass {
+  int i;
+  int j;
+  
+  public AParentClass() {
+    i = 42;
+    j = 128;
+  }
+  
+}
+
+class CrazyClass {
+  TestNoCodeAugmentation copyOfMe = new TestNoCodeAugmentation();
+}
+
+
+  

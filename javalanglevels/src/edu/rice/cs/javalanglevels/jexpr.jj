@@ -1,0 +1,2528 @@
+/**
+ * Grammar for J-expressions.
+ * Adapted from Java1.0.2LS.jj from the JavaCC distribution. 
+ */
+
+options {
+  JAVA_UNICODE_ESCAPE = true;
+  LOOKAHEAD = 1;
+  /* This should be specified externally. (It *is* by Ant.)
+    OUTPUT_DIRECTORY = "parser";
+  */
+  DEBUG_PARSER = false;
+  STATIC = false;
+  JDK_VERSION = "1.5";
+}
+
+PARSER_BEGIN(JExprParser)
+
+package edu.rice.cs.javalanglevels.parser;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.util.ListIterator;
+import java.util.LinkedList;
+import java.util.Vector;
+import java.math.BigInteger;
+
+//import edu.rice.cs.javaast.*;
+//import edu.rice.cs.javaast.Visibility;
+//import edu.rice.cs.javaast.ClassModifier;
+//import edu.rice.cs.javaast.SourceInfo;
+//import edu.rice.cs.javaast.CharConverter;
+import edu.rice.cs.javalanglevels.*;
+import edu.rice.cs.javalanglevels.tree.*;
+
+public class JExprParser {
+  public static final SourceInfo NO_SOURCE_INFO = new SourceInfo(null, -1, -1, -1, -1);
+
+  public static final ClassOrInterfaceType NO_TYPE = new ClassOrInterfaceType(NO_SOURCE_INFO, "Object", new Type[0]);
+  private boolean _inInterface;
+
+//  private Vector<ParseException> _errors;
+  private static File _currentFile;
+  public static void main(String args[]) {
+    JExprParser parser;
+      //    _errors = new Vector<ParseException>();
+      if (args.length == 0) {
+        System.out.println("JExpression Parser Version 1.0.3:  Reading from standard input . . .");
+        parser = new JExprParser(System.in);
+      }
+      else if (args.length == 1) {
+        System.out.println("JExpression Parser Version 1.0.3:  Reading from file " + args[0] + " . . .");
+        try {
+          _currentFile = new File(args[0]);
+          parser = new JExprParser(new java.io.FileInputStream(_currentFile));
+        } catch (java.io.FileNotFoundException e) {
+          System.out.println("JExpression Parser Version 1.0.3:  File " + args[0] + " not found.");
+          return;
+        }
+      }
+      else {
+        System.out.println("JExpression Parser Version 1.0.3:  Usage is one of:");
+        System.out.println("         java JavaParser < inputfile");
+        System.out.println("OR");
+        System.out.println("         java JavaParser inputfile");
+        return;
+      }
+      
+      try {
+        SourceFile result = parser.SourceFile();
+        System.out.println("JExpression Parser Version 1.0.3:  Java program parsed successfully.");
+        System.out.println(result.toString());
+      }
+      catch (Exception e) {
+          System.out.println("JExpression Parser Version 1.0.3:  Encountered errors during parse.");
+          System.out.println(e.toString());
+      }
+  }
+  
+  public JExprParser(File file) throws FileNotFoundException {
+    this(new BufferedReader(new FileReader(file)));
+    _currentFile = file;
+  }
+
+  /** Strips off the "l" or "L" off the end of long literals */   
+  private static String _stripL(String in) {
+    if (in.endsWith("l") || in.endsWith("L")) {
+      return in.substring(0, in.length() - 1);
+    }
+    else {
+      return in;
+    }
+  }
+
+  /** Returns in without first and last character. */
+  private static String _stripQuotes(String in) {
+    int len = in.length();
+
+    return in.substring(1, len - 1);
+  }
+
+  /**
+   * Creates a source location that starts at the given first token
+   * and ends in the last token yet read.
+   */
+  private SourceInfo _loc(Token first) {
+    return new SourceInfo(_currentFile,
+                          first.beginLine,
+                          first.beginColumn,
+                          token.endLine,
+                          token.endColumn);
+  }
+
+  /**
+   * Creates a source location that starts at the given first AST piece
+   * and ends in the last token yet read.
+   */
+  private SourceInfo _loc(JExpressionIF first) {
+    return new SourceInfo(_currentFile,
+                          first.getSourceInfo().getStartLine(),
+                          first.getSourceInfo().getStartColumn(),
+                          token.endLine,
+                          token.endColumn);
+  }
+  
+  private void _throwParseException(String message) throws ParseException {
+    // The error typically occurs on the next token.
+    Token t = token;
+    if (token.next != null) {
+      t = token.next;
+    }
+    // If a certain token or sequence of tokens is expected, display it.
+    ParseException pe = generateParseException();
+//    if (pe.expectedTokenSequences.length == 1) {
+//      message += " Expected";
+//      for (int i = 0; i < pe.expectedTokenSequences.length; i++) {
+//        message += " " + pe.tokenImage[pe.expectedTokenSequences[0][i]];
+//      }
+//      message += ".";
+//    }
+    try {jj_input_stream.inputStream.close(); //TODO: is this crazy?
+    }
+    catch (java.io.IOException e) {
+      System.out.println("I couldn't close the stream!");
+    }
+      
+    throw new JExprParseException(_currentFile, message, t, pe.expectedTokenSequences, tokenImage);    
+//    _errors.add(new ParseException(_currentFile, message, t, null, tokenImage);
+  }
+  
+  private void _throwParseException(ParseException pe, String message) throws ParseException {
+    // Use the embedded error message if thrown from our code
+    if (pe instanceof JExprParseException) {
+      message = pe.getMessage();
+    }
+   
+    _throwParseException(message);
+  }
+  
+  private String _getTokenImage() {
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < tokenImage.length; i++) {
+      sb.append(tokenImage[i] + " ");
+    }
+    return new String(sb).trim();
+  }
+  
+  private boolean _isAbstract(ModifiersAndVisibility mav) {
+    String[] modifiers = mav.getModifiers();
+    for (int i = 0; i < modifiers.length; i++) {
+      if (modifiers[i].equals("abstract")) {
+        return true;
+      }      
+    }
+    return false;
+  }
+}
+
+//class VariableDeclarator {
+//  public Word identifier;
+//  public Type type;
+//  public VariableInitializerI initializer = JExprParser.NO_VARIABLE_INITIALIZER;
+//}
+
+class UnmodifiedClassDef {
+  public Word name;
+  // provide defaults here for things that can be unspecified
+  public TypeParameter[] typeParameters = new TypeParameter[0];
+  public ReferenceType superclass = JExprParser.NO_TYPE;
+  public ReferenceType[] interfaces = new ReferenceType[0];
+  public BracedBody body;
+}
+
+class UnmodifiedInterfaceDef {
+  public Word name;
+  public TypeParameter[] typeParameters = new TypeParameter[0];
+  public ReferenceType[] superinterfaces = new ReferenceType[0];
+  public BracedBody body;
+//  public AbstractMethodDef[] methods = new AbstractMethodDef[0];
+//  public FinalStaticFieldDef[] fields = new FinalStaticFieldDef[0];
+//  public StaticInnerDefI[] inners = new StaticInnerDefI[0];
+}
+
+PARSER_END(JExprParser)
+
+
+/* WHITE SPACE */
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+/* COMMENTS */
+/* Skip all comments, checking that they're valid syntatically.  We skip
+ * them because once we've parsed the class, if we find that it's valid,
+ * we'll grab the text of the file and augment it as needed.  The comments
+ * will remain in their original positions.
+ */
+SKIP :
+{
+  "//" : IN_SINGLE_LINE_COMMENT
+|
+  <"/**" ~["/"]> { input_stream.backup(1); } : IN_FORMAL_COMMENT
+|
+  "/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT>
+SKIP :
+{
+  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n"> : DEFAULT
+}
+
+<IN_FORMAL_COMMENT>
+SKIP :
+{
+  <FORMAL_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT>
+SKIP :
+{
+  <MULTI_LINE_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT, IN_FORMAL_COMMENT, IN_MULTI_LINE_COMMENT>
+SKIP :
+{
+  < ~[] >
+}
+
+TOKEN : /* RESERVED WORDS AND LITERALS */
+{
+  < ABSTRACT: "abstract" >
+| < BOOLEAN: "boolean" >
+| < BREAK: "break" >
+| < BYTE: "byte" >
+| < CASE: "case" >
+| < CATCH: "catch" >
+| < CHAR: "char" >
+| < CLASS: "class" >
+| < CONST: "const" >
+| < CONTINUE: "continue" >
+| < _DEFAULT: "default" >
+| < DO: "do" >
+| < DOUBLE: "double" >
+| < ELSE: "else" >
+| < EXTENDS: "extends" >
+| < FALSE: "false" >
+| < FINAL: "final" >
+| < FINALLY: "finally" >
+| < FLOAT: "float" >
+| < FOR: "for" >
+| < GOTO: "goto" >
+| < IF: "if" >
+| < IMPLEMENTS: "implements" >
+| < IMPORT: "import" >
+| < INSTANCEOF: "instanceof" >
+| < INT: "int" >
+| < INTERFACE: "interface" >
+| < LONG: "long" >
+| < NATIVE: "native" >
+| < NEW: "new" >
+| < NULL: "null" >
+| < PACKAGE: "package">
+| < PRIVATE: "private" >
+| < PROTECTED: "protected" >
+| < PUBLIC: "public" >
+| < RETURN: "return" >
+| < SHORT: "short" >
+| < STRICTFP: "strictfp" >
+| < STATIC: "static" >
+| < SUPER: "super" >
+| < SWITCH: "switch" >
+| < SYNCHRONIZED: "synchronized" >
+| < THIS: "this" >
+| < THROW: "throw" >
+| < THROWS: "throws" >
+| < TRANSIENT: "transient" >
+| < TRUE: "true" >
+| < TRY: "try" >
+| < VOID: "void" >
+| < VOLATILE: "volatile" >
+| < WHILE: "while" >
+}
+
+/* LITERALS */
+
+TOKEN :
+{
+  /** INTEGER_LITERAL is never used */
+//  < INTEGER_LITERAL:
+//        <DECIMAL_LITERAL> (["l","L"])?
+//      | <HEX_LITERAL> (["l","L"])?
+//      | <OCTAL_LITERAL> (["l","L"])?
+//  >
+//|
+  < DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+|
+  < HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+|
+  < OCTAL_LITERAL: "0" (["0"-"7"])* >
+|
+  < LONG_DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* (["l", "L"]) >
+|
+  < LONG_HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ (["l", "L"]) >
+|
+  < LONG_OCTAL_LITERAL: "0" (["0"-"7"])* (["l", "L"]) >
+|
+  < DOUBLE_FLOATING_POINT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["d","D"])?
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["d","D"])?
+      | (["0"-"9"])+ <EXPONENT> (["d","D"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["d","D"]
+  >
+|
+  < FLOATING_POINT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F"])?
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F"])?
+      | (["0"-"9"])+ <EXPONENT> (["f","F"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["f","F"]
+  >
+|
+  < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+|
+  < CHARACTER_LITERAL:
+      "'"
+      (   (~["'","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )
+      "'"
+  >
+|
+  < STRING_LITERAL:
+      "\""
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\""
+  >
+}
+
+/* IDENTIFIERS */
+
+TOKEN :
+{ // deferred
+//  < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+//|
+  < #LETTER:
+      [
+       "\u0024",
+       "\u0041"-"\u005a",
+       "\u005f",
+       "\u0061"-"\u007a",
+       "\u00c0"-"\u00d6",
+       "\u00d8"-"\u00f6",
+       "\u00f8"-"\u00ff",
+       "\u0100"-"\u1fff",
+       "\u3040"-"\u318f",
+       "\u3300"-"\u337f",
+       "\u3400"-"\u3d2d",
+       "\u4e00"-"\u9fff",
+       "\uf900"-"\ufaff"
+      ]
+  >
+|
+  < #DIGIT:
+      [
+       "\u0030"-"\u0039",
+       "\u0660"-"\u0669",
+       "\u06f0"-"\u06f9",
+       "\u0966"-"\u096f",
+       "\u09e6"-"\u09ef",
+       "\u0a66"-"\u0a6f",
+       "\u0ae6"-"\u0aef",
+       "\u0b66"-"\u0b6f",
+       "\u0be7"-"\u0bef",
+       "\u0c66"-"\u0c6f",
+       "\u0ce6"-"\u0cef",
+       "\u0d66"-"\u0d6f",
+       "\u0e50"-"\u0e59",
+       "\u0ed0"-"\u0ed9",
+       "\u1040"-"\u1049"
+      ]
+  >
+}
+
+TOKEN:
+{
+ < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+}
+
+TOKEN : /* SEPARATORS */
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+}
+
+TOKEN : /* OPERATORS */
+{
+  < ASSIGN: "=" >
+| < GT: ">" >
+| < LT: "<" >
+| < BANG: "!" >
+| < TILDE: "~" >
+| < HOOK: "?" >
+| < COLON: ":" >
+| < EQ: "==" >
+| < LE: "<=" >
+| < GE: ">=" >
+| < NE: "!=" >
+| < SC_OR: "||" >
+| < SC_AND: "&&" >
+| < INCR: "++" >
+| < DECR: "--" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < STAR: "*" >
+| < SLASH: "/" >
+| < BIT_AND: "&" >
+| < BIT_OR: "|" >
+| < XOR: "^" >
+| < REM: "%" >
+| < LSHIFT: "<<" >
+| < RSIGNEDSHIFT: ">>" >
+{
+ matchedToken.kind = RSSHIFT1;
+ matchedToken.image = ">@1";
+ matchedToken.next = new Token();
+ matchedToken.next.beginLine = matchedToken.beginLine;
+ matchedToken.next.beginColumn = matchedToken.beginColumn;
+ matchedToken.next.endLine = matchedToken.beginLine;
+ matchedToken.next.endColumn = matchedToken.beginColumn + 1;
+ matchedToken.next.kind = RSSHIFT2;
+ matchedToken.next.image = ">@2";
+}
+| < RUNSIGNEDSHIFT: ">>>" >
+{
+ matchedToken.image = ">`1";
+ matchedToken.kind = RUSHIFT1;
+ matchedToken.next = new Token();
+ matchedToken.next.beginLine = matchedToken.beginLine;
+ matchedToken.next.beginColumn = matchedToken.beginColumn;
+ matchedToken.next.endLine = matchedToken.beginLine;
+ matchedToken.next.endColumn = matchedToken.beginColumn + 1;
+ matchedToken.next.kind = RUSHIFT2;
+ matchedToken.next.image = ">`2";
+ matchedToken.next.next = new Token();
+ matchedToken.next.next.beginLine = matchedToken.beginLine;
+ matchedToken.next.next.beginColumn = matchedToken.beginColumn;
+ matchedToken.next.next.endLine = matchedToken.beginLine;
+ matchedToken.next.next.endColumn = matchedToken.beginColumn + 2;
+ matchedToken.next.next.kind = RUSHIFT3;
+ matchedToken.next.next.image = ">`3";
+}
+| < RSSHIFT1: ">@1" >
+| < RSSHIFT2: ">@2" >
+| < RUSHIFT1: ">`1" >
+| < RUSHIFT2: ">`2" >
+| < RUSHIFT3: ">`3" >
+| < PLUSASSIGN: "+=" >
+| < MINUSASSIGN: "-=" >
+| < STARASSIGN: "*=" >
+| < SLASHASSIGN: "/=" >
+| < ANDASSIGN: "&=" >
+| < ORASSIGN: "|=" >
+| < XORASSIGN: "^=" >
+| < REMASSIGN: "%=" >
+| < LSHIFTASSIGN: "<<=" >
+| < RSIGNEDSHIFTASSIGN: ">>=" >
+| < RUNSIGNEDSHIFTASSIGN: ">>>=" >
+}
+
+TOKEN:
+{
+  <OTHER: ~[]>
+}
+  
+  JAVACODE
+    void _errorChar(char c) {
+    _throwParseException("'" + c + "' expected.");
+  }
+  
+  JAVACODE
+  void _errorString(String s) {
+    StringBuffer message = new StringBuffer();
+    for (int i = 0; i < s.length(); i++) {
+      if (i > 0) {
+        if (i == (s.length() - 1)) {
+          message.append(" or ");
+        }
+        else {
+          message.append(", ");
+        }
+      }
+      message.append(s.charAt(i));
+    }
+    _throwParseException(message.toString() + " expected.");
+  }
+
+/*****************************************
+ * THE JAVA LANGUAGE GRAMMAR STARTS HERE *
+ *****************************************/
+
+/*
+ * Program structuring syntax follows.
+ */
+
+SourceFile SourceFile() :
+{
+  LinkedList<PackageStatement> packageStatements = new LinkedList<PackageStatement>();
+  LinkedList<ImportStatement> importStatements = new LinkedList<ImportStatement>();
+  LinkedList<TypeDefBase> types = new LinkedList<TypeDefBase>();
+  PackageStatement tempP;
+  ImportStatement tempI;
+  TypeDefBase tempT;
+  Token first = getToken(1);
+}
+{
+  try {
+    [ tempP = PackageStatement() {
+      packageStatements.addLast(tempP);
+    }]
+    (
+     tempI = ImportStatement() {
+      importStatements.addLast(tempI);
+    }
+     )*
+    (
+     LOOKAHEAD( ( <ABSTRACT> | <FINAL> | <PUBLIC> | <STRICTFP> )* <CLASS> )
+     tempT = ClassDef() {
+      types.addLast(tempT);
+    }
+     |
+     LOOKAHEAD( ( <STATIC> | <ABSTRACT> | <FINAL> | <PUBLIC> | <PROTECTED> | <PRIVATE> )* <INTERFACE> )
+     tempT = InterfaceDef() {
+       types.addLast(tempT);
+     }
+     )*
+       <EOF> {
+       return new SourceFile(_loc(first),
+                             packageStatements.toArray(new PackageStatement[packageStatements.size()]),
+                             importStatements.toArray(new ImportStatement[importStatements.size()]),
+                             types.toArray(new TypeDefBase[types.size()]));
+     }
+  }
+  catch (ParseException pe) {
+//    if (pe.currentToken.next != null && pe.currentToken.next.kind == EOF) {
+//      _throwParseException(pe, "'}' expected.");
+//    }
+//    else {
+    /** Hmm, how to also indicate that interfaces can appear here w/o messing up elementary level? */
+      _throwParseException(pe, "A class declaration must appear here.");
+//    }
+  }
+}
+
+
+//JExpression JExpression() :
+//{
+//  JExpression ret;
+//}
+//{
+//  ( ret = Operator() |
+//    LOOKAHEAD(MethodDefLookahead())
+//    ret = MethodDef() |
+//    LOOKAHEAD(VariableDeclarationLookahead())
+//    ret = VariableDeclaration() |
+//    LOOKAHEAD(<IDENTIFIER> <DOT>)
+//    ret = CompoundWord() |   
+//    ret = Word() |
+//    ret = Literal() |
+//    ret = Bracketed() |
+//    ret = Braced() |
+//    ret = Parenthesized() |
+//    LOOKAHEAD( ( <ABSTRACT> | <FINAL> | <PUBLIC> | <STRICTFP> )* <CLASS> )
+//    ret = ClassDef() |
+//    LOOKAHEAD( ( <STATIC> | <ABSTRACT> | <FINAL> | <PUBLIC> | <PROTECTED> | <PRIVATE> )* <INTERFACE> )
+//    ret = InterfaceDef() |
+////    ret = CommaSeparatedList() |
+//    //ret = AngleBracketed() |
+////    ret = LineCommented() |
+////    ret = BlockCommented() |
+////    ret = DocCommented() |
+//    ret = Statement()
+////    ret = BracedStatement()
+//     
+//  )
+//  {
+//    return ret;
+//  }
+//}
+  
+void MethodDefLookahead() :
+{}
+{
+//  ( <PUBLIC> | <PROTECTED> | <PRIVATE> | <STATIC> | <ABSTRACT> | <FINAL> |
+// <NATIVE> | <SYNCHRONIZED> )*
+  ModifiersAndVisibility()
+ [ TypeParameters() ]
+  ReturnType() <IDENTIFIER> <LPAREN>//(FormalParameter() | <RPAREN>)
+}
+  
+void ConstructorDefLookahead() :
+{}
+{
+//  ( <PUBLIC> | <PROTECTED> | <PRIVATE> | <STATIC> | <ABSTRACT> | <FINAL> |
+// <NATIVE> | <SYNCHRONIZED> )*
+  ModifiersAndVisibility()
+  <IDENTIFIER> <LPAREN>(FormalParameter() | <RPAREN>)
+}
+
+// This production is to determine lookahead only.  It will be used instead
+// of MethodDefLookahead because of the added complexity of
+// parametric methods and types fooling the lookahead.
+void VariableDeclarationLookahead() :
+{}
+{
+ ( <PUBLIC> | <PROTECTED> | <PRIVATE> | <STATIC> | <ABSTRACT> | <FINAL> |
+ <TRANSIENT> | <VOLATILE> )*
+ Type() <IDENTIFIER> ( <SEMICOLON> | <ASSIGN> | <COMMA> | <LBRACKET> )
+}
+
+PackageStatement PackageStatement() :
+{ 
+  CompoundWord cw;
+  Token first = getToken(1);
+}
+{
+  <PACKAGE> 
+    try {
+    cw = CompoundWord() 
+      (<SEMICOLON> | _errorChar(';')) {//{ System.out.println("cw = " + cw); 
+      return new PackageStatement(_loc(first), cw);
+    }
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "Illegal package name!");
+  }
+}
+  
+ImportStatement ImportStatement() :
+{
+  CompoundWord cw;
+  Token first = getToken(1);
+}
+{
+  <IMPORT>
+  try {
+    cw = CompoundWord()
+    (<DOT> <STAR> <SEMICOLON> {
+      return new PackageImportStatement(_loc(first), cw);
+    }   
+    | (<SEMICOLON> | _errorChar(';')) {
+      return new ClassImportStatement(_loc(first), cw);
+    })
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "Illegal import name!");
+  }
+
+}
+
+CompoundWord CompoundWord() :
+{ Word word; LinkedList<Word> list = new LinkedList<Word>(); }
+{
+  word = Word() { list.add(word); }
+  (
+    /* lookahead to check for ".*" */
+    LOOKAHEAD(2) <DOT> word = Word() { list.add(word); }
+  )*
+  { return new CompoundWord(_loc((Word) list.getFirst()), list.toArray(new Word[list.size()])); }
+}
+
+ModifiersAndVisibility ModifiersAndVisibility() :
+{
+  LinkedList<String> words = new LinkedList<String>();
+  Token t;
+  Token first = getToken(1);
+}
+{  
+ (
+  (
+   t = <PUBLIC> 
+   | t = <PROTECTED> 
+   | t = <PRIVATE> 
+   | t = <STATIC> 
+   | t = <ABSTRACT> 
+   | t = <FINAL> 
+   | t = <TRANSIENT> 
+   | t = <VOLATILE> 
+   | t = <NATIVE> 
+   | t = <SYNCHRONIZED> 
+   | t = <STRICTFP>
+  )
+    {words.addLast(t.image);}
+ )*
+ { 
+   // If there are no modifiers, then we make our own SourceInfo that
+   // points to the beginning of the following token.
+   // Otherwise, the coordinates are backwards.
+    SourceInfo si;
+    if (words.size() == 0) {
+      si = new SourceInfo(_currentFile,
+                          first.beginLine,
+                          first.beginColumn,
+                          first.beginLine,
+                          first.beginColumn);
+    }
+    else {
+      si = _loc(first);
+    }
+    return new ModifiersAndVisibility(si, words.toArray(new String[words.size()])); }
+}
+
+ClassDef ClassDef() :
+{
+  ModifiersAndVisibility modifiers;
+  UnmodifiedClassDef decl;
+  Token first = getToken(1);
+  _inInterface = false;
+}
+{
+  modifiers = ModifiersAndVisibility()
+  decl = UnmodifiedClassDef()
+  {
+    // parse the modifiers later
+//    if ((mav.isStatic) ||
+//        (mav.visibility == Visibility.PRIVATE) ||
+//        (mav.visibility == Visibility.PROTECTED))
+//    {
+//      throw new RuntimeException("Invalid modifiers for top-level class!");
+//    }
+
+    return new ClassDef(_loc(first), 
+                        modifiers,
+                        decl.name,
+                        decl.typeParameters,
+                        decl.superclass,
+                        decl.interfaces,
+                        decl.body);
+  }
+}
+
+UnmodifiedClassDef UnmodifiedClassDef() :
+{
+  UnmodifiedClassDef decl = new UnmodifiedClassDef();
+  Word name;
+}
+{
+  <CLASS>
+  name = Word() { decl.name = name; }
+  [ decl.typeParameters = TypeParameters() ]
+  [ <EXTENDS> decl.superclass = ClassOrInterfaceType() ]
+  [ <IMPLEMENTS> decl.interfaces = NameList() ]
+//    (<LBRACE> | _errorChar('{'))
+   decl.body = BracedBody() 
+//    (<RBRACE> | _errorChar('}'))
+
+  {
+    return decl;
+  }
+}
+
+InnerClassDef InnerClassDef() :
+{
+  ModifiersAndVisibility modifiers;
+  UnmodifiedClassDef decl;
+  Token first = getToken(1);
+}
+{
+  modifiers = ModifiersAndVisibility()
+  decl = UnmodifiedClassDef()
+  {
+    return new InnerClassDef(_loc(first), 
+                             modifiers,
+                             decl.name,
+                             decl.typeParameters,
+                             decl.superclass,
+                             decl.interfaces,
+                             decl.body);
+  }
+}
+//  <CLASS>
+//    
+//    name = Word()
+//    [ typeParams = TypeParameters() ]
+//
+//    [ <EXTENDS> superClass = ClassOrInterfaceType() ]
+//    
+//    [ <IMPLEMENTS> interfaces = NameList() ]
+//
+//  body = BracedBody() {
+//    return new ClassDef(_loc(first),
+//                                modifiers,
+//                                name,
+//                                typeParams,
+//                                superClass,
+//                                interfaces,
+//                                body);
+//  }
+//}
+
+InterfaceDef InterfaceDef() :
+{
+  ModifiersAndVisibility modifiers;
+  UnmodifiedInterfaceDef decl;
+  Token first = getToken(1);
+  _inInterface = true;
+}
+{
+  modifiers = ModifiersAndVisibility()
+  decl = UnmodifiedInterfaceDef()
+  {
+    // parse the modifiers later
+//    if ((mav.isStatic) ||
+//        (mav.visibility == Visibility.PRIVATE) ||
+//        (mav.visibility == Visibility.PROTECTED) ||
+//        (mav.modifier == ClassModifier.FINAL))
+//    {
+//      throw new RuntimeException("invalid modifiers for top-level interface");
+//    }
+
+    return new InterfaceDef(_loc(first),
+                            modifiers,
+                            decl.name,
+                            decl.typeParameters,
+                            decl.superinterfaces,
+                            decl.body);
+  }
+}
+
+UnmodifiedInterfaceDef UnmodifiedInterfaceDef() :
+{
+  UnmodifiedInterfaceDef decl = new UnmodifiedInterfaceDef();
+  BracedBody body;
+  Word name;
+}
+{
+  <INTERFACE>
+  name = Word() { decl.name = name; }
+  [ decl.typeParameters = TypeParameters() ]
+  [ <EXTENDS> decl.superinterfaces = NameList() ]
+  body = BracedBody()
+  {
+    decl.body = body;
+    return decl;
+  }
+}
+
+InnerInterfaceDef InnerInterfaceDef() :
+{
+  ModifiersAndVisibility modifiers;
+  UnmodifiedInterfaceDef decl;
+  Token first = getToken(1);
+  boolean oldInInterface = _inInterface;
+  _inInterface = true;
+}
+{
+  modifiers = ModifiersAndVisibility()
+  decl = UnmodifiedInterfaceDef()
+  {
+    _inInterface = oldInInterface;
+    return new InnerInterfaceDef(_loc(first),
+                            modifiers,
+                            decl.name,
+                            decl.typeParameters,
+                            decl.superinterfaces,
+                            decl.body);
+  }
+}
+
+
+BracedBody BracedBody() :
+{ UnbracedBody body; Token first = getToken(1); }
+{
+  <LBRACE> body = UnbracedBody() <RBRACE> { return new BracedBody(_loc(first), body.getStatements()); }
+}
+
+UnbracedBody UnbracedBody() :
+{ LinkedList<BodyItemI> items = new LinkedList<BodyItemI>(); BodyItemI temp; Token first = getToken(1); }
+{
+  (
+    temp = BodyItem() { items.addLast(temp); }
+  )*
+  { return new UnbracedBody(_loc(first), items.toArray(new BodyItemI[items.size()])); }
+}
+
+// A BodyItem is a method declaration, field declaration, statments, initializer, constructor, or inner declaration.
+BodyItemI BodyItem() :
+{
+  BodyItemI temp;
+}
+{
+  try {
+    (
+      LOOKAHEAD(ModifiersAndVisibility() <CLASS>) temp = InnerClassDef()
+    | LOOKAHEAD(ModifiersAndVisibility() <INTERFACE>) temp = InnerInterfaceDef()
+    | LOOKAHEAD(2) temp = Initializer()
+    | LOOKAHEAD(MethodDefLookahead()) temp = MethodDef()
+//    | LOOKAHEAD(ModifiersAndVisibility() <IDENTIFIER> FormalParameters() [ <THROWS> NameList() ] <LBRACE>)
+    | LOOKAHEAD(ConstructorDefLookahead()) temp = ConstructorDef()
+    | LOOKAHEAD(ModifiersAndVisibility() Type() <IDENTIFIER>) temp = VariableDeclaration() (<SEMICOLON> | _errorString(";("))
+    | temp = Statement()
+    )
+      
+    {
+      return temp;
+    }
+  }
+  catch(ParseException pe) {
+    _throwParseException(pe, "This statement or expression is improperly formatted or not allowed in a class body");
+  }
+}
+
+MethodDef MethodDef() :
+{
+  Token first = getToken(1);
+  ModifiersAndVisibility modifiers;
+  TypeParameter[] typeParams = new TypeParameter[0];
+  ReturnTypeI returnType;
+  Word name;
+  FormalParameter[] params;
+  ReferenceType[] throwsArray = new ReferenceType[0];
+  BracedBody body;
+}
+{
+  try {
+    modifiers = ModifiersAndVisibility()
+     [ typeParams = TypeParameters() ]
+     returnType = ReturnType()
+      name = Word()
+      params = FormalParameters()
+
+      // such weird syntax. brackets after formal params to make result type array!
+      // This is obsolete but allowed as per JLS 8.4
+      (
+       LOOKAHEAD(<LBRACKET>)
+       <LBRACKET> <RBRACKET>
+       {
+      if (returnType instanceof Type) {
+        returnType = new ArrayType(_loc(returnType), ((Type)returnType).getName() + "[]", (Type) returnType);
+      }
+      else { // void return
+        _throwParseException("Cannot have method return array if base type is void!");
+      }
+    }
+    )*
+
+      [ <THROWS> throwsArray = NameList() ] 
+    { if (!_isAbstract(modifiers) && !_inInterface) { 
+      body = ConcreteMethodBody();
+      return new ConcreteMethodDef(_loc(first), 
+                                   modifiers,
+                                   typeParams,
+                                   returnType,
+                                   name,
+                                   params,
+                                   throwsArray,
+                                   body);
+    }
+    else {
+      AbstractMethodBody();
+      return new AbstractMethodDef(_loc(first), 
+                                   modifiers,
+                                   typeParams,
+                                   returnType,
+                                   name,
+                                   params,
+                                   throwsArray);
+    }
+    }
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "This cannot appear in a method declaration!");
+  }
+}
+
+BracedBody ConcreteMethodBody() :
+{ BracedBody body; }
+{
+  body = BracedBody()
+  { return body;
+  }
+}
+  
+void AbstractMethodBody() :
+{}
+{
+  (<SEMICOLON> | _errorChar(';'))
+}
+  
+VariableDeclaration VariableDeclaration() :
+{
+  ModifiersAndVisibility modifiers;
+  LinkedList<VariableDeclarator> variableDeclarators;
+  Token first = getToken(1);
+} 
+{
+  try {
+    modifiers = ModifiersAndVisibility()
+      variableDeclarators = VariableDeclaratorList()
+    {
+      return new VariableDeclaration(_loc(first), 
+                                     modifiers, 
+          variableDeclarators.toArray(new VariableDeclarator[variableDeclarators.size()]));
+    }    
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "This is not a valid variable declaration!");
+  }
+  
+}
+
+ReferenceType[] NameList() :
+{
+  LinkedList<ReferenceType> list = new LinkedList<ReferenceType>();
+  ReferenceType temp;
+}
+{
+  temp = ClassOrInterfaceType() { list.add(temp); }
+  (
+    <COMMA>
+    temp = ClassOrInterfaceType() { list.add(temp); }
+  )*
+  {
+    return list.toArray(new ReferenceType[list.size()]);
+  }
+}
+
+ReturnTypeI ReturnType() :
+{
+  ReturnTypeI ret;
+  Token first = getToken(1);
+}
+{
+  (
+    <VOID> { ret = new VoidReturn(_loc(first), "void"); }
+  |
+    ret = Type()
+  )
+  {
+    return ret;
+  }
+}
+    
+FormalParameter[] FormalParameters() :
+{
+  LinkedList<FormalParameter> list = new LinkedList<FormalParameter>();
+  FormalParameter temp;
+  Token first = getToken(1);
+}
+{
+  (<LPAREN> | _errorChar('('))
+  [
+    temp = FormalParameter() { list.add(temp); }
+    (
+      <COMMA>
+      temp = FormalParameter() { list.add(temp); }
+    )*
+  ]
+  (<RPAREN> | _errorString("),"))
+  {
+    return list.toArray(new FormalParameter[list.size()]);
+  }
+}
+
+FormalParameter FormalParameter() :
+{
+  boolean isFinal = false;
+  Type type;
+  VariableDeclarator declarator;
+  Token first = getToken(1);
+}
+{
+  try {
+    [ <FINAL> { isFinal = true; } ]
+      type = Type()
+      declarator = VariableDeclarator(type)
+    { 
+      if (declarator instanceof InitializedVariableDeclarator) {
+        _throwParseException("Cannot assign values to parameters!");
+      }
+      return new FormalParameter(_loc(first), declarator, isFinal); }
+  }
+  catch (ParseException e) { _throwParseException("This is an invalid formal parameter: make sure that you have specified a correctly formatted type name and identifier!"); }
+}
+
+ConstructorDef ConstructorDef() :
+{
+  ModifiersAndVisibility visibility;
+  Word name = null;
+  FormalParameter[] formalParameters;
+  ReferenceType[] throwsArray = new ReferenceType[0];
+  BracedBody code;
+  Token first = getToken(1);
+}
+{
+
+  try {
+    visibility = ModifiersAndVisibility()
+//      (name = <IDENTIFIER> | _errorString("identifier"))
+      name = Word()
+      formalParameters = FormalParameters()
+      [
+       <THROWS>
+       throwsArray = NameList()
+         ]
+      code = BracedBody() // changed from BlockStatements()
+    {
+      return new ConstructorDef(_loc(first),
+                                name,
+                                visibility,
+                                formalParameters,
+                                throwsArray,
+                                code);
+    }
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "This cannot appear in a constructor definition!");
+  }
+}
+
+Initializer Initializer() :
+{
+  boolean isStatic = false;
+  Block code;
+  Token first = getToken(1);
+}
+{
+  [ <STATIC> { isStatic = true; } ]
+  code = Block()
+  {
+    if (isStatic) {
+      return new StaticInitializer(_loc(first), code);
+    }
+    else {
+      return new InstanceInitializer(_loc(first), code);
+    }
+  }
+}
+
+/*
+ * Type & name syntax follows.
+ */
+
+Type Type() :
+{
+  Type type;
+  Token first = getToken(1);
+}
+{
+ ( LOOKAHEAD(3) type = PrimitiveType() | type = ReferenceType() )
+  (
+   LOOKAHEAD(<LBRACKET>)
+    <LBRACKET> (<RBRACKET> | _errorChar(']'))
+    { type = new ArrayType(_loc(first), type.getName() + "[]", type); }
+  )*
+  {
+    return type;
+  }
+}
+
+PrimitiveType PrimitiveType() :
+{
+  Token name;
+}
+{
+  (
+    name = <BOOLEAN>
+  |
+    name = <CHAR>
+  |
+    name = <BYTE>
+  |
+    name = <SHORT>
+  |
+    name = <INT>
+  |
+    name = <LONG>
+  |
+    name = <FLOAT>
+  |
+    name = <DOUBLE>
+  )
+  { return new PrimitiveType(_loc(name), name.image); }
+}
+
+ReferenceType ReferenceType() :
+{
+  ReferenceType type;
+}
+{
+  ( LOOKAHEAD(2) type = ClassOrInterfaceType() | type = TypeVariable() )
+   {
+     return type;
+   }
+}
+
+ArrayType ArrayType() :
+{
+  Type elemType;
+  ArrayType arrayType = null;
+  Token first = getToken(1);
+}
+{
+ ( LOOKAHEAD(2) elemType = PrimitiveType() | elemType = ReferenceType() )
+  (
+    <LBRACKET> <RBRACKET>
+    {
+      if (arrayType == null) {
+        arrayType = new ArrayType(_loc(first), elemType.getName() + "[]", elemType);
+      }
+      else {
+        arrayType = new ArrayType(_loc(first), arrayType.getName() + "[]", arrayType);
+      }
+    }
+  )+
+  { return arrayType; }
+}
+
+TypeVariable TypeVariable() :
+{
+  Token name;
+}
+{
+ name = <IDENTIFIER>
+  {
+    return new TypeVariable(_loc(name), name.image);
+  }
+}
+
+/** have to break out each period inside the name. */
+ReferenceType ClassOrInterfaceType() :
+{
+  Type[] typeArguments = new Type[0];
+  Token identToken;
+  ReferenceType type;
+}
+{
+ identToken = <IDENTIFIER>
+  [ LOOKAHEAD(<LT>) typeArguments = TypeArguments() ]
+  {
+    type = new ClassOrInterfaceType(_loc(identToken), identToken.image, typeArguments);
+    typeArguments = new Type[0];
+  }
+
+  (
+    LOOKAHEAD(2) // needed due to possible .class case
+    <DOT>
+    identToken = <IDENTIFIER>
+    [ LOOKAHEAD(<LT>) typeArguments = TypeArguments() ]
+    {
+      ClassOrInterfaceType right = new ClassOrInterfaceType(_loc(identToken), identToken.image, typeArguments);
+      typeArguments = new Type[0];
+      type = new MemberType(_loc(type), type.getName() + "." + right.getName(), type, right);
+    }
+  )*
+
+  { return type; }
+}
+
+Type[] TypeArguments() :
+{
+  LinkedList<Type> list = new LinkedList<Type>();
+  Type temp;
+}
+{
+ <LT>
+
+ ( LOOKAHEAD(ArrayType()) temp = ArrayType() | temp = ReferenceType() )
+  {
+    list.add(temp);
+  }
+
+ (
+    <COMMA>
+    ( LOOKAHEAD(ArrayType()) temp = ArrayType() | temp = ReferenceType() )
+    {
+      list.add(temp);
+    }
+  )*
+
+  RightAngledBracket()
+
+  {
+    return list.toArray(new Type[list.size()]);
+  }
+}
+
+TypeParameter[] TypeParameters() :
+{
+  LinkedList<TypeParameter> list = new LinkedList<TypeParameter>();
+  TypeParameter temp;
+}
+{
+ <LT>
+ temp = TypeFormalParameter() { list.add(temp); }
+  (
+    <COMMA>
+    temp = TypeFormalParameter() { list.add(temp); }
+  )*
+  RightAngledBracket()
+  {
+    return list.toArray(new TypeParameter[list.size()]);
+  }
+}
+
+Token RightAngledBracket() :
+{
+  Token t;
+}
+{
+ ( t=<GT> | t=<RSSHIFT1> | t=<RSSHIFT2> | t=<RUSHIFT1> | t=<RUSHIFT2> | t=<RUSHIFT3> )
+  { return t; }
+}
+
+TypeParameter TypeFormalParameter() :
+{
+  TypeVariable variable;
+  ReferenceType bound = NO_TYPE;
+  Token first = getToken(1);
+}
+{
+ variable = TypeVariable()
+  [
+    <EXTENDS>
+    bound = ClassOrInterfaceType()
+  ]
+  {
+    return new TypeParameter(_loc(first), variable, bound);
+  }
+}
+
+/*
+ * Statement syntax follows.
+ */
+
+Statement Statement() :
+{
+  Statement temp;
+}
+{
+  try {
+  (
+   LOOKAHEAD(<LBRACE>)
+    temp = Block()
+  |
+    LOOKAHEAD(2)
+    temp = LabeledStatement()  
+  |
+    temp = SwitchStatement()
+  |
+    temp = IfStatement()
+  |
+    temp = WhileStatement()
+  |
+    temp = DoStatement()
+  |
+    temp = ForStatement()
+  |
+    temp = BreakStatement()
+  |
+    temp = ContinueStatement()
+  |
+    temp = ReturnStatement()
+  |
+    temp = ThrowStatement()
+  |
+    temp = SynchronizedStatement()
+  |
+    temp = TryStatement()
+  |
+   LOOKAHEAD(NonEmptyExpressionLookahead()) temp = ExpressionStatement() 
+  |
+   temp = EmptyStatement()
+  )
+  { return temp; }
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "Invalid statement.");
+  }
+}
+  
+LabeledStatement LabeledStatement() :
+{
+  Word label;
+  Statement statement;
+}
+{
+  label = Word()
+  <COLON>
+  statement = Statement()
+  { return new LabeledStatement(_loc(label), label, statement); }
+}
+
+Block Block() :
+{
+  BracedBody code;
+}
+{
+  code = BracedBody() // changed from BlockStatements()
+  { return new Block(_loc(code), code); }
+}
+
+ExpressionStatement ExpressionStatement() :
+/*
+ * There are many Expressions that are not allowed as standalone
+ * expressions by the JLS.  These should be detected at a later stage.
+ * An ExpressionStatement consisting of an EmptyExpression is an empty statement.
+ */
+{ Expression exp; }
+{   
+  exp = /*Primary() */Expression() <SEMICOLON> /*(<SEMICOLON> | _errorChar(';'))*/
+    { return new ExpressionStatement(_loc(exp), exp); }
+}
+
+Statement SwitchStatement() :
+{
+  Expression test;
+  SwitchCase tempCase;
+  LinkedList<SwitchCase> caseList = new LinkedList<SwitchCase>();
+  Token first = getToken(1);
+}
+{
+  <SWITCH> (<LPAREN> | _errorChar('('))
+  test = Expression()
+  <RPAREN> (<LBRACE> | _errorChar('{'))
+  (
+    tempCase = SwitchCase()
+    { caseList.add(tempCase); }
+  )*
+  (<RBRACE> | _errorChar('}'))
+  {
+    return new SwitchStatement(_loc(first), test, caseList.toArray(new SwitchCase[caseList.size()]));
+  }
+}
+
+SwitchCase SwitchCase() :
+{
+  UnbracedBody statements;
+  Expression label;
+  Token first = getToken(1);
+}
+{
+  <CASE> label = Expression() <COLON> statements = UnbracedBody() // changed from BlockStatements()
+  { return new LabeledCase(_loc(first), label, statements); }
+|
+  <_DEFAULT> <COLON> statements = UnbracedBody() // changed from BlockStatements()
+  { return new DefaultCase(_loc(first), statements); }
+}
+
+Statement IfStatement() : 
+{
+  Expression testExpression;
+  Statement thenStatement;
+  Statement elseStatement = null;
+  Token first = getToken(1);
+}
+{
+  <IF>
+  (<LPAREN> | _errorChar('('))
+  testExpression = Expression()
+  (<RPAREN> | _errorChar(')'))
+  thenStatement = Statement()
+  [ LOOKAHEAD(1) <ELSE> elseStatement = Statement() ]
+  {
+    if (elseStatement == null) {
+      return new IfThenStatement(_loc(first), testExpression, thenStatement);
+    }
+    else {
+      return new IfThenElseStatement(_loc(first), testExpression, thenStatement, elseStatement);
+    }
+  }  
+}
+
+WhileStatement WhileStatement() :
+{
+  Expression condition;
+  Statement body;
+  Token first = getToken(1);
+}
+{
+  <WHILE> (<LPAREN> | _errorChar('(')) condition = Expression() (<RPAREN> | _errorChar(')')) body = Statement()
+  { return new WhileStatement(_loc(first), condition, body); }
+}
+
+Statement DoStatement() :
+{
+  Expression condition;
+  Statement body;
+  Token first = getToken(1);
+}
+{
+  <DO> body = Statement() (<WHILE> | _errorString("\"while\"")) (<LPAREN> | _errorChar('(')) condition = Expression() 
+    (<RPAREN> | _errorChar(')')) (<SEMICOLON> | _errorChar(';'))
+  { return new DoStatement(_loc(first), body, condition); }
+}
+
+ForStatement ForStatement() :
+{ ForInitI init; ForConditionI condition; UnparenthesizedExpressionList update; Statement body; Token first = getToken(1); }
+{
+  <FOR>
+    (<LPAREN> | _errorChar('(')) init = ForInit()
+      (<SEMICOLON> | _errorChar(';')) condition = ForCondition()
+        (<SEMICOLON> | _errorChar(';')) update = UnparenthesizedExpressionList()
+          (<RPAREN> | _errorChar(')')) body = Statement()
+            { return new ForStatement(_loc(first), init, condition, update, body); }
+}
+
+ForInitI ForInit() :
+{
+  ForInitI init;
+}
+{
+  (
+    LOOKAHEAD( [ <FINAL> ] Type() <IDENTIFIER> )
+    init = VariableDeclaration()
+  |
+    init = UnparenthesizedExpressionList()
+  )
+  { return init; }
+}
+
+ForConditionI ForCondition() :
+{ Expression cond; Token first = getToken(1); }
+{
+  LOOKAHEAD(NonEmptyExpressionLookahead()) cond = Expression() { return cond; }
+| { return new EmptyForCondition(_loc(first)); }
+}
+
+BreakStatement BreakStatement() :
+{
+  Word label = null;
+  Token first = getToken(1);
+}
+{
+  <BREAK> [ label = Word() ] (<SEMICOLON> | _errorChar(';'))
+  {
+    if (label == null) {
+      return new UnlabeledBreakStatement(_loc(first));
+    }
+    else {
+      return new LabeledBreakStatement(_loc(first), label);
+    }
+  }
+}
+
+ContinueStatement ContinueStatement() :
+{
+  Word label = null;
+  Token first = getToken(1);
+}
+{
+  <CONTINUE> [ label = Word() ] (<SEMICOLON> | _errorChar(';'))
+  {
+    if (label == null) {
+      return new UnlabeledContinueStatement(_loc(first));
+    }
+    else {
+      return new LabeledContinueStatement(_loc(first), label);
+    }
+  }
+}
+
+ReturnStatement ReturnStatement() :
+{ Expression value; Token first = getToken(1); }
+{
+  <RETURN>
+    (
+      LOOKAHEAD(NonEmptyExpressionLookahead()) value = Expression() (<SEMICOLON> | _errorChar(';')) { return new ValueReturnStatement(_loc(first), value); }
+    | (<SEMICOLON> | _errorChar(';')) { return new VoidReturnStatement(_loc(first)); }
+    )
+}
+
+ThrowStatement ThrowStatement() :
+{
+  Expression exp;
+  Token first = getToken(1);
+}
+{
+  <THROW> exp = Expression() (<SEMICOLON> | _errorChar(';'))
+  { return new ThrowStatement(_loc(first), exp); }
+}
+
+SynchronizedStatement SynchronizedStatement() :
+{
+  Expression exp;
+  Block block;
+  Token first = getToken(1);
+}
+{
+  <SYNCHRONIZED> (<LPAREN> | _errorChar('(')) exp = Expression() <RPAREN> block = Block()
+  { return new SynchronizedStatement(_loc(first), exp, block); }
+}
+
+TryCatchStatement TryStatement() :
+/*
+ * Semantic check required here to make sure that at least one
+ * finally/catch is present.
+ */
+{
+  Block tryBlock;
+  LinkedList<CatchBlock> catchList = new LinkedList<CatchBlock>();
+  FormalParameter catchParam;
+  Block tempCatchBlock;
+  Block finallyBlock = null;
+  Token first = getToken(1);
+  Token catchToken;
+}
+{
+  <TRY> tryBlock = Block()
+  (
+    catchToken = <CATCH> (<LPAREN> | _errorChar('(')) catchParam = FormalParameter() (<RPAREN> | _errorChar(')'))
+    tempCatchBlock = Block()
+    { catchList.add(new CatchBlock(_loc(catchToken), catchParam, tempCatchBlock)); }
+  )*
+  [ <FINALLY> finallyBlock = Block() ]
+  {
+    CatchBlock[] catches = catchList.toArray(new CatchBlock[catchList.size()]);
+    if (finallyBlock == null) {
+      return new NormalTryCatchStatement(_loc(first), tryBlock, catches);
+    }
+    else {
+      return new TryCatchFinallyStatement(_loc(first), tryBlock, catches, finallyBlock);
+    }
+  }
+}
+
+EmptyStatement EmptyStatement() :
+{ Token first = getToken(1); }
+{
+  <SEMICOLON> { return new EmptyStatement(_loc(first)); }
+}
+
+/**
+ * Recognizes: Type (identifier [, initializer ] )+.
+ */
+LinkedList<VariableDeclarator> VariableDeclaratorList() :
+{
+  LinkedList<VariableDeclarator> list = new LinkedList<VariableDeclarator>();
+
+  Type originalType;
+  VariableDeclarator current;
+}
+{
+  try {
+    originalType = Type()
+      current = VariableDeclarator(originalType)
+    {
+      list.add(current);
+    }
+    
+    (
+     <COMMA>
+     current = VariableDeclarator(originalType)
+       {
+      list.add(current);
+    }
+    )*
+    { return list; }
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "This cannot appear in a variable declarator!");
+  }
+}
+
+/**
+ * Recognizes an identifier with any number of possible brackets.
+ * Figures out the real type by dealing with the fact
+ * that [] can be either after type or after identifier!
+ * Very strange syntax indeed.
+ * TODO: Make sure FormalParameter (or anything else that can't have
+ * initialized variable declarators to check for this).
+ *
+ * @param givenType  The type that was recognized before this identifier
+ * @return  The pair of type and identifier. The type encompasses
+ *          all levels of array []s needed (from both after the type and
+ *          after the identifier).
+ */
+VariableDeclarator VariableDeclarator(Type givenType) :
+{
+//  VariableDeclarator decl = new VariableDeclarator();
+  Type type = givenType;
+  Word identifier;
+  VariableInitializerI initializer = null;
+}
+{
+  identifier = Word()
+
+  ( <LBRACKET> <RBRACKET> {
+      type = new ArrayType(_loc(identifier), type.getName() + "[]", type);
+    }
+  )*
+    [ <ASSIGN> initializer = VariableInitializer() ]
+
+  {
+    if (initializer == null) {
+      return new UninitializedVariableDeclarator(_loc(identifier), 
+                                                 type, 
+                                                 identifier);
+    }
+    else {
+      return new InitializedVariableDeclarator(_loc(identifier), 
+                                               type,                                                
+                                               identifier, 
+                                               initializer);
+    }    
+  }
+}
+
+VariableInitializerI VariableInitializer() :
+{
+  VariableInitializerI init;
+}
+{
+  try {
+    init = ArrayInitializer() { return init; }
+  |
+    init = Expression() { return init; }
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "This is an illegal variable initializer!");
+  }
+}
+
+ArrayInitializer ArrayInitializer() :
+{
+  LinkedList<VariableInitializerI> items = new LinkedList<VariableInitializerI>();
+  VariableInitializerI varInit;
+  Token first = getToken(1);
+}
+{
+  try {
+    <LBRACE> varInit = VariableInitializer() { items.add(varInit); }
+      (
+        /* lookahead to check for ",}" */
+        LOOKAHEAD(2) <COMMA> varInit = VariableInitializer() { items.add(varInit); }
+      )*
+      [ <COMMA> ] (<RBRACE> | _errorChar('}'))
+        {
+          /* If the list contains only an EmptyExpression, it's actually an empty list. */
+          if (items.size() == 1 && items.get(0) instanceof EmptyExpression) {
+            return new ArrayInitializer(_loc(first), new VariableInitializerI[0]);
+          }
+          else {
+            return new ArrayInitializer(_loc(first), items.toArray(new VariableInitializerI[items.size()]));
+          }
+        }
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "This is an illegal array initializer!");
+  }
+}
+
+/*
+ * Expression syntax follows.
+ */
+
+void NonEmptyExpressionLookahead() :
+{}
+{
+  // Binary operators (preceded by an EmptyExpression)
+  <ASSIGN> | <PLUSASSIGN> | <MINUSASSIGN> | <STARASSIGN> | <SLASHASSIGN> | <REMASSIGN> | <LSHIFTASSIGN> | <RSIGNEDSHIFTASSIGN>
+    | <RUNSIGNEDSHIFTASSIGN> | <ANDASSIGN> | <ORASSIGN> | <XORASSIGN> | <HOOK> | <SC_OR> | <SC_AND> | <BIT_OR> | <XOR> | <BIT_AND>
+    | <EQ> | <NE> | <LT> | <LE> | <GT> | <GE> | <INSTANCEOF> | <LSHIFT> | RightShiftOp() | <PLUS> | <MINUS> | <STAR> | <SLASH> | <REM>
+  // Unary operators (excluding <PLUS>, <MINUS>)
+    | <INCR> | <DECR> | <TILDE> | <BANG>
+  // Primaries
+    | <LPAREN> | LexicalLiteral() | <NEW> | <THIS> | <SUPER> | <IDENTIFIER> | PrimitiveType()
+}
+
+Expression Expression() :
+{ Expression result; }
+{
+  result = AssignmentExpression() /*NoOpExpression()*/ { return result; }
+}
+
+Expression NoOpExpression() :
+{ Expression left; Expression right; }
+{
+  left = AssignmentExpression()
+    (
+      LOOKAHEAD(NonEmptyExpressionLookahead()) AssertNonEmpty() right = AssignmentExpression()  { left = new NoOpExpression(_loc(left), left, right); }
+    )*
+    { return left; }
+}
+
+/*
+ * An empty method used as a javacc hack to prevent errors where
+ * a potentially-empty production is, in fact, guaranteed to be
+ * non-empty (e.g. 
+ * "<LPAREN> ( LOOKAHEAD(<IDENTIFIER>) Expression() )* <RPAREN>"
+ *  would not be allowed by javacc, but
+ * "<LPAREN> ( LOOKAHEAD(<IDENTIFIER>) AssertNonEmpty() Expression() )* <RPAREN>" 
+ * would).
+ */
+JAVACODE void AssertNonEmpty() {}
+
+Expression AssignmentExpression() :
+{ Expression name; Expression value; }
+{
+  name = ConditionalExpression()
+    [
+      <ASSIGN> value = AssignmentExpression() { return new SimpleAssignmentExpression(_loc(name), name, value); }
+    | <PLUSASSIGN> value = AssignmentExpression() { return new PlusAssignmentExpression(_loc(name), name, value); }
+    | <MINUSASSIGN> value = AssignmentExpression() { return new MinusAssignmentExpression(_loc(name), name, value); }
+    | <STARASSIGN> value = AssignmentExpression() { return new MultiplyAssignmentExpression(_loc(name), name, value); }
+    | <SLASHASSIGN> value = AssignmentExpression() { return new DivideAssignmentExpression(_loc(name), name, value); }
+    | <REMASSIGN> value = AssignmentExpression() { return new ModAssignmentExpression(_loc(name), name, value); }
+    | <LSHIFTASSIGN> value = AssignmentExpression() { return new LeftShiftAssignmentExpression(_loc(name), name, value); }
+    | <RSIGNEDSHIFTASSIGN> value = AssignmentExpression() { return new RightSignedShiftAssignmentExpression(_loc(name), name, value); }
+    | <RUNSIGNEDSHIFTASSIGN> value = AssignmentExpression() { return new RightUnsignedShiftAssignmentExpression(_loc(name), name, value); }
+    | <ANDASSIGN> value = AssignmentExpression() { return new BitwiseAndAssignmentExpression(_loc(name), name, value); }
+    | <ORASSIGN> value = AssignmentExpression() { return new BitwiseOrAssignmentExpression(_loc(name), name, value); }
+    | <XORASSIGN> value = AssignmentExpression() { return new BitwiseXorAssignmentExpression(_loc(name), name, value); }
+    ]
+    { return name; }
+}
+
+Expression ConditionalExpression() :
+{ Expression condition; Expression forTrue; Expression forFalse; }
+{
+  condition = OrExpression()
+    [
+      <HOOK> forTrue = Expression() <COLON> forFalse = ConditionalExpression()
+        { return new ConditionalExpression(_loc(condition), condition, forTrue, forFalse); }
+    ]
+    { return condition; }
+}
+
+Expression OrExpression() :
+{ Expression left; Expression right; }
+{
+  left = AndExpression()
+    (
+      <SC_OR> right = AndExpression() { left = new OrExpression(_loc(left), left, right); }
+    )*
+    { return left; }
+}
+
+Expression AndExpression() :
+{ Expression left; Expression right; }
+{
+  left = BitwiseOrExpression()
+    (
+      <SC_AND> right = BitwiseOrExpression() { left = new AndExpression(_loc(left), left, right); }
+    )*
+    { return left; }
+}
+
+Expression BitwiseOrExpression() :
+{ Expression left; Expression right; }
+{
+  left = BitwiseXorExpression()
+    (
+      <BIT_OR> right = BitwiseXorExpression() { left = new BitwiseOrExpression(_loc(left), left, right); }
+    )*
+    { return left; }
+}
+
+Expression BitwiseXorExpression() :
+{ Expression left; Expression right; }
+{
+  left = BitwiseAndExpression()
+    (
+      <XOR> right = BitwiseAndExpression() { left = new BitwiseXorExpression(_loc(left), left, right); }
+    )*
+    { return left; }
+}
+
+Expression BitwiseAndExpression() :
+{ Expression left; Expression right; }
+{
+  left = EqualityExpression()
+    (
+      <BIT_AND> right = EqualityExpression() { left = new BitwiseAndExpression(_loc(left), left, right); }
+    )*
+    { return left; }
+}
+
+Expression EqualityExpression() :
+{ Expression left; Expression right; }
+{
+  left = ComparisonExpression()
+    (
+      <EQ> right = ComparisonExpression() { left = new EqualsExpression(_loc(left), left, right); }
+    | <NE> right = ComparisonExpression() { left = new NotEqualExpression(_loc(left), left, right); }
+    )*
+    { return left; }
+}
+
+Expression ComparisonExpression() :
+{ Expression left; Expression right; Type type; }
+{
+  left = ShiftBinaryExpression()
+    (
+      <LT> right = ShiftBinaryExpression() { left = new LessThanExpression(_loc(left), left, right); }
+    | <LE> right = ShiftBinaryExpression() { left = new LessThanOrEqualExpression(_loc(left), left, right); }
+    | <GT> right = ShiftBinaryExpression() { left = new GreaterThanExpression(_loc(left), left, right); }
+    | <GE> right = ShiftBinaryExpression() { left = new GreaterThanOrEqualExpression(_loc(left), left, right); }
+    | <INSTANCEOF> type = Type() { left = new InstanceofExpression(_loc(left), left, type); }
+    )*
+    { return left; }
+}
+
+Expression ShiftBinaryExpression() :
+{ Expression left; Expression right; Token rshift; }
+{
+  left = AdditiveExpression()
+    (
+      <LSHIFT> right = AdditiveExpression() { left = new LeftShiftExpression(_loc(left), left, right); }
+    | rshift = RightShiftOp() right = AdditiveExpression()
+        {
+          if (rshift.kind == RSSHIFT1) { left = new RightSignedShiftExpression(_loc(left), left, right); }
+          else { left = new RightUnsignedShiftExpression(_loc(left), left, right); }
+        }
+    )*
+    { return left; }
+}
+
+Expression AdditiveExpression() :
+{ Expression left; Expression right; }
+{
+  left = MultiplicativeExpression()
+    (
+      <PLUS> right = MultiplicativeExpression() { left = new PlusExpression(_loc(left), left, right); }
+    | <MINUS> right = MultiplicativeExpression() { left = new MinusExpression(_loc(left), left, right); }
+    )*
+    { return left; }
+}
+
+Expression MultiplicativeExpression() :
+{ Expression left; Expression right; }
+{
+  left = UnaryExpression()
+    (
+      <STAR> right = UnaryExpression() { left = new MultiplyExpression(_loc(left), left, right); }
+    | <SLASH> right = UnaryExpression() { left = new DivideExpression(_loc(left), left, right); }
+    | <REM> right = UnaryExpression() { left = new ModExpression(_loc(left), left, right); }
+    )*
+    { return left; }
+}
+
+Expression UnaryExpression() :
+{ Expression value; Token first = getToken(1); }
+{
+  /* Lookahead to disambiguate "++;" -- it could be a PrefixIncrement for an EmptyExpression
+   * or a PostfixIncrement for an EmptyExpression.  Here, it is always parsed as a PrefixIncrement.
+   */
+  LOOKAHEAD(1) <INCR> value = UnaryExpression() { return new PositivePrefixIncrementExpression(_loc(first), value); }
+
+  /* Lookahead to disambiguate "--;" -- it could be a PrefixIncrement for an EmptyExpression
+   * or a PostfixIncrement for an EmptyExpression.  Here, it is always parsed as a PrefixIncrement.
+   */
+| LOOKAHEAD(1) <DECR> value = UnaryExpression() { return new NegativePrefixIncrementExpression(_loc(first), value); }
+
+| <PLUS> value = UnaryExpression() { return new PositiveExpression(_loc(first), value); }
+| <MINUS> value = UnaryExpression() { return new NegativeExpression(_loc(first), value); }
+| value = UnaryExpressionNotPlusMinus() { return value; }
+}
+
+Expression UnaryExpressionNotPlusMinus() :
+{ Expression value; Token first = getToken(1); }
+{
+  <TILDE> value = UnaryExpression() { return new BitwiseNotExpression(_loc(first), value); }
+| <BANG> value = UnaryExpression() { return new NotExpression(_loc(first), value); }
+| LOOKAHEAD(CastLookahead()) value = CastExpression() { return value; }
+| value = PostfixIncrementExpression() { return value; }
+}
+
+/* "CastLookahead()" is lifted directly from the Java1.5.jj grammar. */
+// This production is to determine lookahead only.  The LOOKAHEAD specifications
+// below are not used, but they are there just to indicate that we know about
+// this.
+void CastLookahead():
+{}
+{
+  LOOKAHEAD(2) "(" PrimitiveType()
+| LOOKAHEAD("(" Type() "[") "(" Type() "[" "]"
+| "(" Type() ")" ( "~" | "!" | "(" | <IDENTIFIER> | "this" | "super" | "new" | LexicalLiteral() )
+}
+
+Expression CastExpression() :
+{ Type type; Expression value; Token first = getToken(1); }
+{
+  <LPAREN>
+    (
+      // TODO: the primitive lookahead is *WRONG* in the javacc java grammar. Submit a bug.
+      LOOKAHEAD(PrimitiveType() <RPAREN>) type = PrimitiveType() <RPAREN> value = UnaryExpression()
+    | type = Type() <RPAREN> value = UnaryExpressionNotPlusMinus()
+    )
+    { return new CastExpression(_loc(first), type, value); }
+}
+
+Expression PostfixIncrementExpression() :
+{ Expression value; }
+{
+  value = Primary()
+    (
+      <INCR> { value = new PositivePostfixIncrementExpression(_loc(value), value); }
+    | <DECR> { value = new NegativePostfixIncrementExpression(_loc(value), value); }
+    )*
+    { return value; }
+}
+
+Primary Primary() :
+{ Primary value; }
+{
+  value = PrimaryPrefix()
+    (
+      value = PrimarySuffix(value)
+    )*
+    { return value; }
+}
+
+Primary PrimaryPrefix() :
+{ Primary value; Expression nestedValue; ReturnTypeI type; Word name; ParenthesizedExpressionList args; Token first = getToken(1); }
+{
+  [
+    value = LexicalLiteral() { return value; }
+  | value = SimpleInstantiation() { return value; }
+  | <LPAREN> nestedValue = Expression() <RPAREN> { return new Parenthesized(_loc(first), nestedValue); }
+  | LOOKAHEAD(ReturnType() <DOT> <CLASS>) type = ReturnType() <DOT> <CLASS> { return new ClassLiteral(_loc(type), type); }
+
+  | <THIS>
+      [
+        args = ParenthesizedExpressionList() { return new SimpleThisConstructorInvocation(_loc(first), args); }
+      ]
+      { return new SimpleThisReference(_loc(first)); }
+
+  | <SUPER>
+      (
+        LOOKAHEAD(<DOT>) { return new SimpleSuperReference(_loc(first)); }
+      | LOOKAHEAD(<LPAREN>) args = ParenthesizedExpressionList() { return new SimpleSuperConstructorInvocation(_loc(first), args); }
+      | _errorChar('.')
+         /* insures that super never appears without a paren or dot.  This isn't consistent with the "parse everything"
+          *  philosophy, but it's difficult to check this later.
+          */
+      )
+
+  | name = Word()
+      [
+        args = ParenthesizedExpressionList() { return new SimpleMethodInvocation(_loc(name), name, args); }
+      ]
+      { return new SimpleNameReference(_loc(name), name); }
+  ]
+  /* If nothing matches, we assume something's missing and call it an EmptyExpression. */
+  { return new EmptyExpression(_loc(first)); }
+}
+
+Primary PrimarySuffix(Primary prefix) :
+{ Primary value; Word name; ParenthesizedExpressionList args; Expression index; }
+{
+  <LBRACKET> index = Expression() <RBRACKET> { return new ArrayAccess(_loc(prefix), prefix, index); }  
+  
+| <DOT>
+    ( 
+      value = ComplexInstantiation(prefix) { return value; }
+   
+    | <THIS>
+        [
+          args = ParenthesizedExpressionList() { return new ComplexThisConstructorInvocation(_loc(prefix), prefix, args); }
+        ]
+        { return new ComplexThisReference(_loc(prefix), prefix); }
+
+    | <SUPER>
+      (
+        LOOKAHEAD(<DOT>) { return new ComplexSuperReference(_loc(prefix), prefix); }
+      | LOOKAHEAD(<LPAREN>) args = ParenthesizedExpressionList() { return new ComplexSuperConstructorInvocation(_loc(prefix), prefix, args); }
+      | _errorChar('.')
+         /* insures that super never appears without a paren or dot.  This isn't consistent with the "parse everything"
+          *  philosophy, but it's difficult to check this later.
+          */
+      )
+
+    | name = Word()
+        [
+          args = ParenthesizedExpressionList() { return new ComplexMethodInvocation(_loc(prefix), prefix, name, args); }
+        ]
+        { return new ComplexNameReference(_loc(prefix), prefix, name); }
+    )   
+}
+
+LexicalLiteral LexicalLiteral() :
+{ Token t; LexicalLiteral literal; Token first = getToken(1); }
+{
+  try {
+    literal = IntegerLiteral() { return literal; }
+  | literal = FloatLiteral() { return literal; }
+  | t = <CHARACTER_LITERAL> { return new CharLiteral(_loc(t), CharConverter.unescapeChar(_stripQuotes(t.image))); }
+  | t = <STRING_LITERAL> { return new StringLiteral(_loc(t), CharConverter.unescapeString(_stripQuotes(t.image))); }
+  | literal = BooleanLiteral() { return literal; }
+  | <NULL> { return new NullLiteral(_loc(first)); }
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "This is an illegal literal!");
+  }
+}
+
+/** 
+ * Differentiates between array allocations and anonymous inner class definitions
+ */
+Instantiation SimpleInstantiation() :
+{
+  PrimitiveType tempPrimitive;
+  ReferenceType tempReference;
+  Instantiation temp;
+  BracedBody body = null;
+  ParenthesizedExpressionList arguments;
+  Token first = getToken(1);
+}
+{
+  try {
+  (
+   LOOKAHEAD(2)
+     <NEW>
+   tempPrimitive = PrimitiveType()
+     temp = SimpleArrayInstantiationTail(tempPrimitive)
+  |
+   <NEW>
+   tempReference = ClassOrInterfaceType()
+     (
+      temp = SimpleArrayInstantiationTail(tempReference)
+        |
+      arguments = ParenthesizedExpressionList()
+       [ body = BracedBody() ]
+        {
+    if (body == null) {
+      temp = new SimpleNamedClassInstantiation(_loc(first),
+                                              tempReference, 
+                                              arguments);
+    }
+    else {
+      temp = new SimpleAnonymousClassInstantiation(_loc(first),
+                                               tempReference,
+                                               arguments,
+                                               body);
+    }
+  }
+      
+  )
+     )
+  { return temp; }
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "This cannot appear in an allocation expression!");
+  }
+}
+
+// an array allocation either has at least one dimension expression
+// or it has an initializer. can't have both.
+ArrayInstantiation SimpleArrayInstantiationTail(Type elementType) :
+{
+  LinkedList<Expression> dimensions = new LinkedList<Expression>();
+  ArrayType arrayType = null;
+  Expression exp;
+  ArrayInitializer initializer;
+  Token first = getToken(1);
+}
+{
+  (
+    LOOKAHEAD(<LBRACKET> NonEmptyExpressionLookahead())
+    (
+      (
+        LOOKAHEAD(<LBRACKET> NonEmptyExpressionLookahead())
+        <LBRACKET>
+        exp = Expression()
+        <RBRACKET>
+        {
+          if (arrayType == null) {
+            arrayType = new ArrayType(_loc(elementType), elementType.getName() + "[]", elementType);
+          }
+          else {
+            arrayType = new ArrayType(_loc(arrayType), arrayType.getName() + "[]", arrayType);
+          }
+
+          dimensions.add(exp);
+        }
+      )+
+      (
+        LOOKAHEAD(2) <LBRACKET> <RBRACKET>
+        { arrayType = new ArrayType(_loc(arrayType), arrayType.getName() + "[]", arrayType); }
+      )* {
+        return new SimpleUninitializedArrayInstantiation(_loc(elementType),
+                                                        arrayType,
+                                                        new DimensionExpressionList(_loc(first), 
+                dimensions.toArray(new Expression[dimensions.size()])));
+      }
+    )
+  |
+    (
+      (
+        <LBRACKET> <RBRACKET>
+        {
+          if (arrayType == null) {
+            arrayType = new ArrayType(_loc(elementType), elementType.getName() + "[]", elementType);
+          }
+          else {
+            arrayType = new ArrayType(_loc(arrayType), arrayType.getName() + "[]", arrayType);
+          }
+        }
+      )+
+      initializer = ArrayInitializer()
+    )
+  {
+    return new SimpleInitializedArrayInstantiation(_loc(elementType),
+                                                    arrayType,
+                                                    initializer);
+      }
+  )
+}
+
+/** Differentiates between array allocations and anonymous inner class definitions
+ * @param prefix  The Primary before the new. (e.g. a.new Foo())
+ */
+Instantiation ComplexInstantiation(Primary prefix) :
+{
+  PrimitiveType tempPrimitive;
+  ReferenceType tempReference;
+  Instantiation temp;
+  BracedBody body = null;
+  ParenthesizedExpressionList arguments;
+  Token first = getToken(1);
+}
+{
+  try {
+  (
+   LOOKAHEAD(2)
+     <NEW>
+   tempPrimitive = PrimitiveType()
+     temp = ComplexArrayInstantiationTail(prefix, tempPrimitive)
+  |
+   <NEW>
+   tempReference = ClassOrInterfaceType()
+     (
+      temp = ComplexArrayInstantiationTail(prefix, tempReference)
+        |
+      arguments = ParenthesizedExpressionList()
+       [ body = BracedBody() ]
+        {
+    if (body == null) {
+      temp = new ComplexNamedClassInstantiation(_loc(prefix),
+                                                prefix,
+                                                tempReference, 
+                                                arguments);
+    }
+    else {
+      temp = new ComplexAnonymousClassInstantiation(_loc(prefix),
+                                                    prefix,
+                                                    tempReference,
+                                                    arguments,
+                                                    body);
+    }
+  }
+      
+  )
+     )
+  { return temp; }
+  }
+  catch (ParseException pe) {
+    _throwParseException(pe, "This cannot appear in an allocation expression!");
+  }
+}
+
+// an array allocation either has at least one dimension expression
+// or it has an initializer. can't have both.
+ArrayInstantiation ComplexArrayInstantiationTail(Primary prefix, Type elementType) :
+{
+  LinkedList<Expression> dimensions = new LinkedList<Expression>();
+  ArrayType arrayType = null;
+  Expression exp;
+  ArrayInitializer initializer;
+  Token first = getToken(1);
+}
+{
+  (
+    LOOKAHEAD(<LBRACKET> NonEmptyExpressionLookahead())
+    (
+      (
+        LOOKAHEAD(<LBRACKET> NonEmptyExpressionLookahead())
+        <LBRACKET>
+        exp = Expression()
+         <RBRACKET>
+        {
+          if (arrayType == null) {
+            arrayType = new ArrayType(_loc(elementType), elementType.getName() + "[]", elementType);
+          }
+          else {
+            arrayType = new ArrayType(_loc(arrayType), arrayType.getName() + "[]", arrayType);
+          }
+
+          dimensions.add(exp);
+        }
+      )+
+      (
+        LOOKAHEAD(2) <LBRACKET> <RBRACKET>
+        { arrayType = new ArrayType(_loc(arrayType), arrayType.getName() + "[]", arrayType); }
+      )* {
+        return new ComplexUninitializedArrayInstantiation(_loc(prefix),
+                                                          prefix,
+                                                        arrayType,
+                                                        new DimensionExpressionList(_loc(first), 
+                dimensions.toArray(new Expression[dimensions.size()])));
+      }
+    )
+  |
+    (
+      (
+        <LBRACKET> <RBRACKET>
+        {
+          if (arrayType == null) {
+            arrayType = new ArrayType(_loc(elementType), elementType.getName() + "[]", elementType);
+          }
+          else {
+            arrayType = new ArrayType(_loc(arrayType), arrayType.getName() + "[]", arrayType);
+          }
+        }
+      )+
+      initializer = ArrayInitializer()
+    )
+  {
+    return new ComplexInitializedArrayInstantiation(_loc(prefix),
+                                                    prefix,
+                                                    arrayType,
+                                                    initializer);
+      }
+  )
+}
+
+//Instantiation SimpleInstantiation() :
+//{ Type type; ParenthesizedExpressionList args; BracedBody body; DimensionExpressionList dimensions;
+//      ArrayInitializer initializer; Token first = getToken(1); }
+//{
+//  <NEW> type = Type()
+//    (
+//      /* Lookahead to ensure at least one set of brackets follows */
+//      LOOKAHEAD(<LBRACKET>) dimensions = DimensionExpressionList()
+//        { return new SimpleUninitializedArrayInstantiation(_loc(first), type, dimensions); }
+//
+//    | initializer = ArrayInitializer()
+//        { return new SimpleInitializedArrayInstantiation(_loc(first), type, initializer); }
+//
+//    | args = ParenthesizedExpressionList()
+//        [
+//          body = BracedBody() { return new SimpleAnonymousClassInstantiation(_loc(first), type, args, body); }
+//        ]
+//        { return new SimpleNamedClassInstantiation(_loc(first), type, args); }
+//    )
+//}
+//
+//Instantiation ComplexInstantiation(Primary prefix) :
+//{ Type type; ParenthesizedExpressionList args; BracedBody body; DimensionExpressionList dimensions; ArrayInitializer initializer; }
+//{
+//  <NEW> type = Type()
+//    (
+//      /* Lookahead to ensure at least one set of brackets follows */
+//      LOOKAHEAD(<LBRACKET>) dimensions = DimensionExpressionList()
+//        { return new ComplexUninitializedArrayInstantiation(_loc(prefix), prefix, type, dimensions); }
+//
+//    | initializer = ArrayInitializer()
+//        { return new ComplexInitializedArrayInstantiation(_loc(prefix), prefix, type, initializer); }
+//
+//    | args = ParenthesizedExpressionList()
+//        [
+//          body = BracedBody() { return new ComplexAnonymousClassInstantiation(_loc(prefix), prefix, type, args, body); }
+//        ]
+//        { return new ComplexNamedClassInstantiation(_loc(prefix), prefix, type, args); }
+//    )
+//}
+
+/* TODO: This probably doesn't successfully handle overflow, especially 
+ * for Integer.MIN_VALUE.  Testing of overflow should probably not
+ * be the responsibility of the parser--instead, IntegerLiterals should
+ * contain BigIntegers.
+ */
+LexicalLiteral IntegerLiteral() :
+{ Token token; BigInteger value; int maxBitLength; Token first = getToken(1); }
+
+  // we have to use biginteger to deal with literals that intentionally overflow
+  // 0xfffffffffffffffe is an example, from JExprParserTokenManager.java.
+  // Also this allows us to deal with Integer/Long.MIN_VALUE
+{
+  (
+    token = <DECIMAL_LITERAL> { value = new BigInteger(token.image, 10); maxBitLength = 31; }
+  | token = <OCTAL_LITERAL> { value = new BigInteger(token.image, 8); maxBitLength = 32; /* it's always positive so use of sign bit ok */ }
+  | token = <HEX_LITERAL> { /* need to strip 0x */ value = new BigInteger(token.image.substring(2), 16); maxBitLength = 32; /* it's always positive so use of sign bit ok */ }
+  )
+  { if (value.bitLength() <= maxBitLength) { return new IntegerLiteral(_loc(first), value.intValue()); }
+        else { throw new RuntimeException("Integer literal too big: " + token.image); } }
+|
+  (
+    token = <LONG_DECIMAL_LITERAL> { value = new BigInteger(_stripL(token.image), 10); maxBitLength = 63; }
+  | token = <LONG_OCTAL_LITERAL> { value = new BigInteger(_stripL(token.image), 8); maxBitLength = 64; /* it's always positive so use of sign bit ok */ }
+  | token = <LONG_HEX_LITERAL> /* need to strip 0x */ { value = new BigInteger(_stripL(token.image.substring(2)), 16); maxBitLength = 64; /* it's always positive so use of sign bit ok */ }
+  )
+  { if (value.bitLength() <= maxBitLength) { return new LongLiteral(_loc(first), value.longValue()); }
+        else { throw new RuntimeException("Long literal too big: " + token.image); } }
+}
+
+LexicalLiteral FloatLiteral() :
+{ Token t; }
+{
+  (
+    t = <DOUBLE_FLOATING_POINT_LITERAL>
+      {
+        try {
+          double value = Double.parseDouble(t.image);
+          return new DoubleLiteral(_loc(t), value);
+        }
+        catch (NumberFormatException e) {
+          throw new RuntimeException("Invalid double constant: " + t.image + ". Exception: " + e);
+        }
+      }
+  | t = <FLOATING_POINT_LITERAL>
+      {
+        try {
+          float value = Float.parseFloat(t.image);
+          return new FloatLiteral(_loc(t), value);
+        }
+        catch (NumberFormatException e) {
+          throw new RuntimeException("Invalid float constant: " + t.image + ". Exception: " + e);
+        }
+      }
+  )
+}
+
+BooleanLiteral BooleanLiteral() :
+{ Token first = getToken(1); }
+{
+  <TRUE> { return new BooleanLiteral(_loc(first), true); }
+| <FALSE> { return new BooleanLiteral(_loc(first), false); }
+}
+
+/*
+ * Misc helpers
+ */
+
+
+Word Word() :
+{ Token text; Token first = getToken(1); }
+{
+  text = <IDENTIFIER> { return new Word(_loc(first), text.image); }
+}
+
+Token RightShiftOp() :
+{Token t;}
+{
+ (t = <RSSHIFT1> <RSSHIFT2>) {
+   return t;
+  }
+| (t = <RUSHIFT1> <RUSHIFT2> <RUSHIFT3>) {
+  return t;
+  }
+}
+
+ParenthesizedExpressionList ParenthesizedExpressionList() :
+{ ExpressionList list; Token first = getToken(1); }
+{
+  <LPAREN>
+    (
+      list = UnparenthesizedExpressionList() <RPAREN>
+        { return new ParenthesizedExpressionList(_loc(first), list.getExpressions()); }
+    )
+}
+
+UnparenthesizedExpressionList UnparenthesizedExpressionList() :
+{ Vector<Expression> list = new Vector<Expression>(); Expression expression; Token first = getToken(1); }
+{
+  expression = Expression() { list.add(expression); }
+    (
+      <COMMA> expression = Expression() { list.add(expression); }
+    )*
+    {
+      /* If the list contains only an EmptyExpression, it's actually an empty list. */
+      if (list.size() == 1 && list.get(0) instanceof EmptyExpression) {
+        return new UnparenthesizedExpressionList(_loc(first), new Expression[0]);
+      }
+      else {
+        return new UnparenthesizedExpressionList(_loc(first), list.toArray(new Expression[list.size()]));
+      }
+    }
+}
+

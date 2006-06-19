@@ -1,0 +1,12 @@
+class InnerClass {
+  
+  int s;
+  
+  class X {
+    int w;
+    
+    void m() {
+      System.out.println(s);
+    }
+  }
+}

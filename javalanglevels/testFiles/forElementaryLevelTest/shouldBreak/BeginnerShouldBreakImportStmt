@@ -1,0 +1,9 @@
+import java.io.*;
+
+class BeginnerShouldBreakImportStmt {
+  File f;
+  
+  int thisMethodShouldWork() {
+    return 45;
+  }
+}

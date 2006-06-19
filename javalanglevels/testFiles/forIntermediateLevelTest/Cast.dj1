@@ -1,0 +1,11 @@
+class Cast {
+ Object o;
+ 
+ Cast(Integer i) {
+   o = i;
+ }
+ 
+ Integer myMethod() {
+   return (Integer) o;
+ }
+}

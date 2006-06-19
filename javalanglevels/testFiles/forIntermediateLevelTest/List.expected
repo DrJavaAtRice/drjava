@@ -1,0 +1,7 @@
+interface List {
+  public abstract boolean member(final int i);
+  public abstract OrdList createList();
+  public abstract OrdList createList(final int i);
+  public abstract List add(final int i);
+}
+

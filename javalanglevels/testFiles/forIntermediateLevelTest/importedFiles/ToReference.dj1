@@ -1,0 +1,14 @@
+package forIntermediateLevelTest.importedFiles;
+import forIntermediateLevelTest.importedFiles2.AlsoReferenced;
+
+public class ToReference {
+
+  public String toString2() { 
+    AlsoReferenced arp;
+    return "imported from elspeth.importedFiles";
+  }
+
+  public int yourMethod() {
+    return 24;
+  }
+} 

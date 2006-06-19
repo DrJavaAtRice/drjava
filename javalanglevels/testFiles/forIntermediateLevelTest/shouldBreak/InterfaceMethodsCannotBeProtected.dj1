@@ -1,0 +1,4 @@
+//Here, we see that the methods of interfaces are not allowed to be protected.
+interface MyInterfaceYeah {
+  protected boolean yeah(Object o);
+}

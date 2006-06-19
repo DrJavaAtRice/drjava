@@ -1,0 +1,9 @@
+class Sherlock extends Object {
+  AFriend _friend;
+  
+  int foo() {
+    System.out.println("You're my friend, " + _friend.getName());
+    return 5;
+  }
+}
+

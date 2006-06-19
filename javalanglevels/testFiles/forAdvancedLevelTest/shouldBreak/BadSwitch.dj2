@@ -1,0 +1,12 @@
+/** Since we don't parse constant expressions,
+ * this should never be allowed (regardless of the value of the switch case).
+ */
+
+class BadSwitch {
+  void method(char x) {
+    switch(x) {
+      case 1234678902:
+        return;
+    }
+  }
+}

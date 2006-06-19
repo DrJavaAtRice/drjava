@@ -1,0 +1,32 @@
+//Instantiating a ComplexAnonymousInnerClass that extends an Interface should not give an error
+//This one is extra crazy just for grins.
+
+
+
+interface MyMainInterface {
+  interface MyInnerInterface {
+    int myMethod();
+  }
+}
+
+class MoreCrazyStuff {
+  interface AnotherInnerInterface {
+    int yourMethod();
+  }
+}
+
+class MyCrazyTestClassEJS {
+  MyMainInterface.MyInnerInterface i = new MyMainInterface.MyInnerInterface() {
+    public int myMethod() {
+      return 42;
+    }
+  };
+  
+  MoreCrazyStuff.AnotherInnerInterface j = new MoreCrazyStuff.AnotherInnerInterface() {
+    public int yourMethod() {
+      return 42;
+    }
+  };
+
+} 
+  

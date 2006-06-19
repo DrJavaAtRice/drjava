@@ -1,0 +1,9 @@
+
+class ShouldBreakLoops extends Object{
+  int loopedMethod() {
+    for (i=0; i<10;i++) {
+      System.out.println ("i");
+    }
+    return 5;
+  }
+}

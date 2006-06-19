@@ -1,0 +1,15 @@
+/**An assignment in a do loop is not guaranteed to have happened*/
+
+class AssignmentInDoLoop {
+  
+  int myMethod(int j) {
+    int q;
+    do {
+      q = j + 24;
+    }
+    while (j<254);
+
+    
+    return q += 23;
+  }
+}

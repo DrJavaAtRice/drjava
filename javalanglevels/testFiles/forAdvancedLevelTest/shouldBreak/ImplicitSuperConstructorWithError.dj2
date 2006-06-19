@@ -1,0 +1,12 @@
+/* Test that an error is given, because there is an implicit super constructor call, that constructor throws an uncaught exception*/
+class MyParent {
+  
+
+}
+
+class ChildWithImplicitConstructorCall extends MyParent {
+  ChildWithImplicitConstructorCall() {
+    System.out.println("Made my child");
+  }
+ 
+}

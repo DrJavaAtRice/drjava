@@ -1,0 +1,6 @@
+class NoBitwiseOperators {
+ int i;
+ NoBitwiseOperators(int j) {
+   i = ~j;
+ }
+}

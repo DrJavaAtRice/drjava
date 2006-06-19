@@ -1,0 +1,9 @@
+/** Should break becuase the variable whoAmI is undefined, but used */
+class BeginnerShouldBreakShouldBeInitialized {
+  int myMethod(int a, int b) { 
+    int whoAmI;
+    if (b==a) {
+      return whoAmI;
+    }
+    return 5;
+}

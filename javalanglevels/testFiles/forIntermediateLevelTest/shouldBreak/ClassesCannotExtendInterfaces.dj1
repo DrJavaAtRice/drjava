@@ -1,0 +1,8 @@
+//This should break because classes cannot extend interfaces.
+
+class ClassName extends DefinitelyAnInterface {
+  
+}
+
+interface DefinitelyAnInterface {
+}

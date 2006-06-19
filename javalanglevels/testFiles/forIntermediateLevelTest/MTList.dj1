@@ -1,0 +1,45 @@
+ // Represents a non-empty list
+
+public class MTList implements IList2 {
+
+  static MTList Singleton = new MTList();
+
+  
+  private MTList() {
+    
+    }
+
+  public int sum(){
+
+    return 0;
+
+  }
+
+  public String toString2() {
+
+  return "0";  
+
+  }
+
+  public String toStringHelp() {
+
+    return ")"; //empty string
+  }
+
+  public int getlength(){
+
+    return 0; 
+
+  
+
+  }
+
+  
+
+  public int getlengthHelp(int acc) {
+
+        return acc;                       
+
+  }
+
+}

@@ -1,0 +1,1018 @@
+SourceFile:
+  sourceInfo = [Expressions.test: (1,1)-(70,2)]
+  packageStatements = {}
+  importStatements = {
+    #0: PackageImportStatement:
+      sourceInfo = [Expressions.test: (1,1)-(1,19)]
+      cWord = CompoundWord:
+        sourceInfo = [Expressions.test: (1,8)-(1,16)]
+        words = {
+          #0: Word:
+            sourceInfo = [Expressions.test: (1,8)-(1,11)]
+            text = java
+          #1: Word:
+            sourceInfo = [Expressions.test: (1,13)-(1,16)]
+            text = lang
+        }
+  }
+  types = {
+    #0: ClassDef:
+      sourceInfo = [Expressions.test: (3,1)-(67,1)]
+      mav = ModifiersAndVisibility:
+        sourceInfo = [Expressions.test: (3,1)-(3,6)]
+        modifiers = {
+          #0: public
+        }
+      name = Word:
+        sourceInfo = [Expressions.test: (3,14)-(3,24)]
+        text = Expressions
+      typeParameters = {}
+      superclass = ClassOrInterfaceType:
+        sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+        name = Object
+        typeArguments = {}
+      interfaces = {}
+      body = BracedBody:
+        sourceInfo = [Expressions.test: (3,26)-(67,1)]
+        statements = {
+          #0: ConcreteMethodDef:
+            sourceInfo = [Expressions.test: (5,3)-(17,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [Expressions.test: (5,3)-(5,8)]
+              modifiers = {
+                #0: public
+              }
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [Expressions.test: (5,10)-(5,13)]
+              name = void
+            name = Word:
+              sourceInfo = [Expressions.test: (5,15)-(5,34)]
+              text = testNamedExpressions
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [Expressions.test: (5,38)-(17,3)]
+              statements = {
+                #0: IfThenElseStatement:
+                  sourceInfo = [Expressions.test: (6,5)-(11,5)]
+                  testExpression = BooleanLiteral:
+                    sourceInfo = [Expressions.test: (6,9)-(6,12)]
+                    value = true
+                  thenStatement = Block:
+                    sourceInfo = [Expressions.test: (6,15)-(8,5)]
+                    statements = BracedBody:
+                      sourceInfo = [Expressions.test: (6,15)-(8,5)]
+                      statements = {
+                        #0: VariableDeclaration:
+                          sourceInfo = [Expressions.test: (7,7)-(7,15)]
+                          mav = ModifiersAndVisibility:
+                            sourceInfo = [Expressions.test: (7,7)-(7,7)]
+                            modifiers = {}
+                          declarators = {
+                            #0: InitializedVariableDeclarator:
+                              sourceInfo = [Expressions.test: (7,11)-(7,15)]
+                              type = PrimitiveType:
+                                sourceInfo = [Expressions.test: (7,7)-(7,9)]
+                                name = int
+                              name = Word:
+                                sourceInfo = [Expressions.test: (7,11)-(7,11)]
+                                text = x
+                              initializer = IntegerLiteral:
+                                sourceInfo = [Expressions.test: (7,15)-(7,15)]
+                                value = 5
+                          }
+                      }
+                  elseStatement = Block:
+                    sourceInfo = [Expressions.test: (9,10)-(11,5)]
+                    statements = BracedBody:
+                      sourceInfo = [Expressions.test: (9,10)-(11,5)]
+                      statements = {
+                        #0: VariableDeclaration:
+                          sourceInfo = [Expressions.test: (10,7)-(10,15)]
+                          mav = ModifiersAndVisibility:
+                            sourceInfo = [Expressions.test: (10,7)-(10,7)]
+                            modifiers = {}
+                          declarators = {
+                            #0: InitializedVariableDeclarator:
+                              sourceInfo = [Expressions.test: (10,11)-(10,15)]
+                              type = PrimitiveType:
+                                sourceInfo = [Expressions.test: (10,7)-(10,9)]
+                                name = int
+                              name = Word:
+                                sourceInfo = [Expressions.test: (10,11)-(10,11)]
+                                text = x
+                              initializer = IntegerLiteral:
+                                sourceInfo = [Expressions.test: (10,15)-(10,15)]
+                                value = 6
+                          }
+                      }
+                #1: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (13,5)-(13,22)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (13,5)-(13,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (13,12)-(13,22)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [Expressions.test: (13,5)-(13,10)]
+                        name = Object
+                        typeArguments = {}
+                      name = Word:
+                        sourceInfo = [Expressions.test: (13,12)-(13,12)]
+                        text = o
+                      initializer = StringLiteral:
+                        sourceInfo = [Expressions.test: (13,16)-(13,22)]
+                        value = abcde
+                  }
+                #2: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (14,5)-(14,25)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (14,5)-(14,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (14,12)-(14,25)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [Expressions.test: (14,5)-(14,10)]
+                        name = String
+                        typeArguments = {}
+                      name = Word:
+                        sourceInfo = [Expressions.test: (14,12)-(14,12)]
+                        text = s
+                      initializer = CastExpression:
+                        sourceInfo = [Expressions.test: (14,16)-(14,25)]
+                        type = ClassOrInterfaceType:
+                          sourceInfo = [Expressions.test: (14,17)-(14,22)]
+                          name = String
+                          typeArguments = {}
+                        value = SimpleNameReference:
+                          sourceInfo = [Expressions.test: (14,25)-(14,25)]
+                          name = Word:
+                            sourceInfo = [Expressions.test: (14,25)-(14,25)]
+                            text = o
+                  }
+                #3: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (16,5)-(16,37)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [Expressions.test: (16,5)-(16,36)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [Expressions.test: (16,5)-(16,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (16,5)-(16,10)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (16,5)-(16,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [Expressions.test: (16,12)-(16,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [Expressions.test: (16,16)-(16,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [Expressions.test: (16,23)-(16,36)]
+                      expressions = {
+                        #0: ComplexMethodInvocation:
+                          sourceInfo = [Expressions.test: (16,24)-(16,35)]
+                          enclosing = SimpleNameReference:
+                            sourceInfo = [Expressions.test: (16,24)-(16,24)]
+                            name = Word:
+                              sourceInfo = [Expressions.test: (16,24)-(16,24)]
+                              text = o
+                          name = Word:
+                            sourceInfo = [Expressions.test: (16,26)-(16,33)]
+                            text = toString
+                          arguments = ParenthesizedExpressionList:
+                            sourceInfo = [Expressions.test: (16,34)-(16,35)]
+                            expressions = {}
+                      }
+              }
+          #1: ConcreteMethodDef:
+            sourceInfo = [Expressions.test: (19,3)-(25,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [Expressions.test: (19,3)-(19,8)]
+              modifiers = {
+                #0: public
+              }
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [Expressions.test: (19,10)-(19,13)]
+              name = void
+            name = Word:
+              sourceInfo = [Expressions.test: (19,15)-(19,39)]
+              text = testAllocationExpressions
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [Expressions.test: (19,43)-(25,3)]
+              statements = {
+                #0: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (20,5)-(20,27)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (20,5)-(20,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (20,12)-(20,27)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [Expressions.test: (20,5)-(20,10)]
+                        name = Object
+                        typeArguments = {}
+                      name = Word:
+                        sourceInfo = [Expressions.test: (20,12)-(20,12)]
+                        text = o
+                      initializer = SimpleNamedClassInstantiation:
+                        sourceInfo = [Expressions.test: (20,16)-(20,27)]
+                        type = ClassOrInterfaceType:
+                          sourceInfo = [Expressions.test: (20,20)-(20,25)]
+                          name = Object
+                          typeArguments = {}
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [Expressions.test: (20,26)-(20,27)]
+                          expressions = {}
+                  }
+                #1: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (21,5)-(21,30)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (21,5)-(21,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (21,13)-(21,30)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [Expressions.test: (21,5)-(21,11)]
+                        name = Integer
+                        typeArguments = {}
+                      name = Word:
+                        sourceInfo = [Expressions.test: (21,13)-(21,13)]
+                        text = i
+                      initializer = SimpleNamedClassInstantiation:
+                        sourceInfo = [Expressions.test: (21,17)-(21,30)]
+                        type = ClassOrInterfaceType:
+                          sourceInfo = [Expressions.test: (21,21)-(21,27)]
+                          name = Integer
+                          typeArguments = {}
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [Expressions.test: (21,28)-(21,30)]
+                          expressions = {
+                            #0: IntegerLiteral:
+                              sourceInfo = [Expressions.test: (21,29)-(21,29)]
+                              value = 5
+                          }
+                  }
+                #2: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (22,5)-(22,25)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (22,5)-(22,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (22,11)-(22,25)]
+                      type = ArrayType:
+                        sourceInfo = [Expressions.test: (22,5)-(22,9)]
+                        name = int[]
+                        elementType = PrimitiveType:
+                          sourceInfo = [Expressions.test: (22,5)-(22,7)]
+                          name = int
+                      name = Word:
+                        sourceInfo = [Expressions.test: (22,11)-(22,12)]
+                        text = ai
+                      initializer = SimpleUninitializedArrayInstantiation:
+                        sourceInfo = [Expressions.test: (22,20)-(22,25)]
+                        type = ArrayType:
+                          sourceInfo = [Expressions.test: (22,20)-(22,25)]
+                          name = int[]
+                          elementType = PrimitiveType:
+                            sourceInfo = [Expressions.test: (22,20)-(22,22)]
+                            name = int
+                        dimensionSizes = DimensionExpressionList:
+                          sourceInfo = [Expressions.test: (22,23)-(22,25)]
+                          expressions = {
+                            #0: IntegerLiteral:
+                              sourceInfo = [Expressions.test: (22,24)-(22,24)]
+                              value = 5
+                          }
+                  }
+                #3: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (23,5)-(23,34)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (23,5)-(23,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (23,14)-(23,34)]
+                      type = ArrayType:
+                        sourceInfo = [Expressions.test: (23,5)-(23,13)]
+                        name = char[][]
+                        elementType = ArrayType:
+                          sourceInfo = [Expressions.test: (23,5)-(23,11)]
+                          name = char[]
+                          elementType = PrimitiveType:
+                            sourceInfo = [Expressions.test: (23,5)-(23,8)]
+                            name = char
+                      name = Word:
+                        sourceInfo = [Expressions.test: (23,14)-(23,16)]
+                        text = dac
+                      initializer = SimpleUninitializedArrayInstantiation:
+                        sourceInfo = [Expressions.test: (23,24)-(23,34)]
+                        type = ArrayType:
+                          sourceInfo = [Expressions.test: (23,24)-(23,34)]
+                          name = char[][]
+                          elementType = ArrayType:
+                            sourceInfo = [Expressions.test: (23,24)-(23,30)]
+                            name = char[]
+                            elementType = PrimitiveType:
+                              sourceInfo = [Expressions.test: (23,24)-(23,27)]
+                              name = char
+                        dimensionSizes = DimensionExpressionList:
+                          sourceInfo = [Expressions.test: (23,28)-(23,34)]
+                          expressions = {
+                            #0: IntegerLiteral:
+                              sourceInfo = [Expressions.test: (23,29)-(23,29)]
+                              value = 5
+                            #1: IntegerLiteral:
+                              sourceInfo = [Expressions.test: (23,32)-(23,33)]
+                              value = 16
+                          }
+                  }
+                #4: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (24,5)-(24,25)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (24,5)-(24,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (24,11)-(24,25)]
+                      type = ArrayType:
+                        sourceInfo = [Expressions.test: (24,5)-(24,9)]
+                        name = int[]
+                        elementType = PrimitiveType:
+                          sourceInfo = [Expressions.test: (24,5)-(24,7)]
+                          name = int
+                      name = Word:
+                        sourceInfo = [Expressions.test: (24,11)-(24,13)]
+                        text = fai
+                      initializer = ArrayInitializer:
+                        sourceInfo = [Expressions.test: (24,17)-(24,25)]
+                        items = {
+                          #0: IntegerLiteral:
+                            sourceInfo = [Expressions.test: (24,18)-(24,18)]
+                            value = 1
+                          #1: IntegerLiteral:
+                            sourceInfo = [Expressions.test: (24,21)-(24,21)]
+                            value = 2
+                          #2: IntegerLiteral:
+                            sourceInfo = [Expressions.test: (24,24)-(24,24)]
+                            value = 3
+                        }
+                  }
+              }
+          #2: ConcreteMethodDef:
+            sourceInfo = [Expressions.test: (27,3)-(66,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [Expressions.test: (27,3)-(27,8)]
+              modifiers = {
+                #0: public
+              }
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [Expressions.test: (27,10)-(27,13)]
+              name = void
+            name = Word:
+              sourceInfo = [Expressions.test: (27,15)-(27,34)]
+              text = testOtherExpressions
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [Expressions.test: (27,38)-(66,3)]
+              statements = {
+                #0: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (28,5)-(28,13)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (28,5)-(28,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (28,9)-(28,13)]
+                      type = PrimitiveType:
+                        sourceInfo = [Expressions.test: (28,5)-(28,7)]
+                        name = int
+                      name = Word:
+                        sourceInfo = [Expressions.test: (28,9)-(28,9)]
+                        text = i
+                      initializer = IntegerLiteral:
+                        sourceInfo = [Expressions.test: (28,13)-(28,13)]
+                        value = 5
+                  }
+                #1: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (29,5)-(29,13)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (29,5)-(29,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (29,9)-(29,13)]
+                      type = PrimitiveType:
+                        sourceInfo = [Expressions.test: (29,5)-(29,7)]
+                        name = int
+                      name = Word:
+                        sourceInfo = [Expressions.test: (29,9)-(29,9)]
+                        text = j
+                      initializer = IntegerLiteral:
+                        sourceInfo = [Expressions.test: (29,13)-(29,13)]
+                        value = 8
+                  }
+                #2: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (30,5)-(30,19)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (30,5)-(30,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (30,13)-(30,19)]
+                      type = PrimitiveType:
+                        sourceInfo = [Expressions.test: (30,5)-(30,11)]
+                        name = boolean
+                      name = Word:
+                        sourceInfo = [Expressions.test: (30,13)-(30,13)]
+                        text = b
+                      initializer = GreaterThanExpression:
+                        sourceInfo = [Expressions.test: (30,17)-(30,19)]
+                        left = SimpleNameReference:
+                          sourceInfo = [Expressions.test: (30,17)-(30,17)]
+                          name = Word:
+                            sourceInfo = [Expressions.test: (30,17)-(30,17)]
+                            text = i
+                        right = SimpleNameReference:
+                          sourceInfo = [Expressions.test: (30,19)-(30,19)]
+                          name = Word:
+                            sourceInfo = [Expressions.test: (30,19)-(30,19)]
+                            text = j
+                  }
+                #3: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (31,5)-(31,12)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (31,5)-(31,11)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (31,5)-(31,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (31,5)-(31,5)]
+                        text = b
+                    value = LessThanExpression:
+                      sourceInfo = [Expressions.test: (31,9)-(31,11)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (31,9)-(31,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (31,9)-(31,9)]
+                          text = i
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (31,11)-(31,11)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (31,11)-(31,11)]
+                          text = j
+                #4: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (32,5)-(32,18)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (32,5)-(32,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (32,13)-(32,18)]
+                      type = PrimitiveType:
+                        sourceInfo = [Expressions.test: (32,5)-(32,11)]
+                        name = boolean
+                      name = Word:
+                        sourceInfo = [Expressions.test: (32,13)-(32,13)]
+                        text = c
+                      initializer = NotExpression:
+                        sourceInfo = [Expressions.test: (32,17)-(32,18)]
+                        value = SimpleNameReference:
+                          sourceInfo = [Expressions.test: (32,18)-(32,18)]
+                          name = Word:
+                            sourceInfo = [Expressions.test: (32,18)-(32,18)]
+                            text = b
+                  }
+                #5: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (33,5)-(33,11)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (33,5)-(33,10)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (33,5)-(33,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (33,5)-(33,5)]
+                        text = j
+                    value = BitwiseNotExpression:
+                      sourceInfo = [Expressions.test: (33,9)-(33,10)]
+                      value = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (33,10)-(33,10)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (33,10)-(33,10)]
+                          text = i
+                #6: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (34,5)-(34,23)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (34,5)-(34,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (34,9)-(34,23)]
+                      type = PrimitiveType:
+                        sourceInfo = [Expressions.test: (34,5)-(34,7)]
+                        name = int
+                      name = Word:
+                        sourceInfo = [Expressions.test: (34,9)-(34,9)]
+                        text = k
+                      initializer = Parenthesized:
+                        sourceInfo = [Expressions.test: (34,13)-(34,23)]
+                        value = ConditionalExpression:
+                          sourceInfo = [Expressions.test: (34,14)-(34,22)]
+                          condition = EqualsExpression:
+                            sourceInfo = [Expressions.test: (34,14)-(34,17)]
+                            left = SimpleNameReference:
+                              sourceInfo = [Expressions.test: (34,14)-(34,14)]
+                              name = Word:
+                                sourceInfo = [Expressions.test: (34,14)-(34,14)]
+                                text = j
+                            right = SimpleNameReference:
+                              sourceInfo = [Expressions.test: (34,17)-(34,17)]
+                              name = Word:
+                                sourceInfo = [Expressions.test: (34,17)-(34,17)]
+                                text = i
+                          forTrue = IntegerLiteral:
+                            sourceInfo = [Expressions.test: (34,20)-(34,20)]
+                            value = 1
+                          forFalse = IntegerLiteral:
+                            sourceInfo = [Expressions.test: (34,22)-(34,22)]
+                            value = 2
+                  }
+                #7: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (35,5)-(35,13)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (35,5)-(35,12)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (35,5)-(35,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (35,5)-(35,5)]
+                        text = b
+                    value = LessThanOrEqualExpression:
+                      sourceInfo = [Expressions.test: (35,9)-(35,12)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (35,9)-(35,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (35,9)-(35,9)]
+                          text = i
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (35,12)-(35,12)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (35,12)-(35,12)]
+                          text = k
+                #8: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (36,5)-(36,13)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (36,5)-(36,12)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (36,5)-(36,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (36,5)-(36,5)]
+                        text = c
+                    value = GreaterThanOrEqualExpression:
+                      sourceInfo = [Expressions.test: (36,9)-(36,12)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (36,9)-(36,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (36,9)-(36,9)]
+                          text = i
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (36,12)-(36,12)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (36,12)-(36,12)]
+                          text = k
+                #9: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (37,5)-(37,15)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (37,5)-(37,14)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (37,5)-(37,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (37,5)-(37,5)]
+                        text = b
+                    value = NotEqualExpression:
+                      sourceInfo = [Expressions.test: (37,9)-(37,14)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (37,9)-(37,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (37,9)-(37,9)]
+                          text = b
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (37,14)-(37,14)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (37,14)-(37,14)]
+                          text = c
+                #10: VariableDeclaration:
+                  sourceInfo = [Expressions.test: (38,5)-(38,22)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [Expressions.test: (38,5)-(38,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [Expressions.test: (38,13)-(38,22)]
+                      type = PrimitiveType:
+                        sourceInfo = [Expressions.test: (38,5)-(38,11)]
+                        name = boolean
+                      name = Word:
+                        sourceInfo = [Expressions.test: (38,13)-(38,13)]
+                        text = a
+                      initializer = OrExpression:
+                        sourceInfo = [Expressions.test: (38,17)-(38,22)]
+                        left = SimpleNameReference:
+                          sourceInfo = [Expressions.test: (38,17)-(38,17)]
+                          name = Word:
+                            sourceInfo = [Expressions.test: (38,17)-(38,17)]
+                            text = b
+                        right = SimpleNameReference:
+                          sourceInfo = [Expressions.test: (38,22)-(38,22)]
+                          name = Word:
+                            sourceInfo = [Expressions.test: (38,22)-(38,22)]
+                            text = c
+                  }
+                #11: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (39,5)-(39,13)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (39,5)-(39,12)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (39,5)-(39,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (39,5)-(39,5)]
+                        text = c
+                    value = AndExpression:
+                      sourceInfo = [Expressions.test: (39,9)-(39,12)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (39,9)-(39,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (39,9)-(39,9)]
+                          text = a
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (39,12)-(39,12)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (39,12)-(39,12)]
+                          text = b
+                #12: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (40,5)-(40,8)]
+                  expression = PositivePostfixIncrementExpression:
+                    sourceInfo = [Expressions.test: (40,5)-(40,7)]
+                    value = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (40,5)-(40,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (40,5)-(40,5)]
+                        text = j
+                #13: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (41,5)-(41,8)]
+                  expression = NegativePostfixIncrementExpression:
+                    sourceInfo = [Expressions.test: (41,5)-(41,7)]
+                    value = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (41,5)-(41,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (41,5)-(41,5)]
+                        text = i
+                #14: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (42,5)-(42,14)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (42,5)-(42,13)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (42,5)-(42,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (42,5)-(42,5)]
+                        text = k
+                    value = PlusExpression:
+                      sourceInfo = [Expressions.test: (42,9)-(42,13)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (42,9)-(42,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (42,9)-(42,9)]
+                          text = i
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (42,13)-(42,13)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (42,13)-(42,13)]
+                          text = j
+                #15: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (43,5)-(43,14)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (43,5)-(43,13)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (43,5)-(43,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (43,5)-(43,5)]
+                        text = i
+                    value = MinusExpression:
+                      sourceInfo = [Expressions.test: (43,9)-(43,13)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (43,9)-(43,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (43,9)-(43,9)]
+                          text = j
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (43,13)-(43,13)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (43,13)-(43,13)]
+                          text = k
+                #16: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (44,5)-(44,14)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (44,5)-(44,13)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (44,5)-(44,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (44,5)-(44,5)]
+                        text = j
+                    value = MultiplyExpression:
+                      sourceInfo = [Expressions.test: (44,9)-(44,13)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (44,9)-(44,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (44,9)-(44,9)]
+                          text = i
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (44,13)-(44,13)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (44,13)-(44,13)]
+                          text = k
+                #17: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (45,5)-(45,12)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (45,5)-(45,11)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (45,5)-(45,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (45,5)-(45,5)]
+                        text = k
+                    value = DivideExpression:
+                      sourceInfo = [Expressions.test: (45,9)-(45,11)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (45,9)-(45,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (45,9)-(45,9)]
+                          text = i
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (45,11)-(45,11)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (45,11)-(45,11)]
+                          text = j
+                #18: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (46,5)-(46,12)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (46,5)-(46,11)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (46,5)-(46,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (46,5)-(46,5)]
+                        text = i
+                    value = BitwiseAndExpression:
+                      sourceInfo = [Expressions.test: (46,9)-(46,11)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (46,9)-(46,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (46,9)-(46,9)]
+                          text = j
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (46,11)-(46,11)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (46,11)-(46,11)]
+                          text = k
+                #19: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (47,5)-(47,12)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (47,5)-(47,11)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (47,5)-(47,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (47,5)-(47,5)]
+                        text = k
+                    value = BitwiseOrExpression:
+                      sourceInfo = [Expressions.test: (47,9)-(47,11)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (47,9)-(47,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (47,9)-(47,9)]
+                          text = i
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (47,11)-(47,11)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (47,11)-(47,11)]
+                          text = k
+                #20: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (48,5)-(48,12)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (48,5)-(48,11)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (48,5)-(48,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (48,5)-(48,5)]
+                        text = j
+                    value = BitwiseXorExpression:
+                      sourceInfo = [Expressions.test: (48,9)-(48,11)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (48,9)-(48,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (48,9)-(48,9)]
+                          text = k
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (48,11)-(48,11)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (48,11)-(48,11)]
+                          text = i
+                #21: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (49,5)-(49,12)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (49,5)-(49,11)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (49,5)-(49,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (49,5)-(49,5)]
+                        text = k
+                    value = ModExpression:
+                      sourceInfo = [Expressions.test: (49,9)-(49,11)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (49,9)-(49,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (49,9)-(49,9)]
+                          text = i
+                      right = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (49,11)-(49,11)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (49,11)-(49,11)]
+                          text = j
+                #22: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (50,5)-(50,13)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (50,5)-(50,12)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (50,5)-(50,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (50,5)-(50,5)]
+                        text = k
+                    value = LeftShiftExpression:
+                      sourceInfo = [Expressions.test: (50,9)-(50,12)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (50,9)-(50,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (50,9)-(50,9)]
+                          text = k
+                      right = IntegerLiteral:
+                        sourceInfo = [Expressions.test: (50,12)-(50,12)]
+                        value = 2
+                #23: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (51,5)-(51,13)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [Expressions.test: (51,5)-(51,12)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (51,5)-(51,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (51,5)-(51,5)]
+                        text = k
+                    value = RightSignedShiftExpression:
+                      sourceInfo = [Expressions.test: (51,9)-(51,12)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Expressions.test: (51,9)-(51,9)]
+                        name = Word:
+                          sourceInfo = [Expressions.test: (51,9)-(51,9)]
+                          text = k
+                      right = IntegerLiteral:
+                        sourceInfo = [Expressions.test: (51,12)-(51,12)]
+                        value = 2
+                #24: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (52,5)-(52,9)]
+                  expression = PlusAssignmentExpression:
+                    sourceInfo = [Expressions.test: (52,5)-(52,8)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (52,5)-(52,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (52,5)-(52,5)]
+                        text = i
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (52,8)-(52,8)]
+                      value = 2
+                #25: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (53,5)-(53,9)]
+                  expression = MinusAssignmentExpression:
+                    sourceInfo = [Expressions.test: (53,5)-(53,8)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (53,5)-(53,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (53,5)-(53,5)]
+                        text = j
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (53,8)-(53,8)]
+                      value = 4
+                #26: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (54,5)-(54,9)]
+                  expression = MultiplyAssignmentExpression:
+                    sourceInfo = [Expressions.test: (54,5)-(54,8)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (54,5)-(54,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (54,5)-(54,5)]
+                        text = k
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (54,8)-(54,8)]
+                      value = 5
+                #27: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (55,5)-(55,10)]
+                  expression = DivideAssignmentExpression:
+                    sourceInfo = [Expressions.test: (55,5)-(55,9)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (55,5)-(55,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (55,5)-(55,5)]
+                        text = i
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (55,8)-(55,9)]
+                      value = 10
+                #28: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (56,5)-(56,10)]
+                  expression = BitwiseAndAssignmentExpression:
+                    sourceInfo = [Expressions.test: (56,5)-(56,9)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (56,5)-(56,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (56,5)-(56,5)]
+                        text = i
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (56,8)-(56,9)]
+                      value = 12
+                #29: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (57,5)-(57,9)]
+                  expression = BitwiseOrAssignmentExpression:
+                    sourceInfo = [Expressions.test: (57,5)-(57,8)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (57,5)-(57,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (57,5)-(57,5)]
+                        text = j
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (57,8)-(57,8)]
+                      value = 1
+                #30: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (59,5)-(59,10)]
+                  expression = BitwiseXorAssignmentExpression:
+                    sourceInfo = [Expressions.test: (59,5)-(59,9)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (59,5)-(59,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (59,5)-(59,5)]
+                        text = k
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (59,8)-(59,9)]
+                      value = 13
+                #31: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (60,5)-(60,9)]
+                  expression = ModAssignmentExpression:
+                    sourceInfo = [Expressions.test: (60,5)-(60,8)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (60,5)-(60,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (60,5)-(60,5)]
+                        text = k
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (60,8)-(60,8)]
+                      value = 5
+                #32: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (61,5)-(61,10)]
+                  expression = LeftShiftAssignmentExpression:
+                    sourceInfo = [Expressions.test: (61,5)-(61,9)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (61,5)-(61,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (61,5)-(61,5)]
+                        text = i
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (61,9)-(61,9)]
+                      value = 2
+                #33: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (62,5)-(62,10)]
+                  expression = RightSignedShiftAssignmentExpression:
+                    sourceInfo = [Expressions.test: (62,5)-(62,9)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (62,5)-(62,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (62,5)-(62,5)]
+                        text = i
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (62,9)-(62,9)]
+                      value = 2
+                #34: ExpressionStatement:
+                  sourceInfo = [Expressions.test: (63,5)-(63,11)]
+                  expression = RightUnsignedShiftAssignmentExpression:
+                    sourceInfo = [Expressions.test: (63,5)-(63,10)]
+                    name = SimpleNameReference:
+                      sourceInfo = [Expressions.test: (63,5)-(63,5)]
+                      name = Word:
+                        sourceInfo = [Expressions.test: (63,5)-(63,5)]
+                        text = i
+                    value = IntegerLiteral:
+                      sourceInfo = [Expressions.test: (63,10)-(63,10)]
+                      value = 2
+              }
+        }
+  }

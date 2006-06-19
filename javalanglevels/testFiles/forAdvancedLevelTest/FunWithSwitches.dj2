@@ -1,0 +1,44 @@
+// Test switch statements.  Should compile.
+
+class FunWithSwitches {
+
+  boolean method(int x, char y) {
+  
+    switch(x) {
+      case 0:
+        return true;
+        
+      case 1:
+        boolean result = x + y * 3 > 27;
+        return result;
+        
+      case 'q':
+        break;
+    
+      default:
+        return false;
+        
+    }
+   
+    boolean returnMe;
+    
+    switch(y) {
+      case 0:
+        returnMe = true;
+        break;
+        
+      case 26:
+      case 'z':
+        returnMe = false;
+        break;
+        
+      default:
+        returnMe = false;
+        return true;
+    }
+    
+    return returnMe;
+  
+  }
+
+}

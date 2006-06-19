@@ -1,0 +1,21 @@
+/**
+
+ * Represents the abstract list structure.
+
+ */
+
+public interface IList2 {
+
+  
+
+  public int sum();
+
+  public String toStringHelp();
+
+  public int getlength();
+
+  public int getlengthHelp(final int acc);
+
+
+
+}

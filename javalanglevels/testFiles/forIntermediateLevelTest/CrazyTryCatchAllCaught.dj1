@@ -1,0 +1,31 @@
+class CrazyTryCatchAllCaught {
+  
+  int myMethod(int i, int j, char c) {
+    try {
+      if (i+c < j) {
+        throw new ClassNotFoundException("Someone had better catch me!");
+      }
+      try {
+        if (c < j) {
+          throw new CloneNotSupportedException("And someone had better catch me too!");
+        }
+        else if (i<j) {
+          throw new InstantiationException("And me too!");
+        }
+        else throw new RuntimeException("No one needs to catch me");
+      }
+      catch (InstantiationException e) {
+        throw new RuntimeException("yeehah!");
+      }
+      
+    }
+    catch (ClassNotFoundException e) {
+      throw new RuntimeException("I caught your exception, but you don't have to catch me.");
+    }
+    catch (CloneNotSupportedException e) {
+      System.out.println("ohh yeah");
+    }
+    return 5;
+  }
+      
+}

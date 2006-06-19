@@ -1,0 +1,10 @@
+/**Test that a while loop can be correctly handled */
+class FunWithWhileLoops {
+  int myWhilingMethod(int i, int j, char c, double d) {
+    int k = i;
+    while (k<j && (((int) j+d) == c)) {
+      k = i*4;
+    }
+    return 365;
+  }
+}

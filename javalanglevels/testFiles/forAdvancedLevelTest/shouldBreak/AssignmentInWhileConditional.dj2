@@ -1,0 +1,10 @@
+/** cannot have an assignment in the conditional expression of a while loop */
+class AssignmentInWhileConditional {
+  void myMethod() {
+    int i=172;
+    while (i=42) {
+      System.out.println("uh oh!");
+    }
+  }
+}
+  

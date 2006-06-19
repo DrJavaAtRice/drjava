@@ -1,0 +1,6 @@
+/*!DrJava Beginner Level*/
+
+class BeginnerShouldBreakVoid extends Object{
+   void badMethod() {
+  }
+}

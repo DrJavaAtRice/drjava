@@ -1,0 +1,9 @@
+class BeginnerShouldBreakThrows {
+  
+  int i;
+  int j;
+  
+  public int doSomething(char c String s) throws RuntimeException{
+    System.out.println(i+j);
+    }
+  }

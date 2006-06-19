@@ -1,0 +1,24 @@
+//This makes sure that you cannot use an unqualified name to reference a local class of
+//a method from within the method before the local class has been defined.
+
+class RefInnerClassOfMethodWithinMethodToSoon {
+
+  void myMethod() {
+    
+    MyInnerClass c;
+    
+
+    class MyInnerClass {
+    
+    }
+
+  }
+    
+
+}
+
+    
+
+  
+
+  

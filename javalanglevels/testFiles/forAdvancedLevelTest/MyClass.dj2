@@ -1,0 +1,22 @@
+//Makes sure that final fields can be reassigned in constructors.
+
+class MyClass {
+  
+  final int field;
+  
+  MyClass() {
+    field = 5;
+  }
+  
+  MyClass(int i) {
+    field = i;
+  }
+  
+  MyClass(String s) {
+    System.out.println(s);
+    field = 42;
+  }
+}
+
+
+  

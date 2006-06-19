@@ -1,0 +1,17 @@
+class See {
+  int i;
+
+  See() {
+    this(24);
+    i=45;
+  }
+  
+  See(int i) {
+    this.i = i;
+  }
+  
+//  int myMethod() {
+//    //i=42;
+//    return i;
+//  }
+}

@@ -1,0 +1,35 @@
+class Testing5 extends Object{
+  boolean b;
+  char c, d;
+  int i, 
+    j;
+  double dd;
+  
+  //System.out.println("kadjfk");
+  
+  boolean myMethod() {
+    return false;
+  }
+  
+  boolean c(char 
+              toSetTo)  {
+              b(1+1, 34, 'a', true);
+              return 
+    c 
+    != 
+    toSetTo;
+  }
+  
+  boolean b(int wuz,
+            
+            double d,            
+           
+            char up,
+            
+            boolean doh) {
+    return wuz==up;
+  }
+  
+}
+  
+  

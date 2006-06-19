@@ -1,0 +1,12 @@
+/** cannot have an assignment in the conditional expression of a switch statement */
+class AssignmentInSwitchExpression {
+  void myMethod() {
+    int i = 23;
+    switch(i = 92) {
+      case 92:  System.out.println("oh no!"); break;
+      default: break;
+    }
+    
+  }
+}
+  

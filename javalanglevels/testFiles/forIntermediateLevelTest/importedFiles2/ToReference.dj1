@@ -1,0 +1,12 @@
+package forIntermediateLevelTest.importedFiles2;
+
+public class ToReference {
+  
+  public String toString2() { 
+    return "packaged in testsrc";
+  }
+  
+  public String myMethod() {
+    return "24 oceans";
+  }
+}

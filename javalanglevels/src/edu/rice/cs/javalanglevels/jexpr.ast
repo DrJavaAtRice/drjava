@@ -1,0 +1,263 @@
+// TopLevel JExpr: Statement[] statements, ClassDef[] classes, InterfaceDef[] interfaces
+visitmethod visit;
+visitormethodprefix for;
+tabsize 2;
+outputdir tree;
+allownulls no;
+
+package edu.rice.cs.javalanglevels.tree;
+//import edu.rice.cs.javaast.Visibility;
+//import edu.rice.cs.javaast.ClassModifier;
+//import edu.rice.cs.javaast.SourceInfo;
+import edu.rice.cs.javalanglevels.SourceInfo;
+
+begin ast;
+interface JExpressionIF(SourceInfo sourceInfo);  
+  interface VariableInitializerI();
+  interface ReturnTypeI(String name);
+  interface BodyItemI();
+  interface ForInitI();
+  interface ForConditionI();
+//  interface ClassDefBaseI();
+//  interface TypeDefI();
+//    interface InnerDefI();
+//      interface StaticInnerDefI();
+//      interface DynamicInnerDefI();
+//  interface BlockStatementI();
+//  interface AllocationQualifierI();
+//  interface AllocationExpressionI();
+  abstract JExpression(ignoreForEquals SourceInfo sourceInfo); //int startLine, int startColumn, int endLine, int endColumn);
+    SourceFile(PackageStatement[] packageStatements, ImportStatement[] importStatements, TypeDefBase[] types);
+
+    ModifiersAndVisibility(String[] modifiers); 
+
+//    CommaSeparatedList(JExpression[] list);
+    
+    // Unneeded if not doing generics
+    //AngleBracketed(CommaSeparatedList contents);
+
+    /** Compound word is made up of Word.Word.Word, etc. Like System.err.println is CompoundWord(System, err, println). */
+    CompoundWord(Word[] words);// implements AllocationQualifierI;
+    Word(String text);
+
+//      CompoundWordBeforeKeyword();
+
+    abstract TypeDefBase(ModifiersAndVisibility mav, Word name, TypeParameter[] typeParameters, ReferenceType[] interfaces, BracedBody body);// implements TypeDefI;
+      ClassDef(ReferenceType superclass, ReferenceType[] interfaces, BracedBody body);// implements ClassDefBaseI;
+        InnerClassDef() implements BodyItemI; //InnerDefI
+      InterfaceDef(); //, AbstractMethodDef[] methods, FinalStaticFieldDef[] fields, StaticInnerDefI[] inners);
+        InnerInterfaceDef() implements BodyItemI; // StaticInnerDefI
+
+    ConstructorDef(Word name, ModifiersAndVisibility mav, FormalParameter[] parameters, ReferenceType[] throws, BracedBody statements) implements BodyItemI;
+
+    abstract Initializer(Block code) implements BodyItemI;
+      InstanceInitializer();
+      StaticInitializer();
+      
+    PackageStatement(CompoundWord cWord);
+    abstract ImportStatement(CompoundWord cWord);
+      ClassImportStatement();
+      PackageImportStatement();
+
+    abstract Statement() implements BodyItemI;
+//      NormalStatement(JExpression[] contents);
+//      BracedStatement(JExpression[] beforeBrace, Braced body);
+      LabeledStatement(Word label, Statement statement);
+      Block(BracedBody statements);
+      ExpressionStatement(Expression expression);
+      SwitchStatement(Expression test, SwitchCase[] cases);
+      IfThenStatement(Expression testExpression, Statement thenStatement);
+        IfThenElseStatement(Statement elseStatement);
+      WhileStatement(Expression condition, Statement code);
+      DoStatement(Statement code, Expression condition);
+      ForStatement(ForInitI init, ForConditionI condition, UnparenthesizedExpressionList update, Statement code);
+      abstract BreakStatement();
+        LabeledBreakStatement(Word label);
+        UnlabeledBreakStatement();
+      abstract ContinueStatement();
+        LabeledContinueStatement(Word label);
+        UnlabeledContinueStatement();
+      abstract ReturnStatement();
+        VoidReturnStatement();
+        ValueReturnStatement(Expression value);
+      ThrowStatement(Expression thrown);
+      SynchronizedStatement(Expression lockExpr, Block block);
+      abstract TryCatchStatement(Block tryBlock, CatchBlock[] catchBlocks);
+        TryCatchFinallyStatement(Block finallyBlock);
+        NormalTryCatchStatement();
+      EmptyStatement();
+    
+    abstract MethodDef(ModifiersAndVisibility mav, TypeParameter[] typeParams, ReturnTypeI result, Word name, FormalParameter[] params, ReferenceType[] throws) implements BodyItemI;
+      ConcreteMethodDef(BracedBody body);
+      AbstractMethodDef();
+//    FormalParameterList(FormalParameter[] params);
+    FormalParameter(VariableDeclarator declarator, boolean isFinal);//VariableDeclarator declarator);
+    
+    /** e.g. int x = 5, y; */
+    VariableDeclaration(ModifiersAndVisibility mav, VariableDeclarator[] declarators) implements BodyItemI, ForInitI;//, BlockStatementI;
+    
+    /** There is one of these for each variable declared in a VariableDeclaration */
+    abstract VariableDeclarator(Type type, Word name);
+      UninitializedVariableDeclarator();
+      InitializedVariableDeclarator(VariableInitializerI initializer);
+    
+    TypeParameter(TypeVariable variable, ReferenceType bound);
+
+    ArrayInitializer(VariableInitializerI[] items) implements VariableInitializerI;
+
+    abstract Type(String name) implements ReturnTypeI;
+      PrimitiveType();//String name); // should there be subtype per type?
+      ArrayType(Type elementType);
+      abstract ReferenceType(); //String name);
+        MemberType(ReferenceType left, ReferenceType right);
+        ClassOrInterfaceType(Type[] typeArguments);
+        TypeVariable();
+        
+    VoidReturn(String name) implements ReturnTypeI;
+
+    abstract SwitchCase(UnbracedBody code);
+      LabeledCase(Expression label, UnbracedBody code);
+      DefaultCase();
+      
+    CatchBlock(FormalParameter exception, Block block);
+    
+
+    /************************** EXPRESSIONS **************************/
+    abstract Expression() implements VariableInitializerI, ForConditionI;
+
+      abstract AssignmentExpression(Expression name, Expression value);
+        SimpleAssignmentExpression();
+        PlusAssignmentExpression();
+        abstract NumericAssignmentExpression();
+          MinusAssignmentExpression();
+          MultiplyAssignmentExpression();
+          DivideAssignmentExpression();
+          ModAssignmentExpression();
+        abstract ShiftAssignmentExpression();
+          LeftShiftAssignmentExpression();
+          RightSignedShiftAssignmentExpression();
+          RightUnsignedShiftAssignmentExpression();
+        abstract BitwiseAssignmentExpression();
+          BitwiseAndAssignmentExpression();
+          BitwiseOrAssignmentExpression();
+          BitwiseXorAssignmentExpression();
+      
+      abstract BinaryExpression(Expression left, Expression right);
+        abstract BooleanExpression();
+          OrExpression();
+          AndExpression();
+        abstract BitwiseBinaryExpression();
+          BitwiseOrExpression();
+          BitwiseXorExpression();
+          BitwiseAndExpression();
+        abstract EqualityExpression();
+          EqualsExpression();
+          NotEqualExpression();
+        abstract ComparisonExpression();
+          LessThanExpression();
+          LessThanOrEqualExpression();
+          GreaterThanExpression();
+          GreaterThanOrEqualExpression();
+        abstract ShiftBinaryExpression();
+          LeftShiftExpression();
+          RightSignedShiftExpression();
+          RightUnsignedShiftExpression();
+        PlusExpression();
+        abstract NumericBinaryExpression();
+          MinusExpression();
+          MultiplyExpression();
+          DivideExpression();
+          ModExpression();
+        NoOpExpression(); //This currently does not parse
+          
+      abstract UnaryExpression(Expression value);
+        abstract IncrementExpression();
+          abstract PrefixIncrementExpression();
+            PositivePrefixIncrementExpression();
+            NegativePrefixIncrementExpression();
+          abstract PostfixIncrementExpression();
+            PositivePostfixIncrementExpression();
+            NegativePostfixIncrementExpression();
+        abstract NumericUnaryExpression();
+          PositiveExpression();
+          NegativeExpression();
+        BitwiseNotExpression();
+        NotExpression();
+        
+      ConditionalExpression(Expression condition, Expression forTrue, Expression forFalse);
+      
+      InstanceofExpression(Expression value, Type type);
+      CastExpression(Type type, Expression value);
+      
+      abstract Primary();
+
+        abstract LexicalLiteral();
+          IntegerLiteral(int value);
+          LongLiteral(long value);
+          DoubleLiteral(double value);
+          FloatLiteral(float value);
+          BooleanLiteral(boolean value);
+          CharLiteral(char value);
+          StringLiteral(String value);
+          NullLiteral();
+
+        abstract Instantiation();
+          abstract ClassInstantiation(Type type, ParenthesizedExpressionList arguments);
+            abstract NamedClassInstantiation();
+              SimpleNamedClassInstantiation(Type type, ParenthesizedExpressionList arguments);
+              ComplexNamedClassInstantiation(Expression enclosing, Type type, ParenthesizedExpressionList arguments);
+            abstract AnonymousClassInstantiation(BracedBody body);
+              SimpleAnonymousClassInstantiation(Type type, ParenthesizedExpressionList arguments, BracedBody body);
+              ComplexAnonymousClassInstantiation(Expression enclosing, Type type, ParenthesizedExpressionList arguments, BracedBody body);
+          abstract ArrayInstantiation(Type type);
+            abstract UninitializedArrayInstantiation(DimensionExpressionList dimensionSizes);
+              SimpleUninitializedArrayInstantiation(Type type, DimensionExpressionList dimensionSizes);
+              ComplexUninitializedArrayInstantiation(Expression enclosing, Type type, DimensionExpressionList dimensionSizes); // not legal Java, but here for consistency
+            abstract InitializedArrayInstantiation(ArrayInitializer initializer);
+              SimpleInitializedArrayInstantiation(Type type, ArrayInitializer initializer);
+              ComplexInitializedArrayInstantiation(Expression enclosing, Type type, ArrayInitializer initializer); // not legal Java, but here for consistency
+              
+        abstract VariableReference();
+          abstract NameReference(Word name);
+            SimpleNameReference(Word name); //This is a name reference with no "." in it.  If a "." was parsed, we will build a ComplexNameReference
+            ComplexNameReference(Expression enclosing, Word name);
+          abstract ThisReference();
+            SimpleThisReference();
+            ComplexThisReference(Expression enclosing);
+          abstract SuperReference();
+            SimpleSuperReference();
+            ComplexSuperReference(Expression enclosing);
+            
+        abstract FunctionInvocation(ParenthesizedExpressionList arguments);
+          abstract MethodInvocation(Word name);
+            SimpleMethodInvocation(Word name, ParenthesizedExpressionList arguments);
+            ComplexMethodInvocation(Expression enclosing, Word name, ParenthesizedExpressionList arguments);
+          abstract ThisConstructorInvocation();
+            SimpleThisConstructorInvocation(ParenthesizedExpressionList arguments);
+            ComplexThisConstructorInvocation(Expression enclosing, ParenthesizedExpressionList arguments); // not legal Java, but here for consistency
+          abstract SuperConstructorInvocation();
+            SimpleSuperConstructorInvocation(ParenthesizedExpressionList arguments);
+            ComplexSuperConstructorInvocation(Expression enclosing, ParenthesizedExpressionList arguments);
+
+        ClassLiteral(ReturnTypeI type);
+        ArrayAccess(Expression array, Expression index);
+        Parenthesized(Expression value);
+        EmptyExpression();
+//        EmptyDimensionExpression();
+
+        
+    /************************** MISCELLANEOUS **************************/
+        
+    abstract Body(BodyItemI[] statements);
+      BracedBody();
+      UnbracedBody();
+      
+    abstract ExpressionList(Expression[] expressions);
+      ParenthesizedExpressionList();
+      UnparenthesizedExpressionList() implements ForInitI;
+      DimensionExpressionList();
+
+    
+    EmptyForCondition() implements ForConditionI;
+    
+end;

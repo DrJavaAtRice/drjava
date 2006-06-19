@@ -1,0 +1,4 @@
+//Here, we see that the methods of interfaces are always made public.
+interface MyInterfaceYeah {
+  boolean equals(Object o);
+}

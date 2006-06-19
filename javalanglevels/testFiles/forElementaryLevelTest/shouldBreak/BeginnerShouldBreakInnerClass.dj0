@@ -1,0 +1,8 @@
+/*!DrJava Beginner Level*/
+
+class BeginnerShouldBreakInnerClass extends Object {
+  class InnerClass extends Object{
+    int j;
+    int k;
+  }
+}

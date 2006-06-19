@@ -1,0 +1,4 @@
+
+class ShouldBreakFinal extends Object {
+  final int j;
+}

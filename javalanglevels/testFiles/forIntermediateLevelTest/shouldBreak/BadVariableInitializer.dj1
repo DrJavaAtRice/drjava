@@ -1,0 +1,3 @@
+public class BadVariableInitializer {
+  static Object o = fish;
+}

@@ -1,0 +1,11 @@
+import java.util.*;
+
+class TestNoDuplicateAugmentedVariables {
+  LinkedList __hashCodeList;
+  LinkedList __hashCodeList0;
+  LinkedList __equalsList;
+  boolean __toStringFlag;
+  boolean __toStringFlag0;
+  boolean __toStringFlag2;
+  
+}

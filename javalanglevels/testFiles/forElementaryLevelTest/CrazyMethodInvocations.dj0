@@ -1,0 +1,26 @@
+class CrazyMethodInvocations extends Object{
+  int method1() {
+    return 5;
+  }
+  
+  int method2(int i) {
+    return i + 7;
+  }
+  
+  int method3(int i, int j) {
+    return i*j+42;
+  }
+  
+  int method4(int i, int j, int k) {
+    return i+j+k*5;
+  }
+  
+  int mainMethod() {
+    int h = method1();
+    int i = method2(h);
+    int j = method3(h,i);
+    int k = method4(h,i,j);
+    return k;
+  }
+  
+}

@@ -1,0 +1,12 @@
+//cannot assign an initializer to an Object without a new in front of it. 
+
+class testArraysBadInitializer {
+//  Integer[][] i = {{1, 2, 3}};
+  Object o = {1, 2, 3};
+  int j;
+  void myMethod() {
+    
+    java.lang.Integer[] i2 = {j = 5};
+  }
+
+}

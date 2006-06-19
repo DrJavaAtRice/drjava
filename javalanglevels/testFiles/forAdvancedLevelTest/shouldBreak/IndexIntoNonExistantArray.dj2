@@ -1,0 +1,4 @@
+//trying to index into an array that isn't there
+class OhDear {
+  int i = [3];
+}

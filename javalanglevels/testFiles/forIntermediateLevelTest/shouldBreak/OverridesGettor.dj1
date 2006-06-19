@@ -1,0 +1,14 @@
+/**
+ * This overrides a gettor
+ */
+
+class OverridesGettor {
+  int i;
+  char c;
+  
+  protected int i() {
+    return i;
+  }
+  
+  
+}

@@ -1,0 +1,4 @@
+/*!DrJava Beginner Level*/
+
+interface BeginnerShouldBreakInterface extends Object {
+}

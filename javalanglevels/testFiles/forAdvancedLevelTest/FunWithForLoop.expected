@@ -1,0 +1,9 @@
+class FunWithForLoop {
+  int myFunForLoopMethod() { 
+    String myString = "";
+    for (int i = 0; i<250; i++) {
+      myString += i + "abcdefg";
+    }
+    return myString.length();
+  }
+}

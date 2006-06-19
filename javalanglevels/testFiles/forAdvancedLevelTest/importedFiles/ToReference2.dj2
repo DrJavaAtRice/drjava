@@ -1,0 +1,9 @@
+package forAdvancedLevelTest.importedFiles;
+
+class ToReference2 {
+  
+  
+  public String myMethod() {
+    return "24";
+  }
+} 

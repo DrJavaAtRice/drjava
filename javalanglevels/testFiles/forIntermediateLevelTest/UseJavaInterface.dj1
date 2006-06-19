@@ -1,0 +1,11 @@
+//This test makes sure that we know that precompiled interfaces have the methods in Object.
+
+import java.security.acl.*;
+
+class UseJavaInterface {
+  Owner o;
+  
+  String myMethod() {
+    return o.toString();
+  }
+}

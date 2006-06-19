@@ -1,0 +1,9 @@
+//Test Cases must appear by themselves
+import junit.framework.TestCase;
+public class TestClassTesting2 extends TestCase {
+  public void testMethod() {
+  }
+}
+
+class NotATestClass {
+}

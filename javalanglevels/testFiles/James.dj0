@@ -1,0 +1,5 @@
+class James {
+  int can;
+  double sing;
+  char sorta; 
+}

@@ -1,0 +1,11 @@
+import java.util.*;
+class ShouldBreakTypeParameters {
+  
+  Vector<Integer> v;
+  int i;
+  int j;
+  
+  public int doSomething(char c, String s) {
+    return v.getFirst().intValue();
+  }
+}

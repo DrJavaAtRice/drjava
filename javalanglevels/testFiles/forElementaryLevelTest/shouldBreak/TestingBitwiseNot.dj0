@@ -1,0 +1,8 @@
+class TestingBitwiseNot extends Object{
+ double j;
+ 
+ double cannotBitwiseNot() {
+   double i = 5;
+   return ~i;
+ }
+}

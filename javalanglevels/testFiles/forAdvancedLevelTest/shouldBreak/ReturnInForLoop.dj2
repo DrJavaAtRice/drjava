@@ -1,0 +1,9 @@
+/**A return in a for loop is not guaranteed to have happened*/
+
+class ReturnInForLoop {
+  int myMethod(int j) {
+    for (int i = 0; i<5; i++) {
+      return 5;
+    }
+  }
+}

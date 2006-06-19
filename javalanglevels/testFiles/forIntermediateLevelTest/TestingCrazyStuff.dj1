@@ -1,0 +1,14 @@
+//This class tests autoboxing and unboxing.
+class TestingCrazyStuff {
+ static Object o = 5; 
+ static Object b = true;
+ 
+ public Object myMethod() {
+   if (1<2) {
+     return 5;
+   }
+   else {
+     return true;
+   }
+ }
+}

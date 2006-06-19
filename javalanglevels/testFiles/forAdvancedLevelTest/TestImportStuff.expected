@@ -1,0 +1,21 @@
+package forAdvancedLevelTest;
+import forAdvancedLevelTest.importedFiles.ToReference;
+import forAdvancedLevelTest.importedFiles.IsItPackageAndImport;
+
+//this tests that if you have specifically imported a file, but you have a file in your package,
+//the one in your package is used.
+class TestImportStuff {
+  ToReference tr;
+  IsItPackageAndImport iipai;
+  
+  
+  String printField() {
+    System.out.println(iipai.toString());
+    return tr.toString();
+  }
+  
+  int callMethod() { 
+    return tr.yourMethod();
+  }
+  
+}

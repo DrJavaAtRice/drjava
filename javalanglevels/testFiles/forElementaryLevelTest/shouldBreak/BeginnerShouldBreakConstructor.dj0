@@ -1,0 +1,7 @@
+/*!DrJava Beginner Level*/
+
+class BeginnerShouldBreakConstructor extends Object{
+  BeginnerShouldBreakConstructor() {
+    System.out.println("Woah");
+  }
+}

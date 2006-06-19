@@ -1,0 +1,2760 @@
+SourceFile:
+  sourceInfo = [TestWeirdStuff.test: (1,1)-(207,3)]
+  packageStatements = {}
+  importStatements = {
+    #0: PackageImportStatement:
+      sourceInfo = [TestWeirdStuff.test: (1,1)-(1,19)]
+      cWord = CompoundWord:
+        sourceInfo = [TestWeirdStuff.test: (1,8)-(1,16)]
+        words = {
+          #0: Word:
+            sourceInfo = [TestWeirdStuff.test: (1,8)-(1,11)]
+            text = java
+          #1: Word:
+            sourceInfo = [TestWeirdStuff.test: (1,13)-(1,16)]
+            text = util
+        }
+    #1: PackageImportStatement:
+      sourceInfo = [TestWeirdStuff.test: (2,1)-(2,19)]
+      cWord = CompoundWord:
+        sourceInfo = [TestWeirdStuff.test: (2,8)-(2,16)]
+        words = {
+          #0: Word:
+            sourceInfo = [TestWeirdStuff.test: (2,8)-(2,11)]
+            text = java
+          #1: Word:
+            sourceInfo = [TestWeirdStuff.test: (2,13)-(2,16)]
+            text = lang
+        }
+  }
+  types = {
+    #0: ClassDef:
+      sourceInfo = [TestWeirdStuff.test: (5,1)-(161,1)]
+      mav = ModifiersAndVisibility:
+        sourceInfo = [TestWeirdStuff.test: (5,1)-(5,6)]
+        modifiers = {
+          #0: public
+        }
+      name = Word:
+        sourceInfo = [TestWeirdStuff.test: (5,14)-(5,27)]
+        text = TestWeirdStuff
+      typeParameters = {
+        #0: TypeParameter:
+          sourceInfo = [TestWeirdStuff.test: (5,30)-(5,30)]
+          variable = TypeVariable:
+            sourceInfo = [TestWeirdStuff.test: (5,30)-(5,30)]
+            name = T
+          bound = ClassOrInterfaceType:
+            sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+            name = Object
+            typeArguments = {}
+      }
+      superclass = ClassOrInterfaceType:
+        sourceInfo = [TestWeirdStuff.test: (5,41)-(5,45)]
+        name = Outer
+        typeArguments = {}
+      interfaces = {}
+      body = BracedBody:
+        sourceInfo = [TestWeirdStuff.test: (5,47)-(161,1)]
+        statements = {
+          #0: InstanceInitializer:
+            sourceInfo = [TestWeirdStuff.test: (6,3)-(10,3)]
+            code = Block:
+              sourceInfo = [TestWeirdStuff.test: (6,3)-(10,3)]
+              statements = BracedBody:
+                sourceInfo = [TestWeirdStuff.test: (6,3)-(10,3)]
+                statements = {
+                  #0: VariableDeclaration:
+                    sourceInfo = [TestWeirdStuff.test: (7,5)-(7,15)]
+                    mav = ModifiersAndVisibility:
+                      sourceInfo = [TestWeirdStuff.test: (7,5)-(7,5)]
+                      modifiers = {}
+                    declarators = {
+                      #0: InitializedVariableDeclarator:
+                        sourceInfo = [TestWeirdStuff.test: (7,11)-(7,15)]
+                        type = PrimitiveType:
+                          sourceInfo = [TestWeirdStuff.test: (7,5)-(7,9)]
+                          name = float
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (7,11)-(7,11)]
+                          text = f
+                        initializer = SimpleNameReference:
+                          sourceInfo = [TestWeirdStuff.test: (7,15)-(7,15)]
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (7,15)-(7,15)]
+                            text = j
+                    }
+                  #1: ExpressionStatement:
+                    sourceInfo = [TestWeirdStuff.test: (8,5)-(8,26)]
+                    expression = ComplexMethodInvocation:
+                      sourceInfo = [TestWeirdStuff.test: (8,5)-(8,25)]
+                      enclosing = ComplexNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (8,5)-(8,14)]
+                        enclosing = SimpleNameReference:
+                          sourceInfo = [TestWeirdStuff.test: (8,5)-(8,10)]
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (8,5)-(8,10)]
+                            text = System
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (8,12)-(8,14)]
+                          text = out
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (8,16)-(8,22)]
+                        text = println
+                      arguments = ParenthesizedExpressionList:
+                        sourceInfo = [TestWeirdStuff.test: (8,23)-(8,25)]
+                        expressions = {
+                          #0: SimpleNameReference:
+                            sourceInfo = [TestWeirdStuff.test: (8,24)-(8,24)]
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (8,24)-(8,24)]
+                              text = f
+                        }
+                  #2: ExpressionStatement:
+                    sourceInfo = [TestWeirdStuff.test: (9,5)-(9,22)]
+                    expression = SimpleAssignmentExpression:
+                      sourceInfo = [TestWeirdStuff.test: (9,5)-(9,21)]
+                      name = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (9,5)-(9,8)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (9,5)-(9,8)]
+                          text = ints
+                      value = SimpleUninitializedArrayInstantiation:
+                        sourceInfo = [TestWeirdStuff.test: (9,16)-(9,21)]
+                        type = ArrayType:
+                          sourceInfo = [TestWeirdStuff.test: (9,16)-(9,21)]
+                          name = int[]
+                          elementType = PrimitiveType:
+                            sourceInfo = [TestWeirdStuff.test: (9,16)-(9,18)]
+                            name = int
+                        dimensionSizes = DimensionExpressionList:
+                          sourceInfo = [TestWeirdStuff.test: (9,19)-(9,21)]
+                          expressions = {
+                            #0: IntegerLiteral:
+                              sourceInfo = [TestWeirdStuff.test: (9,20)-(9,20)]
+                              value = 5
+                          }
+                }
+          #1: VariableDeclaration:
+            sourceInfo = [TestWeirdStuff.test: (17,3)-(17,24)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (17,3)-(17,9)]
+              modifiers = {
+                #0: private
+              }
+            declarators = {
+              #0: InitializedVariableDeclarator:
+                sourceInfo = [TestWeirdStuff.test: (17,17)-(17,24)]
+                type = PrimitiveType:
+                  sourceInfo = [TestWeirdStuff.test: (17,11)-(17,15)]
+                  name = float
+                name = Word:
+                  sourceInfo = [TestWeirdStuff.test: (17,17)-(17,20)]
+                  text = priv
+                initializer = IntegerLiteral:
+                  sourceInfo = [TestWeirdStuff.test: (17,24)-(17,24)]
+                  value = 7
+            }
+          #2: VariableDeclaration:
+            sourceInfo = [TestWeirdStuff.test: (18,3)-(18,18)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (18,3)-(18,8)]
+              modifiers = {
+                #0: static
+              }
+            declarators = {
+              #0: InitializedVariableDeclarator:
+                sourceInfo = [TestWeirdStuff.test: (18,14)-(18,18)]
+                type = PrimitiveType:
+                  sourceInfo = [TestWeirdStuff.test: (18,10)-(18,12)]
+                  name = int
+                name = Word:
+                  sourceInfo = [TestWeirdStuff.test: (18,14)-(18,14)]
+                  text = j
+                initializer = IntegerLiteral:
+                  sourceInfo = [TestWeirdStuff.test: (18,18)-(18,18)]
+                  value = 5
+            }
+          #3: VariableDeclaration:
+            sourceInfo = [TestWeirdStuff.test: (19,3)-(19,21)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (19,3)-(19,8)]
+              modifiers = {
+                #0: static
+              }
+            declarators = {
+              #0: InitializedVariableDeclarator:
+                sourceInfo = [TestWeirdStuff.test: (19,14)-(19,21)]
+                type = PrimitiveType:
+                  sourceInfo = [TestWeirdStuff.test: (19,10)-(19,12)]
+                  name = int
+                name = Word:
+                  sourceInfo = [TestWeirdStuff.test: (19,14)-(19,17)]
+                  text = Blah
+                initializer = IntegerLiteral:
+                  sourceInfo = [TestWeirdStuff.test: (19,21)-(19,21)]
+                  value = 5
+            }
+          #4: VariableDeclaration:
+            sourceInfo = [TestWeirdStuff.test: (20,3)-(20,20)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (20,3)-(20,3)]
+              modifiers = {}
+            declarators = {
+              #0: UninitializedVariableDeclarator:
+                sourceInfo = [TestWeirdStuff.test: (20,18)-(20,20)]
+                type = ClassOrInterfaceType:
+                  sourceInfo = [TestWeirdStuff.test: (20,3)-(20,16)]
+                  name = TestWeirdStuff
+                  typeArguments = {}
+                name = Word:
+                  sourceInfo = [TestWeirdStuff.test: (20,18)-(20,20)]
+                  text = tws
+            }
+          #5: VariableDeclaration:
+            sourceInfo = [TestWeirdStuff.test: (21,3)-(21,13)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (21,3)-(21,3)]
+              modifiers = {}
+            declarators = {
+              #0: UninitializedVariableDeclarator:
+                sourceInfo = [TestWeirdStuff.test: (21,10)-(21,13)]
+                type = ArrayType:
+                  sourceInfo = [TestWeirdStuff.test: (21,3)-(21,8)]
+                  name = int[]
+                  elementType = PrimitiveType:
+                    sourceInfo = [TestWeirdStuff.test: (21,3)-(21,5)]
+                    name = int
+                name = Word:
+                  sourceInfo = [TestWeirdStuff.test: (21,10)-(21,13)]
+                  text = ints
+            }
+          #6: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (22,3)-(34,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (22,3)-(22,3)]
+              modifiers = {}
+            typeParams = {}
+            result = ArrayType:
+              sourceInfo = [TestWeirdStuff.test: (22,3)-(22,7)]
+              name = int[]
+              elementType = PrimitiveType:
+                sourceInfo = [TestWeirdStuff.test: (22,3)-(22,5)]
+                name = int
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (22,9)-(22,12)]
+              text = getS
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (22,17)-(34,3)]
+              statements = {
+                #0: InstanceInitializer:
+                  sourceInfo = [TestWeirdStuff.test: (23,5)-(25,5)]
+                  code = Block:
+                    sourceInfo = [TestWeirdStuff.test: (23,5)-(25,5)]
+                    statements = BracedBody:
+                      sourceInfo = [TestWeirdStuff.test: (23,5)-(25,5)]
+                      statements = {
+                        #0: VariableDeclaration:
+                          sourceInfo = [TestWeirdStuff.test: (24,7)-(24,17)]
+                          mav = ModifiersAndVisibility:
+                            sourceInfo = [TestWeirdStuff.test: (24,7)-(24,7)]
+                            modifiers = {}
+                          declarators = {
+                            #0: InitializedVariableDeclarator:
+                              sourceInfo = [TestWeirdStuff.test: (24,11)-(24,17)]
+                              type = PrimitiveType:
+                                sourceInfo = [TestWeirdStuff.test: (24,7)-(24,9)]
+                                name = int
+                              name = Word:
+                                sourceInfo = [TestWeirdStuff.test: (24,11)-(24,13)]
+                                text = klj
+                              initializer = IntegerLiteral:
+                                sourceInfo = [TestWeirdStuff.test: (24,17)-(24,17)]
+                                value = 0
+                          }
+                      }
+                #1: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (27,5)-(27,14)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (27,5)-(27,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: UninitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (27,9)-(27,9)]
+                      type = PrimitiveType:
+                        sourceInfo = [TestWeirdStuff.test: (27,5)-(27,7)]
+                        name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (27,9)-(27,9)]
+                        text = x
+                    #1: UninitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (27,12)-(27,14)]
+                      type = ArrayType:
+                        sourceInfo = [TestWeirdStuff.test: (27,12)-(27,14)]
+                        name = int[]
+                        elementType = PrimitiveType:
+                          sourceInfo = [TestWeirdStuff.test: (27,5)-(27,7)]
+                          name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (27,12)-(27,12)]
+                        text = y
+                  }
+                #2: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (28,5)-(28,36)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (28,5)-(28,35)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (28,5)-(28,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (28,5)-(28,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (28,5)-(28,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (28,12)-(28,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (28,16)-(28,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (28,23)-(28,35)]
+                      expressions = {
+                        #0: PlusExpression:
+                          sourceInfo = [TestWeirdStuff.test: (28,24)-(28,34)]
+                          left = IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (28,24)-(28,24)]
+                            value = 3
+                          right = PositiveExpression:
+                            sourceInfo = [TestWeirdStuff.test: (28,27)-(28,34)]
+                            value = PositiveExpression:
+                              sourceInfo = [TestWeirdStuff.test: (28,29)-(28,34)]
+                              value = NegativeExpression:
+                                sourceInfo = [TestWeirdStuff.test: (28,31)-(28,34)]
+                                value = NegativeExpression:
+                                  sourceInfo = [TestWeirdStuff.test: (28,33)-(28,34)]
+                                  value = IntegerLiteral:
+                                    sourceInfo = [TestWeirdStuff.test: (28,34)-(28,34)]
+                                    value = 4
+                      }
+                #3: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (30,5)-(30,34)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (30,5)-(30,33)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (30,5)-(30,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (30,5)-(30,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (30,5)-(30,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (30,12)-(30,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (30,16)-(30,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (30,23)-(30,33)]
+                      expressions = {
+                        #0: CastExpression:
+                          sourceInfo = [TestWeirdStuff.test: (30,24)-(30,32)]
+                          type = PrimitiveType:
+                            sourceInfo = [TestWeirdStuff.test: (30,25)-(30,30)]
+                            name = double
+                          value = SimpleNameReference:
+                            sourceInfo = [TestWeirdStuff.test: (30,32)-(30,32)]
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (30,32)-(30,32)]
+                              text = j
+                      }
+                #4: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (31,5)-(31,36)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (31,5)-(31,35)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (31,5)-(31,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (31,5)-(31,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (31,5)-(31,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (31,12)-(31,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (31,16)-(31,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (31,23)-(31,35)]
+                      expressions = {
+                        #0: ComplexMethodInvocation:
+                          sourceInfo = [TestWeirdStuff.test: (31,24)-(31,34)]
+                          enclosing = SimpleSuperReference: sourceInfo = [TestWeirdStuff.test: (31,24)-(31,28)]
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (31,30)-(31,32)]
+                            text = foo
+                          arguments = ParenthesizedExpressionList:
+                            sourceInfo = [TestWeirdStuff.test: (31,33)-(31,34)]
+                            expressions = {}
+                      }
+                #5: ValueReturnStatement:
+                  sourceInfo = [TestWeirdStuff.test: (33,5)-(33,32)]
+                  value = SimpleAssignmentExpression:
+                    sourceInfo = [TestWeirdStuff.test: (33,12)-(33,31)]
+                    name = SimpleNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (33,12)-(33,15)]
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (33,12)-(33,15)]
+                        text = ints
+                    value = SimpleInitializedArrayInstantiation:
+                      sourceInfo = [TestWeirdStuff.test: (33,23)-(33,31)]
+                      type = ArrayType:
+                        sourceInfo = [TestWeirdStuff.test: (33,23)-(33,27)]
+                        name = int[]
+                        elementType = PrimitiveType:
+                          sourceInfo = [TestWeirdStuff.test: (33,23)-(33,25)]
+                          name = int
+                      initializer = ArrayInitializer:
+                        sourceInfo = [TestWeirdStuff.test: (33,29)-(33,31)]
+                        items = {
+                          #0: IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (33,30)-(33,30)]
+                            value = 1
+                        }
+              }
+          #7: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (36,3)-(38,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (36,3)-(36,3)]
+              modifiers = {}
+            typeParams = {}
+            result = ArrayType:
+              sourceInfo = [TestWeirdStuff.test: (36,3)-(36,7)]
+              name = int[]
+              elementType = PrimitiveType:
+                sourceInfo = [TestWeirdStuff.test: (36,3)-(36,5)]
+                name = int
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (36,9)-(36,15)]
+              text = getInts
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (36,19)-(38,3)]
+              statements = {
+                #0: ValueReturnStatement:
+                  sourceInfo = [TestWeirdStuff.test: (37,5)-(37,16)]
+                  value = SimpleNameReference:
+                    sourceInfo = [TestWeirdStuff.test: (37,12)-(37,15)]
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (37,12)-(37,15)]
+                      text = ints
+              }
+          #8: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (40,3)-(55,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (40,3)-(40,8)]
+              modifiers = {
+                #0: public
+              }
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [TestWeirdStuff.test: (40,10)-(40,13)]
+              name = void
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (40,15)-(40,21)]
+              text = tryThis
+            params = {}
+            throws = {
+              #0: ClassOrInterfaceType:
+                sourceInfo = [TestWeirdStuff.test: (40,32)-(40,55)]
+                name = IllegalArgumentException
+                typeArguments = {}
+            }
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (40,57)-(55,3)]
+              statements = {
+                #0: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (41,5)-(41,13)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (41,5)-(41,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (41,9)-(41,13)]
+                      type = PrimitiveType:
+                        sourceInfo = [TestWeirdStuff.test: (41,5)-(41,7)]
+                        name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (41,9)-(41,9)]
+                        text = i
+                      initializer = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (41,13)-(41,13)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (41,13)-(41,13)]
+                          text = j
+                  }
+                #1: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (42,5)-(42,13)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (42,5)-(42,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (42,9)-(42,13)]
+                      type = PrimitiveType:
+                        sourceInfo = [TestWeirdStuff.test: (42,5)-(42,7)]
+                        name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (42,9)-(42,9)]
+                        text = j
+                      initializer = IntegerLiteral:
+                        sourceInfo = [TestWeirdStuff.test: (42,13)-(42,13)]
+                        value = 0
+                  }
+                #2: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (43,5)-(43,25)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (43,5)-(43,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: UninitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (43,9)-(43,11)]
+                      type = ArrayType:
+                        sourceInfo = [TestWeirdStuff.test: (43,9)-(43,11)]
+                        name = int[]
+                        elementType = PrimitiveType:
+                          sourceInfo = [TestWeirdStuff.test: (43,5)-(43,7)]
+                          name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (43,9)-(43,9)]
+                        text = x
+                    #1: UninitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (43,14)-(43,18)]
+                      type = ArrayType:
+                        sourceInfo = [TestWeirdStuff.test: (43,14)-(43,18)]
+                        name = int[][]
+                        elementType = ArrayType:
+                          sourceInfo = [TestWeirdStuff.test: (43,14)-(43,16)]
+                          name = int[]
+                          elementType = PrimitiveType:
+                            sourceInfo = [TestWeirdStuff.test: (43,5)-(43,7)]
+                            name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (43,14)-(43,14)]
+                        text = y
+                    #2: UninitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (43,21)-(43,25)]
+                      type = ArrayType:
+                        sourceInfo = [TestWeirdStuff.test: (43,21)-(43,25)]
+                        name = int[][]
+                        elementType = ArrayType:
+                          sourceInfo = [TestWeirdStuff.test: (43,21)-(43,23)]
+                          name = int[]
+                          elementType = PrimitiveType:
+                            sourceInfo = [TestWeirdStuff.test: (43,5)-(43,7)]
+                            name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (43,21)-(43,21)]
+                        text = z
+                  }
+                #3: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (44,5)-(44,19)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [TestWeirdStuff.test: (44,5)-(44,18)]
+                    name = SimpleNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (44,5)-(44,5)]
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (44,5)-(44,5)]
+                        text = x
+                    value = SimpleUninitializedArrayInstantiation:
+                      sourceInfo = [TestWeirdStuff.test: (44,13)-(44,18)]
+                      type = ArrayType:
+                        sourceInfo = [TestWeirdStuff.test: (44,13)-(44,18)]
+                        name = int[]
+                        elementType = PrimitiveType:
+                          sourceInfo = [TestWeirdStuff.test: (44,13)-(44,15)]
+                          name = int
+                      dimensionSizes = DimensionExpressionList:
+                        sourceInfo = [TestWeirdStuff.test: (44,16)-(44,18)]
+                        expressions = {
+                          #0: IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (44,17)-(44,17)]
+                            value = 5
+                        }
+                #4: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (45,5)-(45,21)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [TestWeirdStuff.test: (45,5)-(45,20)]
+                    name = SimpleNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (45,5)-(45,5)]
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (45,5)-(45,5)]
+                        text = y
+                    value = SimpleUninitializedArrayInstantiation:
+                      sourceInfo = [TestWeirdStuff.test: (45,13)-(45,20)]
+                      type = ArrayType:
+                        sourceInfo = [TestWeirdStuff.test: (45,13)-(45,20)]
+                        name = int[][]
+                        elementType = ArrayType:
+                          sourceInfo = [TestWeirdStuff.test: (45,13)-(45,18)]
+                          name = int[]
+                          elementType = PrimitiveType:
+                            sourceInfo = [TestWeirdStuff.test: (45,13)-(45,15)]
+                            name = int
+                      dimensionSizes = DimensionExpressionList:
+                        sourceInfo = [TestWeirdStuff.test: (45,16)-(45,20)]
+                        expressions = {
+                          #0: IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (45,17)-(45,17)]
+                            value = 5
+                        }
+                #5: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (46,5)-(46,22)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [TestWeirdStuff.test: (46,5)-(46,21)]
+                    name = SimpleNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (46,5)-(46,5)]
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (46,5)-(46,5)]
+                        text = z
+                    value = SimpleUninitializedArrayInstantiation:
+                      sourceInfo = [TestWeirdStuff.test: (46,13)-(46,21)]
+                      type = ArrayType:
+                        sourceInfo = [TestWeirdStuff.test: (46,13)-(46,21)]
+                        name = int[][]
+                        elementType = ArrayType:
+                          sourceInfo = [TestWeirdStuff.test: (46,13)-(46,18)]
+                          name = int[]
+                          elementType = PrimitiveType:
+                            sourceInfo = [TestWeirdStuff.test: (46,13)-(46,15)]
+                            name = int
+                      dimensionSizes = DimensionExpressionList:
+                        sourceInfo = [TestWeirdStuff.test: (46,16)-(46,21)]
+                        expressions = {
+                          #0: IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (46,17)-(46,17)]
+                            value = 5
+                          #1: IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (46,20)-(46,20)]
+                            value = 6
+                        }
+                #6: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (47,5)-(47,29)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (47,5)-(47,28)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (47,5)-(47,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (47,5)-(47,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (47,5)-(47,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (47,12)-(47,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (47,16)-(47,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (47,23)-(47,28)]
+                      expressions = {
+                        #0: SimpleNameReference:
+                          sourceInfo = [TestWeirdStuff.test: (47,24)-(47,27)]
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (47,24)-(47,27)]
+                            text = Blah
+                      }
+                #7: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (48,5)-(48,37)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (48,5)-(48,36)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (48,5)-(48,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (48,5)-(48,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (48,5)-(48,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (48,12)-(48,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (48,16)-(48,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (48,23)-(48,36)]
+                      expressions = {
+                        #0: SimpleNamedClassInstantiation:
+                          sourceInfo = [TestWeirdStuff.test: (48,24)-(48,35)]
+                          type = ClassOrInterfaceType:
+                            sourceInfo = [TestWeirdStuff.test: (48,28)-(48,33)]
+                            name = Object
+                            typeArguments = {}
+                          arguments = ParenthesizedExpressionList:
+                            sourceInfo = [TestWeirdStuff.test: (48,34)-(48,35)]
+                            expressions = {}
+                      }
+                #8: InnerClassDef:
+                  sourceInfo = [TestWeirdStuff.test: (49,5)-(53,5)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (49,5)-(49,5)]
+                    modifiers = {}
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (49,11)-(49,13)]
+                    text = ABC
+                  typeParameters = {}
+                  superclass = ClassOrInterfaceType:
+                    sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+                    name = Object
+                    typeArguments = {}
+                  interfaces = {}
+                  body = BracedBody:
+                    sourceInfo = [TestWeirdStuff.test: (49,15)-(53,5)]
+                    statements = {
+                      #0: ConcreteMethodDef:
+                        sourceInfo = [TestWeirdStuff.test: (50,7)-(52,7)]
+                        mav = ModifiersAndVisibility:
+                          sourceInfo = [TestWeirdStuff.test: (50,7)-(50,12)]
+                          modifiers = {
+                            #0: public
+                          }
+                        typeParams = {}
+                        result = ClassOrInterfaceType:
+                          sourceInfo = [TestWeirdStuff.test: (50,14)-(50,19)]
+                          name = String
+                          typeArguments = {}
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (50,21)-(50,28)]
+                          text = toString
+                        params = {}
+                        throws = {}
+                        body = BracedBody:
+                          sourceInfo = [TestWeirdStuff.test: (50,32)-(52,7)]
+                          statements = {
+                            #0: ValueReturnStatement:
+                              sourceInfo = [TestWeirdStuff.test: (51,9)-(51,24)]
+                              value = StringLiteral:
+                                sourceInfo = [TestWeirdStuff.test: (51,16)-(51,23)]
+                                value = an ABC
+                          }
+                    }
+              }
+          #9: VariableDeclaration:
+            sourceInfo = [TestWeirdStuff.test: (57,3)-(57,15)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (57,3)-(57,3)]
+              modifiers = {}
+            declarators = {
+              #0: InitializedVariableDeclarator:
+                sourceInfo = [TestWeirdStuff.test: (57,7)-(57,15)]
+                type = PrimitiveType:
+                  sourceInfo = [TestWeirdStuff.test: (57,3)-(57,5)]
+                  name = int
+                name = Word:
+                  sourceInfo = [TestWeirdStuff.test: (57,7)-(57,7)]
+                  text = i
+                initializer = SimpleMethodInvocation:
+                  sourceInfo = [TestWeirdStuff.test: (57,11)-(57,15)]
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (57,11)-(57,13)]
+                    text = foo
+                  arguments = ParenthesizedExpressionList:
+                    sourceInfo = [TestWeirdStuff.test: (57,14)-(57,15)]
+                    expressions = {}
+            }
+          #10: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (58,3)-(60,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (58,3)-(58,8)]
+              modifiers = {
+                #0: public
+              }
+            typeParams = {}
+            result = PrimitiveType:
+              sourceInfo = [TestWeirdStuff.test: (58,10)-(58,12)]
+              name = int
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (58,14)-(58,16)]
+              text = foo
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (58,20)-(60,3)]
+              statements = {
+                #0: ValueReturnStatement:
+                  sourceInfo = [TestWeirdStuff.test: (59,5)-(59,20)]
+                  value = CastExpression:
+                    sourceInfo = [TestWeirdStuff.test: (59,12)-(59,19)]
+                    type = PrimitiveType:
+                      sourceInfo = [TestWeirdStuff.test: (59,13)-(59,15)]
+                      name = int
+                    value = DoubleLiteral:
+                      sourceInfo = [TestWeirdStuff.test: (59,17)-(59,19)]
+                      value = 3.8
+              }
+          #11: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (62,3)-(65,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (62,3)-(62,8)]
+              modifiers = {
+                #0: public
+              }
+            typeParams = {}
+            result = ClassOrInterfaceType:
+              sourceInfo = [TestWeirdStuff.test: (62,10)-(62,15)]
+              name = Vector
+              typeArguments = {}
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (62,17)-(62,19)]
+              text = xyz
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (62,23)-(65,3)]
+              statements = {
+                #0: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (63,5)-(63,16)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (63,5)-(63,15)]
+                    enclosing = SimpleSuperReference: sourceInfo = [TestWeirdStuff.test: (63,5)-(63,9)]
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (63,11)-(63,13)]
+                      text = xyz
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (63,14)-(63,15)]
+                      expressions = {}
+                #1: ValueReturnStatement:
+                  sourceInfo = [TestWeirdStuff.test: (64,5)-(64,16)]
+                  value = NullLiteral: sourceInfo = [TestWeirdStuff.test: (64,12)-(64,15)]
+              }
+          #12: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (67,3)-(69,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (67,3)-(67,8)]
+              modifiers = {
+                #0: public
+              }
+            typeParams = {
+              #0: TypeParameter:
+                sourceInfo = [TestWeirdStuff.test: (67,11)-(67,11)]
+                variable = TypeVariable:
+                  sourceInfo = [TestWeirdStuff.test: (67,11)-(67,11)]
+                  name = T
+                bound = ClassOrInterfaceType:
+                  sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+                  name = Object
+                  typeArguments = {}
+            }
+            result = ClassOrInterfaceType:
+              sourceInfo = [TestWeirdStuff.test: (67,14)-(67,14)]
+              name = T
+              typeArguments = {}
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (67,16)-(67,23)]
+              text = getFirst
+            params = {
+              #0: FormalParameter:
+                sourceInfo = [TestWeirdStuff.test: (67,25)-(67,35)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [TestWeirdStuff.test: (67,35)-(67,35)]
+                  type = ClassOrInterfaceType:
+                    sourceInfo = [TestWeirdStuff.test: (67,25)-(67,33)]
+                    name = Vector
+                    typeArguments = {
+                      #0: ClassOrInterfaceType:
+                        sourceInfo = [TestWeirdStuff.test: (67,32)-(67,32)]
+                        name = T
+                        typeArguments = {}
+                    }
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (67,35)-(67,35)]
+                    text = v
+                isFinal = false
+            }
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (67,38)-(69,3)]
+              statements = {
+                #0: ValueReturnStatement:
+                  sourceInfo = [TestWeirdStuff.test: (68,5)-(68,26)]
+                  value = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (68,12)-(68,25)]
+                    enclosing = SimpleNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (68,12)-(68,12)]
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (68,12)-(68,12)]
+                        text = v
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (68,14)-(68,22)]
+                      text = elementAt
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (68,23)-(68,25)]
+                      expressions = {
+                        #0: IntegerLiteral:
+                          sourceInfo = [TestWeirdStuff.test: (68,24)-(68,24)]
+                          value = 0
+                      }
+              }
+          #13: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (71,3)-(104,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (71,3)-(71,9)]
+              modifiers = {
+                #0: private
+              }
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [TestWeirdStuff.test: (71,11)-(71,14)]
+              name = void
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (71,16)-(71,27)]
+              text = doReplaceAll
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (71,31)-(104,3)]
+              statements = {
+                #0: ForStatement:
+                  sourceInfo = [TestWeirdStuff.test: (72,5)-(72,127)]
+                  init = UnparenthesizedExpressionList:
+                    sourceInfo = [TestWeirdStuff.test: (72,10)-(72,37)]
+                    expressions = {
+                      #0: SimpleAssignmentExpression:
+                        sourceInfo = [TestWeirdStuff.test: (72,10)-(72,26)]
+                        name = SimpleNameReference:
+                          sourceInfo = [TestWeirdStuff.test: (72,10)-(72,13)]
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (72,10)-(72,13)]
+                            text = ints
+                        value = SimpleUninitializedArrayInstantiation:
+                          sourceInfo = [TestWeirdStuff.test: (72,21)-(72,26)]
+                          type = ArrayType:
+                            sourceInfo = [TestWeirdStuff.test: (72,21)-(72,26)]
+                            name = int[]
+                            elementType = PrimitiveType:
+                              sourceInfo = [TestWeirdStuff.test: (72,21)-(72,23)]
+                              name = int
+                          dimensionSizes = DimensionExpressionList:
+                            sourceInfo = [TestWeirdStuff.test: (72,24)-(72,26)]
+                            expressions = {
+                              #0: IntegerLiteral:
+                                sourceInfo = [TestWeirdStuff.test: (72,25)-(72,25)]
+                                value = 3
+                            }
+                      #1: PositivePostfixIncrementExpression:
+                        sourceInfo = [TestWeirdStuff.test: (72,29)-(72,37)]
+                        value = ArrayAccess:
+                          sourceInfo = [TestWeirdStuff.test: (72,29)-(72,35)]
+                          array = SimpleNameReference:
+                            sourceInfo = [TestWeirdStuff.test: (72,29)-(72,32)]
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (72,29)-(72,32)]
+                              text = ints
+                          index = IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (72,34)-(72,34)]
+                            value = 1
+                    }
+                  condition = LessThanExpression:
+                    sourceInfo = [TestWeirdStuff.test: (72,40)-(72,50)]
+                    left = ArrayAccess:
+                      sourceInfo = [TestWeirdStuff.test: (72,40)-(72,46)]
+                      array = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (72,40)-(72,43)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (72,40)-(72,43)]
+                          text = ints
+                      index = IntegerLiteral:
+                        sourceInfo = [TestWeirdStuff.test: (72,45)-(72,45)]
+                        value = 0
+                    right = IntegerLiteral:
+                      sourceInfo = [TestWeirdStuff.test: (72,50)-(72,50)]
+                      value = 3
+                  update = UnparenthesizedExpressionList:
+                    sourceInfo = [TestWeirdStuff.test: (72,53)-(72,95)]
+                    expressions = {
+                      #0: SimpleAssignmentExpression:
+                        sourceInfo = [TestWeirdStuff.test: (72,53)-(72,73)]
+                        name = ArrayAccess:
+                          sourceInfo = [TestWeirdStuff.test: (72,53)-(72,59)]
+                          array = SimpleNameReference:
+                            sourceInfo = [TestWeirdStuff.test: (72,53)-(72,56)]
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (72,53)-(72,56)]
+                              text = ints
+                          index = IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (72,58)-(72,58)]
+                            value = 0
+                        value = PlusExpression:
+                          sourceInfo = [TestWeirdStuff.test: (72,63)-(72,73)]
+                          left = ArrayAccess:
+                            sourceInfo = [TestWeirdStuff.test: (72,63)-(72,69)]
+                            array = SimpleNameReference:
+                              sourceInfo = [TestWeirdStuff.test: (72,63)-(72,66)]
+                              name = Word:
+                                sourceInfo = [TestWeirdStuff.test: (72,63)-(72,66)]
+                                text = ints
+                            index = IntegerLiteral:
+                              sourceInfo = [TestWeirdStuff.test: (72,68)-(72,68)]
+                              value = 0
+                          right = IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (72,73)-(72,73)]
+                            value = 2
+                      #1: PositivePostfixIncrementExpression:
+                        sourceInfo = [TestWeirdStuff.test: (72,76)-(72,84)]
+                        value = ArrayAccess:
+                          sourceInfo = [TestWeirdStuff.test: (72,76)-(72,82)]
+                          array = SimpleNameReference:
+                            sourceInfo = [TestWeirdStuff.test: (72,76)-(72,79)]
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (72,76)-(72,79)]
+                              text = ints
+                          index = IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (72,81)-(72,81)]
+                            value = 0
+                      #2: NegativePostfixIncrementExpression:
+                        sourceInfo = [TestWeirdStuff.test: (72,87)-(72,95)]
+                        value = ArrayAccess:
+                          sourceInfo = [TestWeirdStuff.test: (72,87)-(72,93)]
+                          array = SimpleNameReference:
+                            sourceInfo = [TestWeirdStuff.test: (72,87)-(72,90)]
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (72,87)-(72,90)]
+                              text = ints
+                          index = IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (72,92)-(72,92)]
+                            value = 0
+                    }
+                  code = Block:
+                    sourceInfo = [TestWeirdStuff.test: (72,98)-(72,127)]
+                    statements = BracedBody:
+                      sourceInfo = [TestWeirdStuff.test: (72,98)-(72,127)]
+                      statements = {
+                        #0: ExpressionStatement:
+                          sourceInfo = [TestWeirdStuff.test: (72,99)-(72,126)]
+                          expression = ComplexMethodInvocation:
+                            sourceInfo = [TestWeirdStuff.test: (72,99)-(72,125)]
+                            enclosing = ComplexNameReference:
+                              sourceInfo = [TestWeirdStuff.test: (72,99)-(72,108)]
+                              enclosing = SimpleNameReference:
+                                sourceInfo = [TestWeirdStuff.test: (72,99)-(72,104)]
+                                name = Word:
+                                  sourceInfo = [TestWeirdStuff.test: (72,99)-(72,104)]
+                                  text = System
+                              name = Word:
+                                sourceInfo = [TestWeirdStuff.test: (72,106)-(72,108)]
+                                text = out
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (72,110)-(72,116)]
+                              text = println
+                            arguments = ParenthesizedExpressionList:
+                              sourceInfo = [TestWeirdStuff.test: (72,117)-(72,125)]
+                              expressions = {
+                                #0: ArrayAccess:
+                                  sourceInfo = [TestWeirdStuff.test: (72,118)-(72,124)]
+                                  array = SimpleNameReference:
+                                    sourceInfo = [TestWeirdStuff.test: (72,118)-(72,121)]
+                                    name = Word:
+                                      sourceInfo = [TestWeirdStuff.test: (72,118)-(72,121)]
+                                      text = ints
+                                  index = IntegerLiteral:
+                                    sourceInfo = [TestWeirdStuff.test: (72,123)-(72,123)]
+                                    value = 0
+                              }
+                      }
+                #1: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (73,5)-(73,21)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (73,5)-(73,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (73,12)-(73,21)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [TestWeirdStuff.test: (73,5)-(73,10)]
+                        name = String
+                        typeArguments = {}
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (73,12)-(73,15)]
+                        text = left
+                      initializer = StringLiteral:
+                        sourceInfo = [TestWeirdStuff.test: (73,19)-(73,21)]
+                        value = (
+                  }
+                #2: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (74,5)-(74,49)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (74,5)-(74,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (74,12)-(74,49)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [TestWeirdStuff.test: (74,5)-(74,10)]
+                        name = String
+                        typeArguments = {}
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (74,12)-(74,20)]
+                        text = newString
+                      initializer = ComplexMethodInvocation:
+                        sourceInfo = [TestWeirdStuff.test: (74,24)-(74,49)]
+                        enclosing = SimpleNameReference:
+                          sourceInfo = [TestWeirdStuff.test: (74,24)-(74,27)]
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (74,24)-(74,27)]
+                            text = left
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (74,29)-(74,38)]
+                          text = replaceAll
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [TestWeirdStuff.test: (74,39)-(74,49)]
+                          expressions = {
+                            #0: StringLiteral:
+                              sourceInfo = [TestWeirdStuff.test: (74,40)-(74,44)]
+                              value = \(
+                            #1: StringLiteral:
+                              sourceInfo = [TestWeirdStuff.test: (74,47)-(74,48)]
+                              value = 
+                          }
+                  }
+                #3: InstanceInitializer:
+                  sourceInfo = [TestWeirdStuff.test: (75,5)-(86,5)]
+                  code = Block:
+                    sourceInfo = [TestWeirdStuff.test: (75,5)-(86,5)]
+                    statements = BracedBody:
+                      sourceInfo = [TestWeirdStuff.test: (75,5)-(86,5)]
+                      statements = {
+                        #0: VariableDeclaration:
+                          sourceInfo = [TestWeirdStuff.test: (76,7)-(76,24)]
+                          mav = ModifiersAndVisibility:
+                            sourceInfo = [TestWeirdStuff.test: (76,7)-(76,11)]
+                            modifiers = {
+                              #0: final
+                            }
+                          declarators = {
+                            #0: InitializedVariableDeclarator:
+                              sourceInfo = [TestWeirdStuff.test: (76,19)-(76,24)]
+                              type = PrimitiveType:
+                                sourceInfo = [TestWeirdStuff.test: (76,13)-(76,17)]
+                                name = float
+                              name = Word:
+                                sourceInfo = [TestWeirdStuff.test: (76,19)-(76,20)]
+                                text = fl
+                              initializer = IntegerLiteral:
+                                sourceInfo = [TestWeirdStuff.test: (76,24)-(76,24)]
+                                value = 5
+                          }
+                        #1: InstanceInitializer:
+                          sourceInfo = [TestWeirdStuff.test: (77,7)-(80,7)]
+                          code = Block:
+                            sourceInfo = [TestWeirdStuff.test: (77,7)-(80,7)]
+                            statements = BracedBody:
+                              sourceInfo = [TestWeirdStuff.test: (77,7)-(80,7)]
+                              statements = {
+                                #0: ExpressionStatement:
+                                  sourceInfo = [TestWeirdStuff.test: (78,9)-(78,34)]
+                                  expression = ComplexMethodInvocation:
+                                    sourceInfo = [TestWeirdStuff.test: (78,9)-(78,33)]
+                                    enclosing = ComplexNameReference:
+                                      sourceInfo = [TestWeirdStuff.test: (78,9)-(78,18)]
+                                      enclosing = SimpleNameReference:
+                                        sourceInfo = [TestWeirdStuff.test: (78,9)-(78,14)]
+                                        name = Word:
+                                          sourceInfo = [TestWeirdStuff.test: (78,9)-(78,14)]
+                                          text = System
+                                      name = Word:
+                                        sourceInfo = [TestWeirdStuff.test: (78,16)-(78,18)]
+                                        text = out
+                                    name = Word:
+                                      sourceInfo = [TestWeirdStuff.test: (78,20)-(78,26)]
+                                      text = println
+                                    arguments = ParenthesizedExpressionList:
+                                      sourceInfo = [TestWeirdStuff.test: (78,27)-(78,33)]
+                                      expressions = {
+                                        #0: StringLiteral:
+                                          sourceInfo = [TestWeirdStuff.test: (78,28)-(78,32)]
+                                          value = WOO
+                                      }
+                                #1: ExpressionStatement:
+                                  sourceInfo = [TestWeirdStuff.test: (79,9)-(79,34)]
+                                  expression = ComplexMethodInvocation:
+                                    sourceInfo = [TestWeirdStuff.test: (79,9)-(79,33)]
+                                    enclosing = ComplexNameReference:
+                                      sourceInfo = [TestWeirdStuff.test: (79,9)-(79,18)]
+                                      enclosing = SimpleNameReference:
+                                        sourceInfo = [TestWeirdStuff.test: (79,9)-(79,14)]
+                                        name = Word:
+                                          sourceInfo = [TestWeirdStuff.test: (79,9)-(79,14)]
+                                          text = System
+                                      name = Word:
+                                        sourceInfo = [TestWeirdStuff.test: (79,16)-(79,18)]
+                                        text = out
+                                    name = Word:
+                                      sourceInfo = [TestWeirdStuff.test: (79,20)-(79,26)]
+                                      text = println
+                                    arguments = ParenthesizedExpressionList:
+                                      sourceInfo = [TestWeirdStuff.test: (79,27)-(79,33)]
+                                      expressions = {
+                                        #0: StringLiteral:
+                                          sourceInfo = [TestWeirdStuff.test: (79,28)-(79,32)]
+                                          value = HOO
+                                      }
+                              }
+                        #2: InnerClassDef:
+                          sourceInfo = [TestWeirdStuff.test: (81,7)-(85,7)]
+                          mav = ModifiersAndVisibility:
+                            sourceInfo = [TestWeirdStuff.test: (81,7)-(81,7)]
+                            modifiers = {}
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (81,13)-(81,21)]
+                            text = aselijeij
+                          typeParameters = {}
+                          superclass = ClassOrInterfaceType:
+                            sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+                            name = Object
+                            typeArguments = {}
+                          interfaces = {}
+                          body = BracedBody:
+                            sourceInfo = [TestWeirdStuff.test: (81,23)-(85,7)]
+                            statements = {
+                              #0: ConstructorDef:
+                                sourceInfo = [TestWeirdStuff.test: (82,9)-(84,9)]
+                                name = Word:
+                                  sourceInfo = [TestWeirdStuff.test: (82,16)-(82,24)]
+                                  text = aselijeij
+                                mav = ModifiersAndVisibility:
+                                  sourceInfo = [TestWeirdStuff.test: (82,9)-(82,14)]
+                                  modifiers = {
+                                    #0: public
+                                  }
+                                parameters = {}
+                                throws = {}
+                                statements = BracedBody:
+                                  sourceInfo = [TestWeirdStuff.test: (82,28)-(84,9)]
+                                  statements = {
+                                    #0: ExpressionStatement:
+                                      sourceInfo = [TestWeirdStuff.test: (83,11)-(83,33)]
+                                      expression = ComplexMethodInvocation:
+                                        sourceInfo = [TestWeirdStuff.test: (83,11)-(83,32)]
+                                        enclosing = ComplexNameReference:
+                                          sourceInfo = [TestWeirdStuff.test: (83,11)-(83,20)]
+                                          enclosing = SimpleNameReference:
+                                            sourceInfo = [TestWeirdStuff.test: (83,11)-(83,16)]
+                                            name = Word:
+                                              sourceInfo = [TestWeirdStuff.test: (83,11)-(83,16)]
+                                              text = System
+                                          name = Word:
+                                            sourceInfo = [TestWeirdStuff.test: (83,18)-(83,20)]
+                                            text = out
+                                        name = Word:
+                                          sourceInfo = [TestWeirdStuff.test: (83,22)-(83,28)]
+                                          text = println
+                                        arguments = ParenthesizedExpressionList:
+                                          sourceInfo = [TestWeirdStuff.test: (83,29)-(83,32)]
+                                          expressions = {
+                                            #0: SimpleNameReference:
+                                              sourceInfo = [TestWeirdStuff.test: (83,30)-(83,31)]
+                                              name = Word:
+                                                sourceInfo = [TestWeirdStuff.test: (83,30)-(83,31)]
+                                                text = fl
+                                          }
+                                  }
+                            }
+                      }
+                #4: InstanceInitializer:
+                  sourceInfo = [TestWeirdStuff.test: (88,5)-(89,5)]
+                  code = Block:
+                    sourceInfo = [TestWeirdStuff.test: (88,5)-(89,5)]
+                    statements = BracedBody:
+                      sourceInfo = [TestWeirdStuff.test: (88,5)-(89,5)]
+                      statements = {
+                        #0: ExpressionStatement:
+                          sourceInfo = [TestWeirdStuff.test: (88,7)-(88,35)]
+                          expression = ComplexMethodInvocation:
+                            sourceInfo = [TestWeirdStuff.test: (88,7)-(88,34)]
+                            enclosing = ComplexNameReference:
+                              sourceInfo = [TestWeirdStuff.test: (88,7)-(88,16)]
+                              enclosing = SimpleNameReference:
+                                sourceInfo = [TestWeirdStuff.test: (88,7)-(88,12)]
+                                name = Word:
+                                  sourceInfo = [TestWeirdStuff.test: (88,7)-(88,12)]
+                                  text = System
+                              name = Word:
+                                sourceInfo = [TestWeirdStuff.test: (88,14)-(88,16)]
+                                text = out
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (88,18)-(88,24)]
+                              text = println
+                            arguments = ParenthesizedExpressionList:
+                              sourceInfo = [TestWeirdStuff.test: (88,25)-(88,34)]
+                              expressions = {
+                                #0: StringLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (88,26)-(88,33)]
+                                  value = Yabber
+                              }
+                      }
+                #5: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (90,5)-(90,33)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (90,5)-(90,32)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (90,5)-(90,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (90,5)-(90,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (90,5)-(90,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (90,12)-(90,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (90,16)-(90,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (90,23)-(90,32)]
+                      expressions = {
+                        #0: StringLiteral:
+                          sourceInfo = [TestWeirdStuff.test: (90,24)-(90,31)]
+                          value = Jabber
+                      }
+                #6: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (91,5)-(91,75)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (91,5)-(91,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (91,29)-(91,75)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [TestWeirdStuff.test: (91,5)-(91,27)]
+                        name = TestWeirdStuff
+                        typeArguments = {
+                          #0: ClassOrInterfaceType:
+                            sourceInfo = [TestWeirdStuff.test: (91,20)-(91,26)]
+                            name = Integer
+                            typeArguments = {}
+                        }
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (91,29)-(91,29)]
+                        text = t
+                      initializer = SimpleNamedClassInstantiation:
+                        sourceInfo = [TestWeirdStuff.test: (91,33)-(91,75)]
+                        type = ClassOrInterfaceType:
+                          sourceInfo = [TestWeirdStuff.test: (91,37)-(91,59)]
+                          name = TestWeirdStuff
+                          typeArguments = {
+                            #0: ClassOrInterfaceType:
+                              sourceInfo = [TestWeirdStuff.test: (91,52)-(91,58)]
+                              name = Integer
+                              typeArguments = {}
+                          }
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [TestWeirdStuff.test: (91,60)-(91,75)]
+                          expressions = {
+                            #0: SimpleUninitializedArrayInstantiation:
+                              sourceInfo = [TestWeirdStuff.test: (91,65)-(91,74)]
+                              type = ArrayType:
+                                sourceInfo = [TestWeirdStuff.test: (91,65)-(91,74)]
+                                name = Integer[]
+                                elementType = ClassOrInterfaceType:
+                                  sourceInfo = [TestWeirdStuff.test: (91,65)-(91,71)]
+                                  name = Integer
+                                  typeArguments = {}
+                              dimensionSizes = DimensionExpressionList:
+                                sourceInfo = [TestWeirdStuff.test: (91,72)-(91,74)]
+                                expressions = {
+                                  #0: IntegerLiteral:
+                                    sourceInfo = [TestWeirdStuff.test: (91,73)-(91,73)]
+                                    value = 0
+                                }
+                          }
+                  }
+                #7: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (92,5)-(92,45)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (92,5)-(92,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (92,21)-(92,45)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [TestWeirdStuff.test: (92,5)-(92,19)]
+                        name = Vector
+                        typeArguments = {
+                          #0: ClassOrInterfaceType:
+                            sourceInfo = [TestWeirdStuff.test: (92,12)-(92,18)]
+                            name = Integer
+                            typeArguments = {}
+                        }
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (92,21)-(92,21)]
+                        text = v
+                      initializer = SimpleNamedClassInstantiation:
+                        sourceInfo = [TestWeirdStuff.test: (92,25)-(92,45)]
+                        type = ClassOrInterfaceType:
+                          sourceInfo = [TestWeirdStuff.test: (92,29)-(92,43)]
+                          name = Vector
+                          typeArguments = {
+                            #0: ClassOrInterfaceType:
+                              sourceInfo = [TestWeirdStuff.test: (92,36)-(92,42)]
+                              name = Integer
+                              typeArguments = {}
+                          }
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [TestWeirdStuff.test: (92,44)-(92,45)]
+                          expressions = {}
+                  }
+                #8: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (93,5)-(93,26)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (93,5)-(93,25)]
+                    enclosing = SimpleNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (93,5)-(93,5)]
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (93,5)-(93,5)]
+                        text = v
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (93,7)-(93,9)]
+                      text = add
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (93,10)-(93,25)]
+                      expressions = {
+                        #0: SimpleNamedClassInstantiation:
+                          sourceInfo = [TestWeirdStuff.test: (93,11)-(93,24)]
+                          type = ClassOrInterfaceType:
+                            sourceInfo = [TestWeirdStuff.test: (93,15)-(93,21)]
+                            name = Integer
+                            typeArguments = {}
+                          arguments = ParenthesizedExpressionList:
+                            sourceInfo = [TestWeirdStuff.test: (93,22)-(93,24)]
+                            expressions = {
+                              #0: IntegerLiteral:
+                                sourceInfo = [TestWeirdStuff.test: (93,23)-(93,23)]
+                                value = 5
+                            }
+                      }
+                #9: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (94,5)-(96,14)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (94,5)-(94,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (94,13)-(96,14)]
+                      type = ArrayType:
+                        sourceInfo = [TestWeirdStuff.test: (94,5)-(94,11)]
+                        name = int[][]
+                        elementType = ArrayType:
+                          sourceInfo = [TestWeirdStuff.test: (94,5)-(94,9)]
+                          name = int[]
+                          elementType = PrimitiveType:
+                            sourceInfo = [TestWeirdStuff.test: (94,5)-(94,7)]
+                            name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (94,13)-(94,17)]
+                        text = stuff
+                      initializer = SimpleInitializedArrayInstantiation:
+                        sourceInfo = [TestWeirdStuff.test: (94,25)-(96,14)]
+                        type = ArrayType:
+                          sourceInfo = [TestWeirdStuff.test: (94,25)-(94,31)]
+                          name = int[][]
+                          elementType = ArrayType:
+                            sourceInfo = [TestWeirdStuff.test: (94,25)-(94,29)]
+                            name = int[]
+                            elementType = PrimitiveType:
+                              sourceInfo = [TestWeirdStuff.test: (94,25)-(94,27)]
+                              name = int
+                        initializer = ArrayInitializer:
+                          sourceInfo = [TestWeirdStuff.test: (94,32)-(96,14)]
+                          items = {
+                            #0: ArrayInitializer:
+                              sourceInfo = [TestWeirdStuff.test: (94,33)-(94,39)]
+                              items = {
+                                #0: IntegerLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (94,34)-(94,34)]
+                                  value = 1
+                                #1: IntegerLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (94,36)-(94,36)]
+                                  value = 2
+                                #2: IntegerLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (94,38)-(94,38)]
+                                  value = 3
+                              }
+                            #1: ArrayInitializer:
+                              sourceInfo = [TestWeirdStuff.test: (95,7)-(95,13)]
+                              items = {
+                                #0: IntegerLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (95,8)-(95,8)]
+                                  value = 4
+                                #1: IntegerLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (95,10)-(95,10)]
+                                  value = 5
+                                #2: IntegerLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (95,12)-(95,12)]
+                                  value = 6
+                              }
+                            #2: ArrayInitializer:
+                              sourceInfo = [TestWeirdStuff.test: (96,7)-(96,13)]
+                              items = {
+                                #0: IntegerLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (96,8)-(96,8)]
+                                  value = 7
+                                #1: IntegerLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (96,10)-(96,10)]
+                                  value = 8
+                                #2: IntegerLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (96,12)-(96,12)]
+                                  value = 9
+                              }
+                          }
+                  }
+                #10: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (97,5)-(97,110)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (97,5)-(97,109)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (97,5)-(97,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (97,5)-(97,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (97,5)-(97,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (97,12)-(97,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (97,16)-(97,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (97,23)-(97,109)]
+                      expressions = {
+                        #0: PlusExpression:
+                          sourceInfo = [TestWeirdStuff.test: (97,24)-(97,108)]
+                          left = PlusExpression:
+                            sourceInfo = [TestWeirdStuff.test: (97,24)-(97,92)]
+                            left = PlusExpression:
+                              sourceInfo = [TestWeirdStuff.test: (97,24)-(97,72)]
+                              left = StringLiteral:
+                                sourceInfo = [TestWeirdStuff.test: (97,24)-(97,45)]
+                                value = getFirst(v).class = 
+                              right = ComplexMethodInvocation:
+                                sourceInfo = [TestWeirdStuff.test: (97,49)-(97,72)]
+                                enclosing = ComplexMethodInvocation:
+                                  sourceInfo = [TestWeirdStuff.test: (97,49)-(97,61)]
+                                  enclosing = SimpleNameReference:
+                                    sourceInfo = [TestWeirdStuff.test: (97,49)-(97,49)]
+                                    name = Word:
+                                      sourceInfo = [TestWeirdStuff.test: (97,49)-(97,49)]
+                                      text = t
+                                  name = Word:
+                                    sourceInfo = [TestWeirdStuff.test: (97,51)-(97,58)]
+                                    text = getFirst
+                                  arguments = ParenthesizedExpressionList:
+                                    sourceInfo = [TestWeirdStuff.test: (97,59)-(97,61)]
+                                    expressions = {
+                                      #0: SimpleNameReference:
+                                        sourceInfo = [TestWeirdStuff.test: (97,60)-(97,60)]
+                                        name = Word:
+                                          sourceInfo = [TestWeirdStuff.test: (97,60)-(97,60)]
+                                          text = v
+                                    }
+                                name = Word:
+                                  sourceInfo = [TestWeirdStuff.test: (97,63)-(97,70)]
+                                  text = getClass
+                                arguments = ParenthesizedExpressionList:
+                                  sourceInfo = [TestWeirdStuff.test: (97,71)-(97,72)]
+                                  expressions = {}
+                            right = StringLiteral:
+                              sourceInfo = [TestWeirdStuff.test: (97,76)-(97,92)]
+                              value =  getFirst(v) = 
+                          right = ComplexMethodInvocation:
+                            sourceInfo = [TestWeirdStuff.test: (97,96)-(97,108)]
+                            enclosing = SimpleNameReference:
+                              sourceInfo = [TestWeirdStuff.test: (97,96)-(97,96)]
+                              name = Word:
+                                sourceInfo = [TestWeirdStuff.test: (97,96)-(97,96)]
+                                text = t
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (97,98)-(97,105)]
+                              text = getFirst
+                            arguments = ParenthesizedExpressionList:
+                              sourceInfo = [TestWeirdStuff.test: (97,106)-(97,108)]
+                              expressions = {
+                                #0: SimpleNameReference:
+                                  sourceInfo = [TestWeirdStuff.test: (97,107)-(97,107)]
+                                  name = Word:
+                                    sourceInfo = [TestWeirdStuff.test: (97,107)-(97,107)]
+                                    text = v
+                              }
+                      }
+                #11: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (98,5)-(98,23)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (98,5)-(98,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (98,9)-(98,23)]
+                      type = PrimitiveType:
+                        sourceInfo = [TestWeirdStuff.test: (98,5)-(98,7)]
+                        name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (98,9)-(98,9)]
+                        text = x
+                      initializer = Parenthesized:
+                        sourceInfo = [TestWeirdStuff.test: (98,13)-(98,23)]
+                        value = NegativeExpression:
+                          sourceInfo = [TestWeirdStuff.test: (98,14)-(98,22)]
+                          value = IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (98,22)-(98,22)]
+                            value = 3
+                  }
+                #12: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (99,5)-(99,33)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (99,5)-(99,32)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (99,5)-(99,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (99,5)-(99,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (99,5)-(99,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (99,12)-(99,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (99,16)-(99,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (99,23)-(99,32)]
+                      expressions = {
+                        #0: PlusExpression:
+                          sourceInfo = [TestWeirdStuff.test: (99,24)-(99,31)]
+                          left = Parenthesized:
+                            sourceInfo = [TestWeirdStuff.test: (99,24)-(99,26)]
+                            value = SimpleNameReference:
+                              sourceInfo = [TestWeirdStuff.test: (99,25)-(99,25)]
+                              name = Word:
+                                sourceInfo = [TestWeirdStuff.test: (99,25)-(99,25)]
+                                text = x
+                          right = PositiveExpression:
+                            sourceInfo = [TestWeirdStuff.test: (99,30)-(99,31)]
+                            value = IntegerLiteral:
+                              sourceInfo = [TestWeirdStuff.test: (99,31)-(99,31)]
+                              value = 7
+                      }
+                #13: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (100,5)-(100,60)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (100,5)-(100,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (100,13)-(100,60)]
+                      type = PrimitiveType:
+                        sourceInfo = [TestWeirdStuff.test: (100,5)-(100,11)]
+                        name = boolean
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (100,13)-(100,13)]
+                        text = b
+                      initializer = ComplexMethodInvocation:
+                        sourceInfo = [TestWeirdStuff.test: (100,17)-(100,60)]
+                        enclosing = Parenthesized:
+                          sourceInfo = [TestWeirdStuff.test: (100,17)-(100,45)]
+                          value = CastExpression:
+                            sourceInfo = [TestWeirdStuff.test: (100,18)-(100,44)]
+                            type = ClassOrInterfaceType:
+                              sourceInfo = [TestWeirdStuff.test: (100,19)-(100,25)]
+                              name = Boolean
+                              typeArguments = {}
+                            value = SimpleNamedClassInstantiation:
+                              sourceInfo = [TestWeirdStuff.test: (100,28)-(100,44)]
+                              type = ClassOrInterfaceType:
+                                sourceInfo = [TestWeirdStuff.test: (100,32)-(100,38)]
+                                name = Boolean
+                                typeArguments = {}
+                              arguments = ParenthesizedExpressionList:
+                                sourceInfo = [TestWeirdStuff.test: (100,39)-(100,44)]
+                                expressions = {
+                                  #0: BooleanLiteral:
+                                    sourceInfo = [TestWeirdStuff.test: (100,40)-(100,43)]
+                                    value = true
+                                }
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (100,47)-(100,58)]
+                          text = booleanValue
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [TestWeirdStuff.test: (100,59)-(100,60)]
+                          expressions = {}
+                  }
+                #14: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (101,5)-(101,19)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (101,5)-(101,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (101,9)-(101,19)]
+                      type = PrimitiveType:
+                        sourceInfo = [TestWeirdStuff.test: (101,5)-(101,7)]
+                        name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (101,9)-(101,9)]
+                        text = y
+                      initializer = PlusExpression:
+                        sourceInfo = [TestWeirdStuff.test: (101,13)-(101,19)]
+                        left = Parenthesized:
+                          sourceInfo = [TestWeirdStuff.test: (101,13)-(101,15)]
+                          value = SimpleNameReference:
+                            sourceInfo = [TestWeirdStuff.test: (101,14)-(101,14)]
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (101,14)-(101,14)]
+                              text = x
+                        right = IntegerLiteral:
+                          sourceInfo = [TestWeirdStuff.test: (101,19)-(101,19)]
+                          value = 3
+                  }
+                #15: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (102,5)-(102,21)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (102,5)-(102,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (102,9)-(102,21)]
+                      type = PrimitiveType:
+                        sourceInfo = [TestWeirdStuff.test: (102,5)-(102,7)]
+                        name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (102,9)-(102,9)]
+                        text = z
+                      initializer = CastExpression:
+                        sourceInfo = [TestWeirdStuff.test: (102,13)-(102,21)]
+                        type = PrimitiveType:
+                          sourceInfo = [TestWeirdStuff.test: (102,14)-(102,16)]
+                          name = int
+                        value = PositiveExpression:
+                          sourceInfo = [TestWeirdStuff.test: (102,19)-(102,21)]
+                          value = IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (102,21)-(102,21)]
+                            value = 3
+                  }
+              }
+          #14: ConstructorDef:
+            sourceInfo = [TestWeirdStuff.test: (106,3)-(110,3)]
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (106,3)-(106,16)]
+              text = TestWeirdStuff
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (106,3)-(106,3)]
+              modifiers = {}
+            parameters = {}
+            throws = {}
+            statements = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (106,20)-(110,3)]
+              statements = {
+                #0: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (107,5)-(107,21)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (107,5)-(107,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (107,13)-(107,21)]
+                      type = PrimitiveType:
+                        sourceInfo = [TestWeirdStuff.test: (107,5)-(107,11)]
+                        name = boolean
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (107,13)-(107,13)]
+                        text = b
+                      initializer = BooleanLiteral:
+                        sourceInfo = [TestWeirdStuff.test: (107,17)-(107,21)]
+                        value = false
+                  }
+                #1: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (108,5)-(108,111)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (108,5)-(108,110)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (108,5)-(108,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (108,5)-(108,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (108,5)-(108,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (108,12)-(108,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (108,16)-(108,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (108,23)-(108,110)]
+                      expressions = {
+                        #0: InstanceofExpression:
+                          sourceInfo = [TestWeirdStuff.test: (108,24)-(108,109)]
+                          value = Parenthesized:
+                            sourceInfo = [TestWeirdStuff.test: (108,24)-(108,90)]
+                            value = ConditionalExpression:
+                              sourceInfo = [TestWeirdStuff.test: (108,25)-(108,89)]
+                              condition = BooleanLiteral:
+                                sourceInfo = [TestWeirdStuff.test: (108,25)-(108,29)]
+                                value = false
+                              forTrue = ConditionalExpression:
+                                sourceInfo = [TestWeirdStuff.test: (108,32)-(108,71)]
+                                condition = BooleanLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (108,32)-(108,36)]
+                                  value = false
+                                forTrue = SimpleNamedClassInstantiation:
+                                  sourceInfo = [TestWeirdStuff.test: (108,39)-(108,52)]
+                                  type = ClassOrInterfaceType:
+                                    sourceInfo = [TestWeirdStuff.test: (108,43)-(108,49)]
+                                    name = Integer
+                                    typeArguments = {}
+                                  arguments = ParenthesizedExpressionList:
+                                    sourceInfo = [TestWeirdStuff.test: (108,50)-(108,52)]
+                                    expressions = {
+                                      #0: IntegerLiteral:
+                                        sourceInfo = [TestWeirdStuff.test: (108,51)-(108,51)]
+                                        value = 5
+                                    }
+                                forFalse = SimpleNamedClassInstantiation:
+                                  sourceInfo = [TestWeirdStuff.test: (108,56)-(108,71)]
+                                  type = ClassOrInterfaceType:
+                                    sourceInfo = [TestWeirdStuff.test: (108,60)-(108,66)]
+                                    name = Integer
+                                    typeArguments = {}
+                                  arguments = ParenthesizedExpressionList:
+                                    sourceInfo = [TestWeirdStuff.test: (108,67)-(108,71)]
+                                    expressions = {
+                                      #0: IntegerLiteral:
+                                        sourceInfo = [TestWeirdStuff.test: (108,68)-(108,70)]
+                                        value = 153
+                                    }
+                              forFalse = SimpleNamedClassInstantiation:
+                                sourceInfo = [TestWeirdStuff.test: (108,75)-(108,89)]
+                                type = ClassOrInterfaceType:
+                                  sourceInfo = [TestWeirdStuff.test: (108,79)-(108,85)]
+                                  name = Integer
+                                  typeArguments = {}
+                                arguments = ParenthesizedExpressionList:
+                                  sourceInfo = [TestWeirdStuff.test: (108,86)-(108,89)]
+                                  expressions = {
+                                    #0: IntegerLiteral:
+                                      sourceInfo = [TestWeirdStuff.test: (108,87)-(108,88)]
+                                      value = 34
+                                  }
+                          type = ClassOrInterfaceType:
+                            sourceInfo = [TestWeirdStuff.test: (108,103)-(108,109)]
+                            name = Integer
+                            typeArguments = {}
+                      }
+                #2: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (109,5)-(109,35)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (109,5)-(109,34)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (109,5)-(109,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (109,5)-(109,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (109,5)-(109,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (109,12)-(109,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (109,16)-(109,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (109,23)-(109,34)]
+                      expressions = {
+                        #0: ClassLiteral:
+                          sourceInfo = [TestWeirdStuff.test: (109,24)-(109,33)]
+                          type = VoidReturn:
+                            sourceInfo = [TestWeirdStuff.test: (109,24)-(109,27)]
+                            name = void
+                      }
+              }
+          #15: ConstructorDef:
+            sourceInfo = [TestWeirdStuff.test: (112,3)-(112,53)]
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (112,3)-(112,16)]
+              text = TestWeirdStuff
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (112,3)-(112,3)]
+              modifiers = {}
+            parameters = {
+              #0: FormalParameter:
+                sourceInfo = [TestWeirdStuff.test: (112,18)-(112,22)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [TestWeirdStuff.test: (112,22)-(112,22)]
+                  type = PrimitiveType:
+                    sourceInfo = [TestWeirdStuff.test: (112,18)-(112,20)]
+                    name = int
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (112,22)-(112,22)]
+                    text = a
+                isFinal = false
+              #1: FormalParameter:
+                sourceInfo = [TestWeirdStuff.test: (112,25)-(112,29)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [TestWeirdStuff.test: (112,29)-(112,29)]
+                  type = PrimitiveType:
+                    sourceInfo = [TestWeirdStuff.test: (112,25)-(112,27)]
+                    name = int
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (112,29)-(112,29)]
+                    text = b
+                isFinal = false
+              #2: FormalParameter:
+                sourceInfo = [TestWeirdStuff.test: (112,32)-(112,39)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [TestWeirdStuff.test: (112,39)-(112,39)]
+                  type = ClassOrInterfaceType:
+                    sourceInfo = [TestWeirdStuff.test: (112,32)-(112,37)]
+                    name = String
+                    typeArguments = {}
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (112,39)-(112,39)]
+                    text = s
+                isFinal = false
+              #3: FormalParameter:
+                sourceInfo = [TestWeirdStuff.test: (112,42)-(112,49)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [TestWeirdStuff.test: (112,49)-(112,49)]
+                  type = ClassOrInterfaceType:
+                    sourceInfo = [TestWeirdStuff.test: (112,42)-(112,47)]
+                    name = String
+                    typeArguments = {}
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (112,49)-(112,49)]
+                    text = c
+                isFinal = false
+            }
+            throws = {}
+            statements = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (112,52)-(112,53)]
+              statements = {}
+          #16: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (114,3)-(120,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (114,3)-(114,15)]
+              modifiers = {
+                #0: public
+                #1: static
+              }
+            typeParams = {}
+            result = ClassOrInterfaceType:
+              sourceInfo = [TestWeirdStuff.test: (114,17)-(114,30)]
+              name = TestWeirdStuff
+              typeArguments = {}
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (114,32)-(114,46)]
+              text = callConstructor
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (114,51)-(120,3)]
+              statements = {
+                #0: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (115,5)-(118,50)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (115,5)-(115,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (115,20)-(118,50)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [TestWeirdStuff.test: (115,5)-(115,18)]
+                        name = TestWeirdStuff
+                        typeArguments = {}
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (115,20)-(115,22)]
+                        text = tws
+                      initializer = SimpleNamedClassInstantiation:
+                        sourceInfo = [TestWeirdStuff.test: (115,26)-(118,50)]
+                        type = ClassOrInterfaceType:
+                          sourceInfo = [TestWeirdStuff.test: (115,30)-(115,43)]
+                          name = TestWeirdStuff
+                          typeArguments = {}
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [TestWeirdStuff.test: (115,44)-(118,50)]
+                          expressions = {
+                            #0: IntegerLiteral:
+                              sourceInfo = [TestWeirdStuff.test: (115,45)-(115,45)]
+                              value = 5
+                            #1: IntegerLiteral:
+                              sourceInfo = [TestWeirdStuff.test: (116,45)-(116,45)]
+                              value = 8
+                            #2: StringLiteral:
+                              sourceInfo = [TestWeirdStuff.test: (117,45)-(117,49)]
+                              value = abc
+                            #3: StringLiteral:
+                              sourceInfo = [TestWeirdStuff.test: (118,45)-(118,49)]
+                              value = xyz
+                          }
+                  }
+                #1: ValueReturnStatement:
+                  sourceInfo = [TestWeirdStuff.test: (119,5)-(119,15)]
+                  value = SimpleNameReference:
+                    sourceInfo = [TestWeirdStuff.test: (119,12)-(119,14)]
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (119,12)-(119,14)]
+                      text = tws
+              }
+          #17: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (122,3)-(124,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (122,3)-(122,15)]
+              modifiers = {
+                #0: public
+                #1: static
+              }
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [TestWeirdStuff.test: (122,17)-(122,20)]
+              name = void
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (122,22)-(122,25)]
+              text = main
+            params = {
+              #0: FormalParameter:
+                sourceInfo = [TestWeirdStuff.test: (122,27)-(122,39)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [TestWeirdStuff.test: (122,36)-(122,39)]
+                  type = ArrayType:
+                    sourceInfo = [TestWeirdStuff.test: (122,27)-(122,34)]
+                    name = String[]
+                    elementType = ClassOrInterfaceType:
+                      sourceInfo = [TestWeirdStuff.test: (122,27)-(122,32)]
+                      name = String
+                      typeArguments = {}
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (122,36)-(122,39)]
+                    text = args
+                isFinal = false
+            }
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (122,42)-(124,3)]
+              statements = {
+                #0: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (123,5)-(123,25)]
+                  expression = SimpleNamedClassInstantiation:
+                    sourceInfo = [TestWeirdStuff.test: (123,5)-(123,24)]
+                    type = ClassOrInterfaceType:
+                      sourceInfo = [TestWeirdStuff.test: (123,9)-(123,22)]
+                      name = TestWeirdStuff
+                      typeArguments = {}
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (123,23)-(123,24)]
+                      expressions = {}
+              }
+          #18: ConstructorDef:
+            sourceInfo = [TestWeirdStuff.test: (126,3)-(137,3)]
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (126,3)-(126,16)]
+              text = TestWeirdStuff
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (126,3)-(126,3)]
+              modifiers = {}
+            parameters = {
+              #0: FormalParameter:
+                sourceInfo = [TestWeirdStuff.test: (126,18)-(126,31)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [TestWeirdStuff.test: (126,28)-(126,31)]
+                  type = ArrayType:
+                    sourceInfo = [TestWeirdStuff.test: (126,18)-(126,26)]
+                    name = Integer[]
+                    elementType = ClassOrInterfaceType:
+                      sourceInfo = [TestWeirdStuff.test: (126,18)-(126,24)]
+                      name = Integer
+                      typeArguments = {}
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (126,28)-(126,31)]
+                    text = ints
+                isFinal = false
+            }
+            throws = {}
+            statements = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (126,34)-(137,3)]
+              statements = {
+                #0: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (127,5)-(127,41)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (127,5)-(127,40)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (127,5)-(127,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (127,5)-(127,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (127,5)-(127,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (127,12)-(127,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (127,16)-(127,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (127,23)-(127,40)]
+                      expressions = {
+                        #0: StringLiteral:
+                          sourceInfo = [TestWeirdStuff.test: (127,24)-(127,39)]
+                          value = In constructor
+                      }
+                #1: EmptyStatement: sourceInfo = [TestWeirdStuff.test: (128,5)-(128,5)]
+                #2: EmptyStatement: sourceInfo = [TestWeirdStuff.test: (129,5)-(129,5)]
+                #3: EmptyStatement: sourceInfo = [TestWeirdStuff.test: (130,5)-(130,5)]
+                #4: EmptyStatement: sourceInfo = [TestWeirdStuff.test: (131,5)-(131,5)]
+                #5: EmptyStatement: sourceInfo = [TestWeirdStuff.test: (132,5)-(132,5)]
+                #6: EmptyStatement: sourceInfo = [TestWeirdStuff.test: (133,5)-(133,5)]
+                #7: EmptyStatement: sourceInfo = [TestWeirdStuff.test: (134,5)-(134,5)]
+                #8: EmptyStatement: sourceInfo = [TestWeirdStuff.test: (135,5)-(135,5)]
+                #9: EmptyStatement: sourceInfo = [TestWeirdStuff.test: (136,5)-(136,5)]
+              }
+          #19: ConstructorDef:
+            sourceInfo = [TestWeirdStuff.test: (139,3)-(141,3)]
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (139,3)-(139,16)]
+              text = TestWeirdStuff
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (139,3)-(139,3)]
+              modifiers = {}
+            parameters = {
+              #0: FormalParameter:
+                sourceInfo = [TestWeirdStuff.test: (139,18)-(139,33)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [TestWeirdStuff.test: (139,33)-(139,33)]
+                  type = ClassOrInterfaceType:
+                    sourceInfo = [TestWeirdStuff.test: (139,18)-(139,31)]
+                    name = TestWeirdStuff
+                    typeArguments = {}
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (139,33)-(139,33)]
+                    text = t
+                isFinal = false
+            }
+            throws = {}
+            statements = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (139,36)-(141,3)]
+              statements = {
+                #0: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (140,5)-(140,12)]
+                  expression = SimpleAssignmentExpression:
+                    sourceInfo = [TestWeirdStuff.test: (140,5)-(140,11)]
+                    name = SimpleNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (140,5)-(140,7)]
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (140,5)-(140,7)]
+                        text = tws
+                    value = SimpleNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (140,11)-(140,11)]
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (140,11)-(140,11)]
+                        text = t
+              }
+          #20: InnerInterfaceDef:
+            sourceInfo = [TestWeirdStuff.test: (143,3)-(146,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (143,3)-(143,3)]
+              modifiers = {}
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (143,13)-(143,26)]
+              text = InnerInterface
+            typeParameters = {}
+            interfaces = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (143,28)-(146,3)]
+              statements = {
+                #0: AbstractMethodDef:
+                  sourceInfo = [TestWeirdStuff.test: (144,5)-(144,14)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (144,5)-(144,5)]
+                    modifiers = {}
+                  typeParams = {}
+                  result = PrimitiveType:
+                    sourceInfo = [TestWeirdStuff.test: (144,5)-(144,7)]
+                    name = int
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (144,9)-(144,11)]
+                    text = bar
+                  params = {}
+                  throws = {}
+                #1: InnerClassDef:
+                  sourceInfo = [TestWeirdStuff.test: (145,5)-(145,16)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (145,5)-(145,5)]
+                    modifiers = {}
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (145,11)-(145,13)]
+                    text = DEF
+                  typeParameters = {}
+                  superclass = ClassOrInterfaceType:
+                    sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+                    name = Object
+                    typeArguments = {}
+                  interfaces = {}
+                  body = BracedBody:
+                    sourceInfo = [TestWeirdStuff.test: (145,15)-(145,16)]
+                    statements = {}
+              }
+          #21: InnerClassDef:
+            sourceInfo = [TestWeirdStuff.test: (148,3)-(160,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (148,3)-(148,3)]
+              modifiers = {}
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (148,9)-(148,12)]
+              text = Blah
+            typeParameters = {}
+            superclass = ClassOrInterfaceType:
+              sourceInfo = [TestWeirdStuff.test: (148,22)-(148,26)]
+              name = Outer
+              typeArguments = {}
+            interfaces = {
+              #0: ClassOrInterfaceType:
+                sourceInfo = [TestWeirdStuff.test: (148,39)-(148,52)]
+                name = InnerInterface
+                typeArguments = {}
+              #1: ClassOrInterfaceType:
+                sourceInfo = [TestWeirdStuff.test: (148,55)-(148,68)]
+                name = WeirdInterface
+                typeArguments = {}
+            }
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (148,70)-(160,3)]
+              statements = {
+                #0: VariableDeclaration:
+                  sourceInfo = [TestWeirdStuff.test: (149,5)-(149,23)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (149,5)-(149,13)]
+                    modifiers = {
+                      #0: protected
+                    }
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [TestWeirdStuff.test: (149,19)-(149,23)]
+                      type = PrimitiveType:
+                        sourceInfo = [TestWeirdStuff.test: (149,15)-(149,17)]
+                        name = int
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (149,19)-(149,19)]
+                        text = i
+                      initializer = IntegerLiteral:
+                        sourceInfo = [TestWeirdStuff.test: (149,23)-(149,23)]
+                        value = 5
+                  }
+                #1: ConcreteMethodDef:
+                  sourceInfo = [TestWeirdStuff.test: (150,5)-(153,5)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (150,5)-(150,10)]
+                    modifiers = {
+                      #0: public
+                    }
+                  typeParams = {}
+                  result = PrimitiveType:
+                    sourceInfo = [TestWeirdStuff.test: (150,12)-(150,14)]
+                    name = int
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (150,16)-(150,18)]
+                    text = foo
+                  params = {}
+                  throws = {}
+                  body = BracedBody:
+                    sourceInfo = [TestWeirdStuff.test: (150,22)-(153,5)]
+                    statements = {
+                      #0: ExpressionStatement:
+                        sourceInfo = [TestWeirdStuff.test: (151,7)-(151,49)]
+                        expression = ComplexMethodInvocation:
+                          sourceInfo = [TestWeirdStuff.test: (151,7)-(151,48)]
+                          enclosing = ComplexNameReference:
+                            sourceInfo = [TestWeirdStuff.test: (151,7)-(151,16)]
+                            enclosing = SimpleNameReference:
+                              sourceInfo = [TestWeirdStuff.test: (151,7)-(151,12)]
+                              name = Word:
+                                sourceInfo = [TestWeirdStuff.test: (151,7)-(151,12)]
+                                text = System
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (151,14)-(151,16)]
+                              text = out
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (151,18)-(151,24)]
+                            text = println
+                          arguments = ParenthesizedExpressionList:
+                            sourceInfo = [TestWeirdStuff.test: (151,25)-(151,48)]
+                            expressions = {
+                              #0: PlusExpression:
+                                sourceInfo = [TestWeirdStuff.test: (151,26)-(151,47)]
+                                left = StringLiteral:
+                                  sourceInfo = [TestWeirdStuff.test: (151,26)-(151,40)]
+                                  value = In Blah.foo()
+                                right = SimpleNameReference:
+                                  sourceInfo = [TestWeirdStuff.test: (151,44)-(151,47)]
+                                  name = Word:
+                                    sourceInfo = [TestWeirdStuff.test: (151,44)-(151,47)]
+                                    text = ints
+                            }
+                      #1: ValueReturnStatement:
+                        sourceInfo = [TestWeirdStuff.test: (152,7)-(152,15)]
+                        value = SimpleNameReference:
+                          sourceInfo = [TestWeirdStuff.test: (152,14)-(152,14)]
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (152,14)-(152,14)]
+                            text = i
+                    }
+                #2: ConcreteMethodDef:
+                  sourceInfo = [TestWeirdStuff.test: (154,5)-(159,5)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [TestWeirdStuff.test: (154,5)-(154,10)]
+                    modifiers = {
+                      #0: public
+                    }
+                  typeParams = {}
+                  result = PrimitiveType:
+                    sourceInfo = [TestWeirdStuff.test: (154,12)-(154,14)]
+                    name = int
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (154,16)-(154,18)]
+                    text = bar
+                  params = {}
+                  throws = {}
+                  body = BracedBody:
+                    sourceInfo = [TestWeirdStuff.test: (154,22)-(159,5)]
+                    statements = {
+                      #0: VariableDeclaration:
+                        sourceInfo = [TestWeirdStuff.test: (155,7)-(155,20)]
+                        mav = ModifiersAndVisibility:
+                          sourceInfo = [TestWeirdStuff.test: (155,7)-(155,11)]
+                          modifiers = {
+                            #0: final
+                          }
+                        declarators = {
+                          #0: UninitializedVariableDeclarator:
+                            sourceInfo = [TestWeirdStuff.test: (155,17)-(155,17)]
+                            type = PrimitiveType:
+                              sourceInfo = [TestWeirdStuff.test: (155,13)-(155,15)]
+                              name = int
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (155,17)-(155,17)]
+                              text = z
+                          #1: UninitializedVariableDeclarator:
+                            sourceInfo = [TestWeirdStuff.test: (155,20)-(155,20)]
+                            type = PrimitiveType:
+                              sourceInfo = [TestWeirdStuff.test: (155,13)-(155,15)]
+                              name = int
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (155,20)-(155,20)]
+                              text = y
+                        }
+                      #1: ExpressionStatement:
+                        sourceInfo = [TestWeirdStuff.test: (156,7)-(156,12)]
+                        expression = SimpleAssignmentExpression:
+                          sourceInfo = [TestWeirdStuff.test: (156,7)-(156,11)]
+                          name = SimpleNameReference:
+                            sourceInfo = [TestWeirdStuff.test: (156,7)-(156,7)]
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (156,7)-(156,7)]
+                              text = z
+                          value = IntegerLiteral:
+                            sourceInfo = [TestWeirdStuff.test: (156,11)-(156,11)]
+                            value = 7
+                      #2: ExpressionStatement:
+                        sourceInfo = [TestWeirdStuff.test: (157,7)-(157,42)]
+                        expression = ComplexMethodInvocation:
+                          sourceInfo = [TestWeirdStuff.test: (157,7)-(157,41)]
+                          enclosing = ComplexNameReference:
+                            sourceInfo = [TestWeirdStuff.test: (157,7)-(157,16)]
+                            enclosing = SimpleNameReference:
+                              sourceInfo = [TestWeirdStuff.test: (157,7)-(157,12)]
+                              name = Word:
+                                sourceInfo = [TestWeirdStuff.test: (157,7)-(157,12)]
+                                text = System
+                            name = Word:
+                              sourceInfo = [TestWeirdStuff.test: (157,14)-(157,16)]
+                              text = out
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (157,18)-(157,24)]
+                            text = println
+                          arguments = ParenthesizedExpressionList:
+                            sourceInfo = [TestWeirdStuff.test: (157,25)-(157,41)]
+                            expressions = {
+                              #0: StringLiteral:
+                                sourceInfo = [TestWeirdStuff.test: (157,26)-(157,40)]
+                                value = In Blah.bar()
+                            }
+                      #3: ValueReturnStatement:
+                        sourceInfo = [TestWeirdStuff.test: (158,7)-(158,15)]
+                        value = SimpleNameReference:
+                          sourceInfo = [TestWeirdStuff.test: (158,14)-(158,14)]
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (158,14)-(158,14)]
+                            text = z
+                    }
+              }
+        }
+    #1: InterfaceDef:
+      sourceInfo = [TestWeirdStuff.test: (163,1)-(166,1)]
+      mav = ModifiersAndVisibility:
+        sourceInfo = [TestWeirdStuff.test: (163,1)-(163,1)]
+        modifiers = {}
+      name = Word:
+        sourceInfo = [TestWeirdStuff.test: (163,11)-(163,24)]
+        text = WeirdInterface
+      typeParameters = {}
+      interfaces = {}
+      body = BracedBody:
+        sourceInfo = [TestWeirdStuff.test: (163,26)-(166,1)]
+        statements = {
+          #0: AbstractMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (165,3)-(165,21)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (165,3)-(165,10)]
+              modifiers = {
+                #0: abstract
+              }
+            typeParams = {}
+            result = PrimitiveType:
+              sourceInfo = [TestWeirdStuff.test: (165,12)-(165,14)]
+              name = int
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (165,16)-(165,18)]
+              text = foo
+            params = {}
+            throws = {}
+        }
+    #2: ClassDef:
+      sourceInfo = [TestWeirdStuff.test: (168,1)-(175,1)]
+      mav = ModifiersAndVisibility:
+        sourceInfo = [TestWeirdStuff.test: (168,1)-(168,1)]
+        modifiers = {}
+      name = Word:
+        sourceInfo = [TestWeirdStuff.test: (168,7)-(168,10)]
+        text = Aiya
+      typeParameters = {}
+      superclass = MemberType:
+        sourceInfo = [TestWeirdStuff.test: (168,20)-(168,38)]
+        name = TestWeirdStuff.Blah
+        left = ClassOrInterfaceType:
+          sourceInfo = [TestWeirdStuff.test: (168,20)-(168,33)]
+          name = TestWeirdStuff
+          typeArguments = {}
+        right = ClassOrInterfaceType:
+          sourceInfo = [TestWeirdStuff.test: (168,35)-(168,38)]
+          name = Blah
+          typeArguments = {}
+      interfaces = {}
+      body = BracedBody:
+        sourceInfo = [TestWeirdStuff.test: (168,40)-(175,1)]
+        statements = {
+          #0: VariableDeclaration:
+            sourceInfo = [TestWeirdStuff.test: (169,3)-(169,21)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (169,3)-(169,11)]
+              modifiers = {
+                #0: protected
+              }
+            declarators = {
+              #0: InitializedVariableDeclarator:
+                sourceInfo = [TestWeirdStuff.test: (169,17)-(169,21)]
+                type = PrimitiveType:
+                  sourceInfo = [TestWeirdStuff.test: (169,13)-(169,15)]
+                  name = int
+                name = Word:
+                  sourceInfo = [TestWeirdStuff.test: (169,17)-(169,17)]
+                  text = i
+                initializer = IntegerLiteral:
+                  sourceInfo = [TestWeirdStuff.test: (169,21)-(169,21)]
+                  value = 7
+            }
+          #1: ConstructorDef:
+            sourceInfo = [TestWeirdStuff.test: (170,3)-(172,3)]
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (170,3)-(170,6)]
+              text = Aiya
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (170,3)-(170,3)]
+              modifiers = {}
+            parameters = {}
+            throws = {}
+            statements = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (170,10)-(172,3)]
+              statements = {
+                #0: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (171,5)-(171,35)]
+                  expression = ComplexSuperConstructorInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (171,5)-(171,34)]
+                    enclosing = Parenthesized:
+                      sourceInfo = [TestWeirdStuff.test: (171,5)-(171,26)]
+                      value = SimpleNamedClassInstantiation:
+                        sourceInfo = [TestWeirdStuff.test: (171,6)-(171,25)]
+                        type = ClassOrInterfaceType:
+                          sourceInfo = [TestWeirdStuff.test: (171,10)-(171,23)]
+                          name = TestWeirdStuff
+                          typeArguments = {}
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [TestWeirdStuff.test: (171,24)-(171,25)]
+                          expressions = {}
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (171,33)-(171,34)]
+                      expressions = {}
+              }
+          #2: InnerClassDef:
+            sourceInfo = [TestWeirdStuff.test: (174,3)-(174,24)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (174,3)-(174,8)]
+              modifiers = {
+                #0: static
+              }
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (174,16)-(174,21)]
+              text = alskfj
+            typeParameters = {}
+            superclass = ClassOrInterfaceType:
+              sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+              name = Object
+              typeArguments = {}
+            interfaces = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (174,23)-(174,24)]
+              statements = {}
+        }
+    #3: ClassDef:
+      sourceInfo = [TestWeirdStuff.test: (177,1)-(189,1)]
+      mav = ModifiersAndVisibility:
+        sourceInfo = [TestWeirdStuff.test: (177,1)-(177,8)]
+        modifiers = {
+          #0: abstract
+        }
+      name = Word:
+        sourceInfo = [TestWeirdStuff.test: (177,16)-(177,20)]
+        text = Outer
+      typeParameters = {}
+      superclass = ClassOrInterfaceType:
+        sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+        name = Object
+        typeArguments = {}
+      interfaces = {
+        #0: ClassOrInterfaceType:
+          sourceInfo = [TestWeirdStuff.test: (177,33)-(177,46)]
+          name = WeirdInterface
+          typeArguments = {}
+      }
+      body = BracedBody:
+        sourceInfo = [TestWeirdStuff.test: (177,48)-(189,1)]
+        statements = {
+          #0: AbstractMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (179,3)-(179,20)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (179,3)-(179,10)]
+              modifiers = {
+                #0: abstract
+              }
+            typeParams = {}
+            result = PrimitiveType:
+              sourceInfo = [TestWeirdStuff.test: (179,12)-(179,14)]
+              name = int
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (179,16)-(179,17)]
+              text = dk
+            params = {}
+            throws = {}
+          #1: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (181,3)-(183,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (181,3)-(181,8)]
+              modifiers = {
+                #0: public
+              }
+            typeParams = {}
+            result = PrimitiveType:
+              sourceInfo = [TestWeirdStuff.test: (181,10)-(181,12)]
+              name = int
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (181,14)-(181,16)]
+              text = foo
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (181,20)-(183,3)]
+              statements = {
+                #0: ValueReturnStatement:
+                  sourceInfo = [TestWeirdStuff.test: (182,5)-(182,13)]
+                  value = IntegerLiteral:
+                    sourceInfo = [TestWeirdStuff.test: (182,12)-(182,12)]
+                    value = 3
+              }
+          #2: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (185,3)-(188,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (185,3)-(185,8)]
+              modifiers = {
+                #0: public
+              }
+            typeParams = {}
+            result = ClassOrInterfaceType:
+              sourceInfo = [TestWeirdStuff.test: (185,10)-(185,19)]
+              name = Collection
+              typeArguments = {}
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (185,21)-(185,23)]
+              text = xyz
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (185,27)-(188,3)]
+              statements = {
+                #0: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (186,5)-(186,44)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (186,5)-(186,43)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [TestWeirdStuff.test: (186,5)-(186,14)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [TestWeirdStuff.test: (186,5)-(186,10)]
+                        name = Word:
+                          sourceInfo = [TestWeirdStuff.test: (186,5)-(186,10)]
+                          text = System
+                      name = Word:
+                        sourceInfo = [TestWeirdStuff.test: (186,12)-(186,14)]
+                        text = out
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (186,16)-(186,22)]
+                      text = println
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (186,23)-(186,43)]
+                      expressions = {
+                        #0: StringLiteral:
+                          sourceInfo = [TestWeirdStuff.test: (186,24)-(186,42)]
+                          value = In Collection xyz
+                      }
+                #1: ValueReturnStatement:
+                  sourceInfo = [TestWeirdStuff.test: (187,5)-(187,16)]
+                  value = NullLiteral: sourceInfo = [TestWeirdStuff.test: (187,12)-(187,15)]
+              }
+        }
+    #4: ClassDef:
+      sourceInfo = [TestWeirdStuff.test: (191,1)-(198,1)]
+      mav = ModifiersAndVisibility:
+        sourceInfo = [TestWeirdStuff.test: (191,1)-(191,1)]
+        modifiers = {}
+      name = Word:
+        sourceInfo = [TestWeirdStuff.test: (191,7)-(191,9)]
+        text = Foo
+      typeParameters = {}
+      superclass = MemberType:
+        sourceInfo = [TestWeirdStuff.test: (191,19)-(191,29)]
+        name = Aiya.alskfj
+        left = ClassOrInterfaceType:
+          sourceInfo = [TestWeirdStuff.test: (191,19)-(191,22)]
+          name = Aiya
+          typeArguments = {}
+        right = ClassOrInterfaceType:
+          sourceInfo = [TestWeirdStuff.test: (191,24)-(191,29)]
+          name = alskfj
+          typeArguments = {}
+      interfaces = {}
+      body = BracedBody:
+        sourceInfo = [TestWeirdStuff.test: (191,31)-(198,1)]
+        statements = {
+          #0: InnerClassDef:
+            sourceInfo = [TestWeirdStuff.test: (192,3)-(192,21)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (192,3)-(192,8)]
+              modifiers = {
+                #0: static
+              }
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (192,16)-(192,18)]
+              text = Bar
+            typeParameters = {}
+            superclass = ClassOrInterfaceType:
+              sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+              name = Object
+              typeArguments = {}
+            interfaces = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (192,20)-(192,21)]
+              statements = {}
+          #1: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (194,3)-(194,24)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (194,3)-(194,3)]
+              modifiers = {}
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [TestWeirdStuff.test: (194,3)-(194,6)]
+              name = void
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (194,8)-(194,11)]
+              text = test
+            params = {
+              #0: FormalParameter:
+                sourceInfo = [TestWeirdStuff.test: (194,13)-(194,20)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [TestWeirdStuff.test: (194,20)-(194,20)]
+                  type = ClassOrInterfaceType:
+                    sourceInfo = [TestWeirdStuff.test: (194,13)-(194,18)]
+                    name = String
+                    typeArguments = {}
+                  name = Word:
+                    sourceInfo = [TestWeirdStuff.test: (194,20)-(194,20)]
+                    text = s
+                isFinal = false
+            }
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (194,23)-(194,24)]
+              statements = {}
+          #2: ConcreteMethodDef:
+            sourceInfo = [TestWeirdStuff.test: (195,3)-(197,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [TestWeirdStuff.test: (195,3)-(195,3)]
+              modifiers = {}
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [TestWeirdStuff.test: (195,3)-(195,6)]
+              name = void
+            name = Word:
+              sourceInfo = [TestWeirdStuff.test: (195,8)-(195,13)]
+              text = tester
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [TestWeirdStuff.test: (195,17)-(197,3)]
+              statements = {
+                #0: ExpressionStatement:
+                  sourceInfo = [TestWeirdStuff.test: (196,5)-(196,34)]
+                  expression = SimpleMethodInvocation:
+                    sourceInfo = [TestWeirdStuff.test: (196,5)-(196,33)]
+                    name = Word:
+                      sourceInfo = [TestWeirdStuff.test: (196,5)-(196,8)]
+                      text = test
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [TestWeirdStuff.test: (196,9)-(196,33)]
+                      expressions = {
+                        #0: ComplexMethodInvocation:
+                          sourceInfo = [TestWeirdStuff.test: (196,10)-(196,32)]
+                          enclosing = SimpleNamedClassInstantiation:
+                            sourceInfo = [TestWeirdStuff.test: (196,10)-(196,21)]
+                            type = ClassOrInterfaceType:
+                              sourceInfo = [TestWeirdStuff.test: (196,14)-(196,19)]
+                              name = Object
+                              typeArguments = {}
+                            arguments = ParenthesizedExpressionList:
+                              sourceInfo = [TestWeirdStuff.test: (196,20)-(196,21)]
+                              expressions = {}
+                          name = Word:
+                            sourceInfo = [TestWeirdStuff.test: (196,23)-(196,30)]
+                            text = toString
+                          arguments = ParenthesizedExpressionList:
+                            sourceInfo = [TestWeirdStuff.test: (196,31)-(196,32)]
+                            expressions = {}
+                      }
+              }
+        }
+  }
