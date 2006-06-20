@@ -19,6 +19,13 @@ public class SnapshotIterable<T> extends AbstractIterable<T> implements SizedIte
     _values = vals;
   }
   
+  public SnapshotIterable(Iterator<? extends T> iterator) {
+    SizedIterable<T> vals = EmptyIterable.make();
+    while (iterator.hasNext()) { vals = ComposedIterable.make(vals, iterator.next()); }
+    _values = vals;
+  }
+    
+  
   public Iterator<T> iterator() { return _values.iterator(); }
   public int size() { return _values.size(); }
   public boolean isFixed() { return true; }
@@ -26,5 +33,10 @@ public class SnapshotIterable<T> extends AbstractIterable<T> implements SizedIte
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> SnapshotIterable<T> make(Iterable<? extends T> iterable) {
     return new SnapshotIterable<T>(iterable);
+  }
+  
+  /** Call the constructor (allows {@code T} to be inferred) */
+  public static <T> SnapshotIterable<T> make(Iterator<? extends T> iterator) {
+    return new SnapshotIterable<T>(iterator);
   }
 }

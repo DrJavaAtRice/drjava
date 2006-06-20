@@ -7,7 +7,7 @@ import edu.rice.cs.plt.lambda.Predicate;
  * An Iterator that only returns the values in another Iterator ({@code i}) for which some
  * predicate ({@code p}) holds.  Does not support {@link #remove()}.
  */
-public class FilteredIterator<T> implements Iterator<T> {
+public class FilteredIterator<T> extends ReadOnlyIterator<T> {
   
   private final Predicate<? super T> _p;
   private final Iterator<? extends T> _i;
@@ -26,8 +26,6 @@ public class FilteredIterator<T> implements Iterator<T> {
     advanceLookahead();
     return result;
   }
-  
-  public void remove() { throw new UnsupportedOperationException(); } 
   
   /**
    * Finds the next value in {@code _i} for which {@code _p} holds.

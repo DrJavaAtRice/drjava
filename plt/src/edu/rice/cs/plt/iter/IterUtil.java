@@ -1,6 +1,10 @@
 package edu.rice.cs.plt.iter;
 
 import java.util.*;
+import java.io.Reader;
+import java.io.InputStream;
+import java.io.IOException;
+
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.tuple.*;
 import edu.rice.cs.plt.recur.RecurUtil;
@@ -86,7 +90,7 @@ public class IterUtil {
     int result = Iterable.class.hashCode();
     int shift = 0;
     // So that values in long lists don't get ignored, we mask shift to be < 16
-    for (Object obj : iter) { result ^= obj.hashCode() << (shift & 0xF); shift++; }
+    for (Object obj : iter) { result ^= RecurUtil.safeHashCode(obj) << (shift & 0xF); shift++; }
     return result;
   }
   
@@ -116,6 +120,32 @@ public class IterUtil {
       for (T e : iter) { result.add(e); }
       return result;
     }
+  }
+  
+  /**
+   * Make an iterator based on an older-style {@link Enumeration}.  If an {@code Iterable} is
+   * needed (rather than an {@code Iterator}), the result can be wrapped in a 
+   * {@link ReadOnceIterable}.
+   */
+  public static <T> ReadOnlyIterator<T> asIterator(final Enumeration<? extends T> en) {
+    return new ReadOnlyIterator<T>() {
+      public boolean hasNext() { return en.hasMoreElements(); }
+      public T next() { return en.nextElement(); }
+    };
+  }
+  
+  /**
+   * Make an iterator based on a {@link StringTokenizer}.  (This is similar to 
+   * {@link #asIterator(Enumeration)}, but allows the tokenizer to be treated as an enumeration
+   * of {@code String}s rather than, as defined, an enumeration of {@code Object}s.)  If an 
+   * {@code Iterable} is needed (rather than an {@code Iterator}), the result can be wrapped in a 
+   * {@link ReadOnceIterable}.
+   */
+  public static ReadOnlyIterator<String> asIterator(final StringTokenizer s) {
+    return new ReadOnlyIterator<String>() {
+      public boolean hasNext() { return s.hasMoreTokens(); }
+      public String next() { return s.nextToken(); }
+    };
   }
   
   /** 
@@ -540,6 +570,259 @@ public class IterUtil {
     result = ComposedIterable.make(result, v9);
     result = ComposedIterable.make(result, v10);
     return result;
+  }
+  
+  
+  /** 
+   * @return  An iterable that traverses the given array
+   * @throws IllegalArgumentException  If {@code array} is not an array
+   */
+  public static SizedIterable<?> arrayIterable(Object array) {
+    if (!array.getClass().isArray()) { throw new IllegalArgumentException("Non-array argument"); }
+    if (array instanceof Object[]) { return arrayIterable((Object[]) array); }
+    else if (array instanceof int[]) { return arrayIterable((int[]) array); }
+    else if (array instanceof char[]) { return arrayIterable((char[]) array); }
+    else if (array instanceof byte[]) { return arrayIterable((byte[]) array); }
+    else if (array instanceof double[]) { return arrayIterable((double[]) array); }
+    else if (array instanceof boolean[]) { return arrayIterable((boolean[]) array); }
+    else if (array instanceof short[]) { return arrayIterable((short[]) array); }
+    else if (array instanceof long[]) { return arrayIterable((long[]) array); }
+    else if (array instanceof float[]) { return arrayIterable((float[]) array); }
+    else { throw new IllegalArgumentException("Unrecognized array type"); }
+  }
+  
+  /** @return  An iterable that traverses the given array */
+  public static <T> SizedIterable<T> arrayIterable(final T[] array) {
+    return new SizedIterable<T>() {
+      public int size() { return array.length; }
+      
+      public boolean isFixed() { return true; }
+      
+      public Iterator<T> iterator() {
+        return new IndexedIterator<T>() {
+          protected int size() { return array.length; }
+          protected T get(int i) { return array[i]; }
+        };
+      }
+    };
+  }
+    
+  /** @return  An iterable that traverses the given array */
+  public static SizedIterable<Boolean> arrayIterable(final boolean[] array) {
+    return new SizedIterable<Boolean>() {
+      public int size() { return array.length; }
+      
+      public boolean isFixed() { return true; }
+      
+      public Iterator<Boolean> iterator() {
+        return new IndexedIterator<Boolean>() {
+          protected int size() { return array.length; }
+          protected Boolean get(int i) { return array[i]; }
+        };
+      }
+    };
+  }
+    
+  /** @return  An iterable that traverses the given array */
+  public static SizedIterable<Character> arrayIterable(final char[] array) {
+    return new SizedIterable<Character>() {
+      public int size() { return array.length; }
+      
+      public boolean isFixed() { return true; }
+      
+      public Iterator<Character> iterator() {
+        return new IndexedIterator<Character>() {
+          protected int size() { return array.length; }
+          protected Character get(int i) { return array[i]; }
+        };
+      }
+    };
+  }
+    
+  /** @return  An iterable that traverses the given array */
+  public static SizedIterable<Byte> arrayIterable(final byte[] array) {
+    return new SizedIterable<Byte>() {
+      public int size() { return array.length; }
+      
+      public boolean isFixed() { return true; }
+      
+      public Iterator<Byte> iterator() {
+        return new IndexedIterator<Byte>() {
+          protected int size() { return array.length; }
+          protected Byte get(int i) { return array[i]; }
+        };
+      }
+    };
+  }
+    
+  /** @return  An iterable that traverses the given array */
+  public static SizedIterable<Short> arrayIterable(final short[] array) {
+    return new SizedIterable<Short>() {
+      public int size() { return array.length; }
+      
+      public boolean isFixed() { return true; }
+      
+      public Iterator<Short> iterator() {
+        return new IndexedIterator<Short>() {
+          protected int size() { return array.length; }
+          protected Short get(int i) { return array[i]; }
+        };
+      }
+    };
+  }
+    
+  /** @return  An iterable that traverses the given array */
+  public static SizedIterable<Integer> arrayIterable(final int[] array) {
+    return new SizedIterable<Integer>() {
+      public int size() { return array.length; }
+      
+      public boolean isFixed() { return true; }
+      
+      public Iterator<Integer> iterator() {
+        return new IndexedIterator<Integer>() {
+          protected int size() { return array.length; }
+          protected Integer get(int i) { return array[i]; }
+        };
+      }
+    };
+  }
+    
+  /** @return  An iterable that traverses the given array */
+  public static SizedIterable<Long> arrayIterable(final long[] array) {
+    return new SizedIterable<Long>() {
+      public int size() { return array.length; }
+      
+      public boolean isFixed() { return true; }
+      
+      public Iterator<Long> iterator() {
+        return new IndexedIterator<Long>() {
+          protected int size() { return array.length; }
+          protected Long get(int i) { return array[i]; }
+        };
+      }
+    };
+  }
+    
+  /** @return  An iterable that traverses the given array */
+  public static SizedIterable<Float> arrayIterable(final float[] array) {
+    return new SizedIterable<Float>() {
+      public int size() { return array.length; }
+      
+      public boolean isFixed() { return true; }
+      
+      public Iterator<Float> iterator() {
+        return new IndexedIterator<Float>() {
+          protected int size() { return array.length; }
+          protected Float get(int i) { return array[i]; }
+        };
+      }
+    };
+  }
+    
+  /** @return  An iterable that traverses the given array */
+  public static SizedIterable<Double> arrayIterable(final double[] array) {
+    return new SizedIterable<Double>() {
+      public int size() { return array.length; }
+      
+      public boolean isFixed() { return true; }
+      
+      public Iterator<Double> iterator() {
+        return new IndexedIterator<Double>() {
+          protected int size() { return array.length; }
+          protected Double get(int i) { return array[i]; }
+        };
+      }
+    };
+  }
+  
+  /** @return  An iterable that traverses the given {@link CharSequence} */
+  public static SizedIterable<Character> charSequenceIterable(final CharSequence sequence) {
+    return new SizedIterable<Character>() {
+      public int size() { return sequence.length(); }
+      
+      public boolean isFixed() { return false; }
+      
+      public Iterator<Character> iterator() {
+        return new IndexedIterator<Character>() {
+          protected int size() { return sequence.length(); }
+          protected Character get(int i) { return sequence.charAt(i); }
+        };
+      }
+    };
+  }
+  
+  /** 
+   * @return  An iterable that traverses the given {@link String}; similar to 
+   *          {@link #charSequenceIterable(CharSequence)}, but takes advantage of the fact
+   *          that {@code String}s are immutable
+   */
+  public static SizedIterable<Character> charSequenceIterable(final String sequence) {
+    return new SizedIterable<Character>() {
+      public int size() { return sequence.length(); }
+      
+      public boolean isFixed() { return true; }
+      
+      public Iterator<Character> iterator() {
+        return new IndexedIterator<Character>() {
+          protected int size() { return sequence.length(); }
+          protected Character get(int i) { return sequence.charAt(i); }
+        };
+      }
+    };
+  }
+  
+  /**
+   * @return  An iterable that traverses the given {@link Reader}.  If an {@link IOException}
+   *          occurs while reading, an {@link IllegalStateException} is thrown.  Note that, as a
+   *          {@link ReadOnceIterable}, the result only allows a single traversal
+   *          of its contents.
+   */
+  public static ReadOnceIterable<Character> readerIterable(final Reader in) {
+    return new ReadOnceIterable<Character>(new ReadOnlyIterator<Character>() {
+      private int _lookahead = readNext();
+
+      public boolean hasNext() { return _lookahead >= 0; }
+      
+      public Character next() {
+        if (_lookahead < 0) { throw new NoSuchElementException(); }
+        Character result = (char) _lookahead;
+        _lookahead = readNext();
+        return result;
+      }
+      
+      private int readNext() {
+        try { return in.read(); }
+        catch (IOException e) { throw new IllegalStateException(e); }
+      }
+      
+    });
+  }
+  
+  /**
+   * @return  An iterable that traverses the given {@link InputStream}.  If an {@link IOException}
+   *          occurs while reading, an {@link IllegalStateException} is thrown.  Note that, as a
+   *          {@link ReadOnceIterable}, the result only allows a single traversal
+   *          of its contents.
+   */
+  public static ReadOnceIterable<Byte> inputStreamIterable(final InputStream in) {
+    return new ReadOnceIterable<Byte>(new ReadOnlyIterator<Byte>() {
+      private int _lookahead = readNext();
+      
+      public boolean hasNext() { return _lookahead >= 0; }
+      
+      public Byte next() {
+        if (_lookahead < 0) { throw new NoSuchElementException(); }
+        Byte result = (byte) _lookahead;
+        _lookahead = readNext();
+        return result;
+      }
+      
+      private int readNext() {
+        try { return in.read(); }
+        catch (IOException e) { throw new IllegalStateException(e); }
+      }
+      
+    });
   }
   
 }

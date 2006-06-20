@@ -15,7 +15,7 @@ import java.util.Iterator;
  * @param T  The element type of the permuted lists; note that {@code next()} returns
  *           {@code Iterable<T>}s, not {@code T}s.
  */
-public class PermutationIterator<T> implements Iterator<Iterable<T>> {
+public class PermutationIterator<T> extends ReadOnlyIterator<Iterable<T>> {
   
   private final Iterable<? extends T> _original;
   private final Iterator<? extends T> _elements;
@@ -35,8 +35,6 @@ public class PermutationIterator<T> implements Iterator<Iterable<T>> {
     }
     else { _restPermutations = EmptyIterator.make(); }
   }
-  
-  public void remove() { throw new UnsupportedOperationException(); }
   
   public boolean hasNext() { return _restPermutations.hasNext() || _elements.hasNext(); }
   

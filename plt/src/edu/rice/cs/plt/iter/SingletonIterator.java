@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /** An Iterator over a 1-length list */
-public class SingletonIterator<T> implements Iterator<T> {
+public class SingletonIterator<T> extends ReadOnlyIterator<T> {
   
   private T _element;
   private boolean _hasNext;
@@ -20,8 +20,6 @@ public class SingletonIterator<T> implements Iterator<T> {
     if (_hasNext) { _hasNext = false; return _element; }
     else { throw new NoSuchElementException(); }
   }
-  
-  public void remove() { throw new UnsupportedOperationException(); }  
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> SingletonIterator<T> make(T element) { 
