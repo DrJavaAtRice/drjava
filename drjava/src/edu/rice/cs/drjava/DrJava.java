@@ -67,7 +67,7 @@ import edu.rice.cs.util.newjvm.ExecJVM;
  */
 public class DrJava {
   
-  private static Log _log = new Log("DrJava.txt", true);
+  private static Log _log = new Log("DrJava.txt", false);
   
   /** Class to probe to see if the debugger is available */
   public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";

@@ -69,9 +69,7 @@ public class ButtonComponent extends OptionComponent<Object> {
     _jb = new JButton(text);
     _jb.addActionListener(l);
     _jb.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        notifyChangeListeners();
-      }
+      public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
     });
   }
 

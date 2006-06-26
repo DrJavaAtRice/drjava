@@ -346,14 +346,19 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     _pane = _mf.getInteractionsPane();
     
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.resetPrompts(); } });
+    
+    Utilities.clearEventQueue();
 
 //    System.err.println(_pane.getPromptList());
     assertEquals("PromptList before insert should contain 0 elements", 0, _pane.getPromptList().size());
         
     // Insert some text 
     _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);
-    
+
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(_doc.getLength()); } });
+//    System.err.println(_pane.getPromptList());
+    
+    Utilities.clearEventQueue();
     
     assertEquals("PromptList after insert should contain 1 element", 1, _pane.getPromptList().size());    
     assertEquals("First prompt should be saved as being at position",
@@ -361,6 +366,9 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
                  (int)_pane.getPromptList().get(0)); //needs cast to prevent ambiguity
     
     _doc.insertPrompt();
+    Utilities.clearEventQueue();
+    
+    assertEquals("PromptList has length 2", 2, _pane.getPromptList().size());
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 
@@ -391,6 +399,8 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
  
     /* Wait until reset has finished. */
     synchronized(_resetLock) { while (! _resetDone) _resetLock.wait(); }
+    
+    Utilities.clearEventQueue();
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() { _size = _pane.getPromptList().size(); }

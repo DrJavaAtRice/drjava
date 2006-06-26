@@ -314,7 +314,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     debugListener.assertRegionRemovedCount(1);  //fires once
 
     // Shutdown the debugger
-    if (printMessages) printStream.println("Shutting down...");
+    _log.log("Shutting down...");
     synchronized(_notifierLock) {
       _debugger.shutdown();
       _setPendingNotifies(1);  // shutdown
@@ -322,7 +322,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) printStream.println("Shut down.");
+    _log.log("Shut down.");
     _debugger.removeListener(debugListener);
   }
 
@@ -405,7 +405,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
                  interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.getNegativeTwo()"));
 
     // Shutdown the debugger
-    if (printMessages) printStream.println("Shutting down...");
+    _log.log("Shutting down...");
 
     synchronized(_notifierLock) {
       _debugger.shutdown();
@@ -414,7 +414,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) printStream.println("Shut down.");
+    _log.log("Shut down.");
 
     _debugger.removeListener(debugListener);
   }
@@ -467,9 +467,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     // assertEquals("The value of localVar should not have changed", "11", interpret("localVar"));
 
     // Shutdown the debugger
-    if (printMessages) {
-      printStream.println("Shutting down...");
-    }
+    _log.log(this + " is Shutting Down...");
     synchronized(_notifierLock) {
       _debugger.shutdown();
       _setPendingNotifies(1);  // shutdown
@@ -477,9 +475,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) {
-      printStream.println("Shut down.");
-    }
+    _log.log(this + " is Shutting Down.");
     _debugger.removeListener(debugListener);
   }
 

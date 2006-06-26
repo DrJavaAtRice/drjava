@@ -416,31 +416,31 @@ public final class IndentTest extends DrJavaTestCase {
    */
   public void testIndentInfoSquiggly() throws BadLocationException {
     //empty document
-    BraceReduction rm = doc.getReduced();
-    IndentInfo ii = rm.getIndentInformation();
+    BraceReduction _reduced = doc.getReduced();
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, noBrace, -1, -1, -1);
     //single newline
     doc.insertString(0, "\n", null);
     _assertContents("\n", doc);
-    ii = rm.getIndentInformation();
+    ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, noBrace, -1, -1, 0);
     //single layer brace
     doc.insertString(0, "{\n\n", null);
     // {\n\n#\n
     _assertContents("{\n\n\n", doc);
-    ii = rm.getIndentInformation();
+    ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, -1, 3, 0);
     //another squiggly
     doc.insertString(3, "{\n\n", null);
     // {\n\n{\n\n#\n
     _assertContents("{\n\n{\n\n\n", doc);
-    ii = rm.getIndentInformation();
+    ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, 3, 3, 0);
     //brace with whitespace
     doc.insertString(6, "  {\n\n", null);
     // {\n\n{\n\n  {\n\n#\n
     _assertContents("{\n\n{\n\n  {\n\n\n", doc);
-    ii = rm.getIndentInformation();
+    ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, 5, 3, 0);
   }
 
@@ -450,16 +450,16 @@ public final class IndentTest extends DrJavaTestCase {
    */
   public void testIndentInfoParen() throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n(\n", null);
-    IndentInfo ii = rm.getIndentInformation();
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openParen, 2, 2, 0);
     // paren with stuff in front
     doc.insertString(1, "  helo ", null);
     doc.move(2);
     // \n  helo (\n#
     _assertContents("\n  helo (\n", doc);
-    ii = rm.getIndentInformation();
+    ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openParen, 9, 2, 0);
     //single layer brace
     doc.move(-1);
@@ -467,7 +467,7 @@ public final class IndentTest extends DrJavaTestCase {
     doc.move(1);
     // \n  helo ( (\n#
     _assertContents("\n  helo ( (\n", doc);
-    ii = rm.getIndentInformation();
+    ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openParen, 11, 2, 0);
   }
 
@@ -477,16 +477,16 @@ public final class IndentTest extends DrJavaTestCase {
    */
   public void testIndentInfoBracket() throws BadLocationException {
     // just bracket
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n[\n", null);
-    IndentInfo ii = rm.getIndentInformation();
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openBracket, 2, 2, 0);
     // bracket with stuff in front
     doc.insertString(1, "  helo ", null);
     doc.move(2);
     // \n  helo (\n#
     _assertContents("\n  helo [\n", doc);
-    ii = rm.getIndentInformation();
+    ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openBracket, 9, 2, 0);
     //single layer brace
     doc.move(-1);
@@ -494,7 +494,7 @@ public final class IndentTest extends DrJavaTestCase {
     doc.move(1);
     // \n  helo ( (\n#
     _assertContents("\n  helo [ [\n", doc);
-    ii = rm.getIndentInformation();
+    ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openBracket, 11, 2, 0);
   }
 
@@ -503,10 +503,10 @@ public final class IndentTest extends DrJavaTestCase {
    * @exception BadLocationException
    */
   public void testIndentInfoPrevNewline () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "{\n  {\nhello", null);
     // {\n  {\nhello#
-    IndentInfo ii = rm.getIndentInformation();
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, 9, 7, 5);
   }
 
@@ -565,11 +565,11 @@ public final class IndentTest extends DrJavaTestCase {
    * @exception BadLocationException
    */
   public void testIndentInfoBlockComments () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "(\n /*\n*\n", null);
     // (\n/*\n*#\n
-    rm.move(-1);
-    IndentInfo ii = rm.getIndentInformation();
+    _reduced.move(-1);
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openParen, -1, 7, 1);
   }
 
@@ -578,11 +578,11 @@ public final class IndentTest extends DrJavaTestCase {
    * @exception BadLocationException
    */
   public void testIndentInfoBlockComments2 () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n(\n /*\n*\n", null);
     // \n(\n/*\n*#\n
-    rm.move(-1);
-    IndentInfo ii = rm.getIndentInformation();
+    _reduced.move(-1);
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openParen, 7, 7, 1);
   }
 
@@ -591,11 +591,11 @@ public final class IndentTest extends DrJavaTestCase {
    * @exception BadLocationException
    */
   public void testIndentInfoBlockComments3 () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "{\n  /*\n*\n", null);
     // (\n/*\n*#\n
-    rm.move(-1);
-    IndentInfo ii = rm.getIndentInformation();
+    _reduced.move(-1);
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, -1, 8, 1);
   }
 
@@ -604,11 +604,11 @@ public final class IndentTest extends DrJavaTestCase {
    * @exception BadLocationException
    */
   public void testIndentInfoBlockComments4 () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n{\n  /*\n*\n", null);
     // \n(\n/*\n*#\n
-    rm.move(-1);
-    IndentInfo ii = rm.getIndentInformation();
+    _reduced.move(-1);
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, 8, 8, 1);
   }
 
@@ -617,9 +617,9 @@ public final class IndentTest extends DrJavaTestCase {
    * @exception BadLocationException
    */
   public void testSkippingBraces () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n{\n   { ()}\n}", null);
-    IndentInfo ii = rm.getIndentInformation();
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, 12, 12, 1);
   }
 
@@ -629,9 +629,9 @@ public final class IndentTest extends DrJavaTestCase {
    */
   public void testSkippingComments () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n{\n   //{ ()\n}", null);
-    IndentInfo ii = rm.getIndentInformation();
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, 13, 13, 1);
   }
 
@@ -641,9 +641,9 @@ public final class IndentTest extends DrJavaTestCase {
    */
   public void testSkippingCommentsBraceAtBeginning () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "{\n   //{ ()}{", null);
-    IndentInfo ii = rm.getIndentInformation();
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, openSquiggly, -1, 13, 11);
   }
 
@@ -653,9 +653,9 @@ public final class IndentTest extends DrJavaTestCase {
    */
   public void testNothingToIndentOn () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
+    BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "   //{ ()}{", null);
-    IndentInfo ii = rm.getIndentInformation();
+    IndentInfo ii = _reduced.getIndentInformation();
     _assertIndentInfo(ii, noBrace, -1, -1, -1);
   }
 

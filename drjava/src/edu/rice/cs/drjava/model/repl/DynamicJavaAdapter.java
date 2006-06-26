@@ -60,6 +60,7 @@ import edu.rice.cs.util.*;
  * @version $Id$
  */
 public class DynamicJavaAdapter implements JavaInterpreter {
+  private static Log _log = new Log("MasterSlave.txt", true);
   private InterpreterExtension _djInterpreter;
 
   ClassPathManager cpm;
@@ -424,9 +425,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           evalVisitorContext.defineVariables(checkVisitorContext.getCurrentScopeVariables());
           
           EvaluationVisitor ev = makeEvaluationVisitor(evalVisitorContext);
-//          Utilities.showDebug("Ready to interpret " + ev.toString());
+          _log.log("Ready to interpret " + ev);
           result = n.acceptVisitor(ev);
-//          Utilities.showDebug("Interpreted result is: " + result.toString());
+          _log.log("Interpreted result is: " + result);
         }
       }
       catch (ExecutionError e) {

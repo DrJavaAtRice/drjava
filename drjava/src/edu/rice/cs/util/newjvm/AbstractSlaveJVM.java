@@ -50,7 +50,7 @@ import java.rmi.server.UnicastRemoteObject;
 public abstract class AbstractSlaveJVM implements SlaveRemote, Serializable {
   public static final int CHECK_MAIN_VM_ALIVE_SECONDS = 1;
   
-  protected static final Log _log  = new Log("MasterSlave.txt", false);
+  protected static final Log _log  = new Log("MasterSlave.txt", true);
   
 //  /** remote reference to the Master JVM; after initialization it is immutable until quit is executed. */
 //  public volatile MasterRemote _master;

@@ -49,7 +49,7 @@ import java.util.Arrays;
 public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   implements MasterRemote/*<SlaveType>*/ {
   
-  public static final Log _log  = new Log("MasterSlave.txt", false);
+  public static final Log _log  = new Log("MasterSlave.txt", true);
   
   /** Name for the thread that waits for the slave to exit. */
   protected volatile String _waitForQuitThreadName = "Wait for SlaveJVM Exit Thread";
@@ -213,7 +213,6 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
             
 //          _log.log(asString() + " calling handleSlaveQuit(" + status + ")");
           handleSlaveQuit(status);
-
         }
         catch(NoSuchObjectException e) { throw new UnexpectedException(e); }
         catch(InterruptedException e) { throw new UnexpectedException(e); }
@@ -277,6 +276,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   
   /** Withdraws RMI exports for this. */
   public void dispose() throws RemoteException {
+    _log.log(this + ".dispose() called; slaveRemote is " + _slave);
+    if (_startupInProgress) _log.log(this + ".dispose() is KILLing startup in process; dying slave reference does not yet exist");
     SlaveRemote dyingSlave;
     synchronized(_masterJVMLock) {
       _masterStub = null;
@@ -289,7 +290,10 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       _log.log(this + ".dispose() UNEXPORTing " + this);
       UnicastRemoteObject.unexportObject(this, true);
     }
-    if (dyingSlave != null) dyingSlave.quit();  // unsynchronized; may hasten the death of dyingSlave
+    if (dyingSlave != null) { 
+      _log.log(this + ".dispose() QUITing " + dyingSlave);
+      dyingSlave.quit();  // unsynchronized; may hasten the death of dyingSlave
+    }
   }
   
   /** Quits slave JVM.  On exit, _slave == null.  _quitOnStartup may be true

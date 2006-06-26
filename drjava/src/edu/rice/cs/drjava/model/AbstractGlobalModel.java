@@ -1772,8 +1772,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return true;
   }
  
-  
-  
   /** Exits the program. */
   public void quit() { quit(false); }
   
@@ -1781,10 +1779,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  This functionality is not available via the user interface, but it should be. */
   public void quit(boolean force) {
     try {
-      if (!force && !closeAllFilesOnQuit()) return;
-//    Utilities.show("Closed all files");
-//      disposeExternalResources();  // kills the interpreter
-      dispose(); // in instances of DefaultGlobalModel, kills the interpreter
+      if (! force && ! closeAllFilesOnQuit()) return;
       
       /* [ 1478796 ] DrJava Does Not Shut Down With Project Open. On HP tc1100 and Toshiba Portege tablet PCs, there
        * appears to be a problem in a shutdown hook, presumably the RMI shutdown hook. Shutdown hooks get executed in 
@@ -1802,7 +1797,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /* Terminates DrJava via System.exit with Runtime.halt as a backup if the former gets hung up. */
   private void shutdown() {
-    Thread terminator = new Thread(new Runnable() { public void run() { System.exit(0); } }, "DrJava Exit");
+    
+    Thread terminator = new Thread(new Runnable() { 
+      public void run() { 
+        dispose(); // in instances of DefaultGlobalModel, kills the interpreter and cleans up the RMI hooks in the slave JVM
+        System.exit(0); 
+      }
+    }, "DrJava Exit");
+    
     terminator.start();
     try { Thread.sleep(2000); } // sleep for two seconds to allow the terminator thread to terminate DrJava
     catch(InterruptedException e) { /* proceed */ }
@@ -1814,9 +1816,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  This version does not kill the interpreter. */
   public void dispose() {
     _notifier.removeAllListeners();
-//    Utilities.show("All listeners removed");
     synchronized(_documentsRepos) { _documentsRepos.clear(); }
-//    Utilities.show("Document Repository cleared");
     Utilities.invokeAndWait(new SRunnable() {
       public void run() { _documentNavigator.clear(); }  // this operation must run in event thread
     });

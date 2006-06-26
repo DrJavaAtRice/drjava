@@ -106,8 +106,8 @@ public final class CommandLineTest extends DrJavaTestCase {
   public void setUp() throws Exception {
     super.setUp();
     
-    _log.log("INVOKing DrJava._initConfig() for " + this);
-    DrJava._initConfig();
+//    _log.log("INVOKing DrJava._initConfig() for " + this);
+//    DrJava._initConfig();
     
     _log.log("CREATing a MainFrame for " + this);
     _mf = new MainFrame(); 

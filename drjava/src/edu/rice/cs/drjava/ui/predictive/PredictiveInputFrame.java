@@ -582,7 +582,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
 
     c.fill = GridBagConstraints.BOTH;
     c.weighty = 1.0;
-    contentPane.add(new JScrollPane(_matchList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), c);
+    contentPane.add(new JScrollPane(_matchList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
+                    c);
     
     c.anchor = GridBagConstraints.SOUTHWEST;
     c.fill = GridBagConstraints.NONE;
@@ -740,20 +742,28 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
 
     public void removeUpdate(DocumentEvent e) {
 //      System.out.println("removeUpdate fired!");
-      removeListener();
-      _pim.setMask(_textField.getText());
-      updateExtensionLabel();
-      updateList();
-      addListener();
+      Utilities.invokeLater(new Runnable() {
+        public void run() { 
+          removeListener();
+          _pim.setMask(_textField.getText());
+          updateExtensionLabel();
+          updateList();
+          addListener();
+        }
+      });
     }
 
     public void changedUpdate(DocumentEvent e) {
 //      System.out.println("changedUpdate fired!");
-      removeListener();
-      _pim.setMask(_textField.getText());
-      updateExtensionLabel();
-      updateList();
-      addListener();
+      Utilities.invokeLater(new Runnable() {
+        public void run() { 
+          removeListener();
+          _pim.setMask(_textField.getText());
+          updateExtensionLabel();
+          updateList();
+          addListener();
+        }
+      });
     }
 
     public void caretUpdate(CaretEvent e) { }

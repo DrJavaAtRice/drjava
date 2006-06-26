@@ -60,7 +60,7 @@ import edu.rice.cs.util.Log;
  */
 public abstract class FileOps {
   
-  private static Log _log = new Log("FileOpsTest.txt", true);
+  private static Log _log = new Log("FileOpsTest.txt", false);
   
   /** Special File object corresponding to a dummy file. Simliar to FileOption.NULL_FILE but exists() returns false. */
   public static final File NONEXISTENT_FILE = new File("") {

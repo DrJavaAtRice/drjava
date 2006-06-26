@@ -35,6 +35,8 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import java.util.Vector;
 
+import edu.rice.cs.util.UnexpectedException;
+
 /**
  * This class provides an implementation of the BraceReduction
  * interface for brace matching.  In order to correctly match, this class
@@ -75,54 +77,44 @@ public class ReducedModelControl implements BraceReduction {
 
   /** <P>Updates the BraceReduction to reflect cursor movement. Negative values move left from the cursor, 
    *  positive values move right. </P>
-  *  @param count indicates the direction and magnitude of cursor movement
-  */
+   *  @param count indicates the direction and magnitude of cursor movement
+   */
   public void move(int count) {
-    rmb.move(count);
-    rmc.move(count);
+    try {
+      rmb.move(count);
+      rmc.move(count);
+    }
+    catch(IllegalArgumentException e) { 
+      resetLocation();
+      throw new UnexpectedException(e);
+    }
   }
 
-  /**
-  * <P>Update the BraceReduction to reflect text deletion.</P>
-  * @param count indicates the size and direction of text deletion.
-  * Negative values delete text to the left of the cursor, positive
-  * values delete text to the right.
-  */
+  /** <P>Update the BraceReduction to reflect text deletion.</P>
+   *  @param count indicates the size and direction of text deletion. Negative values delete text to the left of the
+   *  cursor, positive values delete text to the right.
+   */
   public void delete(int count) {
     rmb.delete(count);
     rmc.delete(count);
   }
 
+  /** <P>Finds the closing brace that matches the next significant brace iff that brace is an open brace.</P>
+   *  @return the distance until the matching closing brace.  On failure, returns -1.
+   *  @see #balanceBackward()
+   */
+  public int balanceForward() { return rmb.balanceForward(); }
+  
+  /** <P>Finds the open brace that matches the previous significant brace iff that brace is an closing brace.</P>
+   *  @return the distance until the matching open brace.  On failure, returns -1.
+   *  @see #balanceForward()
+   */
+  public int balanceBackward() { return rmb.balanceBackward(); }
 
-  /**
-  * <P>Finds the closing brace that matches the next significant
-  * brace iff that brace is an open brace.</P>
-  * @return the distance until the matching closing brace.  On
-  * failure, returns -1.
-  * @see #balanceBackward()
-  */
-  public int balanceForward() {
-    return rmb.balanceForward();
-  }
-  /**
-  * <P>Finds the open brace that matches the previous significant
-  * brace iff that brace is an closing brace.</P>
-  * @return the distance until the matching open brace.  On
-  * failure, returns -1.
-  * @see #balanceForward()
-  */
-  public int balanceBackward() {
-    return rmb.balanceBackward();
-  }
-
-  /**
-  *This function returns the state at the relDistance, where relDistance
-  *is relative to the last time it was called. You can reset the last
-  *call to the current offset using resetLocation.
-  */
-  public ReducedModelState moveWalkerGetState(int relDistance) {
-    return rmc.moveWalkerGetState(relDistance);
-  }
+  /** This function returns the state at the relDistance, where relDistance is relative to the last time it was called.
+   *  You can reset the last call to the current offset using resetLocation.
+   */
+  public ReducedModelState moveWalkerGetState(int relDistance) { return rmc.moveWalkerGetState(relDistance); }
 
   /** This function resets the location of the walker in the comment list to
    *  where the current cursor is. This allows the walker to keep walking and

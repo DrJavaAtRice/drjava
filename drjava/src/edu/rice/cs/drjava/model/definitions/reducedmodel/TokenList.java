@@ -94,30 +94,18 @@ public class TokenList extends ModelList<ReducedToken>
      *         INSIDE_DOUBLE_QUOTE
      */
     public ReducedModelState getStateAtCurrent() {
-      if (atFirstItem() || atStart() || TokenList.this.isEmpty()) {
-        return FREE;
-      }
-      else if (prevItem().isLineComment() ||
-               (prevItem().getState() == INSIDE_LINE_COMMENT)) {
+      if (atFirstItem() || atStart() || TokenList.this.isEmpty())  return FREE;
+      else if (prevItem().isLineComment() || (prevItem().getState() == INSIDE_LINE_COMMENT))
         return INSIDE_LINE_COMMENT;
-      }
-      else if (prevItem().isBlockCommentStart() ||
-               (prevItem().getState() == INSIDE_BLOCK_COMMENT)) {
+      else if (prevItem().isBlockCommentStart() || (prevItem().getState() == INSIDE_BLOCK_COMMENT))
         return INSIDE_BLOCK_COMMENT;
-      }
-      else if ((prevItem().isDoubleQuote() && prevItem().isOpen() &&
-                (prevItem().getState() == FREE)) ||
-               (prevItem().getState() == INSIDE_DOUBLE_QUOTE)) {
+      else if ((prevItem().isDoubleQuote() && prevItem().isOpen() && (prevItem().getState() == FREE)) ||
+               (prevItem().getState() == INSIDE_DOUBLE_QUOTE))
         return INSIDE_DOUBLE_QUOTE;
-      }
-      else if ((prevItem().isSingleQuote() && prevItem().isOpen() &&
-                (prevItem().getState() == FREE)) ||
-               (prevItem().getState() == INSIDE_SINGLE_QUOTE)) {
+      else if ((prevItem().isSingleQuote() && prevItem().isOpen() && (prevItem().getState() == FREE)) ||
+               (prevItem().getState() == INSIDE_SINGLE_QUOTE))
         return INSIDE_SINGLE_QUOTE;
-      }
-      else {
-        return FREE;
-      }
+      else return FREE;
     }
 
 
@@ -147,18 +135,11 @@ public class TokenList extends ModelList<ReducedToken>
       this.setBlockOffset(0);
     }
 
-    /**
-     * Splits the current brace if it is a multiple character brace and
-     * fulfills certain conditions.
-     * If the current brace is a // or /*, split it into two braces.
-     * Do the same for star-slash (end comment block) if
-     * the parameter splitClose is true.
-     * Do the same for \\ and \" if splitEscape is true.
-     * If a split was performed, the first of the two Braces
-     * will be the current one when we're done.
-     * The offset is not changed.
-     * The two new Braces will have the same quoted/commented status
-     * as the one they were split from.
+    /** Splits the current brace if it is a multiple character brace and fulfills certain conditions.  If the current 
+     *  brace is a // or /*, split it into two braces.  Do the same for star-slash (end comment block) if the parameter
+     *  splitClose is true.  Do the same for \\ and \" if splitEscape is true.  If a split was performed, the first of
+     *  the two Braces will be the current one when we're done.  The offset is not changed.  The two new Braces will 
+     *  have the same quoted/commented status as the one they were split from.
      */
     void _splitCurrentIfCommentBlock(boolean splitClose,
                                      boolean splitEscape) {
@@ -183,7 +164,6 @@ public class TokenList extends ModelList<ReducedToken>
       }
     }
 
-
     /** The walk function.
      *  Walks along the list on which ReducedModel is based from the current
      *  cursor position.  Which path it takes depends on the
@@ -201,7 +181,6 @@ public class TokenList extends ModelList<ReducedToken>
         curState = curState.update(this);
       }
     }
-
 
     /** Updates the BraceReduction to reflect cursor movement. Negative values move left from the cursor, positive
      *  values move right.
@@ -234,8 +213,7 @@ public class TokenList extends ModelList<ReducedToken>
       return retval;
     }
 
-    /**
-     * Helper function that performs forward moves.
+    /** Helper function that performs forward moves.
      * <ol>
      * <li> at head && count>0:  next
      * <li> LOOP:<BR>
@@ -259,11 +237,9 @@ public class TokenList extends ModelList<ReducedToken>
         this.next();
         currentOffset = 0;
         if (this.atEnd()) {
-          if (count == 0) {
-            break;
-          }
+          if (count == 0) break;
           else {
-            throw new IllegalArgumentException("Moved into tail");
+            throw new IllegalArgumentException("At end");
           }
         }
       }

@@ -84,7 +84,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
   
-  private static final Log _log = new Log("MasterSlave.txt", false);
+  private static final Log _log = new Log("MasterSlave.txt", true);
   private static final boolean printMessages = true;
   
   /** String to append to error messages when no stack trace is available. */
@@ -111,8 +111,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** The current interpreter. */
   private volatile InterpreterData _activeInterpreter;
   
-  /** Busy flag.  Used to prevent multiple interpretations from running simultaneously. */
-  private volatile boolean interpretationInProgress = false;
+//  /** Busy flag.  Used to prevent multiple interpretations from running simultaneously. */
+//  private volatile boolean interpretationInProgress = false;
   
   /** Interactions processor, currently a pre-processor **/
   //  private InteractionsProcessorI _interactionsProcessor;
@@ -225,13 +225,14 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    *  @param interpreter The interpreter (plus metadata) to use
    */
   public void interpret(final String input, final InterpreterData interpreter) {
+    _log.log(this + ".interpret(" + input + ") called");
     try {
-      synchronized(this) { 
-        if (interpretationInProgress) {
+      synchronized(interpreter) { 
+        if (interpreter.inProgress()) {
             _mainJVM.interpretResult(new InterpreterBusy());
           return;
         }
-      interpretationInProgress = true; 
+//      interpretationInProgress = true; 
       interpreter.setInProgress(true);  // records that a given interpreter is in progress (used by debugger?)
       }
       // The following code is NOT synchronized on this. Mutual exclusion is guaranteed by preceding synchronized block.
@@ -241,7 +242,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
           String s = input;
           try {  // Delimiting a catch for RemoteExceptions that might be thrown in catch clauses of enclosed try
             try {
-              _dialog("to interp: " + s);
+              _log.log("Interpreter thread for " + input + " has started");
+//              _dialog("to interp: " + s);
               
 //            Utilities.showDebug("Preparing to invoke interpret method on " + s);
               Object result = interpreter.getInterpreter().interpret(s);
@@ -313,7 +315,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       _log.log("MainJVM.interpret threw" + re.toString());
     }
     finally { // fields are volatile so no synchronization is necessary
-      interpretationInProgress = false;
+//      interpretationInProgress = false;
       interpreter.setInProgress(false); 
     }
   }

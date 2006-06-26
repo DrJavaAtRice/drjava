@@ -93,45 +93,45 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("#1.1", 6, _defModel.getCurrentLocation());
     // document is:
     // Start:=>a/*bc */"\\{}()
-    BraceReduction rm = _defModel.getReduced();
-    assertEquals("2.1", FREE, rm.getStateAtCurrent());
-    rm.move(2);
+    BraceReduction _reduced = _defModel.getReduced();
+    assertEquals("2.1", FREE, _reduced.getStateAtCurrent());
+    _reduced.move(2);
     // document is:
     // Start:a/=>*bc */"\\{}()
-    assertEquals("2.3", "/*", rm.currentToken().getType());
-    rm.move(2);
+    assertEquals("2.3", "/*", _reduced.currentToken().getType());
+    _reduced.move(2);
     // document is:
     // Start:a/*b=>c */"\\{}()
-    assertEquals("2.4", true, rm.currentToken().isGap());
-    assertEquals("2.5", ReducedToken.INSIDE_BLOCK_COMMENT, rm.currentToken().getState());
-    rm.move(2);
+    assertEquals("2.4", true, _reduced.currentToken().isGap());
+    assertEquals("2.5", ReducedToken.INSIDE_BLOCK_COMMENT, _reduced.currentToken().getState());
+    _reduced.move(2);
     // document is:
     // Start:a/*bc =>*/"\{}()
-    assertEquals("2.6", "*/", rm.currentToken().getType());
-    rm.move(2);
+    assertEquals("2.6", "*/", _reduced.currentToken().getType());
+    _reduced.move(2);
     // document is:
     // Start:a/*bc */=>"\{}()
-    assertEquals("2.7", "\"", rm.currentToken().getType());
-    rm.move(1);
+    assertEquals("2.7", "\"", _reduced.currentToken().getType());
+    _reduced.move(1);
     // document is:
     // Start:a/*bc */"=>\{}()
-    assertEquals("2.8", "\\", rm.currentToken().getType());
-    rm.move(1);
+    assertEquals("2.8", "\\", _reduced.currentToken().getType());
+    _reduced.move(1);
     // document is:
     // Start:a/*bc */"\=>{}()
-    assertEquals("2.9", "{", rm.currentToken().getType());
-    rm.move(1);
+    assertEquals("2.9", "{", _reduced.currentToken().getType());
+    _reduced.move(1);
     // document is:
     // Start:a/*bc */"\{=>}()
-    assertEquals("2.91", "}", rm.currentToken().getType());
-    rm.move(1);
+    assertEquals("2.91", "}", _reduced.currentToken().getType());
+    _reduced.move(1);
     // document is:
     // Start:a/*bc */"\{}=>()
-    assertEquals("2.92", "(", rm.currentToken().getType());
-    rm.move(1);
+    assertEquals("2.92", "(", _reduced.currentToken().getType());
+    _reduced.move(1);
     // document is:
     // Start:a/*bc */"\\{}(=>)
-    assertEquals("2.93", ")", rm.currentToken().getType());
+    assertEquals("2.93", ")", _reduced.currentToken().getType());
   }
 
   /**
@@ -139,19 +139,19 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    * @exception BadLocationException
    */
   public void testInsertStarIntoStarSlash() throws BadLocationException {
-    BraceReduction rm = _defModel.getReduced();
+    BraceReduction _reduced = _defModel.getReduced();
     _defModel.insertString(0, "/**/", null);
     // Put new star between second star and second slash
     _defModel.insertString(3, "*", null);
     _defModel.move(-4);
-    assertEquals("1", "/*", rm.currentToken().getType());
-    assertEquals("2", ReducedToken.FREE, rm.currentToken().getState());
-    rm.move(2);
-    assertEquals("3", "*", rm.currentToken().getType());
-    assertEquals("4", ReducedToken.INSIDE_BLOCK_COMMENT, rm.currentToken().getState());
-    rm.move(1);
-    assertEquals("5", "*/", rm.currentToken().getType());
-    assertEquals("6", ReducedToken.FREE, rm.currentToken().getState());
+    assertEquals("1", "/*", _reduced.currentToken().getType());
+    assertEquals("2", ReducedToken.FREE, _reduced.currentToken().getState());
+    _reduced.move(2);
+    assertEquals("3", "*", _reduced.currentToken().getType());
+    assertEquals("4", ReducedToken.INSIDE_BLOCK_COMMENT, _reduced.currentToken().getState());
+    _reduced.move(1);
+    assertEquals("5", "*/", _reduced.currentToken().getType());
+    assertEquals("6", ReducedToken.FREE, _reduced.currentToken().getState());
   }
 
   /**
@@ -159,38 +159,38 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    * @exception BadLocationException
    */
   public void testInsertSlashIntoStarSlash() throws BadLocationException {
-    BraceReduction rm = _defModel.getReduced();
+    BraceReduction _reduced = _defModel.getReduced();
     _defModel.insertString(0, "/**/", null);
     // Put new slash between second star and second slash
     _defModel.insertString(3, "/", null);
     _defModel.move(-4);
-    assertEquals("1", "/*", rm.currentToken().getType());
-    assertEquals("2", ReducedToken.FREE, rm.currentToken().getState());
-    rm.move(2);
-    assertEquals("3", "*/", rm.currentToken().getType());
-    assertEquals("4", ReducedToken.FREE, rm.currentToken().getState());
-    rm.move(2);
-    assertEquals("5", "/", rm.currentToken().getType());
-    assertEquals("6", ReducedToken.FREE, rm.currentToken().getState());
+    assertEquals("1", "/*", _reduced.currentToken().getType());
+    assertEquals("2", ReducedToken.FREE, _reduced.currentToken().getState());
+    _reduced.move(2);
+    assertEquals("3", "*/", _reduced.currentToken().getType());
+    assertEquals("4", ReducedToken.FREE, _reduced.currentToken().getState());
+    _reduced.move(2);
+    assertEquals("5", "/", _reduced.currentToken().getType());
+    assertEquals("6", ReducedToken.FREE, _reduced.currentToken().getState());
   }
 
   /** Test inserting a star between a slash-star combo.
    *  @exception BadLocationException
    */
   public void testInsertStarIntoSlashStar() throws BadLocationException {
-    BraceReduction rm = _defModel.getReduced();
+    BraceReduction _reduced = _defModel.getReduced();
     _defModel.insertString(0, "/**/", null);
     // Put new star between second star and second slash
     _defModel.insertString(1, "*", null);
     _defModel.move(-2);
-    assertEquals("1", "/*", rm.currentToken().getType());
-    assertEquals("2", ReducedToken.FREE, rm.currentToken().getState());
-    rm.move(2);
-    assertEquals("3", "*", rm.currentToken().getType());
-    assertEquals("4", ReducedToken.INSIDE_BLOCK_COMMENT, rm.currentToken().getState());
-    rm.move(1);
-    assertEquals("5", "*/", rm.currentToken().getType());
-    assertEquals("6", ReducedToken.FREE, rm.currentToken().getState());
+    assertEquals("1", "/*", _reduced.currentToken().getType());
+    assertEquals("2", ReducedToken.FREE, _reduced.currentToken().getState());
+    _reduced.move(2);
+    assertEquals("3", "*", _reduced.currentToken().getType());
+    assertEquals("4", ReducedToken.INSIDE_BLOCK_COMMENT, _reduced.currentToken().getState());
+    _reduced.move(1);
+    assertEquals("5", "*/", _reduced.currentToken().getType());
+    assertEquals("6", ReducedToken.FREE, _reduced.currentToken().getState());
   }
 
   /** Test removal of text. */
@@ -199,14 +199,14 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     _defModel.remove(3, 3);
     assertEquals("#0.0", "a/**/", _defModel.getText(0, 5));
     assertEquals("#0.1", 3, _defModel.getCurrentLocation());
-    BraceReduction rm = _defModel.getReduced();
-    assertEquals("1.0", "*/", rm.currentToken().getType());
+    BraceReduction _reduced = _defModel.getReduced();
+    assertEquals("1.0", "*/", _reduced.currentToken().getType());
     // no longer support getBlockOffset
     //        assertEquals("1.1",0,rm.getBlockOffset());
-    rm.move(-2);
-    assertEquals("1.2", "/*", rm.currentToken().getType());
-    rm.move(2);
-    assertEquals("1.3", ReducedToken.INSIDE_BLOCK_COMMENT, rm.getStateAtCurrent());
+    _reduced.move(-2);
+    assertEquals("1.2", "/*", _reduced.currentToken().getType());
+    _reduced.move(2);
+    assertEquals("1.3", ReducedToken.INSIDE_BLOCK_COMMENT, _reduced.getStateAtCurrent());
   }
 
   /** Make sure the vector is consistent: all elements immediately adjoin

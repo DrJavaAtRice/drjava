@@ -278,7 +278,9 @@ public class ClipboardHistoryFrame extends JFrame {
 
     c.fill = GridBagConstraints.BOTH;
     c.weighty = 1.0;
-    contentPane.add(new JScrollPane(_historyList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), c);
+    contentPane.add(new JScrollPane(_historyList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
+                    c);
     
     _previewArea = new JTextArea("");
     _previewArea.setEditable(false);
@@ -287,7 +289,9 @@ public class ClipboardHistoryFrame extends JFrame {
     _previewArea.setFont(DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
     _previewArea.setDisabledTextColor(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
     c.weighty = 2.0;
-    contentPane.add(new JScrollPane(_previewArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), c);
+    contentPane.add(new JScrollPane(_previewArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), 
+                    c);
     
     c.anchor = GridBagConstraints.SOUTH;
     

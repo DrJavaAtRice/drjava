@@ -64,7 +64,7 @@ import java.util.regex.*;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  protected static final Log _log  = new Log("GlobaModelTest.txt", false);
+  protected static final Log _log  = new Log("GlobalModelTest.txt", false);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile File _tempDir;
@@ -79,9 +79,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected static final String FOO_PACKAGE_AS_FIELD_2 = "class DrJavaTestFoo { int package = 5; }";
   protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrJavaTestFoo { int cur_package = 5; }";
   
-  public GlobalModelTestCase() {
-    _log.log("Constructing a " + this);
-  }
+  public GlobalModelTestCase() { _log.log("Constructing a " + this); }
 
   /** Setup for each test case, which does the following.
    *  <OL>

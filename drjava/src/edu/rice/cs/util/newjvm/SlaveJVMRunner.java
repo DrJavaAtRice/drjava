@@ -87,11 +87,13 @@ public final class SlaveJVMRunner {
    */
   public static final boolean SHOW_DEBUG_DIALOGS = false;
   
-  protected static final Log _log  = new Log("MasterSlave.txt", false);
+  protected static final Log _log  = new Log("MasterSlave.txt", true);
   
   private static final long RMI_TIMEOUT = 5000L;
   
   private static Thread _main;
+  
+  private static volatile boolean _notDone;
  
   /** Private constructor to prevent instantiation. */
   private SlaveJVMRunner() { }
@@ -116,12 +118,12 @@ public final class SlaveJVMRunner {
       System.setProperty("java.rmi.server.hostname", "127.0.0.1");
       
       if (args.length != 3 && args.length != 2) System.exit(1);
+      
+      _notDone = true;
         
       _main = Thread.currentThread();
       
-//      // Loading the class that intermittently hangs first readObject(...) call below
-//      Class psi = Class.forName("java.net.PlainSocketImpl");
-      
+
       // get the master remote
       final FileInputStream fstream = new FileInputStream(args[0]);
       final ObjectInputStream ostream = new ObjectInputStream(new BufferedInputStream(fstream));
@@ -129,18 +131,19 @@ public final class SlaveJVMRunner {
       _log.log("Slave JVM reading master remote stub from file " + args[0] + " with " + 
                  fstream.getChannel().size() + " bytes");
       
-/* The following code currently breaks unit tests (and perhaps DrJava) when it detects the hanging
+/* The following code currently breaks unit tests and DrJava itself when it detects the hanging
  * of readObject(...).  It can be commented back if the calling code is revised to handle this form
- * of exit.  Before code can be commented in, variable masterRemote must be converted to field _masterRemote. */
+ * of exit.  */
       
 //      Thread timeout = new Thread("RMI Timeout Thread") {
 //        public void run() {
 //          _log.log("RMI timer started");
+//          
 //          final Object lock = new Object();
 //          try { synchronized(lock) { lock.wait(RMI_TIMEOUT); } }
 //          catch(InterruptedException e) { throw new UnexpectedException(e); }
 //          // Abort starting this slave JVM if readObject has hung
-//          if (_masterRemote == null) {
+//          if (_notDone) {
 //            StackTraceElement[] trace = Thread.getAllStackTraces().get(_main);
 //            _log.log("DUMP of hung deserializing thread:", trace);
 //            System.exit(9);
@@ -154,39 +157,44 @@ public final class SlaveJVMRunner {
       
 //      // if we have a remote classloader to use, load it
 //      if (args.length == 3) _installRemoteLoader(args[2]);
-
+      
+      // Loading the class that intermittently hangs first readObject(...) call below
+      Class psi = Class.forName("java.net.PlainSocketImpl");
+        
       final MasterRemote masterRemote = (MasterRemote) ostream.readObject();
-      _log.log("Slave JVM completed reading " + masterRemote);
+      _notDone = false;
+      _log.log("SlaveJVMRunner completed reading " + masterRemote);
       fstream.close();
       ostream.close();
-  
       
+      AbstractSlaveJVM slave = null;
+
       try {
         Class slaveClass = Class.forName(args[1]);
 //        _log.log("Slave JVM created singleton of " + args[1]);
-        AbstractSlaveJVM slave = _getInstance(slaveClass);
+        slave = _getInstance(slaveClass);
         
         //Export slave object to RMI, passing stub to the master JVM (how does stub get there?  Transitivity?
 //        _log.log("Slave JVM exporting " + slave + " to RMI");
         SlaveRemote slaveRemote = (SlaveRemote) UnicastRemoteObject.exportObject(slave);  
-        _log.log("Slave JVM exported stub " + slaveRemote);
+        _log.log("SlaveJVMRunner exported stub " + slaveRemote);
 
         // start the slave and then notify the master
 //        _log.log("Slave JVM invoking the method " + slave + ".start(" + masterRemote + ")");
         slave.start(masterRemote);
-        _log.log("Slave JVM invoking the method registerSlave(" + slave + ") in the Master JVM");
-        masterRemote.registerSlave(slaveRemote);
+        _log.log("SlaveJVMRunner invoking the method registerSlave(" + slave + ") in the Master JVM");
+        masterRemote.registerSlave(slave);
       }
       catch (Exception e) {
         // Couldn't instantiate the slave.
-        _log.log("Slave JVM could not intstantiate slave class.  Threw exception: " + e);
+        _log.log("SlaveJVMRunner could not instantiate and start slave class '" + slave + "'.  Threw exception: " + e);
         try {
           // Try to show the error properly, through the master
           masterRemote.errorStartingSlave(e);
         }
         catch (RemoteException re) {
           // Couldn't show the error properly, so use another approach
-          String msg = "Couldn't instantiate and register the slave.\n" +
+          String msg = "SlaveJVMRunner could not instantiate and register the slave.\n" +
             "  Also failed to display error through master JVM, because:\n" +
             StringOps.getStackTrace(re) + "\n";
           _showErrorMessage(msg, e);
@@ -196,8 +204,8 @@ public final class SlaveJVMRunner {
     }
     catch (Exception e) { // IOException, ClassNotFoundException
       // There's no master to display the error, so we'll do it ourselves
-      _showErrorMessage("Could not set up the Slave JVM.", e);
-      _log.log("Could not set up the Slave JVM. Calling System.exit(2) in response to: " + e);
+      _showErrorMessage("SlaveJVMRunner could not set up the Slave JVM.", e);
+      _log.log("SlaveJVMRunner could not set up the Slave JVM. Calling System.exit(2) in response to: " + e);
       System.exit(2);
     }
   }
@@ -207,10 +215,10 @@ public final class SlaveJVMRunner {
    *  @param t The Throwable which caused the error.
    */
   private static void _showErrorMessage(String cause, Throwable t) {
-    String msg = "An error occurred while starting the slave JVM:\n  " +
+    String msg = "An error occurred in SlaveJVMRunner while starting the slave JVM:\n  " +
       cause + "\n\nOriginal error:\n" + StringOps.getStackTrace(t);
     
-    _log.log("ERROR in Slave JVM Runner: " + cause + "; threw " + t);
+    _log.log("ERROR in SlaveJVMRunner: " + cause + "; threw " + t);
 
     if (SHOW_DEBUG_DIALOGS) new ScrollableDialog(null, "Error", "Error details:", msg).show();
     else if (! Utilities.TEST_MODE) System.out.println(msg);

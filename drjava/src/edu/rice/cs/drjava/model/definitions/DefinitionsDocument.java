@@ -605,7 +605,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         synchronized(_reduced) {
           setCurrentLocation(selStart);
           Position oldCurrentPosition = createPosition(_currentLocation);
-          _uncommentLine();
+          _uncommentLine();  // accesses _reduced
           toReturn -= WING_COMMENT_OFFSET;
           //int caretPos = getCaretPosition();
           //_doc().setCurrentLocation(caretPos);
@@ -642,7 +642,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           // regardless of how commentLine changes things
           Position walkerPos = this.createPosition(walker);
           // uncomment current line
-          afterUncommentEnd-= _uncommentLine();
+          afterUncommentEnd-= _uncommentLine();  // accesses _reduced
           // Move back to walker spot
           setCurrentLocation(walkerPos.getOffset());
           walker = walkerPos.getOffset();
@@ -659,7 +659,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return afterUncommentEnd;
   }
 
-  /** Uncomments a single line.  This simply looks for a leading "//".
+  /** Uncomments a single line.  This simply looks for a leading "//".  Assumes that _reduced lock is already held and
+   *  that acquireWriteLock is already held.
    *  @pre theads hold this.writeLock() and _reduced lock
    */
   private int _uncommentLine() throws BadLocationException {
@@ -858,7 +859,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             // this might be an inner class
             newPos = _findPrevKeyword(text, "new", openParenPos);
 //            if (oldLog) System.out.println("\tnew found at "+newPos+", openSquigglyPos="+curPos);
-            if (!_isAnonymousInnerClass(newPos, curPos)) {
+            if (! _isAnonymousInnerClass(newPos, curPos)) {
               // not an anonymous inner class
               newPos = ERROR_INDEX;
             }
@@ -1012,16 +1013,18 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
       if (parenStart!=ERROR_INDEX) {
         if (text.charAt(parenStart)=='(') {
-          final int origLocation = _currentLocation;
-          _reduced.move(parenStart+1 - origLocation);  // reduced model points to pos == parenStart+1
-          int parenEnd = balanceForward();
-          _reduced.move(origLocation - (parenStart+1));    // Restore the state of the reduced model;
-          if (parenEnd > -1) {
-            parenEnd = parenEnd + parenStart+1;
-            // System.out.println("\tafter closing paren = "+parenEnd);
-            int afterParen = getFirstNonWSCharPos(parenEnd);
-            // System.out.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
-            cached = (afterParen==openSquigglyPos);          
+          synchronized(_reduced) {
+            final int origLocation = _currentLocation;
+            _reduced.move(parenStart+1 - origLocation);  // reduced model points to pos == parenStart+1
+            int parenEnd = balanceForward();
+            _reduced.move(origLocation - (parenStart+1));    // Restore the state of the reduced model;
+            if (parenEnd > -1) {
+              parenEnd = parenEnd + parenStart+1;
+              // System.out.println("\tafter closing paren = "+parenEnd);
+              int afterParen = getFirstNonWSCharPos(parenEnd);
+              // System.out.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
+              cached = (afterParen==openSquigglyPos);          
+            }
           }
         }
       }

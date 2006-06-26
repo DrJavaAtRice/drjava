@@ -68,6 +68,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** This field NEEDS to be set by setEditorKit() BEFORE any DefinitonsPanes are created. */
   private static DefinitionsEditorKit EDITOR_KIT;
+  
+  /* Minimum number of characters to trigger indent warning prompt */
+  private static int INDENT_WARNING_THRESHOLD = 20000;
     
   /** Our parent window. */
   private final MainFrame _mainFrame;
@@ -316,6 +319,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     
     /** Handle the key typed event from the text field. */
     public void actionPerformed(ActionEvent e) {
+      // The following commented out code was moved into the indent() method
       //int pos = getCaretPosition();
       //_doc().setCurrentLocation(pos);
       indent();
@@ -388,9 +392,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     /* overriding this method is important so that pressing the enter key causes
      * different indentation than pressing other keys, for bug 681203
      */
-    protected int getIndentReason() {
-      return Indenter.ENTER_KEY_PRESS;
-    }
+    protected int getIndentReason() { return Indenter.ENTER_KEY_PRESS; }
   };
 
   /** Likewise, regular text keys like '{', '}', and ':' do not have special actions that are returned by 
@@ -405,7 +407,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   private volatile boolean _inCompoundEdit = false;
   private volatile int _compoundEditKey;
-
 
   /** Our keymap containing key bindings.  Takes precedence over the default map. */
   final Keymap ourMap;
@@ -531,7 +532,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
     //Add listener to components that can bring up popup menus.
     _popupMenuMA = new PopupMenuMouseAdapter();
-    this.addMouseListener( _popupMenuMA );
+    this.addMouseListener(_popupMenuMA);
     this.setHighlighter(new ReverseHighlighter());
     _highlightManager = new HighlightManager(this);
 
@@ -580,11 +581,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         if (km.isLocallyDefined(ks) || km.isLocallyDefined(KeyStroke.getKeyStroke(ks.getKeyChar()))) {
           // We're breaking up compound edits at the granularity of "enter"'s.
           if (e.getKeyCode() == KeyEvent.VK_ENTER) endCompoundEdit();
-         
+          
           CompoundUndoManager undoMan = _doc.getUndoManager();
 //          int key = undoMan.startCompoundEdit();
 //          System.out.println("supering 1 " + isAltF4);
-             
+          
           super.processKeyEvent(e);
           // We call endCompoundEdit() here because one will automatically start when processKeyEvent finishes 
           // (see the definition of _undoListener).
@@ -605,7 +606,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //            System.out.println("not supering 1 " + isAltF4);
             return;
           }
-                        
+          
           // The following conditional fixes ease of use issue 693253 by checking if a typed event is
           // shift-delete or shift-backspace and then performing a delete or backspace operation,
           // respectively
@@ -678,7 +679,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _popMenu.add(indentItem);
 
     JMenuItem commentLinesItem = new JMenuItem("Comment Line(s)");
-    commentLinesItem.addActionListener ( new AbstractAction() {
+    commentLinesItem.addActionListener(new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
         _mainFrame.hourglassOn();
         try{
@@ -833,9 +834,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /** Gets the ErrorCaretListener for this pane. */
-  public ErrorCaretListener getErrorCaretListener() {
-    return _errorListener;
-  }
+  public ErrorCaretListener getErrorCaretListener() { return _errorListener; }
 
   /** Switches the location of the error highlight in the document if there was one. Otherwise adds the 
    *  highlight. The invariant is that there are zero or one error highlights at any time.
@@ -1081,7 +1080,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    *  @param selEnd - the selection end
    */
   protected boolean shouldIndent(int selStart, int selEnd) {
-    if (selEnd > (selStart + 10000)) {
+    if (selEnd > (selStart + INDENT_WARNING_THRESHOLD)) {
       Object[] options = {"Yes", "No"};
       int n = JOptionPane.showOptionDialog
         (_mainFrame,

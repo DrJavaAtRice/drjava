@@ -351,13 +351,10 @@ public class ReducedModelComment extends AbstractReducedModel {
     else return quote;
   }
 
-  /**
-   * Inserts a gap between the characters in a multiple character brace.
-   * This function is called by AbstractReducedModel's method insertGap
-   * when a Gap is inserted between the characters in a comment brace
-   * or an escape sequence.  It splits up the multiple character brace
-   * into its component parts and inserts a Gap of size length in
-   * between the resulting split parts.
+  /** Inserts a gap between the characters in a multiple character brace.  This function is called by
+   *  AbstractReducedModel's method insertGap when a Gap is inserted between the characters in a comment brace or an
+   *  escape sequence.  It splits up the multiple character brace into its component parts and inserts a Gap of size
+   *  length in                                                                                 between the resulting split parts.
    * @param length the size of the Gap to be inserted in characters
    */
   protected void insertGapBetweenMultiCharBrace(int length) {
@@ -379,6 +376,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     _cursor.next();
     return;
   }
+  
   /** USE RULES:
    *  Inserting between braces: This should be called from between the two
    *                            characters of the broken double comment.

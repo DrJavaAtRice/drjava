@@ -76,16 +76,10 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
      *  is immediately right of ')', '}', or ']', it highlights up to the matching open paren/brace/bracket.
      *  @param e the event fired by the caret position change
      */
-    public void caretUpdate(CaretEvent e) {
-//      _doc().setCurrentLocation(getCaretPosition());
-      getDJDocument().setCurrentLocation(getCaretPosition());
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
-          _removePreviousHighlight();
-          _updateMatchHighlight();
-//      DrJava.consoleErr().println(getPromptPos());
-//        }
-//      });
+    public void caretUpdate(CaretEvent e) { // Must execute as part of document update.  Only modifies document.
+      getDJDocument().setCurrentLocation(getCaretPosition());  
+      _removePreviousHighlight();
+      _updateMatchHighlight();
     }
   };
   
@@ -101,7 +95,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     setContentType("text/java");
     
     // Add listener that checks if highlighting matching braces must be updated
-    this.addCaretListener(_matchListener);
+    addCaretListener(_matchListener);
   }
   
   //--------- METHODS -----------
@@ -160,6 +154,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
      *  old: _doc().setCurrentLocation(getCaretPosition());
      *  new:
      */
+    
+    // Is this action still necessary?  
     getDJDocument().setCurrentLocation(getCaretPosition());
     
     // The _reduced lock within DefinitionsDocument should be probably be set as well

@@ -40,7 +40,8 @@ import java.awt.event.KeyEvent;
 import java.awt.datatransfer.*;
 
 import java.util.List;
-import java.util.LinkedList;
+//import java.util.LinkedList;
+import java.util.Vector;
 
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.UnexpectedException;
@@ -85,7 +86,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
 
   private InteractionsDJDocument _doc;
   
-  private List<Integer> _listOfPrompt = new LinkedList<Integer> ();
+  private List<Integer> _listOfPrompt = new Vector<Integer>();  // Vector used because it is synchronized
     
   /** Creates an InteractionsPane with the given document.
    *  Uses default keymap name ("INTERACTIONS_KEYMAP")

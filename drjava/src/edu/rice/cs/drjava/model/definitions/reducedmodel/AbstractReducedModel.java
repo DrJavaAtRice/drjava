@@ -53,19 +53,16 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  */
 public abstract class AbstractReducedModel implements ReducedModelStates {
     
-  /**
-   * The character that represents the cursor in toString().
-   * @see #toString()
-   */
+  /** The character that represents the cursor in toString(). @see #toString() */
   public static final char PTR_CHAR = '#';
   
   /** The reduced model for a document is a list of ReducedTokens (braces and gaps).
-   * @see ModelList
+   *  @see ModelList
    */
   TokenList _tokens;
   
-  /** Keeps track of cursor position in document
-   * @see ModelList.Iterator
+  /** Keeps track of cursor position in document.
+   *  @see ModelList.Iterator
    */
   TokenList.Iterator _cursor;
   

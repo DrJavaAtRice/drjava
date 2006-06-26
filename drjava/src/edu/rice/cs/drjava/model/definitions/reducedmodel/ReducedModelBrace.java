@@ -125,9 +125,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
    *  right.  All functionality has been refactored into TokenList.
    *  @param count indicates the direction and magnitude of cursor movement
    */
-  public void move(int count) {
-    _cursor.move(count);
-  }
+  public void move(int count) { _cursor.move(count); }
 
   /** Updates ReducedModelBrace to reflect text deletion.
    *  Negative values mean text left of the cursor, positive values mean

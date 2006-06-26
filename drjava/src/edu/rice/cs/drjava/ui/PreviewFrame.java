@@ -295,16 +295,10 @@ public abstract class PreviewFrame extends JFrame {
           int num = _pageNumber;
           try {
             num = ((Number) getter.invoke(spinner,new Object[0])).intValue()-1;
-            if ((num >= 0) && (num < _print.getNumberOfPages())) {
-              _goToPage(num);
-            }
-            else {
-              _updateActions();
-            }
+            if ((num >= 0) && (num < _print.getNumberOfPages())) _goToPage(num);
+            else _updateActions();
           }
-          catch(Exception ex) {
-            _updateActions();
-          }
+          catch(Exception ex) { _updateActions(); }
         }
       };
       callMethod(spinner,spinnerClass,"addChangeListener",ca,aa);

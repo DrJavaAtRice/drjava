@@ -3229,7 +3229,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   public void updateFileTitle() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     String fileName = doc.getCompletePath();
-    if (!fileName.equals(_fileTitle)) {
+    if (! fileName.equals(_fileTitle)) {
       _fileTitle = fileName;
       setTitle("File: " + fileName);
       _model.getDocCollectionWidget().repaint();
@@ -3328,18 +3328,20 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    */
   private void _installNewDocumentListener(final Document d) {
     d.addDocumentListener(new DocumentUIListener() {
-      public void changedUpdate(DocumentEvent e) {
-        Utilities.invokeLater(new Runnable() {
-          public void run() {
-            OpenDefinitionsDocument doc = _model.getActiveDocument();
-            if (doc.isModifiedSinceSave()) {
-              _saveAction.setEnabled(true);
-              if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
-                _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-              updateFileTitle();
-            }
-          }
-        });
+      public void changedUpdate(DocumentEvent e) { 
+        
+        // Commented out because the only attributes that affect the status of buttons are inserts and removes
+//        Utilities.invokeLater(new Runnable() {
+//          public void run() {
+//            OpenDefinitionsDocument doc = _model.getActiveDocument();
+//            if (doc.isModifiedSinceSave()) {
+//              _saveAction.setEnabled(true);
+//              if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
+//                _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+//              updateFileTitle();
+//            }
+//          }
+//        });
       }
       public void insertUpdate(DocumentEvent e) {
         Utilities.invokeLater(new Runnable() {
@@ -3347,7 +3349,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             _saveAction.setEnabled(true);
             if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
               _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-            updateFileTitle();
+//            updateFileTitle();  // title not changed by insert operation
           }
         });
       }
@@ -3357,7 +3359,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             _saveAction.setEnabled(true);
             if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
               _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-            updateFileTitle();
+//            updateFileTitle();  // title not changed by remove operation
           }
         });
       }
@@ -5611,10 +5613,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _currLocationField.setFont(_currLocationField.getFont().deriveFont(Font.PLAIN));
     _currLocationField.setHorizontalAlignment(SwingConstants.RIGHT);
     _currLocationField.setPreferredSize(new Dimension(165,12));
-    //_currLocationField.setVisible(true);
-    
+//    _currLocationField.setVisible(true);
+   
     // Initialize the status bar panel
-    //SpringLayout layout = new SpringLayout();
+//    SpringLayout layout = new SpringLayout();
     _statusBar.add( fileNameAndMessagePanel, BorderLayout.CENTER );
 //    _statusBar.add( sbMessagePanel, BorderLayout.CENTER );
     _statusBar.add( _currLocationField, BorderLayout.EAST );
@@ -5624,38 +5626,40 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                                new EmptyBorder(2,2,2,2))));
     getContentPane().add(_statusBar, BorderLayout.SOUTH);
     
-    /*
-     //Adjust constraints for the fileName label so it's next to the left edge.
-     layout.getConstraints(_fileNameField).setX(Spring.constant(0));
-     
-     //Adjust constraints for the message label so it's spaced a bit from the right.
-     //and doesn't interfere with the left-most label
-     layout.putConstraint(SpringLayout.EAST, _sbMessage, -65,
-     SpringLayout.EAST, _statusBar);
-     
-     //Adjust constraints for the location label so it's next to the right edge.
-     layout.putConstraint(SpringLayout.EAST, _currLocationField, 0,
-     SpringLayout.EAST, _statusBar);
-     
-     //Adjust constraints for the panel to set its size
-     layout.putConstraint(SpringLayout.SOUTH, _statusBar, 0,
-     SpringLayout.SOUTH, _currLocationField);*/
+//     //Adjust constraints for the fileName label so it's next to the left edge.
+//     layout.getConstraints(_fileNameField).setX(Spring.constant(0));
+//     
+//     //Adjust constraints for the message label so it's spaced a bit from the right.
+//     //and doesn't interfere with the left-most label
+//     layout.putConstraint(SpringLayout.EAST, _sbMessage, -65,
+//     SpringLayout.EAST, _statusBar);
+//     
+//     //Adjust constraints for the location label so it's next to the right edge.
+//     layout.putConstraint(SpringLayout.EAST, _currLocationField, 0,
+//     SpringLayout.EAST, _statusBar);
+//     
+//     //Adjust constraints for the panel to set its size
+//     layout.putConstraint(SpringLayout.SOUTH, _statusBar, 0,
+//     SpringLayout.SOUTH, _currLocationField);
   }
   
   /** Inner class to handle updating the current position in the document.  Registered with the DefinitionsPane.**/
   private class PositionListener implements CaretListener {
     
-    public void caretUpdate( CaretEvent ce ) {
+    public void caretUpdate(final CaretEvent ce ) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       doc.setCurrentLocation(ce.getDot());  // locking is done by setCurrentLocation
-      updateLocation();
+      Utilities.invokeLater(new Runnable() { // previously invokeAndWait forcing all other listeners to wait (why?)
+        public void run() { updateLocation(); }
+      });
     }
     
+    // Should only be executed in the event thread or prior to pane being set visible
     public void updateLocation() {
       DefinitionsPane p = _currentDefPane;
       _currLocationField.setText(p.getCurrentLine() + ":" + p.getCurrentCol() +"\t"); // + " (offset "+ p.getCaretPosition() +")\t");
-      // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
-      // _model.getParsingControl().delay();
+//      Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
+//      _model.getParsingControl().delay();
     }
   }
   
@@ -5983,7 +5987,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     pane.addKeyListener(_historyListener);
     pane.addFocusListener(_focusListenerForRecentDocs);
     
-    
     // Add listeners
     _installNewDocumentListener(doc);
     ErrorCaretListener caretListener = new ErrorCaretListener(doc, pane, this);
@@ -5995,16 +5998,16 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             revalidateLineNums();
-            if ((_breakpointsPanel!=null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
-            if ((_bookmarksPanel!=null) && (_bookmarksPanel.isDisplayed())) { _bookmarksPanel.repaint(); }
+            if ((_breakpointsPanel != null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
+            if ((_bookmarksPanel != null) && (_bookmarksPanel.isDisplayed())) { _bookmarksPanel.repaint(); }
             for(Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
               FindResultsPanel panel = pair.getFirst();
-              if ((panel!=null) && (panel.isDisplayed())) { panel.repaint(); }
+              if ((panel != null) && (panel.isDisplayed())) { panel.repaint(); }
             }
           }
         });
       }
-      public void changedUpdate(DocumentEvent e) { updateUI(); }
+      public void changedUpdate(DocumentEvent e) { /* updateUI(); */ }  // only attribute changes that matter are inserts and removes
       public void insertUpdate(DocumentEvent e) { updateUI(); }
       public void removeUpdate(DocumentEvent e) { updateUI(); }
     });
@@ -6017,7 +6020,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     // Add to a scroll pane
     final JScrollPane scroll = new BorderlessScrollPane(pane,
-                                                  JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                                                  JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                                   JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     pane.setScrollPane(scroll);
     //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)

@@ -713,55 +713,38 @@ public final class DefinitionsPaneTest extends DrJavaTestCase {
                      , null);
         
         definitions.setCaretPosition(4); 
-        _result = _frame.getFileNameField();
       } 
     });
     
     /* Ensure that DocumentListeners complete. */
-    Utilities.clearEventQueue(); 
+    Utilities.invokeAndWait(new Runnable() { public void run() {  _result = _frame.getFileNameField(); } });
     
     final String fileName = doc.getCompletePath();
-
     assertEquals("Should display the document path", fileName, _result);
     
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        definitions.setCaretPosition(115); 
-        _result = _frame.getFileNameField();
-      } 
-    });
+    Utilities.invokeAndWait(new Runnable() { public void run() {  definitions.setCaretPosition(115); } });
+    // Complete the actions spawned by the preceding command before executing the following command
+    Utilities.invokeAndWait(new Runnable() { public void run() {  _result = _frame.getFileNameField(); } });
     assertEquals("Should display the line matched", "Matches:      new Object() {", _result);
     
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        definitions.setCaretPosition(102);
-        _result = _frame.getFileNameField();
-      } 
-    });
+    Utilities.invokeAndWait(new Runnable() { public void run() { definitions.setCaretPosition(102);  } });
+    // Complete the actions spawned by the preceding command before executing the following command
+    Utilities.invokeAndWait(new Runnable() { public void run() {  _result = _frame.getFileNameField(); } });
     assertEquals("Should display the document matched", fileName, _result);
     
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        definitions.setCaretPosition(119); 
-        _result = _frame.getFileNameField();
-      } 
-    });
+    Utilities.invokeAndWait(new Runnable() { public void run() { definitions.setCaretPosition(119); } });
+    // Complete the actions spawned by the preceding command before executing the following command
+    Utilities.invokeAndWait(new Runnable() { public void run() {  _result = _frame.getFileNameField(); } });
     assertEquals("Should display the line matched", "Matches:   private void _method()...{", _result);
     
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        definitions.setCaretPosition(121); 
-        _result = _frame.getFileNameField();
-      } 
-    });
+    Utilities.invokeAndWait(new Runnable() { public void run() { definitions.setCaretPosition(121); } });
+    // Complete the actions spawned by the preceding command before executing the following command
+    Utilities.invokeAndWait(new Runnable() { public void run() {  _result = _frame.getFileNameField(); } });
     assertEquals("Should display the line matched", "Matches: public class Foo {", _frame.getFileNameField());
     
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        definitions.setCaretPosition(122);
-        _result = _frame.getFileNameField();
-      } 
-    });
+    Utilities.invokeAndWait(new Runnable() { public void run() { definitions.setCaretPosition(122); } });
+    // Complete the actions spawned by the preceding command before executing the following command
+    Utilities.invokeAndWait(new Runnable() { public void run() {  _result = _frame.getFileNameField(); } });
     assertEquals("Should display only one brace when matching an open brace that is the first character in a line",
                  "Matches: {", _result);
     

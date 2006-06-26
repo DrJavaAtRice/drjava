@@ -93,7 +93,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Listens for changes to the cursor position in order to reset the start position */
   private CaretListener _caretListener = new CaretListener() {
     public void caretUpdate(CaretEvent e) {
-      Utilities.invokeAndWait(new Runnable() {
+      Utilities.invokeLater(new Runnable() {  // force other caret listeners to wait (why?)
         public void run() {
           _replaceAction.setEnabled(false);
           _replaceFindNextAction.setEnabled(false);
