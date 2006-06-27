@@ -87,7 +87,7 @@ public final class SlaveJVMRunner {
    */
   public static final boolean SHOW_DEBUG_DIALOGS = false;
   
-  protected static final Log _log  = new Log("MasterSlave.txt", true);
+  protected static final Log _log  = new Log("MasterSlave.txt", false);
   
   private static final long RMI_TIMEOUT = 5000L;
   

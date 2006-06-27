@@ -266,6 +266,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int commentLines(int selStart, int selEnd) { throw new UnsupportedOperationException("Dummy method"); }
   public int uncommentLines(int selStart, int selEnd) { throw new UnsupportedOperationException("Dummy method"); }
   public void indentLines(int selStart, int selEnd) { throw new UnsupportedOperationException("Dummy method"); }
+  public int getCurrentLine() { throw new UnsupportedOperationException("Dummy method"); }
   public int getCurrentCol() { throw new UnsupportedOperationException("Dummy method"); }
   public boolean getClassFileInSync() { throw new UnsupportedOperationException("Dummy method"); }
  

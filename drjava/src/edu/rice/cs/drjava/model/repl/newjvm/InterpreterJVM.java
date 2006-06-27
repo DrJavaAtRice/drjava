@@ -84,7 +84,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
   
-  private static final Log _log = new Log("MasterSlave.txt", true);
+  private static final Log _log = new Log("MasterSlave.txt", false);
   private static final boolean printMessages = true;
   
   /** String to append to error messages when no stack trace is available. */

@@ -49,7 +49,7 @@ import java.util.Arrays;
 public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   implements MasterRemote/*<SlaveType>*/ {
   
-  public static final Log _log  = new Log("MasterSlave.txt", true);
+  public static final Log _log  = new Log("MasterSlave.txt", false);
   
   /** Name for the thread that waits for the slave to exit. */
   protected volatile String _waitForQuitThreadName = "Wait for SlaveJVM Exit Thread";

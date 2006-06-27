@@ -5649,15 +5649,18 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void caretUpdate(final CaretEvent ce ) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       doc.setCurrentLocation(ce.getDot());  // locking is done by setCurrentLocation
-      Utilities.invokeLater(new Runnable() { // previously invokeAndWait forcing all other listeners to wait (why?)
-        public void run() { updateLocation(); }
-      });
+      final int line = doc.getCurrentLine();
+      final int col = doc.getCurrentCol();
+      Utilities.invokeLater(new Runnable() { public void run() { updateLocation(line, col); } });
     }
     
     // Should only be executed in the event thread or prior to pane being set visible
-    public void updateLocation() {
-      DefinitionsPane p = _currentDefPane;
-      _currLocationField.setText(p.getCurrentLine() + ":" + p.getCurrentCol() +"\t"); // + " (offset "+ p.getCaretPosition() +")\t");
+    public void updateLocation() { 
+      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      updateLocation(doc.getCurrentLine(), doc.getCurrentCol()); 
+    }
+    private void updateLocation(int line, int col) {
+      _currLocationField.setText(line + ":" + col +"\t");
 //      Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //      _model.getParsingControl().delay();
     }

@@ -415,7 +415,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Return the current column of the cursor position. Uses a 0 based index. */
   public int getCurrentCol() {
-    // throwErrorHuh();
+    // throwErrorHuh();`
     int here = _currentLocation;
     int startOfLine = getLineStartPos(here);
     return here - startOfLine;

@@ -60,7 +60,7 @@ import edu.rice.cs.util.*;
  * @version $Id$
  */
 public class DynamicJavaAdapter implements JavaInterpreter {
-  private static Log _log = new Log("MasterSlave.txt", true);
+  private static Log _log = new Log("MasterSlave.txt", false);
   private InterpreterExtension _djInterpreter;
 
   ClassPathManager cpm;

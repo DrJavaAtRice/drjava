@@ -68,6 +68,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public int commentLines(int selStart, int selEnd);
   public int uncommentLines(int selStart, int selEnd);
   public boolean getClassFileInSync();
+  public int getCurrentLine();
   public int getCurrentCol();
   public int getOffset(int lineNum);
   public String getQualifiedClassName() throws ClassNameNotFoundException;

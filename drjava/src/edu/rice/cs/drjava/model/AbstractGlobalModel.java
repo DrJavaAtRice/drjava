@@ -3446,28 +3446,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Forwarding method to sync the definitions with whatever view component is representing them. */
     public void setCurrentLocation(int location) { _caretPosition = location; getDocument().setCurrentLocation(location); }
 
-    /**
-     * Get the location of the cursor in the definitions according
-     * to the definitions document.
-     */
+    /** Get the location of the cursor in the definitions according to the definitions document. */
     public int getCurrentLocation() { return getDocument().getCurrentLocation(); }
     
     /** @return the caret position as set by the view. */
     public int getCaretPosition() { return _caretPosition; }
 
-    /**
-     * Forwarding method to find the match for the closing brace
-     * immediately to the left, assuming there is such a brace.
-     * @return the relative distance backwards to the offset before
-     *         the matching brace.
+    /** Forwarding method to find the match for the closing brace immediately to the left, assuming there is such a brace.
+     *  @return the relative distance backwards to the offset before the matching brace.
      */
     public int balanceBackward() { return getDocument().balanceBackward(); }
 
-    /**
-     * Forwarding method to find the match for the open brace
-     * immediately to the right, assuming there is such a brace.
-     * @return the relative distance forwards to the offset after
-     *         the matching brace.
+    /** Forwarding method to find the match for the open brace immediately to the right, assuming there is such a brace.
+     *  @return the relative distance forwards to the offset after `the matching brace.
      */
     public int balanceForward() { return getDocument().balanceForward(); }
     
@@ -3656,7 +3647,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      */
     public boolean undoManagerCanRedo() { return _cacheAdapter.isReady() && getUndoManager().canRedo(); }
     
-    /** Decorater patter for the definitions document. */
+    /** Decorator pattern for the definitions document. */
     public CompoundUndoManager getUndoManager() { return getDocument().getUndoManager(); }
     
     public int getLineStartPos(int pos) { return getDocument().getLineStartPos(pos); }
@@ -3670,6 +3661,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     public void indentLines(int selStart, int selEnd) { getDocument().indentLines(selStart, selEnd); }
+    
+    public int getCurrentLine() { return getDocument().getCurrentLine(); }
     
     public int getCurrentCol() { return getDocument().getCurrentCol(); }
     
