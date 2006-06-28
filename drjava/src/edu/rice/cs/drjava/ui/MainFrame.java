@@ -5660,7 +5660,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       updateLocation(doc.getCurrentLine(), doc.getCurrentCol()); 
     }
     private void updateLocation(int line, int col) {
-      _currLocationField.setText(line + ":" + col +"\t");
+      _currLocationField.setText(line + ":" + col +" \t");  // Space before "\t" required on Mac to avoid obscuring
 //      Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //      _model.getParsingControl().delay();
     }
