@@ -54,9 +54,7 @@ import javax.swing.text.BadLocationException;
  */
 public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
 
-  /**
-   * Tests not having the prefix in the text.
-   */
+  /** Tests not having the prefix in the text. */
   public void testNoPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionCurrLineStartsWith("{", null, null);
     

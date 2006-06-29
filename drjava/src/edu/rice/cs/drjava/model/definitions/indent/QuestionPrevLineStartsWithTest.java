@@ -54,9 +54,7 @@ import javax.swing.text.BadLocationException;
  */
 public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
 
-  /**
-   * Tests not having the prefix in the text.
-   */
+  /** Tests not having the prefix in the text. */
   public void testNoPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("{", null, null);
     
@@ -73,9 +71,7 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     
   }
   
-  /**
-   * Tests hitting start of document.
-   */
+  /** Tests hitting start of document. */
   public void testStartOfDocument() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("{", null, null);
     
@@ -85,9 +81,7 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("second line", !rule.applyRule(_doc, 2, Indenter.OTHER));
   }
   
-  /**
-   * Tests prefix on current line.
-   */
+  /** Tests prefix on current line. */
   public void testPrefixOnCurrLine() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("}", null, null);
     
@@ -102,9 +96,7 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("after brace", !rule.applyRule(_doc, 18, Indenter.OTHER));
   }
   
-  /**
-   * Tests having prev line start with prefix, with text following
-   */
+  /** Tests having prev line start with prefix, with text following */
   public void testStartsWithPrefixWithText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("}", null, null);
         
@@ -122,9 +114,7 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after star (with space)", rule.applyRule(_doc, 16, Indenter.OTHER));
   }
   
-  /**
-   * Tests having prev line start with prefix, with no text following
-   */
+  /** Tests having prev line start with prefix, with no text following */
   public void testStartsWithPrefixNoText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("*", null, null);
     
@@ -141,9 +131,7 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after star (with space)", rule.applyRule(_doc, 13, Indenter.OTHER));
   }
   
-  /**
-   * Tests having a multiple character prefix.
-   */
+  /** Tests having a multiple character prefix. */
   public void testMultipleCharPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("* ", null, null);
     
@@ -155,9 +143,7 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("space star space text", rule.applyRule(_doc, 16, Indenter.OTHER));
   }
   
-  /**
-   * Tests having a commented prefix.
-   */
+  /** Tests having a commented prefix. */
   public void testCommentedPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("*", null, null);
     
@@ -169,9 +155,19 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after star", !rule.applyRule(_doc, 15, Indenter.OTHER));
   }
   
-  /**
-   * Tests having text on a line before the prefix.
-   */
+  /** Tests a prefix that begins a comment. */
+  public void testCommentPrefix() throws BadLocationException {
+    IndentRuleQuestion rule = new QuestionPrevLineStartsWith("/**", null, null);
+    
+    // Star in comment
+    _setDocText("/**\n* \ncomment\n*/");
+    assertTrue("just before star", rule.applyRule(_doc, 4, Indenter.OTHER));
+    assertTrue("just after star", rule.applyRule(_doc, 6, Indenter.OTHER));
+    assertTrue("line after star", !rule.applyRule(_doc, 7, Indenter.OTHER));
+    assertTrue("line after star", !rule.applyRule(_doc, 15, Indenter.OTHER));
+  }
+  
+  /** Tests having text on a line before the prefix. */
   public void testDoesNotStartWithPrefix() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionPrevLineStartsWith("*", null, null);
     

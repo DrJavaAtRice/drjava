@@ -91,21 +91,21 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //  private boolean _updatePending = false;
 
   /** Whether to draw text as antialiased. */
-  private boolean _antiAliasText = false;
+  private volatile boolean _antiAliasText = false;
 
   /** Our current compiler error matching highlight. */
-  private HighlightManager.HighlightInfo _errorHighlightTag = null;
+  private volatile HighlightManager.HighlightInfo _errorHighlightTag = null;
 
   /** Highlight painter for bookmarks. */
-  static ReverseHighlighter.DefaultUnderlineHighlightPainter BOOKMARK_PAINTER =
+  static volatile ReverseHighlighter.DefaultUnderlineHighlightPainter BOOKMARK_PAINTER =
     new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(BOOKMARK_COLOR), 3);
 
   /** Highlight painter for find results. */
-  static ReverseHighlighter.DefaultUnderlineHighlightPainter[] FIND_RESULTS_PAINTERS;
+  static volatile ReverseHighlighter.DefaultUnderlineHighlightPainter[] FIND_RESULTS_PAINTERS;
   
   static {
     FIND_RESULTS_PAINTERS = new ReverseHighlighter.DefaultUnderlineHighlightPainter[FIND_RESULTS_COLORS.length+1];
-    for(int i=0; i<FIND_RESULTS_COLORS.length; ++i) {
+    for(int i = 0; i < FIND_RESULTS_COLORS.length; ++i) {
       FIND_RESULTS_PAINTERS[i] =
         new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(FIND_RESULTS_COLORS[i]), 3);
     }
@@ -114,18 +114,18 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
   
   /** How many find result panels are using the highlight painters. */
-  static int[] FIND_RESULTS_PAINTERS_USAGE = new int[FIND_RESULTS_COLORS.length];
+  static volatile int[] FIND_RESULTS_PAINTERS_USAGE = new int[FIND_RESULTS_COLORS.length];
 
   /** Highlight painter for breakpoints. */
   static ReverseHighlighter.DefaultHighlightPainter BREAKPOINT_PAINTER =
     new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
 
   /** Highlight painter for disabled breakpoints. */
-  static ReverseHighlighter.DefaultHighlightPainter DISABLED_BREAKPOINT_PAINTER =
+  static volatile ReverseHighlighter.DefaultHighlightPainter DISABLED_BREAKPOINT_PAINTER =
     new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
 
   /** Highlight painter for thread's current location. */
-  static ReverseHighlighter.DefaultHighlightPainter THREAD_PAINTER =
+  static volatile ReverseHighlighter.DefaultHighlightPainter THREAD_PAINTER =
     new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
 
   /** The name of the keymap added to the super class (saved so it can be removed). */
@@ -274,7 +274,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    *  to the undo manager.  Must be done in the view because the edits are
    *  stored along with the caret position at the time of the edit.
    */
-  private UndoableEditListener _undoListener = new UndoableEditListener() {
+  private final UndoableEditListener _undoListener = new UndoableEditListener() {
     
     /** The function to handle what happens when an UndoableEditEvent occurs.
      *  @param e
@@ -296,7 +296,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The menu item for the "Toggle Breakpoint" option. Stored in field so that it may be enabled and
    *  disabled depending on Debug Mode.
    */
-  private JMenuItem _toggleBreakpointMenuItem;
+  private volatile JMenuItem _toggleBreakpointMenuItem;
 
 //  /** The menu item for the "Add Watch" option. Stored in field so that it may be enabled and
 //   *  disabled depending on Debug Mode.
@@ -304,15 +304,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //  private JMenuItem _addWatchMenuItem;
 
   /** The contextual popup menu for the Definitions Pane. */
-  private JPopupMenu _popMenu;
+  private volatile JPopupMenu _popMenu;
 
   /** The mouse adapter for handling a popup menu. */
-  private PopupMenuMouseAdapter _popupMenuMA;
+  private volatile PopupMenuMouseAdapter _popupMenuMA;
 
   /** Listens to caret to highlight errors as appropriate. */
-  private ErrorCaretListener _errorListener;
+  private volatile ErrorCaretListener _errorListener;
 
-  private ActionListener _setSizeListener = null;
+  private volatile ActionListener _setSizeListener = null;
 
   /** An action to handle indentation spawned by pressing the tab key. */
   private class IndentKeyActionTab extends AbstractAction {
@@ -379,14 +379,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /** Special action to take care of case when tab key is pressed. */
-  private Action _indentKeyActionTab = new IndentKeyActionTab();
+  private volatile Action _indentKeyActionTab = new IndentKeyActionTab();
 
   /** Because the "default" action for the enter key is special, it must be
    *  grabbed from the Keymap using getAction(KeyStroke), which returns the
    *  "default" action for all keys which have behavior extending beyond
    *  regular text keys.
    */
-  private Action _indentKeyActionLine =
+  private final Action _indentKeyActionLine =
     new IndentKeyAction("\n", (Action) getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)),
                         true /* indent non-code, too */ ) {
     /* overriding this method is important so that pressing the enter key causes
@@ -398,9 +398,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** Likewise, regular text keys like '{', '}', and ':' do not have special actions that are returned by 
    *  getAction(KeyStroke). To make sure these behave right, we use getDefaultAction() instead.
    */
-  private Action _indentKeyActionSquiggly = new IndentKeyAction("}", getKeymap().getDefaultAction());
-  private Action _indentKeyActionOpenSquiggly = new IndentKeyAction("{", getKeymap().getDefaultAction());
-  private Action _indentKeyActionColon = new IndentKeyAction(":", getKeymap().getDefaultAction());
+  private final Action _indentKeyActionSquiggly = new IndentKeyAction("}", getKeymap().getDefaultAction());
+  private final Action _indentKeyActionOpenSquiggly = new IndentKeyAction("{", getKeymap().getDefaultAction());
+  private final Action _indentKeyActionColon = new IndentKeyAction(":", getKeymap().getDefaultAction());
 
   /** Tells us whether we currently are in the middle of a CompoundEdit for regular keystrokes.
    *  Helps us with granular undo.
@@ -438,11 +438,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     //super.setDocument(NULL_DOCUMENT);
     _resetUndo();
     
-    //setFont(new Font("Courier", 0, 12));
     Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);
     setFont(mainFont);
-
-    //setSize(new Dimension(1024, 1000));
+    
     setEditable(true);
     
     // add actions for indent key
@@ -476,11 +474,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     // Setup the color listeners. NOTE: the Foreground/Background listeners add themselves to DrJava.getConfig() 
     // in their own constructors. Rather than refactor it, we decided to work with that design decision.
     temp = new ForegroundColorListener(this);
-    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_NORMAL_COLOR,temp);
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_NORMAL_COLOR, temp);
     _colorOptionListeners.add(pair);
     
     temp = new BackgroundColorListener(this);
-    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,temp);
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, temp);
     _colorOptionListeners.add(pair);
 
     // These listeners do not register themselves in their own constructors.  We do.
@@ -636,7 +634,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
           }
         }
         // This if statement is for tests only
-        if ((e.getModifiers()&InputEvent.ALT_MASK) != 0) testVariable = true; // ALT_MASK actually pressed
+        if ((e.getModifiers() & InputEvent.ALT_MASK) != 0) testVariable = true; // ALT_MASK actually pressed
         else testVariable = false;
         
         super.processKeyEvent(e);
@@ -649,14 +647,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   public static void setEditorKit(DefinitionsEditorKit editorKit) { EDITOR_KIT = editorKit; }
 
-
   /** Enable anti-aliased text by overriding paintComponent. */
   protected void paintComponent(Graphics g) {
     if (CodeStatus.DEVELOPMENT) {
       if (_antiAliasText && g instanceof Graphics2D) {
         Graphics2D g2d = (Graphics2D)g;
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
       }
     }
     super.paintComponent(g);
@@ -715,8 +711,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     JMenuItem toggleBookmarkItem = new JMenuItem("Toggle Bookmark");
     toggleBookmarkItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        if (getSelectionStart()==getSelectionEnd()) {
-          // nothing selected
+        if (getSelectionStart()==getSelectionEnd()) { // nothing selected
           // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
           setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
         }
@@ -750,7 +745,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       super.mousePressed(e);
 
       _lastMouseClick = e;
-
       endCompoundEdit();
 
       // if not in the selected area,
@@ -766,9 +760,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _popMenu.show(e.getComponent(), e.getX(), e.getY());
     }
 
-    public MouseEvent getLastMouseClick() {
-      return _lastMouseClick;
-    }
+    public MouseEvent getLastMouseClick() { return _lastMouseClick; }
   }
 
   /** Comments out the lines contained within the given selection. */
@@ -844,8 +836,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _errorHighlightTag = _highlightManager.addHighlight(from, to, ERROR_PAINTER);
   }
 
-  /** Removes the previous compiler error highlight from the document after the cursor has moved.
-   */
+  /** Removes the previous compiler error highlight from the document after the cursor has moved. */
   public void removeErrorHighlight() {
     if (_errorHighlightTag != null) {
       _errorHighlightTag.remove();
@@ -853,9 +844,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  public boolean hasWarnedAboutModified() {
-    return _hasWarnedAboutModified;
-  }
+  public boolean hasWarnedAboutModified() { return _hasWarnedAboutModified; }
 
   public void hasWarnedAboutModified( boolean hasWarned) {
     _hasWarnedAboutModified = hasWarned;
@@ -864,32 +853,23 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   public void addBreakpointHighlight( Breakpoint bp ) { }
 
   public void removeBreakpointHighlight( Breakpoint bp) { }
-  
-//  /** Reset undo machinery on setDocument. */
-//  private void setDocument(OpenDefinitionsDocument doc) {
-//    super.setDocument(doc);
-//    _resetUndo();
-//  }
 
-  
   /** This instance of the scroll pane is here in order to allow for the definitions pane to save the
    *  horizontal and vertical scroll
    */
-  private JScrollPane _scrollPane;
+  private volatile JScrollPane _scrollPane;
   
   public void setScrollPane(JScrollPane s) { _scrollPane = s; }
   
-  
-  /** Uxed to save the caret position, selection, and scroll when setting the definitions pane to be inactive */
-  
-  private int _savedVScroll;
-  private int _savedHScroll;
-  private int _position;
-  private int _selStart;
-  private int _selEnd;
+  /** Used to save the caret position, selection, and scroll when setting the definitions pane to be inactive */
+  private volatile int _savedVScroll;
+  private volatile int _savedHScroll;
+  private volatile int _position;
+  private volatile int _selStart;
+  private volatile int _selEnd;
   
   /** This function is called when the active document is changed. this function is called on the pane that is 
-   *  replaced by the new active pane. it allows the pane to "shutdown" when not in use.  Currently, this procedure 
+   *  replaced by the new active pane. It allows the pane to "shutdown" when not in use.  Currently, this procedure 
    *  replaces the Definitions Document with a blank dummy document to help conserve memory (so that the pane will 
    *  not be holding onto the last reference of a definitions document not allowing it to be garbage collected)
    */
@@ -1115,39 +1095,24 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
-      //      _indentLines(reason, pm);
-      //_doc.getUndoManager().endCompoundEdit(key); //commented out for french keyboard fix, replaced with endCompoundEdit
       endCompoundEdit();
     }
     catch (OperationCanceledException oce) {
       // if canceled, undo the indent; but first, end compound edit
-      //        _doc.getUndoManager().endCompoundEdit(key); fixed for french keyboard fix
       endCompoundEdit();
       _doc.getUndoManager().undo();
       // pm = null, so cancel can't be pressed
       throw new UnexpectedException(oce);
     }
     catch (RuntimeException e) {
-      //catches the exception to turn off the the hourglass
-      //and close the compound edit before throwing out to
-      //the main frame.
-      //_mainFrame.hourglassOff();
-      //pm.close();
-      
-      // _doc.getUndoManager().endCompoundEdit(key); //commented out for french keyboard fix, replaced with endCompoundEdit()
+      /* Catches the exception to turn off the the hourglass and close the compound edit before throwing out to the
+       * main frame. */
       endCompoundEdit();
       throw e;
     }
     
     //_doc.setCurrentLocation(caretPos);
     setCaretPosition(_doc.getCurrentLocation());
-    //_mainFrame.hourglassOff();
-    //pm.close();
-    
-    //        return null;
-    //      }
-    //    };
-    //    worker.start();
   }
     
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */
@@ -1211,7 +1176,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _redoAction.updateRedoState();
     }
 
-
     /** Updates the undo list, i.e., where we are as regards undo and redo. */
     protected void updateUndoState() {
       if (_doc.undoManagerCanUndo()) {
@@ -1259,9 +1223,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _undoAction.updateUndoState();
     }
 
-    /**
-     * Updates the redo state, i.e., where we are as regards undo and redo.
-     */
+    /** Updates the redo state, i.e., where we are as regards undo and redo. */
     protected void updateRedoState() {
       if (_doc.undoManagerCanRedo()) {
         setEnabled(true);
@@ -1311,23 +1273,17 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private List<FinalizationListener<DefinitionsPane>> _finalizationListeners = 
     new LinkedList<FinalizationListener<DefinitionsPane>>();
   
-  /** Registers a finalization listener with the specific instance of the ddoc
-   *  <p><b>NOTE:</b><i>This should only be used by test cases.  This is to ensure that
-   *  we don't spring memory leaks by allowing our unit tests to keep track of 
-   *  whether objects are being finalized (garbage collected)</i></p>
+  /** Registers a finalization listener with the specific instance of the ddoc. NOTE: this should only be used by test 
+   *  cases.  This policy ensures that we don't spring memory leaks by allowing our unit tests to keep track of 
+   *  whether objects are being finalized (garbage collected).
    *  @param fl the listener to register
    */
-  public void addFinalizationListener(FinalizationListener<DefinitionsPane> fl) {
-    _finalizationListeners.add(fl);
-  }
+  public void addFinalizationListener(FinalizationListener<DefinitionsPane> fl) { _finalizationListeners.add(fl); }
 
-  public List<FinalizationListener<DefinitionsPane>> getFinalizationListeners() {
-    return _finalizationListeners;
-  }
+  public List<FinalizationListener<DefinitionsPane>> getFinalizationListeners() { return _finalizationListeners; }
 
-  /**
-   * This is called when this method is GC'd.  Since this class implements
-   * edu.rice.cs.drjava.model.Finalizable, it must notify its listeners
+  /** This method is called when this object becomes unreachable.  Since this class implements
+   *  edu.rice.cs.drjava.model.Finalizable, it must notify its listeners.
    */
   protected void finalize() {
     FinalizationEvent<DefinitionsPane> fe = new FinalizationEvent<DefinitionsPane>(this);

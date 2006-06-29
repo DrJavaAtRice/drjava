@@ -5,7 +5,7 @@
  *
  * DrJava Open Source License
  * 
- * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
+ * Copyright (C) 2001-2006 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
  * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
  * 
@@ -443,8 +443,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     finally { releaseReadLock(); }   
   }
   
-  
-  
   /** Forwarding method to find the match for the closing brace immediately to the left, assuming 
    *  there is such a brace.
    *  @return the relative distance backwards to the offset before the matching brace.
@@ -517,7 +515,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     // Check cache
-    StringBuffer keyBuf = new StringBuffer("findPrevEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
+    StringBuilder keyBuf = new StringBuilder("findPrevEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
     String key = keyBuf.toString();
     Integer cached = (Integer) _checkCache(key);
     if (cached != null) return cached.intValue();
@@ -586,7 +584,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     // Check cache
-    StringBuffer keyBuf = new StringBuffer("findNextEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
+    StringBuilder keyBuf = new StringBuilder("findNextEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
     String key = keyBuf.toString();
     Integer cached = (Integer) _checkCache(key);
     
@@ -670,7 +668,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipParenPhrases)
     throws BadLocationException {
     // Check cache
-    StringBuffer keyBuf = new StringBuffer("findPrevDelimiter:").append(pos);
+    StringBuilder keyBuf = new StringBuilder("findPrevDelimiter:").append(pos);
     for (char ch: delims) { keyBuf.append(':').append(ch); }
     keyBuf.append(':').append(skipParenPhrases);
     String key = keyBuf.toString();
@@ -767,7 +765,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
     // Check cache
-    StringBuffer keyBuf = new StringBuffer("findPrevCharPos:").append(pos);
+    StringBuilder keyBuf = new StringBuilder("findPrevCharPos:").append(pos);
     for (char ch: whitespace) { keyBuf.append( ':').append(ch); }
     String key = keyBuf.toString();
     Integer cached = (Integer) _checkCache(key);
@@ -1019,7 +1017,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
     // Check cache
-    StringBuffer keyBuf = new StringBuffer("getIndentOfCurrStmt:").append(pos);
+    StringBuilder keyBuf = new StringBuilder("getIndentOfCurrStmt:").append(pos);
     for (char ch: delims) { keyBuf.append(':').append(ch); }
     String key = keyBuf.toString();
     String cached = (String) _checkCache(key);
@@ -1218,25 +1216,22 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return endLinePos;
   }
   
-  /**
-   * Finds the position of the first non-whitespace character after pos.
-   * NB: Skips comments and all whitespace, including newlines
-   * @param pos Position to start from
-   * @return position of first non-whitespace character after pos,
-   * or ERROR_INDEX if end of document is reached
-   */
+  /** Finds the position of the first non-whitespace character after pos. NB: Skips comments and all whitespace, 
+    * including newlines
+    * @param pos Position to start from
+    * @return position of first non-whitespace character after pos, or ERROR_INDEX if end of document is reached
+    */
   public int getFirstNonWSCharPos(int pos) throws BadLocationException {
     char[] whitespace = {' ', '\t', '\n'};
     return getFirstNonWSCharPos(pos, whitespace, false);
   }
   
-  /**
-   * Similar to the single-argument version, but allows including comments.
-   * @param pos Position to start from
-   * @param acceptComments if true, find non-whitespace chars in comments
-   * @return position of first non-whitespace character after pos,
-   * or ERROR_INDEX if end of document is reached
-   */
+  /** Similar to the single-argument version, but allows including comments.
+    * @param pos Position to start from
+    * @param acceptComments if true, find non-whitespace chars in comments
+    * @return position of first non-whitespace character after pos,
+    * or ERROR_INDEX if end of document is reached
+    */
   public int getFirstNonWSCharPos(int pos, boolean acceptComments) throws BadLocationException {
     char[] whitespace = {' ', '\t', '\n'};
     return getFirstNonWSCharPos(pos, whitespace, acceptComments);
@@ -1251,7 +1246,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public int getFirstNonWSCharPos(int pos, char[] whitespace, boolean acceptComments) throws BadLocationException {
     // Check cache
-    StringBuffer keyBuf = new StringBuffer("getFirstNonWSCharPos:").append(pos);
+    StringBuilder keyBuf = new StringBuilder("getFirstNonWSCharPos:").append(pos);
     for (char ch: whitespace) { keyBuf.append(':').append(ch); }
     String key = keyBuf.toString();
     

@@ -50,23 +50,21 @@ import edu.rice.cs.util.UnexpectedException;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * Question rule in the indentation decision tree.  Determines if the 
- * next non-whitespace character is a star '*'.  This is useful for determining
- * if we are at the beginning of a previously ill-formed block comment.
- * <p>
- * <b>Does not work if character being searched for is a '/' or a '*'</b>
- *
- * @version $Id$
- */
+/** Question rule in the indentation decision tree.  Determines if the 
+  * next non-whitespace character is a star '*'.  This is useful for determining
+  * if we are at the beginning of a previously ill-formed block comment.
+  * <p>
+  * <b>Does not work if character being searched for is a '/' or a '*'</b>
+  *
+  * @version $Id$
+  */
 public class QuestionFollowedByStar extends IndentRuleQuestion {
   
-  /**
-   * Constructs a new rule which determines if the current position is
-   * immediately followed by a star '*'.
-   * @param yesRule Rule to use if this rule holds
-   * @param noRule Rule to use if this rule does not hold
-   */
+  /** Constructs a new rule which determines if the current position is
+    * immediately followed by a star '*'.
+    * @param yesRule Rule to use if this rule holds
+    * @param noRule Rule to use if this rule does not hold
+    */
   public QuestionFollowedByStar(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
   
   /** Determines if the next non WS character is '*'. Does not search in quotes or comments.

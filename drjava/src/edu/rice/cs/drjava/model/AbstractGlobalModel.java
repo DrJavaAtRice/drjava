@@ -71,7 +71,6 @@ import javax.swing.text.Segment;
 import javax.swing.text.Style;
 import javax.swing.ProgressMonitor;
 
-import edu.rice.cs.util.Lambda ;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.config.FileOption;
@@ -109,9 +108,12 @@ import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParser ;
 import edu.rice.cs.drjava.project.ProjectProfile;
+import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException ;
 import edu.rice.cs.util.OrderedHashSet;
 import edu.rice.cs.util.Pair;
@@ -140,6 +142,8 @@ import edu.rice.cs.util.ReaderWriterLock;
  *  @version $Id$
  */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
+  
+  public static Log _log = new Log("GlobalModel.txt", false);
  
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
@@ -1661,9 +1665,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   /** Attempts to close all open documents. Also ensures the invariant that there is always at least
     *  one open document holds by creating a new file if necessary.
-    //Bug when the first document, in list view, is selected:
-    //When "close all" documents is selected, each document in turn is set active
-    //Fix: close the currently active document last
     * @return true if all documents were closed
     */
    public boolean closeAllFiles() {
@@ -1689,14 +1690,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (docList.size() == 0) return true;
     
     /* Force the user to save or discard all modified files in docList */
-    for (OpenDefinitionsDocument doc : docList) { if (!(doc.getFileName().compareTo("(Untitled)") == 0 && doc.getLength() == 0) && !doc.canAbandonFile()) return false; }
+    for (OpenDefinitionsDocument doc : docList) { 
+      if (! doc.canAbandonFile()) return false; }
     
-    // If all files are being closed, create a new file before starTing in order to have
-    // a potentially active file that is not in the list of closing files.
+    /* If all files are being closed, create a new file before starting in order to have a potentially active file
+     * that is not in the list of closing files. */
     if (docList.size() == getOpenDefinitionsDocumentsSize()) newFile();
     
-    // Set the active document to the document just after the last document or the document just before the
-    // first document in docList.  A new file does not appear in docList.
+    /* Set the active document to the document just after the last document or the document just before the first 
+     * document in docList.  The new file created above (if necessary) does not appear in docList. */
     _ensureNotActive(docList);
         
     // Close the files in docList.
@@ -1750,12 +1752,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     synchronized(_documentsRepos) { docList = new ArrayList<OpenDefinitionsDocument> (_documentsRepos); }
     
     // first see if the user wants to cancel on any of them
-    boolean canClose = true;
+    OpenDefinitionsDocument retainedDoc = null;
+  
     for (OpenDefinitionsDocument doc : docList) {
-      if (!(doc.getFileName().compareTo("(Untitled)") == 0 && doc.getLength() == 0) && !doc.canAbandonFile()) { canClose = false; break; }
+      if (! doc.canAbandonFile()) { retainedDoc = doc; break; }
     }
     
-    if  (!canClose) { return false; } // the user did want to cancel
+    if  (retainedDoc != null) { // the user did want to cancel
+      _log.log("closeAllFilesOnQuit failed. Retained doc = " + retainedDoc);
+      return false; 
+    } 
     
     // user did not want to cancel, close all of them
     // All files are being closed, create a new file before starting in order to have
@@ -1778,6 +1784,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Exits the program.  If force is true, quits regardless of whether all documents are successfully closed. 
    *  This functionality is not available via the user interface, but it should be. */
   public void quit(boolean force) {
+    _log.log("quit(" + force + ") called");
     try {
       if (! force && ! closeAllFilesOnQuit()) return;
       
@@ -1798,22 +1805,23 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /* Terminates DrJava via System.exit with Runtime.halt as a backup if the former gets hung up. */
   private void shutdown() {
     
+    Utilities.show("Shutting Down!");
+    
     Thread terminator = new Thread(new Runnable() { 
       public void run() { 
-        dispose(); // in instances of DefaultGlobalModel, kills the interpreter and cleans up the RMI hooks in the slave JVM
+        if (Utilities.TEST_MODE) dispose();  // kills interpreter and cleans up RMI hooks in the slave JVM
         System.exit(0); 
       }
     }, "DrJava Exit");
     
     terminator.start();
     try { Thread.sleep(2000); } // sleep for two seconds to allow the terminator thread to terminate DrJava
-    catch(InterruptedException e) { /* proceed */ }
-//    _log.log("In " + this + " System.exit(0) timed out, so Runtime.halt(0) is being used instead");
+    catch(InterruptedException e) { /* ignore */ }
+    _log.log("Terminator thread failed to shut down DrJava within two seconds; proceeding to halt");
     Runtime.getRuntime().halt(0);  // force DrJava to exit if it still alive
   }
     
-  /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests.
-   *  This version does not kill the interpreter. */
+  /** Prepares this model to be thrown away.  Never called outside of tests. This version ignores the slave JVM. */
   public void dispose() {
     _notifier.removeAllListeners();
     synchronized(_documentsRepos) { _documentsRepos.clear(); }
@@ -2969,6 +2977,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      */
     public boolean isUntitled() { return _file == null; }
     
+    public boolean isUntitledAndEmpty() { return _file == null && getLength() == 0; }
+    
     /** Returns true if the file exists on disk. Returns false if the file has been moved or deleted */
     public boolean fileExists() { return _file != null && _file.exists(); }
     
@@ -3417,7 +3427,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      *               its tracks (e.g., file open when the document has been modified since the last save).
      */
     public boolean canAbandonFile() {
-      if (isModifiedSinceSave() || (_file != null && !_file.exists() && _cacheAdapter.isReady()))
+      if (isUntitledAndEmpty()) return true;
+      if (isModifiedSinceSave() || (_file != null && ! _file.exists() && _cacheAdapter.isReady()))
         return _notifier.canAbandonFile(this);
       else return true;
     }

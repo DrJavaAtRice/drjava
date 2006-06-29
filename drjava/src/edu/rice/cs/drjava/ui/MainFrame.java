@@ -967,10 +967,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   };
 
-  /**
-   * Wrapper class for the "Go to File" dialog list entries.
-   * Provides the ability to have the same OpenDefinitionsDocument in there multiple times
-   * with different toString() results.
+  /** Wrapper class for the "Go to File" dialog list entries. Provides the ability to have the same 
+   *  OpenDefinitionsDocument in there multiple times with different toString() results.
    */
   private static class GoToFileListEntry implements Comparable<GoToFileListEntry> {
     public final OpenDefinitionsDocument doc;
@@ -982,7 +980,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public String toString() { return str; }
     public int compareTo(GoToFileListEntry other) { return str.toLowerCase().compareTo(other.str.toLowerCase()); }
     public boolean equals(Object other) {
-      if (!(other instanceof GoToFileListEntry)) return false;
+      if (! (other instanceof GoToFileListEntry)) return false;
       return str.equals(((GoToFileListEntry)other).str);
     }
     public int hashCode() { return str.hashCode(); }
@@ -1088,7 +1086,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       GoToFileListEntry currentEntry = null;
       ArrayList<GoToFileListEntry> list;
       if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_FULLY_QUALIFIED).booleanValue()) {
-        list = new ArrayList<GoToFileListEntry>(2*docs.size());
+        list = new ArrayList<GoToFileListEntry>(2 * docs.size());
       }
       else {
         list = new ArrayList<GoToFileListEntry>(docs.size());
@@ -4041,6 +4039,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   private void _quit() {
+    AbstractGlobalModel._log.log("MainFrame.quit() called");
     if (_promptBeforeQuit) {
       String title = "Quit DrJava?";
       String message = "Are you sure you want to quit DrJava?";

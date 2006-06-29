@@ -130,9 +130,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, doc);
   }
 
-  /**
-   * Test case for SourceForge bug# 681203.
-   */
+  /** Test case for SourceForge bug# 681203. */
   public void testMultiLineStarInsertFirstLine() throws BadLocationException {
     String text =
       "/**\n" +
@@ -160,9 +158,7 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(starAdded, doc);
   }
 
-  /**
-   * Test case for SourceForge bug# 681203.
-   */
+  /** Test case for SourceForge bug# 681203. */
   public void testMultiLineStarInsertLaterLine() throws BadLocationException {
 
     String text =

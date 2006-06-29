@@ -49,6 +49,7 @@ import javax.swing.SwingUtilities;
 
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.ClassPathFilter;
 import edu.rice.cs.drjava.ui.SplashScreen;
@@ -219,6 +220,11 @@ public class DrJava {
     String jvmArgString = getConfig().getSetting(MASTER_JVM_ARGS);
     List<String> jvmArgs = ArgumentTokenizer.tokenize(jvmArgString);
     if (jvmArgs != null && jvmArgs.size() != 0) _jvmArgs.addAll(jvmArgs);
+    if (PlatformFactory.ONLY.isMacPlatform()) {
+      _jvmArgs.add("-Dcom.apple.macos.useScreenMenuBar=true");
+      _jvmArgs.add("-Xdock:name=DrJava");
+//      _jvmArgs.add("-Xdock:icon=Users/cork/drjava/drjava/edu/rice/cs/drjava/ui/icons/DrJava.icns");
+    }
     
     if (! heapSizeGiven && jvmArgString.indexOf("-Xmx")==0) _jvmArgs.add(DEFAULT_MAX_HEAP_SIZE_ARG);
         

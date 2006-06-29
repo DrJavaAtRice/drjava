@@ -39,17 +39,15 @@ import edu.rice.cs.drjava.model.*;
 
 import edu.rice.cs.util.text.EditDocumentInterface;
 
-/**
- * DrJava's print preview window for a console document (interactions or console)
- * @version $Id$
+/** DrJava's print preview window for a console document (interactions or console)
+ *  @version $Id$
  */
 public class PreviewConsoleFrame extends PreviewFrame {
 
-  private EditDocumentInterface _document;
+  private volatile EditDocumentInterface _document;
 
-  /**
-   * Contructs a new PreviewConsoleFrame using a parent model and a MainFrame. The boolean determines whether
-   * the document to be printed is an interactions document.
+  /** Contructs a new PreviewConsoleFrame using a parent model and a MainFrame. The boolean determines whether
+   *  the document to be printed is an interactions document.
    */
   public PreviewConsoleFrame(SingleDisplayModel model, MainFrame mainFrame, boolean interactions)
     throws IllegalStateException {
@@ -58,10 +56,8 @@ public class PreviewConsoleFrame extends PreviewFrame {
   
   
    /** Sets up the document to be displayed and returns the Pageable object that allows display by pages
-   * 
    *  @param model the current display model
    *  @param interactions whether the document is an interactions document
-   *  
    *  @return a Pageable object that allows the document to be displayed by pages
    */
   protected Pageable setUpDocument(SingleDisplayModel model, boolean interactions) {
@@ -71,11 +67,7 @@ public class PreviewConsoleFrame extends PreviewFrame {
   }
 
   protected void _print() {
-    try {
-      _document.print();
-    }
-    catch (PrinterException e) {
-      _showError(e, "Print Error", "An error occured while printing.");
-    }
+    try { _document.print(); }
+    catch (PrinterException e) { _showError(e, "Print Error", "An error occured while printing."); }
   }
 }

@@ -132,13 +132,12 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     buf.append(s);
     */
 
-    // Generate modifiers text on our own, since getKeyStroke can't parse
-    //  locale-specific modifiers.
+    // Generate modifiers text on our own, since getKeyStroke can't parse locale-specific modifiers.
     int modifiers = k.getModifiers();
     boolean isMac = PlatformFactory.ONLY.isMacPlatform();
     StringBuffer buf = new StringBuffer();
     if ((modifiers & Event.META_MASK) > 0) {
-      String meta = (!isMac) ? "meta " : "command ";
+      String meta = (! isMac) ? "meta " : "command ";
       buf.append(meta);
     }
     if ((modifiers & Event.CTRL_MASK) > 0) {

@@ -106,14 +106,10 @@ public final class EventNotifierTest extends DrJavaTestCase {
    */
   public void testPollListeners() {
     TestListener trueListener = new TestListener() {
-      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
-        return true;
-      }
+      public boolean canAbandonFile(OpenDefinitionsDocument doc) { return true; }
     };
     TestListener falseListener = new TestListener() {
-      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
-        return false;
-      }
+      public boolean canAbandonFile(OpenDefinitionsDocument doc) { return false; }
     };
 
     // Make sure trueListener says yes

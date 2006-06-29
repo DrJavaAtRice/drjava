@@ -433,10 +433,8 @@ public class ReducedModelComment extends AbstractReducedModel {
      Once the new value has returned all new calculations will be relative to
      that spot until the walker is reset to the _cursor.  */
 
-  /**
-   * Returns the state at the relLocation, where relLocation is the location
-   * relative to the walker
-   * @param relLocation distance from walker to get state at.
+  /** Returns the state at the relLocation, where relLocation is the location relative to the walker
+   *  @param relLocation distance from walker to get state at.
    */
   protected ReducedModelState moveWalkerGetState(int relLocation) {
     _walker.move(relLocation);

@@ -44,57 +44,50 @@ import java.util.regex.PatternSyntaxException;
  * Model class for predictive string input.
  */
 public class PredictiveInputModel<T extends Comparable<? super T>> {
-  /**
-   * Strategy used for matching and mask extension.
-   */
+  
+  /** Strategy used for matching and mask extension. */
   public static interface MatchingStrategy<X extends Comparable<? super X>> {
-    /**
-     * Returns true if the item is a match.
-     * @param item item to check
-     * @param pim predictive input model
-     * @return true if the item is a match
+    
+    /** Returns true if the item is a match.
+     *  @param item item to check
+     *  @param pim predictive input model
+     *  @return true if the item is a match
      */
     public boolean isMatch(X item, PredictiveInputModel<X> pim);
     
-    /**
-     * Returns true if the two items are equivalent under this matching strategy.
-     * @param item1 first item
-     * @param item2 second item
-     * @param pim predictive input model
-     * @return true if equivalent
+    /** Returns true if the two items are equivalent under this matching strategy.
+     *  @param item1 first item
+     *  @param item2 second item
+     *  @param pim predictive input model
+     *  @return true if equivalent
      */
     public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim);
     
-    /**
-     * Compare the two items and return -1, 0, or 1 if item1 is less than, equal to, or greater than item2.
-     * @param item1 first item
-     * @param item2 second item
-     * @param pim predictive input model
-     * @return -1, 0, or 1
-     */
+    /** Compare the two items and return -1, 0, or 1 if item1 is less than, equal to, or greater than item2.
+      * @param item1 first item
+      * @param item2 second item
+      * @param pim predictive input model
+      * @return -1, 0, or 1
+      */
     public int compare(X item1, X item2, PredictiveInputModel<X> pim);
 
-    /**
-     * Returns the item from the list that is the longest match.
-     * @param item target item
-     * @param items list with items
-     * @param pim predictive input model
-     * @return longest match
-     */
+    /** Returns the item from the list that is the longest match.
+      * @param item target item
+      * @param items list with items
+      * @param pim predictive input model
+      * @return longest match
+      */
     public X getLongestMatch(X item, List<X> items, PredictiveInputModel<X> pim);
     
-    /**
-     * Returns the shared mask extension for the list of items.
-     * @param items items for which the mask extension should be generated
-     * @param pim predictive input model
-     * @return the shared mask extension
-     */
+    /** Returns the shared mask extension for the list of items.
+      * @param items items for which the mask extension should be generated
+      * @param pim predictive input model
+      * @return the shared mask extension
+      */
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim);
   }
   
-  /**
-   * Matching based on string prefix.
-   */
+  /** Matching based on string prefix. */
   public static class PrefixStrategy<X extends Comparable<? super X>> implements MatchingStrategy<X> {
     public String toString() { return "Prefix"; }
     public boolean isMatch(X item, PredictiveInputModel<X> pim) {

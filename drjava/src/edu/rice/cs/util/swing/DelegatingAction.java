@@ -68,14 +68,11 @@ public class DelegatingAction implements Action {
     //MNEMONIC_KEY,
   };
 
-  /**
-   * Can't use a more specific type parameter because of Action interface.
-   */
+  /** Can't use a more specific type parameter because of Action interface. */
   private HashMap<String, Object> _localProperties = new HashMap<String, Object>();
 
-  /**
-   * The action to delegate to. If it's null, this action is
-   * disabled and all method calls will result in IllegalStateExceptions.
+  /** The action to delegate to. If it's null, this action is disabled and all method calls will result in 
+   *  IllegalStateExceptions.
    */
   private Action _delegatee;
   private final LinkedList<PropertyChangeListener> _listenerList =
@@ -98,11 +95,8 @@ public class DelegatingAction implements Action {
 
   private boolean _isDelegatedKey(String key) {
     for (int i = 0; i < KEYS_TO_DELEGATE.length; i++) {
-      if (KEYS_TO_DELEGATE[i].equals(key)) {
-        return true;
-      }
+      if (KEYS_TO_DELEGATE[i].equals(key)) return true;
     }
-
     return false;
   }
 
