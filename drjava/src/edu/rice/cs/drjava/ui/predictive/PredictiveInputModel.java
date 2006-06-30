@@ -40,9 +40,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.regex.PatternSyntaxException;
 
-/**
- * Model class for predictive string input.
- */
+/** Model class for predictive string input. */
 public class PredictiveInputModel<T extends Comparable<? super T>> {
   
   /** Strategy used for matching and mask extension. */
@@ -151,9 +149,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     }
   };
   
-  /**
-   * Matching based on string fragments.
-   */
+  /** Matching based on string fragments. */
   public static class FragmentStrategy<X extends Comparable<? super X>> implements MatchingStrategy<X> {
     public String toString() { return "Fragments"; }
     public boolean isMatch(X item, PredictiveInputModel<X> pim) {
@@ -162,9 +158,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
 
       java.util.StringTokenizer tok = new java.util.StringTokenizer(b);
       while(tok.hasMoreTokens()) {
-        if (a.indexOf(tok.nextToken())<0) {
-          return false;
-        }
+        if (a.indexOf(tok.nextToken()) < 0) return false;
       }
       return true;
     }
@@ -179,21 +173,15 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       return a.compareTo(b);
     }
     public X getLongestMatch(X item, List<X> items, PredictiveInputModel<X> pim) {
-      if (items.size()>0) {
-        return items.get(0);
-      }
-      else {
-        return null;
-      }
+      if (items.size() > 0)  return items.get(0);
+      else return null;
     }
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
       return ""; // can't thing of a good way
     }
   };
   
-  /**
-   * Matching based on string regular expressions.
-   */
+  /** Matching based on string regular expressions. */
   public static class RegExStrategy<X extends Comparable<? super X>> implements MatchingStrategy<X> {
     public String toString() { return "RegEx"; }
     public boolean isMatch(X item, PredictiveInputModel<X> pim) {
@@ -220,64 +208,46 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       return a.compareTo(b);
     }
     public X getLongestMatch(X item, List<X> items, PredictiveInputModel<X> pim) {
-      if (items.size()>0) {
-        return items.get(0); // can't thing of a good way
-      }
-      else {
-        return null;
-      }
+      if (items.size() > 0)  return items.get(0); // can't thing of a good way
+      else return null;
     }
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
       return ""; // can't thing of a good way
     }
   };
   
-  /**
-   * Array of items.
-   */
-  ArrayList<T> _items = new ArrayList<T>();
+  /** Array of items. */
+  private volatile ArrayList<T> _items = new ArrayList<T>();
 
-  /**
-   * Index of currently selected full string.
-   */
-  int _index = 0;
+  /** Index of currently selected full string. */
+  private volatile int _index = 0;
 
-  /**
-   * Array of matching items.
-   */
-  ArrayList<T> _matchingItems = new ArrayList<T>();
+  /** Array of matching items. */
+  private final ArrayList<T> _matchingItems = new ArrayList<T>();
 
-  /**
-   * Currently entered mask.
-   */
-  String _mask = "";
+  /** Currently entered mask. */
+  private volatile String _mask = "";
   
-  /**
-   * True if case should be ignored.
-   */
-  boolean _ignoreCase = false;
+  /** True if case should be ignored. */
+  private volatile boolean _ignoreCase = false;
   
-  /**
-   * Matching strategy.
-   */
-  MatchingStrategy<T> _strategy;
+  /** Matching strategy. */
+  private volatile MatchingStrategy<T> _strategy;
 
-  /**
-   * Create a new predictive input model.
-   * @param ignoreCase true if case should be ignored
-   * @param pim other predictive input model
-   */
+  /** Create a new predictive input model.
+    * @param ignoreCase true if case should be ignored
+    * @param pim other predictive input model
+    */
   public PredictiveInputModel(boolean ignoreCase, PredictiveInputModel<T> pim) {
     this(ignoreCase, pim._strategy, pim._items);
     setMask(pim.getMask());
   }
 
-  /**
-   * Create a new predictive input model.
-   * @param ignoreCase true if case should be ignored
-   * @param strategy matching strategy to use
-   * @param items list of items
-   */
+  /** Create a new predictive input model.
+    * @param ignoreCase true if case should be ignored
+    * @param strategy matching strategy to use
+    * @param items list of items
+    */
   public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, List<T> items) {
     _ignoreCase = ignoreCase;
     _strategy = strategy;
@@ -314,99 +284,73 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     updateMatchingStrings(_items);
   }
 
-  /**
-   * Sets the list
-   * @param items varargs/array of items
-   */
+  /** Sets the list
+    * @param items varargs/array of items
+    */
   public void setList(T... items) {
     _items = new ArrayList<T>(items.length);
-    for(T s: items) {
-      _items.add(s);
-    }
+    for(T s: items) _items.add(s);
     Collections.sort(_items);
     updateMatchingStrings(_items);
   }
 
-  /**
-   * Sets the list.
-   * @param pim other predictive input model
-   */
-  public void setList(PredictiveInputModel<T> pim) {
-    setList(pim._items);
-  }  
+  /** Sets the list.
+    * @param pim other predictive input model
+    */
+  public void setList(PredictiveInputModel<T> pim) { setList(pim._items); }  
 
-  /**
-   * Return the current mask.
-   * @return current mask
-   */
-  public String getMask() {
-    return _mask;
-  }
+  /** Return the current mask.
+    * @return current mask
+    */
+  public String getMask() { return _mask; }
 
-  /**
-   * Set the current mask.
-   * @param mask new mask
-   */
+  /** Set the current mask.
+    * @param mask new mask
+    */
   public void setMask(String mask) {
     _mask = mask;
     updateMatchingStrings(_items);
   }
 
-  /**
-   * Helper function that does indexOf with ignoreCase option.
-   * @param l list
-   * @param item item for which the index should be retrieved
-   * @return index of item in list, or -1 if not found
-   */
+  /** Helper function that does indexOf with ignoreCase option.
+    * @param l list
+    * @param item item for which the index should be retrieved
+    * @return index of item in list, or -1 if not found
+    */
   private int indexOf(ArrayList<T> l, T item) {
     int index = 0;
     for (T i: l) {
-      if (_strategy.equivalent(item, i, this)) {
-        return index;
-      }
+      if (_strategy.equivalent(item, i, this)) return index;
       ++index;
     }
     return -1;
   }
   
-  /**
-   * Update the list of matching strings and current index.
-   * @param items list of items to base the matching on
-   */
+  /** Update the list of matching strings and current index.
+    * @param items list of items to base the matching on
+    */
   private void updateMatchingStrings(ArrayList<T> items) {
     items = new ArrayList<T>(items); // create a new copy, otherwise we might be clearing the list in the next line
     _matchingItems.clear();
     for(T s: items) {
-      if (_strategy.isMatch(s, this)) {
-        _matchingItems.add(s);
-      }
+      if (_strategy.isMatch(s, this)) _matchingItems.add(s);
     }
-    if (_items.size() > 0) {
-      setCurrentItem(_items.get(_index));
-    }
-    else {
-      _index = 0;
-    }
+    if (_items.size() > 0)  setCurrentItem(_items.get(_index));
+    else _index = 0;
   }
 
-  /**
-   * Get currently selected item.
-   * @return currently selected item
-   */
+  /** Get currently selected item.
+    * @return currently selected item
+    */
   public T getCurrentItem() {
-    if (_items.size() > 0) {
-      return _items.get(_index);
-    }
-    else {
-      return null;
-    }
+    if (_items.size() > 0) return _items.get(_index);
+    else return null;
   }
 
-  /**
-   * Set currently selected item.
-   * Will select the item, or if the item does not match the mask, an item as closely preceding as possible.
-   * @param item currently selected item
-   */
+  /** Set currently selected item. Will select the item, or if the item does not match the mask, an item as closely 
+    * preceding as possible.
+    * @param item currently selected item
+    */
   public void setCurrentItem(T item) {
     if (_items.size() == 0) {
       _index = 0;
@@ -432,10 +376,9 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     }
   }
 
-  /**
-   * Select as current item the item in the list of current matches that lexicographically precedes it most closely.
-   * @param item item for witch to find the closest match
-   */
+  /** Select as current item the item in the list of current matches that lexicographically precedes it most closely.
+    * @param item item for witch to find the closest match
+    */
   private void pickClosestMatch(T item) {
     if (_matchingItems.size() > 0) {
       // pick item that lexicographically follows

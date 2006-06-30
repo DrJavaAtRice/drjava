@@ -456,9 +456,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Forwarding method to find the match for the open brace immediately to the right, assuming there 
-   *  is such a brace.
-   * @return the relative distance forwards to the offset after the matching brace.
-   */
+    * is such a brace.
+    * @return the relative distance forwards to the offset after the matching brace.
+    */
   public int balanceForward() {
     acquireReadLock();
     try { synchronized(_reduced) { return _reduced.balanceForward(); } }
@@ -466,8 +466,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** This method is used ONLY for testing.
-   *  @return The reduced model of this document.
-   */
+    * @return The reduced model of this document.
+    */
   public BraceReduction getReduced() { return _reduced; }
   
   /** Returns the indent information for the current location. */
@@ -504,15 +504,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     finally { releaseReadLock(); } 
   }
   
-  /**
-   * Searching backwards, finds the position of the enclosing brace.
-   * NB: ignores comments.
-   * @param pos Position to start from
-   * @param opening opening brace character
-   * @param closing closing brace character
-   * @return position of enclosing squiggly brace, or ERROR_INDEX if beginning
-   * of document is reached.
-   */
+  /** Searching backwards, finds the position of the enclosing brace.  NB: ignores comments.
+    * @param pos Position to start from
+    * @param opening opening brace character
+    * @param closing closing brace character
+    * @return position of enclosing squiggly brace, or ERROR_INDEX if beginning
+    * of document is reached.
+    */
   public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     // Check cache
     StringBuilder keyBuf = new StringBuilder("findPrevEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
@@ -696,10 +694,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
             _reduced.move(i - reducedPos);  // reduced model points to i
             reducedPos = i;                 // reduced model points to reducedPos
             
-            // Check if matching char should be ignored because it is within a comment, 
-            // quotes, or ignored paren phrase
+            // Check if matching char should be ignored because it is within a comment, quotes, or ignored paren phrase
             ReducedModelState state = _reduced.getStateAtCurrent();
-            if (!state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
+            if (! state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
                   || ((i > 0) && _isStartOfComment(text, i - 1)) || (skipParenPhrases && posInParenPhrase()))
               continue;  // ignore matching char 
             else break;  // found valid matching char
@@ -997,7 +994,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public String getIndentOfCurrStmt(int pos) throws BadLocationException {
     char[] delims = {';', '{', '}'};
-    char[] whitespace = {' ', '\t', '\n',','};
+    char[] whitespace = {' ', '\t', '\n', ','};
     return getIndentOfCurrStmt(pos, delims, whitespace);
   }
   

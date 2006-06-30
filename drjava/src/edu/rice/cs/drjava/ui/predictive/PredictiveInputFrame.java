@@ -70,9 +70,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   
   /** Class to save the frame state, i.e. location and dimensions.*/
   public static class FrameState {
-    private Dimension _dim;
-    private Point _loc;
-    private int _currentStrategyIndex;
+    private volatile Dimension _dim;
+    private volatile Point _loc;
+    private volatile int _currentStrategyIndex;
     public FrameState(Dimension d, Point l, int currentStrategyIndex) {
       _dim = d;
       _loc = l;
@@ -281,9 +281,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   }
 
   /** Set the predictive input model.
-   *  @param ignoreCase true if case should be ignored
-   *  @param pim predictive input model
-   */
+    * @param ignoreCase true if case should be ignored
+    * @param pim predictive input model
+    */
   public void setModel(boolean ignoreCase, PredictiveInputModel<T> pim) {
     _pim = new PredictiveInputModel<T>(ignoreCase, pim);
     removeListener();
@@ -294,9 +294,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   }
 
   /** Set the items.
-   *  @param ignoreCase true if case should be ignored
-   *  @param items list of items
-   */
+    * @param ignoreCase true if case should be ignored
+    * @param items list of items
+    */
   public void setItems(boolean ignoreCase, java.util.List<T> items) {
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
     removeListener();
@@ -307,8 +307,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   }
   
   /** Set the currently selected item.
-   *  @param item item to select
-   */
+    * @param item item to select
+    */
   public void setCurrentItem(T item) {
     _pim.setCurrentItem(item);
     removeListener();
@@ -319,9 +319,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   }
 
   /** Set the items.
-   *  @param ignoreCase true if case should be ignored
-   *  @param items varargs/array of items
-   */
+    * @param ignoreCase true if case should be ignored
+    * @param items varargs/array of items
+    */
   public void setItems(boolean ignoreCase, T... items) {
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
     removeListener();
@@ -332,17 +332,17 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   }
 
   /** Return the code for the last button that was pressed. This will be either JOptionPane.OK_OPTION or 
-   *  JOptionPane.CANCEL_OPTION.
-   *  @return button code
-   */
+    * JOptionPane.CANCEL_OPTION.
+    * @return button code
+    */
   public int getButtonPressed() {
     return _buttonPressed;
   }
 
   /** Return the string that was entered in the text field.
-   *  If the user is forced to select an item, then the text of the item will be returned.
-   *  @return text in text field
-   */
+    * If the user is forced to select an item, then the text of the item will be returned.
+    * @return text in text field
+    */
   public String getText() {
     if (_force) {
       Object item = _matchList.getSelectedValue();
@@ -352,8 +352,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   }
 
   /** Return the item that was selected or null the user entered a mask not in the list and force == false.
-   *  @return item that was selected or null
-   */
+    * @return item that was selected or null
+    */
   public T getItem() {
     if (!_force && _pim.getMatchingItems().size() == 0) return null;
     @SuppressWarnings("unchecked") T item = (T)_matchList.getSelectedValue();

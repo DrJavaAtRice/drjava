@@ -1805,8 +1805,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /* Terminates DrJava via System.exit with Runtime.halt as a backup if the former gets hung up. */
   private void shutdown() {
     
-    Utilities.show("Shutting Down!");
-    
+//    Utilities.show("Shutting Down!");
     Thread terminator = new Thread(new Runnable() { 
       public void run() { 
         if (Utilities.TEST_MODE) dispose();  // kills interpreter and cleans up RMI hooks in the slave JVM

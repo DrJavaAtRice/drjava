@@ -108,17 +108,14 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
   }
 
-  /**
-   * Inserts a gap between the characters in a multiple character brace.
-   * However, since ReducedModelBrace doesn't keep track of the comment
-   * braces and escape sequences, we just throw an exception since the
-   * condition in insertGap that spawns this method doesn't arise.
-   */
+  /**Inserts a gap between the characters in a multiple character brace.
+    * However, since ReducedModelBrace doesn't keep track of the comment
+    * braces and escape sequences, we just throw an exception since the
+    * condition in insertGap that spawns this method doesn't arise.
+    */
   protected void insertGapBetweenMultiCharBrace(int length) {
-    throw new RuntimeException("ReducedModelBrace does not keep " +
-                               "track of multi-character braces.");
+    throw new RuntimeException("ReducedModelBrace does not keep track of multi-character braces.");
   }
-
 
   /** Updates ReducedModelBrace to reflect cursor movement.
    *  Negative values move left from the cursor, positive values move
@@ -136,7 +133,6 @@ public class ReducedModelBrace extends AbstractReducedModel {
     _cursor.delete(count);
     return;
   }
-
 
   /** If the current brace is a /, a *, a // or a \n, it's not matchable.
   *  This means it is ignored on balancing and on next/prev brace finding.
@@ -504,17 +500,15 @@ public class ReducedModelBrace extends AbstractReducedModel {
     _parent.resetLocation();
   }
 
-  /*
-   *The braceInfo.distToNewline holds the distance to the previous newline.
-   *To find the enclosing brace one must first move past this newline.
-   *The distance held in this variable is only to the space in front of the
-   *newline hence you must move back that distance + 1.
-   */
+  /** Finds distance to enclosing brace on a preceding line.  The field braceInfo.distToNewline holds the distance to 
+    * the previous newline.  To find the enclosing brace one must first move past this newline. The distance held in 
+    * this variable is only to the space in front of the newline hence you must move back that distance + 1.
+    */
   protected void getDistToEnclosingBrace(IndentInfo braceInfo) {
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
-    //this is the distance to in front of the previous newline.
+    // this is the distance to in front of the previous newline.
     int relDistance = braceInfo.distToNewline + 1;
     int distance = relDistance;
 
@@ -522,8 +516,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
       iter.dispose();
       return;
     }
-    //move to the proper location, then add the rest of the block
-    // and go to the previous.
+    // move to the proper location, then add the rest of the block and go to the previous.
     iter.move(-braceInfo.distToNewline - 1);
     relDistance += iter.getBlockOffset();
     distance += iter.getBlockOffset();

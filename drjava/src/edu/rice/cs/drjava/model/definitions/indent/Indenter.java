@@ -65,10 +65,9 @@ public class Indenter {
   public void buildTree(int indentLevel) {
     char[] indent = new char[indentLevel];
     java.util.Arrays.fill(indent,' ');
-    String oneLevel = new String(indent);
+    final String oneLevel = new String(indent);
 
-    boolean autoCloseComments = DrJava.getConfig().
-      getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue();
+    boolean autoCloseComments = DrJava.getConfig().getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue();
     
     IndentRule
       // Main tree
@@ -86,20 +85,20 @@ public class Indenter {
       rule30 = new QuestionExistsCharInPrevStmt('?', rule40, rule39),
       rule27 = new QuestionExistsCharInStmt('?', ':', rule28, rule29),
       rule26 = new QuestionLineContains(':', rule27, rule30),
-      rule25 = new QuestionStartingNewStmt(rule26, rule31),
+      rule25 = new QuestionStartingNewStmt(rule26, rule31),  // no preceding open brace
       rule24 = rule25,
       rule23 = rule36,
       rule22 = new QuestionHasCharPrecedingOpenBrace(new char[] {'=',',','{'},rule23,rule24),
       rule21 = rule36,
       rule20 = new QuestionStartAfterOpenBrace(rule21, rule22),
       rule19 = new ActionStartStmtOfBracePlus(""),
-      rule18 = new QuestionCurrLineStartsWithSkipComments("}", rule19, rule20),
-      rule17 = new QuestionBraceIsCurly(rule18, rule25),
+      rule18 = new QuestionCurrLineStartsWithSkipComments("}", rule19, rule20),  // ANONYMOUS inner class formatting breaks here
+      rule17 = new QuestionBraceIsCurly(rule18, rule25),  // enclosing block/expr-list opens with '{'?
       rule16 = new ActionBracePlus(" " + oneLevel),
       rule15 = new ActionBracePlus(" "),
-      rule38 = new QuestionCurrLineStartsWith(")", rule30, rule15),  //BROKEN
-      rule14 = new QuestionNewParenPhrase(rule38, rule16), //rule15->rule38
-      rule13 = new QuestionBraceIsParenOrBracket(rule14, rule17),  // last block/expression list opens with "(" or "["?
+      rule38 = new QuestionCurrLineStartsWith(")", rule30, rule15), // does current line start with ')'?
+      rule14 = new QuestionNewParenPhrase(rule38, rule16),         // is current line new phrase after open paren?
+      rule13 = new QuestionBraceIsParenOrBracket(rule14, rule17),  // enclosing block/expr-list opens with "(" or "["?
 
       // Comment tree
       rule12 = new ActionStartPrevLinePlus(""),
