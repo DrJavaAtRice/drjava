@@ -88,7 +88,7 @@ public class ClipboardHistoryFrame extends JFrame {
       _loc = comp.getLocation();
     }
     public String toString() {
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
       sb.append((int)_dim.getWidth());
       sb.append(' ');
       sb.append((int)_dim.getHeight());

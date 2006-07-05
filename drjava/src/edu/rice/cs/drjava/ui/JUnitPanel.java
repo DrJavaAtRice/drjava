@@ -321,19 +321,19 @@ public class JUnitPanel extends ErrorPanel {
     
     /** Gets the message indicating the number of errors and warnings.*/
     protected String _getNumErrorsMessage(String failureName, String failureMeaning) {
-      StringBuffer numErrMsg;
+      StringBuilder numErrMsg;
       
       /** Used for display purposes only */
       int numCompErrs = getErrorModel().getNumCompErrors();
       int numWarnings = getErrorModel().getNumWarnings();     
       
       if (!getErrorModel().hasOnlyWarnings()) {
-        numErrMsg = new StringBuffer(numCompErrs + " " + failureName);   //failureName = error or test (for compilation and JUnit testing respectively)
+        numErrMsg = new StringBuilder(numCompErrs + " " + failureName);   //failureName = error or test (for compilation and JUnit testing respectively)
         if (numCompErrs > 1) numErrMsg.append("s");
         numErrMsg.append(" " + failureMeaning);
         if (numWarnings > 0) numErrMsg.append(" and " + numWarnings + " warning");        
       }
-      else  numErrMsg = new StringBuffer(numWarnings + " warning");       
+      else  numErrMsg = new StringBuilder(numWarnings + " warning");       
       
       if (numWarnings > 1) numErrMsg.append("s");
       if (numWarnings > 0) numErrMsg.append(" found");

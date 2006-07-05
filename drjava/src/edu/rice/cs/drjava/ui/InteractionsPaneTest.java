@@ -293,7 +293,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   
   public void testSystemIn() {
     final Object bufLock = new Object();
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     
     final CompletionMonitor completionMonitor = new CompletionMonitor();
     

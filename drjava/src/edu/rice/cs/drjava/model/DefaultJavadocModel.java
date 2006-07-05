@@ -292,10 +292,10 @@ public class DefaultJavadocModel implements JavadocModel {
     if (docUnits.size() == 0) return;
 
     // Build the source path.
-    StringBuffer sourcePath = new StringBuffer();
-    String separator = System.getProperty("path.separator");
+    final StringBuilder sourcePath = new StringBuilder();
+    final String separator = System.getProperty("path.separator");
     sourceRootSet.addAll(defaultRoots);
-    File[] sourceRoots = sourceRootSet.toArray(new File[sourceRootSet.size()]);
+    final File[] sourceRoots = sourceRootSet.toArray(new File[sourceRootSet.size()]);
     for (int a = 0 ; a  < sourceRoots.length; a++) {
       if (a != 0)  sourcePath.append(separator);
       sourcePath.append(sourceRoots[a].getAbsolutePath());
@@ -580,7 +580,7 @@ public class DefaultJavadocModel implements JavadocModel {
 
       if (errStart != -1) {
         // If we found one, put the entirety of stderr in one CompilerError.
-        StringBuffer buf = new StringBuffer(60 * lines.size());
+        final StringBuilder buf = new StringBuilder(60 * lines.size());
         buf.append(output);
         while (lines.size() > 0) {
           output = (String) lines.removeFirst();
@@ -638,9 +638,9 @@ public class DefaultJavadocModel implements JavadocModel {
 
       // line number is all contiguous number characters after the colon
       int lineno = -1;
-      StringBuffer linenoString = new StringBuffer();
+      final StringBuilder linenoString = new StringBuilder();
       int pos = errStart+6;
-      while ((line.charAt(pos)>='0') && (line.charAt(pos)<='9')) {
+      while ((line.charAt(pos) >= '0') && (line.charAt(pos) <= '9')) {
         linenoString.append(line.charAt(pos));
         pos++;
       }
@@ -776,8 +776,8 @@ public class DefaultJavadocModel implements JavadocModel {
   {
     // Determine the access level
     Configuration config = DrJava.getConfig();
-    String accLevel = config.getSetting(OptionConstants.JAVADOC_ACCESS_LEVEL);
-    StringBuffer accArg = new StringBuffer(10);
+    final String accLevel = config.getSetting(OptionConstants.JAVADOC_ACCESS_LEVEL);
+    final StringBuilder accArg = new StringBuilder(10);
     accArg.append('-');
     accArg.append(accLevel);
 

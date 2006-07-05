@@ -249,7 +249,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   /** Returns a string with all compiler errors. */
   protected String getCompilerErrorString() {
-    StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     buf.append(" compiler error(s):\n");
     buf.append(_model.getCompilerModel().getCompilerErrorModel().toString());
     return buf.toString();

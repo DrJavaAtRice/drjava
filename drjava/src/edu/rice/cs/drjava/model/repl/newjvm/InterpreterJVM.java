@@ -510,9 +510,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     if (traceItems.isEmpty()) traceItems.add(EMPTY_TRACE_TEXT);
     
     // OK, now rebuild string
-    StringBuffer buf = new StringBuffer();
-    ListIterator itor = traceItems.listIterator();
-    String newLine = System.getProperty("line.separator");
+    final StringBuilder buf = new StringBuilder();
+    final ListIterator itor = traceItems.listIterator();
+    final String newLine = System.getProperty("line.separator");
     boolean first = true;
     while (itor.hasNext()) {
       if (first) first = false; else buf.append(newLine);

@@ -184,7 +184,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         charBeforeIndex--;
       }
       
-      StringBuffer returnText = new StringBuffer(docText.substring(0, charBeforeIndex+2));          
+      final StringBuilder returnText = new StringBuilder(docText.substring(0, charBeforeIndex+2));          
       if (previousLine) returnText.append("...");
       returnText.append("{");
       

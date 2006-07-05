@@ -48,7 +48,7 @@ public class ClassPathVector extends Vector<URL> {
   public ClassPathVector(int capacity) { super(capacity); }
   
   public String toString() {
-    StringBuffer cp = new StringBuffer();
+    final StringBuilder cp = new StringBuilder();
     for(URL u : this) {
       cp.append(formatURL(u));
       cp.append(File.pathSeparator);

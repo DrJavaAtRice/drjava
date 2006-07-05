@@ -102,7 +102,7 @@ public class SavableConfiguration extends Configuration {
         int pos;
         while (index < tmpString.length() &&
                ((pos = tmpString.indexOf('\\', index)) >= 0)) {
-          StringBuffer buff = new StringBuffer(tmpString);  // should use StringBuilder, but not 1.4 compatible
+          final StringBuilder buff = new StringBuilder(tmpString);  // should use StringBuilder, but not 1.4 compatible
           buff.insert(pos, '\\');
           index = pos + 2;
           tmpString = buff.toString();

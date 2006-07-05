@@ -116,7 +116,7 @@ public class Log {
    */
   public synchronized void log(String s, StackTraceElement[] trace) {
     if (isEnabled()) {
-      StringBuilder traceImage = new StringBuilder();
+      final StringBuilder traceImage = new StringBuilder();
       for (StackTraceElement e: trace) traceImage.append("\n" + e.toString()); 
       log(s + traceImage.toString());
     }

@@ -59,7 +59,7 @@ public class FontOption extends Option<Font> {
 
   /** Create a String representation of the Font object, in the format: fontname-fontstyle-fontsize. */
   public String format(Font f) {
-    StringBuffer str = new StringBuffer(f.getName());
+    final StringBuilder str = new StringBuilder(f.getName());
     str.append("-");
     if (f.isBold()) {
       str.append("BOLD");

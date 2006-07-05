@@ -254,7 +254,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       catch (IOException ioe) { throw new IOException("File name returned from FileSelector is null"); }
     
       // Create a single string with all formatted lines from this history
-      StringBuffer text = new StringBuffer();
+      final StringBuilder text = new StringBuilder();
       boolean firstLine = true;
       int formatVersion = 1;
       for (String s: strings) {
@@ -324,7 +324,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _document.clearCurrentInteraction();
 
     // Insert into the document and interpret
-    StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     for (String hist: histories) {
       ArrayList<String> interactions = _removeSeparators(hist);
       for (String curr: interactions) {
@@ -614,8 +614,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> args = ArgumentTokenizer.tokenize(s, true);
     boolean seenArg = false;
-    String className = args.get(1);
-    StringBuffer mainCall = new StringBuffer();
+    final String className = args.get(1);
+    final StringBuilder mainCall = new StringBuilder();
     mainCall.append(className.substring(1, className.length() - 1));
     mainCall.append(".main(new String[]{");
     for (int i = 2; i < args.size(); i++) {

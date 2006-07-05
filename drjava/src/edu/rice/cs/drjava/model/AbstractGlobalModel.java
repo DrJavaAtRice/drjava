@@ -1033,7 +1033,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public OpenDefinitionsDocument newTestCase(String name, boolean makeSetUp, boolean makeTearDown) {
     boolean elementary = (DrJava.getConfig().getSetting(LANGUAGE_LEVEL) == 1);
     
-    StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     if (! elementary) buf.append("import junit.framework.TestCase;\n\n");
     buf.append("/**\n");
     buf.append("* A JUnit test case class.\n");

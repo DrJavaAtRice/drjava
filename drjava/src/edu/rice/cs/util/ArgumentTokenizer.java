@@ -67,7 +67,7 @@ public abstract class ArgumentTokenizer {
   public static List<String> tokenize(String arguments, boolean stringify) {
 
     LinkedList<String> argList = new LinkedList<String>();
-    StringBuffer currArg = new StringBuffer();
+    StringBuilder currArg = new StringBuilder();
     boolean escaped = false;
     int state = NO_TOKEN_STATE;  // start in the NO_TOKEN_STATE
     int len = arguments.length();
@@ -154,7 +154,7 @@ public abstract class ArgumentTokenizer {
                 else if (state == NORMAL_TOKEN_STATE) {
                   // Whitespace ends the token; start a new one
                   argList.add(currArg.toString());
-                  currArg = new StringBuffer();
+                  currArg = new StringBuilder();
                   state = NO_TOKEN_STATE;
                 }
               }
@@ -189,7 +189,7 @@ public abstract class ArgumentTokenizer {
    * appropriately.
    */
   protected static String _escapeQuotesAndBackslashes(String s) {
-    StringBuffer buf = new StringBuffer(s);
+    final StringBuilder buf = new StringBuilder(s);
 
     // Walk backwards, looking for quotes or backslashes.
     //  If we see any, insert an extra backslash into the buffer at

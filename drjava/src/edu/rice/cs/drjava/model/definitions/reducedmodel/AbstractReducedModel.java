@@ -90,7 +90,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   
   /** A toString() replacement for testing - easier to read. */
   public String simpleString() {
-    StringBuffer val = new StringBuffer();
+    final StringBuilder val = new StringBuilder();
     ReducedToken tmp;
     
     TokenList.Iterator it = _tokens._getIterator();

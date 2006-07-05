@@ -609,9 +609,9 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
         catch(ExecutionError e) {
           // This error is thrown only if this QualifiedName is not
           // a local variable or a class
-          List<IdentifierToken> ids = node.getIdentifiers();
-          Iterator<IdentifierToken> iter = ids.iterator();
-          StringBuffer fieldBuf = new StringBuffer(iter.next().image());
+          final List<IdentifierToken> ids = node.getIdentifiers();
+          final Iterator<IdentifierToken> iter = ids.iterator();
+          final StringBuilder fieldBuf = new StringBuilder(iter.next().image());
           while (iter.hasNext()) {
             IdentifierToken t = iter.next();
             fieldBuf.append('$').append(t.image());

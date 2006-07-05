@@ -76,7 +76,7 @@ public class ActionBracePlus extends IndentRuleAction {
     int braceLen = bracePos - braceNewLine;
 
     // Create tab string
-    StringBuffer tab = new StringBuffer(_suffix.length() + braceLen);
+    final StringBuilder tab = new StringBuilder(_suffix.length() + braceLen);
     for (int i=0; i < braceLen; i++) {
       tab.append(" ");
     }

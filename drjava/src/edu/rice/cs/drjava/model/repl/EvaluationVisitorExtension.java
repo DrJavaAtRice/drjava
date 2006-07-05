@@ -231,7 +231,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
 
     // DynamicJava doesn't check that the method is really static!
     if (! Modifier.isStatic(m.getModifiers())) {
-      StringBuffer buf = new StringBuffer();
+      final StringBuilder buf = new StringBuilder();
       buf.append(m.getDeclaringClass());
       buf.append(".");
       buf.append(m.getName());

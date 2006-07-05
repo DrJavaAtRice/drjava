@@ -374,7 +374,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
     public R region() { return _region; }
     public RegionListUserObj(R r) { _region = r; }
     public String toString() {
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
       _region.getDocument().acquireReadLock();
       try {
         sb.append(_region.getDocument().toString());

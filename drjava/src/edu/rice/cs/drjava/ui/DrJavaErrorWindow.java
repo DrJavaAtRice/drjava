@@ -143,7 +143,7 @@ public class DrJavaErrorWindow extends JDialog {
     _errorInfo = _errorInfo = new JEditorPane("text/html", HEADER_HTML+NO_ERRORS_HTML);
     _errorInfo.setEditable(false);
     _errorInfo.setBackground(getContentPane().getBackground());    
-    JPanel cp = new JPanel(new BorderLayout(5,5));
+    final JPanel cp = new JPanel(new BorderLayout(5,5));
     cp.setBorder(new EmptyBorder(5,5,5,5));
     setContentPane(cp);
     cp.add(_errorInfo, BorderLayout.NORTH);
@@ -183,13 +183,13 @@ public class DrJavaErrorWindow extends JDialog {
   private void updateErrorInfo() {
     getContentPane().remove(_errorInfo);
     if (_error!=null) {
-      StringBuilder b = new StringBuilder();
+      final StringBuilder b = new StringBuilder();
       if (_error instanceof DrJavaErrorHandler.LoggedCondition) {
         b.append("Logged condition: ");
         b.append(_error.getMessage());
         b.append('\n');
         boolean first = true;
-        for(StackTraceElement ste: _error.getStackTrace()) {
+        for (StackTraceElement ste: _error.getStackTrace()) {
           if (first) { first = false; continue; /* skip first frame, that's the log method itself */ }
           b.append("\tat ");
           b.append(ste);
@@ -236,14 +236,14 @@ public class DrJavaErrorWindow extends JDialog {
       _stackTrace.setText(b.toString());
       _stackTrace.setCaretPosition(0);
       
-      b = new StringBuilder();
-      b.append(HEADER_HTML);
-      b.append(_errorCount);
-      b.append(" error");
-      b.append(((_errorCount>1)?"s":""));
-      b.append(" occured!<br>");
-      b.append(ERRORS_FOOTER_HTML);
-      _errorInfo = new JEditorPane("text/html", b.toString());
+      final StringBuilder b2 = new StringBuilder();
+      b2.append(HEADER_HTML);
+      b2.append(_errorCount);
+      b2.append(" error");
+      b2.append(((_errorCount>1)?"s":""));
+      b2.append(" occured!<br>");
+      b2.append(ERRORS_FOOTER_HTML);
+      _errorInfo = new JEditorPane("text/html", b2.toString());
       _errorInfo.addHyperlinkListener(new HyperlinkListener() {
         public void hyperlinkUpdate(HyperlinkEvent e) {
           if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {

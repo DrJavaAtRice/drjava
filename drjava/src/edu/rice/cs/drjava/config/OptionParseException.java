@@ -55,7 +55,7 @@ public class OptionParseException extends IllegalArgumentException {
   
   /** Format a nice message for the user. */
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    final StringBuilder sb = new StringBuilder();
     sb.append("Could not parse configuration option.\nOption: ");
     sb.append(key);
     sb.append("\nGiven value: \"");

@@ -737,7 +737,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       // was found. display at most 50 characters of the non-found string
       else {
         Toolkit.getDefaultToolkit().beep();
-        StringBuffer statusMessage = new StringBuffer("Search text \"");
+        final StringBuilder statusMessage = new StringBuilder("Search text \"");
         if (_machine.getFindWord().length() <= 50) statusMessage.append(_machine.getFindWord());
         else statusMessage.append(_machine.getFindWord().substring(0, 49) + "...");
         statusMessage.append("\" not found.");

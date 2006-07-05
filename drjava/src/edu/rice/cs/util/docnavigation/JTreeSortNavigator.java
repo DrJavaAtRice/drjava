@@ -201,7 +201,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       /* Embed path in matching root, creating folder nodes if necessary */
       StringTokenizer tok = new StringTokenizer(path, File.separator);
       //ArrayList<String> elements = new ArrayList<String>();
-      StringBuffer pathSoFarBuf = new StringBuffer();
+      final StringBuilder pathSoFarBuf = new StringBuilder();
       InnerNode<?, ItemT> lastNode = root;
       while (tok.hasMoreTokens()) {
         String element = tok.nextToken();

@@ -306,7 +306,7 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
   protected static class FindResultsRegionTreeUserObj extends RegionTreeUserObj<DocumentRegion> {
     public FindResultsRegionTreeUserObj(DocumentRegion r) { super(r); }
     public String toString() {
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
       _region.getDocument().acquireReadLock();
       try {
         sb.append("<html>");

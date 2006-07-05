@@ -238,7 +238,7 @@ public class DrJava {
 
   /** Displays a usage message about the available options. */
   static void displayUsage() {
-    StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     buf.append("Usage: java -jar drjava.jar [OPTIONS] [FILES]\n\n");
     buf.append("where options include:\n");
     buf.append("  -config [FILE]        use a custom config file\n");

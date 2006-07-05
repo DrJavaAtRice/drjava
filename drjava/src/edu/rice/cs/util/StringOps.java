@@ -55,10 +55,10 @@ public abstract class StringOps {
     int toReplaceLength = toReplace.length();
     if (toReplaceLength > 0) {
       int replacementLength = replacement.length();
-      StringBuffer buff;
+      StringBuilder buff;
       while (index < fullStringLength && 
              ((pos = fullString.indexOf(toReplace, index)) >= 0)) {      
-        buff = new StringBuffer(fullString.substring(0, pos));
+        buff = new StringBuilder(fullString.substring(0, pos));
         buff.append(replacement);
         buff.append(fullString.substring(pos + toReplaceLength, fullStringLength));
         index = pos + replacementLength;
@@ -274,7 +274,7 @@ public abstract class StringOps {
     if (a.length == 0)
       return "[]";
     
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append('[');
     buf.append(a[0]);
     
@@ -296,7 +296,7 @@ public abstract class StringOps {
     if (a.length == 0)
       return "[]";
     
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append('[');
     buf.append(a[0]);
     
@@ -318,7 +318,7 @@ public abstract class StringOps {
     if (a.length == 0)
       return "[]";
     
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append('[');
     buf.append(a[0]);
     
@@ -340,7 +340,7 @@ public abstract class StringOps {
     if (a.length == 0)
       return "[]";
     
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append('[');
     buf.append(a[0]);
     
@@ -362,7 +362,7 @@ public abstract class StringOps {
     if (a.length == 0)
       return "[]";
     
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append('[');
     buf.append(a[0]);
     
@@ -384,7 +384,7 @@ public abstract class StringOps {
     if (a.length == 0)
       return "[]";
     
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append('[');
     buf.append(a[0]);
     
@@ -406,7 +406,7 @@ public abstract class StringOps {
     if (a.length == 0)
       return "[]";
     
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append('[');
     buf.append(a[0]);
     
@@ -428,7 +428,7 @@ public abstract class StringOps {
     if (a.length == 0)
       return "[]";
     
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     buf.append('[');
     buf.append(a[0]);
     
@@ -450,7 +450,7 @@ public abstract class StringOps {
     if (a.length == 0)
       return "[]";
     
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
     
     for (int i = 0; i < a.length; i++) {
       if (i == 0)

@@ -63,7 +63,7 @@ public class DefaultOptionMap implements OptionMap {
   public Iterator<OptionParser<?>> keys() { return keys.iterator(); }
   
   public String toString() {
-    StringBuffer result = new StringBuffer("\n{ ");
+    final StringBuilder result = new StringBuilder("\n{ ");
     
     for (OptionParser<?> key: keys) {
       result.append(key.name).append(" = ").append(getString(key)).append('\n');

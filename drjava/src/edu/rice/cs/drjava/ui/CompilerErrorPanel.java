@@ -173,8 +173,8 @@ public class CompilerErrorPanel extends ErrorPanel {
     protected void _updateWithErrors() throws BadLocationException {
       SwingDocument doc = new SwingDocument();
       if (_excludedFiles.length != 0) {
-        StringBuffer msgBuffer = 
-          new StringBuffer("Compilation completed.  The following files were not compiled:\n");
+        final StringBuilder msgBuffer = 
+          new StringBuilder("Compilation completed.  The following files were not compiled:\n");
         for (File f: _excludedFiles) {
           if (f != null) { msgBuffer.append("  ").append(f).append('\n'); } // do not print files from untitled docs
         }
@@ -210,8 +210,8 @@ public class CompilerErrorPanel extends ErrorPanel {
       if (_compileHasOccurred) {
         if (_excludedFiles.length == 0) message = "Compilation completed.";
         else {
-          StringBuffer msgBuffer = 
-            new StringBuffer("Compilation completed.  The following files were not compiled:\n");
+          final StringBuilder msgBuffer = 
+            new StringBuilder("Compilation completed.  The following files were not compiled:\n");
           for (File f: _excludedFiles) {
             if (f!=null) { msgBuffer.append("  ").append(f).append('\n'); } // do not print files from untitled docs
           }

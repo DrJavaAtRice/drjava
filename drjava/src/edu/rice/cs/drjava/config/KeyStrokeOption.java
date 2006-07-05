@@ -89,7 +89,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     // Replace "command" with "meta" (OS X)
     int cIndex = s.indexOf("command");
     if (cIndex > -1) {
-      StringBuffer sb = new StringBuffer(s.substring(0, cIndex));
+      final StringBuilder sb = new StringBuilder(s.substring(0, cIndex));
       sb.append("meta");
       sb.append(s.substring(cIndex + "command".length(), s.length()));
       s = sb.toString();
@@ -98,7 +98,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     // Replace "option" with "alt" (OS X)
     int oIndex = s.indexOf("option");
     if (oIndex > -1) {
-      StringBuffer sb = new StringBuffer(s.substring(0, oIndex));
+      final StringBuilder sb = new StringBuilder(s.substring(0, oIndex));
       sb.append("alt");
       sb.append(s.substring(oIndex + "option".length(), s.length()));
       s = sb.toString();
@@ -135,7 +135,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     // Generate modifiers text on our own, since getKeyStroke can't parse locale-specific modifiers.
     int modifiers = k.getModifiers();
     boolean isMac = PlatformFactory.ONLY.isMacPlatform();
-    StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     if ((modifiers & Event.META_MASK) > 0) {
       String meta = (! isMac) ? "meta " : "command ";
       buf.append(meta);

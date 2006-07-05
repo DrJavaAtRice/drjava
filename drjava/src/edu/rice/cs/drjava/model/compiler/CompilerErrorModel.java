@@ -173,7 +173,7 @@ public class CompilerErrorModel {
 
   /** Prints out this model's errors. */
   public String toString() {
-    StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     buf.append(this.getClass().toString() + ":\n  ");
     for (int i=0; i < _numErrors; i++) {
       buf.append(_errors[i].toString());

@@ -159,8 +159,8 @@ public class History implements OptionConstants, Serializable {
    *  character. A semicolon is added to the end of every statement that didn't already end with one.
    */
   public String getHistoryAsStringWithSemicolons() {
-    StringBuffer s = new StringBuffer();
-    String delimiter = INTERACTION_SEPARATOR + System.getProperty("line.separator");
+    final StringBuilder s = new StringBuilder();
+    final String delimiter = INTERACTION_SEPARATOR + System.getProperty("line.separator");
     for (int i = 0; i < _vector.size(); i++) {
       String nextLine = _vector.get(i);
 //      int nextLength = nextLine.length();
@@ -178,8 +178,8 @@ public class History implements OptionConstants, Serializable {
    *  character.
    */
   public String getHistoryAsString() {
-    StringBuffer sb = new StringBuffer();
-    String delimiter = System.getProperty("line.separator");
+    final StringBuilder sb = new StringBuilder();
+    final String delimiter = System.getProperty("line.separator");
     for (String s: _vector) sb.append(s).append(delimiter);
     return sb.toString();
   }

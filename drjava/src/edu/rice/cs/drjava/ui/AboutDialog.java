@@ -47,11 +47,9 @@ import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.util.Map;
-/**
- * About dialog.
- *
- * @version $Id$
- */
+/** About dialog.
+  * @version $Id$
+  */
 public class AboutDialog extends JDialog implements ActionListener {
 
   private static ImageInfo CSLOGO = new ImageInfo("RiceCS.gif",new Color(0x423585)),
@@ -86,20 +84,15 @@ public class AboutDialog extends JDialog implements ActionListener {
     cp.setLayout(new BorderLayout());
     JLabel drjava = createImageLabel(DRJAVA,JLabel.LEFT);
     if (drjava != null) {
-      drjava.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5),
-                                          drjava.getBorder()));
+      drjava.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5), drjava.getBorder()));
       drjava.setCursor(new Cursor(Cursor.HAND_CURSOR));
       final String url = "http://drjava.org/";
       drjava.setToolTipText(url);
       drjava.addMouseListener(new MouseListener() {
-        public void mousePressed(MouseEvent e) {
-        }        
-        public void mouseReleased(MouseEvent e) {
-        }        
-        public void mouseEntered(MouseEvent e) {
-        }        
-        public void mouseExited(MouseEvent e) {
-        }        
+        public void mousePressed(MouseEvent e) { }        
+        public void mouseReleased(MouseEvent e) { }        
+        public void mouseEntered(MouseEvent e) { }        
+        public void mouseExited(MouseEvent e) { }        
         public void mouseClicked(MouseEvent e) {
           try {
             PlatformFactory.ONLY.openURL(new URL(url));
@@ -109,16 +102,14 @@ public class AboutDialog extends JDialog implements ActionListener {
       
       JPanel djPanel = new JPanel(new GridLayout(1,1));
       djPanel.add(drjava);
-      djPanel.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5),
-                                           new EtchedBorder()));
+      djPanel.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5), new EtchedBorder()));
       cp.add(djPanel,BorderLayout.NORTH);
     }
     JTabbedPane tabs = new JTabbedPane();
     addTab(tabs,"About",createCopyrightTab());
     LICENSE = getLicense();
-    if (LICENSE != null) {
-      addTab(tabs,"DrJava License",createTextScroller(LICENSE));
-    }
+    if (LICENSE != null) addTab(tabs,"DrJava License",createTextScroller(LICENSE));
+    
     addTab(tabs,"DynamicJava License",createTextScroller(DYADE_LICENSE));
     addTab(tabs,"System Properties",createSysPropTab());
     cp.add(createBottomBar(),BorderLayout.SOUTH);
@@ -131,7 +122,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     String[][] rowData = new String[size][2];
     java.util.Iterator entries = props.entrySet().iterator();
     int rowNum = 0;
-    while(entries.hasNext()) {
+    while (entries.hasNext()) {
       Map.Entry entry = (Map.Entry) entries.next();
       rowData[rowNum][0] = (String) entry.getKey();
       rowData[rowNum][1] = (String) entry.getValue();
@@ -153,55 +144,49 @@ public class AboutDialog extends JDialog implements ActionListener {
     return propTab;
   }
 
-  private static void addTab(JTabbedPane tabs, String title,
-                             JComponent tab) {
+  private static void addTab(JTabbedPane tabs, String title, JComponent tab) {
     wrapBorder(tab,new EmptyBorder(5,6,6,5));
     tabs.addTab(title,tab);
   }
 
   public static JComponent createCopyrightTab() {
-    JPanel panel = new JPanel(new BorderLayout());
+    final JPanel panel = new JPanel(new BorderLayout());
 
-    StringBuffer sb = new StringBuffer("DrJava Version : ");
+    final StringBuilder sb = new StringBuilder("DrJava Version : ");
     sb.append(Version.getBuildTimeString());
     sb.append("\n\nDrJava Configuration file: ");
     sb.append(DrJava.getPropertiesFile().getAbsolutePath());
     sb.append("\n\n");
     sb.append(COPYRIGHT);
-    JComponent copy = createTextScroller(sb.toString());
+    final JComponent copy = createTextScroller(sb.toString());
     wrapBorder(copy,new EmptyBorder(0,0,5,0));
 
     // deal with logos now (calibrate size)
-    LogoList logos = new LogoList();
+    final LogoList logos = new LogoList();
     logos.addLogo(createBorderedLabel(CSLOGO,new EmptyBorder(5,5,5,5)), "http://compsci.rice.edu/");
     logos.addLogo(createBorderedLabel(SF,null), "http://sourceforge.net/projects/drjava/");
     logos.resizeLogos();
 
     // add to panel
-    JPanel logoPanel = new JPanel();
+    final JPanel logoPanel = new JPanel();
     logoPanel.setLayout(new BoxLayout(logoPanel,BoxLayout.X_AXIS));
     logoPanel.add(Box.createHorizontalGlue());
     java.util.Iterator it = logos.iterator();
     while(it.hasNext()) {
-      JComponent l = (JComponent) it.next();
+      final JComponent l = (JComponent) it.next();
       logoPanel.add(l);
       l.setCursor(new Cursor(Cursor.HAND_CURSOR));
       final String url = (String)l.getClientProperty("url");
       if (url != null) {
         l.setToolTipText(url);
         l.addMouseListener(new MouseListener() {
-          public void mousePressed(MouseEvent e) {
-          }        
-          public void mouseReleased(MouseEvent e) {
-          }        
-          public void mouseEntered(MouseEvent e) {
-          }        
-          public void mouseExited(MouseEvent e) {
-          }        
+          public void mousePressed(MouseEvent e) { }        
+          public void mouseReleased(MouseEvent e) { }        
+          public void mouseEntered(MouseEvent e) { }        
+          public void mouseExited(MouseEvent e) { }        
           public void mouseClicked(MouseEvent e) {
-            try {            
-              PlatformFactory.ONLY.openURL(new URL(url));
-            } catch(Exception ex) { /* ignore, just not open web page */ }          
+            try { PlatformFactory.ONLY.openURL(new URL(url)); } 
+            catch(Exception ex) { /* ignore, just not open web page */ }          
           }
         });
       }
@@ -221,9 +206,7 @@ public class AboutDialog extends JDialog implements ActionListener {
         width = Math.max(width,d.width);
         height = Math.max(height,d.height);
         add(logo);
-        if (url != null) {
-          logo.putClientProperty("url", url);
-        }
+        if (url != null) logo.putClientProperty("url", url);
       }
     }
 
@@ -239,8 +222,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     }
   }
 
-  public static JPanel createBorderedLabel(ImageInfo info,
-                                           EmptyBorder pad) {
+  public static JPanel createBorderedLabel(ImageInfo info, EmptyBorder pad) {
     JLabel label = createImageLabel(info,JLabel.CENTER);
     if (label == null) return null;
     JPanel panel = new JPanel(new GridLayout(1,1));
@@ -337,11 +319,11 @@ public class AboutDialog extends JDialog implements ActionListener {
         BufferedReader r = new BufferedReader(new InputStreamReader(is));
         try {
           
-          StringBuffer sb = new StringBuffer();
-          for(String s = r.readLine(); s != null; s = r.readLine()) {
+          final StringBuilder sb = new StringBuilder();
+          for (String s = r.readLine(); s != null; s = r.readLine()) {
             int lastSig = s.length()-1; // the last char index
             
-            while(lastSig >= 0 && Character.isWhitespace(s.charAt(lastSig))) lastSig--;
+            while (lastSig >= 0 && Character.isWhitespace(s.charAt(lastSig))) lastSig--;
             if (lastSig < 0) sb.append("\n"); // empty line, so insert two newlines.
             else {
               sb.append(s.substring(0,lastSig+1));

@@ -132,7 +132,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
    * formatElement().
    */
   public String format(Vector<T> v) {
-    StringBuffer res = new StringBuffer(header);
+    final StringBuilder res = new StringBuilder(header);
 
     int size = v.size();
     int i = 0;

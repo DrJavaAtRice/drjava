@@ -1001,7 +1001,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
         public String apply(GoToFileListEntry entry) {
-          StringBuilder sb = new StringBuilder();
+          final StringBuilder sb = new StringBuilder();
           
           if (entry.doc != null) {
             try {
@@ -1402,9 +1402,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    
   /** Opens the Javadoc specified by the word the cursor is on. */
   void _openJavadocUnderCursor() {
-//    Utilities.show("Calling openJavadocUnderCursor()");
     generateOpenJavadocList();
-    if (_openJavadocList==null) {
+    if (_openJavadocList == null) {
       Utilities.show("Cannot load Java API class list. No network connectivity?");
       return;
     }
@@ -1768,7 +1767,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Displays the interactions classpath. */  
   public void viewInteractionsClassPath() {
-    StringBuffer cpBuf = new StringBuffer();
+    final StringBuilder cpBuf = new StringBuilder();
     Vector<URL> classPathElements = _model.getClassPath();
     for(int i = 0; i < classPathElements.size(); i++) {
       cpBuf.append(classPathElements.get(i).getPath());
@@ -2446,9 +2445,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _other = other;
     }
     /** This method chooses the custom icon only for the known filetypes. If these filetypes are not receiving 
-     *  the correct icons, make sure the filenames are correct and that the icons are present in the ui/icons 
-     *  directory.
-     */
+      * the correct icons, make sure the filenames are correct and that the icons are present in the ui/icons 
+      * directory.
+      */
     public Icon getIcon(File f) {
       if (f == null) return _other;
       Icon ret = null;
@@ -2470,10 +2469,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** This class wraps the file display managers by superimposing any notification icons on top of the base 
-   *  file icon.  Currently, only the modified star is allowed, but everything is set up to add notification 
-   *  icons for whether a document has passed the junit test (for display in the tree). This class is static 
-   *  for now.  It may be necessary to make it dynamic when implementing the junit notifications.
-   */
+    * file icon.  Currently, only the modified star is allowed, but everything is set up to add notification 
+    * icons for whether a document has passed the junit test (for display in the tree). This class is static 
+    * for now.  It may be necessary to make it dynamic when implementing the junit notifications.
+    */
   private static class OddDisplayManager implements DisplayManager<OpenDefinitionsDocument> {
     private final Icon _star;
 //    private Icon _juPass;
@@ -2507,8 +2506,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   };
   
   /** This is what is given to the JTreeSortNavigator.  This simply resolves the INavItem to an OpenDefDoc
-   *  using the model and forwards it to the OddDisplayManager for size 20.
-   */
+    * using the model and forwards it to the OddDisplayManager for size 20.
+    */
   private final DisplayManager<INavigatorItem> _navPaneDisplayManager = new DisplayManager<INavigatorItem>() {
     public Icon getIcon(INavigatorItem item) {
       OpenDefinitionsDocument odd = (OpenDefinitionsDocument) item;  // FIX THIS!
@@ -2580,16 +2579,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     /* Definitions Pane */
     
-    // Ensure that DefinitionsPane uses the correct EditorKit!
-    //   This has to be stored as a static field on DefinitionsPane because
-    //   the JEditorPane constructor uses it before we get a chance to
-    //   assign it to an instance field...
+    /* Ensure that DefinitionsPane uses the correct EditorKit!  This has to be stored as a static field on 
+     * DefinitionsPane because the JEditorPane constructor uses it before we get a chance to assign it to an instance
+     * field ... */
     DefinitionsPane.setEditorKit(_model.getEditorKit());
 
     _defScrollPanes = new Hashtable<OpenDefinitionsDocument, JScrollPane>();
     
     /* Other panes */
-    
      _tabbedPane = new JTabbedPane();
      
      JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
@@ -2639,8 +2636,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     });
     _debugStepTimer.setRepeats(false);
     
-    // Working directory is default place to start, else
-    // use user.dir (bug #895998).
+    // Working directory is default place to start, else use user.dir (bug #895998).
     File workDir = _model.getMasterWorkingDirectory();
 
     // Overrides JFileChooser to display the full path of the directory
@@ -2761,22 +2757,16 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     // add recent file and project manager
     
     _recentFileManager = 
-      new RecentFileManager(_fileMenu.getItemCount() - 2,
-                            _fileMenu,
+      new RecentFileManager(_fileMenu.getItemCount() - 2, _fileMenu,
                             new RecentFileManager.RecentFileAction() {
-                              public void actionPerformed(FileOpenSelector selector) {
-                                open(selector);
-                              }
+                              public void actionPerformed(FileOpenSelector selector) { open(selector); }
                             }, 
                             OptionConstants.RECENT_FILES);
                                                
     _recentProjectManager = 
-      new RecentFileManager(_projectMenu.getItemCount()-2,
-                            _projectMenu,
+      new RecentFileManager(_projectMenu.getItemCount()-2, _projectMenu,
                             new RecentFileManager.RecentFileAction() {
-                              public void actionPerformed(FileOpenSelector selector) {
-                                openProject(selector); 
-                              }
+                              public void actionPerformed(FileOpenSelector selector) { openProject(selector); }
                             }, 
                             OptionConstants.RECENT_PROJECTS);
     
@@ -2800,8 +2790,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     // I assume that we want to be contained on the default screen.
     // TODO: support spanning screens in multi-screen setups.
-    Rectangle bounds = GraphicsEnvironment.getLocalGraphicsEnvironment()
-      .getDefaultScreenDevice().getDefaultConfiguration().getBounds();
+    Rectangle bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().
+      getDefaultConfiguration().getBounds();
     
     if (x == Integer.MAX_VALUE)  x = (bounds.width - width + bounds.x) / 2;    // magic value for "not set" - center.
     if (y == Integer.MAX_VALUE)  y = (bounds.height - height + bounds.y) / 2;  // magic value for "not set" - center.
@@ -2833,10 +2823,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     config.addOptionListener(DEFINITIONS_NORMAL_COLOR, new NormalColorOptionListener());
     config.addOptionListener(DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorOptionListener());
     
-    //  Add option listeners for changes to config options
-    //  NOTE: We should only add listeners to view-related (or view-dependent)
-    //        config options here.  Model options should go in
-    //        DefaultGlobalModel._registerOptionListeners().
+    /* Add option listeners for changes to config options.  NOTE: We should only add listeners to view-related (or view-
+     * dependent) config options here.  Model options should go in DefaultGlobalModel._registerOptionListeners(). */
     config.addOptionListener(FONT_MAIN, new MainFontOptionListener());
     config.addOptionListener(FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
     config.addOptionListener(FONT_DOCLIST, new DoclistFontOptionListener());

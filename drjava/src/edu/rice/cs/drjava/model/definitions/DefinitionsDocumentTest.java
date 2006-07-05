@@ -522,8 +522,8 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     "   throw new ParseException(\"wrong number of arguments to |\");\n";
 
     int count = 5000;
-    StringBuffer bigIn = new StringBuffer(input.length() * count);
-    StringBuffer bigExp = new StringBuffer(expected.length() * count);
+    final StringBuilder bigIn = new StringBuilder(input.length() * count);
+    final StringBuilder bigExp = new StringBuilder(expected.length() * count);
     for (int i = 0; i < count; i++) {
       bigIn.append(input);
       bigExp.append(expected);

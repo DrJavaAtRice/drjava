@@ -249,7 +249,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
   protected class BrowserHistoryListUserObj extends RegionListUserObj<DocumentRegion> {
     public BrowserHistoryListUserObj(DocumentRegion r) { super(r); }
     public String toString() {
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
       _region.getDocument().acquireReadLock();
       try {
         sb.append("<html>");

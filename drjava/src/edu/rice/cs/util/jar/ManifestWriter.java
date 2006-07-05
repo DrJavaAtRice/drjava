@@ -77,7 +77,7 @@ public class ManifestWriter {
   protected InputStream getInputStream() {
     // NOTE: All significant lines in the manifest MUST end in the end of line character
 
-    StringBuffer sbuf = new StringBuffer();
+    final StringBuilder sbuf = new StringBuilder();
     sbuf.append(Attributes.Name.MANIFEST_VERSION.toString());
     sbuf.append(": 1.0"+System.getProperty("line.separator"));
     if( !_classPaths.isEmpty() ) {

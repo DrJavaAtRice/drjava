@@ -184,10 +184,8 @@ public class Utilities {
       try {
         java.io.Reader r = DataFlavor.stringFlavor.getReaderForText(t);
         int ch;
-        StringBuilder sb = new StringBuilder();
-        while ((ch=r.read())!=-1) {
-          sb.append((char)ch);
-        }
+        final StringBuilder sb = new StringBuilder();
+        while ((ch=r.read()) !=-1 ) { sb.append((char)ch); }
         s = sb.toString();
       }
       catch(UnsupportedFlavorException ufe) { /* ignore, return null */ }

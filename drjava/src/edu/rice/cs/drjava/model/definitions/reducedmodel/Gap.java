@@ -93,7 +93,7 @@ class Gap extends ReducedToken {
    */
   public String toString() {
 //    String val = "Gap(size: "+_size+"): ";
-    StringBuffer val = new StringBuffer();
+    final StringBuilder val = new StringBuilder();
     int i;
     for (i = 0; i < _size; i++) val.append(" _");
     return val.toString();

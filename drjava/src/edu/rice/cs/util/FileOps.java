@@ -98,7 +98,7 @@ public abstract class FileOps {
     String[] basParts = splitFile(base);
     String[] absParts = splitFile(abs);
     
-    StringBuffer result = new StringBuffer();
+    final StringBuilder result = new StringBuilder();
     // loop until elements differ, record what part of absParts to append
     // next find out how many .. to put in.
     int diffIndex = -1;
@@ -196,7 +196,7 @@ public abstract class FileOps {
       // Do this runaround for filesystems that are case preserving but case insensitive. Remove the last 5 
       // letters from the file name, append ".java" to the end, create a new file and see if its equivalent 
       // to the original
-      StringBuffer name = new StringBuffer(f.getAbsolutePath());
+      final StringBuilder name = new StringBuilder(f.getAbsolutePath());
       String shortName = f.getName();
       if (shortName.length() < 6) return false;
       name.delete(name.length() - 5, name.length());
@@ -233,7 +233,7 @@ public abstract class FileOps {
   /** Reads the entire contents of a file and return them as a String. */
   public static String readFileAsString(final File file) throws IOException {
     FileReader reader = new FileReader(file);
-    StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
 
     while (reader.ready()) {
       char c = (char) reader.read();
@@ -648,7 +648,7 @@ public abstract class FileOps {
     // into absolute paths, and put the path back together
     // EXCEPT for the last item in the array, because that's the "x" we added
     String[] pathEntries = path.split(pathSep);
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     for(int i=0; i<pathEntries.length-1; ++i) { // length-1 to ignore the last element
       File f = new File(pathEntries[i]);
       sb.append(f.getAbsolutePath());

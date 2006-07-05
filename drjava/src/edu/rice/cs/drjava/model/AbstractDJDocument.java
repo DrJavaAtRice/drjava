@@ -513,12 +513,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     // Check cache
-    StringBuilder keyBuf = new StringBuilder("findPrevEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
-    String key = keyBuf.toString();
-    Integer cached = (Integer) _checkCache(key);
+    final StringBuilder keyBuf = 
+      new StringBuilder("findPrevEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
+    final String key = keyBuf.toString();
+    final Integer cached = (Integer) _checkCache(key);
     if (cached != null) return cached.intValue();
     
-    if ((pos>=getLength()) || (pos==DOCSTART)) { return ERROR_INDEX; }
+    if ((pos >= getLength()) || (pos == DOCSTART)) { return ERROR_INDEX; }
     
     final char[] delims = {opening, closing};
     int reducedPos = pos;
@@ -582,9 +583,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     // Check cache
-    StringBuilder keyBuf = new StringBuilder("findNextEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
-    String key = keyBuf.toString();
-    Integer cached = (Integer) _checkCache(key);
+    final StringBuilder keyBuf = 
+      new StringBuilder("findNextEnclosingBrace:").append(opening).append(':').append(closing).append(':').append(pos);
+    final String key = keyBuf.toString();
+    final Integer cached = (Integer) _checkCache(key);
     
     if (cached != null) return cached.intValue();
     if (pos>=getLength()-1) { return ERROR_INDEX; }
@@ -666,11 +668,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipParenPhrases)
     throws BadLocationException {
     // Check cache
-    StringBuilder keyBuf = new StringBuilder("findPrevDelimiter:").append(pos);
+    final StringBuilder keyBuf = new StringBuilder("findPrevDelimiter:").append(pos);
     for (char ch: delims) { keyBuf.append(':').append(ch); }
     keyBuf.append(':').append(skipParenPhrases);
-    String key = keyBuf.toString();
-    Integer cached = (Integer) _checkCache(key);
+    final String key = keyBuf.toString();
+    final Integer cached = (Integer) _checkCache(key);
     if (cached != null) return cached.intValue();
     
     int reducedPos = pos;
@@ -762,10 +764,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
     // Check cache
-    StringBuilder keyBuf = new StringBuilder("findPrevCharPos:").append(pos);
+    final StringBuilder keyBuf = new StringBuilder("findPrevCharPos:").append(pos);
     for (char ch: whitespace) { keyBuf.append( ':').append(ch); }
-    String key = keyBuf.toString();
-    Integer cached = (Integer) _checkCache(key);
+    final String key = keyBuf.toString();
+    final Integer cached = (Integer) _checkCache(key);
     if (cached != null)  return cached.intValue();
     
     int reducedPos = pos;
@@ -1014,10 +1016,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
     // Check cache
-    StringBuilder keyBuf = new StringBuilder("getIndentOfCurrStmt:").append(pos);
+    final StringBuilder keyBuf = new StringBuilder("getIndentOfCurrStmt:").append(pos);
     for (char ch: delims) { keyBuf.append(':').append(ch); }
-    String key = keyBuf.toString();
-    String cached = (String) _checkCache(key);
+    final String key = keyBuf.toString();
+    final String cached = (String) _checkCache(key);
     if (cached != null) return cached;
     
     String lineText;
@@ -1243,11 +1245,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   public int getFirstNonWSCharPos(int pos, char[] whitespace, boolean acceptComments) throws BadLocationException {
     // Check cache
-    StringBuilder keyBuf = new StringBuilder("getFirstNonWSCharPos:").append(pos);
+    final StringBuilder keyBuf = new StringBuilder("getFirstNonWSCharPos:").append(pos);
     for (char ch: whitespace) { keyBuf.append(':').append(ch); }
-    String key = keyBuf.toString();
+    final String key = keyBuf.toString();
     
-    Integer cached = (Integer) _checkCache(key);
+    final Integer cached = (Integer) _checkCache(key);
     if (cached != null)  return cached.intValue();
     
     int result = ERROR_INDEX;  // variable used to hold result to be returned

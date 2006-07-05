@@ -822,7 +822,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public String getEnclosingClassName(int pos, boolean qual) throws BadLocationException, ClassNameNotFoundException {    
 //    boolean oldLog = log; log = false;
     // Check cache
-    StringBuffer keyBuf = new StringBuffer("getEnclosingClassName:").append(pos);
+    final StringBuilder keyBuf = new StringBuilder("getEnclosingClassName:").append(pos);
     keyBuf.append(":").append(qual);
     String key = keyBuf.toString();
     String cached = (String) _checkCache(key);
@@ -970,8 +970,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //                       t.substring(newPos, openSquigglyPos+1)+"`");
     
     // Check cache
-    StringBuffer keyBuf = 
-      new StringBuffer("_getAnonymousInnerClassIndex:").append(newPos).append(':').append(openSquigglyPos);
+    final StringBuilder keyBuf = 
+      new StringBuilder("_getAnonymousInnerClassIndex:").append(newPos).append(':').append(openSquigglyPos);
     String key = keyBuf.toString();
     Boolean cached = (Boolean) _checkCache(key);
     if (cached != null) {
@@ -1055,9 +1055,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    boolean oldLog = log; log = false;
     
     // Check cache
-    StringBuffer keyBuf = new StringBuffer("_getAnonymousInnerClassIndex:").append(pos);
-    String key = keyBuf.toString();
-    Integer cached = (Integer) _checkCache(key);
+    final StringBuilder keyBuf = new StringBuilder("_getAnonymousInnerClassIndex:").append(pos);
+    final String key = keyBuf.toString();
+    final Integer cached = (Integer) _checkCache(key);
     if (cached != null) {
 //      log = oldLog;
       return cached.intValue();
@@ -1139,7 +1139,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     
 //    Utilities.show("getPackageName() called on " + this);
     /* Buffer for constructing the package name. */
-    StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     int oldLocation = 0;  // javac requires this bogus initialization
     
     acquireReadLock();

@@ -102,7 +102,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       _currentStrategyIndex = comp._strategies.indexOf(comp._currentStrategy);
     }
     public String toString() {
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
       sb.append((int)_dim.getWidth());
       sb.append(' ');
       sb.append((int)_dim.getHeight());

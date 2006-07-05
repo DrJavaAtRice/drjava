@@ -290,7 +290,7 @@ public class PopupConsole implements Serializable {
   private String silentInput() {
     final Object monitor = new Object();
     monitorNotified = false;
-    final StringBuffer input = new StringBuffer();  /* shared variable guarded by commandLock */ 
+    final StringBuilder input = new StringBuilder();  /* shared variable guarded by commandLock */ 
     
     synchronized (commandLock) {
       _insertTextCommand = new Lambda<Object,String>() {

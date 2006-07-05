@@ -255,7 +255,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   protected static class BreakpointRegionTreeUserObj extends RegionTreeUserObj<Breakpoint> {
     public BreakpointRegionTreeUserObj (Breakpoint bp) { super(bp); }
     public String toString() {
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
       _region.getDocument().acquireReadLock();
       try {
         sb.append(lineNumber());
