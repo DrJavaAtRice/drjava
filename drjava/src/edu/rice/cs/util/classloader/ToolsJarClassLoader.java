@@ -68,26 +68,31 @@ public class ToolsJarClassLoader extends URLClassLoader {
     javaHomeParents.add(FileOps.getCanonicalFile(new File(javaHome, "..")));
     javaHomeParents.add(FileOps.getCanonicalFile(new File(javaHome, "../..")));
     
-    String winPrograms = System.getenv("ProgramFiles");
-    if (winPrograms != null) {
-      javaHomeParents.add(FileOps.getCanonicalFile(new File(winPrograms, "Java")));
-      javaHomeParents.add(FileOps.getCanonicalFile(new File(winPrograms)));
-    }
-    else {  // in case the environment variables aren't set up properly
-      javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/Java/")));
-      javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/")));
+    final String jv = System.getProperty("java.version");
+    if (!jv.startsWith("1.3") && !jv.startsWith("1.4")) {
+      // in Java 1.3 and 1.4, getenv is deprecated and throws an exception,
+      // so we cannot use it
+      String winPrograms = System.getenv("ProgramFiles");
+      if (winPrograms != null) {
+        javaHomeParents.add(FileOps.getCanonicalFile(new File(winPrograms, "Java")));
+        javaHomeParents.add(FileOps.getCanonicalFile(new File(winPrograms)));
+      }
+      else {  // in case the environment variables aren't set up properly
+        javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/Java/")));
+        javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/")));
+      }
+      
+      String winSystem = System.getenv("SystemDrive");
+      if (winSystem != null) {
+        javaHomeParents.add(FileOps.getCanonicalFile(new File(winSystem, "Java")));
+        javaHomeParents.add(FileOps.getCanonicalFile(new File(winSystem)));
+      }
+      else { // in case the environment variables aren't set up properly
+        javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Java/")));
+        javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/")));
+      }
     }
 
-    String winSystem = System.getenv("SystemDrive");
-    if (winSystem != null) {
-      javaHomeParents.add(FileOps.getCanonicalFile(new File(winSystem, "Java")));
-      javaHomeParents.add(FileOps.getCanonicalFile(new File(winSystem)));
-    }
-    else { // in case the environment variables aren't set up properly
-      javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Java/")));
-      javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/")));
-    }
-    
     javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/")));
     javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/java/")));
     javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/j2se/")));
