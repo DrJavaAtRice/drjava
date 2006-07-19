@@ -3395,11 +3395,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
 
     public void revertFile() throws IOException {
-
+      final OpenDefinitionsDocument doc = this;
+      
       //need to remove old, possibly invalid breakpoints
       removeFromDebugger();
-
-      final OpenDefinitionsDocument doc = this;
+      doc.getBreakpointManager().clearRegions();
+      doc.getBookmarkManager().clearRegions();
+      for (RegionManager<DocumentRegion> rm: doc.getFindResultsManagers()) rm.clearRegions();
+      doc.getBrowserHistoryManager().clearRegions();
 
       try {
         File file = doc.getFile();
