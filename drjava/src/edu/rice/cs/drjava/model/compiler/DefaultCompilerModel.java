@@ -237,7 +237,14 @@ public class DefaultCompilerModel implements CompilerModel {
 //                   Arrays.toString(files) + ", " + Arrays.toString(excludedFiles) + ")");
     
     File buildDir = _model.getBuildDirectory();
+    if (!buildDir.exists() && !buildDir.mkdirs()) {
+      throw new IOException("Could not create build directory: "+buildDir);
+    }
+
     File workDir = _model.getWorkingDirectory();
+    if (!workDir.exists() && !workDir.mkdirs()) {
+      throw new IOException("Could not create working directory: "+workDir);
+    }
      
 //    System.err.println("sourceRoots are: " + Arrays.toString(sourceRoots));
 //    System.err.println("sourceFiles are: " + Arrays.toString(files));

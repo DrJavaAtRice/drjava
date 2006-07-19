@@ -408,7 +408,8 @@ public class ProjectPropertiesFrame extends JFrame {
     dirChooser.setDialogTitle("Select Build Directory");
     dirChooser.setApproveButtonText("Select");
 //  dirChooser.setEditable(true);
-    _buildDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f);
+    // (..., false); since build directory does not have to exist
+    _buildDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f, false);
     _buildDirSelector.setFileField(bd);  // the file field is used as the initial file selection
     //toReturn.add(_buildDirSelector, BorderLayout.EAST);
 

@@ -169,7 +169,9 @@ public class ProjectProfile implements ProjectFileIR {
   public void addCollapsedPath(String cp) { if (cp != null) _collapsedPaths.add(cp); }
   public void setBuildDirectory(File dir) { 
 //    System.err.println("setBuildDirectory(" + dir + ") called");
-    _buildDir = FileOps.validate(dir); 
+// removed call to validate to allow build directory that doesn't exist:
+// it will be created when necessary
+    _buildDir = dir; // FileOps.validate(dir); 
 //    System.err.println("Vaidated form is: " + _buildDir);
   }
   public void setWorkingDirectory(File dir) { _workDir = FileOps.validate(dir); }

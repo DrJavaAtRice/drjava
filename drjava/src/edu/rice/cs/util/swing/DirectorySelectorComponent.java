@@ -69,7 +69,10 @@ public class DirectorySelectorComponent extends JPanel {
   /** The current file */
   protected File _file;
   
-  /** Creates a new DirectorySelectorComponent with default dimensions.
+  /** true if the file specified must exist and a file that doesn't exist will be rejected. */
+  protected boolean _mustExist;
+  
+  /** Creates a new DirectorySelectorComponent with default dimensions whose file must exist.
    *  @param parent  Parent of this component.
    *  @param chooser File chooser to display from the "..." button.
    */
@@ -77,17 +80,30 @@ public class DirectorySelectorComponent extends JPanel {
     this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE);
   }
 
-  /** Creates a new DirectorySelectorComponent.
+  /** Creates a new DirectorySelectorComponent whose file must exist.
    *  @param parent   Parent of this component.
    *  @param chooser  File chooser to display from the "..." button.
    *  @param numCols  Number of columns to display in the text field
    *  @param fontSize Font size for the text field
    */
   public DirectorySelectorComponent(Component parent, DirectoryChooser chooser, int numCols, float fontSize) {
+    this(parent, chooser, numCols, fontSize, true);
+  }
+
+  /** Creates a new DirectorySelectorComponent.
+   *  @param parent   Parent of this component.
+   *  @param chooser  File chooser to display from the "..." button.
+   *  @param numCols  Number of columns to display in the text field
+   *  @param fontSize Font size for the text field
+   *  @param mustExist true if the file specified in the field must exist
+   */
+  public DirectorySelectorComponent(Component parent, DirectoryChooser chooser, int numCols, float fontSize,
+                                    boolean mustExist) {
     
     _parent = parent;
     _chooser = chooser;
     _file = null;
+    _mustExist = mustExist;
     
     _fileField = new JTextField(numCols) {
       public Dimension getMaximumSize() { return new Dimension(Short.MAX_VALUE, super.getPreferredSize().height); }
@@ -193,7 +209,7 @@ public class DirectorySelectorComponent extends JPanel {
       if (! newFile.isDirectory() && _chooser.isFileSelectionEnabled()) newFile = newFile.getParentFile();
     }
     
-    if (newFile != null && ! newFile.exists()) {
+    if (newFile != null && _mustExist && ! newFile.exists()) {
       JOptionPane.showMessageDialog(_parent, "The file '"+ newValue + "'\nis invalid because it does not exist.",
                                     "Invalid File Name", JOptionPane.ERROR_MESSAGE);
       resetFileField(); // revert if not valid
