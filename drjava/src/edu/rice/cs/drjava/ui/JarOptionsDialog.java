@@ -465,6 +465,7 @@ public class JarOptionsDialog extends JFrame {
     fileChooser.setApproveButtonText("Select");
     fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     fileChooser.setMultiSelectionEnabled(false);
+    fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
 
     _jarFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f, false);
     _jarFileSelector.setFileFilter(new FileFilter() {
@@ -691,6 +692,9 @@ public class JarOptionsDialog extends JFrame {
                    }
                    catch(Exception e) {
                      JOptionPane.showMessageDialog(JarOptionsDialog.this, "An error occured while running the jar file: \n"+e, "Error", JOptionPane.ERROR_MESSAGE);
+                   }
+                   finally {
+                     JarOptionsDialog.this.setVisible(false);
                    }
                    return null;
                  }
