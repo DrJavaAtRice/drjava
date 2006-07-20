@@ -282,8 +282,9 @@ public class ProjectProfile implements ProjectFileIR {
     
     // write the main class
     if (_mainClass != null) {
+      fw.write("\n;; rooted at the (parent of the) project file");
       fw.write("\n(main-class");
-      fw.write("\n" + encodeFileRelative(_mainClass, "  "));
+      fw.write("\n" + encodeFileRelative(_mainClass, "  ", _projectFile));
       fw.write(")");
     }
     else fw.write("\n;; no main class");
