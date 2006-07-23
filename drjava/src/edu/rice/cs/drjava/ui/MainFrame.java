@@ -2987,6 +2987,25 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     // Platform-specific UI setup.
     PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
     setUpKeys();    
+    
+    // discard ` character if it was used for the next/prev recent doc feature
+    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+      public boolean dispatchKeyEvent(KeyEvent e) {
+        boolean discardEvent = false;
+        
+        if ((e.getID() == KeyEvent.KEY_TYPED) &&
+            (e.getKeyChar()=='`') &&
+            (((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK) ||
+             ((e.getModifiersEx() & (InputEvent.CTRL_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK))
+                == (InputEvent.CTRL_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK))) &&
+            (e.getComponent().getClass().equals(DefinitionsPane.class))) {
+//          System.out.println("discarding `, modifiers = "+e.getModifiersEx()+": "+e.getComponent());
+          discardEvent = true;
+        }
+        
+        return discardEvent;
+      }
+    });
   }   // End of MainFrame constructor
   
   public void setVisible(boolean b) { 
@@ -5974,6 +5993,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     // made this package private to allow testing of disabling editing during compile and successful switching
     // on and off of ability to edit
     DefinitionsPane pane = new DefinitionsPane(this, doc);
+  
     pane.addKeyListener(_historyListener);
     pane.addFocusListener(_focusListenerForRecentDocs);
     
