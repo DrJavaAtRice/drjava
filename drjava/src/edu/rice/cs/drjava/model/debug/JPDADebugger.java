@@ -220,7 +220,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       // Listen for events from JPDA in a new thread
       EventHandlerThread eventHandler = new EventHandlerThread(this, _vm);
       eventHandler.start();
-      _model.getInteractionsModel().addListener(_watchListener);
+      
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() { 
+              _model.getInteractionsModel().addListener(_watchListener);
+            }
+      });
       
       // re-set breakpoints that have already been set
       Vector<Breakpoint> oldBreakpoints = new Vector<Breakpoint>(_model.getBreakpointManager().getRegions());
@@ -891,7 +896,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Does not return any threads known to be dead.
    */
   public synchronized Vector<DebugThreadData> getCurrentThreadData() throws DebugException {
-    _ensureReady();
+    if (! isReady()) { return new Vector<DebugThreadData>(); }
     List<ThreadReference> listThreads; // Add parameterization <ThreadReference> to listThreads.
     try {
       listThreads = _vm.allThreads();  // JDK 1.5 will eliminate this type warning
