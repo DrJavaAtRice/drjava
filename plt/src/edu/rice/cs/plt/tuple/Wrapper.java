@@ -6,13 +6,17 @@ import edu.rice.cs.plt.lambda.Thunk;
  * An arbitrary pair of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
  * and {@link #hashCode()}.
  */
-public class Wrapper<T> extends Tuple implements Thunk<T> {
+public class Wrapper<T> extends Option<T> implements Thunk<T> {
   
   protected final T _value;
   
   public Wrapper(T value) { _value = value; }
   
   public T value() { return _value; }
+  
+  public <Ret> Ret apply(OptionVisitor<? super T, ? extends Ret> visitor) {
+    return visitor.forSome(_value);
+  }
   
   public String toString() { return "(" + _value + ")"; }
   

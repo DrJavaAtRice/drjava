@@ -1,6 +1,9 @@
 package edu.rice.cs.plt.tuple;
 
-/** Abstract parent of all tuple classes; see the package documentation for general discussion */
+/**
+ * Abstract parent of all tuple classes, providing lazy evaluation of the hash code.  See the 
+ * package documentation for general discussion of the tuple classes.
+ */
 public abstract class Tuple {
 
   private int _hashCode;
