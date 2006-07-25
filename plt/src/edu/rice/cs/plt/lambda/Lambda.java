@@ -27,4 +27,14 @@ public interface Lambda<T, R> {
     public Integer value(Object obj) { return RecurUtil.safeHashCode(obj); }
   };
   
+  /** Increments an integer */
+  public static final Lambda<Integer, Integer> INCREMENT_INT = new Lambda<Integer, Integer>() {
+    public Integer value(Integer i) { return i+1; }
+  };
+  
+  /** Decrements an integer */
+  public static final Lambda<Integer, Integer> DECREMENT_INT = new Lambda<Integer, Integer>() {
+    public Integer value(Integer i) { return i-1; }
+  };
+  
 }

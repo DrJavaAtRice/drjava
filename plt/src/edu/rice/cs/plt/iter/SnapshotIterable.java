@@ -6,7 +6,7 @@ import java.util.LinkedList;
 
 /**
  * Creates an iterable based on the result of immediately traversing some other
- * iterable; generated iterators will traverses those same values in the same order.  
+ * iterable; generated iterators will traverse those same values in the same order.  
  * Changes to the wrapped iterable will <em>not</em> be reflected.
  */
 public class SnapshotIterable<T> extends AbstractIterable<T> implements SizedIterable<T> {
@@ -25,7 +25,6 @@ public class SnapshotIterable<T> extends AbstractIterable<T> implements SizedIte
     _values = vals;
   }
     
-  
   public Iterator<T> iterator() { return _values.iterator(); }
   public int size() { return _values.size(); }
   public boolean isFixed() { return true; }
