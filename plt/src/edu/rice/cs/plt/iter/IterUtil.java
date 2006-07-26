@@ -52,20 +52,37 @@ public class IterUtil {
   }
   
   /** 
-   * @return  A string representation of the given iterable, matching the {@link Collection}
-   *          conventions (results like {@code "[foo, bar, baz]"}); invokes 
-   *          {@link RecurUtil#safeToString(Object)} on each element
+   * Generate a string representation of the given iterable, matching the {@link Collection}
+   * conventions (results like {@code "[foo, bar, baz]"}); invokes 
+   * {@link RecurUtil#safeToString(Object)} on each element
    */
   public static String toString(Iterable<?> iter) {
+    return toString(iter, "[", ", ", "]");
+  }
+  
+  /** 
+   * Generate a string representation of the given iterable where each element is listed on a
+   * separate line; invokes {@link RecurUtil#safeToString(Object)} on each element
+   */
+  public static String multilineToString(Iterable<?> iter) {
+    return toString(iter, "", System.getProperty("line.separator"), "");
+  }
+  
+  /** 
+   * Generate a string representation of the given iterable beginning with {@code prefix}, ending with
+   * {@code suffix}, and delimited by {@code delimiter}; invokes {@link RecurUtil#safeToString(Object)} 
+   * on each element
+   */
+  public static String toString(Iterable<?> iter, String prefix, String delimiter, String suffix) {
     StringBuilder result = new StringBuilder();
-    result.append("[");
+    result.append(prefix);
     boolean first = true;
     for (Object obj : iter) {
       if (first) { first = false; }
-      else { result.append(", "); }
+      else { result.append(delimiter); }
       result.append(RecurUtil.safeToString(obj));
     }
-    result.append("]");
+    result.append(suffix);
     return result.toString();
   }
   
