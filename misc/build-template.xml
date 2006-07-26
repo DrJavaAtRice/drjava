@@ -337,6 +337,7 @@
         <include name="**/*.png" />
         <include name="**/*.jpg" />
         <include name="**/*.jpeg" />
+        <include name="**/*.properties" />
         <!-- Additional resource files should be listed here -->
       </fileset>
     </copy>
