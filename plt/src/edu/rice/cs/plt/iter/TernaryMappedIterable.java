@@ -44,4 +44,15 @@ public class TernaryMappedIterable<T1, T2, T3, R> extends AbstractIterable<R>
     return new TernaryMappedIterable<T1, T2, T3, R>(source1, source2, source3, map);
   }
   
+  /**
+   * Create a {@code TernaryMappedIterable} and wrap it in a {@code SnapshotIterable}, forcing
+   * immediate evaluation of the mapping.
+   */
+  public static <T1, T2, T3, R> SnapshotIterable<R> 
+    makeSnapshot(Iterable<? extends T1> source1, Iterable<? extends T2> source2, 
+                 Iterable<? extends T3> source3,
+                 Lambda3<? super T1, ? super T2, ? super T3, ? extends R> map) {
+    return new SnapshotIterable<R>(new TernaryMappedIterable<T1, T2, T3, R>(source1, source2, 
+                                                                            source3, map));
+  }
 }

@@ -38,4 +38,14 @@ public class BinaryMappedIterable<T1, T2, R> extends AbstractIterable<R>
     return new BinaryMappedIterable<T1, T2, R>(source1, source2, map);
   }
   
+  /**
+   * Create a {@code BinaryMappedIterable} and wrap it in a {@code SnapshotIterable}, forcing
+   * immediate evaluation of the mapping.
+   */
+  public static <T1, T2, R> SnapshotIterable<R> 
+    makeSnapshot(Iterable<? extends T1> source1, Iterable<? extends T2> source2, 
+                 Lambda2<? super T1, ? super T2, ? extends R> map) {
+    return new SnapshotIterable<R>(new BinaryMappedIterable<T1, T2, R>(source1, source2, map));
+  }
+  
 }

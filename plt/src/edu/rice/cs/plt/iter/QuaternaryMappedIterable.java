@@ -49,4 +49,16 @@ public class QuaternaryMappedIterable<T1, T2, T3, T4, R>  extends AbstractIterab
     return new QuaternaryMappedIterable<T1, T2, T3, T4, R>(source1, source2, source3, source4, map);
   }
   
+  /**
+   * Create a {@code QuaternaryMappedIterable} and wrap it in a {@code SnapshotIterable}, forcing
+   * immediate evaluation of the mapping.
+   */
+  public static <T1, T2, T3, T4, R> SnapshotIterable<R> 
+    makeSnapshot(Iterable<? extends T1> source1, Iterable<? extends T2> source2, 
+                 Iterable<? extends T3> source3, Iterable<? extends T4> source4,
+                 Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> map) {
+    return new SnapshotIterable<R>(new QuaternaryMappedIterable<T1, T2, T3, T4, R>(source1, source2, 
+                                                                                   source3, source4, map));
+  }
+  
 }

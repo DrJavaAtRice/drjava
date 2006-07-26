@@ -12,7 +12,7 @@ package edu.rice.cs.plt.iter;
  * modified and are too valuable to abandon, the {@code sizeOf} method provides a workaround that, 
  * through casting, calculates the size appropriately.  An alternative design would allow 
  * collections as components of {@code SizedIterable}s only by manually wrapping them in
- * a bridge class.</p>
+ * a bridge class (see {@link IterUtil#asSizedIterable(java.util.Collection)}).</p>
  */
 public interface SizedIterable<T> extends Iterable<T> {
   /**

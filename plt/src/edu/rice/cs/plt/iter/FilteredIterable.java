@@ -27,4 +27,12 @@ public class FilteredIterable<T> extends AbstractIterable<T> implements Iterable
     return new FilteredIterable<T>(iterable, predicate);
   }
   
+  /**
+   * Create a {@code FilteredIterable} and wrap it in a {@code SnapshotIterable}, forcing
+   * immediate evaluation of the filter.
+   */
+  public static <T> SnapshotIterable<T> makeSnapshot(Iterable<? extends T> iterable,
+                                                     Predicate<? super T> predicate) {
+    return new SnapshotIterable<T>(new FilteredIterable<T>(iterable, predicate));
+  }
 }

@@ -32,4 +32,13 @@ public class MappedIterable<S, T> extends AbstractIterable<T> implements SizedIt
     return new MappedIterable<S, T>(source, map);
   }
   
+  /**
+   * Create a {@code MappedIterable} and wrap it in a {@code SnapshotIterable}, forcing
+   * immediate evaluation of the mapping.
+   */
+  public static <S, T> SnapshotIterable<T> 
+    makeSnapshot(Iterable<? extends S> source, Lambda<? super S, ? extends T> map) {
+    return new SnapshotIterable<T>(new MappedIterable<S, T>(source, map));
+  }
+  
 }

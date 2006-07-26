@@ -41,6 +41,15 @@ public class FiniteSequenceIterable<T> extends AbstractIterable<T> implements Si
     return new FiniteSequenceIterable<T>(initial, successor, size);
   }
   
+  /**
+   * Create a {@code FiniteSequenceIterable} and wrap it in a {@code SnapshotIterable}, forcing
+   * immediate evaluation of the sequence.
+   */
+  public static <T> SnapshotIterable<T> makeSnapshot(T initial, Lambda<? super T, ? extends T> successor, 
+                                                     int size) { 
+    return new SnapshotIterable<T>(new FiniteSequenceIterable<T>(initial, successor, size));
+  }
+  
   /** 
    * Create a simple sequence containing the numbers between {@code start} and {@code end}
    * (inclusive).  {@code start} may be less than <em>or</em> greater than {@code end} (or even

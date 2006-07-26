@@ -34,4 +34,12 @@ public class PermutationIterable<T> extends AbstractIterable<Iterable<T>>
     return new PermutationIterable<T>(original);
   }
   
+  /**
+   * Create a {@code PermutationIterable} and wrap it in a {@code SnapshotIterable}, forcing
+   * immediate evaluation of the permutations.
+   */
+  public static <T> SnapshotIterable<Iterable<T>> makeSnapshot(Iterable<? extends T> original) {
+    return new SnapshotIterable<Iterable<T>>(new PermutationIterable<T>(original));
+  }
+  
 }
