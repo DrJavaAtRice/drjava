@@ -90,6 +90,7 @@ public interface SingleDisplayModel extends GlobalModel {
   /** Shared code between close project and close All files which only sets the new active document after all documents
    *  to be closed have been closed.
    *  @param docList the list of files to close
+   *  @return whether all files were closed
    */
   public boolean closeFiles(List<OpenDefinitionsDocument> docList);  
   

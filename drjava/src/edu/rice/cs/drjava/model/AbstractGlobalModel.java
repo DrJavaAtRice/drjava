@@ -2515,7 +2515,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         getBrowserHistoryManager().addRegion(new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset()));
       }
       catch (FileMovedException fme) {
-        throw new UnexpectedException(fme);
+        /* ignore */
       }
       catch (BadLocationException ble) {
         throw new UnexpectedException(ble);
