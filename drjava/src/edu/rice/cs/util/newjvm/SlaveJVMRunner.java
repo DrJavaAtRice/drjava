@@ -142,12 +142,10 @@ public final class SlaveJVMRunner {
 //      
 //      timeout.setDaemon(true);
 //      timeout.start();
+
       
-//      // if we have a remote classloader to use, load it
-//      if (args.length == 3) _installRemoteLoader(args[2]);
-      
-      // Loading the class that intermittently hangs first readObject(...) call below
-      Class psi = Class.forName("java.net.PlainSocketImpl");
+//      // Loading the class that intermittently hangs first readObject(...) call below
+//      Class psi = Class.forName("java.net.PlainSocketImpl");
         
       final MasterRemote masterRemote = (MasterRemote) ostream.readObject();
       _notDone = false;
