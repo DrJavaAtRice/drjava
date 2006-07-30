@@ -241,7 +241,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 
 //  public void junitAll() { _state.junitAll(); }
   
-  /** Sets the class with the project's main method. */
+  /** Sets the build directory for a project. */
   public void setBuildDirectory(File f) {
     _state.setBuildDirectory(f);
     if (f != null) {
@@ -258,6 +258,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     _notifier.projectBuildDirChanged();
     setProjectChanged(true);
+    setClassPathChanged(true);
   }
  
   // ----- METHODS -----
@@ -301,8 +302,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    *  used, {@code wd} matches its working directory, and forceResest is false.
    */
   public void resetInteractions(File wd, boolean forceReset) {
-    if (! forceReset && ! _jvm.slaveJVMUsed() && wd.equals(_interactionsModel.getWorkingDirectory())) {
-      // eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
+    if (! forceReset && ! _jvm.slaveJVMUsed() && ! isClassPathChanged() && 
+        wd.equals(_interactionsModel.getWorkingDirectory())) {
+      // Eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
 //      Utilities.show("Suppressing resetting of interactions pane");
       _interactionsModel._notifyInterpreterReady(wd);
       return; 
@@ -494,6 +496,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         if (doc.isAuxiliaryFile())
           _interactionsModel.addProjectFilesClassPath(classPath.toURL());
         else _interactionsModel.addExternalFilesClassPath(classPath.toURL());
+        setClassPathChanged(true);
       }
       catch(MalformedURLException murle) {  /* fail silently */ }
     }
@@ -561,10 +564,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
   }
   
-  /** Adds the source roots for all open documents and the paths on the "extra classpath" config option, as well
-   *  as any project-specific classpaths to the interpreter's classpath. This method is called when the interpreter 
-   *  becomes ready
-   */
+  /** Adds the project root (if a project is open), the source roots for other open documents, the paths in the 
+    * "extra classpath" config option, as well as any project-specific classpaths to the interpreter's classpath. 
+    * This method is called in DefaultInteractionsModel when the interpreter becomes ready.
+    */
   public void resetInteractionsClassPath() {
     ClassPathVector projectExtras = getExtraClassPath();
     //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
@@ -602,6 +605,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     try { _interactionsModel.addProjectFilesClassPath(getProjectRoot().toURL()); }
     catch(MalformedURLException murle) { /* fail silently */ } 
+    setClassPathChanged(false);  // reset classPathChanged state
   }
   
 //  private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {

@@ -241,6 +241,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  setting the active document.  It is used by the newFile method to place new files into the active directory.
    */
   private volatile File _activeDirectory;
+  
+  /** A state varible indicating whether the class path has changed. Reset to false by resetInteractions. */
+  private volatile boolean classPathChanged = false;
    
   /** The abstract container which contains views of open documents and allows user to navigate document focus among
    *  this collection of open documents
@@ -495,13 +498,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, cp, cjf, cjflags);
   }
  
+  /** @return true if the class path state has been changed. */
+  public boolean isClassPathChanged() { return classPathChanged; }
+  
+  /** Updates the classpath state. */
+  public void setClassPathChanged(boolean changed) {
+    classPathChanged = changed;
+  }
+  
   /** Notifies the project state that the project has been changed. */
   public void setProjectChanged(boolean changed) {
 //    Utilities.showDebug("Project Changed to " + changed);
     _state.setProjectChanged(changed);
 //    _notifier.projectModified();  // not currently used
   }
- 
+   
   /** @return true if the project state has been changed. */
   public boolean isProjectChanged() { return _state.isProjectChanged(); }
  
@@ -880,7 +891,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
     
     public ClassPathVector getExtraClassPath() { return _projExtraClassPath; }
-    public void setExtraClassPath(ClassPathVector cp) { _projExtraClassPath = cp; }
+    public void setExtraClassPath(ClassPathVector cp) { 
+      _projExtraClassPath = cp; 
+      setClassPathChanged(true);
+    }
   }
  
   protected FileGroupingState makeFlatFileGroupingState() { return new FlatFileGroupingState(); }
@@ -1122,6 +1136,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     try {
       File classPath = odd.getSourceRoot ();
       addDocToClassPath(odd);
+      setClassPathChanged(true);
     }
     catch (InvalidPackageException e) {
       // Invalid package-- don't add it to classpath
@@ -1669,7 +1684,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     */
    public boolean closeAllFiles() {
      List<OpenDefinitionsDocument> docs = getOpenDefinitionsDocuments();
-     return closeFiles(docs);
+     boolean res = closeFiles(docs);
+     if (res) resetInteractions(getWorkingDirectory());
+     return res;
    }
  
   /** This function closes a group of files assuming that the files are contiguous in the enumeration
@@ -2104,6 +2121,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    */
   public void setExtraClassPath(ClassPathVector cp) {
     _state.setExtraClassPath(cp);
+    setClassPathChanged(true);
     //System.out.println("Setting project classpath to: " + cp);
   }
 
@@ -4031,8 +4049,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       synchronized(_documentsRepos) { _documentsRepos.add(doc); }
   }
  
-  /** Does nothing; overridden in DefaultGlobalModel. */
-  protected void addDocToClassPath(OpenDefinitionsDocument doc) { /* do nothing */ }
+  /** Add a document to the classpath for the slave JVM. Does nothing here because there is no slave JVM.  Overridden
+    * in DefaultGlobalModel. */
+  protected void addDocToClassPath(OpenDefinitionsDocument doc) { }
  
   /** Creates a document from a file.
    *  @param file File to read document from

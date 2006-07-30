@@ -81,7 +81,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     });
   }
 
-
   /** Called when the repl prints to System.out.
    *  @param s String to print
    */
@@ -116,10 +115,9 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     _model.systemErrPrint(StringOps.getStackTrace(t));
   }
 
-  /** Called when the Java interpreter is ready to use. Adds any open documents to the classpath. */
+  /** Called when the Java interpreter is ready to use.  This method body adds actions that involve the global model. */
   public void interpreterReady(File wd) {
-//    System.out.println("interpreterReady(" + wd + ") called in DefaultInteractionsModel");  // DEBUG
-    _model.resetInteractionsClassPath();
+    _model.resetInteractionsClassPath();  // Done here rather than in the superclass because _model is available here.
     super.interpreterReady(wd);
   }
 
