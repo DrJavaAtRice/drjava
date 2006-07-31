@@ -140,8 +140,7 @@ public class DrJava {
         File toolsFromConfig = getConfig().getSetting(JAVAC_LOCATION);
         classPath += pathSep + ToolsJarClassLoader.getToolsJarClassPath(toolsFromConfig);
         
-        File workDir = getConfig().getSetting(WORKING_DIRECTORY);
-        if (workDir == null) workDir = FileOption.NULL_FILE;
+        File workDir = new File(System.getProperty("user.home"));
         
         // Add the string pathSep to _filesToOpen if _showDebugConsole is true
         if (_showDebugConsole) _filesToOpen.add(pathSep);  // THIS IS A KLUDGE TO PASS THIS BOOLEAN FLAG TO DrJava

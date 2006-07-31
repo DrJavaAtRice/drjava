@@ -73,18 +73,6 @@ public final class ExecJVM {
     return runJVM(mainClass, classParams, buf.toString(), jvmParams, workDir);
   }
 
-  /* REPAIRING working directory behavior for File I/O.
-   * 1.  We need to restart the JVM if path for working directory does not equal system property "user.dir" (which version of getPath ?)
-   * 2.  We need to add a File argument to some or all our calls to runJVM and to invokeSlave.  The corresponding actual parameter is
-   *     DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY).
-   * 3.  Questions:
-   *     a.  Is running javadoc effected?  What directory should we run this command within?
-   *     b.  What working directory should we use with projects?  (I think it should be a project property that overrides the corresponding
-   *         IDE property.  If so what should the default value be?  The project root?  I think this means that closing a project resets
-   *         the working directory.  Hence, we need to reset interactions when we close a project.)  We can punt on what to do for projects
-   *         in our first cut.
-   */
-
   /** Runs a new JVM.
    *  @param mainClass Class to run
    *  @param classParams Parameters to pass to the main class

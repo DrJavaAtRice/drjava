@@ -386,15 +386,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Create temp directory
     File baseTempDir = tempDirectory();
 
-    // Get current working directory, though not currently checked.
-//    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-//
-//    if (workDir == FileOption.NULL_FILE) {
-//      workDir = new File( System.getProperty("user.dir"));
-//    }
-//    if (workDir.isFile() && workDir.getParent() != null) {
-//      workDir = workDir.getParentFile();
-//    }
     // Now make subdirectory a/b/d
     File subdir = new File(baseTempDir, "a");
     subdir = new File(subdir, "b");

@@ -590,13 +590,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   /** @return the working directory for the Master JVM (editor and GUI). */
   public File getMasterWorkingDirectory() {
-    File workDir = DrJava.getConfig().getSetting( OptionConstants.WORKING_DIRECTORY);
-//    Utilities.show("In getMasterWorkingDirectory, workDir = " + workDir);
-    if (workDir != null && workDir != FileOption.NULL_FILE) {
-//      Utilities.show ("Returning '" + workDir + "' as master working directory");
-      return workDir;
-    }
-    return new File(System.getProperty("user.dir"));
+    return new File(System.getProperty("user.home"));
   }
     
   /** @return the working directory for the Slave (Interactions) JVM */
@@ -1410,7 +1404,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (bd != null) builder.setBuildDirectory(bd);
     
     // add working directory
-    File wd = getWorkingDirectory();  // the value of WORKING_DIRECTORY to be stored in the project
+    File wd = getWorkingDirectory();  // the value of the working directory to be stored in the project
     if (wd != null) builder.setWorkingDirectory(wd);
     
     // add jar main class

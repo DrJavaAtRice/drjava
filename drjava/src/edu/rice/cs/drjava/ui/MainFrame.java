@@ -2832,7 +2832,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
     config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
     config.addOptionListener(TOOLBAR_ENABLED, new ToolbarOptionListener());
-    config.addOptionListener(WORKING_DIRECTORY, new WorkingDirOptionListener());
     config.addOptionListener(LINEENUM_ENABLED, new LineEnumOptionListener());
     config.addOptionListener(QUIT_PROMPT, new QuitPromptOptionListener());
     config.addOptionListener(RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
@@ -7747,11 +7746,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** The OptionListener for TOOLBAR options */
   private class ToolbarOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) { _updateToolbarButtons(); }
-  }
-  
-  /** The OptionListener for WORKING_DIRECTORY. */
-  private class WorkingDirOptionListener implements OptionListener<File> {
-    public void optionChanged(OptionEvent<File> oce) { _setCurrentDirectory(oce.value); }
   }
   
   /** The OptionListener for LINEENUM_ENABLED. */

@@ -56,9 +56,7 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     super(opt, text, parent);  // creates all four buttons
 
     // set up JFileChooser
-    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-    if (workDir == FileOption.NULL_FILE)  workDir = new File(System.getProperty("user.dir"));
-    if (workDir.isFile() && workDir.getParent() != null) workDir = workDir.getParentFile();
+    File workDir = new File(System.getProperty("user.home"));
 
     _jfc = new JFileChooser(workDir);
     _jfc.setDialogTitle("Select");

@@ -622,11 +622,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // Pass assertion and debug port information as JVM arguments
     ArrayList<String> jvmArgs = new ArrayList<String>();
     if (allowAssertions())  jvmArgs.add("-ea");
-    // set the "user.dir" property to the user's working directory so that relative files will resolve correctly.
-    //    File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
-    //    if (workDir != FileOption.NULL_FILE) {
-    //      jvmArgs.add("-Duser.dir=" + workDir.getAbsolutePath());
-    //    }
     int debugPort = getDebugPort();
     _log.log("Main JVM starting with debug port: " + debugPort);
     if (debugPort > -1) {

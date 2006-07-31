@@ -1024,9 +1024,6 @@ public interface OptionConstants {
   
   /** Open directory should default to recursive */
   public static final BooleanOption OPEN_FOLDER_RECURSIVE =  new BooleanOption("open.folder.recursive", Boolean.FALSE);
-  
-  /** Directory to start looking for files in when DrJava starts up. */
-  public static final FileOption WORKING_DIRECTORY = new FileOption("working.directory", FileOption.NULL_FILE);
 
   /** How many spaces to use for indenting. */
   public static final NonNegativeIntegerOption INDENT_LEVEL = 

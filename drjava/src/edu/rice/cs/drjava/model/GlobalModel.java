@@ -429,7 +429,7 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return the working directory for the Slave JVM (only applied to project mode). */
   public File getWorkingDirectory();
   
-   /** Sets the WORKING_DIRECTORY property for the Slave JVM (only applies to project mode). */
+   /** Sets the working directory for the Slave JVM (only applies to project mode). */
   public void setWorkingDirectory(File f);
 
   /** Sets the main file of the project. */
