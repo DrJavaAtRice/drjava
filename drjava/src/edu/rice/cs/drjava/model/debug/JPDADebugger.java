@@ -220,11 +220,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       // Listen for events from JPDA in a new thread
       EventHandlerThread eventHandler = new EventHandlerThread(this, _vm);
       eventHandler.start();
-      
+
+      /* Move the following command to the end of the event queue so that it is done outside outside the readLock
+       * held when this method is called from an InteractionsListener. */
       SwingUtilities.invokeLater(new Runnable() {
-        public void run() { 
-              _model.getInteractionsModel().addListener(_watchListener);
-            }
+        public void run() { _model.getInteractionsModel().addListener(_watchListener); }
       });
       
       // re-set breakpoints that have already been set

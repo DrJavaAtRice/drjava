@@ -222,7 +222,7 @@ public class DrJava {
     if (PlatformFactory.ONLY.isMacPlatform()) {
       _jvmArgs.add("-Dcom.apple.macos.useScreenMenuBar=true");
       _jvmArgs.add("-Xdock:name=DrJava");
-//      _jvmArgs.add("-Xdock:icon=Users/cork/drjava/drjava/edu/rice/cs/drjava/ui/icons/DrJava.icns");
+      _jvmArgs.add("-Xdock:icon=/Applications/DrJava.app/Contents/Resources/DrJava.icns");
     }
     
     if (! heapSizeGiven && jvmArgString.indexOf("-Xmx")==0) _jvmArgs.add(DEFAULT_MAX_HEAP_SIZE_ARG);

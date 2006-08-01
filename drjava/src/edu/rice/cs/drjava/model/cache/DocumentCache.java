@@ -146,19 +146,19 @@ public class DocumentCache {
    */
   private class DocManager implements DCacheAdapter {
     
-    private int _stat; // I know, this is not very OO
-    private DDReconstructor _rec;
-    private DefinitionsDocument _doc;
-    private String _fileName;
+    private final DDReconstructor _rec;
+    private volatile int _stat; // I know, this is not very OO
+    private volatile DefinitionsDocument _doc;
+    private volatile String _fileName;
     
     /** Instantiates a manager for the documents that are produced by the given document reconstructor.
      *  @param rec The reconstructor used to create the document
      */
     public DocManager(DDReconstructor rec, String fn, boolean isUntitled) {
 //      Utilities.showDebug("DocManager(" + rec + ", " + fn + ", " + isUntitled + ")");
+      _rec = rec;
       if (isUntitled) _stat = UNTITLED; 
       else _stat = NOT_IN_QUEUE;
-      _rec = rec;
       _doc = null;
      _fileName = fn;
     }

@@ -33,17 +33,11 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * Tests insertion and move and other non-delete functionality
- * of the reduced model.
- * @version $Id$
- */
-public final class ReducedModelTest extends BraceReductionTestCase
-  implements ReducedModelStates
-{
-  /**
-   * put your documentation comment here
-   */
+/** Tests insertion and move and other non-delete functionality of the reduced model.
+  * @version $Id$
+  */
+public final class ReducedModelTest extends BraceReductionTestCase implements ReducedModelStates {
+  /** Put your documentation comment here. */
   public void testInsertGap() {
     insertGap(model1, 4);
     model1.move(-4);
@@ -59,9 +53,7 @@ public final class ReducedModelTest extends BraceReductionTestCase
     assertEquals("#1.2", 5, model2.currentToken().getSize());
   }
 
-  /**
-   *Test that a gap inserted previous to a gap, unites with that gap.
-   */
+  /** Test that a gap inserted previous to a gap, unites with that gap. */
   public void testInsertGapBeforeGap() {
     insertGap(model1, 3);
     assertTrue("#0.0.0", model1.atEnd());
@@ -78,9 +70,7 @@ public final class ReducedModelTest extends BraceReductionTestCase
     assertEquals("#1.2", 8, model1.currentToken().getSize());
   }
 
-  /**
-   * put your documentation comment here
-   */
+  /** Put your documentation comment here. */
   public void testInsertGapAfterGap() {
     insertGap(model1, 3);
     assertTrue("#0.0", model1.atEnd());
@@ -92,7 +82,7 @@ public final class ReducedModelTest extends BraceReductionTestCase
     assertEquals("#1.2", 7, model1.currentToken().getSize());
   }
 
-  /**Inserts one gap inside of the other*/
+  /** Inserts one gap inside of the other. */
   public void testInsertGapInsideGap() {
     insertGap(model1, 3);
     assertTrue("#0.0", model1.atEnd());
@@ -109,9 +99,7 @@ public final class ReducedModelTest extends BraceReductionTestCase
     assertEquals("#1.3", 7, model1._offset);
   }
 
-  /**
-   * put your documentation comment here
-   */
+  /** Put your documentation comment here. */
   public void testInsertBraceAtStartAndEnd() {
     model1.insertChar('(');
     assertTrue("#0.0", model1.atEnd());

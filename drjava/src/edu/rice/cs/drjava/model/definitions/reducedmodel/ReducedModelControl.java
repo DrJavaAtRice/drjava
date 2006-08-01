@@ -37,29 +37,22 @@ import java.util.Vector;
 
 import edu.rice.cs.util.UnexpectedException;
 
-/**
- * This class provides an implementation of the BraceReduction
- * interface for brace matching.  In order to correctly match, this class
- * keeps track of what is commented (line and block) and what is inside
- * double quotes and keeps this in mind when matching.
- * To avoid unnecessary complication, this class maintains a few
- * invariants for its consistent states, i.e., between top-level
- * function calls.
- * <ol>
- * <li> The cursor offset is never at the end of a brace.  If movement
- * or insertion puts it there, the cursor is updated to point to the 0
- * offset of the next brace.
- * <li> Quoting information is invalid inside valid comments.  When part
- * of the document becomes uncommented, the reduced model must update the
- * quoting information linearly in the newly revealed code.
- * <li> Quote shadowing and comment shadowing are mutually exclusive.
- * <li> There is no nesting of comment open characters. If // is encountered
- *      in the middle of a comment, it is treated as two separate slashes.
- *      Similar for /*.
- * </ol>
- * @author JavaPLT
- * @version $Id$
- */
+/** This class provides an implementation of the BraceReduction interface for brace matching.  In order to correctly
+  * match, this class keeps track of what is commented (line and block) and what is inside double quotes and keeps 
+  * this in mind when matching.  To avoid unnecessary complication, this class maintains a few invariants for its 
+  * consistent states, i.e., between top-level function calls.
+  * <ol>
+  * <li> The cursor offset is never at the end of a brace.  If movement or insertion puts it there, the cursor is 
+  * updated to point to the 0 offset of the next brace.
+  * <li> Quoting information is invalid inside valid comments.  When part of the document becomes uncommented, the
+  * reduced model must update the quoting information linearly in the newly revealed code.
+  * <li> Quote shadowing and comment shadowing are mutually exclusive.
+  * <li> There is no nesting of comment open characters. If // is encountered in the middle of a comment, it is 
+  * treated as two separate slashes.  Similar for /*.
+  * </ol>
+  * @author JavaPLT
+  * @version $Id$
+  */
 public class ReducedModelControl implements BraceReduction {
   ReducedModelBrace rmb;
   ReducedModelComment rmc;

@@ -462,11 +462,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       // package name. The parent of that is the root.
       parentDir = parentDir.getParentFile();
       if (parentDir == null) {
-//        Utilities.show("parent dir of first component is null!");
-        throw new RuntimeException("parent dir of first component is null!");
+        throw new RuntimeException("parent dir of first component of package name is null!");
       }
-      
-//      Utilities.show("Source root of " + sourceFile + " is: " + parentDir);
       return parentDir;
     }
     catch (IOException ioe) {
@@ -480,9 +477,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Delegates the compileAll command to the _state, a FileGroupingState.
    *  Synchronization is handled by the compilerModel.
    */
-//  public void compileAll() throws IOException {
-//    throw new UnsupportedOperationException("AbstractGlobalModel does not support compilation");
-//  }
  
   /** @param state the new file grouping state. */
   public void setFileGroupingState(FileGroupingState state) {
@@ -508,7 +502,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Notifies the project state that the project has been changed. */
   public void setProjectChanged(boolean changed) {
-//    Utilities.showDebug("Project Changed to " + changed);
     _state.setProjectChanged(changed);
 //    _notifier.projectModified();  // not currently used
   }
@@ -590,15 +583,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   /** @return the working directory for the Master JVM (editor and GUI). */
   public File getMasterWorkingDirectory() {
-    return new File(System.getProperty("user.home"));
+    File workDir = DrJava.getConfig().getSetting( OptionConstants.WORKING_DIRECTORY);
+    if (workDir != null && workDir != FileOption.NULL_FILE) return workDir;
+    return new File(System.getProperty("user.dir"));
   }
     
   /** @return the working directory for the Slave (Interactions) JVM */
-  public File getWorkingDirectory() {
-//    Utilities.show("getWorkingDirectory() returns " + _state.getWorkingDirectory());
-//    Utilities.show("isProjectActive() return " + isProjectActive());
-    return _state.getWorkingDirectory();
-  }
+  public File getWorkingDirectory() { return _state.getWorkingDirectory(); }
  
   /** Sets the working directory for the project; ignored in flat file model. */
   public void setWorkingDirectory(File f) {
@@ -607,9 +598,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setProjectChanged(true);
   }
  
-  public void cleanBuildDirectory()  {
-    _state.cleanBuildDirectory();
-  }
+  public void cleanBuildDirectory()  { _state.cleanBuildDirectory(); }
  
   public List<File> getClassFiles() { return _state.getClassFiles(); }
  

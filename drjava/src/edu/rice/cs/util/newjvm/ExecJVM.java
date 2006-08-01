@@ -194,16 +194,14 @@ public final class ExecJVM {
     errBuf.close();
   }
 
-  /**
-   * Prints the stdout and stderr of the given process, line by line.  Adds a
-   * message and tag to identify the source of the output.  Note that this code
-   * will print all available stdout before all stderr, since it is impossible
-   * to determine in which order lines were added to the respective buffers.
-   * @param theProc a Process object whose output will be handled
-   * @param msg an initial message to print before output
-   * @param sourceName a short string to identify the process
-   * @throws IOException if there is a problem with the streams
-   */
+  /** Prints the stdout and stderr of the given process, line by line.  Adds a message and tag to identify the source
+    * of the output.  Note that this code will print all available stdout before all stderr, since it is impossible
+    * to determine in which order lines were added to the respective buffers.
+    * @param theProc a Process object whose output will be handled
+    * @param msg an initial message to print before output
+    * @param sourceName a short string to identify the process
+    * @throws IOException if there is a problem with the streams
+    */
   public static void printOutput(Process theProc, String msg, String sourceName)
     throws IOException {
     // First, write out our opening message.

@@ -1807,7 +1807,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //      if (_aboutDialog == null) _aboutDialog = new AboutDialog(MainFrame.this);
       Point p = MainFrame.this.getLocation();
       _aboutDialog.setVisible(true);
-      //_aboutDialog.setLocation(p.x+(MainFrame.this.getWidth()-_aboutDialog.getWidth())/2, p.y+(MainFrame.this.getHeight()-_aboutDialog.getHeight())/2);
+//      _aboutDialog.setLocation(p.x+(MainFrame.this.getWidth() - _aboutDialog.getWidth())/2, 
+//      p.y+(MainFrame.this.getHeight()-_aboutDialog.getHeight())/2);
       
     }
   };
@@ -3171,7 +3172,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   public boolean getAllowKeyEvents() { return _allowKeyEvents; }
   
-  /** Toggles whether the debugger is enabled or disabled, and updates the display accordingly. Must execute in the 
+  /** Toggles whether the debugger is enabled or disabled, and updates the display accordingly.  Must execute in the 
    *  event thread. */
   public void debuggerToggle() {
     // Make sure the debugger is available
@@ -6914,7 +6915,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //          }
 //          finally { hourglassOff(); }
           if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) && 
-              (_model.getBuildDirectory()!=null)) {
+              (_model.getBuildDirectory() != null)) {
             _scanClassFiles();
           }
           _model.refreshActiveDocument();

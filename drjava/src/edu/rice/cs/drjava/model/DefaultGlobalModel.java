@@ -450,8 +450,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       
       _interactionsModel.addListener(_runMain);
       
+      File workDir;
+      if (isProjectActive()) workDir = getWorkingDirectory(); // use working directory for project
+      else workDir = getSourceRoot();  // use source root of current document
+      
       // Reset interactions to the soure root for this document; class will be executed when new interpreter is ready
-      resetInteractions(getSourceRoot());  
+      resetInteractions(workDir);  
     }
 
     /** Runs JUnit on the current document.  Requires that all source documents are compiled before proceeding. */

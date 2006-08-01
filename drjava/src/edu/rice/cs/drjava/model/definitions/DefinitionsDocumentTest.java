@@ -47,18 +47,16 @@ import junit.framework.TestSuite;
 import javax.swing.text.BadLocationException;
 import java.util.Vector;
 
-/**
- * Tests the functionality of the definitions document.
- * @version $Id$
+/** Tests the functionality of the definitions document.
+ *  @version $Id$
  */
 public final class DefinitionsDocumentTest extends DrJavaTestCase implements ReducedModelStates {
   private DefinitionsDocument _defModel;
   private GlobalEventNotifier _notifier;
 
-  /**
-   * Standard constructor.
-   * @param name of the test
-   */
+  /** Standard constructor.
+    * @param name of the test
+    */
   public DefinitionsDocumentTest(String name) {
     super(name);
   }

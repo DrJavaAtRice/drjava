@@ -46,9 +46,7 @@ public abstract class BraceReductionTestCase extends DrJavaTestCase {
   protected volatile ReducedModelControl model1;
   protected volatile ReducedModelControl model2;
 
-  /**
-   * Sets up the reduced model controls before each test.
-   */
+  /** Sets up the reduced model controls before each test. */
   protected void setUp() throws Exception {
     super.setUp();
     model0 = new ReducedModelControl();
