@@ -277,6 +277,7 @@ public class DrJava {
       return true;
     }
     catch(ClassNotFoundException e) { return false; }
+    catch(UnsupportedClassVersionError e) { return false; }
     catch(RuntimeException e) { return false; }
   }
   
