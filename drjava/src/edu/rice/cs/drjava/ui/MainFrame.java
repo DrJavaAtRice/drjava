@@ -7196,6 +7196,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                 _model.getCompilerModel().addListener(testAfterCompile);  // listener removes itself
                 _compileAll();
                 break;
+              case JOptionPane.CLOSED_OPTION:
               case JOptionPane.NO_OPTION:  // abort unit testing
                 _model.getJUnitModel().nonTestCase(true);  // cleans up
                 break;
