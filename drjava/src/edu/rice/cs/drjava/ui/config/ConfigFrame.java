@@ -787,6 +787,10 @@ public class ConfigFrame extends JFrame {
                                                   "Put the focus in the definitions pane after find/replace", this,
                                                   "<html>Whether to put the focus in the definitions pane after doing a find or replace operation.<br>"+
                                                   "If this is not selected, the focus will be in the Find/Replace pane.</html>"));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_CODE_PREVIEW_POPUPS, 
+                                                  "Show Code Preview Popups", this,
+                                                  "<html>Whether to show a popup window with a code preview when the mouse is hovering<br>"+
+                                                  "over an item in the Breakpoints, Bookmarks and Find All panes.</html>"));
     
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.BROWSER_HISTORY_MAX_SIZE,
                                                          "Maximum Size of Browser History", this,

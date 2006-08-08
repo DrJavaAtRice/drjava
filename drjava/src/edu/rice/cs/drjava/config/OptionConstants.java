@@ -1211,4 +1211,8 @@ public interface OptionConstants {
   /** Whether to show a notification popup when the first DrJava error occurs. */
   public static final BooleanOption DIALOG_DRJAVA_ERROR_POPUP_ENABLED =
     new BooleanOption("dialog.drjava.error.popup.enabled", Boolean.TRUE);
+
+  /** Whether to show the "code preview" popups in the RegionTreePanels (bookmarks, breakpoints, find all). */
+  public static final BooleanOption SHOW_CODE_PREVIEW_POPUPS =
+    new BooleanOption("show.code.preview.popups", Boolean.TRUE);
 }

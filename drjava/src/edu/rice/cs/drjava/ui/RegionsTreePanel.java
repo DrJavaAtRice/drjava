@@ -50,6 +50,7 @@ import java.awt.event.*;
 import java.awt.font.*;
 import java.awt.*;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.debug.*;
@@ -200,43 +201,45 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
       
       // set tooltip
       String tooltip = null;
-      if (leaf) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
-        if (node.getUserObject() instanceof RegionTreeUserObj) {
-          @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>)(node.getUserObject())).region();
-          
-          OpenDefinitionsDocument doc = r.getDocument();
-          doc.acquireReadLock();
-          try {
-            int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
-            int startOffset = doc.getOffset(lnr-3);
-            if (startOffset<0) { startOffset = 0; }
-            int endOffset = doc.getOffset(lnr+3);
-            if (endOffset<0) { endOffset = doc.getLength()-1; }
+      if (DrJava.getConfig().getSetting(OptionConstants.SHOW_CODE_PREVIEW_POPUPS).booleanValue()) {
+        if (leaf) {
+          DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
+          if (node.getUserObject() instanceof RegionTreeUserObj) {
+            @SuppressWarnings("unchecked") R r = ((RegionTreeUserObj<R>)(node.getUserObject())).region();
             
-            // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
-            String s = doc.getText(startOffset, endOffset-startOffset);
-            
-            // this highlights the actual region in red
-            int rStart = r.getStartOffset()-startOffset;
-            if (rStart<0) { rStart = 0; }
-            int rEnd = r.getEndOffset()-startOffset;
-            if (rEnd>s.length()) { rEnd = s.length(); }
-            if ((rStart<=s.length()) && (rEnd>=rStart)) {
-              String t1 = StringOps.encodeHTML(s.substring(0,rStart));
-              String t2 = StringOps.encodeHTML(s.substring(rStart,rEnd));
-              String t3 = StringOps.encodeHTML(s.substring(rEnd));
-              s = t1 + "<font color=#ff0000>" + t2 + "</font>" + t3;
+            OpenDefinitionsDocument doc = r.getDocument();
+            doc.acquireReadLock();
+            try {
+              int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
+              int startOffset = doc.getOffset(lnr-3);
+              if (startOffset<0) { startOffset = 0; }
+              int endOffset = doc.getOffset(lnr+3);
+              if (endOffset<0) { endOffset = doc.getLength()-1; }
+              
+              // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
+              String s = doc.getText(startOffset, endOffset-startOffset);
+              
+              // this highlights the actual region in red
+              int rStart = r.getStartOffset()-startOffset;
+              if (rStart<0) { rStart = 0; }
+              int rEnd = r.getEndOffset()-startOffset;
+              if (rEnd>s.length()) { rEnd = s.length(); }
+              if ((rStart<=s.length()) && (rEnd>=rStart)) {
+                String t1 = StringOps.encodeHTML(s.substring(0,rStart));
+                String t2 = StringOps.encodeHTML(s.substring(rStart,rEnd));
+                String t3 = StringOps.encodeHTML(s.substring(rEnd));
+                s = t1 + "<font color=#ff0000>" + t2 + "</font>" + t3;
+              }
+              else {
+                s = StringOps.encodeHTML(s);
+              }
+              tooltip = "<html><pre>"+s+"</pre></html>";
             }
-            else {
-              s = StringOps.encodeHTML(s);
-            }
-            tooltip = "<html><pre>"+s+"</pre></html>";
+            catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }
+            finally { doc.releaseReadLock(); }
+            setText(node.getUserObject().toString());
+            renderer = this;
           }
-          catch(javax.swing.text.BadLocationException ble) { tooltip = null; /* just don't give a tool tip */ }
-          finally { doc.releaseReadLock(); }
-          setText(node.getUserObject().toString());
-          renderer = this;
         }
       }
       setToolTipText(tooltip);
