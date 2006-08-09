@@ -1,17 +1,16 @@
 package edu.rice.cs.plt.iter;
 
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 
 /**
  * An iterable representing a finite sequence.  The sequence is defined by an initial
  * value and a successor function (described by a {@link Lambda}), along with a size that
- * truncates the (otherwise infinite) list.
+ * truncates the (otherwise infinite) list.  This is a trivial extension to 
+ * {@code TruncatedIterable}, but does add optimized implementations of {@link #size} and
+ * {@link #isFixed} (since the nature of the nested iterable is known).
  */
-public class FiniteSequenceIterable<T> extends AbstractIterable<T> implements SizedIterable<T> {
-  
-  private final T _initial;
-  private final Lambda<? super T, ? extends T> _successor;
-  private final int _size;
+public class FiniteSequenceIterable<T> extends TruncatedIterable<T> {
   
   /**
    * @param initial  The first value in the sequence
@@ -20,15 +19,7 @@ public class FiniteSequenceIterable<T> extends AbstractIterable<T> implements Si
    * @throws IllegalArgumentException  If size is less than {@code 0}
    */
   public FiniteSequenceIterable(T initial, Lambda<? super T, ? extends T> successor, int size) {
-    if (size < 0) { throw new IllegalArgumentException("size < 0"); }
-    _initial = initial;
-    _successor = successor;
-    _size = size;
-  }
-  
-  /** Create a new {@link FiniteSequenceIterator} based on this iterable's parameters */
-  public FiniteSequenceIterator<T> iterator() {
-    return new FiniteSequenceIterator<T>(_initial, _successor, _size);
+    super(new SequenceIterable<T>(initial, successor), size);
   }
   
   public int size() { return _size; }
@@ -62,6 +53,11 @@ public class FiniteSequenceIterable<T> extends AbstractIterable<T> implements Si
     else {
       return new FiniteSequenceIterable<Integer>(start, Lambda.DECREMENT_INT, start-end+1);
     }
+  }
+  
+  /** Create a sequence containing {@code copies} instances of the given value */
+  public static <T> FiniteSequenceIterable<T> makeCopies(T value, int copies) {
+    return new FiniteSequenceIterable<T>(value, LambdaUtil.<T>identity(), copies);
   }
   
 }

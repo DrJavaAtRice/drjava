@@ -111,33 +111,36 @@ public class TotalMap<K, V> {
    * invoke the lambda.
    */
   public void revertAll() { _overrides.clear(); }
+  
+  /** Get the size of the cache -- the number of overridden values */
+  public int cacheSize() { return _overrides.size(); }
     
   /** Call the constructor (allows the type arguments to be inferred) */
-  public <K, V> TotalMap<K, V> make() { return new TotalMap<K, V>(); }
+  public static <K, V> TotalMap<K, V> make() { return new TotalMap<K, V>(); }
   
   /** Call the constructor (allows the type arguments to be inferred) */
-  public <K, V> TotalMap<K, V> make(Lambda<? super K, ? extends V> lambda) {
+  public static <K, V> TotalMap<K, V> make(Lambda<? super K, ? extends V> lambda) {
     return new TotalMap<K, V>(lambda);
   }
   
   /** Call the constructor (allows the type arguments to be inferred) */
-  public <K, V> TotalMap<K, V> make(Lambda<? super K, ? extends V> lambda, boolean cache) {
+  public static <K, V> TotalMap<K, V> make(Lambda<? super K, ? extends V> lambda, boolean cache) {
     return new TotalMap<K, V>(lambda, cache);
   }
   
   /** Call the constructor (allows the type arguments to be inferred) */
-  public <K, V> TotalMap<K, V> make(Map<? super K, V> overrides) {
+  public static <K, V> TotalMap<K, V> make(Map<? super K, V> overrides) {
     return new TotalMap<K, V>(overrides);
   }
   
   /** Call the constructor (allows the type arguments to be inferred) */
-  public <K, V> TotalMap<K, V> make(Lambda<? super K, ? extends V> lambda, 
+  public static <K, V> TotalMap<K, V> make(Lambda<? super K, ? extends V> lambda, 
                                     Map<? super K, V> overrides) {
     return new TotalMap<K, V>(lambda, overrides);
   }
   
   /** Call the constructor (allows the type arguments to be inferred) */
-  public <K, V> TotalMap<K, V> make(Lambda<? super K, ? extends V> lambda, 
+  public static <K, V> TotalMap<K, V> make(Lambda<? super K, ? extends V> lambda, 
                                     Map<? super K, V> overrides, boolean cache) {
     return new TotalMap<K, V>(lambda, overrides, cache);
   }

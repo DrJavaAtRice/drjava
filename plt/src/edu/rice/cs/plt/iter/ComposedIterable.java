@@ -64,6 +64,27 @@ public class ComposedIterable<T> extends AbstractIterable<T> implements SizedIte
   public int size() { return _size.value(); }
   public boolean isFixed() { return _fixed; }
   
+  /**
+   * Determine the last value in the iterable.  This implementation will usually be faster than
+   * the general approach of iterating through the entire list -- for a balanced
+   * {@code ComposedIterable} tree, it takes log(n) time; if the right subtree is a singleton, 
+   * the result is computed trivially.  (Note that the approach used avoids recursion in order 
+   * to prevent a stack overflow.)
+   */
+  public T last() {
+    Iterable<? extends T> lastIterable;
+    if (IterUtil.isEmpty(_i2)) { lastIterable = _i1; }
+    else { lastIterable = _i2; }
+    
+    while (lastIterable instanceof ComposedIterable<?>) {
+      ComposedIterable<? extends T> cast = (ComposedIterable<? extends T>) lastIterable;
+      if (IterUtil.isEmpty(cast._i2)) { lastIterable = cast._i1; }
+      else { lastIterable = cast._i2; }
+    }
+    
+    return IterUtil.last(lastIterable);
+  }
+  
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> ComposedIterable<T> make(Iterable<? extends T> i1, Iterable<? extends T> i2) {
     return new ComposedIterable<T>(i1, i2);

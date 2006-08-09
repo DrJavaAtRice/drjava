@@ -585,7 +585,7 @@ public class RecurUtil {
   /** An implementation of {@link Class#isAnonymousClass}, which is unavailable prior to Java 5.0 */
   private static boolean isAnonymousClass(Class<?> c) {
     String name = c.getName();
-    String nameEnd = name.substring(name.lastIndexOf('$') + 1);
+    String nameEnd = name.substring(name.lastIndexOf('$') + 1); // index is -1 if there is none
     for (int i = 0; i < nameEnd.length(); i++) {
       if (Character.isJavaIdentifierStart(nameEnd.charAt(i))) { return false; }
     }

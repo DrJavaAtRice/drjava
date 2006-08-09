@@ -10,17 +10,20 @@ import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
 
 /**
- * A stack used to store the arguments of a recursive invocation in order to prevent
+ * <p>A stack used to store the arguments of a recursive invocation in order to prevent
  * infinite recursion.  By checking that a given argument has not been used previously before
  * recurring, a client can prevent infinite recursion in some circumstances (such as
- * when traversing an infinite, immutable data structure).  The client may either choose
- * to explicity check for containment, {@link #push} the argument, recur, and then 
- * {@link #pop}, or invoke one of a variety of lambda-based methods that perform these
- * bookkeeping tasks automatically.  In the latter case, when an exception occurs between
- * a {@code push} and a matching {@code pop}, the {@code pop} is guaranteed to execute before 
- * the exception propagates upward.  Thus, clients who do not directly invoke {@link #push}
- * and {@link #pop} may assume that the stack is always in a consistent state.
+ * when traversing an infinite, immutable data structure).</p>
  * 
+ * <p>The client may either choose to explicity check for containment, {@link #push} the 
+ * argument, recur, and then {@link #pop}, or invoke one of a variety of lambda-based 
+ * methods that perform these bookkeeping tasks automatically.  In the latter case, when an 
+ * exception occurs between a {@code push} and a matching {@code pop}, the {@code pop} is 
+ * guaranteed to execute before the exception propagates upward.  Thus, clients who do not 
+ * directly invoke {@link #push} and {@link #pop} may assume that the stack is always in a 
+ * consistent state.</p>
+ * 
+ * @see PrecomputedRecursionStack
  * @see RecursionStack2
  * @see RecursionStack3
  * @see RecursionStack4

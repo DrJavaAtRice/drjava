@@ -8,6 +8,7 @@ import java.io.IOException;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.tuple.*;
 import edu.rice.cs.plt.recur.RecurUtil;
+import edu.rice.cs.plt.collect.ConsList;
 
 /**
  * A collection of static methods operating on iterables.
@@ -21,6 +22,38 @@ public class IterUtil {
   public static boolean isEmpty(Iterable<?> iter) { 
     if (iter instanceof Collection<?>) { return ((Collection<?>) iter).isEmpty(); }
     else { return ! iter.iterator().hasNext(); }
+  }
+  
+  /**
+   * Evaluates to the first value in the given iterable.
+   * @throws NoSuchElementException  If the iterable is empty
+   */
+  public static <T> T first(Iterable<? extends T> iter) {
+    return iter.iterator().next();
+  }
+  
+  /**
+   * Evaluates to the last value in the given iterable.  With the exception of some special cases
+   * (properly designed {@link List}s or {@link ComposedIterable}s), this operation takes time on 
+   * the order of the length of the list.
+   * @throws NoSuchElementException  If the iterable is empty
+   */
+  public static <T> T last(Iterable<? extends T> iter) {
+    if (iter instanceof List<?>) {
+      List<? extends T> l = (List<? extends T>) iter;
+      int size = l.size();
+      if (size == 0) { throw new NoSuchElementException(); }
+      return l.get(size - 1);
+    }
+    else if (iter instanceof ComposedIterable<?>) {
+      return ((ComposedIterable<? extends T>) iter).last();
+    }
+    else {
+      Iterator<? extends T> i = iter.iterator();
+      T result = i.next();
+      while (i.hasNext()) { result = i.next(); }
+      return result;
+    }
   }
   
   /**
@@ -39,10 +72,32 @@ public class IterUtil {
     }
   }
   
+  /**
+   * @return  The size of the given iterable, or bound -- whichever is less.  This allows
+   *          a size to be computed where the iterable may be infinite.  Where possible 
+   *          (when {@code iter} is a {@code SizedIterable} or a {@code Collection}), this is 
+   *          a potentially constant-time operation; otherwise, it is linear in the size of 
+   *          {@code iter} (unless that size is greater than {@code bound}).  Note that if
+   *          a sized iterable computes its size by invoking {@link #sizeOf(Iterable)}, the
+   *          nested call will not safely handle an infinitely-sized iterable.
+   */
+  public static int sizeOf(Iterable<?> iter, int bound) {
+    if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).size(); }
+    else if (iter instanceof Collection<?>) { return ((Collection<?>) iter).size(); }
+    else {
+      int result = 0;
+      for (Object o : iter) {
+        result++;
+        if (result >= bound) { return bound; }
+      }
+      return result;
+    }
+  }
+  
   /** @return  {@code true} iff the given iterable is known to have a fixed size */
   public static boolean isFixed(Iterable<?> iter) {
     if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).isFixed(); }
-    else if (iter instanceof Collection<?>) { return isFixed((Collection<?>) iter); }
+    else if (iter instanceof Collection<?>) { return isFixedCollection((Collection<?>) iter); }
     else { return false; }
   }
   
@@ -117,11 +172,12 @@ public class IterUtil {
    * a {@link SnapshotIterable} can be used instead).
    */
   public static <T> SizedIterable<T> asSizedIterable(final Collection<T> coll) {
-    return new SizedIterable<T>() {
+    class Wrapper extends AbstractIterable<T> implements SizedIterable<T> {
       public Iterator<T> iterator() { return coll.iterator(); }
       public int size() { return coll.size(); }
       public boolean isFixed() { return isFixedCollection(coll); }
-    };
+    }
+    return new Wrapper();
   }
   
   /**
@@ -135,6 +191,22 @@ public class IterUtil {
     else {
       LinkedList<T> result = new LinkedList<T>();
       for (T e : iter) { result.add(e); }
+      return result;
+    }
+  }
+  
+  /**
+   * Make a {@link ConsList} with the given elements.  If the input <em>is</em> a {@code ConsList},
+   * casts it as such; otherwise, creates a new list.  Of course, since ConsLists are immutable,
+   * subsequent changes made to {@code iter} will not be reflected in the result.
+   */
+  public static <T> ConsList<T> asConsList(Iterable<T> iter) {
+    if (iter instanceof ConsList<?>) { return (ConsList<T>) iter; }
+    else {
+      ConsList<T> result = ConsList.empty();
+      for (T elt : ReverseIterable.make(iter)) {
+        result = ConsList.cons(elt, result);
+      }
       return result;
     }
   }
@@ -281,6 +353,22 @@ public class IterUtil {
       if (pred.value(i1.next(), i2.next(), i3.next(), i4.next())) { return true; }
     }
     return false;
+  }
+  
+  /**
+   * Split the given iterable into two at the given index.  The first {@code index} values in
+   * {@code iter} will belong to the first half; the rest will belong to the second half.
+   * Where there are less than {@code index} values in {@code iter}, the first half will contain
+   * them all and the second half will be empty.  Note that the result is a snapshot -- later
+   * modifications to {@code iter} will not be reflected.
+   */
+  public static <T> Pair<Iterable<T>, Iterable<T>> split(Iterable<? extends T> iter, final int index) {
+    Iterator<? extends T> iterator = iter.iterator();
+    Iterable<T> left = EmptyIterable.make();
+    for (int i = 0; i < index && iterator.hasNext(); i++) {
+      left = ComposedIterable.make(left, iterator.next());
+    }
+    return new Pair<Iterable<T>, Iterable<T>>(left, new SnapshotIterable<T>(iterator));
   }
   
   /** @return  An iterable containing the values of the given thunks */
@@ -610,7 +698,7 @@ public class IterUtil {
   
   /** @return  An iterable that traverses the given array */
   public static <T> SizedIterable<T> arrayIterable(final T[] array) {
-    return new SizedIterable<T>() {
+    class Wrapper extends AbstractIterable<T> implements SizedIterable<T> {
       public int size() { return array.length; }
       
       public boolean isFixed() { return true; }
@@ -621,12 +709,13 @@ public class IterUtil {
           protected T get(int i) { return array[i]; }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
     
   /** @return  An iterable that traverses the given array */
   public static SizedIterable<Boolean> arrayIterable(final boolean[] array) {
-    return new SizedIterable<Boolean>() {
+    class Wrapper extends AbstractIterable<Boolean> implements SizedIterable<Boolean> {
       public int size() { return array.length; }
       
       public boolean isFixed() { return true; }
@@ -637,12 +726,13 @@ public class IterUtil {
           protected Boolean get(int i) { return array[i]; }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
     
   /** @return  An iterable that traverses the given array */
   public static SizedIterable<Character> arrayIterable(final char[] array) {
-    return new SizedIterable<Character>() {
+    class Wrapper extends AbstractIterable<Character> implements SizedIterable<Character> {
       public int size() { return array.length; }
       
       public boolean isFixed() { return true; }
@@ -653,12 +743,13 @@ public class IterUtil {
           protected Character get(int i) { return array[i]; }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
     
   /** @return  An iterable that traverses the given array */
   public static SizedIterable<Byte> arrayIterable(final byte[] array) {
-    return new SizedIterable<Byte>() {
+    class Wrapper extends AbstractIterable<Byte> implements SizedIterable<Byte> {
       public int size() { return array.length; }
       
       public boolean isFixed() { return true; }
@@ -669,12 +760,13 @@ public class IterUtil {
           protected Byte get(int i) { return array[i]; }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
     
   /** @return  An iterable that traverses the given array */
   public static SizedIterable<Short> arrayIterable(final short[] array) {
-    return new SizedIterable<Short>() {
+    class Wrapper extends AbstractIterable<Short> implements SizedIterable<Short> {
       public int size() { return array.length; }
       
       public boolean isFixed() { return true; }
@@ -685,12 +777,13 @@ public class IterUtil {
           protected Short get(int i) { return array[i]; }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
     
   /** @return  An iterable that traverses the given array */
   public static SizedIterable<Integer> arrayIterable(final int[] array) {
-    return new SizedIterable<Integer>() {
+    class Wrapper extends AbstractIterable<Integer> implements SizedIterable<Integer> {
       public int size() { return array.length; }
       
       public boolean isFixed() { return true; }
@@ -701,12 +794,13 @@ public class IterUtil {
           protected Integer get(int i) { return array[i]; }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
     
   /** @return  An iterable that traverses the given array */
   public static SizedIterable<Long> arrayIterable(final long[] array) {
-    return new SizedIterable<Long>() {
+    class Wrapper extends AbstractIterable<Long> implements SizedIterable<Long> {
       public int size() { return array.length; }
       
       public boolean isFixed() { return true; }
@@ -717,12 +811,13 @@ public class IterUtil {
           protected Long get(int i) { return array[i]; }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
     
   /** @return  An iterable that traverses the given array */
   public static SizedIterable<Float> arrayIterable(final float[] array) {
-    return new SizedIterable<Float>() {
+    class Wrapper extends AbstractIterable<Float> implements SizedIterable<Float> {
       public int size() { return array.length; }
       
       public boolean isFixed() { return true; }
@@ -733,12 +828,13 @@ public class IterUtil {
           protected Float get(int i) { return array[i]; }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
     
   /** @return  An iterable that traverses the given array */
   public static SizedIterable<Double> arrayIterable(final double[] array) {
-    return new SizedIterable<Double>() {
+    class Wrapper extends AbstractIterable<Double> implements SizedIterable<Double> {
       public int size() { return array.length; }
       
       public boolean isFixed() { return true; }
@@ -749,12 +845,13 @@ public class IterUtil {
           protected Double get(int i) { return array[i]; }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
   
   /** @return  An iterable that traverses the given {@link CharSequence} */
   public static SizedIterable<Character> charSequenceIterable(final CharSequence sequence) {
-    return new SizedIterable<Character>() {
+    class Wrapper extends AbstractIterable<Character> implements SizedIterable<Character> {
       public int size() { return sequence.length(); }
       
       public boolean isFixed() { return false; }
@@ -765,7 +862,8 @@ public class IterUtil {
           protected Character get(int i) { return sequence.charAt(i); }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
   
   /** 
@@ -774,7 +872,7 @@ public class IterUtil {
    *          that {@code String}s are immutable
    */
   public static SizedIterable<Character> charSequenceIterable(final String sequence) {
-    return new SizedIterable<Character>() {
+    class Wrapper extends AbstractIterable<Character> implements SizedIterable<Character> {
       public int size() { return sequence.length(); }
       
       public boolean isFixed() { return true; }
@@ -785,7 +883,8 @@ public class IterUtil {
           protected Character get(int i) { return sequence.charAt(i); }
         };
       }
-    };
+    }
+    return new Wrapper();
   }
   
   /**
