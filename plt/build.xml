@@ -12,13 +12,11 @@
 
   <property environment="env" />
   <property name="java14-home" value="${env.JAVA14_HOME}" />
+  <property name="clover-jar" value="${env.CLOVER_JAR}" />
   
   
   <!-- By default, don't filter tests on anything -->
   <property name="test-spec" value="" />
-  
-  <!-- By default, delete jar files when cleaning -->
-  <property name="delete-jars" value="yes" />
   
   <!-- By default, clean can fail -->
   <property name="clean-can-fail" value="yes" />
@@ -39,7 +37,12 @@
   <taskdef name="retroweaver" classpath="lib/buildlib/retroweaver-all-1.2.3.jar" 
            classname="com.rc.retroweaver.ant.RetroWeaverTask" />
   
+  <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
+       as long as it's not, we can use this extension from the Clover developers. -->
+  <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
+  <extendclasspath path="lib/buildlib/junit.jar" />
 
+                 
   <!-- ***********
        Help Target
        *********** -->
@@ -54,6 +57,8 @@
     <echo message="variables should be defined:" />
     <echo message="JAVA14_HOME: Home folder of the Java 1.4 JRE or J2SDK" />
     <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
+    <echo message="CLOVER_JAR: Location of the Clover jar file (necessary only if " />
+    <echo message="            Clover tasks will be used)"/>
     <echo message="" />
     <echo message="Additionally, Ant must be run under Java 5.0 or later.  If that is " />
     <echo message="not the system default, it may be set for Ant by using JAVA_HOME." />
@@ -134,6 +139,7 @@
         <include name="**/*.png" />
         <include name="**/*.jpg" />
         <include name="**/*.jpeg" />
+        <include name="**/*.properties" />
         <!-- Additional resource files should be listed here -->
       </fileset>
     </copy>
@@ -178,6 +184,7 @@
     <pathconvert property="retroweaver-base-classpath" dirsep="${file.separator}" pathsep="${path.separator}">
       <path>
         <pathelement location="${java14-runtime}" />
+        <pathelement location="${clover-jar}" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </path>
@@ -193,6 +200,7 @@
     <pathconvert property="retroweaver-test-classpath" dirsep="${file.separator}" pathsep="${path.separator}">
       <path>
         <pathelement location="${java14-runtime}" />
+        <pathelement location="${clover-jar}" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
@@ -222,6 +230,7 @@
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
@@ -240,6 +249,7 @@
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
@@ -257,6 +267,7 @@
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
@@ -349,29 +360,62 @@
       <!-- Additional external library APIs may be listed here -->
     </javadoc>
   </target>
+  
+  
+  <target name="clover" depends="clover-15" description="Shortcut for 'clover-15'">
+  </target>
+  
+  <target name="clover-15" depends="clean, setup-clover, test-15, report-clover" 
+          description="Generate a Clover test coverage report (using 'test-15')" />
+  
+  <target name="clover-14" depends="clean, setup-clover, test-14, report-clover" 
+          description="Generate a Clover test coverage report (using 'test-14')" />
+  
+  <target name="clover-14-in-15" depends="clean, setup-clover, test-14-in-15, report-clover" 
+          description="Generate a Clover test coverage report (using 'test-14-in-15')" />
+  
+  <target name="report-clover" depends="resolve-version-tag">
+    <echo message="Generating Clover report" />
+    <clover-report>
+      <current outfile="docs/clover" title="${readable-project-name} Test Coverage (${version-tag})">
+        <format type="html" />
+      </current>
+    </clover-report>
+    <antcall target="clean-intermediate"> <!-- Remove instrumented class files -->
+      <param name="clean-can-fail" value="no" />
+    </antcall>
+  </target>
+
+  <target name="setup-clover">
+    <extendclasspath path="${clover-jar}" />
+    <taskdef resource="clovertasks" classpath="${clover-jar}" />
+    <mkdir dir="cloverdb" />
+    <clover-setup initString="cloverdb/clover.db">
+      <files>
+        <exclude name="**/*Test.java" />
+        <exclude name="**/*TestCase.java" />
+        <!-- Additional test sources should be listed here -->
+      </files>
+    </clover-setup>
+  </target>
 
   
-  <!-- ************
-       Clean Target
-       ************ -->
+  <!-- *************
+       Clean Targets
+       ************* -->
        
-  <target name="clean" unless="skip-clean"
+  <target name="clean" depends="clean-intermediate, clean-products"
           description="Remove all build products; the result should match the intended Subversion contents">
+  </target>
 
-    <echo message="Deleting all build products" />
+  <target name="clean-intermediate" unless="skip-clean">
+    <echo message="Deleting all intermediate build products" />
     
     <delete dir="classes" failonerror="${clean-can-fail}" />
-    <delete dir="docs" failonerror="${clean-can-fail}" />
-    
-    <condition property="do-delete-jars">
-      <istrue value="${delete-jars}" />
-    </condition>
+    <delete dir="cloverdb" failonerror="${clean-can-fail}" />
+
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="${basedir}" defaultexcludes="no">
-        <include name="*.jar" if="do-delete-jars" />
-        <include name="*.zip" if="do-delete-jars" />
-        <include name="*.tar.gz" if="do-delete-jars" />
-        <include name="${ant.project.name}-*" />
         <include name="src/**/*.class" />
         <!-- We could get rid of backups, but "update" ignores them, so they're okay.
              (doesn't work if defaultexcludes is "yes") -->
@@ -383,6 +427,21 @@
       </fileset>
     </delete>
     
+  </target>
+    
+  <target name="clean-products" unless="skip-clean">
+    <echo message="Deleting all final build products" />
+    
+    <delete dir="docs" failonerror="${clean-can-fail}" />
+    
+    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
+      <fileset dir="${basedir}" defaultexcludes="no">
+        <include name="*.jar" />
+        <include name="*.zip" />
+        <include name="*.tar.gz" />
+        <include name="${ant.project.name}-*" />
+      </fileset>
+    </delete>
   </target>
   
 
@@ -402,8 +461,7 @@
   
   <target name="commit" depends="update, build" 
           description="Commit source to the Subversion archive (after building)">
-    <antcall target="clean"> <!-- Clean up after the latest build -->
-      <param name="delete-jars" value="no" />
+    <antcall target="clean-intermediate"> <!-- Clean up after the latest build -->
       <param name="clean-can-fail" value="no" />
     </antcall>
     <exec executable="svn" failonerror="yes">
@@ -494,6 +552,16 @@
     <echo message="Creating ${version-tag}-javadoc.zip" />
     <zip destfile="${version-tag}-javadoc.zip">
       <zipfileset dir="docs/javadoc" prefix="${version-tag}/javadoc" />
+    </zip>
+  </target>
+  
+  <!-- We don't include this in the standard release process, because we don't want to
+       include instrumented files in the release, and because Clover must be run on a
+       licensed machine -->
+  <target name="clover-zip" depends="clover-14-in-15, resolve-version-tag">
+    <echo message="Creating ${version-tag}-clover.zip" />
+    <zip destfile="${version-tag}-clover.zip">
+      <zipfileset dir="docs/clover" prefix="${version-tag}/clover" />
     </zip>
   </target>
   
@@ -592,6 +660,11 @@
   <target name="assert-jar-exists">
     <available property="jar-exists" file="${ant.project.name}.jar" />
     <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
+  </target>
+  
+  <target name="assert-clover-jar-exists">
+    <available property="clover-jar-exists" file="${clover-jar}" />
+    <fail message="${clover-jar} does not exist" unless="clover-jar-exists" />
   </target>
   
   <target name="resolve-development-value">
