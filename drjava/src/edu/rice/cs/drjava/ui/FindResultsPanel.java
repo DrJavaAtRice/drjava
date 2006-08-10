@@ -65,6 +65,7 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 /**
  * Panel for displaying find results.
@@ -173,6 +174,11 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
     };
     _removeButton = new JButton(removeAction);
 
+    // "Highlight" label panel
+    final JPanel highlightPanel = new JPanel();
+    final Color normalColor = highlightPanel.getBackground();
+    highlightPanel.add(new JLabel("Highlight:"));
+    
     _colorBox = new JComboBox();    
     for(int i=0; i<OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       _colorBox.addItem(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[i]));
@@ -187,6 +193,10 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
         _lastIndex = _colorBox.getSelectedIndex();
         if (_lastIndex<OptionConstants.FIND_RESULTS_COLORS.length) {
           ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
+          highlightPanel.setBackground(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_lastIndex]));
+        }
+        else {
+          highlightPanel.setBackground(normalColor);
         }
         _frame.refreshFindResultsHighlightPainter(FindResultsPanel.this, 
                                                   DefinitionsPane.FIND_RESULTS_PAINTERS[_lastIndex]);
@@ -209,7 +219,7 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
       _goToButton, 
         _bookmarkButton,
         _removeButton,
-        new JLabel("Highlight:"),
+        highlightPanel,
         _colorBox
     };
     
