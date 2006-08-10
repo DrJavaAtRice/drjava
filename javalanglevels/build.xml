@@ -42,6 +42,10 @@
   <!-- ASTGen task, used to generate Java source representing an AST with visitors from a single .ast file -->
   <taskdef name="astgen" classpath="lib/buildlib/astgen.jar" classname="edu.rice.cs.astgen.AntTask" />
 
+  <!-- Extension that defines the "extendclasspath" task -->
+  <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
+
+  <extendclasspath path="lib/buildlib/junit.jar" />
 
   <!-- ***********
        Help Target
@@ -247,6 +251,7 @@
     <pathconvert property="retroweaver-base-classpath" dirsep="${file.separator}" pathsep="${path.separator}">
       <path>
         <pathelement location="${java14-runtime}" />
+        <pathelement location="${clover-jar}" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
         <!-- We have to add tests, since the tests are inner classes, and the verifier
@@ -266,6 +271,7 @@
     <pathconvert property="retroweaver-test-classpath" dirsep="${file.separator}" pathsep="${path.separator}">
       <path>
         <pathelement location="${java14-runtime}" />
+        <pathelement location="${clover-jar}" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
@@ -332,7 +338,7 @@
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
-        <pathelement location="lib/buildlib/clover.jar" />
+        <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
@@ -493,11 +499,11 @@
   </target>
 
   <target name="setup-clover" depends="assert-clover-jar-exists">
+    <extendclasspath path="${clover-jar}" />
     <taskdef resource="clovertasks" classpath="${clover-jar}" />
-    <delete file="docs/clover.db" />
-    <clover-setup initString="docs/clover.db">
+    <mkdir dir="cloverdb" />
+    <clover-setup initString="cloverdb/clover.db">
       <files>
-        <!-- *** If there are other tests sources, they should be added here *** -->
         <exclude name="**/*Test.java" />
         <exclude name="**/*TestCase.java" />
         <!-- Additional test sources should be listed here -->
@@ -518,6 +524,7 @@
     <echo message="Deleting all intermediate build products" />
     
     <delete dir="classes" failonerror="${clean-can-fail}" />
+    <delete dir="cloverdb" failonerror="${clean-can-fail}" />
 
     <delete failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
