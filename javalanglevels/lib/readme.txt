@@ -31,7 +31,10 @@ retroweaver-rt-1.2.3.jar: Retroweaver 1.2.3 (the runtime classes package)
 
 buildlib/astgen.jar: astgen-20060227-1521
 
-buildlib/retroweaver-all-1.2.3.jar: Retroweaver 1.2.3
+buildlib/cenquatasks.jar: Distributed with Clover 1.3.9
 
 buildlib/junit.jar: JUnit 3.8.1
+
+buildlib/retroweaver-all-1.2.3.jar: Retroweaver 1.2.3
+
 

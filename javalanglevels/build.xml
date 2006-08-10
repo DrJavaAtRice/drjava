@@ -42,9 +42,9 @@
   <!-- ASTGen task, used to generate Java source representing an AST with visitors from a single .ast file -->
   <taskdef name="astgen" classpath="lib/buildlib/astgen.jar" classname="edu.rice.cs.astgen.AntTask" />
 
-  <!-- Extension that defines the "extendclasspath" task -->
+  <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
+       as long as it's not, we can use this extension from the Clover developers. -->
   <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
-
   <extendclasspath path="lib/buildlib/junit.jar" />
 
   <!-- ***********
@@ -61,9 +61,9 @@
     <echo message="variables should be defined:" />
     <echo message="JAVA14_HOME: Home folder of the Java 1.4 JRE or J2SDK" />
     <echo message="JAVACC_HOME: Top-level directory of JavaCC (version 4.0 or later)" />
+    <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
     <echo message="CLOVER_JAR: Location of the Clover jar file (necessary only if " />
     <echo message="            Clover tasks will be used)"/>
-    <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
     <echo message="" />
     <echo message="Additionally, Ant must be run under Java 5.0 or later.  If that is " />
     <echo message="not the system default, it may be set for Ant by using JAVA_HOME." />
@@ -355,7 +355,7 @@
   </target>
   
   <target name="run-15" depends="compile-15, assert-15"
-          description="Run the DrJava 5.0 classes under Java 5.0 (after compiling)">
+          description="Run the main class (5.0 version) under Java 5.0 (after compiling)">
     <echo message="Running the DrJava application (5.0 classes in Java 5.0)" />
     <java classname="${main-class}" fork="yes" spawn="yes">
       <classpath>
@@ -366,7 +366,7 @@
   </target>
         
   <target name="run-14" depends="compile-14, resolve-java14-exec"
-          description="Run the DrJava 1.4 classes under Java 1.4 (after compiling)">
+          description="Run the main class (1.4 version) under Java 1.4 (after compiling)">
     <echo message="Running the DrJava application (1.4 classses in Java 1.4)" />
     <java classname="${main-class}" jvm="${java14-exec}" fork="yes" spawn="yes">
       <classpath>
@@ -377,7 +377,7 @@
   </target>
         
   <target name="run-14-in-15" depends="compile-14, assert-15"
-          description="Run the DrJava 1.4 classes under Java 5.0 (after compiling)">
+          description="Run the main class (1.4 version) under Java 5.0 (after compiling)">
     <echo message="Running the DrJava application (1.4 classses in Java 5.0)" />
     <java classname="${main-class}" fork="yes" spawn="yes">
       <classpath>
@@ -544,7 +544,6 @@
     
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="${basedir}" defaultexcludes="no">
-        <include name="classes" />
         <include name="src/**/*.class" />
         <!-- We could get rid of backups, but "update" ignores them, so they're okay.
              (doesn't work if defaultexcludes is "yes") -->
