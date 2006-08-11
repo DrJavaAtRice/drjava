@@ -51,7 +51,7 @@ import edu.rice.cs.drjava.model.FindReplaceMachine;
 import edu.rice.cs.drjava.model.FindResult;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.drjava.model.DocumentRegion;
-import edu.rice.cs.drjava.model.SimpleDocumentRegion;
+import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.FileMovedException;
 
@@ -61,6 +61,7 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.StringOps;
 
 /** The tabbed panel that handles requests for finding and replacing text.
  *  @version $Id$
@@ -122,7 +123,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         if (title.length()>10) { title = title.substring(0,10)+"..."; }
         title = "Find: "+title;
         
-        final RegionManager<DocumentRegion> rm = _model.createFindResultsManager();
+        final RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
         final FindResultsPanel panel = _frame.createFindResultsPanel(rm, title);
         
         _updateMachine();
@@ -169,13 +170,56 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             continue;
           }
           
+          final StringBuilder sb = new StringBuilder();
           doc.acquireReadLock();
           try {
             int endSel = fr.getFoundOffset();
             int startSel = endSel-_machine.getFindWord().length();
             final Position startPos = doc.createPosition(startSel);
             final Position endPos = doc.createPosition(endSel);
-            rm.addRegion(new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset()));
+            
+            // create excerpt string
+            int excerptEndSel = doc.getLineEndPos(endSel);
+            int excerptStartSel = doc.getLineStartPos(startSel);
+            int length = Math.min(120, excerptEndSel-excerptStartSel);
+            
+            // this highlights the actual region in red
+            int startRed = startSel - excerptStartSel;
+            int endRed = endSel - excerptStartSel;
+            String s = doc.getText(excerptStartSel, length);
+            
+            // change control characters and ones that may not be displayed to spaces
+            for(int i=0; i<s.length(); ++i) {
+              if ((s.charAt(i)<' ') || (s.charAt(i)>127)) { sb.append(' '); } else { sb.append(s.charAt(i)); }
+            }
+            s = sb.toString();
+            
+            // trim the front
+            for(int i=0; i<s.length(); ++i) {
+              if (!Character.isWhitespace(s.charAt(i))) {
+                break;
+              }
+              --startRed;
+              --endRed;
+            }
+            
+            // trim the end
+            s = s.trim();
+            
+            // bound startRed and endRed
+            if (startRed<0) { startRed = 0; }
+            if (startRed>s.length()) { startRed = s.length(); }
+            if (endRed<startRed) { endRed = startRed; }
+            if (endRed>s.length()) { endRed = s.length(); }
+          
+            // create the excerpt string
+            sb.setLength(0);
+            sb.append(StringOps.encodeHTML(s.substring(0, startRed)));
+            sb.append("<font color=#ff0000>");
+            sb.append(StringOps.encodeHTML(s.substring(startRed, endRed)));
+            sb.append("</font>");
+            sb.append(StringOps.encodeHTML(s.substring(endRed)));
+            rm.addRegion(new MovingDocumentRegion(doc, doc.getFile(), startPos, endPos, sb.toString()));
           }
           catch (FileMovedException fme) {
             throw new UnexpectedException(fme);
@@ -193,6 +237,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
             if (count>0) {
               _frame.showFindResultsPanel(panel);
+            }
+            else {
+              panel.freeResources();
             }
           }
         });

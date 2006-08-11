@@ -172,15 +172,15 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getBookmarkManager on a Dummy");
   }
   
-  public List<RegionManager<DocumentRegion>> getFindResultsManagers() {
+  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers() {
     throw new UnsupportedOperationException("Tried to call getFindResultsManagers on a Dummy");
   }
   
-  public RegionManager<DocumentRegion> createFindResultsManager() {
+  public RegionManager<MovingDocumentRegion> createFindResultsManager() {
     throw new UnsupportedOperationException("Tried to call createFindResultsManager on a Dummy");
   }
   
-  public void disposeFindResultsManager(RegionManager<DocumentRegion> rm) {
+  public void disposeFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
     throw new UnsupportedOperationException("Tried to call disposeFindResultsManager on a Dummy");
   }
   

@@ -144,8 +144,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private final FindReplacePanel _findReplace;
   private final BreakpointsPanel _breakpointsPanel;
   private final BookmarksPanel _bookmarksPanel;
-  private final LinkedList<Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>>> _findResults =
-    new LinkedList<Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>>>();
+  private final LinkedList<Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>>> _findResults =
+    new LinkedList<Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>>>();
   
   private volatile boolean _showDebugger;  // whether the supporting context is debugger capable
   
@@ -2129,26 +2129,26 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param rm the region manager that will contain the regions
    *  @param title the title for the panel
    *  @return new find results tab. */
-  public FindResultsPanel createFindResultsPanel(final RegionManager<DocumentRegion> rm, String title) {
+  public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm, String title) {
     final FindResultsPanel panel = new FindResultsPanel(this, rm, title);
-    final Hashtable<DocumentRegion, HighlightManager.HighlightInfo> highlights =
-      new Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
-    Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>> pair =
-      new Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>>(panel, highlights);
+    final Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
+      new Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>();
+    Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair =
+      new Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>>(panel, highlights);
     _findResults.add(pair);
     
     // hook highlighting listener to find results manager
-    rm.addListener(new RegionManagerListener<DocumentRegion>() {      
-      public void regionAdded(DocumentRegion r, int index) {
+    rm.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
+      public void regionAdded(MovingDocumentRegion r, int index) {
         DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
         highlights.put(r, bpPane.getHighlightManager().
                          addHighlight(r.getStartOffset(), r.getEndOffset(), panel.getSelectedPainter()));
       }
-      public void regionChanged(DocumentRegion r, int index) { 
+      public void regionChanged(MovingDocumentRegion r, int index) { 
         regionRemoved(r);
         regionAdded(r, index);
       }
-      public void regionRemoved(DocumentRegion r) {
+      public void regionRemoved(MovingDocumentRegion r) {
         HighlightManager.HighlightInfo highlight = highlights.get(r);
         if (highlight != null) highlight.remove();
         highlights.remove(r);
@@ -3035,9 +3035,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Set new painter for existing find results highlights. */
   void refreshFindResultsHighlightPainter(FindResultsPanel panel, 
                                           ReverseHighlighter.DefaultUnderlineHighlightPainter painter) {
-    for(Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
+    for(Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
       if (pair.getFirst()==panel) {
-        Hashtable<DocumentRegion, HighlightManager.HighlightInfo> highlights = pair.getSecond();
+        Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights = pair.getSecond();
         for(HighlightManager.HighlightInfo hi: highlights.values()) {
           hi.refresh(painter);
         }
@@ -6010,7 +6010,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             revalidateLineNums();
             if ((_breakpointsPanel != null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
             if ((_bookmarksPanel != null) && (_bookmarksPanel.isDisplayed())) { _bookmarksPanel.repaint(); }
-            for(Pair<FindResultsPanel,Hashtable<DocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
+            for(Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
               FindResultsPanel panel = pair.getFirst();
               if ((panel != null) && (panel.isDisplayed())) { panel.repaint(); }
             }

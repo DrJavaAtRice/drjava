@@ -294,15 +294,15 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public RegionManager<DocumentRegion> getBookmarkManager();
     
   /** @return managers for find result regions. */
-  public List<RegionManager<DocumentRegion>> getFindResultsManagers();
+  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers();
   
   /** Add a region manager for find results to this document.
    *  @param rm the global model's region manager */
-  public void addFindResultsManager(RegionManager<DocumentRegion> rm);
+  public void addFindResultsManager(RegionManager<MovingDocumentRegion> rm);
   
   /** Remove a manager for find results from this document.
    *  @param rm the global model's region manager. */
-  public void removeFindResultsManager(RegionManager<DocumentRegion> rm);
+  public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm);
   
   /** @return manager for browser history regions. */
   public RegionManager<DocumentRegion> getBrowserHistoryManager();

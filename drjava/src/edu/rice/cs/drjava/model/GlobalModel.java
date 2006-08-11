@@ -115,13 +115,13 @@ public interface GlobalModel extends ILoadDocuments {
   public RegionManager<DocumentRegion> getBookmarkManager();
   
   /** @return managers for find result regions. */
-  public List<RegionManager<DocumentRegion>> getFindResultsManagers();
+  public List<RegionManager<MovingDocumentRegion>> getFindResultsManagers();
   
   /** @return new manager for find result regions. */
-  public RegionManager<DocumentRegion> createFindResultsManager();
+  public RegionManager<MovingDocumentRegion> createFindResultsManager();
   
   /** Dispose a manager for find result regions. */
-  public void disposeFindResultsManager(RegionManager<DocumentRegion> rm);
+  public void disposeFindResultsManager(RegionManager<MovingDocumentRegion> rm);
   
   /** @return manager for browser history regions. */
   public RegionManager<DocumentRegion> getBrowserHistoryManager();

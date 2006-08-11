@@ -55,6 +55,7 @@ import javax.swing.border.MatteBorder;
 
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.MovingDocumentRegion;
 import edu.rice.cs.drjava.model.SimpleDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
@@ -72,12 +73,12 @@ import edu.rice.cs.drjava.config.OptionConstants;
  * This class is a swing view class and hence should only be accessed from the event-handling thread.
  * @version $Id$
  */
-public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
+public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected JButton _goToButton;
   protected JButton _bookmarkButton;
   protected JButton _removeButton;
   protected JComboBox _colorBox;
-  protected RegionManager<DocumentRegion> _regionManager;
+  protected RegionManager<MovingDocumentRegion> _regionManager;
   protected int _lastIndex;
   
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */
@@ -90,18 +91,18 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
    *  @param rm the region manager associated with this panel
    *  @param title for the panel
    */
-  public FindResultsPanel(MainFrame frame, RegionManager<DocumentRegion> rm, String title) {
+  public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> rm, String title) {
     super(frame, title);
     _regionManager = rm;
-    _regionManager.addListener(new RegionManagerListener<DocumentRegion>() {      
-      public void regionAdded(DocumentRegion r, int index) {
+    _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
+      public void regionAdded(MovingDocumentRegion r, int index) {
         addRegion(r);
       }
-      public void regionChanged(DocumentRegion r, int index) { 
+      public void regionChanged(MovingDocumentRegion r, int index) { 
         regionRemoved(r);
         regionAdded(r, index);
       }
-      public void regionRemoved(DocumentRegion r) {
+      public void regionRemoved(MovingDocumentRegion r) {
         removeRegion(r);
       }
     });
@@ -233,7 +234,7 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
   
   /** Turn the selected regions into bookmarks. */
   private void _bookmark() {
-    for (final DocumentRegion r: getSelectedRegions()) {
+    for (final MovingDocumentRegion r: getSelectedRegions()) {
       DocumentRegion bookmark = _model.getBookmarkManager().getRegionOverlapping(r.getDocument(),
                                                                                  r.getStartOffset(),
                                                                                  r.getEndOffset());
@@ -255,7 +256,7 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
   
   /** Remove the selected regions. */
   private void _remove() {
-    for (DocumentRegion r: getSelectedRegions()) {
+    for (MovingDocumentRegion r: getSelectedRegions()) {
       _regionManager.removeRegion(r);
     }
     if (_regionManager.getRegions().size()==0) { _close(); }
@@ -263,7 +264,7 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
 
   /** Update button state and text. */
   protected void updateButtons() {
-    ArrayList<DocumentRegion> regs = getSelectedRegions();
+    ArrayList<MovingDocumentRegion> regs = getSelectedRegions();
     _goToButton.setEnabled(regs.size()==1);
     _bookmarkButton.setEnabled(regs.size()>0);
     _removeButton.setEnabled(regs.size()>0);
@@ -296,6 +297,11 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
   /** Close the pane. */
   public void _close() {
     super._close();
+    freeResources();
+  }
+  
+  /** Free the resources; this can be used if the panel was never actually displayed. */
+  public void freeResources() {
     _regionManager.clearRegions();
     _model.disposeFindResultsManager(_regionManager);
     for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
@@ -308,49 +314,27 @@ public class FindResultsPanel extends RegionsTreePanel<DocumentRegion> {
 
   /** Factory method to create user objects put in the tree.
    *  If subclasses extend RegionTreeUserObj, they need to override this method. */
-  protected RegionTreeUserObj<DocumentRegion> makeRegionTreeUserObj(DocumentRegion r) {
+  protected RegionTreeUserObj<MovingDocumentRegion> makeRegionTreeUserObj(MovingDocumentRegion r) {
     return new FindResultsRegionTreeUserObj(r);
   }
 
   /** Class that gets put into the tree. The toString() method determines what's displayed in the three. */
-  protected static class FindResultsRegionTreeUserObj extends RegionTreeUserObj<DocumentRegion> {
-    public FindResultsRegionTreeUserObj(DocumentRegion r) { super(r); }
+  protected static class FindResultsRegionTreeUserObj extends RegionTreeUserObj<MovingDocumentRegion> {
+    protected int _lineNumber;
+    public FindResultsRegionTreeUserObj(MovingDocumentRegion r) {
+      super(r);
+      _lineNumber = _region.getDocument().getLineOfOffset(_region.getStartOffset())+1;
+    }
+//    public int lineNumber() {
+//      return _lineNumber;
+//    }
     public String toString() {
       final StringBuilder sb = new StringBuilder();
-      _region.getDocument().acquireReadLock();
-      try {
-        sb.append("<html>");
-        sb.append(lineNumber());
-        try {
-          sb.append(": ");
-          int endSel = _region.getDocument().getLineEndPos(_region.getEndOffset());
-          int startSel = _region.getDocument().getLineStartPos(_region.getStartOffset());
-          int length = Math.min(120, endSel-startSel);
-          
-          // this highlights the actual region in red
-          int startRed = _region.getStartOffset() - startSel;
-          int endRed = _region.getEndOffset() - startSel;
-          String s = _region.getDocument().getText(startSel, length);
-          for(int i=0; i<s.length(); ++i) {
-            if (!Character.isWhitespace(s.charAt(i))) {
-              break;
-            }
-            --startRed;
-            --endRed;
-          }
-          s = s.trim();
-          if (startRed<0) { startRed = 0; }
-          if (startRed>s.length()) { startRed = s.length(); }
-          if (endRed<startRed) { endRed = startRed; }
-          if (endRed>s.length()) { endRed = s.length(); }
-          sb.append(StringOps.encodeHTML(s.substring(0, startRed)));
-          sb.append("<font color=#ff0000>");
-          sb.append(StringOps.encodeHTML(s.substring(startRed, endRed)));
-          sb.append("</font>");
-          sb.append(StringOps.encodeHTML(s.substring(endRed)));
-          sb.append("</html>");
-        } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
-      } finally { _region.getDocument().releaseReadLock(); }
+      sb.append("<html>");
+      sb.append(lineNumber());
+      sb.append(": ");
+      sb.append(_region.getString());
+      sb.append("</html>");
       return sb.toString();
     }
   }
