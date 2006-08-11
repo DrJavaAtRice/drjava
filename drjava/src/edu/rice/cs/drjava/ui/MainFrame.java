@@ -6865,7 +6865,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         public void run() {
           _enableInteractionsPane();
           _runAction.setEnabled(true);
-          _runProjectAction.setEnabled(true);
+          _runProjectAction.setEnabled(_model.isProjectActive());
         }
       });
     }
@@ -7139,10 +7139,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         public void run() {
           interactionEnded();
           _runAction.setEnabled(true);
-          _runProjectAction.setEnabled(true);
+          _runProjectAction.setEnabled(_model.isProjectActive());
           _junitAction.setEnabled(true);
           _junitAllAction.setEnabled(true);
-          _junitProjectAction.setEnabled(true);
+          _junitProjectAction.setEnabled(_model.isProjectActive());
 // This action should not be enabled until the slave JVM is used          
 //          _resetInteractionsAction.setEnabled(true);
           if (_showDebugger) {
@@ -7308,7 +7308,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             showTab(_junitErrorPanel);
             _junitAction.setEnabled(true);
             _junitAllAction.setEnabled(true);
-            _junitProjectAction.setEnabled(true);
+            _junitProjectAction.setEnabled(_model.isProjectActive());
             _junitErrorPanel.reset();
           }
           finally { 
@@ -7336,7 +7336,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           showTab(_junitErrorPanel);
           _junitAction.setEnabled(true);
           _junitAllAction.setEnabled(true);
-          _junitProjectAction.setEnabled(true);
+          _junitProjectAction.setEnabled(_model.isProjectActive());
           _junitErrorPanel.reset();
         }});
     }
@@ -7489,7 +7489,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     public void projectRunnableChanged() {
       if (_model.getMainClass() != null && _model.getMainClass().exists()) {
-        _runProjectAction.setEnabled(true);
+        _runProjectAction.setEnabled(_model.isProjectActive());
         _runButton = _updateToolbarButton(_runButton, _runProjectAction);
       }
       else {
