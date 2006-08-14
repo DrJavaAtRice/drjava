@@ -92,10 +92,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     _frame  = new MainFrame();
     _log.log("new MainFrame() for next test completed");
-    
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() {  _frame.pack(); }
-    });
+    _frame.pack();
     _log.log("setUp complete for next test");
   }
 

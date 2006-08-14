@@ -118,23 +118,16 @@ public class ReducedModelControl implements BraceReduction {
     rmc.resetWalkerLocationToCursor();
   }
 
-  /**
-   * Get the token currently pointed at by the cursor.
-   * Because the reduced model is split into two reduced sub-models,
-   * we have to check each sub-model first as each one has unique
-   * information.  If we find a non-gap token in either sub-model
-   * we want to return that.  Otherwise, we want to return a sort
-   * of hybrid Gap of the two, i.e., a Gap where there are neither
-   * special comment/quote tokens nor parens/squigglies/brackets.
-   * @return a ReducedToken representative of the unified reduced
-   * model
-   */
+  /** Get the token currently pointed at by the cursor. Because the reduced model is split into two reduced sub-models,
+    * we have to check each sub-model first as each one has unique information.  If we find a non-gap token in either 
+    * sub-model we want to return that.  Otherwise, we want to return a sort of hybrid Gap of the two, i.e., a Gap where
+    * there are neither special comment/quote tokens nor parens/squigglies/brackets.
+    * @return a ReducedToken representative of the unified reduced model
+    */
   public ReducedToken currentToken() {
     // check the reduced comment model for specials
     ReducedToken rmcToken = rmc.current();
-    if (!rmcToken.isGap()) {
-        return rmcToken;
-    }
+    if (!rmcToken.isGap()) return rmcToken;
     // check the reduced brace model for braces
     ReducedToken rmbToken = rmb.current();
     if (!rmbToken.isGap()) {
@@ -146,11 +139,10 @@ public class ReducedModelControl implements BraceReduction {
     return new Gap(size, rmc.getStateAtCurrent());
   }
 
-  /**
-   * Get the shadowing state at the current caret position.
-   * @return FREE|INSIDE_LINE_COMMENT|INSIDE_BLOCK_COMMENT|
-   * INSIDE_SINGLE_QUOTE|INSIDE_DOUBLE_QUOTE
-   */
+  /** Get the shadowing state at the current caret position.
+    * @return FREE|INSIDE_LINE_COMMENT|INSIDE_BLOCK_COMMENT|
+    * INSIDE_SINGLE_QUOTE|INSIDE_DOUBLE_QUOTE
+    */
   public ReducedModelState getStateAtCurrent() {
       return rmc.getStateAtCurrent();
   }

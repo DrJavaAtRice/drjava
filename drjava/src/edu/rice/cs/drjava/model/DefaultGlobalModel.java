@@ -302,11 +302,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    *  used, {@code wd} matches its working directory, and forceResest is false.
    */
   public void resetInteractions(File wd, boolean forceReset) {
+//    Utilities.show("resetInteractions called");
     if (! forceReset && ! _jvm.slaveJVMUsed() && ! isClassPathChanged() && 
         wd.equals(_interactionsModel.getWorkingDirectory())) {
       // Eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
 //      Utilities.show("Suppressing resetting of interactions pane");
       _interactionsModel._notifyInterpreterReady(wd);
+//      Utilities.show("_notifyInterpreterReady called");
       return; 
     }
 //    Utilities.show("Resetting interactions with working directory = " + wd);

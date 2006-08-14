@@ -42,6 +42,8 @@ import java.util.Arrays;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Test functions of the single display model.
  *  @version $Id$
@@ -228,6 +230,11 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
       public synchronized void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
       public synchronized void fileClosed(OpenDefinitionsDocument doc) { closeCount++; }
       public synchronized void activeDocumentChanged(OpenDefinitionsDocument doc) { switchCount++; }
+      public synchronized void interpreterReady(File wd) {  // closing all files calls resetInteractions
+//        Utilities.show("interpreterReady(" + wd + ") called");
+//        Utilities.show("Traceback is:\n" + StringOps.getStackTrace());
+        interpreterReadyCount++;
+      }
     };
     _model.addListener(listener);
 
@@ -269,8 +276,10 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Close all files, ensure new one was created
     _model.closeAllFiles();
+    Utilities.clearEventQueue();
     assertNumOpenDocs(1);
-    assertLength(0, _model.getActiveDocument());
+    assertLength(0, _model.getActiveDocument());    
+    listener.assertInterpreterReadyCount(1);
     listener.assertNewCount(4);
     listener.assertCloseCount(4);
     listener.assertAbandonCount(4);
@@ -354,8 +363,8 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
   }
   
   /** A GlobalModelListener for testing. By default it expects no events to be fired. To customize,
-   * subclass and override one or more methods.
-   */
+    * subclass and override one or more methods.
+    */
   public static class SDTestListener extends TestListener implements GlobalModelListener {
     
     /** Extra counter for SDTestListener */
