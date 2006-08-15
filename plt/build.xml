@@ -61,14 +61,13 @@
     <echo message="JAVA14_HOME: Home folder of the Java 1.4 JRE or J2SDK" />
     <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
     <echo message="CLOVER_JAR: Location of the Clover jar file (necessary only if " />
-    <echo message="            Clover tasks will be used)"/>
+    <echo message="            Clover targets will be used)"/>
     <echo message="" />
     <echo message="Additionally, Ant must be run under Java 5.0 or later.  If that is " />
     <echo message="not the system default, it may be set for Ant by using JAVA_HOME." />
     <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
     <echo message="CLASSPATH will be ignored -- classes on the system classpath will " />
-    <echo message="not be visible during the build process.  To run JUnit tests," />
-    <echo message="a copy of junit.jar should be installed in the Ant lib directory." />
+    <echo message="not be visible during the build process." />
   </target>
   
   
