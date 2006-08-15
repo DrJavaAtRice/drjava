@@ -100,14 +100,13 @@
     <echo message="JAVACC_HOME: Top-level directory of JavaCC (version 4.0 or later)" />
     <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
     <echo message="CLOVER_JAR: Location of the Clover jar file (necessary only if " />
-    <echo message="            Clover tasks will be used)"/>
+    <echo message="            Clover targets will be used)"/>
     <echo message="" />
     <echo message="Additionally, Ant must be run under Java 5.0 or later.  If that is " />
     <echo message="not the system default, it may be set for Ant by using JAVA_HOME." />
     <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
     <echo message="CLASSPATH will be ignored -- classes on the system classpath will " />
-    <echo message="not be visible during the build process.  To run JUnit tests," />
-    <echo message="a copy of junit.jar should be installed in the Ant lib directory." />
+    <echo message="not be visible during the build process." />
   </target>
   
   
@@ -153,13 +152,13 @@
     <copy file="${version-source}" tofile="${version-target}" filtering="yes" />
     
     <antcall target="generate-ast">
-      <param name="generate-sourcefile" value="${jexpression-ast}" />
-      <param name="generate-dir" value="${jexpression-ast-dir}" />
+      <param name="generate-sourcefile" value="${template-ast}" />
+      <param name="generate-dir" value="${template-ast-dir}" />
     </antcall>
     
     <antcall target="generate-parser">
-      <param name="generate-sourcefile" value="${jexpression-parser}" />
-      <param name="generate-dir" value="${jexpression-parser-dir}" />
+      <param name="generate-sourcefile" value="${template-parser}" />
+      <param name="generate-dir" value="${template-parser-dir}" />
     </antcall>
     
     <!-- Any additional files to be generated may be processed here -->
@@ -546,7 +545,7 @@
   </target>
   
   <target name="run-15" depends="compile-15, assert-15"
-          description=Run the main class (5.0 version) under Java 5.0 (after compiling)">
+          description="Run the main class (5.0 version) under Java 5.0 (after compiling)">
     <echo message="Running the DrJava application (5.0 classes in Java 5.0)" />
     <java classname="${main-class}" fork="yes" spawn="yes">
       <classpath>
@@ -702,7 +701,7 @@
     </antcall>
   </target>
 
-  <target name="setup-clover">
+  <target name="setup-clover" depends="assert-clover-jar-exists">
     <extendclasspath path="${clover-jar}" />
     <taskdef resource="clovertasks" classpath="${clover-jar}" />
     <mkdir dir="cloverdb" />
