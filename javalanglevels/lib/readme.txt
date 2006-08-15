@@ -27,14 +27,11 @@ bcel-5.1-pruned.jar: BCEL 5.1 with the following unneeded class files removed (t
                      edu/rice/cs/javalanglevels/**/*.java files are compiled, the compiler will
                      automatically compile BCEL files when needed, and ignore them otherwise.
 
-retroweaver-rt-1.2.3.jar: Retroweaver 1.2.3 (the runtime classes package)
-
+retroweaver-rt-1.2.3.jar: Retroweaver 1.2.3
+buildlib/ant-contrib.jar: ANT Contrib 1.0b2
 buildlib/astgen.jar: astgen-20060227-1521
-
 buildlib/cenquatasks.jar: Distributed with Clover 1.3.9
-
 buildlib/junit.jar: JUnit 3.8.1
-
 buildlib/retroweaver-all-1.2.3.jar: Retroweaver 1.2.3
 
 

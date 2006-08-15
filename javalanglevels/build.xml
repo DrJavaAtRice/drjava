@@ -13,12 +13,13 @@
 
   <property environment="env" />
   <property name="java14-home" value="${env.JAVA14_HOME}" />
-  <property name="javacc-home" value="${env.JAVACC_HOME}" />
+  <property name="javacc-home"  value="${env.JAVACC_HOME}" />
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
   
-  
-  <!-- By default, don't filter tests on anything -->
+  <!-- Testing defaults -->
   <property name="test-spec" value="" />
+  <property name="test-repeat" value="1" /> <!-- TODO: Use this value -->
+  <property name="test-timeout" value="1440" />
   
   <!-- By default, clean can fail -->
   <property name="clean-can-fail" value="yes" />
@@ -41,12 +42,15 @@
   
   <!-- ASTGen task, used to generate Java source representing an AST with visitors from a single .ast file -->
   <taskdef name="astgen" classpath="lib/buildlib/astgen.jar" classname="edu.rice.cs.astgen.AntTask" />
-
+    
   <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
        as long as it's not, we can use this extension from the Clover developers. -->
   <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
   <extendclasspath path="lib/buildlib/junit.jar" />
 
+  <!-- Extension containing various tools, including "for" and "if" -->
+  <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
+                 
   <!-- ***********
        Help Target
        *********** -->
@@ -98,11 +102,14 @@
       <param name="generate-sourcefile" value="${jexpression-ast}" />
       <param name="generate-dir" value="${jexpression-ast-dir}" />
     </antcall>
-    <antcall target="generate-parser" inheritall="false">
+    
+    <antcall target="generate-parser">
       <param name="generate-sourcefile" value="${jexpression-parser}" />
       <param name="generate-dir" value="${jexpression-parser-dir}" />
     </antcall>
+    
     <!-- Any additional files to be generated may be processed here -->
+
   </target>
   
   <!-- Matches source files that are generated.  Search is relative to the base directory
@@ -138,8 +145,8 @@
     <mkdir dir="${generate-dir}" />
     <astgen file="${generate-sourcefile}" />
   </target>
-
-
+  
+  
   <!-- *******************
        Compilation Targets
        ******************* -->
@@ -294,10 +301,60 @@
   <target name="test" depends="test-15" description="Shortcut for 'test-15'">
   </target>
 
- 
-  <target name="test-15" depends="compile-15, assert-15"
+  <target name="test-15" depends="compile-15"
           description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
-    <echo message="Running all 5.0 tests matching '${test-spec}' under Java 5.0" />
+    <antcall target="iterate-tests">
+      <param name="do-test-target" value="do-test-15" />
+    </antcall>
+  </target>
+  
+  <target name="test-14" depends="compile-14"
+          description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="do-test-target" value="do-test-14" />
+    </antcall>
+  </target>
+  
+  <target name="test-14-in-15" depends="compile-14, assert-15"
+          description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="do-test-target" value="do-test-14-in-15" />
+    </antcall>
+  </target>
+  
+  <target name="iterate-tests">
+    <if>
+      <equals arg1="${test-spec}" arg2="" />
+      <then>
+        <limit minutes="${test-timeout}" failonerror="true">
+          <antcall target="${do-test-target}">
+            <param name="test-filter-string" value="" />
+          </antcall>
+        </limit>
+      </then>
+      <else>
+        <for list="${test-spec}" param="test-filter-string-attribute">
+          <sequential>
+            <limit minutes="${test-timeout}" failonerror="true">
+              <antcall target="${do-test-target}">
+                <param name="test-filter-string" value="@{test-filter-string-attribute}" />
+              </antcall>
+            </limit>
+          </sequential>
+        </for>
+      </else>
+    </if>
+  </target>
+  
+  <selector id="tests-to-run">
+    <and>
+      <filename name="**/*${test-filter-string}*/**" />
+      <filename name="**/*Test.class" />
+    </and>
+  </selector>
+ 
+  <target name="do-test-15" depends="assert-15">
+    <echo message="Running all 5.0 tests matching '${test-filter-string}' under Java 5.0" />
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
         <pathelement location="lib/buildlib/junit.jar" />
@@ -308,14 +365,14 @@
       </classpath>
       <formatter type="brief" usefile="false" />
       <batchtest>
-        <fileset dir="classes/test" includes="**/*${test-spec}*Test.class" />
+        <fileset dir="classes/test">
+          <selector refid="tests-to-run" />
+        </fileset>
       </batchtest>
     </junit>
-    
   </target>
 
-  <target name="test-14" depends="compile-14, resolve-java14-exec"
-          description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter">
+  <target name="do-test-14" depends="resolve-java14-exec">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
       <classpath>
@@ -327,13 +384,14 @@
       </classpath>
       <formatter type="brief" usefile="false" />
       <batchtest>
-        <fileset dir="classes/test-14" includes="**/*${test-spec}*Test.class" />
+        <fileset dir="classes/test-14">
+          <selector refid="tests-to-run" />
+        </fileset>
       </batchtest>
     </junit>
   </target>
 
-  <target name="test-14-in-15" depends="compile-14, assert-15"
-          description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
+  <target name="do-test-14-in-15" depends="assert-15">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
@@ -345,7 +403,9 @@
       </classpath>
       <formatter type="brief" usefile="false" />
       <batchtest>
-        <fileset dir="classes/test-14" includes="**/*${test-spec}*Test.class" />
+        <fileset dir="classes/test-14">
+          <selector refid="tests-to-run" />
+        </fileset>
       </batchtest>
     </junit>
   </target>
@@ -556,7 +616,7 @@
     </delete>
     
   </target>
-  
+    
   <target name="clean-products" unless="skip-clean">
     <echo message="Deleting all final build products" />
     
@@ -771,7 +831,7 @@
 
     <fail message="Can't find the java executable in the Java 1.4 home: ${java14-home}" unless="java14-exec" />
   </target>
-    
+  
   <target name="assert-15">
     <fail message="The specified target requires Ant to be run under Java 5.0 or later">
       <condition>
