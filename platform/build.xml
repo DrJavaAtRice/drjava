@@ -419,9 +419,6 @@
   
   <target name="commit" depends="update" 
           description="Commit source to the Subversion archive">
-    <exec executable="svn" failonerror="yes">
-      <arg value="status" />
-    </exec>
     <input message="Please enter a log message for the commit: "
            addproperty="svn-commit-message" />
     <echo message="Running Subversion commit" />
