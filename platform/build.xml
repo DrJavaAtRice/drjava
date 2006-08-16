@@ -1,0 +1,778 @@
+<!-- DrJava Platform-Specific Classes Build Script -->
+
+<!-- This build script is based on the template located at "trunk/misc/build-template.xml"
+     in the DrJava Subversion repository.  In general, changes made to the script should be
+     reflected in the template as well. -->
+     
+<!-- To add an additional platform type, the following should be done:
+     - Create a 'compile-foo' target (use Java 1.4 for compilation where possible)
+     - Create a 'test-foo' target
+     - Add the 'classes/base-foo' directory to the 'jar' and 'jar-base' targets
+     -->
+     
+<project name="platform" default="help">
+
+  <property name="readable-project-name" value="DrJava Platform-Specific Classes" />
+  <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
+
+  <property environment="env" />
+  <property name="java14-home" value="${env.JAVA14_HOME}" />
+  <property name="java15-home" value="${env.JAVA15_HOME}" />
+  <property name="java16-home" value="${env.JAVA16_HOME}" />
+  <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
+  
+  <!-- Testing defaults -->
+  <property name="test-spec" value="" />
+  <property name="test-repeat" value="1" /> <!-- TODO: Use this value -->
+  <property name="test-timeout" value="1440" />
+  
+  <!-- By default, clean can fail -->
+  <property name="clean-can-fail" value="yes" />
+ 
+  <!-- By default, don't append anything extra to the tag -->
+  <property name="tag-append" value="" />
+  
+  <!-- Don't use or inherit the CLASSPATH environment variable for anything -->
+  <property name="build.sysclasspath" value="ignore" />
+  
+  <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
+  
+  <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
+       as long as it's not, we can use this extension from the Clover developers. -->
+  <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
+  <extendclasspath path="lib/buildlib/junit.jar" />
+
+  <!-- Extension containing various tools, including "for" and "if" -->
+  <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
+                 
+                 
+  <!-- ***********
+       Help Target
+       *********** -->
+  
+  <target name="help" description="Print general build script information">
+    <echo message="--------------------------------------------------------------------" />
+    <echo message="${readable-project-name} Build Scripts" />
+    <echo message="--------------------------------------------------------------------" />
+    <echo message="Type 'ant -projecthelp' or 'ant -p' to see the list of targets." />
+    <echo message="" />
+    <echo message="For this build file to function properly, the following environment " />
+    <echo message="variables should be defined (as necessary for the invoked target):" />
+    <echo message="JAVA14_HOME: Home folder of the Java 1.4 J2SDK" />
+    <echo message="JAVA15_HOME: Home folder of the Java 5 JDK" />
+    <echo message="JAVA16_HOME: Home folder of the Java 6 JDK" />
+    <echo message="DRJAVA_JAR: Location of the DrJava jar file.  Preferably, this file" />
+    <echo message="            should be 'drjava-base-15.jar', preventing problems due to" />
+    <echo message="            conflicts with previous 'platform.jar' files and interfaces" />
+    <echo message="            changed by Retroweaver." />
+    <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
+    <echo message="" />
+    <echo message="Some targets will also require that Ant be run under a specific Java " />
+    <echo message="version.  The version to use may be set for Ant by using JAVA_HOME." />
+    <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
+    <echo message="CLASSPATH will be ignored -- classes on the system classpath will " />
+    <echo message="not be visible during the build process." />
+    <echo message="" />
+    <echo message="IMPORTANT: The usual pattern of comprehensive testing before a commit " />
+    <echo message="and automatic compilation before generating a jar file cannot be " />
+    <echo message="followed here, because the sources generally can't be compiled all at " />
+    <echo message="once.  Care must be taken to invoke the appropriate sequence of targets " />
+    <echo message="to produce the desired result." />
+  </target>
+  
+  
+  <!-- *******************
+       Compilation Targets
+       ******************* -->
+       
+  <!-- In general, we prefer using the Java 1.4 language and APIs for compilation, as this
+       allows us to avoid complicating the build process with Retroweaver conversion.  Where
+       that is not possible, later versions are used.  Note that if there are dependencies on
+       later APIs, the DrJava application is responsible for insuring that those classes are 
+       only loaded when the necessary APIs are available. -->
+       
+  <target name="compile-jdk14" depends="resolve-java14-runtime, resolve-java14-tools" 
+          description="Compile the 'jdk14' sources">
+    <antcall target="do-compile">
+      <param name="platform-tag" value="jdk14" />
+      <param name="source-version" value="1.4" />
+      <param name="runtime-jar" value="${java14-runtime}" />
+      <param name="extra-classpath" value="${java14-tools}" />
+    </antcall>
+  </target>
+  
+  <target name="compile-jdk15" depends="resolve-java15-runtime, resolve-java15-tools" 
+          description="Compile the 'jdk15' sources">
+    <antcall target="do-compile">
+      <param name="platform-tag" value="jdk15" />
+      <param name="source-version" value="1.5" />
+      <param name="runtime-jar" value="${java15-runtime}" />
+      <param name="extra-classpath" value="${java15-tools}" />
+    </antcall>
+  </target>
+  
+  <target name="compile-jdk16" depends="resolve-java16-runtime, resolve-java16-tools" 
+          description="Compile the 'jdk16' sources">
+    <antcall target="do-compile">
+      <param name="platform-tag" value="jdk16" />
+      <param name="source-version" value="1.6" />
+      <param name="runtime-jar" value="${java16-runtime}" />
+      <param name="extra-classpath" value="${java16-tools}" />
+    </antcall>
+  </target>
+  
+  <target name="compile-mac" depends="resolve-java14-runtime" 
+          description="Compile the 'mac' sources">
+    <antcall target="do-compile">
+      <param name="platform-tag" value="mac" />
+      <param name="source-version" value="1.4" />
+      <param name="runtime-jar" value="${java14-runtime}" />
+      <param name="extra-classpath" value="${java14-runtime}/../ui.jar" />
+    </antcall>
+  </target>
+  
+  <target name="compile-windows" depends="resolve-java14-runtime" 
+          description="Compile the 'windows' sources">
+    <antcall target="do-compile">
+      <param name="platform-tag" value="windows" />
+      <param name="source-version" value="1.4" />
+      <param name="runtime-jar" value="${java14-runtime}" />
+      <param name="extra-classpath" value="" />
+    </antcall>
+  </target>
+  
+  
+  <!-- Requires that the properties 'platform-tag', 'source-version', 'runtime-jar', and 'extra-classpath' be set -->
+  <target name="do-compile" depends="assert-drjava-jar-exists">
+  
+    <echo message="Compiling src-${platform-tag} directory to classes/base-${platform-tag} and classes/test-${platform-tag}" />
+    
+    <!-- To eliminate confusion, we force recompilation whenever this is invoked -->
+    <delete dir="classes/base-${platform-tag}" />
+    <delete dir="classes/test-${platform-tag}" />
+    <mkdir dir="classes/base-${platform-tag}" />
+    <mkdir dir="classes/test-${platform-tag}" />
+    
+    <javac srcdir="src-${platform-tag}" destdir="classes/base-${platform-tag}" 
+          source="${source-version}" target="${source-version}" sourcepath="" 
+           debug="on" optimize="off" deprecation="on" includeAntRuntime="no" fork="yes">
+      <bootclasspath>
+        <pathelement location="${runtime-jar}" />
+      </bootclasspath>
+      <classpath>
+        <pathelement path="${extra-classpath}" />
+        <fileset refid="libs" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="classes/base-${platform-tag}" />
+        <pathelement location="${drjava-jar}" />
+      </classpath>
+      <compilerarg value="-Xlint" />
+      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
+      <compilerarg value="-Xlint:-serial" /> 
+      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
+           This can be useful in creating a pruned version of a jar file for the lib directory.
+           (You must also clear the sourcepath="" option.)
+      <include name="${src-working-dir}/**/*.java" /> -->
+    </javac>
+    
+    <move todir="classes/test-${platform-tag}">
+      <fileset dir="classes/base-${platform-tag}">
+        <include name="**/*Test.class" />
+        <include name="**/*Test$*.class" />
+        <include name="**/*TestCase.class" />
+        <include name="**/*TestCase$*.class" />
+        <!-- Additional test classes should be listed here -->
+      </fileset>
+    </move>
+    
+    <antcall target="copy-resources" />
+    <antcall target="unjar-libs" />
+    
+  </target>
+  
+
+  <!-- Requires the 'platform-tag' property to be set -->
+  <target name="copy-resources">
+    <copy todir="classes/base-${platform-tag}">
+      <fileset dir="src-${platform-tag}">
+        <include name="**/LICENSE" />
+        <include name="**/README" />
+        <include name="**/*.gif" />
+        <include name="**/*.png" />
+        <include name="**/*.jpg" />
+        <include name="**/*.jpeg" />
+        <include name="**/*.properties" />
+        <!-- Additional resource files should be listed here -->
+      </fileset>
+    </copy>
+  </target>
+  
+  
+  <target name="unjar-libs">
+    <antcall target="do-unjar-libs">
+      <param name="generate-sourcedir" value="lib" />
+      <param name="generate-dir" value="classes/lib" />
+    </antcall>
+  </target>
+  
+  <target name="do-unjar-libs" depends="check-generate-dir-from-dir" unless="already-generated">
+    <echo message="Unjarring jar files in the lib directory" />
+    <!-- Delete "classes/lib" in case it exists (but is out of date) -->
+    <delete dir="classes/lib" />
+    <mkdir dir="classes/lib" />
+    <unjar dest="classes/lib">
+      <fileset refid="libs" />
+      <patternset excludes="META-INF/**" />
+    </unjar>
+  </target>
+  
+  
+  <!-- ***************
+       Testing Targets
+       *************** -->
+  
+  <target name="test-jdk14" depends="compile-jdk14, resolve-java14-tools" 
+          description="Run all 'jdk14' tests under the current JVM (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="platform-tag" value="jdk14" />
+      <param name="extra-classpath" value="${java14-tools}" />
+    </antcall>
+  </target>
+
+  <target name="test-jdk15" depends="compile-jdk15, resolve-java15-tools" 
+          description="Run all 'jdk15' tests under the current JVM (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="platform-tag" value="jdk15" />
+      <param name="extra-classpath" value="${java15-tools}" />
+    </antcall>
+  </target>
+
+  <target name="test-jdk16" depends="compile-jdk16, resolve-java16-tools" 
+          description="Run all 'jdk16' tests under the current JVM (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="platform-tag" value="jdk16" />
+      <param name="extra-classpath" value="${java16-tools}" />
+    </antcall>
+  </target>
+
+  <target name="test-mac" depends="compile-mac" 
+          description="Run all 'mac' tests under the current JVM (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="platform-tag" value="mac" />
+      <param name="extra-classpath" value="" />
+    </antcall>
+  </target>
+
+  <target name="test-windows" depends="compile-windows" 
+          description="Run all 'windows' tests under the current JVM (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="platform-tag" value="windows" />
+      <param name="extra-classpath" value="" />
+    </antcall>
+  </target>
+
+  
+  <target name="iterate-tests">
+    <if>
+      <equals arg1="${test-spec}" arg2="" />
+      <then>
+        <limit minutes="${test-timeout}" failonerror="true">
+          <antcall target="do-test">
+            <param name="test-filter-string" value="" />
+          </antcall>
+        </limit>
+      </then>
+      <else>
+        <for list="${test-spec}" param="test-filter-string-attribute">
+          <sequential>
+            <limit minutes="${test-timeout}" failonerror="true">
+              <antcall target="do-test">
+                <param name="test-filter-string" value="@{test-filter-string-attribute}" />
+              </antcall>
+            </limit>
+          </sequential>
+        </for>
+      </else>
+    </if>
+  </target>
+  
+  <selector id="tests-to-run">
+    <and>
+      <filename name="**/*${test-filter-string}*/**" />
+      <filename name="**/*Test.class" />
+    </and>
+  </selector>
+ 
+  <!-- Requires that the properties 'platform-tag' and 'extra-classpath' be set -->
+  <target name="do-test" depends="assert-drjava-jar-exists">
+    <echo message="Running all ${platform-tag} tests matching '${test-filter-string}' under the current JVM" />
+    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
+      <classpath>
+        <pathelement path="${extra-classpath}" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="classes/test-${platform-tag}" />
+        <pathelement location="classes/base-${platform-tag}" />
+        <pathelement location="classes/lib" />
+        <pathelement location="${drjava-jar}" />
+      </classpath>
+      <formatter type="brief" usefile="false" />
+      <batchtest>
+        <fileset dir="classes/test-${platform-tag}">
+          <selector refid="tests-to-run" />
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+        
+
+  <!-- ***********
+       Jar Targets
+       *********** -->
+       
+  <target name="jar" depends="resolve-version-tag" description="Create the jar file with all classes and libs">
+    <jar jarfile="${ant.project.name}.jar">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+        <attribute name="Build-Version" value="${version-tag}" />
+      </manifest>
+      <fileset dir="classes/lib" />
+      <fileset dir="classes/base-jdk14" />
+      <fileset dir="classes/base-jdk15" />
+      <fileset dir="classes/base-jdk16" />
+      <fileset dir="classes/base-mac" />
+      <fileset dir="classes/base-windows" />
+      <!-- Additional platform types should be listed here -->
+    </jar>
+  </target>
+
+  <target name="jar-base" depends="resolve-version-tag" description="Create the jar file without any support libs">
+    <jar jarfile="${ant.project.name}-base.jar">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+        <attribute name="Build-Version" value="${version-tag}" />
+      </manifest>
+      <fileset dir="classes/base-jdk14" />
+      <fileset dir="classes/base-jdk15" />
+      <fileset dir="classes/base-jdk16" />
+      <fileset dir="classes/base-mac" />
+      <fileset dir="classes/base-windows" />
+      <!-- Additional platform types should be listed here -->
+    </jar>
+  </target>
+
+
+  <!-- *************
+       Clean Targets
+       ************* -->
+       
+  <target name="clean" depends="clean-intermediate, clean-products"
+          description="Remove all build products; the result should match the intended Subversion contents">
+  </target>
+
+  <target name="clean-intermediate" unless="skip-clean">
+    <echo message="Deleting all intermediate build products" />
+    
+    <delete dir="classes/lib" failonerror="${clean-can-fail}" />
+    
+    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
+      <fileset dir="${basedir}" defaultexcludes="no">
+        <include name="src/**/*.class" />
+        <!-- We could get rid of backups, but "update" ignores them, so they're okay.
+             (doesn't work if defaultexcludes is "yes") -->
+        <!-- <include name="**/*~" /> -->
+        <!-- Get rid of pesky OS helper files (doesn't work if defaultexcludes is "yes") -->
+        <include name="**/.DS_Store" />
+        <include name="**/Thumbs.db" />
+        <!-- Additional files to delete may be listed here -->
+      </fileset>
+    </delete>
+    
+  </target>
+    
+  <target name="clean-products" unless="skip-clean">
+    <echo message="Deleting all final build products" />
+    
+    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
+      <fileset dir="${basedir}" defaultexcludes="no">
+        <include name="*.jar" />
+        <include name="*.zip" />
+        <include name="*.tar.gz" />
+        <include name="${ant.project.name}-*" />
+      </fileset>
+    </delete>
+  </target>
+  
+
+  <!-- ******************
+       Subversion Targets 
+       ****************** -->
+  
+  <target name="update" depends="clean" description="Reconcile source with the Subversion archive">
+    <echo message="Running Subversion update" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="update" />
+    </exec>
+    <exec executable="svn" failonerror="yes">
+      <arg value="status" />
+    </exec>
+  </target>
+  
+  <target name="commit" depends="update" 
+          description="Commit source to the Subversion archive">
+    <exec executable="svn" failonerror="yes">
+      <arg value="status" />
+    </exec>
+    <input message="Please enter a log message for the commit: "
+           addproperty="svn-commit-message" />
+    <echo message="Running Subversion commit" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="commit" />
+      <arg value="-m" />
+      <arg value="${svn-commit-message}" />
+    </exec>
+  </target>
+
+  <target name="tag" depends="update, resolve-version-tag" 
+          description="Copy the working copy to a new Subversion tag (after updating)">
+    <echo message="Creating a new Subversion tag with name ${version-tag}"/>
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${basedir}" />
+      <arg value="${svn-repository}/tags/${version-tag}" />
+      <arg value="-m" />
+      <arg value="Created tag ${version-tag}" />
+    </exec>
+  </target>
+  
+  <target name="branch" depends="update" 
+          description="Copy the working copy to a new Subversion branch (after updating)">
+    <echo message="This will create a new branch from your working copy.  If there are changes " />
+    <echo message="in your copy that have not been committed, you may want to do so first, " />
+    <echo message="so that there's a clear branch point for merging later." />
+    <input message="Enter a name for the new branch: "
+           addproperty="svn-branch-name" />
+    <echo message="Creating a new Subversion branch ${svn-branch-name}" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${basedir}" />
+      <arg value="${svn-repository}/branches/${svn-branch-name}" />
+      <arg value="-m" />
+      <arg value="Created branch ${svn-branch-name}" />
+    </exec>
+  </target>
+
+
+  <!-- ***************
+       Release Targets
+       *************** -->
+       
+  <target name="release-stable" description="Generate all release files tagged with 'stable'">
+    <antcall target="release">
+      <param name="tag-append" value="-stable" />
+      <param name="is-development" value="no" />
+    </antcall>
+  </target>
+
+  <target name="release-beta" description="Generate all release files tagged with 'beta'">
+    <antcall target="release">
+      <param name="tag-append" value="-beta" />
+      <param name="is-development" value="no" />
+    </antcall>
+  </target>
+       
+  <target name="release"
+          depends="update, tag, jar-app, src-zip" 
+          description="Generate all release files (after building)">
+    <delete dir="${version-tag}" />
+  </target>
+  
+  <target name="jar-app" depends="assert-jar-exists, resolve-version-tag">
+    <echo message="Creating ${version-tag}.jar" />
+    <copy file="${ant.project.name}.jar" tofile="${version-tag}.jar" />
+  </target>
+
+  <target name="src-zip" depends="resolve-version-tag">
+    <echo message="Creating ${version-tag}-src.zip" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="export" />
+      <arg value="${svn-repository}/tags/${version-tag}" />
+      <arg value="${version-tag}/src" />
+    </exec>
+    <zip destfile="${version-tag}-src.zip">
+      <zipfileset dir="${version-tag}/src" prefix="${version-tag}/src" />
+    </zip>
+  </target>
+  
+
+  <!-- ********************************
+       Misc Occasionally-Useful Targets
+       ******************************** -->
+  
+  <patternset id="exclude-binaries">
+    <exclude name="**/*.jar" />
+    <exclude name="**/*.class" />
+    <exclude name="**/DrJava" />
+    <exclude name="**/*.png" />
+    <exclude name="**/*.icns" />
+    <exclude name="**/*.gif" />
+    <exclude name="**/*.jpg" />
+    <exclude name="**/*.jpeg" />
+    <!-- Additional binary types may be added here -->
+  </patternset>
+
+  <!-- Run a batch find-and-replace on all text files in the project.
+       Assumes the properties "find" and "replace" have been defined
+       (e.g. "ant -Dfind=foo -Dreplace=bar find-and-replace"). -->
+  <target name="find-and-replace">
+    <replace dir="${basedir}" token="${find}" value="${replace}" summary="yes">
+      <patternset refid="exclude-binaries" />
+    </replace>
+  </target>
+  
+  <!-- Standardize all newline character sequences.  Subversion takes care of this 
+       automatically, but sometimes files crop up with the wrong sequence.
+       Use "svn status" after running this to see which files were fixed. -->
+  <target name="fix-newlines" description="Standardize newline character sequences in all text files">
+    <!-- If we're in Windows, use \r\n -->
+    <condition property="newline-code" value="crlf">
+      <os family="windows" />
+    </condition>
+    <!-- Otherwise, use \n -->
+    <property name="newline-code" value="lf" />
+    <fixcrlf srcdir="${basedir}" eol="${newline-code}" fixlast="no">
+      <patternset refid="exclude-binaries" />
+    </fixcrlf>
+  </target>
+  
+  
+  <!-- ***************************
+       Property-resolution Targets 
+       *************************** -->
+  
+  <target name="resolve-java14-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java14-runtime will only be set the *first* time. -->
+
+    <property name="java14-runtime-1" location="${java14-home}/lib/rt.jar" />
+    <available property="java14-runtime" value="${java14-runtime-1}" file="${java14-runtime-1}" />
+
+    <property name="java14-runtime-2" location="${java14-home}/jre/lib/rt.jar" />
+    <available property="java14-runtime" value="${java14-runtime-2}" file="${java14-runtime-2}" />
+
+    <property name="java14-runtime-3" location="${java14-home}/../Classes/classes.jar" />
+    <available property="java14-runtime" value="${java14-runtime-3}" file="${java14-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 1.4 home: ${java14-home}" unless="java14-runtime" />
+  </target>
+  
+  <target name="resolve-java14-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="java14-exec-1" location="${java14-home}/bin/java.exe" />
+    <condition property="java14-exec" value="${java14-exec-1}">
+      <and>
+        <available file="${java14-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
+    
+    <property name="java14-exec-2" location="${java14-home}/bin/java" />
+    <available property="java14-exec" value="${java14-exec-2}" file="${java14-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 1.4 home: ${java14-home}" unless="java14-exec" />
+  </target>
+  
+  <target name="resolve-java14-tools">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java15-tools will only be set the *first* time. -->
+
+    <property name="java14-tools-1" location="${java14-home}/lib/tools.jar" />
+    <available property="java14-tools" value="${java14-tools-1}" file="${java14-tools-1}" />
+
+    <property name="java14-tools-2" location="${java14-home}/jre/lib/tools.jar" />
+    <available property="java14-tools" value="${java14-tools-2}" file="${java14-tools-2}" />
+
+    <property name="java14-tools-3" location="${java14-home}/../Classes/classes.jar" />
+    <available property="java14-tools" value="${java14-tools-3}" file="${java14-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 1.4 home: ${java14-home}" unless="java14-tools" />
+  </target>
+  
+  
+  <target name="resolve-java15-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java15-runtime will only be set the *first* time. -->
+
+    <property name="java15-runtime-1" location="${java15-home}/lib/rt.jar" />
+    <available property="java15-runtime" value="${java15-runtime-1}" file="${java15-runtime-1}" />
+
+    <property name="java15-runtime-2" location="${java15-home}/jre/lib/rt.jar" />
+    <available property="java15-runtime" value="${java15-runtime-2}" file="${java15-runtime-2}" />
+
+    <property name="java15-runtime-3" location="${java15-home}/../Classes/classes.jar" />
+    <available property="java15-runtime" value="${java15-runtime-3}" file="${java15-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 5 home: ${java15-home}" unless="java15-runtime" />
+  </target>
+  
+  <target name="resolve-java15-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="java15-exec-1" location="${java15-home}/bin/java.exe" />
+    <condition property="java15-exec" value="${java15-exec-1}">
+      <and>
+        <available file="${java15-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
+    
+    <property name="java15-exec-2" location="${java15-home}/bin/java" />
+    <available property="java15-exec" value="${java15-exec-2}" file="${java15-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 5 home: ${java15-home}" unless="java15-exec" />
+  </target>
+  
+  <target name="resolve-java15-tools">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java15-tools will only be set the *first* time. -->
+
+    <property name="java15-tools-1" location="${java15-home}/lib/tools.jar" />
+    <available property="java15-tools" value="${java15-tools-1}" file="${java15-tools-1}" />
+
+    <property name="java15-tools-2" location="${java15-home}/jre/lib/tools.jar" />
+    <available property="java15-tools" value="${java15-tools-2}" file="${java15-tools-2}" />
+
+    <property name="java15-tools-3" location="${java15-home}/../Classes/classes.jar" />
+    <available property="java15-tools" value="${java15-tools-3}" file="${java15-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 5 home: ${java15-home}" unless="java15-tools" />
+  </target>
+  
+  
+  <target name="resolve-java16-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java16-runtime will only be set the *first* time. -->
+
+    <property name="java16-runtime-1" location="${java16-home}/lib/rt.jar" />
+    <available property="java16-runtime" value="${java16-runtime-1}" file="${java16-runtime-1}" />
+
+    <property name="java16-runtime-2" location="${java16-home}/jre/lib/rt.jar" />
+    <available property="java16-runtime" value="${java16-runtime-2}" file="${java16-runtime-2}" />
+
+    <property name="java16-runtime-3" location="${java16-home}/../Classes/classes.jar" />
+    <available property="java16-runtime" value="${java16-runtime-3}" file="${java16-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 6 home: ${java16-home}" unless="java16-runtime" />
+  </target>
+  
+  <target name="resolve-java16-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="java16-exec-1" location="${java16-home}/bin/java.exe" />
+    <condition property="java16-exec" value="${java16-exec-1}">
+      <and>
+        <available file="${java16-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
+    
+    <property name="java16-exec-2" location="${java16-home}/bin/java" />
+    <available property="java16-exec" value="${java16-exec-2}" file="${java16-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 6 home: ${java16-home}" unless="java16-exec" />
+  </target>
+  
+  <target name="resolve-java16-tools">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java15-tools will only be set the *first* time. -->
+
+    <property name="java16-tools-1" location="${java16-home}/lib/tools.jar" />
+    <available property="java16-tools" value="${java16-tools-1}" file="${java16-tools-1}" />
+
+    <property name="java16-tools-2" location="${java16-home}/jre/lib/tools.jar" />
+    <available property="java16-tools" value="${java16-tools-2}" file="${java16-tools-2}" />
+
+    <property name="java16-tools-3" location="${java16-home}/../Classes/classes.jar" />
+    <available property="java16-tools" value="${java16-tools-3}" file="${java16-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 6 home: ${java16-home}" unless="java16-tools" />
+  </target>
+  
+  <target name="assert-15">
+    <fail message="The specified target requires Ant to be run under Java 5.0 or later">
+      <condition>
+        <not>
+          <or>
+            <contains string="${java.version}" substring="1.5." />
+            <contains string="${java.version}" substring="1.6." />
+          </or>
+        </not>
+      </condition>
+    </fail>
+  </target>
+    
+  <target name="assert-jar-exists">
+    <available property="jar-exists" file="${ant.project.name}.jar" />
+    <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
+  </target>
+  
+  <target name="assert-drjava-jar-exists">
+    <available property="drjava-jar-exists" file="${drjava-jar}" />
+    <fail message="${drjava-jar} does not exist" unless="drjava-jar-exists" />
+  </target>
+  
+  <target name="resolve-version-tag">
+    <!-- Get a timestamp based on GMT, rather than local time -->
+    <tstamp>
+      <format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
+      <format property="TSTAMP" pattern="HHmm" timezone="GMT" />
+      <format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
+    </tstamp>
+    <property name="version-tag"
+              value="${ant.project.name}${tag-append}-${DSTAMP}-${TSTAMP}" />
+  </target>  
+
+  <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
+       otherwise, the out-of-date target file is deleted (if it exists).  Note that, since
+       properties can only be set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-file-from-file">
+    <dependset>
+      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
+      <targetfilelist dir="${basedir}" files="${generate-file}" />
+    </dependset>
+    <available file="${generate-file}" property="already-generated" />
+  </target>
+
+  <!-- Sets "already-generated" if "generate-file" is more recent than everything in
+       "generate-sourcedir"; otherwise, the out-of-date target file is deleted (if it exists).
+        Note that, since properties can only be set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-file-from-dir">
+    <dependset>
+      <srcfileset dir="${generate-sourcedir}" />
+      <targetfilelist dir="${basedir}" files="${generate-file}" />
+    </dependset>
+    <available file="${generate-file}" property="already-generated" />
+  </target>
+
+  <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
+       than "generate-sourcefile".  Note that, since properties can only be set once, this 
+       should happen underneath an "antcall". -->
+  <target name="check-generate-dir-from-file">
+    <uptodate property="already-generated" targetfile="${generate-dir}" srcfile="${generate-sourcefile}" />
+  </target>
+  
+  <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
+       than everything in "generate-sourcedir".  Note that, since properties can only be 
+       set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-dir-from-dir">
+    <!-- Unfortunately, a bug in uptodate prevents this from working properly,
+         so we just have to equate *existence* with being up to date.
+    <uptodate property="already-generated" targetfile="${generate-dir}" >
+      <srcfiles dir="${generate-sourcedir}" />
+    </uptodate>
+    -->
+    <available file="${generate-dir}" property="already-generated" />
+  </target>
+
+
+</project>

@@ -67,9 +67,8 @@ import com.sun.tools.javac.v8.util.List;
 import com.sun.tools.javac.v8.util.Log;
 
 //import edu.rice.cs.drjava.DrJava;
-import gj.util.Vector;
-import gj.util.Enumeration;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
@@ -246,10 +245,12 @@ public class Javac141Compiler implements CompilerInterface {
    * Allows us to set the extra classpath for the compilers without referencing the
    * config object in a loaded class file
    */ 
-  public void setExtraClassPath( String extraClassPath) {
-      _extraClassPath = extraClassPath;
-  }
+  public void setExtraClassPath( String extraClassPath) { _extraClassPath = extraClassPath; }
   
+  public void setExtraClassPath(ClassPathVector extraClassPath) {
+    setExtraClassPath(extraClassPath.toString());
+  }
+
   /**
    * This method allows us to set the JSR14 collections path across a class loader.
    * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
