@@ -246,6 +246,7 @@
       <include name="${src-working-dir}/**/*.java" /> -->
     </javac>
     
+    <mkdir dir="classes/test" /> <!-- May be deleted by the previous move -->
     <!-- *** If there are other test classes, they should be added here; the list of test *sources*
          should be added under the Clover task as well *** -->
     <move todir="classes/test">
