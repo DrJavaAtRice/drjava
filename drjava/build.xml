@@ -314,8 +314,8 @@
         <pathelement location="classes/test-14" />
       </path>
     </pathconvert>
-    <retroweaver srcdir="classes/test" destdir="classes/test-14" target="1.4" verify="yes"
-                 classpath="${retroweaver-test-classpath}" />
+    <!-- We do not check references here, thus allowing 1.5 references in test classes -->
+    <retroweaver srcdir="classes/test" destdir="classes/test-14" target="1.4" verify="no" />
     <copy todir="classes/test-14">
       <fileset dir="classes/test" excludes="**/*.class" />
     </copy>
@@ -404,6 +404,8 @@
 
   <target name="do-test-14" depends="resolve-java14-exec, resolve-java14-tools">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
+    <echo message="WARNING: 1.4-compatible test classes are (intentionally) not checked for Java 5 API references." />
+    <echo message="If such references exist, these tests will probably fail." />
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
       <classpath>
         <pathelement location="${java14-tools}" />
