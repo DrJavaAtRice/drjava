@@ -123,7 +123,7 @@
           description="Compile all source files (after generating the source)">
   </target>
   
-  <target name="do-compile" depends="assert-15">
+  <target name="do-compile" depends="assert-15, resolve-java15-tools">
   
     <echo message="Compiling src directory to classes/base and classes/test" />
     
@@ -138,6 +138,9 @@
     <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5" sourcepath="" 
            debug="on" optimize="off" deprecation="on" includeAntRuntime="no" fork="yes">
       <classpath>
+        <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
+             debugger code into the "platform" module -->
+        <pathelement location="${java15-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base" />
@@ -210,11 +213,12 @@
     </condition>
   </target>
   
-  <target name="rmi-compile" depends="check-rmi-compile" unless="rmi-classes-uptodate">
+  <target name="rmi-compile" depends="check-rmi-compile, resolve-java15-tools" unless="rmi-classes-uptodate">
     <echo message="Compiling RMI classes" />
     <rmic base="classes/base" includeAntRuntime="no">
       <patternset refid="rmi-base-classes" />
       <classpath>
+        <pathelement location="${java15-tools}" />
         <fileset refid="libs" />
         <pathelement location="classes/base" />
       </classpath>
@@ -222,6 +226,7 @@
     <rmic base="classes/test" includeAntRuntime="no">
       <patternset refid="rmi-test-classes" />
       <classpath>
+        <pathelement location="${java15-tools}" />
         <fileset refid="libs" />
         <pathelement location="classes/base" />
         <pathelement location="classes/test" />
@@ -265,7 +270,7 @@
   </target>
   
   
-  <target name="compile-14" depends="compile-15, resolve-java14-runtime"
+  <target name="compile-14" depends="compile-15, resolve-java14-runtime, resolve-java14-tools"
           description="Create 1.4 versions of the classes (after compiling)">
     <!-- Note: This target, in addition to checking 1.4 compatibility, serves to ensure that there are no dependencies
          on test classes or JUnit classes in the base.  If 1.4 compatibility is no longer needed, a similar dependency
@@ -284,6 +289,7 @@
     <pathconvert property="retroweaver-base-classpath" dirsep="${file.separator}" pathsep="${path.separator}">
       <path>
         <pathelement location="${java14-runtime}" />
+        <pathelement location="${java14-tools}" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
@@ -300,6 +306,7 @@
     <pathconvert property="retroweaver-test-classpath" dirsep="${file.separator}" pathsep="${path.separator}">
       <path>
         <pathelement location="${java14-runtime}" />
+        <pathelement location="${java14-tools}" />
         <pathelement location="${clover-jar}" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base-14" />
@@ -375,10 +382,11 @@
     </and>
   </selector>
  
-  <target name="do-test-15" depends="assert-15">
+  <target name="do-test-15" depends="assert-15, resolve-java15-tools">
     <echo message="Running all 5.0 tests matching '${test-filter-string}' under Java 5.0" />
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
+        <pathelement location="${java15-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
@@ -394,10 +402,11 @@
     </junit>
   </target>
 
-  <target name="do-test-14" depends="resolve-java14-exec">
+  <target name="do-test-14" depends="resolve-java14-exec, resolve-java14-tools">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
       <classpath>
+        <pathelement location="${java14-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
@@ -413,10 +422,11 @@
     </junit>
   </target>
 
-  <target name="do-test-14-in-15" depends="assert-15">
+  <target name="do-test-14-in-15" depends="assert-15, resolve-java15-tools">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
     <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
+        <pathelement location="${java15-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
@@ -436,33 +446,36 @@
   <target name="run" depends="run-15" description="Shortcut for 'run-15'">
   </target>
   
-  <target name="run-15" depends="compile-15, assert-15"
+  <target name="run-15" depends="compile-15, assert-15, resolve-java15-tools"
           description="Run the main class (5.0 version) under Java 5.0 (after compiling)">
     <echo message="Running the DrJava application (5.0 classes in Java 5.0)" />
     <java classname="${main-class}" fork="yes" spawn="yes">
       <classpath>
+        <pathelement location="${java15-tools}" />
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
       </classpath>
     </java>
   </target>
         
-  <target name="run-14" depends="compile-14, resolve-java14-exec"
+  <target name="run-14" depends="compile-14, resolve-java14-exec, resolve-java14-tools"
           description="Run the main class (1.4 version) under Java 1.4 (after compiling)">
     <echo message="Running the DrJava application (1.4 classses in Java 1.4)" />
     <java classname="${main-class}" jvm="${java14-exec}" fork="yes" spawn="yes">
       <classpath>
+        <pathelement location="${java14-tools}" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
     </java>
   </target>
         
-  <target name="run-14-in-15" depends="compile-14, assert-15"
+  <target name="run-14-in-15" depends="compile-14, assert-15, resolve-java15-tools"
           description="Run the main class (1.4 version) under Java 5.0 (after compiling)">
     <echo message="Running the DrJava application (1.4 classses in Java 5.0)" />
     <java classname="${main-class}" fork="yes" spawn="yes">
       <classpath>
+        <pathelement location="${java15-tools}" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
@@ -531,7 +544,7 @@
        Documentation Targets
        ********************* -->
   
-  <target name="javadoc" depends="generate-source, assert-15, resolve-version-tag"
+  <target name="javadoc" depends="generate-source, assert-15, resolve-java15-tools, resolve-version-tag"
           description="Generate javadocs from the source folder (after generating the source)">
     <antcall target="do-javadoc">
       <param name="generate-sourcedir" value="src" />
@@ -546,6 +559,7 @@
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc"
              access="protected" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})">
       <classpath>
+        <pathelement location="${java15-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
       </classpath>
@@ -883,6 +897,35 @@
     <available property="java14-exec" value="${java14-exec-2}" file="${java14-exec-2}" />
 
     <fail message="Can't find the java executable in the Java 1.4 home: ${java14-home}" unless="java14-exec" />
+  </target>
+  
+  <target name="resolve-java14-tools">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java15-tools will only be set the *first* time. -->
+
+    <property name="java14-tools-1" location="${java14-home}/lib/tools.jar" />
+    <available property="java14-tools" value="${java14-tools-1}" file="${java14-tools-1}" />
+
+    <property name="java14-tools-2" location="${java14-home}/jre/lib/tools.jar" />
+    <available property="java14-tools" value="${java14-tools-2}" file="${java14-tools-2}" />
+
+    <property name="java14-tools-3" location="${java14-home}/../Classes/classes.jar" />
+    <available property="java14-tools" value="${java14-tools-3}" file="${java14-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 1.4 home: ${java14-home}" unless="java14-tools" />
+  </target>
+  
+  <target name="resolve-java15-tools" depends="assert-15">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java15-tools will only be set the *first* time. -->
+
+    <property name="java15-tools-1" location="${java.home}/../lib/tools.jar" />
+    <available property="java15-tools" value="${java15-tools-1}" file="${java15-tools-1}" />
+    
+    <property name="java15-tools-2" location="${java.home}/../Classes/classes.jar" />
+    <available property="java15-tools" value="${java15-tools-2}" file="${java15-tools-2}" />
+    
+    <fail message="Can't find tools.jar in the Java 1.5 home: ${java.home}" unless="java15-tools" />
   </target>
   
   <target name="assert-15">
