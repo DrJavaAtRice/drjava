@@ -7061,7 +7061,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                 "index.html" : (className + ".html");
               File index = new File(destDir, fileName);
               URL address = index.getAbsoluteFile().toURL();
-              if (PlatformFactory.ONLY.openURL(address)) {
+              if (!PlatformFactory.ONLY.openURL(address)) {
                 JavadocFrame _javadocFrame = new JavadocFrame(destDir, className, allDocs);
                 _javadocFrame.setVisible(true);
               }
