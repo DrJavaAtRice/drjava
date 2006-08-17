@@ -1,718 +1,871 @@
-<?xml version="1.0"?>
+<!-- DrJava Eclipse Plug-in Build Script -->
 
-<!DOCTYPE project [
-  <!ENTITY build-common SYSTEM "file:build-common.xml">
-]>
+<!-- This build script is based on the template located at "trunk/misc/build-template.xml"
+     in the DrJava Subversion repository.  In general, changes made to the script should be
+     reflected in the template as well. -->
+     
+<project name="eclipse" default="help">
 
-<!--
-  $Id$
--->
-<project name="drjava" default="test">
-  <!-- srcroot is the base directory of the source -->
-  <property name="srcroot" value="${basedir}/src" />
+  <property name="eclipse-version" value="0.9.6" />
 
-  <!-- built is where the compiled classes go -->
-  <property name="built" value="${basedir}/../built" />
+  <property name="readable-project-name" value="DrJava Eclipse Plug-in" />
+  <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
+  <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
 
-  <!-- dist is where the packaged jars go -->
-  <property name="dist" value="${basedir}/dist" />
+  <property environment="env" />
+  <property name="java14-home" value="${env.JAVA14_HOME}" />
+  <property name="eclipse-home" value="${env.ECLIPSE_HOME}" />
+  <property name="drjava-src" value="${env.DRJAVA_SRC}" />
+  <property name="clover-jar" value="${env.CLOVER_JAR}" />
+  
+  <!-- Testing defaults -->
+  <property name="test-spec" value="" />
+  <property name="test-repeat" value="1" /> <!-- TODO: Use this value -->
+  <property name="test-timeout" value="1440" />
+  
+  <!-- By default, clean can fail -->
+  <property name="clean-can-fail" value="yes" />
+ 
+  <!-- By default, don't append anything extra to the tag -->
+  <property name="tag-append" value="" />
+  
+  <!-- Don't use or inherit the CLASSPATH environment variable for anything -->
+  <property name="build.sysclasspath" value="ignore" />
+  
+  <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
+  
+  <fileset id="eclipse-libs" dir="${eclipse-home}/plugins" includes="org.eclipse.*.jar" />
 
-  <!--
-    TODO: this needs to be abstracted to deal with drjava vs util 
-    projpath is the path from srcroot to the root directory of this project
-  -->
-  <property name="projpath" value="edu/rice/cs/${ant.project.name}" />
+  <!-- Retroweaver task, used to convert Java 5.0 class files to be compatible with an earlier JVM;
+       also checks class references to insure that there are no dependencies on 1.5 APIs -->
+  <taskdef name="retroweaver" classpath="lib/buildlib/retroweaver-all-1.2.3.jar" 
+           classname="com.rc.retroweaver.ant.RetroWeaverTask" />
+  
+  <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
+       as long as it's not, we can use this extension from the Clover developers. -->
+  <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
+  <extendclasspath path="lib/buildlib/junit.jar" />
 
-  <!-- put javadoc in this directory --><!-- TODO: project name... -->
-  <property name="javadoc_dir" value="${basedir}/javadoc/${ant.project.name}" />
-
-  <!-- put documentation html in this directory -->
-  <property name="doc_dir" value="${built}/edu/rice/cs/drjava/docs" />
-
-  <!-- DrJava plugin code for other IDEs is in this directory -->
-  <property name="plugins_dir" value="${basedir}/plugins" />
-
-  <!-- Tag and directory for OS X packages -->
-  <property name="osxtag" value="drjava-osx" />
-  <property name="osxdir" value="${basedir}/" />
-
-  <property name="jarfile" value="${basedir}/drjava.jar" />
-  <property name="manifest" value="${basedir}/manifest" />
-
-
-  <!-- Sets a flag indicating that code dealing with new features since the 
-    last stable release should be enabled and testable.
-    Takes effect only after a clean compile -->
-  <target name="development">
-    <filter token="DEVELOPMENT" value = "true" />
-    <copy file="${srcroot}/${projpath}/CodeStatus.orig"
-          tofile="${srcroot}/${projpath}/CodeStatus.java"
-          overwrite="yes"
-          filtering="yes" />
+  <!-- Extension containing various tools, including "for" and "if" -->
+  <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
+                 
+  <!-- ***********
+       Help Target
+       *********** -->
+  
+  <target name="help" description="Print general build script information">
+    <echo message="--------------------------------------------------------------------" />
+    <echo message="${readable-project-name} Build Scripts" />
+    <echo message="--------------------------------------------------------------------" />
+    <echo message="Type 'ant -projecthelp' or 'ant -p' to see the list of targets." />
+    <echo message="" />
+    <echo message="For this build file to function properly, the following environment " />
+    <echo message="variables should be defined:" />
+    <echo message="JAVA14_HOME: Home folder of the Java 1.4 JRE or J2SDK" />
+    <echo message="ECLIPSE_HOME: Location of the 'eclipse' application folder" />
+    <echo message="DRJAVA_SRC: Location of the DrJava sources.  These are included on the " />
+    <echo message="            sourcepath during compilation; any sources referenced by the" />
+    <echo message="            plugin will be included in the jar." />
+    <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
+    <echo message="CLOVER_JAR: Location of the Clover jar file (necessary only if " />
+    <echo message="            Clover targets will be used)"/>
+    <echo message="" />
+    <echo message="Additionally, Ant must be run under Java 5.0 or later.  If that is " />
+    <echo message="not the system default, it may be set for Ant by using JAVA_HOME." />
+    <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
+    <echo message="CLASSPATH will be ignored -- classes on the system classpath will " />
+    <echo message="not be visible during the build process." />
   </target>
-
-  <!-- Sets a flag indicating that code dealing with new features since the 
-    last stable release should not be enabled or testable.
-    Takes effect only after a clean compile -->
-  <target name="stable">
-    <filter token="DEVELOPMENT" value = "false" />
-    <copy file="${srcroot}/${projpath}/CodeStatus.orig"
-          tofile="${srcroot}/${projpath}/CodeStatus.java"
-          overwrite="yes"
-          filtering="yes" />
+  
+  
+  <!-- ************
+       Build Target
+       ************ -->
+  
+  <target name="build" depends="test-14-in-15, jar-14" 
+          description="Shortcut for 'test-14-in-15' and 'jar-14'">
   </target>
+  
 
-
-  <!-- include standard build file parts -->
-  &build-common;
-
-  <!-- generate jar and javadoc
-       Requires version-tag to be set (via command line -Dversion-tag=)
-       For example, to release drjava-20020101-0000, you'd type:
-
-       ant -Dversion-tag=drjava-20020101-0000 release
-  -->
-  <target name="release" if="version-tag" depends="clean,update,compile">
-    <delete dir="${dist}/${version-tag}" />
-    <mkdir dir="${dist}/${version-tag}" />
-
-    <!-- generate javadoc for the committed version! -->
-    <antcall target="generate_javadoc">
-      <param name="javadoc_dir" value="${dist}/${version-tag}/javadoc" />
-      <param name="javadoc_title" value="${version-tag}" />
-    </antcall>
-
-    <zip zipfile="${dist}/${version-tag}-javadoc.zip">
-      <fileset dir="${dist}">
-        <include name="${version-tag}/javadoc/**" />
-      </fileset>
-    </zip>
-
-    <delete dir="${dist}/${version-tag}/javadoc" />
-
-    <cvs dest="${dist}/${version-tag}"
-         tag="HEAD"
-         quiet="yes"
-         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0 src/src-jsr14v1_2"
-         command="export -N" />
-
-    <zip zipfile="${dist}/${version-tag}-src.zip">
-      <fileset dir="${dist}">
-        <include name="${version-tag}/src/**" />
-      </fileset>
-    </zip>
-
-    <delete dir="${dist}/${version-tag}" />
-
-    <antcall target="docs" />
-
-    <antcall target="osxapp">
-      <param name="osxdir" value="${dist}" />
-      <param name="osxtag" value="${version-tag}-osx" />
-    </antcall>
-
-    <antcall target="jar">
-      <param name="jarfile" value="${dist}/${version-tag}.jar" />
-    </antcall>
+  <!-- *******************
+       Compilation Targets
+       ******************* -->
+       
+  <target name="compile" depends="compile-15" description="Shortcut for 'compile-15'">
   </target>
-
-  <target name="compile" depends="do-compile">
-    <rmic base="${built}"
-          classpath="${classpath_text}"
-          classname="edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM" />
-
-    <rmic base="${built}"
-          classpath="${classpath_text}"
-          classname="edu.rice.cs.drjava.model.repl.newjvm.MainJVM" />
-
-    <copy todir="${built}">
-      <fileset dir="${srcroot}">
-        <!-- include the GPL -->
-        <include name="edu/rice/cs/LICENSE" />
-
-        <!-- include graphics -->
-        <include name="${projpath}/**/LICENSE" />
-        <include name="${projpath}/**/README" />
-        <include name="${projpath}/**/*.gif" />
-        <include name="${projpath}/**/*.png" />
-      </fileset>
-    </copy>
-
+  
+  <target name="compile-15" depends="do-compile, copy-resources, unjar-libs"
+          description="Compile all source files">
   </target>
-
-  <!-- Initializes properties used in all Eclipse tasks -->
-  <target name="eclipse">
-    <property name="eclipse_plugin_version" value="0.9.6" />
-    <property name="eclipse_dir" value="${basedir}"/>
-    <property name="eclipse_srcroot" value="${basedir}/src" />
-    <property name="eclipse_built" value="${basedir}/classes" />
-    <property name="eclipse_package" value="edu.rice.cs.drjava_${eclipse_plugin_version}" />
-    <property name="eclipse_package_dir" value="${eclipse_dir}/package/${eclipse_package}" />
-  </target>
-
-  <target name="clean-eclipse" depends="eclipse">
-    <delete dir="${eclipse_built}" />
-    <delete dir="${eclipse_package_dir}" />
-  </target>
-
-  <!-- Compiles the Eclipse specific classes. -->
-  <target name="compile-eclipse" depends="eclipse">
-    <!-- Build the classes -->
-    <mkdir dir="${eclipse_built}" />
-    <antcall target="do-compile">
-      <param name="srcroot" value="${eclipse_srcroot}" />
-      <param name="projpath" value="edu/rice/cs" />
-      <param name="built" value="${eclipse_built}" />
-    </antcall>
-  </target>
-
-  <!-- Creates a distributable package for the Eclipse plugin -->
-  <target name="package-eclipse" depends="compile-eclipse">
-
-    <mkdir dir="${eclipse_package_dir}" />
-    <!-- Make a jar to include DrJava classes -->
-    <antcall target="jar">
-      <param name="jarfile" value="${eclipse_package_dir}/drjava-eclipse.jar"/>
-    </antcall>
-    <!-- Add the plugin classes -->
-    <jar jarfile="${eclipse_package_dir}/drjava-eclipse.jar" update="yes">
-      <fileset dir="${eclipse_built}">
-        <exclude name="**/*Test.class" />
-        <exclude name="**/*Test$*.class" />
-        <include name="**" />
-      </fileset>
-    </jar>
-    <!-- Copy the plugin.xml -->
-    <copy file="${eclipse_dir}/plugin.xml" todir="${eclipse_package_dir}" />
-    <!-- Copy the icons -->
-    <copy todir="${eclipse_package_dir}">
-      <fileset dir="${eclipse_dir}">
-        <include name="plugin.xml" />
-        <include name="icons/**" />
-        <include name="README" />
-        <include name="LICENSE" />
-        <include name="META-INF/**" />
-      </fileset>
-    </copy>
-    <!-- Zip the files for a release -->
-    <zip zipfile="${eclipse_dir}/package/drjava-eclipse-${eclipse_plugin_version}.zip">
-      <fileset dir="${eclipse_dir}/package">
-        <exclude name="drjava-eclipse-${eclipse_plugin_version}.zip" />
-        <include name="${eclipse_package}/**" />
-      </fileset>
-    </zip>
-  </target>
+  
+  <target name="do-compile" depends="assert-eclipse-exists, assert-drjava-src-exists, assert-15">
+  
+    <echo message="Compiling src directory to classes/base and classes/test" />
+    <echo message="NOTE: The 'generate-source' target of the drjava build script is assumed to" />
+    <echo message="have been run.  Otherwise, you may encounter unexpected compilation errors." />
+    <echo message="" />
     
-  <target name="eclipse-src-zip" depends="eclipse">
-    <property name="eclipse_src_zip_dir" value="${eclipse_package_dir}/src/drjava-eclipse-${eclipse_plugin_version}" />
-    <delete dir="${eclipse_src_zip_dir}" />
-    <mkdir dir="${eclipse_src_zip_dir}" />
-
-    <cvs dest="${eclipse_src_zip_dir}"
-         tag="HEAD"
-         quiet="yes"
-         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0 src/src-jsr14v1_2 src/src-jsr14v2_0 src/src-mac13 src/src-mac14 src/src-windows drjava/"
-         command="export -N" />
-
-    <zip zipfile="${eclipse_dir}/package/drjava-eclipse-${eclipse_plugin_version}-src.zip">
-      <fileset dir="${eclipse_package_dir}/src">
-        <include name="drjava-eclipse-${eclipse_plugin_version}/**" />
-      </fileset>
-    </zip>
-    <delete dir="${eclipse_src_zip_dir}" />
-  </target>
-
-  <!-- Initializes properties used in all jEdit tasks -->
-  <target name="jedit">
-    <property name="jedit_dir" value="${plugins_dir}/jedit" />
-    <property name="jedit_srcroot" value="${jedit_dir}/src" />
-    <property name="jedit_built" value="${jedit_dir}/built" />
-  </target>
-
-  <target name="clean-jedit" depends="jedit">
-    <delete dir="${jedit_built}" />
-    <delete file="${jedit_dir}/drjava-jedit.jar" />
-  </target>
-
-  <!-- Compiles the jEdit specific classes. -->
-  <target name="compile-jedit" depends="jedit">
-    <!-- Build the classes -->
-    <mkdir dir="${jedit_built}" />
-    <antcall target="do-compile">
-      <param name="srcroot" value="${jedit_srcroot}" />
-      <param name="projpath" value="edu/rice/cs" />
-      <param name="built" value="${jedit_built}" />
-    </antcall>
-  </target>
-
-  <!-- Creates a distributable jar for the jEdit plugin -->
-  <target name="jar-jedit" depends="compile-jedit">
-
-    <!-- Make a jar to include DrJava classes -->
-    <antcall target="jar">
-      <param name="jarfile" value="${jedit_dir}/drjava-jedit.jar"/>
-    </antcall>
-    <!-- Add the plugin classes -->
-    <jar jarfile="${jedit_dir}/drjava-jedit.jar" update="yes">
-      <fileset dir="${jedit_built}">
-        <exclude name="**/*Test.class" />
-        <exclude name="**/*Test$*.class" />
-        <include name="**/*.class" />
-      </fileset>
-    </jar>
-    <!-- Add the plugin xml and properties data -->
-    <jar jarfile="${jedit_dir}/drjava-jedit.jar" update="yes">
-      <fileset dir="${jedit_dir}">
-        <include name="drjava-jedit.props" />
-	<include name="actions.xml" />
-	<include name="dockables.xml" />
-      </fileset>
-    </jar>
-  </target>
-
-
-  <!-- Compiles only the JSR-14 v1.0 specific classes, and adds
-       them to compilers.jar in the lib directory.
-       Deletes the compiled classes when finished.
-    -->
-  <target name="compile-jsr14v1_0">
-    <property name="projpath_jsr14v1_0" 
-              value="src-jsr14v1_0/edu/rice/cs/${ant.project.name}" />
-    <property name="built_jsr14v1_0"
-              value="${srcroot}/../built-jsr14v1_0/" />
-
-    <!-- Build the classes -->
-    <mkdir dir="${built_jsr14v1_0}" />
-    <antcall target="do-compile">
-      <param name="projpath" value="${projpath_jsr14v1_0}" />
-      <param name="built" value="${built_jsr14v1_0}" />
-    </antcall>
-
-    <!-- Make a jar in the lib directory. No tests are included. -->
-    <jar jarfile="${lib_dir}/compilers.jar" update="yes">
-      <fileset dir="${built_jsr14v1_0}">
-        <exclude name="**/*Test.class" />
-        <exclude name="**/*Test$*.class" />
-        <include name="${projpath}/**" />
-
-        <!-- include the GPL -->
-        <include name="edu/rice/cs/LICENSE" />
-      </fileset>
-    </jar>
-
-    <!-- Delete the compiled classes -->
-    <delete dir="${built_jsr14v1_0}" />
-  </target>
-
-  <!-- Compiles only the JSR-14 v1.2 specific classes, and adds
-       them to compilers.jar in the lib directory.
-       Deletes the compiled classes when finished.
-    -->
-  <target name="compile-jsr14v1_2">
-    <property name="projpath_jsr14v1_2" 
-              value="src-jsr14v1_2/edu/rice/cs/${ant.project.name}" />
-    <property name="built_jsr14v1_2"
-              value="${srcroot}/../built-jsr14v1_2/" />
-
-    <!-- Build the classes -->
-    <mkdir dir="${built_jsr14v1_2}" />
-    <antcall target="do-compile">
-      <param name="projpath" value="${projpath_jsr14v1_2}" />
-      <param name="built" value="${built_jsr14v1_2}" />
-    </antcall>
-
-    <!-- Make a jar in the lib directory. No tests are included. -->
-    <jar jarfile="${lib_dir}/compilers.jar" update="yes">
-      <fileset dir="${built_jsr14v1_2}">
-        <exclude name="**/*Test.class" />
-        <exclude name="**/*Test$*.class" />
-        <include name="${projpath}/**" />
-
-        <!-- include the GPL -->
-        <include name="edu/rice/cs/LICENSE" />
-      </fileset>
-    </jar>
-
-    <!-- Delete the compiled classes -->
-    <delete dir="${built_jsr14v1_2}" />
-  </target>
+    <mkdir dir="classes/base" />
+    <mkdir dir="classes/test" />
     
-  <!-- Compiles only the Mac OS X JDK 1.3 specific classes, and adds
-       them to platform.jar in the lib directory.
-       Deletes the compiled classes when finished.
-    -->
-  <target name="compile-mac13">
-    <property name="projpath_mac13" 
-              value="src-mac13/edu/rice/cs/${ant.project.name}" />
-    <property name="built_mac13"
-              value="${srcroot}/../built-mac13/" />
-
-    <!-- Build the classes -->
-    <mkdir dir="${built_mac13}" />
-    <antcall target="do-compile">
-      <param name="projpath" value="${projpath_mac13}" />
-      <param name="built" value="${built_mac13}" />
-    </antcall>
-
-    <!-- Make a jar in the lib directory. No tests are included. -->
-    <jar jarfile="${lib_dir}/platform.jar" update="yes">
-      <fileset dir="${built_mac13}">
-        <exclude name="**/*Test.class" />
-        <exclude name="**/*Test$*.class" />
-        <include name="${projpath}/**" />
-
-        <!-- include the GPL -->
-        <include name="edu/rice/cs/LICENSE" />
-      </fileset>
-    </jar>
-
-    <!-- Delete the compiled classes -->
-    <delete dir="${built_mac13}" />
-  </target>
+    <!-- Move any test classes back to base to prevent recompilation -->
+    <move todir="classes/base">
+      <fileset dir="classes/test" />
+    </move>
     
-  <!-- Compiles only the Mac OS X JDK 1.3 specific classes and runs
-       all JUnit tests included with the platform support class.
-       Deletes the compiled classes when finished.
-    -->
-  <target name="test-mac13">
-    <property name="projpath_mac13" 
-              value="src-mac13/edu/rice/cs/${ant.project.name}" />
-    <property name="built_mac13"
-              value="${srcroot}/../built-mac13/" />
-
-    <!-- Build the classes -->
-    <mkdir dir="${built_mac13}" />
-    <antcall target="do-compile">
-      <param name="projpath" value="${projpath_mac13}" />
-      <param name="built" value="${built_mac13}" />
-    </antcall>
-
-    <!-- Run all platform-specific JUnit tests. -->
-    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="yes">
+    <!--<javac srcdir="src" destdir="classes/base" source="1.5" target="1.5" sourcepath="${drjava-src}" 
+           debug="on" optimize="off" deprecation="on" includeAntRuntime="no" fork="yes">-->
+    <javac destdir="classes/base" source="1.5" target="1.5" sourcepath="${drjava-src}" 
+           debug="on" optimize="off" deprecation="on" includeAntRuntime="no" fork="yes">
+      <src>
+        <pathelement location="src" />
+        <pathelement location="${drjava-src}/edu/rice/cs/util/sexp" />
+      </src>
       <classpath>
-        <path refid="classpath" />
-        <pathelement path="${built_mac13}" />
+        <fileset refid="libs" />
+        <fileset refid="eclipse-libs" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="classes/base" />
       </classpath>
+      <compilerarg value="-Xlint" />
+      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
+      <compilerarg value="-Xlint:-serial" /> 
+      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
+           This can be useful in creating a pruned version of a jar file for the lib directory.
+           (You must also clear the sourcepath="" option.)
+      <include name="${src-working-dir}/**/*.java" /> -->
+    </javac>
+    
+    <mkdir dir="classes/test" /> <!-- May be deleted by the previous move -->
+    <move todir="classes/test">
+      <fileset dir="classes/base">
+        <include name="**/*Test.class" />
+        <include name="**/*Test$*.class" />
+        <include name="**/*TestCase.class" />
+        <include name="**/*TestCase$*.class" />
+        <!-- Additional test classes should be listed here -->
+      </fileset>
+    </move>
+    
+  </target>
+  
 
-      <!-- This makes JUnit display info about each test to console -->
-      <formatter type="plain" usefile="no" />
+  <target name="copy-resources">
+    <copy todir="classes/base">
+      <fileset dir="src">
+        <include name="**/LICENSE" />
+        <include name="**/README" />
+        <include name="**/*.gif" />
+        <include name="**/*.png" />
+        <include name="**/*.jpg" />
+        <include name="**/*.jpeg" />
+        <include name="**/*.properties" />
+        <!-- Additional resource files should be listed here -->
+      </fileset>
+    </copy>
+  </target>
+  
+  
+  <target name="unjar-libs">
+    <antcall target="do-unjar-libs">
+      <param name="generate-sourcedir" value="lib" />
+      <param name="generate-dir" value="classes/lib" />
+    </antcall>
+  </target>
+  
+  <target name="do-unjar-libs" depends="check-generate-dir-from-dir" unless="already-generated">
+    <echo message="Unjarring jar files in the lib directory" />
+    <!-- Delete "classes/lib" in case it exists (but is out of date) -->
+    <delete dir="classes/lib" />
+    <mkdir dir="classes/lib" />
+    <unjar dest="classes/lib">
+      <fileset refid="libs" />
+      <patternset excludes="META-INF/**" />
+    </unjar>
+  </target>
+  
+  
+  <target name="compile-14" depends="compile-15, resolve-java14-runtime, assert-eclipse-exists"
+          description="Create 1.4 versions of the classes (after compiling)">
+    <!-- Note: This target, in addition to checking 1.4 compatibility, serves to ensure that there are no dependencies
+         on test classes or JUnit classes in the base.  If 1.4 compatibility is no longer needed, a similar dependency
+         check should probably still be done. -->
+    <echo message="Generating 1.4 versions of the classes directories (this may take awhile after a large compile)" />
+    
+    <!-- Convert lib classes -->
+    <mkdir dir="classes/lib-14" />
+    <retroweaver srcdir="classes/lib" destdir="classes/lib-14" target="1.4" verify="no" />
+    <copy todir="classes/lib-14">
+      <fileset dir="classes/lib" excludes="**/*.class" />
+    </copy>
+    
+    <!-- Convert base classes -->
+    <mkdir dir="classes/base-14" />
+    <pathconvert property="retroweaver-base-classpath" dirsep="${file.separator}" pathsep="${path.separator}">
+      <path>
+        <pathelement location="${java14-runtime}" />
+        <pathelement location="${clover-jar}" />
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+        <fileset refid="eclipse-libs" />
+      </path>
+    </pathconvert>
+    <retroweaver srcdir="classes/base" destdir="classes/base-14" target="1.4" verify="yes"
+                 classpath="${retroweaver-base-classpath}" />
+    <copy todir="classes/base-14">
+      <fileset dir="classes/base" excludes="**/*.class" />
+    </copy>
+                 
+    <!-- Convert test classes -->
+    <mkdir dir="classes/test-14" />
+    <pathconvert property="retroweaver-test-classpath" dirsep="${file.separator}" pathsep="${path.separator}">
+      <path>
+        <pathelement location="${java14-runtime}" />
+        <pathelement location="${clover-jar}" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+        <pathelement location="classes/test-14" />
+        <fileset refid="eclipse-libs" />
+      </path>
+    </pathconvert>
+    <retroweaver srcdir="classes/test" destdir="classes/test-14" target="1.4" verify="yes"
+                 classpath="${retroweaver-test-classpath}" />
+    <copy todir="classes/test-14">
+      <fileset dir="classes/test" excludes="**/*.class" />
+    </copy>
+    
+  </target>
 
-      <!-- This makes JUnit run all test classes. It figures out which ones
-           automatically, without needing AllTests classes.
-      -->
+
+  <!-- ***************
+       Testing Targets
+       *************** -->
+  
+  <target name="test" depends="test-15" description="Shortcut for 'test-15'">
+  </target>
+
+  <target name="test-15" depends="compile-15"
+          description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="do-test-target" value="do-test-15" />
+    </antcall>
+  </target>
+  
+  <target name="test-14" depends="compile-14"
+          description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="do-test-target" value="do-test-14" />
+    </antcall>
+  </target>
+  
+  <target name="test-14-in-15" depends="compile-14, assert-15"
+          description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="do-test-target" value="do-test-14-in-15" />
+    </antcall>
+  </target>
+  
+  <target name="iterate-tests">
+    <if>
+      <equals arg1="${test-spec}" arg2="" />
+      <then>
+        <limit minutes="${test-timeout}" failonerror="true">
+          <antcall target="${do-test-target}">
+            <param name="test-filter-string" value="" />
+          </antcall>
+        </limit>
+      </then>
+      <else>
+        <for list="${test-spec}" param="test-filter-string-attribute">
+          <sequential>
+            <limit minutes="${test-timeout}" failonerror="true">
+              <antcall target="${do-test-target}">
+                <param name="test-filter-string" value="@{test-filter-string-attribute}" />
+              </antcall>
+            </limit>
+          </sequential>
+        </for>
+      </else>
+    </if>
+  </target>
+  
+  <selector id="tests-to-run">
+    <and>
+      <filename name="**/*${test-filter-string}*/**" />
+      <filename name="**/*Test.class" />
+    </and>
+  </selector>
+ 
+  <target name="do-test-15" depends="assert-eclipse-exists, assert-15">
+    <echo message="Running all 5.0 tests matching '${test-filter-string}' under Java 5.0" />
+    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
+      <classpath>
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="${clover-jar}" />
+        <pathelement location="classes/test" />
+        <pathelement location="classes/base" />
+        <pathelement location="classes/lib" />
+        <fileset refid="eclipse-libs" />
+      </classpath>
+      <formatter type="brief" usefile="false" />
       <batchtest>
-        <!-- The root of the fileset must be where edu/ is. -->
-        <fileset dir="${srcroot}/src-mac13">
-          <!-- Include only from projpath to only get classes in this project!
-          -->
-          <include name="${projpath}/**/*${test-spec}*Test.java" />
-          <exclude name="**/AllTests.java" />
-          <exclude name="**/Test.java" />
+        <fileset dir="classes/test">
+          <selector refid="tests-to-run" />
         </fileset>
       </batchtest>
     </junit>
-
-    <!-- Delete the compiled classes -->
-    <delete dir="${built_mac13}" />
   </target>
-    
-  <!-- Compiles only the Mac OS X JDK 1.4 specific classes, and adds
-       them to platform.jar in the lib directory.
-       Deletes the compiled classes when finished.
-    -->
-  <target name="compile-mac14">
-    <property name="projpath_mac14" 
-              value="src-mac14/edu/rice/cs/${ant.project.name}" />
-    <property name="built_mac14"
-              value="${srcroot}/../built-mac14/" />
 
-    <!-- Build the classes -->
-    <mkdir dir="${built_mac14}" />
-    <antcall target="do-compile">
-      <param name="projpath" value="${projpath_mac14}" />
-      <param name="built" value="${built_mac14}" />
-    </antcall>
-
-    <!-- Make a jar in the lib directory. No tests are included. -->
-    <jar jarfile="${lib_dir}/platform.jar" update="yes">
-      <fileset dir="${built_mac14}">
-        <exclude name="**/*Test.class" />
-        <exclude name="**/*Test$*.class" />
-        <include name="${projpath}/**" />
-
-        <!-- include the GPL -->
-        <include name="edu/rice/cs/LICENSE" />
-      </fileset>
-    </jar>
-
-    <!-- Delete the compiled classes -->
-    <delete dir="${built_mac14}" />
-  </target>
-    
-  <!-- Compiles only the Mac OS X JDK 1.4 specific classes and runs
-       all JUnit tests included with the platform support class.
-       Deletes the compiled classes when finished.
-    -->
-  <target name="test-mac14">
-    <property name="projpath_mac14" 
-              value="src-mac14/edu/rice/cs/${ant.project.name}" />
-    <property name="built_mac14"
-              value="${srcroot}/../built-mac14/" />
-
-    <!-- Build the classes -->
-    <mkdir dir="${built_mac14}" />
-    <antcall target="do-compile">
-      <param name="projpath" value="${projpath_mac14}" />
-      <param name="built" value="${built_mac14}" />
-    </antcall>
-
-    <!-- Run all platform-specific JUnit tests. -->
-    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="yes">
+  <target name="do-test-14" depends="resolve-java14-exec, assert-eclipse-exists">
+    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
+    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
       <classpath>
-        <path refid="classpath" />
-        <pathelement path="${built_mac14}" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="${clover-jar}" />
+        <pathelement location="classes/test-14" />
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+        <fileset refid="eclipse-libs" />
       </classpath>
-
-      <!-- This makes JUnit display info about each test to console -->
-      <formatter type="plain" usefile="no" />
-
-      <!-- This makes JUnit run all test classes. It figures out which ones
-           automatically, without needing AllTests classes.
-      -->
+      <formatter type="brief" usefile="false" />
       <batchtest>
-        <!-- The root of the fileset must be where edu/ is. -->
-        <fileset dir="${srcroot}/src-mac14">
-          <!-- Include only from projpath to only get classes in this project!
-          -->
-          <include name="${projpath}/**/*${test-spec}*Test.java" />
-          <exclude name="**/AllTests.java" />
-          <exclude name="**/Test.java" />
+        <fileset dir="classes/test-14">
+          <selector refid="tests-to-run" />
         </fileset>
       </batchtest>
     </junit>
-
-    <!-- Delete the compiled classes -->
-    <delete dir="${built_mac14}" />
-  </target>
-    
-  <!-- Compiles only the Windows specific classes, and adds
-       them to platform.jar in the lib directory.
-       Deletes the compiled classes when finished.
-    -->
-  <target name="compile-windows">
-    <property name="projpath_windows" 
-              value="src-windows/edu/rice/cs/${ant.project.name}" />
-    <property name="built_windows"
-              value="${srcroot}/../built-windows/" />
-
-    <!-- Build the classes -->
-    <mkdir dir="${built_windows}" />
-    <antcall target="do-compile">
-      <param name="projpath" value="${projpath_windows}" />
-      <param name="built" value="${built_windows}" />
-    </antcall>
-
-    <!-- Make a jar in the lib directory. No tests are included. -->
-    <jar jarfile="${lib_dir}/platform.jar" update="yes">
-      <fileset dir="${built_windows}">
-        <exclude name="**/*Test.class" />
-        <exclude name="**/*Test$*.class" />
-        <include name="${projpath}/**" />
-
-        <!-- include the GPL -->
-        <include name="edu/rice/cs/LICENSE" />
-      </fileset>
-    </jar>
-
-    <!-- Delete the compiled classes -->
-    <delete dir="${built_windows}" />
   </target>
 
-  <!-- Compiles only the Windows specific classes and runs
-       all JUnit tests included with the platform support class.
-       Deletes the compiled classes when finished.
-    -->
-  <target name="test-windows">
-    <property name="projpath_windows" 
-              value="src-mac14/edu/rice/cs/${ant.project.name}" />
-    <property name="built_windows"
-              value="${srcroot}/../built-windows/" />
-
-    <!-- Build the classes -->
-    <mkdir dir="${built_windows}" />
-    <antcall target="do-compile">
-      <param name="projpath" value="${projpath_windows}" />
-      <param name="built" value="${built_windows}" />
-    </antcall>
-
-    <!-- Run all platform-specific JUnit tests. -->
-    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="yes">
+  <target name="do-test-14-in-15" depends="assert-eclipse-exists, assert-15">
+    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
+    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
       <classpath>
-        <path refid="classpath" />
-        <pathelement path="${built_windows}" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="${clover-jar}" />
+        <pathelement location="classes/test-14" />
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+        <fileset refid="eclipse-libs" />
       </classpath>
-
-      <!-- This makes JUnit display info about each test to console -->
-      <formatter type="plain" usefile="no" />
-
-      <!-- This makes JUnit run all test classes. It figures out which ones
-           automatically, without needing AllTests classes.
-      -->
+      <formatter type="brief" usefile="false" />
       <batchtest>
-        <!-- The root of the fileset must be where edu/ is. -->
-        <fileset dir="${srcroot}/src-windows">
-          <!-- Include only from projpath to only get classes in this project!
-          -->
-          <include name="${projpath}/**/*${test-spec}*Test.java" />
-          <exclude name="**/AllTests.java" />
-          <exclude name="**/Test.java" />
+        <fileset dir="classes/test-14">
+          <selector refid="tests-to-run" />
         </fileset>
       </batchtest>
     </junit>
-
-    <!-- Delete the compiled classes -->
-    <delete dir="${built_windows}" />
   </target>
 
-  <target name="osxapp" depends="jar">
-    <mkdir dir="${osxdir}/${osxtag}/DrJava.app" />
-    <copy todir="${osxdir}/${osxtag}/DrJava.app/">
-      <fileset dir="${basedir}/packaging/DrJava.app" 
-        excludes="Contents/Resources/Java/DrJava.jar-goes-here" />
+
+  <!-- ***********
+       Jar Targets
+       *********** -->
+       
+  <target name="jar" depends="jar-15" description="Shortcut for 'jar-15'" />
+  
+  <target name="jar-15" depends="compile-15, resolve-version-tag" 
+          description="Create the 5.0 jar file with all classes and libs (compiling first)">
+    <jar jarfile="drjava-eclipse-15.jar">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+        <attribute name="Build-Version" value="${version-tag}" />
+        <attribute name="Bundle-ManifestVersion" value="2" />
+        <attribute name="Bundle-Name" value="DrJava Plug-in" />
+        <attribute name="Bundle-SymbolicName" value="edu.rice.cs.drjava; singleton:=true" />
+        <attribute name="Bundle-Version" value="${eclipse-version}" />
+        <attribute name="Bundle-ClassPath" value="drjava-eclipse-15.jar" />
+        <attribute name="Bundle-Activator" value="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin" />
+        <attribute name="Bundle-Localization" value="plugin" />
+        <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.core.runtime, org.eclipse.debug.ui, org.eclipse.jdt.debug.ui, org.eclipse.ui.console, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.jdt.core, org.eclipse.jdt.ui, org.eclipse.search" />
+        <attribute name="Eclipse-AutoStart" value="true" />
+      </manifest>
+      <fileset dir="classes/lib" />
+      <fileset dir="classes/base" />
+    </jar>
+  </target>
+
+  <target name="jar-base-15" depends="compile-15, resolve-version-tag" 
+          description="Create the 5.0 jar file without any support libs (compiling first)">
+    <jar jarfile="drjava-eclipse-base-15.jar">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+        <attribute name="Build-Version" value="${version-tag}" />
+        <attribute name="Bundle-ManifestVersion" value="2" />
+        <attribute name="Bundle-Name" value="DrJava Plug-in" />
+        <attribute name="Bundle-SymbolicName" value="edu.rice.cs.drjava; singleton:=true" />
+        <attribute name="Bundle-Version" value="${eclipse-version}" />
+        <attribute name="Bundle-ClassPath" value="drjava-eclipse-base-15.jar" />
+        <attribute name="Bundle-Activator" value="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin" />
+        <attribute name="Bundle-Localization" value="plugin" />
+        <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.core.runtime, org.eclipse.debug.ui, org.eclipse.jdt.debug.ui, org.eclipse.ui.console, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.jdt.core, org.eclipse.jdt.ui, org.eclipse.search" />
+        <attribute name="Eclipse-AutoStart" value="true" />
+      </manifest>
+      <fileset dir="classes/base" />
+    </jar>
+  </target>
+
+  <target name="jar-14" depends="compile-14, resolve-version-tag" 
+          description="Create the 1.4 jar file with all classes and libs (compiling first)">
+    <jar jarfile="drjava-eclipse.jar">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+        <attribute name="Build-Version" value="${version-tag}" />
+        <attribute name="Bundle-ManifestVersion" value="2" />
+        <attribute name="Bundle-Name" value="DrJava Plug-in" />
+        <attribute name="Bundle-SymbolicName" value="edu.rice.cs.drjava; singleton:=true" />
+        <attribute name="Bundle-Version" value="${eclipse-version}" />
+        <attribute name="Bundle-ClassPath" value="drjava-eclipse.jar" />
+        <attribute name="Bundle-Activator" value="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin" />
+        <attribute name="Bundle-Localization" value="plugin" />
+        <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.core.runtime, org.eclipse.debug.ui, org.eclipse.jdt.debug.ui, org.eclipse.ui.console, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.jdt.core, org.eclipse.jdt.ui, org.eclipse.search" />
+        <attribute name="Eclipse-AutoStart" value="true" />
+      </manifest>
+      <fileset dir="classes/lib-14" />
+      <fileset dir="classes/base-14" />
+    </jar>
+  </target>
+
+  <target name="jar-base-14" depends="compile-14, resolve-version-tag" 
+          description="Create the 1.4 jar file without any support libs (compiling first)">
+    <jar jarfile="drjava-eclipse-base-14.jar">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+        <attribute name="Build-Version" value="${version-tag}" />
+        <attribute name="Bundle-ManifestVersion" value="2" />
+        <attribute name="Bundle-Name" value="DrJava Plug-in" />
+        <attribute name="Bundle-SymbolicName" value="edu.rice.cs.drjava; singleton:=true" />
+        <attribute name="Bundle-Version" value="${eclipse-version}" />
+        <attribute name="Bundle-ClassPath" value="drjava-eclipse-base-14.jar" />
+        <attribute name="Bundle-Activator" value="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin" />
+        <attribute name="Bundle-Localization" value="plugin" />
+        <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.core.runtime, org.eclipse.debug.ui, org.eclipse.jdt.debug.ui, org.eclipse.ui.console, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.jdt.core, org.eclipse.jdt.ui, org.eclipse.search" />
+        <attribute name="Eclipse-AutoStart" value="true" />
+      </manifest>
+      <fileset dir="classes/base-14" />
+    </jar>
+  </target>
+
+
+  <!-- *********************
+       Documentation Targets
+       ********************* -->
+  
+  <target name="javadoc" depends="assert-eclipse-exists, assert-drjava-src-exists, assert-15, resolve-version-tag"
+          description="Generate javadocs from the source folder">
+    <antcall target="do-javadoc">
+      <param name="generate-sourcedir" value="src" />
+      <param name="generate-dir" value="docs/javadoc" />
+    </antcall>
+  </target>
+  
+  <target name="do-javadoc" depends="check-generate-dir-from-dir" unless="already-generated">
+    <echo message="Generating javadocs" />
+    <echo message="NOTE: The 'generate-source' target of the drjava build script is assumed to" />
+    <echo message="have been run.  Otherwise, you may encounter unexpected errors." />
+    <echo message="" />
+    
+    <delete dir="docs/javadoc" />
+    <mkdir dir="docs/javadoc" />
+    <javadoc destdir="docs/javadoc" access="protected" Use="yes" Version="yes" 
+             Author="yes" Windowtitle="${readable-project-name} API (${version-tag})">
+      <fileset dir="src" includes="**/*" />
+      <sourcepath>
+        <pathelement location="src" />
+        <pathelement location="${drjava-src}" />
+      </sourcepath>
+      <classpath>
+        <fileset refid="libs" />
+        <fileset refid="eclipse-libs" />
+        <pathelement location="lib/buildlib/junit.jar" />
+      </classpath>
+      <link href="http://java.sun.com/j2se/1.5/docs/api" />
+      <link href="http://junit.org/junit/javadoc/3.8.1" />
+      <link href="http://drjava.org/javadoc/drjava" />
+      <!-- TODO: Eclipse API link(s) -->
+      <!-- Additional external library APIs may be listed here -->
+    </javadoc>
+  </target>
+  
+  
+  <target name="clover" depends="clover-15" description="Shortcut for 'clover-15'">
+  </target>
+  
+  <target name="clover-15" depends="clean, setup-clover, test-15, report-clover" 
+          description="Generate a Clover test coverage report (using 'test-15')" />
+  
+  <target name="clover-14" depends="clean, setup-clover, test-14, report-clover" 
+          description="Generate a Clover test coverage report (using 'test-14')" />
+  
+  <target name="clover-14-in-15" depends="clean, setup-clover, test-14-in-15, report-clover" 
+          description="Generate a Clover test coverage report (using 'test-14-in-15')" />
+  
+  <target name="report-clover" depends="resolve-version-tag">
+    <echo message="Generating Clover report" />
+    <clover-report>
+      <current outfile="docs/clover" title="${readable-project-name} Test Coverage (${version-tag})">
+        <format type="html" />
+      </current>
+    </clover-report>
+    <antcall target="clean-intermediate"> <!-- Remove instrumented class files -->
+      <param name="clean-can-fail" value="no" />
+    </antcall>
+  </target>
+
+  <target name="setup-clover" depends="assert-clover-jar-exists">
+    <extendclasspath path="${clover-jar}" />
+    <taskdef resource="clovertasks" classpath="${clover-jar}" />
+    <mkdir dir="cloverdb" />
+    <clover-setup initString="cloverdb/clover.db">
+      <files>
+        <exclude name="**/*Test.java" />
+        <exclude name="**/*TestCase.java" />
+        <!-- Additional test sources should be listed here -->
+      </files>
+    </clover-setup>
+  </target>
+
+  
+  <!-- *************
+       Clean Targets
+       ************* -->
+       
+  <target name="clean" depends="clean-intermediate, clean-products"
+          description="Remove all build products; the result should match the intended Subversion contents">
+  </target>
+
+  <target name="clean-intermediate" unless="skip-clean">
+    <echo message="Deleting all intermediate build products" />
+    
+    <delete dir="classes" failonerror="${clean-can-fail}" />
+    <delete dir="cloverdb" failonerror="${clean-can-fail}" />
+
+    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
+      <fileset dir="${basedir}" defaultexcludes="no">
+        <include name="src/**/*.class" />
+        <!-- We could get rid of backups, but "update" ignores them, so they're okay.
+             (doesn't work if defaultexcludes is "yes") -->
+        <!-- <include name="**/*~" /> -->
+        <!-- Get rid of pesky OS helper files (doesn't work if defaultexcludes is "yes") -->
+        <include name="**/.DS_Store" />
+        <include name="**/Thumbs.db" />
+        <!-- Additional files to delete may be listed here -->
+      </fileset>
+    </delete>
+    
+  </target>
+    
+  <target name="clean-products" unless="skip-clean">
+    <echo message="Deleting all final build products" />
+    
+    <delete dir="docs" failonerror="${clean-can-fail}" />
+    
+    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
+      <fileset dir="${basedir}" defaultexcludes="no">
+        <include name="*.jar" />
+        <include name="*.zip" />
+        <include name="*.tar.gz" />
+        <include name="${ant.project.name}-*" />
+        <include name="drjava-eclipse-*" />
+      </fileset>
+    </delete>
+  </target>
+  
+
+  <!-- ******************
+       Subversion Targets 
+       ****************** -->
+  
+  <target name="update" depends="clean" description="Reconcile source with the Subversion archive">
+    <echo message="Running Subversion update" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="update" />
+    </exec>
+    <exec executable="svn" failonerror="yes">
+      <arg value="status" />
+    </exec>
+  </target>
+  
+  <target name="commit" depends="update, build" 
+          description="Commit source to the Subversion archive (after building)">
+    <antcall target="clean-intermediate"> <!-- Clean up after the latest build -->
+      <param name="clean-can-fail" value="no" />
+    </antcall>
+    <exec executable="svn" failonerror="yes">
+      <arg value="status" />
+    </exec>
+    <input message="Please enter a log message for the commit: "
+           addproperty="svn-commit-message" />
+    <echo message="Running Subversion commit" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="commit" />
+      <arg value="-m" />
+      <arg value="${svn-commit-message}" />
+    </exec>
+  </target>
+
+  <target name="tag" depends="update, resolve-version-tag" 
+          description="Copy the working copy to a new Subversion tag (after updating)">
+    <echo message="Creating a new Subversion tag with name ${version-tag}"/>
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${basedir}" />
+      <arg value="${svn-repository}/tags/${version-tag}" />
+      <arg value="-m" />
+      <arg value="Created tag ${version-tag}" />
+    </exec>
+  </target>
+  
+  <target name="branch" depends="update" 
+          description="Copy the working copy to a new Subversion branch (after updating)">
+    <echo message="This will create a new branch from your working copy.  If there are changes " />
+    <echo message="in your copy that have not been committed, you may want to do so first, " />
+    <echo message="so that there's a clear branch point for merging later." />
+    <input message="Enter a name for the new branch: "
+           addproperty="svn-branch-name" />
+    <echo message="Creating a new Subversion branch ${svn-branch-name}" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="copy" />
+      <arg value="${basedir}" />
+      <arg value="${svn-repository}/branches/${svn-branch-name}" />
+      <arg value="-m" />
+      <arg value="Created branch ${svn-branch-name}" />
+    </exec>
+  </target>
+
+
+  <!-- ***************
+       Release Targets
+       *************** -->
+       
+  <target name="release-stable" description="Generate all release files tagged with 'stable'">
+    <antcall target="release">
+      <param name="tag-append" value="-stable" />
+      <param name="is-development" value="no" />
+    </antcall>
+  </target>
+
+  <target name="release-beta" description="Generate all release files tagged with 'beta'">
+    <antcall target="release">
+      <param name="tag-append" value="-beta" />
+      <param name="is-development" value="no" />
+    </antcall>
+  </target>
+       
+  <target name="release"
+          depends="update, build, tag, eclipse-plugin-zip, src-zip, javadoc-zip" 
+          description="Generate all release files (after building)">
+    <delete dir="${version-tag}" />
+  </target>
+  
+  <target name="eclipse-plugin-zip" depends="assert-jar-exists, resolve-version-tag">
+    <echo message="Creating drjava-eclipse-${eclipse-version}.zip" />
+    <property name="eclipse-plugin-dir" value="${version-tag}/plugin" />
+    <mkdir dir="${eclipse-plugin-dir}" />
+    <filter token="VERSION" value="${version-tag}" />
+    <filter token="ECLIPSE_VERSION" value="${eclipse-version}" />
+    <copy todir="${eclipse-plugin-dir}" filtering="yes" >
+      <fileset dir="packaging" excludes="**/*jar-goes-here" />
     </copy>
-
-    <copy file="${jarfile}" tofile="${osxdir}/${osxtag}/DrJava.app/Contents/Resources/Java/DrJava.jar" />
-    
-    <tar tarfile="${osxdir}/${osxtag}.tar">
-      <tarfileset dir="${osxdir}/">
-        <include name="${osxtag}/**/*" />
-        <exclude name="${osxtag}/DrJava.app/Contents/MacOS/DrJava" />
-      </tarfileset>
-      <tarfileset dir="${osxdir}/" mode="755">
-        <include name="${osxtag}/DrJava.app/Contents/MacOS/DrJava" />
-      </tarfileset>
-    </tar>
-    <gzip src="${osxdir}/${osxtag}.tar"
-      zipfile="${osxdir}/${osxtag}.tar.gz" />
-
-    <delete dir="${osxdir}/${osxtag}" />
-    <delete file="${osxdir}/${osxtag}.tar" />
-  </target>
-
-  <!-- Makes a jar with dependencies. No tests are included. -->
-  <target name="jar">
-    <delete file="${jarfile}" />
-<!--
-    <zip zipfile="${jarfile}">
-      <zipfileset src="${srcroot}/edu/rice/cs/LICENSE" />
+    <copy file="drjava-eclipse.jar" todir="${eclipse-plugin-dir}" />
+    <zip destfile="drjava-eclipse-${eclipse-version}.zip">
+      <zipfileset dir="${eclipse-plugin-dir}" prefix="edu.rice.cs.drjava_${eclipse-version}" />
     </zip>
--->
-    <echo message="built: ${built} "/>
-    <jar jarfile="${jarfile}" manifest="${manifest}" update="true" >
-      <!-- Include dependencies -->
-<!--      <zipfileset src="${lib_dir}/gj-util.jar"
-                  excludes="META-INF/MANIFEST.MF" e
-/>-->
-      <zipfileset src="${lib_dir}/dynamicjava.jar"
-                  excludes="META-INF/MANIFEST.MF" />
-      <zipfileset src="${lib_dir}/junit.jar"
-                  excludes="META-INF/MANIFEST.MF" />
-      <zipfileset src="${lib_dir}/compilers.jar"
-                  excludes="META-INF/MANIFEST.MF" />
-      <zipfileset src="${lib_dir}/platform.jar"
-                  excludes="META-INF/MANIFEST.MF" />
-      <zipfileset src="${lib_dir}/winlaf-0.5.1.jar"
-                  excludes="META-INF/MANIFEST.MF" />
-      <zipfileset src="${lib_dir}/javalanglevels.jar"
-                  excludes="META-INF/MANIFEST.MF" />
-      <zipfileset src="drjava.jar"
-                  excludes="META-INF/MANIFEST.MF" />
-      <!-- Include DrJava classes -->
-<!--
-      <fileset dir="${built}">
-        <include name="${projpath}/**" />
-        <exclude name="**/*Test.class" />
-        <exclude name="**/*Test$*.class" />
-        <exclude name="${projpath}/docs/developer/**" />
-        <include name="edu/rice/cs/util/**" />
-        <!- - include the GPL - ->
-        <include name="edu/rice/cs/LICENSE" />
-      </fileset>
--->
-    </jar>
   </target>
-
-  <!-- Run the program! -->
-  <target name="run" depends="compile">
-    <java fork="true" classname="edu.rice.cs.drjava.DrJava">
-      <classpath refid="classpath" />
-    </java>
+  
+  <target name="src-zip" depends="resolve-version-tag">
+    <echo message="Creating ${version-tag}-src.zip" />
+    <exec executable="svn" failonerror="yes">
+      <arg value="export" />
+      <arg value="${svn-repository}/tags/${version-tag}" />
+      <arg value="${version-tag}/src" />
+    </exec>
+    <zip destfile="${version-tag}-src.zip">
+      <zipfileset dir="${version-tag}/src" prefix="${version-tag}/src" />
+    </zip>
   </target>
-
-
-  <!-- Check if docbook2html is available -->
-  <target name="docbook-present">
-    <property environment="env"/>
-    <available file="docbook2html" property="docbook.present">
-      <filepath>
-        <pathelement path="${env.PATH}" />
-      </filepath>
-    </available>
+  
+  <target name="javadoc-zip" depends="javadoc, resolve-version-tag">
+    <echo message="Creating ${version-tag}-javadoc.zip" />
+    <zip destfile="${version-tag}-javadoc.zip">
+      <zipfileset dir="docs/javadoc" prefix="${version-tag}/javadoc" />
+    </zip>
   </target>
-
-  <!-- Create documentation html -->
-  <target name="docs" depends="userdocs,devdocs" unless="docbook.present">
-    <echo message="Could not find docbook2html.  Not generating docs." />
+  
+  <!-- We don't include this in the standard release process, because we don't want to
+       include instrumented files in the release, and because Clover must be run on a
+       licensed machine -->
+  <target name="clover-zip" depends="clover-14-in-15, resolve-version-tag">
+    <echo message="Creating ${version-tag}-clover.zip" />
+    <zip destfile="${version-tag}-clover.zip">
+      <zipfileset dir="docs/clover" prefix="${version-tag}/clover" />
+    </zip>
   </target>
+  
+  
+  <!-- ********************************
+       Misc Occasionally-Useful Targets
+       ******************************** -->
+  
+  <patternset id="exclude-binaries">
+    <exclude name="**/*.jar" />
+    <exclude name="**/*.class" />
+    <exclude name="**/DrJava" />
+    <exclude name="**/*.png" />
+    <exclude name="**/*.icns" />
+    <exclude name="**/*.gif" />
+    <exclude name="**/*.jpg" />
+    <exclude name="**/*.jpeg" />
+    <!-- Additional binary types may be added here -->
+  </patternset>
 
-  <!-- Create the user documentation -->
-  <target name="userdocs" depends="docbook-present" if="docbook.present">
-    <delete dir="${doc_dir}/user/" />
-    <mkdir dir="${doc_dir}/user/" />
-    <echo message="Creating documentation HTML..." />
-    <apply executable="docbook2html" failonerror="yes" type="file">
-      <arg value="-o"/>
-      <arg value="${doc_dir}/user/"/>
-      <fileset dir="${srcroot}/${projpath}/docs/user">
-        <include name="userdoc.docbook" />
-      </fileset>
-    </apply>
+  <!-- Run a batch find-and-replace on all text files in the project.
+       Assumes the properties "find" and "replace" have been defined
+       (e.g. "ant -Dfind=foo -Dreplace=bar find-and-replace"). -->
+  <target name="find-and-replace">
+    <replace dir="${basedir}" token="${find}" value="${replace}" summary="yes">
+      <patternset refid="exclude-binaries" />
+    </replace>
   </target>
-
-  <!-- Create the developer documentation -->
-  <target name="devdocs" depends="docbook-present" if="docbook.present">
-    <delete dir="${doc_dir}/developer/" />
-    <mkdir dir="${doc_dir}/developer/" />
-    <echo message="Creating documentation HTML..." />
-    <apply executable="docbook2html" failonerror="yes" type="file">
-      <arg value="-o"/>
-      <arg value="${doc_dir}/developer/"/>
-      <fileset dir="${srcroot}/${projpath}/docs/developer">
-        <include name="devdoc.docbook" />
-      </fileset>
-    </apply>
+  
+  <!-- Standardize all newline character sequences.  Subversion takes care of this 
+       automatically, but sometimes files crop up with the wrong sequence.
+       Use "svn status" after running this to see which files were fixed. -->
+  <target name="fix-newlines" description="Standardize newline character sequences in all text files">
+    <!-- If we're in Windows, use \r\n -->
+    <condition property="newline-code" value="crlf">
+      <os family="windows" />
+    </condition>
+    <!-- Otherwise, use \n -->
+    <property name="newline-code" value="lf" />
+    <fixcrlf srcdir="${basedir}" eol="${newline-code}" fixlast="no">
+      <patternset refid="exclude-binaries" />
+    </fixcrlf>
   </target>
+  
+  
+  <!-- ***************************
+       Property-resolution Targets 
+       *************************** -->
+  
+  <target name="resolve-java14-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java14-runtime will only be set the *first* time. -->
 
-  <!-- Allow a commit of just the docs, without testing -->
-  <target name="commit-docs">
-    <echo message="Committing the documentation." />
+    <property name="java14-runtime-1" location="${java14-home}/lib/rt.jar" />
+    <available property="java14-runtime" value="${java14-runtime-1}" file="${java14-runtime-1}" />
+
+    <property name="java14-runtime-2" location="${java14-home}/jre/lib/rt.jar" />
+    <available property="java14-runtime" value="${java14-runtime-2}" file="${java14-runtime-2}" />
+
+    <property name="java14-runtime-3" location="${java14-home}/../Classes/classes.jar" />
+    <available property="java14-runtime" value="${java14-runtime-3}" file="${java14-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 1.4 home: ${java14-home}" unless="java14-runtime" />
+  </target>
+  
+  <target name="resolve-java14-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="java14-exec-1" location="${java14-home}/bin/java.exe" />
+    <condition property="java14-exec" value="${java14-exec-1}">
+      <and>
+        <available file="${java14-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
     
-    <tempfile property="commit-comments-filename" 
-            destdir="${java.io.tmpdir}"
-            prefix="commit-comments" />
-    <antcall target="create-commit-comments">
-      <param name="commit-comments-filename" value="${commit-comments-filename}"/>
-    </antcall>
-    <cvs>
-      <commandline>
-        <argument value="commit" />
-        <argument value="-F" />
-        <argument value="${commit-comments-filename}" />
-        <argument value="${srcroot}/${projpath}/docs" />
-      </commandline>
-    </cvs>
-    <delete file="${commit-comments-filename}"/>
-    
+    <property name="java14-exec-2" location="${java14-home}/bin/java" />
+    <available property="java14-exec" value="${java14-exec-2}" file="${java14-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 1.4 home: ${java14-home}" unless="java14-exec" />
   </target>
+  
+  <target name="assert-15">
+    <fail message="The specified target requires Ant to be run under Java 5.0 or later">
+      <condition>
+        <not>
+          <or>
+            <contains string="${java.version}" substring="1.5." />
+            <contains string="${java.version}" substring="1.6." />
+          </or>
+        </not>
+      </condition>
+    </fail>
+  </target>
+    
+  <target name="assert-jar-exists">
+    <available property="jar-exists" file="drjava-eclipse.jar" />
+    <fail message="Can't find drjava-eclipse.jar" unless="jar-exists" />
+  </target>
+  
+  <target name="assert-clover-jar-exists">
+    <available property="clover-jar-exists" file="${clover-jar}" />
+    <fail message="${clover-jar} does not exist" unless="clover-jar-exists" />
+  </target>
+  
+  <target name="assert-drjava-src-exists">
+    <available property="drjava-src-exists" file="${drjava-src}" />
+    <fail message="${drjava-src} does not exist" unless="drjava-src-exists" />
+  </target>
+  
+  <target name="assert-eclipse-exists">
+    <available property="eclipse-exists" file="${eclipse-home}" />
+    <fail message="${eclipse-home} does not exist" unless="eclipse-exists" />
+  </target>
+  
+  <target name="resolve-version-tag">
+    <!-- Get a timestamp based on GMT, rather than local time -->
+    <tstamp>
+      <format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
+      <format property="TSTAMP" pattern="HHmm" timezone="GMT" />
+      <format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
+    </tstamp>
+    <property name="version-tag"
+              value="drjava-eclipse${tag-append}-${DSTAMP}-${TSTAMP}" />
+  </target>  
+
+  <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
+       otherwise, the out-of-date target file is deleted (if it exists).  Note that, since
+       properties can only be set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-file-from-file">
+    <dependset>
+      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
+      <targetfilelist dir="${basedir}" files="${generate-file}" />
+    </dependset>
+    <available file="${generate-file}" property="already-generated" />
+  </target>
+
+  <!-- Sets "already-generated" if "generate-file" is more recent than everything in
+       "generate-sourcedir"; otherwise, the out-of-date target file is deleted (if it exists).
+        Note that, since properties can only be set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-file-from-dir">
+    <dependset>
+      <srcfileset dir="${generate-sourcedir}" />
+      <targetfilelist dir="${basedir}" files="${generate-file}" />
+    </dependset>
+    <available file="${generate-file}" property="already-generated" />
+  </target>
+
+  <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
+       than "generate-sourcefile".  Note that, since properties can only be set once, this 
+       should happen underneath an "antcall". -->
+  <target name="check-generate-dir-from-file">
+    <uptodate property="already-generated" targetfile="${generate-dir}" srcfile="${generate-sourcefile}" />
+  </target>
+  
+  <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
+       than everything in "generate-sourcedir".  Note that, since properties can only be 
+       set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-dir-from-dir">
+    <!-- Unfortunately, a bug in uptodate prevents this from working properly,
+         so we just have to equate *existence* with being up to date.
+    <uptodate property="already-generated" targetfile="${generate-dir}" >
+      <srcfiles dir="${generate-sourcedir}" />
+    </uptodate>
+    -->
+    <available file="${generate-dir}" property="already-generated" />
+  </target>
+
 
 </project>

@@ -3,7 +3,7 @@
 <plugin
    id="edu.rice.cs.drjava"
    name="DrJava"
-   version="0.9.5"
+   version="@ECLIPSE_VERSION@"
    provider-name="Rice University"
    class="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin">
 
