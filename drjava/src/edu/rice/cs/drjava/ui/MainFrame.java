@@ -4019,32 +4019,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    }
    */
   
-  /** Saves the current */
-  private void _saveCurrentDirectory() {
-    try {
-      try {
-        DrJava.getConfig().setSetting(LAST_DIRECTORY, _getFullFile(_model.getActiveDocument().getFile()));
-      }
-      catch (IllegalStateException ise) {
-        // Oops, no active document for which to get the file.
-        // Try saving the current directory of the open chooser.
-        DrJava.getConfig().setSetting(LAST_DIRECTORY, _getFullFile(_openChooser.getCurrentDirectory()));
-      }
-      catch (FileMovedException fme) {
-        // File moved ... well, that's ok, right?  Try again with the new file.
-        DrJava.getConfig().setSetting(LAST_DIRECTORY, _getFullFile(fme.getFile()));
-      }
-    }
-    catch (IOException ioe) {
-      // getting canonical path probably failed under windows.
-      // Not much we can do about this.
-    }
-    catch (Throwable t) {
-      // Oops...
-//      JOptionPane.showMessageDialog(this, t.getMessage());
-    }
-  }
-  
   private void _quit() {
     AbstractGlobalModel._log.log("MainFrame.quit() called");
     if (_promptBeforeQuit) {
@@ -4069,7 +4043,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
     _storePositionInfo();
-    _saveCurrentDirectory();
     
     // Save recent files, but only if there wasn't a problem at startup
     // (Don't want to overwrite a custom config file with a simple typo.)
@@ -6231,6 +6204,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _openChooser.setCurrentDirectory(file);
       _saveChooser.setCurrentDirectory(file);
 //      System.setProperty("user.dir", file.getAbsolutePath());  // Changed system property is ignored by JVM
+      DrJava.getConfig().setSetting(LAST_DIRECTORY, file);
     }
     catch (IOException ioe) {
       // If getCanonicalFile throws an IOException, we can't set the directory of the file chooser.  Oh well.
