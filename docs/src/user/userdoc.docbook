@@ -920,15 +920,32 @@ public class Student {
      <varlistentry>
        <term>Web Browser (<varname>browser.file = ""</varname>)</term>
        <listitem>
-  <para>Optional filename of your computer's web browser, to be used to view Javadoc and links from the Help.  If blank, the platform's default browser (on Windows or Mac OS X) will be used unless you specify a Web Browser Command (explained below).</para>
+  <para>and</para>
        </listitem>
      </varlistentry>
 
      <varlistentry>
        <term>Web Browser Command (<varname>browser.string = ""</varname>)</term>
        <listitem>
-  <para>Any command or arguments you need to start your web browser.  If both this option and the Web Browser option are blank, the platform's default browser will be used.  In this option, any occurrence of "<literal>&lt;URL&gt;</literal>" will be replaced with the URL to open.  (If "<literal>&lt;URL&gt;</literal>" is not specified, the URL will be appended to the end of the command.)</para>
-                <para>On Windows and Mac OS X, you can just leave this option blank and your default web browser will be used.  For other platforms (eg. Linux), here are commands to open common browsers:</para>
+  <para>These two settings allow you to specify how Javadoc files and links from the Help files are opened. On Windows and Mac OS X, we suggest that you leave both options blank so that the default browser of the OS will be used. On other platforms, e.g. on Linux, you need to set one or both of them to let DrJava successfully open HTML files.</para>
+  <para>The filename specified as "Web Browser", if one is set, is the executable that will be run. If no text has been entered as "Web Browser Command", then only the URL will be passed as parameter to the executable.</para>
+  <para>If text has been entered as "Web Browser Command", then any occurrence of "<literal>&lt;URL&gt;</literal>" will be replaced with the URL to open. If "<literal>&lt;URL&gt;</literal>" never occurs. then the URL to open will be appended to the very end.</para>
+  <para>Note that this means there are several ways of accomplishing the same thing. Let's assume that "<literal>/usr/bin/mozilla</literal>" is the filename of the browser. Then these settings all accomplish the same thing:</para>
+  <itemizedlist>
+    <listitem>
+      <para>"<literal>/usr/bin/mozilla</literal>" as "Web Browser" and nothing as "Web Browser Command"</para>
+    </listitem>
+    <listitem>
+      <para>"<literal>/usr/bin/mozilla</literal>" as "Web Browser" and "<literal>&lt;URL&gt;</literal>" as "Web Browser Command"</para>
+    </listitem>
+    <listitem>
+      <para>Nothing as "Web Browser" and "<literal>/usr/bin/mozilla</literal>" as "Web Browser Command"</para>
+    </listitem>
+    <listitem>
+      <para>Nothing as "Web Browser" and "<literal>/usr/bin/mozilla &lt;URL&gt;</literal>" as "Web Browser Command"</para>
+    </listitem>
+  </itemizedlist>
+                <para>Useful settings for Linux: Leave the "Web Browser" setting blank and enter the text specified below as "Web Browser Command".</para>
                 <itemizedlist>
                   <listitem>
                     <para>Mozilla (if it is already running)</para>
@@ -943,6 +960,24 @@ public class Student {
                     <programlisting>konqueror &lt;URL&gt;</programlisting>
                   </listitem>
                 </itemizedlist>
+                <para>Useful settings for Windows: If you do not want the system's default web browser, either specify the executable as "Web Browser" and leave the "Web Browser Command" blank, or leave the "Web Browser" setting blank, and enter the command line as "Web Browser Command". If the web browser's filename contains spaces, then the filename must be surrounded by double quotes in the "Web Browser Command". Example:</para>
+                <itemizedlist>
+                  <listitem>
+                     <para>Leave the "Web Browser" setting blank and enter the following text as "Web Browser Command":</para>
+                     <programlisting>"C:\Program Files\Internet Explorer\iexplore.exe" &lt;URL&gt;</programlisting>
+                  </listitem>
+                 </itemizedlist>
+                <para>Useful settings for Mac OS X: If you do not want the system's browser, we advise that you use the "Web Browser Command" and leave the "Web Browser" setting blank. If possible, use Mac OS X's "open" command as in the examples below:</para>
+                <itemizedlist>
+                  <listitem>
+                     <para>Open in Safari: Leave the "Web Browser" setting blank and enter the following text as "Web Browser Command":</para>
+                     <programlisting>open -b com.apple.Safari &lt;URL&gt;</programlisting>
+                  </listitem>
+                  <listitem>
+                     <para>Open in TextEdit: Leave the "Web Browser" setting blank and enter the following text as "Web Browser Command":</para>
+                     <programlisting>open -b com.apple.TextEdit &lt;URL&gt;</programlisting>
+                  </listitem>
+                 </itemizedlist>
        </listitem>
      </varlistentry>
      
