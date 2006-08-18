@@ -1563,13 +1563,6 @@ public class Student {
  </varlistentry>
  
  <varlistentry>
-   <term>Working Directory (<varname>working.directory = ""</varname>)</term>
-   <listitem>
-     <para>Specifies the "current" directory for the Interactions pane, i.e. <command>new File(".")</command> or <command>System.getProperty("user.dir")</command> when not in project mode (when a project is open, this setting is superseded by the "Working Directory" setting in the <link linkend="project-properties">Project Properties</link>). The open and save dialogs will start here if this option is set. The Interactions classpath will also include this directory.</para>
-   </listitem>
- </varlistentry>
- 
- <varlistentry>
    <term>Size of Interactions History (<varname>history.max.size = 500</varname>)</term>
    <listitem>
      <para>Specifies how many commands will be remembered in the history of the Interactions window.  Previous commands can be recalled using the up and down arrow keys.</para>

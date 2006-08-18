@@ -951,12 +951,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 		<title>Indent Level:</title> 
 		<para>Specifies the number of spaces that make up a "tab" in DrJava.  This is used for auto-indenting.</para>
 	</formalpara></listitem>
-	
-	<listitem><formalpara>
-		<title>Working Directory:</title> 
-		<para>The directory you are currently working from--where DrJava should first try to open and safe files from, and where DrJava should tell the compiler to look for class files.</para>
-	</formalpara></listitem>
-	
+
 	<listitem><formalpara>
 		<title>Size of Interactions History:</title> 
 		<para>Specifies how many interactions will be stored in the history for you to scroll through using the up arrow.</para>
