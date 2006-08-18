@@ -664,4 +664,37 @@ public abstract class FileOps {
     
     return reconstructedPath;
   }
+  
+  /** Return a valid directory for use, i.e. one that exists and is as "close" to the file specified. It is
+    * 1) file, if file is a directory and exists
+    * 2) the closest parent of file, if file is not a directory or does not exist
+    * 3) "user.home"
+    * @return a valid directory for use */
+  public static File getValidDirectory(File file) {
+    // if it's the NULL_FILE, use "user.home"
+    if (file==FileOption.NULL_FILE) {
+      file = new File(System.getProperty("user.home"));
+    }
+    while (!file.exists()) {
+      // if the saved path doesn't exist anymore, try the parent
+      file = file.getParentFile();
+    }
+    if (file==null) {
+      // somehow we ended up with null, use "user.home"
+      file = new File(System.getProperty("user.home"));
+    }
+    // if it's not a directory, try the parent
+    if (!file.isDirectory()) {
+      if (file.getParent() != null) file = file.getParentFile();
+    }
+    
+    // this should be an existing directory now
+    if (file.exists() && file.isDirectory()) {
+      return file;
+    }
+    
+    // ye who enter here, abandon all hope...
+    // the saved path didn't work, and neither did "user.home"
+    throw new UnexpectedException(new IOException("File's parent file is null"));
+  }
 }

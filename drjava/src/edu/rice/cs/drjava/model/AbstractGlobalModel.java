@@ -586,43 +586,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     File file;
     try {
       // restore the path from the configuration
-      file = DrJava.getConfig().getSetting(LAST_DIRECTORY);
-      
-      // if it's the NULL_FILE, use "user.home"
-      if (file==FileOption.NULL_FILE) {
-        file = new File(System.getProperty("user.home"));
-      }
+      file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_DIRECTORY));
     }
     catch (RuntimeException e) {
       // something went wrong, clear the setting and use "user.home"
       DrJava.getConfig().setSetting(LAST_DIRECTORY, FileOption.NULL_FILE);
-      file = new File(System.getProperty("user.home"));
+      file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_DIRECTORY));
     }
-    while (!file.exists()) {
-      // if the saved path doesn't exist anymore, try the parent
-      file = file.getParentFile();
-    }
-    if (file==null) {
-      // somehow we ended up with null, use "user.home"
-      file = new File(System.getProperty("user.home"));
-    }
-    // if it's not a directory, try the parent
-    if (!file.isDirectory()) {
-      if (file.getParent() != null) file = file.getParentFile();
-    }
-
-    // this should be an existing directory now
-    if (file.exists() && file.isDirectory()) {
-	// update the setting and return it
-        DrJava.getConfig().setSetting(LAST_DIRECTORY, file);
-        return file;
-    }
-
-    // ye who enter here, abandon all hope...
-    // the saved path didn't work, and neither did "user.home"
-    throw new UnexpectedException(new IOException("File's parent file is null"));
+    // update the setting and return it
+    DrJava.getConfig().setSetting(LAST_DIRECTORY, file);
+    return file;
   }
-    
+      
   /** @return the working directory for the Slave (Interactions) JVM */
   public File getWorkingDirectory() { return _state.getWorkingDirectory(); }
  
@@ -631,6 +606,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _state.setWorkingDirectory(f);
     _notifier.projectWorkDirChanged();
     setProjectChanged(true);
+    // update the setting
+    DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, _state.getWorkingDirectory());
   }
  
   public void cleanBuildDirectory()  { _state.cleanBuildDirectory(); }
@@ -923,7 +900,23 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getWorkingDirectory() {
       try {
         File[] roots = getSourceRootSet();
-        if (roots.length == 0) return getMasterWorkingDirectory();
+        if (roots.length == 0) {
+          // return getMasterWorkingDirectory();
+          // use the last directory saved to the configuration
+          File file;
+          try {
+            // restore the path from the configuration
+            file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
+          }
+          catch (RuntimeException e) {
+            // something went wrong, clear the setting and use "user.home"
+            DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, FileOption.NULL_FILE);
+            file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
+          }
+          // update the setting and return it
+          DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, file);
+          return file;
+        }
         return roots[0].getCanonicalFile();
       }
       catch(IOException e) { /* fall through */ }

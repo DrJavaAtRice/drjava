@@ -1133,8 +1133,11 @@ public interface OptionConstants {
   public static final NonNegativeIntegerOption DEBUG_PANEL_HEIGHT =
     new NonNegativeIntegerOption("debug.panel.height",new Integer(0));
 
-  /** The directory in use by the user upon the previous quit. */
+  /** The directory in use by the file choosers upon the previous quit. */
   public static final FileOption LAST_DIRECTORY = new FileOption("last.dir", FileOption.NULL_FILE);
+
+  /** The directory in use by the Interactions pane upon the previous quit. */
+  public static final FileOption LAST_INTERACTIONS_DIRECTORY = new FileOption("last.interactions.dir", FileOption.NULL_FILE);
   
   /** The command-line arguments to be passed to the Master JVM. */
   public static final StringOption MASTER_JVM_ARGS = new StringOption("master.jvm.args", "");
