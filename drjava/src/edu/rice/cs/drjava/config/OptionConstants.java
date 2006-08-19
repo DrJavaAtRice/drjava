@@ -1138,6 +1138,11 @@ public interface OptionConstants {
 
   /** The directory in use by the Interactions pane upon the previous quit. */
   public static final FileOption LAST_INTERACTIONS_DIRECTORY = new FileOption("last.interactions.dir", FileOption.NULL_FILE);
+
+  /** Whether to save and restore Interactions pane directory at startup/shutdown (sticky=true), or to use
+    * "user.home" (sticky=false). */
+  public static final BooleanOption STICKY_INTERACTIONS_DIRECTORY =
+    new BooleanOption("sticky.interactions.dir", Boolean.TRUE);
   
   /** The command-line arguments to be passed to the Master JVM. */
   public static final StringOption MASTER_JVM_ARGS = new StringOption("master.jvm.args", "");

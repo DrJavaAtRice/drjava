@@ -606,8 +606,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _state.setWorkingDirectory(f);
     _notifier.projectWorkDirChanged();
     setProjectChanged(true);
-    // update the setting
-    DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, _state.getWorkingDirectory());
+    if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
+      // update the setting
+      DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, _state.getWorkingDirectory());
+    }
   }
  
   public void cleanBuildDirectory()  { _state.cleanBuildDirectory(); }
@@ -903,12 +905,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if (roots.length == 0) {
           // return getMasterWorkingDirectory();
           // use the last directory saved to the configuration
-          File file;
-          try {
-            // restore the path from the configuration
-            file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
+          File file = null;
+          if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
+            try {
+              // restore the path from the configuration
+              file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
+            }
+            catch (RuntimeException e) { file = null; }
           }
-          catch (RuntimeException e) {
+          if (file==null) {
             // something went wrong, clear the setting and use "user.home"
             DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, FileOption.NULL_FILE);
             file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));

@@ -312,8 +312,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       return; 
     }
 //    Utilities.show("Resetting interactions with working directory = " + wd);
-    // update the setting
-    DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
+    if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {    
+      // update the setting
+      DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
+    }
     _interactionsModel.resetInterpreter(wd);
   }
 
