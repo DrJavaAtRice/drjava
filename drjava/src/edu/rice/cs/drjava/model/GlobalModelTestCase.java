@@ -641,15 +641,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
 
     public void assertInterpreterResettingCount(int i) {
-      assertEquals("number of times interactionsResetting fired", i, interpreterResettingCount);
+      assertEquals("number of times interpreterResetting fired", i, interpreterResettingCount);
     }
 
     public void assertInterpreterReadyCount(int i) {
-      assertEquals("number of times interactionsReset fired", i, interpreterReadyCount);
+      assertEquals("number of times interpreterReady fired", i, interpreterReadyCount);
     }
 
     public void assertInterpreterResetFailedCount(int i) {
-      assertEquals("number of times interactionsResetFailed fired", i, interpreterResetFailedCount);
+      assertEquals("number of times interpreterResetFailed fired", i, interpreterResetFailedCount);
     }
 
     public void assertInterpreterExitedCount(int i) {
@@ -757,9 +757,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public void runStarted(OpenDefinitionsDocument doc) { listenerFail("runStarted fired unexpectedly"); }
     
-    public void interpreterResetting() { listenerFail("interactionsResetting fired unexpectedly"); }
+    public void interpreterResetting() { listenerFail("interpreterResetting fired unexpectedly"); }
 
-    public void interpreterReady(File wd) { listenerFail("interactionsReset fired unexpectedly");  }
+    public void interpreterReady(File wd) { listenerFail("interpreterReady fired unexpectedly");  }
     public void interpreterExited(int status) {
       listenerFail("interpreterExited(" + status + ") fired unexpectedly");
     }
