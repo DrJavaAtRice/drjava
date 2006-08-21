@@ -41,6 +41,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -83,14 +84,17 @@ public class DrJava {
   private static final ArrayList<String> _filesToOpen = new ArrayList<String>();
   private static final ArrayList<String> _jvmArgs = new ArrayList<String>();
 
-  private static volatile boolean _showDebugConsole = false;
+  static volatile boolean _showDebugConsole = false;
   
   /* Config objects can't be public static final, since we have to delay construction until we know the 
    * config file's location.  (Might be specified on command line.) Instead, use accessor methods to 
    * prevent others from assigning new values. */
 
-  /** Properties file used by the configuration object. Defaults to ".drjava" in the user's home directory. */
-  private static volatile File _propertiesFile = new File(System.getProperty("user.home"), ".drjava");
+  /** Default properties file used by the configuration object, i.e. ".drjava" in the user's home directory. */
+  public static final File DEFAULT_PROPERTIES_FILE = new File(System.getProperty("user.home"), ".drjava");
+  
+  /** Properties file used by the configuration object. Defaults to DEFAULT_PROPERTIES_FILE. */
+  private static volatile File _propertiesFile = DEFAULT_PROPERTIES_FILE;
   
   /** Configuration object with all customized and default values.  Initialized from _propertiesFile.  */
   private static volatile FileConfiguration _config = _initConfig();
@@ -104,6 +108,12 @@ public class DrJava {
   /** Returns the configuration object with all customized and default values. */
   public static FileConfiguration getConfig() { return _config; }
 
+  /** @return an array of the files that were passed on the command line. */
+  public static String[] getFilesToOpen() { return _filesToOpen.toArray(new String[0]); }
+  
+  /** @return true if the debug console should be enabled */
+  public static boolean getShowDebugConsole() { return _showDebugConsole; }
+  
   /** Starts running DrJava.
    *  @param args Command line argument array
    */
@@ -142,11 +152,22 @@ public class DrJava {
         
         File workDir = new File(System.getProperty("user.home"));
         
-        // Add the string pathSep to _filesToOpen if _showDebugConsole is true
-        if (_showDebugConsole) _filesToOpen.add(pathSep);  // THIS IS A KLUDGE TO PASS THIS BOOLEAN FLAG TO DrJava
+        LinkedList<String> classArgsList = new LinkedList<String>();
+        // need to make the paths absolute since the working directory might change
+        for(String fn: _filesToOpen) {
+            classArgsList.add(new File(fn).getAbsolutePath());
+        }
+
+        // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
+        if (_showDebugConsole) classArgsList.add(0,"-debugConsole");
         
         String[] jvmArgs = _jvmArgs.toArray(new String[0]);
-        String[] classArgs = _filesToOpen.toArray(new String[0]);
+        if (!_propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
+          classArgsList.add(0,"-config");
+          // need to make the paths absolute since the working directory might change
+          classArgsList.add(1,_propertiesFile.getAbsolutePath());
+        }
+        String[] classArgs = classArgsList.toArray(new String[0]);
         
         // Run a new copy of DrJava and exit
         try {
@@ -181,21 +202,20 @@ public class DrJava {
     boolean heapSizeGiven = false;  // indicates whether args includes an argument of the form -Xmx<number>
     
     // Loop through arguments looking for known options
-    int firstFile = 0;
+    int argIndex = 0;
     int len = args.length;
     _filesToOpen.clear();
     
-    for (int i = 0; i < len; i++) {
-      String arg = args[i];
+    while(argIndex < len) {
+      String arg = args[argIndex++];
       
       if (arg.equals("-config")) {
-        if (len == i + 1) { 
+        if (len == argIndex) { 
           // config option is missing file name; should we generate an error?
           return true;
         }
         // arg.length > i+1 implying args list incudes config file name and perhaps files to open
-        setPropertiesFile(args[i + 1]);
-        firstFile = i + 2;
+        setPropertiesFile(args[argIndex++]);
         _config = _initConfig();  // read specified .djrava file into _config
       }
       
@@ -211,7 +231,8 @@ public class DrJava {
         return false;
       }
       else {
-        firstFile = i;
+        // this is the first file to open, do not consume
+        --argIndex;
         break;
       }
     }
@@ -231,7 +252,7 @@ public class DrJava {
 
     // Open the remaining args as filenames
 
-    for (int i = firstFile; i < len; i++) _filesToOpen.add(args[i]);
+    for (int i = argIndex; i < len; i++) { _filesToOpen.add(args[i]); }
     return true;
   }
 

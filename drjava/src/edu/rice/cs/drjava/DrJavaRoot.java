@@ -84,31 +84,22 @@ public class DrJavaRoot {
 //  /** This field is only used in the instance of this class in the Interpreter JVM. */
 //  private static PreventExitSecurityManager _manager = null;
   
-  private static String[] _filesToOpen = new String[0];
   private static boolean _attemptingAugmentedClassPath = false;
-  private static boolean _showDrJavaDebugConsole = false;
   private static SimpleInteractionsWindow _debugConsole = null;
   
   /* Config objects can't be public static final, since we have to delay construction until we know the 
    * config file's location.  (Might be specified on command line.) Instead, use accessor methods to 
    * prevent others from assigning new values. */
-
-  /** Properties file used by the configuration object. Defaults to ".drjava" in the user's home directory. */
-  private static File _propertiesFile = new File(System.getProperty("user.home"), ".drjava");
   
-  public static void main(final String[] filesToOpen) {
-    
-//    Utilities.show("DrJavaRoot started with _filesToOpen = " + Arrays.toString(_filesToOpen));
-    
-    boolean debugConsole = false;
-    int len = filesToOpen.length;
-    if (len > 0 && filesToOpen[len - 1] == System.getProperty("path.separator")) {
-      debugConsole = true;
-      len--;
+  public static void main(final String[] args) {
+//    Utilities.show("DrJavaRoot started with args = " + Arrays.toString(args));
+    // let DrJava class handle command line arguments
+    if (!DrJava.handleCommandLineArgs(args)) {
+      System.exit(0);
     }
-    
-    final int numFiles = len;
-    final boolean showDebugConsole = debugConsole;
+
+    String[] filesToOpen = DrJava.getFilesToOpen();
+    final int numFiles = filesToOpen.length;
       
     /* files to open held in filesToOpen[0:numFiles-1] which may be an initial segment of filesToOpen */
     
@@ -155,9 +146,9 @@ public class DrJavaRoot {
             public void print(String s) { mf.getModel().systemErrPrint(s); }
           }));
           
-//      Utilities.showDebug("showDebugConsole flag = " + _showDebugConsole);
+//      Utilities.showDebug("showDebugConsole flag = " + DrJava.getShowDebugConsole());
           // Show debug console if enabled
-          if (showDebugConsole) showDrJavaDebugConsole(mf);
+          if (DrJava.getShowDebugConsole()) showDrJavaDebugConsole(mf);
         }
         catch (Throwable t) {
           // Show any errors to the real System.err and in an DrJavaErrorHandler
