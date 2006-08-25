@@ -59,7 +59,7 @@ public class DrJavaErrorPopup extends JDialog {
   /** contains the butons */
   private JPanel _buttonPanel;
   /** the button that closes this window */
-  private JButton _closeButton;
+  private JButton _okButton;
   /** the button that shows the error window */
   private JButton _moreButton;
   /** the error */
@@ -87,12 +87,12 @@ public class DrJavaErrorPopup extends JDialog {
     });
 
     _moreButton = new JButton(_moreAction);
-    _closeButton = new JButton(_closeAction);
+    _okButton = new JButton(_okAction);
 
     _bottomPanel = new JPanel(new BorderLayout());
     _buttonPanel = new JPanel();
     _buttonPanel.add(_moreButton);
-    _buttonPanel.add(_closeButton);
+    _buttonPanel.add(_okButton);
     _bottomPanel.add(_keepDisplaying, BorderLayout.WEST);
     _bottomPanel.add(_buttonPanel, BorderLayout.EAST);
 
@@ -107,11 +107,11 @@ public class DrJavaErrorPopup extends JDialog {
     setContentPane(cp);
     cp.add(_errorInfo, BorderLayout.CENTER);
     cp.add(_bottomPanel, BorderLayout.SOUTH);    
-    getRootPane().setDefaultButton(_closeButton);
+    getRootPane().setDefaultButton(_okButton);
   }
   
   /* Close the window. */
-  private Action _closeAction = new AbstractAction("Close") {
+  private Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
       DrJavaErrorPopup.this.dispose();
     }
@@ -120,7 +120,7 @@ public class DrJavaErrorPopup extends JDialog {
   /** Close this window, but display the full DrJava Errors window. */
   private Action _moreAction = new AbstractAction("More Information") {
     public void actionPerformed(ActionEvent e) {
-      _closeAction.actionPerformed(e);
+      _okAction.actionPerformed(e);
       MainFrame.setPopupLoc(DrJavaErrorWindow.singleton(), DrJavaErrorWindow.singleton().getFrame());
       DrJavaErrorWindow.singleton().setVisible(true);
     }

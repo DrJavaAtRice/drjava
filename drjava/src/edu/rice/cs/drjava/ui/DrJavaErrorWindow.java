@@ -73,7 +73,7 @@ public class DrJavaErrorWindow extends JDialog {
   /** the button that copies the stack trace to the clipboard */
   private JButton _copyButton;
   /** the button that closes this window */
-  private JButton _closeButton;
+  private JButton _okButton;
   /** the button that moves to the next error */
   private JButton _nextButton;
   /** the button that moves to the previous error */
@@ -124,7 +124,7 @@ public class DrJavaErrorWindow extends JDialog {
     _nextButton = new JButton(_nextAction);
     _copyButton = new JButton(_copyAction);
     _dismissButton = new JButton(_dismissAction);
-    _closeButton = new JButton(_closeAction);
+    _okButton = new JButton(_okAction);
 
     _bottomPanel = new JPanel(new BorderLayout());
     _buttonPanel = new JPanel();
@@ -132,7 +132,7 @@ public class DrJavaErrorWindow extends JDialog {
     _buttonPanel.add(_nextButton);
     _buttonPanel.add(_copyButton);
     _buttonPanel.add(_dismissButton);
-    _buttonPanel.add(_closeButton);
+    _buttonPanel.add(_okButton);
     _indexLabel = new JLabel();
     _bottomPanel.add(_indexLabel, BorderLayout.CENTER);
     _bottomPanel.add(_buttonPanel, BorderLayout.EAST);
@@ -149,7 +149,7 @@ public class DrJavaErrorWindow extends JDialog {
     cp.add(_errorInfo, BorderLayout.NORTH);
     cp.add(_stackTraceScroll, BorderLayout.CENTER);
     cp.add(_bottomPanel, BorderLayout.SOUTH);    
-    getRootPane().setDefaultButton(_closeButton);
+    getRootPane().setDefaultButton(_okButton);
     init();
   }
   
@@ -278,7 +278,7 @@ public class DrJavaErrorWindow extends JDialog {
   }
   
   /* Close the window. */
-  private Action _closeAction = new AbstractAction("Close") {
+  private Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
       DrJavaErrorWindow.this.dispose();
     }
@@ -324,7 +324,7 @@ public class DrJavaErrorWindow extends JDialog {
       updateErrorInfo();
       JButton errorsButton = DrJavaErrorHandler.getButton();
       if (errorsButton!=null) { errorsButton.setVisible(false); }
-      _closeAction.actionPerformed(e);
+      _okAction.actionPerformed(e);
     }
   };
 
