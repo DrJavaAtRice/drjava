@@ -129,6 +129,33 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     updateButtons();
   }
   
+  /**
+   * Update the tree.
+   */
+  public boolean requestFocusInWindow() {
+    // Only change GUI from event-dispatching thread
+    Runnable doCommand = new Runnable() {
+      public void run() {
+        // Update all tree nodes
+        Enumeration documents = _regionRootNode.children();
+        boolean found = false;
+        while ((!found) && (documents.hasMoreElements())) {
+          DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();          
+          // Find the correct start offset node for this region
+          Enumeration existingRegions = doc.children();
+          while (existingRegions.hasMoreElements()) {
+            DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
+            _regTreeModel.nodeChanged(existing);
+          }
+          _regTreeModel.nodeChanged(doc);
+        }
+        updateButtons();
+      }
+    };
+    Utilities.invokeLater(doCommand);
+    return super.requestFocusInWindow();
+  }
+  
   /** Creates the region tree. */
   private void _setupRegionTree() {
     _regionRootNode = new DefaultMutableTreeNode(_title);

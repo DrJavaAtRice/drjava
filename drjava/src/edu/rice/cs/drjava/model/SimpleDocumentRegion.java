@@ -33,24 +33,39 @@
 
 package edu.rice.cs.drjava.model;
 
+import javax.swing.text.Position;
 import java.io.File;
 
 /**
- * Class for a simple document region.
+ * Class for a simple document region. If a document is provided, then the region will move within the document.
  * @version $Id$
  */
 public class SimpleDocumentRegion implements DocumentRegion {
   protected final OpenDefinitionsDocument _doc;
   protected final File _file;
-  protected final int _startOffset;
-  protected final int _endOffset;
+  protected volatile int _startOffset;
+  protected volatile int _endOffset;
+  protected volatile Position _startPos = null;
+  protected volatile Position _endPos = null;
   
-  /** Create a new simple document region. */
+  /** Create a new simple document region.
+    * @param doc document that contains this region, or null if we don't have a document yet
+    * @param file file that contains the region
+    * @param so start offset of the region; if doc is non-null, then a Position will be created that moves within the document
+    * @param eo end offset of the region; if doc is non-null, then a Position will be created that moves within the document
+    */
   public SimpleDocumentRegion(OpenDefinitionsDocument doc, File file, int so, int eo) {
     _doc = doc;
     _file = file;
     _startOffset = so;
     _endOffset = eo;
+    if (_doc!=null) {
+      try {
+        _startPos = _doc.createPosition(so);
+        _endPos = _doc.createPosition(eo);
+      }
+      catch(javax.swing.text.BadLocationException e) { /* ignore, offset will be static */ }
+    }
   }
   
   /** @return the document, or null if it hasn't been established yet */
@@ -60,10 +75,22 @@ public class SimpleDocumentRegion implements DocumentRegion {
   public File getFile() { return _file; }
 
   /** @return the start offset */
-  public int getStartOffset() { return _startOffset; }
+  public int getStartOffset() {
+    if (_startPos!=null) {
+      // if we have a position that moves within the document, update the offset
+      _startOffset = _startPos.getOffset();
+    }
+    return _startOffset;
+  }
 
   /** @return the end offset */
-  public int getEndOffset() { return _endOffset; }
+  public int getEndOffset() {
+    if (_endPos!=null) {
+      // if we have a position that moves within the document, update the offset
+      _endOffset = _endPos.getOffset();
+    }
+    return _endOffset;
+  }
   
   /** @return true if the specified region is equal to this one. */
   public boolean equals(Object other) {
@@ -71,8 +98,8 @@ public class SimpleDocumentRegion implements DocumentRegion {
     SimpleDocumentRegion o = (SimpleDocumentRegion)other;
     return ((((_doc==null) && (o._doc==null)) || (_doc.equals(o._doc))) &&
             (((_file==null) && (o._file==null)) || (_file.equals(o._file))) &&
-            (_startOffset == o._startOffset) &&
-            (_endOffset == o._endOffset));
+            (_startPos.getOffset() == o._startPos.getOffset()) &&
+            (_endPos.getOffset() == o._endPos.getOffset()));
   }
   
   public String toString() {
