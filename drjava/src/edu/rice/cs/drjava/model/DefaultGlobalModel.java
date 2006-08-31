@@ -128,7 +128,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       if (buildDir != null) {
         //        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
         try {
-          _jvm.addBuildDirectoryClassPath(new File(buildDir.getAbsolutePath()).toURL());
+          _jvm.addBuildDirectoryClassPath(FileOps.toURL(new File(buildDir.getAbsolutePath())));
         } catch(MalformedURLException murle) {
           // edit this later! this is bad! we should handle this exception better!
           throw new RuntimeException(murle);
@@ -247,7 +247,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (f != null) {
       //      System.out.println("adding: " + f.getAbsolutePath());
       try {
-        _jvm.addBuildDirectoryClassPath(new File(f.getAbsolutePath()).toURL());
+        _jvm.addBuildDirectoryClassPath(FileOps.toURL(new File(f.getAbsolutePath())));
       }
       catch(MalformedURLException murle) {
         // TODO! change this! we should handle this exception better!
@@ -467,11 +467,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     /** Runs JUnit on the current document.  Requires that all source documents are compiled before proceeding. */
     public void startJUnit() throws ClassNotFoundException, IOException { _junitModel.junit(this); }
 
-    /** Generates Javadoc for this document, saving the output to a temporary
-     *  directory.  The location is provided to the javadocEnded event on
-     *  the given listener.
-     *  @param saver FileSaveSelector for saving the file if it needs to be saved
-     */
+    /** Generates Javadoc for this document, saving the output to a temporary directory.  The location is provided to 
+      * the javadocEnded event on the given listener.
+      * java@param saver FileSaveSelector for saving the file if it needs to be saved
+      */
     public void generateJavadoc(FileSaveSelector saver) throws IOException {
       // Use the model's classpath, and use the EventNotifier as the listener
       _javadocModel.javadocDocument(this, saver, getClassPath().toString());
@@ -503,9 +502,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     try {
       File classPath = doc.getSourceRoot();
       try {
+        URL pathURL = FileOps.toURL(classPath);
         if (doc.isAuxiliaryFile())
-          _interactionsModel.addProjectFilesClassPath(classPath.toURL());
-        else _interactionsModel.addExternalFilesClassPath(classPath.toURL());
+          _interactionsModel.addProjectFilesClassPath(pathURL);
+        else _interactionsModel.addExternalFilesClassPath(pathURL);
         setClassPathChanged(true);
       }
       catch(MalformedURLException murle) {  /* fail silently */ }
@@ -586,7 +586,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if (cp != null) {
       for (File f : cp) {
-        try { _interactionsModel.addExtraClassPath(f.toURL()); }
+        try { _interactionsModel.addExtraClassPath(FileOps.toURL(f)); }
         catch(MalformedURLException murle) {
           System.out.println("File " + f + " in your extra classpath could not be parsed to a URL; " +
                              "it may contain un-URL-encodable characters.");
@@ -596,7 +596,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     for (OpenDefinitionsDocument odd: getAuxiliaryDocuments()) {
       // this forwards directly to InterpreterJVM.addClassPath(String)
-      try { _interactionsModel.addProjectFilesClassPath(odd.getSourceRoot().toURL()); }
+      try { _interactionsModel.addProjectFilesClassPath(FileOps.toURL(odd.getSourceRoot())); }
       catch(MalformedURLException murle) { /* fail silently */ }
       catch(InvalidPackageException e) {  /* ignore it */ }
     }
@@ -605,7 +605,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // this forwards directly to InterpreterJVM.addClassPath(String)
       try { 
         File sourceRoot = odd.getSourceRoot();
-        if (sourceRoot != null) _interactionsModel.addExternalFilesClassPath(sourceRoot.toURL()); 
+        if (sourceRoot != null) _interactionsModel.addExternalFilesClassPath(FileOps.toURL(sourceRoot)); 
       }
       catch(MalformedURLException murle) { /* ignore it */ }
       catch(InvalidPackageException e) { /* ignore it */ }
@@ -613,7 +613,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     // add project source root to projectFilesClassPath.  All files in project tree have this root.
     
-    try { _interactionsModel.addProjectFilesClassPath(getProjectRoot().toURL()); }
+    try { _interactionsModel.addProjectFilesClassPath(FileOps.toURL(getProjectRoot())); }
     catch(MalformedURLException murle) { /* fail silently */ } 
     setClassPathChanged(false);  // reset classPathChanged state
   }

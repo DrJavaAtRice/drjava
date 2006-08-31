@@ -69,7 +69,7 @@ public class ClassPathVector extends Vector<URL> {
   
   /* Adds specified URL to this; malformed URL's are ignored. */
   public void add(File entry) {
-    try { this.add(entry.toURL()); } 
+    try { add(FileOps.toURL(entry)); } 
     catch(MalformedURLException e) {
 //      IllegalArgumentException ee = new IllegalArgumentException(e.toString());
 //      ee.initCause(e);

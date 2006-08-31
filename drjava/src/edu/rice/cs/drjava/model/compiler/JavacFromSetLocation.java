@@ -42,6 +42,8 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
 
+import edu.rice.cs.util.FileOps;
+
 /**
  * A compiler interface to find Javac from the location
  * specified in Configuration.
@@ -66,8 +68,7 @@ public class JavacFromSetLocation extends CompilerProxy
         }
 
         try {
-            //URL url = new File(loc).toURL();
-            URL url = loc.toURL();
+            URL url = FileOps.toURL(loc);
             return new URLClassLoader(new URL[] { url });
         }
         catch (MalformedURLException e) {

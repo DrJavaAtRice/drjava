@@ -189,14 +189,11 @@ public class DefaultJavadocModel implements JavadocModel {
     }.start();
   }
 
-  /**
-   * This method handles most of the logic of performing a Javadoc operation,
-   * once we know that it won't be canceled.
-   *
-   * @param destDirFile the destination directory for the doc files
-   * @param saver a command object for saving a document (if it moved/changed)
-   * @param classpath an array of classpath elements to be used by Javadoc
-   */
+  /** This method handles most of the logic of performing a Javadoc operation, once we know that it won't be canceled.
+    * @param destDirFile the destination directory for the doc files
+    * @param saver a command object for saving a document (if it moved/changed)
+    * @param classpath an array of classpath elements to be used by Javadoc
+    */
   private void _javadocAllWorker(File destDirFile, FileSaveSelector saver, String classPath) {
     
     if (!_ensureValidToolsJar()) return;

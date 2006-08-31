@@ -79,7 +79,7 @@ public abstract class PreviewFrame extends JFrame {
     private volatile JComponent spinner;
     private volatile Method setValueMethod;
     private final Object[] args = new Object[1];
-    private JSpinnerChanger(Class spinnerClass, JComponent spinnerObj) throws Exception {
+    private JSpinnerChanger(Class<?> spinnerClass, JComponent spinnerObj) throws Exception {
       spinner = spinnerObj;
       setValueMethod = spinnerClass.getMethod("setValue", Object.class);
     }
@@ -246,7 +246,7 @@ public abstract class PreviewFrame extends JFrame {
       Class<?> spinnerClass = Class.forName("javax.swing.JSpinner");
       final JComponent spinner = (JComponent) spinnerClass.newInstance();
       final Method getter = spinnerClass.getMethod("getValue",new Class[0]);
-      Object model = callMethod(spinner,spinnerClass,"getModel",null,null);
+      Object model = callMethod(spinner, spinnerClass, "getModel",null,null);
       Class<?> modelClass = model.getClass();
       Class<?>[] ca = new Class<?>[] {Comparable.class};
       Object[] aa = new Object[] {new Integer(1)};
@@ -265,8 +265,8 @@ public abstract class PreviewFrame extends JFrame {
           catch(Exception ex) { _updateActions(); }
         }
       };
-      callMethod(spinner,spinnerClass,"addChangeListener",ca,aa);
-      return new JSpinnerChanger(spinnerClass,spinner);
+      callMethod(spinner, spinnerClass,"addChangeListener",ca,aa);
+      return new JSpinnerChanger(spinnerClass, spinner);
     } catch(Exception e) {
       /** Displays the previous page of the document. */
       final JTextField tf = new JTextField();

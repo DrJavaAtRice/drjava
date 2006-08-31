@@ -42,12 +42,13 @@ import java.awt.*;
 import java.net.*;
 import java.io.*;
 import java.util.Vector;
+
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 
-/**
- * The frame for displaying the HTML help files.
- * @version $Id$
+/** The frame for displaying the HTML help files.
+ *  @version $Id$
  */
 public class HTMLFrame extends JFrame {
 
@@ -224,7 +225,7 @@ public class HTMLFrame extends JFrame {
 
     if (baseDir == null) _baseURL = null;
     else
-      try { _baseURL = baseDir.toURL(); }
+      try { _baseURL = FileOps.toURL(baseDir); }
       catch(MalformedURLException ex) {
         throw new UnexpectedException(ex);
       }

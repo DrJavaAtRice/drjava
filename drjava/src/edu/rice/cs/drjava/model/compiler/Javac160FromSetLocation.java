@@ -42,6 +42,8 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
 
+import edu.rice.cs.util.FileOps;
+
 /** A compiler interface to find Javac (1.6.0) from the location specified in Configuration.
  *
  *  @version $Id$
@@ -64,7 +66,7 @@ public class Javac160FromSetLocation extends CompilerProxy implements OptionCons
 
     try {
       //URL url = new File(loc).toURL();
-      URL url = loc.toURL();
+      URL url = FileOps.toURL(loc);
       return new URLClassLoader(new URL[] { url });
     }
     catch (MalformedURLException e) { throw new RuntimeException("malformed url exception"); }

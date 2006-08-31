@@ -73,6 +73,7 @@ import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
 import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.drjava.model.FileSaveSelector;
@@ -5626,11 +5627,16 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private class PositionListener implements CaretListener {
     
     public void caretUpdate(final CaretEvent ce ) {
-      OpenDefinitionsDocument doc = _model.getActiveDocument();
-      doc.setCurrentLocation(ce.getDot());  // locking is done by setCurrentLocation
-      final int line = doc.getCurrentLine();
-      final int col = doc.getCurrentCol();
-      Utilities.invokeLater(new Runnable() { public void run() { updateLocation(line, col); } });
+      final OpenDefinitionsDocument doc = _model.getActiveDocument();
+      
+      Utilities.invokeLater(new Runnable() { 
+        public void run() { 
+          doc.setCurrentLocation(ce.getDot());  
+          int line = doc.getCurrentLine();
+          int col = doc.getCurrentCol();
+          updateLocation(line, col); 
+        } 
+      });
     }
     
     // Should only be executed in the event thread or prior to pane being set visible
@@ -7002,12 +7008,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       Utilities.invokeLater(command);
     }
     
-    public void javadocEnded(final boolean success, final File destDir,
-                             final boolean allDocs) {
+    public void javadocEnded(final boolean success, final File destDir, final boolean allDocs) {
       // Only change GUI from event-dispatching thread
       Runnable command = new Runnable() {
         public void run() {
-          
           try {
             showTab(_javadocErrorPanel);
             _javadocAllAction.setEnabled(true);
@@ -7034,7 +7038,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
               String fileName = (allDocs || className.equals("")) ?
                 "index.html" : (className + ".html");
               File index = new File(destDir, fileName);
-              URL address = index.getAbsoluteFile().toURL();
+              URL address = FileOps.toURL(index.getAbsoluteFile());
               if (!PlatformFactory.ONLY.openURL(address)) {
                 JavadocFrame _javadocFrame = new JavadocFrame(destDir, className, allDocs);
                 _javadocFrame.setVisible(true);

@@ -423,34 +423,41 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
   /** Return the current line of the cursor position.  Uses a 1-based index. */
   public int getCurrentLine() {
-    // throwErrorHuh();
-    int here = _currentLocation;
-    if (_cachedLocation > getLength()) {
-      // we can't know the last line number after a delete; starting over.
-      _cachedLocation = 0;
-      _cachedLineNum = 1;
-    }
-    if (_cachedNextLineLoc > getLength()) _cachedNextLineLoc = -1;
-    // let's see if we get off easy
-    if ( ! (_cachedPrevLineLoc < here && here < _cachedNextLineLoc )) {
-
-      // this if improves performance when moving from the end of the document to the beginnning.
-      // in essence, it calculates the line number from scratch
-      if (_cachedLocation - here > here) {
-        _cachedLocation = 0;
-        _cachedLineNum = 1;
+    acquireReadLock();
+    try {
+      synchronized(_reduced) {
+        int here = _currentLocation;
+        if (_cachedLocation > getLength()) {
+          // we can't know the last line number after a delete; starting over.
+          _cachedLocation = 0;
+          _cachedLineNum = 1;
+        }
+        if (_cachedNextLineLoc > getLength()) _cachedNextLineLoc = -1;
+        // let's see if we get off easy
+        if ( ! (_cachedPrevLineLoc < here && here < _cachedNextLineLoc )) {
+          
+          // this if improves performance when moving from the end of the document to the beginnning.
+          // in essence, it calculates the line number from scratch
+          if (_cachedLocation - here > here) {
+            _cachedLocation = 0;
+            _cachedLineNum = 1;
+          }
+          int lineOffset = _getRelativeLine();
+          _cachedLineNum = _cachedLineNum + lineOffset;
+          
+        }
+        _cachedLocation = here;
+        _cachedPrevLineLoc = getLineStartPos(here);
+        _cachedNextLineLoc = getLineEndPos(here);
+        return _cachedLineNum;
       }
-      int lineOffset = _getRelativeLine();
-      _cachedLineNum = _cachedLineNum + lineOffset;
-
     }
-    _cachedLocation = here;
-    _cachedPrevLineLoc = getLineStartPos(here);
-    _cachedNextLineLoc = getLineEndPos(here);
-    return _cachedLineNum;
+    finally { releaseReadLock(); }
   }
 
-  /** This method returns the relative offset of line number from the previous location in the document. */
+  /** This method returns the relative offset of line number from the previous location in the document. 
+    * Assumes the readLock is already held. 
+    */
   private int _getRelativeLine() {
     
     int count = 0;
@@ -463,8 +470,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       while (prevLineLoc > currLoc) {
         count--;
         prevLineLoc = getLineStartPos( prevLineLoc - 1 );
-        // temporary performance optimization
-        setCurrentLocation(prevLineLoc);
       }
     }
 
@@ -474,8 +479,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       while (nextLineLoc < currLoc) {
         count++;
         nextLineLoc = getLineEndPos( nextLineLoc + 1 );
-        // temporary performance optimization
-        setCurrentLocation(nextLineLoc);
       }
     }
     setCurrentLocation(currLoc);
@@ -483,7 +486,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
 
   /** Returns the offset corresponding to the first character of the given line number,
-   *  or -1 if the lineNum is not found.
+   *  or -1 if the lineNum is not found.  Avoid locking the document by copying its text.
    *  @param lineNum the line number for which to calculate the offset.
    *  @return the offset of the first character in the given line number
    */
@@ -497,7 +500,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     // at the top of the loop
     while (offset < defsText.length()) {
       
-      if (curLine==lineNum) return offset;
+      if (curLine == lineNum) return offset;
       
       int nextNewline = defsText.indexOf('\n', offset);
       if (nextNewline == -1) return -1; // end of the document, and couldn't find the supplied lineNum

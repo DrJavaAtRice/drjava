@@ -54,6 +54,7 @@ import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -144,7 +145,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     int lastIndex = 0;
     _startupClassPathVector = new ClassPathVector();
     while (index != -1) {
-      try { _startupClassPathVector.add(new File(_startupClassPath.substring(lastIndex, index)).toURL()); }
+      try { _startupClassPathVector.add(FileOps.toURL(new File(_startupClassPath.substring(lastIndex, index)))); }
       catch(MalformedURLException murle) {
         // just don't add bad classpath entry
       }
@@ -153,7 +154,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     // Get the last entry
     index = _startupClassPath.length();
-    try { _startupClassPathVector.add(new File(_startupClassPath.substring(lastIndex, index)).toURL()); }
+    try { _startupClassPathVector.add(FileOps.toURL(new File(_startupClassPath.substring(lastIndex, index)))); }
     catch(MalformedURLException murle) {
       // fail silently if the classpath entry is bad
     }

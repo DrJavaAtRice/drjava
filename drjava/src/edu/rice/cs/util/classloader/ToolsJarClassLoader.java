@@ -149,7 +149,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
     try {
       URL[] urls = new URL[files.length];
       for (int i=0; i < files.length; i++) {
-        urls[i] = files[i].toURL();
+        urls[i] = FileOps.toURL(files[i]);
       }
       return urls;
     }

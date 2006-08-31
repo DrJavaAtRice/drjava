@@ -58,6 +58,7 @@ import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.ClassPathFilter;
 import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.util.ArgumentTokenizer;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 import edu.rice.cs.util.newjvm.ExecJVM;
@@ -394,7 +395,7 @@ public class DrJava {
     File jar = getConfig().getSetting(JAVAC_LOCATION);
     if (jar != FileOption.NULL_FILE) {
       try {
-        URL[] urls = new URL[] { jar.toURL() };
+        URL[] urls = new URL[] { FileOps.toURL(jar) };
         URLClassLoader loader = new URLClassLoader(urls);
         if (canLoad(loader, className)) return true;
       }

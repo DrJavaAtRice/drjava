@@ -39,6 +39,8 @@ import java.io.*;
 import java.net.*;
 import java.util.zip.*;
 
+import edu.rice.cs.util.FileOps;
+
 /** A custom classloader for use in running test cases. this will load all classes for the test case.  This loader also
  *  provides an excludes list. any class that matches  an entry in the list will be loaded by the system class loader
  *  instead.
@@ -92,7 +94,7 @@ public final class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
     while (st.hasMoreTokens()) {
       item = st.nextToken();
       fPathItems.addElement(item);
-      try{ _loader = new DrJavaURLClassLoader(new URL[]{new File(item).toURL()}, _loader); }
+      try{ _loader = new DrJavaURLClassLoader(new URL[]{FileOps.toURL(new File(item))}, _loader); }
       catch(MalformedURLException e) { 
         /* do nothing */
       }
