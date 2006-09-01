@@ -1028,12 +1028,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             _model.setActiveDocument(p.getItem().doc);
             final int curLine = _model.getActiveDocument().getCurrentLine();
             String t = p.getText();
-            System.out.println("Goto file: "+t);
             if (t.lastIndexOf(':')>=0) {
               try {
                 String end = t.substring(t.lastIndexOf(':')+1);
-                final int lineNum = Integer.parseInt(end);
-                System.out.println("Goto line: "+lineNum);
+                int val = Integer.parseInt(end);
+                int maxLines = p.getItem().doc.getNumberOfLines();
+                final int lineNum = Math.max(1, Math.min(maxLines, val));
                 SwingUtilities.invokeLater(new Runnable() {
                   public void run() {
                     try {
