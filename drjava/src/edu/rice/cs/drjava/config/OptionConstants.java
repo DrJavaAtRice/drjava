@@ -1223,4 +1223,8 @@ public interface OptionConstants {
   /** Whether to show the "code preview" popups in the RegionTreePanels (bookmarks, breakpoints, find all). */
   public static final BooleanOption SHOW_CODE_PREVIEW_POPUPS =
     new BooleanOption("show.code.preview.popups", Boolean.TRUE);
+
+  /** Whether to use Runtime.halt to quit DrJava (see bugs 1550220 and 1478796). */
+  public static final BooleanOption DRJAVA_USE_FORCE_QUIT =
+    new BooleanOption("drjava.use.force.quit", Boolean.FALSE);
 }

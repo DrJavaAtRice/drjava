@@ -125,7 +125,8 @@ class DefaultPlatform implements PlatformSupport {
    */
   private boolean _javadocMainHasExecuteMethod(Class main) {
     try {
-      main.getMethod("execute", (Class<String[]>[])new Class[]{String[].class});
+      @SuppressWarnings("unchecked") Class<String[]>[] arr = new Class[]{String[].class};
+      main.getMethod("execute", arr);
       return true;
     }
     catch (Throwable t) { return false; }

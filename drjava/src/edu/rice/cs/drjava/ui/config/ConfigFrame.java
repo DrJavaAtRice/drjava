@@ -768,6 +768,9 @@ public class ConfigFrame extends JFrame {
                                                  "The command-line arguments to pass to the Main JVM."));
     addOptionComponent(panel, new StringOptionComponent(OptionConstants.SLAVE_JVM_ARGS, "JVM Args for Interactions JVM", this,
                                                  "The command-line arguments to pass to the Interactions JVM."));
+    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.BROWSER_HISTORY_MAX_SIZE,
+                                                         "Maximum Size of Browser History", this,
+                                                         "Determines how many entries are kept in the browser history."));
     
     /* Check box options */
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.AUTO_CLOSE_COMMENTS, "Automatically Close Block Comments", this,
@@ -796,10 +799,10 @@ public class ConfigFrame extends JFrame {
                                                   "Show Code Preview Popups", this,
                                                   "<html>Whether to show a popup window with a code preview when the mouse is hovering<br>"+
                                                   "over an item in the Breakpoints, Bookmarks and Find All panes.</html>"));
-    
-    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.BROWSER_HISTORY_MAX_SIZE,
-                                                         "Maximum Size of Browser History", this,
-                                                         "Determines how many entries are kept in the browser history."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DRJAVA_USE_FORCE_QUIT, 
+                                                  "Forcefully Quit DrJava", this,
+                                                  "<html>On some platforms, DrJava does not shut down properly when files are open<br>"+
+                                                  "(namely tablet PCs). Check this option to force DrJava to close.</html>"));
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 
