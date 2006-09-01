@@ -233,6 +233,7 @@ DrJava can also search across more than one line of text (i.e. the search string
  <title>Go to File</title>
  <para>With the "Go to File" dialog from the Edit Menu (or hitting <keycode>Ctrl+Shift+G</keycode>), you can quickly jump to another file. It will open a <link linkend="predictive-input">predictive input dialog</link>, ask you to type the name of the document, and quickly narrow down the list of candidates. You can then use the cursor keys and <keycode>Enter</keycode> to select the file you want to view.</para>
       </formalpara>
+ <para>The "Go to File" dialog also incorporates the function of the "Go to Line" dialog: If you enter a colon (":") followed by a line number at the end of your input text, the editor will select the file and then jump to the entered line number. Example: "FooBa:123" may take you to the FooBar.java file at line 123.</para>
 
       <formalpara>
  <title>Go to File Under Cursor</title>
