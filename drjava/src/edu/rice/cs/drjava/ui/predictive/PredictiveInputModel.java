@@ -83,7 +83,14 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       * @return the shared mask extension
       */
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim);
-    
+       
+    /** Returns the mask extended by the shared extension.
+      * @param items items for which the mask extension should be generated
+      * @param pim predictive input model
+      * @return the extended shared mask
+      */
+    public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim);
+  
     /** Force the mask to fit this entry. The matching strategies that accept line numbers
       * can combine the current item with the line number. Other strategies just return the
       * current item.
@@ -154,6 +161,9 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       }
       return res;
     }
+    public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim) {
+      return pim._mask + getSharedMaskExtension(items, pim);
+    }
     public String force(X item, String mask) { return item.toString(); }
   };
   
@@ -186,6 +196,9 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     }
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
       return ""; // can't thing of a good way
+    }
+    public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim) {
+      return pim._mask;
     }
     public String force(X item, String mask) { return item.toString(); }
   };
@@ -222,6 +235,9 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     }
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
       return ""; // can't thing of a good way
+    }
+    public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim) {
+      return pim._mask;
     }
     public String force(X item, String mask) { return item.toString(); }
   };
@@ -295,10 +311,15 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       if (items.size() == 0) {
         return ext;
       }
+      
+      int posB = pim._mask.lastIndexOf(':');
+      if (posB<0) { posB = pim._mask.length(); }
+      String mask = pim._mask.substring(0,posB);
+      
       boolean allMatching = true;
-      int len = pim._mask.length();
-      while((allMatching) && (pim._mask.length() + ext.length() < items.get(0).toString().length())) {
-        char origCh = items.get(0).toString().charAt(pim._mask.length()+ext.length());
+      int len = mask.length();
+      while((allMatching) && (mask.length() + ext.length() < items.get(0).toString().length())) {
+        char origCh = items.get(0).toString().charAt(mask.length()+ext.length());
         char ch = (pim._ignoreCase)?(Character.toLowerCase(origCh)):(origCh);
         allMatching = true;
         for (X i: items) {
@@ -315,6 +336,15 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
         }
       }
       return res;
+    }
+    public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim) {
+      int pos = pim._mask.lastIndexOf(':');
+      if (pos<0) { 
+        return pim._mask + getSharedMaskExtension(items, pim);
+      }
+      else {
+        return pim._mask.substring(0,pos) + getSharedMaskExtension(items, pim) + pim._mask.substring(pos);
+      }
     }
     public String force(X item, String mask) {
       int pos = mask.lastIndexOf(':');
@@ -376,6 +406,9 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     }
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
       return ""; // can't thing of a good way
+    }
+    public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim) {
+      return pim._mask;
     }
     public String force(X item, String mask) {
       int pos = mask.lastIndexOf(':');
@@ -441,7 +474,10 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
       return ""; // can't thing of a good way
     }
-    public String force(X item, String mask) {
+    public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim) {
+      return pim._mask;
+    }
+   public String force(X item, String mask) {
       int pos = mask.lastIndexOf(':');
       if (pos<0) { 
         return item.toString();
@@ -657,6 +693,15 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
    */
   public void extendMask(String extension) {
     _mask = _mask + extension;
+    updateMatchingStrings(_matchingItems);
+  }
+  
+
+  /**
+   * Extends the mask by the shared string.
+   */
+  public void extendSharedMask() {
+    _mask = _strategy.getExtendedSharedMask(_matchingItems, this);
     updateMatchingStrings(_matchingItems);
   }
 }

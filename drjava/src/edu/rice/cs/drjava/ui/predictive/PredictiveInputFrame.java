@@ -434,7 +434,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       public void actionPerformed(ActionEvent e) {
 //        System.out.println("tab!");
         removeListener();
-        _pim.extendMask(_pim.getSharedMaskExtension());
+        _pim.extendSharedMask();
         updateTextField();
         updateExtensionLabel();
         updateList();
