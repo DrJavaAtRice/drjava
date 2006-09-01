@@ -242,6 +242,10 @@ public class DrJava {
         _jvmArgs.add(arg); 
       }
       
+      else if ((arg.length() > 1) && (arg.substring(0,2).equals("-D"))) {
+        _jvmArgs.add(arg); 
+      }
+      
       else if (arg.equals("-debugConsole")) _showDebugConsole = true;
       
       else if (arg.equals("-help") || arg.equals("-?")) {
@@ -282,6 +286,7 @@ public class DrJava {
     buf.append("  -config [FILE]        use a custom config file\n");
     buf.append("  -help | -?            print this help message\n");
     buf.append("  -X<jvmOption>         specify a JVM configuration option for the master DrJava JVM\n");      
+    buf.append("  -D<name>[=<value>]    set a Java property for the master DrJava JVM\n");      
     System.out.print(buf.toString());
   }
   
