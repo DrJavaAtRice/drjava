@@ -1026,6 +1026,25 @@ public class MainFrame extends JFrame implements ClipboardOwner {
               addToBrowserHistory();
             }
             _model.setActiveDocument(p.getItem().doc);
+            final int curLine = _model.getActiveDocument().getCurrentLine();
+            String t = p.getText();
+            System.out.println("Goto file: "+t);
+            if (t.lastIndexOf(':')>=0) {
+              try {
+                String end = t.substring(t.lastIndexOf(':')+1);
+                final int lineNum = Integer.parseInt(end);
+                System.out.println("Goto line: "+lineNum);
+                SwingUtilities.invokeLater(new Runnable() {
+                  public void run() {
+                    try {
+                      _jumpToLine(lineNum);
+                    }
+                    catch (RuntimeException e) { _jumpToLine(curLine); }
+                  }
+                });
+              }
+              catch(RuntimeException e) { /* ignore */ }
+            }
             if (docChanged) {
               // defer executing this code until after active document switch (if any) is complete
               SwingUtilities.invokeLater(new Runnable() {
@@ -1048,9 +1067,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       };
       java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>> strategies =
         new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>>();
-      strategies.add(new PredictiveInputModel.FragmentStrategy<GoToFileListEntry>());
-      strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
-      strategies.add(new PredictiveInputModel.RegExStrategy<GoToFileListEntry>());
+      strategies.add(new PredictiveInputModel.FragmentLineNumStrategy<GoToFileListEntry>());
+      strategies.add(new PredictiveInputModel.PrefixLineNumStrategy<GoToFileListEntry>());
+      strategies.add(new PredictiveInputModel.RegExLineNumStrategy<GoToFileListEntry>());
       _gotoFileDialog = 
         new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
                                                     "Go to File",
@@ -4770,6 +4789,15 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   private void _selectAll() { _currentDefPane.selectAll(); }
   
+  /** Jump to the specified line and return the offset.
+    * @return offset */
+  private int _jumpToLine(int lineNum) {   
+      _currentDefPane.centerViewOnLine(lineNum);
+      int pos = _model.getActiveDocument().gotoLine(lineNum);
+      _currentDefPane.setCaretPosition(pos);
+      return pos;
+  }
+  
   /** Ask the user what line they'd like to jump to, then go there. */
   private int _gotoLine() {
     final String msg = "What line would you like to go to?";
@@ -4778,11 +4806,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     try {
       if (lineStr != null) {
         int lineNum = Integer.parseInt(lineStr);
-        _currentDefPane.centerViewOnLine(lineNum);
-        int pos = _model.getActiveDocument().gotoLine(lineNum);
-        _currentDefPane.setCaretPosition(pos);
-        return pos;
-      }
+        return _jumpToLine(lineNum);      }
     }
     catch (NumberFormatException nfe) {
       // invalid input for line number

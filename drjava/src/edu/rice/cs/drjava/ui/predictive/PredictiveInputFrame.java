@@ -345,8 +345,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     */
   public String getText() {
     if (_force) {
-      Object item = _matchList.getSelectedValue();
-      return (item==null)?"":item.toString();
+      @SuppressWarnings("unchecked") T item = (T)_matchList.getSelectedValue();
+      return (item==null)?"":_currentStrategy.force(item,_textField.getText());
     }
     return _textField.getText();
   }

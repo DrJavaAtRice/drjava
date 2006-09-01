@@ -83,6 +83,13 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       * @return the shared mask extension
       */
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim);
+    
+    /** Force the mask to fit this entry. The matching strategies that accept line numbers
+      * can combine the current item with the line number. Other strategies just return the
+      * current item.
+      * @return forced string
+      */
+    public String force(X item, String mask);
   }
   
   /** Matching based on string prefix. */
@@ -147,6 +154,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       }
       return res;
     }
+    public String force(X item, String mask) { return item.toString(); }
   };
   
   /** Matching based on string fragments. */
@@ -179,6 +187,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
       return ""; // can't thing of a good way
     }
+    public String force(X item, String mask) { return item.toString(); }
   };
   
   /** Matching based on string regular expressions. */
@@ -213,6 +222,233 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     }
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
       return ""; // can't thing of a good way
+    }
+    public String force(X item, String mask) { return item.toString(); }
+  };
+  
+  /** Matching based on string prefix, supporting line numbers separated by :. */
+  public static class PrefixLineNumStrategy<X extends Comparable<? super X>> implements MatchingStrategy<X> {
+    public String toString() { return "Prefix"; }
+    public boolean isMatch(X item, PredictiveInputModel<X> pim) {
+      int posB = pim._mask.lastIndexOf(':');
+      if (posB<0) { posB = pim._mask.length(); }
+      String mask = pim._mask.substring(0,posB);
+      
+      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
+      String b = (pim._ignoreCase)?(mask.toLowerCase()):(mask);
+      return a.startsWith(b);
+    }
+    public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {
+      int posA = item1.toString().lastIndexOf(':');
+      if (posA<0) { posA = item1.toString().length(); }
+      String i1 = item1.toString().substring(0,posA);
+
+      int posB = item2.toString().lastIndexOf(':');
+      if (posB<0) { posB = item2.toString().length(); }
+      String i2 = item2.toString().substring(0,posB);
+      
+      String a = (pim._ignoreCase)?(i1.toLowerCase()):(i1);
+      String b = (pim._ignoreCase)?(i2.toLowerCase()):(i2);
+      return a.equals(b);
+    }
+    public int compare(X item1, X item2, PredictiveInputModel<X> pim) {
+      int posA = item1.toString().lastIndexOf(':');
+      if (posA<0) { posA = item1.toString().length(); }
+      String i1 = item1.toString().substring(0,posA);
+
+      int posB = item2.toString().lastIndexOf(':');
+      if (posB<0) { posB = item2.toString().length(); }
+      String i2 = item2.toString().substring(0,posB);
+      
+      String a = (pim._ignoreCase)?(i1.toLowerCase()):(i1);
+      String b = (pim._ignoreCase)?(i2.toLowerCase()):(i2);
+      return a.compareTo(b);
+    }
+    public X getLongestMatch(X item, List<X> items, PredictiveInputModel<X> pim) {
+      X longestMatch = null;
+      int matchLength = -1;
+      for(X i: items) {
+        int posA = i.toString().lastIndexOf(':');
+        if (posA<0) { posA = i.toString().length(); }
+        String i1 = i.toString().substring(0,posA);
+        
+        int posB = item.toString().lastIndexOf(':');
+        if (posB<0) { posB = item.toString().length(); }
+        String i2 = item.toString().substring(0,posB);
+        
+        String s = (pim._ignoreCase)?(i1.toLowerCase()):(i1);
+        String t = (pim._ignoreCase)?(i2.toLowerCase()):(i2);
+        int ml = 0;
+        while((s.length() > ml) && (t.length() > ml) && (s.charAt(ml) == t.charAt(ml))) {
+          ++ml;
+        }
+        if (ml>matchLength) {
+          matchLength = ml;
+          longestMatch = i;
+        }
+      }
+      return longestMatch;
+    }
+    public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
+      String res = "";
+      String ext = "";
+      if (items.size() == 0) {
+        return ext;
+      }
+      boolean allMatching = true;
+      int len = pim._mask.length();
+      while((allMatching) && (pim._mask.length() + ext.length() < items.get(0).toString().length())) {
+        char origCh = items.get(0).toString().charAt(pim._mask.length()+ext.length());
+        char ch = (pim._ignoreCase)?(Character.toLowerCase(origCh)):(origCh);
+        allMatching = true;
+        for (X i: items) {
+          String a = (pim._ignoreCase)?(i.toString().toLowerCase()):(i.toString());
+          if (a.charAt(len)!=ch) {
+            allMatching = false;
+            break;
+          }
+        }
+        if (allMatching) {
+          ext = ext + ch;
+          res = res + origCh;
+          ++len;
+        }
+      }
+      return res;
+    }
+    public String force(X item, String mask) {
+      int pos = mask.lastIndexOf(':');
+      if (pos<0) { 
+        return item.toString();
+      }
+      else {
+        return item.toString()+mask.substring(pos);
+      }
+    }
+  };
+  
+  /** Matching based on string fragments, supporting line numbers. */
+  public static class FragmentLineNumStrategy<X extends Comparable<? super X>> implements MatchingStrategy<X> {
+    public String toString() { return "Fragments"; }
+    public boolean isMatch(X item, PredictiveInputModel<X> pim) {
+      int posB = pim._mask.lastIndexOf(':');
+      if (posB<0) { posB = pim._mask.length(); }
+      String mask = pim._mask.substring(0,posB);
+      
+      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
+      String b = (pim._ignoreCase)?(mask.toLowerCase()):(mask);
+
+      java.util.StringTokenizer tok = new java.util.StringTokenizer(b);
+      while(tok.hasMoreTokens()) {
+        if (a.indexOf(tok.nextToken()) < 0) return false;
+      }
+      return true;
+    }
+    public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {
+      int posA = item1.toString().lastIndexOf(':');
+      if (posA<0) { posA = item1.toString().length(); }
+      String i1 = item1.toString().substring(0,posA);
+
+      int posB = item2.toString().lastIndexOf(':');
+      if (posB<0) { posB = item2.toString().length(); }
+      String i2 = item2.toString().substring(0,posB);
+      
+      String a = (pim._ignoreCase)?(i1.toLowerCase()):(i1);
+      String b = (pim._ignoreCase)?(i2.toLowerCase()):(i2);
+      return a.equals(b);
+    }
+    public int compare(X item1, X item2, PredictiveInputModel<X> pim) {
+      int posA = item1.toString().lastIndexOf(':');
+      if (posA<0) { posA = item1.toString().length(); }
+      String i1 = item1.toString().substring(0,posA);
+
+      int posB = item2.toString().lastIndexOf(':');
+      if (posB<0) { posB = item2.toString().length(); }
+      String i2 = item2.toString().substring(0,posB);
+      
+      String a = (pim._ignoreCase)?(i1.toLowerCase()):(i1);
+      String b = (pim._ignoreCase)?(i2.toLowerCase()):(i2);
+      return a.compareTo(b);
+    }
+    public X getLongestMatch(X item, List<X> items, PredictiveInputModel<X> pim) {
+      if (items.size() > 0)  return items.get(0);
+      else return null;
+    }
+    public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
+      return ""; // can't thing of a good way
+    }
+    public String force(X item, String mask) {
+      int pos = mask.lastIndexOf(':');
+      if (pos<0) { 
+        return item.toString();
+      }
+      else {
+        return item.toString()+mask.substring(pos);
+      }
+    }
+  };
+  
+  /** Matching based on string regular expressions, supporting line numbers. */
+  public static class RegExLineNumStrategy<X extends Comparable<? super X>> implements MatchingStrategy<X> {
+    public String toString() { return "RegEx"; }
+    public boolean isMatch(X item, PredictiveInputModel<X> pim) {
+      int posB = pim._mask.lastIndexOf(':');
+      if (posB<0) { posB = pim._mask.length(); }
+      String mask = pim._mask.substring(0,posB);
+      
+      String a = item.toString();
+
+      try {
+        Pattern p = Pattern.compile(mask,
+                                    (pim._ignoreCase)?(Pattern.CASE_INSENSITIVE):(0));
+        Matcher m = p.matcher(a);
+        return m.matches();
+      }
+      catch (PatternSyntaxException e) {
+        return false;
+      }
+    }
+    public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {
+      int posA = item1.toString().lastIndexOf(':');
+      if (posA<0) { posA = item1.toString().length(); }
+      String i1 = item1.toString().substring(0,posA);
+
+      int posB = item2.toString().lastIndexOf(':');
+      if (posB<0) { posB = item2.toString().length(); }
+      String i2 = item2.toString().substring(0,posB);
+      
+      String a = (pim._ignoreCase)?(i1.toLowerCase()):(i1);
+      String b = (pim._ignoreCase)?(i2.toLowerCase()):(i2);
+      return a.equals(b);
+    }
+    public int compare(X item1, X item2, PredictiveInputModel<X> pim) {
+      int posA = item1.toString().lastIndexOf(':');
+      if (posA<0) { posA = item1.toString().length(); }
+      String i1 = item1.toString().substring(0,posA);
+
+      int posB = item2.toString().lastIndexOf(':');
+      if (posB<0) { posB = item2.toString().length(); }
+      String i2 = item2.toString().substring(0,posB);
+      
+      String a = (pim._ignoreCase)?(i1.toLowerCase()):(i1);
+      String b = (pim._ignoreCase)?(i2.toLowerCase()):(i2);
+      return a.compareTo(b);
+    }
+    public X getLongestMatch(X item, List<X> items, PredictiveInputModel<X> pim) {
+      if (items.size() > 0)  return items.get(0); // can't thing of a good way
+      else return null;
+    }
+    public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
+      return ""; // can't thing of a good way
+    }
+    public String force(X item, String mask) {
+      int pos = mask.lastIndexOf(':');
+      if (pos<0) { 
+        return item.toString();
+      }
+      else {
+        return item.toString()+mask.substring(pos);
+      }
     }
   };
   
