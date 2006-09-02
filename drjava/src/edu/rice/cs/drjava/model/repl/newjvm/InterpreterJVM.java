@@ -85,7 +85,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public static final InterpreterJVM ONLY = new InterpreterJVM();
   
   private static final Log _log = new Log("MasterSlave.txt", false);
-  private static final boolean printMessages = true;
+  private static final boolean printMessages = false;
   
   /** String to append to error messages when no stack trace is available. */
   public static final String EMPTY_TRACE_TEXT = "";
