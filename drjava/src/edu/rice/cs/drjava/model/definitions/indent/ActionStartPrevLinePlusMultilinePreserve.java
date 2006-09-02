@@ -49,29 +49,27 @@ import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * Indents the current line in the document to the indent level of the
- * start of the previous line, preserving any text on the current line,
- * and adds several lines of text at that indent level,
- * and moves the cursor to a particular line and position.
- * @version $Id$
- */
+/** Indents the current line in the document to the indent level of the
+  * start of the previous line, preserving any text on the current line,
+  * and adds several lines of text at that indent level,
+  * and moves the cursor to a particular line and position.
+  * @version $Id$
+  */
 class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
   private String[] _suffices;
   private int _cursorLine, _cursorPos, _psrvLine, _psrvPos;
 
-  /**
-   * Creates a multiline insert rule, properly preserving any text on current line.
-   * @param suffices the new lines to be added
-   * @param cursorLine the line on which to place the cursor
-   * @param cursorPos the character within the line string before which to place
-   * the cursor
-   * @param psrvLine the line in suffics on which to place the preserved text
-   * @param psrvPos the character within the line string in suffices before which
-   * to place the preserved text
-   * @throws IllegalArgumentException if the integer params are negative or
-   * outside the appropriate bounds
-   */
+  /** Creates a multiline insert rule, properly preserving any text on current line.
+    * @param suffices the new lines to be added
+    * @param cursorLine the line on which to place the cursor
+    * @param cursorPos the character within the line string before which to place
+    * the cursor
+    * @param psrvLine the line in suffices on which to place the preserved text
+    * @param psrvPos the character within the line string in suffices before which
+    * to place the preserved text
+    * @throws IllegalArgumentException if the integer params are negative or
+    * outside the appropriate bounds
+    */
   public ActionStartPrevLinePlusMultilinePreserve(String suffices[],
                                                   int cursorLine, int cursorPos,
                                                   int psrvLine, int psrvPos) {

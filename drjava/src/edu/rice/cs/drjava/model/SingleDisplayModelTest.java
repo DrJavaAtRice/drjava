@@ -52,6 +52,8 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
 
   // _log is inherited from GlobalModelTestCase
   
+  private Object _readyLock = new Object(); // lock used for wait/notify on interpreterReady event
+  
   /** Get the instance of the SingleDisplayModel.*/
   private DefaultGlobalModel getSDModel() { return  _model; }
 
@@ -234,6 +236,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
 //        Utilities.show("interpreterReady(" + wd + ") called");
 //        Utilities.show("Traceback is:\n" + StringOps.getStackTrace());
         interpreterReadyCount++;
+        synchronized(_readyLock) { _readyLock.notify(); }
       }
     };
     _model.addListener(listener);
@@ -275,15 +278,22 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     listener.assertNewCount(3);
 
     // Close all files, ensure new one was created
-// THIS TEST COMMENTED OUT TEMPORARILY BECAUSE IT IS BROKEN (dlsmith, 2006-08-21)
-//    _model.closeAllFiles();
-//    Utilities.clearEventQueue();
-//    assertNumOpenDocs(1);
-//    assertLength(0, _model.getActiveDocument());    
-//    listener.assertInterpreterReadyCount(1);
-//    listener.assertNewCount(4);
-//    listener.assertCloseCount(4);
-//    listener.assertAbandonCount(4);
+    _model.closeAllFiles();
+    Utilities.clearEventQueue();
+    assertNumOpenDocs(1);
+    assertLength(0, _model.getActiveDocument()); 
+    
+    // wait for interpreter to be ready
+    try {
+      synchronized(_readyLock) {
+        if (listener.getInterpreterReadyCount() == 0) _readyLock.wait(10000);  // intentionally not a while 
+      }
+    }
+    catch(InterruptedException e) { fail("Wait for interpreterReady event was interrupted by " + e); }
+    listener.assertInterpreterReadyCount(1);  
+    listener.assertNewCount(4);
+    listener.assertCloseCount(4);
+    listener.assertAbandonCount(4);
 
     _model.removeListener(listener);
 //    _log.log("testCloseFiles completed");
@@ -376,12 +386,12 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
       switchCount = 0;
     }
 
-    public void assertSwitchCount(int i) {
-      assertEquals("number of active document switches", i, switchCount);
-    }
+    public void assertSwitchCount(int i) { assertEquals("number of active document switches", i, switchCount); }
 
     public void activeDocumentChanged(OpenDefinitionsDocument doc) {
       fail("activeDocumentChanged fired unexpectedly");
     }
+    
+    public int getInterpreterReadyCount() { return interpreterReadyCount; }
   }
 }

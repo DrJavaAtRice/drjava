@@ -7046,7 +7046,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           finally { hourglassOff(); }
           
           // Display the results.
-//             System.out.println("did we get this far?");
           if (success) {
             String className;
             try {
@@ -7063,7 +7062,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                 "index.html" : (className + ".html");
               File index = new File(destDir, fileName);
               URL address = FileOps.toURL(index.getAbsoluteFile());
-              if (!PlatformFactory.ONLY.openURL(address)) {
+
+              if (! PlatformFactory.ONLY.openURL(address)) {
                 JavadocFrame _javadocFrame = new JavadocFrame(destDir, className, allDocs);
                 _javadocFrame.setVisible(true);
               }

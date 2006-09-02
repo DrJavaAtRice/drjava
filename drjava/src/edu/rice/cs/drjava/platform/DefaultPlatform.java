@@ -174,16 +174,12 @@ class DefaultPlatform implements PlatformSupport {
       List<String> args = ArgumentTokenizer.tokenize(command);
 
       // Prepend the file only if it exists.
-      if (exe != FileOption.NULL_FILE) {
-        args.add(0, exe.getAbsolutePath());
-      }
+      if (exe != FileOption.NULL_FILE) args.add(0, exe.getAbsolutePath());
 
       // Call the command.
       try {
         // Process proc =
         Runtime.getRuntime().exec(args.toArray(new String[args.size()]));
-
-        // TODO: This may cause a memory leak on Windows, if we don't check the exit code.
       }
       catch (Throwable t) {
         // If there was any kind of problem, ignore it and report failure.

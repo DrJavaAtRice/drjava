@@ -124,17 +124,10 @@ public class DefaultJavadocModel implements JavadocModel {
   public void javadocAll(DirectorySelector select, final FileSaveSelector saver, final String classPath) 
     throws IOException {
         
-    // Only javadoc if all are saved. Removed because it is already done inside suggestJavadocDestination (fixes bug where pop-up is shown twice)
-//    _attemptSaveAllDocuments();
+    /* Only javadoc if all are saved. Removed because it is already done inside suggestJavadocDestination; fixes bug 
+       where pop-up is shown twice) */
     if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) { return; }  /* abort if files remain unsaved */
     
-    // Make sure that there is at least one saved document.
-//    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-       
-//    for (OpenDefinitionsDocument doc: docs) {
-//      if (doc.isUntitled()) return;  // ignore javadoc, since a document is still unsaved
-//    }
-//    
     Configuration config = DrJava.getConfig();
     File destDir = config.getSetting(OptionConstants.JAVADOC_DESTINATION);
     
@@ -455,8 +448,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param destDirFile Directory where the results are being saved
    * @param allDocs Whether we are running over all open documents
    */
-  private void _runJavadoc(ArrayList<String> args, String classPath,
-                           File destDirFile, boolean allDocs) {
+  private void _runJavadoc(ArrayList<String> args, String classPath, File destDirFile, boolean allDocs) {
     // Start a new process to execute Javadoc and tell listeners it has started
     // And finally, when we're done notify the listeners with a success flag
     boolean result;

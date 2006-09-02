@@ -112,15 +112,19 @@ public class Indenter {
       rule04 = new ActionStartPrevLinePlus(" * "),  // padding prefix for new line within ordinary block comment
       rule46 = new ActionStartPrevLinePlus("  * "), // padding prefix for new line within special javadoc block comment
       rule47 = new ActionStartPrevLinePlus("  "),   // padding prefix for interior of special javadoc block comment
+      rule45 = new QuestionPrevLineStartsJavaDocWithText(rule46, rule04),  // Prev line begins special javadoc comment?
       rule48 = new QuestionPrevLineStartsJavaDocWithText(rule47, rule05),  // Prev line begins special javadoc comment? 
       rule41 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { " * \n", " */" }, 0, 3, 0, 3),
-      rule45 = new QuestionPrevLineStartsJavaDocWithText(rule46, rule04),  // Prev line begins special javadoc comment?
+      rule49 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { "  * \n", "  */"}, 0, 4, 0, 4),
+      rule50 = new QuestionPrevLineStartsJavaDocWithText(rule49, rule41),
+
+      rule03 = new QuestionCurrLineEmptyOrEnterPress(rule45, rule48),
       rule42 = new QuestionFollowedByStar(rule04, rule41),
-      rule49 = new ActionStartPrevLinePlusMultilinePreserve(new String[] {"  */" }, 0, 4, 0, 4), 
-      rule50 = new QuestionFollowedByStar(rule46, rule49),
-      rule51 = new QuestionPrevLineStartsJavaDocWithText(rule50, rule42),
-      rule03 = new QuestionCurrLineEmptyOrEnterPress((autoCloseComments? rule51 : rule45), rule48),
-      rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
+//      rule49 = new ActionStartPrevLinePlusMultilinePreserve(new String[] {"  */" }, 0, 4, 0, 4), 
+//      rule50 = new QuestionFollowedByStar(rule46, rule49),
+//      rule51 = new QuestionPrevLineStartsJavaDocWithText(rule50, rule42),
+      rule51 = new QuestionCurrLineEmpty(rule50, rule03), // autoClose: rule03 unnecessarily retests CurrentLineEmpty
+      rule02 = new QuestionPrevLineStartsComment(autoCloseComments ? rule51 : rule03, rule06),
       rule43 = new ActionDoNothing(),
       rule44 = new QuestionCurrLineIsWingComment(rule43, rule13),
       rule01 = new QuestionInsideComment(rule02, rule44);

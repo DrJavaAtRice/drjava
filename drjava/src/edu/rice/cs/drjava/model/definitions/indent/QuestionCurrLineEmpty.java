@@ -39,22 +39,19 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 import edu.rice.cs.util.UnexpectedException;
 
-/** @version $Id$
+/** @version $Id: QuestionCurrLineEmptyOrEnterPress.java 3901 2006-06-30 05:28:11Z rcartwright $
   * Asks whether the current line is empty (contains only whitespace), or indentation was
-  * spawned by pressing enter.
-  * 
-  * TODO: eliminate duplicated code with QuestionCurrentLineEmpty
+  * spawned by pressing enter
   */
-class QuestionCurrLineEmptyOrEnterPress extends IndentRuleQuestion {
+class QuestionCurrLineEmpty extends IndentRuleQuestion {
   
-  QuestionCurrLineEmptyOrEnterPress(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
+  QuestionCurrLineEmpty(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
 
   /** Determines if the current line in the document is empty.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, int reason) {
-    if (reason == Indenter.ENTER_KEY_PRESS) return true;
     try {
       // Determine if there are only whitespace chars by seeing if the first non-WS char is the endOfLine
       int here = doc.getCurrentLocation();

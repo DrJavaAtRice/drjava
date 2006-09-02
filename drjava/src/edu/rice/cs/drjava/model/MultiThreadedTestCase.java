@@ -116,7 +116,8 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
       _t = t;
       _e = e;
       if (_mainThread != null) {
-        System.out.println("Uncaught Exception in spawned thread within a MultiThreadedTestCase:\n" + e);
+        System.out.println("Uncaught Exception in spawned thread within a MultiThreadedTestCase:");
+        e.printStackTrace(System.out);
         _mainThread.interrupt();
       }
     }
