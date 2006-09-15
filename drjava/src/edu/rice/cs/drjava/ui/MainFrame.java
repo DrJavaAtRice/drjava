@@ -3896,7 +3896,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Closes all files and makes a new project. */
   private void _newProject() {
 
-    _closeProject(true);  // supress resetting interactions; it will be done in _model.newProject() below
+    _closeProject(true);  // suppress resetting interactions; it will be done in _model.newProject() below
     _saveChooser.setFileFilter(_projectFilter);
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {      

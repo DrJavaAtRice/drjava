@@ -50,7 +50,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -138,9 +137,9 @@ import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.ReaderWriterLock;
 
 /** In simple terms, a DefaultGlobalModel without an interpreter,compiler, junit testing, debugger or javadoc.
- * Basically, has only document handling functionality
- *  @version $Id$
- */
+  * Basically, has only document handling functionality
+  * @version $Id$
+  */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
   public static Log _log = new Log("GlobalModel.txt", false);
@@ -208,7 +207,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected final DefinitionsEditorKit _editorKit = new DefinitionsEditorKit(_notifier);
  
   /** Collection for storing all OpenDefinitionsDocuments. */
-  protected final OrderedHashSet<OpenDefinitionsDocument> _documentsRepos = new OrderedHashSet<OpenDefinitionsDocument>();
+  protected final OrderedHashSet<OpenDefinitionsDocument> _documentsRepos = 
+    new OrderedHashSet<OpenDefinitionsDocument>();
  
   // ---- Input/Output Document Fields ----
  
@@ -277,11 +277,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _findResultsManagers.add(rm);
     
     // install new manager in all documents
-    synchronized(_documentsRepos) {
-      OpenDefinitionsDocument[] docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]);
-      for (final OpenDefinitionsDocument doc: docs) {
-        doc.addFindResultsManager(rm);
-      }
+    for (final OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
+      doc.addFindResultsManager(rm);
     }
     return rm;
   }
@@ -289,11 +286,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Dispose a manager for find result regions. */
   public void disposeFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
     // remove manager from all documents
-    synchronized(_documentsRepos) {
-      OpenDefinitionsDocument[] docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]);
-      for (final OpenDefinitionsDocument doc: docs) {
-        doc.removeFindResultsManager(rm);
-      }
+    for (final OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
+      doc.removeFindResultsManager(rm);
     }
     _findResultsManagers.remove(rm);
   }
@@ -900,31 +894,37 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getBuildDirectory() { return null; }
     public File getProjectRoot() { return getWorkingDirectory(); }
     public File getWorkingDirectory() {
+      _log.log("AbstractGlobalModel.getWorkingDirectory() called");
       try {
         File[] roots = getSourceRootSet();
         if (roots.length == 0) {
           // return getMasterWorkingDirectory();
           // use the last directory saved to the configuration
           File file = null;
+          _log.log("STICKY_INTERACTIONS_DIRECTORY flag is " + DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY));
           if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
             try {
               // restore the path from the configuration
               file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
+              _log.log("Last interactionsDirectory is " + file);
             }
             catch (RuntimeException e) { file = null; }
           }
-          if (file==null) {
+          if (file == null) {
             // something went wrong, clear the setting and use "user.home"
             DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, FileOption.NULL_FILE);
             file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
           }
           // update the setting and return it
           DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, file);
+          _log.log("Returning " + file + " as working directory");
           return file;
         }
+         _log.log("Returning " + roots[0].getCanonicalFile() + " as working directory");
         return roots[0].getCanonicalFile();
       }
       catch(IOException e) { /* fall through */ }
+       _log.log("Returning " + System.getProperty("user.dir") + " as working directory");
       return new File(System.getProperty("user.dir"));  // a flat file configuration should have exactly one source root
     }
     public boolean isProjectActive() { return false; }
@@ -1308,10 +1308,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected void saveAllFilesHelper(FileSaveSelector com) throws IOException {
     
     boolean isProjActive = isProjectActive();
-    
-    OpenDefinitionsDocument[] docs;
-    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (final OpenDefinitionsDocument doc: docs) {
+  
+    for (final OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {  // getOpen... makes a copy
       if (doc.isUntitled() && isProjActive) continue;  // do not force Untitled document to be saved if projectActive()
       aboutToSaveFromSaveAll(doc);
       doc.saveFile(com);
@@ -1336,18 +1334,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     ArrayList<DocFile> srcFileList = new ArrayList<DocFile>();
     LinkedList<DocFile> auxFileList = new LinkedList<DocFile>();
     ArrayList<File> extFileList = new ArrayList<File>();
-
-    OpenDefinitionsDocument[] docs;
     
     File projectRoot = builder.getProjectRoot();
     
 //    Utilities.show("Fetched project root is " + projectRoot);
     
     ClassPathVector exCp = new ClassPathVector();
-    
-    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
    
-    for (OpenDefinitionsDocument doc: docs) {
+    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       
       File f = doc.getFile();
       
@@ -1389,10 +1383,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // add opendefinitionsdocument
     ArrayList<File> srcFileList = new ArrayList<File>();
     LinkedList<File> auxFileList = new LinkedList<File>();
-    OpenDefinitionsDocument[] docs;
-    
-    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) {
+ 
+    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       if (doc.inProjectPath()) {
         DocumentInfoGetter g = info.get(doc);
         builder.addSourceFile(g);
@@ -1663,7 +1655,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   /** Performs any needed operations on the model before closing the project and its files.  This is not
    *   responsible for actually closing the files since that is handled in MainFrame._closeProject().
-   *   Resets interations unless supressReset is true.
+   *   Resets interations unless suppressReset is true.
    */
   public void closeProject(boolean suppressReset) {
     setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().
@@ -1695,13 +1687,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    }
  
   /** Attempts to close all open documents. Also ensures the invariant that there is always at least
-    *  one open document holds by creating a new file if necessary.
+    * one open document holds by creating a new file if necessary.  Resets interactions iff operation succeeds.
     * @return true if all documents were closed
     */
    public boolean closeAllFiles() {
      List<OpenDefinitionsDocument> docs = getOpenDefinitionsDocuments();
      boolean res = closeFiles(docs);
-     if (res) resetInteractions(getWorkingDirectory());
+     if (res) {
+       _log.log("Resetting interactions pane to use " + getWorkingDirectory() + " as working directory");
+       resetInteractions(getWorkingDirectory());
+     }
      return res;
    }
  
@@ -1716,26 +1711,26 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  then it is closed without prompting the user to save it.  If it is in the cache, then
    *  we can successfully notify the user that the file is selected for closing and ask whether to
    *  saveAs, close, or cancel.
-   *  @param docList the list od OpenDefinitionsDocuments to close
+   *  @param docs the list od OpenDefinitionsDocuments to close
    *  @return whether all files were closed
    */
-  public boolean closeFiles(List<OpenDefinitionsDocument> docList) {
-    if (docList.size() == 0) return true;
+  public boolean closeFiles(List<OpenDefinitionsDocument> docs) {
+    if (docs.size() == 0) return true;
     
-    /* Force the user to save or discard all modified files in docList */
-    for (OpenDefinitionsDocument doc : docList) { 
+    /* Force the user to save or discard all modified files in docs */
+    for (OpenDefinitionsDocument doc : docs) { 
       if (! doc.canAbandonFile()) return false; }
     
     /* If all files are being closed, create a new file before starting in order to have a potentially active file
      * that is not in the list of closing files. */
-    if (docList.size() == getOpenDefinitionsDocumentsSize()) newFile();
+    if (docs.size() == getOpenDefinitionsDocumentsSize()) newFile();
     
     /* Set the active document to the document just after the last document or the document just before the first 
-     * document in docList.  The new file created above (if necessary) does not appear in docList. */
-    _ensureNotActive(docList);
+     * document in docs.  The new file created above (if necessary) does not appear in docs. */
+    _ensureNotActive(docs);
         
-    // Close the files in docList.
-    for (OpenDefinitionsDocument doc : docList) { closeFileWithoutPrompt(doc); }  
+    // Close the files in docs.
+    for (OpenDefinitionsDocument doc : docs) { closeFileWithoutPrompt(doc); }  
     return true;
   }
  
@@ -1781,13 +1776,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    */
   public boolean closeAllFilesOnQuit() {
     
-    List<OpenDefinitionsDocument> docList;
-    synchronized(_documentsRepos) { docList = new ArrayList<OpenDefinitionsDocument> (_documentsRepos); }
+    List<OpenDefinitionsDocument> docs = getOpenDefinitionsDocuments();
     
     // first see if the user wants to cancel on any of them
     OpenDefinitionsDocument retainedDoc = null;
   
-    for (OpenDefinitionsDocument doc : docList) {
+    for (OpenDefinitionsDocument doc : docs) {
       if (! doc.canAbandonFile()) { retainedDoc = doc; break; }
     }
     
@@ -1802,11 +1796,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     newFile();
     
     // Set the active document to the document just after the last document or the document just before the
-    // first document in docList.  A new file does not appear in docList.
-    _ensureNotActive(docList);
+    // first document in docs.  A new file does not appear in docs.
+    _ensureNotActive(docs);
         
-    // Close the files in docList.
-    for (OpenDefinitionsDocument doc : docList) { closeFileWithoutPrompt(doc); }  
+    // Close the files in docs.
+    for (OpenDefinitionsDocument doc : docs) { closeFileWithoutPrompt(doc); }  
     
     return true;
   }
@@ -1969,15 +1963,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   /** @return true if all open documents are in sync with their primary class files. */
   public boolean hasOutOfSyncDocuments() {
-    synchronized(_documentsRepos) {      
-      for (OpenDefinitionsDocument doc: _documentsRepos) {
-        if (doc.isSourceFile() && ! doc.checkIfClassFileInSync()) {
+    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
+      if (doc.isSourceFile() && ! doc.checkIfClassFileInSync()) {
 //          Utilities.show("Out of sync document is: " + doc);
-          return true;
-        }
+        return true;
       }
-      return false;
     }
+    return false;
   }
  
 //  public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc) {
@@ -1995,12 +1987,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    * @param indent the number of spaces to make per level of indent
    */
   void setDefinitionsIndent(int indent) {
-    
-    OpenDefinitionsDocument[] docs;
-    
-    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-      
-    for (OpenDefinitionsDocument doc: docs) { doc.setIndent(indent); }
+    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) { doc.setIndent(indent); }
   }
 
   /** A degenerate operation since this has no slave JVM and no interactions model. */
@@ -2144,11 +2131,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    */
   public File[] getSourceRootSet() {
     HashSet<File> roots = new HashSet<File>();
-    OpenDefinitionsDocument[] docs;
-    
-    synchronized(_documentsRepos) { docs =  _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-//    Utilities.show("Getting sourceRootSet for " + Arrays.toString(docs));
-    for (OpenDefinitionsDocument doc: docs) {
+
+    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       try {
         if (! doc.isUntitled()) {
           File root = doc.getSourceRoot ();
@@ -2185,10 +2169,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  @return whether any documents have been modified
    */
   public boolean hasModifiedDocuments() {
-    OpenDefinitionsDocument[] docs;
-    
-    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) {
+    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       if (doc.isModifiedSinceSave()) return true;  
     }
     return false;
@@ -2198,10 +2179,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  @return whether any documents are untitled
    */
   public boolean hasUntitledDocuments() {
-    OpenDefinitionsDocument[] docs;
-    
-    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) {
+    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       if (doc.isUntitled()) return true;  
     }
     return false;
@@ -3943,10 +3921,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    */
   protected OpenDefinitionsDocument _getOpenDocument(File file) {
     
-    OpenDefinitionsDocument[] docs;
-    
-    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
-    for (OpenDefinitionsDocument doc: docs) {
+    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       try {
         File thisFile = null;
         try { thisFile = doc.getFile(); }
@@ -4189,11 +4164,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   /** Sets the first document in the navigator as active. */
   public void setActiveFirstDocument() {
-    List<OpenDefinitionsDocument> docs = getOpenDefinitionsDocuments();
-//    Utilities.show("Initial docs are " + docs);
-    /* The following will select the active document in the navigator, which will signal a listener to call _setActiveDoc(...)
-     */
-    setActiveDocument(docs.get(0));
+ 
+    /* Selects the active document in the navigator, which signals a listener to call _setActiveDoc(...). */
+    setActiveDocument(getOpenDefinitionsDocuments().get(0));
   }
  
   private void _setActiveDoc(INavigatorItem idoc) {

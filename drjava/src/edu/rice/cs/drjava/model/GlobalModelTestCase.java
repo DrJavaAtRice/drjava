@@ -64,7 +64,7 @@ import java.util.regex.*;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  protected static final Log _log  = new Log("GlobalModelTest.txt", false);
+  protected static final Log _log  = new Log("GlobalModel.txt", false);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile File _tempDir;

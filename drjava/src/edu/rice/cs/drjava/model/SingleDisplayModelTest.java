@@ -239,6 +239,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
         synchronized(_readyLock) { _readyLock.notify(); }
       }
     };
+    
     _model.addListener(listener);
     
     // Set up two documents
@@ -269,6 +270,8 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     listener.assertNewCount(2);
     listener.assertSwitchCount(3);
     assertLength(0, _model.getActiveDocument());
+    
+    _log.log("Starting second phase of testCloseFiles");
 
     // Set up two documents
     doc1 = _model.getActiveDocument();
@@ -276,6 +279,8 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     doc2 = setupDocument(BAR_TEXT);
     assertNumOpenDocs(2);
     listener.assertNewCount(3);
+    
+    _log.log("Just before calling _model.closeAllFiles()");
 
     // Close all files, ensure new one was created
     _model.closeAllFiles();

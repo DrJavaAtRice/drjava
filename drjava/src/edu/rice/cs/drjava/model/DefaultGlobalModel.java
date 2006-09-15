@@ -102,6 +102,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /* FIELDS */
   
+  /* static Log _log inherited from AbstractGlobalModel */
+  
   /* Interpreter fields */
   
   /** The document  used in the Interactions model. */
@@ -192,14 +194,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     super();
     AbstractMasterJVM._log.log(this + " has called contstructor for DefaultGlobal Model");
 //    Utilities.show("DefaultGlobalModel super call performed");
-    _jvm = new MainJVM(getWorkingDirectory());
+    File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
+    _jvm = new MainJVM(workDir);
     AbstractMasterJVM._log.log(this + " has created a new MainJVM");
     _compilerModel = new DefaultCompilerModel(this);
     _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
     _javadocModel = new DefaultJavadocModel(this);
     _interactionsDocument = new InteractionsDJDocument();
 
-    _interactionsModel = new DefaultInteractionsModel(this, _jvm, _interactionsDocument, getWorkingDirectory());
+    _interactionsModel = new DefaultInteractionsModel(this, _jvm, _interactionsDocument, workDir);
     _interactionsModel.addListener(_interactionsListener);
     _jvm.setInteractionsModel(_interactionsModel);
     _jvm.setJUnitModel(_junitModel);
@@ -302,16 +305,17 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    *  used, {@code wd} matches its working directory, and forceResest is false.
    */
   public void resetInteractions(File wd, boolean forceReset) {
-//    Utilities.show("resetInteractions called");
-    if (! forceReset && ! _jvm.slaveJVMUsed() && ! isClassPathChanged() && 
-        wd.equals(_interactionsModel.getWorkingDirectory())) {
-      // Eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
-//      Utilities.show("Suppressing resetting of interactions pane");
+//    _log.log("DefaultGlobalModel.resetInteractions called");
+    File workDir = _interactionsModel.getWorkingDirectory();
+//    _log.log("New working directory = " + wd +"; current working directory = " + workDir + ";");
+
+    if (! forceReset && ! _jvm.slaveJVMUsed() && ! isClassPathChanged() && wd.equals(workDir)) {
+    // Eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
+//      _log.log("Suppressing resetting of interactions pane");
       _interactionsModel._notifyInterpreterReady(wd);
-//      Utilities.show("_notifyInterpreterReady called");
       return; 
     }
-//    Utilities.show("Resetting interactions with working directory = " + wd);
+//    _log.log("Resetting interactions with working directory = " + wd);
     if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {    
       // update the setting
       DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);

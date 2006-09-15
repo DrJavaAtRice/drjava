@@ -38,14 +38,10 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.Date;
 
-/**
- * Logging class to record errors or unexpected behavior to a file.
- * The file is created in the current directory, and is only used if
- * the log is enabled.  All logs can be enabled at once with the
- * ENABLE_ALL field.
- *
- * @version $Id$
- */
+/** Logging class to record errors or unexpected behavior to a file.  The file is created in the current directory,
+  * and is only used if the log is enabled.  All logs can be enabled at once with the ENABLE_ALL field.
+  * @version $Id$
+  */
 public class Log {
   public static final boolean ENABLE_ALL = false;
 
@@ -58,11 +54,11 @@ public class Log {
   /** PrintWriter to print messages to a file. */
   protected PrintWriter _writer;
 
-  /** Creates a new Log with the given name.  If enabled is true, a file is created in the current directory 
-   *  with the given name.
-   *  @param name File name for the log
-   *  @param enabled Whether to actively use this log
-   */
+  /** Creates a new Log with the given name.  If enabled is true, a file is created in the current directory with the
+    * given name.
+    * @param name File name for the log
+    * @param enabled Whether to actively use this log
+    */
   public Log(String name, boolean isEnabled) {
     _name = name;
     _isEnabled = isEnabled;
@@ -110,16 +106,19 @@ public class Log {
     }
   }
 
+  /** Converts a stack trace (StackTraceElement[]) to string form */
+  public static String traceToString(StackTraceElement[] trace) {
+    final StringBuilder traceImage = new StringBuilder();
+    for (StackTraceElement e: trace) traceImage.append("\n" + e.toString());
+    return traceImage.toString();
+  }
+    
   /** Prints a message and exception stack trace to the log, if enabled.
    *  @param s Message to print
    *  @param t Throwable to log
    */
   public synchronized void log(String s, StackTraceElement[] trace) {
-    if (isEnabled()) {
-      final StringBuilder traceImage = new StringBuilder();
-      for (StackTraceElement e: trace) traceImage.append("\n" + e.toString()); 
-      log(s + traceImage.toString());
-    }
+    if (isEnabled()) log(s + traceToString(trace));
   }
   
   /** Prints a message and exception stack trace to the log, if enabled.

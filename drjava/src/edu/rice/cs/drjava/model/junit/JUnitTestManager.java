@@ -76,10 +76,10 @@ public class JUnitTestManager {
   public JUnitTestRunner getTestRunner() { return _testRunner; }
   
   /** Find the test classes among the given classNames and accumulate them in
-   *  TestSuite for junit.  Returns null if a test suite is already pending.
-   * @param classNames the class names that are test class candidates
-   * @param files the files corresponding to classNames
-   */
+    * TestSuite for junit.  Returns null if a test suite is already pending.
+    * @param classNames the class names that are test class candidates
+    * @param files the files corresponding to classNames
+    */
   public List<String> findTestClasses(final List<String> classNames, final List<File> files) {
 
     //Utilities.showDebug("InterpreterJVM.findTestClasses(" + classNames + ", " + files + ") called");
@@ -219,8 +219,8 @@ public class JUnitTestManager {
     String stackTrace = StringOps.getStackTrace(failure.thrownException());
     
     /** If the classname is not in the stacktrace, then the test that failed was inherited from a superclass. let's look
-     *  for that classname
-     */
+      * for the classname.
+      */
     if (stackTrace.indexOf(className) == -1) {
       /* get the stack trace of the junit error */
       String trace = failure.trace();
@@ -283,6 +283,8 @@ public class JUnitTestManager {
     if (indexOfClass != -1) file = files.get(indexOfClass);
     else file = _jmc.getFileForClassName(className);
     
+    // if testClass contains no 
+    
     // a test didn't fail, we couldn't even open the test.
     if (file == null) {
       return new JUnitError(new File("nofile"), 0, 0, exception, !isFailure, testName, className, stackTrace);
@@ -298,9 +300,7 @@ public class JUnitTestManager {
     return new JUnitError(file, adjLineNum, 0, exception, !isFailure, testName, className, stackTrace);
   }
 
-  /**
-   * parses the line number out of the stack trace in the given class name.
-   */
+  /** Parses the line number out of the stack trace in the given class name. */
   private int _lineNumber(String sw, String classname) {
     int lineNum;
     int idxClassname = sw.indexOf(classname);

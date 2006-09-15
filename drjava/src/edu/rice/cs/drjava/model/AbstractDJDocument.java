@@ -253,15 +253,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return v;
   }
   
-  /** Separates out keywords from normal text for the given HighlightStatus element. What this does is it looks to see
-   *  if the given part of the text contains a keyword. If it does, it splits the HighlightStatus into separate blocks
-   *  so that each keyword is in its own block. This will find all keywords in a given block.
-   *  Note that the given block must have state NORMAL.
-   *
-   *  @param v Vector with highlight info
-   *  @param i Index of the single HighlightStatus to check for keywords in
-   *  @return the index into the vector of the last processed element
-   */
+  /** Distinguishes keywords from normal text in the given HighlightStatus element. Specifically, it looks to see
+    * if the given text contains a keyword. If it does, it splits the HighlightStatus into separate blocks
+    * so that each keyword has its own block. This process identifies all keywords in the given block.
+    * Note that the given block must have state NORMAL.
+    *
+    * @param v Vector with highlight info
+    * @param i Index of the single HighlightStatus to check for keywords in
+    * @return the index into the vector of the last processed element
+    */
   private int _highlightKeywords(Vector<HighlightStatus> v, int i) {
     // Basically all non-alphanumeric chars are delimiters
     final String delimiters = " \t\n\r{}()[].+-/*;:=!@#$%^&*~<>?,\"`'<>|";
@@ -383,9 +383,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   protected abstract void _styleChanged(); 
   
   /** Clears the memoizing cache for read operations on the document.  This 
-   * operation must be done before the document is modified since the contents 
-   * of this cache are invalidated by any modification to the document.
-   */
+    * operation must be done before the document is modified since the contents 
+    * of this cache are invalidated by any modification to the document.
+    */
   protected void clearCache() {
     synchronized(_helperCache) { if (_cacheInUse) _clearCache(); }
   }
@@ -396,8 +396,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _helperCacheHistory.clear();
     _cacheInUse = false;
   }
-    
-  
+      
   /** Add a character to the underlying reduced model. ONLY called from _reduced synchronized code!
    *  @param curChar the character to be added. */
   private void _addCharToReducedModel(char curChar) {

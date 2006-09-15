@@ -34,6 +34,8 @@
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.util.Log;
+
 import junit.framework.AssertionFailedError;
 
 /** TestCase which can fail if another thread causes an error or failure.
@@ -65,8 +67,10 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
    *  the test to fail, because the listener is often called from another thread.
    */
   protected static void listenerFail(String s) {
-    System.out.println("TEST FAILED: " + s);
-    new AssertionFailedError(s).printStackTrace(System.out);
+    StackTraceElement[] trace = Thread.getAllStackTraces().get(Thread.currentThread());
+    System.out.println("TEST FAILED in a listener thread");
+    System.out.println("Failing thread stack trace:\n " + Log.traceToString(trace));
+//    new AssertionFailedError(s).printStackTrace(System.out);
     _testFailed = true;
     fail(s);
   }
