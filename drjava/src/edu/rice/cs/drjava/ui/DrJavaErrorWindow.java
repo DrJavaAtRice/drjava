@@ -39,7 +39,9 @@ import javax.swing.text.*;
 import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
@@ -208,7 +210,7 @@ public class DrJavaErrorWindow extends JDialog {
       b.append("\n\nSystem Properties:\n");
       b.append("DrJava Version ");
       b.append(edu.rice.cs.drjava.Version.getBuildTimeString());
-      b.append("\n");
+      b.append('\n');
       java.util.Properties props = System.getProperties();
       int size = props.size();
       java.util.Iterator entries = props.entrySet().iterator();
@@ -230,8 +232,18 @@ public class DrJavaErrorWindow extends JDialog {
         else {
           b.append(entry.getValue());
         }
-        b.append("\n");
+        b.append('\n');
       }
+      b.append('\n');
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      try {
+        DrJava.getConfig().saveConfiguration(baos, "DrJava configuration file");
+        b.append(baos.toString());
+      }
+      catch(java.io.IOException ioe) {
+        b.append("IOException when trying to print DrJava configuration file");
+      }
+      b.append('\n');
 
       _stackTrace.setText(b.toString());
       _stackTrace.setCaretPosition(0);
