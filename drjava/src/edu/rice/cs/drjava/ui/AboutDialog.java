@@ -58,6 +58,8 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   private final JButton _okButton = new JButton("OK");
 
+  private final JTabbedPane _tabs = new JTabbedPane();
+  
   public AboutDialog(JFrame owner) {
     super(owner, "About DrJava", true); // (changed to non-modal for now)
 
@@ -71,6 +73,10 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
   
   public void setVisible(boolean vis) {
+    _tabs.remove(0);
+    addTab(_tabs,"About",createCopyrightTab(), 0);
+    _tabs.setSelectedIndex(0);
+    
     if (vis) {
       // suggested from zaq@nosi.com, to keep the frame on the screen!
       //Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -105,15 +111,14 @@ public class AboutDialog extends JDialog implements ActionListener {
       djPanel.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5), new EtchedBorder()));
       cp.add(djPanel,BorderLayout.NORTH);
     }
-    JTabbedPane tabs = new JTabbedPane();
-    addTab(tabs,"About",createCopyrightTab());
+    addTab(_tabs,"About",createCopyrightTab());
     LICENSE = getLicense();
-    if (LICENSE != null) addTab(tabs,"DrJava License",createTextScroller(LICENSE));
+    if (LICENSE != null) addTab(_tabs,"DrJava License",createTextScroller(LICENSE));
     
-    addTab(tabs,"DynamicJava License",createTextScroller(DYADE_LICENSE));
-    addTab(tabs,"System Properties",createSysPropTab());
+    addTab(_tabs,"DynamicJava License",createTextScroller(DYADE_LICENSE));
+    addTab(_tabs,"System Properties",createSysPropTab());
     cp.add(createBottomBar(),BorderLayout.SOUTH);
-    cp.add(tabs,BorderLayout.CENTER);
+    cp.add(_tabs,BorderLayout.CENTER);
   }
 
   private static JComponent createSysPropTab() {
@@ -147,6 +152,11 @@ public class AboutDialog extends JDialog implements ActionListener {
   private static void addTab(JTabbedPane tabs, String title, JComponent tab) {
     wrapBorder(tab,new EmptyBorder(5,6,6,5));
     tabs.addTab(title,tab);
+  }                        
+
+  private static void addTab(JTabbedPane tabs, String title, JComponent tab, int i) {
+    wrapBorder(tab,new EmptyBorder(5,6,6,5));
+    tabs.insertTab(title, null, tab, "", i);
   }                        
   
   public static JComponent createCopyrightTab() {
