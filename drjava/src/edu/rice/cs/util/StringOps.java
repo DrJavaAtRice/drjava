@@ -479,5 +479,34 @@ public abstract class StringOps {
     return s;
   }
 
-
+  /**
+   * Return a string representing the approximate amount of memory specified in bytes.
+   * @param l memory in bytes
+   * @return string approximating the amount of memory
+   */
+  public static String memSizeToString(long l) {
+    String[] sizes = new String[] { "byte", "kilobyte", "megabyte", "gigabyte" };
+    double d = l;
+    int i = 0;
+    while((d >= 1024) && (i<sizes.length)) {
+      ++i;
+      d /= 1024;
+    }
+    if (i>=sizes.length) { i = sizes.length-1; }
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    long whole = (long)d;
+    if (whole==d) {
+      if (whole==1) {
+        pw.format("%d %s", whole, sizes[i]);
+      }
+      else {
+        pw.format("%d %ss", whole, sizes[i]);
+      }
+    }
+    else {
+      pw.format("%.2f %ss", d, sizes[i]);
+    }
+    return sw.toString();
+  }
 }

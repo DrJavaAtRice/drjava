@@ -410,4 +410,16 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals("[123]", StringOps.toString(new Object[] {"123"}));
     assertEquals("[123, 123]", StringOps.toString(new Object[] {"123", new Integer(123)}));
   }
+  
+  public void testMemSizeToString() {
+    assertEquals("<1024", "500 bytes", StringOps.memSizeToString(500));
+    assertEquals("1KB", "1 kilobyte", StringOps.memSizeToString(1024));
+    assertEquals("2KB", "2 kilobytes", StringOps.memSizeToString(1024*2));
+    assertEquals("1.5KB", "1.50 kilobytes", StringOps.memSizeToString((long)(1024*1.5)));
+    assertEquals("1MB", "1 megabyte", StringOps.memSizeToString((1024*1024)));
+    assertEquals("2MB", "2 megabytes", StringOps.memSizeToString((1024*1024*2)));
+    assertEquals("1.1MB", "1.10 megabytes", StringOps.memSizeToString((long)(1024*1024*1.1)));
+    assertEquals("1GB", "1 gigabyte", StringOps.memSizeToString((1024*1024*1024)));
+    assertEquals("1.25GB", "1.25 gigabytes", StringOps.memSizeToString((long)(1024*1024*1024*1.25)));
+  }
 }

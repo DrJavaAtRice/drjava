@@ -243,7 +243,16 @@ public class DrJavaErrorWindow extends JDialog {
       catch(java.io.IOException ioe) {
         b.append("IOException when trying to print DrJava configuration file");
       }
-      b.append('\n');
+      
+      b.append("\n\nUsed memory: about ");
+      b.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));
+      b.append("\nFree memory: about ");
+      b.append(StringOps.memSizeToString(Runtime.getRuntime().freeMemory()));
+      b.append("\nTotal memory: about ");
+      b.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()));
+      b.append("\nTotal memory can expand to: about ");
+      b.append(StringOps.memSizeToString(Runtime.getRuntime().maxMemory()));
+      b.append("\n\n");
 
       _stackTrace.setText(b.toString());
       _stackTrace.setCaretPosition(0);

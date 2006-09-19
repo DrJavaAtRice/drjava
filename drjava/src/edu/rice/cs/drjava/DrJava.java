@@ -268,7 +268,7 @@ public class DrJava {
       _jvmArgs.add("-Xdock:icon=/Applications/DrJava.app/Contents/Resources/DrJava.icns");
     }
     
-    if (! heapSizeGiven && jvmArgString.indexOf("-Xmx")==0) _jvmArgs.add(DEFAULT_MAX_HEAP_SIZE_ARG);
+    if (! heapSizeGiven && jvmArgString.indexOf("-Xmx")<0) _jvmArgs.add(DEFAULT_MAX_HEAP_SIZE_ARG);
         
     _log.log("_jvmArgs = " + _jvmArgs);
 

@@ -147,8 +147,8 @@ public class AboutDialog extends JDialog implements ActionListener {
   private static void addTab(JTabbedPane tabs, String title, JComponent tab) {
     wrapBorder(tab,new EmptyBorder(5,6,6,5));
     tabs.addTab(title,tab);
-  }
-
+  }                        
+  
   public static JComponent createCopyrightTab() {
     final JPanel panel = new JPanel(new BorderLayout());
 
@@ -156,6 +156,14 @@ public class AboutDialog extends JDialog implements ActionListener {
     sb.append(Version.getBuildTimeString());
     sb.append("\n\nDrJava Configuration file: ");
     sb.append(DrJava.getPropertiesFile().getAbsolutePath());
+    sb.append("\n\nUsed memory: about ");
+    sb.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));
+    sb.append("\nFree memory: about ");
+    sb.append(StringOps.memSizeToString(Runtime.getRuntime().freeMemory()));
+    sb.append("\nTotal memory: about ");
+    sb.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()));
+    sb.append("\nTotal memory can expand to: about ");
+    sb.append(StringOps.memSizeToString(Runtime.getRuntime().maxMemory()));
     sb.append("\n\n");
     sb.append(COPYRIGHT);
     final JComponent copy = createTextScroller(sb.toString());
