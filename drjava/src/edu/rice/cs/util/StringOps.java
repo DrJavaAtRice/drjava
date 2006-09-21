@@ -35,6 +35,7 @@ package edu.rice.cs.util;
 
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 
 /**
  * A class to provide some convenient String operations as static methods.
@@ -493,20 +494,29 @@ public abstract class StringOps {
       d /= 1024;
     }
     if (i>=sizes.length) { i = sizes.length-1; }
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
+    StringBuilder sb = new StringBuilder();
     long whole = (long)d;
     if (whole==d) {
       if (whole==1) {
-        pw.format("%d %s", whole, sizes[i]);
+        sb.append(whole);
+        sb.append(' ');
+        sb.append(sizes[i]);
       }
       else {
-        pw.format("%d %ss", whole, sizes[i]);
+        sb.append(whole);
+        sb.append(' ');
+        sb.append(sizes[i]);
+        sb.append('s');
       }
     }
     else {
-      pw.format("%.2f %ss", d, sizes[i]);
+      // two decimal digits
+      DecimalFormat df = new DecimalFormat("#.00");
+      sb.append(df.format(d));
+      sb.append(' ');
+      sb.append(sizes[i]);
+      sb.append('s');
     }
-    return sw.toString();
+    return sb.toString();
   }
 }

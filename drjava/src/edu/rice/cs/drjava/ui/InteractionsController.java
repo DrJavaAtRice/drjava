@@ -75,8 +75,6 @@ import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
 
-import edu.rice.cs.util.swing.InputBox;
-import edu.rice.cs.util.swing.PopupConsole;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.CompletionMonitor;
@@ -93,6 +91,12 @@ public class InteractionsController extends AbstractConsoleController {
   
   private static final String INPUT_ENTERED_NAME = "Input Entered";
   private static final String INSERT_NEWLINE_NAME = "Insert Newline";
+
+  /** Style for System.in box */
+  public static final String INPUT_BOX_STYLE = "input.box.style";
+  
+  /** The symbol used in the document for the input box. */
+  public static final String INPUT_BOX_SYMBOL = "[component]";
   
   /** InteractionsModel to handle interpretation. */
   private InteractionsModel _model;
@@ -182,14 +186,14 @@ public class InteractionsController extends AbstractConsoleController {
           StyleConstants.setComponent(inputAttributes, box);
           try {
             DefaultStyledDocument.ElementSpec[] specs = new DefaultStyledDocument.ElementSpec[]{ 
-              new DefaultStyledDocument.ElementSpec(inputAttributes, DefaultStyledDocument.ElementSpec.ContentType, "[component]".toCharArray(), 0, 11)
+              new DefaultStyledDocument.ElementSpec(inputAttributes, DefaultStyledDocument.ElementSpec.ContentType, INPUT_BOX_SYMBOL.toCharArray(), 0, 11)
             };
             
-            _pane.getStyledDocument().insertString(pos, "[component]", inputAttributes);
-          }
-          catch(BadLocationException e) {
-            completionMonitor.set();
-            return;
+            // update input box style
+            _adapter.setDocStyle(INPUT_BOX_STYLE, inputAttributes);
+            
+            // and insert the symbol for the input box with the correct style
+            _doc.insertBeforeLastPrompt(INPUT_BOX_SYMBOL, INPUT_BOX_STYLE);
           }
           finally {
             inputAttributes.removeAttributes(inputAttributes);
