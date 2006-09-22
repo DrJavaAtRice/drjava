@@ -509,17 +509,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
   }
   
-  /**
-   * Called when the JUnitTestManager wants to open a file that is not
-   * currently open.
-   * TODO: this is the only call to _model
-   *       - remove it to remove GlobalModel dependence
+  /** Called when the JUnitTestManager wants to open a file that is not currently open.
    * @param className the name of the class for which we want to find the file
    * @return the file associated with the given class
    */
-  public File getFileForClassName(String className) {
-    return _model.getSourceFile(className + ".java");
-  }
+  public File getFileForClassName(String className) { return _model.getSourceFile(className + ".java"); }
   
   /** Returns the current classpath in use by the JUnit JVM, in the form of a path-separator delimited string. */
   public ClassPathVector getClassPath() {  return _jvm.getClassPath(); }

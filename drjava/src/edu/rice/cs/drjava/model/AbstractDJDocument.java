@@ -143,13 +143,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   protected abstract Indenter makeNewIndenter(int indentLevel);
   
   /** Get the indent level.
-   *  @return the indent level
-   */
+    * @return the indent level
+    */
   public int getIndent() { return _indent; }
   
   /** Set the indent to a particular number of spaces.
-   *  @param indent the size of indent that you want for the document
-   */
+    * @param indent the size of indent that you want for the document
+    */
   public void setIndent(final int indent) {
     DrJava.getConfig().setSetting(INDENT_LEVEL,new Integer(indent));
     this._indent = indent;
@@ -193,8 +193,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Create a set of Java/GJ keywords for special coloring.
-   *  @return the set of keywords
-   */
+    * @return the set of keywords
+    */
   protected static HashSet<String> _makeKeywords() {
     final String[] words =  {
       "import", "native", "package", "goto", "const", "if", "else", "switch", "while", "for", "do", "true", "false",
@@ -208,8 +208,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Create a set of Java/GJ primitive types for special coloring.
-   *  @return the set of primitive types
-   */
+    * @return the set of primitive types
+    */
   protected static HashSet<String> _makePrimTypes() {
     final String[] words =  {
       "boolean", "char", "byte", "short", "int", "long", "float", "double", "void",
@@ -220,11 +220,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
     
   /** Return all highlight status info for text between start and end. This should collapse adjoining blocks 
-   *  with the same status into one.
+    * with the same status into one.
    */
   public Vector<HighlightStatus> getHighlightStatus(int start, int end) {
-    // First move the reduced model to the start
-    //    int oldLocation = _currentLocation;
+    
+    if (start == end) return new Vector<HighlightStatus>(0);
     Vector<HighlightStatus> v;
 
     acquireReadLock();
@@ -1236,7 +1236,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Finds the position of the first non-whitespace character after pos. NB: Skips comments and all whitespace, 
-   *  including newlines
+   *  including newlines.
    *  @param pos Position to start from
    *  @param whitespace array of whitespace chars to ignore
    *  @param acceptComments if true, find non-whitespace chars in comments

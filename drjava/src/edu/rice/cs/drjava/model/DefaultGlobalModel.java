@@ -192,11 +192,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
     super();
-    AbstractMasterJVM._log.log(this + " has called contstructor for DefaultGlobal Model");
-//    Utilities.show("DefaultGlobalModel super call performed");
+//    AbstractMasterJVM._log.log(this + " has called contstructor for DefaultGlobal Model");
     File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
     _jvm = new MainJVM(workDir);
-    AbstractMasterJVM._log.log(this + " has created a new MainJVM");
+//    AbstractMasterJVM._log.log(this + " has created a new MainJVM");
     _compilerModel = new DefaultCompilerModel(this);
     _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
     _javadocModel = new DefaultJavadocModel(this);
@@ -396,13 +395,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   // ---------- ConcreteOpenDefDoc inner class ----------
 
   /** Inner class to handle operations on each of the open DefinitionsDocuments by the GlobalModel. <br><br>
-   *  This was at one time called the <code>DefinitionsDocumentHandler</code>
-   *  but was renamed (2004-Jun-8) to be more descriptive/intuitive.
-   */
+    * This was at one time called the <code>DefinitionsDocumentHandler</code>
+    * but was renamed (2004-Jun-8) to be more descriptive/intuitive.
+    */
   class ConcreteOpenDefDoc extends AbstractGlobalModel.ConcreteOpenDefDoc {
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.
-     *  @param f file describing DefinitionsDocument to manage
-     */
+      * @param f file describing DefinitionsDocument to manage
+      */
     ConcreteOpenDefDoc(File f) throws IOException { super(f); }
     
     /* Standard constructor for a new document (no associated file) */
@@ -414,13 +413,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     private volatile InteractionsListener _runMain;
 
     /** Runs the main method in this document in the interactions pane after resetting interactions with the source
-     *  root for this document as the working directory.  Warns the use if the class files for the doucment are not 
-     *  up to date.  Fires an event to signal when execution is about to begin.
-     *  NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
-     *  event thread execution!
-     *  @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
-     *  @exception IOException propagated from GlobalModel.compileAll()
-     */
+      * root for this document as the working directory.  Warns the use if the class files for the doucment are not 
+      * up to date.  Fires an event to signal when execution is about to begin.
+      * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
+      * event thread execution!
+      * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
+      * @exception IOException propagated from GlobalModel.compileAll()
+      */
     public void runMain() throws ClassNameNotFoundException, IOException {
       
       // Get the class name for this document, the first top level class in the document.

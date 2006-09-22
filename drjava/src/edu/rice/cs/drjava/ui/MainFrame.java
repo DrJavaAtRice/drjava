@@ -2146,9 +2146,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
 
   /** Create a new find results tab.
-   *  @param rm the region manager that will contain the regions
-   *  @param title the title for the panel
-   *  @return new find results tab. */
+    * @param rm the region manager that will contain the regions
+    * @param title the title for the panel
+    * @return new find results tab. */
   public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm, String title) {
     final FindResultsPanel panel = new FindResultsPanel(this, rm, title);
     final Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
@@ -3272,7 +3272,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     //  Two files in different directories can have the same _fileTitle
     _fileNameField.setToolTipText("Full path for file: " + doc.getCompletePath());
-//    System.out.println("setting " + doc + " to display name: " + getCompletePath(doc));
   }
   
   /** Prompt the user to select a place to open files from, then load them. Ask the user if they'd like to save 
@@ -3281,13 +3280,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @return an array of the files that were chosen
    */
   public File[] getOpenFiles(JFileChooser jfc) throws OperationCanceledException {
-    // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
-//    File selection = jfc.getSelectedFile();
-//    if (selection != null) { // necessary for OS X?
-//      jfc.setSelectedFile(selection.getParentFile());
-//      jfc.setSelectedFile(selection);
-//      jfc.setSelectedFile(null);
-//    }
     int rc = jfc.showOpenDialog(this);
     return getChosenFiles(jfc, rc);
   }
@@ -4040,7 +4032,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    */
   
   private void _quit() {
-    AbstractGlobalModel._log.log("MainFrame.quit() called");
+//    AbstractGlobalModel._log.log("MainFrame.quit() called");
     if (_promptBeforeQuit) {
       String title = "Quit DrJava?";
       String message = "Are you sure you want to quit DrJava?";

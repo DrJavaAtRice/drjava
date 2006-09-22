@@ -56,21 +56,19 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   protected int _offset;
   
   
-  /**
-   * Creates a new DocumentDebugAction.  Automatically tries to create the
-   * EventRequest if a ReferenceType can be found, or else adds this object to the
-   * PendingRequestManager. Any subclass should automatically call
-   * _initializeRequest in its constructor.
-   * @param manager JPDADebugger in charge
-   * @param doc Document this action corresponds to
-   * @param offset Offset into the document that the action affects
-   */
+  /** Creates a new DocumentDebugAction.  Automatically tries to create the EventRequest if a ReferenceType can be 
+    * found, or else adds this object to the PendingRequestManager. Any subclass should automatically call
+    * _initializeRequest in its constructor.
+    * @param manager JPDADebugger in charge
+    * @param doc Document this action corresponds to
+    * @param offset Offset into the document that the action affects
+    */
   public DocumentDebugAction (JPDADebugger manager, OpenDefinitionsDocument doc, int offset) throws DebugException {
     super(manager);
     _exactClassName = null;
     try {
       if (offset >= 0) {
-        if (doc.getNumberOfLines()<500) {
+        if (doc.getNumberOfLines() < 500) {
           // only do this on short files
           // in long files, getEnclosingClassName might take too long
           _exactClassName = doc.getEnclosingClassName(offset, true);

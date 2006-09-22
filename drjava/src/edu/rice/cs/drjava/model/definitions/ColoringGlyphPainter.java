@@ -77,10 +77,13 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     // _metrics is initialized by sync(), which thus must be called before any use of _metrics
   }
   
-  /**
-   * Paints the glyphs representing the given range.
-   */
+  /** Paints the glyphs representing the given range. */
   public void paint(GlyphView v, Graphics g, Shape a, int p0, int p1) {
+    
+    // If there's nothing to show, don't do anything!
+    // For some reason I don't understand we tend to get called sometimes to render a zero-length area.
+    if (p0 == p1) return;
+    
     sync(v);
     
     // Might be a PlainDocument (when AbstractDJPane is first constructed).
@@ -91,8 +94,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
       djdoc = (AbstractDJDocument) doc;
     else
       return; // return if there is no AbstracDJDocument
-    
-    
+
     Segment text;
     TabExpander expander = v.getTabExpander();
     Rectangle alloc = (a instanceof Rectangle) ? (Rectangle)a : a.getBounds();
@@ -110,11 +112,6 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     int y = alloc.y + _metrics.getHeight() - _metrics.getDescent();
     
     text = v.getText(p0, p1);
-    
-    
-    // If there's nothing to show, don't do anything!
-    // For some reason I don't understand we tend to get called sometimes to render a zero-length area.
-    if (p0 == p1) return;
     
     Vector<HighlightStatus> stats = djdoc.getHighlightStatus(p0, p1);
     if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");

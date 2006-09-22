@@ -45,6 +45,7 @@ import java.lang.ref.WeakReference;
 import java.io.File;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
@@ -69,6 +70,8 @@ import edu.rice.cs.drjava.model.*;
  *  @see ReducedModelBrace
  */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
+  
+  public static Log _log = new Log("Definitions.txt", false);
   
   private final static int NO_COMMENT_OFFSET = 0;
   private final static int WING_COMMENT_OFFSET = 2;
@@ -286,11 +289,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //  }
 
 
-  /** Gets the package and class name of this OpenDefinitionsDocument
-   *  @return the qualified class name
+  /** Gets the package and main class name of this OpenDefinitionsDocument
+   *  @return the qualified main class name
    */
   public String getQualifiedClassName() throws ClassNameNotFoundException {
-    return _getPackageQualifier() + getFirstTopLevelClassName();
+    return _getPackageQualifier() + getMainClassName();
   }
 
   /** Gets fully qualified class name of the top level class enclosing the given position. */
@@ -1272,6 +1275,49 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
     }
   }
+  
+  /** Gets the name of the document's main class: the document's only public class (not interface) or 
+    * first top level class if document contains no public classes. */
+  public String getMainClassName() throws ClassNameNotFoundException {
+    
+    acquireReadLock();
+    synchronized(_reduced) {
+      final int oldLocation = _currentLocation;
+      
+      try {
+        setCurrentLocation(0);
+        final String text = getText();
+        final int length = text.length();
+        
+        int index;
+        
+        int indexOfClass = _findKeywordAtToplevel("class", text, 0);
+        int indexOfPublic = _findKeywordAtToplevel("public", text, 0);
+        
+        if (indexOfClass == -1) throw ClassNameNotFoundException.DEFAULT;
+        
+//        _log.log("text =\n" + text);
+//        _log.log("indexOfClass = " + indexOfClass + "; indexOfPublic = " + indexOfPublic);
+        
+        if (indexOfPublic == -1 || indexOfPublic < indexOfClass) 
+          return getNextIdentifier(indexOfClass + "class".length());
+        
+        int afterPublic = indexOfPublic + "public".length();
+        
+        int indexOfPublicClass = afterPublic + _findKeywordAtToplevel("class", text.substring(afterPublic), afterPublic);
+        
+//        _log.log("indexOfPublicClass = " + indexOfPublicClass);
+        
+        if (indexOfPublicClass == -1) throw ClassNameNotFoundException.DEFAULT;
+        
+        return getNextIdentifier(indexOfPublicClass + "class".length());
+      }
+      finally { 
+        setCurrentLocation(oldLocation);
+        releaseReadLock();
+      }
+    }
+  }
 
   /** Gets the name of the top level class in this source file. This attempts to find the first declaration
    *  of a class or interface.
@@ -1316,32 +1362,59 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
         else {
           // no index was valid
-          throw new ClassNameNotFoundException("No top level class name found");
+          throw ClassNameNotFoundException.DEFAULT;
         }
-        //if we make it here we have a valid index
         
-        //first find index of first non whitespace (from the index in document)
-        index = getFirstNonWSCharPos(startPos + index) - startPos;
-        if (index == -1) throw new ClassNameNotFoundException("No top level class name found");
-        
-        int endIndex = textLength; //just in case no whitespace at end of file
-        
-        //find index of next delimiter or whitespace
-        char c;
-        for (int i = index; i < textLength; i++) {
-          c = text.charAt(i);
-          if (!Character.isJavaIdentifierPart(c)) {
-            endIndex = i;
-            break;
-          }
-        }
-        return text.substring(index,endIndex);
+        // we have a valid index
+        return getNextIdentifier(startPos + index);
       }
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+      catch (IllegalStateException e) { throw new ClassNameNotFoundException("No top level class name found"); }
       finally { 
         setCurrentLocation(oldLocation);
         releaseReadLock();
       }
+    }
+  }
+  
+  /** Finds the next identifier (following a non-whitespace character) in the document starting at start. Assumes that
+    * read lock and _reduced lock are already held. */
+  private String getNextIdentifier(final int startPos) throws ClassNameNotFoundException {
+    
+//    int index = 0;
+//    int length = 0;
+//    int endIndex = 0;
+//    String text = "";
+//    int i;
+    try {
+      // first find index of first non whitespace (from the index in document)
+      int index = getFirstNonWSCharPos(startPos);
+      if (index == -1) throw new IllegalStateException("No identifier found");
+      
+      String text = getText();
+      int length = text.length(); 
+      int endIndex = length; //just in case no whitespace at end of file
+      
+      _log.log("In getNextIdentifer text = \n" + text);
+      _log.log("index = " + index + "; length = " + length);
+      
+      //find index of next delimiter or whitespace
+      char c;
+      for (int i = index; i < length; i++) {
+        c = text.charAt(i);
+        if (! Character.isJavaIdentifierPart(c)) {
+          endIndex = i;
+          break;
+        }
+      }
+      _log.log("endIndex = " + endIndex);
+      return text.substring(index, endIndex);
+    }
+    catch(BadLocationException e) { 
+//      System.err.println("text =\n" + text);
+//      System.err.println("The document =\n" + getText());
+//      System.err.println("startPos = " + startPos + "; length = " + length + "; index = " + index + "; endIndex = " + endIndex);
+      throw new UnexpectedException(e); 
     }
   }
 
@@ -1373,7 +1446,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
               if (rt.getState() == ReducedModelStates.FREE &&
                   Character.isWhitespace(text.charAt(indexPastKeyword))) {
                 // found a match but may not be at top level
-                if (!posNotInBlock(index)) index = -1; //in a paren phrase, gone too far
+                if (! posNotInBlock(index)) index = -1; //in a paren phrase, gone too far
                 break;
               }
               else index++;  //move past so we can search again

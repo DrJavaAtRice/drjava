@@ -123,10 +123,8 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     return false;
   }
 
-  /**
-   * Returns the fully qualified class name for "this".
-   * It will append the package name onto the class name
-   * if there is a package name.
+  /** Returns the fully qualified class name for "this". It will append the package name onto the class name
+   *  if there is a package name.
    */
   private String _getFullyQualifiedClassNameForThis() {
     String cName = _thisClassName;

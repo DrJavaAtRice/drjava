@@ -48,6 +48,8 @@ import edu.rice.cs.util.swing.ScrollableDialog;
 import edu.rice.cs.util.swing.Utilities;
 //import edu.rice.cs.util.PreventExitSecurityManager;
 
+import static edu.rice.cs.drjava.config.OptionConstants.*;
+
 /** This class is the root class for the Slave JVM.  The Master JVM invokes the {@link #main} method of this class, 
  *  which is never instantiated. See the {@link #main} method documentation for information on the command line 
  *  parameters this class requires.  If there is an error setting up the slave JVM before the RMI links can be 

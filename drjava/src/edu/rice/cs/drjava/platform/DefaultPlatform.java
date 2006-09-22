@@ -46,12 +46,10 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.List;
 
-/**
- * Default platform-neutral implementation of PlatformSupport.  Most implementations
- * will extend this class to inherit default behaviors.
- *
- * @version $Id$
- */
+/** Default platform-neutral implementation of PlatformSupport.  Most implementations
+  * will extend this class to inherit default behaviors.
+  * @version $Id$
+  */
 class DefaultPlatform implements PlatformSupport {
   /** Singleton instance. */
   public static DefaultPlatform ONLY = new DefaultPlatform();
@@ -59,31 +57,28 @@ class DefaultPlatform implements PlatformSupport {
   /** Private constructor for singleton pattern. */
   protected DefaultPlatform() { }
 
-  /** Utility method to determine if the current Swing look and feel is the
-   *  platform-specific look and feel for the client platform.
-   *
-   *  @return true if current Swing look and feel is the system look and feel
-   */
+  /** Utility method to determine if the current Swing look and feel is the platform-specific look and feel for the
+    * client platform.
+    * @return true if current Swing look and feel is the system look and feel
+    */
   public boolean isUsingSystemLAF() {
     String sysLAF = UIManager.getSystemLookAndFeelClassName();
     String curLAF = UIManager.getLookAndFeel().getClass().getName();
     return (sysLAF.equals(curLAF));
   }
-
-  /**
-   * Hook for performing general UI setup.  Called before all other UI setup is done.
-   * The default implementation does nothing.
-   */
+  
+  /** Hook for performing general UI setup.  Called before all other UI setup is done. The default implementation 
+    * does nothing.
+    */
   public void beforeUISetup() { }
 
-  /**
-   * Hook for performing general UI setup.  Called after all other UI setup is done.
-   * The default implementation does nothing.
-   *
-   * @param about the Action associated with openning the About dialog
-   * @param prefs the Action associated with openning the Preferences dialog
-   * @param quit  the Action associated with quitting the DrJava application
-   */
+  /** Hook for performing general UI setup.  Called after all other UI setup is done. The default implementation 
+    * does nothing.
+    *
+    * @param about the Action associated with openning the About dialog
+    * @param prefs the Action associated with openning the Preferences dialog
+    * @param quit  the Action associated with quitting the DrJava application
+    */
   public void afterUISetup(Action about, Action prefs, Action quit) { }
 
   /** Returns whether this is a Mac OS X platform. */
@@ -133,14 +128,14 @@ class DefaultPlatform implements PlatformSupport {
   }
 
   /** Utility method for opening a URL in a browser in a platform-specific way.
-   *  The default implementation uses Runtime.exec to execute a command specified
-   *  in Preferences.  Platform implementations should attempt the default method
-   *  first, then try to use a "default browser", if such a thing exists on the
-   *  specific platform.
-   *
-   *  @param address the URL to open
-   *  @return true if the URL was successfully handled, false otherwise
-   */
+    * The default implementation uses Runtime.exec to execute a command specified
+    * in Preferences.  Platform implementations should attempt the default method
+    * first, then try to use a "default browser", if such a thing exists on the
+    * specific platform.
+    *
+    * @param address the URL to open
+    * @return true if the URL was successfully handled, false otherwise
+    */
   public boolean openURL(URL address) {
     // Get the two config options.
     Configuration config = DrJava.getConfig();

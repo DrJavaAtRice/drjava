@@ -39,8 +39,8 @@ import edu.rice.cs.util.Log;
 import junit.framework.AssertionFailedError;
 
 /** TestCase which can fail if another thread causes an error or failure.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   public MultiThreadedTestCase() { super(); }
   public MultiThreadedTestCase(String name) { super(name); }  
@@ -64,8 +64,8 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   }
 
   /** This method prints the failure message to System.out and kills the JVM.  Just calling fail() doesn't always cause
-   *  the test to fail, because the listener is often called from another thread.
-   */
+    * the test to fail, because the listener is often called from another thread.
+    */
   protected static void listenerFail(String s) {
     StackTraceElement[] trace = Thread.getAllStackTraces().get(Thread.currentThread());
     System.out.println("TEST FAILED in a listener thread");
@@ -76,9 +76,9 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   }
   
   /** Join with a thread, i.e. continue only after that thread has terminated.  If the join is interrupted, an 
-   *  UnexpectedException is thrown.
-   *  @param t thread to join with
-   */
+    * UnexpectedException is thrown.
+    * @param t thread to join with
+    */
   public static void join(Thread t) {
     try { t.join(); }
     catch(InterruptedException e) {
@@ -98,9 +98,9 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   }
   
   /** Class that stores exceptions thrown in other threads so they can be rethrown in the main thread.
-   *  AssertionFailedErrors thrown in other threads do not count as AssertionFailedErrors in the
-   *  main class, i.e. if an assertion fails in a thread that is not the main thread, the unit test will not fail!
-   */
+    * AssertionFailedErrors thrown in other threads do not count as AssertionFailedErrors in the
+    * main class, i.e. if an assertion fails in a thread that is not the main thread, the unit test will not fail!
+    */
   private static class ExceptionHandler implements java.lang.Thread.UncaughtExceptionHandler {
     
     /** Stored throwable, or null if nothing stored. */
@@ -113,9 +113,9 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     private volatile java.lang.Thread _mainThread = java.lang.Thread.currentThread();
     
     /** Gets called if an uncaught exception occurs in a thread.
-     *  @param t the thread
-     *  @param e the uncaught exception
-     */
+      * @param t the thread
+      * @param e the uncaught exception
+      */
     public void uncaughtException(java.lang.Thread t, Throwable e) {
       _t = t;
       _e = e;
@@ -145,8 +145,8 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
     }
     
     /** Returns true if an exception has occurred.
-     *  @return true if exception has occurred
-     */
+      * @return true if exception has occurred
+      */
     public boolean exceptionOccurred() { return (_e != null); }
     
     public Throwable getException() { return _e; }

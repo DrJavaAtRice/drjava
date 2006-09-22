@@ -894,19 +894,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getBuildDirectory() { return null; }
     public File getProjectRoot() { return getWorkingDirectory(); }
     public File getWorkingDirectory() {
-      _log.log("AbstractGlobalModel.getWorkingDirectory() called");
+//      _log.log("AbstractGlobalModel.getWorkingDirectory() called");
       try {
         File[] roots = getSourceRootSet();
         if (roots.length == 0) {
           // return getMasterWorkingDirectory();
           // use the last directory saved to the configuration
           File file = null;
-          _log.log("STICKY_INTERACTIONS_DIRECTORY flag is " + DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY));
+//          _log.log("STICKY_INTERACTIONS_DIRECTORY flag is " + DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY));
           if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
             try {
               // restore the path from the configuration
               file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
-              _log.log("Last interactionsDirectory is " + file);
+//              _log.log("Last interactionsDirectory is " + file);
             }
             catch (RuntimeException e) { file = null; }
           }
@@ -917,14 +917,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           }
           // update the setting and return it
           DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, file);
-          _log.log("Returning " + file + " as working directory");
+//          _log.log("Returning " + file + " as working directory");
           return file;
         }
-         _log.log("Returning " + roots[0].getCanonicalFile() + " as working directory");
+//         _log.log("Returning " + roots[0].getCanonicalFile() + " as working directory");
         return roots[0].getCanonicalFile();
       }
       catch(IOException e) { /* fall through */ }
-       _log.log("Returning " + System.getProperty("user.dir") + " as working directory");
+//       _log.log("Returning " + System.getProperty("user.dir") + " as working directory");
       return new File(System.getProperty("user.dir"));  // a flat file configuration should have exactly one source root
     }
     public boolean isProjectActive() { return false; }
@@ -1694,7 +1694,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      List<OpenDefinitionsDocument> docs = getOpenDefinitionsDocuments();
      boolean res = closeFiles(docs);
      if (res) {
-       _log.log("Resetting interactions pane to use " + getWorkingDirectory() + " as working directory");
+//       _log.log("Resetting interactions pane to use " + getWorkingDirectory() + " as working directory");
        resetInteractions(getWorkingDirectory());
      }
      return res;
@@ -1786,7 +1786,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     if  (retainedDoc != null) { // the user did want to cancel
-      _log.log("closeAllFilesOnQuit failed. Retained doc = " + retainedDoc);
+//      _log.log("closeAllFilesOnQuit failed. Retained doc = " + retainedDoc);
       return false; 
     } 
     
@@ -1811,7 +1811,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Exits the program.  If force is true, quits regardless of whether all documents are successfully closed. 
    *  This functionality is not available via the user interface, but it should be. */
   public void quit(boolean force) {
-    _log.log("quit(" + force + ") called");
+//    _log.log("quit(" + force + ") called");
     try {
       if (! force && ! closeAllFilesOnQuit()) return;
       
@@ -2884,6 +2884,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().getFirstTopLevelClassName();
     }
     
+    /** Returns the name of the main (public) class, if any.
+     *  @throws ClassNameNotFoundException if no top level class name found.
+     */
+    public String getMainClassName() throws ClassNameNotFoundException {
+      return getDocument().getMainClassName();
+    }
+    
     /** Returns the name of this file, or "(untitled)" if no file. */
     public String getFileName() {
       if (_file == null) return "(Untitled)";
@@ -3284,6 +3291,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       DefinitionsDocument dd = getDocument();
       if (isModifiedSinceSave()) {
         dd.setClassFileInSync(false);
+//        _log.log("checkIfClassFileInSync = false because isModifiedSinceSave()");
         return false;
       }
       
@@ -3291,12 +3299,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
       // Look for cached class file
       File classFile = dd.getCachedClassFile();
+//      _log.log("In checkIfClassFileInSync cacched value of classFile = " + classFile);
       if (classFile == null) {
         // Not cached, so locate the file
         classFile = _locateClassFile();
-        dd.setCachedClassFile (classFile);
-        if ((classFile == null) || (!classFile.exists())) {
+//        _log.log(this + ": in checkIfClassFileInSync _locateClassFile() = " + classFile);
+        dd.setCachedClassFile(classFile);
+        if ((classFile == null) || (! classFile.exists())) {
           // couldn't find the class file
+//          _log.log(this + ": Could not find class file");
           dd.setClassFileInSync(false);
           return false;
         }
@@ -3308,10 +3319,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try { sourceFile = getFile(); }
       catch (FileMovedException fme) {
         dd.setClassFileInSync(false);
+//        _log.log(this + ": File moved");
         return false;
       }
       if ((sourceFile == null) || (sourceFile.lastModified() > classFile.lastModified())) {
         dd.setClassFileInSync(false);
+//        _log.log(this + ": date stamps indicate modification");
         return false;
       }
       else {
@@ -3328,12 +3341,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       String className;
       try { className = getDocument().getQualifiedClassName(); }
-      catch (ClassNameNotFoundException cnnfe) { return null;  /* No source class name */ }
-      
+      catch (ClassNameNotFoundException cnnfe) {
+//        _log.log("_locateClassFile() failed because getQualifedClassName returned ClassNotFound");
+        return null;  /* No source class name */ 
+      }
+//      _log.log("In _locateClassFile, className = " + className);
       String ps = System.getProperty("file.separator");
       // replace periods with the System's file separator
       className = StringOps.replace(className, ".", ps);
       String fileName = className + ".class";
+      
+//      _log.log("In _locateClassFile, fileName = " + fileName);
       
       // Check source root set (open files)
       ArrayList<File> roots = new ArrayList<File>();
