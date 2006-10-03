@@ -55,7 +55,7 @@ import java.util.Date;
   * @version $Id$
   */
 public final class DefinitionsPaneTest extends MultiThreadedTestCase {
-  
+
   private volatile MainFrame _frame;
   
   private static Log _log = new Log("DefinitionsPaneTest.txt", false);
@@ -63,12 +63,12 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
-//    Utilities.invokeAndWait(new Runnable() { 
-//      public void run() { 
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
         DrJava.getConfig().resetToDefaults();
         _frame = new MainFrame(); 
-//      } 
-//    });
+      } 
+    });
   }
   
   public void tearDown() throws Exception {
@@ -131,7 +131,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     final DefinitionsPane defPane = _frame.getCurrentDefPane();
     final OpenDefinitionsDocument doc = defPane.getOpenDefDocument();
     _assertDocumentEmpty(doc, "before testing");
-    
+    _log.log("calling invokeAndWait in testTypeBraceNotInCode");
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         doc.append("  \"", null);
@@ -541,7 +541,6 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   public void testDocumentPaneMemoryLeak()  throws InterruptedException, java.io.IOException{
     _finalCount = 0;
     _finalDocCount = 0;
-    Utilities.clearEventQueue();  // Why are we clearing the event queue here?
     
     FinalizationListener<DefinitionsPane> fl = new FinalizationListener<DefinitionsPane>() {
       public void finalized(FinalizationEvent<DefinitionsPane> e) {
@@ -586,6 +585,9 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     
     System.gc();
     System.runFinalization();
+    
+    Utilities.clearEventQueue();   
+    
     System.gc();
     System.runFinalization();
 //    System.out.println("Current: " + _frame.getCurrentDefPane().hashCode());

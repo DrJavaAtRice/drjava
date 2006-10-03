@@ -136,8 +136,8 @@ import edu.rice.cs.util.text.AbstractDocumentInterface ;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.ReaderWriterLock;
 
-/** In simple terms, a DefaultGlobalModel without an interpreter,compiler, junit testing, debugger or javadoc.
-  * Basically, has only document handling functionality
+/** In simple terms, a DefaultGlobalModel without an interpreter, compiler, junit testing, debugger or javadoc.
+  * Hence, it only has only document handling functionality
   * @version $Id$
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {

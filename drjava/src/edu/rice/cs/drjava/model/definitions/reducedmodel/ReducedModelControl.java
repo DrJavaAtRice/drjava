@@ -296,49 +296,31 @@ public class ReducedModelControl implements BraceReduction {
   }
 
   /** Determines if the cursor is at the end of the reduced model. */
-  boolean atEnd() {
-    return (rmb._cursor.atEnd() || rmc._cursor.atEnd());
-  }
+  boolean atEnd() { return (rmb._cursor.atEnd() || rmc._cursor.atEnd()); }
 
-  /**
-   * Determines if the cursor is at the start of the reduced model.
-   */
-  boolean atStart() {
-    return (rmb._cursor.atStart() || rmc._cursor.atStart());
-  }
+  /** Determines if the cursor is at the start of the reduced model. */
+  boolean atStart() { return (rmb._cursor.atStart() || rmc._cursor.atStart()); }
 
-  /**
-   * Gets the offset within the current token.
-   */
+  /** Gets the offset within the current token. */
   int getBlockOffset() {
-    if (rmb.getBlockOffset() < rmc.getBlockOffset())
-      return rmb.getBlockOffset();
+    if (rmb.getBlockOffset() < rmc.getBlockOffset()) return rmb.getBlockOffset();
     return rmc.getBlockOffset();
   }
 
-  /**
-   * Gets the absolute character offset into the document
-   * represented by the reduced model.
-   */
-  public int absOffset() {
-    return rmc.absOffset();
-  }
+  /** Gets the absolute character offset into the document represented by the reduced model. */
+  public int absOffset() { return rmc.absOffset(); }
 
 
-  /**
-   * A toString() substitute.
-   */
+  /** A toString() substitute. */
   public String simpleString() {
-    return "\n********\n" + rmb.simpleString() + "\n________\n" +
-      rmc.simpleString();
+    return "\n********\n" + rmb.simpleString() + "\n________\n" + rmc.simpleString();
   }
 
-  /**
-   * Returns an IndentInfo containing the following information:
-   * - distance to the previous newline ( start of this line)
-   * - distance to the brace enclosing the beginning of the current line
-   * - distance to the beginning of the line containing that brace
-   */
+  /** Returns an IndentInfo containing the following information:
+    * - distance to the previous newline ( start of this line)
+    * - distance to the brace enclosing the beginning of the current line
+    * - distance to the beginning of the line containing that brace
+    */
   public IndentInfo getIndentInformation() {
     IndentInfo braceInfo = new IndentInfo();
     //get distance to the previous newline (in braceInfo.distToNewline)
@@ -354,9 +336,7 @@ public class ReducedModelControl implements BraceReduction {
     return braceInfo;
   }
 
-  /**
-   * Gets distance to end of line on the line previous.
-   */
+  /** Gets distance to end of line on the line previous. */
   public int getDistToPreviousNewline(int relLoc) {
     return rmc.getDistToPreviousNewline(relLoc);
   }
@@ -365,13 +345,12 @@ public class ReducedModelControl implements BraceReduction {
     return rmc.getDistToNextNewline();
   }
 
-  /** Return all highlight status info for text between the current location and current location
-   *  + end.  This should collapse adjoining blocks with the same status into one.
-   *  @param start The starting location of the area for which we want the status.  The reduced model 
-   *         is already at this position, but the parameter is needed to determine the absolute positions
-   *         in the HighlightStatus objects we return.
-   *  @param length The length of the text segment for which status information must be generated.
-   */
+  /** Return all highlight status info for text between the current location and current location + length.  This should
+    * collapse adjoining blocks with the same status into one.
+    * @param start The start location of the area for which we want the status.  The reduced model is already at this
+    *    position, but this value is needed to determine the absolute positions in HighlightStatus objects we return.
+    * @param length The length of the text segment for which status information must be generated.
+    */
   public Vector<HighlightStatus> getHighlightStatus(final int start, final int length) {
     Vector<HighlightStatus> vec = new Vector<HighlightStatus>();
 
@@ -382,15 +361,23 @@ public class ReducedModelControl implements BraceReduction {
     TokenList.Iterator cursor = rmc._cursor._copy();
 //    int ct = rmc._tokens.listenerCount();
     curLocation = start;
-    curLength = ! cursor.atEnd() ? cursor.current().getSize() - rmc.getBlockOffset() : start + length;
-    curState = ! cursor.atEnd()  ? cursor.current().getHighlightState() : 0;
+    // NOTE: old code threw an exception if cursor.atStart(); it used wrong value for curLength atEnd too
+//    curLength = ! cursor.atEnd() ? cursor.current().getSize() - rmc.getBlockOffset() : start + length; 
+//    curState = ! cursor.atEnd() ? cursor.current().getHighlightState() : 0;
+    if (cursor.atEnd() || cursor.atStart()) { // cursor is not inside a reduced model token
+      curLength = length;
+      curState = 0;
+    }
+    else {
+      curLength = cursor.current().getSize() - rmc.getBlockOffset();
+      curState = cursor.current().getHighlightState();
+    }
 
     while ((curLocation + curLength) < (start + length)) {
       cursor.next();
       //TODO: figure out why this function is iterating past the end of the collection
       //when it gets called from the ColoringGlyphPainter after deleting the last character
-      if(cursor.atEnd())
-        break;
+      if (cursor.atEnd()) break;
       int nextState = cursor.current().getHighlightState();
 
       if (nextState == curState) {
