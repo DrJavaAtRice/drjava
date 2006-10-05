@@ -152,7 +152,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     */
   public void testTypeEnterNotInCode() throws BadLocationException, InterruptedException, InvocationTargetException {
     final DefinitionsPane defPane = _frame.getCurrentDefPane();
-    _frame.show();
+    _frame.setVisible(true);
     OpenDefinitionsDocument doc = defPane.getOpenDefDocument();
     _assertDocumentEmpty(doc, "before testing");
     doc.insertString(0, "/**", null);
@@ -162,8 +162,8 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     SwingUtilities.invokeAndWait(new Runnable() {
       public void run() {
         int enter = KeyEvent.VK_ENTER;
-        defPane.dispatchEvent(new KeyEvent(defPane, KeyEvent.KEY_PRESSED, (new Date()).getTime(), 0, enter));
-        defPane.dispatchEvent(new KeyEvent(defPane, KeyEvent.KEY_RELEASED, (new Date()).getTime(), 0, enter));
+        defPane.dispatchEvent(new KeyEvent(defPane, KeyEvent.KEY_PRESSED, (new Date()).getTime(), 0, enter, KeyEvent.CHAR_UNDEFINED));
+        defPane.dispatchEvent(new KeyEvent(defPane, KeyEvent.KEY_RELEASED, (new Date()).getTime(), 0, enter, KeyEvent.CHAR_UNDEFINED));
       }
     });
     _assertDocumentContents(doc, "/**\n * ", "Enter should indent in a comment");
