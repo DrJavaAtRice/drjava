@@ -62,7 +62,7 @@ public class Configuration {
    */
   public <T> T setSetting(final Option<T> op, final T value) {
     T ret = map.setOption(op, value);
-    Utilities.invokeAndWait(new Runnable() { public void run() { op.notifyListeners(Configuration.this, value); } });
+    Utilities.invokeLater(new Runnable() { public void run() { op.notifyListeners(Configuration.this, value); } });
     return ret;
   }
   
