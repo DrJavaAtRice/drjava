@@ -81,12 +81,14 @@ public class DocumentCache {
   
   private Object _cacheLock = new Object();
     
+  /* General constructor.  Not currently used except when called by default constructor. */
   public DocumentCache(int size) {
 //    Utilities.showDebug("DocumentCache created with size = " + size);
     CACHE_SIZE = size;
     _residentQueue = new OrderedHashSet<DocManager>();
   }
   
+  /* Default constructor; uses default cache size. */
   public DocumentCache() { this(INIT_CACHE_SIZE); }
 
   /** Returns a cache adapter corresponding to the owner of the given reconstructor.
@@ -102,8 +104,9 @@ public class DocumentCache {
   }
   
   /** Changes the number of <b>unmodified</b> documents allowed in the cache at one time. <b> Note: modified documents 
-   *  are not managed in the cache except in transitional situations when a queue document becomes modified.
-   */
+    * are not managed in the cache except in transitional situations when a queue document becomes modified.  Only
+    * used in tests.
+    */
   public void setCacheSize(int size) {
     if (size <= 0) throw new IllegalArgumentException("Cannot set the cache size to zero or less.");
     int dist;

@@ -3129,17 +3129,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Sets up the ctrl-tab listener. */
   private void setUpKeys() { setFocusTraversalKeysEnabled(false); }
   
-  /** Releases any resources this frame is using to prepare it to be garbage collected.  Should only be called 
-   *  from tests. This is implementation specific and may not be needed.
-   */
-  public void dispose() {
-    _model.dispose();
-    Utilities.invokeAndWait(new Runnable() { public void run() { disposeHelp(); }});
-  }
-  
-  /** Helper that enables new Runnable() { ...} above to invoke super.dispose() */
-  private void disposeHelp() { super.dispose(); }
-  
+  /** Relying on inherited dispose() method. */
+    
   /** @return The model providing the logic for this view. */
   public SingleDisplayModel getModel() { return _model; }
   
@@ -4063,6 +4054,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       catch (IOException ioe) { _showIOError(ioe); }
     }
     //DrJava.consoleOut().println("Quitting DrJava...");
+    dispose();    // Free GUI elements of this frame
     _model.quit();
   }
   

@@ -1141,11 +1141,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * This method override restores the old semantics for getWorkingDirectory.  The new definition breaks
    * some unit tests because the slave JVM keeps its working directory open until it shuts down. 
    */
-  public class TestGlobalModel extends DefaultGlobalModel {
+   public class TestGlobalModel extends DefaultGlobalModel {
     public File getWorkingDirectory() { return getMasterWorkingDirectory(); }
   } 
-  
-//   public class TestAbstractGlobalModel extends AbstractGlobalModel {
-//    public File getWorkingDirectory() { return getMasterWorkingDirectory(); }
-//  } 
 }

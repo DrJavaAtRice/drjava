@@ -743,13 +743,16 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
   /** Abstracted out since this is called from find and replace/find. */
   private void _doFind() {
+
     if (_findField.getText().length() > 0) {
+      
       _model.addToBrowserHistory();
 
       _updateMachine();
       _machine.setFindWord(_findField.getText());
       _machine.setReplaceWord(_replaceField.getText());
       _frame.clearStatusMessage(); // _message.setText(""); // JL
+      final boolean searchAll = _machine.getSearchAllDocuments();
       
       // FindResult contains the document that the result was found in, offset to the next occurrence of 
       // the string, and a flag indicating whether the end of the document was wrapped around while searching
@@ -762,35 +765,30 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       final int pos = fr.getFoundOffset();
       
       // If there actually *is* a match, then switch active documents. otherwise don't
-      if (pos != -1) { // found a match
-        Caret c = _defPane.getCaret();
-        c.setDot(c.getDot());
-        
-        if (! matchDoc.equals(openDoc)) {
-          _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
-        }
-        else _model.refreshActiveDocument();  // in a wraparound search, the unmodified active document may have been kicked out of the cache!
-        
-        _defPane.setCaretPosition(pos);
-        _caretChanged = true;
-        _updateMachine();
-      }
-      else {  // If searching all documents, the current document may have been kicked out of the cache
-        _model.refreshActiveDocument();
-      }
-      
-      if (fr.getWrapped() && !_machine.getSearchAllDocuments()) {
+       if (searchAll) {
+         if (! matchDoc.equals(openDoc))  _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+         else _model.refreshActiveDocument();  // the unmodified active document may have been kicked out of the cache!
+       } 
+     
+      if (fr.getWrapped() && ! searchAll) {
         Toolkit.getDefaultToolkit().beep();
         if (!_machine.getSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
-        else  _frame.setStatusMessage("Search wrapped to end.");
+        else _frame.setStatusMessage("Search wrapped to end.");
       }
       
-      if (fr.getAllDocsWrapped() && _machine.getSearchAllDocuments()) {
+      if (fr.getAllDocsWrapped() && searchAll) {
         Toolkit.getDefaultToolkit().beep();
         _frame.setStatusMessage("Search wrapped around all documents.");
       }
       
-      if (pos >= 0) {  // defer executing this code until after active document switch (if any) is complete
+      if (pos >=0) { // found a match
+         Caret c = _defPane.getCaret();
+         c.setDot(c.getDot());
+         _defPane.setCaretPosition(pos);
+         _caretChanged = true;
+         _updateMachine();
+      
+      // defer executing this code until after active document switch (if any) is complete
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             _selectFoundItem();

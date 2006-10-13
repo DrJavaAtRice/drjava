@@ -51,7 +51,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   private OpenDefinitionsDocument _docNext;
   private FindReplaceMachine _frm;
   private File _tempDir;
-  private static final AbstractGlobalModel _model = new AbstractGlobalModel();
+  private static final AbstractGlobalModel _model = new AbstractGlobalModel();  
 
   private static final String EVIL_TEXT =
       "Hear no evil, see no evil, speak no evil.";

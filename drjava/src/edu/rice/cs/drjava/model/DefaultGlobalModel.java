@@ -89,6 +89,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.DefaultCompilerModel;
 import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
+import edu.rice.cs.drjava.ui.MainFrame;
 
 import java.io.*;
 
@@ -191,7 +192,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
-    super();
 //    AbstractMasterJVM._log.log(this + " has called contstructor for DefaultGlobal Model");
     File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
     _jvm = new MainJVM(workDir);

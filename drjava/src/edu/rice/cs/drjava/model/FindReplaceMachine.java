@@ -135,7 +135,7 @@ public class FindReplaceMachine {
  
   public void setPosition(int pos) {
 //    System.err.println("Setting position " + pos + " in doc [" + _doc.getText() + "]");
-    assert (pos >= 0) && (pos <= _doc.getLength());
+//    assert (pos >= 0) && (pos <= _doc.getLength());
     try { _current = _doc.createPosition(pos); }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
@@ -156,13 +156,16 @@ public class FindReplaceMachine {
   /** Change the word being sought.
    *  @param word the new word to seek
    */
-  public void setFindWord(String word) { _findWord = StringOps.replace(word, System.getProperty("line.separator"),"\n");
+  public void setFindWord(String word) { 
+    _findWord = StringOps.replace(word, System.getProperty("line.separator"), "\n"); 
   }
 
   /** Change the replacing word.
    *  @param word the new replacing word
    */
-  public void setReplaceWord(String word) { _replaceWord = StringOps.replace(word, System.getProperty("line.separator"),"\n"); }
+  public void setReplaceWord(String word) { 
+    _replaceWord = StringOps.replace(word, System.getProperty("line.separator"),"\n"); 
+  }
 
   /** Determine if the machine is on an instance of the find word.
    *  @return true if the current position is right after an instance of the find word.
@@ -194,7 +197,6 @@ public class FindReplaceMachine {
     }
     return matchSpace.equals(findWord);
   }
-  
   
   /** If we're on a match for the find word, replace it with the replace word. */
   public boolean replaceCurrent() {
@@ -287,7 +289,6 @@ public class FindReplaceMachine {
     finally { _doc.releaseWriteLock(); }
   }
   
-
   /** Processes all occurences of the find word with the replace word in the current document or in all documents
    *  depending the value of the machine register _searchAllDocuments.
    *  @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
@@ -393,7 +394,7 @@ public class FindReplaceMachine {
       fr = _findNextInDoc(_doc, start, len, searchAll);
     }
     finally { _doc.releaseReadLock(); }
-    if ((fr.getFoundOffset() >= 0) || ! searchAll) return fr;  // match found in _doc
+    if ((fr.getFoundOffset() >= 0) || ! searchAll) return fr;  // match found in _doc or search is local
     
     // find match in other docs
     return _findNextInOtherDocs(_doc, start, len);
@@ -423,17 +424,18 @@ public class FindReplaceMachine {
    *  @return the offset where the instance was found. Returns -1 if no instance was found between start and end
    */  
   private FindResult _findWrapped(OpenDefinitionsDocument doc, int start, int len, boolean allWrapped) {
-    int newLen, newStart;
     
-    assert (_isForward && start + len == doc.getLength()) || (! _isForward && start == 0);
+//    assert (_isForward && start + len == doc.getLength()) || (! _isForward && start == 0);
     
 //    System.err.println("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
 //                       doc.getLength() + ", _isForward = " + _isForward);
 
     if (doc.getLength() == 0) return new FindResult(doc, -1, true, allWrapped);
+    
+    final int newLen, newStart;
     if (_isForward) {
-      newLen = start;
       newStart = 0;
+      newLen = start;
     }
     else {
       newStart = len;
@@ -443,8 +445,7 @@ public class FindReplaceMachine {
 //                     newLen + ", allWrapped = " + allWrapped + ") and _isForward = " + _isForward);
     return _findNextInDocSegment(doc, newStart, newLen, true, allWrapped);
   } 
-      
-      
+     
   /** Find first valid match withing specified segment of doc.  Assumes acquireReadLock is already held. */  
   private FindResult _findNextInDocSegment(OpenDefinitionsDocument doc, int start, int len) {
     return _findNextInDocSegment(doc, start, len, false, false);
@@ -461,28 +462,28 @@ public class FindReplaceMachine {
    *  @return a FindResult object with foundOffset and a flag indicating wrapping to the beginning during a search. The
    *  foundOffset returned insided the FindResult is -1 if no instance was found.
    */
-  private FindResult 
-    _findNextInDocSegment(OpenDefinitionsDocument doc, int start, int len, boolean wrapped, boolean allWrapped) {  
+  private FindResult _findNextInDocSegment(final OpenDefinitionsDocument doc, int start, int len, 
+                                           final boolean wrapped, final boolean allWrapped) {  
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped + " ...)");
     
-    if (len == 0 || doc.getLength() == 0) return new FindResult(doc, -1, wrapped, allWrapped);
+    final int docLen = doc.getLength();;     // The length of the segment to be searched
     
-    int docLen;     // The length of the segment to be searched
+    if (len == 0 || docLen == 0) return new FindResult(doc, -1, wrapped, allWrapped);
+   
     String text;    // The text segment to be searched
-    
-    String findWord = _findWord;       // copy of word being searched (so it can converted to lower case if necessary
-    int wordLen = findWord.length();   // length of search key (word being searched fo  
+    final String findWord;       // copy of word being searched (so it can converted to lower case if necessary
+    final int wordLen = _findWord.length();   // length of search key (word being searched fo  
     
     try { 
-      docLen = doc.getLength();
+
 //      if (wrapped && allWrapped) Utilities.show(start +", " + len + ", " + docLen + ", doc = '" + doc.getText() + "'");
       text = doc.getText(start, len);
       
       if (! _matchCase) {
         text = text.toLowerCase();
-        findWord = findWord.toLowerCase();  // does not affect wordLen
+        findWord = _findWord.toLowerCase();  // does not affect wordLen
       }
-      
+      else findWord = _findWord;
 //       if (wrapped && allWrapped) Utilities.show("Executing loop with findWord = " + findWord + "; text = " + text + "; len = " + len);     
       
       // loop to find first valid (not ignored) occurrence of findWord
@@ -575,34 +576,31 @@ public class FindReplaceMachine {
   } 
   
   /** Determines whether the whole find word is found at the input position
-   * 
-   * @param doc - the document where an instance of the find word was found
-   * @param foundOffset - the position where that instance was found
-   * @return true if the whole word is found at foundOffset, false otherwise
-   */
+    * @param doc - the document where an instance of the find word was found
+    * @param foundOffset - the position where that instance was found
+    * @return true if the whole word is found at foundOffset, false otherwise
+    */
   private boolean wholeWordFoundAtCurrent(OpenDefinitionsDocument doc, int foundOffset) {    
-    String docText;
-    doc.acquireReadLock();
-    try { docText = doc.getText(); }
-    finally {doc.releaseReadLock();}      
-    
-    Character leftOfMatch = null;
-    Character rightOfMatch = null;
-    int leftLocation = foundOffset - 1;
-    int rightLocation = foundOffset + _findWord.length();
+
+    char leftOfMatch = 0;   //  forced initialization
+    char rightOfMatch = 0;  //  forced initialization
+    int leftLoc = foundOffset - 1;
+    int rightLoc = foundOffset + _findWord.length();
     boolean leftOutOfBounds = false;
     boolean rightOutOfBounds = false;
+
+    doc.acquireReadLock();
+    try { 
+      try { leftOfMatch = doc.getText(leftLoc, 1).charAt(0); }
+      catch (BadLocationException e) { leftOutOfBounds = true; }
+      try { rightOfMatch = doc.getText(rightLoc, 1).charAt(0); }
+      catch (BadLocationException e) { rightOutOfBounds = true; }
+    }
+    finally {doc.releaseReadLock();}      
     
-    try { leftOfMatch = new Character(docText.charAt(leftLocation)); }
-    catch (IndexOutOfBoundsException e) { leftOutOfBounds = true; }
-    
-    try { rightOfMatch = new Character(docText.charAt(rightLocation)); }
-    catch (IndexOutOfBoundsException e) { rightOutOfBounds = true; }
-    
-    if (!leftOutOfBounds && !rightOutOfBounds) 
-      return isDelimiter(rightOfMatch) && isDelimiter(leftOfMatch);
-    if (!leftOutOfBounds) return isDelimiter(leftOfMatch);
-    if (!rightOutOfBounds) return isDelimiter(rightOfMatch);
+    if (! leftOutOfBounds && ! rightOutOfBounds) return isDelimiter(rightOfMatch) && isDelimiter(leftOfMatch);
+    if (! leftOutOfBounds) return isDelimiter(leftOfMatch);
+    if (! rightOutOfBounds) return isDelimiter(rightOfMatch);
     return true;
   }
 
@@ -611,9 +609,7 @@ public class FindReplaceMachine {
    * @param ch - a character
    * @return true if ch is a delimiter, false otherwise
    */
-  private boolean isDelimiter(Character ch) {
-    return !Character.isLetterOrDigit(ch.charValue());
-  }
+  private boolean isDelimiter(char ch) { return ! Character.isLetterOrDigit(ch); }
   
   /** Returns true if the currently found instance should be ignored (either because it is inside a string or comment or
    *  because it does not match the whole word when either or both of those conditions are set to true).

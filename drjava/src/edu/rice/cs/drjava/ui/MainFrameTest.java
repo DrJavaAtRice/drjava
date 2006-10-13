@@ -47,6 +47,12 @@ package edu.rice.cs.drjava.ui;
 
 import java.awt.Component;
 import java.awt.event.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.Toolkit;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.io.*;
@@ -99,10 +105,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void tearDown() throws Exception {
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
-        _frame.dispose();
+        _frame.dispose();             // disposes GUI elements of _frame
+        _frame.getModel().dispose();  // explicitly kills the slave JVM
         _frame = null;
       }
     });
+    
     super.tearDown();
   }
 
@@ -157,89 +165,127 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("testDocLocationAfterSwitch completed");
   }
 
-  /**
-   * Tests that the clipboard is unmodified after a "clear line" action.
-   * NOTE: Commented out for commit because of failures, despite proper behavior in GUI.
-   *       This may not work unless the textpane is visible.
-   *
-  public void testClearLine()
-    throws BadLocationException, UnsupportedFlavorException, IOException {
+  
+  private String _data;
+  private String _newData;
+  
+  /** Tests that the clipboard is unmodified after a "clear line" action. */
+  public void testClearLine() throws BadLocationException, UnsupportedFlavorException, IOException {
     // First, copy some data out of the main document.
-    DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDefDocument();
-    doc.insertString(0, "abcdefg", null);
-    pane.setCaretPosition(5);
+    final DefinitionsPane pane = _frame.getCurrentDefPane();
+    final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
+    final String clipString = "***Clipboard***";
+//    _frame.setVisible(true);
+    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        
+        try { 
+          doc.insertString(0, "abcdefg", null);
+          pane.setCaretPosition(5);
+          
+//        ActionMap actionMap = _pane.getActionMap();
+//        String selString = DefaultEditorKit.selectionEndLineAction;
+//        actionMap.get(selString).actionPerformed(new ActionEvent(this, 0, "SelectionEndLine"));
+//        _frame.cutAction.actionPerformed(new ActionEvent(this, 0, "Cut"));
+          
+          _frame.validate();
+//          _frame.paint(_frame.getGraphics());
+//          ActionMap actionMap = _pane.getActionMap();
+//          String selString = DefaultEditorKit.selectionEndLineAction;
+//          actionMap.get(selString).actionPerformed(new ActionEvent(this, 0, "SelectionEndLine"));
+//          pane.setSelectionStart(2);
+//          pane.setSelectionEnd(7);
+          
+          // Get a copy of the current clipboard.
+          Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+          // Insert valid string in clipboars.
 
-    ActionMap actionMap = pane.getActionMap();
-    actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed
-      (new ActionEvent(this, 0, "SelectionEndLine"));
-    _frame.cutAction.actionPerformed(new ActionEvent(this, 0, "Cut"));
+          clip.setContents(new StringSelection(clipString), _frame);
+          Transferable contents = clip.getContents(_frame);
+          
+          // Trigger the Clear Line action from a new position.
+          pane.setCaretPosition(2);
+          _frame.validate();
+//          _frame.paint(_frame.getGraphics());
+          
+          _frame._clearLineAction.actionPerformed(new ActionEvent(pane, 0, "Clear Line"));
+//          _frame.paint(_frame.getGraphics());
+          _frame.validate();
+          
+          // Verify that the clipboard contents are still the same.
+          contents = clip.getContents(null);
+          _data = (String) contents.getTransferData(DataFlavor.stringFlavor);
+        }
+        catch(Throwable t) { listenerFail(t.getMessage()); }
+      }
+    });
+    Utilities.clearEventQueue();
 
-    // Get a copy of the current clipboard.
-    Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
-    Transferable contents = clip.getContents(null);
-    String data = (String) contents.getTransferData(DataFlavor.stringFlavor);
-
-    // Trigger the Clear Line action from a new position.
-    pane.setCaretPosition(2);
-    _frame._clearLineAction.actionPerformed
-      (new ActionEvent(this, 0, "Clear Line"));
-
-    // Verify that the clipboard contents are still the same.
-    contents = clip.getContents(null);
-    String newData = (String) contents.getTransferData(DataFlavor.stringFlavor);
-    assertEquals("Clipboard contents should be unchanged after Clear Line.",
-                 data, newData);
+    assertEquals("Clipboard contents should be unchanged after Clear Line.", clipString, _data);
 
     // Verify that the document text is what we expect.
-    assertEquals("Current line of text should be truncated by Clear Line.",
-                 "ab", doc.getText());
+    assertEquals("Current line of text should be truncated by Clear Line.", "ab", doc.getText());
+    _log.log("testClearLine completed");
   }
-  */
-
-  /**
-   * Tests that the clipboard is modified after a "cut line" action.
-   * NOTE: Commented out for commit because of failures, despite proper behavior in GUI.
-   *       This may not work unless the textpane is visible.
-   *
-  public void testCutLine()
-    throws BadLocationException, UnsupportedFlavorException, IOException {
+  
+  /** Tests that the clipboard is modified after a "cut line" action.
+    * NOTE: Commented out for commit because of failures, despite proper behavior in GUI.
+    *       This may not work unless ActionEvents are dropped in the event queue
+    */
+  public void testCutLine() throws BadLocationException {
     // First, copy some data out of the main document.
-    DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDefDocument();
-    doc.insertString(0, "abcdefg", null);
-    pane.setCaretPosition(5);
-
-    ActionMap actionMap = pane.getActionMap();
-    actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed
-      (new ActionEvent(this, 0, "SelectionEndLine"));
-    _frame.cutAction.actionPerformed(new ActionEvent(this, 0, "Cut"));
-
-    // Get a copy of the current clipboard.
-
-    // Trigger the Cut Line action from a new position.
-    pane.setCaretPosition(2);
-    _frame._cutLineAction.actionPerformed
-      (new ActionEvent(this, 0, "Cut Line"));
-
-    // Verify that the clipboard contents are what we expect.
-    Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
-    Transferable contents = clip.getContents(null);
-    String data = (String) contents.getTransferData(DataFlavor.stringFlavor);
-    assertEquals("Clipboard contents should be changed after Cut Line.",
-                 "cdefg", data);
-
+    
+    final DefinitionsPane pane = _frame.getCurrentDefPane();
+    final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
+//    _frame.setVisible(true);
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        
+        try { 
+          doc.insertString(0, "abcdefg", null);
+          pane.setCaretPosition(5);
+          _frame.validate();
+//          _frame.paint(_frame.getGraphics());
+//          ActionMap actionMap = _pane.getActionMap();
+//          String selString = DefaultEditorKit.selectionEndLineAction;
+//          actionMap.get(selString).actionPerformed(new ActionEvent(pane, 0, "SelectionEndLine"));
+          pane.setSelectionStart(2);
+          pane.setSelectionEnd(7);
+          _frame.validate();
+          pane.cut();
+//          _frame.cutAction.actionPerformed(new ActionEvent(pane, 0, "Cut"));
+          
+          // Get a copy of the current clipboard.
+          
+          // Trigger the Cut Line action from a new position.
+//          _pane.setCaretPosition(2);
+          _frame.validate();
+//          _frame.paint(_frame.getGraphics());
+          
+//          _frame._cutLineAction.actionPerformed(new ActionEvent(this, 0, "Cut Line"));
+//          _frame.dispatchEvent(new ActionEvent(this, 0, "Cut Line"));
+          
+          // Verify that the clipboard contents are what we expect.
+          Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+          Transferable contents = clip.getContents(null);
+          _data = (String) contents.getTransferData(DataFlavor.stringFlavor);
+        }
+        catch(Throwable t) { listenerFail(t.getMessage()); }
+      }
+    });
+    Utilities.clearEventQueue();
+    assertEquals("Clipboard contents should be changed after Cut Line.", "cdefg", _data);
+    
     // Verify that the document text is what we expect.
-    assertEquals("Current line of text should be truncated by Cut Line.",
-                 "ab", doc.getText());
+    assertEquals("Current line of text should be truncated by Cut Line.", "ab", doc.getText());
+    _log.log("testCutLine completed");
   }
-  */
 
-  /**
-   * Make sure that the InteractionsPane is displaying the correct
-   * InteractionsDocument.  (SourceForge bug #681547)  Also make sure this
-   * document cannot be edited before the prompt.
-   */
+
+  /** Make sure that the InteractionsPane is displaying the correct InteractionsDocument.  (SourceForge bug #681547)
+    * Also make sure this document cannot be edited before the prompt.
+    */
   public void testCorrectInteractionsDocument() throws EditDocumentException {
     InteractionsPane pane = _frame.getInteractionsPane();
     final SingleDisplayModel model = _frame.getModel();
@@ -247,14 +293,18 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     // Make the test silent
     Utilities.invokeAndWait(new Runnable() { 
-      public void run() { model.getInteractionsModel().getDocument().setBeep(new TestBeep()); }
+      public void run() { 
+        model.getInteractionsModel().getDocument().setBeep(new TestBeep()); 
+      }
     });
+    Utilities.clearEventQueue();
 
     // Test for strict == equality
     assertTrue("UI's int. doc. should equals Model's int. doc.", pane.getDocument() == doc);
 
     int origLength = doc.getLength();
     doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
+    Utilities.clearEventQueue();
     assertEquals("Document should not have changed.", origLength, doc.getLength());
     _log.log("testCorrectInteractionsDocument completed");
   }
@@ -279,7 +329,6 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       "  }\n" +
       "}\n";
     
-    int oldPos;
     final int newPos = 20;
     
     final DefinitionsPane pane = _frame.getCurrentDefPane();
@@ -294,13 +343,17 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       } 
     });
     
+    Utilities.clearEventQueue();
     assertEquals("Should have inserted correctly.", text, doc.getText());
     
-    doc.indentLines(0, doc.getLength()); // should be enclosed in  write lock/unlock brackets
+    doc.acquireWriteLock();
+    
+    try { doc.indentLines(0, doc.getLength()); }
+    finally { doc.releaseWriteLock(); }
     
     assertEquals("Should have indented.", indented, doc.getText());
     
-    oldPos = pane.getCaretPosition();
+    final int oldPos = pane.getCaretPosition();
 //    System.err.println("Old position is: " + oldPos);
 
     Utilities.invokeAndWait(new Runnable() {
@@ -309,8 +362,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 //        System.err.println("New position is: " + pane.getCaretPosition());
       }
     }); 
+    Utilities.clearEventQueue();
     
-    // Moving this two statement to the event thread breaks "Undo should have restored ..."  Why?
+    // Moving this statement to the event thread breaks "Undo should have restored ..."  Why?
     doc.getUndoManager().undo();
     
     assertEquals("Should have undone.", text, doc.getText());
@@ -325,6 +379,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         doc.getUndoManager().redo();
       }
     });
+    Utilities.clearEventQueue();
+    
     assertEquals("redo",indented, doc.getText());
     assertEquals("redo restores caret position", oldPos, pane.getCaretPosition());
     _log.log("testMultilineIndentAfterScroll completed");
@@ -360,17 +416,22 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     
     assertTrue("Start: defPane1", _defPane1.isEditable());
     assertTrue("Start: defPane2", _defPane2.isEditable());
+    
     Utilities.invokeAndWait(new Runnable() { public void run() { _frame.hourglassOn(); } });
+    Utilities.clearEventQueue();
     
     assertTrue("Glass on: defPane1", _defPane1.isEditable());
     assertTrue("Glass on: defPane2",(! _defPane2.isEditable()));
     model.setActiveDocument(doc1);
-    
+            
     Utilities.invokeAndWait(new Runnable() { public void run() { _frame._switchDefScrollPane(); } });
+    Utilities.clearEventQueue();
     
     assertTrue("Doc Switch: defPane1",(! _defPane1.isEditable()));
     assertTrue("Doc Switch: defPane2", _defPane2.isEditable());
+    
     Utilities.invokeAndWait(new Runnable() { public void run() { _frame.hourglassOff(); } });
+    Utilities.clearEventQueue();
     
     assertTrue("End: defPane1", _defPane1.isEditable());
     assertTrue("End: defPane2", _defPane2.isEditable());
@@ -395,19 +456,22 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         _pane2 = _frame._createDefScrollPane(doc2);
         _defPane1 = (DefinitionsPane) _pane1.getViewport().getView();
         _defPane2 = (DefinitionsPane) _pane2.getViewport().getView();
-        
+        _frame.validate();
         _frame.hourglassOn();
-        
         _defPane1.processKeyEvent(makeFindKeyEvent(_defPane1, 70));
+        _frame.validate();
       }
     });
+    Utilities.clearEventQueue();
     
     assertTrue("the find replace dialog should not come up", ! _frame.getFindReplaceDialog().isDisplayed());
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         _frame.getInteractionsPane().processKeyEvent(makeFindKeyEvent(_frame.getInteractionsPane(), 0));
+        _frame.validate();
       }
     });
+    Utilities.clearEventQueue();
     
     assertTrue("the find replace dialog should not come up", ! _frame.getFindReplaceDialog().isDisplayed());
 
@@ -430,6 +494,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       "    class3 = new ForceOpenClass3();\n" +
       "  }\n" +
       "}";
+    
     FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
     forceOpenClass1_file.deleteOnExit();
     
@@ -445,7 +510,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
           }
         });
       }
-    });                
+    }); 
+    Utilities.clearEventQueue();
     
     assertTrue("the save button should not be enabled after opening a document", !_frame.saveEnabledHuh());
     _log.log("testSaveButtonEnabled completed");
@@ -524,6 +590,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         _frame.addComponentListenerToOpenDocumentsList(listener);
       }
      });
+     Utilities.clearEventQueue();
      
      _model.addListener(openListener);
      
@@ -540,6 +607,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
          });
        }
      });
+     Utilities.clearEventQueue();
      
      /* wait until file has been open and active document changed. */
      synchronized(_openLock) {
@@ -564,6 +632,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
          _frame.getCompileAllButton().doClick();
        }
      });
+     Utilities.clearEventQueue();
 
      synchronized(_compileLock) {
        try { while (! _compileDone) _compileLock.wait(); }
@@ -625,6 +694,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         _frame.getModel().addListener(closeListener);
       }
     });
+    Utilities.clearEventQueue();
            
     /* Asynchronously close the file */
     Utilities.invokeLater(new Runnable() { 
@@ -642,7 +712,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                          "\nDo it by hand.\n");
     }
-    _log.log("testDancingUIClosed completed");
+    _log.log("testDancingUIFileClosed completed");
   }
 
   /** A CompileListener for SingleDisplayModel (instead of GlobalModel) */

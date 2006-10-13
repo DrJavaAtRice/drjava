@@ -107,6 +107,7 @@ import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParser ;
 import edu.rice.cs.drjava.project.ProjectProfile;
+import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
@@ -346,9 +347,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //          IDocumentNavigator.LOG.log("_gainVisitor; modelInitiated = false");
 //        }
         OpenDefinitionsDocument oldDoc = AbstractGlobalModel.this.getActiveDocument();
-        if (!modelInitiated) { addToBrowserHistory(); }
+        if (! modelInitiated) { addToBrowserHistory(); }
         _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document
-        if (!modelInitiated) { addToBrowserHistory(); }
+        if (! modelInitiated) { addToBrowserHistory(); }
         
 //        Utilities.showDebug("Setting the active doc done");
         final File oldDir = _activeDirectory;  // _activeDirectory can be null
@@ -1836,19 +1837,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (DrJava.getConfig().getSetting(OptionConstants.DRJAVA_USE_FORCE_QUIT)) {
         Runtime.getRuntime().halt(0);  // force DrJava to exit
     }
-    else {
-      System.exit(0); 
-    }
+    
+    Thread monitor = new Thread(new Runnable() { 
+      public void run() {
+        try { Thread.sleep(2000); }
+        catch(InterruptedException e) { /* proceed */ }
+        Runtime.getRuntime().halt(0);  // force DrJava to exit if it still alive
+      }
+    });
+    monitor.setDaemon(true);
+    monitor.start();
+    System.exit(0);
   }
     
   /** Prepares this model to be thrown away.  Never called outside of tests. This version ignores the slave JVM. */
-  public void dispose() {
-    _notifier.removeAllListeners();
-    synchronized(_documentsRepos) { _documentsRepos.clear(); }
-    Utilities.invokeAndWait(new SRunnable() {
-      public void run() { _documentNavigator.clear(); }  // this operation must run in event thread
-    });
-  }
+  public void dispose() { }
  
   /** Disposes of external resources. This is a no op in AbstractGlobalModel. */
   public void disposeExternalResources() {
@@ -2513,19 +2516,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public synchronized void addToBrowserHistory() {
     final OpenDefinitionsDocument doc = getActiveDocument();
     
-    if (doc!=null) {
+    if (doc != null) {
       doc.acquireReadLock();
       try {
         final Position startPos = doc.createPosition(doc.getCaretPosition());
         final Position endPos = doc.createPosition(doc.getLineEndPos(doc.getCaretPosition()));
         getBrowserHistoryManager().addRegion(new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset()));
       }
-      catch (FileMovedException fme) {
-        /* ignore */
-      }
-      catch (BadLocationException ble) {
-        throw new UnexpectedException(ble);
-      }
+      catch (FileMovedException fme) { /* ignore */ }
+      catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       finally { doc.releaseReadLock(); }
     }
   }
@@ -4094,7 +4093,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
   /** Returns the currently active document. */
   public OpenDefinitionsDocument getActiveDocument() { return  _activeDocument; }
- 
  
   /** Sets the currently active document by updating the selection model.
    *  @param doc Document to set as active
