@@ -7829,16 +7829,15 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     // center it on owner again
     loc = new Point(ownerLoc.x + (ownerSize.width - frameRect.width) / 2,
-                          ownerLoc.y + (ownerSize.height - frameRect.height) / 2);
+                    ownerLoc.y + (ownerSize.height - frameRect.height) / 2);
     frameRect.setLocation(loc);
     
     // now fit it on the screen
-    if(frameRect.x < screenRect.x)
-      frameRect.x = screenRect.x;
+    if(frameRect.x < screenRect.x) frameRect.x = screenRect.x;
     if(frameRect.x + frameRect.width > screenRect.x + screenRect.width)
       frameRect.x = screenRect.x + screenRect.width - frameRect.width;
-    if(frameRect.y < screenRect.y)
-      frameRect.y = screenRect.y;
+    
+    if(frameRect.y < screenRect.y) frameRect.y = screenRect.y;
     if(frameRect.y + frameRect.height > screenRect.y + screenRect.height)
       frameRect.y = screenRect.y + screenRect.height - frameRect.height;
 

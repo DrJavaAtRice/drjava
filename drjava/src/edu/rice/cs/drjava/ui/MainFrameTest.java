@@ -103,15 +103,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
 
   public void tearDown() throws Exception {
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() {
+    super.tearDown();
+//    Utilities.invokeAndWait(new Runnable() {
+//      public void run() {
         _frame.dispose();             // disposes GUI elements of _frame
         _frame.getModel().dispose();  // explicitly kills the slave JVM
         _frame = null;
-      }
-    });
-    
-    super.tearDown();
+//      }
+//    });
+//    
+
   }
 
   JButton _but;
