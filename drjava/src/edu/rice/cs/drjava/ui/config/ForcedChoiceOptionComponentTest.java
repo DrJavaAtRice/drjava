@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.ui.config;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 
@@ -56,7 +57,9 @@ public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
 
     _option.setValue(testForcedChoice);
     _option.resetToCurrent(); // should reset to the original.
+    Utilities.clearEventQueue();
     _option.updateConfig(); // should update with original values therefore no change.
+    Utilities.clearEventQueue();
 
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.JAVADOC_ACCESS_LEVEL.getDefault(),
@@ -69,7 +72,7 @@ public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
 
     _option.setValue(testForcedChoice);
     _option.updateConfig();
-
+    Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testForcedChoice,
                  DrJava.getConfig().getSetting(OptionConstants.JAVADOC_ACCESS_LEVEL));
@@ -80,8 +83,11 @@ public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
 
     _option.setValue(testForcedChoice);
     _option.updateConfig();
+    Utilities.clearEventQueue();
     _option.resetToDefault(); // resets to default
+    Utilities.clearEventQueue();
     _option.updateConfig();
+    Utilities.clearEventQueue();
 
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.JAVADOC_ACCESS_LEVEL.getDefault(),

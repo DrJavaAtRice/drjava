@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.ui.config;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 
@@ -64,7 +65,7 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
     _option.setValue(testBoolean);
     _option.resetToCurrent(); // should reset to the original.
     _option.updateConfig(); // should update with original values therefore no change.
-
+    Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.LINEENUM_ENABLED.getDefault(),
                  DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
@@ -76,7 +77,7 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
 
     _option.setValue(testBoolean);
     _option.updateConfig();
-
+    Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testBoolean,
                  DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
@@ -87,8 +88,11 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
 
     _option.setValue(testBoolean);
     _option.updateConfig();
+    Utilities.clearEventQueue();
     _option.resetToDefault(); // resets to default
+    Utilities.clearEventQueue();
     _option.updateConfig();
+    Utilities.clearEventQueue();
 
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.LINEENUM_ENABLED.getDefault(),

@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.ui.config;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 import java.io.File;
@@ -59,6 +60,8 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
     _option.resetToCurrent(); // should reset to the original.
     _option.updateConfig(); // should update with original values therefore no change.
 
+    Utilities.clearEventQueue();
+    
     assertTrue("Cancel (resetToCurrent) should not change the config",
                vectorEquals(OptionConstants.EXTRA_CLASSPATH.getDefault(),
                             DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
@@ -71,6 +74,7 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
     _option.setValue(testVector);
     _option.updateConfig();
 
+    Utilities.clearEventQueue();
     assertTrue("Apply (updateConfig) should write change to file",
                vectorEquals(testVector,
                             DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
@@ -82,9 +86,12 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
 
     _option.setValue(testVector);
     _option.updateConfig();
+    Utilities.clearEventQueue();
+    
     _option.resetToDefault(); // resets to default
     _option.updateConfig();
-
+    Utilities.clearEventQueue();
+    
     assertTrue("Apply (updateConfig) should write change to file",
                vectorEquals(OptionConstants.EXTRA_CLASSPATH.getDefault(),
                             DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));

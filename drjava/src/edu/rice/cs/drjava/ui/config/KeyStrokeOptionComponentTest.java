@@ -84,6 +84,7 @@ public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
 
     _option.setValue(testKeyStroke);
     _option.updateConfig();
+    Utilities.clearEventQueue();
     _option.resetToDefault(); // resets to default
     _option.updateConfig();
 

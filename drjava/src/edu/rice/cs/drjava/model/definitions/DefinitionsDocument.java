@@ -71,8 +71,7 @@ import edu.rice.cs.drjava.model.*;
  */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
   
-  public static Log _log = new Log("Definitions.txt", false);
-  
+  public static Log _log = new Log("GlobalModel.txt", false);
   private final static int NO_COMMENT_OFFSET = 0;
   private final static int WING_COMMENT_OFFSET = 2;
   
@@ -289,8 +288,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //  }
 
 
-  /** Gets the package and main class name of this OpenDefinitionsDocument
-   *  @return the qualified main class name
+  /** Gets the package and main class/interface name of this OpenDefinitionsDocument
+   *  @return the qualified main class/interface name
    */
   public String getQualifiedClassName() throws ClassNameNotFoundException {
     return _getPackageQualifier() + getMainClassName();
@@ -310,7 +309,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     catch (InvalidPackageException e) { 
       /* Couldn't find package, pretend there's none; findbugs requires multi-line formatting of this clause */ 
     }
-    if ((packageName != null) && (!packageName.equals(""))) { packageName = packageName + "."; }
+    if ((packageName != null) && (! packageName.equals(""))) { packageName = packageName + "."; }
     return packageName;
   }
 
@@ -1276,10 +1275,21 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }
   
-  /** Gets the name of the document's main class: the document's only public class (not interface) or 
-    * first top level class if document contains no public classes. */
-  public String getMainClassName() throws ClassNameNotFoundException {
+  /** Gets the name of first class/interface decclared in file among the definitions anchored at:
+   * @param indexOfClass  index in this of a top-level occurrence of class 
+   * @param indexOfInterface  index in this of a top-level occurrence of interface
+   */
+  private String getFirstClassName(int indexOfClass, int indexOfInterface) throws ClassNameNotFoundException {
     
+    if ((indexOfClass == -1) && (indexOfInterface == -1)) throw ClassNameNotFoundException.DEFAULT;
+    if ((indexOfInterface == -1) || (indexOfClass != -1 && indexOfClass < indexOfInterface)) 
+          return getNextIdentifier(indexOfClass + "class".length());
+    return getNextIdentifier(indexOfInterface + "interface".length());
+  }
+  
+  /** Gets the name of the document's main class: the document's only public class/interface or 
+    * first top level class if document contains no public classes or interfaces. */
+  public String getMainClassName() throws ClassNameNotFoundException {
     acquireReadLock();
     synchronized(_reduced) {
       final int oldLocation = _currentLocation;
@@ -1287,30 +1297,29 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       try {
         setCurrentLocation(0);
         final String text = getText();
-        final int length = text.length();
         
-        int index;
+        final int indexOfClass = _findKeywordAtToplevel("class", text, 0);
+        final int indexOfInterface = _findKeywordAtToplevel("interface", text, 0);
+        final int indexOfPublic = _findKeywordAtToplevel("public", text, 0);
         
-        int indexOfClass = _findKeywordAtToplevel("class", text, 0);
-        int indexOfPublic = _findKeywordAtToplevel("public", text, 0);
-        
-        if (indexOfClass == -1) throw ClassNameNotFoundException.DEFAULT;
+        if (indexOfPublic == -1)  return getFirstClassName(indexOfClass, indexOfInterface);
         
 //        _log.log("text =\n" + text);
 //        _log.log("indexOfClass = " + indexOfClass + "; indexOfPublic = " + indexOfPublic);
         
-        if (indexOfPublic == -1 || indexOfPublic < indexOfClass) 
-          return getNextIdentifier(indexOfClass + "class".length());
+        // There is an explicit public declaration
+        final int afterPublic = indexOfPublic + "public".length();
+        final String subText = text.substring(afterPublic);
+        setCurrentLocation(afterPublic);
+//        _log.log("After public text = '" + subText + "'");
+        int indexOfPublicClass  = _findKeywordAtToplevel("class", subText, afterPublic);  // relative offset
+        if (indexOfPublicClass != -1) indexOfPublicClass += afterPublic;
+        int indexOfPublicInterface = _findKeywordAtToplevel("interface", subText, afterPublic); // relative offset
+        if (indexOfPublicInterface != -1) indexOfPublicInterface += afterPublic;
+//        _log.log("indexOfPublicClass = " + indexOfPublicClass + " indexOfPublicInterface = " + indexOfPublicInterface);
         
-        int afterPublic = indexOfPublic + "public".length();
+        return getFirstClassName(indexOfPublicClass, indexOfPublicInterface);
         
-        int indexOfPublicClass = afterPublic + _findKeywordAtToplevel("class", text.substring(afterPublic), afterPublic);
-        
-//        _log.log("indexOfPublicClass = " + indexOfPublicClass);
-        
-        if (indexOfPublicClass == -1) throw ClassNameNotFoundException.DEFAULT;
-        
-        return getNextIdentifier(indexOfPublicClass + "class".length());
       }
       finally { 
         setCurrentLocation(oldLocation);
@@ -1381,6 +1390,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * read lock and _reduced lock are already held. */
   private String getNextIdentifier(final int startPos) throws ClassNameNotFoundException {
     
+//    _log.log("getNextIdentifer(" + startPos + ") called");
+    
 //    int index = 0;
 //    int length = 0;
 //    int endIndex = 0;
@@ -1395,8 +1406,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       int length = text.length(); 
       int endIndex = length; //just in case no whitespace at end of file
       
-      _log.log("In getNextIdentifer text = \n" + text);
-      _log.log("index = " + index + "; length = " + length);
+//      _log.log("In getNextIdentifer text = \n" + text);
+//      _log.log("index = " + index + "; length = " + length);
       
       //find index of next delimiter or whitespace
       char c;
@@ -1407,7 +1418,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           break;
         }
       }
-      _log.log("endIndex = " + endIndex);
+//      _log.log("endIndex = " + endIndex);
       return text.substring(index, endIndex);
     }
     catch(BadLocationException e) { 
@@ -1418,13 +1429,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }
 
-  /** Finds the first occurrence of the keyword within the text that is not enclosed within a brace or comment 
-   *  and is followed by whitespace.
-   *  @param keyword the keyword for which to search
-   *  @param text in which to search
-   *  @param textOffset Offset at which the text occurs in the document
-   *  @return index of the keyword, or -1 if the keyword is not found or not followed by whitespace
-   */
+  /** Finds the first occurrence of the keyword within the text (located at textOffset in this documennt) that is not 
+    * enclosed within a brace or comment and is followed by whitespace.
+    * @param keyword the keyword for which to search
+    * @param text in which to search
+    * @param textOffset Offset at which the text occurs in the document
+    * @return index of the keyword in text, or -1 if the keyword is not found or not followed by whitespace
+    */
   private int _findKeywordAtToplevel(String keyword, String text, int textOffset) {
     
     acquireReadLock();
@@ -1458,6 +1469,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           }
         }
         setCurrentLocation(oldLocation);
+//        _log.log("findKeyWord(" + keyword + ", ..., " + textOffset + ")");
         return index;
       }
       finally { releaseReadLock(); }

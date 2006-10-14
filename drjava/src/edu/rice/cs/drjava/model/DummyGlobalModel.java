@@ -290,7 +290,7 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call getSourceFile on a Dummy");
   }
 
-  public File getSourceFileFromPaths(String fileName, List<File> paths) {
+  public File findFileInPaths(String fileName, List<File> paths) {
      throw new UnsupportedOperationException("Tried to call getSourceFileFromPaths on a Dummy");
   }
 

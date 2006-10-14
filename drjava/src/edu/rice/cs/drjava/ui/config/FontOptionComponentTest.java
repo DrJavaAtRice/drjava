@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.ui.config;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 
@@ -59,7 +60,7 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
     _option.setValue(testFont);
     _option.resetToCurrent(); // should reset to the original.
     _option.updateConfig(); // should update with original values therefore no change.
-
+    Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.FONT_MAIN.getDefault(),
                  DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
@@ -71,7 +72,7 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
 
     _option.setValue(testFont);
     _option.updateConfig();
-
+    Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testFont,
                  DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
@@ -82,8 +83,10 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
 
     _option.setValue(testFont);
     _option.updateConfig();
+    Utilities.clearEventQueue();
     _option.resetToDefault(); // resets to default
     _option.updateConfig();
+    Utilities.clearEventQueue();
 
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.FONT_MAIN.getDefault(),

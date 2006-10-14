@@ -596,12 +596,16 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     Utilities.clearEventQueue();
     
     System.gc();
+    Utilities.clearEventQueue(); 
     System.runFinalization();
     
     Utilities.clearEventQueue();   
+    Utilities.clearEventQueue(); 
     
     System.gc();
+    Utilities.clearEventQueue(); 
     System.runFinalization();
+    Utilities.clearEventQueue(); 
 //    System.out.println("Current: " + _frame.getCurrentDefPane().hashCode());
     
 //    System.out.println("Foo");

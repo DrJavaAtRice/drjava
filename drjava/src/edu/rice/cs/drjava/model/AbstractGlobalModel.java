@@ -2199,7 +2199,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (f != null) return f;
     }
     Vector<File> sourcepath = DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
-    return getSourceFileFromPaths(fileName, sourcepath);
+    return findFileInPaths(fileName, sourcepath);
   }
 
   /** Searches for a file with the given name on the provided paths. Returns null if the file is not found.
@@ -2207,7 +2207,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  @param paths An array of directories to search
    *  @return the file if it is found, or null otherwise
    */
-  public File getSourceFileFromPaths(String fileName, List<File> paths) {
+  public File findFileInPaths(String fileName, List<File> paths) {
     for (File p: paths) {
       File f = _getSourceFileFromPath(fileName, p);
       if (f != null) return f;
@@ -3341,16 +3341,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       String className;
       try { className = getDocument().getQualifiedClassName(); }
       catch (ClassNameNotFoundException cnnfe) {
-//        _log.log("_locateClassFile() failed because getQualifedClassName returned ClassNotFound");
+        _log.log("_locateClassFile() failed for " + this + " because getQualifedClassName returned ClassNotFound");
         return null;  /* No source class name */ 
       }
-//      _log.log("In _locateClassFile, className = " + className);
+      _log.log("In _locateClassFile, className = " + className);
       String ps = System.getProperty("file.separator");
       // replace periods with the System's file separator
       className = StringOps.replace(className, ".", ps);
       String fileName = className + ".class";
       
-//      _log.log("In _locateClassFile, fileName = " + fileName);
+      _log.log("In _locateClassFile, classfileName = " + fileName);
       
       // Check source root set (open files)
       ArrayList<File> roots = new ArrayList<File>();
@@ -3358,23 +3358,36 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (getBuildDirectory() != null) roots.add(getBuildDirectory());
       
       // Add the current document to the beginning of the roots list
-      try { roots.add(getSourceRoot()); }
+      try {
+        File root = getSourceRoot();
+        _log.log("Directory " + root + " added to list of source roots");
+        roots.add(root); 
+      }
       catch (InvalidPackageException ipe) {
         try {
+          _log.log(this + " has no source root, using parent directory instead");
           File root = getFile().getParentFile();
-          if (root != null) roots.add(root);
+          if (root != null) {
+            roots.add(root);
+            _log.log("Added parent directory " + root + " to list of source roots");
+          }
         }
         catch(NullPointerException e) { throw new UnexpectedException(e); }
         catch(FileMovedException fme) {
           // Moved, but we'll add the old file to the set anyway
+          _log.log("File for " + this + "has moved; adding parent directory to list of roots");
           File root = fme.getFile().getParentFile();
           if (root != null) roots.add(root);
         }
       }
       
-      File classFile = getSourceFileFromPaths(fileName, roots);
-      if (classFile != null) return classFile;
+      File classFile = findFileInPaths(fileName, roots);
+      if (classFile != null) {
+        _log.log("Found source file " + classFile + " for " + this);
+        return classFile;
+      }
       
+      _log.log(this + " not found on path of source roots");
       // Class not on source root set, check system classpath
       String cp = System.getProperty("java.class.path");
       String pathSeparator = System.getProperty("path.separator");
@@ -3389,12 +3402,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         cpVector.add(new File(cp.substring(i, nextSeparator)));
         i = nextSeparator + 1;
       }
-      classFile = getSourceFileFromPaths(fileName, cpVector);
+      classFile = findFileInPaths(fileName, cpVector);
       
       if (classFile != null) return classFile;
       
       // not on system classpath, check interactions classpath
-      return getSourceFileFromPaths(fileName, DrJava.getConfig().getSetting(EXTRA_CLASSPATH));
+      return findFileInPaths(fileName, DrJava.getConfig().getSetting(EXTRA_CLASSPATH));
     }
 
     /** Determines if the definitions document has been changed by an outside agent. If the document has changed,

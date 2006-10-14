@@ -66,6 +66,7 @@ public final class ColorOptionComponentTest extends DrJavaTestCase {
     _option.setValue(testColor);
     _option.resetToCurrent(); // should reset to the original.
     _option.updateConfig(); // should update with original values therefore no change.
+    Utilities.clearEventQueue();
 
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.DEFINITIONS_NORMAL_COLOR.getDefault(),
@@ -78,7 +79,7 @@ public final class ColorOptionComponentTest extends DrJavaTestCase {
 
     _option.setValue(testColor);
     _option.updateConfig();
-
+    Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testColor,
                  DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));

@@ -246,7 +246,7 @@ public interface GlobalModel extends ILoadDocuments {
    *  @param fileName Name of the source file to look for
    *  @param paths An array of directories to search
    */
-  public File getSourceFileFromPaths(String fileName, List<File> paths);
+  public File findFileInPaths(String fileName, List<File> paths);
 
   /** Gets an array of all sourceRoots for the open definitions documents, without duplicates. */
   public File[] getSourceRootSet();
