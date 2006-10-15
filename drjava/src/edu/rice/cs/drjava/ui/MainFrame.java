@@ -5994,7 +5994,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       private void updateUI() {
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
-            revalidateLineNums();
+            // revalidateLineNums();
             if ((_breakpointsPanel != null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
             if ((_bookmarksPanel != null) && (_bookmarksPanel.isDisplayed())) { _bookmarksPanel.repaint(); }
             for(Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
@@ -6321,17 +6321,17 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   }
   
-  /** Revalidate the line numers, i.e. also redraw the ones not currently visible. */
-  public void revalidateLineNums() {
-    if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
-      JScrollPane sp = _defScrollPanes.get(_model.getActiveDocument());
-      if (sp!=null) {
-        LineEnumRule ler = (LineEnumRule)sp.getRowHeader().getView();
-        ler.revalidate();
-        _repaintLineNums();
-      }
-    }
-  }
+//  /** Revalidate the line numers, i.e. also redraw the ones not currently visible. */
+//  public void revalidateLineNums() {
+//    if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
+//      JScrollPane sp = _defScrollPanes.get(_model.getActiveDocument());
+//      if (sp!=null) {
+//        LineEnumRule ler = (LineEnumRule)sp.getRowHeader().getView();
+//        ler.revalidate();
+//        _repaintLineNums();
+//      }
+//    }
+//  }
   
   /** Update the row header (line number enumeration) for the definitions scroll pane. */
   private void _updateDefScrollRowHeader() {
