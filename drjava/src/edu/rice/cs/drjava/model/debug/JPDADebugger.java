@@ -952,6 +952,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _log("VMDisconnected when getting the current stack frame data.", vmde);
       return new Vector<DebugStackData>();
     }
+    catch (InvalidStackFrameException isfe) {
+      _log("The stack frame requested is invalid.", isfe);
+      return new Vector<DebugStackData>();
+    }
   }
 
   /** Takes the location of event e, opens the document corresponding to its class
