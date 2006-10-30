@@ -227,13 +227,13 @@
     
     <!-- Move any test classes back to base to prevent recompilation -->
     <move todir="classes/base">
-      <fileset dir="classes/test" />
+      <fileset dir="classes/test" includes="**/*" />
     </move>
     
     <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5" sourcepath="" 
            debug="on" optimize="off" deprecation="on" includeAntRuntime="no" fork="yes">
       <classpath>
-        <fileset refid="libs" />
+        <fileset refid="libs" includes="**/*" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base" />
       </classpath>
@@ -315,14 +315,14 @@
     <rmic base="classes/base" includeAntRuntime="no">
       <patternset refid="rmi-base-classes" />
       <classpath>
-        <fileset refid="libs" />
+        <fileset refid="libs" includes="**/*" />
         <pathelement location="classes/base" />
       </classpath>
     </rmic>
     <rmic base="classes/test" includeAntRuntime="no">
       <patternset refid="rmi-test-classes" />
       <classpath>
-        <fileset refid="libs" />
+        <fileset refid="libs" includes="**/*" />
         <pathelement location="classes/base" />
         <pathelement location="classes/test" />
       </classpath>
@@ -361,7 +361,7 @@
     <delete dir="classes/lib" />
     <mkdir dir="classes/lib" />
     <unjar dest="classes/lib">
-      <fileset refid="libs" />
+      <fileset refid="libs" includes="**/*" />
       <patternset excludes="META-INF/**" />
     </unjar>
   </target>
@@ -598,8 +598,8 @@
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
-      <fileset dir="classes/lib" />
-      <fileset dir="classes/base" />
+      <fileset dir="classes/lib" includes="**/*" />
+      <fileset dir="classes/base" includes="**/*" />
     </jar>
   </target>
 
@@ -612,7 +612,7 @@
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
-      <fileset dir="classes/base" />
+      <fileset dir="classes/base" includes="**/*" />
     </jar>
   </target>
 
@@ -625,8 +625,8 @@
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
-      <fileset dir="classes/lib-14" />
-      <fileset dir="classes/base-14" />
+      <fileset dir="classes/lib-14" includes="**/*" />
+      <fileset dir="classes/base-14" includes="**/*" />
     </jar>
   </target>
 
@@ -639,7 +639,7 @@
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
-      <fileset dir="classes/base-14" />
+      <fileset dir="classes/base-14" includes="**/*" />
     </jar>
   </target>
 
