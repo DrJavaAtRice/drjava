@@ -6,7 +6,7 @@
      
 <project name="eclipse" default="help">
 
-  <property name="eclipse-version" value="0.9.6" />
+  <property name="eclipse-version" value="0.9.8" />
 
   <property name="readable-project-name" value="DrJava Eclipse Plug-in" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
@@ -82,9 +82,13 @@
        Build Target
        ************ -->
   
+  <target name="build" depends="jar-14" description="Shortcut for 'jar-14'">
+  </target>
+  <!-- test-14-in-15 should be here, but has been removed until testing works correctly
   <target name="build" depends="test-14-in-15, jar-14" 
           description="Shortcut for 'test-14-in-15' and 'jar-14'">
   </target>
+  -->
   
 
   <!-- *******************
@@ -94,7 +98,7 @@
   <target name="compile" depends="compile-15" description="Shortcut for 'compile-15'">
   </target>
   
-  <target name="compile-15" depends="do-compile, copy-resources, unjar-libs"
+  <target name="compile-15" depends="check-rmi-compile, do-compile, rmi-compile, copy-resources, unjar-libs"
           description="Compile all source files">
   </target>
   
@@ -110,15 +114,17 @@
     
     <!-- Move any test classes back to base to prevent recompilation -->
     <move todir="classes/base">
-      <fileset dir="classes/test" />
+      <fileset dir="classes/test" includes="**/*" />
     </move>
     
     <!--<javac srcdir="src" destdir="classes/base" source="1.5" target="1.5" sourcepath="${drjava-src}" 
            debug="on" optimize="off" deprecation="on" includeAntRuntime="no" fork="yes">-->
+          <!-- (Have to specify additional explicit srcdirs - see below) -->
     <javac destdir="classes/base" source="1.5" target="1.5" sourcepath="${drjava-src}" 
            debug="on" optimize="off" deprecation="on" includeAntRuntime="no" fork="yes">
       <src>
         <pathelement location="src" />
+        <!-- These classes won't automatically compile, because they aren't in files matching their name -->
         <pathelement location="${drjava-src}/edu/rice/cs/util/sexp" />
       </src>
       <classpath>
@@ -149,7 +155,73 @@
     
   </target>
   
-
+  
+  <!-- Matches base class files that should be RMI compiled.  Search is relative to "classes/base". -->
+  <patternset id="rmi-base-classes">
+    <include name="edu/rice/cs/drjava/model/repl/newjvm/InterpreterJVM.class" />
+    <include name="edu/rice/cs/drjava/model/repl/newjvm/MainJVM.class" />
+    <include name="edu/rice/cs/util/newjvm/RemoteClassLoader.class" />
+    <!-- Additional base RMI classes should be listed here -->
+  </patternset>
+  
+  <!-- Matches test class files that should be RMI compiled.  Search is relative to "classes/test". -->
+  <patternset id="rmi-test-classes">
+    <exclude name="**" />
+    <!-- Additional test RMI classes should be listed here -->
+  </patternset>
+  
+  <!-- This check has to happen *before* do-compile; otherwise, the rmi class files will
+       always be up to date -->
+  <target name="check-rmi-compile">
+    <condition property="rmi-classes-uptodate">
+      <and>
+        <available file="classes/base" type="dir" />
+        <available file="classes/test" type="dir" />
+        <not>
+          <or>
+            <!-- If a source is "up to date" with respect to its class file
+                (reversing the usual order), the class file is out of date.  This
+                allows for a one-to-many relationship between a source and its classes.  -->
+            <uptodate>
+              <srcfiles dir="classes/base">
+                <patternset refid="rmi-base-classes" />
+              </srcfiles>
+              <!-- Regular expression copied from the Ant manual; they say it maps from
+                   classes to their sources -->
+              <mapper type="regexp" from="^(.*?)(\$$[^/\\\.]*)?\.class$$" to="\1.java" />
+            </uptodate>
+            <uptodate>
+              <srcfiles dir="classes/test">
+                <patternset refid="rmi-test-classes" />
+              </srcfiles>
+              <mapper type="regexp" from="^(.*?)(\$$[^/\\\.]*)?\.class$$" to="\1.java" />
+            </uptodate>
+          </or>
+        </not>
+      </and>
+    </condition>
+  </target>
+  
+  <target name="rmi-compile" depends="check-rmi-compile" unless="rmi-classes-uptodate">
+    <echo message="Compiling RMI classes" />
+    <rmic base="classes/base" includeAntRuntime="no">
+      <patternset refid="rmi-base-classes" />
+      <classpath>
+        <fileset refid="libs" />
+        <pathelement location="classes/base" />
+      </classpath>
+    </rmic>
+    <rmic base="classes/test" includeAntRuntime="no">
+      <patternset refid="rmi-test-classes" />
+      <classpath>
+        <fileset refid="libs" />
+        <pathelement location="classes/base" />
+        <pathelement location="classes/test" />
+      </classpath>
+    </rmic>
+  </target>
+  
+  
   <target name="copy-resources">
     <copy todir="classes/base">
       <fileset dir="src">
@@ -370,15 +442,6 @@
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
-        <attribute name="Bundle-ManifestVersion" value="2" />
-        <attribute name="Bundle-Name" value="DrJava Plug-in" />
-        <attribute name="Bundle-SymbolicName" value="edu.rice.cs.drjava; singleton:=true" />
-        <attribute name="Bundle-Version" value="${eclipse-version}" />
-        <attribute name="Bundle-ClassPath" value="drjava-eclipse-15.jar" />
-        <attribute name="Bundle-Activator" value="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin" />
-        <attribute name="Bundle-Localization" value="plugin" />
-        <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.core.runtime, org.eclipse.debug.ui, org.eclipse.jdt.debug.ui, org.eclipse.ui.console, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.jdt.core, org.eclipse.jdt.ui, org.eclipse.search" />
-        <attribute name="Eclipse-AutoStart" value="true" />
       </manifest>
       <fileset dir="classes/lib" />
       <fileset dir="classes/base" />
@@ -391,15 +454,6 @@
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
-        <attribute name="Bundle-ManifestVersion" value="2" />
-        <attribute name="Bundle-Name" value="DrJava Plug-in" />
-        <attribute name="Bundle-SymbolicName" value="edu.rice.cs.drjava; singleton:=true" />
-        <attribute name="Bundle-Version" value="${eclipse-version}" />
-        <attribute name="Bundle-ClassPath" value="drjava-eclipse-base-15.jar" />
-        <attribute name="Bundle-Activator" value="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin" />
-        <attribute name="Bundle-Localization" value="plugin" />
-        <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.core.runtime, org.eclipse.debug.ui, org.eclipse.jdt.debug.ui, org.eclipse.ui.console, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.jdt.core, org.eclipse.jdt.ui, org.eclipse.search" />
-        <attribute name="Eclipse-AutoStart" value="true" />
       </manifest>
       <fileset dir="classes/base" />
     </jar>
@@ -411,15 +465,6 @@
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
-        <attribute name="Bundle-ManifestVersion" value="2" />
-        <attribute name="Bundle-Name" value="DrJava Plug-in" />
-        <attribute name="Bundle-SymbolicName" value="edu.rice.cs.drjava; singleton:=true" />
-        <attribute name="Bundle-Version" value="${eclipse-version}" />
-        <attribute name="Bundle-ClassPath" value="drjava-eclipse.jar" />
-        <attribute name="Bundle-Activator" value="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin" />
-        <attribute name="Bundle-Localization" value="plugin" />
-        <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.core.runtime, org.eclipse.debug.ui, org.eclipse.jdt.debug.ui, org.eclipse.ui.console, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.jdt.core, org.eclipse.jdt.ui, org.eclipse.search" />
-        <attribute name="Eclipse-AutoStart" value="true" />
       </manifest>
       <fileset dir="classes/lib-14" />
       <fileset dir="classes/base-14" />
@@ -432,15 +477,6 @@
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
-        <attribute name="Bundle-ManifestVersion" value="2" />
-        <attribute name="Bundle-Name" value="DrJava Plug-in" />
-        <attribute name="Bundle-SymbolicName" value="edu.rice.cs.drjava; singleton:=true" />
-        <attribute name="Bundle-Version" value="${eclipse-version}" />
-        <attribute name="Bundle-ClassPath" value="drjava-eclipse-base-14.jar" />
-        <attribute name="Bundle-Activator" value="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin" />
-        <attribute name="Bundle-Localization" value="plugin" />
-        <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.core.runtime, org.eclipse.debug.ui, org.eclipse.jdt.debug.ui, org.eclipse.ui.console, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.jdt.core, org.eclipse.jdt.ui, org.eclipse.search" />
-        <attribute name="Eclipse-AutoStart" value="true" />
       </manifest>
       <fileset dir="classes/base-14" />
     </jar>
