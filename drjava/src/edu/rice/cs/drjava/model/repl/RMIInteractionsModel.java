@@ -148,16 +148,20 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _notifyInterpreterChanged(inProgress);
   }
 
-  /** Updates the prompt and status of the document after an interpreter change.
+  /** Updates the prompt and status of the document after an interpreter change.  Assumes write lock is already held.
    *  @param prompt New prompt to display
    *  @param inProgress whether the interpreter is currently in progress
    *  @param updatePrompt whether or not the interpreter has changed
    */
   private void _updateDocument(String prompt, boolean inProgress, boolean updatePrompt) {
     if (updatePrompt) {
-      _document.setPrompt(prompt);
-      _document.insertNewLine(_document.getLength());
-      _document.insertPrompt();
+      _document.acquireWriteLock();
+      try {
+        _document.setPrompt(prompt);
+        _document.insertNewLine(_document.getLength());
+        _document.insertPrompt();
+      }
+      finally { _document.releaseWriteLock(); }      
     }
     _document.setInProgress(inProgress);
   }

@@ -50,9 +50,7 @@ public interface JavadocListener {
    */
   public void saveBeforeJavadoc();
   
-  /**
-   * Called after Javadoc is started by the GlobalModel.
-   */
+  /** Called after Javadoc is started by the GlobalModel. */
   public void javadocStarted();
   
   /**

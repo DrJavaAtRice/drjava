@@ -203,6 +203,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 
   /** Starts testing the source using JUnit.  Demands that the definitions be saved and compiled before proceeding
    *  with testing.  Fires the appropriate events as the testing proceeds and finishes.
+   *  TODO: this method is redundant and should be deprecated
    *  @exception IOException if a file with errors cannot be opened
    *  @exception ClassNotFoundException when the class is compiled to a location not on the classpath.
    */

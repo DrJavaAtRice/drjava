@@ -94,7 +94,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Listens for changes to the cursor position in order to reset the start position */
   private CaretListener _caretListener = new CaretListener() {
     public void caretUpdate(CaretEvent e) {
-      Utilities.invokeLater(new Runnable() {  // force other caret listeners to wait (why?)
+      Utilities.invokeLater(new Runnable() {
         public void run() {
           _replaceAction.setEnabled(false);
           _replaceFindNextAction.setEnabled(false);
@@ -766,13 +766,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       
       // If there actually *is* a match, then switch active documents. otherwise don't
        if (searchAll) {
-         if (! matchDoc.equals(openDoc))  _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+         if (! matchDoc.equals(openDoc)) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
          else _model.refreshActiveDocument();  // the unmodified active document may have been kicked out of the cache!
        } 
      
       if (fr.getWrapped() && ! searchAll) {
         Toolkit.getDefaultToolkit().beep();
-        if (!_machine.getSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
+        if (! _machine.getSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
         else _frame.setStatusMessage("Search wrapped to end.");
       }
       
@@ -781,14 +781,14 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         _frame.setStatusMessage("Search wrapped around all documents.");
       }
       
-      if (pos >=0) { // found a match
-         Caret c = _defPane.getCaret();
-         c.setDot(c.getDot());
-         _defPane.setCaretPosition(pos);
-         _caretChanged = true;
-         _updateMachine();
-      
-      // defer executing this code until after active document switch (if any) is complete
+      if (pos >= 0) { // found a match
+        Caret c = _defPane.getCaret();
+        c.setDot(c.getDot());
+        _defPane.setCaretPosition(pos);
+        _caretChanged = true;
+        _updateMachine();
+        
+        // defer executing this code until after active document switch (if any) is complete
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             _selectFoundItem();

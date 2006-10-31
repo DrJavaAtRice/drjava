@@ -677,12 +677,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     JMenuItem commentLinesItem = new JMenuItem("Comment Line(s)");
     commentLinesItem.addActionListener(new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        _mainFrame.hourglassOn();
+        _mainFrame.simpleHourglassOn();
         try{
           _doc.setCurrentLocation(getCaretPosition());
           _commentLines();
         }
-        finally{ _mainFrame.hourglassOff(); }
+        finally{ _mainFrame.simpleHourglassOff(); }
       }
     });
     _popMenu.add(commentLinesItem);
@@ -869,7 +869,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private volatile int _selEnd;
   
   /** This function is called when the active document is changed. this function is called on the pane that is 
-   *  replaced by the new active pane. It allows the pane to "shutdown" when not in use.  Currently, this procedure 
+   * replaced by the new active pane. It allows the pane to "shutdown" when not in use.  Currently, this procedure 
    *  replaces the Definitions Document with a blank dummy document to help conserve memory (so that the pane will 
    *  not be holding onto the last reference of a definitions document not allowing it to be garbage collected)
    */

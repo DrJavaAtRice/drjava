@@ -34,6 +34,7 @@
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.ui.DefinitionsPaneTest;
 import edu.rice.cs.util.Log;
 
 import junit.framework.AssertionFailedError;
@@ -60,6 +61,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   public void tearDown() throws Exception {
     ExceptionHandler.ONLY.rethrow();
     if (_testFailed) fail("test failed in another thread");
+    DefinitionsPaneTest._log.log("MultithreadedTestCase.tearDown() calling super.tearDown()");
     super.tearDown();
   }
 

@@ -75,8 +75,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   protected static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
   
   /** The total number of errors in the list */
-  protected int _numErrors;
-  protected JCheckBox _showHighlightsCheckBox;
+  protected volatile int _numErrors;
+  protected volatile JCheckBox _showHighlightsCheckBox;
   
   // TODO: is this necessary, or can we get by with installing a domain-specific
   //       model in the constructor - e.g. JavadocModel
@@ -498,10 +498,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      */
     protected String _getErrorTitle() {
       CompilerErrorModel cem = getErrorModel();
-      if (cem.getNumCompErrors() > 1)
-        return "--------------\n*** Errors ***\n--------------\n";
-      if (cem.getNumCompErrors() > 0)
-        return "-------------\n*** Error ***\n-------------\n";
+      if (cem.getNumCompErrors() > 1) return "--------------\n*** Errors ***\n--------------\n";
+      if (cem.getNumCompErrors() > 0) return "-------------\n*** Error ***\n-------------\n";
       return "";
     }
       
@@ -510,10 +508,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      */
     protected String _getWarningTitle() {
       CompilerErrorModel cem = getErrorModel();
-      if (cem.getNumWarnings() > 1)
-        return "--------------\n** Warnings **\n--------------\n";
-      if (cem.getNumWarnings() > 0)
-        return "-------------\n** Warning **\n-------------\n";
+      if (cem.getNumWarnings() > 1) return "--------------\n** Warnings **\n--------------\n";
+      if (cem.getNumWarnings() > 0) return "-------------\n** Warning **\n-------------\n";
       return "";
     }
         
@@ -571,8 +567,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       // Show errors first and warnings second
       
       String errorTitle = _getErrorTitle();
-      if (cem.getNumWarnings() > 0)   
-        doc.append(errorTitle, BOLD_ATTRIBUTES);
+      if (cem.getNumWarnings() > 0) doc.append(errorTitle, BOLD_ATTRIBUTES);
       
       for (int errorNum = 0; errorNum < numErrors; errorNum++) {
         int startPos = doc.getLength();
@@ -588,8 +583,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }
       
       String warningTitle = _getWarningTitle();
-      if (cem.getNumCompErrors() > 0)   
-        doc.append(warningTitle, BOLD_ATTRIBUTES);
+      if (cem.getNumCompErrors() > 0) doc.append(warningTitle, BOLD_ATTRIBUTES);
       
       for (int errorNum = 0; errorNum < numErrors; errorNum++) {
         int startPos = doc.getLength();

@@ -39,11 +39,9 @@ import javax.swing.text.BadLocationException;
 import javax.swing.event.DocumentListener;
 import edu.rice.cs.drjava.model.FileMovedException;
 
-/**
- * The Reconstructor is basically a mix between a factory and
- * a lambda.  This class is used by the DocumentCache in order
- * to be able to load DefinitionsDocuments lazily from disk.
- */
+/** The Reconstructor is a closure that builds a document.  This class is used by the DocumentCache to load 
+  * DefinitionsDocuments lazily from files on disk.
+  */
 public interface DDReconstructor {
   
   /** @return a new DefinitionsDocument */

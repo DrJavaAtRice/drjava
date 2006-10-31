@@ -173,6 +173,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Whether or not to reset the interactions JVM after compiling.  Should only be false in test cases. */
   private volatile boolean _resetAfterCompile = true;
   
+  /** Number of errors in last compilation.  compilerModel._numErrors is trashed when the compile model is reset. */
+  private volatile int _numCompErrors = 0;
+  
   /* JUnit Fields */
   
   /** JUnitModel manages all JUnit functionality. */
@@ -282,13 +285,17 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Gets the JavadocModel, which provides all methods relating to Javadoc. */
   public JavadocModel getJavadocModel() { return _javadocModel; }
   
+  public int getNumCompErrors() { return _numCompErrors; }
+  public void setNumCompErrors(int num) { _numCompErrors = num; }
+  
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
     // Kill the interpreter
-    _jvm.killInterpreter(null); 
-    try { _jvm.dispose(); }
-    catch(RemoteException e) { /* ignore */ }
-    super.dispose();
+    _jvm.killInterpreter(null);
+    // Commented out because it invokes UnicastRemoteObject.unexport
+//    try { _jvm.dispose(); }
+//    catch(RemoteException e) { /* ignore */ }
+    super.dispose();  // removes the global model listeners!
   }
 
   /** Disposes of external resources. Kills the slave JVM. */

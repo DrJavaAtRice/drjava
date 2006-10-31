@@ -70,26 +70,28 @@ import org.apache.bcel.classfile.*;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 /** Manages unit testing via JUnit.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
   
   /** RMI interface to a secondary JVM for running tests.  Using a second JVM prevents interactions and tests from 
-   *  corrupting the state of DrJava.
-   */
+    * corrupting the state of DrJava.
+    */
   private final MainJVM _jvm;
   
-  /** Compiler model containing a lock used to prevent simultaneous test and compile. */
+  /** The compiler model.  It contains a lock used to prevent simultaneous test and compile.  It also tracks the number
+    * errors in the last compilation, which is required information if junit forces compilation.  
+    */
   private final CompilerModel _compilerModel;
   
   /** The global model to which the JUnitModel belongs */
   private final GlobalModel _model;
   
   /** The error model containing all current JUnit errors. */
-  private JUnitErrorModel _junitErrorModel;
+  private volatile JUnitErrorModel _junitErrorModel;
   
   /** State flag to prevent starting new tests on top of old ones */
   private volatile boolean _testInProgress = false;
@@ -104,10 +106,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   private final SwingDocument _junitDoc = new SwingDocument();
   
   /** Main constructor.
-   *  @param jvm RMI interface to a secondary JVM for running tests
-   *  @param compilerModel the CompilerModel, used only as a lock to prevent simultaneous test and compile
-   *  @param model used only for getSourceFile
-   */
+    * @param jvm RMI interface to a secondary JVM for running tests
+    * @param compilerModel the CompilerModel, used only as a lock to prevent simultaneous test and compile
+    * @param model used only for getSourceFile
+    */
   public DefaultJUnitModel(MainJVM jvm, CompilerModel compilerModel, GlobalModel model) {
     _jvm = jvm;
     _compilerModel = compilerModel;
@@ -243,15 +245,18 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     // new ScrollableDialog(null, "classpaths assembled in junitOpenDefDocs: " + classpaths, "", "").show();
     
     if (_model.hasOutOfSyncDocuments() || _model.hasModifiedDocuments()) { 
-    // hasOutOfSyncDocments() uses grainy time stamps which do not detect some changes to source documents 
+      /* hasOutOfSyncDocments() can return false when some documents have not been successfully compiled; the granularity
+         of time-stamping and the presence of multiple classes in a file (some of which compile successfully) can produce 
+         \false reports.  */
 //      System.err.println("Out of sync documents exist");
         
         CompilerListener testAfterCompile = new DummyCompilerListener() {
           public void compileEnded(File workDir, File[] excludedFiles) {
             final CompilerListener listenerThis = this;
             try {
-              if (_model.hasOutOfSyncDocuments()) {
-                JOptionPane.showMessageDialog(null, "All open source files must be compiled before running a unit test", 
+              if (_model.hasOutOfSyncDocuments() || _model.getNumCompErrors() > 0) {
+                if (! Utilities.TEST_MODE) 
+                  JOptionPane.showMessageDialog(null, "All open files must be compiled before running a unit test", 
                                               "Must Compile All Before Testing", JOptionPane.ERROR_MESSAGE); 
                 nonTestCase(allTests);
                 return;

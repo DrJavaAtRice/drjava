@@ -134,11 +134,13 @@ public abstract class PreviewFrame extends JFrame {
     public void windowClosing(WindowEvent ev) { _close(); }
   };
 
-  /** Contructs a new PreviewFrame using a parent model and a Pageable object print to show. */
+  /** Contructs a new PreviewFrame using a parent model and a Pageable object print to show. Should only be called in 
+    * event thread. 
+    */
   public PreviewFrame(SingleDisplayModel model, MainFrame mainFrame, boolean interactions) 
     throws IllegalStateException {
     super("Print Preview");
-    mainFrame.hourglassOn();
+    mainFrame.simpleHourglassOn();
     _model = model;
     _mainFrame = mainFrame;
     _toolBar = new JToolBar();
@@ -195,7 +197,7 @@ public abstract class PreviewFrame extends JFrame {
 
   private void _close() {
     dispose();
-    _mainFrame.hourglassOff();
+    _mainFrame.simpleHourglassOff();
   }
 
   private void _nextPage() {

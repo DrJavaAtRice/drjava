@@ -76,8 +76,7 @@ public class ScrollableDialog implements Serializable {
    * @param width Width for this dialog
    * @param height Height for this dialog
    */
-  public ScrollableDialog(JFrame parent, String title, String header, String text,
-                          int width, int height)
+  public ScrollableDialog(JFrame parent, String title, String header, String text, int width, int height)
   {
     _dialog = new JDialog(parent, title, true);    
     Container content = _dialog.getContentPane();
@@ -94,8 +93,7 @@ public class ScrollableDialog implements Serializable {
     
     // Add components
     JScrollPane textScroll = 
-      new BorderlessScrollPane(_textArea,
-                               JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+      new BorderlessScrollPane(_textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     JPanel scrollWrapper = new JPanel(new BorderLayout(0,5));
     scrollWrapper.setBorder(new EmptyBorder(5,5,0,5));

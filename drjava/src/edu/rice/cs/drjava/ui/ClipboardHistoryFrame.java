@@ -314,19 +314,20 @@ public class ClipboardHistoryFrame extends JFrame {
     updateView();
   }
   
-  /** Validates before changing visibility,
-   *  @param b true if frame should be shown, false if it should be hidden.
-   */
+  /** Validates before changing visibility.  Should only run in the event thread.
+    * @param b true if frame should be shown, false if it should be hidden.
+    */
   public void setVisible(boolean b) {
+    assert EventQueue.isDispatchThread();
     validate();
     super.setVisible(b);
     if (b) {
-      _mainFrame.hourglassOn();
+      _mainFrame.simpleHourglassOn();
       updateView();
       _historyList.requestFocus();
     }
     else {
-      _mainFrame.hourglassOff();
+      _mainFrame.simpleHourglassOff();
       _mainFrame.toFront();
     }
   }

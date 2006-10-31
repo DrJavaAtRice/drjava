@@ -196,7 +196,7 @@ public final class CommandLineTest extends DrJavaTestCase {
   }
 
   public void tearDown() throws Exception {
-    _mf.dispose();
+    Utilities.invokeAndWait(new Runnable() { public void run() { _mf.dispose(); } });
     _mf = null;
     super.tearDown();
   }

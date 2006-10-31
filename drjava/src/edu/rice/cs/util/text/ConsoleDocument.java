@@ -199,9 +199,13 @@ public class ConsoleDocument implements EditDocumentInterface {
   /** Gets the position immediately before the prompt, or the doc length if there is no prompt. */
   public int getPositionBeforePrompt() {
     acquireReadLock();
+    int len = _document.getLength();
     try {
-      if (_hasPrompt) return _promptPos - _prompt.length();
-      return _document.getLength();
+      if (_hasPrompt) {
+        int promptStart = _promptPos - _prompt.length();
+        return (promptStart < len && promptStart >= 0) ? promptStart : len;  // ensure position is within document 
+      }
+      return len;
     }
     finally { releaseReadLock(); }
   }

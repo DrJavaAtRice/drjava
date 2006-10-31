@@ -212,7 +212,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    *  @param items varargs/array of items
    */
   public PredictiveInputFrame(Frame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
-                              java.util.List<PredictiveInputModel.MatchingStrategy<T>> strategies,
+                              List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               CloseAction<T> okAction, CloseAction<T> cancelAction, T... items) {
     this(owner, title, force, ignoreCase, info, strategies, okAction, cancelAction, Arrays.asList(items));
 //    super(title);
@@ -297,7 +297,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     * @param ignoreCase true if case should be ignored
     * @param items list of items
     */
-  public void setItems(boolean ignoreCase, java.util.List<T> items) {
+  public void setItems(boolean ignoreCase, List<T> items) {
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
     removeListener();
     updateTextField();
@@ -345,7 +345,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     */
   public String getText() {
     if (_force) {
-      @SuppressWarnings("unchecked") T item = (T)_matchList.getSelectedValue();
+      @SuppressWarnings("unchecked") 
+        T item = (T)_matchList.getSelectedValue();
       return (item==null)?"":_currentStrategy.force(item,_textField.getText());
     }
     return _textField.getText();
@@ -356,7 +357,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     */
   public T getItem() {
     if (!_force && _pim.getMatchingItems().size() == 0) return null;
-    @SuppressWarnings("unchecked") T item = (T)_matchList.getSelectedValue();
+    @SuppressWarnings("unchecked") 
+      T item = (T)_matchList.getSelectedValue();
     return item;
   }
 
@@ -444,13 +446,13 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
 //        System.out.println("up!");
-        if (_matchList.getModel().getSize()>0) {
+        if (_matchList.getModel().getSize() > 0) {
           removeListener();
           int i = _matchList.getSelectedIndex();
-          if (i>0) {
-            _matchList.setSelectedIndex(i-1);
-            _matchList.ensureIndexIsVisible(i-1);
-            _pim.setCurrentItem(_pim.getMatchingItems().get(i-1));
+          if (i > 0) {
+            _matchList.setSelectedIndex(i - 1);
+            _matchList.ensureIndexIsVisible(i - 1);
+            _pim.setCurrentItem(_pim.getMatchingItems().get(i - 1));
             updateInfo();
           }
           addListener();
@@ -463,10 +465,10 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
         if (_matchList.getModel().getSize()>0) {
           removeListener();
           int i = _matchList.getSelectedIndex();
-          if (i<_matchList.getModel().getSize()-1) {
-            _matchList.setSelectedIndex(i+1);
-            _matchList.ensureIndexIsVisible(i+1);
-            _pim.setCurrentItem(_pim.getMatchingItems().get(i+1));
+          if (i < _matchList.getModel().getSize() - 1) {
+            _matchList.setSelectedIndex(i + 1);
+            _matchList.ensureIndexIsVisible(i + 1);
+            _pim.setCurrentItem(_pim.getMatchingItems().get(i + 1));
             updateInfo();
           }
           addListener();
@@ -476,13 +478,11 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0), new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
 //        System.out.println("page up!");
-        if (_matchList.getModel().getSize()>0) {
+        if (_matchList.getModel().getSize() > 0) {
           removeListener();
           int page = _matchList.getLastVisibleIndex() - _matchList.getFirstVisibleIndex() + 1;
           int i = _matchList.getSelectedIndex() - page;
-          if (i<0) {
-            i = 0;
-          }
+          if (i < 0)  i = 0;
           _matchList.setSelectedIndex(i);
           _matchList.ensureIndexIsVisible(i);
           _pim.setCurrentItem(_pim.getMatchingItems().get(i));
@@ -498,8 +498,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
           removeListener();
           int page = _matchList.getLastVisibleIndex() - _matchList.getFirstVisibleIndex() + 1;
           int i = _matchList.getSelectedIndex() + page;
-          if (i>=_matchList.getModel().getSize()) {
-            i = _matchList.getModel().getSize()-1;
+          if (i >= _matchList.getModel().getSize()) {
+            i = _matchList.getModel().getSize() - 1;
           }
           _matchList.setSelectedIndex(i);
           _matchList.ensureIndexIsVisible(i);
@@ -516,7 +516,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
 //        char c = e.getKeyChar();
 //        if ((c != KeyEvent.VK_DELETE) && (c != KeyEvent.VK_BACK_SPACE) && (c >= 32)) {
 //          String oldMask = _pim.getMask();
-//          String newMask = oldMask.substring(0, _textField.getCaretPosition()) + c + oldMask.substring(_textField.getCaretPosition());
+//          String newMask = oldMask.substring(0, _textField.getCaretPosition()) + c + 
+//            oldMask.substring(_textField.getCaretPosition());
 //          _pim.setMask(newMask);
 //          if (_force && (_pim.getMatchingItems().size()==0)) {
 //            Toolkit.getDefaultToolkit().beep();
@@ -532,9 +533,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       }
 
       public void focusLost(FocusEvent e) {
-        if ((e.getOppositeComponent()!=_strategyBox) && 
-            (e.getOppositeComponent()!=_okButton) && 
-            (e.getOppositeComponent()!=cancelButton)) {
+        if ((e.getOppositeComponent() != _strategyBox) && 
+            (e.getOppositeComponent() != _okButton) && 
+            (e.getOppositeComponent() != cancelButton)) {
           _textField.requestFocus();
         }
       }

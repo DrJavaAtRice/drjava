@@ -179,9 +179,17 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "   }" +
     "}";
 
+   private static final String MULTI_CLASSES_IN_FILE_TEXT = 
+    "import junit.framework.TestCase;" +
+    " class A { } " +
+    " class B /* with syntax error */ { public void foo(int x) { } } " +
+    " public class Test extends TestCase { " + 
+    "   public void testAB() { assertTrue(\"this is true\", true); } " +
+    " }";
+  
   /** Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
-   */
+    * @return a test suite based on the methods in this class
+    */
   public static Test suite() { return  new TestSuite(GlobalModelJUnitTest.class); }
   
   /** Tests that a JUnit file with no errors is reported to have no errors. */
@@ -228,8 +236,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     listener.runJUnit(_model.getJUnitModel());
 
-    assertEquals("test case has one error reported", 1,
-                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
+    assertEquals("test case has one error reported", 1, _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
     
     _log.log("testOneJUnitError completed");
@@ -275,8 +282,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     listener.runJUnit(doc);
 
-    assertEquals("test case has one error reported", 1,
-                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
+    assertEquals("test case has one error reported", 1, _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     listener.assertJUnitEndCount(1);
     _model.removeListener(listener);
     
@@ -341,8 +347,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitStartCount(1);
     listener.assertJUnitEndCount(1);
 
-    assertEquals("test case has one error reported", 1,
-                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
+    assertEquals("test case has one error reported", 1, _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener);
     
     _log.log("testResultOfNonPublicTestCase completed");
@@ -641,8 +646,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertFalse("second error should be a failure", jem.getError(1).isWarning());
     
     _log.log("testJUnitAllWithErrors completed");
-  }
-  
+  } 
   
   /** Tests that junit all works with one or two test cases that should pass. */
   public void testJUnitStaticInnerClass() throws Exception {
@@ -675,6 +679,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testJUnitStaticInnerClass completed");
   }  
  
+  /** Tests that testing an uncompiled but correct group of files will first compile and then run test. */
   public class JUnitCompileBeforeTestListener extends JUnitTestListener {
     
     /* Method copied by _mainListener in MainFrame. */
@@ -705,5 +710,53 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
       catch(IOException e) { throw new UnexpectedException(e); }  
     }
     public void fileSaved(OpenDefinitionsDocument doc) { }
+  }
+  
+  /** Tests that when a JUnit file with no errors is compiled and then modified to contain
+    * an error does not pass unit testing (by running correct class files).
+    */
+  public void testCorrectFilesAfterIncorrectChanges() throws Exception {
+    if (printMessages) System.out.println("-----testCorrectFilesAfterIncorrectChanges-----");
+    
+    OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
+    JUnitNonTestListener listener = new JUnitNonTestListener(true);
+    File file = new File(_tempDir, "NonTestCase.java");
+    doc.saveFile(new FileSelector(file));
+    doc.startCompile();
+    doc = setupDocument(MULTI_CLASSES_IN_FILE_TEXT);
+    file = new File(_tempDir, "Test.java");
+    doc.saveFile(new FileSelector(file));
+    doc.startCompile();
+    _model.addListener(listener);
+    
+    listener.runJUnit(_model.getJUnitModel());
+    
+    listener.assertNonTestCaseCount(0);
+    listener.assertJUnitSuiteStartedCount(1);
+    listener.assertJUnitTestStartedCount(1);
+    listener.assertJUnitTestEndedCount(1);
+    _model.removeListener(listener);
+    
+    doc.remove(87,4);
+    
+    JUnitTestListener listener2 = new JUnitCompileBeforeTestListener();
+      
+    _model.addListener(listener2);
+    
+//    Utilities.show("calling _runJunit in testNoClassFile");
+    
+    listener2.runJUnit(doc);
+//    Utilities.showDebug("Junit run completed");
+    
+    if (printMessages) System.out.println("after test");
+    listener2.assertCompileBeforeJUnitCount(1);
+    listener2.assertNonTestCaseCount(1);
+    listener2.assertJUnitStartCount(0);
+    listener2.assertJUnitEndCount(0);
+    listener2.assertJUnitSuiteStartedCount(0);
+    listener2.assertJUnitTestStartedCount(0);
+    listener2.assertJUnitTestEndedCount(0);
+    _model.removeListener(listener2);
+    _log.log("testCorrectFilesAfterIncorrectChanges completed");
   }
 }

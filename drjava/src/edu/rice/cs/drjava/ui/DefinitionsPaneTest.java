@@ -58,7 +58,8 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
 
   private volatile MainFrame _frame;
   
-  private static final Log _log = new Log("DefinitionsPaneTest.txt", false);
+  public static final Log _log = new Log("DefinitionsPaneTest.txt", false);  // used in other tests
+  
   private static final char UNDEFINED = KeyEvent.CHAR_UNDEFINED;
   private static final int PRESSED = KeyEvent.KEY_PRESSED;
   private static final int RELEASED = KeyEvent.KEY_RELEASED;
@@ -91,9 +92,10 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   }
   
   public void tearDown() throws Exception {
-    Utilities.invokeAndWait(new Runnable() {
+    Utilities.invokeLater(new Runnable() {
       public void run() {
         _frame.dispose();
+        _log.log("Main Frame disposed");
         _frame = null;
       }
     });
@@ -180,6 +182,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     _assertDocumentEmpty(doc, "before testing");
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
+
         try { 
           doc.insertString(0, "/**", null);
           defPane.setCaretPosition(3);
@@ -190,6 +193,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
           _frame.validate();
         }
         catch(Throwable t) { listenerFail(t.getMessage()); }
+        _log.log("Completed processing of keyEvents");
       }
     });
     Utilities.clearEventQueue();
@@ -219,7 +223,8 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
         defPane.processKeyEvent(new KeyEvent(defPane, PRESSED, (new Date()).getTime(), M_MASK, W, UNDEFINED));
         _frame.validate();
       }
-    });
+    }); 
+    Utilities.clearEventQueue();
     
     _assertDocumentEmpty(doc, "point 2");
         
@@ -547,8 +552,8 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   }
   
   
-  private int _finalCount;
-  private int _finalDocCount;
+  private volatile int _finalCount;
+  private volatile int _finalDocCount;
   
   public void testDocumentPaneMemoryLeak()  throws InterruptedException, java.io.IOException{
     _finalCount = 0;

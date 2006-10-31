@@ -32,6 +32,7 @@
  *END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
+import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
@@ -81,8 +82,12 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
     assertSame("getFirst test", i1, tree.getFirst());
     assertSame("getLast test", i4, tree.getLast());
     
-    tree.setNextChangeModelInitiated(true);
-    tree.setActiveDoc(i1);
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        tree.setNextChangeModelInitiated(true);
+        tree.setActiveDoc(i1);
+      }
+    });
     assertSame("getCurrent test", i1, tree.getCurrent());
     assertSame("getNext test 1", i2, tree.getNext(i1));
     assertSame("getNext test 2", i3, tree.getNext(i2));
@@ -145,33 +150,29 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
    * try to delete the parent.
    */
   public void testRenameDocument() {
-    String name = "MyTest.dj0";
-    String newName = "MyTest.dj0*";
-    DummyINavigatorItem item = new DummyINavigatorItem(name);
-    DummyINavigatorItem newItem = new DummyINavigatorItem(newName);
-//    Object _lock = new Object();
-//    synchronized(_lock) {
-      tree.addDocument(item, "folder3");
-//    }
+    final String name = "MyTest.dj0";
+    final String newName = "MyTest.dj0*";
+    final DummyINavigatorItem item = new DummyINavigatorItem(name);
+    final DummyINavigatorItem newItem = new DummyINavigatorItem(newName);
+    Utilities.invokeAndWait(new Runnable() { public void run() { tree.addDocument(item, "folder3"); } });
     InnerNode folder3 = (InnerNode)source.getChildAt(2);
     assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
-//    synchronized(_lock) {
-      tree.refreshDocument(item, "folder3");
-//    }
-//    synchronized(_lock) {
-      assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
-      LeafNode<?> node = (LeafNode<?>)folder3.getChildAt(0);
-      assertEquals("node should have correct name", name, node.toString());
-      tree.removeDocument(item);
-      tree.addDocument(newItem, "folder3");
-      folder3 = (InnerNode)source.getChildAt(2);
-      LeafNode<?> newNode = (LeafNode<?>)folder3.getChildAt(0);
-      
+    Utilities.invokeAndWait(new Runnable() { public void run() { tree.refreshDocument(item, "folder3"); } });
+    assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
+    LeafNode<?> node = (LeafNode<?>)folder3.getChildAt(0);
+    assertEquals("node should have correct name", name, node.toString());
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        tree.removeDocument(item);
+        tree.addDocument(newItem, "folder3");
+      }
+    });
+    folder3 = (InnerNode)source.getChildAt(2);
+    LeafNode<?> newNode = (LeafNode<?>)folder3.getChildAt(0);
+    
 //      tree.refreshDocument(newItem, "folder3")
-      assertEquals("should have been renamed", newName, newNode.toString());
-      assertEquals("node should have same parent", folder3, newNode.getParent());
-      tree.removeDocument(newItem);
-//    }
+    assertEquals("should have been renamed", newName, newNode.toString());
+    assertEquals("node should have same parent", folder3, newNode.getParent());
+    Utilities.invokeAndWait(new Runnable() { public void run() { tree.removeDocument(newItem); } });
   }
-  
 }

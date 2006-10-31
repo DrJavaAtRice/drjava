@@ -98,8 +98,7 @@ public class CompilerErrorModel {
   /** The global model which created/controls this object. */
   private final GlobalModel _model;
 
-  /** Constructs an empty CompilerErrorModel.
-   */
+  /** Constructs an empty CompilerErrorModel with no errors and a dummy global model. */
   public CompilerErrorModel() {
     _model = new DummyGlobalModel() {
       public OpenDefinitionsDocument getDocumentForFile(File file) {
@@ -119,10 +118,11 @@ public class CompilerErrorModel {
     _positions = new Position[0];
   }
 
-  /** Constructs a new CompilerErrorModel to be maintained by a particular OpenDefinitionsDocument.
-   *  @param errors the list of CompilerError's (or a subclass).
-   *  @param model is the model to find documents from
-   */
+  /** Constructs a new CompilerErrorModel with specified global model.  Performed in DefaultGlobalModel construction 
+    * and after compilation has been performed.
+    * @param errors the list of CompilerError's (or a subclass).
+    * @param model is the model to find documents from
+    */
   public CompilerErrorModel(CompilerError[] errors, GlobalModel model) {
     _model = model;
 

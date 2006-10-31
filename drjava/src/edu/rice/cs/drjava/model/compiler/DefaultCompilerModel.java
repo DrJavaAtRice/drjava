@@ -82,8 +82,8 @@ public class DefaultCompilerModel implements CompilerModel {
   private Object _slaveJVMLock = new Object();
 
   /** Main constructor.  
-   *  @param m the GlobalModel that is the source of documents for this CompilerModel
-   */
+    * @param m the GlobalModel that is the source of documents for this CompilerModel
+    */
   public DefaultCompilerModel(GlobalModel m) {
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new CompilerError[0], _model);
@@ -241,8 +241,8 @@ public class DefaultCompilerModel implements CompilerModel {
       throw new IOException("Could not create build directory: "+buildDir);
     }
 
-    File workDir = _model.getWorkingDirectory();
-    if ((workDir!=null) && !workDir.exists() && !workDir.mkdirs()) {
+    File workDir = _model.getWorkingDirectory(); 
+    if ((workDir != null) && ! workDir.exists() && ! workDir.mkdirs()) {
       throw new IOException("Could not create working directory: "+workDir);
     }
      
@@ -266,10 +266,7 @@ public class DefaultCompilerModel implements CompilerModel {
 
   //-------------------------------- Helpers --------------------------------//
 
-  /**
-   * Converts JExprParseExceptions thrown by the JExprParser in language levels to
-   * CompilerErrors.
-   */
+  /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. */
   private LinkedList<CompilerError> _parseExceptions2CompilerErrors(LinkedList<JExprParseException> pes) {
     LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
     Iterator<JExprParseException> iter = pes.iterator();
@@ -280,9 +277,7 @@ public class DefaultCompilerModel implements CompilerModel {
     return errors;
   }
   
-  /**
-   * Converts errors thrown by the language level visitors to CompilerErrors.
-   */
+  /** Converts errors thrown by the language level visitors to CompilerErrors. */
   private LinkedList<CompilerError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpressionIF>> visitorErrors) {
     LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
     Iterator<Pair<String, JExpressionIF>> iter = visitorErrors.iterator();
@@ -394,13 +389,13 @@ public class DefaultCompilerModel implements CompilerModel {
     return false;
   }
 
-  /** Sorts the given array of CompilerErrors and divides it into groups
-   *  based on the file, giving each group to the appropriate
-   *  OpenDefinitionsDocument, opening files if necessary. 
-   */
+  /** Sorts the given array of CompilerErrors and divides it into groups based on the file, giving each group to the
+    * appropriate OpenDefinitionsDocument, opening files if necessary.  Called immediately after compilations finishes.
+    */
   private void _distributeErrors(CompilerError[] errors) throws IOException {
-    resetCompilerErrors();  // Why is this done?
+//    resetCompilerErrors();  // Why is this done?
     _compilerErrorModel = new CompilerErrorModel(errors, _model);
+    _model.setNumCompErrors(_compilerErrorModel.getNumCompErrors());  // cache number of compiler errors in global model
   }
 
   /** Gets an array of all sourceRoots for the open definitions documents, without duplicates. Note that if any of the 
@@ -457,7 +452,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Gets the CompilerErrorModel representing the last compile. */
   public CompilerErrorModel getCompilerErrorModel() { return _compilerErrorModel; }
 
-  /** Gets the total number of current errors. */
+  /** Gets the total number of errors in this compiler model. */
   public int getNumErrors() { return getCompilerErrorModel().getNumErrors(); }
   
   /** Gets the total number of current compiler errors. */

@@ -64,21 +64,13 @@ public final class IndentInfoTest extends DrJavaTestCase {
         //Do nothing
         return 0;
       }
-      protected void endCompoundEdit(int key) {
-        //Do nothing
-      }
-      protected void endLastCompoundEdit() {
-        //Do nothing
-      }
+      protected void endCompoundEdit(int key) { /* Do nothing. */ }
+      protected void endLastCompoundEdit() { /* Do nothing. */ }
       protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
-        //Do nothing
+        /* Do nothing */
       }
-      protected void _styleChanged() {
-        //Do nothing 
-      }
-      protected Indenter makeNewIndenter(int indentLevel) {
-        return new Indenter(indentLevel);
-      }
+      protected void _styleChanged() { /* Do nothing. */ }
+      protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
     };
   }
   

@@ -423,6 +423,14 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call getDocumentCount on a Dummy");
   }
   
+  public int getNumCompErrors() {
+     throw new UnsupportedOperationException("Tried to call getNumCompErrors on a Dummy");
+  }
+  
+   public void setNumCompErrors(int num) {
+     throw new UnsupportedOperationException("Tried to call setNumCompErrors on a Dummy");
+  }
+   
   public OpenDefinitionsDocument getODDForDocument(AbstractDocumentInterface doc) {
      throw new UnsupportedOperationException("Tried to call getODDForDocument on a Dummy");
   }

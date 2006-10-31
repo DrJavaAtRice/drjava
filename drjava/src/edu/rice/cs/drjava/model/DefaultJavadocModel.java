@@ -110,17 +110,13 @@ public class DefaultJavadocModel implements JavadocModel {
 
   // -------------------- Javadoc All Documents --------------------
   
-  /** Javadocs all open documents, after ensuring that all are saved.
-   *  The user provides a destination, and the gm provides the package info.
-   *  Must run in the event-handling thread.
-   *
-   * @param select a command object for selecting a directory and warning a user
-   *        about bad input
-   * @param saver a command object for saving a document (if it moved/changed)
-   * @param classPath a collection of classpath elements to be used by Javadoc
-   *
-   * @throws IOException if there is a problem manipulating files
-   */
+  /** Javadocs all open documents, after ensuring that all are saved.  The user provides a destination, and the global 
+    * model provides the package info.  Must run in the event-handling thread.
+    * @param select a command object for selecting a directory and warning a user about bad input
+    * @param saver a command object for saving a document (if it moved/changed)
+    * @param classPath a collection of classpath elements to be used by Javadoc
+    * @throws IOException if there is a problem manipulating files
+    */
   public void javadocAll(DirectorySelector select, final FileSaveSelector saver, final String classPath) 
     throws IOException {
         
@@ -175,6 +171,7 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     catch (OperationCanceledException oce) { return; } // If the user cancels anywhere, silently return.
   
+    _notifier.javadocStarted();  // fire first so _javadocAllWorker can fire javadocEnded
     // Start a new thread to do the work.
     final File destDirF = destDir;
     new Thread("DrJava Javadoc Thread") {
@@ -189,7 +186,7 @@ public class DefaultJavadocModel implements JavadocModel {
     */
   private void _javadocAllWorker(File destDirFile, FileSaveSelector saver, String classPath) {
     
-    if (!_ensureValidToolsJar()) return;
+//    if (!_ensureValidToolsJar()) return;  // addresses on 1.3/1.4 incompatiblies; no longer relevant
 
     String destDir = destDirFile.getAbsolutePath();
 
@@ -265,14 +262,14 @@ public class DefaultJavadocModel implements JavadocModel {
       catch (IOException ioe) {
         // There was a problem getting the file for this document.
         // Kill javadoc and display the exception as an error.
-        _notifier.javadocStarted();  // fire first so it can fire javadocEnded
+//        _notifier.javadocStarted();  // fire first so it can fire javadocEnded // already done above
         _showCompilerError(ioe.getMessage(), file);
         return;
       }
       catch (InvalidPackageException ipe) {
         // Bad package - kill the javadoc operation and display the exception
         // as an error.
-        _notifier.javadocStarted();  // fire first so it can fire javadocEnded
+//        _notifier.javadocStarted();  // fire first so it can fire javadocEnded  // already done above
         _showCompilerError(ipe.getMessage(), file);
          return;
       }
@@ -292,9 +289,7 @@ public class DefaultJavadocModel implements JavadocModel {
     }
 
     // Generate all command line arguments
-    ArrayList<String> args = _buildCommandLineArgs(docUnits, destDir,
-                                                   sourcePath.toString(),
-                                                   classPath);
+    ArrayList<String> args = _buildCommandLineArgs(docUnits, destDir, sourcePath.toString(), classPath);
 
     // Run the actual Javadoc process
     _runJavadoc(args, classPath, destDirFile, true);
@@ -304,29 +299,22 @@ public class DefaultJavadocModel implements JavadocModel {
 
   // -------------------- Javadoc Current Document --------------------
 
-  /**
-   * Generates Javadoc for the given document only, after ensuring it is saved.
-   * Saves the output to a temporary directory, which is provided in the
-   * javadocEnded event.
-   *
-   * @param doc Document to generate Javadoc for
-   * @param saver a command object for saving the document (if it moved/changed)
-   * @param classPath a collection of classpath elements to be used by Javadoc
-   *
-   * @throws IOException if there is a problem manipulating files
-   */
-  public void javadocDocument(final OpenDefinitionsDocument doc,
-                              final FileSaveSelector saver,
-                              final String classPath)           throws IOException {
+  /** Generates Javadoc for the given document only, after ensuring it is saved. Saves the output in a temp directory
+    * which is passed to _javadocDocuemntWorker, which is passed to a subsequent javadocEnded event.
+    * @param doc Document to generate Javadoc for
+    * @param saver a command object for saving the document (if it moved/changed)
+    * @param classPath a collection of classpath elements to be used by Javadoc
+    *
+    * @throws IOException if there is a problem manipulating files
+    */
+  public void javadocDocument(final OpenDefinitionsDocument doc, final FileSaveSelector saver, final String classPath)
+    throws IOException {
     // Prompt to save if necessary
     //  (TO DO: should only need to save the current document)
     if (doc.isUntitled() || doc.isModifiedSinceSave()) _notifier.saveBeforeJavadoc();
 
     // Make sure it is saved
-    if (doc.isUntitled() || doc.isModifiedSinceSave()) {
-      // The user didn't save, so don't generate Javadoc
-      return;
-    }
+    if (doc.isUntitled() || doc.isModifiedSinceSave()) return;  // The user didn't save, so don't generate Javadoc
 
     // Try to get the file from the document
     final File file = _getFileFromDocument(doc, saver);
@@ -334,50 +322,39 @@ public class DefaultJavadocModel implements JavadocModel {
     // Generate to a temporary directory
     final File destDir = FileOps.createTempDirectory("DrJava-javadoc");
 
+    _notifier.javadocStarted();  // fire first so _javadocDocumntWorker can fire javadocEnded
     // Start a new thread to do the work.
     new Thread("DrJava Javadoc Thread") {
-      public void run() {
-//        _javadocDocumentWorker(destDir, file, doc, saver, classpathArray);
-        _javadocDocumentWorker(destDir, file, classPath);
-      }
+      public void run() { _javadocDocumentWorker(destDir, file, classPath); }
     }.start();
   }
 
-  /**
-   * Handles most of the logic for generating Javadoc for a single file,
-   * once we know that it won't be canceled.
-   *
-   * @param destDirFile the destination directory for the doc files
-   * @param docFile the file of the document
-   * @param classpath an array of classpath elements to be used by Javadoc
-   */
-  private void _javadocDocumentWorker(File destDirFile, File docFile, String classPath) {
-    if (!_ensureValidToolsJar()) return;
+  /** Handles most of the logic for generating Javadoc for a single file, once we know that it won't be canceled.
+    * @param destDirFile the destination directory for the doc files
+    * @param docFile the file of the document
+    * @param classpath an array of classpath elements to be used by Javadoc
+    */
+  private void _javadocDocumentWorker(File destDir, File docFile, String classPath) {
+//    if (!_ensureValidToolsJar()) return;  // addresses on 1.3/1.4 incompatiblies; no longer relevant
 
     // Generate all command line arguments
-    String destDir = destDirFile.getAbsolutePath();
-    ArrayList<String> args = _buildCommandLineArgs(docFile, destDir, classPath);
+    String destDirName = destDir.getAbsolutePath();
+    ArrayList<String> args = _buildCommandLineArgs(docFile, destDirName, classPath);
 
     // Run the actual Javadoc process
-    _runJavadoc(args, classPath, destDirFile, false);
+    _runJavadoc(args, classPath, destDir, false);
   }
 
 
 
   // -------------------- Helper Methods --------------------
 
-  /**
-   * Suggests a default location for generating Javadoc, based on the given
-   * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
-   * the sourceroot.)
-   *
-   * Ensures that the document is saved first, or else no reasonable
-   * suggestion will be found.
-   *
-   * @param doc Document with the source root to use as the default.
-   * @return Suggested destination directory, or null if none could be
-   * determined.
-   */
+  /** Suggests a default location for generating Javadoc, based on the given document's source root.  (Appends 
+    * JavadocModel.SUGGESTED_DIR_NAME to the sourceroot.) Ensures that the document is saved first, or else no 
+    * reasonable suggestion will be found.
+    * @param doc Document with the source root to use as the default.
+    * @return Suggested destination directory, or null if none could be determined.
+    */
   public File suggestJavadocDestination(OpenDefinitionsDocument doc) {
     _attemptSaveAllDocuments();
 
@@ -400,37 +377,32 @@ public class DefaultJavadocModel implements JavadocModel {
     if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) _notifier.saveBeforeJavadoc();
   }
 
-  /**
-   * Ensures that a valid version of tools.jar is being used for our classpath.
-   * Ends the process with an error and returns false if not.
-   *
-   * Using JDK 1.4 with a 1.3 tools.jar is invalid, but using JDK 1.3 with
-   * a 1.4 tools.jar is ok.
-   */
-  private boolean _ensureValidToolsJar() {
-    PlatformSupport platform = PlatformFactory.ONLY;
-    String version = platform.getJavaSpecVersion();
-    if (!"1.3".equals(version) && platform.has13ToolsJar()) {
-      String msg =
-        "There is an incompatible version of tools.jar on your\n" +
-        "classpath, so Javadoc cannot run.\n" +
-        "(tools.jar is version 1.3, JDK is version " + version + ")";
-      _notifier.javadocStarted();  // fire first so it can fire javadocEnded
-      _showCompilerError(msg, null);
-      return false;
-    }
-    return true;
-  }
+//  /** Ensures that a valid version of tools.jar is being used for our classpath.
+//    * Ends the process with an error and returns false if not.
+//    * Using JDK 1.4 with a 1.3 tools.jar is invalid, but using JDK 1.3 with
+//    * a 1.4 tools.jar is ok.
+//    */
+//  private boolean _ensureValidToolsJar() {
+//    PlatformSupport platform = PlatformFactory.ONLY;
+//    String version = platform.getJavaSpecVersion();
+//    if (!"1.3".equals(version) && platform.has13ToolsJar()) {
+//      String msg =
+//        "There is an incompatible version of tools.jar on your\n" +
+//        "classpath, so Javadoc cannot run.\n" +
+//        "(tools.jar is version 1.3, JDK is version " + version + ")";
+//      _notifier.javadocStarted();  // fire first so it can fire javadocEnded
+//      _showCompilerError(msg, null);
+//      return false;
+//    }
+//    return true;
+//  }
 
-  /**
-   * Treats the given message as a Javadoc error, firing the
-   * end event necessary to show the error.  The javadocStarted() event
-   * <i>must</i> have already been fired, and Javadoc generation must
-   * halt after calling this method.
-   *
-   * @param msg Message to display as an error
-   * @param f File that caused the error
-   */
+  /** Treats the given message as a Javadoc error, firing the end event necessary to show the error.  The 
+    * javadocStarted() event <i>must</i> have already been fired, and Javadoc generation must halt after calling this
+    * method.
+    * @param msg Message to display as an error
+    * @param f File that caused the error
+    */
   private void _showCompilerError(String msg, File f) {
     CompilerError[] errors = new CompilerError[1];
     errors[0] = new CompilerError(f, -1, -1, msg, false);
@@ -454,7 +426,7 @@ public class DefaultJavadocModel implements JavadocModel {
     boolean result;
     try {
       // Notify all listeners that Javadoc is starting.
-      _notifier.javadocStarted();
+//      _notifier.javadocStarted();  // already done in worker methods
 
       result = _javadoc(args.toArray(new String[args.size()]), classPath);
 

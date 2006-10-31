@@ -124,13 +124,11 @@ public class VectorOption<T> extends Option<Vector<T>> {
     return res;
   }
 
-  /**
-   * @param v The Vector to be formatted.
-   * @return A String representing "v". The overall String
-   * format is determined by the method Vector<T>.tString(),
-   * but each element of the vector is formatted by calling
-   * formatElement().
-   */
+  /** Formats the Vector v.  The overall String format is determined by the method Vector<T>.tString(), but each 
+    * element of the vector is formatted by calling formatElement().
+    * @param v The Vector to be formatted.
+    * @return A String representing "v". 
+    */
   public String format(Vector<T> v) {
     final StringBuilder res = new StringBuilder(header);
 
@@ -143,7 +141,5 @@ public class VectorOption<T> extends Option<Vector<T>> {
     }
     return res.append(footer).toString();
   }
-
-
 }
 

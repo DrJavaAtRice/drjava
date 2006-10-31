@@ -59,7 +59,7 @@ public class SimpleDocumentRegion implements DocumentRegion {
     _file = file;
     _startOffset = so;
     _endOffset = eo;
-    if (_doc!=null) {
+    if (_doc != null) {
       try {
         _startPos = _doc.createPosition(so);
         _endPos = _doc.createPosition(eo);
@@ -76,7 +76,7 @@ public class SimpleDocumentRegion implements DocumentRegion {
 
   /** @return the start offset */
   public int getStartOffset() {
-    if (_startPos!=null) {
+    if (_startPos != null) {
       // if we have a position that moves within the document, update the offset
       _startOffset = _startPos.getOffset();
     }
@@ -85,7 +85,7 @@ public class SimpleDocumentRegion implements DocumentRegion {
 
   /** @return the end offset */
   public int getEndOffset() {
-    if (_endPos!=null) {
+    if (_endPos != null) {
       // if we have a position that moves within the document, update the offset
       _endOffset = _endPos.getOffset();
     }
@@ -96,13 +96,13 @@ public class SimpleDocumentRegion implements DocumentRegion {
   public boolean equals(Object other) {
     if (!(other instanceof SimpleDocumentRegion) || (other==null)) return false;
     SimpleDocumentRegion o = (SimpleDocumentRegion)other;
-    return ((((_doc==null) && (o._doc==null)) || (_doc.equals(o._doc))) &&
-            (((_file==null) && (o._file==null)) || (_file.equals(o._file))) &&
-            (_startPos.getOffset() == o._startPos.getOffset()) &&
-            (_endPos.getOffset() == o._endPos.getOffset()));
+    return (((_doc == null && o._doc == null) || _doc.equals(o._doc)) &&
+            ((_file == null && o._file == null) || _file.equals(o._file)) &&
+            _startPos.getOffset() == o._startPos.getOffset() &&
+            _endPos.getOffset() == o._endPos.getOffset());
   }
   
   public String toString() {
-    return ((_doc!=null)?_doc.toString():"null") + " "+_startOffset+" .. "+_endOffset;
+    return (_doc != null ? _doc.toString() : "null") + " "+_startOffset+" .. "+_endOffset;
   }
 }

@@ -50,22 +50,35 @@ import edu.rice.cs.util.UnexpectedException;
   * <li> There is no nesting of comment open characters. If // is encountered in the middle of a comment, it is 
   * treated as two separate slashes.  Similar for /*.
   * </ol>
+  * All of the code in the class assumes that a lock on this is held.
   * @author JavaPLT
   * @version $Id$
   */
 public class ReducedModelControl implements BraceReduction {
-  ReducedModelBrace rmb;
-  ReducedModelComment rmc;
-  int _offset;
+  /* private fields; default visibility for testing purposes only. */
+  volatile ReducedModelBrace _rmb;
+  volatile ReducedModelComment _rmc;
+  volatile int _offset;
 
-  public ReducedModelControl() {
-    rmb = new ReducedModelBrace(this);
-    rmc = new ReducedModelComment();
+  // Relying on default constructor
+//  public ReducedModelControl() {
+//    rmb = new ReducedModelBrace(this);
+//    rmc = new ReducedModelComment();
+//  }
+  
+  private ReducedModelBrace getRMB() {
+    if (_rmb == null) _rmb = new ReducedModelBrace(this);
+    return _rmb;
   }
-
+  
+  private ReducedModelComment getRMC() {
+    if (_rmc == null) _rmc = new ReducedModelComment();
+    return _rmc;
+  }
+  
   public void insertChar(char ch) {
-    rmb.insertChar(ch);
-    rmc.insertChar(ch);
+    getRMB().insertChar(ch);
+    getRMC().insertChar(ch);
   }
 
   /** <P>Updates the BraceReduction to reflect cursor movement. Negative values move left from the cursor, 
@@ -74,8 +87,8 @@ public class ReducedModelControl implements BraceReduction {
    */
   public void move(int count) {
     try {
-      rmb.move(count);
-      rmc.move(count);
+      getRMB().move(count);
+      getRMC().move(count);
     }
     catch(IllegalArgumentException e) { 
       resetLocation();
@@ -88,26 +101,26 @@ public class ReducedModelControl implements BraceReduction {
    *  cursor, positive values delete text to the right.
    */
   public void delete(int count) {
-    rmb.delete(count);
-    rmc.delete(count);
+    getRMB().delete(count);
+    getRMC().delete(count);
   }
 
   /** <P>Finds the closing brace that matches the next significant brace iff that brace is an open brace.</P>
    *  @return the distance until the matching closing brace.  On failure, returns -1.
    *  @see #balanceBackward()
    */
-  public int balanceForward() { return rmb.balanceForward(); }
+  public int balanceForward() { return getRMB().balanceForward(); }
   
   /** <P>Finds the open brace that matches the previous significant brace iff that brace is an closing brace.</P>
    *  @return the distance until the matching open brace.  On failure, returns -1.
    *  @see #balanceForward()
    */
-  public int balanceBackward() { return rmb.balanceBackward(); }
+  public int balanceBackward() { return getRMB().balanceBackward(); }
 
   /** This function returns the state at the relDistance, where relDistance is relative to the last time it was called.
    *  You can reset the last call to the current offset using resetLocation.
    */
-  public ReducedModelState moveWalkerGetState(int relDistance) { return rmc.moveWalkerGetState(relDistance); }
+  public ReducedModelState moveWalkerGetState(int relDistance) { return getRMC().moveWalkerGetState(relDistance); }
 
   /** This function resets the location of the walker in the comment list to
    *  where the current cursor is. This allows the walker to keep walking and
@@ -115,7 +128,7 @@ public class ReducedModelControl implements BraceReduction {
    *  every call to stateAtRelLocation. It is an optimization.
    */
   public void resetLocation() {
-    rmc.resetWalkerLocationToCursor();
+    getRMC().resetWalkerLocationToCursor();
   }
 
   /** Get the token currently pointed at by the cursor. Because the reduced model is split into two reduced sub-models,
@@ -126,17 +139,17 @@ public class ReducedModelControl implements BraceReduction {
     */
   public ReducedToken currentToken() {
     // check the reduced comment model for specials
-    ReducedToken rmcToken = rmc.current();
-    if (!rmcToken.isGap()) return rmcToken;
+    ReducedToken rmcToken = getRMC().current();
+    if (! rmcToken.isGap()) return rmcToken;
     // check the reduced brace model for braces
-    ReducedToken rmbToken = rmb.current();
-    if (!rmbToken.isGap()) {
-      rmbToken.setState(rmc.getStateAtCurrent());
+    ReducedToken rmbToken = getRMB().current();
+    if (! rmbToken.isGap()) {
+      rmbToken.setState(getRMC().getStateAtCurrent());
       return rmbToken;
     }
     // otherwise, we have a gap.
     int size = getSize(rmbToken,rmcToken);
-    return new Gap(size, rmc.getStateAtCurrent());
+    return new Gap(size, getRMC().getStateAtCurrent());
   }
 
   /** Get the shadowing state at the current caret position.
@@ -144,7 +157,7 @@ public class ReducedModelControl implements BraceReduction {
     * INSIDE_SINGLE_QUOTE|INSIDE_DOUBLE_QUOTE
     */
   public ReducedModelState getStateAtCurrent() {
-      return rmc.getStateAtCurrent();
+      return getRMC().getStateAtCurrent();
   }
 
   /**
@@ -152,12 +165,12 @@ public class ReducedModelControl implements BraceReduction {
    * @return "" if current is a Gap, otherwise, use ReducedToken.getType()
    */
   String getType() {
-    ReducedToken rmcToken = rmc.current();
-    if (!rmcToken.isGap())
+    ReducedToken rmcToken = getRMC().current();
+    if (! rmcToken.isGap())
       return rmcToken.getType();
 
-    ReducedToken rmbToken = rmb.current();
-    if (!rmbToken.isGap()) {
+    ReducedToken rmbToken = getRMB().current();
+    if (! rmbToken.isGap()) {
       return rmbToken.getType();
     }
     return ""; //a gap
@@ -172,12 +185,12 @@ public class ReducedModelControl implements BraceReduction {
    * @return the number of characters represented by the current token
    */
   int getSize() {
-    return getSize(rmb.current(),rmc.current());
+    return getSize(getRMB().current(),getRMC().current());
   }
 
   int getSize(ReducedToken rmbToken, ReducedToken rmcToken) {
-    int rmb_offset = rmb.getBlockOffset();
-    int rmc_offset = rmc.getBlockOffset();
+    int rmb_offset = getRMB().getBlockOffset();
+    int rmc_offset = getRMC().getBlockOffset();
     int rmb_size = rmbToken.getSize();
     int rmc_size = rmcToken.getSize();
     int size;
@@ -203,14 +216,14 @@ public class ReducedModelControl implements BraceReduction {
    * Move the reduced model to the next token and update the cursor information.
    */
   void next() {
-    if (rmc._cursor.atStart()) {
-      rmc.next();
-      rmb.next();
+    if (getRMC()._cursor.atStart()) {
+      getRMC().next();
+      getRMB().next();
       return;
     }
-    int size = getSize(rmb.current(),rmc.current());
-    rmc.move(size - _offset);
-    rmb.move(size - _offset);
+    int size = getSize(getRMB().current(), getRMC().current());
+    getRMC().move(size - _offset);
+    getRMB().move(size - _offset);
   }
 
   /**
@@ -218,49 +231,49 @@ public class ReducedModelControl implements BraceReduction {
    */
   void prev() {
     int size;
-    if (rmc._cursor.atEnd()) {
-      rmc.prev();
-      rmb.prev();
-      if (rmc._cursor.atStart()) {
+    if (getRMC()._cursor.atEnd()) {
+      getRMC().prev();
+      getRMB().prev();
+      if (getRMC()._cursor.atStart()) {
         return; // because in place now.
       }
 
-      if (rmc.current().getSize() < rmb.current().getSize()) {
-        size = -rmc.current().getSize();
+      if (getRMC().current().getSize() < getRMB().current().getSize()) {
+        size = -getRMC().current().getSize();
       }
       else {
-        size = -rmb.current().getSize();
+        size = -getRMB().current().getSize();
       }
-      rmc.next();
-      rmb.next();
+      getRMC().next();
+      getRMB().next();
       move(size);
     }
-    else if (rmb.getBlockOffset() < rmc.getBlockOffset()) {
-      rmb.prev();
-      size = rmb.current().getSize() + rmb.getBlockOffset();
-      rmb.next();
-      if (size < rmc.getBlockOffset()) {
+    else if (getRMB().getBlockOffset() < getRMC().getBlockOffset()) {
+      getRMB().prev();
+      size = getRMB().current().getSize() + getRMB().getBlockOffset();
+      getRMB().next();
+      if (size < getRMC().getBlockOffset()) {
         move(-size);
       }
       else {
-        move(-rmc.getBlockOffset());
+        move(-getRMC().getBlockOffset());
       }
     }
-    else if (rmb.getBlockOffset() == rmc.getBlockOffset()) {
-      rmb.prev();
-      rmc.prev();
-      rmb.setBlockOffset(0);
-      rmc.setBlockOffset(0);
+    else if (getRMB().getBlockOffset() == getRMC().getBlockOffset()) {
+      getRMB().prev();
+      getRMC().prev();
+      getRMB().setBlockOffset(0);
+      getRMC().setBlockOffset(0);
     }
     else {
-      rmc.prev();
-      size = rmc.current().getSize() + rmc.getBlockOffset();
-      rmc.next();
-      if (size < rmb.getBlockOffset()) {
+      getRMC().prev();
+      size = getRMC().current().getSize() + getRMC().getBlockOffset();
+      getRMC().next();
+      if (size < getRMB().getBlockOffset()) {
         move(-size);
       }
       else {
-        move(-rmb.getBlockOffset());
+        move(-getRMB().getBlockOffset());
       }
     }
   }
@@ -269,15 +282,15 @@ public class ReducedModelControl implements BraceReduction {
    * Get the previous token.
    */
   public ReducedToken prevItem() {
-    int rmbOffset = rmb.getBlockOffset();
-    int rmcOffset = rmc.getBlockOffset();
+    int rmbOffset = getRMB().getBlockOffset();
+    int rmcOffset = getRMC().getBlockOffset();
 
     prev();
     ReducedToken temp = currentToken();
     next();
 
-    rmb.setBlockOffset(rmbOffset);
-    rmc.setBlockOffset(rmcOffset);
+    getRMB().setBlockOffset(rmbOffset);
+    getRMC().setBlockOffset(rmcOffset);
     return temp;
   }
 
@@ -285,35 +298,35 @@ public class ReducedModelControl implements BraceReduction {
    * Get the next token.
    */
   public ReducedToken nextItem() {
-    int rmbOffset = rmb.getBlockOffset();
-    int rmcOffset = rmc.getBlockOffset();
+    int rmbOffset = getRMB().getBlockOffset();
+    int rmcOffset = getRMC().getBlockOffset();
     next();
     ReducedToken temp = currentToken();
     prev();
-    rmb.setBlockOffset(rmbOffset);
-    rmc.setBlockOffset(rmcOffset);
+    getRMB().setBlockOffset(rmbOffset);
+    getRMC().setBlockOffset(rmcOffset);
     return temp;
   }
 
   /** Determines if the cursor is at the end of the reduced model. */
-  boolean atEnd() { return (rmb._cursor.atEnd() || rmc._cursor.atEnd()); }
+  boolean atEnd() { return (getRMB()._cursor.atEnd() || getRMC()._cursor.atEnd()); }
 
   /** Determines if the cursor is at the start of the reduced model. */
-  boolean atStart() { return (rmb._cursor.atStart() || rmc._cursor.atStart()); }
+  boolean atStart() { return (getRMB()._cursor.atStart() || getRMC()._cursor.atStart()); }
 
   /** Gets the offset within the current token. */
   int getBlockOffset() {
-    if (rmb.getBlockOffset() < rmc.getBlockOffset()) return rmb.getBlockOffset();
-    return rmc.getBlockOffset();
+    if (getRMB().getBlockOffset() < getRMC().getBlockOffset()) return getRMB().getBlockOffset();
+    return getRMC().getBlockOffset();
   }
 
   /** Gets the absolute character offset into the document represented by the reduced model. */
-  public int absOffset() { return rmc.absOffset(); }
+  public int absOffset() { return getRMC().absOffset(); }
 
 
   /** A toString() substitute. */
   public String simpleString() {
-    return "\n********\n" + rmb.simpleString() + "\n________\n" + rmc.simpleString();
+    return "\n********\n" + getRMB().simpleString() + "\n________\n" + getRMC().simpleString();
   }
 
   /** Returns an IndentInfo containing the following information:
@@ -324,25 +337,25 @@ public class ReducedModelControl implements BraceReduction {
   public IndentInfo getIndentInformation() {
     IndentInfo braceInfo = new IndentInfo();
     //get distance to the previous newline (in braceInfo.distToNewline)
-    rmc.getDistToPreviousNewline(braceInfo);
+    getRMC().getDistToPreviousNewline(braceInfo);
     //get distance to the closing brace before that new line.
-    rmb.getDistToEnclosingBrace(braceInfo);
+    getRMB().getDistToEnclosingBrace(braceInfo);
     //get distance to newline before the previous, just mentioned, brace.
-    rmc.getDistToIndentNewline(braceInfo);
+    getRMC().getDistToIndentNewline(braceInfo);
     // get distance to the brace enclosing the current location
-    rmb.getDistToEnclosingBraceCurrent(braceInfo);
+    getRMB().getDistToEnclosingBraceCurrent(braceInfo);
     // get distance to the beginning of that brace's line
-    rmc.getDistToCurrentBraceNewline(braceInfo);
+    getRMC().getDistToCurrentBraceNewline(braceInfo);
     return braceInfo;
   }
 
   /** Gets distance to end of line on the line previous. */
   public int getDistToPreviousNewline(int relLoc) {
-    return rmc.getDistToPreviousNewline(relLoc);
+    return getRMC().getDistToPreviousNewline(relLoc);
   }
 
   public int getDistToNextNewline() {
-    return rmc.getDistToNextNewline();
+    return getRMC().getDistToNextNewline();
   }
 
   /** Return all highlight status info for text between the current location and current location + length.  This should
@@ -358,7 +371,7 @@ public class ReducedModelControl implements BraceReduction {
     int curLocation;
     int curLength;
 
-    TokenList.Iterator cursor = rmc._cursor._copy();
+    TokenList.Iterator cursor = getRMC()._cursor._copy();
 //    int ct = rmc._tokens.listenerCount();
     curLocation = start;
     // NOTE: old code threw an exception if cursor.atStart(); it used wrong value for curLength atEnd too
@@ -369,7 +382,7 @@ public class ReducedModelControl implements BraceReduction {
       curState = 0;
     }
     else {
-      curLength = cursor.current().getSize() - rmc.getBlockOffset();
+      curLength = cursor.current().getSize() - getRMC().getBlockOffset();
       curState = cursor.current().getHighlightState();
     }
 

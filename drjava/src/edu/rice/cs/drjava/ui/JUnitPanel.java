@@ -168,9 +168,8 @@ public class JUnitPanel extends ErrorPanel {
     if (juem != null) {
       _numErrors = juem.getNumErrors();
       testsHaveRun = juem.haveTestsRun();
-    } else {
-      _numErrors = 0;
-    }
+    } 
+    else _numErrors = 0;
     _errorListPane.updateListPane(testsHaveRun); //changed!!
   }
 
@@ -354,10 +353,10 @@ public class JUnitPanel extends ErrorPanel {
       switchToError(0);
     }
 
-    /** Replaces the "Testing in progress..." text with the given message.
+    /** Replaces the "Testing in progress..." text with the given message.  Must run in event thread.
      *  @param msg the text to insert
      */
-    private void _replaceInProgressText(String msg) throws BadLocationException {
+    public void _replaceInProgressText(String msg) throws BadLocationException {
       int start = 0;
       if (_warnedOutOfSync) { start = TEST_OUT_OF_SYNC.length(); }
       int len = START_JUNIT_MSG.length();

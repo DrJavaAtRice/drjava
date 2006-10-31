@@ -198,7 +198,7 @@ public abstract class AbstractConsoleController implements Serializable {
   class CaretUpdateListener implements DocumentListener {
     public void insertUpdate(final DocumentEvent e) {
       // Queue an asynchronous task in the event thread to update the document pane; Use SwingUtilities to ensure that
-      // the caret update is performed after the document update listeners have run.
+      // the caret update is performed after the document update listeners have run.  Fixes (?) bug #1571405.
       SwingUtilities.invokeLater(new Runnable() { 
         public void run() {
           

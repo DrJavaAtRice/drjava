@@ -72,7 +72,7 @@ import edu.rice.cs.util.OrderedHashSet;
 
 public class DocumentCache {
   
-  private static final int INIT_CACHE_SIZE = 24;
+  private static final int INIT_CACHE_SIZE = 32;
   
   /** @invariant _residentQueue.size() <= CACHE_SIZE */
   private int CACHE_SIZE;
@@ -251,13 +251,16 @@ public class DocumentCache {
     private boolean isUnmanagedOrUntitled() { return (_stat & 0x1) != 0; }  // tests if _stat is odd
      
     /** Called by the cache when the document is removed from the active queue and subject to virtualization. 
-     *  @pre lock for this already held. */
+      * Assumes cacheLock is already held. 
+      */
     void kickOut() { kickOut(false); }
     
     /** Called by the cache when the document is being closed.   Note that _doc can be null in this case!
-     *  @pre lock for this already held. */
+      * Assumes cacheLock is already held. 
+      */
     void closingKickOut() { kickOut(true); }
    
+    /** Performs the actual kickOut operation.  Assumes cacheLock is already held. */
     private void kickOut(boolean isClosing) {
 //      Utilities.showDebug("kickOut(" + isClosing + ") called on " + this);
       if (! isClosing) {

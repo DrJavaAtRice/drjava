@@ -87,16 +87,12 @@ public class JavadocErrorPanel extends ErrorPanel {
     reset();
   }
 
-  /**
-   * Reset the errors to the current error information.
-   */
+  /** Reset the errors to the current error information. */
   public void reset() {
-    CompilerErrorModel em = getModel().getJavadocModel().getJavadocErrorModel();
-    if (em != null) {
-      _numErrors = em.getNumErrors();
-    } else {
-      _numErrors = 0;
-    }
+    CompilerErrorModel model = getModel().getJavadocModel().getJavadocErrorModel();
+    if (model != null) _numErrors = model.getNumErrors();
+    else _numErrors = 0;
+
     _errorListPane.updateListPane(true);
   }
 

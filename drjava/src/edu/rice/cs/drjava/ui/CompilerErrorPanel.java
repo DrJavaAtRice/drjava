@@ -38,6 +38,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
@@ -90,23 +91,16 @@ public class CompilerErrorPanel extends ErrorPanel {
     // Also: The UI will go out of sync with reality if the active compiler
     // is later changed somewhere else. This is because there is no way
     // to listen on the active compiler.
-    _compilerChoiceBox =
-      new JComboBox(getModel().getCompilerModel().getAvailableCompilers());
+    final CompilerModel compilerModel = getModel().getCompilerModel();
+    _compilerChoiceBox = new JComboBox(compilerModel.getAvailableCompilers());
     _compilerChoiceBox.setEditable(false);
-    _compilerChoiceBox.setSelectedItem
-      (getModel().getCompilerModel().getActiveCompiler());
+    _compilerChoiceBox.setSelectedItem(compilerModel.getActiveCompiler());
     _compilerChoiceBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        CompilerInterface compiler = (CompilerInterface)
-          _compilerChoiceBox.getSelectedItem();
-        if (compiler != null) {
-          getModel().getCompilerModel().setActiveCompiler(compiler);
-        }
-        else {
-          getModel().getCompilerModel()
-            .setActiveCompiler(NoCompilerAvailable.ONLY);
-        }
-        getModel().getCompilerModel().resetCompilerErrors();
+        CompilerInterface compiler = (CompilerInterface) _compilerChoiceBox.getSelectedItem();
+        if (compiler == null) compiler = NoCompilerAvailable.ONLY;
+        compilerModel.setActiveCompiler(compiler);
+        compilerModel.resetCompilerErrors();
         _compileHasOccurred = false;
         reset();
       }
@@ -139,18 +133,17 @@ public class CompilerErrorPanel extends ErrorPanel {
     _errorListPane.setCompilationInProgress();
   }
   
-  protected CompilerErrorModel getErrorModel() {
-    return getModel().getCompilerModel().getCompilerErrorModel();
-  }
+  public CompilerErrorModel getErrorModel() { return getModel().getCompilerModel().getCompilerErrorModel(); }
   
   /** Clean up when the tab is closed. */
+  @Override
   protected void _close() {
     super._close();
     getModel().getCompilerModel().resetCompilerErrors();
     reset();
   }
   
-  /** Reset the errors to the current error information immediately following compilation */
+  /** Reset the errors to the current error information immediately following compilation. */
   public void reset(File[] excludedFiles) {
     _excludedFiles = excludedFiles;
     reset();

@@ -735,9 +735,10 @@ public class JarOptionsDialog extends JFrame {
 
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
+    assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
-      _mainFrame.hourglassOn();
+      _mainFrame.simpleHourglassOn();
       ProcessingFrame pf = new ProcessingFrame(this, "Checking class files", "Processing, please wait.");
       pf.setVisible(true);
       _loadSettings();
@@ -745,7 +746,7 @@ public class JarOptionsDialog extends JFrame {
       pf.dispose();
     }
     else {
-      _mainFrame.hourglassOff();
+      _mainFrame.simpleHourglassOff();
       _mainFrame.toFront();
     }
     super.setVisible(vis);

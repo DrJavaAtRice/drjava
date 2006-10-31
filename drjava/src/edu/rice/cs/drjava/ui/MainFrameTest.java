@@ -418,7 +418,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     assertTrue("Start: defPane1", _defPane1.isEditable());
     assertTrue("Start: defPane2", _defPane2.isEditable());
     
-    Utilities.invokeAndWait(new Runnable() { public void run() { _frame.hourglassOn(); } });
+    Utilities.invokeAndWait(new Runnable() { public void run() { _frame.simpleHourglassOn(); } });
     Utilities.clearEventQueue();
     
     assertTrue("Glass on: defPane1", _defPane1.isEditable());
@@ -431,7 +431,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     assertTrue("Doc Switch: defPane1",(! _defPane1.isEditable()));
     assertTrue("Doc Switch: defPane2", _defPane2.isEditable());
     
-    Utilities.invokeAndWait(new Runnable() { public void run() { _frame.hourglassOff(); } });
+    Utilities.invokeAndWait(new Runnable() { public void run() { _frame.simpleHourglassOff(); } });
     Utilities.clearEventQueue();
     
     assertTrue("End: defPane1", _defPane1.isEditable());
@@ -458,7 +458,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         _defPane1 = (DefinitionsPane) _pane1.getViewport().getView();
         _defPane2 = (DefinitionsPane) _pane2.getViewport().getView();
         _frame.validate();
-        _frame.hourglassOn();
+        _frame.simpleHourglassOn();
         _defPane1.processKeyEvent(makeFindKeyEvent(_defPane1, 70));
         _frame.validate();
       }

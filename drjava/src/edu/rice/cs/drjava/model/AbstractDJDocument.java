@@ -75,16 +75,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** A set of Java keywords. */
   protected static final HashSet<String> _primTypes = _makePrimTypes();
   /** The default indent setting. */
-  protected int _indent = 2;
+  protected volatile int _indent = 2;
   
   /** The reduced model of the document (stored in field _reduced) handles most of the document logic and keeps 
    *  track of state.  This field together with _currentLocation function as a virtual object for purposes of 
    *  synchronization.  All operations that access or modify this virtual object should be synchronized on _reduced.
    */
-  public BraceReduction _reduced = new ReducedModelControl();  // public only for locking purposes
+  public volatile BraceReduction _reduced = new ReducedModelControl();  // public only for locking purposes
 
   /** The absolute character offset in the document. */
-  protected int _currentLocation = 0;
+  protected volatile int _currentLocation = 0;
   
   /* The fields _helperCache, _helperCacheHistory, and _cacheInUse function as a virtual object that is synchronized
    * on operations that access or modify any of these fields.  The _helperCache object serves as the lock. 
@@ -105,7 +105,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Whether anything is stored in the cache.  It is used to avoid clearing the table
    *  unnecessarily on every change to the document.
    */
-  protected boolean _cacheInUse;
+  protected volatile boolean _cacheInUse;
   
   /** Maximum number of elements to allow in the helper method cache.  Only encountered when indenting 
    *  very large blocks, since the cache is cleared after each change to the document.
@@ -119,28 +119,42 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public static final int ERROR_INDEX = -1;
   
   /** The instance of the indent decision tree used by Definitions documents. */
-  private final Indenter _indenter;
+  private volatile Indenter _indenter;
   
   /* Saved here to allow the listener to be removed easily. This is needed to allow for garbage collection. */
-  private OptionListener<Integer> _listener1;
-  private OptionListener<Boolean> _listener2;
+  private volatile OptionListener<Integer> _listener1;
+  private volatile OptionListener<Boolean> _listener2;
   
   /*-------- CONSTRUCTORS --------*/
   
+  /** Standard default constructor; required because a unary constructor is defined. */
   protected AbstractDJDocument() {
-    int ind = DrJava.getConfig().getSetting(INDENT_LEVEL).intValue();
-    _indenter = makeNewIndenter(ind); //new Indenter(ind);
-    _initNewIndenter();
+//    int ind = DrJava.getConfig().getSetting(INDENT_LEVEL).intValue();
+//    _indenter = makeNewIndenter(ind); //new Indenter(ind);
+//    _initNewIndenter();
   }
   
+  /** Constructor used to build a new document with an existing indenter. Only used in tests. */
   protected AbstractDJDocument(Indenter indent) { _indenter = indent; }
   
   //-------- METHODS ---------//
   
   /* acquireReadLock, releaseReadLock, acquireWriteLock, releaseWriteLock are inherited from SwingDocument. */
   
-  /** Returns a new indenter. */
+  /** Returns a new indenter.  Assumes writeLock is held. */
   protected abstract Indenter makeNewIndenter(int indentLevel);
+  
+  /** Get the indenter.  Assumes writeLock is already held.
+    * @return the indenter
+    */
+  private Indenter getIndenter() { 
+    if (_indenter == null) {
+      int ind = DrJava.getConfig().getSetting(INDENT_LEVEL).intValue();
+      _indenter = makeNewIndenter(ind); //new Indenter(ind);
+      _initNewIndenter();
+    }
+    return _indenter; 
+  }
   
   /** Get the indent level.
     * @return the indent level
@@ -160,18 +174,21 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     DrJava.getConfig().removeOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
   
+  /** Only called from within getIndenter(). */
   private void _initNewIndenter() {
     // Create the indenter from the config values
     
+    final Indenter indenter = _indenter;
+    
     _listener1 = new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
-        _indenter.buildTree(oce.value.intValue());
+        indenter.buildTree(oce.value.intValue());
       }
     };
     
     _listener2 = new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
-        _indenter.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue());
+        indenter.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue());
       }
     };
     
@@ -956,7 +973,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Indents a line using the Indenter.  Public ONLY for testing purposes. Assumes writeLock is already held.*/
-  public boolean _indentLine(int reason) { return _indenter.indent(this, reason); }
+  public boolean _indentLine(int reason) { return getIndenter().indent(this, reason); }
   
   /** Returns the "intelligent" beginning of line.  If currPos is to the right of the first 
    *  non-whitespace character, the position of the first non-whitespace character is returned.  
@@ -1595,6 +1612,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     catch(BadLocationException e) { throw new UnexpectedException(e); }
     finally { releaseReadLock(); }
   }
+  
+  /** Returns the byte image (as written to a file) of this document. */
+  public byte[] getBytes() { return getText().getBytes(); }
   
   public void clear() {
     acquireWriteLock();

@@ -147,10 +147,8 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _addButtons(); // all buttons needs to be added consecutively as a group for glue to work properly               
     _buttonPanel.add(Box.createHorizontalGlue());
 
-    _listScrollPane = new JScrollPane(_list,
-                                      JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+    _listScrollPane = new JScrollPane(_list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                       JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
     _panel = new JPanel(new BorderLayout());
     _panel.add(_listScrollPane, BorderLayout.CENTER);
     _panel.add(_buttonPanel, BorderLayout.SOUTH);

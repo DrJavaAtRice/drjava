@@ -65,11 +65,8 @@ public class InteractionsDJDocument extends AbstractDJDocument {
   public InteractionsDJDocument() { super(); }  
   
   protected int startCompoundEdit() { return 0; /* Do nothing */ }
-  
   protected void endCompoundEdit(int key) { /* Do nothing */ }
-
   protected void endLastCompoundEdit() { /* Do nothing */ }
-  
   protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) { }
   protected void _styleChanged() { /* Do nothing */ }
   

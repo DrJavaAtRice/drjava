@@ -1020,48 +1020,47 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = 
         new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
-          if (p.getItem()!=null) {
-            boolean docChanged = !p.getItem().doc.equals(_model.getActiveDocument());
-            if (docChanged) {
-              addToBrowserHistory();
-            }
-            _model.setActiveDocument(p.getItem().doc);
-            final int curLine = _model.getActiveDocument().getCurrentLine();
-            String t = p.getText();
-            if (t.lastIndexOf(':')>=0) {
+          if (p.getItem() != null) {
+            final OpenDefinitionsDocument newDoc = p.getItem().doc;
+            final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
+            if (docChanged) addToBrowserHistory();
+            _model.setActiveDocument(newDoc);
+            final int curLine = newDoc.getCurrentLine();
+            final String t = p.getText();
+            final int last = t.lastIndexOf(':');
+            if (last >= 0) {
               try {
-                String end = t.substring(t.lastIndexOf(':')+1);
+                String end = t.substring(last + 1);
                 int val = Integer.parseInt(end);
                 int maxLines = p.getItem().doc.getNumberOfLines();
                 final int lineNum = Math.max(1, Math.min(maxLines, val));
                 SwingUtilities.invokeLater(new Runnable() {
                   public void run() {
-                    try {
-                      _jumpToLine(lineNum);
-                    }
+                    try { _jumpToLine(lineNum); }
                     catch (RuntimeException e) { _jumpToLine(curLine); }
+                    if (docChanged) addToBrowserHistory();
                   }
                 });
               }
               catch(RuntimeException e) { /* ignore */ }
             }
-            if (docChanged) {
-              // defer executing this code until after active document switch (if any) is complete
-              SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                  addToBrowserHistory();
-                }
-              });
-            }
+//            if (docChanged) {
+//              // defer executing this code until after active document switch (if any) is complete
+//              SwingUtilities.invokeLater(new Runnable() {
+//                public void run() {
+//                  addToBrowserHistory();
+//                }
+//              });
+//            }
           }
-          hourglassOff();
+          simpleHourglassOff();
           return null;
         }
       };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = 
         new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
-          hourglassOff();
+          simpleHourglassOff();
           return null;
         }
       };
@@ -1081,7 +1080,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                     cancelAction,
                                                     new GoToFileListEntry(null, "dummy")) {
         public void setOwnerEnabled(boolean b) {
-          if (b) { hourglassOff(); } else { hourglassOn(); }
+          if (b) { simpleHourglassOff(); } else { simpleHourglassOn(); }
         }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
@@ -1141,7 +1140,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       if (currentEntry != null) {
         _gotoFileDialog.setCurrentItem(currentEntry);
       }
-      hourglassOn();
+      simpleHourglassOn();
       /* if (!  Utilities.TEST_MODE) */ 
       _gotoFileDialog.setVisible(true);
     }
@@ -1250,7 +1249,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         initGotoFileDialog();
         _gotoFileDialog.setModel(true, pim); // ignore case
         if (currentEntry != null) _gotoFileDialog.setCurrentItem(currentEntry);
-        hourglassOn();
+        simpleHourglassOn();
         /* The following predicate suppresses the display of the dialog during unit testing.  If the unit test is revised
          * to confirm that the dialog is displayed, this test must be removed. */
         if (MainFrame.this.isVisible()) _gotoFileDialog.setVisible(true);  // predicate suppresses display in unit tests
@@ -1266,10 +1265,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   };
   
 
-  /**
-   * Wrapper class for the "Open Javadoc" dialog list entries.
-   * Provides the ability to have the same class name in there multiple times in different packages.
-   */
+  /** Wrapper class for the "Open Javadoc" dialog list entries.  Provides the ability to have the same class name in
+    * there multiple times in different packages.
+    */
   private static class OpenJavadocListEntry implements Comparable<OpenJavadocListEntry> {
     private final String str, fullStr;
     private final URL url;
@@ -1317,14 +1315,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           if (p.getItem()!=null) {
             PlatformFactory.ONLY.openURL(p.getItem().getURL());
           }
-          hourglassOff();
+          simpleHourglassOff();
           return null;
         }
       };
       PredictiveInputFrame.CloseAction<OpenJavadocListEntry> cancelAction = 
         new PredictiveInputFrame.CloseAction<OpenJavadocListEntry>() {
         public Object apply(PredictiveInputFrame<OpenJavadocListEntry> p) {
-          hourglassOff();
+          simpleHourglassOff();
           return null;
         }
       };
@@ -1344,7 +1342,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                        cancelAction,
                                                        new OpenJavadocListEntry("dummy", "dummy", null)) {
         public void setOwnerEnabled(boolean b) {
-          if (b) { hourglassOff(); } else { hourglassOn(); }
+          if (b) { simpleHourglassOff(); } else { simpleHourglassOn(); }
         }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
@@ -1415,7 +1413,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) {
       initOpenJavadocDialog();     
       _openJavadocDialog.setItems(true, _openJavadocList); // ignore case
-      hourglassOn();
+      simpleHourglassOn();
       _openJavadocDialog.setVisible(true);
     }
   };
@@ -1506,7 +1504,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         else {
           initOpenJavadocDialog();
           _openJavadocDialog.setModel(true, pim); // ignore case
-          hourglassOn();
+          simpleHourglassOn();
           _openJavadocDialog.setVisible(true);
         }
       }
@@ -1563,14 +1561,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
             finally { odd.releaseWriteLock(); }
           }
-          hourglassOff();
+          simpleHourglassOff();
           return null;
         }
       };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = 
         new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
-          hourglassOff();
+          simpleHourglassOff();
           return null;
         }
       };
@@ -1590,7 +1588,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                     cancelAction,
                                                     new GoToFileListEntry(null, "dummy")) {
         public void setOwnerEnabled(boolean b) {
-          if (b) { hourglassOff(); } else { hourglassOn(); }
+          if (b) { simpleHourglassOff(); } else { simpleHourglassOn(); }
         }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
@@ -1691,7 +1689,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         _completeWordDialog.setModel(true, pim); // ignore case
         _completeWordDialog.selectStrategy();
         if (currentEntry != null) _completeWordDialog.setCurrentItem(currentEntry);
-        hourglassOn();
+        simpleHourglassOn();
         _completeWordDialog.setVisible(true);
       }
     }
@@ -1719,18 +1717,18 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Action for commenting out a block of text using wing comments. */
   private final Action _commentLinesAction = new AbstractAction("Comment Line(s)") {
     public void actionPerformed(ActionEvent ae) {
-      hourglassOn();
+      simpleHourglassOn();
       try{ commentLines(); }
-      finally{ hourglassOff(); }
+      finally{ simpleHourglassOff(); }
     }
   };
   
   /** Action for un-commenting a block of commented text. */
   private final Action _uncommentLinesAction = new AbstractAction("Uncomment Line(s)") {
     public void actionPerformed(ActionEvent ae){
-      hourglassOn();
+      simpleHourglassOn();
       try{ uncommentLines(); }
-      finally{ hourglassOff(); }
+      finally{ simpleHourglassOff(); }
     }
   };
   
@@ -3157,8 +3155,19 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         public void run() { 
           getGlassPane().setVisible(true);
           _currentDefPane.setEditable(false);
-          setAllowKeyEvents(false); }
+          setAllowKeyEvents(false); 
+        }
       });
+    }
+  }
+  
+  public void simpleHourglassOn() {
+    assert EventQueue.isDispatchThread();
+    hourglassNestLevel++;
+    if (hourglassNestLevel == 1) {
+    getGlassPane().setVisible(true);
+    _currentDefPane.setEditable(false);
+    setAllowKeyEvents(false); 
     }
   }
   
@@ -3174,6 +3183,16 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           setAllowKeyEvents(true);
         }
       });
+    }
+  }
+  
+  public void simpleHourglassOff() { 
+    assert EventQueue.isDispatchThread();
+    hourglassNestLevel--;
+    if (hourglassNestLevel == 0) {
+      getGlassPane().setVisible(false);
+      _currentDefPane.setEditable(true);
+      setAllowKeyEvents(true);
     }
   }
   
@@ -3194,13 +3213,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       if (isDebuggerReady()) debugger.shutdown();
       else {
         // Turn on debugger
-        hourglassOn();
+        simpleHourglassOn();
         try {
           debugger.startup();  // may kick active document (if unmodified) out of memory!
           _model.refreshActiveDocument();
           _updateDebugStatus();
         }
-        finally { hourglassOff(); }
+        finally { simpleHourglassOff(); }
       }
     }
     catch (DebugException de) {
@@ -3469,7 +3488,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   public void openProject(FileOpenSelector projectSelector) {
     
     try {
-      hourglassOn();
+      simpleHourglassOn();
       final File[] file = projectSelector.getFiles();
       if (file.length < 1)
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
@@ -3481,7 +3500,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       /* do nothing, we just won't open anything */
     }
     catch(Exception e) { e.printStackTrace(System.out); }
-    finally { hourglassOff(); }    
+    finally { simpleHourglassOff(); }    
   }
   
   
@@ -3536,20 +3555,21 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     return _closeProject(false);
   }
   
-  /** Signals the model to close the project, then closes all open files.  It also restores the list view navigator
-   *   @ param quitting whether the project is being closed as part of quitting DrJava
-   *   @return true if the project is closed, false if cancelled
-   */
+  /** Saves the project file; closes all open project files; and calls _model.closeProject(quitting) the 
+    * clean up the state of the global model.  It also restores the list view navigator
+    *   @ param quitting whether the project is being closed as part of quitting DrJava
+    *   @return true if the project is closed, false if cancelled
+    */
   boolean _closeProject(boolean quitting) {
     if (_checkProjectClose()) {
       List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
 //      System.err.println("projDocs = " + projDocs);
-      //    for(OpenDefinitionsDocument d: projDocs) {
-      //      _model.closeFile(d);
-      //    }
       boolean couldClose = _model.closeFiles(projDocs);
       if (! couldClose) return false;
+      // project file has been saved and all files closed
+      if (quitting) return true;
       _model.closeProject(quitting);
+
       Component renderer = _model.getDocumentNavigator().getRenderer();
       new ForegroundColorListener(renderer);
       new BackgroundColorListener(renderer);
@@ -3604,7 +3624,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    */
   public void open(FileOpenSelector openSelector) {
     try {
-      hourglassOn();
+      simpleHourglassOn();
       _model.openFiles(openSelector);
     }
     catch (AlreadyOpenException aoe) {
@@ -3620,7 +3640,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           // File was deleted, but use the same name anyway
           fileName = fme.getFile().getName();
         }
-        
         try {
           File f = openDoc.getFile();
           if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
@@ -3642,7 +3661,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _showFileNotFoundError(fnf); 
     }
     catch (IOException ioe) { _showIOError(ioe); }
-    finally { hourglassOff(); }
+    finally { simpleHourglassOff(); }
   }
   
   
@@ -3675,12 +3694,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param rec true if files in nested folders should be opened
    */
   private void _openFolder(File dir, boolean rec) {
-    hourglassOn();
+    simpleHourglassOn();
     try { _model.openFolder(dir, rec); }
     catch(AlreadyOpenException e) { /* do nothing */ }
     catch(IOException e) { _showIOError(e); }
     catch(OperationCanceledException oce) { /* do nothing */ }
-    finally { hourglassOff(); }
+    finally { simpleHourglassOff(); }
   }
     
   /** Delegates directly to the model to close the active document */
@@ -3761,9 +3780,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   }
   
-  /**
-   * Opens a new PrintPreview frame.
-   */
+  /** Opens a new PrintPreview frame. */
   private void _printDefDocPreview() {
     try {
       _model.getActiveDocument().preparePrintJob();
@@ -3851,13 +3868,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /* Package private to allow use in MainFrameTest. */
   void _saveAll() {
-    hourglassOn();
+    simpleHourglassOn();
     try {
       if (_model.isProjectActive()) _saveProject();
       _model.saveAllFiles(_saveSelector);
     }
     catch (IOException ioe) { _showIOError(ioe); }
-    finally { hourglassOff(); }
+    finally { simpleHourglassOff(); }
   }
   
   // Called by the ProjectPropertiesFrame
@@ -4129,7 +4146,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   private void _compile() {
     _cleanUpForCompile();
-    hourglassOn();
+    simpleHourglassOn();
     try {
       final OpenDefinitionsDocument doc = _model.getActiveDocument();
 //      new Thread("Compile Document") {
@@ -4140,13 +4157,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //        }
 //      }.start();
     }
-    finally { hourglassOff();}
+    finally { simpleHourglassOff();}
 //    update(getGraphics());
   }
   
   private void _compileFolder() {
     _cleanUpForCompile();
-    hourglassOn();
+    simpleHourglassOn();
     try {
       OpenDefinitionsDocument d;
       Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().getDocuments();
@@ -4166,7 +4183,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //        }.start();
       }
     }
-    finally { hourglassOff(); }
+    finally { simpleHourglassOff(); }
 //    update(getGraphics()); 
   }
   
@@ -4174,11 +4191,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _cleanUpForCompile();
 //    new Thread("Compile All") {
 //      public void run() {
-    hourglassOn();
+    simpleHourglassOn();
     try { _model.getCompilerModel().compileProject(); }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
     catch (IOException ioe) { _showIOError(ioe); }
-    finally { hourglassOff();}
+    finally { simpleHourglassOff();}
 //      }
 //    }.start();
 //    update(getGraphics()); 
@@ -4188,11 +4205,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _cleanUpForCompile();
 //    new Thread("Compile All") {
 //      public void run() {
-    hourglassOn();
+    simpleHourglassOn();
     try { _model.getCompilerModel().compileAll(); }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
     catch (IOException ioe) { _showIOError(ioe); }
-    finally { hourglassOff();}
+    finally { simpleHourglassOff();}
 //      }
 //    }.start();
 //    update(getGraphics()); 
@@ -4344,11 +4361,16 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   private void _junit() {
+    simpleHourglassOn(); // turned off in JUnitStarted/NonTestCase  
     new Thread("Run JUnit on Current Document") {
       public void run() {
         _disableJUnitActions();
-        hourglassOn();  // turned off in JUnitStarted/NonTestCase  
-        try { _model.getActiveDocument().startJUnit(); }
+//        hourglassOn();  // moved into the prelude before this thread start  
+        try { 
+          _model.getJUnitModel().junit(_model.getActiveDocument()); 
+//          _model.getActiveDocument().startJUnit();  // Equivalent to preceding
+        }
+
         catch (FileMovedException fme) { _showFileMovedError(fme); }
         catch (IOException ioe) { _showIOError(ioe); }
         catch (ClassNotFoundException cnfe) { _showClassNotFoundError(cnfe); }
@@ -4366,11 +4388,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   private void _junitFolder() {
+    simpleHourglassOn();  // turned off when JUnitStarted event is fired
     new Thread("Run JUnit on specified folder") {
       public void run() { 
         INavigatorItem n;
         _disableJUnitActions();
-        hourglassOn();  // turned off when JUnitStarted event is fired
+//        hourglassOn();  // turned off when JUnitStarted event is fired
         if (_model.getDocumentNavigator().isGroupSelected()) {
           Enumeration<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
           final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
@@ -4388,10 +4411,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Tests the documents in the project source tree. Assumes that DrJava is in project mode. */
   private void _junitProject() { 
+    simpleHourglassOn();  // turned off in JUnitStarted/NonTestCase event
      new Thread("Running Junit Tests") {
       public void run() {
         _disableJUnitActions();
-        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
+//        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
         try { _model.getJUnitModel().junitProject(); } 
         catch(UnexpectedException e) { _junitInterrupted(e); }
       }
@@ -4400,10 +4424,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Tests all open documents. */
   private void _junitAll() {
+    simpleHourglassOn();  // turned off in JUnitStarted/NonTestCase event
     new Thread("Running Junit Tests") {
       public void run() {
         _disableJUnitActions();
-        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
+//        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
         try { _model.getJUnitModel().junitAll(); } 
         catch(UnexpectedException e) { _junitInterrupted(e); }
       }
@@ -5046,8 +5071,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   }
   
-  /** Creates and returns a file menu.  Side effects: sets values for _saveMenuItem.
-   */
+  /** Creates and returns a file menu.  Side effects: sets values for _saveMenuItem. */
   private JMenu _setUpFileMenu(int mask) {
     JMenu fileMenu = new JMenu("File");
     fileMenu.setMnemonic(KeyEvent.VK_F);
@@ -5666,7 +5690,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _interactionsController.setPrevPaneAction(_switchToPreviousPaneAction);
     _interactionsController.setNextPaneAction(_switchToNextPaneAction);
     
-    JScrollPane interactionsScroll = new BorderlessScrollPane(_interactionsPane);
+    JScrollPane interactionsScroll = 
+      new BorderlessScrollPane(_interactionsPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                                                  JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     _interactionsContainer.add(interactionsScroll, BorderLayout.CENTER);
     
     if (_showDebugger) {
@@ -6403,14 +6429,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     // Only change GUI from event-dispatching thread
     Runnable command = new Runnable() {
       public void run() {
-        /*
-         if (isDebuggerReady()) {
-         _disableStepTimer();
-         Debugger manager = _model.getDebugger();
-         manager.clearCurrentStepRequest();
-         _removeThreadLocationHighlight();
-         }
-         */
+//         if (isDebuggerReady()) {
+//         _disableStepTimer();
+//         Debugger manager = _model.getDebugger();
+//         manager.clearCurrentStepRequest();
+//         _removeThreadLocationHighlight();
+//         }
         
         _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
         _interactionsPane.setEditable(true);
@@ -6422,19 +6446,18 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     Utilities.invokeLater(command);
   }
   
-  // Comment out current selection using wing commenting.  Public for testing purposes only. */
-  public void commentLines() {
+  // Comment out current selection using wing commenting.  Non-private for testing purposes only. */
+  void commentLines() {
     // Delegate everything to the DefinitionsDocument.
     OpenDefinitionsDocument openDoc = _model.getActiveDocument();
     int caretPos = _currentDefPane.getCaretPosition();
     openDoc.setCurrentLocation(caretPos);
     int start = _currentDefPane.getSelectionStart();
     int end = _currentDefPane.getSelectionEnd();
-    _currentDefPane.endCompoundEdit();
-    DummyOpenDefDoc dummy = new DummyOpenDefDoc();
-    _currentDefPane.notifyInactive();
+//    _currentDefPane.endCompoundEdit();
+//    _currentDefPane.notifyInactive();
     int newEnd = openDoc.commentLines(start, end);
-    _currentDefPane.notifyActive();
+//    _currentDefPane.notifyActive();
     _currentDefPane.setCaretPosition(start+2);
     if (start != end) _currentDefPane.moveCaretPosition(newEnd);
   }
@@ -6450,15 +6473,15 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _currentDefPane.endCompoundEdit();
     
     //notify inactive to prevent refreshing of the DefPane every time an insertion is made
-    _currentDefPane.notifyInactive();
+//    _currentDefPane.notifyInactive();
     openDoc.setCurrentLocation(start);
     Position startPos;
     try {startPos = openDoc.createPosition(start);}
-    catch (BadLocationException e) {throw new UnexpectedException(e);}
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
     
     int startOffset = startPos.getOffset();        
     int newEnd = openDoc.uncommentLines(start, end);
-    _currentDefPane.notifyActive();
+//    _currentDefPane.notifyActive();
     if (startOffset != startPos.getOffset()) start -= 2;      
     _currentDefPane.setCaretPosition(start);
     if (start != end)   _currentDefPane.moveCaretPosition(newEnd);
@@ -6482,7 +6505,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param shouldHighlight true iff the line should be highlighted.
    *  @param shouldWarn about modifications?
    */
-  public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, final boolean shouldHighlight) {
+  public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, 
+                                        final boolean shouldHighlight) {
     scrollToDocumentAndOffset(doc, offset, shouldHighlight, true);
   }
   
@@ -6493,11 +6517,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param shouldWarn about modifications?
    *  @param shouldAddToHistory true if the location before and after the switch should be added to the browser history
    */
-  public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, final boolean shouldHighlight,
-                                        final boolean shouldAddToHistory) {
-    if (shouldAddToHistory) {
-      addToBrowserHistory();
-    }
+  public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, 
+                                        final boolean shouldHighlight, final boolean shouldAddToHistory) {
+    if (shouldAddToHistory) addToBrowserHistory();
     
     if (!_model.getActiveDocument().equals(doc)) {
       _model.setActiveDocument(doc);
@@ -6629,37 +6651,34 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void nonCurrThreadDied() { }
   }
 
-  /**
-  * @author jlugo
-  * 
-  */
- private class DJAsyncTaskLauncher extends AsyncTaskLauncher {
-   
-  protected boolean shouldSetEnabled() { return true; }
-
-  protected void setParentContainerEnabled(boolean enabled) {
-   if (enabled) hourglassOff(); 
-   else hourglassOn();
+  /** @author jlugo */
+  private class DJAsyncTaskLauncher extends AsyncTaskLauncher {
+    
+    protected boolean shouldSetEnabled() { return true; }
+    
+    protected void setParentContainerEnabled(boolean enabled) {
+      if (enabled) simpleHourglassOff(); 
+      else simpleHourglassOn();
+    }
+    
+    protected IAsyncProgress createProgressMonitor(final String description, final int min, final int max) {
+      return new IAsyncProgress() {
+        private ProgressMonitor _monitor = new ProgressMonitor(MainFrame.this, description, "", min, max);
+        
+        public void close() { _monitor.close(); }
+        public int  getMaximum() { return _monitor.getMaximum() ; }
+        public int  getMillisToDecideToPopup() { return _monitor.getMillisToDecideToPopup(); }
+        public int  getMillisToPopup() { return  _monitor.getMillisToPopup(); }
+        public int  getMinimum() { return _monitor.getMinimum(); }
+        public String  getNote() { return _monitor.getNote(); }
+        public boolean  isCanceled() { return _monitor.isCanceled(); }
+        public void  setMaximum(int m) { _monitor.setMaximum(m); }
+        public void  setMinimum(int m) { _monitor.setMinimum(m); }
+        public void  setNote(String note) { _monitor.setNote(note); }
+        public void  setProgress(int nv) { _monitor.setProgress(nv); }
+      };
+    }
   }
-
-  protected IAsyncProgress createProgressMonitor(final String description, final int min, final int max) {
-    return new IAsyncProgress() {
-      private ProgressMonitor _monitor = new ProgressMonitor(MainFrame.this, description, "", min, max);
-      
-      public void close() { _monitor.close(); }
-      public int  getMaximum() { return _monitor.getMaximum() ; }
-      public int  getMillisToDecideToPopup() { return _monitor.getMillisToDecideToPopup(); }
-      public int  getMillisToPopup() { return  _monitor.getMillisToPopup(); }
-      public int  getMinimum() { return _monitor.getMinimum(); }
-      public String  getNote() { return _monitor.getNote(); }
-      public boolean  isCanceled() { return _monitor.isCanceled(); }
-      public void  setMaximum(int m) { _monitor.setMaximum(m); }
-      public void  setMinimum(int m) { _monitor.setMinimum(m); }
-      public void  setNote(String note) { _monitor.setNote(note); }
-      public void  setProgress(int nv) { _monitor.setProgress(nv); }
-    };
-  }
- }
   
   /** Inner class to listen to all events in the model. */
  private class ModelListener implements GlobalModelListener {
@@ -6794,7 +6813,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
 //      Utilities.showDebug("MainFrame Listener: ActiveDocument changed to " + active);
       // code that accesses the GUI must run in the event-dispatching thread. 
-      Utilities.invokeLater(new Runnable() {  // invokeAndWait is arguably better but it may create occasional deadlocks.
+      Utilities.invokeLater(new Runnable() {  // invokeAndWait can create occasional deadlocks.
         public void run() {
           _recentDocFrame.pokeDocument(active);
           _switchDefScrollPane();
@@ -6922,8 +6941,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
     
     public void junitStarted() {
-      /* Note: hourglassOn() is done by various junit commands (other than junitClasses); hourglass must be off for 
-       * actual testing; the balancing hourglassOff() is located here and in nonTestCase */
+      /* Note: simpleHourglassOn() is done by various junit commands (other than junitClasses); hourglass must be off 
+       * for actual testing; the balancing simpleHourglassOff() is located here and in nonTestCase */
       
       // Only change GUI from event-dispatching thread
 //      new ScrollableDialog(null, "junitStarted(" + docs + ") called in MainFrame", "", "").show();
@@ -6936,7 +6955,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             // _junitAction.setEnabled(false);
             // _junitAllAction.setEnabled(false);
           }
-          finally { hourglassOff(); }  
+          finally { simpleHourglassOff(); }  
         }
       });
     }
@@ -6999,23 +7018,25 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       });
     }
     
+    /** Fire just before javadoc asynchronous thread is started. Only runs in the event thread. */
     public void javadocStarted() {
       
-      // Only change GUI from event-dispatching thread
-      Runnable command = new Runnable() {
-        public void run() {
-          // if we don't lock edits, our error highlighting might break
-          hourglassOn();
-          
-          showTab(_javadocErrorPanel);
-          _javadocErrorPanel.setJavadocInProgress();
-          _javadocAllAction.setEnabled(false);
-          _javadocCurrentAction.setEnabled(false);
-        }
-      };
-      Utilities.invokeLater(command);
+//      // Only change GUI from event-dispatching thread
+//      Runnable command = new Runnable() {
+//        public void run() {
+//          // if we don't lock edits, our error highlighting might break
+      simpleHourglassOn();
+      
+      showTab(_javadocErrorPanel);
+      _javadocErrorPanel.setJavadocInProgress();
+      _javadocAllAction.setEnabled(false);
+      _javadocCurrentAction.setEnabled(false);
+//        }
+//      };
+//      Utilities.invokeLater(command);
     }
     
+
     public void javadocEnded(final boolean success, final File destDir, final boolean allDocs) {
       // Only change GUI from event-dispatching thread
       Runnable command = new Runnable() {
@@ -7027,7 +7048,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             _javadocErrorPanel.reset();
             _model.refreshActiveDocument();
           }
-          finally { hourglassOff(); }
+          finally { simpleHourglassOff(); }
           
           // Display the results.
           if (success) {
@@ -7071,7 +7092,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     public void interpreterExited(final int status) {
       // Only show prompt if option is set and not in TEST_MODE
-      if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue() && ! Utilities.TEST_MODE) {
+      if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue() && ! Utilities.TEST_MODE && 
+          MainFrame.this.isVisible()) {
         // Show the dialog in a Swing thread, so Interactions can
         // start resetting right away.
         Runnable command = new Runnable() {
@@ -7134,10 +7156,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           if (_showDebugger) {
             _toggleDebuggerAction.setEnabled(true);
           }
-          // Moved this line here from interpreterResetting since
-          // it was possible to get an InputBox in InteractionsController
-          // between interpreterResetting and interpreterReady.
-          // Fixes bug #917054 "Interactions Reset Bug".
+//           Moved this line here from interpreterResetting since
+//           it was possible to get an InputBox in InteractionsController
+//           between interpreterResetting and interpreterReady.
+//           Fixes bug #917054 "Interactions Reset Bug".
           _interactionsController.interruptConsoleInput();
         }
       };
@@ -7162,9 +7184,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
     
     /** Compile all open source files if this option is configured or running as a unit test.  Otherwise, pop up a
-     *  dialog to ask if all open source files should be compiled in order to test the program. */
+      * dialog to ask if all open source files should be compiled in order to test the program. 
+      */
     public void compileBeforeJUnit(final CompilerListener testAfterCompile) {
-      if (DrJava.getConfig().getSetting(ALWAYS_COMPILE_BEFORE_JUNIT).booleanValue() || ! MainFrame.this.isVisible()) {
+      System.err.println("in compileBeforeJUnit, TEST_MODE = " + Utilities.TEST_MODE);
+      if (DrJava.getConfig().getSetting(ALWAYS_COMPILE_BEFORE_JUNIT).booleanValue() || Utilities.TEST_MODE) {
         // Compile all open source files
         _model.getCompilerModel().addListener(testAfterCompile);  // listener removes itself
         _compileAll();
@@ -7205,20 +7229,17 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       });
     }
     
-    /** Helper method shared by all "saveBeforeX" methods.
-     * @param message a prompt message to be displayed to the user
-     * @param option the BooleanOption for the prompt dialog checkbox
-     * @param checkMsg the description of the checkbox ("Always save before X")
-     */
+    /** Helper method shared by all "saveBeforeX" methods.  In JUnit tests, YES option is automatically selected
+      * @param message a prompt message to be displayed to the user
+      * @param option the BooleanOption for the prompt dialog checkbox
+      * @param checkMsg the description of the checkbox ("Always save before X")
+      */
     private void _saveAllBeforeProceeding(String message, BooleanOption option, String checkMsg) {
 //      new ScrollableDialog(null, "saveBeforeProceeding called in MainFrame", "", "").show();
       if (_model.hasModifiedDocuments()) {
-        if (!DrJava.getConfig().getSetting(option).booleanValue()) {
+        if (! DrJava.getConfig().getSetting(option).booleanValue() && ! Utilities.TEST_MODE) {
           ConfirmCheckBoxDialog dialog =
-            new ConfirmCheckBoxDialog(MainFrame.this,
-                                      "Must Save All Files to Continue",
-                                      message,
-                                      checkMsg);
+            new ConfirmCheckBoxDialog(MainFrame.this, "Must Save All Files to Continue", message, checkMsg);
           int rc = dialog.show();
           
           switch (rc) {
@@ -7298,7 +7319,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             _junitErrorPanel.reset();
           }
           finally { 
-            hourglassOff();
+            simpleHourglassOff();
             _restoreJUnitActionsEnabled();
           }
         }});
@@ -7331,11 +7352,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void currentDirectoryChanged(final File dir) { _setCurrentDirectory(dir); }
     
     /** Check if the specified document has been modified. If it has, ask the user if he would like to save it 
-     *  and save the document if yes. Also give the user a "cancel" option to cancel doing the operation 
-     *  that got us here in the first place.
-     *
-     *  @return A boolean indicating whether the user cancelled the save process.  False means cancel.
-     */
+      * and save the document if yes. Also give the user a "cancel" option to cancel doing the operation 
+      * that got us here in the first place.
+      *
+      * @return A boolean indicating whether the user cancelled the save process.  False means cancel.
+      */
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {
       return _fileSaveHelper(doc, JOptionPane.YES_NO_CANCEL_OPTION);
     }
@@ -7389,9 +7410,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
     
     /** Check if the current document has been modified. If it has, ask the user if he would like to save it 
-     *  and save the document if yes.
-     *  @return true if quitting should continue, false if the user cancelled
-     */
+      * and save the document if yes.
+      * @return true if quitting should continue, false if the user cancelled
+      */
     public boolean quitFile(OpenDefinitionsDocument doc) { return _fileSaveHelper(doc, JOptionPane.YES_NO_CANCEL_OPTION); }
     
     /** Called to ask the listener if it is OK to revert the current document to a newer version saved on file. */
@@ -7413,22 +7434,17 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       int rc = JOptionPane.showConfirmDialog(MainFrame.this, text, fname + " Modified on Disk", 
                                              JOptionPane.YES_NO_OPTION);
       switch (rc) {
-        case JOptionPane.YES_OPTION:
-          return true;
-        case JOptionPane.NO_OPTION:
-          return false;
+        case JOptionPane.YES_OPTION:    return true;
+        case JOptionPane.NO_OPTION:     return false;
         case JOptionPane.CLOSED_OPTION:
-        case JOptionPane.CANCEL_OPTION:
-          return false;
-        default:
-          throw new RuntimeException("Invalid rc: " + rc);
+        case JOptionPane.CANCEL_OPTION: return false;
+        default:                        throw new RuntimeException("Invalid rc: " + rc);
       }
     }
     
-    
     public void interactionIncomplete() { }
     
-    /* changes to the state */
+    /* Changes to the state */
     
     public void projectBuildDirChanged() {
       if (_model.getBuildDirectory() != null) {
@@ -7454,7 +7470,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           _runButton = _updateToolbarButton(_runButton, _runAction);
           _compileButton = _updateToolbarButton(_compileButton, _compileAllAction);
           _junitButton = _updateToolbarButton(_junitButton, _junitAllAction);
-    projectRunnableChanged();
+          projectRunnableChanged();
         }
       });
     }
@@ -7531,9 +7547,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Shows the components passed in in the appropriate place in the tabbedPane depending on the position of
-   *  the component in the _tabs list.
-   *  @param c the component to show in the tabbedPane
-   */
+    * the component in the _tabs list.
+    * @param c the component to show in the tabbedPane
+    */
   public void showTab(final Component c) {
     
     // This retarded method doesn't work for our two always-on tabs, so here's a temporary kludge.
@@ -7621,24 +7637,18 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       
   boolean isDebuggerReady() { return _showDebugger &&  _model.getDebugger().isReady(); }
   
-  /** Return the find replace dialog.
-   *  Package protected for use in tests
-   */
+  /** Return the find replace dialog. Package protected for use in tests. */
   FindReplacePanel getFindReplaceDialog() { return _findReplace; }
   
-  
-  /**
-   * Builds the Hashtables in KeyBindingManager that are used to keep track
-   * of key-bindings and allows for live updating, conflict resolution, and
-   * intelligent error messages (the ActionToNameMap).
-   * IMPORTANT: Don't use this way to put actions into the KeyBindingManager if
-   * the action is a menu item. It will already have been put in. Putting in
-   * in again will cause bug #803304 "Uncomment lines wont rebind".
-   */
+  /** Builds the Hashtables in KeyBindingManager that are used to keep track of key-bindings and allows for live 
+    * updating, conflict resolution, and intelligent error messages (the ActionToNameMap).  
+    * IMPORTANT: Don't use this way to put actions into the KeyBindingManager if the action is a menu item. It will 
+    * already have been put in.  Putting in again will cause bug #803304 "Uncomment lines wont rebind".
+    */
   private void _setUpKeyBindingMaps() {
     final ActionMap _actionMap = _currentDefPane.getActionMap();
     
-    KeyBindingManager.Singleton.put(KEY_BACKWARD, _actionMap.get(DefaultEditorKit.backwardAction),null, "Backward");
+    KeyBindingManager.Singleton.put(KEY_BACKWARD, _actionMap.get(DefaultEditorKit.backwardAction), null, "Backward");
     KeyBindingManager.Singleton.addShiftAction(KEY_BACKWARD, DefaultEditorKit.selectionBackwardAction);
     
     KeyBindingManager.Singleton.put(KEY_BEGIN_DOCUMENT, _actionMap.get(DefaultEditorKit.beginAction), null, 
@@ -7761,24 +7771,20 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   };
   
   
-  /**
-   * Wrapper for setPopupLoc(Window, Component) that uses the window's owner as the owner
-   * to center the popup on.
-   * @param popup the Popup window
-   */
+  /** Wrapper for setPopupLoc(Window, Component) that uses the window's owner as the owner to center the popup on.
+    * @param popup the Popup window
+    */
   public void setPopupLoc(Window popup) {
     MainFrame.setPopupLoc(popup, (popup.getOwner()!=null)?popup.getOwner():this);
   }
   
-  /**
-   * Sets the location of the popup in a consistant way.
-   * If the popup has an owner, the popup is centered over the owner.
-   * If the popup has no owner(owner == null), the popup is centered over the first monitor.
-   * In either case, the popup is moved and scaled if any part of it is not on the screen.
-   * This method should be called for all popups to maintain consistancy.
-   * @param popup the popup window
-   * @param owner the parent component for the popup
-   */
+  /** Sets the location of the popup in a consistant way.  If the popup has an owner, the popup is centered over the
+    * owner.  If the popup has no owner(owner == null), the popup is centered over the first monitor.  In either case,
+    * the popup is moved and scaled if any part of it is not on the screen.  This method should be called for all popups
+    * to maintain consistancy.
+    * @param popup the popup window
+    * @param owner the parent component for the popup
+    */
   public static void setPopupLoc(Window popup, Component owner) {
     Rectangle frameRect = popup.getBounds();
     
@@ -7833,12 +7839,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     frameRect.setLocation(loc);
     
     // now fit it on the screen
-    if(frameRect.x < screenRect.x) frameRect.x = screenRect.x;
-    if(frameRect.x + frameRect.width > screenRect.x + screenRect.width)
+    if (frameRect.x < screenRect.x) frameRect.x = screenRect.x;
+    if (frameRect.x + frameRect.width > screenRect.x + screenRect.width)
       frameRect.x = screenRect.x + screenRect.width - frameRect.width;
     
-    if(frameRect.y < screenRect.y) frameRect.y = screenRect.y;
-    if(frameRect.y + frameRect.height > screenRect.y + screenRect.height)
+    if (frameRect.y < screenRect.y) frameRect.y = screenRect.y;
+    if (frameRect.y + frameRect.height > screenRect.y + screenRect.height)
       frameRect.y = screenRect.y + screenRect.height - frameRect.height;
 
     popup.setSize(frameRect.getSize());

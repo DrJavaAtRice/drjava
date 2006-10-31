@@ -105,9 +105,9 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase {
   }
 
   /** Tests that key strokes are output in a parseable format even in foreign locales.  The test must be run in a 
-   *  separate JVM, because once the locale is set, it cannot be set back.  (If someone can figure out how
-   *  to effectively set it back, feel free to remove this hack!)
-   */
+    * separate JVM, because once the locale is set, it cannot be set back.  (If someone can figure out how
+    * to effectively set it back, feel free to remove this hack!)
+    */
   public void testLocaleSpecificFormat() throws IOException, InterruptedException {
     String className = "edu.rice.cs.drjava.config.KeyStrokeOptionTest";
     String[] args = new String[0];

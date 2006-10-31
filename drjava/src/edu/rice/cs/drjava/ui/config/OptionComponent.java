@@ -38,6 +38,7 @@ import java.awt.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
@@ -156,8 +157,9 @@ public abstract class OptionComponent<T> implements Serializable {
     });
   }
   
-  /** List of change listeners. */
-  private ArrayList<ChangeListener> _changeListeners = new ArrayList<ChangeListener>();
+  /** List of change listeners.  A volatile Vector is used here because a race involving operations on this field was 
+    * encountered in MainFrameTest during _frame.pack() in initialization. It previously was a nonvolatile ArrayList. */
+  private volatile Vector<ChangeListener> _changeListeners = new Vector<ChangeListener>();  
 }
                                       
   
