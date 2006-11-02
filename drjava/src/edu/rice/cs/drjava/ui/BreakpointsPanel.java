@@ -81,7 +81,10 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
        *  Must be executed in event thread.
        *  @param bp the breakpoint
        */
-      public void regionAdded(final Breakpoint bp, int index) { addRegion(bp); }
+      public void regionAdded(final Breakpoint bp, int index) { 
+        assert EventQueue.isDispatchThread();
+        addRegion(bp); 
+      }
       
       /**
        * Called when a breakpoint is changed.

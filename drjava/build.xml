@@ -399,6 +399,7 @@
           <selector refid="tests-to-run" />
         </fileset>
       </batchtest>
+      <jvmarg value="-ea"/> 
     </junit>
   </target>
 
@@ -421,6 +422,7 @@
           <selector refid="tests-to-run" />
         </fileset>
       </batchtest>
+      <jvmarg value="-ea"/> 
     </junit>
   </target>
 
@@ -441,6 +443,7 @@
           <selector refid="tests-to-run" />
         </fileset>
       </batchtest>
+      <jvmarg value="-ea"/> 
     </junit>
   </target>
 

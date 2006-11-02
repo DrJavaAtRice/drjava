@@ -7094,9 +7094,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       // Only show prompt if option is set and not in TEST_MODE
       if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue() && ! Utilities.TEST_MODE && 
           MainFrame.this.isVisible()) {
-        // Show the dialog in a Swing thread, so Interactions can
-        // start resetting right away.
-        Runnable command = new Runnable() {
+        // Synchronously pop up a dialog box concerning restarting the JVM.
+        Utilities.invokeAndWait(new Runnable() {  
           public void run() {
             String msg = "The interactions window was terminated by a call " +
               "to System.exit(" + status + ").\n" +
@@ -7113,8 +7112,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
               DrJava.getConfig().setSetting(INTERACTIONS_EXIT_PROMPT, Boolean.FALSE);
             }
           }
-        };
-        Utilities.invokeLater(command);
+        });
       }
     }
     

@@ -50,13 +50,16 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   public void addDocument(ItemT doc);
   
   /** Adds an <code>INavigatorItem</code> into this navigator in a position relative to a given path.
-   *  @param doc the document to be added into this navigator.
-   *  @param path the relative path to insert this INavigatorItem at.
-   */
+    * @param doc the document to be added into this navigator.
+    * @param path the relative path to insert this INavigatorItem at.
+    */
   public void addDocument(ItemT doc, String path);
   
   /** Returns the currently selected navigator item, or null if no navigator item is selected. */
   public ItemT getCurrent();
+  
+  /** Returns the model lock for this navigator.  Only used for locking in code external to the implementing class. */
+  public Object getModelLock();
   
   /** Removes a given <code>INavigatorItem<code> from this navigator. Removes all <code>INavigatorItem</code>s 
    *  from this navigator that are "equal" (<code>.equals(...)</code>) to the passed argument. Any of the 

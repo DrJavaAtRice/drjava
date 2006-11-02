@@ -63,93 +63,69 @@ public abstract class AsyncTask<ParamType, ResType> {
 
  private String _name;
 
- /**
-  * Default Constructor
-  */
- public AsyncTask() {
-  this("Untitled");
- }
+ /** Default Constructor */
+ public AsyncTask() { this("Untitled"); }
 
- /**
-  * Creates a task that has the given name
-  * 
-  * @param name
-  *          The name of the task.
-  */
- public AsyncTask(String name) {
-  _name = name;
- }
+ /** Creates a task that has the given name
+   * @param name The name of the task.
+   */
+ public AsyncTask(String name) { _name = name; }
 
- /**
-  * This is the method of the task that is run on the separate thread. Any
-  * implementation of this method should not make any changes to GUI components
-  * unless those calls are made explicitly thread safe by the developer. Any
-  * code that modifies swing GUI components in any way should be located in the
-  * <code>complete</code> method.
-  * 
-  * @param param
-  *          Any parameter that should be passed to the task when it is
-  *          executed
-  * @param monitor
-  *          An object that handles the flow of information about the progress
-  *          of the task both to and from the runAsync method. This also offers
-  *          a means of passing a result from the async step to the completion
-  *          step.
-  * @throws Exception
-  */
+ /** This is the method of the task that is run on the separate thread. Any
+   * implementation of this method should not make any changes to GUI components
+   * unless those calls are made explicitly thread safe by the developer. Any
+   * code that modifies swing GUI components in any way should be located in the
+   * <code>complete</code> method.
+   * 
+   * @param param
+   *          Any parameter that should be passed to the task when it is
+   *          executed
+   * @param monitor
+   *          An object that handles the flow of information about the progress
+   *          of the task both to and from the runAsync method. This also offers
+   *          a means of passing a result from the async step to the completion
+   *          step.
+   * @throws Exception
+   */
  public abstract ResType runAsync(ParamType param, IAsyncProgress monitor) throws Exception;
 
- /**
-  * This is the completion step where any modifications to swing components
-  * should be made. This method is called on the AWT event thread and so any
-  * changes made to swing components are safe.
-  * 
-  * @param result
-  *          The result set from within the runAsync method that specifies any
-  *          changes that need to be made on swing components in the UI thread
-  * @param isCanceled
-  *          Whether the user requested that the task be aborted. The task is
-  *          not obligated to have actually aborted. This parameter merely
-  *          states whether the cancel request was made.
-  */
+ /** This is the completion step where any modifications to swing components
+   * should be made. This method is called on the AWT event thread and so any
+   * changes made to swing components are safe.
+   * 
+   * @param result
+   *          The result set from within the runAsync method that specifies any
+   *          changes that need to be made on swing components in the UI thread
+   * @param isCanceled
+   *          Whether the user requested that the task be aborted. The task is
+   *          not obligated to have actually aborted. This parameter merely
+   *          states whether the cancel request was made.
+   */
  public abstract void complete(AsyncCompletionArgs<ResType> args);
 
- /**
-  * Sets the description of the task that should be displayed in the progress
-  * monitor that the user sees. While the task is in progress, a separate note
-  * can be set in order to display specific information about the progress of
-  * the task. This can be set by calling <code>ProgressMonitor.setNote</code>
-  * 
-  * @return A brief description of the task being performed
-  */
+ /** Sets the description of the task that should be displayed in the progress
+   * monitor that the user sees. While the task is in progress, a separate note
+   * can be set in order to display specific information about the progress of
+   * the task. This can be set by calling <code>ProgressMonitor.setNote</code>
+   * 
+   * @return A brief description of the task being performed
+   */
  public abstract String getDiscriptionMessage();
 
- /**
-  * Returns the name of this specific type of task. If this is not overridden
-  * 
-  * @return the name of the task
-  */
- public String getName() {
-  return _name;
- }
+ /** Returns the name of this specific type of task. If this is not overridden
+   * @return the name of the task
+   */
+ public String getName() { return _name; }
 
- /**
-  * Reutrns the minimum value of the progress monitor
-  * 
-  * @return The minimum value (0.0%) of the progress monitor
-  */
- public int getMinProgress() {
-  return 0;
- }
+ /** Returns the minimum value of the progress monitor
+   * @return The minimum value (0.0%) of the progress monitor
+   */
+ public int getMinProgress() { return 0; }
 
- /**
-  * Reutrns the minimum value of the progress monitor
-  * 
-  * @return The minimum value (100.0%) of the progress monitor
-  */
- public int getMaxProgress() {
-  return 100;
- }
+ /** Reutrns the minimum value of the progress monitor
+   * @return The minimum value (100.0%) of the progress monitor
+   */
+ public int getMaxProgress() { return 100; }
 
  public String toString() {
   return getClass().getName() + ": " + getName() + " (@" + System.identityHashCode(this) + ")";

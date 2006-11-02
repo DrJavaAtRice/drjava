@@ -75,7 +75,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
 //  private int _currentIndex = -1;
   
   /** The cell renderer for this JList */
-  private CustomListCellRenderer _renderer;
+  private volatile CustomListCellRenderer _renderer;
   
   /** the collection of INavigationListeners listening to this JListNavigator */
   private final Vector<INavigationListener<? super ItemT>> navListeners = new Vector<INavigationListener<? super ItemT>>();
@@ -127,7 +127,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
     this.setCellRenderer(_renderer);
   }
   
-  /** Adds the document doc to this navigator.  Should only be executed in event thead.
+  /** Adds the document doc to this navigator.  Should only be executed in event thread.
    *  @param doc the document to add
    */
   public void addDocument(ItemT doc) { synchronized(_model) { _model.addElement(doc); } }
@@ -194,6 +194,9 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   
   /** Returns the currently selected item, or null if none. */
   public ItemT getCurrent() { return _current; }
+  
+  /** Returns the model lock. */
+  public Object getModelLock() { return _model; }
   
   /** Removes the document from the navigator.  Should only be executed in event thread.
    *  @param doc the document to remove

@@ -54,41 +54,44 @@ public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implemen
    */
     public IDocumentNavigator<ItemT> makeTreeNavigator(String path) { return new JTreeSortNavigator<ItemT>(path); }
     
-  /** Creates a list navigator and migrates the navigator items from parent to the new navigator
-   *  @param parent the navigator to migrate from
-   *  @return the new list navigator
-   */
+    /** Creates a list navigator and migrates the navigator items from parent to the new navigator.  The migration
+      * is asynchronous but it completes before any subsequent computation in the event thread.
+      * @param parent the navigator to migrate from
+      * @return the new list navigator
+      */
     public IDocumentNavigator<ItemT> makeListNavigator(final IDocumentNavigator<ItemT> parent) {
-      final IDocumentNavigator<ItemT> tbr = makeListNavigator();
-      Utilities.invokeAndWait(new Runnable() { 
-        public void run() { 
-          migrateNavigatorItems(tbr, parent);
-          migrateListeners(tbr, parent);
-        }
+      final IDocumentNavigator<ItemT> child = makeListNavigator();
+      Utilities.invokeLater(new Runnable() { 
+        public void run() {
+//          synchronized (child.getModelLock()) { // dropped because of cost; each atomic action is still synchronized
+            migrateNavigatorItems(child, parent);
+            migrateListeners(child, parent);
+          }
+//        }
       });
-      return tbr;
+      return child;
     }
   
-  /** Creates a tree navigator and migrates the navigator items from the parent to the new navigator
-   *  @param name the name of the root node
-   *  @param parent the navigator to migrate from
-   *  @return the new tree navigator
-   */
+    /** Creates a tree navigator and migrates the navigator items from the parent to the new navigator. The migration
+      * is asynchronous but it completes before any subsequent computation in the event thread.
+      * @param name the name of the root node
+      * @param parent the navigator to migrate from
+      * @return the new tree navigator
+      */
     public IDocumentNavigator<ItemT> makeTreeNavigator(String name, final IDocumentNavigator<ItemT> parent, 
                                                 final List<Pair<String, INavigatorItemFilter<ItemT>>> l) {
       
-      final IDocumentNavigator<ItemT> tbr = makeTreeNavigator(name);
-      
-      Utilities.invokeAndWait(new Runnable() { 
+      final IDocumentNavigator<ItemT> child = makeTreeNavigator(name);
+      Utilities.invokeLater(new Runnable() { 
         public void run() { 
-          
-          for(Pair<String, INavigatorItemFilter<ItemT>> p: l) { tbr.addTopLevelGroup(p.getFirst(), p.getSecond()); }
-          
-          migrateNavigatorItems(tbr, parent);
-          migrateListeners(tbr, parent);
-        }
+//          synchronized (child.getModelLock()) { // dropped because of cost; each atomic action is still synchronized
+            for(Pair<String, INavigatorItemFilter<ItemT>> p: l) { child.addTopLevelGroup(p.getFirst(), p.getSecond()); }
+            migrateNavigatorItems(child, parent);
+            migrateListeners(child, parent);
+          }
+//        }
       });     
-      return tbr;
+      return child;
     }
     
     /** Migrates all the navigator items from parent to child

@@ -41,8 +41,8 @@ import java.awt.event.KeyEvent;
 import java.awt.Event;
 import java.util.Hashtable;
 
-/** Class representing all configuration options with values of type KeyStroke.  This code should only run in the 
- *  event thread, so no synchronization is necessary (or advisable).*/
+/** Class representing all configuration options with values of type KeyStroke.  Only runs in the event thread, so no
+  * synchronization is necessary (or advisable).*/
 public class KeyStrokeOption extends Option<KeyStroke> {
 
   /** Storage for keystrokes.*/
@@ -74,17 +74,14 @@ public class KeyStrokeOption extends Option<KeyStroke> {
   }
 
 
-  /**
-   * @param s The String to be parsed, must be the string representation of
-   * the KeyStroke to be created. Uses the method KeyStroke.getKeyStroke(String s)
-   * which returns a KeyStroke if the string is correctly formatted or null
-   * otherwise.
-   * @return The KeyStroke object corresponding to the input string "s".
-   */
+  /** @param s The String to be parsed, must be the string representation of
+    * the KeyStroke to be created. Uses the method KeyStroke.getKeyStroke(String s)
+    * which returns a KeyStroke if the string is correctly formatted or null
+    * otherwise.
+    * @return The KeyStroke object corresponding to the input string "s".
+    */
   public KeyStroke parse(String s) {
-    if (s.equals("<none>")) {
-      return NULL_KEYSTROKE;
-    }
+    if (s.equals("<none>")) { return NULL_KEYSTROKE; }
 
     // Replace "command" with "meta" (OS X)
     int cIndex = s.indexOf("command");
@@ -112,10 +109,9 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     return ks;
   }
 
-  /**
-   * @param k The instance of class KeyStroke to be formatted.
-   * @return A String representing the KeyStroke "k".
-   */
+  /** @param k The instance of class KeyStroke to be formatted.
+    * @return A String representing the KeyStroke "k".
+    */
   public String format(KeyStroke k) {
     if (k == NULL_KEYSTROKE) {
       return "<none>";

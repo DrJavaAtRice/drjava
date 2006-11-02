@@ -44,6 +44,7 @@ import edu.rice.cs.drjava.project.ProjectFileParser;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.io.*;
@@ -141,7 +142,12 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     assertEquals("Build directory should not have been set", null, _model.getBuildDirectory());
     
 //    System.err.println("Opening Project File");
-    _model.openProject(_projFile);
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try { _model.openProject(_projFile); }
+        catch(Exception e) { throw new UnexpectedException(e); }
+      } 
+    });
 //    System.err.println("Completed Opening Project File");
 //    System.err.println("Project documents are: " + _model.getProjectDocuments());
     
@@ -155,10 +161,21 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   public void testCloseAllClosesProject()  throws MalformedProjectFileException, IOException {
     
 //    Utilities.showDebug("executing testCloseAllClosesProject");
-    _model.openProject(_projFile);
-    
+     Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try { _model.openProject(_projFile); }
+        catch(Exception e) { throw new UnexpectedException(e); }
+      } 
+    });
     assertTrue("Project should have been opened", _model.isProjectActive());
-    _frame.closeAll();
+    
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try { _frame.closeAll(); }
+        catch(Exception e) { throw new UnexpectedException(e); }
+      } 
+    });
+
     assertFalse("Project should have been closed", _model.isProjectActive());
   }
   
@@ -166,21 +183,24 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     
 //     Utilities.showDebug("executing testSaveProject");
     
-    _frame.openProject(new FileOpenSelector() {
-      public File[] getFiles() throws OperationCanceledException { return new File[] {_projFile}; }
-    });
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        _frame.openProject(new FileOpenSelector() {
+          public File[] getFiles() throws OperationCanceledException { return new File[] {_projFile}; }
+        });
         
-    // open a new file and make it an auxiliary file
-    _frame.open(new FileOpenSelector() {
-      public File[] getFiles() throws OperationCanceledException {
-        return new File[] {_auxFile};
-      }
+        // open a new file and make it an auxiliary file
+        _frame.open(new FileOpenSelector() {
+          public File[] getFiles() throws OperationCanceledException {
+            return new File[] {_auxFile};
+          }
+        });
+        _frame._moveToAuxiliary();
+
+        _frame.saveProject();
+        _frame._closeProject();
+      } 
     });
-    _frame._moveToAuxiliary();
-    
-    _frame.saveProject();
-    _frame._closeProject();
-    
     List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     assertEquals("One empty document remaining", 1, docs.size());
     assertEquals("Name is (Untitled)", "(Untitled)", _model.getActiveDocument().toString());

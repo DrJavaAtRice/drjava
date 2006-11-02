@@ -36,6 +36,8 @@ package edu.rice.cs.drjava.model.debug;
 import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
+import java.awt.EventQueue;
+
 /** Keeps track of all listeners to a Debugger, and has the ability  to notify them of some event.
  *  <p>
  *  This class has a specific role of managing DebugListeners.  Other classes with similar names use similar code to 
@@ -60,6 +62,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
   
   /** Called when debugger mode has been enabled.  Must be executed in event thread. */
   public void debuggerStarted() {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -72,6 +75,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
 
   /** Called when debugger mode has been disabled.  Must be executed in event thread. */
   public void debuggerShutdown() {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -89,6 +93,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
     *  @param shouldHighlight true iff the line should be highlighted.
     */
   public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber,  boolean shouldHighlight) {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -104,6 +109,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
    *  @param index the index at which it was added
    */
   public void regionAdded(Breakpoint bp, int index) {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -116,6 +122,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
    * @param bp the breakpoint
    */
   public void breakpointReached(Breakpoint bp) {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -133,6 +140,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
    *  @param index the index at which it was changed
    */
   public void regionChanged(Breakpoint bp, int index) {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -149,6 +157,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
    *  @param w the watch
    */
   public void watchSet(DebugWatchData w) {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -161,6 +170,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
    *  @param w the watch
    */
   public void watchRemoved(DebugWatchData w) {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -173,6 +183,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
    *  @param bp the breakpoint
    */
   public void regionRemoved(Breakpoint bp) {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -183,6 +194,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
 
   /** Called when a step is requested on the current thread. Must be executed in event thread. */
   public void stepRequested() {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -203,6 +215,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
 
   /** Called when the current thread is resumed.  Must be executed in event thread. */
   public void currThreadResumed() {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -213,6 +226,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
 
   /** Called when a thread starts. Must be executed in event thread. */
   public void threadStarted() {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -223,6 +237,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
 
   /** Called when the current thread dies. Must be executed in event thread. */
   public void currThreadDied() {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();
@@ -233,6 +248,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
 
   /** Called when any thread other than the current thread dies. Must be executed in event thread. */
   public void nonCurrThreadDied() {
+    assert EventQueue.isDispatchThread();
     _lock.startRead();
     try {
       int size = _listeners.size();

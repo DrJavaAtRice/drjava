@@ -903,9 +903,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     
   /** This function is called when switching a pane to be the active document pane.  It allows the pane to do whatever 
    *  "startup" is required.  Since setInactive swapped out the document for a dummy document, we need to reload the 
-   *  actual document and reset its caret position to the saved location.
+   *  actual document and reset its caret position to the saved location.  Only runs in event thread.
    */
   public void notifyActive() {
+    assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     super.setDocument(_doc);
     if (_doc.getUndoableEditListeners().length == 0) _resetUndo();
     
@@ -931,7 +932,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       }
     }
     finally { _doc.releaseWriteLock(); }
-//    synchronized(_lock) {  // Why synchronize?  This code now runs in the event thread, but was not in legacy code
     _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
     _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
     // Explicitly set scrollbar policies fixing bug #1445898 

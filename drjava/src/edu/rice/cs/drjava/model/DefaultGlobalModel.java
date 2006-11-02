@@ -33,7 +33,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import javax.swing.text.BadLocationException;
+
+import java.awt.EventQueue;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -49,6 +50,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
+
+import javax.swing.text.BadLocationException;
 import javax.swing.SwingUtilities;
 
 import edu.rice.cs.util.ClassPathVector;
@@ -428,6 +431,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       * @exception IOException propagated from GlobalModel.compileAll()
       */
     public void runMain() throws ClassNameNotFoundException, IOException {
+      assert EventQueue.isDispatchThread();
       
       // Get the class name for this document, the first top level class in the document.
       final String className = getDocument().getQualifiedClassName();

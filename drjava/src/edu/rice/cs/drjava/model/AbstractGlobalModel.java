@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.model;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;

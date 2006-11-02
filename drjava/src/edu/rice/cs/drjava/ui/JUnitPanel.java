@@ -89,6 +89,7 @@ public class JUnitPanel extends ErrorPanel {
     "The documents being tested have been modified and should be recompiled!\n";
 
   protected JUnitErrorListPane _errorListPane;
+  private final MainFrame _mainFrame;      // only used in assert statements
   private int _testCount;
   private boolean _testsSuccessful;
 
@@ -114,11 +115,12 @@ public class JUnitPanel extends ErrorPanel {
   private final JLabel _fileLabel = new JLabel();
 
   /** Constructor.
-   *  @param model SingleDisplayModel in which we are running
-   *  @param frame MainFrame in which we are displayed
-   */
+    * @param model SingleDisplayModel in which we are running
+    * @param frame MainFrame in which we are displayed
+    */
   public JUnitPanel(SingleDisplayModel model, MainFrame frame) {
     super(model, frame, "Test Output", "Test Progress");
+    _mainFrame = frame;
     _testCount = 0;
     _testsSuccessful = true;
 
@@ -137,10 +139,9 @@ public class JUnitPanel extends ErrorPanel {
 
   protected JUnitErrorModel getErrorModel() { return getModel().getJUnitModel().getJUnitErrorModel(); }
 
-  /**
-   * Updates all document styles with the attributes contained in newSet.
-   * @param newSet Style containing new attributes to use.
-   */
+  /** Updates all document styles with the attributes contained in newSet.
+    * @param newSet Style containing new attributes to use.
+    */
   protected void _updateStyles(AttributeSet newSet) {
     super._updateStyles(newSet);
     OUT_OF_SYNC_ATTRIBUTES.addAttributes(newSet);
@@ -256,7 +257,7 @@ public class JUnitPanel extends ErrorPanel {
 
       try {
         // Insert the classname if it has changed
-        if (!className.equals(_runningTestName)) {
+        if (! className.equals(_runningTestName)) {
           _runningTestName = className;
           doc.insertString(index, "  " + className + "\n", NORMAL_ATTRIBUTES);
           index = doc.getLength();
@@ -294,8 +295,9 @@ public class JUnitPanel extends ErrorPanel {
       }
     }
 
-    /** Puts the error pane into "junit in progress" state. */
+    /** Puts the error pane into "junit in progress" state.  Only runs in event thread. */
     public void setJUnitInProgress() {
+      assert EventQueue.isDispatchThread();
       _errorListPositions = new Position[0];
       progressReset(0);
       _runningTestNamePositions.clear();
@@ -326,7 +328,7 @@ public class JUnitPanel extends ErrorPanel {
       int numCompErrs = getErrorModel().getNumCompErrors();
       int numWarnings = getErrorModel().getNumWarnings();     
       
-      if (!getErrorModel().hasOnlyWarnings()) {
+      if (! getErrorModel().hasOnlyWarnings()) {
         numErrMsg = new StringBuilder(numCompErrs + " " + failureName);   //failureName = error or test (for compilation and JUnit testing respectively)
         if (numCompErrs > 1) numErrMsg.append("s");
         numErrMsg.append(" " + failureMeaning);
@@ -353,10 +355,11 @@ public class JUnitPanel extends ErrorPanel {
       switchToError(0);
     }
 
-    /** Replaces the "Testing in progress..." text with the given message.  Must run in event thread.
+    /** Replaces the "Testing in progress..." text with the given message.  Only runs in event thread.
      *  @param msg the text to insert
      */
     public void _replaceInProgressText(String msg) throws BadLocationException {
+      assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       int start = 0;
       if (_warnedOutOfSync) { start = TEST_OUT_OF_SYNC.length(); }
       int len = START_JUNIT_MSG.length();

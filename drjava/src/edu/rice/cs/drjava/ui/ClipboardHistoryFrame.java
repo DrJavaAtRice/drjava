@@ -314,7 +314,7 @@ public class ClipboardHistoryFrame extends JFrame {
     updateView();
   }
   
-  /** Validates before changing visibility.  Should only run in the event thread.
+  /** Validates before changing visibility.  Only runs in the event thread.
     * @param b true if frame should be shown, false if it should be hidden.
     */
   public void setVisible(boolean b) {

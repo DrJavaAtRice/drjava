@@ -145,6 +145,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
   /** Causes all display tables to update their information from the debug manager. */
   public void updateData() {
+    assert EventQueue.isDispatchThread();
     if (_debugger.isReady()) {
       try {
         _watches = _debugger.getWatches();
@@ -595,13 +596,13 @@ public class DebugPanel extends JPanel implements OptionConstants {
       Utilities.invokeLater(new Runnable() { public void run() { updateData(); } });
     }
 
-    /** Called when a thread starts.  Must be executed in event thread. */
+    /** Called when a thread starts.  Only runs in event thread. */
     public void threadStarted() { updateData(); }
 
-    /** Called when the current thread dies. Must be executed in event thread. */
+    /** Called when the current thread dies. Only runs in event thread. */
     public void currThreadDied() { updateData(); }
 
-    /** Called when any thread other than the current thread dies. Must be executed in event thread. */
+    /** Called when any thread other than the current thread dies. Only runs in event thread. */
     public void nonCurrThreadDied() { updateData(); }
 
     /** Called when the current (selected) thread is set in the debugger.

@@ -38,6 +38,8 @@ import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.swing.Utilities;
 
+import java.awt.EventQueue;
+
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.Position;
@@ -61,11 +63,12 @@ public class ErrorCaretListener implements CaretListener {
   public OpenDefinitionsDocument getOpenDefDoc() { return _openDoc; }
 
   /** After each update to the caret, determine if changes in highlighting need to be made.  Highlights the line 
-   *  if the compiler output tab is showing.
+   *  if the compiler output tab is showing.  Only runs in the event thread.
    */
   public void caretUpdate(CaretEvent evt) {
+//    assert EventQueue.isDispatchThread();  // including this assertion breaks DefinitionsPaneTest
     // Now we can assume at least one error.
-    updateHighlight(evt.getDot()); // Called method runs in the event thread
+    updateHighlight(evt.getDot());
   }
 
   /** Update the highlight appropriately. */
@@ -110,10 +113,11 @@ public class ErrorCaretListener implements CaretListener {
     Utilities.invokeLater(new Runnable() { public void run() { _definitionsPane.removeErrorHighlight(); } });
   }
 
-  /** Highlights the given error in the source.  Assume caller is running in event thread.
+  /** Highlights the given error in the source.  Only runs in event thread.
    *  @param pos the position of the error
    */
   private void _highlightErrorInSource(Position pos) {
+    assert EventQueue.isDispatchThread();
     if (pos == null) return;
     int errPos = pos.getOffset();
     

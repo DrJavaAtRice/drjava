@@ -308,7 +308,12 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     
     int oldPos = pane.getCaretPosition();
     
-    Utilities.invokeAndWait(new Runnable() { public void run() { pane.setCaretPosition(newPos); } });
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        pane.setCaretPosition(newPos); 
+        _frame.validate();
+      } 
+    });
     Utilities.clearEventQueue();
     
     doc.getUndoManager().undo();  

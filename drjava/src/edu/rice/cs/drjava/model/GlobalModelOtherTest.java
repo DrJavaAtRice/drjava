@@ -42,6 +42,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -549,15 +550,26 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File dir = new File(_tempDir, "bar");
     dir.mkdir();
     File file = new File(dir, "Foo.java");
-    OpenDefinitionsDocument doc = doCompile(FOO_CLASS, file);
-    doc.runMain();
+    final OpenDefinitionsDocument doc = doCompile(FOO_CLASS, file);
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try { doc.runMain(); }
+        catch(Exception e) { throw new UnexpectedException(e); }
+      }
+    });
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertInteractionsContains(InteractionsModel.BANNER_PREFIX);
     doc.insertString(doc.getLength(), " ", null);
-    doc.runMain();
     
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try { doc.runMain(); }
+        catch(Exception e) { throw new UnexpectedException(e); }
+      }
+    });
+    
+//    Utilities.clearEventQueue();
     assertInteractionsContains(DefaultGlobalModel.DOCUMENT_OUT_OF_SYNC_MSG);
     Utilities.clearEventQueue();  
     // Killing time here; Slave JVM may not have released Foo.class so that the file can be deleted on Windows.

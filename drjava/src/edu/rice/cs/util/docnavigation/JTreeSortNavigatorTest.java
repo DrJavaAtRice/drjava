@@ -32,8 +32,9 @@
  *END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
-import edu.rice.cs.util.swing.Utilities;
 
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -53,28 +54,36 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
   
   public void setUp() throws Exception {
     super.setUp();
+    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
 
-    File f = File.createTempFile("project-",".pjt").getCanonicalFile();
-    tree = new JTreeSortNavigator<DummyINavigatorItem>(f.getCanonicalPath());
-    
-    tree.addTopLevelGroup("[ Source Files ]", new INavigatorItemFilter<INavigatorItem>(){
-      public boolean accept(INavigatorItem n) { return true; }
+        try {
+          File f = File.createTempFile("project-",".pjt").getCanonicalFile();
+          tree = new JTreeSortNavigator<DummyINavigatorItem>(f.getCanonicalPath());
+          
+          tree.addTopLevelGroup("[ Source Files ]", new INavigatorItemFilter<INavigatorItem>(){
+            public boolean accept(INavigatorItem n) { return true; }
+          });
+          i1 = new DummyINavigatorItem("item1");
+          i2 = new DummyINavigatorItem("item2");
+          i3 = new DummyINavigatorItem("item1");
+          i4 = new DummyINavigatorItem("item2");
+          tree.addDocument(i1, "folder1");
+          tree.addDocument(i2, "folder1");
+          tree.addDocument(i3, "folder2");
+          tree.addDocument(i4, "folder2");
+          
+          root = (DefaultMutableTreeNode)tree.getModel().getRoot();
+          source = (DefaultMutableTreeNode)root.getChildAt(0);
+          folder1 = (DefaultMutableTreeNode)source.getChildAt(0);
+          folder2 = (DefaultMutableTreeNode)source.getChildAt(1);
+          
+          projName = root.toString();
+        }
+        catch(Exception e) { throw new UnexpectedException(e); }
+      }
     });
-    i1 = new DummyINavigatorItem("item1");
-    i2 = new DummyINavigatorItem("item2");
-    i3 = new DummyINavigatorItem("item1");
-    i4 = new DummyINavigatorItem("item2");
-    tree.addDocument(i1, "folder1");
-    tree.addDocument(i2, "folder1");
-    tree.addDocument(i3, "folder2");
-    tree.addDocument(i4, "folder2");
-    
-    root = (DefaultMutableTreeNode)tree.getModel().getRoot();
-    source = (DefaultMutableTreeNode)root.getChildAt(0);
-    folder1 = (DefaultMutableTreeNode)source.getChildAt(0);
-    folder2 = (DefaultMutableTreeNode)source.getChildAt(1);
-    
-    projName = root.toString();
   }
   
   public void testTraversalOps() {

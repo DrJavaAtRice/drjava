@@ -89,7 +89,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   private Vector<INavigationListener<? super ItemT>> navListeners = new Vector<INavigationListener<? super ItemT>>();
   
   /** The renderer for this JTree. */
-  private CustomTreeCellRenderer _renderer;
+  private volatile CustomTreeCellRenderer _renderer;
   
   private DisplayManager<? super ItemT> _displayManager;
   private Icon _rootIcon;
@@ -154,6 +154,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    *  @param doc the document to be added into this navigator.
    */
   public void addDocument(ItemT doc) {
+    assert EventQueue.isDispatchThread();
     addDocument(doc, "");
 //    GroupNode _root = null;
 //    synchronized(_model) {
@@ -183,8 +184,8 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    *                                  <code>contains</code> method.
    */
   public void addDocument(ItemT doc, String path) {
-    
-    synchronized(_model) {
+    assert EventQueue.isDispatchThread();
+    synchronized(_model) { // lock for mutation
       
       /* Identify root matching doc if any */
       GroupNode<ItemT> root = null;
@@ -238,13 +239,12 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
 //      _hasNonProjFilesOpen = (lastNode == root); 
       //    _model.insertNodeInto(child, lastNode, lastNode.getChildCount());
       this.expandPath(new TreePath(lastNode.getPath()));
-      child.setUserObject(doc);
-    }
+      }
   }
   
   private void addTopLevelGroupToRoot(InnerNode<?, ItemT> parent) {
-    
-    synchronized(_model) {
+    assert EventQueue.isDispatchThread();
+    synchronized(_model) { // lock for mutation
       int indexInRoots = _roots.indexOf(parent);
       int num = _model.getChildCount(_model.getRoot());
       int i;
@@ -256,20 +256,19 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     }
   }
   
-  /** Inserts the child node (INavigatorItem) into the sorted position as a parent node's child.  Should only be
-   *  executed from event thread.
+  /** Inserts the child node (INavigatorItem) into the sorted position as a parent node's child.  Only
+   *  executes in the event thread.  Assumes that _model lock is already held.
    *  @param child the node to add
    *  @param parent the node to add under
    */
   private void insertNodeSortedInto(LeafNode<ItemT> child, InnerNode<?, ItemT> parent) {
-    
     int numChildren = parent.getChildCount();
     String newName = child.toString();
     String oldName = parent.getUserObject().toString();
     DefaultMutableTreeNode parentsKid;
     
     /** Make sure that if the parent is a top level group, it is added to the tree model group. */
-    synchronized (_model) {
+//    synchronized (_model) {
       if (((DefaultMutableTreeNode)_model.getRoot()).getIndex(parent) == -1 && _roots.contains(parent)) {
         addTopLevelGroupToRoot(parent);
       }
@@ -284,20 +283,21 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
         } else throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
       }
       _model.insertNodeInto(child, parent, i);
-    }
+//    }
   }
   
-  /** Inserts a folder (String) into sorted position under the parent.  Should only be executed from event thread.
-   *  @param child the folder to add
-   *  @param parent the folder to add under
-   */
-  private void insertFolderSortedInto(InnerNode<?, ItemT> child, InnerNode<?, ItemT> parent){
+  /** Inserts a folder (String) into sorted position under the parent.  Only executes in event thread. Assumes that
+    * _model lock is already held
+    * @param child the folder to add
+    * @param parent the folder to add under
+    */
+  private void insertFolderSortedInto(InnerNode<?, ItemT> child, InnerNode<?, ItemT> parent) {
     int numChildren = parent.getChildCount();
     String newName = child.toString();
     String oldName = parent.getUserObject().toString();
     DefaultMutableTreeNode parentsKid;
     
-    synchronized (_model) {
+//    synchronized (_model) {
       if (((DefaultMutableTreeNode)_model.getRoot()).getIndex(parent) == -1 && _roots.contains(parent)) {
         addTopLevelGroupToRoot(parent);
       }
@@ -316,24 +316,24 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
         else throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
       }
       _model.insertNodeInto(child, parent, i);
-    }
+//    }
   }
   
   /** Removes a given <code>INavigatorItem<code> from this navigator. Removes all <code>INavigatorItem</code>s
    *  from this navigator that are "equal" (using <code>.equals(...)</code>) to the passed argument. Any of
    *  the removed documents may be returned by this method. If the NavigatorItem is found in the navigator, null
-   *  is returned.  Should only be executed from event thread.
+   *  is returned.  Only executes from event thread.
    *  @param doc the docment to be removed
    *  @return doc a document removed from this navigator as a result of invoking this method.
    *  @throws IllegalArgumentException if this navigator contains no document equal to doc
    */
   public ItemT removeDocument(ItemT doc) {
     assert EventQueue.isDispatchThread();
-//    synchronized(_model) { 
+    synchronized(_model) { // lock for mutation
       LeafNode<ItemT> toRemove = getNodeForDoc(doc);
       if (toRemove == null) return null;
       return removeNode(getNodeForDoc(doc));
-//    }
+    }
   } 
   
   /** Assumes lock on _model is already held */
@@ -343,8 +343,8 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
 //    }
   }
   
-  /** Only takes in nodes that have an INavigatorItem as their object; assumes lock on _model is already held.
-   *  Should only be executed from event thread. */
+  /** Only takes in nodes that have an INavigatorItem as their object; assumes _model lock is already held.
+   *  Only executes in event thread. */
   private ItemT removeNode(LeafNode<ItemT> toRemove) {
     DefaultMutableTreeNode parent = (DefaultMutableTreeNode)toRemove.getParent();
     _model.removeNodeFromParent(toRemove);
@@ -369,9 +369,8 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     return toRemove.getData();
   }
   
-  /** If the given node is an InnerNode, it removes it from the tree if it has no children.  If the given node is a 
-    * leaf or the root, it does nothing to it.  Assumes that lock on _model is already held.  Should only be executed in
-    * the event thread.
+  /** If the given node is an InnerNode with no childrne, it removes it from the tree.  If the given node is a leaf or
+    * the root, it does nothing to it.  Assumes that _model lock is already held.  Only executes in the event thread.
     */
   private void cleanFolderNode(DefaultMutableTreeNode node) {
 //    synchronized(_model) {
@@ -386,7 +385,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Resets a given <code>INavigatorItem<code> in the tree.  This may affect the placement of the item or its display
-   *  to reflect any changes made in the model.  Should only be executed from event thread.
+   *  to reflect any changes made in the model.  Only executes in the event thread.
    *  @param doc the document to be refreshed
    *  @throws IllegalArgumentException if this navigator contains no document equal to doc.
    */
@@ -436,7 +435,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
 //    }
   }
   
-  /** Sets the specified document to be active (current).  Should only be done in event thread. */
+  /** Sets the specified document to be active (current).  Only executes in the event thread. */
   public void setActiveDoc(ItemT doc) {
     assert EventQueue.isDispatchThread();
 //    synchronized (_model) {
@@ -453,21 +452,21 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Returns a typed equivalent to {@code next.getUserObject()}.  Assumes the DefaultMutableTreeNode
-   * is a leaf node in _model and thus, if parameterized, would have type ItemT.  This is a workaround for
-   * the lack of a generic implementation of TreeModel and TreeNode.  If those classes become generified,
-   * this code will no longer be necessary.
-   */
+    * is a leaf node in _model and thus, if parameterized, would have type ItemT.  This is a workaround for
+    * the lack of a generic implementation of TreeModel and TreeNode.  If those classes become generified,
+    * this code will no longer be necessary.
+    */
   private ItemT getNodeUserObject(DefaultMutableTreeNode n) {
     @SuppressWarnings("unchecked") ItemT result = (ItemT) n.getUserObject();
     return result;
   }
   
-  /** Returns the next document in the collection (using enumeration order)
+  /** Returns the next document in the collection (using enumeration order).  Executes in any thread.
    *  @param doc the INavigatorItem of interest
    *  @return the INavigatorItem which comes after doc
    */
   public ItemT getNext(ItemT doc) {
-    synchronized (_model) {
+    synchronized (_model) { // locks out mutation
       DefaultMutableTreeNode node = _doc2node.get(doc);
       if (node == null) return doc; // doc may not be contained in navigator
       // TODO: check for "package" case
@@ -477,12 +476,12 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     }
   }
   
-  /** Returns the previous document in the collection (using enumeration order)
+  /** Returns the previous document in the collection (using enumeration order).  Executes in any thread.
    *  @param doc the INavigatorItem of interest
    *  @return the INavigatorItem which comes before doc
    */
   public ItemT getPrevious(ItemT doc) {
-    synchronized (_model) {
+    synchronized (_model) { // locks out mutation
       DefaultMutableTreeNode node = _doc2node.get(doc);
       if (node == null) return doc; // doc may not be contained in navigator
       // TODO: check for "package" case
@@ -492,44 +491,44 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     }
   }
   
-  /** Returns the first document in the collection (using enumeration order)
+  /** Returns the first document in the collection (using enumeration order).  Executes in any thread.
    *  @return the INavigatorItem which comes before doc
    */
   public ItemT getFirst() {
-    synchronized(_model) {
+    synchronized(_model) { // locks out mutation
       DefaultMutableTreeNode root = (DefaultMutableTreeNode) _model.getRoot();
       return getNodeUserObject(root.getFirstLeaf());
     }
   }
   
-  /** Returns the last document in the collection (using enumeration order)
+  /** Returns the last document in the collection (using enumeration order).  Executes in any thread.
    *  @return the INavigatorItem which comes before doc
    */
   public ItemT getLast() {
-    synchronized(_model) {
+    synchronized(_model) { // locks out mutation
       DefaultMutableTreeNode root = (DefaultMutableTreeNode) _model.getRoot();
       return getNodeUserObject(root.getLastLeaf());
     }
   }
   
-  /** Tests to see if a given document is contained in this navigator.
+  /** Tests to see if a given document is contained in this navigator.  Executes in any thread.
    *  @param doc the document to test for containment.
    *  @return <code>true</code> if this navigator contains a document that is "equal" (as tested by the
    *          <code>equals</code< method) to the passed document, else <code>false</code>.
    */
   public boolean contains(ItemT doc) { 
-    synchronized (_model) { return _doc2node.containsKey(doc); }
+    synchronized (_model) { return _doc2node.containsKey(doc); }  // locks out mutation
   }
   
   /** Returns all the <code>IDocuments</code> contained in this navigator. Does not assert any type of ordering on 
-   *  the returned structure.
+   *  the returned structure.  Executes in any thread.
    *  @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
    */
   public Enumeration<ItemT> getDocuments() {
     
     final Vector<ItemT> list = new Vector<ItemT>(); // Use Vector because it implements an Enumeration
     
-    synchronized(_model) {
+    synchronized(_model) { // locks out mutation
       // e has a raw type because depthFirstEnumeration() has a raw type signature
       Enumeration e = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
       
@@ -544,20 +543,22 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Returns the number of <code>IDocuments</code> contained by this <code>IDocumentNavigator</code>
-   *  Not synchronized on the assumption that size field of a HashMap always has a legitimate
-   *  value (either the size of the current state or the size of its state before some concurrent
-   *  operation started.
-   *  @return the number of documents within this navigator.
-   */
+    * Not synchronized on the assumption that size field of a HashMap always has a legitimate
+    * value (either the size of the current state or the size of its state before some concurrent
+    * operation started.  Executes in any thread.  Assume size() always returns a valid (perhaps stale) value.
+    * @return the number of documents within this navigator.
+    */
   public int getDocumentCount() { return _doc2node.size(); }
   
   /** Returns whether this <code>IDocumentNavigator</code> contains any <code>IDocuments</code>.
-   *  @return <code>true</code> if this navigator contains one or more documents, else <code>false</code>.
-   */
+    * @return <code>true</code> if this navigator contains one or more documents, else <code>false</code>.
+    * Executes in any thread.  Assume isEmpty() always returns a valid (perhaps stale) value.
+    */
   public boolean isEmpty() { return _doc2node.isEmpty(); }
   
-  /** Removes all <code>IDocuments</code> from this <code>IDocumentNavigator</code>. */
-  public void clear() { 
+  /** Removes all <code>IDocuments</code> from this <code>IDocumentNavigator</code>.  Only executes in event thread. */
+  public void clear() {
+    assert EventQueue.isDispatchThread();
     synchronized (_model) {
       _doc2node.clear();
       ((DefaultMutableTreeNode)_model.getRoot()).removeAllChildren();
@@ -565,19 +566,22 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Adds an <code>INavigationListener</code> to this navigator. After invoking this method, the passed 
-   *  listener will be eligible for observing this navigator. If the provided listener is already observing 
-   *  this navigator (as tested by the == operator), no action is taken.
-   *  @param listener the listener to be added to this navigator.
-   */
+    * listener will be eligible for observing this navigator. If the provided listener is already observing 
+    * this navigator (as tested by the == operator), no action is taken.  Only executes in event thread.
+    * @param listener the listener to be added to this navigator.
+    */
   public void addNavigationListener(INavigationListener<? super ItemT> listener) {
-    synchronized (_model) { navListeners.add(listener); }
+    assert EventQueue.isDispatchThread();
+    synchronized (_model) { navListeners.add(listener); }  // locks out mutation
   }
   
   /** Removes the given listener from observing this navigator. After invoking this method, all observers 
-   *  watching this navigator "equal" (as tested by the == operator) will no longer receive observable dispatches.
-   *  @param listener the listener to be removed from this navigator
-   */
+    * watching this navigator "equal" (as tested by the == operator) will no longer receive observable dispatches.
+    * Only executes in event thread.
+    * @param listener the listener to be removed from this navigator
+    */
   public void removeNavigationListener(INavigationListener<? super ItemT> listener) {
+    assert EventQueue.isDispatchThread();
     synchronized (_model) { navListeners.remove(listener); }
   }
   
@@ -586,7 +590,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    */
   public Collection<INavigationListener<? super ItemT>> getNavigatorListeners() { return navListeners; }
   
-  /** Standard visitor pattern
+  /** Standard visitor pattern.   Only used within this class.
    *  @param algo the visitor to run
    *  @param input the input for the visitor
    */
@@ -717,6 +721,9 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     if (current == null) return null;
     return current.execute(_leafVisitor);
   }
+  
+  /** Returns the model lock. */
+  public Object getModelLock() { return _model; }
   
   private final NodeDataVisitor<ItemT, ItemT> _leafVisitor = new NodeDataVisitor<ItemT, ItemT>() {
     public ItemT fileCase(File f, Object... p){ return null; }

@@ -154,7 +154,6 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     }
     
     _log.log(this + ".invokeSlave(...) called");
-    assert (_slave != null);
     
     /******************************************************************************************************
      * First, we we export ourselves to a file, if it has not already been done on a previous invocation. *
@@ -181,10 +180,10 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       ostream.close();
     }
     
-    final String[] args = 
-      new String[] { _masterStubFile.getAbsolutePath(), _slaveClassName };
+    final String[] args = new String[] { _masterStubFile.getAbsolutePath(), _slaveClassName };
     
-    // Start a thread to wait for the slave to die.  When it dies, delegate what to do (restart?) to subclass
+    // Start a thread to create the slave JVM and wait for it to die.  When it dies, delegate what to do (restart?) 
+    // to subclass
     _monitorThread = new Thread(_waitForQuitThreadName) {
       public void run() {
         try { /* Create the slave JVM. */ 

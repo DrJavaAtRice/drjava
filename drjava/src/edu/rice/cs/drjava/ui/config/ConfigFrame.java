@@ -210,7 +210,7 @@ public class ConfigFrame extends JFrame {
   /** Performs deferred initialization.  Only runs in the event thread.  Some of this code occasionally generated swing
    *  exceptions  when run in themain thread as part of MainFrame construction prior to making MainFrame visible. */
   public void setUp() {
-    
+    assert EventQueue.isDispatchThread();
     /* Set up _fileOptionChooser, _browserChooser, and _dirChooser.  The line _dirChooser.setSelectedFile(...) caused
      * java.lang.ArrayIndexOutOfBoundsException within swing code in a JUnit test setUp() routine that constructed a
      * a MainFrame.
