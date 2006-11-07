@@ -175,8 +175,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           try {
             int endSel = fr.getFoundOffset();
             int startSel = endSel-_machine.getFindWord().length();
-            final Position startPos = doc.createPosition(startSel);
-            final Position endPos = doc.createPosition(endSel);
+            final Position startPos = doc.createWrappedPosition(startSel);
+            final Position endPos = doc.createWrappedPosition(endSel);
             
             // create excerpt string
             int excerptEndSel = doc.getLineEndPos(endSel);
@@ -190,13 +190,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             
             // change control characters and ones that may not be displayed to spaces
             for(int i=0; i<s.length(); ++i) {
-              if ((s.charAt(i)<' ') || (s.charAt(i)>127)) { sb.append(' '); } else { sb.append(s.charAt(i)); }
+              if ((s.charAt(i)<' ') || (s.charAt(i) > 127)) { sb.append(' '); } else { sb.append(s.charAt(i)); }
             }
             s = sb.toString();
             
             // trim the front
             for(int i=0; i<s.length(); ++i) {
-              if (!Character.isWhitespace(s.charAt(i))) {
+              if (! Character.isWhitespace(s.charAt(i))) {
                 break;
               }
               --startRed;

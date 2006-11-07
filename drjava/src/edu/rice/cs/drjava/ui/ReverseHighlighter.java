@@ -79,17 +79,13 @@ public class ReverseHighlighter extends DefaultHighlighter {
     component = null;
   }
   
-  /**
-   * Adds a highlight to the view.  Returns a tag that can be used 
-   * to refer to the highlight.
-   *
-   * @param p0   the start offset of the range to highlight >= 0
-   * @param p1   the end offset of the range to highlight >= p0
-   * @param p    the painter to use to actually render the highlight
-   * @return     an object that can be used as a tag
-   *   to refer to the highlight
-   * @exception BadLocationException if the specified location is invalid
-   */
+  /** Adds a highlight to the view.  Returns a tag that can be used  to refer to the highlight.
+    * @param p0   the start offset of the range to highlight >= 0
+    * @param p1   the end offset of the range to highlight >= p0
+    * @param p    the painter to use to actually render the highlight
+    * @return     an object that can be used as a tag to refer to the highlight
+    * @exception BadLocationException if the specified location is invalid
+    */
   public Object addHighlight(int p0, int p1, Highlighter.HighlightPainter p) throws BadLocationException {
     Document doc = component.getDocument();
     HighlightInfo i = (getDrawsLayeredHighlights() &&
@@ -102,8 +98,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
     if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
       // insert solid painters after the frame and underline painters
       for(HighlightInfo hli: highlights) {
-        if ((!(hli.getPainter() instanceof DefaultFrameHighlightPainter)) && 
-            (!(hli.getPainter() instanceof DefaultUnderlineHighlightPainter))) {
+        if ((! (hli.getPainter() instanceof DefaultFrameHighlightPainter)) && 
+            (! (hli.getPainter() instanceof DefaultUnderlineHighlightPainter))) {
           break;
         }
         ++insertPos;
@@ -223,18 +219,15 @@ public class ReverseHighlighter extends DefaultHighlighter {
       HighlightInfo info = (HighlightInfo) tag;
       int oldP0 = info.p0.getOffset();
       int oldP1 = info.p1.getOffset();
-      if (p0 == oldP0) {
-        safeDamageRange(Math.min(oldP1, p1),
-                        Math.max(oldP1, p1));
-      } else if (p1 == oldP1) {
-        safeDamageRange(Math.min(p0, oldP0),
-                        Math.max(p0, oldP0));
-      } else {
+      if (p0 == oldP0) safeDamageRange(Math.min(oldP1, p1), Math.max(oldP1, p1));
+      else if (p1 == oldP1) safeDamageRange(Math.min(p0, oldP0), Math.max(p0, oldP0));
+      else {
         safeDamageRange(oldP0, oldP1);
         safeDamageRange(p0, p1);
       }
       info.p0 = doc.createPosition(p0);
       info.p1 = doc.createPosition(p1);
+      // TODO: figure out what is wrong here.  The preceding lines are dead code.
     }
   }
   
@@ -285,18 +278,12 @@ public class ReverseHighlighter extends DefaultHighlighter {
     }
   }
   
-  /**
-   * Queues damageRange() call into event dispatch thread
-   * to be sure that views are in consistent state.
-   */
+  /** Queues damageRange() call into event dispatch thread to be sure that views are in consistent state. */
   private void safeDamageRange(final Position p0, final Position p1) {
     safeDamager.damageRange(p0, p1);
   }
   
-  /**
-   * Queues damageRange() call into event dispatch thread
-   * to be sure that views are in consistent state.
-   */
+  /** Queues damageRange() call into event dispatch thread to be sure that views are in consistent state. */
   private void safeDamageRange(int a0, int a1) throws BadLocationException {
     Document doc = component.getDocument();
     safeDamageRange(doc.createPosition(a0), doc.createPosition(a1));
@@ -327,9 +314,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   private boolean drawsLayeredHighlights;
   private SafeDamager safeDamager = new SafeDamager();
   
-  /**
-   * Simple highlight painter that draws a rectangular box around text.
-   */
+  /** Simple highlight painter that draws a rectangular box around text. */
   public static class DefaultFrameHighlightPainter extends LayeredHighlighter.LayerPainter {
     
     /**

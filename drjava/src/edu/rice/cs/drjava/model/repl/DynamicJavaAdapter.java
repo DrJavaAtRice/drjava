@@ -323,6 +323,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     _djInterpreter.setAccessible(accessible);
   }
 
+  /** Gets whether protected and private variables should be accessible in the interpreter. */
+  public boolean getPrivateAccessible() { return _djInterpreter.getAccessible(); }
+  
   /** Factory method to make a new NameVisitor.
    *  @param nameContext the context
    *  @return visitor the visitor

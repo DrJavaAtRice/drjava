@@ -95,6 +95,7 @@ import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException ;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+//import edu.rice.cs.drjava.model.definitions.DefinitionsDocument.WrappedPosition;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener ;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
@@ -735,31 +736,35 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Adds File f to end of _auxFiles array. */
     public void addAuxFile(File f) {
-      int n = _auxFiles.length;
-      File[] newAuxFiles = new File[n + 1];
-      System.arraycopy(_auxFiles, 0, newAuxFiles, 0, n);  // newAuxFiles[0:n-1] = _auxFiles[0:n-1]
-      newAuxFiles[n] = f;
-      _auxFiles = newAuxFiles;
+      synchronized(_auxFiles) {
+        int n = _auxFiles.length;
+        File[] newAuxFiles = new File[n + 1];
+        System.arraycopy(_auxFiles, 0, newAuxFiles, 0, n);  // newAuxFiles[0:n-1] = _auxFiles[0:n-1]
+        newAuxFiles[n] = f;
+        _auxFiles = newAuxFiles;
+      }
     }
     
     /** Removes File f from _auxFiles array. Assumes that f is a member of _auxFiles.  If f is not found, throws an 
      *  UnexpectedException. */
     public void remAuxFile(File file) {
-      int newLen = _auxFiles.length - 1;
-      File[] newAuxFiles = new File[newLen];
-      try {
-        int j = 0;
-        for (File f: _auxFiles) {
-          if (! f.equals(file)) {
-            newAuxFiles[j] = file;
-            j++;
+      synchronized(_auxFiles) {
+        int newLen = _auxFiles.length - 1;
+        File[] newAuxFiles = new File[newLen];
+        try {
+          int j = 0;
+          for (File f: _auxFiles) {
+            if (! f.equals(file)) {
+              newAuxFiles[j] = file;
+              j++;
+            }
           }
+          if (j < newLen) throw new IllegalStateException("auxFiles list contain two copies of " + file);
+          _auxFiles = newAuxFiles;
         }
-        if (j < newLen) throw new IllegalStateException("auxFiles list contain two copies of " + file);
-        _auxFiles = newAuxFiles;
-      }
-      catch(Exception e) { // negative array size or index out of bounds
-        throw new UnexpectedException(e);
+        catch(Exception e) { // negative array size or index out of bounds
+          throw new UnexpectedException(e);
+        }
       }
     }
     
@@ -2253,7 +2258,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private static volatile int ID_COUNTER = 0; /* Seed for assigning id numbers to OpenDefinitionsDocuments */
  
   // ---------- ConcreteRegionManager inner class -------
-  /** Simple region manager for the entire model. */
+  /** Simple region manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. */
   static class ConcreteRegionManager<R extends DocumentRegion> extends EventNotifier<RegionManagerListener<R>>
     implements RegionManager<R> {
     /** Vector of regions. */
@@ -2261,47 +2266,45 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     protected volatile R _current = null;
     protected volatile int _maxSize;
     
-    /**
-     * Create a new ConcreteRegionManager with the specified maximum size.
-     * @param size maximum number of regions that can be stored in this manager.
-     */
+    /** Create a new ConcreteRegionManager with the specified maximum size.
+      * @param size maximum number of regions that can be stored in this manager.
+      */
     public ConcreteRegionManager(int size) { _maxSize = size; }
     
     /** Create a new ConcreteRegionManager without maximum size. */
     public ConcreteRegionManager() { this(0); }
     
     /** Returns the region in this manager at the given offset, or null if one does not exist.
-     *  @param odd the document
-     *  @param offset the offset in the document
-     *  @return the DocumentRegion at the given line number, or null if it does not exist.
-     */
+      * @param odd the document
+      * @param offset the offset in the document
+      * @return the DocumentRegion at the given line number, or null if it does not exist.
+      */
     public R getRegionAt(OpenDefinitionsDocument odd, int offset) {
       for (R r: _regions) {
-        if ((r.getDocument().equals(odd)) && (offset >= r.getStartOffset()) && (offset <= r.getEndOffset())) return r;
+        if (r.getDocument().equals(odd) && offset >= r.getStartOffset() && offset <= r.getEndOffset()) return r;
       }
       return null;
     }
     
     /** Get the DocumentRegion that is stored in this RegionsTreePanel overlapping the area for the given document,
-     *  or null if it doesn't exist.
-     *  @param odd the document
-     *  @param startOffset the start offset
-     *  @param endOffset the end offset
-     *  @return the DocumentRegion or null
-     */
+      * or null if it doesn't exist.
+      * @param odd the document
+      * @param startOffset the start offset
+      * @param endOffset the end offset
+      * @return the DocumentRegion or null
+      */
     public R getRegionOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
-      for(R r: _regions) {        
-        if (!(r.getDocument().equals(odd))) { continue; }
+      for (R r: _regions) {        
+        if (! (r.getDocument().equals(odd))) { continue; }
         
-        if (((r.getStartOffset()>=startOffset) && (r.getEndOffset()<=endOffset)) || // r contained in startOffset-endOffset
-            (( r.getStartOffset()<=startOffset) && (r.getEndOffset()>=endOffset)) || // startOffset-endOffset contained in r
-            ((r.getStartOffset()>=startOffset) && (r.getStartOffset()<=endOffset)) || // r starts within startOffset-endOffset
-            ((r.getEndOffset()>=startOffset) && (r.getEndOffset()<=endOffset))) { // r ends within startOffset-endOffset
+        if ((r.getStartOffset() >= startOffset && r.getEndOffset() <= endOffset) || // r contained in startOffset-endOffset
+            (r.getStartOffset() <= startOffset && r.getEndOffset() >= endOffset) || // startOffset-endOffset contained in r
+            (r.getStartOffset() >= startOffset && r.getStartOffset() <= endOffset) || // r starts within startOffset-endOffset
+            (r.getEndOffset() >= startOffset && r.getEndOffset() <= endOffset)) { // r ends within startOffset-endOffset
           // already there
           return r;
         }
       }
-      
       // not found
       return null;
     }
@@ -2310,28 +2313,24 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     protected int getIndexOf(R region) {
       int index = 0;
       for (R r: _regions) {
-        if (region==r) { return index; }
-        else { ++index; }
+        if (region == r) return index;
+        else  ++index;
       }
       return -1;
     }
     
     /** Add the supplied DocumentRegion to the manager.
-     *  @param region the DocumentRegion to be inserted into the manager
-     *  @param index the index at which the DocumentRegion was inserted
-     */
+      * @param region the DocumentRegion to be inserted into the manager
+      * @param index the index at which the DocumentRegion was inserted
+      */
     public void addRegion(final R region) {
       int index = getIndexOf(_current);
       // only add if current, previous, and next are not already the region; prevents trivial duplicates
-      if (!region.equals(_current) && 
-          ((index==_regions.size()-1) || (!region.equals(_regions.get(index+1)))) &&
-          ((index<=0) || (!region.equals(_regions.get(index-1))))) {
-        if ((_current!=null) && (index>=0)) {
-          _regions.add(index+1, region);
-        }
-        else {
-          _regions.add(region);
-        }
+      if (! region.equals(_current) && 
+          (index == _regions.size() - 1 || ! region.equals(_regions.get(index+1))) &&
+          (index<=0 || ! region.equals(_regions.get(index-1)))) {
+        if ((_current != null) && (index>=0)) _regions.add(index+1, region);
+        else _regions.add(region);
         
         _current = region;
         final int regionIndex = getIndexOf(region);
@@ -2537,8 +2536,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   } 
   
-  /** Add the current location to the browser history. */
-  public synchronized void addToBrowserHistory() {
+  /** Add the current location to the browser history.  Only runs in event thread. */
+  public void addToBrowserHistory() {
+    assert EventQueue.isDispatchThread(); 
     final OpenDefinitionsDocument doc = getActiveDocument();
     
     int startPos = 0;  // required by javac
@@ -2548,8 +2548,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (doc != null) {
       doc.acquireReadLock();
       try {
-        startPos = doc.createPosition(doc.getCaretPosition()).getOffset();
-        endPos = doc.createPosition(doc.getLineEndPos(doc.getCaretPosition())).getOffset();
+        startPos = doc.createWrappedPosition(doc.getCaretPosition()).getOffset();
+        endPos = doc.createWrappedPosition(doc.getLineEndPos(doc.getCaretPosition())).getOffset();
         file = doc.getFile();
       }
       catch (FileMovedException fme) { /* ignore */ }
@@ -3699,9 +3699,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     public Position createPosition(int offs) throws BadLocationException {
-      return getDocument().createPosition(offs);
+      return getDocument().createPosition(offs);  // should we create wrapped positions instead?
     }
     
+    public Position createWrappedPosition(int offs) throws BadLocationException {
+      return getDocument().createWrappedPosition(offs);
+    }
+
     public Element getDefaultRootElement() { return getDocument().getDefaultRootElement(); }
     
     public Position getEndPosition() { return getDocument().getEndPosition(); }
@@ -4273,9 +4277,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
  
   private void _setActiveDoc(INavigatorItem idoc) {
-    synchronized (this) {
+//    synchronized (this) {
       _activeDocument = (OpenDefinitionsDocument) idoc;
-    }
+//    }
     refreshActiveDocument();
   }
  

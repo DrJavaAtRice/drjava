@@ -43,28 +43,24 @@ import edu.rice.cs.util.swing.Utilities;
 
 import junit.framework.*;
 
-/**
- * Tests the functionality of the repl interpreter.
- * @version $Id$
- */
+/** Tests the functionality of the repl interpreter.
+  * @version $Id$
+  */
 public final class JavaInterpreterTest extends DrJavaTestCase {
   private JavaInterpreter _interpreter;
   static public boolean testValue;
 
-  /**
-   * The setup method run before each test.
-   */
+  /** The setup method run before each test. */
   protected void setUp() throws Exception {
     super.setUp();
     _interpreter = new DynamicJavaAdapter(new ClassPathManager());
     testValue = false;
   }
 
-  /**
-   * Asserts that the results of interpreting the first of each
-   * Pair is equal to the second.
-   * @param cases an array of Pairs
-   */
+  /** Asserts that the results of interpreting the first of each
+    * Pair is equal to the second.
+    * @param cases an array of Pairs
+    */
   private void tester(Pair[] cases) throws ExceptionReturnedException {
     for (int i = 0; i < cases.length; i++) {
       Object out = _interpreter.interpret(cases[i].first());
@@ -72,10 +68,9 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
     }
   }
 
-  /**
-   * Make sure interpreting simple constants works.
-   * Note that strings and characters are quoted.
-   */
+  /** Make sure interpreting simple constants works.
+    * Note that strings and characters are quoted.
+    */
   public void testConstants() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       Pair.make("5", new Integer(5)),
@@ -484,9 +479,12 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
       }
     });
     DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, Boolean.valueOf(false));
+    Utilities.clearEventQueue();
+//    System.err.println("\nPrivate Access = " + _interpreter.getPrivateAccessible());
     try {
       _interpreter.interpret("class A { private int i = 0; }");
       _interpreter.interpret("new A().i");
+      System.err.println("Private access erroneously succeeded");
       fail("Should not have access to the private field i inside class A.");
     }
     catch (ExceptionReturnedException ere) {

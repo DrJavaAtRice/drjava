@@ -180,4 +180,7 @@ public interface JavaInterpreter extends Interpreter {
    *  @param accessible Whether protected and private variable are accessible
    */
   public void setPrivateAccessible(boolean accessible);
+  
+  /** Gets whether protected and private variables should be accessible in the interpreter. */
+  public boolean getPrivateAccessible();
 }

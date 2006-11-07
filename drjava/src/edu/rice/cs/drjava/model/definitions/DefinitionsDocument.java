@@ -133,13 +133,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * (the DefaultGlobalModel) can find the next ODD given a DD. */
   private volatile OpenDefinitionsDocument _odd;
   
-  private CompoundUndoManager _undoManager;
+  private volatile CompoundUndoManager _undoManager;
   
   /** Keeps track of the listeners to this model. */
   private final GlobalEventNotifier _notifier;
   
   /** List with weak references to positions. */
-  private LinkedList<WeakReference<WrappedPosition>> _wrappedPosList;
+  private volatile LinkedList<WeakReference<WrappedPosition>> _wrappedPosList;
+  
+  /** Lock protecting _wrappedPosList. */
+  private final Object _wrappedPosListLock = new Object();
   
   /** Convenience constructor for using a custom indenter.
    *  @param indenter custom indenter class
@@ -1477,6 +1480,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Wrapper for Position objects to allow relinking to a new Document. */
+  //TODO: move this class to OpenDefinitionsDocument interface
   public static class WrappedPosition implements Position {
     private Position _wrapped;
     public WrappedPosition(Position w) { setWrapped(w); }
@@ -1484,52 +1488,55 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     public int getOffset() { return _wrapped.getOffset(); }
   }
   
-  /** Overloaded factory method for Positions. Stores the created Position instance
+  /** Factory method for created WrappedPositions. Stores the created Position instance
    *  so it can be linked to a different DefinitionsDocument later. */
-  public synchronized Position createPosition(int offs) throws BadLocationException {
-    WrappedPosition wp = new WrappedPosition(super.createPosition(offs));
-    if (_wrappedPosList==null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }
-    _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));
+  public Position createWrappedPosition(int offs) throws BadLocationException {
+    WrappedPosition wp = new WrappedPosition(createPosition(offs));
+    synchronized(_wrappedPosListLock) {
+      if (_wrappedPosList == null) _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); 
+      _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));
+    }
     return wp;
   }
   
-  /**
-   * Remove all positions that have been garbage-collected from the list of positions, then return a weakly-linked
-   * hashmap with positions and their current offsets.
-   * @return list of weak references to all positions that have been created and that have not been garbage-collected yet.
-   */
-  public synchronized WeakHashMap<WrappedPosition, Integer> getWrappedPositionOffsets() {
+  /** Remove all positions that have been garbage-collected from the list of positions, then return a weakly-linked
+    * hashmap with positions and their current offsets.
+    * @return list of weak references to all positions that have been created and that have not been garbage-collected yet.
+    */
+  public WeakHashMap<WrappedPosition, Integer> getWrappedPositionOffsets() {
     LinkedList<WeakReference<WrappedPosition>> newList = new LinkedList<WeakReference<WrappedPosition>>();
-    if (_wrappedPosList==null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }
-    WeakHashMap<WrappedPosition, Integer> ret = new WeakHashMap<WrappedPosition, Integer>(_wrappedPosList.size());
-    
-    for (WeakReference<WrappedPosition> wr: _wrappedPosList) {
-      if (wr.get()!=null)  {
-        // hasn't been garbage-collected yet
-        newList.add(wr);
-        ret.put(wr.get(), wr.get().getOffset());
+    synchronized(_wrappedPosListLock) {
+      if (_wrappedPosList == null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }
+      WeakHashMap<WrappedPosition, Integer> ret = new WeakHashMap<WrappedPosition, Integer>(_wrappedPosList.size());
+      
+      for (WeakReference<WrappedPosition> wr: _wrappedPosList) {
+        if (wr.get() != null)  {
+          // hasn't been garbage-collected yet
+          newList.add(wr);
+          ret.put(wr.get(), wr.get().getOffset());
+        }
       }
-    }
-    _wrappedPosList.clear();
-    _wrappedPosList = newList;
-    
+      _wrappedPosList.clear();
+      _wrappedPosList = newList;  
     return ret;
+    }
   }
  
-  /**
-   * Re-create the wrapped positions in the hashmap, update the wrapped position, and add them to the list.
-   * @param whm weakly-linked hashmap of wrapped positions and their offsets
-   */
-  public synchronized void setWrappedPositionOffsets(WeakHashMap<WrappedPosition, Integer> whm) throws BadLocationException {
-    if (_wrappedPosList==null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }
-    _wrappedPosList.clear();
-    
-    for(Map.Entry<WrappedPosition, Integer> entry: whm.entrySet()) {
-      if (entry.getKey()!=null) {
-        // hasn't been garbage-collected yet
-        WrappedPosition wp = entry.getKey();
-        wp.setWrapped(super.createPosition(entry.getValue()));
-        _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));
+  /** Re-create the wrapped positions in the hashmap, update the wrapped position, and add them to the list.
+    * @param whm weakly-linked hashmap of wrapped positions and their offsets
+    */
+  public void setWrappedPositionOffsets(WeakHashMap<WrappedPosition, Integer> whm) throws BadLocationException {
+    synchronized(_wrappedPosListLock) {
+      if (_wrappedPosList == null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }
+      _wrappedPosList.clear();
+      
+      for(Map.Entry<WrappedPosition, Integer> entry: whm.entrySet()) {
+        if (entry.getKey() != null) {
+          // hasn't been garbage-collected yet
+          WrappedPosition wp = entry.getKey();
+          wp.setWrapped(createPosition(entry.getValue()));
+          _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));
+        }
       }
     }
   }

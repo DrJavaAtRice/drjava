@@ -601,21 +601,12 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     
     _model.closeAllFiles();
     
-    // make sure that the event queue is empty (can we explicity test this condition?)
-    Utilities.clearEventQueue();
-    Utilities.clearEventQueue();
+    _ct = 0;
+    do { _cleanup(); }
+    while (_finalDocCount != 6 || _finalCount != 6);
     
-    System.gc();
-    Utilities.clearEventQueue(); 
-    System.runFinalization();
+    if (_ct > 1) System.err.println("testDocumentPaneMemoryLeak required " + _ct + " iterations");
     
-    Utilities.clearEventQueue();   
-    Utilities.clearEventQueue(); 
-    
-    System.gc();
-    Utilities.clearEventQueue(); 
-    System.runFinalization();
-    Utilities.clearEventQueue(); 
 //    System.out.println("Current: " + _frame.getCurrentDefPane().hashCode());
     
 //    System.out.println("Foo");
@@ -625,6 +616,17 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
 //    System.err.println("_finalCount = " + _finalCount);
     
     _log.log("testDocumentPaneMemoryLeak completed");
+  }
+  
+  private int _ct = 0;
+  private void _cleanup() {
+    // make sure that the event queue is empty
+    Utilities.clearEventQueue();
+    Utilities.clearEventQueue();
+    System.gc();
+    System.runFinalization();
+    System.gc();
+    _ct++;
   }
   
   // This testcase checks that we do no longer discard Alt keys that would be used to make the {,},[,] chars that the french keyboards has.

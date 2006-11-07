@@ -44,10 +44,9 @@ public class SplashScreen extends JWindow {
   public static final String SPLASH_ICON = "splash.png";
   private ImageIcon _icon;
 
-  /**
-   * Creates a new splash screen, but does not display it.  Display the
-   * splash screen using show() and close it with dispose().
-   */
+  /** Creates a new splash screen, but does not display it.  Display the splash screen using show() and close it 
+    * with dispose().
+    */
   public SplashScreen() {
     _icon = MainFrame.getIcon(SPLASH_ICON);
     getContentPane().add(new JLabel(_icon, SwingConstants.CENTER));

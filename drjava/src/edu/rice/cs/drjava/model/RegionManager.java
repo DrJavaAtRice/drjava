@@ -36,11 +36,9 @@ package edu.rice.cs.drjava.model;
 import edu.rice.cs.util.Lambda;
 import java.util.Vector;
 
-/**
- * Interface for a region manager.
- *
- * @version $Id$
- */
+/** Interface for a region manager.
+  * @version $Id$
+  */
 public interface RegionManager<R extends DocumentRegion> {    
   /** Returns the region in this manager at the given offset, or null if one does not exist.
    *  @param odd the document

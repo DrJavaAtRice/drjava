@@ -95,16 +95,12 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     super(frame, title);
     _regionManager = rm;
     _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
-      public void regionAdded(MovingDocumentRegion r, int index) {
-        addRegion(r);
-      }
+      public void regionAdded(MovingDocumentRegion r, int index) { addRegion(r); }
       public void regionChanged(MovingDocumentRegion r, int index) { 
         regionRemoved(r);
         regionAdded(r, index);
       }
-      public void regionRemoved(MovingDocumentRegion r) {
-        removeRegion(r);
-      }
+      public void regionRemoved(MovingDocumentRegion r) { removeRegion(r); }
     });
     
     OptionListener<Color> temp;
@@ -235,12 +231,13 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   /** Turn the selected regions into bookmarks. */
   private void _bookmark() {
     for (final MovingDocumentRegion r: getSelectedRegions()) {
-      DocumentRegion bookmark = _model.getBookmarkManager().getRegionOverlapping(r.getDocument(),
-                                                                                 r.getStartOffset(),
-                                                                                 r.getEndOffset());
-      if (bookmark==null) {
+      DocumentRegion bookmark = 
+        _model.getBookmarkManager().getRegionOverlapping(r.getDocument(), r.getStartOffset(), r.getEndOffset());
+      if (bookmark == null) {
         try {
-          _model.getBookmarkManager().addRegion(new SimpleDocumentRegion(r.getDocument(), r.getDocument().getFile(), r.getStartOffset(), r.getEndOffset()));
+          DocumentRegion newR = 
+            new SimpleDocumentRegion(r.getDocument(), r.getDocument().getFile(), r.getStartOffset(), r.getEndOffset());
+          _model.getBookmarkManager().addRegion(newR);
         }
         catch (FileMovedException fme) {
           throw new UnexpectedException(fme);

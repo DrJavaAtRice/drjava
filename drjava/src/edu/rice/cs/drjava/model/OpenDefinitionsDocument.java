@@ -41,6 +41,7 @@ import java.awt.print.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Position;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.drjava.model.FileSaveSelector;
@@ -339,4 +340,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   /** @return the caret position as set by the view. */
   public int getCaretPosition();
+  
+  /** Creates a WrappedPosition in the document. */
+  public Position createWrappedPosition(int offs) throws BadLocationException;
 }

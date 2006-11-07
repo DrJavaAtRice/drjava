@@ -520,7 +520,7 @@ public class FindReplaceMachine {
 //        Utilities.show("Finished iteration with text = " + text + "; len = " + len);
         if (_shouldIgnore(foundLocation, doc)) continue;
         
-        _current = doc.createPosition(matchLocation);   
+        _current = doc.createPosition(matchLocation);   // formerly doc.createWrappedPosition(...)
         
 //        System.err.println("Returning result = " + new FindResult(doc, matchLocation, wrapped, allWrapped));
 

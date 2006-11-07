@@ -334,7 +334,7 @@ public class CompilerErrorModel {
           // create new positions for all errors on this line
           while ((curError < _numErrors) && file.equals(_errors[curError].file()) &&  // we are still in this file
                  (_errors[curError].lineNumber() == curLine)) {
-            _positions[curError] = document.createPosition(offset + _errors[curError].startColumn());
+            _positions[curError] = document.createWrappedPosition(offset + _errors[curError].startColumn());
             curError++;
           }
 

@@ -71,16 +71,12 @@ public class BookmarksPanel extends RegionsTreePanel<DocumentRegion> {
   public BookmarksPanel(MainFrame frame) {
     super(frame, "Bookmarks");
     _model.getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() {      
-      public void regionAdded(DocumentRegion r, int index) {
-        addRegion(r);
-      }
+      public void regionAdded(DocumentRegion r, int index) { addRegion(r); }
       public void regionChanged(DocumentRegion r, int index) { 
         regionRemoved(r);
         regionAdded(r, index);
       }
-      public void regionRemoved(DocumentRegion r) {
-        removeRegion(r);
-      }
+      public void regionRemoved(DocumentRegion r) { removeRegion(r); }
     });
   }
   

@@ -2120,10 +2120,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         startSel = doc.getLineStartPos(startSel);
       }
       DocumentRegion r = _model.getBookmarkManager().getRegionOverlapping(doc, startSel, endSel);
-      if (r==null) {
-        final Position startPos = doc.createPosition(startSel);
-        final Position endPos = doc.createPosition(endSel);
-        _model.getBookmarkManager().addRegion(new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset()));
+      if (r == null) {
+        final Position startPos = doc.createWrappedPosition(startSel);
+        final Position endPos = doc.createWrappedPosition(endSel);
+        SimpleDocumentRegion newR = new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset());
+        _model.getBookmarkManager().addRegion(newR);
       }
       else {
         _model.getBookmarkManager().removeRegion(r);
@@ -6484,7 +6485,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //    _currentDefPane.notifyActive();
     if (startOffset != startPos.getOffset()) start -= 2;      
     _currentDefPane.setCaretPosition(start);
-    if (start != end)   _currentDefPane.moveCaretPosition(newEnd);
+    if (start != end) _currentDefPane.moveCaretPosition(newEnd);
   }
   
   
@@ -7185,7 +7186,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       * dialog to ask if all open source files should be compiled in order to test the program. 
       */
     public void compileBeforeJUnit(final CompilerListener testAfterCompile) {
-      System.err.println("in compileBeforeJUnit, TEST_MODE = " + Utilities.TEST_MODE);
+//      System.err.println("in compileBeforeJUnit, TEST_MODE = " + Utilities.TEST_MODE);
       if (DrJava.getConfig().getSetting(ALWAYS_COMPILE_BEFORE_JUNIT).booleanValue() || Utilities.TEST_MODE) {
         // Compile all open source files
         _model.getCompilerModel().addListener(testAfterCompile);  // listener removes itself
@@ -7209,7 +7210,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                 _model.getJUnitModel().nonTestCase(true);  // cleans up
                 break;
               default:
-                throw new RuntimeException("Invalid returnCode from showConfirmDialog: " + rc);
+                throw new UnexpectedException("Invalid returnCode from showConfirmDialog: " + rc);
             }
           }
         });

@@ -47,12 +47,10 @@ package edu.rice.cs.util.swing;
 
 import java.io.File;
 
-/**
- * This class is a wrapper for a file whose <code>toString</code> method
- * outputs only the last element in the file path.  If it's a file, then
- * it outputs the file name without its parent directories.  If it's a 
- * directory, then it outputs the name of that directory only
- */
+/** This class is a wrapper for a file whose <code>toString</code> method outputs only the last element in the file
+  * path.  If it's a file, then it outputs the file name without its parent directories.  If it's a  directory, then
+  * it outputs the name of that directory only
+  */
 public class FileDisplay {
   
   private File _file;

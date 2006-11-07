@@ -287,12 +287,8 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
 //        for(int i=0;i<_listModel.getSize();++i) { edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("\t"+_listModel.elementAt(i)); }
 
         String name = "";
-        try {
-          name = r.getDocument().getQualifiedClassName();
-        }
-        catch (ClassNameNotFoundException cnnfe) {
-          name = r.getDocument().toString();
-        }
+        try { name = r.getDocument().getQualifiedClassName(); }
+        catch (ClassNameNotFoundException cnnfe) { name = r.getDocument().toString(); }
         
         RegionListUserObj<R> userObj = makeRegionListUserObj(r);
         _listModel.add(index, userObj);

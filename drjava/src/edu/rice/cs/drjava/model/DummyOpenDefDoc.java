@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.model.FinalizationListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
+//import edu.rice.cs.drjava.model.definitions.DefinitionsDocument.WrappedPosition;
 
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.docnavigation.*;
@@ -225,6 +226,10 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   public Position createPosition(int offs) throws BadLocationException {
+    return _defDoc.createPosition(offs);
+  }
+  
+  public Position createWrappedPosition(int offs) throws BadLocationException {
     return _defDoc.createPosition(offs);
   }
   
