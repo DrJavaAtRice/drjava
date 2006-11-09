@@ -65,12 +65,13 @@ public class MovingDocumentRegion implements DocumentRegion {
 
   /** @return the start offset */
   public int getStartOffset() {
-    return ((_doc==null)||(_doc.getLength()>=_startPosition.getOffset()))?_startPosition.getOffset():_doc.getLength();
+    return 
+      (_doc==null || _doc.getLength() >= _startPosition.getOffset()) ? _startPosition.getOffset() : _doc.getLength();
   }
 
   /** @return the end offset */
   public int getEndOffset() {
-    return ((_doc==null)||(_doc.getLength()>=_endPosition.getOffset()))?_endPosition.getOffset():_doc.getLength();
+    return (_doc==null || _doc.getLength() >= _endPosition.getOffset()) ? _endPosition.getOffset() : _doc.getLength();
   }
   
   /** @return the string it was assigned */
@@ -80,16 +81,17 @@ public class MovingDocumentRegion implements DocumentRegion {
   
   /** @return true if the specified region is equal to this one. */
   public boolean equals(Object other) {
-    if (!(other instanceof MovingDocumentRegion) || (other==null)) return false;
+    if ((other == null) || ! (other instanceof MovingDocumentRegion)) return false;
     MovingDocumentRegion o = (MovingDocumentRegion)other;
-    return ((((_doc==null) && (o._doc==null)) || (_doc.equals(o._doc))) &&
-            (((_file==null) && (o._file==null)) || (_file.equals(o._file))) &&
-            (_startPosition.getOffset() == o._startPosition.getOffset()) &&
-            (_endPosition.getOffset() == o._endPosition.getOffset()) &&
-            (_string.equals(o._string)));
+    return (((_doc == null && o._doc == null) || _doc.equals(o._doc)) &&
+            ((_file == null && o._file == null) || _file.equals(o._file)) &&
+            _startPosition.getOffset() == o._startPosition.getOffset() &&
+            _endPosition.getOffset() == o._endPosition.getOffset() &&
+            _string.equals(o._string));
   }
   
   public String toString() {
-    return ((_doc!=null)?_doc.toString():"null") + " "+_startPosition.getOffset()+" .. "+_endPosition.getOffset();
+    return 
+      (_doc != null ? _doc.toString() : "null") + " " + _startPosition.getOffset() + " .. " + _endPosition.getOffset();
   }
 }

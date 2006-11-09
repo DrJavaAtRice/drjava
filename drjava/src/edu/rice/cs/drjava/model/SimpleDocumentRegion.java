@@ -94,8 +94,8 @@ public class SimpleDocumentRegion implements DocumentRegion {
   
   /** @return true if the specified region is equal to this one. */
   public boolean equals(Object other) {
-    if (!(other instanceof SimpleDocumentRegion) || (other==null)) return false;
-    SimpleDocumentRegion o = (SimpleDocumentRegion)other;
+    if (other==null || ! (other instanceof SimpleDocumentRegion)) return false;
+    SimpleDocumentRegion o = (SimpleDocumentRegion) other;
     return (((_doc == null && o._doc == null) || _doc.equals(o._doc)) &&
             ((_file == null && o._file == null) || _file.equals(o._file)) &&
             _startPos.getOffset() == o._startPos.getOffset() &&

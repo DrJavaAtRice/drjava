@@ -145,6 +145,8 @@ import edu.rice.cs.util.text.AbstractDocumentInterface ;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.ReaderWriterLock;
 
+import static java.lang.Math.*;
+
 /** In simple terms, a DefaultGlobalModel without an interpreter, compiler, junit testing, debugger or javadoc.
   * Hence, it only has only document handling functionality
   * @version $Id$
@@ -355,7 +357,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //          IDocumentNavigator.LOG.log("_gainVisitor; modelInitiated = false");
 //        }
         OpenDefinitionsDocument oldDoc = AbstractGlobalModel.this.getActiveDocument();
-        if (! modelInitiated) { addToBrowserHistory(); }
+//        if (! modelInitiated) { addToBrowserHistory(); }
         _setActiveDoc(doc);  // sets _activeDocument, the shadow copy of the active document
         if (! modelInitiated) { addToBrowserHistory(); }
         
@@ -2328,8 +2330,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       // only add if current, previous, and next are not already the region; prevents trivial duplicates
       if (! region.equals(_current) && 
           (index == _regions.size() - 1 || ! region.equals(_regions.get(index+1))) &&
-          (index<=0 || ! region.equals(_regions.get(index-1)))) {
-        if ((_current != null) && (index>=0)) _regions.add(index+1, region);
+          (index <= 0 || ! region.equals(_regions.get(index-1)))) {
+        if ((_current != null) && (index >= 0)) _regions.add(index+1, region);
         else _regions.add(region);
         
         _current = region;
@@ -2349,43 +2351,39 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       else {
         // if next was the region to be added, make that the current region
-        if ((index<_regions.size()-1) && (region.equals(_regions.get(index+1)))) {
-          nextCurrentRegion();
-        }
+        if ((index<_regions.size()-1) && (region.equals(_regions.get(index+1)))) nextCurrentRegion();
         // if previous was the region to be added, make that the current region
-        else if ((index>0) && (region.equals(_regions.get(index-1)))) {
-          prevCurrentRegion();
-        }
+        else if ((index>0) && (region.equals(_regions.get(index-1)))) prevCurrentRegion();
       }
     }
     
     /** Remove regions more recent than the current region. */
     protected void removeMoreRecentThanCurrent() {
-      if (_current!=null) {
+      if (_current != null) {
         int index = getIndexOf(_current);
-        while ((index>=0) && (index<_regions.size()-1)) {
-          removeRegion(_regions.lastElement());
-        }
+        if (index < 0) return;
+        while (index < _regions.size() - 1) { removeRegion(_regions.lastElement()); }  // remove last element
       }
     }
     
-    /** Remove regions if there are more than the maximum number allowed. */
+    /** Remove regions if there are more than the maximum number allowed. Typically used to remove one region. */
     protected void shrinkManager() {
-      if (_maxSize>0) {
-        while(_regions.size()>_maxSize) {
+      if (_maxSize > 0) {
+        int size;
+        while ((size = _regions.size()) > _maxSize) {
           int index = getIndexOf(_current);
-          if (index<=_regions.size()/2) {
-            // in first half, remove last element
-            removeRegion(_regions.lastElement());
+          if (index <= (size - 1)/2) {
+            // in first half, remove last element; distinct from index unless _maxSize = 1
+            _regions.remove(size - 1);
           }
           else {
-            // in second half, remove first element
-            removeRegion(_regions.firstElement());
+            // in second half, remove first element; distinct from index
+            _regions.remove(0);
           }
         }
       }
     }
-    
+
     /** Remove the given DocumentRegion from the manager.
      *  @param region the DocumentRegion to be removed.
      */
@@ -2394,15 +2392,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       // if a more recent region is not available, select a less recent region, if available
       // if a less recent region is not available either, set to null
       final R cur = _current; // so we can verify if _current got changed
-      if (region==cur) {
+      if (region == cur) {
         if (nextCurrentRegion().equals(cur)) {
           if (prevCurrentRegion().equals(cur)) {
             _current = null;
           }
         }
       }
-      for(int i=0;i<_regions.size();++i) {
-        if (region==_regions.get(i)) {
+      for(int i = 0; i < _regions.size(); ++i) {
+        if (region == _regions.get(i)) {
           _regions.remove(i);
           break;
         }
@@ -2423,58 +2421,44 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Tells the manager to remove all regions. */
     public void clearRegions() {
       _current = null;
-      while(_regions.size()>0) { removeRegion(_regions.get(0)); }
+      while (_regions.size() > 0) { removeRegion(_regions.get(0)); }
     }
     
     /** @return the current region or null if none selected */
     public R getCurrentRegion() {
-      if (!_regions.contains(_current)) {
-        _current = null;
-      }
+      if (!_regions.contains(_current)) _current = null;
       return _current;
     }
     
     /** @return the index of the current region or -1 if none selected */
     public int getCurrentRegionIndex() {
-      if (_current!=null) {
-        return getIndexOf(_current);
-      }
-      else {
-        return -1;
-      }
+      if (_current != null) return getIndexOf(_current);
+      return -1;
     }
     
     /** @return true if the current region is the first in the list, i.e. prevCurrentRegion is without effect */
     public boolean isCurrentRegionFirst() {
-      return (getIndexOf(_current)==0);
+      return getIndexOf(_current) == 0;
     }
     
     /** @return true if the current region is the last in the list, i.e. nextCurrentRegion is without effect */
-    public boolean isCurrentRegionLast() {
-      return (getIndexOf(_current)==_regions.size()-1);
-    }
+    public boolean isCurrentRegionLast() { return (getIndexOf(_current) == _regions.size() - 1);  }
 
     /** Set the current region. 
      *  @param region new current region */
     public void setCurrentRegion(R region) {
-      if (!_regions.contains(_current)) {
-        _current = null;
-      }
+//      if (!_regions.contains(_current)) _current = null;
       _current = region;
     }
     
     /** Make the region that is more recent the current region.
      *  @return new current region */
     public R nextCurrentRegion() {
-      if (_current!=null) {
+      if (_current != null) {
         int index = getIndexOf(_current);
-        if (index+1 < _regions.size()) {
-          _current = _regions.get(index+1);
-        }
+        if (index + 1 < _regions.size()) _current = _regions.get(index+1);
       }
-      else {
-        _current = _regions.lastElement();
-      }
+      else _current = _regions.lastElement();
       return _current;
     }
     
@@ -2493,12 +2477,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return _current;
     }
     
-    /**
-     * Set the maximum number of regions that can be stored in this manager.
-     * If the maximum capacity has been reached and another region is added, the region at the end farther
-     * away from the insertion location will be discarded.
-     * @param size maximum number of regions, or 0 if no maximum
-     */
+    /** Set the maximum number of regions that can be stored in this manager.  If the maximum capacity has been reached
+      * and another region is added, the region at the end farther away from the insertion location will be discarded.
+      * @param size maximum number of regions, or 0 if no maximum
+      */
     public void setMaximumSize(int size) {
       _maxSize = size;
       
@@ -2590,12 +2572,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       
       /** Get the DocumentRegion that is stored in this RegionsTreePanel overlapping the area for the given document,
-       *  or null if it doesn't exist.
-       *  @param odd the document
-       *  @param startOffset the start offset
-       *  @param endOffset the end offset
-       *  @return the DocumentRegion or null
-       */
+        * or null if it doesn't exist.
+        * @param odd the document
+        * @param startOffset the start offset
+        * @param endOffset the end offset
+        * @return the DocumentRegion or null
+        */
       public R getRegionOverlapping(OpenDefinitionsDocument odd, int startOffset, int endOffset) {
         return _superSetManager.getRegionOverlapping(odd, startOffset, endOffset);
       }

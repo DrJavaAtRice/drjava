@@ -56,7 +56,7 @@ import edu.rice.cs.util.swing.Utilities;
 /** This class is an extension of JList that adds data shadowing the model embedded in a JList.
  *  Since all changes to the model (except for the selected item!) must go through this interface,
  *  we can support access to methods from non-event threads as long as these methods do not modify
- *  the model.  However, all of the methods that access and modify the model (the latter only running
+ *  the model.  However, all of the public methods that access and modify the model (the latter only running
  *  in the event thread) must be atomic relative to each other, so synchronization is required in most
  *  cases.
  * 
@@ -154,7 +154,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
    *  document, returns doc
    */
   public ItemT getNext(ItemT doc) { 
-    synchronized (_model) {
+    synchronized(_model) {
       int i = _model.indexOf(doc);
       if (i == -1)
         throw new IllegalArgumentException("No such document " + doc.toString() + " found in collection of open documents");
@@ -169,11 +169,11 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
    *  @return the document which comes before doc in the list
    */
   public ItemT getPrevious(ItemT doc) {  
-    synchronized (_model) {
+    synchronized(_model) {
       int i = _model.indexOf(doc);
-      if ( i == -1 )
+      if (i == -1)
         throw new IllegalArgumentException("No such document " + doc.toString() + " found in collection of open documents");
-      if ( i == 0) return doc;
+      if (i == 0) return doc;
       return getFromModel(i - 1);
     }
   }
@@ -181,16 +181,12 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   /** Gets the first document in the series.
    *  @return the first document in the collection
    */
-  public ItemT getFirst() { 
-    synchronized (_model) { return getFromModel(0); } 
-  }
+  public ItemT getFirst() { synchronized (_model) { return getFromModel(0); } }
   
   /** Gets the first document in the series.
    *  @return the first document in the collection
    */
-  public ItemT getLast() { 
-    synchronized (_model) { return getFromModel(_model.size() - 1); } 
-  }
+  public ItemT getLast() { synchronized (_model) { return getFromModel(_model.size() - 1); } }
   
   /** Returns the currently selected item, or null if none. */
   public ItemT getCurrent() { return _current; }
@@ -240,20 +236,20 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   }
     
   /** Returns whether or not the navigator contains the document
-   *  @param doc the document to find
-   *  @return true if this list contains doc (using identity as equality measure), false if not.
-   */
+    * @param doc the document to find
+    * @return true if this list contains doc (using identity as equality measure), false if not.
+    */
   public boolean contains(ItemT doc) { 
     synchronized(_model) { return _model.contains(doc); }
   }
   
   /** @return an Enumeration of the documents in this list (ordering is consistent with getNext() and getPrev()).
-   * This cast in this method required to work around the stupid partial generification of DefaultListModel in Java 1.5.
-   * The class should be generic: DefaultListModel<T> { ... Enumeration<T> elements() {...} ... } instead of 
-   * DefaultListModel { ... Enumeration<?> elements() {...} ... }.
-   */
+    * This cast in this method required to work around the stupid partial generification of DefaultListModel in Java 1.5.
+    * The class should be generic: DefaultListModel<T> { ... Enumeration<T> elements() {...} ... } instead of 
+    * DefaultListModel { ... Enumeration<?> elements() {...} ... }.
+    */
   public Enumeration<ItemT> getDocuments() { 
-    synchronized (_model) {
+    synchronized(_model) {
 //    Cast forced by lousy generic typing of DefaultListModel in Java 1.5
       @SuppressWarnings("unchecked") Enumeration<ItemT> result = (Enumeration<ItemT>) _model.elements();
       return result;  
@@ -267,17 +263,17 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   public boolean isEmpty() { return _model.isEmpty(); }
   
   /** Adds listener to the collection of listeners.
-   *  @param listener
-   */
+    * @param listener
+    */
   public void addNavigationListener(INavigationListener<? super ItemT> listener) { 
     synchronized(_model) { navListeners.add(listener); }
   }
   
   /** Unregisters the listener listener
-   *  @param listener
-   */
+    * @param listener
+    */
   public void removeNavigationListener(INavigationListener<? super ItemT> listener) { 
-    synchronized (_model) { navListeners.remove(listener); }
+    synchronized(_model) { navListeners.remove(listener); }
   }
   
   /** @return the navigator listeners. */
@@ -304,7 +300,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
    * 
    */
   public boolean selectDocumentAt(final int x, final int y) {
-    synchronized (_model) {
+    synchronized(_model) {
       final int idx = locationToIndex(new java.awt.Point(x,y));
       java.awt.Rectangle rect = getCellBounds(idx, idx);
       if (rect.contains(x, y)) {
@@ -348,7 +344,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
 //    }
 //  }
 //  
-  public String toString() { synchronized (_model) { return _model.toString(); } }
+  public String toString() { synchronized(_model) { return _model.toString(); } }
   
   /** The cell renderer for this list. */
   private static class CustomListCellRenderer extends DefaultListCellRenderer {

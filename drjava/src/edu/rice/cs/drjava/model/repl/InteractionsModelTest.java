@@ -520,7 +520,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     protected void _notifyInteractionStarted() { }
     protected void _notifyInteractionEnded() { 
       _log.log("_notifyInteractionEnded called.");
-      synchronized (_interactionLock) {
+      synchronized(_interactionLock) {
         _interactionDone = true;
         _interactionLock.notify();
       }

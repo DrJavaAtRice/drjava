@@ -40,6 +40,7 @@ import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 
 import javax.swing.text.BadLocationException;
@@ -51,6 +52,8 @@ import javax.swing.text.Position;
 public class FindReplaceMachine {
   
   // TODO: is _start still used in any way that matters?
+  
+  static private Log _log = new Log("FindReplace.txt", false);
   
   /* Visible machine state; manipulated directly or indirectly by FindReplacePanel. */
   private OpenDefinitionsDocument _doc;      // Current search document 
@@ -407,7 +410,7 @@ public class FindReplaceMachine {
    */
   private FindResult _findNextInDoc(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
     // search from current position to "end" of document ("end" is start if searching backward)
-//    System.err.println("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
+    _log.log("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
     FindResult fr = _findNextInDocSegment(doc, start, len);
     if (fr.getFoundOffset() >= 0 || searchAll) return fr;
     
@@ -425,10 +428,10 @@ public class FindReplaceMachine {
    */  
   private FindResult _findWrapped(OpenDefinitionsDocument doc, int start, int len, boolean allWrapped) {
     
-//    assert (_isForward && start + len == doc.getLength()) || (! _isForward && start == 0);
+    assert (_isForward && start + len == doc.getLength()) || (! _isForward && start == 0);
     
-//    System.err.println("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
-//                       doc.getLength() + ", _isForward = " + _isForward);
+    _log.log("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
+                       doc.getLength() + ", _isForward = " + _isForward);
 
     if (doc.getLength() == 0) return new FindResult(doc, -1, true, allWrapped);
     
@@ -441,8 +444,8 @@ public class FindReplaceMachine {
       newStart = len;
       newLen = doc.getLength() - len;
     }
-//      System.err.println("Calling _findNextInDocSegment(" + doc.getText() + ", newStart = " + newStart + ", newLen = " + 
-//                     newLen + ", allWrapped = " + allWrapped + ") and _isForward = " + _isForward);
+      _log.log("Calling _findNextInDocSegment(" + doc.getText() + ", newStart = " + newStart + ", newLen = " + 
+                     newLen + ", allWrapped = " + allWrapped + ") and _isForward = " + _isForward);
     return _findNextInDocSegment(doc, newStart, newLen, true, allWrapped);
   } 
      
@@ -462,7 +465,7 @@ public class FindReplaceMachine {
    *  @return a FindResult object with foundOffset and a flag indicating wrapping to the beginning during a search. The
    *  foundOffset returned insided the FindResult is -1 if no instance was found.
    */
-  private FindResult _findNextInDocSegment(final OpenDefinitionsDocument doc, int start, int len, 
+  private FindResult _findNextInDocSegment(final OpenDefinitionsDocument doc, final int start, final int len, 
                                            final boolean wrapped, final boolean allWrapped) {  
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped + " ...)");
     
@@ -487,34 +490,38 @@ public class FindReplaceMachine {
 //       if (wrapped && allWrapped) Utilities.show("Executing loop with findWord = " + findWord + "; text = " + text + "; len = " + len);     
       
       // loop to find first valid (not ignored) occurrence of findWord
-      // loop carried variables are text, len, start; 
-      // loop invariant variables are _doc, docLen, _isForward, findWord, wordLen.
-      // On forward search, (start + len) is invariant; on backward search start is invariant.
+      // loop carried variables are rem, foundOffset; 
+      // loop invariant variables are _doc, docLen, _isForward, findWord, wordLen, start, len.
+      // Invariant:  on forwardsearch, foundOffset + rem == len; on backward search foundOffset == rem.
       // loop exits by returning match (as FindResult) or by falling through with no match.
       // if match is returned, _current has been updated to match location
-      while (len >= wordLen) {
-        
+      int foundOffset = _isForward? 0 : len;
+      int rem = len;
+//      _log.log("Starting search loop; text = '" + text + "' findWord = '" + findWord + "' forward? = " + _isForward + " rem = " + rem + " foundOffset = " + foundOffset);
+      while (rem >= wordLen) {
+
         // Find next match in text
-        int foundOffset = _isForward ? text.indexOf(findWord) : text.lastIndexOf(findWord);
+        foundOffset = _isForward ? text.indexOf(findWord, foundOffset) : text.lastIndexOf(findWord, foundOffset);
+//        _log.log("foundOffset = " + foundOffset);
         if (foundOffset < 0) break;  // no valid match in this document
         int foundLocation = start + foundOffset;
         int matchLocation;
         
         if (_isForward) {
-          int adjustedOffset = foundOffset + wordLen;
-          start += adjustedOffset;                       // start is moved to match
-          text = text.substring(adjustedOffset, len);    // len is length of text before update
-          len = len - adjustedOffset;                    // len is updated to length of text after update
-          matchLocation = start;                         // matchLocation is index in _doc of right edge of match
+          foundOffset += wordLen;                          // skip over matched word
+//          text = text.substring(adjustedOffset, len);    // len is length of text before update
+          rem = len - foundOffset;                         // len is updated to length of remaining text to search
+          matchLocation = foundLocation + wordLen;         // matchLocation is index in _doc of right edge of match
 //            _current = docToSearch.createPosition(start);          // put caret at beginning of found word
         }
-        else {
-          len = foundOffset;                             // start is left invariant; len is moved to match
-          matchLocation = start + foundOffset;           // matchLocation is index in _doc of left edge of match
-          text = text.substring(0, len);                 // len is length of text after update
+        else { 
+          foundOffset -= wordLen;                        // skip over matched word        
+          rem = foundOffset;                             // rem is adjusted to match foundOffset
+          matchLocation = foundLocation;                 // matchLocation is index in _doc of left edge of match
+//          text = text.substring(0, len);               // len is length of text after update
 //            _current = docToSearch.createPosition(foundLocation);  // put caret at end of found word
         }
-        
+//        _log.log("rem = " + rem);
         doc.setCurrentLocation(foundLocation);           // _shouldIgnore below uses reduced model
         
 //        Utilities.show("Finished iteration with text = " + text + "; len = " + len);

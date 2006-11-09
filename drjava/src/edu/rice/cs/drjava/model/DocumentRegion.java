@@ -35,10 +35,9 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 
-/**
- * Interface for region data.
- * @version $Id$
- */
+/** Interface for region data.
+  * @version $Id$
+  */
 public interface DocumentRegion {
   /** @return the document, or null if it hasn't been established yet */
   public OpenDefinitionsDocument getDocument();

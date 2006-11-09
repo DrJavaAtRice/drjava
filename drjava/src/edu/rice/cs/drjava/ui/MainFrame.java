@@ -3064,6 +3064,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   }
   
+  /** Creates the folder chooser during MainFrame initialization which does not run in event thread. */
   private DirectoryChooser makeFolderChooser(final File workDir) {
     final DirectoryChooser dc = new DirectoryChooser(this);
     /* The following code fragement was moved to the event thread because setSelectedFile occasionally generates an 
@@ -3203,9 +3204,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   public boolean getAllowKeyEvents() { return _allowKeyEvents; }
   
-  /** Toggles whether the debugger is enabled or disabled, and updates the display accordingly.  Must execute in the 
-   *  event thread. */
+  /** Toggles whether the debugger is enabled or disabled, and updates the display accordingly.  Only runs in the 
+    * event thread. */
   public void debuggerToggle() {
+    assert EventQueue.isDispatchThread();
     // Make sure the debugger is available
     Debugger debugger = _model.getDebugger();
     if (!debugger.isAvailable()) return;
@@ -5656,7 +5658,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //     SpringLayout.SOUTH, _currLocationField);
   }
   
-  /** Inner class to handle updating the current position in the document.  Registered with the DefinitionsPane.**/
+  /** Inner class to handle updating the current position in the document.  Registered with the DefinitionsPane. **/
   private class PositionListener implements CaretListener {
     
     public void caretUpdate(final CaretEvent ce ) {
@@ -5672,11 +5674,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       });
     }
     
-    // Should only be executed in the event thread or prior to pane being set visible
-    public void updateLocation() { 
+    // Only runs in the event thread or prior to pane being set visible
+    public void updateLocation() {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       updateLocation(doc.getCurrentLine(), doc.getCurrentCol()); 
     }
+    
     private void updateLocation(int line, int col) {
       _currLocationField.setText(line + ":" + col +" \t");  // Space before "\t" required on Mac to avoid obscuring
 //      Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
@@ -5699,7 +5702,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     if (_showDebugger) {
       // hook highlighting listener to breakpoint manager
       _model.getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
-        /* Called when a breakpoint is added. Must be executed in event thread. */
+        /* Called when a breakpoint is added. Only runs in event thread. */
         public void regionAdded(final Breakpoint bp, int index) {
           DefinitionsPane bpPane = getDefPaneGivenODD(bp.getDocument());
           _documentBreakpointHighlights.
@@ -5710,13 +5713,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           _updateDebugStatus();
         }
         
-        /** Called when a breakpoint is changed. Must execute in event thread. */
+        /** Called when a breakpoint is changed. Only runs in event thread. */
         public void regionChanged(Breakpoint bp, int index) { 
           regionRemoved(bp);
           regionAdded(bp, index);
         }
         
-        /** Called when a breakpoint is removed. Must be executed in event thread. */
+        /** Called when a breakpoint is removed. Only runs in event thread. */
         public void regionRemoved(final Breakpoint bp) {      
           HighlightManager.HighlightInfo highlight = _documentBreakpointHighlights.get(bp);
           if (highlight != null) highlight.remove();
@@ -5726,7 +5729,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
 
     // hook highlighting listener to bookmark manager
-    _model.getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() {      
+    _model.getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() { 
+      // listener methods only run in the event thread
       public void regionAdded(DocumentRegion r, int index) {
         DefinitionsPane bpPane = getDefPaneGivenODD(r.getDocument());
         _documentBookmarkHighlights.

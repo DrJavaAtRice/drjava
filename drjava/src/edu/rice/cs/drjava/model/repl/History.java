@@ -243,7 +243,7 @@ public class History implements OptionConstants, Serializable {
 
       int numToDelete = size() - newSize;
 
-      for (int i=0; i< numToDelete; i++) { _vector.remove(0); }
+      for (int i = 0; i< numToDelete; i++) { _vector.remove(0); }
 
       moveEnd();
     }
@@ -281,7 +281,7 @@ public class History implements OptionConstants, Serializable {
       if (getCurrent().startsWith(_currentSearchString, 0)) break;
     }
     
-    if (!getCurrent().startsWith(_currentSearchString, 0))  moveEnd();
+    if (! getCurrent().startsWith(_currentSearchString, 0))  moveEnd();
   }
 
   /** Forward-searches the history for the next matching string.
@@ -297,6 +297,6 @@ public class History implements OptionConstants, Serializable {
       if (getCurrent().startsWith(_currentSearchString, 0))  break;
     }
     
-    if (!getCurrent().startsWith(_currentSearchString, 0)) moveEnd();
+    if (! getCurrent().startsWith(_currentSearchString, 0)) moveEnd();
   }
 }

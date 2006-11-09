@@ -59,7 +59,7 @@ class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<It
    */
   private int insertDoc(ItemT doc) {
     int i;
-    synchronized (_model) {
+    synchronized(_model) {
       for (i = 0; i<_model.size(); i++) { 
         ItemT item = getFromModel(i);
         if (doc.getName().toUpperCase().compareTo(item.getName().toUpperCase()) <= 0) break;
