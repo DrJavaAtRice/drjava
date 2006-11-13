@@ -254,7 +254,22 @@ public class DrJavaErrorWindow extends JDialog {
       b.append(StringOps.memSizeToString(Runtime.getRuntime().maxMemory()));
       b.append("\n\n");
 
-      _stackTrace.setText(b.toString());
+      // filter out user.dir, user.home and user.name
+      String infoText = b.toString();
+
+      String userHome = System.getProperty("user.home");
+      String anonUserHome = "<anonymized user.home>";
+      infoText = replaceString(infoText, userHome, anonUserHome);
+      
+      String userDir = System.getProperty("user.dir");
+      String anonUserDir = "<anonymized user.dir>";
+      infoText = replaceString(infoText, userDir, anonUserDir);
+      
+      String userName = System.getProperty("user.name");
+      String anonUserName = "<anonymized user.name>";
+      infoText = replaceString(infoText, userName, anonUserName);
+      
+      _stackTrace.setText(infoText);
       _stackTrace.setCaretPosition(0);
       
       final StringBuilder b2 = new StringBuilder();
@@ -317,6 +332,16 @@ public class DrJavaErrorWindow extends JDialog {
       }
     }
   };
+  
+  /** Replaces all occurrences of orig in text with repl. */
+  private static String replaceString(String text, String orig, String repl) {
+    int pos = 0;
+    while((pos=text.indexOf(orig,pos))>=0) {
+      // found occurrence at pos
+      text = text.substring(0,pos) + repl + text.substring(pos+orig.length(), text.length());
+    }
+    return text;
+  }
   
   /** Go to the next error. */
   private Action _nextAction = new AbstractAction("Next") {
