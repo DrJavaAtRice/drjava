@@ -39,7 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /** A JUnit test case for the ClasspathVector class. */
 public class ClassPathVectorTest extends DrJavaTestCase {
@@ -74,10 +74,9 @@ public class ClassPathVectorTest extends DrJavaTestCase {
     };
     for (File f : files) vu.add(f);
     
-    Vector<File> vf = vu.asFileVector();
+    ArrayList<File> vf = vu.asFileVector();
     assertEquals("Size of vectors should agree", vu.size(), vf.size());
-    for(int i=0; i<files.length; i++)
-      assertEquals(files[i].getCanonicalFile(), vf.get(i));
+    for(int i=0; i<files.length; i++) assertEquals(files[i].getCanonicalFile(), vf.get(i));
   }
   
   private void addElement(ClassPathVector v, String element) {

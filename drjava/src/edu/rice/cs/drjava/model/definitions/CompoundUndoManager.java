@@ -41,16 +41,15 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Extended UndoManager with increased functionality.  Can handle aggregating multiple edits into one for the purposes
- *  of undoing and redoing.  Is used to be able to call editToBeUndone and editToBeRedone since they are protected 
- *  methods in UndoManager.
- * 
- *  Mpst methods are synchronized because _compoundEdits and _keys data structures are not thread safe but UndoManager is.
- *  The synchronization scheme (locking on this) follows that of UndoManager.
- *  @version $Id$
- */
+  * of undoing and redoing.  It exposes editToBeUndone and editToBeRedone (under new names); they are protected methods
+  * in UndoManager.  The public methods that involve composite state are synchronized, so this manager can be accessed
+  * outside of the event thread.  The internal data structures _compoundEdits and _keys are not thread safe but they
+  * only accessed only by synchronized methods.  The synchronization scheme (locking on this) follows UndoManager.
+  * @version $Id$
+  */
 public class CompoundUndoManager extends UndoManager {
   
-  private static int counter = 0;
+  private static volatile int counter = 0;
   
   private final int id;
   
@@ -61,10 +60,10 @@ public class CompoundUndoManager extends UndoManager {
   private final LinkedList<Integer> _keys;
   
   /** The next key to use for nested CompoundEdits. */
-  private int _nextKey;
+  private volatile int _nextKey;
   
   /** The last edit that was performed before the last save. */
-  private UndoableEdit _savePoint;
+  private volatile UndoableEdit _savePoint;
   
   /** Keeps track of the listeners to this undo manager. */
   private final GlobalEventNotifier _notifier;
@@ -165,8 +164,8 @@ public class CompoundUndoManager extends UndoManager {
   public synchronized boolean canUndo() { return _compoundEditInProgress() || super.canUndo(); }
   
   /** Returns the presentation name for this undo, or delegates to super if none is available
-   *  @return the undo's presentation name
-   */
+    * @return the undo's presentation name
+    */
   public synchronized String getUndoPresentationName() {
     if (_compoundEditInProgress()) return "Undo Previous Command";
     return super.getUndoPresentationName();
@@ -179,10 +178,10 @@ public class CompoundUndoManager extends UndoManager {
   }
   
   /** Overload for undo which allows the initiator of a CompoundEdit to abandon it.
-   *  XXX: This has not been properly tested and very possibly may not work.
-   *  @param key the key returned by the last call to startCompoundEdit
-   *  @throws IllegalArgumentException if the key is incorrect
-   */
+    * XXX: This has not been properly tested and very possibly may not work.
+    * @param key the key returned by the last call to startCompoundEdit
+    * @throws IllegalArgumentException if the key is incorrect
+    */
   public synchronized void undo(int key) {
     if (_keys.get(0) == key) {
       final CompoundEdit ce = _compoundEdits.get(0);

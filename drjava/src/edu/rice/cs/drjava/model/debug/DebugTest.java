@@ -45,7 +45,7 @@ import edu.rice.cs.util.swing.Utilities;
  */
 public final class DebugTest extends DebugTestCase implements OptionConstants {
   
-  /** Tests startup and shutdown, ensuring that all appropriate fields are initialized.  Ensures multiple startups
+  /** Tests startUp and shutdown, ensuring that all appropriate fields are initialized.  Ensures multiple startups
    *  and shutdowns work, even after a reset, which changes the debug port.
    */
   public void testStartupAndShutdown() throws DebugException, InterruptedException {
@@ -55,8 +55,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Start debugger
     synchronized(_notifierLock) {
-      _debugger.startup();
-      _setPendingNotifies(1);  // startup
+      _debugger.startUp();
+      _setPendingNotifies(1);  // startUp
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(1);  //fires
@@ -64,8 +64,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Check fields and status
     assertTrue("Debug Manager should be ready", _debugger.isReady());
-    assertNotNull("EventRequestManager should not be null after startup", _debugger.getEventRequestManager());
-    assertNotNull("PendingRequestManager should not be null after startup", _debugger.getPendingRequestManager());
+    assertNotNull("EventRequestManager should not be null after startUp", _debugger.getEventRequestManager());
+    assertNotNull("PendingRequestManager should not be null after startUp", _debugger.getPendingRequestManager());
 
     // Shutdown the debugger
     synchronized(_notifierLock) {
@@ -78,8 +78,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Start debugger again without resetting
     synchronized(_notifierLock) {
-      _debugger.startup();
-      _setPendingNotifies(1);  // startup
+      _debugger.startUp();
+      _setPendingNotifies(1);  // startUp
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(2);  //fires
@@ -138,8 +138,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Start debugger again after reset
     synchronized(_notifierLock) {
-      _debugger.startup();
-      _setPendingNotifies(1);  // startup
+      _debugger.startUp();
+      _setPendingNotifies(1);  // startUp
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(3);  //fires

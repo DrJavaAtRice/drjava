@@ -247,8 +247,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     _debugger.addListener(debugListener);
     // Start debugger
     synchronized(_notifierLock) {
-      _debugger.startup();
-      _setPendingNotifies(1);  // startup
+      _debugger.startUp();
+      _setPendingNotifies(1);  // startUp
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
@@ -337,8 +337,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     _debugger.addListener(debugListener);
     // Start debugger
     synchronized(_notifierLock) {
-      _debugger.startup();
-      _setPendingNotifies(1);  // startup
+      _debugger.startUp();
+      _setPendingNotifies(1);  // startUp
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
@@ -427,8 +427,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     _debugger.addListener(debugListener);
     // Start debugger
     synchronized(_notifierLock) {
-      _debugger.startup();
-      _setPendingNotifies(1);  // startup
+      _debugger.startUp();
+      _setPendingNotifies(1);  // startUp
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 

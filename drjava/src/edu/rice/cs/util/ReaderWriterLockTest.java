@@ -61,7 +61,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
 
   /** Notifies the _notifyObject (semaphore) when the _notifyCount reaches 0.  (Decrements the count on each call.) */
   private void _notify() {
-    synchronized (_notifyObject) {
+    synchronized(_notifyObject) {
       _notifyCount--;
       if (_notifyCount <= 0) {
         _notifyObject.notify();
@@ -84,7 +84,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     _notifyCount = 3;
 
     // Start the readers
-    synchronized (_notifyObject) {
+    synchronized(_notifyObject) {
       r1.start();
       r2.start();
       r3.start();
@@ -107,7 +107,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     _notifyCount = 3;
 
     // Start the readers
-    synchronized (_notifyObject) {
+    synchronized(_notifyObject) {
       w1.start();
       w2.start();
       w3.start();
@@ -135,7 +135,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     _lock.startRead();
     Thread w = new Thread() {
       public void run() {
-        synchronized (_lock) {
+        synchronized(_lock) {
           _lock.notifyAll();
           _lock.startWrite();
           // Waits here and releases _lock...
@@ -143,7 +143,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
         }
       }
     };
-    synchronized (_lock) {
+    synchronized(_lock) {
       w.start();
       _lock.wait();
     }
@@ -232,7 +232,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     _notifyCount = 8;
 
     // Start the readers
-    synchronized (_notifyObject) {
+    synchronized(_notifyObject) {
       w1.start();
       w2.start();
       r1.start();

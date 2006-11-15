@@ -68,14 +68,13 @@ public class TokenList extends ModelList<ReducedToken>
       _offset = that.getBlockOffset();
     }
 
-    /**
-     * Makes a fresh copy of this TokenList.Iterator.
-     * copy() returns a ModelList<ReducedToken>.Iterator copy
-     * which is not as fully featured as a TokenList.Iterator.
-     * The underscore differentiates between the two.  This
-     * differentiation was easiest since it allowed us to keep
-     * TokenList.Iterator extending ModelList<ReducedToken>.Iterator.
-     */
+    /** Makes a fresh copy of this TokenList.Iterator.
+      * copy() returns a ModelList<ReducedToken>.Iterator copy
+      * which is not as fully featured as a TokenList.Iterator.
+      * The underscore differentiates between the two.  This
+      * differentiation was easiest since it allowed us to keep
+      * TokenList.Iterator extending ModelList<ReducedToken>.Iterator.
+      */
     public TokenList.Iterator _copy() { return new Iterator(this); }
 
     public void setTo(TokenList.Iterator that) {

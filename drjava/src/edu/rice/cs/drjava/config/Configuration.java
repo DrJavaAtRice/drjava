@@ -84,11 +84,11 @@ public class Configuration {
   /** Returns whether there were any exceptions when starting. */
   public boolean hadStartupException() { return _startupException != null; }
   
-  /** Returns the exception caught during startup, or null if none were caught. */
+  /** Returns the exception caught during startUp, or null if none were caught. */
   public Exception getStartupException() { return _startupException; }
   
   /** Stores exception caught during creation of this Configuration object, so it can be displayed later by the UI.
-   *  @param e Exception caught during startup
+   *  @param e Exception caught during startUp
    */
   public void storeStartupException(Exception e) { _startupException = e; }
   

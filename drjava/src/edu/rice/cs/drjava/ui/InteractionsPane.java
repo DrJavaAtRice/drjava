@@ -86,7 +86,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
 
   private InteractionsDJDocument _doc;
   
-  private List<Integer> _listOfPrompt = new Vector<Integer>();  // Vector used because it is synchronized
+  private List<Integer> _listOfPrompt = new Vector<Integer>();  // Vector used because it is synchronized.
     
   /** Creates an InteractionsPane with the given document.
    *  Uses default keymap name ("INTERACTIONS_KEYMAP")
@@ -209,7 +209,8 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** Resets the list of prompts. Called when the interactions pane is reset. */
   public void resetPrompts() { _listOfPrompt.clear(); }
   
-  /** Adds the position to the list of prompt positions. package private for tests. */
+  /** Adds the position to the list of prompt positions. package private for tests. Does not necessarily run in
+    * event thread. _listOfPrompt is a Vector which is thread safe. */
   void addToPromptList(int pos) {
     if (! _listOfPrompt.contains(new Integer(pos))) _listOfPrompt.add(new Integer(pos));
   }

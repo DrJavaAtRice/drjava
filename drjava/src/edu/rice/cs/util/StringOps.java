@@ -263,7 +263,7 @@ public abstract class StringOps {
     String simpleName = c.getName();
     int idx = Math.max(simpleName.lastIndexOf('.'), 
                        simpleName.lastIndexOf('$'));
-    return simpleName.substring(idx+1); // strip the package name
+    return simpleName.substring(idx + 1); // strip the package name
   }
   
   /**

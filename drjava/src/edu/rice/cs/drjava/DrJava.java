@@ -93,7 +93,7 @@ public class DrJava {
     }
   }
   
-  /** Pause time for displaying DrJava banner on startup (in milliseconds) */
+  /** Pause time for displaying DrJava banner on startUp (in milliseconds) */
   private static final int PAUSE_TIME = 2000;
   
   private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx128M";
@@ -508,22 +508,16 @@ public class DrJava {
       //
       final String CB = "Created-By: ";
       int beginPos = str.indexOf(CB);
-      if (beginPos>=0) {
+      if (beginPos >= 0) {
         beginPos += CB.length();
         int endPos = str.indexOf(System.getProperty("line.separator"), beginPos);
-        if (endPos>=0) {
-          return str.substring(beginPos, endPos);
-        }
+        if (endPos >= 0) return str.substring(beginPos, endPos);
         else {
           endPos = str.indexOf(' ', beginPos);
-          if (endPos>=0) {
-            return str.substring(beginPos, endPos);
-          }
+          if (endPos >= 0) return str.substring(beginPos, endPos);
           else {
             endPos = str.indexOf('\t', beginPos);
-            if (endPos>=0) {
-              return str.substring(beginPos, endPos);
-            }
+            if (endPos >= 0) return str.substring(beginPos, endPos);
           }
         }
       }

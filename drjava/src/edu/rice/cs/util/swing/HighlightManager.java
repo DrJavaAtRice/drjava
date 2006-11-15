@@ -43,15 +43,16 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.util.UnexpectedException;
 
+/** This class has synchronized public methods because it is accessed outside of the event thread. */
 public class HighlightManager {
 
     //private Hashtable<HighlightPosition, Stack<HighlightInfo>> _highlights;
 
-    /** An unsorted Vector of Stack<HighlightInfo>, each of which corresponds to a unique
-     *  region in the document. All HighlightInfo objects within a given stack must correspond
-     *  to the same region but must have unique Highlighter.HighlightPainters.
-     *  Each stack is ordered so the most recent highlight is at the top.
-     */
+  /** An unsorted Vector of Stack<HighlightInfo>, each of which corresponds to a unique
+    * region in the document. All HighlightInfo objects within a given stack must correspond
+    * to the same region but must have unique Highlighter.HighlightPainters.
+    * Each stack is ordered so the most recent highlight is at the top.
+    */
     private Vector<Stack<HighlightInfo>> _highlights;
 
     /** The component necessary for creating positions in in the document, which is also
@@ -84,7 +85,7 @@ public class HighlightManager {
      *  @param p the Highlighter.HighlightPainter for painting
      *  @return HighlightInfo the HighlightInfo object, for keeping a tag of a given highlight
      */
-    public HighlightInfo addHighlight(int startOffset, int endOffset, Highlighter.HighlightPainter p) {
+    public synchronized HighlightInfo addHighlight(int startOffset, int endOffset, Highlighter.HighlightPainter p) {
 
       HighlightInfo newLite = new HighlightInfo(startOffset,endOffset,p);
 
@@ -143,7 +144,7 @@ public class HighlightManager {
      *  @param endOffset the offset at which the desired highlight shoud end.
      *  @param p the Highlighter.HighlightPainter for painting
      */
-    public void removeHighlight(int startOffset, int endOffset, Highlighter.HighlightPainter p) {
+    public synchronized void removeHighlight(int startOffset, int endOffset, Highlighter.HighlightPainter p) {
       HighlightInfo newLite = new HighlightInfo(startOffset,endOffset,p);
       removeHighlight(newLite);
     }

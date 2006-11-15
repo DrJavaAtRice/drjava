@@ -304,8 +304,8 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _log.log("Staring debugger in " + this);
     // Start debugger
     synchronized(_notifierLock) {
-      _setPendingNotifies(1);  // startup
-      _debugger.startup();
+      _setPendingNotifies(1);  // startUp
+      _debugger.startUp();
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     _log.log("Finished starting debugger in " + this);

@@ -412,7 +412,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.
       * @param f file describing DefinitionsDocument to manage
       */
-    ConcreteOpenDefDoc(File f) throws IOException { super(f); }
+    ConcreteOpenDefDoc(File f) { super(f); }
     
     /* Standard constructor for a new document (no associated file) */
     ConcreteOpenDefDoc() { super(); }
@@ -447,7 +447,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         public void interpreterReady(File wd) {
           // Restart debugger if it was previously enabled and is now off
           if (wasDebuggerEnabled && (! getDebugger().isReady())) {
-            try { getDebugger().startup(); } catch(DebugException de) { /* ignore, continue without debugger */ }
+            try { getDebugger().startUp(); } catch(DebugException de) { /* ignore, continue without debugger */ }
           }
           
           // Load the proper text into the interactions document
@@ -507,7 +507,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    /** Creates a ConcreteOpenDefDoc for a given file f
    *  @return OpenDefinitionsDocument object for f
    */
-  protected ConcreteOpenDefDoc _createOpenDefinitionsDocument(File f) throws IOException { return new ConcreteOpenDefDoc(f); }
+  protected ConcreteOpenDefDoc _createOpenDefinitionsDocument(File f) throws IOException { 
+    if (! f.exists()) throw new FileNotFoundException("file " + f + " cannot be found");
+    return new ConcreteOpenDefDoc(f); 
+  }
   
   /** Adds the source root for doc to the interactions classpath; this function is a helper to _openFiles.
    *  @param doc the document to add to the classpath

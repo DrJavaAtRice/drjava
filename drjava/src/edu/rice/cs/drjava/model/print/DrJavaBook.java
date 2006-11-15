@@ -92,8 +92,8 @@ public class DrJavaBook implements Pageable {
 //  HashMap map = new HashMap();
     map.put(TextAttribute.FONT, PRINT_FONT);
 
-    char[] carraigeReturn = {(char) 10};
-    String lineSeparator = new String(carraigeReturn);
+    char[] carriageReturn = {(char) 10};
+    String lineSeparator = new String(carriageReturn);
 
     try {
       thisText = text.substring(0, text.indexOf(lineSeparator));
@@ -110,8 +110,7 @@ public class DrJavaBook implements Pageable {
 
     // loop over each of the *real* lines in the document
     while (! (thisText.equals("") && (text.equals("")))) {
-      if (thisText.equals(""))
-        thisText = " ";
+      if (thisText.equals("")) thisText = " ";
 
       AttributedCharacterIterator charIterator = (new AttributedString(thisText, map)).getIterator();
       LineBreakMeasurer measurer = new LineBreakMeasurer(charIterator, frc);

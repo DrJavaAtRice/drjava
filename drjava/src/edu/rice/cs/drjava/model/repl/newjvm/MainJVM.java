@@ -325,12 +325,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       InterpreterJVMRemoteI slave = ensureInterpreterConnected();
       
       try {
-        Vector<String> strClassPath = new Vector<String>(slave.getAugmentedClassPath());
-        ClassPathVector classPath = new ClassPathVector(strClassPath.size() + _startupClassPathVector.size());
-        
-        for(String s : strClassPath) { 
-          classPath.add(s); // automatically converted to URL
-        }
+        ClassPathVector classPath = slave.getAugmentedClassPath();  // returns fresh copy
+//        ClassPathVector classPath = new ClassPathVector(strClassPath.size() + _startupClassPathVector.size());
         
         classPath.addAll(_startupClassPathVector);
         //        for(int i = 0; i < _startupClasspathVector.size(); i++) {
@@ -643,7 +639,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // Create and invoke the Interpreter JVM
     try {
       // _startupClasspath is sent in as the interactions classpath
-//      System.out.println("startup: " + _startupClasspath);
+//      System.out.println("startUp: " + _startupClasspath);
 //      Utilities.show("Calling invokeSlave(" + jvmArgs + ", " + _startupClassPath + ", " +  _workDir +")");
       invokeSlave(jvmArgsArray, _startupClassPath, _workDir);
       _slaveJVMUsed = false;

@@ -64,8 +64,8 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> implement
     _isEnabled = isEnabled;
 
     try {
-      _startPos = doc.createWrappedPosition(doc.getLineStartPos(offset));
-      _endPos = doc.createWrappedPosition(doc.getLineEndPos(offset));
+      _startPos = doc.createPosition(doc.getLineStartPos(offset));
+      _endPos = doc.createPosition(doc.getLineEndPos(offset));
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);

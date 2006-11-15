@@ -260,7 +260,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     int port = _model.getDebugPort();
     assertTrue("generated debug port", port != -1);
 
-    // Resetting after startup should change the port
+    // Resetting after startUp should change the port
     _model.setWaitingForFirstInterpreter(false);
     _model.interpreterResetting();
     int newPort = _model.getDebugPort();

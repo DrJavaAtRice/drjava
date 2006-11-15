@@ -34,10 +34,11 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.rmi.RemoteException;
-import java.util.Vector;
 import java.util.List;
 import java.io.File;
+
 import edu.rice.cs.util.newjvm.*;
+import edu.rice.cs.util.ClassPathVector;
 
 /**
  * This interface specifies the methods that the interpreter JVM exposes
@@ -82,35 +83,30 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    */
   public void removeInterpreter(String name) throws RemoteException;
 
-  /**
-   * Sets the current interpreter to be the one specified by the given name
-   * @param name the unique name of the interpreter to set active
-   * @return Whether the new interpreter is currently in progress
-   * with an interaction
-   */
+  /** Sets the current interpreter to be the one specified by the given name
+    * @param name the unique name of the interpreter to set active
+    * @return Whether the new interpreter is currently in progress
+    * with an interaction
+    */
   public boolean setActiveInterpreter(String name) throws RemoteException;
 
-  /**
-   * Sets the default interpreter to be active.
-   * @return Whether the new interpreter is currently in progress
-   * with an interaction
-   */
+  /** Sets the default interpreter to be active.
+    * @return Whether the new interpreter is currently in progress
+    * with an interaction
+    */
   public boolean setToDefaultInterpreter() throws RemoteException;
 
-  /**
-   * Returns a copy of the list of unique entries on the classpath.
-   */
-  public Vector<String> getAugmentedClassPath() throws RemoteException;
+  /** Returns a copy of the list of unique entries on the classpath. */
+  public ClassPathVector getAugmentedClassPath() throws RemoteException;
 
-  /**
-   * Gets the string representation of the value of a variable in the current interpreter.
-   * @param var the name of the variable
-   */
+  /** Gets the string representation of the value of a variable in the current interpreter.
+    * @param var the name of the variable
+    */
   public String getVariableToString(String var) throws RemoteException;
 
   /** Gets the class name of a variable in the current interpreter.
-   *  @param var the name of the variable
-   */
+    * @param var the name of the variable
+    */
   public String getVariableClassName(String var) throws RemoteException;
 
   /** Sets whether to allow private access. */

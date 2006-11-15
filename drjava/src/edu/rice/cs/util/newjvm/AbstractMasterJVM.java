@@ -124,24 +124,24 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   protected abstract void handleSlaveQuit(int status);
   
   /** Invokes slave JVM without any JVM arguments.
-   *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
+   *  @throws IllegalStateException if slave JVM already connected or startUp is in progress.
    */
   protected final void invokeSlave() throws IOException, RemoteException {
     invokeSlave(new String[0], FileOption.NULL_FILE);
   }
   
   /** Invokes slave JVM, using the system classpath.
-   *  @param jvmArgs Array of arguments to pass to the JVM on startup
-   *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
+   *  @param jvmArgs Array of arguments to pass to the JVM on startUp
+   *  @throws IllegalStateException if slave JVM already connected or startUp is in progress.
    */
   protected final void invokeSlave(String[] jvmArgs, File workDir) throws IOException, RemoteException {
     invokeSlave(jvmArgs, System.getProperty("java.class.path"), workDir);
   }
  
   /** Creates and invokes slave JVM.
-   *  @param jvmArgs Array of arguments to pass to the JVM on startup
+   *  @param jvmArgs Array of arguments to pass to the JVM on startUp
    *  @param cp Classpath to use when starting the JVM
-   *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
+   *  @throws IllegalStateException if slave JVM already connected or startUp is in progress.
    */
   protected final void invokeSlave(final String[] jvmArgs, final String cp, final File workDir) throws IOException, 
     RemoteException {
@@ -268,7 +268,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       }
     }
     if (quitSlavePending) {
-      _log.log(this + " Executing deferred quitSlave() that was called during startup");
+      _log.log(this + " Executing deferred quitSlave() that was called during startUp");
       quitSlave();  // not synchronized; _slave may be null when this code executes
     }
   }
@@ -276,7 +276,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   /** Withdraws RMI exports for this. */
   public void dispose() throws RemoteException {
     _log.log(this + ".dispose() called; slaveRemote is " + _slave);
-    if (_startupInProgress) _log.log(this + ".dispose() is KILLing startup in process; dying slave reference does not yet exist");
+    if (_startupInProgress) _log.log(this + ".dispose() is KILLing startUp in process; dying slave reference does not yet exist");
     SlaveRemote dyingSlave;
     synchronized(_masterJVMLock) {
       _masterStub = null;

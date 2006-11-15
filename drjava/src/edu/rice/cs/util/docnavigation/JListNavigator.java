@@ -181,12 +181,12 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   /** Gets the first document in the series.
    *  @return the first document in the collection
    */
-  public ItemT getFirst() { synchronized (_model) { return getFromModel(0); } }
+  public ItemT getFirst() { synchronized(_model) { return getFromModel(0); } }
   
   /** Gets the first document in the series.
    *  @return the first document in the collection
    */
-  public ItemT getLast() { synchronized (_model) { return getFromModel(_model.size() - 1); } }
+  public ItemT getLast() { synchronized(_model) { return getFromModel(_model.size() - 1); } }
   
   /** Returns the currently selected item, or null if none. */
   public ItemT getCurrent() { return _current; }
@@ -198,7 +198,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
    *  @param doc the document to remove
    */
   public ItemT removeDocument(ItemT doc) {
-    synchronized (_model) {
+    synchronized(_model) {
       // System.err.println("removing from old list " + doc);
       int i = _model.indexOf(doc);
       if( i == -1 )
@@ -216,7 +216,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
    *  that is equal to the passed document.
    */
   public void refreshDocument(ItemT doc, String path) {
-    synchronized (_model) {
+    synchronized(_model) {
       removeDocument(doc);
       addDocument(doc);
     }

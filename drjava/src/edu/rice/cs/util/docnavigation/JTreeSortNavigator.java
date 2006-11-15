@@ -1,50 +1,35 @@
-/*BEGIN_COPYRIGHT_BLOCK
+ /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
  * 
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
+ * Copyright (C) 2001-2006 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
- * conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * 
- *     - Redistributions of source code must retain the above copyright 
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
  * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
- * OTHER DEALINGS WITH THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
  * 
- END_COPYRIGHT_BLOCK*/
-
-
-
+ *END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
@@ -267,22 +252,20 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     DefaultMutableTreeNode parentsKid;
     
     /** Make sure that if the parent is a top level group, it is added to the tree model group. */
-//    synchronized (_model) {
-      if (((DefaultMutableTreeNode)_model.getRoot()).getIndex(parent) == -1 && _roots.contains(parent)) {
-        addTopLevelGroupToRoot(parent);
-      }
-      int i;
-      for (i = 0; i < numChildren; i++ ) {
-        parentsKid = ((DefaultMutableTreeNode) parent.getChildAt(i));
-        if (parentsKid instanceof InnerNode) {
-          // do nothing, it's a folder
-        } else if(parentsKid instanceof LeafNode) {
-          oldName = ((LeafNode<?>)parentsKid).getData().getName();
-          if ((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)) break;
-        } else throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
-      }
-      _model.insertNodeInto(child, parent, i);
-//    }
+    if (((DefaultMutableTreeNode)_model.getRoot()).getIndex(parent) == -1 && _roots.contains(parent)) {
+      addTopLevelGroupToRoot(parent);
+    }
+    int i;
+    for (i = 0; i < numChildren; i++ ) {
+      parentsKid = ((DefaultMutableTreeNode) parent.getChildAt(i));
+      if (parentsKid instanceof InnerNode) {
+        // do nothing, it's a folder
+      } else if(parentsKid instanceof LeafNode) {
+        oldName = ((LeafNode<?>)parentsKid).getData().getName();
+        if ((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)) break;
+      } else throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
+    }
+    _model.insertNodeInto(child, parent, i);
   }
   
   /** Inserts a folder (String) into sorted position under the parent.  Only executes in event thread. Assumes that
@@ -296,26 +279,24 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     String oldName = parent.getUserObject().toString();
     DefaultMutableTreeNode parentsKid;
     
-//    synchronized (_model) {
-      if (((DefaultMutableTreeNode)_model.getRoot()).getIndex(parent) == -1 && _roots.contains(parent)) {
-        addTopLevelGroupToRoot(parent);
-      }
-      
-      int countFolders = 0;
-      int i;
-      for (i = 0; i < numChildren; i++) {
-        parentsKid = ((DefaultMutableTreeNode)parent.getChildAt(i));
-        if (parentsKid instanceof InnerNode) {
-          countFolders++;
-          oldName = parentsKid.toString();
-          if ((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)) break;
-        } 
-        else if (parentsKid instanceof LeafNode) break;
-        // we're out of folders, and starting into the files, so just break out.
-        else throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
-      }
-      _model.insertNodeInto(child, parent, i);
-//    }
+    if (((DefaultMutableTreeNode)_model.getRoot()).getIndex(parent) == -1 && _roots.contains(parent)) {
+      addTopLevelGroupToRoot(parent);
+    }
+    
+    int countFolders = 0;
+    int i;
+    for (i = 0; i < numChildren; i++) {
+      parentsKid = ((DefaultMutableTreeNode)parent.getChildAt(i));
+      if (parentsKid instanceof InnerNode) {
+        countFolders++;
+        oldName = parentsKid.toString();
+        if ((newName.toUpperCase().compareTo(oldName.toUpperCase()) < 0)) break;
+      } 
+      else if (parentsKid instanceof LeafNode) break;
+      // we're out of folders, and starting into the files, so just break out.
+      else throw new IllegalStateException("found a node in navigator that is not an InnerNode or LeafNode");
+    }
+    _model.insertNodeInto(child, parent, i);
   }
   
   /** Removes a given <code>INavigatorItem<code> from this navigator. Removes all <code>INavigatorItem</code>s
@@ -335,7 +316,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     }
   } 
   
-  /** Assumes lock on _model is already held */
+  /** Assumes lock on _model is already held or that it is being run in the event thread. */
   private LeafNode<ItemT> getNodeForDoc(ItemT doc) { 
 //    synchronized(_model) { 
       return _doc2node.get(doc); 
@@ -475,7 +456,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    *  @return the INavigatorItem which comes after doc
    */
   public ItemT getNext(ItemT doc) {
-    synchronized (_model) { // locks out mutation
+    synchronized(_model) { // locks out mutation
       DefaultMutableTreeNode node = _doc2node.get(doc);
       if (node == null) return doc; // doc may not be contained in navigator
       // TODO: check for "package" case
@@ -490,7 +471,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    *  @return the INavigatorItem which comes before doc
    */
   public ItemT getPrevious(ItemT doc) {
-    synchronized (_model) { // locks out mutation
+    synchronized(_model) { // locks out mutation
       DefaultMutableTreeNode node = _doc2node.get(doc);
       if (node == null) return doc; // doc may not be contained in navigator
       // TODO: check for "package" case
@@ -526,8 +507,11 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    *          <code>equals</code< method) to the passed document, else <code>false</code>.
    */
   public boolean contains(ItemT doc) { 
-    synchronized (_model) { return _doc2node.containsKey(doc); }  // locks out mutation
+    synchronized(_model) { return _doc2node.containsKey(doc); }  // locks out mutation
   }
+  
+  /** Tests to see if a given document is contained in this navigator.  Only executes in event thread.*/
+  public boolean _contains(ItemT doc) { return _doc2node.containsKey(doc); }
   
   /** Returns all the <code>IDocuments</code> contained in this navigator. Does not assert any type of ordering on 
    *  the returned structure.  Executes in any thread.
@@ -535,7 +519,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    */
   public Enumeration<ItemT> getDocuments() {
     
-    final Vector<ItemT> list = new Vector<ItemT>(); // Use Vector because it implements an Enumeration
+    final Vector<ItemT> list = new Vector<ItemT>(getDocumentCount()); // Use Vector because it implements an Enumeration
     
     synchronized(_model) { // locks out mutation
       // e has a raw type because depthFirstEnumeration() has a raw type signature
@@ -568,7 +552,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   /** Removes all <code>IDocuments</code> from this <code>IDocumentNavigator</code>.  Only executes in event thread. */
   public void clear() {
     assert EventQueue.isDispatchThread();
-    synchronized (_model) {
+    synchronized(_model) {
       _doc2node.clear();
       ((DefaultMutableTreeNode)_model.getRoot()).removeAllChildren();
     }
@@ -581,7 +565,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     */
   public void addNavigationListener(INavigationListener<? super ItemT> listener) {
     assert EventQueue.isDispatchThread();
-    synchronized (_model) { navListeners.add(listener); }  // locks out access during mutation
+    synchronized(_model) { navListeners.add(listener); }  // locks out access during mutation
   }
   
   /** Removes the given listener from observing this navigator. After invoking this method, all observers 
@@ -591,7 +575,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     */
   public void removeNavigationListener(INavigationListener<? super ItemT> listener) {
     assert EventQueue.isDispatchThread();
-    synchronized (_model) { navListeners.remove(listener); }
+    synchronized(_model) { navListeners.remove(listener); }
   }
   
   /** Returns a collection of all navigator listeners. Note: this is a dangerous method since it exposes a shared data 
@@ -710,17 +694,17 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   
   /** Returns the name of the top level group that the selected item descends from.  Only runs in event thread. */
   public String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException {
-//    synchronized (_model) {
+    assert EventQueue.isDispatchThread();
+    
       TreePath p = getSelectionPath();
       TreeNode n = (TreeNode) p.getLastPathComponent();
       
       if (n == _model.getRoot())
         throw new GroupNotSelectedException("there is no top level group for the root of the tree");
       
-      while(!_roots.contains(n)) { n = n.getParent(); }
+      while (! _roots.contains(n)) { n = n.getParent(); }
       
       return ((GroupNode<?>)n).getData();
-//    }
   }
   
   /** Returns the currently selected leaf node, or null if the selected node is not a leaf. Only reads a single
@@ -780,39 +764,39 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     if (o instanceof InnerNode) ((InnerNode<?, ?>)o).setCollapsed(false);
   }
   
-  /** Collapses all the paths in the tree that match one of the path strings included
-   *  in the given hash set.  Path strings must follow a specific format in order for
-   *  them to work. See the documentation of <code>generatePathString</code> for 
-   *  information on the format of the path strings.
-   *  @param paths A hash set of path strings. 
-   * 
-   *  Only the call on collapsePaths is synchronized since the prelude only involves private data
-   */
+  /** Collapses all the paths in the tree that match one of the path strings included in the given hash set.  Path 
+    * strings must follow a specific format in order for them to work. See the documentation of 
+    * <code>generatePathString</code> for information on the format of the path strings.  Only executes in event thread.
+    * @param paths A hash set of path strings. 
+    */
   public void collapsePaths(String[] paths) {
+    assert EventQueue.isDispatchThread();
+    
     HashSet<String> set = new HashSet<String>();
     for (String s : paths) { set.add(s); }
     collapsePaths(set);
   }
 
-  /** Set variation of collapsePaths(String ...).  Private except for testing code. */
+  /** Set variation of collapsePaths(String ...).  Private except for testing code. Only runs in event thread except
+    * for testing code. 
+    */
   void collapsePaths(HashSet<String> paths) {
-//    synchronized (_model) {
-      DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
-      // We use a raw type here because depthFirstEnumeration() has a raw type signature
-      Enumeration nodes = rootNode.depthFirstEnumeration();
-      ArrayList<String> list = new ArrayList<String>();
-      while (nodes.hasMoreElements()) {
-        DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
-        if (tn instanceof InnerNode) {
-          TreePath tp = new TreePath(tn.getPath());
-          String s = generatePathString(tp);
-          boolean shouldCollapse = paths.contains(s);
-          if (shouldCollapse) { 
-            collapsePath(tp);
-          }
+    
+    DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
+    // We use a raw type here because depthFirstEnumeration() has a raw type signature
+    Enumeration nodes = rootNode.depthFirstEnumeration();
+    ArrayList<String> list = new ArrayList<String>();
+    while (nodes.hasMoreElements()) {
+      DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
+      if (tn instanceof InnerNode) {
+        TreePath tp = new TreePath(tn.getPath());
+        String s = generatePathString(tp);
+        boolean shouldCollapse = paths.contains(s);
+        if (shouldCollapse) { 
+          collapsePath(tp);
         }
       }
-//    }
+    }
   }
   
   /** @return an array of path strings corresponding to the paths of the tree nodes that

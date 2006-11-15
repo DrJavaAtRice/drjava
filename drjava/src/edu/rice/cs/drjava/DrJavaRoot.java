@@ -131,7 +131,7 @@ public class DrJavaRoot {
           
           /* This call on invokeLater only runs in the main thread, so we use SwingUtilities rather than Utilities.
            * We use invokeLater here ensure all files have finished loading and added to the fileview before the MainFrame
-           * is set visible.  When this was not done, we occasionally encountered a NullPointerExceptio on startup when 
+           * is set visible.  When this was not done, we occasionally encountered a NullPointerExceptio on startUp when 
            * specifying a file (ex: java -jar drjava.jar somefile.java)
            */
           SwingUtilities.invokeLater(new Runnable(){ public void run(){ mf.setVisible(true); } });

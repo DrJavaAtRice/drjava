@@ -220,7 +220,7 @@ public class FileSelectorComponent extends JPanel {
   /** The chooser method for the validation of filenames that are manually entered into the text field.
    *  @return False, if file does not exist. True, otherwise.
    */
-  public synchronized boolean validateTextField() {
+  public boolean validateTextField() {
 //    if (_validationInProgress) return true;
 //    _validationInProgress = true;
     

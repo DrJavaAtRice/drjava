@@ -401,8 +401,8 @@ public class ConfigFrame extends JFrame {
                                                      "<html>Any directories or jar files to add to the classpath<br>"+
                                                      "of the Compiler and Interactions Pane.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.STICKY_INTERACTIONS_DIRECTORY,
-                                                         "Restore last working directory of the Interactions pane on startup", this,
-                                                         "<html>Whether to restore the last working directory of the Interaction pane on startup,<br>"+
+                                                         "Restore last working directory of the Interactions pane on startUp", this,
+                                                         "<html>Whether to restore the last working directory of the Interaction pane on startUp,<br>"+
                                                          "or to always use the value of the \"user.home\" Java property<br>"+
                                                          "(currently "+System.getProperty("user.home")+")."));
 

@@ -404,5 +404,5 @@ public class ConsoleDocument implements EditDocumentInterface {
   /** Swing-style writeUnlock(). */
   public void releaseWriteLock() { _document.releaseWriteLock(); }
   
-  public int getLockState() { return _document.getLockState(); }
+//  public int getLockState() { return _document.getLockState(); }
 }

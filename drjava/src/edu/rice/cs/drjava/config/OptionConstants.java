@@ -215,7 +215,7 @@ public interface OptionConstants {
     new BooleanOption("lineenum.enabled", Boolean.FALSE);
 
   /**
-   * Whether to save and restore window size and position at startup/shutdown.
+   * Whether to save and restore window size and position at startUp/shutdown.
    */
   public static final BooleanOption WINDOW_STORE_POSITION =
     new BooleanOption("window.store.position", Boolean.TRUE);
@@ -1099,35 +1099,35 @@ public interface OptionConstants {
   /** Whether to enabled the Show Debug Console menu item in the Tools menu. */
   public static final BooleanOption SHOW_DEBUG_CONSOLE = new BooleanOption("show.debug.console", Boolean.FALSE);
 
-  /** Height of MainFrame at startup.  Can be overridden if out of bounds. */
+  /** Height of MainFrame at startUp.  Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption WINDOW_HEIGHT =
     new NonNegativeIntegerOption("window.height",new Integer(700));
 
-  /** Width of MainFrame at startup.  Can be overridden if out of bounds. */
+  /** Width of MainFrame at startUp.  Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption WINDOW_WIDTH =
     new NonNegativeIntegerOption("window.width",new Integer(800));
 
-  /** X position of MainFrame at startup.  Can be overridden if out of bounds. This value can legally be negative in a
+  /** X position of MainFrame at startUp.  Can be overridden if out of bounds. This value can legally be negative in a
    *  multi-screen setup.
    */
   public static final IntegerOption WINDOW_X = new IntegerOption("window.x", new Integer(Integer.MAX_VALUE));
 
-  /** Y position of MainFrame at startup.  Can be overridden if out of bounds. This value can legally be negative in a
+  /** Y position of MainFrame at startUp.  Can be overridden if out of bounds. This value can legally be negative in a
    *  multi-screen setup.
    */
   public static final IntegerOption WINDOW_Y = new IntegerOption("window.y", new Integer(Integer.MAX_VALUE));
 
-  /** Width of DocList at startup.  Must be less than WINDOW_WIDTH. Can be overridden if out of bounds. */
+  /** Width of DocList at startUp.  Must be less than WINDOW_WIDTH. Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption DOC_LIST_WIDTH =
     new NonNegativeIntegerOption("doc.list.width",new Integer(150));
 
-  /** Height of tabbed panel at startup.  Must be less than WINDOW_HEIGHT + DEBUG_PANEL_HEIGHT.  Can be overridden if 
+  /** Height of tabbed panel at startUp.  Must be less than WINDOW_HEIGHT + DEBUG_PANEL_HEIGHT.  Can be overridden if 
    *  out of bounds.
    */
   public static final NonNegativeIntegerOption TABS_HEIGHT =
     new NonNegativeIntegerOption("tabs.height",new Integer(120));
 
-  /** Height of debugger panel at startup.  Must be less than WINDOW_HEIGHT + TABS_HEIGHT.  Can be overridden if out of
+  /** Height of debugger panel at startUp.  Must be less than WINDOW_HEIGHT + TABS_HEIGHT.  Can be overridden if out of
    *  bounds.
    */
   public static final NonNegativeIntegerOption DEBUG_PANEL_HEIGHT =
@@ -1139,7 +1139,7 @@ public interface OptionConstants {
   /** The directory in use by the Interactions pane upon the previous quit. */
   public static final FileOption LAST_INTERACTIONS_DIRECTORY = new FileOption("last.interactions.dir", FileOption.NULL_FILE);
 
-  /** Whether to save and restore Interactions pane directory at startup/shutdown (sticky=true), or to use
+  /** Whether to save and restore Interactions pane directory at startUp/shutdown (sticky=true), or to use
     * "user.home" (sticky=false). */
   public static final BooleanOption STICKY_INTERACTIONS_DIRECTORY =
     new BooleanOption("sticky.interactions.dir", Boolean.TRUE);
@@ -1153,7 +1153,7 @@ public interface OptionConstants {
   /** The last state of the "Clipboard History" dialog. */
   public static final StringOption DIALOG_CLIPBOARD_HISTORY_STATE = new StringOption("dialog.clipboard.history.state", "default");
 
-  /** Whether to save and restore window size and position at startup/shutdown. */
+  /** Whether to save and restore window size and position at startUp/shutdown. */
   public static final BooleanOption DIALOG_CLIPBOARD_HISTORY_STORE_POSITION =
     new BooleanOption("dialog.clipboardhistory.store.position", Boolean.TRUE);
 
@@ -1164,14 +1164,14 @@ public interface OptionConstants {
   /** The last state of the "Go to File" dialog. */
   public static final StringOption DIALOG_GOTOFILE_STATE = new StringOption("dialog.gotofile.state", "default");
 
-  /** Whether to save and restore window size and position at startup/shutdown. */
+  /** Whether to save and restore window size and position at startUp/shutdown. */
   public static final BooleanOption DIALOG_GOTOFILE_STORE_POSITION =
     new BooleanOption("dialog.gotofile.store.position", Boolean.TRUE);
 
   /** The last state of the "Open Javadoc" dialog. */
   public static final StringOption DIALOG_OPENJAVADOC_STATE = new StringOption("dialog.openjavadoc.state", "default");
 
-  /** Whether to save and restore window size and position at startup/shutdown. */
+  /** Whether to save and restore window size and position at startUp/shutdown. */
   public static final BooleanOption DIALOG_OPENJAVADOC_STORE_POSITION =
     new BooleanOption("dialog.openjavadoc.store.position", Boolean.TRUE);
 
@@ -1188,7 +1188,7 @@ public interface OptionConstants {
   /** The last state of the "Complete File" dialog. */
   public static final StringOption DIALOG_COMPLETE_WORD_STATE = new StringOption("dialog.completeword.state", "default");
 
-  /** Whether to save and restore window size and position at startup/shutdown. */
+  /** Whether to save and restore window size and position at startUp/shutdown. */
   public static final BooleanOption DIALOG_COMPLETE_WORD_STORE_POSITION =
     new BooleanOption("dialog.completeword.store.position", Boolean.TRUE);
   
@@ -1208,7 +1208,7 @@ public interface OptionConstants {
   /** The last state of the "Create Jar from Project " dialog. */
   public static final StringOption DIALOG_JAROPTIONS_STATE = new StringOption("dialog.jaroptions.state", "default");
 
-  /** Whether to save and restore window size and position at startup/shutdown. */
+  /** Whether to save and restore window size and position at startUp/shutdown. */
   public static final BooleanOption DIALOG_JAROPTIONS_STORE_POSITION =
     new BooleanOption("dialog.jaroptions.store.position", Boolean.TRUE);
 

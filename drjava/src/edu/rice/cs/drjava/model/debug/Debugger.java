@@ -64,7 +64,7 @@ public interface Debugger {
   public boolean isAvailable();
 
   /** Attaches the debugger to the Interactions JVM to prepare for debugging. */
-  public void startup() throws DebugException;
+  public void startUp() throws DebugException;
 
   /** Disconnects the debugger from the Interactions JVM and cleans up any state. */
   public void shutdown();

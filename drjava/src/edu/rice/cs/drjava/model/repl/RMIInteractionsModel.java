@@ -34,10 +34,10 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.text.EditDocumentInterface;
 
 import java.net.URL;
-import java.util.Vector;
 import java.io.File;
 
 /**
@@ -180,5 +180,5 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Gets the interpreter classpath from the interpreter jvm.
    * @return a vector of classpath elements
    */
-  public Vector<URL> getClassPath() { return _jvm.getClassPath(); }
+  public ClassPathVector getClassPath() { return _jvm.getClassPath(); }
 }

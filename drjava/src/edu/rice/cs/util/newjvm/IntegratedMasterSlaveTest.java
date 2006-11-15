@@ -130,7 +130,7 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
 
       invokeSlave(new String[0], FileOption.NULL_FILE);           
 
-      synchronized (_connectedLock) { while (! _connected) _connectedLock.wait();  }
+      synchronized(_connectedLock) { while (! _connected) _connectedLock.wait();  }
 
       ((TestSlaveRemote)getSlave()).startLetterTest();
       
@@ -166,7 +166,7 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     protected void handleSlaveConnected() {
       TestSlaveRemote slave = (TestSlaveRemote) getSlave();
       assertTrue("slave is set", slave != null);
-      assertTrue("startup not in progress", ! isStartupInProgress());
+      assertTrue("startUp not in progress", ! isStartupInProgress());
       // getLetter should have never been called.
       assertEquals("letter value", 'a', _letter);
       synchronized(_connectedLock) { 
@@ -183,7 +183,7 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
         assertEquals("last letter returned", 'f', _letter);
       }
       assertTrue("slave is not set", getSlave() == null);
-      assertTrue("startup not in progress", ! isStartupInProgress());
+      assertTrue("startUp not in progress", ! isStartupInProgress());
 
       // alert test method that quit occurred.
       synchronized(_quitLock) {

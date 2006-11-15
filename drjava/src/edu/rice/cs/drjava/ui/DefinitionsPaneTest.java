@@ -605,7 +605,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     do { _cleanup(); }
     while (_finalDocCount != 6 || _finalCount != 6);
     
-    if (_ct > 1) System.err.println("testDocumentPaneMemoryLeak required " + _ct + " iterations");
+    if (_ct > 1) System.out.println("testDocumentPaneMemoryLeak required " + _ct + " iterations");
     
 //    System.out.println("Current: " + _frame.getCurrentDefPane().hashCode());
     

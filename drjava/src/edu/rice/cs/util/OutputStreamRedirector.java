@@ -54,9 +54,8 @@ public abstract class OutputStreamRedirector extends OutputStream {
     print(new String(b, off, len));
   }
 
-  /**
-   * Implement this method to print to the appropriate destination.
-   * @param s The string to be printed to the new destination.
-   */
+  /** Implement this method to print to the appropriate destination.
+    * @param s The string to be printed to the new destination.
+    */
   public abstract void print(String s);
 }

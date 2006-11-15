@@ -79,8 +79,8 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
         Pair.make("false", Boolean.FALSE),
         Pair.make("\'c\'", "'" + new Character('c') + "'"),
         Pair.make("1.345", new Double(1.345)),
-        Pair.make("\"buwahahahaha!\"", new String("\"buwahahahaha!\"")),
-        Pair.make("\"yah\\\"eh\\\"\"", new String("\"yah\"eh\"\"")),
+        Pair.make("\"buwahahahaha!\"", "\"buwahahahaha!\""),
+        Pair.make("\"yah\\\"eh\\\"\"", "\"yah\"eh\"\""),
         Pair.make("'\\''", "'" + new Character('\'') + "'")
     };
     tester(cases);
@@ -207,7 +207,7 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
   public void testStringOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       // concatenation
-      Pair.make("\"yeah\" + \"and\"", new String("\"yeah" + "and\"")),
+      Pair.make("\"yeah\" + \"and\"", "\"yeah" + "and\""),
       // equals
       Pair.make("\"yeah\".equals(\"yeah\")", Boolean.valueOf("yeah".equals("yeah"))),
 
@@ -411,7 +411,7 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
 
   /** Test that a variable can be defined in the interpreter by an external source. */
   public void testDefineVariableExternally() throws ExceptionReturnedException {
-    _interpreter.defineVariable("foo", new String("hello"));
+    _interpreter.defineVariable("foo", "hello");
     assertEquals("manipulated externally defined variable",
                  "\"ello\"", _interpreter.interpret("foo.substring(1,5)"));
     _interpreter.defineVariable("x", 3);
@@ -484,7 +484,7 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
     try {
       _interpreter.interpret("class A { private int i = 0; }");
       _interpreter.interpret("new A().i");
-      System.err.println("Private access erroneously succeeded");
+      System.out.println("Private access erroneously succeeded");
       fail("Should not have access to the private field i inside class A.");
     }
     catch (ExceptionReturnedException ere) {

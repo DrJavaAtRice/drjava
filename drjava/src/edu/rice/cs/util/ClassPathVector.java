@@ -36,12 +36,12 @@ package edu.rice.cs.util;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.io.File;
-import java.util.Vector;
+import java.util.ArrayList;
 
-/** A vector of classpath entries. Basically just a Vector<URL>, except with additional logic to format the toString
- *  to be suitable for passing to invocations of java -classpath ...
+/** A vector of classpath entries. Basically just a ArrayList<URL>, except with additional logic to format the toString
+ *  to be suitable for passing to invocations of java -classpath ... .  Like ArrayList, this class is not thread safe.
  */
-public class ClassPathVector extends Vector<URL> {
+public class ClassPathVector extends ArrayList<URL> {
   
   public ClassPathVector() { }
   
@@ -77,8 +77,8 @@ public class ClassPathVector extends Vector<URL> {
     }
   }
   
-  public Vector<File> asFileVector() {
-    Vector<File> v = new Vector<File>();
+  public ArrayList<File> asFileVector() {
+    ArrayList<File> v = new ArrayList<File>();
     for(URL url : this) { v.add(new File(url.getFile())); }
     return v;
   }

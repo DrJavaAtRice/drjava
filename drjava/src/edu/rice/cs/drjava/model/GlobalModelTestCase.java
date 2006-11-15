@@ -68,6 +68,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   protected volatile DefaultGlobalModel _model;
   protected volatile File _tempDir;
+  protected volatile OpenDefinitionsDocument _doc;  // the working document in some shared set up routines
 
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
@@ -184,18 +185,19 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     // Open a new document
     int numOpen = _model.getOpenDefinitionsDocuments().size();
-    OpenDefinitionsDocument doc = _model.newFile();
+    Utilities.invokeAndWait(new Runnable() { public void run () { _doc = _model.newFile(); } });
+    
     assertNumOpenDocs(numOpen + 1);
 
     listener.assertNewCount(1);
-    assertLength(0, doc);
-    assertModified(false, doc);
+    assertLength(0, _doc);
+    assertModified(false, _doc);
 
-    changeDocumentText(text, doc);
-    assertModified(true, doc);
+    changeDocumentText(text, _doc);
+    assertModified(true, _doc);
     _model.removeListener(listener); 
 
-    return doc;
+    return _doc;
   }
 
   /** Compiles a new file with the given text. The compile is expected to succeed and it is checked to make sure it

@@ -91,12 +91,9 @@ public class VectorOption<T> extends Option<Vector<T>> {
     int startFirstElement = header.length();
     int startFooter = s.length() - footer.length();
 
-    if (startFooter < startFirstElement ||
-        !s.startsWith(header) ||
-        !s.endsWith(footer)) {
-      throw new OptionParseException(name, s,
-                                     "Value must start with "+header+" and end "+
-                                     "with "+footer+" to be a valid vector.");
+    if (startFooter < startFirstElement || !s.startsWith(header) || ! s.endsWith(footer)) {
+      throw new OptionParseException(name, s, "Value must start with " + header + " and end " + "with " + footer + 
+                                     " to be a valid vector.");
     }
     s = s.substring(startFirstElement, startFooter);
     String d = String.valueOf(delim);
@@ -112,15 +109,11 @@ public class VectorOption<T> extends Option<Vector<T>> {
       if (!isDelim) {
         res.add(parser.parse(token));
       } else if (sawDelim) { // isDelim & sawDelim (two delims in a row)
-        throw new OptionParseException(name, s,
-                                       "Argument contains delimiter with no preceding list element.");
+        throw new OptionParseException(name, s, "Argument contains delimiter with no preceding list element.");
       }
       sawDelim = isDelim;
     }
-    if (sawDelim) {
-      throw new OptionParseException(name, s,
-                                     "Value shouldn't end with a delimiter.");
-    }
+    if (sawDelim) throw new OptionParseException(name, s, "Value shouldn't end with a delimiter.");
     return res;
   }
 

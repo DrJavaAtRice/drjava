@@ -71,11 +71,11 @@ import edu.rice.cs.drjava.model.*;
  */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
   
-  public static Log _log = new Log("GlobalModel.txt", false);
-  private final static int NO_COMMENT_OFFSET = 0;
-  private final static int WING_COMMENT_OFFSET = 2;
+  public static final Log _log = new Log("GlobalModel.txt", false);
+  private static final int NO_COMMENT_OFFSET = 0;
+  private static final int WING_COMMENT_OFFSET = 2;
   
-  List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
+  private volatile List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   
   public void addDocumentClosedListener(DocumentClosedListener l) { 
     synchronized(_closedListeners) { _closedListeners.add(l); }
@@ -97,7 +97,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  be released so that this can be GC'd. */
   public void close() {
     _removeIndenter();
-    
     synchronized(_closedListeners) {
       for (DocumentClosedListener l: _closedListeners)  { l.close(); }
       _closedListeners = new LinkedList<DocumentClosedListener>();
@@ -105,7 +104,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   // end debug code
-  
   
   /** The maximum number of undos the model can remember */
   private static final int UNDO_LIMIT = 1000;
@@ -138,11 +136,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Keeps track of the listeners to this model. */
   private final GlobalEventNotifier _notifier;
   
+  /* Relying on the following definition in AbstractDJDocument.  It must be placed there to be initialized before use!
+  protected static final Object _wrappedPosListLock = new Object();
+  */
+  
   /** List with weak references to positions. */
   private volatile LinkedList<WeakReference<WrappedPosition>> _wrappedPosList;
-  
-  /** Lock protecting _wrappedPosList. */
-  private final Object _wrappedPosListLock = new Object();
   
   /** Convenience constructor for using a custom indenter.
    *  @param indenter custom indenter class
@@ -533,7 +532,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       try {     
         synchronized(_reduced) {
           setCurrentLocation(selStart);
-          Position oldCurrentPosition = createPosition(_currentLocation);
+          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
           _commentLine();   
           toReturn += WING_COMMENT_OFFSET;
           //int caretPos = getCaretPosition();
@@ -561,7 +560,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     try {
       // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc doing the
       // indentLine calls.
-      final Position endPos = this.createPosition(end);
+      final Position endPos = this.createUnwrappedPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = start;
       synchronized(_reduced) {
@@ -569,7 +568,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           setCurrentLocation(walker);
           // Keep pointer to walker position that will stay current
           // regardless of how commentLine changes things
-          Position walkerPos = this.createPosition(walker);
+          Position walkerPos = this.createUnwrappedPosition(walker);
           // Comment out current line
           _commentLine();  // must be atomic
           afterCommentEnd += WING_COMMENT_OFFSET;
@@ -612,7 +611,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       try {
         synchronized(_reduced) {
           setCurrentLocation(selStart);
-          Position oldCurrentPosition = createPosition(_currentLocation);
+          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
           _uncommentLine();  // accesses _reduced
           toReturn -= WING_COMMENT_OFFSET;
           //int caretPos = getCaretPosition();
@@ -640,7 +639,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     try {
       // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc
       // doing the indentLine calls.
-      final Position endPos = this.createPosition(end);
+      final Position endPos = this.createUnwrappedPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = start;
       synchronized(_reduced) {
@@ -648,7 +647,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           setCurrentLocation(walker);
           // Keep pointer to walker position that will stay current
           // regardless of how commentLine changes things
-          Position walkerPos = this.createPosition(walker);
+          Position walkerPos = this.createUnwrappedPosition(walker);
           // uncomment current line
           afterUncommentEnd-= _uncommentLine();  // accesses _reduced
           // Move back to walker spot
@@ -1490,8 +1489,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Factory method for created WrappedPositions. Stores the created Position instance
    *  so it can be linked to a different DefinitionsDocument later. */
-  public Position createWrappedPosition(int offs) throws BadLocationException {
-    WrappedPosition wp = new WrappedPosition(createPosition(offs));
+  public Position createPosition(int offs) throws BadLocationException {
+    WrappedPosition wp = new WrappedPosition(createUnwrappedPosition(offs));
     synchronized(_wrappedPosListLock) {
       if (_wrappedPosList == null) _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); 
       _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));
@@ -1534,7 +1533,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         if (entry.getKey() != null) {
           // hasn't been garbage-collected yet
           WrappedPosition wp = entry.getKey();
-          wp.setWrapped(createPosition(entry.getValue()));
+          wp.setWrapped(createUnwrappedPosition(entry.getValue()));
           _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));
         }
       }

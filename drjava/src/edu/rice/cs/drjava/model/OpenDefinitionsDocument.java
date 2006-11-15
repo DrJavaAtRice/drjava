@@ -342,5 +342,5 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public int getCaretPosition();
   
   /** Creates a WrappedPosition in the document. */
-  public Position createWrappedPosition(int offs) throws BadLocationException;
+  public Position createUnwrappedPosition(int offs) throws BadLocationException;
 }

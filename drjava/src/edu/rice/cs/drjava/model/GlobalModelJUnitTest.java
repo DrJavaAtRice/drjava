@@ -471,12 +471,16 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     
-    OpenDefinitionsDocument untitled = docs.get(0);
+    final OpenDefinitionsDocument untitled = docs.get(0);
     
 //    System.out.println("Untitled file is named: " + untitled.getName());
     
-    untitled.quitFile();
-    _model.closeFileWithoutPrompt(untitled);
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        untitled.quitFile();
+        _model.closeFileWithoutPrompt(untitled);
+      }
+    });
     
     // set up test listener for compile command; automatically checks that compilation is performed
     JUnitTestListener listener = new JUnitCompileBeforeTestListener();

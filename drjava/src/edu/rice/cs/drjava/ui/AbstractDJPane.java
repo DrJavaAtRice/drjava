@@ -39,6 +39,7 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
 import edu.rice.cs.util.swing.*;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 
 import java.awt.*;
@@ -73,10 +74,12 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   protected final CaretListener _matchListener = new CaretListener() {
     
     /** Checks caret position to see if it needs to set or remove a highlight from the document. When the cursor
-     *  is immediately right of ')', '}', or ']', it highlights up to the matching open paren/brace/bracket.
-     *  @param e the event fired by the caret position change
-     */
-    public void caretUpdate(CaretEvent e) { // Must execute as part of document update.  Only modifies document.
+      * is immediately right of ')', '}', or ']', it highlights up to the matching open paren/brace/bracket.
+      * This method must execute as part of the document update. If deferred using invokeLater, it does not work.
+      * Only modifies the document--not any GUI classes.
+      * @param e the event fired by the caret position change
+      */
+    public void caretUpdate(CaretEvent e) { 
       getDJDocument().setCurrentLocation(getCaretPosition());  
       _removePreviousHighlight();
       _updateMatchHighlight();
@@ -110,7 +113,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   
   protected abstract void _updateMatchHighlight();
 
-  /** Removes the previous highlight so document is cleared when caret position changes. */
+  /** Removes the previous highlight so document is cleared when caret position changes.  Can be executed from outside
+    * the event thread. */
   protected void _removePreviousHighlight() {
     if (_matchHighlight != null) {
       _matchHighlight.remove();
@@ -123,8 +127,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
    *  @param pos
    */
   public void setCaretPosition(int pos) {
-        super.setCaretPosition(pos);
-        getDJDocument().setCurrentLocation(pos);
+    super.setCaretPosition(pos);
+    getDJDocument().setCurrentLocation(pos);
 //    _doc.setCurrentLocation(pos);
   }
   
@@ -156,7 +160,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
      */
     
     // Is this action still necessary?  
-    getDJDocument().setCurrentLocation(getCaretPosition());
+//    getDJDocument().setCurrentLocation(getCaretPosition());
     
     // The _reduced lock within DefinitionsDocument should be probably be set as well
     

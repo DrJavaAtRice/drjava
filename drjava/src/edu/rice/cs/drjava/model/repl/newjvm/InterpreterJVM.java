@@ -35,7 +35,7 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.List;
@@ -828,8 +828,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    *  @return a vector of strings so that RMI doesn't have to serialize the URL object. Serializing URL objects fails
    *  when using jsr14.
    */
-  public synchronized Vector<String> getAugmentedClassPath() {
-    Vector<String> ret = new Vector<String>();
+  public synchronized ClassPathVector getAugmentedClassPath() {
+    ClassPathVector ret = new ClassPathVector();
 
     for (ClassPathEntry e: _classPathManager.getProjectCP())  ret.add(e.getEntry().toString());
 

@@ -68,7 +68,7 @@ import javax.swing.SwingUtilities;
  *
  *  Every public method in this class throws an llegalStateException if
  *  it is called while the debugger is not active, except for isAvailable,
- *  isReady, and startup.  Public methods also throw a DebugException if
+ *  isReady, and startUp.  Public methods also throw a DebugException if
  *  the EventHandlerThread has caught an exception.
  *
  *  @version $Id$
@@ -117,7 +117,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private volatile Throwable _eventHandlerError;
 
   /** Builds a new JPDADebugger to debug code in the Interactions JVM, using the JPDA/JDI interfaces.
-   *  Does not actually connect to the interpreterJVM until startup().
+   *  Does not actually connect to the interpreterJVM until startUp().
    */
   public JPDADebugger(DefaultGlobalModel model) {
     _model = model;
@@ -177,7 +177,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /** Returns whether the debugger is currently enabled. */
   public boolean isReady() { return _vm != null; }
   
-  /** Ensures that debugger is active.  Should be called by every public method in the debugger except for startup().
+  /** Ensures that debugger is active.  Should be called by every public method in the debugger except for startUp().
    *  Assumes lock is already held.
    *  @throws IllegalStateException if debugger is not active
    *  @throws DebugException if an exception was detected in the EventHandlerThread
@@ -202,7 +202,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   }
 
   /** Attaches the debugger to the Interactions JVM to prepare for debugging. */
-  public synchronized void startup() throws DebugException {
+  public synchronized void startUp() throws DebugException {
     if (! isReady()) {
       _eventHandlerError = null;
       // check if all open documents are in sync
@@ -210,7 +210,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         doc.checkIfClassFileInSync();
       }
 
-      _attachToVM();
+      try { _attachToVM(); }
+      catch(DebugException e1) {  // We sometimes see ConnectExceptions stating that the connection was refused
+        try { _attachToVM(); }
+        catch(DebugException e2) { _attachToVM(); }  // if we throw another exception, three strikes and we're out
+      }
 
       // Listen for events when threads die
       ThreadDeathRequest tdr = _eventManager.createThreadDeathRequest();
@@ -241,6 +245,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       throw new IllegalStateException("Debugger has already been started.");
   }
 
+    
   /** Handles the details of attaching to the interpreterJVM. Assume lock is already held. */
   private void _attachToVM() throws DebugException {
     // Blocks until the interpreter has registered if hasn't already.  Blocks all synchronized methods in this class.
@@ -332,7 +337,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   }
 
 
-  /** Returns the current EventRequestManager from JDI, or null if startup() has not been called. */
+  /** Returns the current EventRequestManager from JDI, or null if startUp() has not been called. */
   EventRequestManager getEventRequestManager() { return _eventManager; }
 
   /** Returns the pending request manager used by the debugger. */
@@ -459,19 +464,19 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
   /** Returns whether the debugger currently has any suspended threads. */
   public synchronized boolean hasSuspendedThreads() throws DebugException {
-    if (!isReady()) return false;
+    if (! isReady()) return false;
     return _suspendedThreads.size() > 0;
   }
 
   /** Returns whether the debugger's current thread is suspended. */
   public synchronized boolean isCurrentThreadSuspended() throws DebugException {
-    if (!isReady()) return false;
+    if (! isReady()) return false;
     return hasSuspendedThreads() && !hasRunningThread();
   }
 
   /** Returns whether the thread the debugger is tracking is now running. */
   public synchronized boolean hasRunningThread() throws DebugException {
-    if (!isReady()) return false;
+    if (! isReady()) return false;
     return _runningThread != null;
   }
 
@@ -929,7 +934,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   public synchronized Vector<DebugStackData> getCurrentStackFrameData()
     throws DebugException
   {
-    if (!isReady()) return new Vector<DebugStackData>();
+    if (! isReady()) return new Vector<DebugStackData>();
 
     if (_runningThread != null || _suspendedThreads.size() <= 0) {
       throw new DebugException("No suspended thread to obtain stack frames.");
@@ -1202,7 +1207,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
   /** Updates the stored value of each watched field and variable. */
   private synchronized void _updateWatches() throws DebugException {
-    if (!isReady()) { return; }
+    if (! isReady()) return;
       
     if (_suspendedThreads.size() <= 0) {
       // Not suspended, get values in interpreter

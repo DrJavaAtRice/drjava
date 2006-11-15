@@ -65,19 +65,13 @@ public class ErrorCaretListener implements CaretListener {
   /** After each update to the caret, determine if changes in highlighting need to be made.  Highlights the line 
    *  if the compiler output tab is showing.  Only runs in the event thread.
    */
-  public void caretUpdate(CaretEvent evt) {
-//    assert EventQueue.isDispatchThread();  // including this assertion breaks DefinitionsPaneTest
+  public void caretUpdate(final CaretEvent evt) {
     // Now we can assume at least one error.
-    updateHighlight(evt.getDot());
+    updateHighlight(evt.getDot()); // invokeLater unnecessary here; this method runs in the event thread!
   }
 
   /** Update the highlight appropriately. */
   public void updateHighlight(final int curPos) {
-    // Don't highlight unless compiler tab selected
-//    if (!tabSelected()) {
-//      _errorListPane.selectNothing();
-//      return;
-//    }
     Utilities.invokeLater(new Runnable() { public void run() { 
       ErrorPanel panel = _frame.getSelectedErrorPanel();
       if (panel == null) {

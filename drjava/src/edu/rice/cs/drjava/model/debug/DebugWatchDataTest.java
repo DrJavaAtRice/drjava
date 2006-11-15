@@ -85,13 +85,13 @@ public final class DebugWatchDataTest extends DrJavaTestCase {
    */
   public void testFirstCreation() {
     DebugWatchData data = new DebugWatchData("foo");
-    assertEquals("should have a name on startup",
+    assertEquals("should have a name on startUp",
                  "foo", data.getName());
-    assertEquals("should have no value on startup",
+    assertEquals("should have no value on startUp",
                  "", data.getValue());
-    assertEquals("should have no type on startup",
+    assertEquals("should have no type on startUp",
                  "", data.getType());
-    assertTrue("should not be changed on startup", !data.isChanged());
+    assertTrue("should not be changed on startUp", !data.isChanged());
   }
   
   /**

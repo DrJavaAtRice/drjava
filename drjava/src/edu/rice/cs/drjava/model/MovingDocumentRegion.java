@@ -66,12 +66,12 @@ public class MovingDocumentRegion implements DocumentRegion {
   /** @return the start offset */
   public int getStartOffset() {
     return 
-      (_doc==null || _doc.getLength() >= _startPosition.getOffset()) ? _startPosition.getOffset() : _doc.getLength();
+      (_doc == null || _doc.getLength() >= _startPosition.getOffset()) ? _startPosition.getOffset() : _doc.getLength();
   }
 
   /** @return the end offset */
   public int getEndOffset() {
-    return (_doc==null || _doc.getLength() >= _endPosition.getOffset()) ? _endPosition.getOffset() : _doc.getLength();
+    return (_doc == null || _doc.getLength() >= _endPosition.getOffset()) ? _endPosition.getOffset() : _doc.getLength();
   }
   
   /** @return the string it was assigned */

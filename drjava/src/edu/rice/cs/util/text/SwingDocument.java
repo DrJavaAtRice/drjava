@@ -40,6 +40,7 @@ import java.awt.print.Pageable;
 
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.Position;
 import javax.swing.text.BadLocationException;
 
 import java.util.Hashtable;
@@ -51,14 +52,18 @@ import java.util.Hashtable;
  */
 public class SwingDocument extends DefaultStyledDocument implements EditDocumentInterface, AbstractDocumentInterface {
   
-  /** The lock state.  See ReadersWritersLocking interface for documentation. */
-  private volatile int _lockState = UNLOCKED;
+//  /** The lock state.  See ReadersWritersLocking interface for documentation. */
+//  private volatile int _lockState = UNLOCKED;
   
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;
 
   /** Determines which edits are legal on this document. */
   protected DocumentEditCondition _condition;
+  
+  /** Lock used to protect _wrappedPosListLock in DefinitionsDocument.  Placed here to ensure that it initialized before
+    * use! */
+  protected static final Object _wrappedPosListLock = new Object();
 
   /** Creates a new document adapter for a Swing StyledDocument. TODO: convert _styles and _condition to lazily 
     * initialized volatiles as soon as support for Java 1.4 is dropped and the double-check idiom is safe. */
@@ -209,29 +214,32 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   /* Locking operations */
   
   /* Swing-style readLock(). Must be renamed because inherited writeLock is final. */
-  public synchronized void acquireReadLock() {
-    _lockState++;
+  public /* synchronized */ void acquireReadLock() {
+//    _lockState++;
     readLock();
   }
    
   /* Swing-style readUnlock(). Must be renamed because inherited writeLock is final. */
-  public synchronized void releaseReadLock() {
+  public /* synchronized */ void releaseReadLock() {
     readUnlock();
-    _lockState--;
+//    _lockState--;
   }
 
   /** Swing-style writeLock().  Must be renamed because inherited writeLock is final. */
-  public synchronized void acquireWriteLock() { 
-    _lockState = MODIFYLOCKED;
+  public /* synchronized */ void acquireWriteLock() { 
+//    _lockState = MODIFYLOCKED;
     writeLock(); 
   }
   
    /** Swing-style writeUnlock().  Must be renamed because inherited writeUnlock is final.*/
-  public void releaseWriteLock() { 
+  public /* synchronized*/ void releaseWriteLock() { 
     writeUnlock();
-    _lockState = UNLOCKED;
+//   _lockState = UNLOCKED;
   }
   
-  public int getLockState() { return _lockState; }
+  /** Performs the default behavior for createPosition in DefaultStyledDocument. */
+  public Position createUnwrappedPosition(int offs) throws BadLocationException { return super.createPosition(offs); }
+  
+//  public int getLockState() { return _lockState; }
 }
 

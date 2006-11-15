@@ -72,6 +72,7 @@ import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
 import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
+import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -1022,8 +1023,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
           if (p.getItem() != null) {
             final OpenDefinitionsDocument newDoc = p.getItem().doc;
-            final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
-            if (docChanged) addToBrowserHistory();
+//            final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
+//            if (docChanged) addToBrowserHistory();
             _model.setActiveDocument(newDoc);
             final int curLine = newDoc.getCurrentLine();
             final String t = p.getText();
@@ -1038,7 +1039,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                   public void run() {
                     try { _jumpToLine(lineNum); }
                     catch (RuntimeException e) { _jumpToLine(curLine); }
-                    if (docChanged) addToBrowserHistory();
+//                    if (docChanged) addToBrowserHistory();
                   }
                 });
               }
@@ -1187,7 +1188,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         ++end;
       }
       if ((start>=0) && (end<s.length())) {
-        mask = s.substring(start, end+1);
+        mask = s.substring(start, end + 1);
         pim.setMask(mask);
       }
     }
@@ -1198,19 +1199,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     if (pim.getMatchingItems().size() == 1) {
       // exactly one match, go to file
       if (pim.getCurrentItem() != null) {
-        boolean docChanged = !pim.getCurrentItem().doc.equals(_model.getActiveDocument());
-        if (docChanged) {
-          addToBrowserHistory();
-        }
+//        boolean docChanged = !pim.getCurrentItem().doc.equals(_model.getActiveDocument());
+//        if (docChanged) { addToBrowserHistory(); }
         _model.setActiveDocument(pim.getCurrentItem().doc);
-        if (docChanged) {
-          // defer executing this code until after active document switch (if any) is complete
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              addToBrowserHistory();
-            }
-          });
-        }
+//        if (docChanged) {
+//          // defer executing this code until after active document switch (if any) is complete
+//          SwingUtilities.invokeLater(new Runnable() {
+//            public void run() { addToBrowserHistory(); } });
+//        }
       }
     }
     else {
@@ -1219,19 +1215,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       if (pim.getMatchingItems().size() == 1) {
         // exactly one match with ".java" appended, go to file
         if (pim.getCurrentItem() != null) {
-          boolean docChanged = !pim.getCurrentItem().doc.equals(_model.getActiveDocument());
-          if (docChanged) {
-            addToBrowserHistory();
-          }
+//          boolean docChanged = !pim.getCurrentItem().doc.equals(_model.getActiveDocument());
+//          if (docChanged) { addToBrowserHistory(); }
           _model.setActiveDocument(pim.getCurrentItem().doc);
-          if (docChanged) {
-            // defer executing this code until after active document switch (if any) is complete
-            SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                addToBrowserHistory();
-              }
-            });
-          }
+//          if (docChanged) {
+//            // defer executing this code until after active document switch (if any) is complete
+//            SwingUtilities.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+//          }
         }
       }
       else {
@@ -1241,7 +1231,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           // if there are no matches, shorten the mask until there is at least one
           mask = pim.getMask();
           while(mask.length()>0) {
-            mask = mask.substring(0, mask.length()-1);
+            mask = mask.substring(0, mask.length() - 1);
             pim.setMask(mask);
             if (pim.getMatchingItems().size()>0) { break; }
           }
@@ -1388,7 +1378,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             String fullClassName = link.replace('/', '.');
             String simpleClassName = fullClassName;
             int lastDot = fullClassName.lastIndexOf('.');
-            if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot+1); }
+            if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
             try {
               _openJavadocList.add(new OpenJavadocListEntry(simpleClassName, fullClassName, new URL(base + "/" + link + ".html")));
             }
@@ -1451,7 +1441,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         ++end;
       }
       if ((start>=0) && (end<s.length())) {
-        mask = s.substring(start, end+1);
+        mask = s.substring(start, end + 1);
         pim.setMask(mask);
       }
     }
@@ -1483,9 +1473,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           // if there are no matches, shorten the mask until there is at least one
           mask = pim.getMask();
           while(mask.length()>0) {
-            mask = mask.substring(0, mask.length()-1);
+            mask = mask.substring(0, mask.length() - 1);
             pim.setMask(mask);
-            if (pim.getMatchingItems().size()>0) { break; }
+            if (pim.getMatchingItems().size() > 0) { break; }
           }
         }
         else {
@@ -1541,7 +1531,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
               
               // check that we're at the end of a word
               if ((loc<s.length()) && (!Character.isWhitespace(s.charAt(loc))) &&
-                  ("()[]{}<>.,:;/*+-!~&|%".indexOf(s.charAt(loc))==-1)) return null;
+                  ("()[]{}<>.,:;/*+-!~&|%".indexOf(s.charAt(loc)) == -1)) return null;
               
               // find start
               int start = loc;
@@ -1549,7 +1539,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                 if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
                 --start;
               }
-              while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+              while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start < loc)) {
                 ++start;
               }
               
@@ -1643,30 +1633,30 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       
       // check that we're at the end of a word
       if ((loc<s.length()) && (!Character.isWhitespace(s.charAt(loc))) &&
-          ("()[]{}<>.,:;/*+-!~&|%".indexOf(s.charAt(loc))==-1)) return;
+          ("()[]{}<>.,:;/*+-!~&|%".indexOf(s.charAt(loc)) == -1)) return;
       
       // find start
       int start = loc;
-      while(start>0) {
+      while(start > 0) {
         if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
         --start;
       }
-      while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+      while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start < loc)) {
         ++start;
       }
       
       int end = loc-1;
       
-      if ((start>=0) && (end<s.length())) {
-        mask = s.substring(start, end+1);
+      if ((start>=0) && (end < s.length())) {
+        mask = s.substring(start, end + 1);
         pim.setMask(mask);
       }
       
       if (pim.getMatchingItems().size() == 1) {
         if (pim.getCurrentItem() != null) {
           // exactly one match, auto-complete
-          if (!s.substring(start, loc).equals(pim.getCurrentItem().toString())) {
-            odd.remove(start, loc-start);
+          if (! s.substring(start, loc).equals(pim.getCurrentItem().toString())) {
+            odd.remove(start, loc - start);
             odd.insertString(start, pim.getCurrentItem().toString(), null);
           }
           return;
@@ -1679,10 +1669,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         if (pim.getMatchingItems().size() == 0) {
           // if there are no matches, shorten the mask until there is at least one
           mask = pim.getMask();
-          while(mask.length()>0) {
-            mask = mask.substring(0, mask.length()-1);
+          while(mask.length() > 0) {
+            mask = mask.substring(0, mask.length() - 1);
             pim.setMask(mask);
-            if (pim.getMatchingItems().size()>0) { break; }
+            if (pim.getMatchingItems().size() > 0) { break; }
           }
         }       
         initCompleteWordDialog();
@@ -1786,7 +1776,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Displays the interactions classpath. */  
   public void viewInteractionsClassPath() {
     final StringBuilder cpBuf = new StringBuilder();
-    Vector<URL> classPathElements = _model.getClassPath();
+    ClassPathVector classPathElements = _model.getClassPath();
     for(int i = 0; i < classPathElements.size(); i++) {
       cpBuf.append(classPathElements.get(i).getPath());
       if (i + 1 < classPathElements.size()) cpBuf.append("\n");
@@ -1846,16 +1836,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
         _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
       //disables switching documents while the next one is opening up, in order to prevent out of control switching
-      addToBrowserHistory();
+//      addToBrowserHistory();
       _model.setActiveNextDocument();
       _findReplace.updateFirstDocInSearch();
       this.setEnabled(true);
-      // defer executing this code until after active document switch (if any) is complete
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          addToBrowserHistory();
-        }
-      });
+//      // defer executing this code until after active document switch (if any) is complete
+//      SwingUtilities.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
     }
   };
   
@@ -1865,16 +1851,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       this.setEnabled(false);
       if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
         _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
-      addToBrowserHistory();
+//      addToBrowserHistory();
       _model.setActivePreviousDocument();
       _findReplace.updateFirstDocInSearch();
       this.setEnabled(true);
-      // defer executing this code until after active document switch (if any) is complete
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          addToBrowserHistory();
-        }
-      });
+//      // defer executing this code until after active document switch (if any) is complete
+//      SwingUtilities.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
     }
   };
   
@@ -2099,9 +2081,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Toggles a bookmark. */
   private final Action _toggleBookmarkAction = new AbstractAction("Toggle Bookmark") {
-    public void actionPerformed(ActionEvent ae) {
-      toggleBookmark();
-    }
+    public void actionPerformed(ActionEvent ae) { toggleBookmark(); }
   };
 
   /** Toggle a bookmark. */
@@ -2121,8 +2101,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       }
       DocumentRegion r = _model.getBookmarkManager().getRegionOverlapping(doc, startSel, endSel);
       if (r == null) {
-        final Position startPos = doc.createWrappedPosition(startSel);
-        final Position endPos = doc.createWrappedPosition(endSel);
+        final Position startPos = doc.createPosition(startSel);
+        final Position endPos = doc.createPosition(endSel);
         SimpleDocumentRegion newR = new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset());
         _model.getBookmarkManager().addRegion(newR);
       }
@@ -2140,9 +2120,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Add the current location to the browser history. */
-  public void addToBrowserHistory() {
-    _model.addToBrowserHistory();
-  }
+  public void addToBrowserHistory() { _model.addToBrowserHistory(); }
 
   /** Create a new find results tab.
     * @param rm the region manager that will contain the regions
@@ -2725,7 +2703,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _recentDocFrame.pokeDocument(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
     _currentDefPane.notifyActive();
-    
   
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -2924,7 +2901,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           int result = JOptionPane.
             showConfirmDialog(_configFrame,
                               "Specifying Main JVM Args is an advanced option. Invalid arguments may cause\n" +
-                              "DrJava to fail on startup.  You may need to edit or delete your .drjava preferences file\n" +
+                              "DrJava to fail on startUp.  You may need to edit or delete your .drjava preferences file\n" +
                               "to recover.\n Are you sure you want to set this option?\n" +
                               "(You will have to restart Drjava before changes take effect.)",
                               "Confirm Main JVM Arguments", JOptionPane.YES_NO_OPTION);
@@ -3218,7 +3195,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         // Turn on debugger
         simpleHourglassOn();
         try {
-          debugger.startup();  // may kick active document (if unmodified) out of memory!
+          debugger.startUp();  // may kick active document (if unmodified) out of memory!
           _model.refreshActiveDocument();
           _updateDebugStatus();
         }
@@ -4067,7 +4044,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _recentProjectManager.saveRecentFiles();
     _storePositionInfo();
     
-    // Save recent files, but only if there wasn't a problem at startup
+    // Save recent files, but only if there wasn't a problem at startUp
     // (Don't want to overwrite a custom config file with a simple typo.)
     if (! DrJava.getConfig().hadStartupException()) {
       try { DrJava.getConfig().saveConfiguration(); }
@@ -4307,8 +4284,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             ++pos;
           }
           if (ok) {
-            if (s.lastIndexOf('.')>=0) {
-              s = s.substring(s.lastIndexOf('.')+1);
+            if (s.lastIndexOf('.') >= 0) {
+              s = s.substring(s.lastIndexOf('.') + 1);
             }
             GoToFileListEntry entry = new GoToFileListEntry(dummyDoc, s);
             hs.add(entry);
@@ -5663,21 +5640,27 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     public void caretUpdate(final CaretEvent ce ) {
       final OpenDefinitionsDocument doc = _model.getActiveDocument();
-      
-      Utilities.invokeLater(new Runnable() { 
-        public void run() { 
-          doc.setCurrentLocation(ce.getDot());  
-          int line = doc.getCurrentLine();
-          int col = doc.getCurrentCol();
-          updateLocation(line, col); 
-        } 
-      });
+      // The following block of code does not appear to require running in the event thread
+//      Utilities.invokeLater(new Runnable() { 
+//        public void run() { 
+          doc.acquireReadLock();
+          try {
+            doc.setCurrentLocation(ce.getDot());  
+            int line = doc.getCurrentLine();
+            int col = doc.getCurrentCol();
+            updateLocation(line, col);
+          }
+          finally { doc.releaseReadLock(); }
+//        } 
+//      });
     }
     
-    // Only runs in the event thread or prior to pane being set visible
+    // This method appears safe outside the event thread
     public void updateLocation() {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
-      updateLocation(doc.getCurrentLine(), doc.getCurrentCol()); 
+      doc.acquireReadLock();  // lock to ensure consistency of two reads from doc
+      try { updateLocation(doc.getCurrentLine(), doc.getCurrentCol()); }
+      finally { doc.releaseReadLock(); }
     }
     
     private void updateLocation(int line, int col) {
@@ -5976,9 +5959,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _recentDocFrame.setVisible(false);
       OpenDefinitionsDocument doc = _recentDocFrame.getDocument();
       if (doc != null) {
-        addToBrowserHistory();
-        _model.getDocumentNavigator().setActiveDoc(doc);
-        addToBrowserHistory();
+//        addToBrowserHistory();
+        _model.setActiveDocument(doc);
+//        addToBrowserHistory();
       }
     }
   }
@@ -6068,7 +6051,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     return scroll;
   }
-  
   
   private void _setUpPanes() {
     // DefinitionsPane
@@ -6481,7 +6463,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //    _currentDefPane.notifyInactive();
     openDoc.setCurrentLocation(start);
     Position startPos;
-    try {startPos = openDoc.createPosition(start);}
+    try { startPos = openDoc.createUnwrappedPosition(start); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     
     int startOffset = startPos.getOffset();        
@@ -6537,8 +6519,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         // get the line number after the switch of documents was made
         int lineNumber = doc.getLineOfOffset(offset)+1;
         
-        // this block occurs if the documents is already open and as such
-        // has a positive size
+        // this block occurs if the documents is already open and as such has a positive size
         if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {      
           _currentDefPane.centerViewOnOffset(offset);
           _currentDefPane.requestFocusInWindow();
@@ -6569,9 +6550,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         }
         _updateDebugStatus();
 
-        if (shouldAddToHistory) {
-          addToBrowserHistory();
-        }    
+//        if (shouldAddToHistory) { addToBrowserHistory(); }    
       }
     });
   }
@@ -6692,20 +6671,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
      new DJAsyncTaskLauncher().executeTask(task, param, showProgress, lockUI);
    }
    public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc) {
-     boolean docChanged = !doc.equals(_model.getActiveDocument());
-     if (docChanged) {
-       addToBrowserHistory();
-     }
+//     boolean docChanged = !doc.equals(_model.getActiveDocument());
+//     if (docChanged) { addToBrowserHistory(); }
      
      // Always switch to doc
      _model.setActiveDocument(doc);
      
-     // defer executing this code until after active document switch (if any) is complete
-     SwingUtilities.invokeLater(new Runnable() {
-       public void run() {
-         addToBrowserHistory();
-       }
-     });
+//     // defer executing this code until after active document switch (if any) is complete
+//     SwingUtilities.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
      
      // Prompt to revert if modified
      if (doc.isModifiedSinceSave()) {

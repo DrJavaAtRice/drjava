@@ -43,6 +43,8 @@ import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 
+import java.awt.EventQueue;
+
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
@@ -139,7 +141,7 @@ public class FindReplaceMachine {
   public void setPosition(int pos) {
 //    System.err.println("Setting position " + pos + " in doc [" + _doc.getText() + "]");
 //    assert (pos >= 0) && (pos <= _doc.getLength());
-    try { _current = _doc.createPosition(pos); }
+    try { _current = _doc.createUnwrappedPosition(pos); }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
 
@@ -159,7 +161,7 @@ public class FindReplaceMachine {
   /** Change the word being sought.
    *  @param word the new word to seek
    */
-  public void setFindWord(String word) { 
+  public void setFindWord(String word) {  
     _findWord = StringOps.replace(word, System.getProperty("line.separator"), "\n"); 
   }
 
@@ -170,10 +172,14 @@ public class FindReplaceMachine {
     _replaceWord = StringOps.replace(word, System.getProperty("line.separator"),"\n"); 
   }
 
-  /** Determine if the machine is on an instance of the find word.
-   *  @return true if the current position is right after an instance of the find word.
-   */
+  /** Determine if the machine is on an instance of the find word.  Only executes in event thread except for
+    * initialization.
+    * @return true if the current position is right after an instance of the find word.
+    */
   public boolean onMatch() {
+    
+//    assert EventQueue.isDispatchThread();
+    
     String findWord = _findWord;
     int wordLen, off;
     
@@ -185,15 +191,13 @@ public class FindReplaceMachine {
 
     if (off < 0) return false;
     
-     String matchSpace;
-    _doc.acquireReadLock();
+    String matchSpace;
     try {
       if (off + wordLen > _doc.getLength()) return false;
       matchSpace = _doc.getText(off, wordLen);
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
-    finally { _doc.releaseReadLock(); }
-    
+
     if (!_matchCase) {
       matchSpace = matchSpace.toLowerCase();
       findWord = findWord.toLowerCase();
@@ -201,8 +205,10 @@ public class FindReplaceMachine {
     return matchSpace.equals(findWord);
   }
   
-  /** If we're on a match for the find word, replace it with the replace word. */
+  /** If we're on a match for the find word, replace it with the replace word.  Only executes in event thread. */
   public boolean replaceCurrent() {
+    
+    assert EventQueue.isDispatchThread();
 
     if (! onMatch()) return false;
     _doc.acquireWriteLock();
@@ -266,30 +272,28 @@ public class FindReplaceMachine {
    *    document text: "hhellollo"<p>
    *  Depending on the cursor position, clicking replace all could either make the document text read "hello" 
    *  (which is correct) or "e".  This is because of the behavior of findNext(), and it would be incorrect
-   *  to change that behavior.
+   *  to change that behavior.  Only executes in event thread.
    *  @return the number of replacements
    */
   private int _replaceAllInCurrentDoc() {
-//    System.err.println("_replaceAllInCurrentDoc() called; _doc = [" + _doc.getText() + "]");
-    _doc.acquireWriteLock();
-    try {
-      if (_isForward) setPosition(0);
-      else setPosition(_doc.getLength());
-      
-      int count = 0;
-      FindResult fr = findNext(false);  // find next match in current doc   
+
+    assert EventQueue.isDispatchThread();
+    
+    if (_isForward) setPosition(0);
+    else setPosition(_doc.getLength());
+    
+    int count = 0;
+    FindResult fr = findNext(false);  // find next match in current doc   
 //      Utilities.show(fr + " returned by call on findNext()");
-      
-      while (! fr.getWrapped()) {
-        replaceCurrent();
-        count++;
+    
+    while (! fr.getWrapped()) {
+      replaceCurrent();  // sets writeLock so that other threads do not see inconsistent state
+      count++;
 //        Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
-        fr = findNext(false);           // find next match in current doc
+      fr = findNext(false);           // find next match in current doc
 //        Utilities.show("Call on findNext() returned " + fr.toString() + "in doc '" + _doc.getText() + "'");
-      }
-      return count;
     }
-    finally { _doc.releaseWriteLock(); }
+    return count;
   }
   
   /** Processes all occurences of the find word with the replace word in the current document or in all documents
@@ -300,11 +304,14 @@ public class FindReplaceMachine {
   public int processAll(Lambda<Void, FindResult> findAction) { return processAll(findAction, _searchAllDocuments); }
   
   /** Processes all occurences of the find word with the replace word in the current document of in all documents
-   *  depending the value of the flag searchAll. 
+   *  depending the value of the flag searchAll.  Only executes in event thread.
    *  @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
    *  @return the number of replacements
    */
   private int processAll(Lambda<Void, FindResult> findAction, boolean searchAll) {
+    
+    assert EventQueue.isDispatchThread();
+    
     if (searchAll) {
       OpenDefinitionsDocument startDoc = _doc;
       int count = 0;           // the number of replacements done so farr
@@ -329,12 +336,12 @@ public class FindReplaceMachine {
    *    findString:    "hello"<br>
    *    replaceString: "e"<br>
    *    document text: "hhellollo"<p>
+   *  Only executes in event thread.
    *  @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
    *  @return the number of replacements
    */
   private int _processAllInCurrentDoc(Lambda<Void, FindResult> findAction) {
-    _doc.acquireWriteLock();
-    try {
+    
       if (_isForward) setPosition(0);
       else setPosition(_doc.getLength());
       
@@ -347,8 +354,6 @@ public class FindReplaceMachine {
         fr = findNext(false);           // find next match in current doc
       }
       return count;
-    }
-    finally { _doc.releaseWriteLock(); }
   }
   
   public FindResult findNext() { return findNext(_searchAllDocuments); }
@@ -359,44 +364,42 @@ public class FindReplaceMachine {
    *  same instance won't be found twice.  In a backward search, the position returned is at the beginning of the word.  
    *  Also returns a flag indicating whether the end of the document was reached and wrapped around. This is done
    *  using the FindResult class which contains the matching document, an integer offset and two flag indicated whether
-   *  the search wrapped (within _doc and across all documents)
+   *  the search wrapped (within _doc and across all documents).  Only executes in the event thread.
    *  @param searchAll whether to search all documents (or just _doc)
    *  @return a FindResult object containing foundOffset and a flag indicating wrapping to the beginning during a search
    */
   private FindResult findNext(boolean searchAll) {
     
+    assert EventQueue.isDispatchThread();
+    
     // Find next match, if any, in _doc. 
-    _doc.acquireReadLock();
     FindResult fr;
     int start;
     int len;
-    try {
       
-      // If the user just found a match and toggled the "Search Backwards" option, we should skip the matched text.
-      if (_skipText) {  // adjust position (offset)
+    // If the user just found a match and toggled the "Search Backwards" option, we should skip the matched text.
+    if (_skipText) {  // adjust position (offset)
 //      System.err.println("Skip text is true!  Last find word = " + _lastFindWord);
-        int wordLen = _lastFindWord.length();
-        if (_isForward) setPosition(getCurrentOffset() + wordLen);
-        else setPosition(getCurrentOffset() - wordLen);
-        positionChanged();
-      }
-      
+      int wordLen = _lastFindWord.length();
+      if (_isForward) setPosition(getCurrentOffset() + wordLen);
+      else setPosition(getCurrentOffset() - wordLen);
+      positionChanged();
+    }
+    
 //    System.err.println("findNext(" + searchAll + ") called with _doc = [" + _doc.getText() + "] and offset = " + _current.getOffset());
-      
-      int offset = getCurrentOffset();
+    
+    int offset = getCurrentOffset();
 //    System.err.println("findNext(" + searchAll + ") called; initial offset is " + offset);
 //    System.err.println("_doc = [" + _doc.getText() + "], _doc.getLength() = " + _doc.getLength());
-      if (_isForward) { 
-        start = offset; 
-        len = _doc.getLength() - offset; 
-      }
-      else { 
-        start = 0; 
-        len = offset; 
-      }
-      fr = _findNextInDoc(_doc, start, len, searchAll);
+    if (_isForward) { 
+      start = offset; 
+      len = _doc.getLength() - offset; 
     }
-    finally { _doc.releaseReadLock(); }
+    else { 
+      start = 0; 
+      len = offset; 
+    }
+    fr = _findNextInDoc(_doc, start, len, searchAll);
     if ((fr.getFoundOffset() >= 0) || ! searchAll) return fr;  // match found in _doc or search is local
     
     // find match in other docs
@@ -449,7 +452,7 @@ public class FindReplaceMachine {
     return _findNextInDocSegment(doc, newStart, newLen, true, allWrapped);
   } 
      
-  /** Find first valid match withing specified segment of doc.  Assumes acquireReadLock is already held. */  
+  /** Find first valid match withing specified segment of doc. */  
   private FindResult _findNextInDocSegment(OpenDefinitionsDocument doc, int start, int len) {
     return _findNextInDocSegment(doc, start, len, false, false);
   }
@@ -465,11 +468,13 @@ public class FindReplaceMachine {
    *  @return a FindResult object with foundOffset and a flag indicating wrapping to the beginning during a search. The
    *  foundOffset returned insided the FindResult is -1 if no instance was found.
    */
-  private FindResult _findNextInDocSegment(final OpenDefinitionsDocument doc, final int start, final int len, 
+  private FindResult _findNextInDocSegment(final OpenDefinitionsDocument doc, final int start, final int origLen, 
                                            final boolean wrapped, final boolean allWrapped) {  
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped + " ...)");
     
     final int docLen = doc.getLength();;     // The length of the segment to be searched
+    
+    final int len = (origLen < 0) ? docLen - start : origLen;  // set len for end of doc if origLen < 0
     
     if (len == 0 || docLen == 0) return new FindResult(doc, -1, wrapped, allWrapped);
    
@@ -480,7 +485,9 @@ public class FindReplaceMachine {
     try { 
 
 //      if (wrapped && allWrapped) Utilities.show(start +", " + len + ", " + docLen + ", doc = '" + doc.getText() + "'");
-      text = doc.getText(start, len);
+      doc.acquireReadLock(); 
+      try { text = doc.getText(start, len); }
+      finally { doc.releaseReadLock(); }
       
       if (! _matchCase) {
         text = text.toLowerCase();
@@ -527,7 +534,7 @@ public class FindReplaceMachine {
 //        Utilities.show("Finished iteration with text = " + text + "; len = " + len);
         if (_shouldIgnore(foundLocation, doc)) continue;
         
-        _current = doc.createPosition(matchLocation);   // formerly doc.createWrappedPosition(...)
+        _current = doc.createUnwrappedPosition(matchLocation);   // formerly doc.createPosition(...)
         
 //        System.err.println("Returning result = " + new FindResult(doc, matchLocation, wrapped, allWrapped));
 
@@ -612,20 +619,23 @@ public class FindReplaceMachine {
   }
 
   /** Determines whether a character is a delimiter (not a letter or digit) as a helper to wholeWordFoundAtCurrent
-   * 
-   * @param ch - a character
-   * @return true if ch is a delimiter, false otherwise
-   */
+    * 
+    * @param ch - a character
+    * @return true if ch is a delimiter, false otherwise
+    */
   private boolean isDelimiter(char ch) { return ! Character.isLetterOrDigit(ch); }
   
   /** Returns true if the currently found instance should be ignored (either because it is inside a string or comment or
-   *  because it does not match the whole word when either or both of those conditions are set to true).
-   * 
-   *  @param foundOffset the location of the instance found
-   *  @param doc the current document where the instance was found
-   *  @return true if the location should be ignored, false otherwise
-   */
+    * because it does not match the whole word when either or both of those conditions are set to true).  Only executes 
+    * in event thread.
+    * @param foundOffset the location of the instance found
+    * @param doc the current document where the instance was found
+    * @return true if the location should be ignored, false otherwise
+    */
   private boolean _shouldIgnore(int foundOffset, OpenDefinitionsDocument odd) {
+    
+    assert EventQueue.isDispatchThread();
+    
     return (_matchWholeWord && ! wholeWordFoundAtCurrent(odd, foundOffset)) || 
       (_ignoreCommentsAndStrings && odd.getStateAtCurrent() != ReducedModelStates.FREE);
   }

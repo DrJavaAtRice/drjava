@@ -131,7 +131,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The name of the keymap added to the super class (saved so it can be removed). */
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
 
-  /** Updates the highlight if there is any. */
+  /** Updates the highlight if there is any. Not necessarily executed in event thread. */
   protected void _updateMatchHighlight() {
     int to = getCaretPosition();
     int from = _doc.balanceBackward(); //_doc()._reduced.balanceBackward();
@@ -902,7 +902,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
     
   /** This function is called when switching a pane to be the active document pane.  It allows the pane to do whatever 
-   *  "startup" is required.  Since setInactive swapped out the document for a dummy document, we need to reload the 
+   *  "startUp" is required.  Since setInactive swapped out the document for a dummy document, we need to reload the 
    *  actual document and reset its caret position to the saved location.  Only runs in event thread.
    */
   public void notifyActive() {
@@ -977,6 +977,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   public void removeSetSizeListener() { _setSizeListener = null; }
 
   public void centerViewOnOffset(int offset) {
+    assert EventQueue.isDispatchThread();
     try {
       FontMetrics metrics = getFontMetrics(getFont());
       JViewport defViewPort = _mainFrame.getDefViewport();

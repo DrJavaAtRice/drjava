@@ -83,7 +83,7 @@ public final class ForcedChoiceOptionTest extends DrJavaTestCase {
                                                     "protected",
                                                     null);
     
-    assertTrue("Formatting \"private\"", "private".equals(fco.format(new String("private"))));
-    assertTrue("Formatting \"public\"", "public".equals(fco.format(new String("public"))));
+    assertTrue("Formatting \"private\"", "private".equals(fco.format("private")));
+    assertTrue("Formatting \"public\"", "public".equals(fco.format("public")));
   }
 }

@@ -117,10 +117,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   
   private Action _findAllAction =  new AbstractAction("Find All") {
     public void actionPerformed(final ActionEvent e) {
-      if (_findField.getText().length()>0) {
+      if (_findField.getText().length() > 0) {
         String searchStr = _findField.getText();
         String title = searchStr;
-        if (title.length()>10) { title = title.substring(0,10)+"..."; }
+        if (title.length()>10) { title = title.substring(0,10) + "..."; }
         title = "Find: "+title;
         
         final RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
@@ -171,17 +171,16 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           }
           
           final StringBuilder sb = new StringBuilder();
-          doc.acquireReadLock();
           try {
             int endSel = fr.getFoundOffset();
             int startSel = endSel-_machine.getFindWord().length();
-            final Position startPos = doc.createWrappedPosition(startSel);
-            final Position endPos = doc.createWrappedPosition(endSel);
+            final Position startPos = doc.createPosition(startSel);
+            final Position endPos = doc.createPosition(endSel);
             
             // create excerpt string
             int excerptEndSel = doc.getLineEndPos(endSel);
             int excerptStartSel = doc.getLineStartPos(startSel);
-            int length = Math.min(120, excerptEndSel-excerptStartSel);
+            int length = Math.min(120, excerptEndSel - excerptStartSel);
             
             // this highlights the actual region in red
             int startRed = startSel - excerptStartSel;
@@ -189,16 +188,14 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             String s = doc.getText(excerptStartSel, length);
             
             // change control characters and ones that may not be displayed to spaces
-            for(int i=0; i<s.length(); ++i) {
-              if ((s.charAt(i)<' ') || (s.charAt(i) > 127)) { sb.append(' '); } else { sb.append(s.charAt(i)); }
+            for(int i = 0; i < s.length(); ++i) {
+              if ((s.charAt(i) < ' ') || (s.charAt(i) > 127)) { sb.append(' '); } else { sb.append(s.charAt(i)); }
             }
             s = sb.toString();
             
             // trim the front
-            for(int i=0; i<s.length(); ++i) {
-              if (! Character.isWhitespace(s.charAt(i))) {
-                break;
-              }
+            for(int i = 0; i < s.length(); ++i) {
+              if (! Character.isWhitespace(s.charAt(i))) break;
               --startRed;
               --endRed;
             }
@@ -207,10 +204,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             s = s.trim();
             
             // bound startRed and endRed
-            if (startRed<0) { startRed = 0; }
-            if (startRed>s.length()) { startRed = s.length(); }
-            if (endRed<startRed) { endRed = startRed; }
-            if (endRed>s.length()) { endRed = s.length(); }
+            if (startRed < 0) { startRed = 0; }
+            if (startRed > s.length()) { startRed = s.length(); }
+            if (endRed < startRed) { endRed = startRed; }
+            if (endRed > s.length()) { endRed = s.length(); }
           
             // create the excerpt string
             sb.setLength(0);
@@ -227,7 +224,6 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           catch (BadLocationException ble) {
             throw new UnexpectedException(ble);
           }
-          finally { doc.releaseReadLock(); }
         }
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -261,9 +257,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
       // replaces the occurrence at the current position
       boolean replaced = _machine.replaceCurrent();
-      if (replaced) {
-        _selectReplacedItem(replaceWord.length());
-      }
+      if (replaced) _selectReplacedItem(replaceWord.length());
       _replaceAction.setEnabled(false);
       _replaceFindNextAction.setEnabled(false);
       _replaceFindPreviousAction.setEnabled(false);
@@ -698,7 +692,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   
   /** Called from MainFrame in response to opening this or changes in the active document. */
   void beginListeningTo(DefinitionsPane defPane) {
-    if (_defPane==null) {
+    if (_defPane == null) {
       // removed so it doesn't give the pane focus when switching documents
 //      requestFocusInWindow(); 
       _displayed = true;
@@ -710,7 +704,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _machine.setFindWord(_findField.getText());
       _machine.setReplaceWord(_replaceField.getText());
       _frame.clearStatusMessage(); // _message.setText(""); // JL
-      if (!_machine.onMatch() || _findField.getText().equals("")) {
+      if (! _machine.onMatch() || _findField.getText().equals("")) {
         _replaceAction.setEnabled(false);
         _replaceFindNextAction.setEnabled(false);
         _replaceFindPreviousAction.setEnabled(false);
@@ -731,7 +725,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       throw new UnexpectedException(new RuntimeException("FindReplacePanel should not be listening to anything"));
   }
 
-  /** Called from MainFrame upon closing this Dialog or changes in the active document */
+  /** Called from MainFrame upon closing this Dialog or changes in the active document. */
   public void stopListening() {
     if (_defPane != null) {
       _defPane.removeCaretListener(_caretListener);
@@ -796,7 +790,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             _replaceFindNextAction.setEnabled(true);
             _replaceFindPreviousAction.setEnabled(true);
             _machine.setLastFindWord();
-            _model.addToBrowserHistory();
+//            _model.addToBrowserHistory();
           }});
       }
       // else the entire document was searched and no instance of the string
@@ -931,7 +925,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
     // Found this little statement that will show the selected text in _defPane without giving _defPane 
     // focus, allowing the user to hit enter repeatedly and change the document while finding next.
-    _defPane.getCaret().setSelectionVisible(true);
+    SwingUtilities.invokeLater(new Runnable() { 
+      public void run() { _defPane.getCaret().setSelectionVisible(true); } 
+    });
 //    _defPane.centerViewOnOffset(from);
   }
 

@@ -304,7 +304,7 @@ public class ReaderWriterLock {
     /** Causes this ReaderWriterThread to wait until stopWaiting is called. While it's waiting, it is on the waitQueue.
      */
     public void startWaiting() {
-      synchronized (ReaderWriterLock.this) {
+      synchronized(ReaderWriterLock.this) {
         _isWaiting = true;
         _waitQueue.addLast(this);
         while (_isWaiting) {
@@ -318,7 +318,7 @@ public class ReaderWriterLock {
     
     /** Wakes up this ReaderWriterThread, removing it from the waitQueue. */
     public void stopWaiting() {
-      synchronized (ReaderWriterLock.this) {
+      synchronized(ReaderWriterLock.this) {
         _isWaiting = false;
         _waitQueue.remove(this);  // note: we must be in the front group!
         ReaderWriterLock.this.notifyAll();

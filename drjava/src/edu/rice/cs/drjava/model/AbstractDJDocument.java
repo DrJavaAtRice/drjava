@@ -81,7 +81,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    *  track of state.  This field together with _currentLocation function as a virtual object for purposes of 
    *  synchronization.  All operations that access or modify this virtual object should be synchronized on _reduced.
    */
-  public volatile BraceReduction _reduced = new ReducedModelControl();  // public only for locking purposes
+  public final BraceReduction _reduced = new ReducedModelControl();  // public only for locking purposes
 
   /** The absolute character offset in the document. */
   protected volatile int _currentLocation = 0;
@@ -434,12 +434,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public void setCurrentLocation(int loc)  { 
     acquireReadLock();
     try {
-      synchronized(_reduced) { // locked because reading _currentLocation is not protected by locking in move
-        move(loc - _currentLocation);  // sets _currentLocation
+      synchronized(_reduced) {
+        int dist = loc - _currentLocation;  // _currentLocation and _reduced can be updated asynchronously
+        _currentLocation = loc;
+        _reduced.move(dist);
       }
     }
     finally { releaseReadLock(); }
-  }
+  }  
+  
   
   /** The actual cursor movement logic.  Helper for setCurrentLocation(int).
    *  @param dist the distance from the current location to the new location.
@@ -449,9 +452,21 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     try {
       synchronized(_reduced) {
         int newLoc = _currentLocation + dist;
-        // location is set asynchronously when caret is moved so the following adjustment is necessary
-        if (newLoc < 0) newLoc = 0;
-        else if (newLoc > getLength()) newLoc = getLength();
+//        // location is set asynchronously when caret is moved so the following adjustment is necessary
+//        // should no longer be true
+//        if (newLoc < 0) {
+//          assert false; // should never get here
+//          dist -= newLoc; // increase dist by error in newLoc
+//          newLoc = 0;
+//        }
+//        else {
+//          int len = getLength();
+//          if (newLoc > len) {
+//            assert false; // should never get here
+//            dist -= (newLoc - len); // decrease dist by error in newLoc
+//            newLoc = len;
+//          }
+//        }
         _currentLocation = newLoc;
         _reduced.move(dist);
       }
@@ -910,7 +925,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       synchronized(_reduced) {
         if (selStart == selEnd) {  // single line to indent
 //          Utilities.showDebug("selStart = " + selStart + " currentLocation = " + _currentLocation);
-          Position oldCurrentPosition = createPosition(_currentLocation);
+          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
           
           // Indent, updating current location if necessary.
 //          Utilities.showDebug("Indenting line at offset " + selStart);
@@ -946,14 +961,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     // Keep marker at the end. This Position will be the correct endpoint no matter how we change 
     // the doc doing the indentLine calls.
-    final Position endPos = this.createPosition(end);
+    final Position endPos = this.createUnwrappedPosition(end);
     // Iterate, line by line, until we get to/past the end
     int walker = start;
     while (walker < endPos.getOffset()) {
       setCurrentLocation(walker);
       // Keep pointer to walker position that will stay current
       // regardless of how indentLine changes things
-      Position walkerPos = this.createPosition(walker);
+      Position walkerPos = this.createUnwrappedPosition(walker);
       // Indent current line
       // We ignore current location info from each line, because it probably doesn't make sense in a block context.
       _indentLine(reason);  // this operation is atomic

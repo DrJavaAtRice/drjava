@@ -100,7 +100,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     
 //    System.err.println("Doc text: " + _adapter.getText());
 //    System.err.println("The styles list is: " + _adapter.getStylesList());
-//    System.err.println("The length of the startup banner is: " + InteractionsModel.getStartUpBanner().length());
+//    System.err.println("The length of the startUp banner is: " + InteractionsModel.getStartUpBanner().length());
     
     /* Reset interactions and wait until it completes */
 

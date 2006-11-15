@@ -321,8 +321,8 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
       new File("/tmp/nowhere2") 
     };
     texts = new String[] { 
-      new String("kfgkasjg\n" + "faijskgisgj\n" + "sifjsidgjsd\n"),
-      new String("isdjfdi\n" + "jfa") 
+      "kfgkasjg\n" + "faijskgisgj\n" + "sifjsidgjsd\n",
+      "isdjfdi\n" + "jfa" 
     };
     getter = new TestDocGetter(files, texts);
     
@@ -348,8 +348,8 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   private void setupDoc() {
     files = new File[] { new File("/tmp/nowhere") };
     texts = new String[] { 
-      new String("This is a block of test text.\n" + "It doesn't matter what goes in here.\n" +
-                 "But it does matter if it is manipulated properly!\n") };
+      "This is a block of test text.\n" + "It doesn't matter what goes in here.\n" +
+                 "But it does matter if it is manipulated properly!\n"};
     getter = new TestDocGetter(files, texts);
   }
   
@@ -363,16 +363,16 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
       new File("/tmp/nowhere5") 
     };
     texts = new String[] { 
-      new String("This is the first block of test text.\n" + "It doesn't matter what goes in here.\n" +
-                 "But it does matter if it is manipulated properly!\n"),
-      new String("This is the second block of test text.\n" + "It doesn't matter what goes in here.\n" +
-                 "But it does matter if it is manipulated properly!\n"),
-      new String("This is the third block of test text.\n" + "It doesn't matter what goes in here.\n" +
-                 "But it does matter if it is manipulated properly!\n"),
-      new String("This is the fourth block of test text.\n" + "It doesn't matter what goes in here.\n" +
-                 "But it does matter if it is manipulated properly!\n"),
-      new String("This is the fifth block of test text.\n" + "It doesn't matter what goes in here.\n" +
-                 "But it does matter if it is manipulated properly!\n") };
+      "This is the first block of test text.\n" + "It doesn't matter what goes in here.\n" +
+                 "But it does matter if it is manipulated properly!\n",
+      "This is the second block of test text.\n" + "It doesn't matter what goes in here.\n" +
+                 "But it does matter if it is manipulated properly!\n",
+      "This is the third block of test text.\n" + "It doesn't matter what goes in here.\n" +
+                 "But it does matter if it is manipulated properly!\n",
+      "This is the fourth block of test text.\n" + "It doesn't matter what goes in here.\n" +
+                 "But it does matter if it is manipulated properly!\n",
+      "This is the fifth block of test text.\n" + "It doesn't matter what goes in here.\n" +
+                 "But it does matter if it is manipulated properly!\n" };
     getter = new TestDocGetter(files, texts);
   }
   

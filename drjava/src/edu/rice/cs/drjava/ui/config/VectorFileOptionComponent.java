@@ -42,7 +42,7 @@ import java.awt.event.*;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 /** Graphical form of a VectorOption for the Extra Classpath/Sourcepath options. Uses a file chooser for each File element.
  *  @version $Id$
@@ -80,11 +80,9 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
   }
 
   /** Displays the given value. */
-  public void setValue(Vector<File> value) {
-    File[] array = new File[value.size()];
-    value.copyInto(array);
+  public void setValue(ArrayList<File> files) {
     _listModel.clear();
-    for (int i = 0; i < array.length; i++) { _listModel.addElement(array[i]); }
+    for (File f: files) _listModel.addElement(f);
   }
 
   /** Set the file filter for this vector option component. */

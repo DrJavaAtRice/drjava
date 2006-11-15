@@ -61,8 +61,8 @@ public class SimpleDocumentRegion implements DocumentRegion {
     _endOffset = eo;
     if (_doc != null) {
       try {
-        _startPos = _doc.createWrappedPosition(so);
-        _endPos = _doc.createWrappedPosition(eo);
+        _startPos = _doc.createPosition(so);
+        _endPos = _doc.createPosition(eo);
       }
       catch(javax.swing.text.BadLocationException e) { /* ignore, offset will be static */ }
     }

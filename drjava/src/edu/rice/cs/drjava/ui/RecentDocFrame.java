@@ -238,13 +238,15 @@ public class RecentDocFrame extends JWindow {
     if (start == -1) start = 0;
     
     // skip the end line, if we're at one
-    // if (doc.getLength() >= endl.length() && text.substring(start, start+endl.length()) == endl) start+=endl.length();
-    if (doc.getLength() >= endl.length() && text.substring(start, start+endl.length()).equals(endl)) start+=endl.length();
+//    if (doc.getLength() >= endl.length() && text.substring(start, start+endl.length()) == endl) 
+//    start += endl.length();
+    if (doc.getLength() >= endl.length() && text.substring(start, start+endl.length()).equals(endl)) 
+      start += endl.length();
     /* get the ending point 2 lines down */
     int index;
     for (int i=0;i<4;i++) {
       if (end < doc.getLength()) {
-        index = text.indexOf(endl, end+endl.length());
+        index = text.indexOf(endl, end + endl.length());
         if (index != -1) end = index;
       }
     }
@@ -261,10 +263,7 @@ public class RecentDocFrame extends JWindow {
   
   public void refreshColor() { }
   
-  /**
-   * sets this frame as visible only if _docs is non empty.
-   * also resets the frame accordingly
-   */
+  /** Sets this frame as visible only if _docs is non empty. Also resets the frame accordingly */
   public void setVisible(boolean v) {
     centerH();
     if (_docs.size() > 0) {
@@ -279,9 +278,7 @@ public class RecentDocFrame extends JWindow {
   }
   
   /** Centers the frame in the screen. */
-  private void centerH() {
-    MainFrame.setPopupLoc(this, _frame);
-  }
+  private void centerH() { MainFrame.setPopupLoc(this, _frame); }
   
   /** Centers the frame in the screen. */
   private void centerV() {

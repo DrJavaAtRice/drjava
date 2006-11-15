@@ -61,37 +61,37 @@ public class DrJavaErrorWindow extends JDialog {
   public static final String SF_LINK_NAME = "http://sourceforge.net/projects/drjava";
   
   /** information about the error */
-  private JEditorPane _errorInfo;
+  private volatile JEditorPane _errorInfo;
   /** contains the stack trace */
-  private JTextArea _stackTrace;
+  private final JTextArea _stackTrace;
   /** label with index */
-  private JLabel _indexLabel;
+  private final JLabel _indexLabel;
   /** scroll pane for _stackTrace */
-  private JScrollPane _stackTraceScroll;
+  private final JScrollPane _stackTraceScroll;
   /** compresses the buttonPanel into the east */
-  private JPanel _bottomPanel;
+  private final JPanel _bottomPanel;
   /** contains the butons */
-  private JPanel _buttonPanel;
+  private final JPanel _buttonPanel;
   /** the button that copies the stack trace to the clipboard */
-  private JButton _copyButton;
+  private final JButton _copyButton;
   /** the button that closes this window */
-  private JButton _okButton;
+  private final JButton _okButton;
   /** the button that moves to the next error */
-  private JButton _nextButton;
+  private final JButton _nextButton;
   /** the button that moves to the previous error */
-  private JButton _prevButton;
+  private final JButton _prevButton;
   /** the button that clears all errors and closes the window */
-  private JButton _dismissButton;
+  private final JButton _dismissButton;
   /** the number of errors that had occurred */
-  private int _errorCount;
+  private volatile int _errorCount;
   /** the currently selected error */
-  private Throwable _error;
+  private volatile Throwable _error;
   /** the currently selected error index */
-  private int _errorIndex;
+  private volatile int _errorIndex;
   /** the parent frame */
-  private static JFrame _parentFrame = new JFrame();
+  private static volatile JFrame _parentFrame = new JFrame();
   /** true if parent changed since last singleton() call */
-  private static boolean _parentChanged = true;
+  private static volatile boolean _parentChanged = true;
   
   /** Sets the parent frame. */
   public static void setFrame(JFrame f) { _parentFrame = f; _parentChanged = true; }
@@ -100,13 +100,17 @@ public class DrJavaErrorWindow extends JDialog {
   public static JFrame getFrame() { return _parentFrame; }
   
   /** The singleton instance of this dialog. */
-  private static DrJavaErrorWindow _singletonInstance;
+  private static volatile DrJavaErrorWindow _singletonInstance;
   
   /** Returns the singleton instance. Recreates it if necessary. */
-  public static synchronized DrJavaErrorWindow singleton() {
+  public static DrJavaErrorWindow singleton() {
     if (_parentChanged) {
-      _singletonInstance = new DrJavaErrorWindow();
-      _parentChanged = false;
+      synchronized(DrJavaErrorWindow.class) {
+        if (_parentChanged) {
+          _singletonInstance = new DrJavaErrorWindow();
+          _parentChanged = false;
+        }
+      }
     }
     return _singletonInstance;
   }
@@ -224,7 +228,7 @@ public class DrJavaErrorWindow extends JDialog {
           for(int i=0; i<ls.length(); ++i) {
             int ch = ls.charAt(i);
             b.append("\\u");
-            String hexString = "0000"+Integer.toHexString(ch);
+            String hexString = "0000" + Integer.toHexString(ch);
             b.append(hexString.substring(hexString.length()-4));
           }
           b.append("\"");
@@ -314,14 +318,14 @@ public class DrJavaErrorWindow extends JDialog {
   }
   
   /* Close the window. */
-  private Action _okAction = new AbstractAction("OK") {
+  private final Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
       DrJavaErrorWindow.this.dispose();
     }
   };
   
   /* Go to the previous error. */
-  private Action _prevAction = new AbstractAction("Previous") {
+  private final Action _prevAction = new AbstractAction("Previous") {
     public void actionPerformed(ActionEvent e) {
       if (_errorIndex>0) {
         --_errorIndex;
@@ -344,7 +348,7 @@ public class DrJavaErrorWindow extends JDialog {
   }
   
   /** Go to the next error. */
-  private Action _nextAction = new AbstractAction("Next") {
+  private final Action _nextAction = new AbstractAction("Next") {
     public void actionPerformed(ActionEvent e) {
       if (_errorIndex<_errorCount-1) {
         ++_errorIndex;

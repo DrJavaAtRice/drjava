@@ -137,7 +137,7 @@ public abstract class FileOps {
       }
       else {
         list.add(path.substring(0,idx));
-        path = path.substring(idx+1);
+        path = path.substring(idx + 1);
       }
     }
     return list.toArray(new String[list.size()]);
@@ -203,7 +203,7 @@ public abstract class FileOps {
       if (shortName.length() < 6) return false;
       name.delete(name.length() - 5, name.length());
       name.append(".java");
-      File test = new File(new String(name));
+      File test = new File(name.toString());
       return (test.equals(f));
     }
     public String getDescription() { return "Java Source Files (*.java)"; }
@@ -406,7 +406,7 @@ public abstract class FileOps {
     // This filter allows only directories, and accepts each directory only once
     FileFilter directoryFilter = new FileFilter(){
       public boolean accept(File f){
-        boolean toReturn = f.isDirectory() && !exploredDirectories.contains(f);
+        boolean toReturn = f.isDirectory() && ! exploredDirectories.contains(f);
         exploredDirectories.add(f);
         return toReturn;
       }
@@ -651,7 +651,7 @@ public abstract class FileOps {
     // EXCEPT for the last item in the array, because that's the "x" we added
     String[] pathEntries = path.split(pathSep);
     final StringBuilder sb = new StringBuilder();
-    for(int i=0; i<pathEntries.length-1; ++i) { // length-1 to ignore the last element
+    for(int i = 0; i<pathEntries.length - 1; ++i) { // length-1 to ignore the last element
       File f = new File(pathEntries[i]);
       sb.append(f.getAbsolutePath());
       sb.append(pathSep);
@@ -661,7 +661,7 @@ public abstract class FileOps {
     // if the reconstructed path is non-empty, then it will have an extra
     // path separator at the end; take it off
     if (reconstructedPath.length()!=0) {
-      reconstructedPath = reconstructedPath.substring(0, reconstructedPath.length()-1);
+      reconstructedPath = reconstructedPath.substring(0, reconstructedPath.length() - 1);
     }
     
     return reconstructedPath;
