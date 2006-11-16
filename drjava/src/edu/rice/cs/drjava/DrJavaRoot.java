@@ -169,11 +169,11 @@ public class DrJavaRoot {
     openCommandLineFiles(mf, filesToOpen, filesToOpen.length);
   }
   
-  /** Handle the list of files specified on the command line.  Feature request #509701.
-   *  If the final element in filesToOpen is a pathSeparator, it opens the debug console.
-   *  If file exists, open it in DrJava.  Otherwise, ignore it.
-   *  Is there a better way to handle nonexistent files?  Dialog box, maybe?
-   */
+  /** Handle the list of files specified on the command line.  Feature request #509701. If the final element in 
+    * filesToOpen is a pathSeparator, it opens the debug console. If file exists, open it in DrJava.  Otherwise, ignore
+    * it.  Is there a better way to handle nonexistent files?  Dialog box, maybe?
+    * Why the wait?
+    */
   static void openCommandLineFiles(final MainFrame mf, final String[] filesToOpen, final int len) { 
     Utilities.invokeAndWait(new Runnable() { public void run() { _openCommandLineFiles(mf, filesToOpen, len); }});
   }

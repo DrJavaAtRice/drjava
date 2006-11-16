@@ -233,20 +233,14 @@ public class ReducedModelBrace extends AbstractReducedModel {
     return -1;
   }
 
-  /**
-   * If the current ReducedToken is an open significant brace and the
-   * offset is 0 (i.e., if we're immediately left of said brace),
-   * push the current Brace onto a Stack and iterate forwards,
-   * keeping track of the distance covered.
-   * - For every closed significant Brace, if it matches the top of the Stack,
-   *   pop the Stack.  Increase the distance by the size of the Brace.
-   *   If the Stack is Empty, we have a balance.  Return distance.
-   *   If the closed Brace does not match the top of the Stack, return -1;
-   *   We have an unmatched open Brace at the top of the Stack.
-   * - For every open significant Brace, push onto the Stack.
-   *   Increase distance by size of the Brace, continue.
-   * - Anything else, increase distance by size of the ReducedToken, continue.
-   */
+  /** If the current ReducedToken is an open significant brace and the offset is 0 (i.e., if we're immediately left of 
+    * said brace), push the current Brace onto a Stack and iterate forwards, keeping track of the distance covered.
+    * - For every closed significant Brace, if it matches the top of the Stack,  pop the Stack.  Increase the distance 
+    *   by the size of the Brace. If the Stack is Empty, we have a balance.  Return distance.  If the closed Brace does 
+    *   not match the top of the Stack, return -1; We have an unmatched open Brace at the top of the Stack.
+    * - For every open significant Brace, push onto the Stack.  Increase distance by size of the Brace, continue.
+    * - Anything else, increase distance by size of the ReducedToken, continue.
+    */
   public int balanceForward() {
     //System.out.println("-------------------------------------------");
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();

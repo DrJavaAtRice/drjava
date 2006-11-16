@@ -53,7 +53,7 @@ public interface CompilerModel {
   //----------------------------Locking--------------------------------------//
   
   /** Returns the lock used to prevent simultaneous compilation and JUnit testing */
-  public Object getSlaveJVMLock();
+  public Object getCompilerLock();
   
   //-------------------------- Listener Management --------------------------//
   

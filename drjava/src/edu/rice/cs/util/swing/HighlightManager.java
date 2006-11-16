@@ -78,7 +78,7 @@ public class HighlightManager {
 
     /** Adds a highlight using the supplied painter to the vector element(Stack) that exactly corresponds to the 
      *  specified bounds. The most recently added highlights over a given range appear on top of the older highlights. 
-     *  All highlights in a given range(Stack) must be unique, that is, each must use a different painter -- redundant 
+     *  All highlights in a given range(Stack) must be unique, that is, each must use a different painter--redundant 
      *  highlights are shifted to the top of the stack, but not added twice.
      *  @param startOffset the offset at which the highlight is to begin.
      *  @param endOffset the offset at which the highlight is to end.

@@ -62,11 +62,10 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
-/**
- * Panel for displaying regions in a tree sorted by class name and line number.
- * This class is a swing view class and hence should only be accessed from the event-handling thread.
- * @version $Id$
- */
+/** Panel for displaying regions in a tree sorted by class name and line number.  This class is a swing class that
+  * should only be accessed from the event thread.
+  * @version $Id$
+  */
 public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedPanel {
   protected JPanel _leftPane;
   
@@ -84,11 +83,11 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   
   protected DefaultTreeCellRenderer dtcr;
   
-  /** Constructs a new panel to display regions in a tree.
-   *  This is swing view class and hence should only be accessed from the event-handling thread.
-   *  @param frame the MainFrame
-   *  @param title title of the pane
-   */
+  /** Constructs a new panel to display regions in a tree. This is swing view class and hence should only be accessed 
+    * from the event thread.
+    * @param frame the MainFrame
+    * @param title title of the pane
+    */
   public RegionsTreePanel(MainFrame frame, String title) {
     super(frame, title);
     _title = title;
@@ -354,22 +353,16 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   /** Go to region. */
   protected void goToRegion() {
     ArrayList<R> r = getSelectedRegions();
-    if (r.size() == 1) {
-      _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), false);
-    }
+    if (r.size() == 1) _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), false);
   }
     
   /** Add a region to the tree. Must be executed in event thread.
-   *  @param r the region
-   */
+    * @param r the region
+    */
   public void addRegion(final R r) {
     String name = "";
-    try {
-      name = r.getDocument().getQualifiedClassName();
-    }
-    catch (ClassNameNotFoundException cnnfe) {
-      name = r.getDocument().toString();
-    }
+    try { name = r.getDocument().getQualifiedClassName(); }
+    catch (ClassNameNotFoundException cnnfe) { name = r.getDocument().toString(); }
 
     DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(name);
     

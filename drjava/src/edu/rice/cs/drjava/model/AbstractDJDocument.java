@@ -404,7 +404,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * of this cache are invalidated by any modification to the document.
     */
   protected void clearCache() {
-    synchronized(_helperCache) { if (_cacheInUse) _clearCache(); }
+     synchronized(_helperCache) { if (_cacheInUse) _clearCache(); }
   }
   
   /** Clears the helper method cache.  Should be called every time the document is modified. */

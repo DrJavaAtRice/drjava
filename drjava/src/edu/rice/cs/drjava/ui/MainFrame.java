@@ -1054,14 +1054,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //              });
 //            }
           }
-          simpleHourglassOff();
+          hourglassOff();
           return null;
         }
       };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = 
         new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
-          simpleHourglassOff();
+          hourglassOff();
           return null;
         }
       };
@@ -1081,7 +1081,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                     cancelAction,
                                                     new GoToFileListEntry(null, "dummy")) {
         public void setOwnerEnabled(boolean b) {
-          if (b) { simpleHourglassOff(); } else { simpleHourglassOn(); }
+          if (b) { hourglassOff(); } else { hourglassOn(); }
         }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
@@ -1141,7 +1141,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       if (currentEntry != null) {
         _gotoFileDialog.setCurrentItem(currentEntry);
       }
-      simpleHourglassOn();
+      hourglassOn();
       /* if (!  Utilities.TEST_MODE) */ 
       _gotoFileDialog.setVisible(true);
     }
@@ -1239,7 +1239,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         initGotoFileDialog();
         _gotoFileDialog.setModel(true, pim); // ignore case
         if (currentEntry != null) _gotoFileDialog.setCurrentItem(currentEntry);
-        simpleHourglassOn();
+        hourglassOn();
         /* The following predicate suppresses the display of the dialog during unit testing.  If the unit test is revised
          * to confirm that the dialog is displayed, this test must be removed. */
         if (MainFrame.this.isVisible()) _gotoFileDialog.setVisible(true);  // predicate suppresses display in unit tests
@@ -1305,14 +1305,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           if (p.getItem()!=null) {
             PlatformFactory.ONLY.openURL(p.getItem().getURL());
           }
-          simpleHourglassOff();
+          hourglassOff();
           return null;
         }
       };
       PredictiveInputFrame.CloseAction<OpenJavadocListEntry> cancelAction = 
         new PredictiveInputFrame.CloseAction<OpenJavadocListEntry>() {
         public Object apply(PredictiveInputFrame<OpenJavadocListEntry> p) {
-          simpleHourglassOff();
+          hourglassOff();
           return null;
         }
       };
@@ -1332,7 +1332,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                        cancelAction,
                                                        new OpenJavadocListEntry("dummy", "dummy", null)) {
         public void setOwnerEnabled(boolean b) {
-          if (b) { simpleHourglassOff(); } else { simpleHourglassOn(); }
+          if (b) { hourglassOff(); } else { hourglassOn(); }
         }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
@@ -1403,7 +1403,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) {
       initOpenJavadocDialog();     
       _openJavadocDialog.setItems(true, _openJavadocList); // ignore case
-      simpleHourglassOn();
+      hourglassOn();
       _openJavadocDialog.setVisible(true);
     }
   };
@@ -1494,7 +1494,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         else {
           initOpenJavadocDialog();
           _openJavadocDialog.setModel(true, pim); // ignore case
-          simpleHourglassOn();
+          hourglassOn();
           _openJavadocDialog.setVisible(true);
         }
       }
@@ -1551,14 +1551,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
             finally { odd.releaseWriteLock(); }
           }
-          simpleHourglassOff();
+          hourglassOff();
           return null;
         }
       };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = 
         new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
-          simpleHourglassOff();
+          hourglassOff();
           return null;
         }
       };
@@ -1578,7 +1578,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                                     cancelAction,
                                                     new GoToFileListEntry(null, "dummy")) {
         public void setOwnerEnabled(boolean b) {
-          if (b) { simpleHourglassOff(); } else { simpleHourglassOn(); }
+          if (b) { hourglassOff(); } else { hourglassOn(); }
         }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
@@ -1679,7 +1679,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         _completeWordDialog.setModel(true, pim); // ignore case
         _completeWordDialog.selectStrategy();
         if (currentEntry != null) _completeWordDialog.setCurrentItem(currentEntry);
-        simpleHourglassOn();
+        hourglassOn();
         _completeWordDialog.setVisible(true);
       }
     }
@@ -1707,18 +1707,18 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Action for commenting out a block of text using wing comments. */
   private final Action _commentLinesAction = new AbstractAction("Comment Line(s)") {
     public void actionPerformed(ActionEvent ae) {
-      simpleHourglassOn();
+      hourglassOn();
       try{ commentLines(); }
-      finally{ simpleHourglassOff(); }
+      finally{ hourglassOff(); }
     }
   };
   
   /** Action for un-commenting a block of commented text. */
   private final Action _uncommentLinesAction = new AbstractAction("Uncomment Line(s)") {
     public void actionPerformed(ActionEvent ae){
-      simpleHourglassOn();
+      hourglassOn();
       try{ uncommentLines(); }
-      finally{ simpleHourglassOff(); }
+      finally{ hourglassOff(); }
     }
   };
   
@@ -3125,50 +3125,24 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    */
   JButton getCompileAllButton() { return _compileButton; }
   
-  /** Make the cursor an hourglass. */
-  private int hourglassNestLevel = 0;
-  public void hourglassOn() {
-    hourglassNestLevel++;
-    if (hourglassNestLevel == 1) {      
-      Utilities.invokeAndWait(new Runnable() {
-        public void run() { 
-          getGlassPane().setVisible(true);
-          _currentDefPane.setEditable(false);
-          setAllowKeyEvents(false); 
-        }
-      });
-    }
-  }
+  private volatile int _hourglassNestLevel = 0;
   
-  public void simpleHourglassOn() {
+  /** Make the cursor an hourglass. Only runs in the event thread. */  
+  public void hourglassOn() {
     assert EventQueue.isDispatchThread();
-    hourglassNestLevel++;
-    if (hourglassNestLevel == 1) {
+    _hourglassNestLevel++;
+    if (_hourglassNestLevel == 1) {
     getGlassPane().setVisible(true);
     _currentDefPane.setEditable(false);
     setAllowKeyEvents(false); 
     }
   }
   
-  /** Return the cursor to normal. */
+  /** Return the cursor to normal. Only runs in the event thread. */ 
   public void hourglassOff() { 
-    hourglassNestLevel--;
-//    Utilities.showDebug("hourglassOff() called; level = " + hourglassNestLevel);
-    if (hourglassNestLevel == 0) {
-      Utilities.invokeAndWait(new Runnable() {
-        public void run() {
-          getGlassPane().setVisible(false);
-          _currentDefPane.setEditable(true);
-          setAllowKeyEvents(true);
-        }
-      });
-    }
-  }
-  
-  public void simpleHourglassOff() { 
     assert EventQueue.isDispatchThread();
-    hourglassNestLevel--;
-    if (hourglassNestLevel == 0) {
+    _hourglassNestLevel--;
+    if (_hourglassNestLevel == 0) {
       getGlassPane().setVisible(false);
       _currentDefPane.setEditable(true);
       setAllowKeyEvents(true);
@@ -3193,13 +3167,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       if (isDebuggerReady()) debugger.shutdown();
       else {
         // Turn on debugger
-        simpleHourglassOn();
+        hourglassOn();
         try {
           debugger.startUp();  // may kick active document (if unmodified) out of memory!
           _model.refreshActiveDocument();
           _updateDebugStatus();
         }
-        finally { simpleHourglassOff(); }
+        finally { hourglassOff(); }
       }
     }
     catch (DebugException de) {
@@ -3468,7 +3442,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   public void openProject(FileOpenSelector projectSelector) {
     
     try {
-      simpleHourglassOn();
+      hourglassOn();
       final File[] file = projectSelector.getFiles();
       if (file.length < 1)
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
@@ -3480,7 +3454,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       /* do nothing, we just won't open anything */
     }
     catch(Exception e) { e.printStackTrace(System.out); }
-    finally { simpleHourglassOff(); }    
+    finally { hourglassOff(); }    
   }
   
   
@@ -3604,7 +3578,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    */
   public void open(FileOpenSelector openSelector) {
     try {
-      simpleHourglassOn();
+      hourglassOn();
       _model.openFiles(openSelector);
     }
     catch (AlreadyOpenException aoe) {
@@ -3641,7 +3615,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _showFileNotFoundError(fnf); 
     }
     catch (IOException ioe) { _showIOError(ioe); }
-    finally { simpleHourglassOff(); }
+    finally { hourglassOff(); }
   }
   
   
@@ -3674,12 +3648,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param rec true if files in nested folders should be opened
    */
   private void _openFolder(File dir, boolean rec) {
-    simpleHourglassOn();
+    hourglassOn();
     try { _model.openFolder(dir, rec); }
     catch(AlreadyOpenException e) { /* do nothing */ }
     catch(IOException e) { _showIOError(e); }
     catch(OperationCanceledException oce) { /* do nothing */ }
-    finally { simpleHourglassOff(); }
+    finally { hourglassOff(); }
   }
     
   /** Delegates directly to the model to close the active document */
@@ -3848,13 +3822,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /* Package private to allow use in MainFrameTest. */
   void _saveAll() {
-    simpleHourglassOn();
+    hourglassOn();
     try {
       if (_model.isProjectActive()) _saveProject();
       _model.saveAllFiles(_saveSelector);
     }
     catch (IOException ioe) { _showIOError(ioe); }
-    finally { simpleHourglassOff(); }
+    finally { hourglassOff(); }
   }
   
   // Called by the ProjectPropertiesFrame
@@ -4126,7 +4100,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   private void _compile() {
     _cleanUpForCompile();
-    simpleHourglassOn();
+    hourglassOn();
     try {
       final OpenDefinitionsDocument doc = _model.getActiveDocument();
 //      new Thread("Compile Document") {
@@ -4137,13 +4111,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //        }
 //      }.start();
     }
-    finally { simpleHourglassOff();}
+    finally { hourglassOff();}
 //    update(getGraphics());
   }
   
   private void _compileFolder() {
     _cleanUpForCompile();
-    simpleHourglassOn();
+    hourglassOn();
     try {
       OpenDefinitionsDocument d;
       Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().getDocuments();
@@ -4163,7 +4137,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //        }.start();
       }
     }
-    finally { simpleHourglassOff(); }
+    finally { hourglassOff(); }
 //    update(getGraphics()); 
   }
   
@@ -4171,11 +4145,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _cleanUpForCompile();
 //    new Thread("Compile All") {
 //      public void run() {
-    simpleHourglassOn();
+    hourglassOn();
     try { _model.getCompilerModel().compileProject(); }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
     catch (IOException ioe) { _showIOError(ioe); }
-    finally { simpleHourglassOff();}
+    finally { hourglassOff();}
 //      }
 //    }.start();
 //    update(getGraphics()); 
@@ -4185,11 +4159,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _cleanUpForCompile();
 //    new Thread("Compile All") {
 //      public void run() {
-    simpleHourglassOn();
+    hourglassOn();
     try { _model.getCompilerModel().compileAll(); }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
     catch (IOException ioe) { _showIOError(ioe); }
-    finally { simpleHourglassOff();}
+    finally { hourglassOff();}
 //      }
 //    }.start();
 //    update(getGraphics()); 
@@ -4341,7 +4315,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   private void _junit() {
-    simpleHourglassOn(); // turned off in JUnitStarted/NonTestCase  
+    hourglassOn(); // turned off in JUnitStarted/NonTestCase  
     new Thread("Run JUnit on Current Document") {
       public void run() {
         _disableJUnitActions();
@@ -4368,7 +4342,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   private void _junitFolder() {
-    simpleHourglassOn();  // turned off when JUnitStarted event is fired
+    hourglassOn();  // turned off when JUnitStarted event is fired
     new Thread("Run JUnit on specified folder") {
       public void run() { 
         INavigatorItem n;
@@ -4391,7 +4365,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Tests the documents in the project source tree. Assumes that DrJava is in project mode. */
   private void _junitProject() { 
-    simpleHourglassOn();  // turned off in JUnitStarted/NonTestCase event
+    hourglassOn();  // turned off in JUnitStarted/NonTestCase event
      new Thread("Running Junit Tests") {
       public void run() {
         _disableJUnitActions();
@@ -4404,7 +4378,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Tests all open documents. */
   private void _junitAll() {
-    simpleHourglassOn();  // turned off in JUnitStarted/NonTestCase event
+    hourglassOn();  // turned off in JUnitStarted/NonTestCase event
     new Thread("Running Junit Tests") {
       public void run() {
         _disableJUnitActions();
@@ -6371,9 +6345,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Disable any step timer. */
   private void _disableStepTimer() {
-    synchronized(_debugStepTimer) {  // Why is this synchronized?
-      if (_debugStepTimer.isRunning()) _debugStepTimer.stop();
-    }
+    synchronized(_debugStepTimer) { if (_debugStepTimer.isRunning()) _debugStepTimer.stop(); }
   }
   
   /** Checks if debugPanel's status bar displays the DEBUGGER_OUT_OF_SYNC message but the current document is 
@@ -6508,13 +6480,15 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                                         final boolean shouldHighlight, final boolean shouldAddToHistory) {
     if (shouldAddToHistory) addToBrowserHistory();
     
-    if (!_model.getActiveDocument().equals(doc)) {
+    boolean toSameDoc = _model.getActiveDocument().equals(doc);
+    
+    if (! toSameDoc) {
       _model.setActiveDocument(doc);
       _findReplace.updateFirstDocInSearch();
     }
     else _model.refreshActiveDocument();
     
-    SwingUtilities.invokeLater(new Runnable() {  
+    Runnable command = new Runnable() {  
       public void run() {
         // get the line number after the switch of documents was made
         int lineNumber = doc.getLineOfOffset(offset)+1;
@@ -6524,13 +6498,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           _currentDefPane.centerViewOnOffset(offset);
           _currentDefPane.requestFocusInWindow();
         }
-        
-        /* The execution of this block of code is deferred using SwingUtilties to fix bug #1243993.
-         * It is not clear why this deferral works.
-         * Comment by mgricken: Probably because the _currentDefPane hasn't been created yet for
-         * a new document. That's why I had to move the code above into this Runnable. If this
-         * method was called for a yet unseen document, the document would be switched, but the cursor
-         * would not be positioned correctly. */
+               
         if (shouldHighlight) {
           _removeThreadLocationHighlight();
           int startOffset = doc.getOffset(lineNumber);
@@ -6552,7 +6520,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 
 //        if (shouldAddToHistory) { addToBrowserHistory(); }    
       }
-    });
+    };
+    
+    /* Comment by mgricken: If ! toSameDoc, the _currentDefPane hasn't been created yet for a new document.   
+     * Consequently, we need to use SwingUtilities.invokeLater if ! toSameDoc. */
+    if (toSameDoc) Utilities.invokeLater(command);  
+    else SwingUtilities.invokeLater(command);
   }
   
   /** Listens to events from the debugger. */
@@ -6571,9 +6544,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     /** Called when a step is requested on the current thread.  Must be executed in event thread. */
     public void stepRequested() {
       // Print a message if step takes a long time
-      synchronized(_debugStepTimer) {  // Why is this synchronized
-        if (!_debugStepTimer.isRunning()) _debugStepTimer.start();
-      }
+      synchronized(_debugStepTimer) { if (!_debugStepTimer.isRunning()) _debugStepTimer.start(); }
     }
     
     public void currThreadSuspended() {
@@ -6641,8 +6612,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     protected boolean shouldSetEnabled() { return true; }
     
     protected void setParentContainerEnabled(boolean enabled) {
-      if (enabled) simpleHourglassOff(); 
-      else simpleHourglassOn();
+      if (enabled) hourglassOff(); 
+      else hourglassOn();
     }
     
     protected IAsyncProgress createProgressMonitor(final String description, final int min, final int max) {
@@ -6933,7 +6904,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             // _junitAction.setEnabled(false);
             // _junitAllAction.setEnabled(false);
           }
-          finally { simpleHourglassOff(); }  
+          finally { hourglassOff(); }  
         }
       });
     }
@@ -7003,7 +6974,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //      Runnable command = new Runnable() {
 //        public void run() {
 //          // if we don't lock edits, our error highlighting might break
-      simpleHourglassOn();
+      hourglassOn();
       
       showTab(_javadocErrorPanel);
       _javadocErrorPanel.setJavadocInProgress();
@@ -7026,7 +6997,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             _javadocErrorPanel.reset();
             _model.refreshActiveDocument();
           }
-          finally { simpleHourglassOff(); }
+          finally { hourglassOff(); }
           
           // Display the results.
           if (success) {
@@ -7295,7 +7266,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             _junitErrorPanel.reset();
           }
           finally { 
-            simpleHourglassOff();
+            hourglassOff();
             _restoreJUnitActionsEnabled();
           }
         }});
@@ -7436,7 +7407,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
     
     public void projectClosed() {
-      Utilities.invokeAndWait(new Runnable() {
+      Utilities.invokeAndWait(new Runnable() {  // Why the wait?
         public void run() {
           _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
           _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);

@@ -302,47 +302,31 @@ public class InteractionsController extends AbstractConsoleController {
   }
   
   private void fireConsoleInputCompleted(String text) {
-    for(ConsoleStateListener listener : _consoleStateListeners) {
-      listener.consoleInputCompleted(text, this);
-    }
+    for(ConsoleStateListener listener : _consoleStateListeners) { listener.consoleInputCompleted(text, this); }
   }
   
-  /** 
-   * Gets the input listener for console input requests.
+  /** Gets the input listener for console input requests.
    * @return the input listener for console input requests.
    */
   public InputListener getInputListener() { return _inputListener; }
 
-  /** 
-   * Forces console input to complete without the user hitting <Enter>. 
-   * Called by MainFrame when reset is called so that this lock is released.
-   * <p>
-   * This method is thread safe.
-   * @throws UnsupportedOperationException If the interactions pane is not receiving console input
-   */
-  public void interruptConsoleInput() {
-    synchronized(_consoleInputCommandLock) {
-      SwingUtilities.invokeLater(_inputCompletionCommand);
-    }
-  }
+  /** Forces console input to complete without the user hitting <Enter>.  Called by MainFrame when reset is called so 
+    * that this lock is released.  This method is thread safe.
+    * @throws UnsupportedOperationException If the interactions pane is not receiving console input
+    */
+  public void interruptConsoleInput() { SwingUtilities.invokeLater(_inputCompletionCommand); }
   
-  /** 
-   * Inserts text into the console.
-   * <p>
-   * This method is thread safe 
-   * @param input The text to insert into the console input box
-   * @throws UnsupportedOperationException If the the interactions pane is not receiving console input
-   */
+  /** Inserts text into the console.  This method is thread safe.
+    * @param input The text to insert into the console input box
+    * @throws UnsupportedOperationException If the the interactions pane is not receiving console input
+    */
   public void insertConsoleText(String input) {
-    synchronized(_consoleInputCommandLock) {
-      _insertTextCommand.apply(input);
-    }
+    synchronized(_consoleInputCommandLock) { _insertTextCommand.apply(input); }
   }
 
-  /** 
-   * Accessor method for the InteractionsModel.
-   * @return the interactions model
-   */
+  /** Accessor method for the InteractionsModel.
+    * @return the interactions model
+    */
   public InteractionsModel getInteractionsModel() {  return _model; }
 
   /**

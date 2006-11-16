@@ -14,18 +14,18 @@ public class CompletionMonitor {
   public synchronized boolean isFlag() { return _flag; }
   
   /** Sets the state to signaled, indicating that waiting threads can continue */
-  synchronized public void set() {
+  public synchronized void set() {
     _flag = true;
     this.notifyAll();
   }
   
   /** Sets the state to unsignaled */
-  synchronized public void reset() { _flag = false; }
+  public synchronized void reset() { _flag = false; }
   
   /** Causes the calling thread to wait for the signal to be set before continuing
    *  If the signal is already set, it returns immediately
    * @return returns true, unless the waiting thread was interrupted */
-  synchronized public boolean waitOne() {
+  public synchronized boolean waitOne() {
     while (!_flag) {
       try { this.wait(); } 
       catch (InterruptedException e) { return false; }

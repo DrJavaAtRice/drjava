@@ -140,7 +140,7 @@ public abstract class PreviewFrame extends JFrame {
   public PreviewFrame(SingleDisplayModel model, MainFrame mainFrame, boolean interactions) 
     throws IllegalStateException {
     super("Print Preview");
-    mainFrame.simpleHourglassOn();
+    mainFrame.hourglassOn();
     _model = model;
     _mainFrame = mainFrame;
     _toolBar = new JToolBar();
@@ -197,7 +197,7 @@ public abstract class PreviewFrame extends JFrame {
 
   private void _close() {
     dispose();
-    _mainFrame.simpleHourglassOff();
+    _mainFrame.hourglassOff();
   }
 
   private void _nextPage() {

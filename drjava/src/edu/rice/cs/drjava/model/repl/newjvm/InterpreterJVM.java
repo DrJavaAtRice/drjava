@@ -220,7 +220,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public void interpret(String s, String interpreterName) { interpret(s, getInterpreter(interpreterName));  }
   
   /** Interprets the given string of source code with the given interpreter.  The result is returned to MainJVM via
-   *  the interpretResult method.  Not synchronized!
+   *  the interpretResult method.  Not synchronized on this!
    *  @param input Source code to interpret.
    *  @param interpreter The interpreter (plus metadata) to use
    */

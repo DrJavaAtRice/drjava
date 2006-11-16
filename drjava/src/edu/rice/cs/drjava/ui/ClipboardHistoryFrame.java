@@ -322,12 +322,12 @@ public class ClipboardHistoryFrame extends JFrame {
     validate();
     super.setVisible(b);
     if (b) {
-      _mainFrame.simpleHourglassOn();
+      _mainFrame.hourglassOn();
       updateView();
       _historyList.requestFocus();
     }
     else {
-      _mainFrame.simpleHourglassOff();
+      _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }
   }

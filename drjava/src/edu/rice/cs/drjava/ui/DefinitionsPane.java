@@ -677,12 +677,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     JMenuItem commentLinesItem = new JMenuItem("Comment Line(s)");
     commentLinesItem.addActionListener(new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        _mainFrame.simpleHourglassOn();
+        _mainFrame.hourglassOn();
         try{
           _doc.setCurrentLocation(getCaretPosition());
           _commentLines();
         }
-        finally{ _mainFrame.simpleHourglassOff(); }
+        finally{ _mainFrame.hourglassOff(); }
       }
     });
     _popMenu.add(commentLinesItem);

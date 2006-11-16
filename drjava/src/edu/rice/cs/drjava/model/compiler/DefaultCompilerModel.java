@@ -78,8 +78,8 @@ public class DefaultCompilerModel implements CompilerModel {
   /** The working directory corresponding to the last compilation */
   private File _workDir;
   
-  /** The lock for using the slaveJVM to perform compilation and run unit tests */
-  private Object _slaveJVMLock = new Object();
+  /** The lock providing mutual exclustion between compilation and unit testing */
+  private Object _compilerLock = new Object();
 
   /** Main constructor.  
     * @param m the GlobalModel that is the source of documents for this CompilerModel
@@ -93,7 +93,7 @@ public class DefaultCompilerModel implements CompilerModel {
   //--------------------------------- Locking -------------------------------//
   
   /** Returns the lock used to prevent simultaneous compilation and JUnit testing */
-  public Object getSlaveJVMLock() { return _slaveJVMLock; }
+  public Object getCompilerLock() { return _compilerLock; }
 
   //-------------------------- Listener Management --------------------------//
 
@@ -376,7 +376,7 @@ public class DefaultCompilerModel implements CompilerModel {
       /** Compile the files in specified sourceRoots and files */
     
       if (compilerErrorsArray.length == 0) 
-        synchronized(_slaveJVMLock) { compilerErrorsArray = compiler.compile(sourceRoots, files); }
+        synchronized(_compilerLock) { compilerErrorsArray = compiler.compile(sourceRoots, files); }
 
       _distributeErrors(compilerErrorsArray);
     }

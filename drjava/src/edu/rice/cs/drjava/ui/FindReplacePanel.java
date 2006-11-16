@@ -120,8 +120,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       if (_findField.getText().length() > 0) {
         String searchStr = _findField.getText();
         String title = searchStr;
-        if (title.length()>10) { title = title.substring(0,10) + "..."; }
-        title = "Find: "+title;
+        if (title.length() > 10) { title = title.substring(0,10) + "..."; }
+        title = "Find: " + title;
         
         final RegionManager<MovingDocumentRegion> rm = _model.createFindResultsManager();
         final FindResultsPanel panel = _frame.createFindResultsPanel(rm, title);
@@ -132,113 +132,118 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         _frame.clearStatusMessage();
         final OpenDefinitionsDocument startDoc = _defPane.getOpenDefDocument();
         final LinkedList<FindResult> results = new LinkedList<FindResult>();
-        final int count = _machine.processAll(new Lambda<Void, FindResult>() {
-          public Void apply(final FindResult fr) {
-            results.add(fr);
-            return null;
-          }
-        });
-
-        // list of documents that have been reverted in the process of "find all"
-        LinkedList<OpenDefinitionsDocument> reverted = new LinkedList<OpenDefinitionsDocument>();
         
-        for (FindResult fr: results) {
-          if (reverted.contains(fr.getDocument())) {
-            // skipping document because we have previously noticed that it has been modified,
-            // i.e. the document is in the reverted list
-            continue;
-          }
-          
-          // get the original time stamp
-          long origts = fr.getDocument().getTimestamp();
-          
-          if (!_model.getActiveDocument().equals(fr.getDocument())) {
-            _model.setActiveDocument(fr.getDocument());
-          }
-          else _model.refreshActiveDocument();
-          
-          final OpenDefinitionsDocument doc = _defPane.getOpenDefDocument();
-          
-          // get the time stamp after making the document the active one
-          long newts = doc.getTimestamp();
-          if (newts!=origts) {
-            // timestamps changed, document has been modified, so all our FindResults
-            // may not apply anymore. we are going to discard all FindResults for this
-            // document.
-            // add thi document to the list of reverted documents
-            reverted.add(doc);
-            continue;
-          }
-          
-          final StringBuilder sb = new StringBuilder();
-          try {
-            int endSel = fr.getFoundOffset();
-            int startSel = endSel-_machine.getFindWord().length();
-            final Position startPos = doc.createPosition(startSel);
-            final Position endPos = doc.createPosition(endSel);
-            
-            // create excerpt string
-            int excerptEndSel = doc.getLineEndPos(endSel);
-            int excerptStartSel = doc.getLineStartPos(startSel);
-            int length = Math.min(120, excerptEndSel - excerptStartSel);
-            
-            // this highlights the actual region in red
-            int startRed = startSel - excerptStartSel;
-            int endRed = endSel - excerptStartSel;
-            String s = doc.getText(excerptStartSel, length);
-            
-            // change control characters and ones that may not be displayed to spaces
-            for(int i = 0; i < s.length(); ++i) {
-              if ((s.charAt(i) < ' ') || (s.charAt(i) > 127)) { sb.append(' '); } else { sb.append(s.charAt(i)); }
+        _frame.hourglassOn();
+        try {
+          final int count = _machine.processAll(new Lambda<Void, FindResult>() {
+            public Void apply(final FindResult fr) {
+              results.add(fr);
+              return null;
             }
-            s = sb.toString();
-            
-            // trim the front
-            for(int i = 0; i < s.length(); ++i) {
-              if (! Character.isWhitespace(s.charAt(i))) break;
-              --startRed;
-              --endRed;
+          });
+          
+          // list of documents that have been reverted in the process of "find all"
+          LinkedList<OpenDefinitionsDocument> reverted = new LinkedList<OpenDefinitionsDocument>();
+          
+          for (FindResult fr: results) {
+            if (reverted.contains(fr.getDocument())) {
+              // skipping document because we have previously noticed that it has been modified,
+              // i.e. the document is in the reverted list
+              continue;
             }
             
-            // trim the end
-            s = s.trim();
+            // get the original time stamp
+            long origts = fr.getDocument().getTimestamp();
             
-            // bound startRed and endRed
-            if (startRed < 0) { startRed = 0; }
-            if (startRed > s.length()) { startRed = s.length(); }
-            if (endRed < startRed) { endRed = startRed; }
-            if (endRed > s.length()) { endRed = s.length(); }
+            if (!_model.getActiveDocument().equals(fr.getDocument())) {
+              _model.setActiveDocument(fr.getDocument());
+            }
+            else _model.refreshActiveDocument();
+            
+            final OpenDefinitionsDocument doc = _defPane.getOpenDefDocument();
+            
+            // get the time stamp after making the document the active one
+            long newts = doc.getTimestamp();
+            if (newts!=origts) {
+              // timestamps changed, document has been modified, so all our FindResults
+              // may not apply anymore. we are going to discard all FindResults for this
+              // document.
+              // add thi document to the list of reverted documents
+              reverted.add(doc);
+              continue;
+            }
+            
+            final StringBuilder sb = new StringBuilder();
+            try {
+              int endSel = fr.getFoundOffset();
+              int startSel = endSel-_machine.getFindWord().length();
+              final Position startPos = doc.createPosition(startSel);
+              final Position endPos = doc.createPosition(endSel);
+              
+              // create excerpt string
+              int excerptEndSel = doc.getLineEndPos(endSel);
+              int excerptStartSel = doc.getLineStartPos(startSel);
+              int length = Math.min(120, excerptEndSel - excerptStartSel);
+              
+              // this highlights the actual region in red
+              int startRed = startSel - excerptStartSel;
+              int endRed = endSel - excerptStartSel;
+              String s = doc.getText(excerptStartSel, length);
+              
+              // change control characters and ones that may not be displayed to spaces
+              for(int i = 0; i < s.length(); ++i) {
+                if ((s.charAt(i) < ' ') || (s.charAt(i) > 127)) { sb.append(' '); } else { sb.append(s.charAt(i)); }
+              }
+              s = sb.toString();
+              
+              // trim the front
+              for(int i = 0; i < s.length(); ++i) {
+                if (! Character.isWhitespace(s.charAt(i))) break;
+                --startRed;
+                --endRed;
+              }
+              
+              // trim the end
+              s = s.trim();
+              
+              // bound startRed and endRed
+              if (startRed < 0) { startRed = 0; }
+              if (startRed > s.length()) { startRed = s.length(); }
+              if (endRed < startRed) { endRed = startRed; }
+              if (endRed > s.length()) { endRed = s.length(); }
+              
+              // create the excerpt string
+              sb.setLength(0);
+              sb.append(StringOps.encodeHTML(s.substring(0, startRed)));
+              sb.append("<font color=#ff0000>");
+              sb.append(StringOps.encodeHTML(s.substring(startRed, endRed)));
+              sb.append("</font>");
+              sb.append(StringOps.encodeHTML(s.substring(endRed)));
+              rm.addRegion(new MovingDocumentRegion(doc, doc.getFile(), startPos, endPos, sb.toString()));
+            }
+            catch (FileMovedException fme) {
+              throw new UnexpectedException(fme);
+            }
+            catch (BadLocationException ble) {
+              throw new UnexpectedException(ble);
+            }
+          }
           
-            // create the excerpt string
-            sb.setLength(0);
-            sb.append(StringOps.encodeHTML(s.substring(0, startRed)));
-            sb.append("<font color=#ff0000>");
-            sb.append(StringOps.encodeHTML(s.substring(startRed, endRed)));
-            sb.append("</font>");
-            sb.append(StringOps.encodeHTML(s.substring(endRed)));
-            rm.addRegion(new MovingDocumentRegion(doc, doc.getFile(), startPos, endPos, sb.toString()));
-          }
-          catch (FileMovedException fme) {
-            throw new UnexpectedException(fme);
-          }
-          catch (BadLocationException ble) {
-            throw new UnexpectedException(ble);
-          }
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              _model.setActiveDocument(startDoc);
+              Toolkit.getDefaultToolkit().beep();
+              _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
+              if (count>0) {
+                _frame.showFindResultsPanel(panel);
+              }
+              else {
+                panel.freeResources();
+              }
+            }
+          });
         }
-
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            _model.setActiveDocument(startDoc);
-            Toolkit.getDefaultToolkit().beep();
-            _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
-            if (count>0) {
-              _frame.showFindResultsPanel(panel);
-            }
-            else {
-              panel.freeResources();
-            }
-          }
-        });
+        finally { _frame.hourglassOff(); }
       }
     }
   };

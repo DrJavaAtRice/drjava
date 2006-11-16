@@ -738,7 +738,7 @@ public class JarOptionsDialog extends JFrame {
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
-      _mainFrame.simpleHourglassOn();
+      _mainFrame.hourglassOn();
       ProcessingFrame pf = new ProcessingFrame(this, "Checking class files", "Processing, please wait.");
       pf.setVisible(true);
       _loadSettings();
@@ -746,7 +746,7 @@ public class JarOptionsDialog extends JFrame {
       pf.dispose();
     }
     else {
-      _mainFrame.simpleHourglassOff();
+      _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }
     super.setVisible(vis);

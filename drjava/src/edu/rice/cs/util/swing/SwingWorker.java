@@ -52,7 +52,7 @@ import javax.swing.SwingUtilities;
  * @version $Id$
  */
 public abstract class SwingWorker {
-  private Object _value;  // see getValue(), setValue()
+  private volatile Object _value;  // see getValue(), setValue()
 //  private Thread _thread;
 
   /**
@@ -60,21 +60,21 @@ public abstract class SwingWorker {
    * under separate synchronization control.
    */
   private static class ThreadVar {
-    private Thread _thread;
+    private volatile Thread _thread;
     ThreadVar(Thread t) { _thread = t; }
-    synchronized Thread get() { return _thread; }
-    synchronized void clear() { _thread = null; }
+    Thread get() { return _thread; }
+    void clear() { _thread = null; }
   }
 
-  private ThreadVar _threadVar;
+  private volatile ThreadVar _threadVar;
 
   /** Gets the value produced by the worker thread, or null if it
    *  hasn't been constructed yet.
    */
-  protected synchronized Object getValue() { return _value; }
+  protected Object getValue() { return _value; }
 
   /** Sets the value produced by worker thread. */
-  private synchronized void setValue(Object x) { _value = x; }
+  private void setValue(Object x) { _value = x; }
 
   /** Compute the value to be returned by the <code>get</code> method. */
   public abstract Object construct();

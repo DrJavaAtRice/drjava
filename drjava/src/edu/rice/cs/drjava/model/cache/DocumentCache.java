@@ -98,7 +98,7 @@ public class DocumentCache {
    */
   public DCacheAdapter register(OpenDefinitionsDocument odd, DDReconstructor rec) {
     DocManager mgr = new DocManager(rec, odd.toString(), odd.isUntitled());
-    notifyRegistrationListeners(odd, mgr);
+    notifyRegistrationListeners(odd, mgr);  // runs synchronously; only used in tests
 //    System.err.println("register(" + odd + ", " + rec + ") called");
     return mgr;
   }
@@ -109,25 +109,22 @@ public class DocumentCache {
     */
   public void setCacheSize(int size) {
     if (size <= 0) throw new IllegalArgumentException("Cannot set the cache size to zero or less.");
-    int dist;
+    int diff;
     DocManager[] removed = null;  // bogus initialization makes javac happy
     synchronized(_cacheLock) {    // lock the cache so entries can be removed if necessary
       CACHE_SIZE = size;
-      dist = _residentQueue.size() - CACHE_SIZE;
-      if (dist > 0) { 
-        removed = new DocManager[dist];
-        for (int i = 0; i < dist; i++) removed[i] = _residentQueue.remove(0);
+      diff = _residentQueue.size() - CACHE_SIZE;
+      if (diff > 0) { 
+        removed = new DocManager[diff];
+        for (int i = 0; i < diff; i++) removed[i] = _residentQueue.remove(0);
       }
-      if (dist > 0) kickOut(removed);
+      if (diff > 0) kickOut(removed);
     }
   }
   
   /** Kicks out all documents in removed.  Assumes that _cacheLock is already held. */
   private void kickOut(DocManager[] removed) {
-    for (int i = 0; i < removed.length; i++) {
-      DocManager dm = removed[i];
-      dm.kickOut();
-    }
+    for (DocManager dm: removed) dm.kickOut();
   }
     
   public int getCacheSize() { return CACHE_SIZE; }
@@ -289,12 +286,16 @@ public class DocumentCache {
   
   private LinkedList<RegistrationListener> _regListeners =   new LinkedList<RegistrationListener>();
   
-  public void addRegistrationListener(RegistrationListener list) { _regListeners.add(list); }
-  public void removeRegistrationListener(RegistrationListener list) { _regListeners.remove(list); }
+  public void addRegistrationListener(RegistrationListener list) { synchronized(_regListeners) { _regListeners.add(list); } }
+    public void removeRegistrationListener(RegistrationListener list) { synchronized(_regListeners) { _regListeners.remove(list); } }
   public void clearRegistrationListeners() { _regListeners.clear(); }
+  // Only used in DocumentCacheTest; must be synchronous for test to succeed.
   private void notifyRegistrationListeners(final OpenDefinitionsDocument odd, final DocManager man) {
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() { for (RegistrationListener list : _regListeners) { list.registered(odd, man); } }
-    });
+    synchronized(_regListeners) {
+      if (_regListeners.isEmpty()) return; 
+      Utilities.invokeAndWait(new Runnable() {
+        public void run() { for (RegistrationListener list : _regListeners) { list.registered(odd, man); } }
+      });
+    }
   }
 }

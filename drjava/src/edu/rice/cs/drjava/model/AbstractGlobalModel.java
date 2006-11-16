@@ -2277,7 +2277,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Create a new ConcreteRegionManager without maximum size. */
     public ConcreteRegionManager() { this(0); }
     
-    /** Returns the region in this manager at the given offset, or null if one does not exist.ý
+    /** Returns the region in this manager at the given offset, or null if one does not exist.
       * @param odd the document
       * @param offset the offset in the document
       * @return the DocumentRegion at the given line number, or null if it does not exist.
@@ -2877,8 +2877,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         try {
           _notifier.documentNotFound(this, _file);
           final String path = fixPathForNavigator(getFile().getCanonicalFile().getCanonicalPath());
-          Utilities.invokeAndWait(new SRunnable() {
-            public void run() { _documentNavigator.refreshDocument( ConcreteOpenDefDoc.this, path); }
+          Utilities.invokeLater(new SRunnable() { // formerly invokeAndWait(...)  Why?
+            public void run() { _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); }
           });
           return _cacheAdapter.getDocument();
         }

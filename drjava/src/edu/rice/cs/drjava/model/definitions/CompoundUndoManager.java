@@ -178,7 +178,7 @@ public class CompoundUndoManager extends UndoManager {
   }
   
   /** Overload for undo which allows the initiator of a CompoundEdit to abandon it.
-    * XXX: This has not been properly tested and very possibly may not work.
+    * WARNING: this has been used to date and has not been properly tested and very possibly may not work.
     * @param key the key returned by the last call to startCompoundEdit
     * @throws IllegalArgumentException if the key is incorrect
     */
@@ -188,9 +188,14 @@ public class CompoundUndoManager extends UndoManager {
       _compoundEdits.remove(0);
       _keys.remove(0);
       
-      ce.end();
-      ce.undo();
-      SwingUtilities.invokeLater(new Runnable() { public void run() { ce.die(); } });  // an unsafe method inherited from CompoundEdit
+      
+      SwingUtilities.invokeLater(new Runnable() { 
+        public void run() { 
+          ce.end();
+          ce.undo();
+          ce.die(); 
+        } 
+      });  // unsafe methods inherited from CompoundEdit
     }
     else throw new IllegalArgumentException("Bad undo key " + key + "!");
   }

@@ -68,11 +68,9 @@ import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-/**
- * Panel for displaying find results.
- * This class is a swing view class and hence should only be accessed from the event-handling thread.
- * @version $Id$
- */
+/** Panel for displaying find results. This class is a swing class which should only be accessed from the event thread.
+  * @version $Id$
+  */
 public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected JButton _goToButton;
   protected JButton _bookmarkButton;
@@ -85,12 +83,11 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
     new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
   
-  /** Constructs a new find results panel.
-   *  This is swing view class and hence should only be accessed from the event-handling thread.
-   *  @param frame the MainFrame
-   *  @param rm the region manager associated with this panel
-   *  @param title for the panel
-   */
+  /** Constructs a new find results panel. This is swing class which should only be accessed from the event thread.
+    * @param frame the MainFrame
+    * @param rm the region manager associated with this panel
+    * @param title for the panel
+    */
   public FindResultsPanel(MainFrame frame, RegionManager<MovingDocumentRegion> rm, String title) {
     super(frame, title);
     _regionManager = rm;
@@ -120,9 +117,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     
     public ColorComboRenderer() {
       super();
-      setBorder(new CompoundBorder(
-                                   new MatteBorder(2, 10, 2, 10, Color.white), new LineBorder(
-                                                                                              Color.black)));
+      setBorder(new CompoundBorder(new MatteBorder(2, 10, 2, 10, Color.white), new LineBorder(Color.black)));
     }
     
     public Component getListCellRendererComponent(JList list, Object value,
@@ -151,23 +146,17 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   /** Creates the buttons for controlling the regions. Should be overridden. */
   protected JComponent[] makeButtons() {    
     Action goToAction = new AbstractAction("Go to") {
-      public void actionPerformed(ActionEvent ae) {
-        goToRegion();
-      }
+      public void actionPerformed(ActionEvent ae) { goToRegion(); }
     };
     _goToButton = new JButton(goToAction);
 
     Action bookmarkAction = new AbstractAction("Bookmark") {
-      public void actionPerformed(ActionEvent ae) {
-        _bookmark();
-      }
+      public void actionPerformed(ActionEvent ae) { _bookmark(); }
     };
     _bookmarkButton = new JButton(bookmarkAction);
 
     Action removeAction = new AbstractAction("Remove") {
-      public void actionPerformed(ActionEvent ae) {
-        _remove();
-      }
+      public void actionPerformed(ActionEvent ae) { _remove(); }
     };
     _removeButton = new JButton(removeAction);
 
@@ -192,18 +181,15 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
           ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
           highlightPanel.setBackground(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_lastIndex]));
         }
-        else {
-          highlightPanel.setBackground(normalColor);
-        }
+        else highlightPanel.setBackground(normalColor);
+
         _frame.refreshFindResultsHighlightPainter(FindResultsPanel.this, 
                                                   DefinitionsPane.FIND_RESULTS_PAINTERS[_lastIndex]);
       }
     });
     // find the first available color, or choose "None"
     for(_lastIndex=0; _lastIndex<OptionConstants.FIND_RESULTS_COLORS.length; ++_lastIndex) {
-      if (DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex]==0) {
-        break;
-      }
+      if (DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex]==0) break;
     }
     if (_lastIndex<OptionConstants.FIND_RESULTS_COLORS.length) {
       ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
@@ -212,15 +198,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _frame.refreshFindResultsHighlightPainter(FindResultsPanel.this, 
                                               DefinitionsPane.FIND_RESULTS_PAINTERS[_lastIndex]);
     
-    JComponent[] buts = new JComponent[] { 
-      _goToButton, 
-        _bookmarkButton,
-        _removeButton,
-        highlightPanel,
-        _colorBox
-    };
-    
-    return buts;
+    return new JComponent[] { _goToButton, _bookmarkButton, _removeButton, highlightPanel, _colorBox};
   }
   
   /** @return the selected painter for these find results. */
@@ -239,23 +217,17 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
             new SimpleDocumentRegion(r.getDocument(), r.getDocument().getFile(), r.getStartOffset(), r.getEndOffset());
           _model.getBookmarkManager().addRegion(newR);
         }
-        catch (FileMovedException fme) {
-          throw new UnexpectedException(fme);
-        }
+        catch (FileMovedException fme) { throw new UnexpectedException(fme); }
       }
     }
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */
-  protected void performDefaultAction() {
-    goToRegion();
-  }
+  protected void performDefaultAction() { goToRegion(); }
   
   /** Remove the selected regions. */
   private void _remove() {
-    for (MovingDocumentRegion r: getSelectedRegions()) {
-      _regionManager.removeRegion(r);
-    }
+    for (MovingDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
     if (_regionManager.getRegions().size()==0) { _close(); }
   }
 
@@ -270,23 +242,11 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   /** Makes the popup menu actions. Should be overridden if additional actions besides "Go to" and "Remove" are added. */
   protected AbstractAction[] makePopupMenuActions() {
     AbstractAction[] acts = new AbstractAction[] {
-      new AbstractAction("Go to") {
-        public void actionPerformed(ActionEvent e) {
-          goToRegion();
-        }
-      },
+      new AbstractAction("Go to") { public void actionPerformed(ActionEvent e) { goToRegion(); } },
         
-        new AbstractAction("Bookmark") {
-          public void actionPerformed(ActionEvent e) {
-            _bookmark();
-          }
-        },
-        
-        new AbstractAction("Remove") {
-          public void actionPerformed(ActionEvent e) {
-            _remove();
-          }
-        }
+        new AbstractAction("Bookmark") { public void actionPerformed(ActionEvent e) { _bookmark(); } },
+          
+          new AbstractAction("Remove") { public void actionPerformed(ActionEvent e) { _remove(); } }
     };
     return acts;
   }

@@ -99,9 +99,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** State flag to record if test classes in projects must end in "Test" */
   private boolean _forceTestSuffix = false;
   
-  /** lock to protect conditional updates to _testInProgress */
-  final private Object _testLock = new Object();
-  
   /** The document used to display JUnit test results.  Used only for testing. */
   private final SwingDocument _junitDoc = new SwingDocument();
   
@@ -172,14 +169,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    *  @param files a list of their source files in the same order as qualified class names.
    */
   public void junitClasses(List<String> qualifiedClassnames, List<File> files) {
-//    Utilities.showDebug("junitClasses(" + qualifiedClassnames + ", " + files);
-    synchronized(_compilerModel.getSlaveJVMLock()) {
- 
-       // test and set _testInProgress 
-      synchronized(_testLock) {
-        if (_testInProgress) return;
-        _testInProgress = true;
-      }
+    Utilities.showDebug("junitClasses(" + qualifiedClassnames + ", " + files);
+    synchronized(_compilerModel.getCompilerLock()) {
+      
+      // Check _testInProgress 
+      if (_testInProgress) return;
+      
       List<String> testClasses;
       try { testClasses = _jvm.findTestClasses(qualifiedClassnames, files); }
       catch(IOException e) { throw new UnexpectedException(e); }
@@ -228,12 +223,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
 //    System.err.println("junitOpenDefDocs(" + lod + "," + allTests + ")");
     
-    // Test and et _testInProgress flag
-    synchronized(_testLock) { 
-      if (_testInProgress) return; 
-      _testInProgress = true;
-    }
-      
+    // Check_testInProgress flag
+    if (_testInProgress) return; 
+
     //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
 
@@ -424,7 +416,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
     // TODO: should we disable compile commands while testing?  Should we use protected flag instead of lock?
    
-    synchronized(_compilerModel.getSlaveJVMLock()) {
+    synchronized(_compilerModel.getCompilerLock()) {
       /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
       List<String> tests;
       try { tests = _jvm.findTestClasses(classNames, files); }
