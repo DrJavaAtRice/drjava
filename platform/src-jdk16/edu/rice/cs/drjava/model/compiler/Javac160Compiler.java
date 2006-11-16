@@ -62,7 +62,7 @@ import com.sun.tools.javac.util.DefaultFileManager;
 import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Options;
 import com.sun.tools.javac.util.Position;
-import com.sun.tools.javac.util.List;
+// import com.sun.tools.javac.util.List; Clashes with java.util.List
 import com.sun.tools.javac.util.Log;
 
 import edu.rice.cs.util.FileOps;
@@ -126,7 +126,7 @@ public class Javac160Compiler implements CompilerInterface {
   public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
                                                List<? extends File> sourcePath, File destination, 
                                                List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
-    Context context = createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+    Context context = _createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
     new CompilerErrorListener(context, errors);
     
@@ -134,7 +134,7 @@ public class Javac160Compiler implements CompilerInterface {
     
     /** Default FileManager provided by Context class */
     DefaultFileManager fileManager = (DefaultFileManager) context.get(JavaFileManager.class);
-    List<JavaFileObject> fileObjects = List.nil();
+    com.sun.tools.javac.util.List<JavaFileObject> fileObjects = com.sun.tools.javac.util.List.nil();
     for (File f : files) fileObjects = fileObjects.prepend(fileManager.getRegularFile(f));
     
     try { compiler.compile(fileObjects); }
@@ -184,11 +184,11 @@ public class Javac160Compiler implements CompilerInterface {
     
   
   /** We need to embed a DiagnosticListener in our own Context.  This listener will build a CompilerError list. */
-  private static class CompilerErrorListener extends DiagnosticListener<JavaFileObject> {
+  private static class CompilerErrorListener implements DiagnosticListener<JavaFileObject> {
     
     private List<? super CompilerError> _errors;
     
-    public ErrorListener(Context context, List<? super CompilerError> errors) {
+    public CompilerErrorListener(Context context, List<? super CompilerError> errors) {
       _errors = errors;
       context.put(DiagnosticListener.class, this);
     }
@@ -212,11 +212,11 @@ public class Javac160Compiler implements CompilerInterface {
         * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
       
       
-      _errors.addLast(new CompilerError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
-                                        ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
-                                        ((int) d.getColumnNumber()) - 1, 
-                                        d.getMessage(null),    // null is the locale
-                                        isWarning));
+      _errors.add(new CompilerError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
+                                    ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
+                                    ((int) d.getColumnNumber()) - 1, 
+                                    d.getMessage(null),    // null is the locale
+                                    isWarning));
     }
   }
   
