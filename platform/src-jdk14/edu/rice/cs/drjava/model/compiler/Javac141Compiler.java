@@ -55,6 +55,9 @@ import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 // Uses Java 1.4.1+ / JSR-14 v1.2 compiler classes
 import com.sun.tools.javac.v8.JavaCompiler;
@@ -63,7 +66,7 @@ import com.sun.tools.javac.v8.util.Name;
 import com.sun.tools.javac.v8.util.Options;
 import com.sun.tools.javac.v8.util.Position;
 import com.sun.tools.javac.v8.util.Hashtable;
-import com.sun.tools.javac.v8.util.List;
+//import com.sun.tools.javac.v8.util.List; Clashes with java.util.List
 import com.sun.tools.javac.v8.util.Log;
 
 //import edu.rice.cs.drjava.DrJava;
@@ -75,25 +78,18 @@ import edu.rice.cs.util.UnexpectedException;
  * An implementation of the CompilerInterface that supports compiling with
  * javac 1.4.1+.
  *
+ * This is cross-compiled against the Java 1.4 libraries, so 1.5 APIs and language
+ * constructs are not allowed.
+ *
  * @version $Id$
  */
 public class Javac141Compiler implements CompilerInterface {
   
-  private String _extraClassPath = "";
-
-  protected boolean _allowAssertions = false;
-  
-  protected boolean _warningsEnabled = true;
-    
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new Javac141Compiler();
 
   public static final String COMPILER_CLASS_NAME =
     "com.sun.tools.javac.v8.JavaCompiler";
-  
-  protected Context context = null;
-
-  private String _builtPath = "";
   
   /** A writer that discards its input. */
   private static final Writer NULL_WRITER = new Writer() {
@@ -108,17 +104,6 @@ public class Javac141Compiler implements CompilerInterface {
   private static final PrintWriter NULL_PRINT_WRITER =
     new PrintWriter(NULL_WRITER);
 
-  //private final boolean _supportsGenerics;
-  protected JavaCompiler compiler;
-
-  /**
-   * We need to explicitly make the compiler's log and pass it
-   * to JavaCompiler.make() so we can keep a pointer to the log,
-   * since the log is not retrievable from the compiler. We
-   * need to use the log to determine if any errors occurred.
-   */
-  protected OurLog compilerLog;
-
   /**
    * Constructor for Javac141Compiler will throw a RuntimeException if an invalid version
    * of the JDK is in use. 
@@ -129,8 +114,69 @@ public class Javac141Compiler implements CompilerInterface {
     } 
   }
   
+/** Compile the given files.
+  *  @param files  Source files to compile.
+  *  @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
+  *  @param sourcePath  Location of additional sources to be compiled on-demand.  If @code{null}, the default is used.
+  *  @param destination  Location (directory) for compiled classes.  If @code{null}, the default in-place location is used.
+  *  @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with @code{sourceVersion} 
+  *                        If @code{null}, the default is used.
+  *  @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  If @code{null},
+  *                        the default is used.
+  *  @param showWarnings  Whether compiler warnings should be shown or ignored.
+  *  @return Errors that occurred. If no errors, should be zero length (not null).
+  */
+  public List/*<? extends CompilerError>*/ compile(List/*<? extends File>*/ files, List/*<? extends File>*/ classPath, 
+                                                   List/*<? extends File>*/ sourcePath, File destination, 
+                                                   List/*<? extends File>*/ bootClassPath, String sourceVersion, boolean showWarnings) {
+    Context context = _createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+    OurLog log = new OurLog(context);
+    JavaCompiler compiler = JavaCompiler.make(context);
+    
+    com.sun.tools.javac.v8.util.List filesToCompile = new com.sun.tools.javac.v8.util.List();
+    Iterator/*<? extends File>*/ filesI = files.iterator();
+    while (filesI.hasNext()) {
+      // TODO: Can we assume the files are canonical/absolute?  If not, we should use the util methods here.
+      File f = (File) filesI.next();
+      filesToCompile = filesToCompile.prepend(f.getAbsolutePath());
+    }
+
+    try { compiler.compile(filesToCompile); }
+    catch (Throwable t) {
+      // GJ defines the compile method to throw Throwable?!
+      //Added to account for error in javac whereby a variable that was not declared will
+      //cause an out of memory error. This change allows us to output both errors and not
+      //just the out of memory error
+      
+      LinkedList/*<CompilerError>*/ errors = log.getErrors();
+      errors.addFirst(new CompilerError("Compile exception: " + t, false));
+      return errors;
+    }
+
+    return log.getErrors();
+  }
+  
+
+  public boolean isAvailable() {
+    try {
+      Class.forName(COMPILER_CLASS_NAME);
+      return _isValidVersion();
+    }
+    catch (Exception e) {
+      return false;
+    }
+  }
+
+  public String getName() {
+    return "javac 1.4.x";
+  }
+
+  public String toString() {
+    return getName();
+  }
+
   /**
-   * Uses reflection on the Log object to deduce which JDK is being used.
+    * Uses reflection on the Log object to deduce which JDK is being used.
    * If the constructor for Log in this JDK does not match that of Java 1.4.1
    * or JSR-14 v1.2, then the version is not supported.
    */
@@ -153,214 +199,41 @@ public class Javac141Compiler implements CompilerInterface {
     }
   }
   
-  /**
-   * Compile the given files.
-   * @param files Source files to compile.
-   * @param sourceRoot Source root directory, the base of the package structure.
-   *
-   * @return Array of errors that occurred. If no errors, should be zero
-   * length array (not null).
-   */
-  public CompilerError[] compile(File sourceRoot, File[] files) {
-    File[] sourceRoots = new File[] { sourceRoot };
-    return compile(sourceRoots, files);
-  }
-  
-  /**
-   * Compile the given files.
-   * @param files Source files to compile.
-   * @param sourceRoots Array of source root directories, the base of
-   *  the package structure for all files to compile.
-   *
-   * @return Array of errors that occurred. If no errors, should be zero
-   * length array (not null).
-   */
-  public CompilerError[] compile(File[] sourceRoots, File[] files) {
-    // We must re-initialize the compiler on each compile. Otherwise
-    // it gets very confused.
-    //DrJava.consoleOut().println("-- In JavacGJCompiler: SourceRoots:");
-    //for (int i = 0 ; i < sourceRoots.length; i ++) {
-    //  DrJava.consoleOut().println(sourceRoots[i]);
-    //}
-    initCompiler(sourceRoots);
-    List filesToCompile = new List();
-
-    for (int i = 0; i < files.length; i++) {
-      filesToCompile = filesToCompile.prepend(files[i].getAbsolutePath());
-    }
-
-    try {
-      compiler.compile(filesToCompile);
-    }
-    catch (Throwable t) {
-      // GJ defines the compile method to throw Throwable?!
-      //System.err.println("Compile error: " + t);
-      //t.printStackTrace();
-      
-      
-      //Added to account for error in javac whereby a variable that was not declared will
-      //cause an out of memory error. This change allows us to output both errors and not
-      //just the out of memory error
-      
-      CompilerError[] errorArray = new CompilerError[compilerLog.getErrors().length + 1];
-      for(int i = 0; i < compilerLog.getErrors().length; i++) {
-        errorArray[i+1] = compilerLog.getErrors()[i];
-      }
-      errorArray[0] = new CompilerError("Compile exception: " + t, false);
-      return errorArray; 
-      
-//      return compilerLog.getErrors();
-//      return new CompilerError[] {
-//        new CompilerError("Compile exception: " + t, false)
-//      };
-    }
-
-    CompilerError[] errors = compilerLog.getErrors();
-
-    // null out things to not keep pointers to dead data
-    compiler = null;
-    compilerLog = null;
-    return errors;
-  }
-
-  public boolean isAvailable() {
-    try {
-      Class.forName(COMPILER_CLASS_NAME);
-      return _isValidVersion();
-    }
-    catch (Exception e) {
-      return false;
-    }
-  }
-
-  public String getName() {
-    return "javac 1.4.x";
-  }
-
-  public String toString() {
-    return getName();
-  }
-
-  /**
-   * Allows us to set the extra classpath for the compilers without referencing the
-   * config object in a loaded class file
-   */ 
-  public void setExtraClassPath( String extraClassPath) { _extraClassPath = extraClassPath; }
-  
-  public void setExtraClassPath(ClassPathVector extraClassPath) {
-    setExtraClassPath(extraClassPath.toString());
-  }
-
-  /**
-   * This method allows us to set the JSR14 collections path across a class loader.
-   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
-   */
-  public void addToBootClassPath( File cp) {
-    throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
-  }
-
-  /**
-   * Sets whether to allow assert statements.
-   */
-  public void setAllowAssertions(boolean allow) {
-    _allowAssertions = allow;
-  }
-  
-  /**
-   * Sets whether or not warnings are allowed
-   */
-  public void setWarningsEnabled(boolean warningsEnabled) {
-    _warningsEnabled = warningsEnabled;
-  }
-  
-  protected Context createContext(File[] sourceRoots) {
+  protected Context _createContext(List/*<? extends File>*/ classPath, List/*<? extends File>*/ sourcePath, File destination, 
+                                   List/*<? extends File>*/ bootClassPath, String sourceVersion, boolean showWarnings) {
     Context context = new Context();
     Options options = Options.instance(context);
     
-    HashMap/*<String,String>*/ toAdd = CompilerOptions.getOptions(_warningsEnabled);
-    LinkedList /*<String>*/ keys = new LinkedList/*<String>*/(toAdd.keySet());
-    LinkedList /*<String>*/values = new LinkedList/*<String>*/(toAdd.values());
-        
-    for(int i = 0; i< toAdd.size(); i++)
-      options.put((String)values.get(i), (String)values.get(i));
-    
-    //options.putAll(CompilerOptions.getOptions(_warningsEnabled));
-    
+    Iterator/*<Map.Entry<String, String>>*/ optsI = CompilerOptions.getOptions(showWarnings).entrySet().iterator();
+    while (optsI.hasNext()) {
+      Map.Entry/*<String, String>*/ entry = (Map.Entry) optsI.next();
+      options.put((String) entry.getKey(), (String) entry.getValue());
+    }
+
     // Turn on debug -- maybe this should be setable some day?
     options.put("-g", "");
 
-    // turn on generics, if we have em
-    _addGenericsOption(options);
-
-    // Set output target version
-    _addSourceAndTargetOptions(options);
-    
-
-    String sourceRootString = getSourceRootString(sourceRoots);
-    options.put("-sourcepath", sourceRootString /*sourceRoot.getAbsolutePath()*/);
-
-    String cp = System.getProperty("java.class.path");
-    // Adds extra.classpath to the classpath.
-    cp += _extraClassPath;
-    cp += File.pathSeparator + sourceRootString;
-    
-    options.put("-classpath", cp);
+    if (classPath != null) { options.put("-classpath", _pathToString(classPath)); }
+    if (sourcePath != null) { options.put("-sourcepath", _pathToString(sourcePath)); }
+    if (destination != null) { options.put("-d", destination.getPath()); }
+    if (bootClassPath != null) { options.put("-bootclasspath", _pathToString(bootClassPath)); }
+    if (sourceVersion != null) { options.put("-source", sourceVersion); }
+    if (!showWarnings) { options.put("-nowarn", ""); }
     
     return context;
   }
   
-  /**
-   * Adds the appropriate switch for generics, if available.
-   */
-  protected void _addGenericsOption(Options options) {
-    // No generics support
-  }
-  
-  /**
-   * Adds the appropriate values for the source and target arguments.
-   */
-  protected void _addSourceAndTargetOptions(Options options) {
-    // Set output classfile version to 1.1
-    options.put("-target", "1.1");
-    
-    // Allow assertions in 1.4 if configured and in Java >= 1.4
-    String version = System.getProperty("java.version");
-    if ((_allowAssertions) && (version != null) &&
-        ("1.4.0".compareTo(version) <= 0)) {
-      options.put("-source", "1.4");
+  protected static String _pathToString(List/*<? extends File>*/ path) {
+    StringBuffer result = new StringBuffer();
+    Iterator/*<? extends File>*/ pathI = path.iterator();
+    boolean first = true;
+    while (pathI.hasNext()) {
+      File f = (File) pathI.next();
+      if (!first) { result.append(File.pathSeparatorChar); }
+      first = false;
+      result.append(f.getPath());
     }
-    if(! _builtPath.equals(""))
-      options.put("-d",_builtPath);
-  }
-  
-  /**
-   * Package protected utility method for getting a properly formatted
-   * string with several source paths from an array of files.
-   */
-  protected String getSourceRootString(File[] sourceRoots) {
-    StringBuffer roots = new StringBuffer();
-    for (int i = 0; i < sourceRoots.length; i++) {
-      roots.append(sourceRoots[i].getAbsolutePath());
-      if (i < sourceRoots.length - 1) {
-        roots.append(File.pathSeparator);
-      }
-    }
-    return roots.toString();
-  }
-
-  protected void initCompiler(File[] sourceRoots) {
-    context = createContext(sourceRoots);
-    compilerLog = new OurLog(context);
-
-    compiler = JavaCompiler.make(context);
-  }
-
-   
-  public void setBuildDirectory(File dir){
-    if(dir == null)
-      _builtPath = "";
-    else
-      _builtPath=dir.getAbsolutePath(); 
+    return result.toString();
   }
   
   /**
@@ -368,7 +241,7 @@ public class Javac141Compiler implements CompilerInterface {
    * messages ourselves. This version will work for JDK 1.4.1+
    * or JSR14 v1.2+.
    */
-  private class OurLog extends Log {
+  private static class OurLog extends Log {
     // List of CompilerError
     private LinkedList _errors = new LinkedList();
     private String _sourceName = "";
@@ -417,8 +290,7 @@ public class Javac141Compiler implements CompilerInterface {
                                         false));
     }
 
-    public CompilerError[] getErrors() {
-      return (CompilerError[]) _errors.toArray(new CompilerError[0]);
-    }
+    public LinkedList/*<CompilerError>*/ getErrors() { return _errors; }
   }
+  
 }

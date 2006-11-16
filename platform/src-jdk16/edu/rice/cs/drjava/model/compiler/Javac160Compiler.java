@@ -43,6 +43,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 // Uses JDK 1.6.0 tools classes
@@ -77,63 +78,11 @@ import edu.rice.cs.util.swing.Utilities;
  */
 public class Javac160Compiler implements CompilerInterface {
   
-  private LinkedList<CompilerError> _errors = new LinkedList<CompilerError>();
-  
-  private String _extraClassPath = "";
-
-  protected boolean _allowAssertions = false;  
-  protected boolean _warningsEnabled = true;
-  
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new Javac160Compiler();
 
   public static final String COMPILER_CLASS_NAME = "com.sun.tools.javac.main.JavaCompiler";
   
-  private Context _context = null;
-  
-  private String _builtPath = "";
-  
-  /** A writer that discards its input.  TODO: move this constant to CompilerInterface. */
-  private static final Writer NULL_WRITER = new Writer() {
-    public void write(char cbuf[], int off, int len) throws IOException {}
-    public void flush() throws IOException {}
-    public void close() throws IOException {}
-  };
-
-  /** A no-op printwriter to pass to the compiler to print error messages. TODO: move to CompilerInterface.*/
-  private static final PrintWriter NULL_PRINT_WRITER = new PrintWriter(NULL_WRITER);
-
-  private JavaCompiler _compiler;
-
-  /** We need to embed a DiagnosticListener in our own Context.  This listener will build a CompilerError list. */
-  private DiagnosticListener<JavaFileObject> diagnosticListener = new DiagnosticListener<JavaFileObject>() {
-    public void report(Diagnostic<? extends JavaFileObject> d) {
-      
-      Diagnostic.Kind dt = d.getKind();
-      boolean isWarning = false;  // init required by javac
-      
-      switch (dt) {
-        case OTHER:             return;
-        case NOTE:              return;
-        case MANDATORY_WARNING: isWarning = true; break;
-        case WARNING:           isWarning = true; break;
-        case ERROR:             isWarning = false; break;
-      }
-
-      /* The new Java 6.0 Diagnostic interface appears to be broken.  The expression d.getSource().getName() returns a 
-       * non-existent path--the name of the test file (allocated as a TEMP file) appended to the source root for 
-       * DrJava--in GlobalModelCompileErrorsTest.testCompileFailsCorrectLineNumbers().  The expression 
-       * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
-      
-      
-      _errors.addLast(new CompilerError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
-                                        ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
-                                        ((int) d.getColumnNumber()) - 1, 
-                                        d.getMessage(null),    // null is the locale
-                                        isWarning));
-    }
-  };
-
   /** Constructor for Javac160Compiler will throw a RuntimeException if an invalid version of the JDK is in use. */ 
   private Javac160Compiler() {
     if (! _isValidVersion()) throw new RuntimeException("Invalid version of Java 1.6 compiler.");
@@ -161,132 +110,114 @@ public class Javac160Compiler implements CompilerInterface {
   
   public boolean isAvailable() { return _isValidVersion(); }
   
+
   /** Compile the given files.
-   *  @param files Source files to compile.
-   *  @param sourceRoot Source root directory, the base of the package structure.
-   *
-   *  @return Array of errors that occurred. If no errors, should be zero length array (not null).
-   */
-  public CompilerError[] compile(File sourceRoot, File[] files) {
-    File[] sourceRoots = new File[] { sourceRoot };
-    return compile(sourceRoots, files);
-  }
-  
-  /** Compile the given files.
-   *  @param files Source files to compile.
-   *  @param sourceRoots Array of source root directories, the base of the package structure for all files to compile.
-   *
-   *  @return Array of errors that occurred. If no errors, should be zero length array (not null).
-   */
-  public CompilerError[] compile(File[] sourceRoots, File[] files) {
+    *  @param files  Source files to compile.
+    *  @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
+  *  @param sourcePath  Location of additional sources to be compiled on-demand.  If @code{null}, the default is used.
+  *  @param destination  Location (directory) for compiled classes.  If @code{null}, the default in-place location is used.
+  *  @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with @code{sourceVersion} 
+  *                        If @code{null}, the default is used.
+  *  @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  If @code{null},
+    *                        the default is used.
+  *  @param showWarnings  Whether compiler warnings should be shown or ignored.
+    *  @return Errors that occurred. If no errors, should be zero length (not null).
+    */
+  public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
+                                               List<? extends File> sourcePath, File destination, 
+                                               List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+    Context context = createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+    LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
+    new CompilerErrorListener(context, errors);
     
-    initCompiler(sourceRoots);  // binds compiler to a compiler with our DiagnosticListener
+    JavaCompiler compiler = JavaCompiler.instance(context);
     
     /** Default FileManager provided by Context class */
-    DefaultFileManager fileManager = (DefaultFileManager) _context.get(JavaFileManager.class);
-    
-    /** List of FileObjects to compile. */
+    DefaultFileManager fileManager = (DefaultFileManager) context.get(JavaFileManager.class);
     List<JavaFileObject> fileObjects = List.nil();
     for (File f : files) fileObjects = fileObjects.prepend(fileManager.getRegularFile(f));
     
-//    Utilities.show("Compiling " + fileObjects);
-//    Utilities.show("Javac160Compiler is: " + _compiler); 
-    try { _compiler.compile(fileObjects); }
-    
+    try { compiler.compile(fileObjects); }
     catch(Throwable t) {  // compiler threw an exception/error (typically out of memory error)
-      _errors.addFirst(new CompilerError("Compile exception: " + t, false));
-//      Utilities.showTrace(t);
+      errors.addFirst(new CompilerError("Compile exception: " + t, false));
     }
-
-    // null out things to not keep pointers to dead data
-    _compiler = null;
-    return _errors.toArray(new CompilerError[_errors.size()]);
+    
+    return errors;
   }
-
+  
+  
   public String toString() { return "JDK 1.6"; }
   
   public String getName() { return toString(); }
 
-  /** Sets the extra classpath for the compilers without referencing the config object in a loaded class file. */ 
-  public void setExtraClassPath(String extraClassPath) { _extraClassPath = extraClassPath; }
-
-  public void setExtraClassPath(ClassPathVector extraClassPath) { setExtraClassPath(extraClassPath.toString()); }
-  
-  /** Sets the JSR14 collections path across a class loader.  We cannot cast a loaded class to a subclass (?), so all
-   *  compiler interfaces must have this method)
-   */
-  public void addToBootClassPath( File cp) {
-    throw new UnexpectedException( new Exception("Method only implemented in JSR14 Compiler"));
-  }
-
-  /** Sets whether to allow assert statements. */
-  public void setAllowAssertions(boolean allow) { _allowAssertions = allow; }
-  
-  /** Sets whether or not warnings are allowed. */
-  public void setWarningsEnabled(boolean warningsEnabled) { _warningsEnabled = warningsEnabled; }
-  
-  private Context createContext(File[] sourceRoots) {
-    Context _context = new Context();
-    Options options = Options.instance(_context);
-    // options.putAll(CompilerOptions.getOptions(_warningsEnabled));  // No putAll(String, String) method in Options!
-    for (Map.Entry<String, String> e: CompilerOptions.getOptions(_warningsEnabled).entrySet()) 
+  private Context _createContext(List<? extends File> classPath, List<? extends File> sourcePath, File destination, 
+                                 List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+    Context context = new Context();
+    Options options = Options.instance(context);
+    for (Map.Entry<String, String> e : CompilerOptions.getOptions(showWarnings).entrySet()) {
       options.put(e.getKey(), e.getValue());
-
+    }
+    
     //Should be setable some day?
     options.put("-g", "");
-
-    // Set output target version
-    _addSourceAndTargetOptions(options);   
-
-    String sourceRootString = getSourceRootString(sourceRoots);
-    options.put("-sourcepath", sourceRootString /*sourceRoot.getAbsolutePath()*/);
-
-    String cp = System.getProperty("java.class.path");
-    // Adds extra.classpath to the classpath.
-    cp += _extraClassPath;
-    cp += File.pathSeparator + sourceRootString;
     
-    options.put("-classpath", cp);    
-    return _context;
+    if (classPath != null) { options.put("-classpath", _pathToString(classPath)); }
+    if (sourcePath != null) { options.put("-sourcepath", _pathToString(sourcePath)); }
+    if (destination != null) { options.put("-d", destination.getPath()); }
+    if (bootClassPath != null) { options.put("-bootclasspath", _pathToString(bootClassPath)); }
+    if (sourceVersion != null) { options.put("-source", sourceVersion); }
+    if (!showWarnings) { options.put("-nowarn", ""); }
+    
+    return context;
   }
-
-  /** Adds the appropriate value for the -d argument. */
-  protected void _addSourceAndTargetOptions(Options options) {
-    
-    options.put("-source", "1.6");
-    options.put("-target", "1.6");
-    
-    if (!_builtPath.equals("")) {
-      options.put("-d", _builtPath);
+  
+  private static String _pathToString(List<? extends File> path) {
+    StringBuffer result = new StringBuffer();
+    boolean first = true;
+    for (File f : path) {
+      if (!first) { result.append(File.pathSeparatorChar); }
+      first = false;
+      result.append(f.getPath());
     }
+    return result.toString();
   }
-
-  /** Package protected utility method for getting a properly formatted string with several source paths from an array
-   *  of files.
-   */
-  private String getSourceRootString(File[] sourceRoots) {
-    StringBuffer roots = new StringBuffer();
-    for (int i = 0; i < sourceRoots.length; i++) {
-      roots.append(sourceRoots[i].getAbsolutePath());
-      if (i < sourceRoots.length - 1) {
-        roots.append(File.pathSeparator);
+    
+  
+  /** We need to embed a DiagnosticListener in our own Context.  This listener will build a CompilerError list. */
+  private static class CompilerErrorListener extends DiagnosticListener<JavaFileObject> {
+    
+    private List<? super CompilerError> _errors;
+    
+    public ErrorListener(Context context, List<? super CompilerError> errors) {
+      _errors = errors;
+      context.put(DiagnosticListener.class, this);
+    }
+    
+    public void report(Diagnostic<? extends JavaFileObject> d) {
+      
+      Diagnostic.Kind dt = d.getKind();
+      boolean isWarning = false;  // init required by javac
+      
+      switch (dt) {
+        case OTHER:             return;
+        case NOTE:              return;
+        case MANDATORY_WARNING: isWarning = true; break;
+        case WARNING:           isWarning = true; break;
+        case ERROR:             isWarning = false; break;
       }
+      
+      /* The new Java 6.0 Diagnostic interface appears to be broken.  The expression d.getSource().getName() returns a 
+        * non-existent path--the name of the test file (allocated as a TEMP file) appended to the source root for 
+        * DrJava--in GlobalModelCompileErrorsTest.testCompileFailsCorrectLineNumbers().  The expression 
+        * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
+      
+      
+      _errors.addLast(new CompilerError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
+                                        ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
+                                        ((int) d.getColumnNumber()) - 1, 
+                                        d.getMessage(null),    // null is the locale
+                                        isWarning));
     }
-    return roots.toString();
   }
-
-   /* Creates an instance of the 6.0 javac compiler with a context that includes our diagnostic listener. */
-   private void initCompiler(File[] sourceRoots) {
-     
-    _context = createContext(sourceRoots);
-    _context.put(DiagnosticListener.class, diagnosticListener);
-    
-    _compiler = JavaCompiler.instance(_context);
-//    Utilities.show("Compiler version " + _compiler.version() + " created");
-  }
-    
-  public void setBuildDirectory(File dir) {
-    if (dir == null) _builtPath = "";
-    else _builtPath = dir.getAbsolutePath(); 
-  }
+  
 }

@@ -147,11 +147,15 @@
   
     <echo message="Compiling src-${platform-tag} directory to classes/base-${platform-tag} and classes/test-${platform-tag}" />
     
-    <!-- To eliminate confusion, we force recompilation whenever this is invoked -->
-    <delete dir="classes/base-${platform-tag}" />
-    <delete dir="classes/test-${platform-tag}" />
+    <!-- Make the directories if they don't already exist -->
     <mkdir dir="classes/base-${platform-tag}" />
     <mkdir dir="classes/test-${platform-tag}" />
+    <!-- To eliminate confusion, we force recompilation whenever this is invoked (can't delete the directories
+         because they contain svn versioning data) -->
+    <delete>
+      <fileset dir="classes/base-${platform-tag}" includes="**/*" />  
+      <fileset dir="classes/test-${platform-tag}" includes="**/*" />  
+    </delete>
     
     <javac srcdir="src-${platform-tag}" destdir="classes/base-${platform-tag}" 
           source="${source-version}" target="${source-version}" sourcepath="" 
