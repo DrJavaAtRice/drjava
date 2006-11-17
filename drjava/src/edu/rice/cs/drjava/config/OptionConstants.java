@@ -346,85 +346,61 @@ public interface OptionConstants {
   
   public static final KeyStrokeOption KEY_CLOSE_PROJECT =
     new KeyStrokeOption("key.close.project",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_W, mask |
-                                               InputEvent.SHIFT_MASK));
-  /**
-   * The key binding for showing the print preview
-   */
+                        KeyStroke.getKeyStroke(KeyEvent.VK_W, mask | InputEvent.SHIFT_MASK));
+  
+  /** The key binding for showing the print preview */
   public static final KeyStrokeOption KEY_PAGE_SETUP =
-    new KeyStrokeOption("key.page.setup",
-                        KeyStrokeOption.NULL_KEYSTROKE);
-  /**
-   * The key binding for showing the print preview
-   */
+    new KeyStrokeOption("key.page.setup", KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /** The key binding for showing the print preview. */
   public static final KeyStrokeOption KEY_PRINT_PREVIEW =
-    new KeyStrokeOption("key.print.preview",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_P, mask |
-                                               InputEvent.SHIFT_MASK));
-  /**
-   * The key binding for printing a file
-   */
+    new KeyStrokeOption("key.print.preview", KeyStroke.getKeyStroke(KeyEvent.VK_P, mask | InputEvent.SHIFT_MASK));
+  
+  /** The key binding for printing a file */
   public static final KeyStrokeOption KEY_PRINT =
-    new KeyStrokeOption("key.print",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
-  /**
-   * The key binding for quitting
-   */
+    new KeyStrokeOption("key.print", KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
+  
+  /** The key binding for quitting */
   public static final KeyStrokeOption KEY_QUIT =
-    new KeyStrokeOption("key.quit",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_Q, mask));
-  /**
-   * The key binding for undo-ing
-   */
+    new KeyStrokeOption("key.quit", KeyStroke.getKeyStroke(KeyEvent.VK_Q, mask));
+  
+  /** The key binding for forced quitting */
+  public static final KeyStrokeOption KEY_FORCE_QUIT =
+    new KeyStrokeOption("key.force.quit", KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /** The key binding for undo-ing */
   public static final KeyStrokeOption KEY_UNDO =
-    new KeyStrokeOption("key.undo",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask));
-  /**
-   * The key binding for redo-ing
-   */
+    new KeyStrokeOption("key.undo", KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask));
+  
+  /** The key binding for redo-ing */
   public static final KeyStrokeOption KEY_REDO =
-    new KeyStrokeOption("key.redo",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask |
-                                               InputEvent.SHIFT_MASK));
-  /**
-   * The key binding for cutting
-   */
+    new KeyStrokeOption("key.redo", KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask | InputEvent.SHIFT_MASK));
+  
+  /** The key binding for cutting */
   public static final KeyStrokeOption KEY_CUT =
-    new KeyStrokeOption("key.cut",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_X, mask));
-  /**
-   * The key binding for copying
-   */
+    new KeyStrokeOption("key.cut", KeyStroke.getKeyStroke(KeyEvent.VK_X, mask));
+  
+  /** The key binding for copying */
   public static final KeyStrokeOption KEY_COPY =
-    new KeyStrokeOption("key.copy",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
-  /**
-   * The key binding for pasting
-   */
+    new KeyStrokeOption("key.copy", KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
+  
+  /** The key binding for pasting */
   public static final KeyStrokeOption KEY_PASTE =
-    new KeyStrokeOption("key.paste",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_V, mask));
-  /**
-   * The key binding for pasting from history
-   */
+    new KeyStrokeOption("key.paste", KeyStroke.getKeyStroke(KeyEvent.VK_V, mask));
+  
+  /** The key binding for pasting from history */
   public static final KeyStrokeOption KEY_PASTE_FROM_HISTORY =
-    new KeyStrokeOption("key.paste.from.history",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_V , mask | InputEvent.SHIFT_MASK));
-  /**
-   * The key binding for selecting all text
-   */
+    new KeyStrokeOption("key.paste.from.history", KeyStroke.getKeyStroke(KeyEvent.VK_V , mask | InputEvent.SHIFT_MASK));
+  
+  /** The key binding for selecting all text */
   public static final KeyStrokeOption KEY_SELECT_ALL =
-    new KeyStrokeOption("key.select.all",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_A, mask));
-  /**
-   * The key binding for find and replace
-   */
+    new KeyStrokeOption("key.select.all", KeyStroke.getKeyStroke(KeyEvent.VK_A, mask));
+  
+  /** The key binding for find and replace */
   public static final KeyStrokeOption KEY_FIND_NEXT =
-    new KeyStrokeOption("key.find.next",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
-  /**
-   * The key binding for find previous (opposite direction)
-   */
+    new KeyStrokeOption("key.find.next", KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
+  
+  /** The key binding for find previous (opposite direction) */
   public static final KeyStrokeOption KEY_FIND_PREV =
     new KeyStrokeOption("key.find.prev",
                         KeyStroke.getKeyStroke(KeyEvent.VK_F3,  InputEvent.SHIFT_MASK));

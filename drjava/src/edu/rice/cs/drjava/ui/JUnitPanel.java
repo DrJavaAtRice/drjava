@@ -33,6 +33,7 @@
 
 package edu.rice.cs.drjava.ui;
 
+import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerError;
@@ -252,7 +253,7 @@ public class JUnitPanel extends ErrorPanel {
       String className = _getClassFromName(name);
       String fullName = className + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
-      Document doc = getDocument();
+      SwingDocument doc = (SwingDocument) getDocument();
       int index = doc.getLength();
 
       try {
@@ -267,7 +268,7 @@ public class JUnitPanel extends ErrorPanel {
         doc.insertString(index, "    ", NORMAL_ATTRIBUTES);
         index = doc.getLength();
         doc.insertString(index, testName + "\n", NORMAL_ATTRIBUTES);
-        Position pos = doc.createPosition(index);
+        Position pos = doc.createDJPosition(index);
         _runningTestNamePositions.put(fullName, pos);
         setCaretPosition(index);
       }
@@ -283,15 +284,15 @@ public class JUnitPanel extends ErrorPanel {
       String fullName = _getClassFromName(name) + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
       
-      Document doc = getDocument();
+      DJDocument doc = (DJDocument) getDocument();
       Position namePos = _runningTestNamePositions.get(fullName);
       AttributeSet set;
-      if (!wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
+      if (! wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
       else set = TEST_PASS_ATTRIBUTES;
       if (namePos != null) {
         int index = namePos.getOffset();
         int length = testName.length();
-        if (doc instanceof SwingDocument) ((SwingDocument)doc).setCharacterAttributes(index, length, set, false);
+        doc.setCharacterAttributes(index, length, set, false);
       }
     }
 
@@ -363,7 +364,7 @@ public class JUnitPanel extends ErrorPanel {
       int start = 0;
       if (_warnedOutOfSync) { start = TEST_OUT_OF_SYNC.length(); }
       int len = START_JUNIT_MSG.length();
-      Document doc = getDocument();
+      SwingDocument doc = (SwingDocument) getDocument();
       if (doc.getLength() >= len + start) {
         doc.remove(start, len);
         doc.insertString(start, msg, BOLD_ATTRIBUTES);

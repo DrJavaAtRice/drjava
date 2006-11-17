@@ -419,6 +419,10 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call quit on a Dummy");
   }
   
+  public void forceQuit() {
+     throw new UnsupportedOperationException("Tried to call forceQuit on a Dummy");
+  }
+  
   public int getDocumentCount() {
      throw new UnsupportedOperationException("Tried to call getDocumentCount on a Dummy");
   }

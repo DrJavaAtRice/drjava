@@ -925,7 +925,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       synchronized(_reduced) {
         if (selStart == selEnd) {  // single line to indent
 //          Utilities.showDebug("selStart = " + selStart + " currentLocation = " + _currentLocation);
-          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
+          Position oldCurrentPosition = createPosition(_currentLocation);
           
           // Indent, updating current location if necessary.
 //          Utilities.showDebug("Indenting line at offset " + selStart);
@@ -961,14 +961,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     // Keep marker at the end. This Position will be the correct endpoint no matter how we change 
     // the doc doing the indentLine calls.
-    final Position endPos = this.createUnwrappedPosition(end);
+    final Position endPos = this.createPosition(end);
     // Iterate, line by line, until we get to/past the end
     int walker = start;
     while (walker < endPos.getOffset()) {
       setCurrentLocation(walker);
       // Keep pointer to walker position that will stay current
       // regardless of how indentLine changes things
-      Position walkerPos = this.createUnwrappedPosition(walker);
+      Position walkerPos = this.createPosition(walker);
       // Indent current line
       // We ignore current location info from each line, because it probably doesn't make sense in a block context.
       _indentLine(reason);  // this operation is atomic

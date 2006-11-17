@@ -34,7 +34,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
-import edu.rice.cs.util.text.AbstractDocumentInterface;
+import edu.rice.cs.util.text.SwingDocumentInterface;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 
@@ -47,7 +47,7 @@ import javax.swing.ProgressMonitor;
 /** Interface to be collectively shared by the Definitions Document, Open Definitions Document,
  *  and the Interactions Document. Collectively represents a DrJava Document
  */
-public interface DJDocument extends StyledDocument, AbstractDocumentInterface {
+public interface DJDocument extends SwingDocumentInterface {
   
   /** Gets the indent level.
    *  @return the indent level

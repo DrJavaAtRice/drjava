@@ -33,9 +33,9 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
+
 import javax.swing.text.*;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
-
 /**
  * This is an editor kit for editing Java source files.
  * It functions as the controller in the MVC arrangement.
@@ -76,7 +76,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
    *
    *  Improvements to this approach are welcome...  :)
    */
-  public Document createNewDocument() { return  _createDefaultTypedDocument(); }
+  public DefinitionsDocument createNewDocument() { return  _createDefaultTypedDocument(); }
 
   /** Creates a new DefinitionsDocument.
    *  @return a new DefinitionsDocument.

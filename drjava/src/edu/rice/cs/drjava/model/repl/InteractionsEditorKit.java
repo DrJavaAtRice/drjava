@@ -46,7 +46,6 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.definitions.ColoringGlyphPainter;
-
 import javax.swing.text.*;
 import java.awt.*;
 
@@ -98,7 +97,7 @@ public class InteractionsEditorKit extends StyledEditorKit {
   /** We want to use our ColoringView to render text, so here we return a factory that creates ColoringViews. */
   public final ViewFactory getViewFactory() { return _factory; }
   
-  public Document createDefaultDocument() {
+  public InteractionsDJDocument createDefaultDocument() {
     return new InteractionsDJDocument();
   }
   

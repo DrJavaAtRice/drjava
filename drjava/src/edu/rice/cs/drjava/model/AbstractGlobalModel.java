@@ -1188,15 +1188,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
  
   /** Open multiple files and add them to the pool of definitions documents.  The provided file selector chooses
-  *  a collection of files, and on successfully opening each file, the fileOpened() event is fired.  This method
-  *  also checks if there was previously a single unchanged, untitled document open, and if so, closes it after
-  *  a successful opening.
-  *  @param com a command pattern command that selects what file
-  *            to open
-  *  @return The open document, or null if unsuccessful
-  *  @exception IOException
-  *  @exception OperationCanceledException if the open was canceled
-  *  @exception AlreadyOpenException if the file is already open
+  * a collection of files, and on successfully opening each file, the fileOpened() event is fired.  This method
+  * also checks if there was previously a single unchanged, untitled document open, and if so, closes it after
+  * a successful opening.
+  * @param com a command pattern command that selects what file to open
+  * @return The open document, or null if unsuccessful
+  * @exception IOException
+  * @exception OperationCanceledException if the open was canceled
+  * @exception AlreadyOpenException if the file is already open
   */
   public OpenDefinitionsDocument[] openFiles(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException {
@@ -1261,7 +1260,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     //        SHOW_GETDOC = false;
     for (File f: filesNotFound) { _notifier.fileNotFound(f); }
     
-    if (!alreadyOpenDocuments.isEmpty()) {
+    if (! alreadyOpenDocuments.isEmpty()) {
       for(OpenDefinitionsDocument d : alreadyOpenDocuments) {
         _notifier.handleAlreadyOpenDocument(d);
         _notifier.fileOpened(d);
@@ -1342,7 +1341,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       doc.saveFile(com);
     }
   }
- 
  
   /** Creates a new FileGroupingState for specificed project file and default values for other properties.
    *  @param projFile the new project file (which does not yet exist in the file system)
@@ -1833,12 +1831,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return true;
   }
  
-  /** Exits the program. */
+   /** Exits the program.  Only quits if all documents are successfully closed. */
   public void quit() { quit(false); }
   
-  /** Exits the program.  If force is true, quits regardless of whether all documents are successfully closed. 
-   *  This functionality is not available via the user interface, but it should be. */
-  public void quit(boolean force) {
+   /** Halts the program immediately. */
+  public void forceQuit() { quit(true); }
+  
+  /** Exits the program.  If force is true, quits regardless of whether all documents are successfully closed. */
+  private void quit(boolean force) {
 //    _log.log("quit(" + force + ") called");
     try {
       if (! force && ! closeAllFilesOnQuit()) return;
@@ -1852,13 +1852,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
        * Runtime.halt if our attempt to exit times out.
        */
       
-      shutdown();
+      shutdown(force);
     }
-    catch(Throwable t) { shutdown(); /* force exit anyway */ }
+    catch(Throwable t) { shutdown(true); /* force exit anyway */ }
   }
   
   /* Terminates DrJava via System.exit with Runtime.halt as a backup if the former gets hung up. */
-  private void shutdown() {
+  private void shutdown(boolean force) {
+    if (force) Runtime.getRuntime().halt(0);
+    
     dispose();  // kills interpreter and cleans up RMI hooks in the slave JVM
     
     if (DrJava.getConfig().getSetting(OptionConstants.DRJAVA_USE_FORCE_QUIT)) {
@@ -2530,8 +2532,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     if (doc != null) {
       try {
-        startPos = doc.createPosition(doc.getCaretPosition()).getOffset();
-        endPos = doc.createPosition(doc.getLineEndPos(doc.getCaretPosition())).getOffset();
+        startPos = doc.createDJPosition(doc.getCaretPosition()).getOffset();
+        endPos = doc.createDJPosition(doc.getLineEndPos(doc.getCaretPosition())).getOffset();
         file = doc.getFile();
       }
       catch (FileMovedException fme) { /* ignore */ }
@@ -3675,11 +3677,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     public Position createPosition(int offs) throws BadLocationException {
-      return getDocument().createPosition(offs);  // should we create wrapped positions instead?
+      return getDocument().createPosition(offs); 
     }
     
-    public Position createUnwrappedPosition(int offs) throws BadLocationException {
-      return getDocument().createUnwrappedPosition(offs);
+    public Position createDJPosition(int offs) throws BadLocationException {
+      return getDocument().createDJPosition(offs);
     }
 
     public Element getDefaultRootElement() { return getDocument().getDefaultRootElement(); }

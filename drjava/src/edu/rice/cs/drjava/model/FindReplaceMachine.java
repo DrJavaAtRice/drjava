@@ -141,7 +141,7 @@ public class FindReplaceMachine {
   public void setPosition(int pos) {
 //    System.err.println("Setting position " + pos + " in doc [" + _doc.getText() + "]");
 //    assert (pos >= 0) && (pos <= _doc.getLength());
-    try { _current = _doc.createUnwrappedPosition(pos); }
+    try { _current = _doc.createPosition(pos); }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
 
@@ -534,7 +534,7 @@ public class FindReplaceMachine {
 //        Utilities.show("Finished iteration with text = " + text + "; len = " + len);
         if (_shouldIgnore(foundLocation, doc)) continue;
         
-        _current = doc.createUnwrappedPosition(matchLocation);   // formerly doc.createPosition(...)
+        _current = doc.createPosition(matchLocation);   // formerly doc.createPosition(...)
         
 //        System.err.println("Returning result = " + new FindResult(doc, matchLocation, wrapped, allWrapped));
 

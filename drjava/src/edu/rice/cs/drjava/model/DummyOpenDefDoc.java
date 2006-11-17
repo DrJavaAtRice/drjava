@@ -212,7 +212,6 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public boolean inNewProjectPath(File f) { throw new UnsupportedOperationException("Dummy method"); }
   public boolean inProject() { return false; }
   public boolean isAuxiliaryFile() { return false; }
-  public boolean belongsHuh(Document doc) { return false; }
   public int getLineStartPos(int pos) { throw new UnsupportedOperationException("Dummy method"); }
   public int getLineEndPos(int pos) { throw new UnsupportedOperationException("Dummy method"); }
   
@@ -229,8 +228,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     return _defDoc.createPosition(offs);
   }
   
-  public Position createUnwrappedPosition(int offs) throws BadLocationException {
-    return _defDoc.createUnwrappedPosition(offs);
+  public Position createDJPosition(int offs) throws BadLocationException {
+    return _defDoc.createDJPosition(offs);
   }
   
   public Element getDefaultRootElement() { return _defDoc.getDefaultRootElement(); }

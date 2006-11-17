@@ -98,8 +98,6 @@ public interface EditDocumentInterface extends ReadersWritersLocking, Serializab
    */
   public String getDocText(int offs, int len);
   
-  
-  
   /** Appends a string to this in the given named style, if the edit condition allows it.
    *  @param str String to be inserted
    *  @param style Name of the style to use.  Must have been added using addStyle.
@@ -117,5 +115,4 @@ public interface EditDocumentInterface extends ReadersWritersLocking, Serializab
   
   /** Prints the given console document */
   public void print() throws PrinterException;
-  
 }

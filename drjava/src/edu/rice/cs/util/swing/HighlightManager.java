@@ -39,9 +39,11 @@ import java.util.Vector;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Highlighter;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.Position;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.SwingDocumentInterface;
 
 /** This class has synchronized public methods because it is accessed outside of the event thread. */
 public class HighlightManager {
@@ -207,8 +209,16 @@ public class HighlightManager {
 
         _highlightTag = null;
         try {
-          _startPos = _component.getDocument().createPosition(from);
-          _endPos = _component.getDocument().createPosition(to);
+          Document doc = _component.getDocument();
+          if (doc instanceof SwingDocumentInterface) {
+            SwingDocumentInterface sdoc = (SwingDocumentInterface) doc;
+            _startPos = sdoc.createDJPosition(from);
+            _endPos = sdoc.createDJPosition(to);
+          }
+          else {
+            _startPos = doc.createPosition(from);
+            _endPos = doc.createPosition(to);
+          }
         }
         catch (BadLocationException ble) {
           throw new UnexpectedException(ble);

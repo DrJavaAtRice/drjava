@@ -59,7 +59,7 @@ import edu.rice.cs.drjava.model.definitions.*;
  * @version $Id$
  */
 public interface OpenDefinitionsDocument extends DJDocument, Finalizable<DefinitionsDocument>,
-  Comparable<OpenDefinitionsDocument>, INavigatorItem, AbstractDocumentInterface {
+  Comparable<OpenDefinitionsDocument>, INavigatorItem {
   
   //----- Forwarding Methods -----/
 
@@ -342,5 +342,5 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public int getCaretPosition();
   
   /** Creates a WrappedPosition in the document. */
-  public Position createUnwrappedPosition(int offs) throws BadLocationException;
+  public Position createPosition(int offs) throws BadLocationException;
 }

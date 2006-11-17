@@ -376,6 +376,9 @@ public interface GlobalModel extends ILoadDocuments {
   /** Exits the program.  Only quits if all documents are successfully closed. */
   public void quit();
   
+  /** Halts the program immediately. */
+  public void forceQuit();
+  
   /** Returns the document count */
   public int getDocumentCount();
   

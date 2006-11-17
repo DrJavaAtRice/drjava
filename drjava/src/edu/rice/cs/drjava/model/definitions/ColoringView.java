@@ -46,6 +46,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.util.text.EditDocumentInterface;
 
 /**
  * This view class renders text on the screen using the reduced model info.
@@ -199,7 +200,7 @@ public class ColoringView extends PlainView implements OptionConstants {
      DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 +
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);
      */
-    Document doc = getDocument();
+    EditDocumentInterface doc = (EditDocumentInterface) getDocument();
     if (doc instanceof InteractionsDJDocument) ((InteractionsDJDocument)doc).setBoldFonts(p1,g);
     
     return  super.drawSelectedText(g, x, y, p0, p1);

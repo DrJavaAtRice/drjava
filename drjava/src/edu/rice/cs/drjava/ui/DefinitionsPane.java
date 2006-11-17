@@ -986,7 +986,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       // Scroll to make sure this item is visible
       // Centers the selection in the viewport
       Rectangle startRect;
-      startRect = this.modelToView(offset);
+      startRect = modelToView(offset);
 
       if (startRect != null) {
         int startRectX = (int) startRect.getX();
@@ -999,7 +999,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         // that encompasses the entire selection
         startRect.add(endPoint);
 
-        this.scrollRectToVisible(startRect);
+        scrollRectToVisible(startRect);
       }
       removeSetSizeListener();
 

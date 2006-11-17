@@ -532,7 +532,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       try {     
         synchronized(_reduced) {
           setCurrentLocation(selStart);
-          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
+          Position oldCurrentPosition = createPosition(_currentLocation);
           _commentLine();   
           toReturn += WING_COMMENT_OFFSET;
           //int caretPos = getCaretPosition();
@@ -560,7 +560,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     try {
       // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc doing the
       // indentLine calls.
-      final Position endPos = this.createUnwrappedPosition(end);
+      final Position endPos = this.createPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = start;
       synchronized(_reduced) {
@@ -568,7 +568,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           setCurrentLocation(walker);
           // Keep pointer to walker position that will stay current
           // regardless of how commentLine changes things
-          Position walkerPos = this.createUnwrappedPosition(walker);
+          Position walkerPos = this.createPosition(walker);
           // Comment out current line
           _commentLine();  // must be atomic
           afterCommentEnd += WING_COMMENT_OFFSET;
@@ -611,7 +611,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       try {
         synchronized(_reduced) {
           setCurrentLocation(selStart);
-          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
+          Position oldCurrentPosition = createPosition(_currentLocation);
           _uncommentLine();  // accesses _reduced
           toReturn -= WING_COMMENT_OFFSET;
           //int caretPos = getCaretPosition();
@@ -639,7 +639,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     try {
       // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc
       // doing the indentLine calls.
-      final Position endPos = this.createUnwrappedPosition(end);
+      final Position endPos = this.createPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = start;
       synchronized(_reduced) {
@@ -647,7 +647,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           setCurrentLocation(walker);
           // Keep pointer to walker position that will stay current
           // regardless of how commentLine changes things
-          Position walkerPos = this.createUnwrappedPosition(walker);
+          Position walkerPos = this.createPosition(walker);
           // uncomment current line
           afterUncommentEnd-= _uncommentLine();  // accesses _reduced
           // Move back to walker spot
@@ -1489,8 +1489,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Factory method for created WrappedPositions. Stores the created Position instance
    *  so it can be linked to a different DefinitionsDocument later. */
-  public Position createPosition(int offs) throws BadLocationException {
-    WrappedPosition wp = new WrappedPosition(createUnwrappedPosition(offs));
+  public Position createDJPosition(int offs) throws BadLocationException {
+    WrappedPosition wp = new WrappedPosition(createPosition(offs));
     synchronized(_wrappedPosListLock) {
       if (_wrappedPosList == null) _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); 
       _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));
@@ -1533,7 +1533,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         if (entry.getKey() != null) {
           // hasn't been garbage-collected yet
           WrappedPosition wp = entry.getKey();
-          wp.setWrapped(createUnwrappedPosition(entry.getValue()));
+          wp.setWrapped(createPosition(entry.getValue()));
           _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));
         }
       }

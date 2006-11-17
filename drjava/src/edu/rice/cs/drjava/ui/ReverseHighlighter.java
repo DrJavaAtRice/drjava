@@ -1,3 +1,36 @@
+/*BEGIN_COPYRIGHT_BLOCK
+ *
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
+ *
+ * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2006 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
+ *
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
+ *END_COPYRIGHT_BLOCK*/
+
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.text.*;
@@ -6,22 +39,18 @@ import java.awt.*;
 import javax.swing.plaf.*;
 import javax.swing.*;
 
-/**
- * Implements the Highlighter interfaces.  Implements a simple highlight painter, but stores
- * the highlights in reverse order. That means that the selection (for copying) is always
- * the foremost hightlight, and after that, the highlights are drawn from most recent
- * to oldest.
- * Based on DefaultHighlighter by Timothy Prinzing, version 1.39 12/19/03
- * Unfortunately, as the vector of highlights in DefaultHighlighter was private, there was
- * no efficient way to make use of inheritance.
- */
+import edu.rice.cs.util.text.SwingDocumentInterface;
+
+/** Implements the Highlighter interfaces.  Implements a simple highlight painter, but stores the highlights in reverse 
+  * order. That means that the selection (for copying) is always the foremost hightlight, and after that, the highlights
+  * are drawn from most recent to oldest.  Based on DefaultHighlighter by Timothy Prinzing, version 1.39 12/19/03
+  * Unfortunately, as the vector of highlights in DefaultHighlighter was private, there was no efficient way to make use
+  * of inheritance.
+  */
 public class ReverseHighlighter extends DefaultHighlighter { 
-  /**
-   * Creates a new ReverseHighlighter object.
-   */
-  public ReverseHighlighter() {
-    drawsLayeredHighlights = true;
-  }
+  
+  /** Creates a new ReverseHighlighter object. */
+  public ReverseHighlighter() { drawsLayeredHighlights = true; }
   
   // ---- Highlighter methods ----------------------------------------------
   
@@ -87,13 +116,21 @@ public class ReverseHighlighter extends DefaultHighlighter {
     * @exception BadLocationException if the specified location is invalid
     */
   public Object addHighlight(int p0, int p1, Highlighter.HighlightPainter p) throws BadLocationException {
+    
     Document doc = component.getDocument();
     HighlightInfo i = (getDrawsLayeredHighlights() &&
                        (p instanceof LayeredHighlighter.LayerPainter)) ?
       new LayeredHighlightInfo() : new HighlightInfo();
     i.painter = p;
-    i.p0 = doc.createPosition(p0);
-    i.p1 = doc.createPosition(p1);
+    if (doc instanceof SwingDocumentInterface) {
+      SwingDocumentInterface sdoc = (SwingDocumentInterface) doc;
+      i.p0 = sdoc.createDJPosition(p0);
+      i.p1 = sdoc.createDJPosition(p1);
+    }
+    else {
+      i.p0 = doc.createPosition(p0);
+      i.p1 = doc.createPosition(p1);
+    }
     int insertPos = 0;
     if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
       // insert solid painters after the frame and underline painters
@@ -110,11 +147,9 @@ public class ReverseHighlighter extends DefaultHighlighter {
     return i;
   }
   
-  /**
-   * Removes a highlight from the view.
-   *
-   * @param tag the reference to the highlight
-   */
+  /** Removes a highlight from the view.
+    * @param tag the reference to the highlight
+    */
   public void removeHighlight(Object tag) {
     if (tag instanceof LayeredHighlightInfo) {
       LayeredHighlightInfo lhi = (LayeredHighlightInfo)tag;
@@ -129,9 +164,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     highlights.removeElement(tag);
   }
   
-  /**
-   * Removes all highlights.
-   */
+  /** Removes all highlights. */
   public void removeAllHighlights() {
     TextUI mapper = component.getUI();
     if (getDrawsLayeredHighlights()) {
@@ -211,8 +244,16 @@ public class ReverseHighlighter extends DefaultHighlighter {
       // Mark the highlights region as invalid, it will reset itself
       // next time asked to paint.
       lhi.width = lhi.height = 0;
-      lhi.p0 = doc.createPosition(p0);
-      lhi.p1 = doc.createPosition(p1);
+      
+      if (doc instanceof SwingDocumentInterface) {
+        SwingDocumentInterface sdoc = (SwingDocumentInterface) doc;
+        lhi.p0 = sdoc.createDJPosition(p0);
+        lhi.p1 = sdoc.createDJPosition(p1);
+      }
+      else {
+        lhi.p0 = doc.createPosition(p0);
+        lhi.p1 = doc.createPosition(p1);
+      }
       safeDamageRange(Math.min(p0, p1), Math.max(p0, p1));
     }
     else {
@@ -225,8 +266,15 @@ public class ReverseHighlighter extends DefaultHighlighter {
         safeDamageRange(oldP0, oldP1);
         safeDamageRange(p0, p1);
       }
-      info.p0 = doc.createPosition(p0);
-      info.p1 = doc.createPosition(p1);
+      if (doc instanceof SwingDocumentInterface) {
+        SwingDocumentInterface sdoc = (SwingDocumentInterface) doc;
+        info.p0 = sdoc.createDJPosition(p0);
+        info.p1 = sdoc.createDJPosition(p1);
+      }
+      else {
+        info.p0 = doc.createPosition(p0);
+        info.p1 = doc.createPosition(p1);
+      }
       // TODO: figure out what is wrong here.  The preceding lines are dead code.
     }
   }
@@ -286,7 +334,18 @@ public class ReverseHighlighter extends DefaultHighlighter {
   /** Queues damageRange() call into event dispatch thread to be sure that views are in consistent state. */
   private void safeDamageRange(int a0, int a1) throws BadLocationException {
     Document doc = component.getDocument();
-    safeDamageRange(doc.createPosition(a0), doc.createPosition(a1));
+    Position p0, p1;
+    if (doc instanceof SwingDocumentInterface) {
+      SwingDocumentInterface sdoc = (SwingDocumentInterface) doc;
+      p0 = sdoc.createDJPosition(a0);
+      p1 = sdoc.createDJPosition(a1);
+    }
+    else {
+      p0 = doc.createPosition(a0);
+      p1 = doc.createPosition(a1);
+    }
+      
+    safeDamageRange(p0, p1);
   }
   
   /**
@@ -732,9 +791,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
       p0.add(pos0);
       p1.add(pos1);
       
-      if (addToQueue) {
-        SwingUtilities.invokeLater(this);
-      }
+      if (addToQueue) SwingUtilities.invokeLater(this);
     }
   }
 }

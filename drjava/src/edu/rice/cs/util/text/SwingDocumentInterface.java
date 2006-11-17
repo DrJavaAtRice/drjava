@@ -35,37 +35,11 @@ package edu.rice.cs.util.text;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-//import javax.swing.text.Document;
+import javax.swing.text.StyledDocument;
 import javax.swing.text.Position;
 
-/** Swing Document interface augmented by readers/writers locking operations */
-public interface AbstractDocumentInterface extends ReadersWritersLocking { 
-  
-  /* Methods from Document interface used in FindReplaceMachine */
-  
-  Position createPosition(int offs) throws BadLocationException;
-
-  /* Returns the length of the document. */
-  int getLength();
-  
-  /* Returns the specified substring of the document. */
-  String getText(int offset, int length) throws BadLocationException;
-  
-  /* Returns the entire text of this document. */
-  String getText();
-  
-  /* Inserts given string with specified attributes at the specified offset. */
-  void insertString(int offset, String str, AttributeSet a) throws BadLocationException;
-  
-  /* Removes the substring of specified length at the specified offset. */
-  void remove(int offset, int length) throws BadLocationException;
-  
-  /** Appends given string with specified attributes to end of this document. */
-  void append(String str, AttributeSet set);
-  
-  /** Creates Positions that persist when a DefinitionsDocument is kicked out of the cache. */
-  Position createDJPosition(int offs) throws BadLocationException;
-}
+/** DefaultStyledDocument interface augmented by AbstractDocumentInterface. */
+public interface SwingDocumentInterface extends AbstractDocumentInterface, StyledDocument { }
 
 
     

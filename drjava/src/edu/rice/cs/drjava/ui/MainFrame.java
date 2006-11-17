@@ -65,6 +65,7 @@ import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
@@ -72,31 +73,33 @@ import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
 import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
+import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.drjava.project.*;
+
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
-import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.swing.AsyncTask;
-import edu.rice.cs.util.swing.AsyncTaskLauncher;
-import edu.rice.cs.util.swing.DelegatingAction;
-import edu.rice.cs.util.swing.DirectoryChooser;
-import edu.rice.cs.util.swing.HighlightManager;
-import edu.rice.cs.util.swing.SwingWorker;
-import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
-import edu.rice.cs.util.swing.BorderlessScrollPane;
-import edu.rice.cs.util.swing.BorderlessSplitPane;
-import edu.rice.cs.util.swing.FileDisplayManager;
-import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
-import edu.rice.cs.drjava.project.*;
-import edu.rice.cs.util.swing.*;
-import edu.rice.cs.util.*;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.util.swing.AsyncTask;
+import edu.rice.cs.util.swing.AsyncTaskLauncher;
+import edu.rice.cs.util.swing.BorderlessScrollPane;
+import edu.rice.cs.util.swing.BorderlessSplitPane;
+import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
+import edu.rice.cs.util.swing.DelegatingAction;
+import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.swing.FileDisplayManager;
+import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
+import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.swing.*;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
+
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 /** DrJava's main window. */
@@ -905,6 +908,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Quits DrJava.  Optionally displays a prompt before quitting. */
   private final Action _quitAction = new AbstractAction("Quit") {
     public void actionPerformed(ActionEvent ae) { _quit(); }
+  };
+  
+  
+   /** Quits DrJava.  Optionally displays a prompt before quitting. */
+  private final Action _forceQuitAction = new AbstractAction("Force Quit") {
+    public void actionPerformed(ActionEvent ae) { _forceQuit(); }
   };
   
   /** Selects all text in window. */
@@ -2101,8 +2110,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       }
       DocumentRegion r = _model.getBookmarkManager().getRegionOverlapping(doc, startSel, endSel);
       if (r == null) {
-        final Position startPos = doc.createPosition(startSel);
-        final Position endPos = doc.createPosition(endSel);
+        final Position startPos = doc.createDJPosition(startSel);
+        final Position endPos = doc.createDJPosition(endSel);
         SimpleDocumentRegion newR = new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset());
         _model.getBookmarkManager().addRegion(newR);
       }
@@ -3307,7 +3316,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Makes sure save and compile buttons and menu items are enabled and disabled appropriately after document
    *  modifications.
    */
-  private void _installNewDocumentListener(final Document d) {
+  private void _installNewDocumentListener(final OpenDefinitionsDocument d) {
     d.addDocumentListener(new DocumentUIListener() {
       public void changedUpdate(DocumentEvent e) { 
         
@@ -4008,7 +4017,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         }
       }
     }
-
     // tried passing false here. seemed to help with bug
     // [ 1478796 ] DrJava Does Not Shut Down With Project Open
     // on HP tc1100 and Toshiba Portege tablet PCs, but did not help in all cases
@@ -4028,6 +4036,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     dispose();    // Free GUI elements of this frame
     _model.quit();
   }
+  
+  private void _forceQuit() { _model.forceQuit(); }
   
   /** Stores the current position and size info for window and panes to the config framework. */
   private void _storePositionInfo() {
@@ -4945,6 +4955,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrJava");
     _setUpAction(_aboutAction, "About", "About DrJava");
     _setUpAction(_errorsAction, "DrJava Errors", "drjavaerror", "Show a window with internal DrJava errors");
+    _setUpAction(_forceQuitAction, "Force Quit", "Force DrJava to quit without cleaning up");
   }
   
   private void _setUpAction(Action a, String name, String icon, String shortDesc) {
@@ -5327,6 +5338,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART);
     _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT);
     _addMenuItem(helpMenu, _errorsAction, KEY_DRJAVA_ERRORS);
+    _addMenuItem(helpMenu, _forceQuitAction, KEY_FORCE_QUIT);
     return helpMenu;
   }
   
@@ -5711,7 +5723,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         clearStatusMessage();
         
         if (_tabbedPane.getSelectedComponent() == _consoleScroll)
-          // Use SwingUtilities because this action must execute AFTER all pending events in the event queue
+          // Use SwingUtilities because this action must execute AFTER all pending events in the 33
           SwingUtilities.invokeLater(new Runnable() { public void run() { _consolePane.requestFocusInWindow(); } });
           
         // Update error highlights?
@@ -6435,7 +6447,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //    _currentDefPane.notifyInactive();
     openDoc.setCurrentLocation(start);
     Position startPos;
-    try { startPos = openDoc.createUnwrappedPosition(start); }
+    try { startPos = openDoc.createPosition(start); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     
     int startOffset = startPos.getOffset();        
