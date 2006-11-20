@@ -265,11 +265,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _vm = connector.attach(args);
       _eventManager = _vm.eventRequestManager();
     }
-    catch (IOException ioe) {
-      throw new DebugException("Could not connect to VM: " + ioe);
-    }
-    catch (IllegalConnectorArgumentsException icae) {
-      throw new DebugException("Could not connect to VM: " + icae);
+    catch(Exception e1) {
+      try { _vm = connector.attach(args); }
+      catch(Exception e2) {
+        try { _vm = connector.attach(args); }
+        catch(Exception e3) { throw new DebugException("Could not connect to VM: " + e3); } // three strikes and you are out
+      }
     }
 
     _interpreterJVM = _getInterpreterJVMRef();

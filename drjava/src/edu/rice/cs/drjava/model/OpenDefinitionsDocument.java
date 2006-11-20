@@ -341,6 +341,9 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** @return the caret position as set by the view. */
   public int getCaretPosition();
   
-  /** Creates a WrappedPosition in the document. */
+  /** Creates a Position in the document.  Forwards to the embedded SwingDocument. */
   public Position createPosition(int offs) throws BadLocationException;
+  
+  /** Reconstruct the embedded positions in a document (which may been lost because document was kicked out of cache. */
+  public void makePositions();
 }

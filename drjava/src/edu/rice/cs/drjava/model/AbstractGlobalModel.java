@@ -1894,6 +1894,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   //----------------------- Specified by IGetDocuments -----------------------//
 
+  /** Gets the document for the specified file; may involve opening the file. */
   public OpenDefinitionsDocument getDocumentForFile(File file) throws IOException {
     // Check if this file is already open
     OpenDefinitionsDocument doc = _getOpenDocument(file);
@@ -2866,7 +2867,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     void setInitialHScroll(int i)  { _initHScroll = i; }
     void setInitialSelStart(int i) { _initSelStart = i; }
     void setInitialSelEnd(int i)   { _initSelEnd = i; }
-    
+  
     /** Gets the definitions document being handled.
      *  @return document being handled
      */
@@ -2887,6 +2888,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         catch(Throwable t) { throw new UnexpectedException(t); }
       }
     }
+    
+    /** Reconstructs the embedded positions for this document. */
+    public void makePositions() { _cacheAdapter.makePositions(); }
 
     /** Returns the name of the top level class, if any.
      *  @throws ClassNameNotFoundException if no top level class name found.
@@ -3029,18 +3033,20 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return new DDReconstructor() {
         
         // Brand New documents start at location 0
-        private int _loc = 0;
+        private volatile int _loc = 0;
         
         // Start out with empty lists of listeners on the very first time the document is made
-        private DocumentListener[] _list = { };
-        private List<FinalizationListener<DefinitionsDocument>> _finalListeners =
+        private volatile DocumentListener[] _list = { };
+        private volatile List<FinalizationListener<DefinitionsDocument>> _finalListeners =
           new LinkedList<FinalizationListener<DefinitionsDocument>>();
         
         // Weak hashmap that associates a WrappedPosition with its offset when saveDocInfo was called
-        private WeakHashMap< DefinitionsDocument.WrappedPosition, Integer> _positions =
+        private volatile WeakHashMap< DefinitionsDocument.WrappedPosition, Integer> _positions =
           new WeakHashMap<DefinitionsDocument.WrappedPosition, Integer>();
         
-        /** Reconstruct this document.  Assumes _cacheLock is held.
+        private volatile boolean _positionsMade = false;
+        
+        /** Reconstructs this document except for embedded positions.  Assumes _cacheLock is held.
           * @param image the bytes in the cached file image for this document. 
           */
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException {
@@ -3067,9 +3073,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           for (FinalizationListener<DefinitionsDocument> l: _finalListeners) {
             newDefDoc.addFinalizationListener(l);
           }
-
-          // re-create and update all positions
-          newDefDoc.setWrappedPositionOffsets(_positions);
+          
+          _positionsMade = false;
           
           newDefDoc.resetModification();  // Why is this necessary? A reconstructed document is already unmodified.
 
@@ -3080,6 +3085,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           _packageName = newDefDoc.getPackageName();
 //          System.err.println("make() returned " + newDefDoc);
           return newDefDoc;
+
+        }
+        
+        /** Reconstructs the embedded positions for this document.  Synchronized*/
+        public void makePositions() { 
+          if (_positionsMade) return;
+          synchronized(this) {
+            if (_positionsMade) return; // double-check works for volatile fields in Java 1.4 and later code
+            _positionsMade = true;
+          }
+          try { getDocument().setWrappedPositionOffsets(_positions); }
+          catch(Exception e) { /* ignore */ } // omitted positions are not fatal
         }
         
         /** Saves the information for this document before it is kicked out of the cache.  Only called from 
@@ -3987,11 +4004,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return new ConcreteOpenDefDoc(f);
   }
  
-  /** Returns the OpenDefinitionsDocument corresponding to the given  File, or null if that file is not open.
+  /** Returns the OpenDefinitionsDocument corresponding to the given File, or null if that file is not open.
    *  @param file File object to search for
    *  @return Corresponding OpenDefinitionsDocument, or null
    */
   protected OpenDefinitionsDocument _getOpenDocument(File file) {
+    
+//    System.err.println("_getOpenDocument(" + file + ") called");
     
     for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
       try {
@@ -4166,6 +4185,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     try {
       Utilities.invokeAndWait(new SRunnable() {  
         public void run() {
+          doc.makePositions();  // reconstruct the embedded postions in this document (reconstructs document if necesarry)
           _documentNavigator.setNextChangeModelInitiated(true);
           addToBrowserHistory();
           _documentNavigator.setActiveDoc(doc);

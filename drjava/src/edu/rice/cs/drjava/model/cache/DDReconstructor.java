@@ -47,6 +47,9 @@ public interface DDReconstructor {
   /** @return a new DefinitionsDocument */
   public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException;
   
+  /** Reconstructs the embedded positions in the reconstructed DefinitionsDocument */
+  public void makePositions();
+  
   /** Saves information (like cursor location, highlight, etc.) from the DefinitionsDocument before the cache deletes it
    *  so that those pieces of info can be restored when reconstructing the DefinitionsDocument again.
    *  @param doc the DefinitionsDocument whose data needs saving

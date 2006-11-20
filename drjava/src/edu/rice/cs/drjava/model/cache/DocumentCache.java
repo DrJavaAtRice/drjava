@@ -176,9 +176,9 @@ public class DocumentCache {
 //      The following line is commented out because the double-check can be broken by multi-processor caching or
 //      compiler optimization.  Under Java 5.0, the line is safe provided that _doc is declared volatile.     
 
-//      if (_doc != null) return _doc;  
+      if (_doc != null) return _doc;  
       synchronized(_cacheLock) { // lock the cache so that this DocManager's state can be updated
-        if (_doc != null) return _doc;  // _doc may have changed since test outside of _cacheLock
+        if (_doc != null) return _doc;  // double-check works for volatile fields in Java 1.4 and later
         try { // _doc is not in memory
           _doc = _rec.make();
           assert _doc != null;
@@ -189,6 +189,8 @@ public class DocumentCache {
         return _doc;
       }
     }
+    
+    public void makePositions() { _rec.makePositions(); }
     
     /** Checks whether the document is resident (in the cache or modified). 
      *  @return if the document is resident.

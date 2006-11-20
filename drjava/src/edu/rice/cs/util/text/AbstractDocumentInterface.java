@@ -42,23 +42,26 @@ import javax.swing.text.Position;
 public interface AbstractDocumentInterface extends ReadersWritersLocking { 
   
   /* Methods from Document interface used in FindReplaceMachine */
-  
-  Position createPosition(int offs) throws BadLocationException;
 
-  /* Returns the length of the document. */
+  /** Returns the length of the document. */
   int getLength();
   
-  /* Returns the specified substring of the document. */
+  /** Returns the specified substring of the document. */
   String getText(int offset, int length) throws BadLocationException;
   
-  /* Returns the entire text of this document. */
+  /** Returns the entire text of this document. */
   String getText();
   
-  /* Inserts given string with specified attributes at the specified offset. */
+  /** Inserts given string with specified attributes at the specified offset. */
   void insertString(int offset, String str, AttributeSet a) throws BadLocationException;
   
-  /* Removes the substring of specified length at the specified offset. */
+  /** Removes the substring of specified length at the specified offset. */
   void remove(int offset, int length) throws BadLocationException;
+  
+  /** Creates a Postion in the document. */
+  Position createPosition(int offs) throws BadLocationException;
+  
+  /* New methods that are not in the Document interface. */
   
   /** Appends given string with specified attributes to end of this document. */
   void append(String str, AttributeSet set);
