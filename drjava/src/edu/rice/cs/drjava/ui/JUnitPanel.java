@@ -253,7 +253,7 @@ public class JUnitPanel extends ErrorPanel {
       String className = _getClassFromName(name);
       String fullName = className + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
-      SwingDocument doc = (SwingDocument) getDocument();
+      SwingDocument doc = getSwingDocument();
       int index = doc.getLength();
 
       try {
@@ -284,7 +284,7 @@ public class JUnitPanel extends ErrorPanel {
       String fullName = _getClassFromName(name) + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
       
-      DJDocument doc = (DJDocument) getDocument();
+      SwingDocument doc = getSwingDocument();
       Position namePos = _runningTestNamePositions.get(fullName);
       AttributeSet set;
       if (! wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
@@ -364,7 +364,7 @@ public class JUnitPanel extends ErrorPanel {
       int start = 0;
       if (_warnedOutOfSync) { start = TEST_OUT_OF_SYNC.length(); }
       int len = START_JUNIT_MSG.length();
-      SwingDocument doc = (SwingDocument) getDocument();
+      SwingDocument doc = getSwingDocument();
       if (doc.getLength() >= len + start) {
         doc.remove(start, len);
         doc.insertString(start, msg, BOLD_ATTRIBUTES);

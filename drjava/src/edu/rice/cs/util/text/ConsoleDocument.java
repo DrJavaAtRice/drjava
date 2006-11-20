@@ -279,7 +279,6 @@ public class ConsoleDocument implements EditDocumentInterface {
     if (_document instanceof SwingDocument) 
       ((SwingDocument)_document).addColoring(offs, offs + str.length(), style);
   }
-
   /** Removes a portion of the document, if the edit condition allows it.
    *  @param offs Offset to start deleting from
    *  @param len Number of characters to remove
