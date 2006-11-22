@@ -200,8 +200,7 @@ public class DefaultJavadocModel implements JavadocModel {
     boolean docAll = DrJava.getConfig().getSetting(OptionConstants.JAVADOC_FROM_ROOTS).booleanValue();
 
     // Each document has a package hierarchy to traverse.
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-    for (OpenDefinitionsDocument doc: docs) {
+    for (OpenDefinitionsDocument doc: _model.getOpenDefinitionsDocuments()) {
       File file = null;
 
       try {

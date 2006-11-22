@@ -303,7 +303,7 @@ public class CompilerErrorModel {
         //Now find the file and document we are working on
         File file = _errors[curError].file();
         OpenDefinitionsDocument document;
-        try {document = _model.getDocumentForFile(file); }
+        try { document = _model.getDocumentForFile(file); }
         catch (Exception e) {
           // This is intended to catch IOException or OperationCanceledException
           if ((e instanceof IOException) || (e instanceof OperationCanceledException)) {

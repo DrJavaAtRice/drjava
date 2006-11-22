@@ -469,7 +469,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
     
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getSortedOpenDefinitionsDocuments();
     
     final OpenDefinitionsDocument untitled = docs.get(0);
     

@@ -41,6 +41,7 @@ import java.util.Vector;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
@@ -52,7 +53,7 @@ import edu.rice.cs.util.swing.Utilities;
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   
   //  _log can be inherited from GlobalModelTestCase
-  Log _log = new Log("GlobalModelOtherTest.txt", false);
+  Log _log = new Log("GlobalModelOtherTest.txt", true);
   
   private static final String FOO_CLASS =
     "package bar;\n" +
@@ -209,9 +210,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     IOException, InterruptedException {
     // Compile Foo
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
-    File dir1 = new File(_tempDir, "dir1");
+    File dir1 = FileOps.makeFile(_tempDir, "dir1");
     dir1.mkdir();
-    File file1 = new File(dir1, "TestFile1.java");
+    File file1 = FileOps.makeFile(dir1, "TestFile1.java");
     doCompile(doc1, file1);
 
     assertEquals("interactions result", "\"DrJavaTestFoo\"", interpret("new DrJavaTestFoo().getClass().getName()"));
@@ -226,9 +227,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Compile Baz which extends Foo in another directory.
     OpenDefinitionsDocument doc2 = setupDocument(BAZ_TEXT);
-    File dir2 = new File(_tempDir, "dir2");
+    File dir2 = FileOps.makeFile(_tempDir, "dir2");
     dir2.mkdir();
-    File file2 = new File(dir2, "TestFile1.java");
+    File file2 = FileOps.makeFile(dir2, "TestFile1.java");
     doCompile(doc2, file2);
 
     // Ensure that Baz can use the Foo class from extra classpath
@@ -251,7 +252,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     IOException, InterruptedException {
     // Compile a test file
     OpenDefinitionsDocument doc1 = setupDocument("public class DrJavaTestClass {}");
-    File file1 = new File(_tempDir, "DrJavaTestClass.java");
+    File file1 = FileOps.makeFile(_tempDir, "DrJavaTestClass.java");
     doCompile(doc1, file1);
 
     // This shouldn't cause an error (no output should be displayed)
@@ -307,13 +308,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File baseTempDir = tempDirectory();
 
     // Now make subdirectory a/b/c
-    File subdir = new File(baseTempDir, "a");
-    subdir = new File(subdir, "b");
-    subdir = new File(subdir, "c");
+    File subdir = FileOps.makeFile(baseTempDir, "a");
+    subdir = FileOps.makeFile(subdir, "b");
+    subdir = FileOps.makeFile(subdir, "c");
     subdir.mkdirs();
 
     // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = new File(subdir, "DrJavaTestFoo.java");
+    File fooFile = FileOps.makeFile(subdir, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
 
@@ -334,13 +335,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File baseTempDir = tempDirectory();
 
     // Now make subdirectory a/b/c
-    File subdir = new File(baseTempDir, "a");
-    subdir = new File(subdir, "b");
-    subdir = new File(subdir, "c");
+    File subdir = FileOps.makeFile(baseTempDir, "a");
+    subdir = FileOps.makeFile(subdir, "b").getCanonicalFile();
+    subdir = FileOps.makeFile(subdir, "c").getCanonicalFile();
     subdir.mkdirs();
 
     // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = new File(subdir, "DrJavaTestFoo.java");
+    File fooFile = FileOps.makeFile(subdir, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc = setupDocument("package a.b.c;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
 //    System.err.println("Package name is: " + _model.getPackageName());
@@ -360,15 +361,15 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   public void testGetSourceRootPackageThreeDeepValidRelative() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
-    File subdir = new File(baseTempDir, "a");
-    subdir = new File(subdir, "b");
-    subdir = new File(subdir, "c");
+    File subdir = FileOps.makeFile(baseTempDir, "a");
+    subdir = FileOps.makeFile(subdir, "b");
+    subdir = FileOps.makeFile(subdir, "c");
     subdir.mkdirs();
 
     // Save the footext to DrJavaTestFoo.java in a relative directory
     //   temp/./a/b/../b/c == temp/a/b/c
-    File relDir = new File(baseTempDir, "./a/b/../b/c");
-    File fooFile = new File(relDir, "DrJavaTestFoo.java");
+    File relDir = FileOps.makeFile(baseTempDir, "./a/b/../b/c");
+    File fooFile = FileOps.makeFile(relDir, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc =
       setupDocument("package a.b.c;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
@@ -389,13 +390,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File baseTempDir = tempDirectory();
 
     // Now make subdirectory a/b/d
-    File subdir = new File(baseTempDir, "a");
-    subdir = new File(subdir, "b");
-    subdir = new File(subdir, "d");
+    File subdir = FileOps.makeFile(baseTempDir, "a");
+    subdir = FileOps.makeFile(subdir, "b");
+    subdir = FileOps.makeFile(subdir, "d");
     subdir.mkdirs();
 
     // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = new File(subdir, "DrJavaTestFoo.java");
+    File fooFile = FileOps.makeFile(subdir, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc =
       setupDocument("package a.b.c;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
@@ -415,11 +416,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File baseTempDir = tempDirectory();
 
     // Now make subdirectory a
-    File subdir = new File(baseTempDir, "a");
+    File subdir = FileOps.makeFile(baseTempDir, "a");
     subdir.mkdir();
 
     // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = new File(subdir, "DrJavaTestFoo.java");
+    File fooFile = FileOps.makeFile(subdir, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc = setupDocument("package a;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
 
@@ -440,23 +441,23 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File baseTempDir = tempDirectory();
 
     // Now make subdirectories a, b
-    File subdir1 = new File(baseTempDir, "a");
+    File subdir1 = FileOps.makeFile(baseTempDir, "a");
     subdir1.mkdir();
-    File subdir2 = new File(baseTempDir, "b");
+    File subdir2 = FileOps.makeFile(baseTempDir, "b");
     subdir2.mkdir();
 
     // Save the footext to DrJavaTestFoo.java in subdirectory 1
-    File file1 = new File(subdir1, "DrJavaTestFoo.java");
+    File file1 = FileOps.makeFile(subdir1, "DrJavaTestFoo.java");
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     doc1.saveFileAs(new FileSelector(file1));
 
     // Save the bartext to Bar.java in subdirectory 1
-    File file2 = new File(subdir1, "Bar.java");
+    File file2 = FileOps.makeFile(subdir1, "Bar.java");
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     doc2.saveFileAs(new FileSelector(file2));
 
     // Save the bartext to Bar.java in subdirectory 2
-    File file3 = new File(subdir2, "Bar.java");
+    File file3 = FileOps.makeFile(subdir2, "Bar.java");
     OpenDefinitionsDocument doc3 = setupDocument(BAR_TEXT);
     doc3.saveFileAs(new FileSelector(file3));
     
@@ -493,8 +494,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Rename the directory so it's not on the classpath anymore
     String tempPath = f.getParent();
-    File tempDir = new File(tempPath);
-    tempDir.renameTo(new File(tempPath + "a"));
+    File tempDir = FileOps.makeFile(tempPath);
+    tempDir.renameTo(FileOps.makeFile(tempPath + "a"));
 
     String result = interpret("new DrJavaTestFoo().getClass().getName()");
 
@@ -505,7 +506,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Add new directory to classpath through Config
     Vector<File> cp = new Vector<File>();
-    cp.add(new File(tempPath + "a"));
+    cp.add(FileOps.makeFile(tempPath + "a"));
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
     Utilities.clearEventQueue();
@@ -517,8 +518,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("interactions result", "\"DrJavaTestFoo\"", result);
 
     // Rename directory back to clean up
-    tempDir = new File(tempPath + "a");
-    boolean renamed = tempDir.renameTo(new File(tempPath));
+    tempDir = FileOps.makeFile(tempPath + "a");
+    boolean renamed = tempDir.renameTo(FileOps.makeFile(tempPath));
     
     _log.log("testInteractionsLiveUpdateClasspath() completed");
   }
@@ -548,9 +549,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
 
   public void testRunMainMethod() throws Exception {
-    File dir = new File(_tempDir, "bar");
+    File dir = FileOps.makeFile(_tempDir, "bar");
     dir.mkdir();
-    File file = new File(dir, "Foo.java");
+    File file = FileOps.makeFile(dir, "Foo.java");
     final OpenDefinitionsDocument doc = doCompile(FOO_CLASS, file);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 

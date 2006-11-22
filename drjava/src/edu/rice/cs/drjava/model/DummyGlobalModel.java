@@ -558,6 +558,10 @@ public class DummyGlobalModel implements GlobalModel {
   public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments() {
     throw new UnsupportedOperationException("Tried to getOpenDefinitionsDocuments on a Dummy!");
   }
+ 
+  public List<OpenDefinitionsDocument> getSortedOpenDefinitionsDocuments() {
+    throw new UnsupportedOperationException("Tried to getSortedOpenDefinitionsDocuments on a Dummy!");
+  }
 
   public boolean hasModifiedDocuments() {
     throw new UnsupportedOperationException("Tried to call hasModifiedDocuments on a Dummy!");

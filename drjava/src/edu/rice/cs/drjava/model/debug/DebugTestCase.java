@@ -34,6 +34,7 @@
 package edu.rice.cs.drjava.model.debug;
 
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 
 import java.io.*;
@@ -47,12 +48,8 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 //  protected final boolean printEvents = true;
 //  protected final boolean printMessages = true;
 //  protected PrintStream printStream = System.err; 
-  /*
-  {
-    try { printStream = new PrintStream(new FileOutputStream("log.txt", true), true); }
-    catch(java.io.IOException ioe) { printStream = System.out; }
-  }
-  */
+  
+  // _log inherited from GlabalModelTestCase
 
   protected volatile int _pendingNotifies = 0;
   protected final Object _notifierLock = new Object();
@@ -261,7 +258,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
    */
   protected void _setPendingNotifies(int n) throws InterruptedException {
     synchronized(_notifierLock) {
-      _log.log("waiting for " + n + " notifications...");
+      _log.log("Waiting for " + n + " notifications ...");
       _pendingNotifies = n;
     }
   }
@@ -270,7 +267,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   protected void _notifyLock() {
     synchronized(_notifierLock) {
       _pendingNotifies--;
-      _log.log("notified, count = "+_pendingNotifies);     
+      _log.log("notified; count = " + _pendingNotifies);     
       if (_pendingNotifies == 0) {
         _log.log("Notify count reached 0 -- notifying!");
         _notifierLock.notifyAll();  // can accommodate multiple threads waiting on this event (NOT USED?)
@@ -287,7 +284,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
    */
   protected OpenDefinitionsDocument _startupDebugger(String fileName, String classText) throws Exception {
     // Create a file in the temporary directory
-    File file = new File(_tempDir, fileName);
+    File file = FileOps.makeFile(_tempDir, fileName);
     return _startupDebugger(file, classText);
   }
 

@@ -212,8 +212,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
       try { _attachToVM(); }
       catch(DebugException e1) {  // We sometimes see ConnectExceptions stating that the connection was refused
-        try { _attachToVM(); }
-        catch(DebugException e2) { _attachToVM(); }  // if we throw another exception, three strikes and we're out
+        try { 
+          _attachToVM(); 
+          System.out.println("Two attempts required for debugger to attach to slave JVM");
+        }
+        catch(DebugException e2) { 
+          _attachToVM();
+          System.out.println("Three attempts required for debugger to attach to slave JVM");
+        }  // if we throw another exception, three strikes and we're out
       }
 
       // Listen for events when threads die
@@ -265,13 +271,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _vm = connector.attach(args);
       _eventManager = _vm.eventRequestManager();
     }
-    catch(Exception e1) {
-      try { _vm = connector.attach(args); }
-      catch(Exception e2) {
-        try { _vm = connector.attach(args); }
-        catch(Exception e3) { throw new DebugException("Could not connect to VM: " + e3); } // three strikes and you are out
-      }
-    }
+    catch(Exception e) { throw new DebugException("Could not connect to VM: " + e); }
 
     _interpreterJVM = _getInterpreterJVMRef();
   }

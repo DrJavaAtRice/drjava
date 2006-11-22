@@ -442,5 +442,5 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /** @return the caret position as set by the view. */
   public int getCaretPosition() { return 0; }
   
-  public void makePositions() { /* do nothing */ }
+//  public void makePositions() { /* do nothing */ }
 }

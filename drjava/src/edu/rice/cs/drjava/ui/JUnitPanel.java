@@ -355,10 +355,10 @@ public class JUnitPanel extends ErrorPanel {
       // Select the first error
       switchToError(0);
     }
-
+    
     /** Replaces the "Testing in progress..." text with the given message.  Only runs in event thread.
-     *  @param msg the text to insert
-     */
+      * @param msg the text to insert
+      */
     public void _replaceInProgressText(String msg) throws BadLocationException {
       assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
       int start = 0;

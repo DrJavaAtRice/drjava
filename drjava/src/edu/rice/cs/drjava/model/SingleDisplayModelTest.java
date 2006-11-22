@@ -369,7 +369,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     };
     _model.openFiles(fos);
     _log.log("Opened files " + Arrays.toString(files));
-    OpenDefinitionsDocument doc = _model.getOpenDefinitionsDocuments().get(5);
+    OpenDefinitionsDocument doc = _model.getSortedOpenDefinitionsDocuments().get(5);
     _model.setActiveDocument(doc);
     _log.log("Active document is: " + doc);
     files[5].delete();

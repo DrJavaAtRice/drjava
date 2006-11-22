@@ -526,10 +526,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     return dist + relLoc;
   }
 
-  /**
-  * returns the distance to the space before the next newline
-  * returns the distance to the end of the document if there is no newline
-  */
+  /** Returns the distance to the gap before the next newline (end of document if no newline) */
   public int getDistToNextNewline() {
     TokenList.Iterator copyCursor = _cursor._copy();
     if (copyCursor.atStart()) {

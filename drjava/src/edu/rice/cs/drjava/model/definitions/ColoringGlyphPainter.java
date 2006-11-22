@@ -78,11 +78,11 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
   }
   
   /** Paints the glyphs representing the given range. */
-  public void paint(GlyphView v, Graphics g, Shape a, int p0, int p1) {
+  public void paint(GlyphView v, Graphics g, Shape a, int start, int end) {
     
     // If there's nothing to show, don't do anything!
     // For some reason I don't understand we tend to get called sometimes to render a zero-length area.
-    if (p0 == p1) return;
+    if (start == end) return;
     
     sync(v);
     
@@ -102,8 +102,8 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     // determine the x coordinate to render the glyphs
     int x = alloc.x;
     int p = v.getStartOffset();
-    if (p != p0) {
-      text = v.getText(p, p0);
+    if (p != start) {
+      text = v.getText(p, start);
       int width = Utilities.getTabbedTextWidth(text, _metrics, x, expander, p);
       x += width;
     }
@@ -111,9 +111,9 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     // determine the y coordinate to render the glyphs
     int y = alloc.y + _metrics.getHeight() - _metrics.getDescent();
     
-    text = v.getText(p0, p1);
+    text = v.getText(start, end);
     
-    Vector<HighlightStatus> stats = djdoc.getHighlightStatus(p0, p1);
+    Vector<HighlightStatus> stats = djdoc.getHighlightStatus(start, end);
     if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
     try {
       for (int i = 0; i < stats.size(); i++) {
@@ -122,19 +122,19 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
         int location = stat.getLocation();
         
         
-        if((location < p1) && ((location + length) > p0)) {
+        if((location < end) && ((location + length) > start)) {
           
           // Adjust the length and location to fit within the bounds of
           // the element we're about to render
-          if (location < p0) {
-            length -= (p0-location);
-            location = p0;
+          if (location < start) {
+            length -= (start-location);
+            location = start;
           }        
-          if ((location + length) > p1) {
-            length = p1 - location;
+          if ((location + length) > end) {
+            length = end - location;
           }
           
-          if (!(djdoc instanceof InteractionsDJDocument) || !((InteractionsDJDocument)djdoc).setColoring((p0+p1)/2,g))      
+          if (!(djdoc instanceof InteractionsDJDocument) || !((InteractionsDJDocument)djdoc).setColoring((start+end)/2,g))      
             setFormattingForState(g, stat.getState());
           
           djdoc.getText(location, length, text);
@@ -151,11 +151,11 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
    * Determine the span the glyphs given a start location
    * (for tab expansion).
    */
-  public float getSpan(GlyphView v, int p0, int p1, 
+  public float getSpan(GlyphView v, int start, int end, 
                        TabExpander e, float x) {
     sync(v);
-    Segment text = v.getText(p0, p1);
-    int width = Utilities.getTabbedTextWidth(text, _metrics, (int) x, e, p0);
+    Segment text = v.getText(start, end);
+    int width = Utilities.getTabbedTextWidth(text, _metrics, (int) x, e, start);
     return width;
   }
   
@@ -187,24 +187,24 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     
     sync(v);
     Rectangle alloc = (a instanceof Rectangle) ? (Rectangle)a : a.getBounds();
-    int p0 = v.getStartOffset();
-    int p1 = v.getEndOffset();
+    int start = v.getStartOffset();
+    int end = v.getEndOffset();
     TabExpander expander = v.getTabExpander();
     Segment text;
     
-    if(pos == p1) {
+    if(pos == end) {
       // The caller of this is left to right and borders a right to
       // left view, return our end location.
       return new Rectangle(alloc.x + alloc.width, alloc.y, 0,
                            _metrics.getHeight());
     }
-    if ((pos >= p0) && (pos <= p1)) {
+    if ((pos >= start) && (pos <= end)) {
       // determine range to the left of the position
-      text = v.getText(p0, pos);
-      int width = Utilities.getTabbedTextWidth(text, _metrics, alloc.x, expander, p0);
+      text = v.getText(start, pos);
+      int width = Utilities.getTabbedTextWidth(text, _metrics, alloc.x, expander, start);
       return new Rectangle(alloc.x + width, alloc.y, 0, _metrics.getHeight());
     }
-    throw new BadLocationException("modelToView - can't convert", p1);
+    throw new BadLocationException("modelToView - can't convert", end);
   }
   
   /**
@@ -225,15 +225,15 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
                          Position.Bias[] biasReturn) {
     sync(v);
     Rectangle alloc = (a instanceof Rectangle) ? (Rectangle)a : a.getBounds();
-    int p0 = v.getStartOffset();
-    int p1 = v.getEndOffset();
+    int start = v.getStartOffset();
+    int end = v.getEndOffset();
     TabExpander expander = v.getTabExpander();
-    Segment text = v.getText(p0, p1);
+    Segment text = v.getText(start, end);
     
     int offs = Utilities.getTabbedTextOffset(text, _metrics, 
-                                             alloc.x, (int) x, expander, p0);
-    int retValue = p0 + offs;
-    if(retValue == p1) {
+                                             alloc.x, (int) x, expander, start);
+    int retValue = start + offs;
+    if(retValue == end) {
       // No need to return backward bias as GlyphPainter1 is used for
       // ltr text only.
       retValue--;
@@ -260,14 +260,14 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
    * @return the model location desired for a break
    * @see View#breakView
    */
-  public int getBoundedPosition(GlyphView v, int p0, float x, float len) {
+  public int getBoundedPosition(GlyphView v, int start, float x, float len) {
     sync(v);
     TabExpander expander = v.getTabExpander();
-    Segment s = v.getText(p0, v.getEndOffset());
+    Segment s = v.getText(start, v.getEndOffset());
     int index = Utilities.getTabbedTextOffset(s, _metrics, (int)x, (int)(x+len),
-                                              expander, p0, false);
-    int p1 = p0 + index;
-    return p1;
+                                              expander, start, false);
+    int end = start + index;
+    return end;
   }
   
   void sync(GlyphView v) {

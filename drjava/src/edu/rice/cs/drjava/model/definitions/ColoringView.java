@@ -144,7 +144,7 @@ public class ColoringView extends PlainView implements OptionConstants {
    *  @return the x coordinate at the end of the range
    *  @throws BadLocationException if the range is invalid
    */
-  protected int drawUnselectedText(Graphics g, int x, int y, int p0, int p1) throws BadLocationException {
+  protected int drawUnselectedText(Graphics g, int x, int y, int start, int end) throws BadLocationException {
         
     // Might be a PlainDocument (when AbstractDJPane is first constructed).
     //   See comments for DefinitionsEditorKit.createNewDocument() for details.
@@ -155,9 +155,9 @@ public class ColoringView extends PlainView implements OptionConstants {
     
     // If there's nothing to show, don't do anything!
     // For some reason I don't understand we tend to get called sometimes to render a zero-length area.
-    if (p0 == p1) return  x;
+    if (start == end) return  x;
 
-    Vector<HighlightStatus> stats = _doc.getHighlightStatus(p0, p1);
+    Vector<HighlightStatus> stats = _doc.getHighlightStatus(start, end);
     if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
     
     for (int i = 0; i < stats.size(); i++) {
@@ -165,11 +165,11 @@ public class ColoringView extends PlainView implements OptionConstants {
       int length = stat.getLength();
       int location = stat.getLocation();
       // If this highlight status extends past p1, end at p1
-      if (location + length > p1) length = p1 - stat.getLocation();
+      if (location + length > end) length = end - stat.getLocation();
       
       Segment text = getLineBuffer();
       
-      if (!(_doc instanceof InteractionsDJDocument) || !((InteractionsDJDocument)_doc).setColoring((p0+p1)/2,g))      
+      if (!(_doc instanceof InteractionsDJDocument) || !((InteractionsDJDocument)_doc).setColoring((start+end)/2,g))      
         setFormattingForState(g, stat.getState());
       //      else
       //        DrJava.consoleErr().println("Highlight: p0="+p0+"; p1="+p1+"; location="+location+"; color="+g.getColor()+"; text="+text);
@@ -195,15 +195,15 @@ public class ColoringView extends PlainView implements OptionConstants {
    * @return the location of the end of the image (range)
    * @exception BadLocationException
    */
-  protected int drawSelectedText(Graphics g, int x, int y, int p0, int p1) throws BadLocationException {
+  protected int drawSelectedText(Graphics g, int x, int y, int start, int end) throws BadLocationException {
     /*
      DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 +
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);
      */
     EditDocumentInterface doc = (EditDocumentInterface) getDocument();
-    if (doc instanceof InteractionsDJDocument) ((InteractionsDJDocument)doc).setBoldFonts(p1,g);
+    if (doc instanceof InteractionsDJDocument) ((InteractionsDJDocument)doc).setBoldFonts(end,g);
     
-    return  super.drawSelectedText(g, x, y, p0, p1);
+    return  super.drawSelectedText(g, x, y, start, end);
   }
 
   /** Given a particular state, assign it a color.

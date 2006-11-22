@@ -298,7 +298,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     // Commented out because it invokes UnicastRemoteObject.unexport
 //    try { _jvm.dispose(); }
 //    catch(RemoteException e) { /* ignore */ }
-    super.dispose();  // removes the global model listeners!
+    _notifier.removeAllListeners();  // removes the global model listeners!
   }
 
   /** Disposes of external resources. Kills the slave JVM. */

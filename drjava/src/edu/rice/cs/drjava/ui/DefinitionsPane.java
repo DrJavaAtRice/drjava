@@ -270,10 +270,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /** Listens to any undoable events in the document, and adds them
-   *  to the undo manager.  Must be done in the view because the edits are
-   *  stored along with the caret position at the time of the edit.
-   */
+  /** Listens to any undoable events in the document, and adds them to the undo manager.  Must be done in the view 
+    * because the edits are stored along with the caret position at the time of the edit.
+    */
   private final UndoableEditListener _undoListener = new UndoableEditListener() {
     
     /** The function to handle what happens when an UndoableEditEvent occurs.
@@ -485,29 +484,29 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     temp = new MatchColorOptionListener();
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_MATCH_COLOR, temp);
     _colorOptionListeners.add(pair);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR, temp);
+    DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_MATCH_COLOR, temp);
     
     temp = new ErrorColorOptionListener();
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.COMPILER_ERROR_COLOR, temp);
     _colorOptionListeners.add(pair);
-    DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, temp);
+    DrJava.getConfig().addOptionListener(OptionConstants.COMPILER_ERROR_COLOR, temp);
 
     temp = new BookmarkColorOptionListener();
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.BOOKMARK_COLOR, temp);
     _colorOptionListeners.add(pair);
-    DrJava.getConfig().addOptionListener( OptionConstants.BOOKMARK_COLOR, temp);
+    DrJava.getConfig().addOptionListener(OptionConstants.BOOKMARK_COLOR, temp);
 
-    for(int i=0; i<FIND_RESULTS_COLORS.length; ++i) {
+    for (int i=0; i<FIND_RESULTS_COLORS.length; ++i) {
       temp = new FindResultsColorOptionListener(i);
       pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLORS[i], temp);
       _colorOptionListeners.add(pair);
-      DrJava.getConfig().addOptionListener( OptionConstants.FIND_RESULTS_COLORS[i], temp);
+      DrJava.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], temp);
     }
     
     temp = new BreakpointColorOptionListener();
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, temp);
     _colorOptionListeners.add(pair);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_COLOR, temp);
+    DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_BREAKPOINT_COLOR, temp);
     
     temp = new DisabledBreakpointColorOptionListener();
     pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, temp);
@@ -973,8 +972,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     if (_setSizeListener != null) _setSizeListener.actionPerformed(null);
   }
 
-  public void addSetSizeListener(ActionListener listener) { _setSizeListener = listener; }
-  public void removeSetSizeListener() { _setSizeListener = null; }
+//  public void addSetSizeListener(ActionListener listener) { _setSizeListener = listener; }
+//  public void removeSetSizeListener() { _setSizeListener = null; }
 
   public void centerViewOnOffset(int offset) {
     assert EventQueue.isDispatchThread();
@@ -1001,7 +1000,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
         scrollRectToVisible(startRect);
       }
-      removeSetSizeListener();
+//      removeSetSizeListener();  // Why?  None was added
 
       setCaretPosition(offset);
     }

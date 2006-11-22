@@ -89,7 +89,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     doc3 = setupDocument(FOO_TEXT);
     assertNumOpenDocs(4);
 
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getSortedOpenDefinitionsDocuments();
     assertEquals("size of document array", 4, docs.size());
 
     assertEquals("document 1", doc1, docs.get(1));
@@ -110,7 +110,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _model.closeFile(doc1);
     assertNumOpenDocs(2);
 
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getSortedOpenDefinitionsDocuments();
     assertEquals("size of document array", 2, docs.size());
     assertContents(BAR_TEXT, docs.get(1));
 
@@ -354,7 +354,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       fail("Open was unexpectedly canceled!");
     }
     listener.assertOpenCount(2);
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getSortedOpenDefinitionsDocuments();
     assertEquals("size of document array", 2, docs.size());
     assertContents(FOO_TEXT, docs.get(0));
     assertContents(BAR_TEXT, docs.get(1));
@@ -394,7 +394,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       listener.assertOpenCount(0);
       listener.assertCloseCount(0);
 
-      List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+      List<OpenDefinitionsDocument> docs = _model.getSortedOpenDefinitionsDocuments();
       doc1 = docs.get(1);
       assertModified(true, doc1);
       assertContents(FOO_TEXT, doc1);
@@ -764,6 +764,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     fooDoc.setFile(file1);
     barDoc.setFile(file2);
     trdDoc.setFile(file3);
+    
+    // None of these documents has been entered in the _documentsRepos
 
     // check.
     FileSelector fs = new FileSelector(file1);

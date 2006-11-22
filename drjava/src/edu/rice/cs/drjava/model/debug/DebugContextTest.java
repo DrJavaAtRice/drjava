@@ -46,7 +46,9 @@ import edu.rice.cs.util.swing.Utilities;
  */
 public final class DebugContextTest extends DebugTestCase {
   
-//  public static Log _log = new Log("Debug.txt", false);
+  
+//  inherits _log from GlobalModelTestCase 
+//  public static Log _log = new Log("Debug.txt", true);
   
   /** Tests that the sourcepath config option properly adds files to the search directories. */
   public void testDebugSourcepath() throws Exception {
@@ -114,6 +116,8 @@ public final class DebugContextTest extends DebugTestCase {
     // Source is highlighted because file is now on sourcepath
     debugListener.assertStepRequestedCount(3);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
+    
+    _log.log("Shutting down testDebugSourcePath");
 
     // Shut down
     _shutdownAndWaitForInteractionEnded();
@@ -142,7 +146,7 @@ public final class DebugContextTest extends DebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    _log.log("----After breakpoint:\n" + getInteractionsText());
+//    _log.log("----After breakpoint:\n" + getInteractionsText());
 
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
@@ -152,7 +156,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsDoesNotContain("Baz Line 1");
 
-    _log.log("adding another breakpoint");
+//    _log.log("adding another breakpoint");
 
     // Set another breakpoint (after is class loaded)
     _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9,true);
@@ -167,7 +171,7 @@ public final class DebugContextTest extends DebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    _log.log("****"+getInteractionsText());
+//    _log.log("****"+getInteractionsText());
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2); // fires
@@ -179,12 +183,12 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Resume until next breakpoint
     synchronized(_notifierLock) {
-      _log.log("resuming");
+//      _log.log("resuming");
       _setPendingNotifies(3);  // suspended, updated, breakpointReached
       _asyncResume();
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
-    _log.log("----After one resume:\n" + getInteractionsText());
+//    _log.log("----After one resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(2);  //fires (no waiting)
     debugListener.assertBreakpointReachedCount(2);  //fires
     debugListener.assertThreadLocationUpdatedCount(3);  //fires
@@ -193,12 +197,12 @@ public final class DebugContextTest extends DebugTestCase {
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
 
-    _log.log("-------- Adding interpret listener --------");
+//    _log.log("-------- Adding interpret listener --------");
     // Resume until finished, waiting for call to interpret to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      _log.log("-------- resuming --------");
+//      _log.log("-------- resuming --------");
       _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied (since it's the last thread)
       _asyncResume();
       while (_pendingNotifies > 0) _notifierLock.wait();
@@ -241,7 +245,7 @@ public final class DebugContextTest extends DebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    _log.log("----After breakpoint:\n" + getInteractionsText());
+//    _log.log("----After breakpoint:\n" + getInteractionsText());
 
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
@@ -272,7 +276,7 @@ public final class DebugContextTest extends DebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    _log.log("****"+getInteractionsText());
+//    _log.log("****"+getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
@@ -291,7 +295,7 @@ public final class DebugContextTest extends DebugTestCase {
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
 
-    _log.log("----After resume:\n" + getInteractionsText());
+//    _log.log("----After resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertThreadLocationUpdatedCount(3);
@@ -303,7 +307,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertRegionRemovedCount(2);  //fires (no waiting)
 
     // Shutdown the debugger
-    _log.log("Shutting down...");
+//    _log.log("Shutting down ...");
 
     synchronized(_notifierLock) {
       _setPendingNotifies(1);  // shutdown
@@ -312,7 +316,7 @@ public final class DebugContextTest extends DebugTestCase {
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
-    _log.log("Shut down.");
+    _log.log("Completed testStepIntoOverBreakpoint");
     _debugger.removeListener(debugListener);
   }
 
@@ -323,8 +327,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.addListener(debugListener);
 
     // Start up
-    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugStaticField.java",
-                                                   CLASS_WITH_STATIC_FIELD);
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugStaticField.java", CLASS_WITH_STATIC_FIELD);
 
     // Set a breakpoint
     _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"), 4,true);
@@ -342,7 +345,7 @@ public final class DebugContextTest extends DebugTestCase {
     // TODO: Why is this call being made?
     DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
     DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
-    _log.log("----After breakpoint:\n" + getInteractionsText());
+//    _log.log("----After breakpoint:\n" + getInteractionsText());
 
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(2);  //fires
@@ -376,7 +379,7 @@ public final class DebugContextTest extends DebugTestCase {
       _asyncStep(Debugger.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
-    _log.log("****"+getInteractionsText());
+//    _log.log("****"+getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(4);  // fires
@@ -401,25 +404,23 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.removeListener(debugListener);
   }
 
-  /**
-   * Tests that watches can correctly see the values of local
-   * variables, fields and fields of outer classes. Also tests
-   * that we can watch objects initialized to null (bug #771040).
-   * Also tests that we can watch final local variables of outer
-   * classes (bug #769174).
-   */
+  /** Tests that watches can correctly see the values of local variables, fields and fields of outer classes. Also tests
+    * that we can watch objects initialized to null (bug #771040) and that we can watch final local variables of outer
+    * classes (bug #769174).
+    */
   public void testNonStaticWatches() throws Exception {
     _log.log("----testNonStaticWatches----");
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
+    
+    final String monkey = MONKEY_WITH_INNER_CLASS;
 
     // Start up
-    OpenDefinitionsDocument doc = _startupDebugger("Monkey.java",
-                                                   MONKEY_WITH_INNER_CLASS);
+    OpenDefinitionsDocument doc = _startupDebugger("Monkey.java", monkey);
 
     // Set a breakpoint
-    _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;"), 10, true);
-    _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("System.out.println(\"localVar = \" + localVar);"), 32, true);
+    _debugger.toggleBreakpoint(doc, monkey.indexOf("innerMethodFoo = 12;"), 10, true);
+    _debugger.toggleBreakpoint(doc, monkey.indexOf("System.out.println(\"localVar = \" + localVar);"), 32, true);
     
     Utilities.clearEventQueue();
     debugListener.assertRegionAddedCount(2);
@@ -441,7 +442,7 @@ public final class DebugContextTest extends DebugTestCase {
     Utilities.clearEventQueue();
     debugListener.assertWatchSetCount(7);
 
-    _log.log("first step");
+//    _log.log("first step");
     
     // Step to line 11
     synchronized(_notifierLock) {
@@ -480,7 +481,7 @@ public final class DebugContextTest extends DebugTestCase {
     assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
     assertEquals("watch value incorrect", "8", watches.get(1).getValue());
 
-    _log.log("second step in " + this);
+//    _log.log("second step in " + this);
     
     // Step to line 12
     synchronized(_notifierLock) {
@@ -495,7 +496,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
 
-      _log.log("third step in " + this);
+//      _log.log("third step in " + this);
       
     // Step to line 13
     synchronized(_notifierLock) {
@@ -510,7 +511,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
 
-    _log.log("fourth step in " + this);
+//    _log.log("fourth step in " + this);
 
     // Step to line 14
     synchronized(_notifierLock) {
@@ -525,7 +526,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
 
-    _log.log("fifth step in " + this);
+//    _log.log("fifth step in " + this);
 
     // Step to line 15
     synchronized(_notifierLock) {
@@ -555,7 +556,7 @@ public final class DebugContextTest extends DebugTestCase {
     assertEquals("watch value incorrect", "null", watches.get(5).getValue());
     assertEquals("watch type incorrect", "java.lang.String", watches.get(5).getType());
 
-      _log.log("sixth step in " + this);
+//      _log.log("sixth step in " + this);
 
     // Step into static method
     synchronized(_notifierLock) {
@@ -624,8 +625,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.addListener(debugListener);
 
     // Start up
-    OpenDefinitionsDocument doc = _startupDebugger("MonkeyStaticStuff.java",
-                                                   MONKEY_STATIC_STUFF);
+    OpenDefinitionsDocument doc = _startupDebugger("MonkeyStaticStuff.java", MONKEY_STATIC_STUFF);
 
     // Set a breakpoint
     int index = MONKEY_STATIC_STUFF.indexOf("System.out.println(MonkeyInner.MonkeyTwoDeep.twoDeepFoo);");
@@ -675,21 +675,17 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.removeListener(debugListener);
   }
 
-  /**
-   * Tests that watches can correctly see the values of final local
-   * variables and method parameters from enclosing classes.
-   *
-   * Note:  Some final local variables are inlined by the compiler
-   * (even in debug mode), so they are unavailable to the debugger.
-   */
+  /** Tests that watches can correctly see the values of final local variables and method parameters from enclosing
+    * classes.   Note:  Some final local variables are inlined by the compiler (even in debug mode), so they are 
+    * unavailable to the debugger.
+    */
   public void testWatchLocalVarsFromInnerClass() throws Exception {
     _log.log("----testWatchLocalVarsFromInnerClass----");
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
 
     // Start up
-    OpenDefinitionsDocument doc = _startupDebugger("InnerClassWithLocalVariables.java",
-                                                   INNER_CLASS_WITH_LOCAL_VARS);
+    OpenDefinitionsDocument doc = _startupDebugger("InnerClassWithLocalVariables.java", INNER_CLASS_WITH_LOCAL_VARS);
 
     // Set a breakpoint
     int index = INNER_CLASS_WITH_LOCAL_VARS.indexOf("numArgs:");
@@ -712,11 +708,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Check watch values
     Vector<DebugWatchData> watches = _debugger.getWatches();
-    assertEquals("numArgs watch value incorrect",
-                 "1", watches.get(0).getValue());
+    assertEquals("numArgs watch value incorrect", "1", watches.get(0).getValue());
     String argsWatch = watches.get(1).getValue();
-    assertTrue("args watch value incorrect",
-               argsWatch.indexOf("java.lang.String") != -1);
+    assertTrue("args watch value incorrect", argsWatch.indexOf("java.lang.String") != -1);
 
     // unfortunately, inlined variable can't be seen
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.get(2).getValue());
@@ -726,13 +720,10 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.removeListener(debugListener);
   }
 
-  /**
-   * Tests that watches can correctly see the values of final local
-   * variables and method parameters from enclosing classes.
-   *
-   * Note:  Some final local variables are inlined by the compiler
-   * (even in debug mode), so they are unavailable to the debugger.
-   */
+  /** Tests that watches can correctly see the values of final local variables and method parameters from enclosing
+    * classes.  Note:  Some final local variables are inlined by the compiler (even in debug mode), so they are 
+    * unavailable to the debugger.
+    */
   public void testThreadShouldDie() throws Exception {
     _log.log("----testThreadShouldDie----");
     StepTestListener debugListener = new StepTestListener();

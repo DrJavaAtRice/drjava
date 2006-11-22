@@ -92,14 +92,19 @@ public class SimpleDocumentRegion implements DocumentRegion {
     return _endOffset;
   }
   
+  /** Structural equality method that copes with null!  This method should be a member of class Object. */
+  public static boolean equals(Object o1, Object o2) { 
+    if (o1 == null) return o2 == null;
+    return o1.equals(o2);
+  }
+  
   /** @return true if the specified region is equal to this one. */
   public boolean equals(Object other) {
-    if (other==null || ! (other instanceof SimpleDocumentRegion)) return false;
+    if (other == null || other.getClass() != getClass()) return false;
     SimpleDocumentRegion o = (SimpleDocumentRegion) other;
-    return (((_doc == null && o._doc == null) || _doc.equals(o._doc)) &&
-            ((_file == null && o._file == null) || _file.equals(o._file)) &&
+    return equals(_doc, o._doc) && equals(_file, o._file) &&
             _startPos.getOffset() == o._startPos.getOffset() &&
-            _endPos.getOffset() == o._endPos.getOffset());
+            _endPos.getOffset() == o._endPos.getOffset();
   }
   
   public String toString() {

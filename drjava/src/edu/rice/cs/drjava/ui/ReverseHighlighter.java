@@ -55,31 +55,25 @@ public class ReverseHighlighter extends DefaultHighlighter {
     }
   }
   
-  /**
-   * Called when the UI is being installed into the
-   * interface of a JTextComponent.  Installs the editor, and
-   * removes any existing highlights.
-   *
-   * @param c the editor component
-   * @see Highlighter#install
-   */
+  /** Called when the UI is being installed into the interface of a JTextComponent.  Installs the editor, and
+    * removes any existing highlights.
+    * @param c the editor component
+    * @see Highlighter#install
+    */
   public void install(JTextComponent c) {
     component = c;
     removeAllHighlights();
   }
   
-  /**
-   * Called when the UI is being removed from the interface of
-   * a JTextComponent.
-   *
-   * @param c the component
-   * @see Highlighter#deinstall
-   */
+  /** Called when the UI is being removed from the interface of a JTextComponent.
+    * @param c the component
+    * @see Highlighter#deinstall
+    */
   public void deinstall(JTextComponent c) {
     component = null;
   }
   
-  /** Adds a highlight to the view.  Returns a tag that can be used  to refer to the highlight.
+  /** Adds a highlight to the view.  Returns a tag that can be used to refer to the highlight.
     * @param p0   the start offset of the range to highlight >= 0
     * @param p1   the end offset of the range to highlight >= p0
     * @param p    the painter to use to actually render the highlight
@@ -92,8 +86,10 @@ public class ReverseHighlighter extends DefaultHighlighter {
                        (p instanceof LayeredHighlighter.LayerPainter)) ?
       new LayeredHighlightInfo() : new HighlightInfo();
     i.painter = p;
+
     i.p0 = doc.createPosition(p0);
     i.p1 = doc.createPosition(p1);
+
     int insertPos = 0;
     if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
       // insert solid painters after the frame and underline painters
@@ -211,6 +207,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
       // Mark the highlights region as invalid, it will reset itself
       // next time asked to paint.
       lhi.width = lhi.height = 0;
+
       lhi.p0 = doc.createPosition(p0);
       lhi.p1 = doc.createPosition(p1);
       safeDamageRange(Math.min(p0, p1), Math.max(p0, p1));
@@ -225,8 +222,10 @@ public class ReverseHighlighter extends DefaultHighlighter {
         safeDamageRange(oldP0, oldP1);
         safeDamageRange(p0, p1);
       }
+
       info.p0 = doc.createPosition(p0);
       info.p1 = doc.createPosition(p1);
+
       // TODO: figure out what is wrong here.  The preceding lines are dead code.
     }
   }
@@ -286,6 +285,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   /** Queues damageRange() call into event dispatch thread to be sure that views are in consistent state. */
   private void safeDamageRange(int a0, int a1) throws BadLocationException {
     Document doc = component.getDocument();
+
     safeDamageRange(doc.createPosition(a0), doc.createPosition(a1));
   }
   
@@ -650,10 +650,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
       }
     }
     
-    /**
-     * Restricts the region based on the receivers offsets and messages
-     * the painter to paint the region.
-     */
+    /** Restricts the region based on the receivers offsets and messages the painter to paint the region.*/
     void paintLayeredHighlights(Graphics g, int p0, int p1,
                                 Shape viewBounds, JTextComponent editor,
                                 View view) {

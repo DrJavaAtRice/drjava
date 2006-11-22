@@ -356,11 +356,11 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     }
     
     /** Gets the SwingDocument associated with this ErrorListPane.  The inherited getDocument method must be preserved
-     *  because the ErrorListPane constructor uses it fetch a Document that is NOT a SwingDocument.  ErrorListPane 
-     *  immediately sets the Document corresponding to this JEditorPane to a SwingDocument and strictly maintains it as 
-     *  a SwingDocument, but the JEditorPane constructor binds its document to a PlainDocument and uses getDocument 
-     *  before ErrorListPane can set this field to a SwingDocument.
-     */
+      * because the ErrorListPane constructor uses it fetch a Document that is NOT a SwingDocument.  ErrorListPane 
+      * immediately sets the Document corresponding to this JEditorPane to a SwingDocument and strictly maintains it as 
+      * a SwingDocument, but the JEditorPane constructor binds its document to a PlainDocument and uses getDocument 
+      * before ErrorListPane can set this field to a SwingDocument.
+      */
     public SwingDocument getSwingDocument() { return (SwingDocument) getDocument(); }
     
     /** Assigns the given keystroke to the given action in this pane.
