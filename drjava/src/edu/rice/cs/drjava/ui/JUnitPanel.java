@@ -268,7 +268,7 @@ public class JUnitPanel extends ErrorPanel {
         doc.insertString(index, "    ", NORMAL_ATTRIBUTES);
         index = doc.getLength();
         doc.insertString(index, testName + "\n", NORMAL_ATTRIBUTES);
-        Position pos = doc.createDJPosition(index);
+        Position pos = doc.createPosition(index);
         _runningTestNamePositions.put(fullName, pos);
         setCaretPosition(index);
       }

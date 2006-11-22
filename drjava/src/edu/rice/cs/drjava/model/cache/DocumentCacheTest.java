@@ -389,7 +389,6 @@ public class DocumentCacheTest extends DrJavaTestCase {
         _doc_made++;
         return _saved;
       }
-      public void makePositions() { /* do nothing */ }
       public void saveDocInfo(DefinitionsDocument doc) { _doc_saved++; }
       public void addDocumentListener(javax.swing.event.DocumentListener dl) { /* do nothing */ }
     };

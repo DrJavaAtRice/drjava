@@ -52,6 +52,7 @@ public abstract class FileOps {
   
   private static Log _log = new Log("FileOpsTest.txt", false);
   
+  
   /** Special File object corresponding to a dummy file. Simliar to FileOption.NULL_FILE but exists() returns false. */
   public static final File NONEXISTENT_FILE = new File("") {
     public String getAbsolutePath() { return ""; }
@@ -59,6 +60,18 @@ public abstract class FileOps {
     public String toString() { return ""; }
     public boolean exists() { return false; }
   };
+  
+  public static File makeFile(String path) { 
+    File f = new File(path);
+    try { return f.getCanonicalFile(); }
+    catch(IOException e) { return f; }
+  }
+  
+  public static File makeFile(File parentDir, String child) { 
+    File f = new File(parentDir, child);
+    try { return f.getCanonicalFile(); }
+    catch(IOException e) { return f; }
+  }
   
   /** Determines whether the specified file in within the specified file tree. */
   public static boolean inFileTree(File f, File root) {

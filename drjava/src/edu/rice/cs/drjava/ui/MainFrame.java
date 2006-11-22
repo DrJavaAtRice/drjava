@@ -2110,8 +2110,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       }
       DocumentRegion r = _model.getBookmarkManager().getRegionOverlapping(doc, startSel, endSel);
       if (r == null) {
-        final Position startPos = doc.createDJPosition(startSel);
-        final Position endPos = doc.createDJPosition(endSel);
+        final Position startPos = doc.createPosition(startSel);
+        final Position endPos = doc.createPosition(endSel);
         SimpleDocumentRegion newR = new SimpleDocumentRegion(doc, doc.getFile(), startPos.getOffset(), endPos.getOffset());
         _model.getBookmarkManager().addRegion(newR);
       }
@@ -4763,12 +4763,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private void _selectAll() { _currentDefPane.selectAll(); }
   
   /** Jump to the specified line and return the offset.
-    * @return offset */
+   * @return offset */
   private int _jumpToLine(int lineNum) {   
-      _currentDefPane.centerViewOnLine(lineNum);
-      int pos = _model.getActiveDocument().gotoLine(lineNum);
-      _currentDefPane.setCaretPosition(pos);
-      return pos;
+    int pos = _model.getActiveDocument().gotoLine(lineNum);
+    _currentDefPane.setCaretPosition(pos);
+    _currentDefPane.centerViewOnOffset(pos);
+    return pos;
   }
   
   /** Ask the user what line they'd like to jump to, then go there. */
@@ -6447,7 +6447,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //    _currentDefPane.notifyInactive();
     openDoc.setCurrentLocation(start);
     Position startPos;
-    try { startPos = openDoc.createPosition(start); }
+    try { startPos = openDoc.createUnwrappedPosition(start); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     
     int startOffset = startPos.getOffset();        

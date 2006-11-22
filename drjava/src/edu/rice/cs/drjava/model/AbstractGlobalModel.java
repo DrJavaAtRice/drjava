@@ -54,14 +54,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator ;
+import java.util.ListIterator;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
@@ -122,6 +124,7 @@ import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.NullFile;
 import edu.rice.cs.util.OperationCanceledException ;
 import edu.rice.cs.util.OrderedHashSet;
 import edu.rice.cs.util.Pair;
@@ -153,7 +156,7 @@ import static java.lang.Math.*;
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
-  public static Log _log = new Log("GlobalModel.txt", false);
+  public static Log _log = new Log("GlobalModel.txt", true);
  
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
@@ -218,8 +221,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected final DefinitionsEditorKit _editorKit = new DefinitionsEditorKit(_notifier);
  
   /** Collection for storing all OpenDefinitionsDocuments. */
-  protected final OrderedHashSet<OpenDefinitionsDocument> _documentsRepos = 
-    new OrderedHashSet<OpenDefinitionsDocument>();
+//  protected final OrderedHashSet<OpenDefinitionsDocument> 
+  private final AbstractMap<File, OpenDefinitionsDocument> _documentsRepos = 
+    new LinkedHashMap<File, OpenDefinitionsDocument>();
  
   // ---- Input/Output Document Fields ----
  
@@ -700,7 +704,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean inProject(File f) {
       String path;
       
-      if (f == null || ! inProjectPath(f)) return false;
+      if (isUntitled(f) || ! inProjectPath(f)) return false;
       try {
         path = f.getCanonicalPath();
         return _projFilePaths.contains(path);
@@ -793,7 +797,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean isAuxiliaryFile(File f) {
       String path;
       
-      if (f == null) return false;
+      if (isUntitled(f)) return false;  
       
       try { path = f.getCanonicalPath();}
       catch(IOException ioe) { return false; }
@@ -1062,7 +1066,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public OpenDefinitionsDocument newFile(File parentDir) {
     final ConcreteOpenDefDoc doc = _createOpenDefinitionsDocument();
     doc.setParentDirectory(parentDir);
-    doc.setFile(null);
+    doc.setFile(new NullFile());
     addDocToNavigator(doc);
     _notifier.newFileCreated(doc);
     return doc;
@@ -1617,14 +1621,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     DocFile active = null;
     for (DocFile f: srcFiles) {
       if (f.lastModified() > f.getSavedModDate()) f.setSavedModDate (f.lastModified());
-//      if (f.isActive() && active == null) active = f;
-//      else projFiles.add(f);
       projFiles.add(f);
     }
     for (DocFile f: auxFiles) {
       if (f.lastModified() > f.getSavedModDate()) f.setSavedModDate (f.lastModified());
-//      if (f.isActive() && active == null) active = f;
-//      else projFiles.add(f);
       projFiles.add(f);
     }
     // Insert active file as last file on list.
@@ -1743,6 +1743,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public boolean closeFiles(List<OpenDefinitionsDocument> docs) {
     if (docs.size() == 0) return true;
     
+    _log.log("closeFiles(" + docs + ") called");
     /* Force the user to save or discard all modified files in docs */
     for (OpenDefinitionsDocument doc : docs) { 
       if (! doc.canAbandonFile()) return false; }
@@ -1777,10 +1778,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public boolean closeFileWithoutPrompt(final OpenDefinitionsDocument doc) {
     //    new Exception("Closed document " + doc).printStackTrace();
     
+    _log.log("closeFileWithoutPrompt(" + doc + ") called; getRawFile() = " + doc.getRawFile());
+    _log.log("_documentsRepos = " + _documentsRepos);
     boolean found;
-    synchronized(_documentsRepos) { found = _documentsRepos.remove(doc); }
+    synchronized(_documentsRepos) { found = (_documentsRepos.remove(doc.getRawFile()) != null); }
     
-    if (! found) return false;
+    if (! found) {
+      _log.log("Cannot close " + doc + "; not found!");
+      return false;
+    }
         
     // remove regions for this file
     doc.getBreakpointManager().clearRegions();
@@ -1891,8 +1897,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   /** Disposes of external resources. This is a no op in AbstractGlobalModel. */
   public void disposeExternalResources() { /* no op */ }
- 
-  //----------------------- Specified by IGetDocuments -----------------------//
 
   /** Gets the document for the specified file; may involve opening the file. */
   public OpenDefinitionsDocument getDocumentForFile(File file) throws IOException {
@@ -1981,20 +1985,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
   public int getDocumentCount() { return _documentsRepos.size(); }
  
-  /** Returns a new collection of all documents currently open for editing.
-   *  This is equivalent to the results of getDocumentForFile for the set
-   *  of all files for which isAlreadyOpen returns true.
-   *  @return a random-access List of the open definitions documents.
-   *
-   *  This essentially duplicates the method valuesArray() in OrderedHashSet.
-   */
+  /** Returns a new collection of all documents currently open for editing.  This is equivalent to the results of 
+    * getDocumentForFile for the set of all files for which isAlreadyOpen returns true.
+    * @return a random-access List of the open definitions documents..
+    */
   public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments() {
     synchronized(_documentsRepos) {
       ArrayList<OpenDefinitionsDocument> docs = new ArrayList<OpenDefinitionsDocument>(_documentsRepos.size());
-      for (OpenDefinitionsDocument doc: _documentsRepos) { docs.add(doc); }
+      for (OpenDefinitionsDocument doc: _documentsRepos.values()) { docs.add(doc); }
       return docs;
     }
   }
+  /* Returns a sorted (by time of insertion) collection of all open documents. */
+  public List<OpenDefinitionsDocument> getSortedOpenDefinitionsDocuments() { return getOpenDefinitionsDocuments(); }
  
   /** @return the size of the collection of OpenDefinitionsDocuments */
   public int getOpenDefinitionsDocumentsSize() { synchronized(_documentsRepos) { return _documentsRepos.size(); } }
@@ -2009,16 +2012,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     return false;
   }
- 
-//  public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc) {
-//    synchronized(_documentsRepos) { return _documentsRepos.getValue(idoc); }
-//  }
- 
-//  public INavigatorItem getIDocGivenODD(OpenDefinitionsDocument odd) {
-//    synchronized(_documentsRepos) { return _documentsRepos.getKey(odd); }
-//  }
- 
-  //----------------------- End IGetDocuments Methods -----------------------//
  
   /**
    * Set the indent tab size for all definitions documents.
@@ -2533,8 +2526,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     if (doc != null) {
       try {
-        startPos = doc.createDJPosition(doc.getCaretPosition()).getOffset();
-        endPos = doc.createDJPosition(doc.getLineEndPos(doc.getCaretPosition())).getOffset();
+        startPos = doc.createPosition(doc.getCaretPosition()).getOffset();
+        endPos = doc.createPosition(doc.getLineEndPos(doc.getCaretPosition())).getOffset();
         file = doc.getFile();
       }
       catch (FileMovedException fme) { /* ignore */ }
@@ -2543,6 +2536,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       getBrowserHistoryManager().addRegion(new SimpleDocumentRegion(doc, file, startPos, endPos));
     }
   }
+  
+  public static boolean isUntitled(final File f) { return f == null || (f instanceof NullFile); }
   
   // ---------- ConcreteOpenDefDoc inner class ----------
 
@@ -2818,23 +2813,27 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     //------------ Getters and Setters -------------//
     
-    /** Returns the file field for this document; does not check whether the file exists. */
+    /** Returns the file field for this document; does not check whether the file is NullFile or file exists. */
     public File getRawFile() { return _file; }
     
-    /** Returns the file for this document, null if the document is untitled (and hence has no file).  If the document's
+    /** Returns the file for this document, null if the document is null (which should never happen).  If the document's
      *  file does not exist, this throws a FileMovedException.  If a FileMovedException is thrown, you
      *  can retrieve the non-existence source file from the FileMovedException by using the getFile() method.
      *  @return the file for this document
      */
     public File getFile() throws FileMovedException {
-        if (_file == null) return null;
-        if (_file.exists()) return _file;
-        else throw new FileMovedException(_file, "This document's file has been moved or deleted.");
+      File f = _file;  // single read of f
+        if (AbstractGlobalModel.isUntitled(f)) return null;  // assert f != null
+        if (f.exists()) return f;
+        else throw new FileMovedException(f, "This document's file has been moved or deleted.");
     }
     /** Sets the file for this openDefinitionsDocument. */
-    public void setFile(File file) {
-      _file = file;
-      if (_file != null) _timestamp = _file.lastModified();
+    public void setFile(final File file) {  
+      synchronized(this) { // ensures that _file and _timestamp are consistent
+        _file = file;
+        if (! AbstractGlobalModel.isUntitled(file)) _timestamp = file.lastModified();
+        else _timestamp = 0L;
+      }
     }
     
     /** Returns the timestamp. */
@@ -2842,8 +2841,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Whenever this document has been saved, this method should be called to update its "isModified" information. */
     public void resetModification() {
-      getDocument().resetModification();
-      if (_file != null) _timestamp = _file.lastModified();
+      synchronized(this) {
+        getDocument().resetModification();
+        File f = _file; 
+        if (! AbstractGlobalModel.isUntitled(f)) _timestamp = f.lastModified();
+      }
     }
     
     /** @return The parent directory; should be in canonical form. */
@@ -2853,9 +2855,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      *  @param pd The parent directory
      */
     public void setParentDirectory(File pd) {
-      if (_file != null)
-        throw new IllegalArgumentException("The parent directory can only be set for untitled documents");
-      _parentDir = pd;  
+      synchronized(this) {
+        if (! AbstractGlobalModel.isUntitled(_file))
+          throw new IllegalArgumentException("The parent directory can only be set for untitled documents");
+        _parentDir = pd;  
+      }
     }
  
     public int getInitialVerticalScroll()   { return _initVScroll; }
@@ -2889,8 +2893,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
-    /** Reconstructs the embedded positions for this document. */
-    public void makePositions() { _cacheAdapter.makePositions(); }
+//    /** Reconstructs the embedded positions for this document. */
+//    public void makePositions() { _cacheAdapter.makePositions(); }
 
     /** Returns the name of the top level class, if any.
      *  @throws ClassNameNotFoundException if no top level class name found.
@@ -2906,10 +2910,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().getMainClassName();
     }
     
-    /** Returns the name of this file, or "(untitled)" if no file. */
+    /** Returns the name of this file, or "(Untitled)" if no file. */
     public String getFileName() {
-      if (_file == null) return "(Untitled)";
-      return _file.getName();
+      if (isUntitled()) return "(Untitled)";
+      return _file.getName(); 
     }
 
     /** Returns the name of the file for this document with an appended asterisk (if modified) or spaces */
@@ -2922,12 +2926,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Returns the canonical path for this document, "(Untitled)" if unsaved), "" if the file path is ill-formed. */
     public String getCanonicalPath() {
-      
       String path = "(Untitled)";
-
-      File file = getRawFile();
-      if (file != null) path = FileOps.getCanonicalPath(file);
-      return path;
+      if (isUntitled()) return path;
+      return FileOps.getCanonicalPath(getRawFile());
     }
      
     /** Returns the canonical path augmented by " *" if the document has been modified. */
@@ -2993,7 +2994,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** @return true if this has a legal source file name (ends in extension ".java", ".dj0", ".dj1", or ".dj2". */
     public boolean isSourceFile() {
-      if (_file == null) return false;
+      if (isUntitled()) return false;  // assert _file != null
       String name = _file.getName();
       for (String ext: CompilerModel.EXTENSIONS) { if (name.endsWith(ext)) return true; }
       return false;
@@ -3002,12 +3003,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).
      *  @return true if the document is untitled and has no file
      */
-    public boolean isUntitled() { return _file == null; }
+    public boolean isUntitled() { return AbstractGlobalModel.isUntitled(_file); }
     
-    public boolean isUntitledAndEmpty() { return _file == null && getLength() == 0; }
+    public boolean isUntitledAndEmpty() { return isUntitled() && getLength() == 0; }  // should be synchronized?
     
     /** Returns true if the file exists on disk. Returns false if the file has been moved or deleted */
-    public boolean fileExists() { return _file != null && _file.exists(); }
+    public boolean fileExists() { 
+      File f = _file; // single read of _file;
+      return  ! AbstractGlobalModel.isUntitled(f) && f.exists(); 
+    }
     
     //--------------- Major Operations ----------------//
     
@@ -3019,7 +3023,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try {
         _notifier.documentNotFound(this, _file);
         File f = getFile();
-        if (f == null) return false;
+        if (isUntitled()) return false;
         String path = fixPathForNavigator(getFile().getCanonicalPath());
         _documentNavigator.refreshDocument(this, path);
         return true;
@@ -3044,11 +3048,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         private volatile WeakHashMap< DefinitionsDocument.WrappedPosition, Integer> _positions =
           new WeakHashMap<DefinitionsDocument.WrappedPosition, Integer>();
         
-        private volatile boolean _positionsMade = false;
-        
-        /** Reconstructs this document except for embedded positions.  Assumes _cacheLock is held.
-          * @param image the bytes in the cached file image for this document. 
-          */
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException {
           
 //          System.err.println("DDReconstructor.make() called on " + ConcreteOpenDefDoc.this);
@@ -3059,7 +3058,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             _editorKit.read(new InputStreamReader(new ByteArrayInputStream(_image)), newDefDoc, 0);
             _log.log("Reading from image for " + _file + " containing " + _image.length + " chars");
           }
-          else if (_file != null) {
+          else if (! isUntitled()) {
             final InputStreamReader reader = new FileReader(_file);
             _editorKit.read(reader, newDefDoc, 0);
             reader.close(); // win32 needs readers closed explicitly!
@@ -3073,8 +3072,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           for (FinalizationListener<DefinitionsDocument> l: _finalListeners) {
             newDefDoc.addFinalizationListener(l);
           }
-          
-          _positionsMade = false;
+
+          // re-create and update all positions
+          newDefDoc.setWrappedPositionOffsets(_positions);
           
           newDefDoc.resetModification();  // Why is this necessary? A reconstructed document is already unmodified.
 
@@ -3085,19 +3085,63 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           _packageName = newDefDoc.getPackageName();
 //          System.err.println("make() returned " + newDefDoc);
           return newDefDoc;
-
         }
         
-        /** Reconstructs the embedded positions for this document.  Synchronized*/
-        public void makePositions() { 
-          if (_positionsMade) return;
-          synchronized(this) {
-            if (_positionsMade) return; // double-check works for volatile fields in Java 1.4 and later code
-            _positionsMade = true;
-          }
-          try { getDocument().setWrappedPositionOffsets(_positions); }
-          catch(Exception e) { /* ignore */ } // omitted positions are not fatal
-        }
+        
+//        private volatile boolean _positionsMade = false;
+//        
+//        /** Reconstructs this document except for embedded positions.  Assumes _cacheLock is held.
+//          * @param image the bytes in the cached file image for this document. 
+//          */
+//        public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException {  // should sync on _file
+//          
+////          System.err.println("DDReconstructor.make() called on " + ConcreteOpenDefDoc.this);
+//          DefinitionsDocument newDefDoc = new DefinitionsDocument(_notifier);
+//          newDefDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
+//          
+//          if (_image != null) {
+//            _editorKit.read(new InputStreamReader(new ByteArrayInputStream(_image)), newDefDoc, 0);
+//            _log.log("Reading from image for " + _file + " containing " + _image.length + " chars");
+//          }
+//          else if (! isUntitled()) {
+//            final InputStreamReader reader = new FileReader(_file);
+//            _editorKit.read(reader, newDefDoc, 0);
+//            reader.close(); // win32 needs readers closed explicitly!
+//          }
+//          _loc = Math.min(_loc, newDefDoc.getLength()); // make sure not past end
+//          _loc = Math.max(_loc, 0); // make sure not less than 0
+//          newDefDoc.setCurrentLocation(_loc);
+//          for (DocumentListener d : _list) {
+//            if (d instanceof DocumentUIListener) newDefDoc.addDocumentListener(d);
+//          }
+//          for (FinalizationListener<DefinitionsDocument> l: _finalListeners) {
+//            newDefDoc.addFinalizationListener(l);
+//          }
+//          
+//          _positionsMade = false;
+//          
+//          newDefDoc.resetModification();  // Why is this necessary? A reconstructed document is already unmodified.
+//
+//          //            tempDoc.setUndoManager(_undo);
+//          assert ! newDefDoc.isModifiedSinceSave();
+////          System.err.println ("_packageName in make() = " + _packageName);
+////          System.err.println("tempDoc.getLength() = " + tempDoc.getLength());
+//          _packageName = newDefDoc.getPackageName();
+////          System.err.println("make() returned " + newDefDoc);
+//          return newDefDoc;
+//
+//        }
+        
+//        /** Reconstructs the embedded positions for this document.  Synchronized*/
+//        public void makePositions() { 
+//          if (_positionsMade) return;
+//          synchronized(this) {
+//            if (_positionsMade) return; // double-check works for volatile fields in Java 1.4 and later code
+//            _positionsMade = true;
+//          }
+//          try { getDocument().setWrappedPositionOffsets(_positions); }
+//          catch(Exception e) { /* ignore */ } // omitted positions are not fatal
+//        }
         
         /** Saves the information for this document before it is kicked out of the cache.  Only called from 
           * DocumentCache.  Assumes that cache lock is already held. 
@@ -3153,7 +3197,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try {
         final File file = getFile();
 //        System.err.println("file name for doc to be saved is: " + file);
-        if (file != null) {
+        if (! isUntitled()) {
           realCommand = new TrivialFSS(file);
 //          System.err.println("TrivialFSS set up");
         }
@@ -3182,8 +3226,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _packageName = getDocument().getPackageName();
       try {
         final OpenDefinitionsDocument openDoc = this;
-        final File file = com.getFile();
-//        System.err.println("saveFileAs called on " + file);
+        final File file = com.getFile().getCanonicalFile();
+        _log.log("saveFileAs called on " + file);
         OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
 
         // Check if file is already open in another document
@@ -3219,9 +3263,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
               catch (BadLocationException docFailed) { throw new UnexpectedException(docFailed); }
             }
           });
-          
           resetModification();
+          synchronized(_documentsRepos) {
+            File f = getRawFile();
+//            OpenDefinitionsDocument d = _documentsRepos.get(f);
+            // d == this except in some unit tests where documents are not entered in _documentRepos
+//            assert d == this;
+            _documentsRepos.remove(f);
+            _documentsRepos.put(file, this);
+          }
           setFile(file);
+          
           
           // this.getPackageName does not return "" if this is untitled and contains a legal package declaration     
 //          try {
@@ -3258,8 +3310,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
     public void preparePrintJob() throws BadLocationException, FileMovedException {
       String fileName = "(Untitled)";
-      File sourceFile = getFile();
-      if (sourceFile != null)  fileName = sourceFile.getAbsolutePath();
+      File sourceFile = getFile();  // single read of _file
+      if (! AbstractGlobalModel.isUntitled(sourceFile)) fileName = sourceFile.getAbsolutePath();
 
       _book = new DrJavaBook(getDocument().getText(), fileName, _pageFormat);
     }
@@ -3316,18 +3368,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      */
     public boolean modifiedOnDisk() {
       boolean ret = false;
-      final File f = _file;
-
-      if (f != null) ret = (f.lastModified() > _timestamp);
+      final File f = _file;  // single read of f
+      if (! AbstractGlobalModel.isUntitled(f)) ret = (f.lastModified() > _timestamp);
       return ret;
     }
     
     /** Determines if document has a class file consistent with its current state.  If this document is unmodified,
      *  this method examines the primary class file corresponding to this document and compares the timestamps of
-     *  the class file to that of the source file.  The empty untitled document is consider to be "in sync".
+     *  the class file to that of the source file.  An empty untitled document is consider to be "in sync".
      */
     public boolean checkIfClassFileInSync() {
       _log.log("checkIfClassFileInSync() called for " + this);
+      if (isUntitled()) return true; // unmodified, untitled document
+      
       // If modified, then definitely out of sync
       DefinitionsDocument dd = getDocument();
       if (isModifiedSinceSave()) {
@@ -3336,8 +3389,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         return false;
       }
       
-      if (isUntitled()) return true; // unmodified, untitled document
-
       // Look for cached class file
       File classFile = dd.getCachedClassFile();
 //      _log.log("In checkIfClassFileInSync cacched value of classFile = " + classFile);
@@ -3363,11 +3414,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //        _log.log(this + ": File moved");
         return false;
       }
-      if (sourceFile != null) {
+      if (sourceFile != null) { 
         _log.log(sourceFile + " has timestamp " + sourceFile.lastModified());
         _log.log(classFile + " has timestamp " + classFile.lastModified());
       }
-      if ((sourceFile == null) || (sourceFile.lastModified() > classFile.lastModified())) {
+      if (sourceFile == null || sourceFile.lastModified() > classFile.lastModified()) {  // assert sourceFile != null 
         dd.setClassFileInSync(false);
 //        _log.log(this + ": date stamps indicate modification");
         return false;
@@ -3487,12 +3538,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       doc.getBookmarkManager().clearRegions();
       for (RegionManager<MovingDocumentRegion> rm: doc.getFindResultsManagers()) rm.clearRegions();
       doc.getBrowserHistoryManager().clearRegions();
-
+      
+      if (doc.isUntitled()) throw new UnexpectedException("Cannot revert an Untitled file!");
+      
       try {
-        File file = doc.getFile();
-        if (file == null) throw new UnexpectedException("Cannot revert an Untitled file!");
         //this line precedes .remove() so that an invalid file is not cleared before this fact is discovered.
-
+        File file = doc.getFile();
         FileReader reader = new FileReader(file);
         doc.clear();
 
@@ -3514,9 +3565,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      */
     public boolean canAbandonFile() {
 //      assert EventQueue.isDispatchThread();
-      File f = _file;
       if (isUntitledAndEmpty()) return true;
-      if (isModifiedSinceSave() || (f != null && ! f.exists() && _cacheAdapter.isReady()))
+      File f = _file;
+      if (isModifiedSinceSave() || (! AbstractGlobalModel.isUntitled(f) && ! f.exists() && _cacheAdapter.isReady()))
         return _notifier.canAbandonFile(this);
       else return true;
     }
@@ -3539,7 +3590,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      */
     public int gotoLine(int line) {
       DefinitionsDocument dd = getDocument();
-      dd.gotoLine (line);
+      dd.gotoLine(line);
       return dd.getCurrentLocation();
     }
 
@@ -3605,12 +3656,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      *          location of the source file.
      */
     File _getSourceRoot(String packageName) throws InvalidPackageException {
+      
+      if (isUntitled())
+        throw new InvalidPackageException(-1, "Can not get source root for unsaved file. Please save.");
+      
       File sourceFile;
-      try {
-        sourceFile = getFile();
-        if (sourceFile == null)
-          throw new InvalidPackageException(-1, "Can not get source root for unsaved file. Please save.");
-      }
+      try { sourceFile = getFile(); }
       catch (FileMovedException fme) {
         throw new
           InvalidPackageException(-1, "File has been moved or deleted from its previous location. Please save.");
@@ -3693,12 +3744,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().getUndoableEditListeners();
     }
     
-    public Position createPosition(int offs) throws BadLocationException {
-      return getDocument().createPosition(offs); 
+    public Position createUnwrappedPosition(int offs) throws BadLocationException {
+      return getDocument().createUnwrappedPosition(offs); 
     }
-    
-    public Position createDJPosition(int offs) throws BadLocationException {
-      return getDocument().createDJPosition(offs);
+
+    public Position createPosition(int offs) throws BadLocationException {
+      return getDocument().createPosition(offs);
     }
 
     public Element getDefaultRootElement() { return getDocument().getDefaultRootElement(); }
@@ -4003,37 +4054,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (! f.exists()) throw new FileNotFoundException("file " + f + " cannot be found");
     return new ConcreteOpenDefDoc(f);
   }
- 
-  /** Returns the OpenDefinitionsDocument corresponding to the given File, or null if that file is not open.
+    
+ /** Returns the OpenDefinitionsDocument corresponding to the given File, or null if that file is not open.
    *  @param file File object to search for
    *  @return Corresponding OpenDefinitionsDocument, or null
    */
   protected OpenDefinitionsDocument _getOpenDocument(File file) {
-    
-//    System.err.println("_getOpenDocument(" + file + ") called");
-    
-    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
-      try {
-        File thisFile = null;
-        try { thisFile = doc.getFile(); }
-        catch (FileMovedException fme) { thisFile = fme.getFile(); } // File is invalid, but compare anyway
-        finally {
-          // Always do the comparison
-          if (thisFile != null) {
-            try {
-              // Compare canonical paths if possible
-              if (thisFile.getCanonicalFile().equals(file.getCanonicalFile())) return doc;
-            }
-            catch (IOException ioe) {
-              // Can be thrown from getCanonicalFile. If so, compare the files themselves
-              if (thisFile.equals(file)) return doc;
-            }
-          }
-        }
-      }
-      catch (IllegalStateException ise) { /* No file in doc; fail silently */ }
-    }
-    return null;
+    synchronized(_documentsRepos) { return _documentsRepos.get(file); }
   }
  
   /** Returns the OpenDefinitionsDocuments that are NOT identified as project source files. */
@@ -4122,7 +4149,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         catch(IOException e) { _documentNavigator.addDocument(doc); }
       }});
-      synchronized(_documentsRepos) { _documentsRepos.add(doc); }
+      synchronized(_documentsRepos) { _documentsRepos.put(doc.getRawFile(), doc); }
   }
  
   /** Add a document to the classpath for the slave JVM. Does nothing here because there is no slave JVM.  Overridden
@@ -4185,7 +4212,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     try {
       Utilities.invokeAndWait(new SRunnable() {  
         public void run() {
-          doc.makePositions();  // reconstruct the embedded postions in this document (reconstructs document if necesarry)
+//          doc.makePositions();  // reconstruct the embedded postions in this document (reconstructs document if necesarry)
           _documentNavigator.setNextChangeModelInitiated(true);
           addToBrowserHistory();
           _documentNavigator.setActiveDoc(doc);

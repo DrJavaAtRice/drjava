@@ -5,7 +5,7 @@
  *
  * DrJava Open Source License
  * 
- * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
+ * Copyright (C) 2001-2006 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
  * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
  * 
@@ -31,13 +31,22 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util.text;
+package edu.rice.cs.util;
+import java.io.File;
+import java.io.Serializable;
 
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.StyledDocument;
-import javax.swing.text.Position;
+/** A null file.  This class is NOT a singleton because we need multiple, distinct null files for untitled documents. 
+  * The equals method is overridden so that distinct NullFile objects (which all have the same path) are unequal. 
+  */
+public class NullFile extends File implements Serializable {
 
-/** DefaultStyledDocument interface augmented by AbstractDocumentInterface. */
-public interface SwingDocumentInterface extends AbstractDocumentInterface, StyledDocument { }
-
+  public NullFile() { super(""); }
+  public String toString() { return "(Untitled)"; }
+  
+  /**  All distinct objects of type NullFile are unequal. */
+  public boolean equals(Object o) {
+    if (o == null || o.getClass() != getClass()) return false;
+    return o == this;
+  }
+    
+}

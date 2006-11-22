@@ -33,9 +33,8 @@
 
 package edu.rice.cs.util.text;
 
-import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.util.UnexpectedException;
-import static edu.rice.cs.util.text.SwingDocumentInterface.*;
+import static edu.rice.cs.util.text.AbstractDocumentInterface.*;
 
 import java.awt.print.Pageable;
 
@@ -47,12 +46,11 @@ import javax.swing.text.BadLocationException;
 import java.util.Hashtable;
 
 /** A swing implementation of the toolkit-independent EditDocumentInterface.  This class is instantiated only
-  * by test code. This document must use the readers/writers locking protocol established in its superclasses.
-  * TODO: create a separate DummySwingDocument class for testing and make SwingDocument abstract.  Move the
-  * DJDocument interface to util.  Factor out common code wth AbstractDJDocument.
-  * @version $Id$
-  */
-public class SwingDocument extends DefaultStyledDocument implements EditDocumentInterface, SwingDocumentInterface {
+ *  by test code. This document must use the readers/writers locking protocol established in its superclasses.
+ *  TODO: create a separate DummySwingDocument class for testing and make SwingDocument abstract.
+ *  @version $Id$
+ */
+public class SwingDocument extends DefaultStyledDocument implements EditDocumentInterface, AbstractDocumentInterface {
   
 //  /** The lock state.  See ReadersWritersLocking interface for documentation. */
 //  private volatile int _lockState = UNLOCKED;
@@ -103,6 +101,15 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     try { _condition = condition; }
     finally { releaseWriteLock(); }
   }
+  
+  /* Clears the document. */
+  public void clear() {
+    acquireWriteLock();
+    try { remove(0, getLength()); }
+    catch(BadLocationException e) { throw new UnexpectedException(e); }
+    finally { releaseWriteLock(); }
+  }
+  
 
   /** Inserts a string into the document at the given offset and the given named style, if the edit condition 
    *  allows it.
@@ -202,14 +209,6 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   /** Appends given string with specified named style to end of this document. */
   public void append(String str, String style) { append(str, style == null ? null : getDocStyle(style)); }
   
-  /* Clears the document. */
-  public void clear() {
-    acquireWriteLock();
-    try { remove(0, getLength()); }
-    catch(BadLocationException e) { throw new UnexpectedException(e); }
-    finally { releaseWriteLock(); }
-   }
-  
   /** A SwingDocument instance does not have a default style */
   public String getDefaultStyle() { return null; }
   
@@ -247,8 +246,8 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
 //   _lockState = UNLOCKED;
   }
   
-  /** Perfoms createPosition except in DefinitionsDocument where it creates a WrappedPosition. */
-  public Position createDJPosition(int offs) throws BadLocationException { return createPosition(offs); }
+  /** Performs the default behavior for createPosition in DefaultStyledDocument. */
+  public Position createUnwrappedPosition(int offs) throws BadLocationException { return super.createPosition(offs); }
   
 //  public int getLockState() { return _lockState; }
 }

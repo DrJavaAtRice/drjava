@@ -228,8 +228,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     return _defDoc.createPosition(offs);
   }
   
-  public Position createDJPosition(int offs) throws BadLocationException {
-    return _defDoc.createDJPosition(offs);
+  public Position createUnwrappedPosition(int offs) throws BadLocationException {
+    return _defDoc.createUnwrappedPosition(offs);
   }
   
   public Element getDefaultRootElement() { return _defDoc.getDefaultRootElement(); }
