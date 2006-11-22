@@ -49,9 +49,6 @@ public interface DCacheAdapter {
    */
   public DefinitionsDocument getDocument() throws IOException, FileMovedException;
   
-  /* Reconstructes the embedded positions in the reconstructed document. */
-  public void makePositions();
-  
   /** Checks whether the document is ready to be returned.  If false, then the document would have to be
    *  loaded from disk when getDocument() is called.  
    *  @return if the document is already loaded

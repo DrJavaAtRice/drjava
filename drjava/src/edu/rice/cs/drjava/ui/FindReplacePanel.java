@@ -177,8 +177,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             try {
               int endSel = fr.getFoundOffset();
               int startSel = endSel-_machine.getFindWord().length();
-              final Position startPos = doc.createDJPosition(startSel);
-              final Position endPos = doc.createDJPosition(endSel);
+              final Position startPos = doc.createPosition(startSel);
+              final Position endPos = doc.createPosition(endSel);
               
               // create excerpt string
               int excerptEndSel = doc.getLineEndPos(endSel);
@@ -810,7 +810,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       }
     }
     
-    if (! DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+    if (!DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
       _findField.requestFocusInWindow();
     }
   }
@@ -913,7 +913,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     int position = _machine.getCurrentOffset();
     int to, from;
     to = position;
-    if (! _machine.getSearchBackwards()) from = position - _machine.getFindWord().length();
+    if (!_machine.getSearchBackwards()) from = position - _machine.getFindWord().length();
     else from = position + _machine.getFindWord().length();
     _selectFoundItem(from, to);
   }
@@ -924,14 +924,15 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
    *  removePreviousHighlight method which was removed since selections are removed automatically upon
    *  a caret change.
    */
-  private void _selectFoundItem(final int from, final int to) {
+  private void _selectFoundItem(int from, int to) {
     _defPane.centerViewOnOffset(from);
     _defPane.select(from, to);
-   
-    // setSelectionVisible shows the selected text in _defPane without giving _defPane 
+
+    // Found this little statement that will show the selected text in _defPane without giving _defPane 
     // focus, allowing the user to hit enter repeatedly and change the document while finding next.
     SwingUtilities.invokeLater(new Runnable() { 
-      public void run() {  _defPane.getCaret().setSelectionVisible(true); } });
+      public void run() { _defPane.getCaret().setSelectionVisible(true); } 
+    });
 //    _defPane.centerViewOnOffset(from);
   }
 

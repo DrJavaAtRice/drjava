@@ -575,7 +575,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         
         if (!err.isWarning()){
           _insertErrorText(err, doc);
-          Position pos = doc.createDJPosition(startPos);
+          Position pos = doc.createPosition(startPos);
           _errorListPositions[errorPositionInListOfErrors] = pos;
           _errorTable.put(pos, err);
           errorPositionInListOfErrors++;
@@ -591,7 +591,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         
         if (err.isWarning()){
           _insertErrorText(err, doc);
-          Position pos = doc.createDJPosition(startPos);
+          Position pos = doc.createPosition(startPos);
           _errorListPositions[errorPositionInListOfErrors] = pos;
           _errorTable.put(pos, err);
           errorPositionInListOfErrors++;
