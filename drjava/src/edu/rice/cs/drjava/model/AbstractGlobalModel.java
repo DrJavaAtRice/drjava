@@ -156,7 +156,7 @@ import static java.lang.Math.*;
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
-  public static Log _log = new Log("GlobalModel.txt", true);
+  public static Log _log = new Log("GlobalModel.txt", false);
  
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
