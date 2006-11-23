@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.List;
 
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.util.FileOpenSelector;
@@ -379,7 +380,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   }
 
   /** Called when a compile has finished running. */
-  public void compileEnded(File workDir, File[] excludedFiles) {
+  public void compileEnded(File workDir, List<? extends File> excludedFiles) {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.compileEnded(workDir, excludedFiles); } }
     finally { _lock.endRead(); }

@@ -53,6 +53,7 @@ import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.regex.*;
+import java.util.List;
 
 /** Base class for tests over the {@link GlobalModel}.
  *
@@ -756,7 +757,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 //    }
 
     public void compileStarted() { listenerFail("compileStarted fired unexpectedly"); }
-    public void compileEnded(File workDir, File[] excludedFiles) { listenerFail("compileEnded fired unexpectedly"); }
+    public void compileEnded(File workDir, List<? extends File> excludedFiles) { listenerFail("compileEnded fired unexpectedly"); }
     
     public void runStarted(OpenDefinitionsDocument doc) { listenerFail("runStarted fired unexpectedly"); }
     
@@ -937,9 +938,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
 //    public boolean notDone() { return ! _interactionsReset; }
     
-    public void newFileCreated(OpenDefinitionsDocument doc) { /* ingore this operation */ }
+    @Override public void newFileCreated(OpenDefinitionsDocument doc) { /* ingore this operation */ }
     
-    public void compileStarted() {
+    @Override public void compileStarted() {
 //      Utilities.showDebug("compileStarted called in CSSListener");
       assertCompileStartCount(0);
       assertCompileEndCount(0);
@@ -949,7 +950,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       synchronized(this) { compileStartCount++; }
     }
     
-    public void compileEnded(File workDir, File[] excludedFiles) {
+    @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
 //      Utilities.showDebug("compileEnded called in CSSListener");
       assertCompileEndCount(0);
       assertCompileStartCount(1);
@@ -1007,13 +1008,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       }
     }
     
-    public void compileStarted() {
+    @Override public void compileStarted() {
       assertCompileStartCount(0);
       assertCompileEndCount(0);
       synchronized(this) { compileStartCount++; }
     }
     
-    public void compileEnded(File workDir, File[] excludedFiles) {
+    @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
 //      Utilities.showDebug("compileEnded called in CSSListener");
       assertCompileEndCount(0);
       assertCompileStartCount(1);
@@ -1083,37 +1084,37 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       compileStartCount = 0; 
       compileEndCount = 0;
     }
-    public void junitStarted() {
+    @Override public void junitStarted() {
       if (printMessages) System.out.println("listener.junitStarted");
       synchronized(this) { junitStartCount++; }
     }
-    public void junitSuiteStarted(int numTests) {
+    @Override public void junitSuiteStarted(int numTests) {
       if (printMessages) System.out.println("listener.junitSuiteStarted, numTests = "+numTests);
       assertJUnitStartCount(1);
       synchronized(this) { junitSuiteStartedCount++; }
     }
-    public void junitTestStarted(String name) {
+    @Override public void junitTestStarted(String name) {
       if (printMessages) System.out.println("  listener.junitTestStarted, " + name);
       synchronized(this) { junitTestStartedCount++; }
     }
-    public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
+    @Override public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
       if (printMessages) System.out.println("  listener.junitTestEnded, name = " + name + " succ = " + wasSuccessful + 
                                             " err = " + causedError);
       synchronized(this) { junitTestEndedCount++; }
       assertEquals("junitTestEndedCount should be same as junitTestStartedCount", junitTestEndedCount, 
                    junitTestStartedCount);
     }
-    public void nonTestCase(boolean isTestAll) {
+    @Override public void nonTestCase(boolean isTestAll) {
       if (printMessages) System.out.println("listener.nonTestCase, isTestAll=" + isTestAll);
       synchronized(this) { nonTestCaseCount++; }
       _notifyJUnitDone();
     }
-    public void classFileError(ClassFileError e) {
+    @Override public void classFileError(ClassFileError e) {
       if (printMessages) System.out.println("listener.classFileError, e="+e);
       synchronized(this) { classFileErrorCount++; }
       _notifyJUnitDone();
     }
-    public void junitEnded() {
+    @Override public void junitEnded() {
       //assertJUnitSuiteStartedCount(1);
       if (printMessages) System.out.println("junitEnded event!");
       synchronized(this) { junitEndCount++; }

@@ -358,18 +358,10 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call interpretCurrentInteraction on a Dummy");
   }
 
-  public ClassPathVector getClassPath() {
-     throw new UnsupportedOperationException("Tried to call getClasspath on a Dummy");
+  public ClassPathVector getInteractionsClassPath() {
+     throw new UnsupportedOperationException("Tried to call getInteractionsClasspath on a Dummy");
   }
 
-  public ClassPathVector getExtraClassPath() {
-     throw new UnsupportedOperationException("Tried to call getExtraClasspath on a Dummy");
-  }
-
-  public void setExtraClassPath(ClassPathVector cp) {
-     throw new UnsupportedOperationException("Tried to call setExtraClasspath on a Dummy");
-  }
-  
   public void loadHistory(FileOpenSelector selector) throws IOException {
      throw new UnsupportedOperationException("Tried to call loadHistory on a Dummy");
   }
@@ -405,6 +397,10 @@ public class DummyGlobalModel implements GlobalModel {
   
   public int getDebugPort() throws IOException {
      throw new UnsupportedOperationException("Tried to call getDebugPort on a Dummy");
+  }
+  
+  public ClassPathVector getClassPath() {
+    throw new UnsupportedOperationException("Tried to call getClassPath on a Dummy");
   }
 
   public PageFormat getPageFormat() {
@@ -501,6 +497,14 @@ public class DummyGlobalModel implements GlobalModel {
   
   public File getMainClass() {
      throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
+  }
+  
+  public ClassPathVector getExtraClassPath() {
+    throw new UnsupportedOperationException("Tried to call getExtraClasspath on a Dummy");
+  }
+  
+  public void setExtraClassPath(ClassPathVector cp) {
+    throw new UnsupportedOperationException("Tried to call setExtraClasspath on a Dummy");
   }
   
   public void setCreateJarFile(File f) {

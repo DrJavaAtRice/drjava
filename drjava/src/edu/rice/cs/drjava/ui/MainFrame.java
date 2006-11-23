@@ -1785,7 +1785,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Displays the interactions classpath. */  
   public void viewInteractionsClassPath() {
     final StringBuilder cpBuf = new StringBuilder();
-    ClassPathVector classPathElements = _model.getClassPath();
+    ClassPathVector classPathElements = _model.getInteractionsClassPath();
     for(int i = 0; i < classPathElements.size(); i++) {
       cpBuf.append(classPathElements.get(i).getPath());
       if (i + 1 < classPathElements.size()) cpBuf.append("\n");
@@ -6869,12 +6869,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       });
     }    
     
-    public void compileEnded(File workDir, final File[] excludedFiles) {
+    public void compileEnded(File workDir, final List<? extends File> excludedFiles) {
       // Only change GUI from event-dispatching thread
       Utilities.invokeLater(new Runnable() {
         public void run() {
 //          try {
-          _compilerErrorPanel.reset(excludedFiles);
+          _compilerErrorPanel.reset(excludedFiles.toArray(new File[0]));
           if (isDebuggerReady()) {
 //              _model.getActiveDocument().checkIfClassFileInSync();
             

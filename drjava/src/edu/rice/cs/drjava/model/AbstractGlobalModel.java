@@ -2135,8 +2135,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
 
   /** throws new UnsupportedOperationException */
-  public ClassPathVector getClassPath() {
-    throw new UnsupportedOperationException("AbstractGlobalModel does not support classPaths");
+  public ClassPathVector getInteractionsClassPath() {
+    throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
  
   /** Returns a project's extra classpaths; empty for FlatFileGroupingState
@@ -2535,6 +2535,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       getBrowserHistoryManager().addRegion(new SimpleDocumentRegion(doc, file, startPos, endPos));
     }
+  }
+  
+  /** throws an UnsupportedOperationException */
+  public ClassPathVector getClassPath() {
+    throw new UnsupportedOperationException("AbstractGlobalModel does not support class paths");
   }
   
   public static boolean isUntitled(final File f) { return f == null || (f instanceof NullFile); }

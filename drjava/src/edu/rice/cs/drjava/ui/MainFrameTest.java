@@ -56,6 +56,7 @@ import java.awt.Toolkit;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.io.*;
+import java.util.List;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.*;
@@ -719,29 +720,29 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   /** A CompileListener for SingleDisplayModel (instead of GlobalModel) */
   class SingleDisplayModelCompileListener extends GlobalModelTestCase.TestListener implements GlobalModelListener {
 
-    public void compileStarted() { }
+    @Override public void compileStarted() { }
 
     /** Just notify when the compile has ended */
-    public void compileEnded(File workDir, File[] excludedFiles) {
+    @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
       synchronized(_compileLock) { 
         _compileDone = true;
         _compileLock.notify();
       }
     }
 
-    public void fileOpened(OpenDefinitionsDocument doc) { }
-    public void activeDocumentChanged(OpenDefinitionsDocument active) { }
+    @Override public void fileOpened(OpenDefinitionsDocument doc) { }
+    @Override public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   }
   
    /** A FileClosedListener for SingleDisplayModel (instead of GlobalModel) */
   class SingleDisplayModelFileOpenedListener extends GlobalModelTestCase.TestListener implements GlobalModelListener {
     
-    public void fileClosed(OpenDefinitionsDocument doc) { }
+    @Override public void fileClosed(OpenDefinitionsDocument doc) { }
 
-    public void fileOpened(OpenDefinitionsDocument doc) { }
+    @Override public void fileOpened(OpenDefinitionsDocument doc) { }
   
-    public void newFileCreated(OpenDefinitionsDocument doc) { }
-    public void activeDocumentChanged(OpenDefinitionsDocument doc) { 
+    @Override public void newFileCreated(OpenDefinitionsDocument doc) { }
+    @Override public void activeDocumentChanged(OpenDefinitionsDocument doc) { 
         synchronized(_openLock) {
         _openDone = true;
         _openLock.notify();
@@ -752,16 +753,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   /** A FileClosedListener for SingleDisplayModel (instead of GlobalModel) */
   class SingleDisplayModelFileClosedListener extends GlobalModelTestCase.TestListener implements GlobalModelListener {
 
-    public void fileClosed(OpenDefinitionsDocument doc) {
+    @Override public void fileClosed(OpenDefinitionsDocument doc) {
       synchronized(_closeLock) {
         _closeDone = true;
         _closeLock.notify();
       }
     }
 
-    public void fileOpened(OpenDefinitionsDocument doc) { }
-    public void newFileCreated(OpenDefinitionsDocument doc) { }
-    public void activeDocumentChanged(OpenDefinitionsDocument active) { }
+    @Override public void fileOpened(OpenDefinitionsDocument doc) { }
+    @Override public void newFileCreated(OpenDefinitionsDocument doc) { }
+    @Override public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   }
 
   /** Create a new temporary file in _tempDir. */

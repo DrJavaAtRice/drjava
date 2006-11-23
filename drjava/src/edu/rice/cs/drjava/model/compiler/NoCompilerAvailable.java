@@ -34,8 +34,9 @@
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
+import java.util.List;
+import java.util.Arrays;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.ClassPathVector;
 
 /** A CompilerInterface implementation for signifying that no compiler is available.
  *  @version $Id$
@@ -46,14 +47,22 @@ public class NoCompilerAvailable implements CompilerInterface {
 
   private NoCompilerAvailable() { }
 
-  public CompilerError[] compile(File sourceRoot, File[] files) {
-    File[] sourceRoots = new File[] { sourceRoot };
-    return compile(sourceRoots, files);
-  }
-  
-  public CompilerError[] compile(File[] sourceRoots, File[] files) {
-    CompilerError error = new CompilerError(files[0], -1, -1, MESSAGE, false);
-    return new CompilerError[] { error };
+/** Compile the given files.
+  *  @param files  Source files to compile.
+  *  @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
+  *  @param sourcePath  Location of additional sources to be compiled on-demand.  If @code{null}, the default is used.
+  *  @param destination  Location (directory) for compiled classes.  If @code{null}, the default in-place location is used.
+  *  @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with @code{sourceVersion} 
+  *                        If @code{null}, the default is used.
+  *  @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  If @code{null},
+  *                        the default is used.
+  *  @param showWarnings  Whether compiler warnings should be shown or ignored.
+  *  @return Errors that occurred. If no errors, should be zero length (not null).
+  */
+  public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
+                                               List<? extends File> sourcePath, File destination, 
+                                               List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+    return Arrays.asList(new CompilerError(MESSAGE, false));
   }
 
   public boolean isAvailable() { return true; }
@@ -62,27 +71,4 @@ public class NoCompilerAvailable implements CompilerInterface {
 
   public String toString() { return getName(); }
 
-  /** Sets the extra classpath for the compilers without referencing the config object in a loaded class file. */ 
-  public void setExtraClassPath(String extraClassPath) { }
-  
-  /** @inheritDoc */
-  public void setExtraClassPath(ClassPathVector extraClassPath) { }
-    
-  /** Sets whether to allow assertions in Java 1.4. */
-  public void setAllowAssertions(boolean allow) { }
-  
-  /** Sets whether or not warnings are allowed */
-  public void setWarningsEnabled(boolean warningsEnabled) { }
-  
-  /** This method allows us to set the JSR14 collections path across a class loader.
-   *  (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
-   */
-  public void addToBootClassPath( File cp) {
-    throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
-  }
-  
-  public void setBuildDirectory(File builddir) { }
 }
-
-
-

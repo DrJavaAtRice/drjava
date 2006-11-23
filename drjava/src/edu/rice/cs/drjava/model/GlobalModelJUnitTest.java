@@ -191,7 +191,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     * @return a test suite based on the methods in this class
     */
   public static Test suite() { return  new TestSuite(GlobalModelJUnitTest.class); }
-  
+
   /** Tests that a JUnit file with no errors is reported to have no errors. */
   public void testNoJUnitErrors() throws Exception {
     if (printMessages) System.out.println("----testNoJUnitErrors-----");
@@ -379,7 +379,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    _log.log("testDoNotRunJUnitIfFileHasBeenMoved completed");
 //  }
   
-  /** Tests a document that has no corresponding class file. */
+/** Tests a document that has no corresponding class file. */
   public void testNoClassFile() throws Exception {
     if (printMessages) System.out.println("----testNoClassFile-----");
 //    Utilities.show("Running testNoClassFile");

@@ -34,6 +34,7 @@
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
+import java.util.List;
 
 import edu.rice.cs.drjava.model.EventNotifier;
 
@@ -80,7 +81,7 @@ class CompilerEventNotifier extends EventNotifier<CompilerListener> implements C
   }
 
   /** Called when a compile has finished running. */
-  public void compileEnded(File workDir, File[] excludedFiles) {
+  public void compileEnded(File workDir, List<? extends File> excludedFiles) {
     _lock.startRead();
     try { for (CompilerListener cl : _listeners) { cl.compileEnded(workDir, excludedFiles); } }
     finally { _lock.endRead(); }

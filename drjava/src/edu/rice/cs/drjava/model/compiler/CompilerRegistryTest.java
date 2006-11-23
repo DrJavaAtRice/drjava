@@ -34,12 +34,12 @@ package edu.rice.cs.drjava.model.compiler;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.classloader.LimitingClassLoader;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import java.io.File;
+import java.util.List;
 
 /** Test cases for {@link CompilerRegistry}. Here we test that the compiler registry correctly finds
  *  available compilers.
@@ -196,17 +196,14 @@ public final class CompilerRegistryTest extends DrJavaTestCase {
       testField = true;
     }
 
-     public void addToBootClassPath(File s) { }
-     public CompilerError[] compile(File[] sourceRoots, File[] files) { return null; }
-     public CompilerError[] compile(File sourceRoot, File[] files) { return null; }
+    public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
+                                                 List<? extends File> sourcePath, File destination, 
+                                                 List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+      return null;
+    }
      public String getName() { return "Without"; }
      public boolean isAvailable() { return false; }
-     public void setAllowAssertions(boolean allow) { }
-     public void setWarningsEnabled(boolean warningsEnabled) { }
-     public void setExtraClassPath(String extraClassPath) { }
-     public void setExtraClassPath(ClassPathVector extraClassPath) { }
      public String toString() { return "Without"; }
-     public void setBuildDirectory(File builddir) { }
   }
 
   /** Test that createCompiler() does successfully instantiate compilers that do not have the ONLY static field,

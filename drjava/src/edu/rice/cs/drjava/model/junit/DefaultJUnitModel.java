@@ -243,7 +243,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //      System.err.println("Out of sync documents exist");
         
         CompilerListener testAfterCompile = new DummyCompilerListener() {
-          public void compileEnded(File workDir, File[] excludedFiles) {
+          @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
             final CompilerListener listenerThis = this;
             try {
               if (_model.hasOutOfSyncDocuments() || _model.getNumCompErrors() > 0) {

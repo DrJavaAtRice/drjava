@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
+import java.util.StringTokenizer;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.SwingUtilities;
@@ -97,7 +98,7 @@ import edu.rice.cs.drjava.ui.MainFrame;
 import java.io.*;
 
 /** Handles the bulk of DrJava's program logic. The UI components interface with the GlobalModel through its public
- *  methods, and teh GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
+ *  methods, and the GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
  *  UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile
  *  functionality of DrJava, along with many other things. <p>
  *  @version $Id$
@@ -157,7 +158,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     new CompilerListener() {
     public void compileStarted() { }
     
-    public void compileEnded(File workDir, File[] excludedFiles) {
+    public void compileEnded(File workDir, List<? extends File> excludedFiles) {
       // Only clear interactions if there were no errors and unit testing is not in progress
       if ( ((_compilerModel.getNumErrors() == 0) || (_compilerModel.getCompilerErrorModel().hasOnlyWarnings()))
             && ! _junitModel.isTestInProgress() && _resetAfterCompile) {
@@ -386,7 +387,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 
 
   /** Returns the current classpath in use by the Interpreter JVM. */
-  public ClassPathVector getClassPath() { return _jvm.getClassPath(); }
+  public ClassPathVector getInteractionsClassPath() { return _jvm.getClassPath(); }
   
   /** Sets whether or not the Interactions JVM will be reset after a compilation succeeds.  This should ONLY be used 
    *  in tests!  This method is not supported by AbstractGlobalModel.
@@ -589,6 +590,63 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // Something went wrong in initialization, don't use debugger
       _debugger = NoDebuggerAvailable.ONLY;
     }
+  }
+
+  /** Get the class path to be used in all class-related operations.
+   *  TODO: Insure that this is used wherever appropriate.
+   */
+  public ClassPathVector getClassPath() {
+    ClassPathVector result = new ClassPathVector();
+    
+    if (isProjectActive()) {
+      File buildDir = getBuildDirectory();
+      if (buildDir != null) { _addFileToClassPath(buildDir, result); }
+      
+      /* We prefer to assume the project root is the project's source root, rather than
+       * checking *every* file in the project for its source root.  This is a bit problematic,
+       * because "Compile Project" won't care if the user has multiple source roots (or even just a
+       * single "src" subdirectory), and the user in this situation (assuming the build dir is 
+       * null) wouldn't notice a problem until trying to access the compiled classes in the 
+       * Interactions.
+       */
+      File projRoot = getProjectRoot();
+      if (projRoot != null) { _addFileToClassPath(projRoot, result); }
+      
+      ClassPathVector projectExtras = getExtraClassPath();
+      if (projectExtras != null) { result.addAll(projectExtras); }
+    }
+    else {
+      for (File f : getSourceRootSet()) { _addFileToClassPath(f, result); }
+    }
+      
+    Vector<File> globalExtras = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
+    if (globalExtras != null) {
+      for (File f : globalExtras) { _addFileToClassPath(f, result); }
+    }
+    
+    /* We must add JUnit to the class path.  We do so by including the current JVM's class path.
+     * This is not ideal, because all other classes on the current class path (including all of DrJava's
+     * internal classes) are also included.  But we're probably stuck doing something like this if we
+     * want to continue bundling JUnit with DrJava.
+     */
+    String currentClassPath = System.getProperty("java.class.path");
+    if (currentClassPath != null) {
+      // TODO: Parsing this string needs to only happen once, not every time this method is invoked.
+      StringTokenizer tokens = new StringTokenizer(currentClassPath, File.pathSeparator);
+      while (tokens.hasMoreTokens()) {
+        _addFileToClassPath(new File(tokens.nextToken()), result);
+      }
+    }
+    
+    return result;
+  }
+    
+  /** Helper for getClassPath: add a File, rather than a URL, to the given path */
+  private void _addFileToClassPath(File f, ClassPathVector cp) {
+    /* TODO: This conversion should be done somewhere where errors can be reported to the user --
+      for example, when a file is selected in the preferences dialog. */
+    try { cp.add(FileOps.toURL(f)); }
+    catch (MalformedURLException e) { /* ignore */ }
   }
   
   /** Adds the project root (if a project is open), the source roots for other open documents, the paths in the 

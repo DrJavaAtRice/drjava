@@ -34,7 +34,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import  java.io.File;
-import  edu.rice.cs.util.ClassPathVector;
+import java.util.List;
 
 /** The minimum interface that a compiler must meet to be used by DrJava.
  *  @version $Id$
@@ -42,20 +42,21 @@ import  edu.rice.cs.util.ClassPathVector;
 public interface CompilerInterface {
   
   /** Compile the given files.
-   *  @param files Source files to compile.
-   *  @param sourceRoot Source root directory, the base of the package structure.
-   *  @return Array of errors that occurred. If no errors, should be zero length array (not null).
+   *  @param files  Source files to compile.
+   *  @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
+   *  @param sourcePath  Location of additional sources to be compiled on-demand.  If @code{null}, the default is used.
+   *  @param destination  Location (directory) for compiled classes.  If @code{null}, the default in-place location is used.
+   *  @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with @code{sourceVersion} 
+   *                        If @code{null}, the default is used.
+   *  @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  If @code{null},
+   *                        the default is used.
+   *  @param showWarnings  Whether compiler warnings should be shown or ignored.
+   *  @return Errors that occurred. If no errors, should be zero length (not null).
    */
+  List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
+                                        List<? extends File> sourcePath, File destination, 
+                                        List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings);
   
-  CompilerError[] compile(File sourceRoot, File[] files);
-  
-  /** Compile the given files.
-   *  @param files Source files to compile.
-   *  @param sourceRoots Array of source root directories, the base of the package structure for all files to compile.
-   *  @return Array of errors that occurred. If no errors, should be zero length array (not null).
-   */
-  CompilerError[] compile(File[] sourceRoots, File[] files);
-
   /** Indicates whether this compiler is actually available. As in: Is it installed and located? This method 
    *  should load the compiler class, which should hopefully prove whether the class can load.  If this 
    *  method returns true, the {@link #compile} method should not fail due to class not being found.
@@ -68,34 +69,4 @@ public interface CompilerInterface {
   /** Should return info about compiler, at least including name. */
   String toString();
   
-  /** Allows us to set the extra classpath for the compilers without referencing the config object in a loaded class 
-   *  file.
-   */ 
-  void setExtraClassPath(String extraClassPath);
-  
-  /** Sets the extra classpath in the form of a ClasspathVector. This should include any classpath entries from 
-   *  the project's classpath, if any, and the entries from EXTRA_CLASSPATH.
-   * @param extraClassPath the classpath to use as the compiler's extra classpath
-   */
-  void setExtraClassPath(ClassPathVector extraClassPath);
-  
-  /** Sets whether to allow assertions in Java 1.4.  (Allows us not to reference the config object in a 
-   *  loaded class file.)
-   */
-  void setAllowAssertions(boolean allow);
-  
-  /** Sets whether or not warnings are allowed. */
-  void setWarningsEnabled(boolean warningsEnabled);
-  
-  /** This method allows us to set the JSR14 collections path across a class loader.
-   *  (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
-   */ 
-  void addToBootClassPath(File s);
-  
-  /** Sets the output directory, or null for default */
-  void setBuildDirectory(File dir);
-  
 }
-
-
-

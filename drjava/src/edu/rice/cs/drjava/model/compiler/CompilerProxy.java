@@ -34,10 +34,10 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
+import java.util.List;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.classloader.StickyClassLoader;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -57,9 +57,6 @@ public class CompilerProxy implements CompilerInterface {
 
   private final String _className;
   private final ClassLoader _newLoader;
-  private boolean _warningsEnabled = true;
-  private File _buildDir;
-  private ClassPathVector _extraClassPath = new ClassPathVector();
   
   /** These classes will always be loaded using the previous classloader. This is important to make sure there is
    *  only one instance of them, so their values can be freely passed about the program.
@@ -95,15 +92,6 @@ public class CompilerProxy implements CompilerInterface {
       
       _log.log("_realCompiler set to " + _realCompiler);
       
-      _realCompiler.setBuildDirectory(_buildDir);
-      
-      _realCompiler.setExtraClassPath(File.pathSeparator + _extraClassPath.toString());
-      
-      _realCompiler.setWarningsEnabled(_warningsEnabled);
-      
-      boolean allowAssertions = DrJava.getConfig().getSetting(OptionConstants.RUN_WITH_ASSERT).booleanValue();
-      _realCompiler.setAllowAssertions(allowAssertions);
-      
       String compilerClass = _realCompiler.getClass().getName();
       _log.log("Compiler created with name " + compilerClass);
     }
@@ -115,38 +103,24 @@ public class CompilerProxy implements CompilerInterface {
   }
 
 
-  /** Compile the given files.
-   *  @param files Source files to compile.
-   *  @param sourceRoot Source root directory, the base of the package structure.
-   *  @return Array of errors that occurred. If no errors, should be zero length array (not null).
-   */
-  public CompilerError[] compile(File sourceRoot, File[] files) {
+/** Compile the given files.
+  *  @param files  Source files to compile.
+  *  @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
+  *  @param sourcePath  Location of additional sources to be compiled on-demand.  If @code{null}, the default is used.
+  *  @param destination  Location (directory) for compiled classes.  If @code{null}, the default in-place location is used.
+  *  @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with @code{sourceVersion} 
+  *                        If @code{null}, the default is used.
+  *  @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  If @code{null},
+  *                        the default is used.
+  *  @param showWarnings  Whether compiler warnings should be shown or ignored.
+  *  @return Errors that occurred. If no errors, should be zero length (not null).
+  */
+  public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
+                                               List<? extends File> sourcePath, File destination, 
+                                               List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
     _recreateCompiler();
     _log.log("realCompiler is " + _realCompiler.getClass());
-    CompilerError[] ret =  _realCompiler.compile(sourceRoot, files);
-
-    return ret;
-  }
-
-  /** Compile the given files.
-   *  @param files Source files to compile.
-   *  @param sourceRoots Array of source root directories, the base of the package structure for all files to compile.
-   *
-   *  @return Array of errors that occurred. If no errors, should be zero length array (not null).
-   */
-  public CompilerError[] compile(File[] sourceRoots, File[] files) {
-    _log.log("proxy to compile: " + files[0]);
-
-//    DrJava.consoleOut().println("-- In CompilerProxy: SourceRoots:");
-//    for (int i = 0 ; i < sourceRoots.length; i ++) {
-//      DrJava.consoleOut().println(sourceRoots[i]);
-//    }
-
-    _recreateCompiler();
-    _log.log("realCompiler is " + _realCompiler.getClass());
-    CompilerError[] ret =  _realCompiler.compile(sourceRoots, files);
-
-    return ret;
+    return _realCompiler.compile(files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
   }
 
   /** Indicates whether this compiler is actually available. As in: Is it installed and located? This method should
@@ -168,34 +142,6 @@ public class CompilerProxy implements CompilerInterface {
   /** Should return info about compiler, at least including name. */
   public String toString() { return getName(); }
 
-  /** Sets the extra classpath for the compilers without referencing the config object in a loaded class file. */
-  public void setExtraClassPath( String extraClassPath) { _realCompiler.setExtraClassPath(extraClassPath); }
-  
-  /** Sets the extra classpath in the form of a ClasspathVector. This should include any classpath entries from the
-   *  project's classpath, if any, and the entries from EXTRA_CLASSPATH.
-   *  @param extraClassPath the classpath to use as the compiler's extra classpath
-   */
-  public void setExtraClassPath(ClassPathVector extraClassPath) { _extraClassPath = extraClassPath; }
-
-  /** Sets whether to allow assertions in Java 1.4. */
-  public void setAllowAssertions(boolean allow) { _realCompiler.setAllowAssertions(allow); }
-  
-  /** Sets whether or not warnings are allowed. */
-  public void setWarningsEnabled(boolean warningsEnabled) {
-    _realCompiler.setWarningsEnabled(warningsEnabled);
-    _warningsEnabled = warningsEnabled;
-  }
-
-  /** Sets the JSR14 collections path across a class loader.
-   *  (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
-   */
-  public void addToBootClassPath( File cp) { _realCompiler.addToBootClassPath(cp); }
-
-  /** Sets the build directory for the compilers. */
-  public void setBuildDirectory(File buildDir) {
-    _realCompiler.setBuildDirectory(buildDir);
-    _buildDir = buildDir;
-  }
 }
 
 

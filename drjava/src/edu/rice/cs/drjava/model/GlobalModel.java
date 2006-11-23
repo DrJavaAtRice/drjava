@@ -311,18 +311,8 @@ public interface GlobalModel extends ILoadDocuments {
   /** Returns the current classpath in use by the Interpreter JVM. This includes the original jvm classpath, the global
    *  drjava extra classpaths, and the project extra classpaths.
    */
-  public ClassPathVector getClassPath();
+  public ClassPathVector getInteractionsClassPath();
 
-  /** Returns only the project's extra classpaths.
-   *  @return The classpath entries loaded along with the project
-   */
-  public ClassPathVector getExtraClassPath();
-  
-  /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
-   *  project preferences.
-   */
-  public void setExtraClassPath(ClassPathVector cp);
-  
   // TODO: Move history methods to a more appropriate home.
 
   /** Interprets file selected in the FileOpenSelector. Assumes all strings have no trailing whitespace. Interprets 
@@ -366,6 +356,11 @@ public interface GlobalModel extends ILoadDocuments {
   public int getDebugPort() throws IOException;
 
   //--------------------------------- Misc ---------------------------------//
+  
+  /** Get the class path to be used in all class-related operations.
+   *  TODO: Insure that this is used wherever appropriate.
+   */
+  public ClassPathVector getClassPath();
 
   // TODO: comment
   public PageFormat getPageFormat();
@@ -447,6 +442,16 @@ public interface GlobalModel extends ILoadDocuments {
   /** Return the main file for the project If not in project mode, returns null. */
   public File getMainClass();
 
+  /** Returns only the project's extra classpaths.
+    *  @return The classpath entries loaded along with the project
+    */
+  public ClassPathVector getExtraClassPath();
+  
+  /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
+    *  project preferences.
+    */
+  public void setExtraClassPath(ClassPathVector cp);
+  
   /** Sets the create jar file of the project. */
   public void setCreateJarFile(File f);
   
