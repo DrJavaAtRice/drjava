@@ -3,6 +3,7 @@ package edu.rice.cs.plt.recur;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.IdentityPair;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda2;
@@ -40,13 +41,23 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
  */
 public class PrecomputedRecursionStack2<T1, T2, R> {
   
-  private Map<IdentityPair<T1, T2>, Lambda2<? super T1, ? super T2, ? extends R>> _previous;
-  private LinkedList<IdentityPair<T1, T2>> _stack;
+  private final Lambda2<? super T1, ? super T2, ? extends Pair<T1, T2>> _pairFactory;
+  private final Map<Pair<T1, T2>, Lambda2<? super T1, ? super T2, ? extends R>> _previous;
+  private final LinkedList<Pair<T1, T2>> _stack;
   
-  /** Create an empty recursion stack */
-  public PrecomputedRecursionStack2() {
-    _previous = new HashMap<IdentityPair<T1, T2>, Lambda2<? super T1, ? super T2, ? extends R>>();
-    _stack = new LinkedList<IdentityPair<T1, T2>>();
+  /** Create an empty recursion stack with an {@link IdentityPair} factory */
+  public PrecomputedRecursionStack2() { this(IdentityPair.<T1, T2>factory()); }
+  
+  /**
+   * Create an empty recursion stack with the given {@code Pair} factory
+   * @param pairFactory  A lambda used to produce a pair for values placed on the
+   *                     stack.  This provides clients with control over the method used
+   *                     to determine if a value has been seen previously.
+   */
+  public PrecomputedRecursionStack2(Lambda2<? super T1, ? super T2, ? extends Pair<T1, T2>> pairFactory) {
+    _pairFactory = pairFactory;
+    _previous = new HashMap<Pair<T1, T2>, Lambda2<? super T1, ? super T2, ? extends R>>();
+    _stack = new LinkedList<Pair<T1, T2>>();
   }
   
   /** 
@@ -54,7 +65,7 @@ public class PrecomputedRecursionStack2<T1, T2, R> {
    *          are currently on the stack
    */
   public boolean contains(T1 arg1, T2 arg2) {
-    return _previous.containsKey(new IdentityPair<T1, T2>(arg1, arg2));
+    return _previous.containsKey(_pairFactory.value(arg1, arg2));
   }
   
   /** 
@@ -63,7 +74,7 @@ public class PrecomputedRecursionStack2<T1, T2, R> {
    */
   public R get(T1 arg1, T2 arg2) {
     Lambda2<? super T1, ? super T2, ? extends R> result = 
-      _previous.get(new IdentityPair<T1, T2>(arg1, arg2));
+      _previous.get(_pairFactory.value(arg1, arg2));
     if (result == null) { throw new IllegalArgumentException("Values are not on the stack"); }
     return result.value(arg1, arg2);
   }
@@ -89,7 +100,7 @@ public class PrecomputedRecursionStack2<T1, T2, R> {
    * @throws IllegalArgumentException  If the arguments are already on the stack
    */
   public void push(T1 arg1, T2 arg2, Lambda2<? super T1, ? super T2, ? extends R> value) {
-    IdentityPair<T1, T2> wrapped = new IdentityPair<T1, T2>(arg1, arg2);
+    Pair<T1, T2> wrapped = _pairFactory.value(arg1, arg2);
     if (_previous.containsKey(wrapped)) {
       throw new IllegalArgumentException("The given arguments are already on the stack");
     }
@@ -102,7 +113,7 @@ public class PrecomputedRecursionStack2<T1, T2, R> {
    * @throws IllegalArgumentException  If the arguments are not at the top of the stack
    */
   public void pop(T1 arg1, T2 arg2) {
-    IdentityPair<T1, T2> wrapped = new IdentityPair<T1, T2>(arg1, arg2);
+    Pair<T1, T2> wrapped = _pairFactory.value(arg1, arg2);
     if (_stack.isEmpty() || !_stack.getLast().equals(wrapped)) {
       throw new IllegalArgumentException("the given arguments are not on top of the stack");
     }
@@ -216,6 +227,12 @@ public class PrecomputedRecursionStack2<T1, T2, R> {
   /** Call the constructor (allows the type arguments to be inferred) */
   public static <T1, T2, R> PrecomputedRecursionStack2<T1, T2, R> make() {
     return new PrecomputedRecursionStack2<T1, T2, R>();
+  }
+  
+  /** Call the constructor (allows the type arguments to be inferred) */
+  public static <T1, T2, R> PrecomputedRecursionStack2<T1, T2, R> 
+    make(Lambda2<? super T1, ? super T2, ? extends Pair<T1, T2>> pairFactory) {
+    return new PrecomputedRecursionStack2<T1, T2, R>(pairFactory);
   }
   
 }

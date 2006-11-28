@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.tuple;
 
+import edu.rice.cs.plt.lambda.Lambda4;
+
 /**
  * An arbitrary 4-tuple of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
  * and {@link #hashCode()}.
@@ -49,6 +51,15 @@ public class Quad<T1, T2, T3, T4> extends Triple<T1, T2, T3> {
   public static <T1, T2, T3, T4> Quad<T1, T2, T3, T4> make(T1 first, T2 second, T3 third, 
                                                            T4 fourth) {
     return new Quad<T1, T2, T3, T4>(first, second, third, fourth);
+  }
+  
+  /** Produce a lambda that invokes the constructor */
+  public static <T1, T2, T3, T4> Lambda4<T1, T2, T3, T4, Quad<T1, T2, T3, T4>> factory() {
+    return new Lambda4<T1, T2, T3, T4, Quad<T1, T2, T3, T4>>() {
+      public Quad<T1, T2, T3, T4> value(T1 first, T2 second, T3 third, T4 fourth) {
+        return new Quad<T1, T2, T3, T4>(first, second, third, fourth);
+      }
+    };
   }
   
 }

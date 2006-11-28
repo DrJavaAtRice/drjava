@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.tuple;
 
+import edu.rice.cs.plt.lambda.Lambda3;
+
 /**
  * A triple that defines {@link #equals} and {@link #hashCode} in terms of its elements' 
  * identity ({@code ==}) instead of equality (@code equals})
@@ -35,6 +37,15 @@ public class IdentityTriple<T1, T2, T3> extends Triple<T1, T2, T3> {
   /** Call the constructor (allows the type arguments to be inferred) */
   public static <T1, T2, T3> IdentityTriple<T1, T2, T3> make(T1 first, T2 second, T3 third) {
     return new IdentityTriple<T1, T2, T3>(first, second, third);
+  }
+  
+  /** Produce a lambda that invokes the constructor */
+  public static <T1, T2, T3> Lambda3<T1, T2, T3, Triple<T1, T2, T3>> factory() {
+    return new Lambda3<T1, T2, T3, Triple<T1, T2, T3>>() {
+      public Triple<T1, T2, T3> value(T1 first, T2 second, T3 third) {
+        return new IdentityTriple<T1, T2, T3>(first, second, third);
+      }
+    };
   }
   
 }

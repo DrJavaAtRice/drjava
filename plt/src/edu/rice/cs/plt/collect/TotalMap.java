@@ -9,9 +9,9 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
  * <p>A map that is defined for all values in the domain {@code K}.  This class is similar
  * to the {@link java.util.Map} interface, but there are fundamental differences that make
  * it difficult to implement the interface.  For example, it's impossible to produce a
- * {@code valueSet} for an arbitrary {@code TotalMap}.  It's even impossible to safely define
+ * {@code valueSet} for an arbitrary {@code TotalMap}.  (It's even impossible to safely define
  * the {@code Map.get} method, since it is defined for all {@code Object}s, and the
- * lambda implementing the total map is only defined in terms of {@code K}.<p>
+ * lambda implementing the total map is only defined in terms of {@code K}.)<p>
  * 
  * <p>The total coverage of the domain is achieved by defining the map in terms of a
  * {@link Lambda}.  Additionally, specific values can be overridden with specific results

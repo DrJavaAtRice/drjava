@@ -3,6 +3,7 @@ package edu.rice.cs.plt.recur;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
+import edu.rice.cs.plt.tuple.Wrapper;
 import edu.rice.cs.plt.tuple.IdentityWrapper;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -40,27 +41,37 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
  */
 public class PrecomputedRecursionStack<T, R> {
   
-  private Map<IdentityWrapper<T>, Lambda<? super T, ? extends R>> _previous;
-  private LinkedList<IdentityWrapper<T>> _stack;
+  private final Lambda<? super T, ? extends Wrapper<T>> _wrapperFactory;
+  private final Map<Wrapper<T>, Lambda<? super T, ? extends R>> _previous;
+  private final LinkedList<Wrapper<T>> _stack;
   
-  /** Create an empty recursion stack */
-  public PrecomputedRecursionStack() {
-    _previous = new HashMap<IdentityWrapper<T>, Lambda<? super T, ? extends R>>();
-    _stack = new LinkedList<IdentityWrapper<T>>();
+  /** Create an empty recursion stack with an {@link IdentityWrapper} factory */
+  public PrecomputedRecursionStack() { this(IdentityWrapper.<T>factory()); }
+  
+  /**
+   * Create an empty recursion stack with the given {@code Wrapper} factory
+   * @param wrapperFactory  A lambda used to produce a wrapper for values placed on the
+   *                        stack.  This provides clients with control over the method used
+   *                        to determine if a value has been seen previously.
+   */
+  public PrecomputedRecursionStack(Lambda<? super T, ? extends Wrapper<T>> wrapperFactory) {
+    _wrapperFactory = wrapperFactory;
+    _previous = new HashMap<Wrapper<T>, Lambda<? super T, ? extends R>>();
+    _stack = new LinkedList<Wrapper<T>>();
   }
   
   /** 
    * @return  {@code true} iff a value identical (according to {@code ==}) to {@code arg}
    *          is currently on the stack
    */
-  public boolean contains(T arg) { return _previous.containsKey(new IdentityWrapper<T>(arg)); }
+  public boolean contains(T arg) { return _previous.containsKey(_wrapperFactory.value(arg)); }
   
   /** 
    * @return  The infinite-case result provided for {@code arg}
    * @throws  IllegalStateException  If {@code arg} is not on the stack
    */
   public R get(T arg) {
-    Lambda<? super T, ? extends R> result = _previous.get(new IdentityWrapper<T>(arg));
+    Lambda<? super T, ? extends R> result = _previous.get(_wrapperFactory.value(arg));
     if (result == null) { throw new IllegalArgumentException("Value is not on the stack"); }
     return result.value(arg);
   }
@@ -82,7 +93,7 @@ public class PrecomputedRecursionStack<T, R> {
    * @throws IllegalArgumentException  If {@code arg} is already on the stack
    */
   public void push(T arg, Lambda<? super T, ? extends R> value) {
-    IdentityWrapper<T> wrapped = new IdentityWrapper<T>(arg);
+    Wrapper<T> wrapped = _wrapperFactory.value(arg);
     if (_previous.containsKey(wrapped)) {
       throw new IllegalArgumentException("arg is already on the stack");
     }
@@ -95,7 +106,7 @@ public class PrecomputedRecursionStack<T, R> {
    * @throws IllegalArgumentException  If {@code arg} is not at the top of the stack
    */
   public void pop(T arg) {
-    IdentityWrapper<T> wrapped = new IdentityWrapper<T>(arg);
+    Wrapper<T> wrapped = _wrapperFactory.value(arg);
     if (_stack.isEmpty() || !_stack.getLast().equals(wrapped)) {
       throw new IllegalArgumentException("arg is not on top of the stack");
     }
@@ -206,6 +217,12 @@ public class PrecomputedRecursionStack<T, R> {
   /** Call the constructor (allows the type arguments to be inferred) */
   public static <T, R> PrecomputedRecursionStack<T, R> make() {
     return new PrecomputedRecursionStack<T, R>();
+  }
+  
+  /** Call the constructor (allows the type arguments to be inferred) */
+  public static <T, R> PrecomputedRecursionStack<T, R> 
+    make(Lambda<? super T, ? extends Wrapper<T>> wrapperFactory) {
+    return new PrecomputedRecursionStack<T, R>(wrapperFactory);
   }
   
 }

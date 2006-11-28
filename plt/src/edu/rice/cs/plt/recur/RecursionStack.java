@@ -3,6 +3,7 @@ package edu.rice.cs.plt.recur;
 import java.util.LinkedList;
 import edu.rice.cs.plt.collect.Multiset;
 import edu.rice.cs.plt.collect.HashMultiset;
+import edu.rice.cs.plt.tuple.Wrapper;
 import edu.rice.cs.plt.tuple.IdentityWrapper;
 import edu.rice.cs.plt.lambda.Command;
 import edu.rice.cs.plt.lambda.Command1;
@@ -30,32 +31,42 @@ import edu.rice.cs.plt.lambda.Lambda;
  */
 public class RecursionStack<T> {
   
-  private Multiset<IdentityWrapper<T>> _previous;
-  private LinkedList<IdentityWrapper<T>> _stack;
+  private final Lambda<? super T, ? extends Wrapper<T>> _wrapperFactory;
+  private final Multiset<Wrapper<T>> _previous;
+  private final LinkedList<Wrapper<T>> _stack;
   
-  /** Create an empty recursion stack */
-  public RecursionStack() {
-    _previous = new HashMultiset<IdentityWrapper<T>>();
-    _stack = new LinkedList<IdentityWrapper<T>>();
+  /** Create an empty recursion stack with an {@link IdentityWrapper} factory */
+  public RecursionStack() { this(IdentityWrapper.<T>factory()); }
+  
+  /**
+   * Create an empty recursion stack with the given {@code Wrapper} factory
+   * @param wrapperFactory  A lambda used to produce a wrapper for values placed on the
+   *                        stack.  This provides clients with control over the method used
+   *                        to determine if a value has been seen previously.
+   */
+  public RecursionStack(Lambda<? super T, ? extends Wrapper<T>> wrapperFactory) {
+    _wrapperFactory = wrapperFactory;
+    _previous = new HashMultiset<Wrapper<T>>();
+    _stack = new LinkedList<Wrapper<T>>();
   }
   
   /** 
    * @return  {@code true} iff a value identical (according to {@code ==}) to {@code arg}
    *          is currently on the stack
    */
-  public boolean contains(T arg) { return _previous.contains(new IdentityWrapper<T>(arg)); }
+  public boolean contains(T arg) { return _previous.contains(_wrapperFactory.value(arg)); }
   
   /** 
    * @return  {@code true} iff at least {@code threshold} values identical (according to 
    *          {@code ==}) to {@code arg} are currently on the stack
    */
   public boolean contains(T arg, int threshold) {
-    return _previous.count(new IdentityWrapper<T>(arg)) >= threshold;
+    return _previous.count(_wrapperFactory.value(arg)) >= threshold;
   }
   
   /** Add {@code arg} to the top of the stack */
   public void push(T arg) {
-    IdentityWrapper<T> wrapped = new IdentityWrapper<T>(arg);
+    Wrapper<T> wrapped = _wrapperFactory.value(arg);
     _stack.addLast(wrapped);
     _previous.add(wrapped);
   }
@@ -65,7 +76,7 @@ public class RecursionStack<T> {
    * @throws IllegalArgumentException  If {@code arg} is not at the top of the stack
    */
   public void pop(T arg) {
-    IdentityWrapper<T> wrapped = new IdentityWrapper<T>(arg);
+    Wrapper<T> wrapped = _wrapperFactory.value(arg);
     if (_stack.isEmpty() || !_stack.getLast().equals(wrapped)) {
       throw new IllegalArgumentException("arg is not on top of the stack");
     }
@@ -308,5 +319,10 @@ public class RecursionStack<T> {
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> RecursionStack<T> make() { return new RecursionStack<T>(); }
+  
+  /** Call the constructor (allows {@code T} to be inferred) */
+  public static <T> RecursionStack<T> make(Lambda<? super T, ? extends Wrapper<T>> wrapperFactory) {
+    return new RecursionStack<T>(wrapperFactory);
+  }
   
 }

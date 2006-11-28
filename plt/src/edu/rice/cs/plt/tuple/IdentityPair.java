@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.tuple;
 
+import edu.rice.cs.plt.lambda.Lambda2;
+
 /**
  * A pair that defines {@link #equals} and {@link #hashCode} in terms of its elements' 
  * identity ({@code ==}) instead of equality (@code equals})
@@ -33,6 +35,15 @@ public class IdentityPair<T1, T2> extends Pair<T1, T2> {
   /** Call the constructor (allows the type arguments to be inferred) */
   public static <T1, T2> IdentityPair<T1, T2> make(T1 first, T2 second) {
     return new IdentityPair<T1, T2>(first, second);
+  }
+  
+  /** Produce a lambda that invokes the constructor */
+  public static <T1, T2> Lambda2<T1, T2, Pair<T1, T2>> factory() {
+    return new Lambda2<T1, T2, Pair<T1, T2>>() {
+      public Pair<T1, T2> value(T1 first, T2 second) {
+        return new IdentityPair<T1, T2>(first, second);
+      }
+    };
   }
   
 }

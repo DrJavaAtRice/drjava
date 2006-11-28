@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.tuple;
 
+import edu.rice.cs.plt.lambda.Lambda2;
+
 /**
  * An arbitrary pair of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
  * and {@link #hashCode()}.
@@ -46,6 +48,15 @@ public class Pair<T1, T2> extends Tuple {
   /** Call the constructor (allows the type arguments to be inferred) */
   public static <T1, T2> Pair<T1, T2> make(T1 first, T2 second) {
     return new Pair<T1, T2>(first, second);
+  }
+  
+  /** Produce a lambda that invokes the constructor */
+  public static <T1, T2> Lambda2<T1, T2, Pair<T1, T2>> factory() {
+    return new Lambda2<T1, T2, Pair<T1, T2>>() {
+      public Pair<T1, T2> value(T1 first, T2 second) {
+        return new Pair<T1, T2>(first, second);
+      }
+    };
   }
   
 }

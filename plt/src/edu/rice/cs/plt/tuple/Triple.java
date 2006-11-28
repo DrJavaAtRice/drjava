@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.tuple;
 
+import edu.rice.cs.plt.lambda.Lambda3;
+
 /**
  * An arbitrary 3-tuple of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
  * and {@link #hashCode()}.
@@ -46,6 +48,15 @@ public class Triple<T1, T2, T3> extends Pair<T1, T2> {
   /** Call the constructor (allows the type arguments to be inferred) */
   public static <T1, T2, T3> Triple<T1, T2, T3> make(T1 first, T2 second, T3 third) {
     return new Triple<T1, T2, T3>(first, second, third);
+  }
+  
+  /** Produce a lambda that invokes the constructor */
+  public static <T1, T2, T3> Lambda3<T1, T2, T3, Triple<T1, T2, T3>> factory() {
+    return new Lambda3<T1, T2, T3, Triple<T1, T2, T3>>() {
+      public Triple<T1, T2, T3> value(T1 first, T2 second, T3 third) {
+        return new Triple<T1, T2, T3>(first, second, third);
+      }
+    };
   }
   
 }

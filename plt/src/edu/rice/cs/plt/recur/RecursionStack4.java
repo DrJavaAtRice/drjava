@@ -3,6 +3,7 @@ package edu.rice.cs.plt.recur;
 import java.util.LinkedList;
 import edu.rice.cs.plt.collect.Multiset;
 import edu.rice.cs.plt.collect.HashMultiset;
+import edu.rice.cs.plt.tuple.Quad;
 import edu.rice.cs.plt.tuple.IdentityQuad;
 import edu.rice.cs.plt.lambda.Command;
 import edu.rice.cs.plt.lambda.Command4;
@@ -30,13 +31,25 @@ import edu.rice.cs.plt.lambda.Lambda4;
  */
 public class RecursionStack4<T1, T2, T3, T4> {
   
-  private Multiset<IdentityQuad<T1, T2, T3, T4>> _previous;
-  private LinkedList<IdentityQuad<T1, T2, T3, T4>> _stack;
+  private final Lambda4<? super T1, ? super T2, ? super T3, ? super T4, 
+                        ? extends Quad<T1, T2, T3, T4>> _quadFactory;
+  private final Multiset<Quad<T1, T2, T3, T4>> _previous;
+  private final LinkedList<Quad<T1, T2, T3, T4>> _stack;
   
-  /** Create an empty recursion stack */
-  public RecursionStack4() {
-    _previous = new HashMultiset<IdentityQuad<T1, T2, T3, T4>>();
-    _stack = new LinkedList<IdentityQuad<T1, T2, T3, T4>>();
+  /** Create an empty recursion stack with an {@link IdentityQuad} factory */
+  public RecursionStack4() { this(IdentityQuad.<T1, T2, T3, T4>factory()); }
+  
+  /**
+   * Create an empty recursion stack with the given {@code Quad} factory
+   * @param quadFactory  A lambda used to produce a quad for values placed on the
+   *                     stack.  This provides clients with control over the method used
+   *                     to determine if a value has been seen previously.
+   */
+  public RecursionStack4(Lambda4<? super T1, ? super T2, ? super T3, ? super T4,
+                                 ? extends Quad<T1, T2, T3, T4>> quadFactory) {
+    _quadFactory = quadFactory;
+    _previous = new HashMultiset<Quad<T1, T2, T3, T4>>();
+    _stack = new LinkedList<Quad<T1, T2, T3, T4>>();
   }
   
   /** 
@@ -44,7 +57,7 @@ public class RecursionStack4<T1, T2, T3, T4> {
    *          given arguments is currently on the stack
    */
   public boolean contains(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
-    return _previous.contains(new IdentityQuad<T1, T2, T3, T4>(arg1, arg2, arg3, arg4));
+    return _previous.contains(_quadFactory.value(arg1, arg2, arg3, arg4));
   }
   
   /** 
@@ -52,12 +65,12 @@ public class RecursionStack4<T1, T2, T3, T4> {
    *          (according to {@code ==}) to the given arguments are currently on the stack
    */
   public boolean contains(T1 arg1, T2 arg2, T3 arg3, T4 arg4, int threshold) {
-    return _previous.count(new IdentityQuad<T1, T2, T3, T4>(arg1, arg2, arg3, arg4)) >= threshold;
+    return _previous.count(_quadFactory.value(arg1, arg2, arg3, arg4)) >= threshold;
   }
   
   /** Add the given arguments to the top of the stack */
   public void push(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
-    IdentityQuad<T1, T2, T3, T4> wrapped = new IdentityQuad<T1, T2, T3, T4>(arg1, arg2, arg3, arg4);
+    Quad<T1, T2, T3, T4> wrapped = _quadFactory.value(arg1, arg2, arg3, arg4);
     _stack.addLast(wrapped);
     _previous.add(wrapped);
   }
@@ -67,7 +80,7 @@ public class RecursionStack4<T1, T2, T3, T4> {
    * @throws IllegalArgumentException  If the given arguments are not at the top of the stack
    */
   public void pop(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
-    IdentityQuad<T1, T2, T3, T4> wrapped = new IdentityQuad<T1, T2, T3, T4>(arg1, arg2, arg3, arg4);
+    Quad<T1, T2, T3, T4> wrapped = _quadFactory.value(arg1, arg2, arg3, arg4);
     if (_stack.isEmpty() || !_stack.getLast().equals(wrapped)) {
       throw new IllegalArgumentException("given args are not on top of the stack");
     }
@@ -335,4 +348,10 @@ public class RecursionStack4<T1, T2, T3, T4> {
     return new RecursionStack4<T1, T2, T3, T4>();
   }
 
+  /** Call the constructor (allows the type arguments to be inferred) */
+  public static <T1, T2, T3, T4> RecursionStack4<T1, T2, T3, T4> 
+    make(Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends Quad<T1, T2, T3, T4>> quadFactory) {
+    return new RecursionStack4<T1, T2, T3, T4>(quadFactory);
+  }
+  
 }

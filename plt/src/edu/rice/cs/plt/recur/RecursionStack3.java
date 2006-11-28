@@ -3,6 +3,7 @@ package edu.rice.cs.plt.recur;
 import java.util.LinkedList;
 import edu.rice.cs.plt.collect.Multiset;
 import edu.rice.cs.plt.collect.HashMultiset;
+import edu.rice.cs.plt.tuple.Triple;
 import edu.rice.cs.plt.tuple.IdentityTriple;
 import edu.rice.cs.plt.lambda.Command;
 import edu.rice.cs.plt.lambda.Command3;
@@ -30,13 +31,24 @@ import edu.rice.cs.plt.lambda.Lambda3;
  */
 public class RecursionStack3<T1, T2, T3> {
   
-  private Multiset<IdentityTriple<T1, T2, T3>> _previous;
-  private LinkedList<IdentityTriple<T1, T2, T3>> _stack;
+  private final Lambda3<? super T1, ? super T2, ? super T3, ? extends Triple<T1, T2, T3>> _tripleFactory;
+  private final Multiset<Triple<T1, T2, T3>> _previous;
+  private final LinkedList<Triple<T1, T2, T3>> _stack;
   
-  /** Create an empty recursion stack */
-  public RecursionStack3() {
-    _previous = new HashMultiset<IdentityTriple<T1, T2, T3>>();
-    _stack = new LinkedList<IdentityTriple<T1, T2, T3>>();
+  /** Create an empty recursion stack with an {@link IdentityTriple} factory */
+  public RecursionStack3() { this(IdentityTriple.<T1, T2, T3>factory()); }
+  
+  /**
+   * Create an empty recursion stack with the given {@code Triple} factory
+   * @param tripleFactory  A lambda used to produce a triple for values placed on the
+   *                       stack.  This provides clients with control over the method used
+   *                       to determine if a value has been seen previously.
+   */
+  public RecursionStack3(Lambda3<? super T1, ? super T2, ? super T3, 
+                                 ? extends Triple<T1, T2, T3>> tripleFactory) {
+    _tripleFactory = tripleFactory;
+    _previous = new HashMultiset<Triple<T1, T2, T3>>();
+    _stack = new LinkedList<Triple<T1, T2, T3>>();
   }
   
   /** 
@@ -44,7 +56,7 @@ public class RecursionStack3<T1, T2, T3> {
    *          given arguments is currently on the stack
    */
   public boolean contains(T1 arg1, T2 arg2, T3 arg3) {
-    return _previous.contains(new IdentityTriple<T1, T2, T3>(arg1, arg2, arg3));
+    return _previous.contains(_tripleFactory.value(arg1, arg2, arg3));
   }
   
   /** 
@@ -52,12 +64,12 @@ public class RecursionStack3<T1, T2, T3> {
    *          (according to {@code ==}) to the given arguments are currently on the stack
    */
   public boolean contains(T1 arg1, T2 arg2, T3 arg3, int threshold) {
-    return _previous.count(new IdentityTriple<T1, T2, T3>(arg1, arg2, arg3)) >= threshold;
+    return _previous.count(_tripleFactory.value(arg1, arg2, arg3)) >= threshold;
   }
   
   /** Add the given arguments to the top of the stack */
   public void push(T1 arg1, T2 arg2, T3 arg3) {
-    IdentityTriple<T1, T2, T3> wrapped = new IdentityTriple<T1, T2, T3>(arg1, arg2, arg3);
+    Triple<T1, T2, T3> wrapped = _tripleFactory.value(arg1, arg2, arg3);
     _stack.addLast(wrapped);
     _previous.add(wrapped);
   }
@@ -67,7 +79,7 @@ public class RecursionStack3<T1, T2, T3> {
    * @throws IllegalArgumentException  If the given arguments are not at the top of the stack
    */
   public void pop(T1 arg1, T2 arg2, T3 arg3) {
-    IdentityTriple<T1, T2, T3> wrapped = new IdentityTriple<T1, T2, T3>(arg1, arg2, arg3);
+    Triple<T1, T2, T3> wrapped = _tripleFactory.value(arg1, arg2, arg3);
     if (_stack.isEmpty() || !_stack.getLast().equals(wrapped)) {
       throw new IllegalArgumentException("given args are not on top of the stack");
     }
@@ -333,4 +345,10 @@ public class RecursionStack3<T1, T2, T3> {
     return new RecursionStack3<T1, T2, T3>();
   }
 
+  /** Call the constructor (allows the type arguments to be inferred) */
+  public static <T1, T2, T3> RecursionStack3<T1, T2, T3> 
+    make(Lambda3<? super T1, ? super T2, ? super T3, ? extends Triple<T1, T2, T3>> tripleFactory) {
+    return new RecursionStack3<T1, T2, T3>(tripleFactory);
+  }
+  
 }

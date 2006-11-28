@@ -1,6 +1,7 @@
 package edu.rice.cs.plt.tuple;
 
 import edu.rice.cs.plt.lambda.Thunk;
+import edu.rice.cs.plt.lambda.Lambda;
 
 /**
  * An arbitrary pair of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
@@ -37,5 +38,12 @@ public class Wrapper<T> extends Option<T> implements Thunk<T> {
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> Wrapper<T> make(T value) { return new Wrapper<T>(value); }
+  
+  /** Produce a lambda that invokes the constructor */
+  public static <T> Lambda<T, Wrapper<T>> factory() {
+    return new Lambda<T, Wrapper<T>>() {
+      public Wrapper<T> value(T value) { return new Wrapper<T>(value); }
+    };
+  }
   
 }

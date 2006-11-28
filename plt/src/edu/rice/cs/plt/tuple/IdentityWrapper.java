@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.tuple;
 
+import edu.rice.cs.plt.lambda.Lambda;
+
 /**
  * A wrapper that defines {@link #equals} and {@link #hashCode} in terms of its value's 
  * identity ({@code ==}) instead of equality (@code equals})
@@ -27,5 +29,12 @@ public class IdentityWrapper<T> extends Wrapper<T> {
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> IdentityWrapper<T> make(T value) { return new IdentityWrapper<T>(value); }
+  
+  /** Produce a lambda that invokes the constructor */
+  public static <T> Lambda<T, Wrapper<T>> factory() {
+    return new Lambda<T, Wrapper<T>>() {
+      public Wrapper<T> value(T value) { return new IdentityWrapper<T>(value); }
+    };
+  }
   
 }

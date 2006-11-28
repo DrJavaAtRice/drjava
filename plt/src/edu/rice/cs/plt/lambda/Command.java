@@ -9,7 +9,7 @@ package edu.rice.cs.plt.lambda;
  * @see Command4
  * @see Thunk
  */
-public interface Command {
+public interface Command extends Runnable {
   
   public void run();
   

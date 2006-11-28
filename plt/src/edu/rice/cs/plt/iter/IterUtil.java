@@ -237,6 +237,60 @@ public class IterUtil {
     };
   }
   
+  /**
+   * Make an iterator based on a {@link Reader}.  If an {@link IOException}
+   * occurs while reading, an {@link IllegalStateException} is thrown.  If an 
+   * {@code Iterable} is needed (rather than an {@code Iterator}), the result 
+   * can be wrapped in a {@link ReadOnceIterable}.
+   */
+  public static ReadOnlyIterator<Character> asIterator(final Reader in) {
+    return new ReadOnlyIterator<Character>() {
+      private int _lookahead = readNext();
+
+      public boolean hasNext() { return _lookahead >= 0; }
+      
+      public Character next() {
+        if (_lookahead < 0) { throw new NoSuchElementException(); }
+        Character result = (char) _lookahead;
+        _lookahead = readNext();
+        return result;
+      }
+      
+      private int readNext() {
+        try { return in.read(); }
+        catch (IOException e) { throw new IllegalStateException(e); }
+      }
+      
+    };
+  }
+  
+  /**
+   * Make an iterator based on an {@link InputStream}.  If an {@link IOException}
+   * occurs while reading, an {@link IllegalStateException} is thrown.  If an 
+   * {@code Iterable} is needed (rather than an {@code Iterator}), the result 
+   * can be wrapped in a {@link ReadOnceIterable}.
+   */
+  public static ReadOnlyIterator<Byte> asIterator(final InputStream in) {
+    return new ReadOnlyIterator<Byte>() {
+      private int _lookahead = readNext();
+      
+      public boolean hasNext() { return _lookahead >= 0; }
+      
+      public Byte next() {
+        if (_lookahead < 0) { throw new NoSuchElementException(); }
+        Byte result = (byte) _lookahead;
+        _lookahead = readNext();
+        return result;
+      }
+      
+      private int readNext() {
+        try { return in.read(); }
+        catch (IOException e) { throw new IllegalStateException(e); }
+      }
+      
+    };
+  }
+  
   /** 
    * @return  {@code true} iff the given predicate holds for all values in {@code iter}
    *          (computation halts immediately where the predicate fails)
@@ -551,7 +605,57 @@ public class IterUtil {
     return new QuaternaryMappedIterable<T1, T2, T3, T4, 
                                         Quad<T1, T2, T3, T4>>(iter1, iter2, iter3, iter4, makeQuad);
   }
+  
+  /** Create an {@link EmptyIterable}; equivalent to {@link #makeIterable()} */
+  public static <T> EmptyIterable<T> empty() {
+    return EmptyIterable.make();
+  }
+  
+  /** Create a {@link SingletonIterable}; equivalent to {@link #makeIterable(Object)} */
+  public static <T> SingletonIterable<T> singleton(T value) {
+    return SingletonIterable.make(value);
+  }
+  
+  /** Create a {@link ComposedIterable} with the given arguments */
+  public static <T> ComposedIterable<T> compose(T first, Iterable<? extends T> rest) {
+    return ComposedIterable.make(first, rest);
+  }
     
+  /** Create a {@link ComposedIterable} with the given arguments */
+  public static <T> ComposedIterable<T> compose(Iterable<? extends T> rest, T last) {
+    return ComposedIterable.make(rest, last);
+  }
+    
+  /** Create a {@link ComposedIterable} with the given arguments */
+  public static <T> ComposedIterable<T> compose(Iterable<? extends T> i1, Iterable<? extends T> i2) {
+    return ComposedIterable.make(i1, i2);
+  }
+  
+  /** Create a {@link SnapshotIterable} with the given iterable */
+  public static <T> SnapshotIterable<T> snapshot(Iterable<? extends T> iter) {
+    return SnapshotIterable.make(iter);
+  }
+  
+  /** Create a {@link SnapshotIterable} with the given iterator */
+  public static <T> SnapshotIterable<T> snapshot(Iterator<? extends T> iter) {
+    return SnapshotIterable.make(iter);
+  }
+    
+  /** Create a {@link MappedIterable} with the given arguments */
+  public static <S, T> MappedIterable<S, T> map(Iterable<? extends S> source, 
+                                                Lambda<? super S, ? extends T> map) {
+    return MappedIterable.make(source, map);
+  }
+  
+  /**
+   * Create a {@link MappedIterable} and wrap it in a {@link SnapshotIterable}, forcing
+   * immediate evaluation of the mapping.
+   */
+  public static <S, T> SnapshotIterable<T> 
+    mapSnapshot(Iterable<? extends S> source, Lambda<? super S, ? extends T> map) {
+    return SnapshotIterable.make(MappedIterable.make(source, map));
+  }
+  
   /**
    * Create an immutable SizedIterable containing the given values.  Unfortunately, the use of 
    * varargs here causes an unchecked warning at the call site when {@code T} is a non-reifiable
@@ -885,60 +989,6 @@ public class IterUtil {
       }
     }
     return new Wrapper();
-  }
-  
-  /**
-   * @return  An iterable that traverses the given {@link Reader}.  If an {@link IOException}
-   *          occurs while reading, an {@link IllegalStateException} is thrown.  Note that, as a
-   *          {@link ReadOnceIterable}, the result only allows a single traversal
-   *          of its contents.
-   */
-  public static ReadOnceIterable<Character> readerIterable(final Reader in) {
-    return new ReadOnceIterable<Character>(new ReadOnlyIterator<Character>() {
-      private int _lookahead = readNext();
-
-      public boolean hasNext() { return _lookahead >= 0; }
-      
-      public Character next() {
-        if (_lookahead < 0) { throw new NoSuchElementException(); }
-        Character result = (char) _lookahead;
-        _lookahead = readNext();
-        return result;
-      }
-      
-      private int readNext() {
-        try { return in.read(); }
-        catch (IOException e) { throw new IllegalStateException(e); }
-      }
-      
-    });
-  }
-  
-  /**
-   * @return  An iterable that traverses the given {@link InputStream}.  If an {@link IOException}
-   *          occurs while reading, an {@link IllegalStateException} is thrown.  Note that, as a
-   *          {@link ReadOnceIterable}, the result only allows a single traversal
-   *          of its contents.
-   */
-  public static ReadOnceIterable<Byte> inputStreamIterable(final InputStream in) {
-    return new ReadOnceIterable<Byte>(new ReadOnlyIterator<Byte>() {
-      private int _lookahead = readNext();
-      
-      public boolean hasNext() { return _lookahead >= 0; }
-      
-      public Byte next() {
-        if (_lookahead < 0) { throw new NoSuchElementException(); }
-        Byte result = (byte) _lookahead;
-        _lookahead = readNext();
-        return result;
-      }
-      
-      private int readNext() {
-        try { return in.read(); }
-        catch (IOException e) { throw new IllegalStateException(e); }
-      }
-      
-    });
   }
   
 }

@@ -86,10 +86,10 @@ public class IterUtilTest extends TestCase {
     assertFalse(iter.hasNext());
   }
   
-  public void testReaderIterable() {
-    assertTrue(isEmpty(readerIterable(new StringReader(""))));
+  public void testReaderAsIterator() {
+    assertFalse(asIterator(new StringReader("")).hasNext());
     
-    Iterator<Character> iter = readerIterable(new StringReader("Foo")).iterator();
+    Iterator<Character> iter = asIterator(new StringReader("Foo"));
     assertTrue(iter.hasNext());
     assertEquals('F', iter.next());
     assertTrue(iter.hasNext());
@@ -99,11 +99,11 @@ public class IterUtilTest extends TestCase {
     assertFalse(iter.hasNext());
   }
   
-  public void testInputStreamIterable() {
-    assertTrue(isEmpty(inputStreamIterable(new ByteArrayInputStream(new byte[0]))));
+  public void testInputStreamAsIterator() {
+    assertFalse(asIterator(new ByteArrayInputStream(new byte[0])).hasNext());
     
     byte[] bytes = { 1, 15, 3 };
-    Iterator<Byte> iter = inputStreamIterable(new ByteArrayInputStream(bytes)).iterator();
+    Iterator<Byte> iter = asIterator(new ByteArrayInputStream(bytes));
     assertTrue(iter.hasNext());
     assertEquals(1, (byte) iter.next());
     assertTrue(iter.hasNext());

@@ -3,6 +3,7 @@ package edu.rice.cs.plt.recur;
 import java.util.LinkedList;
 import edu.rice.cs.plt.collect.Multiset;
 import edu.rice.cs.plt.collect.HashMultiset;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.IdentityPair;
 import edu.rice.cs.plt.lambda.Command;
 import edu.rice.cs.plt.lambda.Command2;
@@ -30,13 +31,23 @@ import edu.rice.cs.plt.lambda.Lambda2;
  */
 public class RecursionStack2<T1, T2> {
   
-  private Multiset<IdentityPair<T1, T2>> _previous;
-  private LinkedList<IdentityPair<T1, T2>> _stack;
+  private final Lambda2<? super T1, ? super T2, ? extends Pair<T1, T2>> _pairFactory;
+  private final Multiset<Pair<T1, T2>> _previous;
+  private final LinkedList<Pair<T1, T2>> _stack;
   
-  /** Create an empty recursion stack */
-  public RecursionStack2() {
-    _previous = new HashMultiset<IdentityPair<T1, T2>>();
-    _stack = new LinkedList<IdentityPair<T1, T2>>();
+  /** Create an empty recursion stack with an {@link IdentityPair} factory */
+  public RecursionStack2() { this(IdentityPair.<T1, T2>factory()); }
+  
+  /**
+   * Create an empty recursion stack with the given {@code Pair} factory
+   * @param pairFactory  A lambda used to produce a pair for values placed on the
+   *                     stack.  This provides clients with control over the method used
+   *                     to determine if a value has been seen previously.
+   */
+  public RecursionStack2(Lambda2<? super T1, ? super T2, ? extends Pair<T1, T2>> pairFactory) {
+    _pairFactory = pairFactory;
+    _previous = new HashMultiset<Pair<T1, T2>>();
+    _stack = new LinkedList<Pair<T1, T2>>();
   }
   
   /** 
@@ -44,7 +55,7 @@ public class RecursionStack2<T1, T2> {
    *          given arguments is currently on the stack
    */
   public boolean contains(T1 arg1, T2 arg2) {
-    return _previous.contains(new IdentityPair<T1, T2>(arg1, arg2));
+    return _previous.contains(_pairFactory.value(arg1, arg2));
   }
   
   /** 
@@ -52,12 +63,12 @@ public class RecursionStack2<T1, T2> {
    *          (according to {@code ==}) to the given arguments are currently on the stack
    */
   public boolean contains(T1 arg1, T2 arg2, int threshold) {
-    return _previous.count(new IdentityPair<T1, T2>(arg1, arg2)) >= threshold;
+    return _previous.count(_pairFactory.value(arg1, arg2)) >= threshold;
   }
   
   /** Add the given arguments to the top of the stack */
   public void push(T1 arg1, T2 arg2) {
-    IdentityPair<T1, T2> wrapped = new IdentityPair<T1, T2>(arg1, arg2);
+    Pair<T1, T2> wrapped = _pairFactory.value(arg1, arg2);
     _stack.addLast(wrapped);
     _previous.add(wrapped);
   }
@@ -67,7 +78,7 @@ public class RecursionStack2<T1, T2> {
    * @throws IllegalArgumentException  If the given arguments are not at the top of the stack
    */
   public void pop(T1 arg1, T2 arg2) {
-    IdentityPair<T1, T2> wrapped = new IdentityPair<T1, T2>(arg1, arg2);
+    Pair<T1, T2> wrapped = _pairFactory.value(arg1, arg2);
     if (_stack.isEmpty() || !_stack.getLast().equals(wrapped)) {
       throw new IllegalArgumentException("given args are not on top of the stack");
     }
@@ -323,5 +334,11 @@ public class RecursionStack2<T1, T2> {
   
   /** Call the constructor (allows the type arguments to be inferred) */
   public static <T1, T2> RecursionStack2<T1, T2> make() { return new RecursionStack2<T1, T2>(); }
+  
+  /** Call the constructor (allows the type arguments to be inferred) */
+  public static <T1, T2> RecursionStack2<T1, T2> make(Lambda2<? super T1, ? super T2, 
+                                                              ? extends Pair<T1, T2>> pairFactory) {
+    return new RecursionStack2<T1, T2>(pairFactory);
+  }
   
 }
