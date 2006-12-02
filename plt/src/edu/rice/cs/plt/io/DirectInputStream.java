@@ -5,8 +5,8 @@ import java.io.*;
 /**
  * <p>An {@code InputStream} that supports reading directly into an {@code OutputStream}.  This class
  * provides default implementations defined in terms of {@code InputStream} and {@code OutputStream}
- * methods.  Subclasses can override (at least) {@link readAll(OutputStream, byte[])} and
- * {@link read(OutputStream, int, byte[])} to provide better implementations (by, for example,
+ * methods.  Subclasses can override (at least) {@link #readAll(OutputStream, byte[])} and
+ * {@link #read(OutputStream, int, byte[])} to provide better implementations (by, for example,
  * not invoking {@link InputStream#read(byte[])}).</p>
  * 
  * <p>Also guarantees that, consistent with the {@link Reader} class, all read operations are

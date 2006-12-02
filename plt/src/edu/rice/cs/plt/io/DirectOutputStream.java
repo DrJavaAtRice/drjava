@@ -5,8 +5,8 @@ import java.io.*;
 /**
  * <p>An {@code OutputStream} that supports writing directly from an {@code InputStream}.  This class
  * provides default implementations defined in terms of {@code InputStream} and {@code OutputStream}
- * methods.  Subclasses can override (at least) {@link writeAll(InputStream, byte[])} and
- * {@link write(InputStream, int, byte[])} to provide better implementations (by, for example,
+ * methods.  Subclasses can override (at least) {@link #writeAll(InputStream, byte[])} and
+ * {@link #write(InputStream, int, byte[])} to provide better implementations (by, for example,
  * not invoking {@link OutputStream#write(byte[])}).</p>
  * 
  * <p>Also guarantees that, consistent with the {@link Writer} class, all write operations are

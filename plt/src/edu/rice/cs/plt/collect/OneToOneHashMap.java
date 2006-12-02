@@ -128,8 +128,8 @@ public class OneToOneHashMap<K, V> extends AbstractMap<K, V> implements OneToOne
   
   /**
    * Provide access to the set of entries in this map.  Follows the contract of
-   * {@link Map#entrySet()}, and insures that changes made to the set are reflected
-   * consistently in this map.  Note that the {@link Map.Entry#setValue()} method
+   * {@link Map#entrySet}, and insures that changes made to the set are reflected
+   * consistently in this map.  Note that the {@link java.util.Map.Entry#setValue} method
    * is not supported.
    */
   public Set<Map.Entry<K, V>> entrySet() {

@@ -4,7 +4,7 @@ import java.util.Map.Entry;
 
 /**
  * An implementation of {@link Entry} that does not support
- * the {@link #setValue()} operation; all other methods are
+ * the {@link #setValue} operation; all other methods are
  * delegated to a wrapped {@code Entry}.
  */
 public class ImmutableMapEntry<K, V> implements Entry<K, V> {

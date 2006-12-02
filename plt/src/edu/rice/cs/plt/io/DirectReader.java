@@ -5,8 +5,8 @@ import java.io.*;
 /**
  * A {@code Reader} that supports reading directly into a {@code Writer}.  This class
  * provides default implementations defined in terms of {@code Reader} and {@code Writer}
- * methods.  Subclasses can override (at least) {@link readAll(Writer, char[])} and
- * {@link read(Writer, int, char[])} to provide better implementations (by, for example,
+ * methods.  Subclasses can override (at least) {@link #readAll(Writer, char[])} and
+ * {@link #read(Writer, int, char[])} to provide better implementations (by, for example,
  * not invoking {@link Reader#read(char[])}).
  * 
  * @see DirectInputStream

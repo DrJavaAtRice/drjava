@@ -10,7 +10,7 @@ import java.util.LinkedList;
  * Abstraction of {@link ExpandingByteBuffer} and {@link ExpandingCharBuffer} to manage
  * indices and bookeeping for these buffers from a single control point.  In general, this
  * class represents an expandable and thread safe buffer of elements of some type.  {@code T} is the
- * type of a sequence of these elements of fixed length {@link BUFFER_SIZE}.  Subclasses are responsible
+ * type of a sequence of these elements of fixed length {@link #BUFFER_SIZE}.  Subclasses are responsible
  * for managing reading and writing, but need not interact directly with the expanding queue
  * of {@code T}s, nor with the indices used to manage this queue.  Instead, the methods in
  * this class provide the necessary tools.  Synchronization should occur on the ExpandingBuffer

@@ -11,7 +11,7 @@ import java.util.Collection;
  * the default delegation behavior in most cases.  Subclasses can also
  * invoke the overridden methods in {@link AbstractSet} to use the
  * default implementations there by invoking, for example,
- * {@link #abstractSetAddAll()} (see {@link AbstractSet} and
+ * {@link #abstractSetAddAll} (see {@link AbstractSet} and
  * {@link java.util.AbstractCollection} for details on the default
  * implementations).
  */

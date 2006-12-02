@@ -29,7 +29,7 @@ public class IOUtil {
     catch (SecurityException e) { return f; }
   }
   
-  /** Apply {@link attemptAbsoluteFile} to all files in a list */
+  /** Apply {@link #attemptAbsoluteFile} to all files in a list */
   public static Iterable<File> attemptAbsoluteFiles(Iterable<? extends File> files) {
     return IterUtil.mapSnapshot(files, ATTEMPT_ABSOLUTE_FILE);
   }
@@ -41,7 +41,7 @@ public class IOUtil {
   /**
    * Make a best attempt at evaluating {@link File#getCanonicalFile()}.  In the event of an
    * {@link IOException} or a {@link SecurityException}, the result is instead the result of
-   * {@link #attemptAbsoluteFile()}.  (Clients <em>cannot</em> assume, then, that the result 
+   * {@link #attemptAbsoluteFile}.  (Clients <em>cannot</em> assume, then, that the result 
    * is canonical.)
    */
   public static File attemptCanonicalFile(File f) {
@@ -50,7 +50,7 @@ public class IOUtil {
     catch (SecurityException e) { return attemptAbsoluteFile(f); }
   }
   
-  /** Apply {@link attemptCanonicalFile} to all files in a list */
+  /** Apply {@link #attemptCanonicalFile} to all files in a list */
   public static Iterable<File> attemptCanonicalFiles(Iterable<? extends File> files) {
     return IterUtil.mapSnapshot(files, ATTEMPT_CANONICAL_FILE);
   }
@@ -178,7 +178,7 @@ public class IOUtil {
   }
   
   /**
-   * Similar to {@link #attemptListFiles()}, but returns a non-null {@code Iterable}
+   * Similar to {@link #attemptListFiles(File)}, but returns a non-null {@code Iterable}
    * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
    * the result here is an empty iterable.
    */
@@ -189,7 +189,7 @@ public class IOUtil {
   }
   
   /**
-   * Similar to {@link #attemptListFiles(FileFilter)}, but returns a non-null {@code Iterable}
+   * Similar to {@link #attemptListFiles(File, FileFilter)}, but returns a non-null {@code Iterable}
    * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
    * the result here is an empty iterable.
    */
@@ -218,7 +218,7 @@ public class IOUtil {
   }
   
   /**
-   * Make a best attempt at invoking {@link File#renameTo()}.  In the event of a 
+   * Make a best attempt at invoking {@link File#renameTo}.  In the event of a 
    * {@link SecurityException}, the result is {@code false}.
    */
   public static boolean attemptRenameTo(File f, File dest) {
@@ -227,7 +227,7 @@ public class IOUtil {
   }
   
   /**
-   * Like {@link #attemptRenameTo()}, makes a best attempt at renaming {@code f}.
+   * Like {@link #attemptRenameTo}, makes a best attempt at renaming {@code f}.
    * Before doing so, however, {@code dest}, if it exists, is deleted.  (On some systems,
    * such as Windows, the rename will otherwise fail.)
    */
@@ -237,7 +237,7 @@ public class IOUtil {
   }
   
   /**
-   * Make a best attempt at invoking {@link File#setLastModified()}.  In the event of a 
+   * Make a best attempt at invoking {@link File#setLastModified}.  In the event of a 
    * {@link SecurityException}, the result is {@code false}.
    */
   public static boolean attemptSetLastModified(File f, long time) {
@@ -246,7 +246,7 @@ public class IOUtil {
   }
   
   /**
-   * Make a best attempt at invoking {@link File#setReadOnly()}.  In the event of a 
+   * Make a best attempt at invoking {@link File#setReadOnly}.  In the event of a 
    * {@link SecurityException}, the result is {@code false}.
    */
   public static boolean attemptSetReadOnly(File f) {
@@ -257,7 +257,7 @@ public class IOUtil {
   /**
    * Converts a {@code File} to all lowercase in case-insensitive systems; otherwise, returns the file
    * untouched.  This provides a basis for comparing files in case-insensitive file systems.
-   * Note that a canonical file (see {@link File#getCanonicalFile} and {@link #attempCanonicalFile})
+   * Note that a canonical file (see {@link File#getCanonicalFile} and {@link #attemptCanonicalFile})
    * is not necessarily in canonical case, and applying this function to a canonical file may
    * create a file that is no longer canonical.  Where the file doesn't exist, it's even possible
    * that two <em>different</em> canonical files have the same canonical case representation.
@@ -278,7 +278,7 @@ public class IOUtil {
   };
   
   /**
-   * Determine if the given file is a member (as determined by {@link File#getParentFile()})
+   * Determine if the given file is a member (as determined by {@link File#getParentFile})
    * of another file.  If {@code f.equals(ancestor)}, the result is {@code true}.
    */
   public static boolean isMember(File f, File ancestor) {
@@ -308,7 +308,7 @@ public class IOUtil {
   
   /**
    * Attempt to delete the given {@code File}.  If {@code f} is a directory, this method will first
-   * recur on each of {@code f}'s members.  In all cases, {@link #attemptDelete()} will be invoked on
+   * recur on each of {@code f}'s members.  In all cases, {@link #attemptDelete} will be invoked on
    * {@code f}, and the result of this method will be identical to that result.
    */
   public boolean deleteRecursively(File f) {
@@ -335,7 +335,7 @@ public class IOUtil {
   
   /**
    * Attempt to mark the given {@code File} for deletion.  If {@code f} is a directory, this method 
-   * will also recur on each of {@code f}'s members.  In all cases, {@link #attemptDeleteOnExit()} will 
+   * will also recur on each of {@code f}'s members.  In all cases, {@link #attemptDeleteOnExit} will 
    * be invoked on {@code f}.  (Note that {@code f} may not actually be deleted on exit if some of its 
    * contents change after invoking this method, or if an error occurs in listing and marking its members 
    * for deletion.)
@@ -507,7 +507,7 @@ public class IOUtil {
    * Writes text to the file, overwriting whatever was there.  Ignores any exceptions that occur.
    * @param file  File to write to
    * @param text  Text to write
-   * @return  {@true} iff the operation succeeded without an exception.
+   * @return  {@code true} iff the operation succeeded without an exception.
    */
   public static boolean attemptWriteStringToFile(File file, String text) {
     try { writeStringToFile(file, text); return true; }
@@ -536,7 +536,7 @@ public class IOUtil {
    * @param text  Text to write
    * @param append  {@code true} iff the file should be opened in "append" mode (rather than
    *                "overwrite" mode)
-   * @return  {@true} iff the operation succeeded without an exception.
+   * @return  {@code true} iff the operation succeeded without an exception.
    */
   public static boolean attemptWriteStringToFile(File file, String text, boolean append) {
     try { writeStringToFile(file, text, append); return true; }
@@ -545,8 +545,8 @@ public class IOUtil {
   }
   
   /**
-   * Create a temporary file (via {@link File#createTempFile()}) and immediately mark it for deletion
-   * @throws IOException  If an exception occurs in {@link File#createTempFile()}
+   * Create a temporary file (via {@link File#createTempFile}) and immediately mark it for deletion
+   * @throws IOException  If an exception occurs in {@link File#createTempFile}
    * @throws SecurityException  If write or delete access to the system temp directory is denied
    */
   public static File createAndMarkTempFile(String prefix, String suffix) throws IOException {
@@ -554,8 +554,8 @@ public class IOUtil {
   }
   
   /**
-   * Create a temporary file (via {@link File#createTempFile()}) and immediately mark it for deletion
-   * @throws IOException  If an exception occurs in {@link File#createTempFile()}
+   * Create a temporary file (via {@link File#createTempFile}) and immediately mark it for deletion
+   * @throws IOException  If an exception occurs in {@link File#createTempFile}
    * @throws SecurityException  If write or delete access to {@code location} is denied
    */
   public static File createAndMarkTempFile(String prefix, String suffix, File location) throws IOException {
@@ -565,10 +565,10 @@ public class IOUtil {
   }
   
   /**
-   * Create a temporary directory (named by {@link File#createTempFile()}) and immediately mark it for 
+   * Create a temporary directory (named by {@link File#createTempFile}) and immediately mark it for 
    * deletion.  (Deletion will only actually occur if the directory is empty on exit, or if all files 
    * created in the directory are also marked for deletion.)
-   * @throws IOException  If an exception occurs in {@link File#createTempFile()}, or if the attempt to
+   * @throws IOException  If an exception occurs in {@link File#createTempFile}, or if the attempt to
    *                      create the directory is unsuccessful
    * @throws SecurityException  If write access to the system temp directory is denied
    */
@@ -577,10 +577,10 @@ public class IOUtil {
   }
   
   /**
-   * Create a temporary directory (named by {@link File#createTempFile()}) and immediately mark it for 
+   * Create a temporary directory (named by {@link File#createTempFile}) and immediately mark it for 
    * deletion.  (Deletion will only actually occur if the directory is empty on exit, or if all files 
    * created in the directory are also marked for deletion.)
-   * @throws IOException  If an exception occurs in {@link File#createTempFile()}, or if the attempt to
+   * @throws IOException  If an exception occurs in {@link File#createTempFile}, or if the attempt to
    *                      create the directory is unsuccessful
    * @throws SecurityException  If write access to {@code location} is denied
    */
@@ -882,7 +882,7 @@ public class IOUtil {
                                                     
   /**
    * Define a {@code FileFilter} that accepts files whose (simple) names in the
-   * canonical case (see {@link #canonicalCase()}) match a regular expression.
+   * canonical case (see {@link #canonicalCase}) match a regular expression.
    */
   public static FileFilter regexpCanonicalCaseFileFilter(final String regexp) {
     return new FileFilter() {
@@ -892,7 +892,7 @@ public class IOUtil {
                                                     
   /**
    * Define a {@code FileFilter} that accepts files with the given extension (that is,
-   * for extension {@code txt}, files whose canonical-case names (see {@link #canonicalCase()}) 
+   * for extension {@code txt}, files whose canonical-case names (see {@link #canonicalCase}) 
    * end in {@code .txt})
    */
   public static FileFilter extensionFileFilter(String extension) {

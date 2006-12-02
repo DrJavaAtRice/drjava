@@ -12,8 +12,8 @@ public interface OneToOneMap<K, V> extends Map<K, V> {
   /**
    * Produce the value corresponding to the given key, or {@code null} if
    * {@code containsKey(key)} does not hold.  Note that this essentially duplicates
-   * the {@link Map#get()} method, but provides a stronger type signature along with
-   * a name consistent with {@link #getKey()}.
+   * the {@link Map#get} method, but provides a stronger type signature along with
+   * a name consistent with {@link #getKey}.
    */
   public V getValue(K key);
   
@@ -26,8 +26,8 @@ public interface OneToOneMap<K, V> extends Map<K, V> {
   /**
    * Remove the mapping corresponding to the given key, if any.  Return the matching
    * value, or {@code null} if there is none.  Note that this essentially duplicates
-   * the {@link Map#remove()} method, but provides a stronger type signature along
-   * with a name consistent with {@link #removeValue()}.
+   * the {@link Map#remove} method, but provides a stronger type signature along
+   * with a name consistent with {@link #removeValue}.
    */
   public V removeKey(K key);
   
@@ -39,7 +39,7 @@ public interface OneToOneMap<K, V> extends Map<K, V> {
   
   /**
    * Remove the given key-value pair if it exists.  This provides a safer alternative
-   * to {@link #removeKey()} or {@link #removeValue()}, because it requires clients to
+   * to {@link #removeKey} or {@link #removeValue}, because it requires clients to
    * explicitly state the key-value pair, avoiding erroneous assumptions.
    */
   public boolean remove(K key, V value);

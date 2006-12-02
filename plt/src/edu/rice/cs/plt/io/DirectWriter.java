@@ -5,8 +5,8 @@ import java.io.*;
 /**
  * A {@code Writer} that supports writing directly from a {@code Reader}.  This class
  * provides default implementations defined in terms of {@code Reader} and {@code Writer}
- * methods.  Subclasses can override (at least) {@link writeAll(Reader, char[])} and
- * {@link write(Reader, int, char[])} to provide better implementations (by, for example,
+ * methods.  Subclasses can override (at least) {@link #writeAll(Reader, char[])} and
+ * {@link #write(Reader, int, char[])} to provide better implementations (by, for example,
  * not invoking {@link Writer#write(char[])}).
  * 
  * @see DirectOutputStream

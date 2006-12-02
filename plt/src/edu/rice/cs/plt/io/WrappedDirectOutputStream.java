@@ -4,7 +4,7 @@ import java.io.*;
 
 /**
  * An implementation of {@code DirectOutputStream} that inherits that class's default implementations
- * and delegates all other operations to the wrapped {@code InputStream}.
+ * and delegates all other operations to the wrapped {@code OutputStream}.
  */
 public class WrappedDirectOutputStream extends DirectOutputStream {
   private OutputStream _stream;
