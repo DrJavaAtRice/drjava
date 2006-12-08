@@ -6315,7 +6315,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       
       if (rhvport != null) {
         Component view = rhvport.getView();
-        view.repaint();
+        if (view != null) {
+          view.repaint();
+        }
       }
     }
   }
