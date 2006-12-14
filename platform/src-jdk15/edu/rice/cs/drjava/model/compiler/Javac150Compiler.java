@@ -285,7 +285,7 @@ public class Javac150Compiler implements CompilerInterface {
   /** Get an empty List using reflection, since the method to do so changed  with version 1.5.0_04. */
   private com.sun.tools.javac.util.List<String> _emptyStringList() {
     try {
-      Method nil = List.class.getMethod("nil");
+      Method nil = com.sun.tools.javac.util.List.class.getMethod("nil");
       @SuppressWarnings("unchecked") com.sun.tools.javac.util.List<String> result = 
         (com.sun.tools.javac.util.List<String>) nil.invoke(null);
       return result;
