@@ -46,21 +46,27 @@ public class Log {
   public static final boolean ENABLE_ALL = false;
 
   /** Whether this particular log is enabled in development mode. */
-  protected boolean _isEnabled;
+  protected volatile boolean _isEnabled;
 
   /** The filename of this log. */
-  protected String _name;
+  protected volatile String _name;
+  
+  /** The file object for this log. */
+  protected volatile File _file;
 
   /** PrintWriter to print messages to a file. */
-  protected PrintWriter _writer;
+  protected volatile PrintWriter _writer;
 
   /** Creates a new Log with the given name.  If enabled is true, a file is created in the current directory with the
     * given name.
     * @param name File name for the log
     * @param enabled Whether to actively use this log
     */
-  public Log(String name, boolean isEnabled) {
-    _name = name;
+  public Log(String name, boolean isEnabled) { this(new File(name), isEnabled); }
+  
+  public Log(File f, boolean isEnabled) {
+    _file = f;
+    _name = f.getName();
     _isEnabled = isEnabled;
     _init();
   }
@@ -70,8 +76,7 @@ public class Log {
     if (_writer == null) {
       if (_isEnabled || ENABLE_ALL) {
         try {
-          File f = new File(_name);
-          FileWriter w = new FileWriter(f.getAbsolutePath(), true);
+          FileWriter w = new FileWriter(_file.getAbsolutePath(), true);
           _writer = new PrintWriter(w);
 
           log("Log '" + _name + "' opened: " + (new Date()));
@@ -89,9 +94,7 @@ public class Log {
   public void setEnabled(boolean isEnabled) { _isEnabled = isEnabled; }
 
   /** Returns whether this log is currently enabled. */
-  public boolean isEnabled() {
-    return (_isEnabled || ENABLE_ALL);
-  }
+  public boolean isEnabled() { return (_isEnabled || ENABLE_ALL); }
 
   /** Prints a message to the log, if enabled.
    *  @param message Message to print.

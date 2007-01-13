@@ -281,14 +281,11 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
       } else {
         kit = Toolkit.getDefaultToolkit();
       }
-      /* Use of the deprecated method here is necessary to get a handle on
-       * a FontMetrics object.  This is required by our dependence on the
-       * javax.swing.text.Utilities class, which does a lot of Java 1.1-style
-       * calculation (presumably these methods should be deprecated, too).
-       * The deprecated use can't be fixed without an in-depth understanding
-       * of fonts, glyphs, and font rendering.  Where _metrics is currently used,
-       * the Font methods getLineMetrics, getStringBounds, getHeight, getAscent,
-       * and getDescent will probably be helpful.
+      /* The deprecated method here is necessary to get a handle on a FontMetrics object.  This is required by our 
+       * dependence on the javax.swing.text.Utilities class, which does a lot of Java 1.1-style calculation (presumably
+       * these methods should be deprecated, too). The deprecated use can't be fixed without an in-depth understanding
+       * of fonts, glyphs, and font rendering.  Where _metrics is currently used, the Font methods getLineMetrics, 
+       * getStringBounds, getHeight, getAscent, and getDescent will probably be helpful.
        */
       @SuppressWarnings("deprecation") FontMetrics newMetrics = kit.getFontMetrics(f);
       _metrics = newMetrics;
