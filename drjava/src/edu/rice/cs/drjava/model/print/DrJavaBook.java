@@ -40,7 +40,7 @@ import java.awt.font.*;
 import java.text.*;
 
 /**
- * The DrJavaBook class in DrJava's implementation of a Pageable object. It
+ * The DrJavaBook class is DrJava's implementation of a Pageable object. It
  * serves as the control class for printing, and is responsible for
  * preparing the print job of previewing or printing given the String
  * representation of the document.
@@ -89,7 +89,6 @@ public class DrJavaBook implements Pageable {
     int linesPerPage = (int) (_format.getImageableHeight() / lineHeight) - 1;
 
     HashMap<TextAttribute,Object> map = new HashMap<TextAttribute,Object>(); // Added parameterization <TextAttribute, Object>.
-//  HashMap map = new HashMap();
     map.put(TextAttribute.FONT, PRINT_FONT);
 
     char[] carriageReturn = {(char) 10};
