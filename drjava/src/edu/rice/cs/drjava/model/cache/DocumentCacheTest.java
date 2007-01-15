@@ -124,6 +124,27 @@ public class DocumentCacheTest extends DrJavaTestCase {
   public void testCacheSize() {
     _cache.setCacheSize(6);
     assertEquals("Wrong cache size", 6, _cache.getCacheSize());
+    _cache.setCacheSize(34);
+    assertEquals("Wrong cache size", 34, _cache.getCacheSize());
+    
+    /* test that an IllegalArgumentException is thrown when a
+     * cacheSize <= 0 is provided
+     */
+    try {
+     _cache.setCacheSize(0);
+     fail("IllegalArgumentException expected.");
+    }
+    catch (IllegalArgumentException iae) {
+      //We're good
+    }
+    
+    try {
+     _cache.setCacheSize(-34);
+     fail("IllegalArgumentException expected.");
+    }
+    catch (IllegalArgumentException iae) {
+      //We're good
+    }
   }
   
   public void testNewDocumentsInAndOutOfTheCache() throws BadLocationException, IOException {

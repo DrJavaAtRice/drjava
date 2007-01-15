@@ -172,10 +172,24 @@ public final class ModelListTest extends DrJavaTestCase {
     ModelList<Integer>.Iterator itFull = fFull.getIterator();
     try {
       itFull.current();
-      throw new RuntimeException("Current call in initial position "+
-                                 "did not fail.");
+      fail("Current call in initial position did not fail.");
     }
-    catch (Exception e) {
+    catch (RuntimeException e) {
+      //This call was supposed to throw an exception
+            assertEquals("current() throws exception when at end",
+                   e.getMessage(),
+                   "Attempt to call current on an iterator in the initial position");
+    }
+    itFull.next();
+    try {
+      itFull.current();
+      fail("Current call in final position did not fail.");
+    }
+    catch (RuntimeException e) {
+      //This call was supposed to throw an exception
+      assertEquals("current() throws exception when at end",
+                   e.getMessage(),
+                   "Attempt to call current on an iterator in the final position");
     }
   }
 
@@ -219,7 +233,7 @@ public final class ModelListTest extends DrJavaTestCase {
     itFull.insert(new Integer(1));
     assertEquals("#0.0", new Integer(0), itFull.nextItem());
   }
-
+  
   public void testCollapse() {
     ModelList<Integer>.Iterator itFull = fFull.getIterator();
     ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
@@ -239,6 +253,7 @@ public final class ModelListTest extends DrJavaTestCase {
     itFull.collapse(itFull2);
     assertEquals("#2.1", 2, fFull.length());
 
+    //collapse to the right
     itFull.insert(new Integer(4));
     assertEquals("#3.0", 3, fFull.length());
     assertEquals("#3.0b",new Integer(4),itFull.current());
@@ -250,6 +265,18 @@ public final class ModelListTest extends DrJavaTestCase {
     itFull.prev();
     assertEquals("#4.0", new Integer(4), itFull.current());
     assertEquals("#4.1", new Integer(6), itFull2.current());
+    
+    //collapse to the left
+    itFull.insert(new Integer(7));
+    assertEquals("#5.0a", 3, fFull.length());
+    assertEquals("#5.0b", new Integer(7), itFull.current());
+    assertEquals("#5.0c", new Integer(6), itFull2.current());
+    itFull2.collapse(itFull);
+    assertEquals("#5.1a", 2, fFull.length());
+    assertEquals("#5.1b", new Integer(7), itFull.current());
+    assertEquals("#5.1c", new Integer(6), itFull2.current());
+    assertEquals("#5.2a", new Integer(6), itFull.nextItem());
+    assertEquals("#5.2b", new Integer(7), itFull2.prevItem());
   }
 
   public void testNotifyInsert() {
@@ -302,7 +329,30 @@ public final class ModelListTest extends DrJavaTestCase {
     assertEquals("#1.1", new Integer(0), itFull3.current());
     assertEquals("#1.2", new Integer(0), itFull.current());
   }
-
+  
+  public void testListenerCount() {
+    ModelList<Character> testList = new ModelList<Character>();
+    
+    assertEquals("No iterators", 0, testList.listenerCount());
+    
+    ModelList<Character>.Iterator iter1 = testList.getIterator();
+    
+    assertEquals("One iterator", 1, testList.listenerCount());
+    
+    ModelList<Character>.Iterator iter2 = testList.getIterator();
+    
+    assertEquals("Two iterators", 2, testList.listenerCount());
+    
+    iter1.dispose();
+    iter1 = null;
+    
+    assertEquals("Removed first iterator", 1, testList.listenerCount());
+    
+    iter2.dispose();
+    iter2 = null;
+    
+    assertEquals("Removed second iterator", 0, testList.listenerCount());
+  }
 }
 
 
