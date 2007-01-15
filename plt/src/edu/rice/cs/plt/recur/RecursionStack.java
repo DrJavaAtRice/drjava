@@ -5,8 +5,7 @@ import edu.rice.cs.plt.collect.Multiset;
 import edu.rice.cs.plt.collect.HashMultiset;
 import edu.rice.cs.plt.tuple.Wrapper;
 import edu.rice.cs.plt.tuple.IdentityWrapper;
-import edu.rice.cs.plt.lambda.Command;
-import edu.rice.cs.plt.lambda.Command1;
+import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
 
@@ -91,101 +90,101 @@ public class RecursionStack<T> {
   public boolean isEmpty() { return _stack.isEmpty(); }
   
   /**
-   * Run the given command, unless {@code arg} is already on the stack; push {@code arg}
-   * onto the stack during command execution
+   * Run the given runnable, unless {@code arg} is already on the stack; push {@code arg}
+   * onto the stack during runnable execution
    */
-  public void run(Command c, T arg) {
+  public void run(Runnable r, T arg) {
     if (!contains(arg)) { 
       push(arg);
-      try { c.run(); }
+      try { r.run(); }
       finally { pop(arg); }
     }
   }
   
   /**
-   * Run the given command, unless {@code threshold} instances of {@code arg} are already 
-   * on the stack; push {@code arg} onto the stack during command execution
+   * Run the given runnable, unless {@code threshold} instances of {@code arg} are already 
+   * on the stack; push {@code arg} onto the stack during runnable execution
    */
-  public void run(Command c, T arg, int threshold) {
+  public void run(Runnable r, T arg, int threshold) {
     if (!contains(arg, threshold)) { 
       push(arg);
-      try { c.run(); }
+      try { r.run(); }
       finally { pop(arg); }
     }
   }
   
   /**
-   * If {@code arg} is not on the stack, run {@code c}; otherwise, run {@code infiniteCase}.  
-   * In either case, push {@code arg} onto the stack during command execution.
+   * If {@code arg} is not on the stack, run {@code r}; otherwise, run {@code infiniteCase}.  
+   * In either case, push {@code arg} onto the stack during runnable execution.
    */
-  public void run(Command c, Command infiniteCase, T arg) {
-    Command toRun = (contains(arg) ? infiniteCase : c);
+  public void run(Runnable r, Runnable infiniteCase, T arg) {
+    Runnable toRun = (contains(arg) ? infiniteCase : r);
     push(arg);
     try { toRun.run(); }
     finally { pop(arg); }
   }
   
   /**
-   * If less than {@code threshold} instances of {@code arg} are on the stack, run {@code c}; 
+   * If less than {@code threshold} instances of {@code arg} are on the stack, run {@code r}; 
    * otherwise, run {@code infiniteCase}.  In either case, push {@code arg} onto the stack 
-   * during command execution.
+   * during runnable execution.
    */
-  public void run(Command c, Command infiniteCase, T arg, int threshold) {
-    Command toRun = (contains(arg, threshold) ? infiniteCase : c);
+  public void run(Runnable r, Runnable infiniteCase, T arg, int threshold) {
+    Runnable toRun = (contains(arg, threshold) ? infiniteCase : r);
     push(arg);
     try { toRun.run(); }
     finally { pop(arg); }
   }
   
   /**
-   * Run the given command with argument {@code arg}, unless {@code arg} is already on the 
-   * stack; push {@code arg} onto the stack during command execution
+   * Run the given runnable with argument {@code arg}, unless {@code arg} is already on the 
+   * stack; push {@code arg} onto the stack during runnable execution
    */
-  public <V extends T> void run(Command1<? super V> c, V arg) {
+  public <V extends T> void run(Runnable1<? super V> r, V arg) {
     if (!contains(arg)) { 
       push(arg);
-      try { c.run(arg); }
+      try { r.run(arg); }
       finally { pop(arg); }
     }
   }
   
   /**
-   * Run the given command with argument {@code arg}, unless {@code threshold} instances 
+   * Run the given runnable with argument {@code arg}, unless {@code threshold} instances 
    * of {@code arg} are already on the stack; push {@code arg} onto the stack during 
-   * command execution
+   * runnable execution
    */
-  public <V extends T> void run(Command1<? super V> c, V arg, int threshold) {
+  public <V extends T> void run(Runnable1<? super V> r, V arg, int threshold) {
     if (!contains(arg, threshold)) { 
       push(arg);
-      try { c.run(arg); }
+      try { r.run(arg); }
       finally { pop(arg); }
     }
   }
   
   /**
-   * If {@code arg} is not on the stack, run {@code c} with argument {@code arg}; otherwise, 
+   * If {@code arg} is not on the stack, run {@code r} with argument {@code arg}; otherwise, 
    * run {@code infiniteCase}.  In either case, push {@code arg} onto the stack during 
-   * command execution.
+   * runnable execution.
    */
-  public <V extends T> void run(Command1<? super V> c, Command1<? super V> infiniteCase, V arg) {
+  public <V extends T> void run(Runnable1<? super V> r, Runnable1<? super V> infiniteCase, V arg) {
     // The javac type checker is broken here
-    @SuppressWarnings("unchecked") Command1<? super V> toRun = 
-      (Command1<? super V>) (contains(arg) ? infiniteCase : c);
+    @SuppressWarnings("unchecked") Runnable1<? super V> toRun = 
+      (Runnable1<? super V>) (contains(arg) ? infiniteCase : r);
     push(arg);
     try { toRun.run(arg); }
     finally { pop(arg); }
   }
   
   /**
-   * If less than {@code threshold} instances of {@code arg} are on the stack, run {@code c}
+   * If less than {@code threshold} instances of {@code arg} are on the stack, run {@code r}
    * with argument {@code arg}; otherwise, run {@code infiniteCase}.  In either case, 
-   * push {@code arg} onto the stack during command execution.
+   * push {@code arg} onto the stack during runnable execution.
    */
-  public <V extends T> void run(Command1<? super V> c, Command1<? super V> infiniteCase, V arg, 
+  public <V extends T> void run(Runnable1<? super V> r, Runnable1<? super V> infiniteCase, V arg, 
                                 int threshold) {
     // The javac type checker is broken here
-    @SuppressWarnings("unchecked") Command1<? super V> toRun = 
-      (Command1<? super V>) (contains(arg, threshold) ? infiniteCase : c);
+    @SuppressWarnings("unchecked") Runnable1<? super V> toRun = 
+      (Runnable1<? super V>) (contains(arg, threshold) ? infiniteCase : r);
     push(arg);
     try { toRun.run(arg); }
     finally { pop(arg); }

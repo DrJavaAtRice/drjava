@@ -2,7 +2,7 @@
  * <p>A collection of interfaces facilitating first-class functions in Java.  Three families
  * of interfaces are defined, each with variants for 0 to 4 arguments:<ul>
  * <li>{@code Lambda}, a standard function definition (0-ary lambdas are called {@code Thunk}s)</li>
- * <li>{@code Command}, a void function</li>
+ * <li>{@code Runnable}, a void function</li>
  * <li>{@code Predicate}, a {@code Lambda} with return type {@code Boolean}</li>
  * </ul>
  * Since it's impossible to define a type-safe lambda with an arbitrary number of

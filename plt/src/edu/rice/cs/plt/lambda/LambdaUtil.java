@@ -3,14 +3,14 @@ package edu.rice.cs.plt.lambda;
 import edu.rice.cs.plt.iter.IterUtil;
 
 /**
- * A collection of static methods that create or operate on lambdas, commands, and predicates.
+ * A collection of static methods that create or operate on lambdas, runnables, and predicates.
  * Since most of these operations apply to lambdas of arbitrary arity, they are defined here 
  * in groups with similar or identical names, but slightly different types.  These groups 
  * include:<ul>
  * <li>{@code nullThunk}, {@code nullLambda}, etc.: create a lambda that returns {@code null}</li>
  * <li>{@code valueThunk}, {@code valueLambda}, etc.: create a lambda that returns a value
  *     determined at creation time</li>
- * <li>{@code promote}: add an additional, ignored argument to a command, lambda, or predicate</li>
+ * <li>{@code promote}: add an additional, ignored argument to a runnable, lambda, or predicate</li>
  * <li>{@code compose}: define the lambda that takes the result of one lambda and applies it
  *     to another</li>
  * <li>{@code curry}, {@code curryFirst}, etc.: convert an n-ary lambda to a unary lambda 
@@ -18,8 +18,8 @@ import edu.rice.cs.plt.iter.IterUtil;
  * <li>{@code negate}: define a predicate whose result is the opposite of the given predicate</li>
  * <li>{@code and}: define a conjunction of predicates</li>
  * <li>{@code or}: define a disjunction of predicates</li>
- * <li>{@code asCommand}: define a command equivalent to the given lambda, ignoring the result</li>
- * <li>{@code asLambda}: define a lambda equivalent to the given command, returning the given
+ * <li>{@code asRunnable}: define a runnable equivalent to the given lambda, ignoring the result</li>
+ * <li>{@code asLambda}: define a lambda equivalent to the given runnable, returning the given
  *     result after execution</li>
  * <li>{@code asPredicate}: treat a lambda with a {@code Boolean} return type as a predicate</li>
  */
@@ -27,6 +27,9 @@ public final class LambdaUtil {
   
   /** Prevents instance creation */
   private LambdaUtil() {}
+  
+  /** A runnable that does nothing */
+  public static final Runnable NO_OP = new Runnable() { public void run() { } };
   
   /** @return  The identity lambda for the type {@code T} */
   public static <T> Lambda<T, T> identity() {
@@ -95,32 +98,32 @@ public final class LambdaUtil {
     };
   }
   
-  /** @return A {@code Command1} equivalent to {@code c} with an ignored argument */
-  public static Command1<Object> promote(final Command c) {
-    return new Command1<Object>() {
-      public void run(Object arg) { c.run(); }
+  /** @return A {@code Runnable1} equivalent to {@code r} with an ignored argument */
+  public static Runnable1<Object> promote(final Runnable r) {
+    return new Runnable1<Object>() {
+      public void run(Object arg) { r.run(); }
     };
   }
   
-  /** @return A {@code Command2} equivalent to {@code c} with an additional, ignored argument */
-  public static <T> Command2<T, Object> promote(final Command1<? super T> c) {
-    return new Command2<T, Object>() {
-      public void run(T arg1, Object arg2) { c.run(arg1); }
+  /** @return A {@code Runnable2} equivalent to {@code r} with an additional, ignored argument */
+  public static <T> Runnable2<T, Object> promote(final Runnable1<? super T> r) {
+    return new Runnable2<T, Object>() {
+      public void run(T arg1, Object arg2) { r.run(arg1); }
     };
   }
   
-  /** @return A {@code Command3} equivalent to {@code c} with an additional, ignored argument */
-  public static <T1, T2> Command3<T1, T2, Object> promote(final Command2<? super T1, ? super T2> c) {
-    return new Command3<T1, T2, Object>() {
-      public void run(T1 arg1, T2 arg2, Object arg3) { c.run(arg1, arg2); }
+  /** @return A {@code Runnable3} equivalent to {@code r} with an additional, ignored argument */
+  public static <T1, T2> Runnable3<T1, T2, Object> promote(final Runnable2<? super T1, ? super T2> r) {
+    return new Runnable3<T1, T2, Object>() {
+      public void run(T1 arg1, T2 arg2, Object arg3) { r.run(arg1, arg2); }
     };
   }
   
-  /** @return A {@code Command4} equivalent to {@code c} with an additional, ignored argument */
+  /** @return A {@code Runnable4} equivalent to {@code r} with an additional, ignored argument */
   public static <T1, T2, T3> 
-    Command4<T1, T2, T3, Object> promote(final Command3<? super T1, ? super T2, ? super T3> c) {
-    return new Command4<T1, T2, T3, Object>() {
-      public void run(T1 arg1, T2 arg2, T3 arg3, Object arg4) { c.run(arg1, arg2, arg3); }
+    Runnable4<T1, T2, T3, Object> promote(final Runnable3<? super T1, ? super T2, ? super T3> r) {
+    return new Runnable4<T1, T2, T3, Object>() {
+      public void run(T1 arg1, T2 arg2, T3 arg3, Object arg4) { r.run(arg1, arg2, arg3); }
     };
   }
   
@@ -226,45 +229,45 @@ public final class LambdaUtil {
     };
   }
   
-  /** @return  A command that executes {@code c1} followed by {@code c2} */
-  public static Command compose(final Command c1, final Command c2) { 
-    return new Command() {
-      public void run() { c1.run(); c2.run(); }
+  /** @return  A runnable that executes {@code r1} followed by {@code r2} */
+  public static Runnable compose(final Runnable r1, final Runnable r2) { 
+    return new Runnable() {
+      public void run() { r1.run(); r2.run(); }
     };
   }
   
-  /** @return  A command that executes {@code c1} followed by {@code c2} with the same input */
-  public static <T> Command1<T> compose(final Command1<? super T> c1, 
-                                        final Command1<? super T> c2) { 
-    return new Command1<T>() {
-      public void run(T arg) { c1.run(arg); c2.run(arg); }
+  /** @return  A runnable that executes {@code r1} followed by {@code r2} with the same input */
+  public static <T> Runnable1<T> compose(final Runnable1<? super T> r1, 
+                                         final Runnable1<? super T> r2) { 
+    return new Runnable1<T>() {
+      public void run(T arg) { r1.run(arg); r2.run(arg); }
     };
   }
   
-  /** @return  A command that executes {@code c1} followed by {@code c2} with the same input */
-  public static <T1, T2> Command2<T1, T2> compose(final Command2<? super T1, ? super T2> c1, 
-                                                  final Command2<? super T1, ? super T2> c2) { 
-    return new Command2<T1, T2>() {
-      public void run(T1 arg1, T2 arg2) { c1.run(arg1, arg2); c2.run(arg1, arg2); }
+  /** @return  A runnable that executes {@code r1} followed by {@code r2} with the same input */
+  public static <T1, T2> Runnable2<T1, T2> compose(final Runnable2<? super T1, ? super T2> r1, 
+                                                   final Runnable2<? super T1, ? super T2> r2) { 
+    return new Runnable2<T1, T2>() {
+      public void run(T1 arg1, T2 arg2) { r1.run(arg1, arg2); r2.run(arg1, arg2); }
     };
   }
   
-  /** @return  A command that executes {@code c1} followed by {@code c2} with the same input */
-  public static <T1, T2, T3> Command3<T1, T2, T3> 
-    compose(final Command3<? super T1, ? super T2, ? super T3> c1, 
-            final Command3<? super T1, ? super T2, ? super T3> c2) {
-    return new Command3<T1, T2, T3>() {
-      public void run(T1 a1, T2 a2, T3 a3) { c1.run(a1, a2, a3); c2.run(a1, a2, a3); }
+  /** @return  A runnable that executes {@code r1} followed by {@code r2} with the same input */
+  public static <T1, T2, T3> Runnable3<T1, T2, T3> 
+    compose(final Runnable3<? super T1, ? super T2, ? super T3> r1, 
+            final Runnable3<? super T1, ? super T2, ? super T3> r2) {
+    return new Runnable3<T1, T2, T3>() {
+      public void run(T1 a1, T2 a2, T3 a3) { r1.run(a1, a2, a3); r2.run(a1, a2, a3); }
     };
   }
   
-  /** @return  A command that executes {@code c1} followed by {@code c2} with the same input */
-  public static <T1, T2, T3, T4> Command4<T1, T2, T3, T4>
-    compose(final Command4<? super T1, ? super T2, ? super T3, ? super T4> c1, 
-            final Command4<? super T1, ? super T2, ? super T3, ? super T4> c2) {
-    return new Command4<T1, T2, T3, T4>() {
+  /** @return  A runnable that executes {@code r1} followed by {@code r2} with the same input */
+  public static <T1, T2, T3, T4> Runnable4<T1, T2, T3, T4>
+    compose(final Runnable4<? super T1, ? super T2, ? super T3, ? super T4> r1, 
+            final Runnable4<? super T1, ? super T2, ? super T3, ? super T4> r2) {
+    return new Runnable4<T1, T2, T3, T4>() {
       public void run(T1 a1, T2 a2, T3 a3, T4 a4) { 
-        c1.run(a1, a2, a3, a4); c2.run(a1, a2, a3, a4);
+        r1.run(a1, a2, a3, a4); r2.run(a1, a2, a3, a4);
       }
     };
   }
@@ -612,79 +615,79 @@ public final class LambdaUtil {
     };
   }
   
-  /** @return  A command that executes the given thunk (ignoring the result) */
-  public static Command asCommand(final Thunk<?> thunk) {
-    return new Command() { public void run() { thunk.value(); } };
+  /** @return  A runnable that executes the given thunk (ignoring the result) */
+  public static Runnable asRunnable(final Thunk<?> thunk) {
+    return new Runnable() { public void run() { thunk.value(); } };
   }
   
-  /** @return  A command that executes the given lambda (ignoring the result) */
-  public static <T> Command1<T> asCommand(final Lambda<? super T, ?> lambda) {
-    return new Command1<T>() { public void run(T arg) { lambda.value(arg); } };
+  /** @return  A runnable that executes the given lambda (ignoring the result) */
+  public static <T> Runnable1<T> asRunnable(final Lambda<? super T, ?> lambda) {
+    return new Runnable1<T>() { public void run(T arg) { lambda.value(arg); } };
   }
   
-  /** @return  A command that executes the given lambda (ignoring the result) */
-  public static <T1, T2> Command2<T1, T2> asCommand(final Lambda2<? super T1, ? super T2, ?> lambda) {
-    return new Command2<T1, T2>() { 
+  /** @return  A runnable that executes the given lambda (ignoring the result) */
+  public static <T1, T2> Runnable2<T1, T2> asRunnable(final Lambda2<? super T1, ? super T2, ?> lambda) {
+    return new Runnable2<T1, T2>() { 
       public void run(T1 arg1, T2 arg2) { lambda.value(arg1, arg2); }
     };
   }
   
-  /** @return  A command that executes the given lambda (ignoring the result) */
-  public static <T1, T2, T3> Command3<T1, T2, T3> 
-    asCommand(final Lambda3<? super T1, ? super T2, ? super T3, ?> lambda) {
-    return new Command3<T1, T2, T3>() { 
+  /** @return  A runnable that executes the given lambda (ignoring the result) */
+  public static <T1, T2, T3> Runnable3<T1, T2, T3> 
+    asRunnable(final Lambda3<? super T1, ? super T2, ? super T3, ?> lambda) {
+    return new Runnable3<T1, T2, T3>() { 
       public void run(T1 arg1, T2 arg2, T3 arg3) { lambda.value(arg1, arg2, arg3); }
     };
   }
   
-  /** @return  A command that executes the given lambda (ignoring the result) */
-  public static <T1, T2, T3, T4> Command4<T1, T2, T3, T4> 
-    asCommand(final Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ?> lambda) {
-    return new Command4<T1, T2, T3, T4>() { 
+  /** @return  A runnable that executes the given lambda (ignoring the result) */
+  public static <T1, T2, T3, T4> Runnable4<T1, T2, T3, T4> 
+    asRunnable(final Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ?> lambda) {
+    return new Runnable4<T1, T2, T3, T4>() { 
       public void run(T1 a1, T2 a2, T3 a3, T4 a4) { lambda.value(a1, a2, a3, a4); }
     };
   }
   
-  /** @return  A thunk that executes the given command, then returns {@code result} */
-  public static <R> Thunk<R> asThunk(final Command c, final R result) {
-    return new Thunk<R>() { public R value() { c.run(); return result; } };
+  /** @return  A thunk that executes the given runnable, then returns {@code result} */
+  public static <R> Thunk<R> asThunk(final Runnable r, final R result) {
+    return new Thunk<R>() { public R value() { r.run(); return result; } };
   }
   
-  /** @return  A lambda that executes the given command, then returns {@code result} */
-  public static <T, R> Lambda<T, R> asLambda(final Command1<? super T> c, final R result) {
-    return new Lambda<T, R>() { public R value(T arg) { c.run(arg); return result; } };
+  /** @return  A lambda that executes the given runnable, then returns {@code result} */
+  public static <T, R> Lambda<T, R> asLambda(final Runnable1<? super T> r, final R result) {
+    return new Lambda<T, R>() { public R value(T arg) { r.run(arg); return result; } };
   }
   
-  /** @return  A lambda that executes the given command, then returns {@code result} */
-  public static <T1, T2, R> Lambda2<T1, T2, R> asLambda(final Command2<? super T1, ? super T2> c, 
-                                                 final R result) {
+  /** @return  A lambda that executes the given runnable, then returns {@code result} */
+  public static <T1, T2, R> Lambda2<T1, T2, R> asLambda(final Runnable2<? super T1, ? super T2> r, 
+                                                        final R result) {
     return new Lambda2<T1, T2, R>() { 
-      public R value(T1 arg1, T2 arg2) { c.run(arg1, arg2); return result; }
+      public R value(T1 arg1, T2 arg2) { r.run(arg1, arg2); return result; }
     };
   }
   
-  /** @return  A lambda that executes the given command, then returns {@code result} */
+  /** @return  A lambda that executes the given runnable, then returns {@code result} */
   public static <T1, T2, T3, R> Lambda3<T1, T2, T3, R> 
-    asLambda(final Command3<? super T1, ? super T2, ? super T3> c, final R result) {
+    asLambda(final Runnable3<? super T1, ? super T2, ? super T3> r, final R result) {
     return new Lambda3<T1, T2, T3, R>() { 
-      public R value(T1 arg1, T2 arg2, T3 arg3) { c.run(arg1, arg2, arg3); return result; }
+      public R value(T1 arg1, T2 arg2, T3 arg3) { r.run(arg1, arg2, arg3); return result; }
     };
   }
   
-  /** @return  A lambda that executes the given command, then returns {@code result} */
+  /** @return  A lambda that executes the given runnable, then returns {@code result} */
   public static <T1, T2, T3, T4, R> Lambda4<T1, T2, T3, T4, R> 
-    asLambda(final Command4<? super T1, ? super T2, ? super T3, ? super T4> c, final R result) {
+    asLambda(final Runnable4<? super T1, ? super T2, ? super T3, ? super T4> r, final R result) {
     return new Lambda4<T1, T2, T3, T4, R>() { 
-      public R value(T1 a1, T2 a2, T3 a3, T4 a4) { c.run(a1, a2, a3, a4); return result; }
+      public R value(T1 a1, T2 a2, T3 a3, T4 a4) { r.run(a1, a2, a3, a4); return result; }
     };
   }
   
-  /** @return  A predicate based on an input that acts as a predicate but is not types as one */
+  /** @return  A predicate based on an input that acts as a predicate but is not typed as one */
   public static <T> Predicate<T> asPredicate(final Lambda<? super T, ? extends Boolean> lambda) {
     return new Predicate<T>() { public Boolean value(T arg) { return lambda.value(arg); } };
   }
   
-  /** @return  A predicate based on an input that acts as a predicate but is not types as one */
+  /** @return  A predicate based on an input that acts as a predicate but is not typed as one */
   public static <T1, T2> Predicate2<T1, T2> 
     asPredicate(final Lambda2<? super T1, ? super T2, ? extends Boolean> lambda) {
     return new Predicate2<T1, T2>() { 
@@ -692,7 +695,7 @@ public final class LambdaUtil {
     };
   }
   
-  /** @return  A predicate based on an input that acts as a predicate but is not types as one */
+  /** @return  A predicate based on an input that acts as a predicate but is not typed as one */
   public static <T1, T2, T3> Predicate3<T1, T2, T3> 
     asPredicate(final Lambda3<? super T1, ? super T2, ? super T3, ? extends Boolean> lambda) {
     return new Predicate3<T1, T2, T3>() { 
@@ -700,7 +703,7 @@ public final class LambdaUtil {
     };
   }
   
-  /** @return  A predicate based on an input that acts as a predicate but is not types as one */
+  /** @return  A predicate based on an input that acts as a predicate but is not typed as one */
   public static <T1, T2, T3, T4> Predicate4<T1, T2, T3, T4> 
     asPredicate(final Lambda4<? super T1, ? super T2, 
                               ? super T3, ? super T4, ? extends Boolean> lambda) {

@@ -7,7 +7,7 @@ package edu.rice.cs.plt.lambda;
  * @see Lambda2
  * @see Lambda3
  * @see Lambda4
- * @see Command
+ * @see Runnable
  */
 public interface Thunk<T> {
   public T value();

@@ -11,7 +11,7 @@ package edu.rice.cs.plt.lambda;
  * @see Lambda
  * @see Lambda3
  * @see Lambda4
- * @see Command2
+ * @see Runnable2
  */
 public interface Lambda2<T1, T2, R> {
   public R value(T1 arg1, T2 arg2);

@@ -4,7 +4,7 @@ import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
 
 /**
- * An arbitrary pair of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
+ * An arbitrary 1-tuple; overrides {@link #toString()}, {@link #equals(Object)}, 
  * and {@link #hashCode()}.
  */
 public class Wrapper<T> extends Option<T> implements Thunk<T> {

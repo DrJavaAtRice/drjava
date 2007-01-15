@@ -5,8 +5,7 @@ import edu.rice.cs.plt.collect.Multiset;
 import edu.rice.cs.plt.collect.HashMultiset;
 import edu.rice.cs.plt.tuple.Triple;
 import edu.rice.cs.plt.tuple.IdentityTriple;
-import edu.rice.cs.plt.lambda.Command;
-import edu.rice.cs.plt.lambda.Command3;
+import edu.rice.cs.plt.lambda.Runnable3;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda3;
 
@@ -94,36 +93,36 @@ public class RecursionStack3<T1, T2, T3> {
   public boolean isEmpty() { return _stack.isEmpty(); }
   
   /**
-   * Run the given command, unless the given arguments are already on the stack; push the 
-   * arguments onto the stack during command execution
+   * Run the given runnable, unless the given arguments are already on the stack; push the 
+   * arguments onto the stack during runnable execution
    */
-  public void run(Command c, T1 arg1, T2 arg2, T3 arg3) {
+  public void run(Runnable r, T1 arg1, T2 arg2, T3 arg3) {
     if (!contains(arg1, arg2, arg3)) { 
       push(arg1, arg2, arg3);
-      try { c.run(); }
+      try { r.run(); }
       finally { pop(arg1, arg2, arg3); }
     }
   }
   
   /**
-   * Run the given command, unless {@code threshold} instances of the given arguments are 
-   * already on the stack; push the arguments onto the stack during command execution
+   * Run the given runnable, unless {@code threshold} instances of the given arguments are 
+   * already on the stack; push the arguments onto the stack during runnable execution
    */
-  public void run(Command c, T1 arg1, T2 arg2, T3 arg3, int threshold) {
+  public void run(Runnable r, T1 arg1, T2 arg2, T3 arg3, int threshold) {
     if (!contains(arg1, arg2, arg3, threshold)) { 
       push(arg1, arg2, arg3);
-      try { c.run(); }
+      try { r.run(); }
       finally { pop(arg1, arg2, arg3); }
     }
   }
   
   /**
-   * If the given arguments are not on the stack, run {@code c}; otherwise, run 
+   * If the given arguments are not on the stack, run {@code r}; otherwise, run 
    * {@code infiniteCase}.  In either case, push the arguments onto the stack during 
-   * command execution.
+   * runnable execution.
    */
-  public void run(Command c, Command infiniteCase, T1 arg1, T2 arg2, T3 arg3) {
-    Command toRun = (contains(arg1, arg2, arg3) ? infiniteCase : c);
+  public void run(Runnable r, Runnable infiniteCase, T1 arg1, T2 arg2, T3 arg3) {
+    Runnable toRun = (contains(arg1, arg2, arg3) ? infiniteCase : r);
     push(arg1, arg2, arg3);
     try { toRun.run(); }
     finally { pop(arg1, arg2, arg3); }
@@ -131,56 +130,56 @@ public class RecursionStack3<T1, T2, T3> {
   
   /**
    * If less than {@code threshold} instances of the given arguments are on the stack, run 
-   * {@code c}; otherwise, run {@code infiniteCase}.  In either case, push the 
-   * arguments onto the stack during command execution.
+   * {@code r}; otherwise, run {@code infiniteCase}.  In either case, push the 
+   * arguments onto the stack during runnable execution.
    */
-  public void run(Command c, Command infiniteCase, T1 arg1, T2 arg2, T3 arg3, int threshold) {
-    Command toRun = (contains(arg1, arg2, arg3, threshold) ? infiniteCase : c);
+  public void run(Runnable r, Runnable infiniteCase, T1 arg1, T2 arg2, T3 arg3, int threshold) {
+    Runnable toRun = (contains(arg1, arg2, arg3, threshold) ? infiniteCase : r);
     push(arg1, arg2, arg3);
     try { toRun.run(); }
     finally { pop(arg1, arg2, arg3); }
   }
   
   /**
-   * Run the given command with the given arguments, unless the arguments are already on the 
-   * stack; push the arguments onto the stack during command execution
+   * Run the given runnable with the given arguments, unless the arguments are already on the 
+   * stack; push the arguments onto the stack during runnable execution
    */
   public <V1 extends T1, V2 extends T2, V3 extends T3>
-    void run(Command3<? super V1, ? super V2, ? super V3> c, V1 arg1, V2 arg2, V3 arg3) {
+    void run(Runnable3<? super V1, ? super V2, ? super V3> r, V1 arg1, V2 arg2, V3 arg3) {
     if (!contains(arg1, arg2, arg3)) { 
       push(arg1, arg2, arg3);
-      try { c.run(arg1, arg2, arg3); }
+      try { r.run(arg1, arg2, arg3); }
       finally { pop(arg1, arg2, arg3); }
     }
   }
   
   /**
-   * Run the given command with the given arguments, unless {@code threshold} instances 
+   * Run the given runnable with the given arguments, unless {@code threshold} instances 
    * of the arguments are already on the stack; push the arguments onto the stack during 
-   * command execution
+   * runnable execution
    */
   public <V1 extends T1, V2 extends T2, V3 extends T3>
-    void run(Command3<? super V1, ? super V2, ? super V3> c, V1 arg1, V2 arg2, V3 arg3, 
+    void run(Runnable3<? super V1, ? super V2, ? super V3> r, V1 arg1, V2 arg2, V3 arg3, 
              int threshold) {
     if (!contains(arg1, arg2, arg3, threshold)) { 
       push(arg1, arg2, arg3);
-      try { c.run(arg1, arg2, arg3); }
+      try { r.run(arg1, arg2, arg3); }
       finally { pop(arg1, arg2, arg3); }
     }
   }
   
   /**
-   * If the given arguments are not on the stack, run {@code c} with argument the arguments; 
+   * If the given arguments are not on the stack, run {@code r} with argument the arguments; 
    * otherwise, run {@code infiniteCase}.  In either case, push the arguments onto the 
-   * stack during command execution.
+   * stack during runnable execution.
    */
   public <V1 extends T1, V2 extends T2, V3 extends T3>
-    void run(Command3<? super V1, ? super V2, ? super V3> c, 
-             Command3<? super V1, ? super V2, ? super V3> infiniteCase, 
+    void run(Runnable3<? super V1, ? super V2, ? super V3> r, 
+             Runnable3<? super V1, ? super V2, ? super V3> infiniteCase, 
              V1 arg1, V2 arg2, V3 arg3) {
     // The javac type checker is broken here
-    @SuppressWarnings("unchecked") Command3<? super V1, ? super V2, ? super V3> toRun = 
-      (Command3<? super V1, ? super V2, ? super V3>) (contains(arg1, arg2, arg3) ? infiniteCase : c);
+    @SuppressWarnings("unchecked") Runnable3<? super V1, ? super V2, ? super V3> toRun = 
+      (Runnable3<? super V1, ? super V2, ? super V3>) (contains(arg1, arg2, arg3) ? infiniteCase : r);
     push(arg1, arg2, arg3);
     try { toRun.run(arg1, arg2, arg3); }
     finally { pop(arg1, arg2, arg3); }
@@ -188,17 +187,17 @@ public class RecursionStack3<T1, T2, T3> {
   
   /**
    * If less than {@code threshold} instances of the given arguments are on the stack, 
-   * run {@code c} with the arguments; otherwise, run {@code infiniteCase}.  In either case, 
-   * push the arguments onto the stack during command execution.
+   * run {@code r} with the arguments; otherwise, run {@code infiniteCase}.  In either case, 
+   * push the arguments onto the stack during runnable execution.
    */
   public <V1 extends T1, V2 extends T2, V3 extends T3>
-    void run(Command3<? super V1, ? super V2, ? super V3> c, 
-             Command3<? super V1, ? super V2, ? super V3> infiniteCase, 
+    void run(Runnable3<? super V1, ? super V2, ? super V3> r, 
+             Runnable3<? super V1, ? super V2, ? super V3> infiniteCase, 
                   V1 arg1, V2 arg2, V3 arg3, int threshold) {
     // The javac type checker is broken here
-    @SuppressWarnings("unchecked") Command3<? super V1, ? super V2, ? super V3> toRun = 
-      (Command3<? super V1, ? super V2, ? super V3>) (contains(arg1, arg2, arg3, threshold) ? 
-                                                        infiniteCase : c);
+    @SuppressWarnings("unchecked") Runnable3<? super V1, ? super V2, ? super V3> toRun = 
+      (Runnable3<? super V1, ? super V2, ? super V3>) (contains(arg1, arg2, arg3, threshold) ? 
+                                                        infiniteCase : r);
     push(arg1, arg2, arg3);
     try { toRun.run(arg1, arg2, arg3); }
     finally { pop(arg1, arg2, arg3); }

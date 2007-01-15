@@ -24,7 +24,7 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
  * used to create precomputed values, providing an initial "empty box" that can be "filled" when 
  * computation is complete.  This allows the definition, for example, of data structures that 
  * contain themselves.  Due to the restricted applicability of this class (in comparison to
- * {@code RecursionStack}), methods that involve invoking {@code Command}s or recurring multiple
+ * {@code RecursionStack}), methods that involve invoking {@code Runnable}s or recurring multiple
  * times based on a threshold value are not defined here.</p>
  * 
  * <p>The client may either choose to explicity check for containment, {@link #push} the argument, 

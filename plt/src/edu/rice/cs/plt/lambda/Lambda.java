@@ -12,7 +12,7 @@ import edu.rice.cs.plt.recur.RecurUtil;
  * @see Lambda2
  * @see Lambda3
  * @see Lambda4
- * @see Command1
+ * @see Runnable1
  */
 public interface Lambda<T, R> {
   public R value(T arg);
