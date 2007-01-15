@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.StringTokenizer;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Predicate;
-import edu.rice.cs.plt.lambda.Command;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.tuple.Wrapper;
@@ -209,7 +208,7 @@ public class IOUtil {
   }
   
   /**
-   * Make a best attempt at invoking {@link File#mkdir()}.  In the event of a 
+   * Make a best attempt at invoking {@link File#mkdirs()}.  In the event of a 
    * {@link SecurityException}, the result is {@code false}.
    */
   public static boolean attemptMkdirs(File f) {
@@ -320,7 +319,7 @@ public class IOUtil {
     if (f.isDirectory()) {
       try {
         final File canonicalF = f.getCanonicalFile();
-        Command deleteMembers = new Command() {
+        Runnable deleteMembers = new Runnable() {
           public void run() {
             for (File child : attemptListFilesAsIterable(canonicalF)) { deleteRecursively(child, stack); }
           }
@@ -352,7 +351,7 @@ public class IOUtil {
          Java closes the list of files to deleted on exit in reverse order. */
       try {
         final File canonicalF = f.getCanonicalFile();
-        Command markMembers = new Command() {
+        Runnable markMembers = new Runnable() {
           public void run() {
             for (File child : attemptListFilesAsIterable(canonicalF)) { deleteOnExitRecursively(child, stack); }
           }
