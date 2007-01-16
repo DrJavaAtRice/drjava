@@ -36,7 +36,7 @@ package edu.rice.cs.drjava.project;
 import java.io.File;
 import java.io.IOException;
 
-import edu.rice.cs.util.Pair;
+import edu.rice.cs.plt.tuple.Pair;
 
 public class DocFile extends File {
   

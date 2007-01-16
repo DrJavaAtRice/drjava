@@ -70,12 +70,12 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
 
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.OrderedHashSet;
-import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.SRunnable;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;

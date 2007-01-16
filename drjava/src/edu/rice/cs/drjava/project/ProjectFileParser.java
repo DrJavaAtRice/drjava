@@ -42,7 +42,7 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 
 import edu.rice.cs.drjava.config.FileOption;
-import edu.rice.cs.util.Pair;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.sexp.*;
 import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.drjava.model.SimpleDocumentRegion;

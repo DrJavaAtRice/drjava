@@ -32,7 +32,8 @@
  *END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
-import edu.rice.cs.util.Pair;
+
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.util.List;
@@ -85,7 +86,7 @@ public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implemen
       Utilities.invokeLater(new Runnable() { 
         public void run() { 
 //          synchronized (child.getModelLock()) { // dropped because of cost; each atomic action is still synchronized
-            for(Pair<String, INavigatorItemFilter<ItemT>> p: l) { child.addTopLevelGroup(p.getFirst(), p.getSecond()); }
+            for(Pair<String, INavigatorItemFilter<ItemT>> p: l) { child.addTopLevelGroup(p.first(), p.second()); }
             migrateNavigatorItems(child, parent);
             migrateListeners(child, parent);
           }

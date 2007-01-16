@@ -32,7 +32,7 @@
  *END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
-import edu.rice.cs.util.Pair;
+import edu.rice.cs.plt.tuple.Pair;
 import java.util.List;
 
 /** Factory that produces bbjects that implement IDocumentNavigator. */

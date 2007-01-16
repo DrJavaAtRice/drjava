@@ -62,9 +62,9 @@ import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.OptionConstants;
 
@@ -262,7 +262,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _regionManager.clearRegions();
     _model.disposeFindResultsManager(_regionManager);
     for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
-      DrJava.getConfig().removeOptionListener(p.getFirst(), p.getSecond());
+      DrJava.getConfig().removeOptionListener(p.first(), p.second());
     }
     if (_lastIndex<OptionConstants.FIND_RESULTS_COLORS.length) {
       --DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];

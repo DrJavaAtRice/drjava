@@ -34,7 +34,7 @@
 package edu.rice.cs.drjava.project;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.util.Pair;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.FileOps;
 
 import static edu.rice.cs.util.StringOps.convertToLiteral;
@@ -203,8 +203,8 @@ public class ProjectTest extends DrJavaTestCase {
     SEList c = SExpParser.parse("(file (name \"file-name\") (select 1 2))").get(0);
     DocFile df = ProjectFileParser.ONLY.parseFile(c,null);
     Pair<Integer,Integer> p = df.getSelection();
-    assertEquals("First int should be a 1", 1, (int)p.getFirst()); //need cast to prevent ambiguity
-    assertEquals("Second int should be a 2", 2, (int)p.getSecond());//need cast to prevent ambiguity
+    assertEquals("First int should be a 1", 1, (int)p.first()); //need cast to prevent ambiguity
+    assertEquals("Second int should be a 2", 2, (int)p.second());//need cast to prevent ambiguity
     assertEquals("Name should have been file-name", "file-name", df.getPath());
   }
 

@@ -519,8 +519,10 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
 /**
  * A structure to contain a String and an Object pair.
  * This class is used to help test the JavaInterpreter.
+ * TODO: Is there a reason this is declared explicitly?  Maybe for the
+ * sake of serialization or reflection?
  */
-class Pair extends edu.rice.cs.util.Pair<String, Object> {
+class Pair extends edu.rice.cs.plt.tuple.Pair<String, Object> {
   /**
    * Constructs a pair.
    * @param f the first item in the pair
@@ -536,15 +538,4 @@ class Pair extends edu.rice.cs.util.Pair<String, Object> {
    */
   public static Pair make(String first, Object second) { return new Pair(first, second); }
 
-  /**
-   * Gets the first of this pair.
-   * @return getFirst()
-   */
-  public String first() { return getFirst(); }
-
-  /**
-   * Gets the second of this pair.
-   * @return getSecond()
-   */
-  public Object second() { return getSecond(); }
 }

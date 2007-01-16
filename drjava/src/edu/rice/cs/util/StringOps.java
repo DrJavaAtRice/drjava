@@ -33,6 +33,7 @@
 
 package edu.rice.cs.util;
 
+import edu.rice.cs.plt.tuple.Pair;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;

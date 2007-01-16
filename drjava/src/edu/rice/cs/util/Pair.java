@@ -37,8 +37,10 @@ import java.io.Serializable;
  * A pair.
  *
  * @version $Id$
+ * @deprecated  Replaced by the class {@link edu.rice.cs.plt.tuple.Pair}.  Accessors
+ *              in the new class are named {@code first()} and {@code second()}.
  */
-public class Pair<T,U> implements Serializable{
+@Deprecated public class Pair<T,U> implements Serializable{
   T _first;
   U _second;
 

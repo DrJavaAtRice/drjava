@@ -506,10 +506,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
     }
     
-    edu.rice.cs.util.Pair<Integer,Integer> oAndL =
+    edu.rice.cs.plt.tuple.Pair<Integer,Integer> oAndL =
       StringOps.getOffsetAndLength(interaction, startRow, startCol, endRow, endCol);
 
-    _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.getFirst().intValue(),oAndL.getSecond().intValue());
+    _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.first().intValue(),oAndL.second().intValue());
 
     _document.appendSyntaxErrorResult(errorMessage, interaction, startRow, startCol, endRow, endCol,
                                       InteractionsDocument.ERROR_STYLE);

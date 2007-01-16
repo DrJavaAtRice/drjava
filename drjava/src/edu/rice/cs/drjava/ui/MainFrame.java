@@ -76,13 +76,13 @@ import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.project.*;
 
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.util.swing.AsyncTask;
@@ -3041,8 +3041,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   void refreshFindResultsHighlightPainter(FindResultsPanel panel, 
                                           ReverseHighlighter.DefaultUnderlineHighlightPainter painter) {
     for(Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
-      if (pair.getFirst()==panel) {
-        Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights = pair.getSecond();
+      if (pair.first()==panel) {
+        Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights = pair.second();
         for(HighlightManager.HighlightInfo hi: highlights.values()) {
           hi.refresh(painter);
         }
@@ -5998,7 +5998,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             if ((_breakpointsPanel != null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
             if ((_bookmarksPanel != null) && (_bookmarksPanel.isDisplayed())) { _bookmarksPanel.repaint(); }
             for(Pair<FindResultsPanel,Hashtable<MovingDocumentRegion, HighlightManager.HighlightInfo>> pair: _findResults) {
-              FindResultsPanel panel = pair.getFirst();
+              FindResultsPanel panel = pair.first();
               if ((panel != null) && (panel.isDisplayed())) { panel.repaint(); }
             }
           }

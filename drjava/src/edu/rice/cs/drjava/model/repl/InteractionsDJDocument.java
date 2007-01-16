@@ -37,7 +37,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
-import edu.rice.cs.util.Pair;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -104,46 +104,46 @@ public class InteractionsDJDocument extends AbstractDJDocument {
   public boolean setColoring(int point, Graphics g) {
     synchronized(_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
-        Pair<Integer,Integer> loc = p.getFirst();
-        if (loc.getFirst() <= point && loc.getSecond() >= point) {
-          if (p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
+        Pair<Integer,Integer> loc = p.first();
+        if (loc.first() <= point && loc.second() >= point) {
+          if (p.second().equals(InteractionsDocument.ERROR_STYLE)) {
             //DrJava.consoleErr().println("Error Style");
             g.setColor(ERROR_COLOR);   
             g.setFont(g.getFont().deriveFont(Font.BOLD));
           }
-          else if (p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
+          else if (p.second().equals(InteractionsDocument.DEBUGGER_STYLE)) {
             //DrJava.consoleErr().println("Debugger Style");
             g.setColor(DEBUGGER_COLOR);
             g.setFont(g.getFont().deriveFont(Font.BOLD));
           }
-          else if (p.getSecond().equals(ConsoleDocument.SYSTEM_OUT_STYLE)) {
+          else if (p.second().equals(ConsoleDocument.SYSTEM_OUT_STYLE)) {
             //DrJava.consoleErr().println("System.out Style");
             g.setColor(INTERACTIONS_SYSTEM_OUT_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if (p.getSecond().equals(ConsoleDocument.SYSTEM_IN_STYLE)) {
+          else if (p.second().equals(ConsoleDocument.SYSTEM_IN_STYLE)) {
             //DrJava.consoleErr().println("System.in Style");
             g.setColor(INTERACTIONS_SYSTEM_IN_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if (p.getSecond().equals(ConsoleDocument.SYSTEM_ERR_STYLE)) {
+          else if (p.second().equals(ConsoleDocument.SYSTEM_ERR_STYLE)) {
             //DrJava.consoleErr().println("System.err Style");
             g.setColor(INTERACTIONS_SYSTEM_ERR_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if (p.getSecond().equals(InteractionsDocument.OBJECT_RETURN_STYLE)) {
+          else if (p.second().equals(InteractionsDocument.OBJECT_RETURN_STYLE)) {
             g.setColor(NORMAL_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if (p.getSecond().equals(InteractionsDocument.STRING_RETURN_STYLE)) {
+          else if (p.second().equals(InteractionsDocument.STRING_RETURN_STYLE)) {
             g.setColor(DOUBLE_QUOTED_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if (p.getSecond().equals(InteractionsDocument.NUMBER_RETURN_STYLE)) {
+          else if (p.second().equals(InteractionsDocument.NUMBER_RETURN_STYLE)) {
             g.setColor(NUMBER_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if (p.getSecond().equals(InteractionsDocument.CHARACTER_RETURN_STYLE)) {
+          else if (p.second().equals(InteractionsDocument.CHARACTER_RETURN_STYLE)) {
             g.setColor(SINGLE_QUOTED_COLOR);
             g.setFont(MAIN_FONT);
           }
@@ -160,11 +160,11 @@ public class InteractionsDJDocument extends AbstractDJDocument {
   public void setBoldFonts(int point, Graphics g) {
     synchronized(_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
-        Pair<Integer,Integer> loc = p.getFirst();
-        if (loc.getFirst() <= point && loc.getSecond() >= point) {
-          if (p.getSecond().equals(InteractionsDocument.ERROR_STYLE))
+        Pair<Integer,Integer> loc = p.first();
+        if (loc.first() <= point && loc.second() >= point) {
+          if (p.second().equals(InteractionsDocument.ERROR_STYLE))
             g.setFont(g.getFont().deriveFont(Font.BOLD));
-          else if (p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE))
+          else if (p.second().equals(InteractionsDocument.DEBUGGER_STYLE))
             g.setFont(g.getFont().deriveFont(Font.BOLD));
           else  g.setFont(MAIN_FONT);
           return;

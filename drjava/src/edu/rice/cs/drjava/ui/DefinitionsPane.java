@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.LinkedList;
 
 // TODO: Check synchronization.
-import edu.rice.cs.util.Pair;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.HighlightManager;
@@ -1127,10 +1127,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   public void close() {
     for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
-      DrJava.getConfig().removeOptionListener(p.getFirst(), p.getSecond());
+      DrJava.getConfig().removeOptionListener(p.first(), p.second());
     }
     for (Pair<Option<Boolean>, OptionListener<Boolean>> p: _booleanOptionListeners) {
-      DrJava.getConfig().removeOptionListener(p.getFirst(), p.getSecond());
+      DrJava.getConfig().removeOptionListener(p.first(), p.second());
     }
     _colorOptionListeners.clear();
     _booleanOptionListeners.clear();

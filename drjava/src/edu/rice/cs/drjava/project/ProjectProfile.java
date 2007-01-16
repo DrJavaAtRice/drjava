@@ -40,9 +40,9 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.io.*;
 
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.Version;
-import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
@@ -392,9 +392,9 @@ public class ProjectProfile implements ProjectFileIR {
     if (p1 != null || p2 != null /*|| active */)  ret += "\n" + prefix + "      ";
 
     // The next three tags go on the same line (if they exist)
-    if (p1 != null) ret += "(select " + p1.getFirst() + " " + p1.getSecond() + ")";
+    if (p1 != null) ret += "(select " + p1.first() + " " + p1.second() + ")";
 
-    if (p2 != null) ret += "(scroll " + p2.getFirst() + " " + p2.getSecond() + ")";
+    if (p2 != null) ret += "(scroll " + p2.first() + " " + p2.second() + ")";
 
     if (modDate > 0) {
       String s = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date(modDate));

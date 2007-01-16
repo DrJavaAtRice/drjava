@@ -119,6 +119,7 @@ import edu.rice.cs.drjava.project.ProjectProfile;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
 
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
@@ -127,7 +128,6 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.NullFile;
 import edu.rice.cs.util.OperationCanceledException ;
 import edu.rice.cs.util.OrderedHashSet;
-import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.SRunnable;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -4123,10 +4123,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       Pair<Integer,Integer> sel = df.getSelection();
       String pkg = df.getPackage();
       doc.setPackage(pkg);  // Trust information in the project file; if it is wrong, _packageName invariant is broken
-      doc.setInitialVScroll(scroll.getFirst());
-      doc.setInitialHScroll( scroll.getSecond());
-      doc.setInitialSelStart(sel.getFirst());
-      doc.setInitialSelEnd(sel.getSecond());
+      doc.setInitialVScroll(scroll.first());
+      doc.setInitialHScroll( scroll.second());
+      doc.setInitialSelStart(sel.first());
+      doc.setInitialSelEnd(sel.second());
     }
     else {
 //      Utilities.show("Opened a file " + file.getName() + " that is not a DocFile");

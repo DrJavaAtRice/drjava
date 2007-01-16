@@ -35,7 +35,7 @@ package edu.rice.cs.drjava.project;
 
 import java.io.File;
 
-import edu.rice.cs.util.Pair;
+import edu.rice.cs.plt.tuple.Pair;
 
 /** Classes that implement this interface are expected to give information specific to a single document that is
  *  to be saved by the project file builder.  These objects are passed to the builder upon a save.  These objects
