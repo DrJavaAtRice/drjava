@@ -873,42 +873,81 @@ public class IOUtil {
    * Define a {@code FileFilter} that accepts files whose (simple) names match
    * a regular expression.
    */
-  public static FileFilter regexpFileFilter(final String regexp) {
-    return new FileFilter() {
-      public boolean accept(File f) { return f.getName().matches(regexp); }
+  public static FileFilter regexpFileFilter(String regexp) {
+    return predicateFileFilter(regexpFilePredicate(regexp));
+  }
+
+  /**
+    * Define a {@code Predicate} that accepts files whose (simple) names match
+   * a regular expression.
+   */
+  public static Predicate<File> regexpFilePredicate(final String regexp) {
+    return new Predicate<File>() {
+      public Boolean value(File f) { return f.getName().matches(regexp); }
     };
   }
-                                                    
+  
   /**
    * Define a {@code FileFilter} that accepts files whose (simple) names in the
    * canonical case (see {@link #canonicalCase}) match a regular expression.
    */
-  public static FileFilter regexpCanonicalCaseFileFilter(final String regexp) {
-    return new FileFilter() {
-      public boolean accept(File f) { return canonicalCase(f).getName().matches(regexp); }
-    };
+  public static FileFilter regexpCanonicalCaseFileFilter(String regexp) {
+    return predicateFileFilter(regexpCanonicalCaseFilePredicate(regexp));
   }
                                                     
+  /**
+    * Define a {@code Predicate} that accepts files whose (simple) names in the
+   * canonical case (see {@link #canonicalCase}) match a regular expression.
+   */
+  public static Predicate<File> regexpCanonicalCaseFilePredicate(final String regexp) {
+    return new Predicate<File>() {
+      public Boolean value(File f) { return canonicalCase(f).getName().matches(regexp); }
+    };
+  }
+  
   /**
    * Define a {@code FileFilter} that accepts files with the given extension (that is,
    * for extension {@code txt}, files whose canonical-case names (see {@link #canonicalCase}) 
    * end in {@code .txt})
    */
   public static FileFilter extensionFileFilter(String extension) {
+    return predicateFileFilter(extensionFilePredicate(extension));
+  }
+  
+  /**
+   * Define a {@code Predicate} that accepts files with the given extension (that is,
+   * for extension {@code txt}, files whose canonical-case names (see {@link #canonicalCase}) 
+   * end in {@code .txt})
+   */
+  public static Predicate<File> extensionFilePredicate(String extension) {
     // Insure that the extension is in the canonical case
     extension = canonicalCase(new File(extension)).getName();
     final String suffix = "." + extension;
-    return new FileFilter() {
-      public boolean accept(File f) { return canonicalCase(f).getName().endsWith(suffix); }
+    return new Predicate<File>() {
+      public Boolean value(File f) { return canonicalCase(f).getName().endsWith(suffix); }
     };
   }
-                                                    
-  public static FileFilter ALWAYS_ACCEPT = predicateFileFilter(Predicate.TRUE);
-  public static FileFilter ALWAYS_REJECT = predicateFileFilter(Predicate.FALSE);
-  public static FileFilter ACCEPT_FILES = new FileFilter() {
-    public boolean accept(File f) { return f.isFile(); }
+                 
+  /** A predicate that tests whether {@code isFile()} holds for a file */
+  public static final Predicate<File> IS_FILE = new Predicate<File>() {
+    public Boolean value(File f) { return f.isFile(); }
   };
-  public static FileFilter ACCEPT_DIRECTORIES = new FileFilter() {
-    public boolean accept(File f) { return f.isDirectory(); }
+  
+  /** A predicate that tests whether {@code isDirectory()} holds for a file */
+  public static final Predicate<File> IS_DIRECTORY = new Predicate<File>() {
+    public Boolean value(File f) { return f.isDirectory(); }
   };
+  
+  /** A {@code FileFilter} that always accepts */
+  public static final FileFilter ALWAYS_ACCEPT = predicateFileFilter(Predicate.TRUE);
+
+  /** A {@code FileFilter} that always rejects */
+  public static final FileFilter ALWAYS_REJECT = predicateFileFilter(Predicate.FALSE);
+
+  /** A {@code FileFilter} that only accepts files for which {@code isFile()} holds */
+  public static final FileFilter ACCEPT_FILES = predicateFileFilter(IS_FILE);
+
+  /** A {@code FileFilter} that only accepts files for which {@code isDirectory()} holds */
+  public static final FileFilter ACCEPT_DIRECTORIES = predicateFileFilter(IS_DIRECTORY);
+  
 }
