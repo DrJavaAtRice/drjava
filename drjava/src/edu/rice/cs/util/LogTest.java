@@ -44,16 +44,12 @@ import java.util.Date;
 import java.util.Random;
 
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.plt.io.IOUtil;
 
 /** Test cases for {@link Log}.
- *  @version $Id: FileOpsTest.java 3896 2006-06-26 21:19:25Z rcartwright $
+ *  @version $Id$
  */
 public class LogTest extends MultiThreadedTestCase {
-  
-  static final String FILENAME_PREFIX = "$#%#$";
-  static final File FILE1 = new File(FILENAME_PREFIX + "logtest1.txt");
-  static final File FILE2 = new File(FILENAME_PREFIX + "logtest2.txt");
-  static final File FILE3 = new File(FILENAME_PREFIX + "logtest3.txt");
   
   static final int SHORT_TIME = 10000;  // few seconds in milliseconds
   
@@ -81,27 +77,6 @@ public class LogTest extends MultiThreadedTestCase {
     
   }
   
-  public void setUp() throws Exception {
-    super.setUp();
-    
-    // Clear log files if they exist, so beginning of files are written by these tests
-    new FileWriter(FILE1).close();
-    new FileWriter(FILE2).close();
-    new FileWriter(FILE3).close();
-  }
-  
-  public void tearDown() throws Exception {
-    // Delete log files
-    /* Note: this code does not currently delete the files.
-     * TO DO: Find a way to delete these files so the build directory does not contain more clutter.
-     */
-    FILE1.deleteOnExit();
-    FILE2.deleteOnExit();
-    FILE3.deleteOnExit();
-    
-    super.tearDown();
-  }
-  
   /** Parses a date printed by Date.toString(); returns null if there is a parse error. */
   @SuppressWarnings("deprecation")
   private static Date parse(String s) {
@@ -113,6 +88,7 @@ public class LogTest extends MultiThreadedTestCase {
     * and their timestamps are within the past few seconds.
     */
   public void testLog() throws IOException {
+    File FILE1 = IOUtil.createAndMarkTempFile("logtest001",".txt");
     Log log1 = new Log(FILE1, true);
     log1.log("Message 1");
     log1.log("Message 2");
@@ -128,7 +104,7 @@ public class LogTest extends MultiThreadedTestCase {
 //    System.err.println("Current time in millis is: " + System.currentTimeMillis());
     Date time0 = parse(s0);
     assertTrue("Log opened within last few seconds", time0.compareTo(earlier) >= 0 && time0.compareTo(now) <= 0);
-    assertEquals("Log open message", "Log '" + FILE1.getName() + "' opened", s0.substring(30, 60));
+    assertEquals("Log open message", "Log '" + FILE1.getName() + "' opened", s0.substring(30, 43+FILE1.getName().length()));
     
     String s1 = fin.readLine();
     Date time1 = parse(s1);
@@ -152,6 +128,7 @@ public class LogTest extends MultiThreadedTestCase {
     * methods (one with the Throwable itself and the other with the the StackTraceElement[])
     */
   public void testExceptionPrinting() throws IOException {
+    File FILE2 = IOUtil.createAndMarkTempFile("logtest002",".txt");
     Log log2 = new Log(FILE2, true);
 //    System.err.println("Starting testExceptionPrinting");
     
@@ -175,7 +152,7 @@ public class LogTest extends MultiThreadedTestCase {
     String s0 = fin.readLine();
     Date time0 = parse(s0);
     assertTrue("Log opened within last few seconds", time0.compareTo(earlier) >= 0 && time0.compareTo(now) <= 0);
-    assertEquals("Log open message", "Log '" + FILE2.getName() + "' opened", s0.substring(30, 60));
+    assertEquals("Log open message", "Log '" + FILE2.getName() + "' opened", s0.substring(30, 43+FILE2.getName().length()));
     
     String s1 = fin.readLine();
     Date time1 = parse(s1);
@@ -212,7 +189,7 @@ public class LogTest extends MultiThreadedTestCase {
     * the entries in the log may be corrupted).
     */
   public void testConcurrentWrites() throws IOException, InterruptedException {
-
+    File FILE3 = IOUtil.createAndMarkTempFile("logtest003",".txt");
     Log log3 = new Log(FILE3, true);
     Random r = new Random();
     Thread[] threads = new Thread[NUM_THREADS];
@@ -223,11 +200,10 @@ public class LogTest extends MultiThreadedTestCase {
     BufferedReader fin = new BufferedReader(new FileReader(FILE3));
     Date earlier = new Date(new Date().getTime() - SHORT_TIME);
     Date now = new Date();
-    
     String s0 = fin.readLine();
     Date time0 = parse(s0);
     assertTrue("Log opened within last 10 seconds", time0.compareTo(earlier) >= 0 && time0.compareTo(now) <= 0);
-    assertEquals("Log open message", "Log '" + FILE3.getName() + "' opened", s0.substring(30, 60));
+    assertEquals("Log open message", "Log '" + FILE3.getName() + "' opened", s0.substring(30, 43+FILE3.getName().length()));
     
     for (int i = 0; i < NUM_THREADS; i++) {
       String s1 = fin.readLine();
