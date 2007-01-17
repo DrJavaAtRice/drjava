@@ -52,6 +52,8 @@ import java.util.List;
  * @version $Id$
  */
 public final class CommandLineTest extends DrJavaTestCase {
+  /** File separator, i.e. '/' or '\\'. */
+  private static final char FS = File.separatorChar;
 
   /** The MainFrame we're working with. */
   private MainFrame _mf;
@@ -351,9 +353,9 @@ public final class CommandLineTest extends DrJavaTestCase {
 
     assertTrue("child directory created OK", new File(newDirectory, "childDir").mkdir());
 
-    File relativeFile = new File(newDirectory, "./X.java");
-    File relativeFile2 = new File(newDirectory, "./Y.java");
-    File relativeFile3 = new File(newDirectory, "childDir/../Z.java");
+    File relativeFile = new File(newDirectory, "."+FS+"X.java");
+    File relativeFile2 = new File(newDirectory, "."+FS+"Y.java");
+    File relativeFile3 = new File(newDirectory, "childDir"+FS+".."+FS+"Z.java");
 
     try {
       checkFile(relativeFile, funnyName);
