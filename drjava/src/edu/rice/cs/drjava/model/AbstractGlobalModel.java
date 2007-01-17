@@ -3690,14 +3690,29 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       // Must use the canonical path, in case there are dots in the path (which will conflict with the package name)
       try {
         File parentDir = sourceFile.getCanonicalFile();
+        File grandParentDir;
         while (! packageStack.isEmpty()) {
           String part = pop(packageStack);
           parentDir = parentDir.getParentFile();
+          grandParentDir = parentDir.getParentFile();
 
           if (parentDir == null) throw new RuntimeException("parent dir is null!");
 
           // Make sure the package piece matches the directory name
-          if (! part.equals(parentDir.getName ())) {
+          boolean equal;
+          if (grandParentDir!=null) {
+            // grand parent exists, compare File objects
+            // this handles case-insensitivity for packages on Windows
+            File packageDir = new File(grandParentDir,part);
+            equal = packageDir.equals(parentDir);
+          }
+          else {
+            // grand parent does not exist, so we can't create a File object
+            // with the package's name. Just compare names; this doesn't
+            // handle case-insensitivity for packages on Windows
+            equal = part.equals(parentDir.getName()); 
+          }
+          if (!equal) {
             String msg = "The source file " + sourceFile.getAbsolutePath() +
               " is in the wrong directory or in the wrong package. " +
               "The directory name " + parentDir.getName() +
