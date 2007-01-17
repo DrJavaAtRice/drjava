@@ -686,8 +686,8 @@ public abstract class FileOps {
     * 3) "user.home"
     * @return a valid directory for use */
   public static File getValidDirectory(File file) {
-    // if it's the NULL_FILE, use "user.home"
-    if (file==FileOption.NULL_FILE) {
+    // if it's the NULL_FILE or null, use "user.home"
+    if ((file==FileOption.NULL_FILE)||(file==null)) {
       file = new File(System.getProperty("user.home"));
     }
     while (!file.exists()) {
