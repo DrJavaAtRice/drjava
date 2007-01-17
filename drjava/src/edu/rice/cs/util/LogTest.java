@@ -88,13 +88,13 @@ public class LogTest extends MultiThreadedTestCase {
     * and their timestamps are within the past few seconds.
     */
   public void testLog() throws IOException {
-    File FILE1 = IOUtil.createAndMarkTempFile("logtest001",".txt");
-    Log log1 = new Log(FILE1, true);
+    File file1 = IOUtil.createAndMarkTempFile("logtest001",".txt");
+    Log log1 = new Log(file1, true);
     log1.log("Message 1");
     log1.log("Message 2");
     log1.log("Message 3");
     
-    BufferedReader fin = new BufferedReader(new FileReader(FILE1));
+    BufferedReader fin = new BufferedReader(new FileReader(file1));
     Date earlier = new Date(new Date().getTime() - SHORT_TIME);
     Date now = new Date();
     
@@ -104,7 +104,7 @@ public class LogTest extends MultiThreadedTestCase {
 //    System.err.println("Current time in millis is: " + System.currentTimeMillis());
     Date time0 = parse(s0);
     assertTrue("Log opened within last few seconds", time0.compareTo(earlier) >= 0 && time0.compareTo(now) <= 0);
-    assertEquals("Log open message", "Log '" + FILE1.getName() + "' opened", s0.substring(30, 43+FILE1.getName().length()));
+    assertEquals("Log open message", "Log '" + file1.getName() + "' opened", s0.substring(30, 43+file1.getName().length()));
     
     String s1 = fin.readLine();
     Date time1 = parse(s1);
@@ -128,8 +128,8 @@ public class LogTest extends MultiThreadedTestCase {
     * methods (one with the Throwable itself and the other with the the StackTraceElement[])
     */
   public void testExceptionPrinting() throws IOException {
-    File FILE2 = IOUtil.createAndMarkTempFile("logtest002",".txt");
-    Log log2 = new Log(FILE2, true);
+    File file2 = IOUtil.createAndMarkTempFile("logtest002",".txt");
+    Log log2 = new Log(file2, true);
 //    System.err.println("Starting testExceptionPrinting");
     
     // Throw a couple of exceptions and log them
@@ -145,14 +145,14 @@ public class LogTest extends MultiThreadedTestCase {
       log2.log("Message 2", e.getStackTrace());
     }
     
-    BufferedReader fin = new BufferedReader(new FileReader(FILE2));
+    BufferedReader fin = new BufferedReader(new FileReader(file2));
     Date earlier = new Date(new Date().getTime() - SHORT_TIME);
     Date now = new Date();
     
     String s0 = fin.readLine();
     Date time0 = parse(s0);
     assertTrue("Log opened within last few seconds", time0.compareTo(earlier) >= 0 && time0.compareTo(now) <= 0);
-    assertEquals("Log open message", "Log '" + FILE2.getName() + "' opened", s0.substring(30, 43+FILE2.getName().length()));
+    assertEquals("Log open message", "Log '" + file2.getName() + "' opened", s0.substring(30, 43+file2.getName().length()));
     
     String s1 = fin.readLine();
     Date time1 = parse(s1);
@@ -189,21 +189,21 @@ public class LogTest extends MultiThreadedTestCase {
     * the entries in the log may be corrupted).
     */
   public void testConcurrentWrites() throws IOException, InterruptedException {
-    File FILE3 = IOUtil.createAndMarkTempFile("logtest003",".txt");
-    Log log3 = new Log(FILE3, true);
+    File file3 = IOUtil.createAndMarkTempFile("logtest003",".txt");
+    Log log3 = new Log(file3, true);
     Random r = new Random();
     Thread[] threads = new Thread[NUM_THREADS];
     for (int i = 0; i < NUM_THREADS; i++) threads[i] = new LogTestThread(log3, r.nextInt(DELAY));
     for (int i = 0; i < NUM_THREADS; i++) threads[i].start();
     for (int i = 0; i < NUM_THREADS; i++) threads[i].join();
    
-    BufferedReader fin = new BufferedReader(new FileReader(FILE3));
+    BufferedReader fin = new BufferedReader(new FileReader(file3));
     Date earlier = new Date(new Date().getTime() - SHORT_TIME);
     Date now = new Date();
     String s0 = fin.readLine();
     Date time0 = parse(s0);
     assertTrue("Log opened within last 10 seconds", time0.compareTo(earlier) >= 0 && time0.compareTo(now) <= 0);
-    assertEquals("Log open message", "Log '" + FILE3.getName() + "' opened", s0.substring(30, 43+FILE3.getName().length()));
+    assertEquals("Log open message", "Log '" + file3.getName() + "' opened", s0.substring(30, 43+file3.getName().length()));
     
     for (int i = 0; i < NUM_THREADS; i++) {
       String s1 = fin.readLine();
