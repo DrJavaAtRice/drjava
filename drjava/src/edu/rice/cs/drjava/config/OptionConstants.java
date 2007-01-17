@@ -520,14 +520,14 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_BROWSE_FORWARD =
     new KeyStrokeOption("key.browse.forward",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_MASK|InputEvent.SHIFT_MASK));
 
   /**
    * The key binding for jumping to the previous location in the browser history
    */
   public static final KeyStrokeOption KEY_BROWSE_BACK =
     new KeyStrokeOption("key.browse.back",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK|InputEvent.SHIFT_MASK));
 
   /**
    * The key binding for openning the preferences dialog

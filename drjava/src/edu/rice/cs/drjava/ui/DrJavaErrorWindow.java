@@ -211,69 +211,10 @@ public class DrJavaErrorWindow extends JDialog {
         }
       }
       
-      b.append("\n\nSystem Properties:\n");
-      b.append("DrJava Version ");
-      b.append(edu.rice.cs.drjava.Version.getBuildTimeString());
-      b.append('\n');
-      java.util.Properties props = System.getProperties();
-      int size = props.size();
-      java.util.Iterator entries = props.entrySet().iterator();
-      while(entries.hasNext()) {
-        java.util.Map.Entry entry = (java.util.Map.Entry)entries.next();
-        b.append(entry.getKey());
-        b.append(" = ");
-        if (entry.getKey().equals("line.separator")) {
-          b.append("\"");
-          String ls = (String)entry.getValue();
-          for(int i=0; i<ls.length(); ++i) {
-            int ch = ls.charAt(i);
-            b.append("\\u");
-            String hexString = "0000" + Integer.toHexString(ch);
-            b.append(hexString.substring(hexString.length()-4));
-          }
-          b.append("\"");
-        }
-        else {
-          b.append(entry.getValue());
-        }
-        b.append('\n');
-      }
-      b.append('\n');
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      try {
-        DrJava.getConfig().saveConfiguration(baos, "DrJava configuration file");
-        b.append(baos.toString());
-      }
-      catch(java.io.IOException ioe) {
-        b.append("IOException when trying to print DrJava configuration file");
-      }
-      
-      b.append("\n\nUsed memory: about ");
-      b.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));
-      b.append("\nFree memory: about ");
-      b.append(StringOps.memSizeToString(Runtime.getRuntime().freeMemory()));
-      b.append("\nTotal memory: about ");
-      b.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()));
-      b.append("\nTotal memory can expand to: about ");
-      b.append(StringOps.memSizeToString(Runtime.getRuntime().maxMemory()));
       b.append("\n\n");
+      b.append(getSystemAndDrJavaInfo());
 
-      // filter out user.dir, user.home and user.name
-      String infoText = b.toString();
-
-      String userHome = System.getProperty("user.home");
-      String anonUserHome = "<anonymized user.home>";
-      infoText = replaceString(infoText, userHome, anonUserHome);
-      
-      String userDir = System.getProperty("user.dir");
-      String anonUserDir = "<anonymized user.dir>";
-      infoText = replaceString(infoText, userDir, anonUserDir);
-      
-      String userName = System.getProperty("user.name");
-      String anonUserName = "<anonymized user.name>";
-      infoText = replaceString(infoText, userName, anonUserName);
-      
-      _stackTrace.setText(infoText);
+      _stackTrace.setText(b.toString());
       _stackTrace.setCaretPosition(0);
       
       final StringBuilder b2 = new StringBuilder();
@@ -315,6 +256,76 @@ public class DrJavaErrorWindow extends JDialog {
     }
     getContentPane().add(_errorInfo, BorderLayout.NORTH);
     validate();
+  }
+  
+  /** Return a string with the system properties, the DrJava configuration file contents, and
+    * information about memory. The data is anonymized.
+    * @return information string */
+  public static String getSystemAndDrJavaInfo() {
+    final StringBuilder b = new StringBuilder();
+    b.append("System Properties:\n");
+    b.append("DrJava Version ");
+    b.append(edu.rice.cs.drjava.Version.getBuildTimeString());
+    b.append('\n');
+    java.util.Properties props = System.getProperties();
+    int size = props.size();
+    java.util.Iterator entries = props.entrySet().iterator();
+    while(entries.hasNext()) {
+      java.util.Map.Entry entry = (java.util.Map.Entry)entries.next();
+      b.append(entry.getKey());
+      b.append(" = ");
+      if (entry.getKey().equals("line.separator")) {
+        b.append("\"");
+        String ls = (String)entry.getValue();
+        for(int i=0; i<ls.length(); ++i) {
+          int ch = ls.charAt(i);
+          b.append("\\u");
+          String hexString = "0000" + Integer.toHexString(ch);
+          b.append(hexString.substring(hexString.length()-4));
+        }
+        b.append("\"");
+      }
+      else {
+        b.append(entry.getValue());
+      }
+      b.append('\n');
+    }
+    b.append('\n');
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      DrJava.getConfig().saveConfiguration(baos, "DrJava configuration file");
+      b.append(baos.toString());
+    }
+    catch(java.io.IOException ioe) {
+      b.append("IOException when trying to print DrJava configuration file");
+    }
+    
+    b.append("\n\nUsed memory: about ");
+    b.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));
+    b.append("\nFree memory: about ");
+    b.append(StringOps.memSizeToString(Runtime.getRuntime().freeMemory()));
+    b.append("\nTotal memory: about ");
+    b.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()));
+    b.append("\nTotal memory can expand to: about ");
+    b.append(StringOps.memSizeToString(Runtime.getRuntime().maxMemory()));
+    b.append("\n\n");
+    
+    // filter out user.dir, user.home and user.name
+    String infoText = b.toString();
+    
+    String userHome = System.getProperty("user.home");
+    String anonUserHome = "<anonymized user.home>";
+    infoText = replaceString(infoText, userHome, anonUserHome);
+    
+    String userDir = System.getProperty("user.dir");
+    String anonUserDir = "<anonymized user.dir>";
+    infoText = replaceString(infoText, userDir, anonUserDir);
+    
+    String userName = System.getProperty("user.name");
+    String anonUserName = "<anonymized user.name>";
+    infoText = replaceString(infoText, userName, anonUserName);
+    
+    return infoText;
   }
   
   /* Close the window. */

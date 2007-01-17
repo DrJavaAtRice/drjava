@@ -41,6 +41,11 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.text.*;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.awt.*;
 
@@ -58,6 +63,16 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   private final JButton _okButton = new JButton("OK");
 
+  /** the button that copies the system properties to the clipboard */
+  private JButton _copyButton;
+  
+  /** the table with the System Properties information */
+  private JTable _propertiesTable;
+
+  /** index the System Properties tab, one of the tabs in _tabs */
+  private int _propertiesTabIndex;
+  
+  /** the pane with tabs to select */
   private final JTabbedPane _tabs = new JTabbedPane();
   
   public AboutDialog(JFrame owner) {
@@ -117,11 +132,12 @@ public class AboutDialog extends JDialog implements ActionListener {
     
     addTab(_tabs,"DynamicJava License",createTextScroller(DYADE_LICENSE));
     addTab(_tabs,"System Properties",createSysPropTab());
+    _propertiesTabIndex = _tabs.getTabCount()-1;
     cp.add(createBottomBar(),BorderLayout.SOUTH);
     cp.add(_tabs,BorderLayout.CENTER);
   }
 
-  private static JComponent createSysPropTab() {
+  private JComponent createSysPropTab() {
     java.util.Properties props = System.getProperties();
     int size = props.size();
     String[][] rowData = new String[size][2];
@@ -140,8 +156,8 @@ public class AboutDialog extends JDialog implements ActionListener {
     });
     String[] nvStrings = new String[]{"Name","Value"};
     UneditableTableModel model = new UneditableTableModel(rowData, nvStrings);
-    JTable table = new JTable(model);
-    JScrollPane scroller = new BorderlessScrollPane(table);
+    _propertiesTable = new JTable(model);
+    JScrollPane scroller = new BorderlessScrollPane(_propertiesTable);
     wrapBorder(scroller,new EmptyBorder(5,0,0,0));
     JPanel propTab = new JPanel(new BorderLayout());
     propTab.add(new JLabel("Current system properties:"),BorderLayout.NORTH);
@@ -276,8 +292,25 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   private JPanel createBottomBar() {
     JPanel panel = new JPanel(new BorderLayout());
+    JPanel buttonPanel = new JPanel();
+    _copyButton = new JButton(new AbstractAction("Copy System Properties") {
+      public void actionPerformed(ActionEvent e) {
+        Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+        StringSelection contents = new StringSelection(DrJavaErrorWindow.getSystemAndDrJavaInfo());
+        cb.setContents(contents, null);
+      }
+    });
+    _tabs.addChangeListener(new ChangeListener() {
+      // This method is called whenever the selected tab changes
+      public void stateChanged(ChangeEvent evt) {
+        _copyButton.setVisible(_tabs.getSelectedIndex()==_propertiesTabIndex);
+      }
+    });
+    _copyButton.setVisible(_tabs.getSelectedIndex()==_propertiesTabIndex);
     _okButton.addActionListener(this);
-    panel.add(_okButton,BorderLayout.EAST);
+    buttonPanel.add(_copyButton);
+    buttonPanel.add(_okButton);
+    panel.add(buttonPanel,BorderLayout.EAST);
     wrapBorder(panel,new EmptyBorder(5,5,5,5));
     return panel;
   }
