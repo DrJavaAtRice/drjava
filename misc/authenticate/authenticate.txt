@@ -1,0 +1,10 @@
+This is just a dummy file allowing users to make modifications to the repository, thus
+forcing a one-time authentication, without actually changing anything.
+
+New developers can force authentication with a command sequence like the following:
+
+svn co https://svn.sourceforge.net/svnroot/drjava/branches/authenticate
+cd authenticate
+svn propset touched myUserName authenticate.txt
+svn commit -m "Touched by myUserName"
+  
