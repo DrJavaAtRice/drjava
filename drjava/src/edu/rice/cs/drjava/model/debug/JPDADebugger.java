@@ -213,10 +213,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       try { _attachToVM(); }
       catch(DebugException e1) {  // We sometimes see ConnectExceptions stating that the connection was refused
         try { 
+          try { Thread.sleep(100); } // Give any temporary connection problems a chance to resolve
+          catch (InterruptedException e) { /* ignore */ }
           _attachToVM(); 
           System.out.println("Two attempts required for debugger to attach to slave JVM");
         }
-        catch(DebugException e2) { 
+        catch(DebugException e2) {
+          try { Thread.sleep(100); } // Give any temporary connection problems a chance to resolve
+          catch (InterruptedException e) { /* ignore */ }
           _attachToVM();
           System.out.println("Three attempts required for debugger to attach to slave JVM");
         }  // if we throw another exception, three strikes and we're out
@@ -261,7 +265,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     AttachingConnector connector = _getAttachingConnector();
 
     // Try to connect on our debug port
-    Map<String, Connector.Argument> args = connector.defaultArguments();  /* Warning expected; Connector has not yet been generified */
+    Map<String, Connector.Argument> args = connector.defaultArguments();
     Connector.Argument port = args.get("port");
     Connector.Argument host = args.get("hostname");
     try {
@@ -280,7 +284,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private AttachingConnector _getAttachingConnector()
     throws DebugException {
     VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
-    List<AttachingConnector> connectors = vmm.attachingConnectors();  // Warning expected; Connector not yet generified.
+    List<AttachingConnector> connectors = vmm.attachingConnectors();
     AttachingConnector connector = null;
     for (AttachingConnector conn: connectors) {
       if (conn.name().equals("com.sun.jdi.SocketAttach"))  connector = conn;

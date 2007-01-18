@@ -89,7 +89,7 @@ public class EventHandlerThread extends Thread {
     while (_connected) {
       try {
         try {
-          // Remove and consume a set of events from the queue
+          // Remove and consume a set of events from the queue (blocks for an event)
           EventSet eventSet = queue.remove();
           EventIterator it = eventSet.eventIterator();
           
