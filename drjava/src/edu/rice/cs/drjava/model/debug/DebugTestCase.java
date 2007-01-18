@@ -34,7 +34,7 @@
 package edu.rice.cs.drjava.model.debug;
 
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.Log;
 
 import java.io.*;
@@ -284,7 +284,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
    */
   protected OpenDefinitionsDocument _startupDebugger(String fileName, String classText) throws Exception {
     // Create a file in the temporary directory
-    File file = FileOps.makeFile(_tempDir, fileName);
+    File file = IOUtil.attemptCanonicalFile(new File(_tempDir, fileName));
     return _startupDebugger(file, classText);
   }
 

@@ -41,7 +41,6 @@ import java.util.Vector;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
@@ -62,6 +61,12 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     "    System.out.println(\"Foo\");\n" +
     "  }\n" +
     "}\n";
+  
+  /** Get the canonical name of a file.  If the operation fails, the test will fail. */
+  private File makeCanonical(File f) {
+    try { return f.getCanonicalFile(); }
+    catch (IOException e) { fail("Can't get a canonical path for file " + f); return null; }
+  }
 
   /** Tests that the undoableEditHappened event is fired if the undo manager is in use. */
   public void testUndoEventsOccur() throws BadLocationException {
@@ -210,9 +215,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     IOException, InterruptedException {
     // Compile Foo
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
-    File dir1 = FileOps.makeFile(_tempDir, "dir1");
+    File dir1 = makeCanonical(new File(_tempDir, "dir1"));
     dir1.mkdir();
-    File file1 = FileOps.makeFile(dir1, "TestFile1.java");
+    File file1 = makeCanonical(new File(dir1, "TestFile1.java"));
     doCompile(doc1, file1);
 
     assertEquals("interactions result", "\"DrJavaTestFoo\"", interpret("new DrJavaTestFoo().getClass().getName()"));
@@ -227,9 +232,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Compile Baz which extends Foo in another directory.
     OpenDefinitionsDocument doc2 = setupDocument(BAZ_TEXT);
-    File dir2 = FileOps.makeFile(_tempDir, "dir2");
+    File dir2 = makeCanonical(new File(_tempDir, "dir2"));
     dir2.mkdir();
-    File file2 = FileOps.makeFile(dir2, "TestFile1.java");
+    File file2 = makeCanonical(new File(dir2, "TestFile1.java"));
     doCompile(doc2, file2);
 
     // Ensure that Baz can use the Foo class from extra classpath
@@ -252,7 +257,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     IOException, InterruptedException {
     // Compile a test file
     OpenDefinitionsDocument doc1 = setupDocument("public class DrJavaTestClass {}");
-    File file1 = FileOps.makeFile(_tempDir, "DrJavaTestClass.java");
+    File file1 = makeCanonical(new File(_tempDir, "DrJavaTestClass.java"));
     doCompile(doc1, file1);
 
     // This shouldn't cause an error (no output should be displayed)
@@ -308,13 +313,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File baseTempDir = tempDirectory();
 
     // Now make subdirectory a/b/c
-    File subdir = FileOps.makeFile(baseTempDir, "a");
-    subdir = FileOps.makeFile(subdir, "b");
-    subdir = FileOps.makeFile(subdir, "c");
+    File subdir = makeCanonical(new File(baseTempDir, "a"));
+    subdir = makeCanonical(new File(subdir, "b"));
+    subdir = makeCanonical(new File(subdir, "c"));
     subdir.mkdirs();
 
     // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = FileOps.makeFile(subdir, "DrJavaTestFoo.java");
+    File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
 
@@ -335,13 +340,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File baseTempDir = tempDirectory();
 
     // Now make subdirectory a/b/c
-    File subdir = FileOps.makeFile(baseTempDir, "a");
-    subdir = FileOps.makeFile(subdir, "b").getCanonicalFile();
-    subdir = FileOps.makeFile(subdir, "c").getCanonicalFile();
+    File subdir = makeCanonical(new File(baseTempDir, "a"));
+    subdir = makeCanonical(new File(subdir, "b").getCanonicalFile());
+    subdir = makeCanonical(new File(subdir, "c").getCanonicalFile());
     subdir.mkdirs();
 
     // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = FileOps.makeFile(subdir, "DrJavaTestFoo.java");
+    File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc = setupDocument("package a.b.c;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
 //    System.err.println("Package name is: " + _model.getPackageName());
@@ -361,15 +366,15 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   public void testGetSourceRootPackageThreeDeepValidRelative() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
-    File subdir = FileOps.makeFile(baseTempDir, "a");
-    subdir = FileOps.makeFile(subdir, "b");
-    subdir = FileOps.makeFile(subdir, "c");
+    File subdir = makeCanonical(new File(baseTempDir, "a"));
+    subdir = makeCanonical(new File(subdir, "b"));
+    subdir = makeCanonical(new File(subdir, "c"));
     subdir.mkdirs();
 
     // Save the footext to DrJavaTestFoo.java in a relative directory
     //   temp/./a/b/../b/c == temp/a/b/c
-    File relDir = FileOps.makeFile(baseTempDir, "./a/b/../b/c");
-    File fooFile = FileOps.makeFile(relDir, "DrJavaTestFoo.java");
+    File relDir = makeCanonical(new File(baseTempDir, "./a/b/../b/c"));
+    File fooFile = makeCanonical(new File(relDir, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc =
       setupDocument("package a.b.c;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
@@ -390,13 +395,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File baseTempDir = tempDirectory();
 
     // Now make subdirectory a/b/d
-    File subdir = FileOps.makeFile(baseTempDir, "a");
-    subdir = FileOps.makeFile(subdir, "b");
-    subdir = FileOps.makeFile(subdir, "d");
+    File subdir = makeCanonical(new File(baseTempDir, "a"));
+    subdir = makeCanonical(new File(subdir, "b"));
+    subdir = makeCanonical(new File(subdir, "d"));
     subdir.mkdirs();
 
     // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = FileOps.makeFile(subdir, "DrJavaTestFoo.java");
+    File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc =
       setupDocument("package a.b.c;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
@@ -416,11 +421,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File baseTempDir = tempDirectory();
 
     // Now make subdirectory a
-    File subdir = FileOps.makeFile(baseTempDir, "a");
+    File subdir = makeCanonical(new File(baseTempDir, "a"));
     subdir.mkdir();
 
     // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = FileOps.makeFile(subdir, "DrJavaTestFoo.java");
+    File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc = setupDocument("package a;\n" + FOO_TEXT);
     doc.saveFileAs(new FileSelector(fooFile));
 
@@ -441,23 +446,23 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File baseTempDir = tempDirectory();
 
     // Now make subdirectories a, b
-    File subdir1 = FileOps.makeFile(baseTempDir, "a");
+    File subdir1 = makeCanonical(new File(baseTempDir, "a"));
     subdir1.mkdir();
-    File subdir2 = FileOps.makeFile(baseTempDir, "b");
+    File subdir2 = makeCanonical(new File(baseTempDir, "b"));
     subdir2.mkdir();
 
     // Save the footext to DrJavaTestFoo.java in subdirectory 1
-    File file1 = FileOps.makeFile(subdir1, "DrJavaTestFoo.java");
+    File file1 = makeCanonical(new File(subdir1, "DrJavaTestFoo.java"));
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     doc1.saveFileAs(new FileSelector(file1));
 
     // Save the bartext to Bar.java in subdirectory 1
-    File file2 = FileOps.makeFile(subdir1, "Bar.java");
+    File file2 = makeCanonical(new File(subdir1, "Bar.java"));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     doc2.saveFileAs(new FileSelector(file2));
 
     // Save the bartext to Bar.java in subdirectory 2
-    File file3 = FileOps.makeFile(subdir2, "Bar.java");
+    File file3 = makeCanonical(new File(subdir2, "Bar.java"));
     OpenDefinitionsDocument doc3 = setupDocument(BAR_TEXT);
     doc3.saveFileAs(new FileSelector(file3));
     
@@ -494,8 +499,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Rename the directory so it's not on the classpath anymore
     String tempPath = f.getParent();
-    File tempDir = FileOps.makeFile(tempPath);
-    tempDir.renameTo(FileOps.makeFile(tempPath + "a"));
+    File tempDir = makeCanonical(new File(tempPath));
+    tempDir.renameTo(makeCanonical(new File(tempPath + "a")));
 
     String result = interpret("new DrJavaTestFoo().getClass().getName()");
 
@@ -506,7 +511,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Add new directory to classpath through Config
     Vector<File> cp = new Vector<File>();
-    cp.add(FileOps.makeFile(tempPath + "a"));
+    cp.add(makeCanonical(new File(tempPath + "a")));
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
     Utilities.clearEventQueue();
@@ -518,8 +523,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("interactions result", "\"DrJavaTestFoo\"", result);
 
     // Rename directory back to clean up
-    tempDir = FileOps.makeFile(tempPath + "a");
-    boolean renamed = tempDir.renameTo(FileOps.makeFile(tempPath));
+    tempDir = makeCanonical(new File(tempPath + "a"));
+    boolean renamed = tempDir.renameTo(makeCanonical(new File(tempPath)));
     
     _log.log("testInteractionsLiveUpdateClasspath() completed");
   }
@@ -549,9 +554,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
 
   public void testRunMainMethod() throws Exception {
-    File dir = FileOps.makeFile(_tempDir, "bar");
+    File dir = makeCanonical(new File(_tempDir, "bar"));
     dir.mkdir();
-    File file = FileOps.makeFile(dir, "Foo.java");
+    File file = makeCanonical(new File(dir, "Foo.java"));
     final OpenDefinitionsDocument doc = doCompile(FOO_CLASS, file);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 

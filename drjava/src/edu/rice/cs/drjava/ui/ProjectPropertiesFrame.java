@@ -48,8 +48,8 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.config.*;
 
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.ClassPathVector;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
@@ -461,7 +461,7 @@ public class ProjectPropertiesFrame extends JFrame {
     FileFilter filter = new FileFilter() {
       public boolean accept(File f) {
         String name = f.getName();
-        return  FileOps.inFileTree(f, projRoot) && (f.isDirectory() ||
+        return  IOUtil.isMember(f, projRoot) && (f.isDirectory() ||
             (name.endsWith(".java") || name.endsWith(".dj0") || name.endsWith(".dj1") || name.endsWith(".dj2")));
       }
       public String getDescription() { return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2) in project"; }

@@ -120,6 +120,10 @@ import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.SplashScreen;
 
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.lambda.LambdaUtil;
+
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
@@ -694,7 +698,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Determines whether the specified file in within the project file tree.
      *  No synchronization is required because only immutable data is accessed.
      */
-    public boolean inProjectPath(File f) { return FileOps.inFileTree(f, getProjectRoot()); }
+    public boolean inProjectPath(File f) { return IOUtil.isMember(f, getProjectRoot()); }
     
     /** @return the absolute path to the project file.  Since projectFile is final, no synchronization
      *  is necessary.
@@ -1289,27 +1293,29 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void openFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException {
     if (dir == null) return; // just in case
  
-    ArrayList<File> files;
     if (dir.isDirectory()) {
-      files = FileOps.getFilesInDir(dir, rec, new FileFilter() {
-        public boolean accept(File f) {
-          return  f.isDirectory() || (f.isFile() &&
-            f.getName().endsWith(DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]));
-        }
-      });
+      Iterable<File> filesIterable;
+      String extension = DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)];
+      FileFilter match = IOUtil.predicateFileFilter(LambdaUtil.and(IOUtil.IS_FILE, 
+                                                                   IOUtil.extensionFilePredicate(extension)));
+      if (rec) { filesIterable = IOUtil.listFilesRecursively(dir, match); }
+      else { filesIterable = IOUtil.attemptListFilesAsIterable(dir, match); }
+      List<File> files = IterUtil.asList(filesIterable);
       
-      if (isProjectActive())
+      if (isProjectActive()) {
         Collections.sort(files, new Comparator<File>() {
-        public int compare(File o1,File o2) {
-          return - o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
-        }
-      });
-      else
+          public int compare(File o1,File o2) {
+            return - o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
+          }
+        });
+      }
+      else {
         Collections.sort(files, new Comparator<File>() {
-        public int compare(File o1,File o2) {
-          return - o1.getName().compareTo(o2.getName());
-        }
-      });
+          public int compare(File o1,File o2) {
+            return - o1.getName().compareTo(o2.getName());
+          }
+        });
+      }
       
       int ct = files.size();
       
@@ -1377,7 +1383,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File f = doc.getFile();
       
       if (doc.isUntitled()) extFileList.add(f);
-      else if (FileOps.inFileTree(f, projectRoot)) {
+      else if (IOUtil.isMember(f, projectRoot)) {
         DocFile file = new DocFile(f);
         file.setPackage(doc.getPackageName());  // must save _packageName so it is correct when project is loaded
         builder.addSourceFile(file);
@@ -2987,7 +2993,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** An open file is in the new project if the source root is the same as the new project root. */
     public boolean inNewProjectPath(File projRoot) {
-      try { return ! isUntitled() && FileOps.inFileTree(getFile(), projRoot); }
+      try { return ! isUntitled() && IOUtil.isMember(getFile(), projRoot); }
       catch(FileMovedException e) { return false; }
     }
  

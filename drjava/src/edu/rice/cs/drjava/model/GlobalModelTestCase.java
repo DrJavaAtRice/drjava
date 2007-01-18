@@ -1141,7 +1141,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
   /* A variant of DefaultGlobalModel used only for testing purposes.  This variant
    * does not change the working directory when resetting interactions.  This test class and its
-   * descendants were written before the distinction between getWorkingDirectoru and getMasterDirectory.
+   * descendants were written before the distinction between getWorkingDirectory and getMasterDirectory.
    * This method override restores the old semantics for getWorkingDirectory.  The new definition breaks
    * some unit tests because the slave JVM keeps its working directory open until it shuts down. 
    */

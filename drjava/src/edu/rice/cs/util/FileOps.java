@@ -61,20 +61,35 @@ public abstract class FileOps {
     public boolean exists() { return false; }
   };
   
-  public static File makeFile(String path) { 
+  /**
+   * @deprecated  If a best-attempt canonical file is needed, use 
+   *              {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead
+   *              (for example, {@code IOUtil.attemptCanonicalFile(new File(path))})
+   */
+  @Deprecated public static File makeFile(String path) { 
     File f = new File(path);
     try { return f.getCanonicalFile(); }
     catch(IOException e) { return f; }
   }
   
-  public static File makeFile(File parentDir, String child) { 
+  /**
+   * @deprecated  If a best-attempt canonical file is needed, 
+   *              use {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead
+   *              (for example, {@code IOUtil.attemptCanonicalFile(new File(parentDir, child))})
+   */
+  @Deprecated public static File makeFile(File parentDir, String child) { 
     File f = new File(parentDir, child);
     try { return f.getCanonicalFile(); }
     catch(IOException e) { return f; }
   }
   
-  /** Determines whether the specified file in within the specified file tree. */
-  public static boolean inFileTree(File f, File root) {
+  /** Determines whether the specified file in within the specified file tree. 
+    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#isMember} instead.  Note that the
+    *              replacement method does not test for {@code null} values and does not
+    *              convert to canonical paths -- if these things are necessary, they should
+    *              be done before invoking the method.
+    */
+  @Deprecated public static boolean inFileTree(File f, File root) {
     if (root == null || f == null) return false;
     try {
       if (! f.isDirectory()) f = f.getParentFile();
@@ -88,10 +103,16 @@ public abstract class FileOps {
   
   /** Makes a file equivalent to the given file f that is relative to base file b.  In other words,
    *  <code>new File(b,makeRelativeTo(base,abs)).getCanonicalPath()</code> equals
-   *  <code>f.getCanonicalPath()</code><p> 
-   *  In Linux/Unix, if the file f is <code>/home/username/folder/file.java</code> and the file b is 
+   *  <code>f.getCanonicalPath()</code>
+   * 
+   *  <p>In Linux/Unix, if the file f is <code>/home/username/folder/file.java</code> and the file b is 
    *  <code>/home/username/folder/sublevel/file2.java</code>, then the resulting File path from this method would be 
    *  <code>../file.java</code> while its canoncial path would be <code>/home/username/folder/file.java</code>.</p>
+   * 
+   * <p>Warning: this method is inherently broken, because it assumes a relative path exists between all
+   * files.  The Java file system model, however, supports multiple system roots (see {@link File#listRoots}).
+   * Thus, two files from different "file systems" (in Windows, different drives) have no common parent.</p>
+   * 
    *  @param f The path that is to be made relative to the base file
    *  @param b The file to make the next file relative to
    *  @return A new file whose path is relative to the base file while the value of <code>getCanonicalPath()</code> 
@@ -138,8 +159,10 @@ public abstract class FileOps {
    *  is <code>/home/username/txt.txt</code> in linux would be split into the string array: 
    *  {&quot;&quot;,&quot;home&quot;,&quot;username&quot;,&quot;txt.txt&quot;}. Delimeters are excluded.
    *  @param fileToSplit the file to split into its directories.
+   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#fullPath} instead.  It returns a list of {@code File}
+   *               objects rather than strings, but they appear in the same order.
    */
-  public static String[] splitFile(File fileToSplit) {
+  @Deprecated public static String[] splitFile(File fileToSplit) {
     String path = fileToSplit.getPath();
     ArrayList<String> list = new ArrayList<String>();
     while (! path.equals("")) {
@@ -162,8 +185,11 @@ public abstract class FileOps {
    *  @param recur  Whether subdirectories accepted by {@code f} should be recursively searched.  Note that 
    *         subdirectories that <em>aren't</em> accepted by {@code f} will be ignored.
    *  @param f  The filter to apply to contained {@code File}s.
-   *  @return  An array of Files in the directory specified; if the directory does not exist, returns an empty list. */
-  public static ArrayList<File> getFilesInDir(File d, boolean recur, FileFilter f) {
+   *  @return  An array of Files in the directory specified; if the directory does not exist, returns an empty list.
+   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#attemptListFilesAsIterable} or
+   *               {@link edu.rice.cs.plt.io.IOUtil#listFilesRecursively(File, FileFilter, FileFilter)} instead.
+   */
+  @Deprecated public static ArrayList<File> getFilesInDir(File d, boolean recur, FileFilter f) {
     ArrayList<File> l = new ArrayList<File>();
     getFilesInDir(d, l, recur, f);
     return l;

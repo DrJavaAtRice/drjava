@@ -51,7 +51,7 @@ import edu.rice.cs.util.FileOps;
 /** Test cases for {@link FileOps}.
  *  @version $Id$
  */
-public class FileOpsTest extends DrJavaTestCase {
+@SuppressWarnings("deprecation") public class FileOpsTest extends DrJavaTestCase {
   private static final Log _log = new Log("FileOpsTest.txt", false);
   public static final String TEXT = "hi, dude.";
   public static final String PREFIX = "prefix";

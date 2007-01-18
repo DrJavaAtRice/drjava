@@ -33,7 +33,7 @@
 
 package edu.rice.cs.util.swing;
 
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.io.File;
@@ -76,6 +76,6 @@ public class FileChooser extends JFileChooser {
   public boolean isTraversable(File f) {
     if (_root == null) return super.isTraversable(f);
 //    Utilities.show("isTraversable(" + f + ") called; _root = " + _root);
-    return f != null && f.isDirectory() && FileOps.inFileTree(f, _root);
+    return f != null && f.isDirectory() && IOUtil.isMember(f, _root);
   }
 }
