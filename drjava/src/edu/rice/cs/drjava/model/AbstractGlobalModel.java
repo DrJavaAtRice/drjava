@@ -949,8 +949,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         return roots[0].getCanonicalFile();
       }
       catch(IOException e) { /* fall through */ }
-//       _log.log("Returning " + System.getProperty("user.dir") + " as working directory");
-      return new File(System.getProperty("user.dir"));  // a flat file configuration should have exactly one source root
+//       _log.log("Returning " + System.getProperty("user.home") + " as working directory");
+      return new File(System.getProperty("user.home"));  // a flat file configuration should have exactly one source root
     }
     public boolean isProjectActive() { return false; }
     public boolean inProjectPath(OpenDefinitionsDocument doc) { return false; }

@@ -58,6 +58,7 @@ import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.*;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.*;
 
@@ -92,6 +93,9 @@ public class DrJavaRoot {
    * prevent others from assigning new values. */
   
   public static void main(final String[] args) {
+    // Platform-specific UI setup.
+    PlatformFactory.ONLY.beforeUISetup();
+
 //    Utilities.show("DrJavaRoot started with args = " + Arrays.toString(args));
     // let DrJava class handle command line arguments
     if (!DrJava.handleCommandLineArgs(args)) {
@@ -131,7 +135,7 @@ public class DrJavaRoot {
           
           /* This call on invokeLater only runs in the main thread, so we use SwingUtilities rather than Utilities.
            * We use invokeLater here ensure all files have finished loading and added to the fileview before the MainFrame
-           * is set visible.  When this was not done, we occasionally encountered a NullPointerExceptio on startUp when 
+           * is set visible.  When this was not done, we occasionally encountered a NullPointerException on start up when 
            * specifying a file (ex: java -jar drjava.jar somefile.java)
            */
           SwingUtilities.invokeLater(new Runnable(){ public void run(){ mf.setVisible(true); } });

@@ -2538,8 +2538,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     // Cache the config object, since we use it many, many times.
     final Configuration config = DrJava.getConfig();
    
-    // Platform-specific UI setup.
-    PlatformFactory.ONLY.beforeUISetup();
   
 //    Utilities.show("MainFrame starting");
     
@@ -2643,7 +2641,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     });
     _debugStepTimer.setRepeats(false);
     
-    // Working directory is default place to start, else use user.dir (bug #895998).
+    // Working directory is default place to start (bug #895998).
     File workDir = _model.getMasterWorkingDirectory();
 
     // Overrides JFileChooser to display the full path of the directory
@@ -2910,7 +2908,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           int result = JOptionPane.
             showConfirmDialog(_configFrame,
                               "Specifying Main JVM Args is an advanced option. Invalid arguments may cause\n" +
-                              "DrJava to fail on startUp.  You may need to edit or delete your .drjava preferences file\n" +
+                              "DrJava to fail on start up.  You may need to edit or delete your .drjava preferences file\n" +
                               "to recover.\n Are you sure you want to set this option?\n" +
                               "(You will have to restart Drjava before changes take effect.)",
                               "Confirm Main JVM Arguments", JOptionPane.YES_NO_OPTION);
@@ -6216,7 +6214,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       file = _getFullFile(file);
       _openChooser.setCurrentDirectory(file);
       _saveChooser.setCurrentDirectory(file);
-//      System.setProperty("user.dir", file.getAbsolutePath());  // Changed system property is ignored by JVM
       DrJava.getConfig().setSetting(LAST_DIRECTORY, file);
     }
     catch (IOException ioe) {

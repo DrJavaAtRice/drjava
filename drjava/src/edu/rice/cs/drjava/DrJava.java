@@ -68,7 +68,6 @@ import edu.rice.cs.util.newjvm.ExecJVM;
  *  (i) the location of tools.jar in the Java JDK installed on this machine (so DrJava can invoke the javac compiler
  *      stored in tools.jar)
  *  (ii) the argument string for invoking the main JVM (notably -X options used to determine maximum heap size, etc.)
- *  This version of DrJava no longer supports the transitional JSR-14 compilers or the GJ compiler.
  *  @version $Id$
  */
 public class DrJava {
@@ -92,9 +91,6 @@ public class DrJava {
       TEST_COMPILER_CLASS = TEST_15_16_COMPILER_CLASS;
     }
   }
-  
-  /** Pause time for displaying DrJava banner on startUp (in milliseconds) */
-  private static final int PAUSE_TIME = 2000;
   
   private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx128M";
   
@@ -135,20 +131,12 @@ public class DrJava {
    *  @param args Command line argument array
    */
   public static void main(final String[] args) {
+    // Platform-specific UI setup.
+    PlatformFactory.ONLY.beforeUISetup();
     
-    final SplashScreen splash = new SplashScreen();
-    splash.setVisible(true);
-    splash.repaint();
+    new SplashScreen().flash();
 //    Utilities.showDebug("Calling configureAndLoadDrJavaRoot with args = " + args);
     configureAndLoadDrJavaRoot(args); 
-    
-    // This obviously only runs in the main thread, not the UI thread, so use SwingUtilities rather than Utilities.
-    SwingUtilities.invokeLater(new Runnable() { 
-      public void run() { 
-        try { Thread.sleep(PAUSE_TIME); }
-        catch(InterruptedException e) { }
-        splash.dispose(); 
-      }});
   }
   
   public static void configureAndLoadDrJavaRoot(String[] args) {
@@ -157,50 +145,55 @@ public class DrJava {
       if (handleCommandLineArgs(args)) {
         
         // Check that compiler and debugger are available on classpath (including tools.jar location)
-        checkForCompilersAndDebugger(args);
+        boolean restart = !checkForCompilersAndDebugger(args);
         
-        // Start the DrJava master JVM
-        String pathSep = System.getProperty("path.separator");
-        String classPath = edu.rice.cs.util.FileOps.convertToAbsolutePathEntries(System.getProperty("java.class.path"));
-        
-        // Include both the javac location stored in .drjava prefences and the path proposed by ToolsJarClassLoader 
-        File toolsFromConfig = getConfig().getSetting(JAVAC_LOCATION);
-        classPath += pathSep + ToolsJarClassLoader.getToolsJarClassPath(toolsFromConfig);
-        
-        File workDir = new File(System.getProperty("user.home"));
+        // Restart if there are custom JVM args
+        restart |= getConfig().getSetting(MASTER_JVM_ARGS).length() > 0;
         
         LinkedList<String> classArgsList = new LinkedList<String>();
-        // need to make the paths absolute since the working directory might change
-        for(String fn: _filesToOpen) {
-            classArgsList.add(new File(fn).getAbsolutePath());
-        }
+        classArgsList.addAll(_filesToOpen);
 
         // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
-        if (_showDebugConsole) classArgsList.add(0,"-debugConsole");
+        if (_showDebugConsole) { classArgsList.addFirst("-debugConsole"); }
         
-        String[] jvmArgs = _jvmArgs.toArray(new String[0]);
         if (!_propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
-          classArgsList.add(0,"-config");
-          // need to make the paths absolute since the working directory might change
-          classArgsList.add(1,_propertiesFile.getAbsolutePath());
+          // Placed in reversed order to get "-config filename"
+          classArgsList.addFirst(_propertiesFile.getAbsolutePath());
+          classArgsList.addFirst("-config");
         }
+
         String[] classArgs = classArgsList.toArray(new String[0]);
         
-        // Run a new copy of DrJava and exit
-        try {
+        if (restart) {
+          // Determine classpath
+          String pathSep = System.getProperty("path.separator");
+          String classPath = FileOps.convertToAbsolutePathEntries(System.getProperty("java.class.path"));
+          
+          // Include both the javac location stored in .drjava prefences and the path proposed by ToolsJarClassLoader 
+          File toolsFromConfig = getConfig().getSetting(JAVAC_LOCATION);
+          classPath += pathSep + ToolsJarClassLoader.getToolsJarClassPath(toolsFromConfig);
+        
+          // Run a new copy of DrJava and exit
+          try {
 //          Utilities.showDebug("Starting DrJavaRoot with classArgs = " + Arrays.toString(classArgs) + "; classPath = " + classPath + 
-//                             "; jvmArgs = " + Arrays.toString(jvmArgs) + "; workDir = " + workDir);
-          ExecJVM.runJVM("edu.rice.cs.drjava.DrJavaRoot", classArgs, classPath, jvmArgs, workDir);
+//                             "; jvmArgs = " + _jvmArgs + "; workDir = " + workDir);
+            ExecJVM.runJVM("edu.rice.cs.drjava.DrJavaRoot", classArgs, classPath, _jvmArgs.toArray(new String[0]), null);
+          }
+          catch (IOException ioe) {
+            // Display error
+            final String[] text = {
+              "DrJava was unable to load its compiler and debugger.  Would you ",
+              "like to start DrJava without a compiler and debugger?", "\nReason: " + ioe.toString()
+            };
+            int result = JOptionPane.showConfirmDialog(null, text, "Could Not Load Compiler and Debugger",
+                                                       JOptionPane.YES_NO_OPTION);
+            if (result != JOptionPane.YES_OPTION) { System.exit(0); }
+          }
         }
-        catch (IOException ioe) {
-          // Display error
-          final String[] text = {
-            "DrJava was unable to load its compiler and debugger.  Would you ",
-            "like to start DrJava without a compiler and debugger?", "\nReason: " + ioe.toString()
-          };
-          int result = JOptionPane.showConfirmDialog(null, text, "Could Not Load Compiler and Debugger",
-                                                     JOptionPane.YES_NO_OPTION);
-          if (result != JOptionPane.YES_OPTION) { System.exit(0); }
+        
+        else {
+          // No restart -- just invoke DrJavaRoot.main.
+          DrJavaRoot.main(classArgs);
         }
       }
     }
@@ -237,12 +230,8 @@ public class DrJava {
         _toolsLoader = new ToolsJarClassLoader(getConfig().getSetting(JAVAC_LOCATION));
       }
       
-      else if ((arg.length() > 1) && (arg.substring(0,2).equals("-X"))) {
-        if (arg.substring(0,4).equals("-Xmx")) heapSizeGiven = true;
-        _jvmArgs.add(arg); 
-      }
-      
-      else if ((arg.length() > 1) && (arg.substring(0,2).equals("-D"))) {
+      else if (arg.startsWith("-X") || arg.startsWith("-D")) {
+        if (arg.startsWith("-Xmx")) { heapSizeGiven = true; }
         _jvmArgs.add(arg); 
       }
       
@@ -259,16 +248,21 @@ public class DrJava {
       }
     }
     
-    String jvmArgString = getConfig().getSetting(MASTER_JVM_ARGS);
-    List<String> jvmArgs = ArgumentTokenizer.tokenize(jvmArgString);
-    if (jvmArgs != null && jvmArgs.size() != 0) _jvmArgs.addAll(jvmArgs);
+    List<String> configArgs = ArgumentTokenizer.tokenize(getConfig().getSetting(MASTER_JVM_ARGS));
+    for (String arg : configArgs) {
+      if (arg.startsWith("-Xmx")) { heapSizeGiven = true; }
+      _jvmArgs.add(arg);
+    }
+
     if (PlatformFactory.ONLY.isMacPlatform()) {
-      _jvmArgs.add("-Dcom.apple.macos.useScreenMenuBar=true");
-      _jvmArgs.add("-Xdock:name=DrJava");
-      _jvmArgs.add("-Xdock:icon=/Applications/DrJava.app/Contents/Resources/DrJava.icns");
+      String iconLoc = System.getProperty("edu.rice.cs.drjava.icon");
+      if (iconLoc != null) { // we are running inside the Mac app wrapper
+        _jvmArgs.add("-Xdock:name=DrJava");
+        _jvmArgs.add("-Xdock:icon=" + iconLoc);
+      }
     }
     
-    if (! heapSizeGiven && jvmArgString.indexOf("-Xmx")<0) _jvmArgs.add(DEFAULT_MAX_HEAP_SIZE_ARG);
+    if (!heapSizeGiven) { _jvmArgs.add(DEFAULT_MAX_HEAP_SIZE_ARG); }
         
     _log.log("_jvmArgs = " + _jvmArgs);
 
@@ -290,17 +284,23 @@ public class DrJava {
     System.out.print(buf.toString());
   }
   
-   /** Check to see if a compiler and the debugger are available in a tools.jar file.  If it can't find them, it prompts
-    *  the user to optionally specify the location of a propert tools.jar file.
+   /** Check to see if a compiler and the debugger are available in a tools.jar file.  If it can't find them, it 
+    *  prompts the user to optionally specify the location of a propert tools.jar file.
     *  @param args Command line argument array, in case we need to restart
-   */
-  static void checkForCompilersAndDebugger(String[] args) {
-    
-    boolean needCompiler = ! hasAvailableCompiler();
-    boolean needDebugger = ! hasAvailableDebugger();
-
-    // Try to make sure both compiler and debugger are available
-    if (needCompiler || needDebugger) promptForToolsJar(needCompiler, needDebugger);
+    *  @return  {@code true} iff the compiler and debugger are available without restarting
+    */
+  static boolean checkForCompilersAndDebugger(String[] args) {
+    if (canLoad(_thisLoader, TEST_COMPILER_CLASS) && canLoad(_thisLoader, TEST_DEBUGGER_CLASS)) {
+      return true;
+    }
+    else {
+      boolean haveCompiler = canLoad(_thisLoader, TEST_COMPILER_CLASS) || 
+                             canLoad(_toolsLoader, TEST_COMPILER_CLASS);
+      boolean haveDebugger = canLoad(_thisLoader, TEST_DEBUGGER_CLASS) || 
+                             canLoad(_toolsLoader, TEST_DEBUGGER_CLASS);
+      if (!haveCompiler || !haveDebugger) { promptForToolsJar(!haveCompiler, !haveDebugger); }
+      return false;
+    }
   }
 
   /** Returns whether the debugger will be able to load successfully.  Checks for the ability to load the 

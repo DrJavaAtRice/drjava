@@ -25,11 +25,13 @@
 		<key>JVMVersion</key>
 		<string>1.4+</string>
 		<key>MainClass</key>
-		<string>edu.rice.cs.drjava.DrJavaRoot</string>
+		<string>edu.rice.cs.drjava.DrJava</string>
 		<key>Properties</key>
 		<dict>
 			<key>apple.laf.useScreenMenuBar</key>
 			<string>true</string>
+                        <key>edu.rice.cs.drjava.icon</key>
+                        <string>$APP_PACKAGE/Contents/Resources/DrJava.icns</string>
 		</dict>
 	</dict>
 </dict>

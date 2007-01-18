@@ -35,13 +35,16 @@ package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 
 /**
  * A splash screen window to be displayed as DrJava is first starting up.
  * @version $Id$
  */
 public class SplashScreen extends JWindow {
-  public static final String SPLASH_ICON = "splash.png";
+  private static final String SPLASH_ICON = "splash.png";
+  private static final int PAUSE_TIME = 4000; // in milliseconds
+  
   private ImageIcon _icon;
 
   /** Creates a new splash screen, but does not display it.  Display the splash screen using show() and close it 
@@ -61,4 +64,20 @@ public class SplashScreen extends JWindow {
     setLocation(ownerLoc.x + (ownerSize.width - frameSize.width) / 2,
                 ownerLoc.y + (ownerSize.height - frameSize.height) / 2);
   }
+  
+  /** Display the splash screen, and schedule it to be removed after a delay.  This does not
+    * need to run on the event thread.
+    */
+  public void flash() {
+    setVisible(true);
+    repaint();
+    Timer cleanup = new Timer(PAUSE_TIME, new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        dispose();
+      }
+    });
+    cleanup.setRepeats(false);
+    cleanup.start();
+  }
+  
 }
