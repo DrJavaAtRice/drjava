@@ -3,7 +3,7 @@ forcing a one-time authentication, without actually changing anything.
 
 New developers can force authentication with a command sequence like the following:
 
-svn co https://svn.sourceforge.net/svnroot/drjava/branches/authenticate
+svn co https://drjava.svn.sourceforge.net/svnroot/drjava/trunk/misc/authenticate
 cd authenticate
 svn propset touched myUserName authenticate.txt
 svn commit -m "Touched by myUserName"
