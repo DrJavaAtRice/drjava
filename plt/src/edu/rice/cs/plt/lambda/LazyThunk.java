@@ -5,17 +5,17 @@ package edu.rice.cs.plt.lambda;
  * invocation of {@link #value()} evaluates the thunk; subsequent invocations return the same 
  * value as returned previously.
  */
-public class LazyThunk<T> implements Thunk<T> {
+public class LazyThunk<R> implements Thunk<R> {
 
-  private T _val;
-  private Thunk<T> _thunk;
+  private R _val;
+  private Thunk<R> _thunk;
   
-  public LazyThunk(Thunk<T> value) {
+  public LazyThunk(Thunk<R> value) {
     _thunk = value;
     // the value of _val doesn't matter
   }
   
-  public T value() {
+  public R value() {
     if (_thunk != null) {
       _val = _thunk.value();
       _thunk = null;
@@ -23,6 +23,6 @@ public class LazyThunk<T> implements Thunk<T> {
     return _val;
   }
   
-  public static <T> LazyThunk<T> make(Thunk<T> value) { return new LazyThunk<T>(value); }
+  public static <R> LazyThunk<R> make(Thunk<R> value) { return new LazyThunk<R>(value); }
   
 }

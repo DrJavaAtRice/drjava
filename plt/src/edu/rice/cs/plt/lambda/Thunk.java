@@ -9,6 +9,6 @@ package edu.rice.cs.plt.lambda;
  * @see Lambda4
  * @see Runnable
  */
-public interface Thunk<T> {
-  public T value();
+public interface Thunk<R> {
+  public R value();
 }
