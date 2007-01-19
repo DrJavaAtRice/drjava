@@ -419,7 +419,7 @@ public class IOUtil {
           public Iterable<File> value() {
             Iterable<File> dirFiles = IterUtil.empty();
             for (File child : attemptListFilesAsIterable(canonicalF)) {
-              dirFiles = IterUtil.compose(dirFiles, listFilesRecursively(f, filter, recursionFilter, stack));
+              dirFiles = IterUtil.compose(dirFiles, listFilesRecursively(child, filter, recursionFilter, stack));
             }
             return dirFiles;
           }
