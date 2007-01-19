@@ -52,9 +52,9 @@ import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 
 
@@ -290,7 +290,7 @@ public class DefaultCompilerModel implements CompilerModel {
   private void _compileFiles(List<? extends File> files, File buildDir) throws IOException {
     if (!files.isEmpty()) {
       /* Canonicalize buildDir */
-      if (buildDir != null) buildDir = FileOps.getCanonicalFile(buildDir);
+      if (buildDir != null) buildDir = IOUtil.attemptCanonicalFile(buildDir);
       
       List<File> classPath = _model.getClassPath().asFileVector();
       
@@ -348,7 +348,7 @@ public class DefaultCompilerModel implements CompilerModel {
     HashSet<File> javaFileSet = new HashSet<File>();
     boolean containsLanguageLevels = false;
     for (File f : files) {
-      File canonicalFile = FileOps.getCanonicalFile(f);
+      File canonicalFile = IOUtil.attemptCanonicalFile(f);
       String fileName = canonicalFile.getPath();
       int lastIndex = fileName.lastIndexOf(".dj");
       if (lastIndex != -1) {

@@ -41,6 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Collection;
 
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.DirectorySelector;
@@ -220,10 +221,8 @@ public class DefaultJavadocModel implements JavadocModel {
             // Include all the other source files at the source root.
             // But don't do it if we've already done it for this directory.
             defaultRoots.add(sourceRoot);
-            File[] javaFiles = sourceRoot.listFiles(FileOps.JAVA_FILE_FILTER);
-            if (javaFiles!=null) { // listFiles may return null if there's an IO error
-              for (File f: javaFiles) { docUnits.add(f.getAbsolutePath());}
-            }
+            Iterable<File> javaFiles = IOUtil.attemptListFilesAsIterable(sourceRoot, IOUtil.extensionFileFilter("java"));
+            for (File f: javaFiles) { docUnits.add(f.getAbsolutePath());}
           }
         }
         else {
@@ -319,7 +318,7 @@ public class DefaultJavadocModel implements JavadocModel {
     final File file = _getFileFromDocument(doc, saver);
 
     // Generate to a temporary directory
-    final File destDir = FileOps.createTempDirectory("DrJava-javadoc");
+    final File destDir = IOUtil.createAndMarkTempDirectory("DrJava-javadoc", "");
 
     _notifier.javadocStarted();  // fire first so _javadocDocumntWorker can fire javadocEnded
     // Start a new thread to do the work.
@@ -431,7 +430,7 @@ public class DefaultJavadocModel implements JavadocModel {
 
       // If success and we're generating current, make sure the temp
       //  directory gets deleted on exit.
-      if (result && !allDocs) FileOps.deleteDirectoryOnExit(destDirFile);
+      if (result && !allDocs) IOUtil.deleteOnExitRecursively(destDirFile);
 
       // Notify all listeners that we're done.
       _notifier.javadocEnded(result, destDirFile, allDocs);

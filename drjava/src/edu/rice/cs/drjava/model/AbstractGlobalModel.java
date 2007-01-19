@@ -1249,7 +1249,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     for (final File f: files) {
       if (f == null) throw new IOException("File name returned from FileSelector is null");
       try {
-        OpenDefinitionsDocument d = _rawOpenFile(FileOps.getCanonicalFile (f));
+        OpenDefinitionsDocument d = _rawOpenFile(IOUtil.attemptCanonicalFile(f));
         //always return last opened Doc
         retDocs.add(d);
         filesOpened.add(d);
@@ -2937,9 +2937,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Returns the canonical path for this document, "(Untitled)" if unsaved), "" if the file path is ill-formed. */
     public String getCanonicalPath() {
-      String path = "(Untitled)";
-      if (isUntitled()) return path;
-      return FileOps.getCanonicalPath(getRawFile());
+      if (isUntitled()) { return "(Untitled)"; }
+      else { return IOUtil.attemptCanonicalFile(getRawFile()).getPath(); }
     }
      
     /** Returns the canonical path augmented by " *" if the document has been modified. */

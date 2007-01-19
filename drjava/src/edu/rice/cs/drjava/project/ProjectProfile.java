@@ -41,10 +41,11 @@ import java.text.SimpleDateFormat;
 import java.io.*;
 
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.Version;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
@@ -52,7 +53,6 @@ import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugException;
 
 import static edu.rice.cs.util.StringOps.*;
-import static edu.rice.cs.util.FileOps.*;
 
 /** The internal representation of a project; it is the internal analog of a project file. Includes support for 
  *  writing corresponding project file. 
@@ -378,8 +378,8 @@ public class ProjectProfile implements ProjectFileIR {
   private String encodeDocFile(DocFile df, String prefix, boolean relative) throws IOException {
     String ret = "";
     String path;
-    if (relative) path = makeRelativeTo(df, _projectRoot).getPath();
-    else path = FileOps.getCanonicalPath(df);
+    if (relative) path = FileOps.makeRelativeTo(df, _projectRoot).getPath();
+    else path = IOUtil.attemptCanonicalFile(df).getPath();
 
     path = replace(path, File.separator, "/");
     ret += prefix + "(file (name " + convertToLiteral(path) + ")";
@@ -432,7 +432,7 @@ public class ProjectProfile implements ProjectFileIR {
    */
   private String encodeBreakpointRelative(DebugBreakpointData bp, String prefix) throws IOException {
     String ret = "";
-    String path = makeRelativeTo(bp.getFile(), _projectRoot).getPath();
+    String path = FileOps.makeRelativeTo(bp.getFile(), _projectRoot).getPath();
     
     path = replace(path,File.separator,"/");
     ret += prefix + "(breakpoint (name " + convertToLiteral(path) + ")";
@@ -468,7 +468,7 @@ public class ProjectProfile implements ProjectFileIR {
    */
   private String encodeBookmarkRelative(DocumentRegion bp, String prefix) throws IOException {
     String ret = "";
-    String path = makeRelativeTo(bp.getDocument().getFile(), _projectRoot).getPath();
+    String path = FileOps.makeRelativeTo(bp.getDocument().getFile(), _projectRoot).getPath();
     
     path = replace(path,File.separator,"/");
     ret += prefix + "(bookmark (name " + convertToLiteral(path) + ")";

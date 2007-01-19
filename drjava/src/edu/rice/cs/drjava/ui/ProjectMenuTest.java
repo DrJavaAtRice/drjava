@@ -41,8 +41,8 @@ import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParser;
 
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
@@ -82,7 +82,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     
     // create temp directory for this test
     _base = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
-    _parent = FileOps.createTempDirectory("proj", _base);
+    _parent = IOUtil.createAndMarkTempDirectory("proj", "", _base);
     _srcDir = new File(_parent, "src");
     _srcDir.mkdir(); // create the src directory
 
@@ -92,9 +92,9 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     _projFile = new File(_parent, "test.pjt");
     
     _file1 = new File(_srcDir, "test1.java");
-    FileOps.writeStringToFile(_file1, "");  // create dummy file
+    IOUtil.writeStringToFile(_file1, "");  // create dummy file
     _file2 = new File(_srcDir, "test2.java");
-    FileOps.writeStringToFile(_file2, "");// create dummy file
+    IOUtil.writeStringToFile(_file2, "");// create dummy file
     
 //    System.err.println("test1.java and test1.java created");
     
@@ -110,7 +110,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
       "   (file (name \"src/test1.java\")(select 32 32))" +
       "   (file (name \"src/test2.java\")(select 32 32)))";
     
-    FileOps.writeStringToFile(_projFile, _projFileText);
+    IOUtil.writeStringToFile(_projFile, _projFileText);
 
 //    Utilities.invokeAndWait(new Runnable() { 
 //      public void run() { 
@@ -123,7 +123,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   }
 
   public void tearDown() throws Exception {
-    FileOps.deleteDirectoryOnExit(_parent);
+    IOUtil.deleteOnExitRecursively(_parent);
     _auxFile.delete();
     _frame.dispose();
     _projFile = null;

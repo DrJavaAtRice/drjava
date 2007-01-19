@@ -58,8 +58,8 @@ import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 //import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 //import edu.rice.cs.util.ExitingNotAllowedException;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.ClassPathVector;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.text.SwingDocument;
@@ -301,10 +301,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         File sourceRoot = doc.getSourceRoot();
         File buildRoot = (buildDir == null) ? sourceRoot: buildDir;
         
-        File classFileDir = new File(FileOps.getCanonicalPath(buildRoot) + File.separator + packagePath);
+        File classFileDir = new File(IOUtil.attemptCanonicalFile(buildRoot), packagePath);
         
         File sourceDir = 
-          (buildDir == null) ? classFileDir : new File(FileOps.getCanonicalPath(sourceRoot) + File.separator + packagePath);
+          (buildDir == null) ? classFileDir : new File(IOUtil.attemptCanonicalFile(sourceRoot), packagePath);
         
         if (! classDirsAndRoots.containsKey(classFileDir)) {
           classDirsAndRoots.put(classFileDir, sourceDir);

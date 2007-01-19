@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.*;
@@ -485,7 +486,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   /** Tests that the save button does not set itself as enabled immediately after opening a file. */
   public void testSaveButtonEnabled() throws IOException {
     String user = System.getProperty("user.name");
-    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
     String forceOpenClass1_string =
       "public class ForceOpenClass1 {\n" +
@@ -497,7 +498,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       "  }\n" +
       "}";
     
-    FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
+    IOUtil.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
     forceOpenClass1_file.deleteOnExit();
     
     //_frame.setVisible(true);
@@ -536,7 +537,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     final GlobalModel _model = _frame.getModel();
     
      String user = System.getProperty("user.name");
-     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
 
      File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
      String forceOpenClass1_string =
@@ -561,9 +562,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        "  String s = \"asf\";\n" +
        "}";
 
-     FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
-     FileOps.writeStringToFile(forceOpenClass2_file, forceOpenClass2_string);
-     FileOps.writeStringToFile(forceOpenClass3_file, forceOpenClass3_string);
+     IOUtil.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
+     IOUtil.writeStringToFile(forceOpenClass2_file, forceOpenClass2_string);
+     IOUtil.writeStringToFile(forceOpenClass3_file, forceOpenClass3_string);
      forceOpenClass1_file.deleteOnExit();
      forceOpenClass2_file.deleteOnExit();
      forceOpenClass3_file.deleteOnExit();
@@ -642,7 +643,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      }
      _log.log("File saved and compiled");
      
-     if (! FileOps.deleteDirectory(_tempDir))
+     if (! IOUtil.deleteRecursively(_tempDir))
        System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
    
      _log.log("testDancingUIFileOpened completed");
@@ -657,7 +658,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      *  username and create the temporary directory. Only sticky part is deciding where to put it, in FileOps maybe?
      */
     String user = System.getProperty("user.name");
-    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
     String forceOpenClass1_string =
       "public class ForceOpenClass1 {\n" +
@@ -669,7 +670,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       "  }\n" +
       "}";
     
-    FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
+    IOUtil.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
     forceOpenClass1_file.deleteOnExit();
     
     final ComponentAdapter listener = new ComponentAdapter() {
@@ -710,7 +711,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       catch(InterruptedException e) { fail(e.toString()); }
     }
     
-    if (! FileOps.deleteDirectory(_tempDir)) {
+    if (! IOUtil.deleteRecursively(_tempDir)) {
       System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                          "\nDo it by hand.\n");
     }
@@ -776,16 +777,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testGotoFileUnderCursor() throws IOException {
 //    Utilities.show("Running testGotoFileUnderCursor");
     String user = System.getProperty("user.name");
-    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
 
     final File goto1_file = new File(_tempDir, "GotoFileUnderCursor1.java");
     String goto1_string = "GotoFileUnderCursorTest";
-    FileOps.writeStringToFile(goto1_file, goto1_string);
+    IOUtil.writeStringToFile(goto1_file, goto1_string);
     goto1_file.deleteOnExit();
 
     final File goto2_file = new File(_tempDir, "GotoFileUnderCursorTest.java");
     String goto2_string = "GotoFileUnderCursor1";
-    FileOps.writeStringToFile(goto2_file, goto2_string);
+    IOUtil.writeStringToFile(goto2_file, goto2_string);
     goto2_file.deleteOnExit();
 
     Utilities.invokeAndWait(new Runnable() { 
@@ -838,16 +839,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   /** Tests that "go to file under cursor" works if unique after appending ".java" */
   public void testGotoFileUnderCursorAppendJava() throws IOException {
     String user = System.getProperty("user.name");
-    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
 
     final File goto1_file = new File(_tempDir, "GotoFileUnderCursor2Test.java");
     String goto1_string = "GotoFileUnderCursor2";
-    FileOps.writeStringToFile(goto1_file, goto1_string);
+    IOUtil.writeStringToFile(goto1_file, goto1_string);
     goto1_file.deleteOnExit();
 
     final File goto2_file = new File(_tempDir, "GotoFileUnderCursor2.java");
     String goto2_string = "GotoFileUnderCursor2Test";
-    FileOps.writeStringToFile(goto2_file, goto2_string);
+    IOUtil.writeStringToFile(goto2_file, goto2_string);
     goto2_file.deleteOnExit();
 
     Utilities.invokeAndWait(new Runnable() { 
@@ -907,16 +908,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testGotoFileUnderCursorShowDialog() throws IOException {
 //    Utilities.show("Running testGotoFileUnderCursorShowDialog()");
     String user = System.getProperty("user.name");
-    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
 
     final File goto1_file = new File(_tempDir, "GotoFileUnderCursor3.java");
     String goto1_string = "GotoFileUnderCursor";
-    FileOps.writeStringToFile(goto1_file, goto1_string);
+    IOUtil.writeStringToFile(goto1_file, goto1_string);
     goto1_file.deleteOnExit();
 
     final File goto2_file = new File(_tempDir, "GotoFileUnderCursor4.java");
     String goto2_string = "GotoFileUnderCursor3";
-    FileOps.writeStringToFile(goto2_file, goto2_string);
+    IOUtil.writeStringToFile(goto2_file, goto2_string);
     goto2_file.deleteOnExit();
 
     Utilities.invokeAndWait(new Runnable() { 

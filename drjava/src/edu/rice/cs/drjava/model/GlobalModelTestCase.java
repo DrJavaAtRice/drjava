@@ -38,7 +38,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
@@ -100,7 +100,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _log.log("Global model created for " + this);
     DrJava.getConfig().resetToDefaults();
     String user = System.getProperty("user.name");
-    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     // Wait until model has connected to slave JVM
     _log.log("Ensuring that interpreter is connected in " + this);
     _model._jvm.ensureInterpreterConnected();
@@ -108,7 +108,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model.setResetAfterCompile(false);
     _log.log("Completed (GlobalModelTestCase) set up of " + this);
 
-//    FileOps.deleteDirectoryOnExit(_tempDir);
 //    _model.getOpenDefinitionsDocuments().get(0).saveFile(new FileSelector(new File(_tempDir, "blank document")));
 //    super.setUp();
   }
@@ -116,7 +115,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws Exception {
     _log.log("Tearing down " + this);
-    boolean ret = FileOps.deleteDirectory(_tempDir);
+    boolean ret = IOUtil.deleteRecursively(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
 
     _model.dispose();
@@ -152,7 +151,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   /** Create a new temporary directory in _tempDir. */
   protected File tempDirectory() throws IOException {
-    return FileOps.createTempDirectory("DrJava-test", _tempDir);
+    return IOUtil.createAndMarkTempDirectory("DrJava-test", "", _tempDir);
   }
 
   protected File createFile(String name) { return new File(_tempDir, name); }
@@ -169,7 +168,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
   protected File writeToNewTempFile(String text) throws IOException {
     File temp = tempFile();
-    FileOps.writeStringToFile(temp, text);
+    IOUtil.writeStringToFile(temp, text);
     return temp;
   }
 

@@ -38,7 +38,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.OverwriteException;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.WarningFileSelector;
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.io.File;
@@ -58,7 +58,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     super.setUp();
     DrJava.getConfig().resetToDefaults();
     String user = System.getProperty("user.name");
-    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     _history = new History();
   }
 
@@ -66,7 +66,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
    * Cleans up temporary files and tries to free used variables after each test.
    */
   public void tearDown() throws Exception {
-    boolean ret = FileOps.deleteDirectory(_tempDir);
+    boolean ret = IOUtil.deleteRecursively(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
     _tempDir = null;
     _history = null;

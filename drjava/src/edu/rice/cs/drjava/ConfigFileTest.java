@@ -35,7 +35,7 @@ package edu.rice.cs.drjava;
 
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.plt.io.IOUtil;
 
 import java.awt.*;
 import java.io.File;
@@ -57,8 +57,8 @@ public final class ConfigFileTest extends DrJavaTestCase {
   
   /** Creates a custom properties file, tells DrJava to use it, and checks that it is being used. */
   public void testCustomConfigFile() throws IOException {
-    File propsFile = FileOps.writeStringToNewTempFile("DrJavaProps", ".txt", CUSTOM_PROPS);
-    propsFile.deleteOnExit();
+    File propsFile = IOUtil.createAndMarkTempFile("DrJavaProps", ".txt");
+    IOUtil.writeStringToFile(propsFile, CUSTOM_PROPS);
     DrJava.setPropertiesFile(propsFile.getAbsolutePath());
     DrJava._initConfig();
     FileConfiguration config = DrJava.getConfig();

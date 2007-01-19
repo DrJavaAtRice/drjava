@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -56,7 +57,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
 
   /** Returns an array of possible Files for the tools.jar file. */
   public static File[] getToolsJarFiles(File toolsJar) {
-    File javaHome = FileOps.getCanonicalFile(new File(System.getProperty("java.home")));
+    File javaHome = IOUtil.attemptCanonicalFile(new File(System.getProperty("java.home")));
     
     /*
      * javaHomeParents is a set of (attempted) canonical paths that may not exist.
@@ -65,8 +66,8 @@ public class ToolsJarClassLoader extends URLClassLoader {
      * doesn't show up multiple times.
      */
     LinkedHashSet<File> javaHomeParents = new LinkedHashSet<File>();
-    javaHomeParents.add(FileOps.getCanonicalFile(new File(javaHome, "..")));
-    javaHomeParents.add(FileOps.getCanonicalFile(new File(javaHome, "../..")));
+    javaHomeParents.add(IOUtil.attemptCanonicalFile(new File(javaHome, "..")));
+    javaHomeParents.add(IOUtil.attemptCanonicalFile(new File(javaHome, "../..")));
     
     final String jv = System.getProperty("java.version");
     if (!jv.startsWith("1.3") && !jv.startsWith("1.4")) {
@@ -74,31 +75,31 @@ public class ToolsJarClassLoader extends URLClassLoader {
       // so we cannot use it
       String winPrograms = System.getenv("ProgramFiles");
       if (winPrograms != null) {
-        javaHomeParents.add(FileOps.getCanonicalFile(new File(winPrograms, "Java")));
-        javaHomeParents.add(FileOps.getCanonicalFile(new File(winPrograms)));
+        javaHomeParents.add(IOUtil.attemptCanonicalFile(new File(winPrograms, "Java")));
+        javaHomeParents.add(IOUtil.attemptCanonicalFile(new File(winPrograms)));
       }
       else {  // in case the environment variables aren't set up properly
-        javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/Java/")));
-        javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Program Files/")));
+        javaHomeParents.add(IOUtil.attemptCanonicalFile(new File("/C:/Program Files/Java/")));
+        javaHomeParents.add(IOUtil.attemptCanonicalFile(new File("/C:/Program Files/")));
       }
       
       String winSystem = System.getenv("SystemDrive");
       if (winSystem != null) {
-        javaHomeParents.add(FileOps.getCanonicalFile(new File(winSystem, "Java")));
-        javaHomeParents.add(FileOps.getCanonicalFile(new File(winSystem)));
+        javaHomeParents.add(IOUtil.attemptCanonicalFile(new File(winSystem, "Java")));
+        javaHomeParents.add(IOUtil.attemptCanonicalFile(new File(winSystem)));
       }
       else { // in case the environment variables aren't set up properly
-        javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/Java/")));
-        javaHomeParents.add(FileOps.getCanonicalFile(new File("/C:/")));
+        javaHomeParents.add(IOUtil.attemptCanonicalFile(new File("/C:/Java/")));
+        javaHomeParents.add(IOUtil.attemptCanonicalFile(new File("/C:/")));
       }
     }
 
-    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/")));
-    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/java/")));
-    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/j2se/")));
-    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/local/")));
-    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/local/java/")));
-    javaHomeParents.add(FileOps.getCanonicalFile(new File("/usr/local/j2se/")));
+    javaHomeParents.add(IOUtil.attemptCanonicalFile(new File("/usr/")));
+    javaHomeParents.add(IOUtil.attemptCanonicalFile(new File("/usr/java/")));
+    javaHomeParents.add(IOUtil.attemptCanonicalFile(new File("/usr/j2se/")));
+    javaHomeParents.add(IOUtil.attemptCanonicalFile(new File("/usr/local/")));
+    javaHomeParents.add(IOUtil.attemptCanonicalFile(new File("/usr/local/java/")));
+    javaHomeParents.add(IOUtil.attemptCanonicalFile(new File("/usr/local/j2se/")));
     
     
     /* javaHomes is a set of potential Java installations.  Each is an existing directory. */
@@ -126,13 +127,13 @@ public class ToolsJarClassLoader extends URLClassLoader {
     /* The result is a set of existing tools.jar files, (attempted) canonicalized */
     LinkedHashSet<File> result = new LinkedHashSet<File>();
     
-    try { if (toolsJar.isFile()) result.add(FileOps.getCanonicalFile(toolsJar)); }
+    try { if (toolsJar.isFile()) result.add(IOUtil.attemptCanonicalFile(toolsJar)); }
     catch (SecurityException e) { /* ignore */ }
     
     for (File home : javaHomes) {
       try {
         File tools = new File(home, "lib/tools.jar");
-        if (tools.isFile()) { result.add(FileOps.getCanonicalFile(tools)); }
+        if (tools.isFile()) { result.add(IOUtil.attemptCanonicalFile(tools)); }
       }
       catch (SecurityException e) { /* ignore */ }
     }

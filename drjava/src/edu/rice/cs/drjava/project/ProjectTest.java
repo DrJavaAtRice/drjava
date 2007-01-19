@@ -35,7 +35,7 @@ package edu.rice.cs.drjava.project;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.plt.io.IOUtil;
 
 import static edu.rice.cs.util.StringOps.convertToLiteral;
 
@@ -62,13 +62,13 @@ public class ProjectTest extends DrJavaTestCase {
     super.setUp();
     try { 
       base = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
-      parent = FileOps.createTempDirectory("proj", base);
+      parent = IOUtil.createAndMarkTempDirectory("proj", "", base);
       buildDir = new File(parent, "built");
       buildDir.mkdir();  // create the specified directory
       srcDir = new File(parent, "src");
       srcDir.mkdir(); // create the specified directory
       absp = parent.getCanonicalPath() + File.separator; 
-      FileOps.deleteDirectoryOnExit(parent);
+      IOUtil.deleteOnExitRecursively(parent);
     }
     catch(IOException e) { fail("could not initialize temp path string"); }
   }
@@ -106,7 +106,7 @@ public class ProjectTest extends DrJavaTestCase {
     
     File f = new File(parent, "test1.pjt");
 
-    FileOps.writeStringToFile(f, proj1);
+    IOUtil.writeStringToFile(f, proj1);
 //    System.err.println("Project directory is " + parent);
 //    System.err.println("Project file is " + f);
 //    System.err.println("projFile exists? " + f.exists());
@@ -167,7 +167,7 @@ public class ProjectTest extends DrJavaTestCase {
     
     File f = new File(parent, "test1.pjt");
 
-    FileOps.writeStringToFile(f, proj1);
+    IOUtil.writeStringToFile(f, proj1);
 //    System.err.println("Project directory is " + parent);
 //    System.err.println("Project file is " + f);
 //    System.err.println("projFile exists? " + f.exists());
@@ -210,7 +210,7 @@ public class ProjectTest extends DrJavaTestCase {
 
   public void testWriteFile() throws IOException, MalformedProjectFileException {
     File pf = new File(parent, "test2.pjt");
-    FileOps.writeStringToFile(pf, "");
+    IOUtil.writeStringToFile(pf, "");
     ProjectProfile fb = new ProjectProfile(pf);
     String sr = pf.getCanonicalFile().getParent();
 

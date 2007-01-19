@@ -34,7 +34,7 @@
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
@@ -100,7 +100,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   public void setUp() throws Exception {
     super.setUp();
     String user = System.getProperty("user.name");
-    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     _docPrev = _model.newFile(_tempDir);;
     _doc = _model.newFile(_tempDir);
     _docNext = _model.newFile(_tempDir);

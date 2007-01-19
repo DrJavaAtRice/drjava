@@ -38,8 +38,8 @@ import java.io.*;
 import java.util.List;
 import javax.swing.text.BadLocationException;
 
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
@@ -329,8 +329,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         try { file = doc.getFile(); }
         catch (FileMovedException fme) { fail("file does not exist"); } // We know file should exist
         if (tempFile1.equals(file))
-          assertEquals("file to open", FileOps.getCanonicalFile(tempFile1), FileOps.getCanonicalFile(file));
-        else assertEquals("file to open", FileOps.getCanonicalFile(tempFile2), FileOps.getCanonicalFile(file));
+          assertEquals("file to open", IOUtil.attemptCanonicalFile(tempFile1), IOUtil.attemptCanonicalFile(file));
+        else assertEquals("file to open", IOUtil.attemptCanonicalFile(tempFile2), IOUtil.attemptCanonicalFile(file));
       }
     };
 
@@ -534,7 +534,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
 
-    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
     
     _log.log("testRealSaveFirstSave completed");
   }
@@ -552,7 +552,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     doc.saveFile(new FileSelector(file));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
-    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
 
     // Listener to use on future saves
     TestListener listener = new TestListener() {
@@ -581,7 +581,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     Utilities.clearEventQueue();
     listener.assertSaveCount(1);
-    assertEquals("contents of saved file 2nd write", BAR_TEXT, FileOps.readFileAsString(file));
+    assertEquals("contents of saved file 2nd write", BAR_TEXT, IOUtil.toString(file));
     assertFalse("no backup was made", backup.exists());
 
     //enable file backups
@@ -596,8 +596,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
         
     Utilities.clearEventQueue();
     listener.assertSaveCount(2);
-    assertEquals("contents of saved file 3rd write", FOO_TEXT, FileOps.readFileAsString(file));
-    assertEquals("contents of backup file 3rd write", BAR_TEXT, FileOps.readFileAsString(backup));
+    assertEquals("contents of saved file 3rd write", FOO_TEXT, IOUtil.toString(file));
+    assertEquals("contents of backup file 3rd write", BAR_TEXT, IOUtil.toString(backup));
 
     /* Set the config back to the original option */
     DrJava.getConfig().setSetting(BACKUP_FILES, backupStatus);
@@ -617,7 +617,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     doc.saveFile(new FileSelector(file));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
-    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
 
     TestListener listener = new TestListener() {
       public void fileSaved(OpenDefinitionsDocument doc) {
@@ -645,7 +645,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertModified(false, doc);
     assertContents(BAR_TEXT, doc);
 
-    assertEquals("contents of saved file", BAR_TEXT, FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", BAR_TEXT, IOUtil.toString(file));
     
     _log.log("testCancelSaveAlreadySaved completed");
   }
@@ -659,7 +659,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     doc.saveFile(new FileSelector(file));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
-    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
 
     // No events better be fired!
     _model.addListener(new TestListener());
@@ -669,7 +669,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
 
     doc.saveFileAs(new CancelingSelector());
 
-    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file));
+    assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
     
     _log.log("testCancelSaveAsAlreadySaved completed");
   }
@@ -684,7 +684,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     doc.saveFile(new FileSelector(file1));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
-    assertEquals("contents of saved file", FOO_TEXT, FileOps.readFileAsString(file1));
+    assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file1));
 
     // Make sure we save now to the new file name
     TestListener listener = new TestListener() {
@@ -707,9 +707,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
 
     doc.saveFileAs(new FileSelector(file2));
 
-    assertEquals("contents of saved file1", FOO_TEXT, FileOps.readFileAsString(file1));
+    assertEquals("contents of saved file1", FOO_TEXT, IOUtil.toString(file1));
 
-    assertEquals("contents of saved file2", BAR_TEXT, FileOps.readFileAsString(file2));
+    assertEquals("contents of saved file2", BAR_TEXT, IOUtil.toString(file2));
     
     _log.log("testSaveAsAlreadySaved completed");
   }
@@ -772,9 +772,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
 
     _model.saveAllFiles(fs); // this should save the files as file1,file2,file3 respectively
 
-    assertEquals("contents of saved file1", FOO_TEXT, FileOps.readFileAsString(file1));
-    assertEquals("contents of saved file2", BAR_TEXT, FileOps.readFileAsString(file2));
-    assertEquals("contents of saved file3", "third document contents", FileOps.readFileAsString(file3));
+    assertEquals("contents of saved file1", FOO_TEXT, IOUtil.toString(file1));
+    assertEquals("contents of saved file2", BAR_TEXT, IOUtil.toString(file2));
+    assertEquals("contents of saved file3", "third document contents", IOUtil.toString(file3));
     
     _log.log("testSaveAllSaveCorrectFiles completed");
   }
@@ -842,8 +842,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     synchronized(tempFile1) { tempFile1.wait(2000); }
 
     String s = "THIS IS ONLY A TEST";
-    FileOps.writeStringToFile(tempFile1, s);
-    assertEquals("contents of saved file", s, FileOps.readFileAsString(tempFile1));
+    IOUtil.writeStringToFile(tempFile1, s);
+    assertEquals("contents of saved file", s, IOUtil.toString(tempFile1));
 
     tempFile1.setLastModified((new java.util.Date()).getTime());
 
@@ -886,8 +886,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     synchronized(tempFile1) { tempFile1.wait(2000); }
 
     String s = "THIS IS ONLY A TEST";
-    FileOps.writeStringToFile(tempFile1, s);
-    assertEquals("contents of saved file", s, FileOps.readFileAsString(tempFile1));
+    IOUtil.writeStringToFile(tempFile1, s);
+    assertEquals("contents of saved file", s, IOUtil.toString(tempFile1));
 
     assertTrue("modified on disk1", doc.modifiedOnDisk());
     boolean reverted = doc.revertIfModifiedOnDisk();
@@ -944,7 +944,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertEquals("contents of saved file",
                  History.HISTORY_FORMAT_VERSION_2 +
                  s1 + delim + s2 + delim + s3 + delim,
-                 FileOps.readFileAsString(f));
+                 IOUtil.toString(f));
 
     _model.clearHistory();
     // confirm that the history is clear
@@ -984,8 +984,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     String s2 = "System.out.println(\"x = \" + x)";
     String s3 = "x = 5;";
     String s4 = "System.out.println(\"x = \" + x)";
-    FileOps.writeStringToFile(f1,s1+'\n'+s2+'\n');
-    FileOps.writeStringToFile(f2,s3+'\n'+s4+'\n');
+    IOUtil.writeStringToFile(f1,s1+'\n'+s2+'\n');
+    IOUtil.writeStringToFile(f2,s3+'\n'+s4+'\n');
 
     listener.assertInteractionStartCount(0);
     _model.loadHistory(fs1);
@@ -1076,7 +1076,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       File file = null;
       try { file = doc.getFile(); }
       catch (FileMovedException fme) { fail("file does not exist"); }     // We know file should exist
-      assertEquals("file to open", FileOps.getCanonicalFile(_expected), FileOps.getCanonicalFile(file));
+      assertEquals("file to open", IOUtil.attemptCanonicalFile(_expected), IOUtil.attemptCanonicalFile(file));
     }
   }
 }

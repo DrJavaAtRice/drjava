@@ -36,8 +36,8 @@ package edu.rice.cs.drjava.model.cache;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.OperationCanceledException;
 
 import javax.swing.text.BadLocationException;
@@ -63,7 +63,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
     createModel();
     
     String user = System.getProperty("user.name");
-    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     
     _cache = _model.getDocumentCache();
     _cache.setCacheSize(4);
@@ -78,7 +78,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
   }
   
   public void tearDown() throws Exception {
-    boolean ret = FileOps.deleteDirectory(_tempDir);
+    boolean ret = IOUtil.deleteRecursively(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
     _model.dispose();
 

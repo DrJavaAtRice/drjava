@@ -36,7 +36,7 @@ package edu.rice.cs.drjava;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
@@ -340,7 +340,7 @@ public final class CommandLineTest extends DrJavaTestCase {
 
     try { checkFile(relativeFile, funnyName); }
     catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
-    finally { FileOps.deleteDirectoryOnExit(newDirectory); }
+    finally { IOUtil.deleteOnExitRecursively(newDirectory); }
     _log.log("testRelativePath completed");
   }
 
@@ -363,7 +363,7 @@ public final class CommandLineTest extends DrJavaTestCase {
       checkFile(relativeFile3, funnyName);
     }
     catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
-    finally { FileOps.deleteDirectoryOnExit(newDirectory); }
+    finally { IOUtil.deleteOnExitRecursively(newDirectory); }
     _log.log("testDotPaths completed");
   }
 
@@ -372,7 +372,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     // OK, we have to create a directory with a hard-coded name in the current working directory, so we'll make it
     // strange. If this directory happens to exist, it'll be deleted.
     File newDirectory = new File(funnyName);
-    if (newDirectory.exists()) FileOps.deleteDirectory(newDirectory);
+    if (newDirectory.exists()) IOUtil.deleteOnExitRecursively(newDirectory);
 
     assertTrue("directory created OK", newDirectory.mkdir());
 //    _log.log("Temporary directory " + funnyName + " created");
@@ -381,7 +381,7 @@ public final class CommandLineTest extends DrJavaTestCase {
 
   /** Helper for testRelativeFile and testDotPaths. */
   private void checkFile(File relativeFile, String funnyName) throws IOException, InvalidPackageException {
-    FileOps.writeStringToFile(relativeFile, "package " + funnyName + "; class X { }");
+    IOUtil.writeStringToFile(relativeFile, "package " + funnyName + "; class X { }");
     assertTrue("file exists", relativeFile.exists());
 
     String path = relativeFile.getCanonicalPath();

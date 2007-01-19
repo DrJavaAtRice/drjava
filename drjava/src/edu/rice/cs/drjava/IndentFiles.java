@@ -37,7 +37,7 @@ import java.io.*;
 import java.util.Vector;
 // TODO: Change the usage of these classes to Collections style.
 // TODO: Do these need to be synchronized?
-import edu.rice.cs.util.FileOps;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
@@ -109,13 +109,13 @@ public class IndentFiles {
         System.out.flush();
       }
       try {
-        String fileContents = FileOps.readFileAsString(file);
+        String fileContents = IOUtil.toString(file);
         DefinitionsDocument doc = new DefinitionsDocument(indenter, new GlobalEventNotifier());
         doc.insertString(0, fileContents, null); // (no attributes)
         int docLen = doc.getLength();
         doc.indentLines(0, docLen);
         fileContents = doc.getText();
-        FileOps.writeStringToFile(file, fileContents);
+        IOUtil.writeStringToFile(file, fileContents);
         if (!silent) System.out.println("done.");
       }
       catch (Exception e) {
