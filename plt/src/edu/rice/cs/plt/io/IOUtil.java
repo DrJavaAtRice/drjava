@@ -310,7 +310,7 @@ public class IOUtil {
    * recur on each of {@code f}'s members.  In all cases, {@link #attemptDelete} will be invoked on
    * {@code f}, and the result of this method will be identical to that result.
    */
-  public boolean deleteRecursively(File f) {
+  public static boolean deleteRecursively(File f) {
     return deleteRecursively(f, new RecursionStack<File>(Wrapper.<File>factory()));
   }
   
@@ -339,7 +339,7 @@ public class IOUtil {
    * contents change after invoking this method, or if an error occurs in listing and marking its members 
    * for deletion.)
    */
-  public void deleteOnExitRecursively(File f) {
+  public static void deleteOnExitRecursively(File f) {
     deleteOnExitRecursively(f, new RecursionStack<File>(Wrapper.<File>factory()));
   }
   
@@ -544,8 +544,9 @@ public class IOUtil {
   }
   
   /**
-   * Create a temporary file (via {@link File#createTempFile}) and immediately mark it for deletion
-   * @throws IOException  If an exception occurs in {@link File#createTempFile}
+   * Create a temporary file in the system temp directory (via {@link File#createTempFile(String, String)}) and 
+   * immediately mark it for deletion
+   * @throws IOException  If an exception occurs in {@link File#createTempFile(String, String)}
    * @throws SecurityException  If write or delete access to the system temp directory is denied
    */
   public static File createAndMarkTempFile(String prefix, String suffix) throws IOException {
@@ -553,8 +554,9 @@ public class IOUtil {
   }
   
   /**
-   * Create a temporary file (via {@link File#createTempFile}) and immediately mark it for deletion
-   * @throws IOException  If an exception occurs in {@link File#createTempFile}
+   * Create a temporary file in the specified directory (via {@link File#createTempFile(String, String, File)}) and 
+   * immediately mark it for deletion
+   * @throws IOException  If an exception occurs in {@link File#createTempFile(String, String, File)}
    * @throws SecurityException  If write or delete access to {@code location} is denied
    */
   public static File createAndMarkTempFile(String prefix, String suffix, File location) throws IOException {
