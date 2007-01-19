@@ -89,7 +89,7 @@ public class JavadocDialog implements DirectorySelector {
     
     // Create components for dialog
     String msg = "Select a destination directory for the Javadoc files:";
-    _selector = new DirectorySelectorComponent(_frame, chooser);
+    _selector = new DirectorySelectorComponent(_frame, chooser, DirectorySelectorComponent.DEFAULT_NUM_COLS, DirectorySelectorComponent.DEFAULT_FONT_SIZE, false);
     _checkBox = new JCheckBox("Always Prompt For Destination");
     Object[] components = new Object[] { msg, _selector, _checkBox };
 

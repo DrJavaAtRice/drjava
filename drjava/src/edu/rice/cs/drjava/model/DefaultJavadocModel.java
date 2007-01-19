@@ -144,7 +144,7 @@ public class DefaultJavadocModel implements JavadocModel {
         if (!destDir.getPath().equals("") && !destDir.exists()) {
           // If the choice doesn't exist, ask to create it.
           boolean create = select.askUser
-            ("The directory you chose does not exist:\\n'" + destDir + "'\nWould you like to create it?",
+            ("The directory you chose does not exist:\n'" + destDir + "'\nWould you like to create it?",
              "Create Directory?");
           if (create) {
             boolean dirMade = destDir.mkdirs();
