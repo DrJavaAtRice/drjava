@@ -116,17 +116,17 @@ public class DocFile extends File {
     _scroll = new Pair<Integer,Integer>(new Integer(vert), new Integer(horiz));
   }
   
-  /** @return true if this file is supposed to be the active document when opened. */
+  /** @return  {@code true} if this file is supposed to be the active document when opened. */
   public boolean isActive() { return _active; }
   
-  /** @param active whether this file should be the active document when opened. */
+  /** @param active  Whether this file should be the active document when opened. */
   
   public void setActive(boolean active) { _active = active; }
   /** @return the package of the document stored in this file */
   
   public String getPackage() { return _package; }
   
-  /** @param pack the name of the package defined in the document text. */
+  /** @param pkg  The name of the package defined in the document text. */
   public void setPackage(String pkg) { _package = pkg; }
   
   /** Sets lastModified for this file to the time the including project file was saved. The <code>lastModified</code>
@@ -135,6 +135,6 @@ public class DocFile extends File {
    */
   public void setSavedModDate(long mod) { _mod = mod; }
   
-  /** @return the modification date of this file at the time the project file was generated. */
+  /** @return  The modification date of this file at the time the project file was generated. */
   public long getSavedModDate() { return _mod; }
 }

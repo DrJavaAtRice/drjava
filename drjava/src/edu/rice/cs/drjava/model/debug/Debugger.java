@@ -117,10 +117,10 @@ public interface Debugger {
 
 
   /** Toggles whether a breakpoint is set at the given line in the given document.
-   *  @param doc Document in which to set or remove the breakpoint
-   *  @param offset Start offset on the line to set the breakpoint
-   *  @param lineNum Line on which to set or remove the breakpoint
-   *  @param enabled true if this breakpoint should be enabled
+   *  @param doc  Document in which to set or remove the breakpoint
+   *  @param offset  Start offset on the line to set the breakpoint
+   *  @param lineNum  Line on which to set or remove the breakpoint
+   *  @param isEnabled  {@code true} if this breakpoint should be enabled
    */
   public void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) throws DebugException;
 

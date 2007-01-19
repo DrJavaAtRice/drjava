@@ -6473,7 +6473,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param doc Document to display
    *  @param offset Offset to display
    *  @param shouldHighlight true iff the line should be highlighted.
-   *  @param shouldWarn about modifications?
    */
   public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, 
                                         final boolean shouldHighlight) {
@@ -6484,7 +6483,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param doc Document to display
    *  @param offset Offset to display
    *  @param shouldHighlight true iff the line should be highlighted.
-   *  @param shouldWarn about modifications?
    *  @param shouldAddToHistory true if the location before and after the switch should be added to the browser history
    */
   public void scrollToDocumentAndOffset(final OpenDefinitionsDocument doc, final int offset, 

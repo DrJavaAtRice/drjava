@@ -59,8 +59,8 @@ public class Log {
 
   /** Creates a new Log with the given name.  If enabled is true, a file is created in the current directory with the
     * given name.
-    * @param name File name for the log
-    * @param enabled Whether to actively use this log
+    * @param name  File name for the log
+    * @param isEnabled  Whether to actively use this log
     */
   public Log(String name, boolean isEnabled) { this(new File(name), isEnabled); }
   
@@ -89,7 +89,7 @@ public class Log {
   }
 
   /** Sets whether this log is enabled.  Only has an effect if the code is in development mode.
-   *  @param enabled Whether to print messages to the log file
+   *  @param isEnabled  Whether to print messages to the log file
    */
   public void setEnabled(boolean isEnabled) { _isEnabled = isEnabled; }
 
@@ -117,8 +117,8 @@ public class Log {
   }
     
   /** Prints a message and exception stack trace to the log, if enabled.
-   *  @param s Message to print
-   *  @param t Throwable to log
+   *  @param s  Message to print
+   *  @param trace  Stack track to log
    */
   public synchronized void log(String s, StackTraceElement[] trace) {
     if (isEnabled()) log(s + traceToString(trace));

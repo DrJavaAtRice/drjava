@@ -72,7 +72,6 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   /** Constructs a new breakpoints panel.
    *  This is swing view class and hence should only be accessed from the event-handling thread.
    *  @param frame the MainFrame
-   *  @param title title of the pane
    */
   public BreakpointsPanel(MainFrame frame) {
     super(frame, "Breakpoints");

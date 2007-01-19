@@ -92,14 +92,6 @@ public abstract class AsyncTask<ParamType, ResType> {
  /** This is the completion step where any modifications to swing components
    * should be made. This method is called on the AWT event thread and so any
    * changes made to swing components are safe.
-   * 
-   * @param result
-   *          The result set from within the runAsync method that specifies any
-   *          changes that need to be made on swing components in the UI thread
-   * @param isCanceled
-   *          Whether the user requested that the task be aborted. The task is
-   *          not obligated to have actually aborted. This parameter merely
-   *          states whether the cancel request was made.
    */
  public abstract void complete(AsyncCompletionArgs<ResType> args);
 

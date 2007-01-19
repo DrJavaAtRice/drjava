@@ -52,8 +52,8 @@ public class FindResult {
    * Constructor for a FindResult.
    * @param document the document where the found instance is located
    * @param foundoffset the offset of the instance found
-   * @param wrapped true if the search wrapped to the beginning (or end) of the document
-   * @param allDocsWrapped true if the search wrapped to the start document
+   * @param wrapped {@code true} if the search wrapped to the beginning (or end) of the document
+   * @param allWrapped {@code true} if the search wrapped to the start document
    */
   public FindResult(OpenDefinitionsDocument document, int foundoffset, boolean wrapped, boolean allWrapped) {
     _document = document;

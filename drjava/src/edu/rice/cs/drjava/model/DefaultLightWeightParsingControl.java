@@ -152,7 +152,8 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
   }
   
   /** Start or stop automatic updates.
-   *  @param true to start or false to stop automatic updates */
+   *  @param b  {@code true} to start or {@code false} to stop automatic updates
+   */
   public void setAutomaticUpdates(boolean b) {
     _log.log("setAutomaticUpdates("+b+")");
     _running = b;

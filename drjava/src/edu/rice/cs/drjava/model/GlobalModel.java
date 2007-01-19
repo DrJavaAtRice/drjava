@@ -227,7 +227,6 @@ public interface GlobalModel extends ILoadDocuments {
   /** Parses out the given project file, sets up the state and other configurations
    *  such as the Navigator and the classpath, and returns an array of files to open.
    *  @param file The project file to parse
-   *  @return an array of document's files to open
    */
   public void openProject(File file) throws IOException, MalformedProjectFileException;
 

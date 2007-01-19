@@ -1517,7 +1517,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  preceding project if any has already been closed.
    *
    *  @param projectFile The project file to parse
-   *  @return an array of source files in the project
    */
   public void openProject(File projectFile) throws IOException, MalformedProjectFileException {
     _loadProject(ProjectFileParser.ONLY.parse(projectFile));
@@ -1526,7 +1525,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Loads the specified project into the document navigator and opens all of the files (if not already open).
    *  Assumes that any prior project has been closed.  Only runs in event thread.
    *  @param projectFile The project file to parse
-   *  @return an array of document's files to open
    */
   private void _loadProject(final ProjectFileIR ir) throws IOException {
     
@@ -1810,7 +1808,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   /** Closes all open documents.  This operation can be cancelled by the user since it
    *  checks if all files can be abandoned BEFORE it actually modifies the project state.
-   *  @param false if the user cancelled
+   *  @return  {@code false} if the user cancelled
    */
   public boolean closeAllFilesOnQuit() {
     
@@ -2237,7 +2235,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
 
   /** Searches for a file with the given name on the provided paths. Returns null if the file is not found.
-   *  @param filename Name of the source file to look for
+   *  @param fileName Name of the source file to look for
    *  @param paths An array of directories to search
    *  @return the file if it is found, or null otherwise
    */

@@ -241,23 +241,17 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     biasReturn[0] = Position.Bias.Forward;
     return retValue;
   }
-  
+
   /**
-   * Determines the best location (in the model) to break
-   * the given view.
-   * This method attempts to break on a whitespace
-   * location.  If a whitespace location can't be found, the
-   * nearest character location is returned.
+   * Determines the best location (in the model) to break the given view.  This method attempts to break on a 
+   * whitespace location.  If a whitespace location can't be found, the nearest character location is returned.
    *
-   * @param v the view 
-   * @param p0 the location in the model where the
-   *  fragment should start its representation >= 0
-   * @param x the graphic location along the axis that the
-   *  broken view would occupy >= 0; this may be useful for
-   *  things like tab calculations
-   * @param len specifies the distance into the view
-   *  where a potential break is desired >= 0  
-   * @return the model location desired for a break
+   * @param v  The view 
+   * @param start  The location in the model where the fragment should start its representation >= 0
+   * @param x  The graphic location along the axis that the broken view would occupy >= 0; this may be useful for
+   *           things like tab calculations
+   * @param len  Specifies the distance into the view where a potential break is desired >= 0  
+   * @return  The model location desired for a break
    * @see View#breakView
    */
   public int getBoundedPosition(GlyphView v, int start, float x, float len) {

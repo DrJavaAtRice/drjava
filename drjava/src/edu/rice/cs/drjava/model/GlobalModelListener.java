@@ -56,7 +56,7 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
    * Performs any UI related steps to handle the case in which a file is being opened that
    * is already open and modified. The two choices are to revert to the copy on disk, or to
    * keep the current changes.
-   * @return true if the user wishes to revert the document, false to ignore
+   * @param doc  {@code true} if the user wishes to revert the document, {@code false} to ignore
    */
   public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc);
   

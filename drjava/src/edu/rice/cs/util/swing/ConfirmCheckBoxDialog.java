@@ -66,14 +66,13 @@ public class ConfirmCheckBoxDialog {
     this(parent, title, message, checkBoxText, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION); }
 
  /** Instantiates a new confirm dialog with Yes/No as the options.
-   *  @param parent the parent frame
-   *  @param title the title of the dialog
-   *  @param checkBoxText the text to display with the checkbox
-   *  @param message the stuff to display in the body of the dialog. For a simple message, it should be a String; it can
-   *         also be an Object[] including Strings and Components to display in the body of the dialog.
-   *  @param checkBoxText the text to display with the checkbox
-   *  @param messageType the JOptionPane message type
-   *  @param optionType the JOptionPane option type
+   *  @param parent  The parent frame
+   *  @param title  The title of the dialog
+   *  @param message  The stuff to display in the body of the dialog. For a simple message, it should be a String; it can
+   *                  also be an Object[] including Strings and Components to display in the body of the dialog.
+   *  @param checkBoxText  The text to display with the checkbox
+   *  @param messageType  The JOptionPane message type
+   *  @param optionType  The JOptionPane option type
    */
   public ConfirmCheckBoxDialog(JFrame parent, String title, Object message, String checkBoxText, int messageType, 
                                int optionType) {

@@ -52,8 +52,6 @@ import edu.rice.cs.util.FileOps;
  *  the custom internal classpath to get resources.
  * 
  *  This allows this class to be used an a remote classloader to test cases that spawn multiple jvms. 
- * 
- *  @see edu.rice.cs.util.newjvm.CustomSystemClassLoader for details on using remote class loaders.
  */
 
 

@@ -136,13 +136,13 @@ public class ColoringView extends PlainView implements OptionConstants {
    *  text on [p0,p1) in the model. We have to start drawing at (x,y), and
    *  the function returns the x coordinate when we're done.
    *
-   *  @param g the graphics context
-   *  @param x the starting X coordinate
-   *  @param y the starting Y coordinate
-   *  @param p0 the beginning position in the model
-   *  @param p1 the ending position in the model
-   *  @return the x coordinate at the end of the range
-   *  @throws BadLocationException if the range is invalid
+   *  @param g  The graphics context
+   *  @param x  The starting X coordinate
+   *  @param y  The starting Y coordinate
+   *  @param start  The beginning position in the model
+   *  @param end  The ending position in the model
+   *  @return  The x coordinate at the end of the range
+   *  @throws BadLocationException  If the range is invalid
    */
   protected int drawUnselectedText(Graphics g, int x, int y, int start, int end) throws BadLocationException {
         
@@ -187,13 +187,13 @@ public class ColoringView extends PlainView implements OptionConstants {
   }
 
   /** Draws the selected text image at the specified location.
-   * @param g the text image
-   * @param x the x coordinate for the drawn text
-   * @param y the y coordinate for the drawn text
-   * @param p0 the beginning position in the model
-   * @param p1 the end position in the model
-   * @return the location of the end of the image (range)
-   * @exception BadLocationException
+   * @param g  The text image
+   * @param x  The x coordinate for the drawn text
+   * @param y  The y coordinate for the drawn text
+   * @param start  The beginning position in the model
+   * @param end  The end position in the model
+   * @return  The location of the end of the image (range)
+   * @throws BadLocationException
    */
   protected int drawSelectedText(Graphics g, int x, int y, int start, int end) throws BadLocationException {
     /*

@@ -49,7 +49,7 @@ public interface LightWeightParsingControl {
   public void delay();
   
   /** Start or stop automatic updates.
-   *  @param true to start or false to stop automatic updates */
+   *  @param b  {@code true} to start or {@code false} to stop automatic updates */
   public void setAutomaticUpdates(boolean b);
 
   /** Reset light-weight parsing. Forget everything. */

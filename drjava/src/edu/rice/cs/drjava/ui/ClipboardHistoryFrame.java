@@ -134,7 +134,7 @@ public class ClipboardHistoryFrame extends JFrame {
    *  @param title dialog title
    *  @param chm the clipboard history model
    *  @param okAction the action to perform when OK is clicked
-   *  @param okAction the action to perform when Cancel is clicked
+   *  @param cancelAction the action to perform when Cancel is clicked
    */
   public ClipboardHistoryFrame(MainFrame owner, String title, ClipboardHistoryModel chm,
                                CloseAction okAction, CloseAction cancelAction) {

@@ -73,9 +73,8 @@ public class RecentFileManager implements OptionConstants {
   protected RecentFileAction _recentFileAction;
 
   /** Creates a new RecentFileManager.
-   *  @param pos Position in the file menu
-   *  @param fileMenu File menu to add the entry to
-   *  @param frame MainFrame containing the File menu
+   *  @param pos  Position in the file menu
+   *  @param fileMenu  File menu to add the entry to
    */
   public RecentFileManager(int pos, JMenu fileMenu, RecentFileAction action, VectorOption<File> settingConfigConstant) {
     _pos = pos;
