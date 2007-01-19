@@ -8,7 +8,7 @@
 
 <chapter id="supportingTechnology">
   <title>Supporting Technology</title>
-  <para>This section is intended as a repository of acquired knowledge with respect to the ins and outs of supporting technology used with DrJava.  For each tool or library, a section will address questions like:
+  <para>This section is intended as a repository of acquired knowledge with respect to supporting technology used with DrJava.  For each tool or library, a section will address questions like:
   
     <itemizedlist>
       <listitem><para>How is this technology used in the DrJava code base or build process?</para></listitem>
@@ -28,13 +28,68 @@
 
   <section id="java">
     <title>Java Language & APIs</title>
-    <para>[TODO]</para>
+    <para>The Java language and APIs are documented by Sun at <ulink url="http://java.sun.com">http://java.sun.com</ulink>.  The language actually exists in different "editions": Standard Edition (SE), Enterprise Edition (EE), and a collection of Micro Editions (ME).  The Standard Edition is DrJava's target platform.  See the <link linkend="installJDK">JDK section of Getting Started</link> for instruction on installing Java.</para>
+    <para>The language itself is documented by the Java Language Specification, available at <ulink url="http://java.sun.com/docs/books/jls/index.html">http://java.sun.com/docs/books/jls</ulink>.  This is a good authoritative reference on the language, and any good Java developer should be familiar with it.</para>
+    <section>
+      <title>The <command>java</command> Command</title>
+      <para>Java sources are compiled to a collection of <literal>class</literal> files.  These files can then be interpreted by a Java interpreter, which creates a <firstterm>Java virtual machine (JVM)</firstterm> and executes a class's <literal>main</literal> method.  Sun's <command>java</command> is one such interpreter.</para>
+      <para>Documentation on the <command>java</command> command can be found with <ulink url="http://java.sun.com/j2se/1.5.0/docs/tooldocs/">Sun's Java tools documentation</ulink>.</para>
+      <para>A typical invocation of the interpreter looks like this:
+        <informalexample><para><literal>java -cp lib/plt.jar:classes/base edu.rice.cs.MyClass</literal></para></informalexample>
+        The <literal>-cp</literal> option specifies a <firstterm>class path</firstterm> &mdash; a collection of files or directories in which the necessary <literal>class</literal> files are located.  This path is searched from left to right; when the code makes reference to an unknown class name, the first matching <literal>class</literal> file on the class path is used.</para>
+      <para>Directories of <literal>class</literal> files may be packaged and compressed into a single <literal>jar</literal> file for simplified distribution.  These are essentially just <literal>zip</literal> archives of <literal>class</literal> file collections.  In addition, a default <literal>main</literal> class can be specified for a <literal>jar</literal> file.  Since all necessary classes for running DrJava are bundled into a single <literal>jar</literal> file, this allows the application to be run with a simplified command syntax: 
+        <informalexample><para><literal>java -jar drjava.jar</literal></para></informalexample>
+      </para>
+    </section>
+    <section>
+      <title>Standard Java APIs</title>
+      <para>DrJava is written in version 5 of Java, and makes extensive use of features that are new in that version.  It's especially important that DrJava developers be quite comfortable with Java generics.  Sun has posted a <ulink url="http://java.sun.com/j2se/1.5/pdf/generics-tutorial.pdf">tutorial by Gilad Bracha</ulink> that provides a good overview.  There is also a a good <ulink url="http://java.sun.com/j2se/1.5.0/docs/guide/language/index.html">summary of Java 5 features</ulink> available in Sun's documentation.</para>
+      <para>The API specification is another essential reference for developers, available here: <ulink url="http://java.sun.com/j2se/1.5.0/docs/api/">http://java.sun.com/j2se/1.5.0/docs/api/</ulink>.  A few important packages in the API include:
+        <variablelist>
+          <varlistentry>
+            <term><literal>java.lang</literal></term>
+            <listitem><para>The <literal>Object</literal> class, wrapper classes, strings, threads, and interface with the system are all defined here.</para></listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><literal>java.util</literal></term>
+            <listitem><para>Standard lists, maps, and other collections are defined here.  Note that the newer, non-synchronized classes (like <literal>ArrayList</literal>) are usually preferred over their older, synchronized counterparts (like <literal>Vector</literal>).</para></listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><literal>java.io</literal></term>
+            <listitem><para>Provides access to file reading and writing and other file-system operations.</para></listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><literal>javax.swing</literal></term>
+            <listitem><para>The DrJava GUI is implemented using <firstterm>Swing</firstterm>, the standard Java GUI framework.  (Note that many Swing classes and concepts depend on the <literal>java.awt</literal> package.)</para></listitem>
+          </varlistentry>
+        </variablelist>
+      </para>
+
+      <para>The <ulink url="http://java.sun.com/docs/books/tutorial/">Java Tutorial</ulink> provides a collection of small tutorials covering different parts of the APIs.</para>
+
+      <para>Development in DrJava is limited in some ways by a desire for backwards compatibility.  While the program is developed using Java 5, it is still released for platforms that only support Java 1.4.  Thus, most classes and methods that were introduced with the Java 5 APIs cannot currently be used in DrJava.  (Such classes and methods should be designated with a "since 1.5" tag in the API documentation.)  For details, see the discussion on <link linkend="retroweaver">Retroweaver</link>, a tool that enables this backwards compatibility.</para>
+    </section>
   </section>
 
   <section id="javac">
     <title><command>javac</command></title>
-    <para>[TODO]</para>
-    <!-- We can point to the <link linkend="installJDK">JDK installation instructions</link> for installation details -->
+    <para>The Sun Java compiler, <command>javac</command>, is used to build DrJava.  The DrJava application also interfaces, at runtime, with the user's <command>javac</command> compiler.  See the <link linkend="installJDK">JDK section of Getting Started</link> for installation instructions.</para>
+    <para>Documentation on the <command>javac</command> command can be found with <ulink url="http://java.sun.com/j2se/1.5.0/docs/tooldocs/">Sun's Java tools documentation</ulink>.</para>
+    <section>
+      <title>Compilation Paths</title>
+      <para>There are a number of search paths used as parameters to perform compilation.  To avoid confusion, it's important to be familiar with the distinction between them.
+      <itemizedlist>
+        <listitem><para>The <firstterm>boot class path</firstterm> is the location of the standard Java APIs.  It is conceptually prepended to the standard class path whenever a search for a class occurs.  By default, this is the location of the APIs used to run the compiler; it is only necessary to manipulate this setting if compilation should occur against a different or customized version of the APIs.</para></listitem>
+        <listitem><para>The <firstterm>class path</firstterm> points to additional libraries and classes used for compilation.  For example, if JUnit tests are to be compiled, the <filename>junit.jar</filename> file should be on the class path.  If iterative updates are to be made to the sources (as is usually the case), the location of the compiled classes should be part of the class path as well.</para></listitem>
+        <listitem><para>The <firstterm>source path</firstterm> is the location of source files that, while not explicitly required to be compiled, can be automatically compiled if the classes they define are needed.  This allows, for example, the compilation of a single source file to silently trigger the compilation of many others.  Since such on-demand processing changes the compiler's internal symbol tables on-the-fly, however, it's generally not a good idea to take advantage of this feature &mdash; changing the order in which sources are passed to the compiler can change the meaning of the program!  A better alternative is to simply list <emphasis>all</emphasis> sources that need to be compiled explicitly (Ant and DrJava do this easily and automatically), and set the source path to an empty string.</para></listitem>
+        <listitem><para>The <firstterm>compiler JVM boot class path</firstterm> is the location of the Java APIs used to <emphasis>run</emphasis> the compiler.  Since <command>javac</command> is <emphasis>implemented</emphasis> in Java, it runs in a JVM, and that JVM needs access to the standard APIs.  It's important to note that there need not be any relationship between this value and tha compilation boot class path.  The <command>javac</command> command should automatically set up this parameter correctly.</para></listitem>
+        <listitem><para>Similarly, the <firstterm>compiler JVM class path</firstterm> is the location of additional libraries and classes used to <emphasis>run</emphasis> the compiler.  Typically, the classes implementing the compiler are found in a <filename>tools.jar</filename> file, and that jar file will need to be on the compiler JVM class path.  Again, there need not be any relationship between this value and the compilation class path.  And the <command>javac</command> command will automatically set this correctly.</para></listitem>
+      </itemizedlist></para>
+    </section>
+      
   </section>
   
   <section id="javadoc">

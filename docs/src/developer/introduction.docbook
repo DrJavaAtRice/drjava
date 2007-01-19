@@ -8,7 +8,7 @@
 <chapter id="introduction">
   <title>Introduction</title>
   
-  <para>This document is primarily intended as an orientation resource and collection of acquired knowledge for Rice students working as DrJava developers.  As an open-source project, DrJava's source code is also available for browsing and modification to the general public, and so the following will also serve to provide those interested with the necessary tools to build, fix, and improve the code base.  (Although we do not usually provide direct CVS commit access to individuals outside the Rice development team, interested parties are welcome to submit changes via the SourceForge Tracker forums.)</para>
+  <para>This document is primarily intended as an orientation resource and collection of acquired knowledge for Rice students working as DrJava developers.  As an open-source project, DrJava's source code is also available for browsing and modification to the general public, and so the following will also serve to provide those interested with the necessary tools to build, fix, and improve the code base.  (Although we do not usually provide direct Subversion commit access to individuals outside the Rice development team, interested parties are welcome to submit changes via the SourceForge Tracker forums.)</para>
   
   <section>
     <title>Overview</title>

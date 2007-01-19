@@ -32,7 +32,7 @@
       <para>For Rice students wishing to work with the DrJava developer team, you should also do the following:
         <itemizedlist>
           <listitem><para>Get a Computer Science Department Unix account, if you don't already have one.  This account is distinct from the Owlnet account given to all undergraduates, and will allow you to login and develop in the PLT computer lab.  You can pick up an application from the department secretaries; have it signed by Corky Cartwright.</para></listitem>
-          <listitem><para>Subscribe to the <literal>drjava-dev-l</literal> mailing list.  You can do so here: <ulink url="http://groups.google.com/group/drjava-dev-l">http://groups.google.com/group/drjava-dev-l</ulink>.  This list is the main electronic forum for communication among the team members (like a course discussion board).  Feel free to post your ideas or ask for help here.</para></listitem>
+          <listitem><para>Subscribe to the <literal>javaplt</literal> mailing list.  You can do so here: <ulink url="https://mailman.rice.edu/mailman/listinfo/javaplt">https://mailman.rice.edu/mailman/listinfo/javaplt</ulink>.  This list is the main electronic forum for communication among the team members (like a course discussion board).  Feel free to post your ideas or ask for help here.</para></listitem>
         </itemizedlist>
       </para>
     </section>
@@ -43,11 +43,11 @@
   <section>
     <title>Installing Essential Software</title>
     
-    <para>You will need to have four programs properly installed and set up on any system you intend to use for development.  These are the Sun Java Development Kit (for compilation), JUnit (for running unit tests), a Subversion client (to access the source code repository), and Apache Ant (for scripted building).</para>
+    <para>You will need to have three programs properly installed and set up on any system you intend to use for development.  These are the Sun Java Development Kit (for compilation), a Subversion client (to access the source code repository), and Apache Ant (for scripted building).</para>
     
     <section id="installJDK">
       <title>Sun Java Development Kit</title>
-      <para>If it's not already installed on your system, you can download the JDK from <ulink url="http://java.sun.com">Sun's Web site</ulink>.  You will need to have installed both the J2SE JDK 5.0 and the J2SE SDK 1.4 (note the distinction on the download pages between a Java <emphasis>Runtime Environment</emphasis>, which just contains the tools needed to <emphasis>run</emphasis> Java programs, and a Java <emphasis>Development Kit</emphasis>, which contains a compiler and other tools, in addition to the runtime application).  The DrJava sources are written in the Java 5 language.  However, in order to support users who only have Java 1.4 installed, the 1.4 SDK is also used in the build process.  (Note: theoretically, any Java 5.0 compiler should be able to handle the DrJava sources.  However, there are currently some dependencies on Sun's tools in the main DrJava code branch, so you will need to have those tools available.)</para>
+      <para>If it's not already installed on your system, you can download the JDK from <ulink url="http://java.sun.com">Sun's Web site</ulink>.  You will need to have installed both the J2SE JDK 5 and the J2SE SDK 1.4 (note the distinction on the download pages between a Java <emphasis>Runtime Environment</emphasis>, which just contains the tools needed to <emphasis>run</emphasis> Java programs, and a Java <emphasis>Development Kit</emphasis>, which contains a compiler and other tools, in addition to the runtime application).  The DrJava sources are written in the Java 5 language.  However, in order to support users who only have Java 1.4 installed, the 1.4 SDK is also used in the build process.  (Note: theoretically, any Java 5.0 compiler should be able to handle the DrJava sources.  However, there are currently some dependencies on Sun's tools in the main DrJava code module, so you will need to have those tools available.)</para>
       
       <para>If you like, you can set up your command-line environment to better support Java, but it's not strictly necessary.  See <link linkend="environmentSettings">Command-Line Environment Settings</link> for details.</para>
       
@@ -58,19 +58,8 @@
       
       <note id="osx-java">
         <title>Mac OS X</title>
-        <para>Java is built in to Mac OS X, which makes Apple, rather than Sun, the main source of core Java software for the platform.  Java 5.0 is only supported since version 10.4 (Tiger) of the operating system; it is difficult to set up a DrJava development environment in earlier systems.  If you haven't done so already, you should install the Developer Tools, distributed on CD or DVD with the OS, and also available from the <ulink url="http://developer.apple.com">Apple Developer Connection</ulink> (free membership may be required).  This will contain <emphasis>at least</emphasis> the Java 1.4 tools.  If you need to, you can then dowload the Java 5.0 tools from the ADC Web site.  To see what is currently installed, go to <filename>/System/Library/Frameworks/JavaVM.framework/Versions</filename>.</para>
+        <para>Java is built in to Mac OS X, which makes Apple, rather than Sun, the main source of core Java software for the platform.  Java 5 is only supported since version 10.4 (Tiger) of the operating system; it is difficult to set up a DrJava development environment in earlier systems.  If you haven't done so already, you should install the Developer Tools, distributed on CD or DVD with the OS, and also available from the <ulink url="http://developer.apple.com">Apple Developer Connection</ulink> (free membership may be required).  This will contain <emphasis>at least</emphasis> the Java 1.4 tools.  If you need to, you can then dowload the Java 5 tools from the ADC Web site.  To see what is currently installed, go to <filename>/System/Library/Frameworks/JavaVM.framework/Versions</filename>.</para>
         <para>For more information on Java in OS X, see <ulink url="http://developer.apple.com/java/faq/">this FAQ</ulink>.</para>
-      </note>
-      
-    </section>
-    
-    <section id="installJUnit">
-      <title>JUnit</title>
-      <para>One of the most important factors in maintaining DrJava's code quality is the presence of extensive unit tests.  In order to compile and run these tests, you will need a copy of JUnit, a Java testing framework.  It can be downloaded from the <ulink url="http://junit.org">JUnit Web site</ulink> (versions 3.8 and 4.0 should both work).  Copy the decompressed directory into a convenient location (such as <filename>/usr/local</filename>, your home directory, or <filename>C:\Program Files</filename>).</para>
-      
-      <note>
-        <title>Rice Java PLT</title>
-        <para>On the Rice Computer Science department network, a copy of JUnit may be found in the <filename>/home/javaplt/packages</filename> directory.</para>
       </note>
       
     </section>
@@ -83,7 +72,7 @@
       
       <note>
         <title>Rice Java PLT</title>
-        <para>On the Rice Computer Science department network, the Subversion client is located at <filename>/home/javaplt/packages/subversion-1.3.0/subversion/clients/cmdline</filename>.</para>
+        <para>On the Rice Computer Science department network, the Subversion client is located at <filename>/home/javaplt/packages/RHE4/subversion-1.3.2/subversion/clients/cmdline</filename>.</para>
       </note>
       
     </section>
@@ -131,7 +120,7 @@
       
       <note>
         <title>Microsoft Windows</title>
-        <para>Each version of Windows has a slightly different method for setting environment variables.  In most cases, you can double-click the <guibutton>System</guibutton> icon in the Control Panel (or choose <guibutton>Properties</guibutton> after right-clicking on <guibutton>My Computer</guibutton>), and then find a button for <guibutton>Environment Variables</guibutton> (usually on the <guibutton>Advanced</guibutton> tab).  You may need to log out and back in before your settings will take effect.  Note that path-like variables (such as <literal>PATH</literal> and <literal>CLASSPATH</literal>) should use a semicolon (<literal>;</literal>) to delimit filenames.  You can use a variable's value at any time (both in a later declaration and at the command line) with syntax like <literal>$ANT_HOME</literal> [TODO: is this true?].</para>
+        <para>Each version of Windows has a slightly different method for setting environment variables.  In most cases, you can select <guibutton>System</guibutton> in the Control Panel (or choose <guibutton>Properties</guibutton> after right-clicking on <guibutton>My Computer</guibutton>), and then find a button for <guibutton>Environment Variables</guibutton> (usually on the <guibutton>Advanced</guibutton> tab).  You may need to log out and back in before your settings will take effect.  Note that path-like variables (such as <literal>PATH</literal> and <literal>CLASSPATH</literal>) should use a semicolon (<literal>;</literal>) to delimit filenames.  You can use a variable's value at any time (both in a later declaration and at the command line) with syntax like <literal>$ANT_HOME</literal> [TODO: is this true?].</para>
         
         <para>If you're using Cygwin (a Unix-like environment for Windows), many of the Unix instructions above are relevant.  You <emphasis>could</emphasis>, for example, define the environment variables in a <filename>.bashrc</filename> file.  However, it's probably best to use the system-wide Windows facilities (such as the <guibutton>Environment Variables</guibutton> dialog box) whenever possible.  One problem you will encounter when using Cygwin is that Windows filenames and paths are formatted differently from Cygwin filenames and paths.  Generally, Java applications (including Ant, with some exceptions) will only be able to handle <emphasis>Windows</emphasis>-style paths.  On the other hand, some Cygwin programs expect Cygwin's Unix-like paths.  To deal with this problem, you may need to thoroughly familiarize yourself with the <command>cygpath</command> command, which converts between the two formats.</para>
       </note>
@@ -153,7 +142,7 @@
               
               <row>
                 <entry><literal>JAVA_HOME</literal></entry>
-                <entry>Location of the Java 5.0 installation.  The specified directory should have a <filename>bin</filename> subdirectory containing <command>java</command>, <command>javac</command>, <command>javadoc</command>, etc.</entry>
+                <entry>Location of the Java 5 installation.  The specified directory should have a <filename>bin</filename> subdirectory containing <command>java</command>, <command>javac</command>, <command>javadoc</command>, etc.</entry>
                 <entry>Specifies which Java installation Ant should use (not strictly necessary if the correct <command>java</command> command is on the command path).</entry>
               </row>
               
@@ -175,12 +164,6 @@
                 <entry>You will want the <command>ant</command> command on your path, as it will be used often.  Ant requires <command>svn</command> on the path.  You may want to explore the current settings before you make any modifications.  Note the use of previously-declared environment variables in this example.  Also keep in mind that the <emphasis>first</emphasis> matching location for a command in the path will shadow all later matches.  The Java commands are not strictly required to be available on the path, but it will probably be convenient to make them so.</entry>
               </row>
               
-              <row>
-                <entry><literal>CLASSPATH</literal></entry>
-                <entry>For example, <literal>$CLASSPATH:/usr/local/junit3.8.1/junit.jar</literal>.</entry>
-                <entry>Ant must be set up to access JUnit.  This can be done by <emphasis>either</emphasis> placing <filename>junit.jar</filename> on the system classpath <emphasis>or</emphasis> by copying the file to <filename>$ANT_HOME/lib</filename> (or <filename>.ant/lib</filename> in your home directory).  Note that, on some platforms, setting up JUnit via <literal>CLASSPATH</literal> doesn't seem to work correctly. [TODO: Explore this issue.]</entry>
-              </row>
-              
             </tbody>
           </tgroup>
         </informaltable>
@@ -200,14 +183,14 @@
       
       <para>You can use Subversion to get a copy of the DrJava source code.  In Subversion terminology, downloading a fresh copy is (usually) synonymous with "checking out" the code.  You can download the sources with the following command:
       
-        <informalexample><para><literal>svn co https://svn.sourceforge.net/svnroot/drjava/trunk/drjava</literal></para></informalexample>
+        <informalexample><para><literal>svn co https://drjava.svn.sourceforge.net/svnroot/drjava/trunk/drjava</literal></para></informalexample>
         
         A <filename>drjava</filename> directory will be created in your working directory, and Subversion will output the name of each file it downloads.</para>
       
-      <para>Note that the above command only checks out <emphasis>part</emphasis> of the DrJava sources.  The sources are divided into independent units, each a subdirectory of <filename>trunk</filename>.  Each unit can be built, tested, and modified without the others.  You can check out a different directory by simply modifying the URL given to Subversion.
+      <para>Note that the above command only checks out <emphasis>part</emphasis> of the DrJava sources.  The sources are divided into independent modules, each a subdirectory of <filename>trunk</filename>.  Each module can be built, tested, and modified without the others.  You can check out a different directory by simply modifying the URL given to Subversion.
       
         <warning>
-          <para>While it is possible to check out the entire <filename>https://svn.sourceforge.net/svnroot/drjava</filename> directory, you <emphasis>should not</emphasis> do so!  This top-level directory contains dozens of copies of the sources, including snapshots at various stages of development.  If you download this directory, it will take a lot of time and disk space.</para>
+          <para>While it is possible to check out the entire <filename>https://drjava.svn.sourceforge.net/svnroot/drjava</filename> directory, you <emphasis>should not</emphasis> do so!  This top-level directory contains dozens of copies of the sources, including snapshots at various stages of development.  If you download this directory, it will take a lot of time and disk space.</para>
         </warning>
        
         The full list of <filename>trunk</filename>'s subdirectories includes:
@@ -215,7 +198,7 @@
         <variablelist>
           <varlistentry>
             <term><literal>drjava</literal></term>
-            <listitem><para>The main application, containing the bulk of the code.  Building this directory will create the DrJava application.</para></listitem>
+            <listitem><para>The main application, containing the bulk of the code.  Building this module will create the DrJava application.</para></listitem>
           </varlistentry>
           
           <varlistentry>
@@ -224,7 +207,17 @@
           </varlistentry>
           
           <varlistentry>
-            <term><literal>platforms</literal></term>
+            <term><literal>javalanglevels</literal></term>
+            <listitem><para>A Java preprocessor used to provide the Language Levels facility.</para></listitem>
+          </varlistentry>
+          
+          <varlistentry>
+            <term><literal>plt</literal></term>
+            <listitem><para>General-purpose utility classes, including things that are "missing" from the Java API like predicates and tuples.</para></listitem>
+          </varlistentry>
+          
+          <varlistentry>
+            <term><literal>platform</literal></term>
             <listitem><para>A collection of platform-dependent code, such as the concrete compiler interfaces and special OS-specific GUI setup instructions.</para></listitem>
           </varlistentry>
           
@@ -241,6 +234,11 @@
           <varlistentry>
             <term><literal>jedit</literal></term>
             <listitem><para>A similar wrapper for the interactions pane in the JEdit IDE.</para></listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><literal>misc</literal></term>
+            <listitem><para>Files that don't belong in a specific module.</para></listitem>
           </varlistentry>
 
         </variablelist></para>
@@ -260,7 +258,7 @@
     
         <informalexample><para><literal>ant</literal></para></informalexample>
         
-        The name <literal>help</literal> refers to an Ant <firstterm>target</firstterm>.  Different targets can be used to accomplish different tasks, and they are often set up to recognize dependencies.  For example, the <literal>test</literal> target recognizes its dependency on the <literal>compile</literal> task; when you ask Ant to run the tests, it will automatically compile them first.  In this particular example, the <literal>help</literal> task (which is set up as the default when none is specified) simply prints a message about the script and the environment settings it expects.  If an error occurs here, Ant may not be properly set up.</para>
+        The name <literal>help</literal> refers to an Ant <firstterm>target</firstterm>.  Different targets can be used to accomplish different tasks, and they are often set up to recognize dependencies.  For example, the <literal>test</literal> target recognizes its dependency on the <literal>compile</literal> target; when you ask Ant to run the tests, it will automatically compile them first.  In this particular example, the <literal>help</literal> target (which is set up as the default when none is specified) simply prints a message about the script and the environment settings it expects.  If an error occurs here, Ant may not be properly set up.</para>
         
       <para>Second, enter the following command:
         
@@ -270,7 +268,7 @@
         
         <informalexample><para><literal>ant build</literal></para></informalexample>
         
-        The process will take awhile.  Ant will generally log each action it takes to the console; you may want to follow what's going on.  Here's a summary of the major steps:
+        The process will take awhile.  Ant will generally log each action it takes to the console; you should make sure you can follow what's going on.  Here's a summary of the major steps:
         
         <itemizedlist>
         
@@ -284,7 +282,7 @@
           <listitem>
             <formalpara>
               <title><literal>do-compile</literal></title>
-              <para>Invokes the <command>javac</command> compiler.  Generated class files will be placed in a new <filename>classes</filename> directory, with the subdirectories <filename>base</filename> and <filename>test</filename> for standard and test classes, respectively.  Any compiler errors or warnings will be printed to the console.  Because the 5.0 version of <command>javac</command> does not handle <literal>@SuppressWarnings</literal> annotations, you may see some warnings that ought to be suppressed; on the other hand, any warnings that are not marked with the suppress annotation highlight a problem that should be addressed.</para>
+              <para>Invokes the <command>javac</command> compiler.  Generated class files will be placed in a new <filename>classes</filename> directory, with the subdirectories <filename>base</filename> and <filename>test</filename> for standard and test classes, respectively.  Any compiler errors or warnings will be printed to the console.  Where warnings are expected, they will be tagged in the code with a <literal>@SuppressWarnings</literal> annotation.  Thus, any warnings you see during compilation highlight a problem that should be addressed.</para>
             </formalpara>
           </listitem>
         
@@ -298,21 +296,21 @@
           <listitem>
             <formalpara>
               <title><literal>unjar-libs</literal></title>
-              <para>Expands the <filename>*.jar</filename> files in the <filename>lib</filename> folder into <filename>classes/lib</filename>.</para>
+              <para>Expands the <filename>*.jar</filename> files in the <filename>lib</filename> directory into <filename>classes/lib</filename>.  These library classes will be bundled with the finished product.</para>
             </formalpara>
           </listitem>
         
           <listitem>
             <formalpara>
               <title><literal>compile-14</literal></title>
-              <para>Invokes Retroweaver on the <filename>classes</filename> directories, generating class files compatible with Java 1.4 in the <filename>classes/base-14</filename>, <filename>classes/test-14</filename>, and <filename>classes/lib-14</filename> directories.  This allows us to support users who only have Java 1.4 available on their systems.  If there are any references to unavailable classes (such as <literal>java.util.Queue</literal>, which was introduced in the 5.0 APIs), a warning will be generated and should be immediately addressed.</para>
+              <para>Invokes the Retroweaver tool on the <filename>classes</filename> directories, generating class files compatible with Java 1.4 in the <filename>classes/base-14</filename>, <filename>classes/test-14</filename>, and <filename>classes/lib-14</filename> directories.  This allows us to support users who only have Java 1.4 available on their systems.  If there are any references to unavailable classes (such as <literal>java.util.Queue</literal>, which was introduced in the Java 5 APIs), a warning will be generated and should be immediately addressed.</para>
             </formalpara>
           </listitem>
         
           <listitem>
             <formalpara>
               <title><literal>test-14-in-15</literal></title>
-              <para>Runs the JUnit tests in <filename>classes/test-14</filename> under Java 5.0.  This will constitute the bulk of the build time.  A summary of the running time for each test will be logged, and if a failure occurs, testing will halt immediately.  Note that there are also a <literal>test-14</literal> target and a <literal>test-15</literal> target that will not be run by <literal>build</literal>, but that can be invoked manually.</para>
+              <para>Runs the JUnit tests in <filename>classes/test-14</filename> under Java 5.  This will constitute the bulk of the build time.  A summary of the running time for each test will be logged, and if a failure occurs, testing will halt immediately.  Note that there are also a <literal>test-14</literal> target and a <literal>test-15</literal> target that will not be run by <literal>build</literal>, but that can be invoked manually.</para>
             </formalpara>
           </listitem>
         
@@ -364,7 +362,7 @@
         
         <informalexample><para><literal>ant -Dtest-spec=<replaceable>filterString</replaceable> test</literal></para></informalexample>
         
-        All classes in <filename>classes/test</filename> with names containing <replaceable>filterString</replaceable> and ending in <literal>Test</literal> (that is, matching the regular expression <literal>*<replaceable>filterString</replaceable>*Test.class</literal>) will be run by JUnit.</para>
+        All test classes in <filename>classes/test</filename> with paths matching <replaceable>filterString</replaceable> will be run by JUnit.</para>
         
     </section>
     
@@ -373,7 +371,7 @@
       
       <para>When you're ready to submit the changes you've made to the Subversion archive (in Subversion terminology, <firstterm>commit</firstterm> the changes), and assuming you're a member of the DrJava SourceForge project, you can do so with the Ant script.  While the <command>svn</command> command could be invoked directly from the command line (or some IDEs), using Ant is the preferred approach because it allows you to insure that your changes do not break any functionality or conflict with other changes that have been made by other developers concurrently.  The Ant script will run a fresh compile and all tests before committing your changes.</para>
       
-      <para>If this is the first time you've committed a change on your current system, you will need to perform a manual commit in order to check your authentication.  You can do this by checking out the <filename>https://svn.sourceforge.net/svnroot/drjava/branches/authenticate</filename> directory and following the instructions in <filename>authenticate/authenticate.txt</filename>.  When you commit, you will be prompted for a password (if the username is incorrect, just hit Enter and you will be prompted for a username as well).  [TODO: Improve this process, if possible.  It would be nice if there were just an "svn authenticate" command.]  That authentication information will be stored on your system, and future commits will not require you to reenter your password.</para>
+      <para>If this is the first time you've committed a change on your current system, you will need to perform a manual commit in order to check your authentication.  You can do this by checking out the <filename>https://drjava.svn.sourceforge.net/svnroot/drjava/trunk/misc/authenticate</filename> directory and following the instructions in <filename>authenticate/authenticate.txt</filename>.  When you commit, you will be prompted for a password (if the username is incorrect, just hit Enter and you will be prompted for a username as well).  [TODO: Improve this process, if possible.  It would be nice if there were just an "svn authenticate" command.]  That authentication information will be stored on your system, and future commits will not require you to reenter your password.</para>
       
       <para>After your system is set up for automatic authentication, you can perform a commit with the following:
 
@@ -385,8 +383,15 @@
         
           <listitem>
             <formalpara>
-              <title><literal>clean</literal></title>
-              <para>Removes all extraneous files &mdash that is, those that didn't come from the Subversion repository.  This will include generated sources, javadocs, the <filename>classes</filename> directory, and generated jar files.  Note that, typically, this target is also invoked directly as the need arises.</para>
+              <title><literal>clean-intermediate</literal></title>
+              <para>Removes all intermediate build products &mdash that is, files that didn't come from the Subversion repository and that aren't finished products.  This will include generated sources and the <filename>classes</filename> directory.  Note that, typically, this target (or just <literal>clean</literal>) is also invoked directly as the need arises.</para>
+            </formalpara>
+          </listitem>
+        
+          <listitem>
+            <formalpara>
+              <title><literal>clean-products</literal></title>
+              <para>Removes all final build products.  This will include DrJava jar files and generated javadocs.</para>
             </formalpara>
           </listitem>
         
@@ -406,8 +411,8 @@
         
           <listitem>
             <formalpara>
-              <title><literal>clean</literal></title>
-              <para>To prevent extraneous messages when the commit takes place, the project is cleaned up once again.  This time, though, the <filename>drjava.jar</filename> file will <emphasis>not</emphasis> be deleted.</para>
+              <title><literal>clean-intermediate</literal></title>
+              <para>To prevent extraneous messages when the commit takes place, the project is cleaned up once again.</para>
             </formalpara>
           </listitem>
         
