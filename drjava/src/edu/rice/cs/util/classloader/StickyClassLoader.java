@@ -38,6 +38,7 @@ import java.net.URL;
 import java.io.IOException;
 
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.FileOps;
 
 /** A {@link ClassLoader} that works as the union of two classloaders, but always tries to delegate to the first of 
  *  these.  The purpose for this class is to ensure that classes loaded transitively due to some class's loading are
@@ -174,7 +175,7 @@ public class StickyClassLoader extends ClassLoader {
         throw new ClassNotFoundException("Resource not found: " + fileName);
       }
       
-      byte[] data = IOUtil.toByteArray(resource.openStream());
+      byte[] data = FileOps.readStreamAsBytes(resource.openStream());
       try {
         return defineClass(name, data, 0, data.length);
       }
