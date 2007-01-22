@@ -35,6 +35,7 @@ package edu.rice.cs.util.newjvm;
 
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.plt.io.IOUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -86,7 +87,7 @@ public final class ExecJVM {
 
     LinkedList<String> args = new LinkedList<String>();
     args.add("-classpath");
-    args.add(edu.rice.cs.util.FileOps.convertToAbsolutePathEntries(classPath));
+    args.add(classPath);
     _addArray(args, jvmParams);
     String[] jvmWithCP = args.toArray(new String[args.size()]);
 
@@ -101,8 +102,9 @@ public final class ExecJVM {
    */
   public static Process runJVMPropagateClassPath(String mainClass, String[] classParams, String[] jvmParams, File workDir)
     throws IOException {
-    String cp = System.getProperty("java.class.path");
-    return runJVM(mainClass, classParams, cp, jvmParams, workDir);
+    Iterable<File> cp = IOUtil.parsePath(System.getProperty("java.class.path"));
+    cp = IOUtil.getAbsoluteFiles(cp);
+    return runJVM(mainClass, classParams, IOUtil.pathToString(cp), jvmParams, workDir);
   }
 
   /** Runs a new JVM, propagating the present classpath.

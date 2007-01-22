@@ -510,8 +510,9 @@ public abstract class FileOps {
    *  @param file the file to rename
    *  @param dest the destination file
    *  @return true iff the rename was successful
+   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#attemptMove}, which is equally Windows-friendly, instead.
    */
-  public static boolean renameFile(File file, File dest) {
+  @Deprecated public static boolean renameFile(File file, File dest) {
     if (dest.exists()) dest.delete();
     return file.renameTo(dest);
   }
@@ -700,8 +701,11 @@ public abstract class FileOps {
    * 
    *  @param path path string with entries to convert
    *  @return path string with all entries as absolute paths
+   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#parsePath}, {@link edu.rice.cs.plt.io.IOUtil#getAbsoluteFiles},
+   *               {@link edu.rice.cs.plt.io.IOUtil#attemptAbsoluteFiles}, and {@link edu.rice.cs.plt.io.IOUtil#pathToString},
+   *               as needed, instead.
    */
-  public static String convertToAbsolutePathEntries(String path) {
+  @Deprecated public static String convertToAbsolutePathEntries(String path) {
     String pathSep = System.getProperty("path.separator");
     
     // split leaves off trailing empty strings

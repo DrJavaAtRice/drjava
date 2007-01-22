@@ -167,7 +167,7 @@ public class DrJava {
         if (restart) {
           // Determine classpath
           String pathSep = System.getProperty("path.separator");
-          String classPath = FileOps.convertToAbsolutePathEntries(System.getProperty("java.class.path"));
+          String classPath = System.getProperty("java.class.path");
           
           // Include both the javac location stored in .drjava prefences and the path proposed by ToolsJarClassLoader 
           File toolsFromConfig = getConfig().getSetting(JAVAC_LOCATION);
