@@ -324,6 +324,13 @@ public interface OptionConstants {
     new KeyStrokeOption("key.save.all.files",
                         KeyStroke.getKeyStroke(KeyEvent.VK_S, mask |
                                                InputEvent.ALT_MASK));
+  
+  /**
+   * The key binding for renaming a file
+   */
+  public static final KeyStrokeOption KEY_RENAME_FILE = 
+    new KeyStrokeOption("key.rename.file", KeyStrokeOption.NULL_KEYSTROKE);
+  
   /**
    * The key binding for reverting a file
    */

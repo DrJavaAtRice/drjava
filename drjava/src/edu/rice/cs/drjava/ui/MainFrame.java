@@ -318,6 +318,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public boolean verifyOverwrite() { return _verifyOverwrite(); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
   };
+
+  /** Returns the file to save to the model (command pattern). 
+  private final FileSaveSelector _renameSelector = new FileSaveSelector() {
+    public File getFile() throws OperationCanceledException { return getSaveFile(_saveChooser); }
+    public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
+    public boolean verifyOverwrite() { return _verifyOverwrite(); }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
+  }; */
   
   /** Provides the view's contribution to the Javadoc interaction. */
   private final JavadocDialog _javadocSelector = new JavadocDialog(this);
@@ -531,6 +539,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private final Action _saveAsAction = new AbstractAction("Save As...") {
     public void actionPerformed(ActionEvent ae) { _saveAs(); }
   };
+
+  /** Asks the user for a file name and renames and saves the document
+   *  currently in the definitions pane to that file.
+   */
+  private final Action _renameAction = new AbstractAction("Rename") {
+    public void actionPerformed(ActionEvent ae) { _rename(); }
+  };  
   
   private final Action _saveProjectAction = new AbstractAction("Save") {
     public void actionPerformed(ActionEvent ae) {
@@ -3826,6 +3841,32 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       return false;
     }
   }
+
+  private boolean _rename() {
+    try {
+      if (!_model.getActiveDocument().fileExists()) {
+        return _saveAs();
+      }
+      else {
+        File fileToDelete;
+        try {
+          fileToDelete = _model.getActiveDocument().getFile();
+        } catch (FileMovedException fme) {
+          return _saveAs();
+        }
+        boolean toReturn = _model.getActiveDocument().saveFileAs(_saveAsSelector);
+        /** Delete the old file if save was successful */
+        if (toReturn && !_model.getActiveDocument().getFile().equals(fileToDelete)) fileToDelete.delete();
+        /** this highlights the document in the navigator */
+        _model.setActiveDocument(_model.getActiveDocument());
+        return toReturn;
+      }
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+      return false;
+    }
+  }  
   
   /* Package private to allow use in MainFrameTest. */
   void _saveAll() {
@@ -4812,6 +4853,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _setUpAction(_openProjectAction, "Open", "Open an existing project");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "Save As", "SaveAs", "Save the current document with a new name");
+    _setUpAction(_renameAction, "Rename", "Rename", "Rename the current document");
     _setUpAction(_saveProjectAction, "Save", "Save", "Save the current project");
     _saveProjectAction.setEnabled(false);
     _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", "Save current project to new project file");
@@ -5051,6 +5093,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _saveAction.setEnabled(true);
     _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
     _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES);
+    _addMenuItem(fileMenu, _renameAction, KEY_RENAME_FILE);
 //    fileMenu.add(_saveProjectAsAction);
     
     _addMenuItem(fileMenu, _revertAction, KEY_REVERT_FILE);
@@ -5848,6 +5891,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _navPanePopupMenu.add(_saveAction);
     _navPanePopupMenu.add(_saveAsAction);
     _navPanePopupMenu.add(_revertAction);
+    _navPanePopupMenu.add(_renameAction);
     _navPanePopupMenu.addSeparator();
     _navPanePopupMenu.add(_closeAction);
     _navPanePopupMenu.addSeparator();
