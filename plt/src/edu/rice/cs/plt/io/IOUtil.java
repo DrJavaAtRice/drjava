@@ -6,6 +6,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.tuple.Wrapper;
 import edu.rice.cs.plt.recur.RecursionStack;
 
@@ -28,6 +29,19 @@ public class IOUtil {
     catch (SecurityException e) { return f; }
   }
   
+  /**
+   * Apply {@link File#getAbsoluteFile} to all files in a list
+   * @throws SecurityException  If any of the {@code getAbsoluteFile()} invocations triggers
+   *                            a {@code SecurityException}
+   */
+  public static Iterable<File> getAbsoluteFiles(Iterable<? extends File> files) {
+    return IterUtil.mapSnapshot(files, GET_ABSOLUTE_FILE);
+  }
+  
+  private static final Lambda<File, File> GET_ABSOLUTE_FILE = new Lambda<File, File>() {
+    public File value(File arg) { return arg.getAbsoluteFile(); }
+  };
+  
   /** Apply {@link #attemptAbsoluteFile} to all files in a list */
   public static Iterable<File> attemptAbsoluteFiles(Iterable<? extends File> files) {
     return IterUtil.mapSnapshot(files, ATTEMPT_ABSOLUTE_FILE);
@@ -48,6 +62,28 @@ public class IOUtil {
     catch (IOException e) { return attemptAbsoluteFile(f); }
     catch (SecurityException e) { return attemptAbsoluteFile(f); }
   }
+  
+  /**
+   * Apply {@link File#getCanonicalFile} to all files in a list
+   * @throws IOException  If any of the {@code getCanonicalFile()} invocations triggers
+   *                      an {@code IOException}
+   * @throws SecurityException  If any of the {@code getCanonicalFile()} invocations triggers
+   *                            a {@code SecurityException}
+   */
+  public static Iterable<File> getCanonicalFiles(Iterable<? extends File> files) throws IOException {
+    try { return IterUtil.mapSnapshot(files, GET_CANONICAL_FILE); }
+    catch (WrappedException e) { 
+      if (e.getCause() instanceof IOException) { throw (IOException) e.getCause(); }
+      else { throw e; }
+    }
+  }
+  
+  private static final Lambda<File, File> GET_CANONICAL_FILE = new Lambda<File, File>() {
+    public File value(File arg) {
+      try { return arg.getCanonicalFile(); }
+      catch (IOException e) { throw new WrappedException(e); }
+    }
+  };
   
   /** Apply {@link #attemptCanonicalFile} to all files in a list */
   public static Iterable<File> attemptCanonicalFiles(Iterable<? extends File> files) {
