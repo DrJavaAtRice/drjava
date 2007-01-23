@@ -264,6 +264,7 @@ public abstract class FileOps {
    *  @param stream Input stream to read.
    *  @return Byte array consisting of all data read from stream.
    *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#toByteArray} instead, which provides the same functionality.
+   *               Note that the {@code IOUtil} method will not close the {@code InputStream}, while this method does.
    */
   @Deprecated public static byte[] readStreamAsBytes(final InputStream stream) throws IOException {
     BufferedInputStream buffered;

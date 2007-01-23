@@ -36,6 +36,7 @@ package edu.rice.cs.util.classloader;
 import java.util.Arrays;
 import java.net.URL;
 import java.io.IOException;
+import java.io.InputStream;
 
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOps;
@@ -175,18 +176,12 @@ public class StickyClassLoader extends ClassLoader {
         throw new ClassNotFoundException("Resource not found: " + fileName);
       }
       
-      byte[] data = FileOps.readStreamAsBytes(resource.openStream());
+      InputStream in = resource.openStream();
       try {
+        byte[] data = IOUtil.toByteArray(in);
         return defineClass(name, data, 0, data.length);
       }
-      catch (Error t) {
-        /*
-         System.err.println("Sticky " + this + " error when loading " + name +
-         " with resolve=" + resolve + ":");
-         */
-        //t.printStackTrace();
-        throw t;
-      }
+      finally { in.close(); }
     }
     catch (IOException ioe) {
       throw new ClassNotFoundException(ioe.toString());
