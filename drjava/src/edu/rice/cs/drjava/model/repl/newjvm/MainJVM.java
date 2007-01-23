@@ -38,7 +38,6 @@ import java.io.*;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-import java.util.Vector;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -58,6 +57,7 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.plt.io.IOUtil;
 
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
@@ -109,11 +109,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private volatile boolean _allowAssertions = false;
   
   /** Classpath to use for starting the interpreter JVM */
-  private volatile String _startupClassPath;
-  
-  /** Starting classpath reorganized into a vector. */
-  private volatile ClassPathVector _startupClassPathVector;
-  
+  private volatile Iterable<File> _startupClassPath;
+
   /** A list of user-defined arguments to pass to the interpreter. */
   private volatile List<String> _optionArgs;
   
@@ -134,30 +131,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _interactionsModel = new DummyInteractionsModel();
     _junitModel = new DummyJUnitModel();
     _debugModel = new DummyDebugModel();
-    _startupClassPath = System.getProperty("java.class.path");
-    _parseStartupClassPath();
+    _startupClassPath = IOUtil.attemptCanonicalFiles(IOUtil.parsePath(System.getProperty("java.class.path")));
     _optionArgs = new ArrayList<String>();
-  }
-  
-  private void _parseStartupClassPath() {
-    String separator = System.getProperty("path.separator");
-    int index = _startupClassPath.indexOf(separator);
-    int lastIndex = 0;
-    _startupClassPathVector = new ClassPathVector();
-    while (index != -1) {
-      try { _startupClassPathVector.add(FileOps.toURL(new File(_startupClassPath.substring(lastIndex, index)))); }
-      catch(MalformedURLException murle) {
-        // just don't add bad classpath entry
-      }
-      lastIndex = index + separator.length();
-      index = _startupClassPath.indexOf(separator, lastIndex);
-    }
-    // Get the last entry
-    index = _startupClassPath.length();
-    try { _startupClassPathVector.add(FileOps.toURL(new File(_startupClassPath.substring(lastIndex, index)))); }
-    catch(MalformedURLException murle) {
-      // fail silently if the classpath entry is bad
-    }
   }
   
   public boolean isInterpreterRunning() { return _interpreterJVM() != null; }
@@ -326,21 +301,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       
       try {
         ClassPathVector classPath = slave.getAugmentedClassPath();  // returns fresh copy
-//        ClassPathVector classPath = new ClassPathVector(strClassPath.size() + _startupClassPathVector.size());
-        
-        classPath.addAll(_startupClassPathVector);
-        //        for(int i = 0; i < _startupClasspathVector.size(); i++) {
-        //          classpath.addElement(_startupClasspathVector.elementAt(i));
-        //        }
-        //        Vector<String> augmentedClasspath = _interpreterJVM().getAugmentedClasspath();
-        //        for(int i = 0; i < augmentedClasspath.size(); i++) {
-        //          classpdElement(augmentedClasspath.ementAt(i));
-        //        }
+        for (File f : _startupClassPath) {
+          try { classPath.add(FileOps.toURL(f)); }
+          catch (MalformedURLException e) { /* just ignore bad classpath entry */ }
+        }
         return classPath;
       }
-      catch (RemoteException re) { _threwException(re); }
+      catch (RemoteException re) { _threwException(re); return new ClassPathVector(); }
     }
-    return new ClassPathVector();
+    else { return new ClassPathVector(); }
   }
   
   
@@ -606,8 +575,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param classPath Classpath for the interpreter JVM
    */
   public void setStartupClassPath(String classPath) {
-    _startupClassPath = classPath;
-    _parseStartupClassPath();
+    _startupClassPath = IOUtil.attemptCanonicalFiles(IOUtil.parsePath(classPath));
   }
   
   /** Starts the interpreter if it's not running already. */
@@ -638,10 +606,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     // Create and invoke the Interpreter JVM
     try {
-      // _startupClasspath is sent in as the interactions classpath
-//      System.out.println("startUp: " + _startupClasspath);
+     // _startupClasspath is sent in as the interactions classpath
 //      Utilities.show("Calling invokeSlave(" + jvmArgs + ", " + _startupClassPath + ", " +  _workDir +")");
-      invokeSlave(jvmArgsArray, _startupClassPath, _workDir);
+      invokeSlave(jvmArgsArray, IOUtil.pathToString(_startupClassPath), _workDir);
       _slaveJVMUsed = false;
     }
     catch (RemoteException re) { _threwException(re); }
