@@ -405,7 +405,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       if (testName != null) {
         String ext;
         for(int i=0; i < DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS.length; i++) {
-          ext = DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[i];
+          ext = "." + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[i];
           if (testName.endsWith(ext)) testName = testName.substring(0, testName.length() - ext.length());
         }
         // For now, don't include setUp and tearDown
@@ -3645,7 +3645,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param chooser the selector that returns the files to open
    */
   public void openFolder(DirectoryChooser chooser) {
-    String type = "'" + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
+    String type = "'." + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
     chooser.setDialogTitle("Open All " + type + "Files in ...");
     
     File openDir = null;
@@ -4748,7 +4748,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           if (fc.getFileFilter() instanceof JavaSourceFilter) {
             if (chosen.getName().indexOf(".") == -1)
               return new File(chosen.getAbsolutePath() + 
-                              DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+                              "." + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
           }
           return chosen;
         }
