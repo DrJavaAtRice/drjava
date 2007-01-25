@@ -1293,21 +1293,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void openFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException {
     if (dir == null) return; // just in case
  
-    Log l = new Log("AbstractGlobalModel_openFolder.log", false);
-    l.log(String.format("Recursive Searching %s", (rec ? "Enabled" : "Disabled")));
-    
     if (dir.isDirectory()) {
       Iterable<File> filesIterable;
 
       String extension = DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)];
-      //HACK: the dot needs to be removed, otherwise
-      //IOUtils.fileExtensionPredicate() will try to match ..<ext>
-      if (extension.startsWith(".")) {
-       extension = extension.substring(1);
-       l.log(String.format("Extension tweaked to %s", extension));
-      }
-
-      l.log(String.format("Searching %s for *%s", dir.getAbsolutePath(), extension));
       
       FileFilter match = IOUtil.predicateFileFilter(LambdaUtil.and(IOUtil.IS_FILE, 
                                                                    IOUtil.extensionFilePredicate(extension)));
@@ -1315,12 +1304,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       else { filesIterable = IOUtil.attemptListFilesAsIterable(dir, match); }
       List<File> files = IterUtil.asList(filesIterable);
 
-      //What did we find?
-      l.log(String.format("Found %d file(s):", files.size()));
-      for (File f : files) {
-       l.log(f.getAbsolutePath()); 
-      }
-      
       if (isProjectActive()) {
         Collections.sort(files, new Comparator<File>() {
           public int compare(File o1,File o2) {
