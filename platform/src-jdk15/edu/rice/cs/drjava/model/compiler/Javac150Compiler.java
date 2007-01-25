@@ -331,6 +331,20 @@ public class Javac150Compiler implements CompilerInterface {
                                         true));
     }
 
+    /** "Mandatory warnings" were added at some point in the development of JDK 5 */
+    public void mandatoryWarning(int pos, String key, Object ... args) {
+      super.mandatoryWarning(pos, key, args);
+      //System.out.println("warning: pos = " + pos);
+      
+      String msg = getText("compiler.warn." + key, args);
+      
+      _errors.addLast(new CompilerError(new File(currentSource().toString()),
+                                        Position.line(pos) - 1, // gj is 1 based
+                                        Position.column(pos) - 1,
+                                        msg,
+                                        true));
+    }
+    
     /** JSR14 uses this crazy signature on error method because it localizes the error message. */
     public void error(int pos, String key, Object ... args) {
       super.error(pos, key, args);
@@ -345,6 +359,20 @@ public class Javac150Compiler implements CompilerInterface {
                                         false));
     }
 
+    public void note(String key, Object ... args) {
+      super.note(key, args);
+      // For now, we just ignore notes
+      
+      //String msg = getText("compiler.note." + key, args);
+    }
+    
+    public void mandatoryNote(String key, Object ... args) {
+      super.mandatoryNote(key, args);
+      // For now, we just ignore notes
+      
+      //String msg = getText("compiler.note." + key, args);
+    }
+    
     public LinkedList<CompilerError> getErrors() { return _errors; }
   }
 }
