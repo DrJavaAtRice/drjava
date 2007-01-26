@@ -5094,6 +5094,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
     _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES);
     _addMenuItem(fileMenu, _renameAction, KEY_RENAME_FILE);
+    _renameAction.setEnabled(false);
 //    fileMenu.add(_saveProjectAsAction);
     
     _addMenuItem(fileMenu, _revertAction, KEY_REVERT_FILE);
@@ -5855,6 +5856,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _navPanePopupMenuForExternal = new JPopupMenu();
     _navPanePopupMenuForExternal.add(_saveAction);
     _navPanePopupMenuForExternal.add(_saveAsAction);
+    _navPanePopupMenuForExternal.add(_renameAction);
     _navPanePopupMenuForExternal.add(_revertAction);
     _navPanePopupMenuForExternal.addSeparator();
     _navPanePopupMenuForExternal.add(_closeAction);
@@ -5872,6 +5874,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _navPanePopupMenuForAuxiliary = new JPopupMenu();
     _navPanePopupMenuForAuxiliary.add(_saveAction);
     _navPanePopupMenuForAuxiliary.add(_saveAsAction);
+    _navPanePopupMenuForAuxiliary.add(_renameAction);
     _navPanePopupMenuForAuxiliary.add(_revertAction);
     _navPanePopupMenuForAuxiliary.addSeparator();
     _navPanePopupMenuForAuxiliary.add(_closeAction);
@@ -5890,8 +5893,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _navPanePopupMenu = new JPopupMenu();
     _navPanePopupMenu.add(_saveAction);
     _navPanePopupMenu.add(_saveAsAction);
-    _navPanePopupMenu.add(_revertAction);
     _navPanePopupMenu.add(_renameAction);
+    _navPanePopupMenu.add(_revertAction);
     _navPanePopupMenu.addSeparator();
     _navPanePopupMenu.add(_closeAction);
     _navPanePopupMenu.addSeparator();
@@ -6737,6 +6740,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         public void run() {
           doc.documentSaved();  // used to update the document cache
           _saveAction.setEnabled(false);
+          _renameAction.setEnabled(true);
           _revertAction.setEnabled(true);
           updateFileTitle();
           _currentDefPane.requestFocusInWindow();
@@ -6823,6 +6827,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           boolean isModified = active.isModifiedSinceSave();
           boolean canCompile = (! isModified && ! active.isUntitled());
           _saveAction.setEnabled(! canCompile);
+          _renameAction.setEnabled(! active.isUntitled());
           _revertAction.setEnabled(! active.isUntitled());
           
           // Update error highlights
