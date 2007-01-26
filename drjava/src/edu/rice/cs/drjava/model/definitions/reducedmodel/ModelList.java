@@ -33,7 +33,7 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import java.util.HashSet;
+import edu.rice.cs.plt.collect.WeakHashSet;
 import java.util.Set;
 
 /* TODO: convert ModelList representation to a doubly linked circular list;
@@ -69,7 +69,13 @@ class ModelList<T> {
     _tail.pred = _head;
     _tail.succ = null;
     _length = 0;
-    _listeners = new HashSet<Iterator>();
+    /*
+     * We use a WeakHashSet so that listeners do not leak. That is, even
+     * if the dispose method is not called, when they are no longer
+     * strongly referenced, they will be automatically removed from the
+     * listener set.
+     */
+    _listeners = new WeakHashSet<Iterator>();
   }
 
   /**
