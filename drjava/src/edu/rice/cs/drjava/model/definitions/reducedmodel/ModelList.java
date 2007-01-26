@@ -371,6 +371,7 @@ class ModelList<T> {
      *  in the set of listeners so they can stay updated.
      */
     private void notifyOfInsert(int pos) {
+      /*
       java.util.Iterator<Iterator> iter =
         ModelList.this._listeners.iterator();
       while (iter.hasNext()) {
@@ -382,6 +383,15 @@ class ModelList<T> {
           next._pos += 1;
         }
       }
+      */
+      for (Iterator listener : ModelList.this._listeners) {
+        if ( listener._pos < pos ) {
+          // do nothing
+        }
+        else { // ( next._pos == pos ) || next._pos > pos
+          listener._pos += 1;
+        }
+      } 
     }
 
     /**
@@ -389,7 +399,8 @@ class ModelList<T> {
      * in the set of listeners so they can stay updated.
      */
     private void notifyOfRemove(int pos, Node<T> point) {
-      java.util.Iterator<Iterator> iter =
+      /*
+       java.util.Iterator<Iterator> iter =
         ModelList.this._listeners.iterator();
       while (iter.hasNext()) {
         Iterator next = iter.next();
@@ -403,12 +414,25 @@ class ModelList<T> {
           next._pos -= 1;
         }
       }
+      */
+      for (Iterator listener : ModelList.this._listeners) {
+        if ( listener._pos < pos ) {
+          // do nothing
+        }
+        else if ( listener._pos == pos ) {
+          listener._point = point;
+        }
+        else { // next._pos > pos
+          listener._pos -= 1;
+        }
+      }
     }
 
     /** When an iterator collapses part of the list, it notifies other iterators
      *  in the set of listeners so they can stay updated.
      */
     private void notifyOfCollapse(int leftPos, int rightPos, Node<T> rightPoint) {
+      /*
       java.util.Iterator<Iterator> iter = ModelList.this._listeners.iterator();
       while (iter.hasNext()) {
         Iterator next = iter.next();
@@ -421,6 +445,20 @@ class ModelList<T> {
         }
         else { // next._pos > rightPos
           next._pos -= (rightPos - leftPos - 1);
+        }
+      }
+    }
+    */
+      for (Iterator listener : ModelList.this._listeners) {
+        if ( listener._pos <= leftPos ) {
+          // do nothing
+        }
+        else if (( listener._pos > leftPos ) && ( listener._pos <= rightPos )) {
+          listener._pos = leftPos + 1;
+          listener._point = rightPoint;
+        }
+        else { // next._pos > rightPos
+          listener._pos -= (rightPos - leftPos - 1);
         }
       }
     }
