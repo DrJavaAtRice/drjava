@@ -165,7 +165,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param indent the size of indent that you want for the document
     */
   public void setIndent(final int indent) {
-    DrJava.getConfig().setSetting(INDENT_LEVEL,new Integer(indent));
+    DrJava.getConfig().setSetting(INDENT_LEVEL, indent);
     this._indent = indent;
   }
   
@@ -273,7 +273,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Distinguishes keywords from normal text in the given HighlightStatus element. Specifically, it looks to see
     * if the given text contains a keyword. If it does, it splits the HighlightStatus into separate blocks
     * so that each keyword has its own block. This process identifies all keywords in the given block.
-    * Note that the given block must have state NORMAL.
+    * Note that the given block must have state NORMAL.  Assumes that readLock is ALREADY HELD.
     *
     * @param v Vector with highlight info
     * @param i Index of the single HighlightStatus to check for keywords in
@@ -496,7 +496,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     finally { releaseReadLock(); }  
   }
   
-  /** This method is used ONLY for testing.
+  /** This method is used ONLY for testing.  This method is UNSAFE in any other context!
     * @return The reduced model of this document.
     */
   public BraceReduction getReduced() { return _reduced; }
@@ -511,9 +511,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     IndentInfo info;
     acquireReadLock();
-    try { synchronized(_reduced) { info = _reduced.getIndentInformation(); } }
+    try { 
+      synchronized(_reduced) { info = _reduced.getIndentInformation(); } 
+      _storeInCache(key, info);
+    }
     finally { releaseReadLock(); }  
-    _storeInCache(key, info);
+
     return info;
   }
   
@@ -556,6 +559,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     int reducedPos = pos;
     int i;  // index of for loop below
     int braceBalance = 0;
+    
     acquireReadLock();
     try {
       String text = getText(DOCSTART, pos);
@@ -596,13 +600,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         
         _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
       }  // end synchronized
+      
+      if (i == DOCSTART-1) reducedPos = ERROR_INDEX; // No matching char was found
+      _storeInCache(key, reducedPos);
     }
     finally { releaseReadLock(); }
     
     // Return position of matching char or ERROR_INDEX 
-    
-    if (i == DOCSTART-1) reducedPos = ERROR_INDEX; // No matching char was found
-    _storeInCache(key, new Integer(reducedPos));
     return reducedPos;  
   }
     
@@ -668,13 +672,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         
         _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
       }  // end synchronized
+      
+      if (i == text.length()) reducedPos = ERROR_INDEX; // No matching char was found
+      _storeInCache(key, reducedPos);
     }
     finally { releaseReadLock(); }
     
-    // Return position of matching char or ERROR_INDEX 
-    
-    if (i == text.length()) reducedPos = ERROR_INDEX; // No matching char was found
-    _storeInCache(key, new Integer(reducedPos));
+    // Return position of matching char or ERROR_INDEX     
     return reducedPos;  
   }
 
@@ -740,13 +744,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         
         _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
       }  // end synchronized
+      
+      if (i == DOCSTART-1) reducedPos = ERROR_INDEX; // No matching char was found
+      _storeInCache(key, reducedPos);
     }
     finally { releaseReadLock(); }
     
     // Return position of matching char or ERROR_INDEX 
-    
-    if (i == DOCSTART-1) reducedPos = ERROR_INDEX; // No matching char was found
-    _storeInCache(key, new Integer(reducedPos));
     return reducedPos;  
   }
   
@@ -850,12 +854,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         /* Exit invariant same as for loop except that i <= reducedPos because at break i = reducedPos */
         _reduced.move(origLocation - reducedPos);
       }
+      
+      int result = reducedPos;
+      if (i < 0) result = ERROR_INDEX;
+      _storeInCache(key, result);
+      return result;
     }
     finally { releaseReadLock(); }
-    int result = reducedPos;
-    if (i < 0) result = ERROR_INDEX;
-    _storeInCache(key, new Integer(result));
-    return result;
+
   }
   
   /** Checks the helper method cache for a stored value.  Returns the value if it has been cached, or null 
@@ -1090,12 +1096,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         // Get the position of the first non-ws character on this line
         int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
         lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt); 
+        _storeInCache(key, lineText);
       }
     }
     catch(Throwable t) { throw new UnexpectedException(t); }
     finally { releaseReadLock(); }
     
-    _storeInCache(key, lineText);
     return lineText;
   }
   
@@ -1143,12 +1149,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           i = lineText.indexOf(findChar, i+1);
         }
       }
+      
+      if (i == -1) matchIndex = ERROR_INDEX;
+      _storeInCache(key, matchIndex);
     }
     catch (Throwable t) { throw new UnexpectedException(t); }
     finally { releaseReadLock(); }
     
-    if (i == -1) matchIndex = ERROR_INDEX;
-    _storeInCache(key, new Integer(matchIndex));
     return matchIndex;
   }
   
@@ -1173,16 +1180,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         dist = _reduced.getDistToPreviousNewline(0);
         _reduced.move(location - pos);
       }
+      
+      if (dist == -1) {
+        // No previous newline was found; return DOCSTART
+        _storeInCache(key, DOCSTART);
+        return DOCSTART;
+      }
+      _storeInCache(key, pos - dist);
     }
     finally { releaseReadLock(); }
-    
-    if (dist == -1) {
-      // No previous newline was found; return DOCSTART
-      _storeInCache(key, new Integer(DOCSTART));
-      return DOCSTART;
-    }
-    
-    _storeInCache(key, new Integer(pos - dist));
+
     return pos - dist;
   }
   
@@ -1207,9 +1214,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         dist = _reduced.getDistToNextNewline();
         _reduced.move(location - pos);
       }
+      _storeInCache(key, pos + dist);
     }
     finally { releaseReadLock(); }
-    _storeInCache(key, new Integer(pos + dist));
+   
     return pos + dist;
   }
   
@@ -1225,25 +1233,26 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     Integer cached = (Integer) _checkCache(key);
     if (cached != null)  return cached.intValue();
     
-    int startLinePos = getLineStartPos(pos);
-    int endLinePos = getLineEndPos(pos);
-    
-    // Get all text on this line
-    String text = this.getText(startLinePos, endLinePos - startLinePos);
-    int walker = 0;
-    while (walker < text.length()) {
-      if (text.charAt(walker) == ' ' ||
-          text.charAt(walker) == '\t') {
-        walker++;
+    acquireReadLock();
+    try {
+      int startLinePos = getLineStartPos(pos);
+      int endLinePos = getLineEndPos(pos);
+      
+      // Get all text on this line
+      String text = this.getText(startLinePos, endLinePos - startLinePos);
+      int walker = 0;
+      while (walker < text.length()) {
+        if (text.charAt(walker) == ' ' || text.charAt(walker) == '\t') walker++;
+        else {
+          _storeInCache(key, startLinePos + walker);
+          return startLinePos + walker;
+        }
       }
-      else {
-        _storeInCache(key, new Integer(startLinePos + walker));
-        return startLinePos + walker;
-      }
+      // No non-WS char found, so return last position on line
+      _storeInCache(key, endLinePos);
+      return endLinePos;
     }
-    // No non-WS char found, so return last position on line
-    _storeInCache(key, new Integer(endLinePos));
-    return endLinePos;
+    finally { releaseReadLock(); }
   }
   
   /** Finds the position of the first non-whitespace character after pos. NB: Skips comments and all whitespace, 
@@ -1339,10 +1348,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         result = reducedPos;
         if (i == endPos) result = ERROR_INDEX;
       }
+      _storeInCache(key, result);
     }
     finally { releaseReadLock(); }
-    
-    _storeInCache(key, new Integer(result));
+
     return result;
   }
   
@@ -1401,10 +1410,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         inParenPhrase = posInParenPhrase();
         _reduced.move(here - pos);
       }
+      _storeInCache(key, Boolean.valueOf(inParenPhrase));
     }
     finally { releaseReadLock(); }
 
-    _storeInCache(key, Boolean.valueOf(inParenPhrase));
     return inParenPhrase;
   }
 
@@ -1420,7 +1429,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return info.braceTypeCurrent.equals(IndentInfo.openParen);
   }
 
-  /** Returns true if the given position is not inside a paren/brace/etc phrase.  Assumes that acquireReadLock is held.
+  /** Returns true if the given position is not inside a paren/brace/etc phrase.  Assumes that read lock is ALREADY HELD.
    *  @param pos the position we're looking at
    *  @return true if pos is immediately inside a paren/brace/etc
    */

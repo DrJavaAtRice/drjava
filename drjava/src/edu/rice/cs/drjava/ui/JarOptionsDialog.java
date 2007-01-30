@@ -221,23 +221,6 @@ public class JarOptionsDialog extends JFrame {
       try {
         _rootFile = _rootFile.getCanonicalFile();
       } catch(IOException e) { }
-    
-      FileChooser chooser = new FileChooser(_rootFile);
-      chooser.setDialogTitle("Select Main Class");
-//      chooser.setTopMessage("Select the main class for the executable jar file:");
-      chooser.setApproveButtonText("Select");
-      FileFilter filter = new FileFilter() {
-        public boolean accept(File f) {
-          String name = f.getName();
-          return  !f.isDirectory() && name.endsWith(".class");
-        }
-        public String getDescription() { return "Class Files (*.class)"; }
-      };
-      chooser.addChoosableFileFilter(filter);
-//      chooser.addChoosableFileFilter(filter);
-//      chooser.setShowFiles(true);
-//      chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
-      _mainClassField.setFileChooser(chooser);
       
       final File mc = _model.getMainClass();
       if (mc == null)  _mainClassField.setText("");
@@ -410,35 +393,49 @@ public class JarOptionsDialog extends JFrame {
    *  @return the panel containing the label and the selector for the main class.
    */
   private JPanel _makeMainClassSelectorPanel() {
-    _mainClassField = new FileSelectorStringComponent(this, null, 20, 12f) {
-        public File convertStringToFile(String s) { 
-          s = s.trim().replace('.', java.io.File.separatorChar) + ".class";
-          if (s.equals("")) return null;
-          else return new File(_rootFile, s);
-        }
-        
-        public String convertFileToString(File f) {
-          if (f == null)  return "";
-          else {
-            try {
-              String s = edu.rice.cs.util.FileOps.makeRelativeTo(f, _rootFile).toString();
-              s = s.substring(0, s.lastIndexOf(".class"));
-              s = s.replace(java.io.File.separatorChar, '.').replace('$', '.');
-              int pos = 0;
-              boolean ok = true;
-              while((pos = s.indexOf('.', pos)) >= 0) {
-                if ((s.length() <= pos + 1) || (Character.isDigit(s.charAt(pos + 1)))) {
-                  ok = false;
-                  break;
-                }
-                ++pos;
+    
+    FileChooser chooser = new FileChooser(_rootFile);
+    chooser.setDialogTitle("Select Main Class");
+//      chooser.setTopMessage("Select the main class for the executable jar file:");
+    chooser.setApproveButtonText("Select");
+    FileFilter filter = new FileFilter() {
+      public boolean accept(File f) {
+        String name = f.getName();
+        return  !f.isDirectory() && name.endsWith(".class");
+      }
+      public String getDescription() { return "Class Files (*.class)"; }
+    };
+    chooser.addChoosableFileFilter(filter);
+    
+    _mainClassField = new FileSelectorStringComponent(this, chooser, 20, 12f) {
+      public File convertStringToFile(String s) { 
+        s = s.trim().replace('.', java.io.File.separatorChar) + ".class";
+        if (s.equals("")) return null;
+        else return new File(_rootFile, s);
+      }
+      
+      public String convertFileToString(File f) {
+        if (f == null)  return "";
+        else {
+          try {
+            String s = edu.rice.cs.util.FileOps.makeRelativeTo(f, _rootFile).toString();
+            s = s.substring(0, s.lastIndexOf(".class"));
+            s = s.replace(java.io.File.separatorChar, '.').replace('$', '.');
+            int pos = 0;
+            boolean ok = true;
+            while((pos = s.indexOf('.', pos)) >= 0) {
+              if ((s.length() <= pos + 1) || (Character.isDigit(s.charAt(pos + 1)))) {
+                ok = false;
+                break;
               }
-              if (ok) return s;
-              return "";
+              ++pos;
             }
-            catch(Exception e) { return ""; }
+            if (ok) return s;
+            return "";
           }
+          catch(Exception e) { return ""; }
         }
+      }
     };
     _mainClassField.getTextField().getDocument().addDocumentListener(new DocumentListener() {
       public void insertUpdate(DocumentEvent e) { setEnabled(); }

@@ -142,13 +142,9 @@ public interface OptionConstants {
   /* ---------- Font Options ---------- */
 
   /** Main (definitions document, tab contents) */
-  public static final FontOption FONT_MAIN =
-    new FontOption("font.main", DefaultFont.getDefaultMainFont());
+  public static final FontOption FONT_MAIN = new FontOption("font.main", DefaultFont.getDefaultMainFont());
 
-  /**
-   * Class that allows the main font to be initialized properly.
-   * On Mac14, Monospaced-PLAIN-12 is too faint, so use Monaco instead.
-   */
+  /** Class that allows the main font to be initialized properly. On Mac OS X, Monaco is the best monospaced font. */
   static class DefaultFont {
     public static Font getDefaultMainFont() {
       if (PlatformFactory.ONLY.isMacPlatform())  return Font.decode("Monaco-12");
@@ -159,12 +155,8 @@ public interface OptionConstants {
       else return Font.decode("Monospaced-12");
     }
     public static Font getDefaultDocListFont() {
-      if (PlatformFactory.ONLY.isMacPlatform()) {
-        return Font.decode("Monaco-10");
-      }
-      else {
-        return Font.decode("Monospaced-10");
-      }
+      if (PlatformFactory.ONLY.isMacPlatform()) return Font.decode("Monaco-10");
+      else return Font.decode("Monospaced-10");
     }
   }
 
@@ -173,81 +165,58 @@ public interface OptionConstants {
     new FontOption("font.line.numbers", DefaultFont.getDefaultLineNumberFont());
 
   /** List of open documents */
-  public static final FontOption FONT_DOCLIST =
-    new FontOption("font.doclist", DefaultFont.getDefaultDocListFont());
+  public static final FontOption FONT_DOCLIST = new FontOption("font.doclist", DefaultFont.getDefaultDocListFont());
 
  /** Toolbar buttons */
-  public static final FontOption FONT_TOOLBAR =
-    new FontOption("font.toolbar", Font.decode("dialog-10"));
+  public static final FontOption FONT_TOOLBAR = new FontOption("font.toolbar", Font.decode("dialog-10"));
 
-  /**
-   * Whether to draw anti-aliased text.  (Slightly slower.)
-   */
-  public static final BooleanOption TEXT_ANTIALIAS =
-    new BooleanOption("text.antialias", Boolean.FALSE);
+  /** Whether to draw anti-aliased text.  (Slightly slower.) */
+  public static final BooleanOption TEXT_ANTIALIAS = new BooleanOption("text.antialias", Boolean.FALSE);
 
 
   /* ---------- Other Display Options ---------- */
 
-  /**
-   * Whether icons should be displayed on the toolbar buttons.
-   */
+  /** Whether icons should be displayed on the toolbar buttons. */
   public static final BooleanOption TOOLBAR_ICONS_ENABLED =
     new BooleanOption("toolbar.icons.enabled", Boolean.TRUE);
 
-  /**
-   * Whether text should be displayed on the toolbar buttons.
-   * Note: this is only relevant if toolbar icons are enabled
-   */
-  public static final BooleanOption TOOLBAR_TEXT_ENABLED =
-    new BooleanOption("toolbar.text.enabled", Boolean.TRUE);
+  /** Whether text should be displayed on toolbar buttons. Note: only relevant if toolbar icons are enabled. */
+  public static final BooleanOption TOOLBAR_TEXT_ENABLED = new BooleanOption("toolbar.text.enabled", Boolean.TRUE);
 
-  /**
-   * Whether or not the toolbar should be displayed
-   */
-   public static final BooleanOption TOOLBAR_ENABLED = 
-     new BooleanOption("toolbar.enabled", Boolean.TRUE);
+  /** Whether or not the toolbar should be displayed. */
+   public static final BooleanOption TOOLBAR_ENABLED = new BooleanOption("toolbar.enabled", Boolean.TRUE);
 
-  /**
-   * Whether the line-numbers should be displayed in a row header.
-   */
-  public static final BooleanOption LINEENUM_ENABLED =
-    new BooleanOption("lineenum.enabled", Boolean.FALSE);
+  /** Whether the line-numbers should be displayed in a row header. */
+  public static final BooleanOption LINEENUM_ENABLED = new BooleanOption("lineenum.enabled", Boolean.FALSE);
 
-  /**
-   * Whether to save and restore window size and position at startUp/shutdown.
-   */
-  public static final BooleanOption WINDOW_STORE_POSITION =
-    new BooleanOption("window.store.position", Boolean.TRUE);
+  /** Whether to save and restore window size and position at startUp/shutdown. */
+  public static final BooleanOption WINDOW_STORE_POSITION = new BooleanOption("window.store.position", Boolean.TRUE);
 
-  /**
-   * whether a sample of the source code will be show when fast switching documents
-   */
+  /** Whether a sample of the source code will be show when fast switching documents. */
   public static final BooleanOption SHOW_SOURCE_WHEN_SWITCHING = 
     new BooleanOption("show.source.for.fast.switch", Boolean.TRUE);
   
   /** The current look and feel. */
   public static final ForcedChoiceOption LOOK_AND_FEEL =
-    new ForcedChoiceOption("look.and.feel",
-                           LookAndFeels.getDefaultLookAndFeel(),
-                           LookAndFeels.getLookAndFeels());
+    new ForcedChoiceOption("look.and.feel", LookAndFeels.getDefaultLookAndFeel(), LookAndFeels.getLookAndFeels());
 
   /** Class that allows the look and feels to be initialized properly. */
   static class LookAndFeels {
     
     /** Mac platform should default to aqua; use metal elsewhere.
-     *  @return the look-and-feel to use by default
-     */
+      *  @return the look-and-feel to use by default
+      */
     public static String getDefaultLookAndFeel() {
       if (PlatformFactory.ONLY.isMacPlatform()) return UIManager.getSystemLookAndFeelClassName();
-      else return UIManager.getCrossPlatformLookAndFeelClassName();
+      else 
+        return UIManager.getCrossPlatformLookAndFeelClassName();
     }
     /** Need to ensure that a look-and-feel can be instantiated and is valid.
-     *  TODO:  store the LookAndFeel object rather than its classname.
-     *         This would be much nicer, as we could display a useful name,
-     *         and wouldn't have to reinstantiate it when it's installed.
-     *  @return the list of availabe look-and-feel classnames
-     */
+      *  TODO:  store the LookAndFeel object rather than its classname.
+      *         This would be much nicer, as we could display a useful name,
+      *         and wouldn't have to reinstantiate it when it's installed.
+      *  @return the list of available look-and-feel classnames
+      */
     public static ArrayList<String> getLookAndFeels() {
       ArrayList<String> lookAndFeels = new ArrayList<String>();
       LookAndFeelInfo[] lafis = UIManager.getInstalledLookAndFeels();

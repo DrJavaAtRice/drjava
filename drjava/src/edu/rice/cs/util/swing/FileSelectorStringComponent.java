@@ -61,22 +61,22 @@ public class FileSelectorStringComponent extends JPanel {
   protected final JButton _chooserButton;
 
   /** File chooser to open when clicking the "..." button. */
-  protected FileChooser _chooser;
+  protected final FileChooser _chooser;
 
   /** The current file */
-  protected File _file;
+  protected volatile File _file;
   
   /** Creates a new DirectorySelectorStringComponent with default dimensions.
    *  @param parent  Parent of this component.
-   *  @param chooser File chooser to display from the "..." button.
+   *  @param chooser File chooser to display from the "..." button.  Assumed non-null!
    */
   public FileSelectorStringComponent(Component parent, FileChooser chooser) {
     this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE);
   }
 
   /** Creates a new DirectorySelectorStringComponent.
-   *  @param parent   Parent of this component.
-   *  @param chooser  File chooser to display from the "..." button.
+   *  @param parent   Parent of this component.  
+   *  @param chooser  File chooser to display from the "..." button.  Assumed non-null!
    *  @param numCols  Number of columns to display in the text field
    *  @param fontSize Font size for the text field
    */
@@ -115,9 +115,6 @@ public class FileSelectorStringComponent extends JPanel {
   /** Returns the file chooser. */
   public FileChooser getFileChooser() { return _chooser; }
 
-  /** Sets the file chooser. */
-  public void setFileChooser(FileChooser c) { _chooser = c; }
-
   /** Converts a string representation from the text field into a File. */
   public File convertStringToFile(String s) {
     s = s.trim();
@@ -138,9 +135,7 @@ public class FileSelectorStringComponent extends JPanel {
     File newFile = null;
     if (! newValue.equals("")) {
       newFile = convertStringToFile(newValue);
-      if (! newFile.isDirectory() && ! _chooser.isFileSelectionEnabled()) {
-        newFile = newFile.getParentFile();
-      }
+      if (! newFile.isDirectory() && ! _chooser.isFileSelectionEnabled()) newFile = newFile.getParentFile();
     }
     
     if (newFile != null && ! newFile.exists()) newFile = _file;

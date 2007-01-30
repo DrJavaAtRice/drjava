@@ -401,8 +401,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       }
     });
     _strategyBox.addFocusListener(new FocusListener() {
-      public void focusGained(FocusEvent e) {
-      }
+      public void focusGained(FocusEvent e) { }
 
       public void focusLost(FocusEvent e) {
         if ((e.getOppositeComponent() != _textField) && 
@@ -529,8 +528,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
 //    });
 
     _textField.addFocusListener(new FocusListener() {
-      public void focusGained(FocusEvent e) {
-      }
+      public void focusGained(FocusEvent e) { }
 
       public void focusLost(FocusEvent e) {
         if ((e.getOppositeComponent() != _strategyBox) && 

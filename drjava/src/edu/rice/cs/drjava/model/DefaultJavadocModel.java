@@ -222,7 +222,7 @@ public class DefaultJavadocModel implements JavadocModel {
             // But don't do it if we've already done it for this directory.
             defaultRoots.add(sourceRoot);
             Iterable<File> javaFiles = IOUtil.attemptListFilesAsIterable(sourceRoot, IOUtil.extensionFileFilter("java"));
-            for (File f: javaFiles) { docUnits.add(f.getAbsolutePath());}
+            for (File f: javaFiles) { docUnits.add(f.getAbsolutePath()); }
           }
         }
         else {

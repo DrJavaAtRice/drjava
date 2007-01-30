@@ -139,30 +139,29 @@ public abstract class AbstractConsoleController implements Serializable {
   }
 
   /** Sets the font for the document, updating all existing text.  This behavior is only necessary in Mac OS X, since
-   *  setFont() works fine on JTextPane on all other tested platforms.
-   *  @param f New font to use.
-   */
+    * setFont() works fine on JTextPane on all other tested platforms.  This glitch in the Mac JVM still exists as of
+    * 11-28-06 in beta Java 6.0 build 88.
+    * @param f New font to use.
+    */
   public void setDefaultFont(Font f) {
     Color c = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
     setDefaultFont(f, c);
   }
 
-  /**
-   * Sets the color for the document, updating all existing text.
-   * This behavior is only necessary in Mac OS X, since
-   * changing the main font works on all other tested platforms.
-   * @param c New color to use.
-   */
+  /** Sets the color for the document, updating all existing text.  This behavior is only necessary in Mac OS X, since
+    * changing the main font works on all other tested platforms.
+    * @param c New color to use.
+    */
   public void setDefaultFont(Color c) {
     Font f = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN);
     setDefaultFont(f, c);
   }
 
   /** Sets the font and color for the document, updating all existing text.  This behavior is only necessary in Mac OS
-   *  X, since setFont() and changing the main font works on all other tested platforms.
-   *  @param f New font to use.
-   *  @param c New color to use.
-   */
+    * X, since setFont() and changing the main font works on all other tested platforms.
+    * @param f New font to use.
+    * @param c New color to use.
+    */
   public void setDefaultFont(Font f, Color c) {
     if (PlatformFactory.ONLY.isMacPlatform()) {
       SimpleAttributeSet fontSet = new SimpleAttributeSet();
@@ -180,8 +179,8 @@ public abstract class AbstractConsoleController implements Serializable {
   }
 
   /** Updates all document styles with the attributes contained in newSet.
-   *  @param newSet Style containing new attributes to use.
-   */
+    * @param newSet Style containing new attributes to use.
+    */
   protected void _updateStyles(AttributeSet newSet) {
     _defaultStyle.addAttributes(newSet);
     _systemOutStyle.addAttributes(newSet);
