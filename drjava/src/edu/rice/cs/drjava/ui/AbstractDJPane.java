@@ -155,12 +155,10 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
      *  channels and thus it may not be in sync with the document's position.  For that reason, we must grab the
      *  caretPostion and set the current location to that value before calling the insertLine operation.  The logic
      *  for a single line insert is very dependent on the current location.
-     *  old: _doc().setCurrentLocation(getCaretPosition());
-     *  new:
      */
     
-    // Is this action still necessary?  
-//    getDJDocument().setCurrentLocation(getCaretPosition());
+    // Is this action still necessary?  Answer: yes!  Without this line, the caret often moves when the user hits "tab"
+    getDJDocument().setCurrentLocation(getCaretPosition());
     
     // The _reduced lock within DefinitionsDocument should be probably be set as well
     
