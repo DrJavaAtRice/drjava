@@ -306,11 +306,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  empty string if no package name is found.
    */
   protected String _getPackageQualifier() {
-    String packageName = "";
-    try { packageName = getPackageName(); }
-    catch (InvalidPackageException e) { 
-      /* Couldn't find package, pretend there's none; findbugs requires multi-line formatting of this clause */ 
-    }
+    String packageName = getPackageName();
     if ((packageName != null) && (! packageName.equals(""))) { packageName = packageName + "."; }
     return packageName;
   }

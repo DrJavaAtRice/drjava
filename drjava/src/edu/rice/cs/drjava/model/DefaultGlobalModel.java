@@ -312,11 +312,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
  
   /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is 
    *  indicated (on by default).  The reset operation is suppressed if the existing slave JVM has not been
-   *  used, {@code wd} matches its working directory, and forceResest is false.
+   *  used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null}
+   *  if a valid directory cannot be determined.  In that case, the former working directory is used.
    */
   public void resetInteractions(File wd, boolean forceReset) {
 //    _log.log("DefaultGlobalModel.resetInteractions called");
     File workDir = _interactionsModel.getWorkingDirectory();
+    if (wd == null) { wd = workDir; }
 //    _log.log("New working directory = " + wd +"; current working directory = " + workDir + ";");
 
     if (! forceReset && ! _jvm.slaveJVMUsed() && ! isClassPathChanged() && wd.equals(workDir)) {
@@ -473,8 +475,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       
       File workDir;
       if (isProjectActive()) workDir = getWorkingDirectory(); // use working directory for project
-      else workDir = getSourceRoot();  // use source root of current document
-      
+      else {
+        // use source root of current document
+        try { workDir = getSourceRoot(); }
+        catch (InvalidPackageException e) { workDir = null; }
+      }
       // Reset interactions to the soure root for this document; class will be executed when new interpreter is ready
       resetInteractions(workDir);  
     }

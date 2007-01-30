@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
-//import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 //import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.plt.io.IOUtil;
@@ -290,27 +290,30 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     for (OpenDefinitionsDocument doc: lod) /* for all nonEmpty documents in lod */ {
       if (doc.isSourceFile())  { // excludes Untitled documents and open non-source files
+        try {
+          File sourceRoot = doc.getSourceRoot(); // may throw an InvalidPackageException
+          
+          // doc has valid package name; add it to list of open java source doc files
+          openDocFiles.add(doc.getCanonicalPath());
         
-        // doc has valid package name; add it to list of open java source doc files
-        openDocFiles.add(doc.getCanonicalPath());
-        
-        String packagePath = doc.getPackageName().replace('.', File.separatorChar);
-        
-        // Add (canonical path name for) build directory for doc to classDirs
-        
-        File sourceRoot = doc.getSourceRoot();
-        File buildRoot = (buildDir == null) ? sourceRoot: buildDir;
-        
-        File classFileDir = new File(IOUtil.attemptCanonicalFile(buildRoot), packagePath);
-        
-        File sourceDir = 
-          (buildDir == null) ? classFileDir : new File(IOUtil.attemptCanonicalFile(sourceRoot), packagePath);
-        
-        if (! classDirsAndRoots.containsKey(classFileDir)) {
-          classDirsAndRoots.put(classFileDir, sourceDir);
+          String packagePath = doc.getPackageName().replace('.', File.separatorChar);
+          
+          // Add (canonical path name for) build directory for doc to classDirs
+          
+          File buildRoot = (buildDir == null) ? sourceRoot: buildDir;
+          
+          File classFileDir = new File(IOUtil.attemptCanonicalFile(buildRoot), packagePath);
+          
+          File sourceDir = 
+            (buildDir == null) ? classFileDir : new File(IOUtil.attemptCanonicalFile(sourceRoot), packagePath);
+          
+          if (! classDirsAndRoots.containsKey(classFileDir)) {
+            classDirsAndRoots.put(classFileDir, sourceDir);
 //          System.err.println("Adding " + classFileDir + " with source root " + sourceRoot + 
 //          " to list of class directories");
+          }
         }
+        catch (InvalidPackageException e) { /* Skip the file, since it doesn't have a valid package */ }
       }
     }
     

@@ -4002,10 +4002,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         return new Pair<Integer,Integer>(scrollv,scrollh); 
       }
       public File getFile() { return doc.getRawFile(); }
-      public String getPackage() {
-        try { return doc.getPackageName(); }
-        catch(InvalidPackageException e) { return null; }
-      }
+      public String getPackage() { return doc.getPackageName(); }
       public boolean isActive() { return _model.getActiveDocument() == doc; }
       public boolean isUntitled() { return doc.isUntitled(); }
     };
