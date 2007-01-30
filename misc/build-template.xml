@@ -39,7 +39,7 @@
   <property name="main-class" value="edu.rice.cs.template.Runner" />
 
   <!-- *** Change the repository if it is not the DrJava SourceForge repository *** -->
-  <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
+  <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
 
   <!-- *** Environment properties that are not needed may be removed *** -->
   <property environment="env" />
