@@ -2,9 +2,12 @@ package edu.rice.cs.plt.io;
 
 import java.io.*;
 import java.util.StringTokenizer;
+import java.util.List;
+import java.util.LinkedList;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.lambda.Thunk;
+import edu.rice.cs.plt.lambda.LazyThunk;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.tuple.Wrapper;
@@ -14,7 +17,7 @@ import edu.rice.cs.plt.recur.RecursionStack;
  * Provides additional operations on {@link File}s, {@link InputStream}s, {@link OutputStream}s,
  * {@link Reader}s, and {@link Writer}s not defined in the {@code java.io} package.
  */
-public class IOUtil {
+public final class IOUtil {
   
   /** Prevents instance creation */
   private IOUtil() {}
@@ -877,7 +880,104 @@ public class IOUtil {
     return toStringBuffer(r).toString();
   }
   
+  /** If {@code r} is a {@code BufferedReader}, cast it as such; otherwise, wrap it in a {@code BufferedReader} */
+  public static BufferedReader makeBuffered(Reader r) {
+    if (r instanceof BufferedReader) { return (BufferedReader) r; }
+    else { return new BufferedReader(r); }
+  }
   
+  /** If {@code w} is a {@code BufferedWriter}, cast it as such; otherwise, wrap it in a {@code BufferedWriter} */
+  public static BufferedWriter makeBuffered(Writer w) {
+    if (w instanceof BufferedWriter) { return (BufferedWriter) w; }
+    else { return new BufferedWriter(w); }
+  }
+  
+  
+  /* Note: If we allowed use of Java 5 APIs, the following code could be simplified by just defining one method
+   * that handles Closeables.
+   */
+  
+  private static final Thunk<List<InputStream>> INPUT_STREAMS_TO_CLOSE = LazyThunk.make(new Thunk<List<InputStream>>() {
+    public List<InputStream> value() {
+      // On the first request, register a shutdown hook to clean up the list
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+        public void run() {
+          for (InputStream in : INPUT_STREAMS_TO_CLOSE.value()) {
+            try { in.close(); }
+            catch (IOException e) { /* We've made a best effort, and must ignore the exception */ }
+          }
+        }
+      });
+      return new LinkedList<InputStream>();
+    }
+  });
+  
+  /** Register the given stream to be closed on exit.  {@link InputStream#close} will be invoked from a shutdown hook. */
+  public static void closeOnExit(InputStream in) {
+    INPUT_STREAMS_TO_CLOSE.value().add(in);
+  }
+  
+  private static final Thunk<List<OutputStream>> OUTPUT_STREAMS_TO_CLOSE = LazyThunk.make(new Thunk<List<OutputStream>>() {
+    public List<OutputStream> value() {
+      // On the first request, register a shutdown hook to clean up the list
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+        public void run() {
+          for (OutputStream out : OUTPUT_STREAMS_TO_CLOSE.value()) {
+            try { out.close(); }
+            catch (IOException e) { /* We've made a best effort, and must ignore the exception */ }
+          }
+        }
+      });
+      return new LinkedList<OutputStream>();
+    }
+  });
+  
+  /** Register the given stream to be closed on exit.  {@link OutputStream#close} will be invoked from a shutdown hook. */
+  public static void closeOnExit(OutputStream out) {
+    OUTPUT_STREAMS_TO_CLOSE.value().add(out);
+  }
+  
+  private static final Thunk<List<Reader>> READERS_TO_CLOSE = LazyThunk.make(new Thunk<List<Reader>>() {
+    public List<Reader> value() {
+      // On the first request, register a shutdown hook to clean up the list
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+        public void run() {
+          for (Reader r : READERS_TO_CLOSE.value()) {
+            try { r.close(); }
+            catch (IOException e) { /* We've made a best effort, and must ignore the exception */ }
+          }
+        }
+      });
+      return new LinkedList<Reader>();
+    }
+  });
+  
+  /** Register the given reader to be closed on exit.  {@link Reader#close} will be invoked from a shutdown hook. */
+  public static void closeOnExit(Reader r) {
+    READERS_TO_CLOSE.value().add(r);
+  }
+  
+  private static final Thunk<List<Writer>> WRITERS_TO_CLOSE = LazyThunk.make(new Thunk<List<Writer>>() {
+    public List<Writer> value() {
+      // On the first request, register a shutdown hook to clean up the list
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+        public void run() {
+          for (Writer w : WRITERS_TO_CLOSE.value()) {
+            try { w.close(); }
+            catch (IOException e) { /* We've made a best effort, and must ignore the exception */ }
+          }
+        }
+      });
+      return new LinkedList<Writer>();
+    }
+  });
+  
+  /** Register the given stream to be closed on exit.  {@link Reader#close} will be invoked from a shutdown hook. */
+  public static void closeOnExit(Writer w) {
+    WRITERS_TO_CLOSE.value().add(w);
+  }
+  
+
   /** Define a {@code FileFilter} in terms of a {@code Predicate} */
   public static FileFilter predicateFileFilter(final Predicate<? super File> p) {
     return new FileFilter() {

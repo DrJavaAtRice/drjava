@@ -13,7 +13,7 @@ import edu.rice.cs.plt.collect.ConsList;
 /**
  * A collection of static methods operating on iterables.
  */
-public class IterUtil {
+public final class IterUtil {
   
   /** Prevents instance creation */
   private IterUtil() {}
@@ -604,6 +604,15 @@ public class IterUtil {
       };
     return new QuaternaryMappedIterable<T1, T2, T3, T4, 
                                         Quad<T1, T2, T3, T4>>(iter1, iter2, iter3, iter4, makeQuad);
+  }
+  
+  /** Collapse a list of lists into a single list */
+  public static <T> SizedIterable<T> collapse(Iterable<? extends Iterable<? extends T>> iter) {
+    SizedIterable<T> result = EmptyIterable.make();
+    for (Iterable<? extends T> nested : iter) {
+      result = ComposedIterable.make(result, nested);
+    }
+    return result;
   }
   
   /** Create an {@link EmptyIterable}; equivalent to {@link #makeIterable()} */
