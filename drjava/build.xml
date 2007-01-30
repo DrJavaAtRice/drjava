@@ -9,7 +9,7 @@
   <property name="readable-project-name" value="DrJava" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
   <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
-  <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
+  <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
 
   <property environment="env" />
   <property name="java14-home" value="${env.JAVA14_HOME}" />
