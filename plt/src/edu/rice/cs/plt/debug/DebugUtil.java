@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.debug;
 
+import edu.rice.cs.plt.lambda.Predicate2;
+
 /** A collection of utility fields and methods to facilitate code-embedded debugging and logging */
 public final class DebugUtil {
   
@@ -23,6 +25,75 @@ public final class DebugUtil {
   public static volatile Log error = VoidLog.INSTANCE;
   
   /**
+   * Create a filter for use with logging that will reject all calls made from a location starting with
+   * one of the given prefixes (that is, {@code (className + "." + methodName).startsWith(prefix)}).
+   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and2(Predicate2, Predicate2)},
+   * etc.
+   */
+  public static Predicate2<Thread, StackTraceElement> blackListLocationFilter(final String... prefixes) {
+    return new Predicate2<Thread, StackTraceElement>() {
+      public Boolean value(Thread thread, StackTraceElement location) {
+        String caller = location.getClassName() + "." + location.getMethodName();
+        for (String pre : prefixes) {
+          if (caller.startsWith(pre)) { return false; }
+        }
+        return true;
+      }
+    };
+  }
+  
+  /**
+   * Create a filter for use with logging that will reject all calls <emph>not</emph> made from a location starting 
+   * with one of the given prefixes (that is, {@code (className + "." + methodName).startsWith(prefix)}).
+   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and2(Predicate2, Predicate2)},
+   * etc.
+   */
+  public static Predicate2<Thread, StackTraceElement> whiteListLocationFilter(final String... prefixes) {
+    return new Predicate2<Thread, StackTraceElement>() {
+      public Boolean value(Thread thread, StackTraceElement location) {
+        String caller = location.getClassName() + "." + location.getMethodName();
+        for (String pre : prefixes) {
+          if (caller.startsWith(pre)) { return true; }
+        }
+        return false;
+      }
+    };
+  }
+  
+  /**
+   * Create a filter for use with logging that will reject all calls made from the given thread(s).
+   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and2(Predicate2, Predicate2)},
+   * etc.
+   */
+  public static Predicate2<Thread, StackTraceElement> blackListThreadFilter(final Thread... threads) {
+    return new Predicate2<Thread, StackTraceElement>() {
+      public Boolean value(Thread thread, StackTraceElement location) {
+        for (Thread t : threads) {
+          if (thread.equals(t)) { return false; }
+        }
+        return true;
+      }
+    };
+  }
+  
+  /**
+   * Create a filter for use with logging that will reject all calls <emph>not</emph> made from the given thread(s).
+   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and2(Predicate2, Predicate2)},
+   * etc.
+   */
+  public static Predicate2<Thread, StackTraceElement> whiteListThreadFilter(final Thread... threads) {
+    return new Predicate2<Thread, StackTraceElement>() {
+      public Boolean value(Thread thread, StackTraceElement location) {
+        for (Thread t : threads) {
+          if (thread.equals(t)) { return true; }
+        }
+        return false;
+      }
+    };
+  }
+  
+  
+  /**
    * An alternative to the built-in {@code assert} statement that treats the assertion as an expression
    * rather than a statement.  If assertions are enabled and the argument is {@code false}, this method will fail;
    * in any case, the value of the argument is returned.  This allows code to be conditionally
@@ -31,7 +102,7 @@ public final class DebugUtil {
    * their associated overhead, whether assertions are enabled or not.)
    */
   public static boolean check(boolean assertion) {
-    assert(assertion);
+    assert assertion;
     return assertion;
   }
   
