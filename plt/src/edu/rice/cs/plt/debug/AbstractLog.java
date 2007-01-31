@@ -213,9 +213,9 @@ public abstract class AbstractLog implements Log {
   private static SizedIterable<String> processValue(String name, Object value) {
     SizedIterable<String> valStrings = processText(RecurUtil.safeToString(value));
     if (valStrings.size() > 1 || IterUtil.first(valStrings).length() > IDEAL_LINE_WIDTH) {
-      // if this is an array or SizedIterable, print values on separate lines
-      if (value instanceof SizedIterable<?>) {
-        valStrings = processText(IterUtil.multilineToString((SizedIterable<?>) value));
+      // if this is an array or Iterable, print values on separate lines
+      if (value instanceof Iterable<?>) {
+        valStrings = processText(IterUtil.multilineToString((Iterable<?>) value));
       }
       else if (value instanceof Object[]) {
         valStrings = processText(RecurUtil.arrayToString((Object[]) value, ArrayStringMode.SHALLOW_MULTILINE));
