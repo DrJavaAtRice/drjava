@@ -31,7 +31,7 @@ import edu.rice.cs.plt.text.TextUtil;
  * by declaring the {@code write} method {@code synchronized}).</li>
  * </ul>
  */
-public abstract class AbstractLog {
+public abstract class AbstractLog implements Log {
   
   private static final SizedIterable<String> EMPTY_MESSAGE = IterUtil.singleton("");
   private static final SizedIterable<String> START_MESSAGE = IterUtil.singleton("Starting");
