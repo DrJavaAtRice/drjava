@@ -225,12 +225,9 @@ class ModelList<T> {
     /**
      * Disposes of an iterator by removing it from the list's set of
      * listeners.  When an iterator is no longer necessary, it
-     * should be disposed of.  Otherwise, there will be memory leaks
-     * because the listener set of the list provides a root reference
-     * for the duration of the list's existence.  What this means is that
-     * unless an iterator is disposed of, it will continue to exist even
-     * after garbage collection as long as the list itself is not
-     * garbage collected.
+     * should be disposed of. If the iterator is not disposed, it will
+     * automatically be removed from the listener set when it is no
+     * longer reachable except via the listener set.
      */
     public void dispose() { ModelList.this.removeListener(this); }
 
