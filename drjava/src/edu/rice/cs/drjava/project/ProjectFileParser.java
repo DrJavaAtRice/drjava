@@ -315,8 +315,19 @@ public class ProjectFileParser {
       }
       else if (name.compareToIgnoreCase("mod-date") == 0) {
         String tmp = ProjectFileParser.ONLY.parseStringNode(c.getFirst());
-        try { modDate = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse(tmp); }
-        catch (java.text.ParseException e) { throw new PrivateProjectException("Bad mod-date: " + e.getMessage()); }
+        try {
+          //attemp parsing in default locale
+          modDate = ProjectProfile.MOD_DATE_FORMAT.parse(tmp); }
+        catch (java.text.ParseException e1) {
+          //parsing in default locale failed
+          try {
+            //attempt parsing in current locale
+            modDate = new SimpleDateFormat(ProjectProfile.MOD_DATE_FORMAT_STRING).parse(tmp);
+          } catch (java.text.ParseException e2) {
+            //both parsings failed
+            throw new PrivateProjectException("Bad mod-date: " + e2.getMessage());
+          }
+        }
       }
         
       return c.getRest().accept(this);

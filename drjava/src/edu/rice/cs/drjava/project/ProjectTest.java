@@ -47,7 +47,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+//import java.text.SimpleDateFormat;
 
 /** Test class for project files */
 public class ProjectTest extends DrJavaTestCase {
@@ -119,7 +119,7 @@ public class ProjectTest extends DrJavaTestCase {
     File base = f.getParentFile();
     assertEquals("first source filename", new File(base,"src/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
     assertEquals("mod-date value", 
-                 new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse("16-Jul-2004 03:45:23").getTime(),
+                 ProjectProfile.MOD_DATE_FORMAT.parse("16-Jul-2004 03:45:23").getTime(),
                  pfir.getSourceFiles()[0].getSavedModDate());
     assertEquals("last source filename", new File(base,"src/sexp/SEList.java").getPath(), 
                  pfir.getSourceFiles()[6].getPath());
@@ -182,7 +182,7 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("proj-root-and-base", root.getPath(), pfir.getProjectRoot().getPath());
     assertEquals("first source filename", new File(base,"src/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
     assertEquals("mod-date value", 
-                 new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse("16-Jul-2004 03:45:23").getTime(),
+                 ProjectProfile.MOD_DATE_FORMAT.parse("16-Jul-2004 03:45:23").getTime(),
                  pfir.getSourceFiles()[0].getSavedModDate());
     assertEquals("last source filename", new File(root, "sexp/SEList.java").getPath(), 
                  pfir.getSourceFiles()[6].getPath());

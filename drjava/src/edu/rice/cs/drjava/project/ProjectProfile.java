@@ -37,7 +37,9 @@ import java.util.ArrayList;
 import java.util.List;
 //import java.util.Vector;
 import java.util.Date;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.io.*;
 
 import edu.rice.cs.plt.tuple.Pair;
@@ -58,6 +60,9 @@ import static edu.rice.cs.util.StringOps.*;
  *  writing corresponding project file. 
  */
 public class ProjectProfile implements ProjectFileIR {
+  static final String MOD_DATE_FORMAT_STRING = "dd-MMM-yyyy HH:mm:ss";
+  static final DateFormat MOD_DATE_FORMAT =
+    new SimpleDateFormat(MOD_DATE_FORMAT_STRING, Locale.US);
   
   /* Private fields */
   
@@ -397,7 +402,7 @@ public class ProjectProfile implements ProjectFileIR {
     if (p2 != null) ret += "(scroll " + p2.first() + " " + p2.second() + ")";
 
     if (modDate > 0) {
-      String s = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date(modDate));
+      String s = MOD_DATE_FORMAT.format(new Date(modDate));
       ret += "(mod-date " + convertToLiteral(s) + ")";
     }
     
