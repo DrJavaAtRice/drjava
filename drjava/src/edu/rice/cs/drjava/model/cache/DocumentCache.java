@@ -33,6 +33,7 @@
 
 package edu.rice.cs.drjava.model.cache;
 
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import java.util.*;
 import java.io.IOException;
@@ -40,6 +41,8 @@ import java.io.IOException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
+
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.OrderedHashSet;
@@ -72,6 +75,9 @@ import edu.rice.cs.util.OrderedHashSet;
 
 public class DocumentCache {
   
+  /** Log file. */
+  private static final Log _log = new Log("DocumentCache.txt", false);
+ 
   private static final int INIT_CACHE_SIZE = 32;
   
   /** @invariant _residentQueue.size() <= CACHE_SIZE */
@@ -163,7 +169,20 @@ public class DocumentCache {
      _fileName = fn;
     }
     
-    public DDReconstructor getReconstructor() { return _rec; }
+    /** Adds DocumentListener to the reconstructor. */
+    public void addDocumentListener(DocumentListener l) { _rec.addDocumentListener(l); }
+    
+    /** Makes this document; assumes that cacheLock is already held. */
+    private DefinitionsDocument makeDocument() {
+      try { // _doc is not in memory
+        _doc = _rec.make();
+        assert _doc != null;
+      }
+      catch(Exception e) { throw new UnexpectedException(e); }
+//        Utilities.showDebug("Document " + _doc + " reconstructed; _stat = " + _stat);
+      if (_stat == NOT_IN_QUEUE) add();       // add this to queue 
+      return _doc;
+    }
     
     /** Gets the physical document (DD) for this manager.  If DD is not in memory, it loads it into memory and returns
      *  it.  If the document has been modified in memory since it was last fetched, make it "unmanaged", removing it from 
@@ -173,25 +192,45 @@ public class DocumentCache {
     public DefinitionsDocument getDocument() throws IOException, FileMovedException {
 //      Utilities.showDebug("getDocument called on " + this + " with _stat = " + _stat);
       
-//      The following double-check idiom is safe in Java 1.4 and later JVMs provided that _doc is volatile.     
-      if (_doc != null) return _doc;  
+//      The following double-check idiom is safe in Java 1.4 and later JVMs provided that _doc is volatile.
+      final DefinitionsDocument doc = _doc;  // create a snapshot of _doc
+      if (doc != null) return doc;  
       synchronized(_cacheLock) { // lock the cache so that this DocManager's state can be updated
         if (_doc != null) return _doc;  // _doc may have changed since test outside of _cacheLock
-        try { // _doc is not in memory
-          _doc = _rec.make();
-          assert _doc != null;
-        }
-        catch(BadLocationException e) { throw new UnexpectedException(e); }
-//        Utilities.showDebug("Document " + _doc + " reconstructed; _stat = " + _stat);
-        if (_stat == NOT_IN_QUEUE) add();       // add this to queue 
-        return _doc;
+        return makeDocument();
+      }
+    }
+    
+    /** Gets the text of this document using in order of preference (i) cached _doc; (ii) cached reconstructor _image; 
+      * and (iii) the document after forcing it to be loaded. */
+    public String getText() {
+      final DefinitionsDocument doc = _doc;  // create a snapshot of _doc
+      if (doc != null) return doc.getText();
+      synchronized(_cacheLock) { // lock the state of this DocManager
+        if (_doc != null) return _doc.getText(); // _doc may have changed since test outside of _cacheLock
+        String image = _rec.getText();
+        if (image != null) return image;
+        return makeDocument().getText();
+      }
+    }
+    
+    /* Gets the specified substring of this document; throws an exception if the specification is ill-formed. */
+    public String getText(int offset, int len) { 
+      String text = getText();
+      _log.log("getText(" + offset + ", " + len + ") called on '" + text + "' which has " + text.length() + " chars");
+      try {
+        return text.substring(offset, offset + len);
+      }
+      catch(Exception e) { 
+        _log.log("getText(...) threw the exception: " + e); 
+        throw new UnexpectedException(e);
       }
     }
     
     /** Checks whether the document is resident (in the cache or modified). 
      *  @return if the document is resident.
      */
-    public boolean isReady() { synchronized (_cacheLock) { return _doc != null; } }
+    public boolean isReady() {  return _doc != null; }  // _doc is volatile so synchronization is unnecessary
   
     /** Closes the corresponding document for this adapter.  Done when a document is closed by the navigator. */
     public void close() {

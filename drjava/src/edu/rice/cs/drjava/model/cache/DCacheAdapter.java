@@ -34,20 +34,29 @@
 package edu.rice.cs.drjava.model.cache;
 
 import java.io.IOException;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
-/** A lightweight wrapper type for DefinitionsDocuments that may or may not be resident in memory.
- *  An object of within OpenDefinitionsDocument holds the DefinitionsDocument associated with the
- *  OpenDefinitionsDocument.
- */
+/** A lightweight wrapper type for DefinitionsDocuments that may or may not be resident in memory.  An instance of this
+  * The wrapper includes a copy of the String text of the document if it has been kicked out of the cache.
+  */
 public interface DCacheAdapter {
   
   /** Retrieves the document for its corresponding ODD
    *  @return the definitions document for the corresponding ODD
    */
   public DefinitionsDocument getDocument() throws IOException, FileMovedException;
+  
+  /* Gets the entire text of this document. */
+  public String getText();
+  
+  /* Gets the specified substring of this document.
+   * @throws an IndexOutOfBounds exception if the specification is ill-formed. 
+   */
+  public String getText(int offset, int length);
   
   /** Checks whether the document is ready to be returned.  If false, then the document would have to be
    *  loaded from disk when getDocument() is called.  
@@ -58,7 +67,8 @@ public interface DCacheAdapter {
   /** Closes the corresponding document for this adapter. */
   public void close();
   
-  public DDReconstructor getReconstructor();
+  /** Adds a DocumentListener to the reconstructor. */
+  public void addDocumentListener(DocumentListener l);
   
   /* Method for notifying the DCacheAdapter that this document has been saved to a file. */
   public void documentSaved(String fileName);

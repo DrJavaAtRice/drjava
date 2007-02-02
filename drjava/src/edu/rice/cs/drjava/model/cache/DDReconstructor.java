@@ -57,4 +57,7 @@ public interface DDReconstructor {
    *  @param dl the listener to add to the document
    */
   public void addDocumentListener(DocumentListener dl);
+  
+  /** Returns the string text for document that has been kicked out; null otherwise. */
+  public String getText();
 }

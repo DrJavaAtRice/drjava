@@ -472,6 +472,8 @@ public class FindReplaceMachine {
                                            final boolean wrapped, final boolean allWrapped) {  
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped + " ...)");
     
+    assert start > -1;
+    
     final int docLen = doc.getLength();;     // The length of the segment to be searched
     
     final int len = (origLen < 0) ? docLen - start : origLen;  // set len for end of doc if origLen < 0
@@ -522,6 +524,7 @@ public class FindReplaceMachine {
 //            _current = docToSearch.createPosition(start);          // put caret at beginning of found word
         }
         else { 
+          
           foundOffset -= wordLen;                        // skip over matched word        
           rem = foundOffset;                             // rem is adjusted to match foundOffset
           matchLocation = foundLocation;                 // matchLocation is index in _doc of left edge of match
@@ -531,7 +534,8 @@ public class FindReplaceMachine {
 //        _log.log("rem = " + rem);
         doc.setCurrentLocation(foundLocation);           // _shouldIgnore below uses reduced model
         
-//        Utilities.show("Finished iteration with text = " + text + "; len = " + len);
+//        _log.log("Finished iteration with text = " + text + "; len = " + len + "; foundLocation = " + foundLocation);
+        assert foundLocation > -1;
         if (_shouldIgnore(foundLocation, doc)) continue;
         
         _current = doc.createPosition(matchLocation);   // formerly doc.createPosition(...)
@@ -606,9 +610,11 @@ public class FindReplaceMachine {
     doc.acquireReadLock();
     try { 
       try { leftOfMatch = doc.getText(leftLoc, 1).charAt(0); }
-      catch (BadLocationException e) { leftOutOfBounds = true; }
+      catch (BadLocationException e) { leftOutOfBounds = true; } 
+      catch (IndexOutOfBoundsException e) { leftOutOfBounds = true; }
       try { rightOfMatch = doc.getText(rightLoc, 1).charAt(0); }
-      catch (BadLocationException e) { rightOutOfBounds = true; }
+      catch (BadLocationException e) { rightOutOfBounds = true; } 
+      catch (IndexOutOfBoundsException e) { rightOutOfBounds = true; }
     }
     finally {doc.releaseReadLock();}      
     

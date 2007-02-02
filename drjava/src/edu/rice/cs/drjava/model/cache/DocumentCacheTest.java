@@ -412,6 +412,8 @@ public class DocumentCacheTest extends DrJavaTestCase {
       }
       public void saveDocInfo(DefinitionsDocument doc) { _doc_saved++; }
       public void addDocumentListener(javax.swing.event.DocumentListener dl) { /* do nothing */ }
+      public String getText() { return null; }
+      public String getText(int offset, int length) { return null; }
     };
     
     OpenDefinitionsDocument doc1 =  _model.newFile();

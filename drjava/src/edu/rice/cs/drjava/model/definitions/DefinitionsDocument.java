@@ -52,7 +52,6 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.*;
 
-
 /** The document model for the definitions pane.
  *
  *  This implementation of <code>Document</code> contains a "reduced model". The reduced model is automatically kept

@@ -2751,7 +2751,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //     private boolean _modifiedSinceSave;
     
     /** String image of document as last read from or written to disk; initially null */
-    private byte[] _image;
+    private String _image;
     private volatile File _file;
     private volatile long _timestamp;
     
@@ -3058,6 +3058,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         private volatile WeakHashMap< DefinitionsDocument.WrappedPosition, Integer> _positions =
           new WeakHashMap<DefinitionsDocument.WrappedPosition, Integer>();
         
+        public String getText() { return _image; }
+        
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException {
           
 //          System.err.println("DDReconstructor.make() called on " + ConcreteOpenDefDoc.this);
@@ -3065,8 +3067,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           newDefDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
           
           if (_image != null) {
-            _editorKit.read(new InputStreamReader(new ByteArrayInputStream(_image)), newDefDoc, 0);
-            _log.log("Reading from image for " + _file + " containing " + _image.length + " chars");
+            _editorKit.read(new StringReader(_image), newDefDoc, 0);
+            _log.log("Reading from image for " + _file + " containing " + _image.length() + " chars");
           }
           else if (! isUntitled()) {
             final InputStreamReader reader = new FileReader(_file);
@@ -3163,8 +3165,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           // Save document image.  Note: this could be optimized to eliminate redundant updates to _image
           String text = doc.getText();
           if (text.length() > 0) {
-            _image = text.getBytes();  
-            _log.log("Saving image containing " + _image.length + " chars for " + _file);
+            _image = text;  
+            _log.log("Saving image containing " + _image.length() + " chars for " + _file);
           }
           _loc = doc.getCurrentLocation();
           _list = doc.getDocumentListeners();
@@ -3750,7 +3752,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Implementation of the javax.swing.text.Document interface. */
     public void addDocumentListener(DocumentListener listener) {
       if (_cacheAdapter.isReady()) getDocument().addDocumentListener(listener);
-      else _cacheAdapter.getReconstructor().addDocumentListener(listener);
+      else _cacheAdapter.addDocumentListener(listener);
     }
     
     List<UndoableEditListener> _undoableEditListeners = new LinkedList<UndoableEditListener>();
@@ -3804,11 +3806,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //  The following method must be renamed as private getDocumentText if the preceding code is commented in.
     
-    /** Gets the text of this. */
-    public String getText() { return getDocument().getText(); }
+    /** Gets the text of this.  Avoids reloading the document if it is kicked out of the cache. */
+    public String getText() { return _cacheAdapter.getText(); }
     
+    /** Gets the specified substring of this.  Avoids reloading the document if it is kicked out of the cache. */
     public String getText(int offset, int length) throws BadLocationException {
-      return getDocument().getText(offset, length);
+      return _cacheAdapter.getText(offset, length);
     }
     
     public void getText(int offset, int length, Segment txt) throws BadLocationException {
