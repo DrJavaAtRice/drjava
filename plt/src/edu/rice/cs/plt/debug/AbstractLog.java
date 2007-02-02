@@ -1,6 +1,7 @@
 package edu.rice.cs.plt.debug;
 
 import java.util.Date;
+import java.util.Collection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -216,6 +217,11 @@ public abstract class AbstractLog implements Log {
       // if this is an array or Iterable, print values on separate lines
       if (value instanceof Iterable<?>) {
         valStrings = processText(IterUtil.multilineToString((Iterable<?>) value));
+      }
+      // this check is necessary for Retroweaver compatibility -- the Iterable check fails at run time
+      // (because java.lang.Iterable becomes com.rc.retroweaver.runtime.Iterable_)
+      else if (value instanceof Collection<?>) {
+        valStrings = processText(IterUtil.multilineToString((Collection<?>) value));
       }
       else if (value instanceof Object[]) {
         valStrings = processText(RecurUtil.arrayToString((Object[]) value, ArrayStringMode.SHALLOW_MULTILINE));

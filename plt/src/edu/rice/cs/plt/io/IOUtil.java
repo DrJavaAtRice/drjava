@@ -892,6 +892,24 @@ public final class IOUtil {
     else { return new BufferedWriter(w); }
   }
   
+  /**
+   * If {@code in} is a {@code BufferedInputStream}, cast it as such; otherwise, wrap it in a 
+   * {@code BufferedInputStream}
+   */
+  public static BufferedInputStream makeBuffered(InputStream in) {
+    if (in instanceof BufferedInputStream) { return (BufferedInputStream) in; }
+    else { return new BufferedInputStream(in); }
+  }
+  
+  /**
+   * If {@code out} is a {@code BufferedOutputStream}, cast it as such; otherwise, wrap it in a 
+   * {@code BufferedOutputStream}
+   */
+  public static BufferedOutputStream makeBuffered(OutputStream out) {
+    if (out instanceof BufferedOutputStream) { return (BufferedOutputStream) out; }
+    else { return new BufferedOutputStream(out); }
+  }
+  
   
   /* Note: If we allowed use of Java 5 APIs, the following code could be simplified by just defining one method
    * that handles Closeables.

@@ -9,9 +9,14 @@ public abstract class AbstractIterable<T> implements Iterable<T> {
   /** Defers to {@link IterUtil#toString} */
   public String toString() { return IterUtil.toString(this); }
   
-  /** Defers to {@link IterUtil#isEqual} (unless {@code obj} is not an {@code Iterable}) */
+  /**
+   * Defers to {@link IterUtil#isEqual} (unless {@code obj} is not an {@code AbstractIterable}).  It's tempting
+   * to check for equality whenever {@code obj} is <em>any</em> iterable, but that would break the contract of
+   * {@code equals()}, since it would not necessarily be symmetric.  See {@link Collection#equals} for further
+   * discussion.
+   */
   public boolean equals(Object obj) {
-    if (obj instanceof Iterable<?>) { return IterUtil.isEqual(this, (Iterable<?>) obj); }
+    if (obj instanceof AbstractIterable<?>) { return IterUtil.isEqual(this, (AbstractIterable<?>) obj); }
     else { return false; }
   }
   

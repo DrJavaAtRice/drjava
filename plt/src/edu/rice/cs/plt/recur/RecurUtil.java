@@ -50,7 +50,7 @@ public final class RecurUtil {
     DEFAULT_INF_STRING_GENERATOR = LambdaUtil.curry(new Lambda2<ArrayStringMode, Object, String>() {
       public String value(ArrayStringMode mode, Object obj) { 
         if (obj.getClass().isArray()) { return mode.prefix() + "..." + mode.suffix(); }
-        else { return ReflectUtil.simpleNameOf(obj.getClass()) + "..."; }
+        else { return ReflectUtil.simpleName(obj.getClass()) + "..."; }
       }
     });
     
@@ -266,7 +266,7 @@ public final class RecurUtil {
         return array.toString();
         
       case TYPE_AND_SIZE:
-        return ReflectUtil.simpleNameOf(array.getClass().getComponentType()) + "[" + array.length + "]";
+        return ReflectUtil.simpleName(array.getClass().getComponentType()) + "[" + array.length + "]";
 
       default:
         StringBuilder result = new StringBuilder();
