@@ -218,13 +218,8 @@ public class DocumentCache {
     public String getText(int offset, int len) { 
       String text = getText();
       _log.log("getText(" + offset + ", " + len + ") called on '" + text + "' which has " + text.length() + " chars");
-      try {
-        return text.substring(offset, offset + len);
-      }
-      catch(Exception e) { 
-        _log.log("getText(...) threw the exception: " + e); 
-        throw new UnexpectedException(e);
-      }
+      
+      return text.substring(offset, offset + len);
     }
     
     /** Checks whether the document is resident (in the cache or modified). 
