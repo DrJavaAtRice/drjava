@@ -327,6 +327,31 @@
        Testing Targets
        *************** -->
   
+  <!-- The following targets test if the "quiet" formatter is
+       available, and if so, select it. Otherwise, the "brief"
+       formatter is used. -->
+  <target name="init-test-check-quiet-formatter">
+      <available property="quiet.present" classname="org.apache.tools.ant.taskdefs.optional.junit.QuietJUnitResultFormatter" />
+  </target>
+
+  <target name="init-test-set-quiet" 
+	  depends="init-test-check-quiet-formatter"
+	  if="quiet.present">
+    <property name="junit-formatter" value="quiet" />
+    <property name="junit-haltonfailure" value="no" />
+  </target>
+
+  <target name="init-test-set-brief"
+          depends="init-test-check-quiet-formatter"
+          unless="quiet.present">
+    <property name="junit-formatter" value="brief" />
+    <property name="junit-haltonfailure" value="yes" />
+  </target>
+
+  <target name="init-test"
+	  depends="init-test-set-quiet, init-test-set-brief">
+  </target>
+
   <target name="test" depends="test-15" description="Shortcut for 'test-15'">
   </target>
 
@@ -382,9 +407,14 @@
     </and>
   </selector>
  
-  <target name="do-test-15" depends="assert-15, resolve-java15-tools">
+  <target name="do-test-15" depends="assert-15, resolve-java15-tools, init-test">
     <echo message="Running all 5.0 tests matching '${test-filter-string}' under Java 5.0" />
-    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
+    <junit haltonfailure="${junit-haltonfailure}"
+	   failureproperty="do-test-15-failed"
+	   fork="yes"
+	   forkmode="perTest"
+	   maxmemory="256M"
+	   dir="${basedir}">
       <classpath>
         <pathelement location="${java15-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
@@ -393,7 +423,7 @@
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
       </classpath>
-      <formatter type="brief" usefile="false" />
+      <formatter type="${junit-formatter}" usefile="false" />
       <batchtest>
         <fileset dir="classes/test">
           <selector refid="tests-to-run" />
@@ -401,13 +431,20 @@
       </batchtest>
       <jvmarg value="-ea"/> 
     </junit>
+    <fail if="do-test-15-failed" message="One or more unit tests failed."/>
   </target>
 
-  <target name="do-test-14" depends="resolve-java14-exec, resolve-java14-tools">
+  <target name="do-test-14" depends="resolve-java14-exec, resolve-java14-tools, init-test">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
     <echo message="WARNING: 1.4-compatible test classes are (intentionally) not checked for Java 5 API references." />
     <echo message="If such references exist, these tests will probably fail." />
-    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
+    <junit haltonfailure="${junit-haltonfailure}"
+	   failureproperty="do-test-14-failed"
+	   fork="yes"
+	   forkmode="perTest"
+	   maxmemory="256M"
+	   jvm="${java14-exec}"
+	   dir="${basedir}">
       <classpath>
         <pathelement location="${java14-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
@@ -416,7 +453,7 @@
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
-      <formatter type="brief" usefile="false" />
+      <formatter type="${junit-formatter}" usefile="false" />
       <batchtest>
         <fileset dir="classes/test-14">
           <selector refid="tests-to-run" />
@@ -424,11 +461,17 @@
       </batchtest>
       <jvmarg value="-ea"/> 
     </junit>
+    <fail if="do-test-14-failed" message="One or more unit tests failed."/>
   </target>
 
-  <target name="do-test-14-in-15" depends="assert-15, resolve-java15-tools">
+  <target name="do-test-14-in-15" depends="assert-15, resolve-java15-tools, init-test">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
-    <junit haltonfailure="yes" fork="yes" forkmode="perTest" maxmemory="256M" dir="${basedir}">
+    <junit haltonfailure="${junit-haltonfailure}"
+	   failureproperty="do-test-14-in-15-failed"
+	   fork="yes"
+	   forkmode="perTest"
+	   maxmemory="256M"
+	   dir="${basedir}">
       <classpath>
         <pathelement location="${java15-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
@@ -437,7 +480,7 @@
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
-      <formatter type="brief" usefile="false" />
+      <formatter type="${junit-formatter}" usefile="false" />
       <batchtest>
         <fileset dir="classes/test-14">
           <selector refid="tests-to-run" />
@@ -445,6 +488,7 @@
       </batchtest>
       <jvmarg value="-ea"/> 
     </junit>
+    <fail if="do-test-14-in-15-failed" message="One or more unit tests failed."/>
   </target>
 
 
