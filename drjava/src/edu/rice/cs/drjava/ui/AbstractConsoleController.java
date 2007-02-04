@@ -55,17 +55,17 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 
 /** Abstract class to handle hooking up a console document with its pane.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public abstract class AbstractConsoleController implements Serializable {
   /** Adapter for the Swing document used by the model.*/
-  protected InteractionsDJDocument _adapter;
+  protected final InteractionsDJDocument _adapter;
 
   /** Pane from the view. */
-  protected InteractionsPane _pane;
+  protected final InteractionsPane _pane;
 
   /** Style to use for default text. */
-  protected SimpleAttributeSet _defaultStyle;
+  protected final SimpleAttributeSet _defaultStyle;
 
   /** Style to use for System.out. */
   protected final SimpleAttributeSet _systemOutStyle;
@@ -76,10 +76,10 @@ public abstract class AbstractConsoleController implements Serializable {
   // package private for testing purposes (although I haven't written tests yet)
 
   /** Action to change focus to previous pane. */
-  Action switchToPrevPaneAction;
+  volatile Action switchToPrevPaneAction;
 
   /** Action to change focus to next pane. */
-  Action switchToNextPaneAction;
+  volatile Action switchToNextPaneAction;
 
   /** Initializes the document adapter and interactions pane. Subclasses *must* call _init() at the end 
    *  of their constructors.

@@ -99,32 +99,29 @@ public class InteractionsController extends AbstractConsoleController {
   public static final String INPUT_BOX_SYMBOL = "[component]";
   
   /** InteractionsModel to handle interpretation. */
-  private InteractionsModel _model;
+  private volatile InteractionsModel _model;
 
   /** Document from the model.*/
-  private InteractionsDocument _doc;
+  private volatile InteractionsDocument _doc;
 
   /** Style to use for error messages. */
-  private SimpleAttributeSet _errStyle;
+  private volatile SimpleAttributeSet _errStyle;
 
   /** Style to use for debug messages. */
   private final SimpleAttributeSet _debugStyle;
 
   /** Lambda used to input text into the embedded System.in input box */
-  private Lambda<String, String> _insertTextCommand;
+  private volatile Lambda<String, String> _insertTextCommand;
   
-  /** 
-   * Runnable command used to force the System.in input to complete <p>
-   *
-   * <b>NOTE:</b> This command must be executed on swing's event handling thread.
-   */
-  private Runnable _inputCompletionCommand;
+  /** Runnable command used to force the System.in input to complete <p>
+    * <b>NOTE:</b> This command must be executed on swing's event handling thread.
+    */
+  private volatile Runnable _inputCompletionCommand;
     
-  /** 
-   * A lock used to ensure that the _insertTextCommand and 
-   * _inputCompletionCommand are set synchronously
-   */
-  private Object _consoleInputCommandLock = new Object();
+  /** A lock used to ensure that the _insertTextCommand and 
+    * _inputCompletionCommand are set synchronously
+    */
+  private volatile Object _consoleInputCommandLock = new Object();
   
   /** Default implementation of the insert text command */
   private static final Lambda<String, String> _defaultInsertTextCommand = 
@@ -136,16 +133,11 @@ public class InteractionsController extends AbstractConsoleController {
   
   /** Default implementation of the input completion command */
   private static final Runnable _defaultInputCompletionCommand = 
-    new Runnable() {
-      public void run() {
-        // Do nothing
-      }    
-    };
+    new Runnable() { public void run() { /* Do nothing */ }  };
   
   /** Listens for input requests from System.in, displaying an input box as needed. */
-  protected InputListener _inputListener = new InputListener() {
+  protected volatile InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
-      
       final InputBox box = new InputBox();
       final CompletionMonitor completionMonitor = new CompletionMonitor();
       
@@ -154,7 +146,7 @@ public class InteractionsController extends AbstractConsoleController {
           // Reset the commands to their default inactive state
           _setConsoleInputCommands(_defaultInputCompletionCommand, _defaultInsertTextCommand);
           
-          box.dissableInputs();
+          box.disableInputs();
                     
           completionMonitor.set();
           
@@ -627,15 +619,16 @@ public class InteractionsController extends AbstractConsoleController {
   };
   
 
-  /** A box that can be inserted into the interactions pane for separate input. */
+  /** A box that can be inserted into the interactions pane for separate input.   Do not confuse with 
+    * edu.rice.cs.util.swing.InputBox. */
   private static class InputBox extends JTextArea {
     private static final int BORDER_WIDTH = 1;
     private static final int INNER_BUFFER_WIDTH = 3;
     private static final int OUTER_BUFFER_WIDTH = 2;
-    private Color _bgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
-    private Color _fgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
-    private Color _sysInColor = DrJava.getConfig().getSetting(OptionConstants.SYSTEM_IN_COLOR);
-    private boolean _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS);
+    private volatile Color _bgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
+    private volatile Color _fgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
+    private volatile Color _sysInColor = DrJava.getConfig().getSetting(OptionConstants.SYSTEM_IN_COLOR);
+    private volatile boolean _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS);
     
     public InputBox() {
       setForeground(_sysInColor);
@@ -706,9 +699,7 @@ public class InteractionsController extends AbstractConsoleController {
       super.paintComponent(g);
     }
     
-    /**
-     * Specifies what to do when the <Enter> key is hit.
-     */
+    /** Specifies what to do when the <Enter> key is hit. */
     public void setInputCompletionCommand(final Runnable command) {
       InputMap im = getInputMap(WHEN_FOCUSED);
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
@@ -721,10 +712,9 @@ public class InteractionsController extends AbstractConsoleController {
       });
     }
     
-    /**
-     * Generates a lambda that can be used to insert text into this input box
-     * @return A lambda that inserts the given text into the textbox when applied
-     */
+    /** Generates a lambda that can be used to insert text into this input box
+      * @return A lambda that inserts the given text into the textbox when applied
+      */
     public Lambda<String,String> makeInsertTextCommand() {
       return new Lambda<String, String>() {
         public String apply(String input) {
@@ -734,47 +724,37 @@ public class InteractionsController extends AbstractConsoleController {
       };
     }
     
-    /**
-     * Behaves somewhat like setEnable(false) in that it dissables all
-     * input to the text box, but it does not change the appearance of the text.
-     */
-    public void dissableInputs() {
+    /** Behaves somewhat like setEnable(false) in that it disables all
+      * input to the text box, but it does not change the appearance of the text.
+      */
+    public void disableInputs() {
       setEditable(false);
       
       ActionMap am = getActionMap();
       Action action;
       
       action = am.get(INPUT_ENTERED_NAME);
-      if (action != null) {
-        action.setEnabled(false);
-      }
+      if (action != null) action.setEnabled(false);
       
       action = am.get(INSERT_NEWLINE_NAME);
-      if (action != null) {
-        action.setEnabled(false);
-      }
+      if (action != null) action.setEnabled(false);
       
       getCaret().setVisible(false);
     }
   }
   
-  /**
-   * A listener interface that allows for others outside the interactions
-   * controller to be notified when the input console is enabled in the
-   * interactions pane.
-   */
+  /** A listener interface that allows for others outside the interactions
+    * controller to be notified when the input console is enabled in the
+    * interactions pane.
+    */
   public interface ConsoleStateListener extends EventListener {
     
-    /**
-     * Called when the input console is started in the interactions pane 
-     * <p>
-     * This method is called from the thread that initiated the console input
-     */
+    /** Called when the input console is started in the interactions pane. <p>
+      * This method is called from the thread that initiated the console input
+      */
     public void consoleInputStarted(InteractionsController c);
     
-    /**
-     * Called when the console input is complete.
-     * <p>
+    /** Called when the console input is complete. <p>
      * This method is called from the thread that initiated the console input
      * @param result The text that was inputted to the console
      */

@@ -46,7 +46,7 @@ public abstract class AsyncTaskLauncher {
   
   /**
    * Returns whether the launcher should call
-   * <code>setParentContainerEnabled</code> both to dissable and to re-enable
+   * <code>setParentContainerEnabled</code> both to disable and to re-enable
    * the parent. This gives the concrete implementation of the launcher more
    * control in case dissabling and re-enabling the view could cause
    * inconsistent behavior.
@@ -107,12 +107,9 @@ public abstract class AsyncTaskLauncher {
     Runnable uiInit = new Runnable() {
       public void run() {
         final boolean shouldUnlockUI = shouldSetEnabled() && lockUI;
-        final IAsyncProgress monitor = createProgressMonitor(task.getDiscriptionMessage(), 
-                                                             task.getMinProgress(), 
-                                                             task.getMaxProgress());
-        if (shouldSetEnabled() && lockUI) {
-          setParentContainerEnabled(false);
-        }
+        final IAsyncProgress monitor = 
+          createProgressMonitor(task.getDiscriptionMessage(), task.getMinProgress(), task.getMaxProgress());
+        if (shouldSetEnabled() && lockUI) setParentContainerEnabled(false);
         
         Thread taskThread = new Thread(new Runnable() {
           public void run() {
@@ -124,16 +121,14 @@ public abstract class AsyncTaskLauncher {
               caughtException = e;
             }
             
-            final AsyncCompletionArgs<R> args = new AsyncCompletionArgs<R>(result, caughtException, monitor
-                                                                             .isCanceled());
+            final AsyncCompletionArgs<R> args = 
+              new AsyncCompletionArgs<R>(result, caughtException, monitor.isCanceled());
             
             Runnable cleanup = new Runnable() {
               public void run() {
                 task.complete(args);
                 
-                if (shouldUnlockUI) {
-                  setParentContainerEnabled(true);
-                }
+                if (shouldUnlockUI) setParentContainerEnabled(true);
               }
             };
             

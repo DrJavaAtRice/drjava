@@ -4435,7 +4435,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }.start();
   }
   
-  /* These are used to save the state of the enabled property of the actions dissabled during junit testing. */
+  /* These are used to save the state of the enabled property of the actions disabled during junit testing. */
   private volatile DecoratedAction _junit_compileProjectDecoratedAction;
   private volatile DecoratedAction _junit_compileAllDecoratedAction;
   private volatile DecoratedAction _junit_compileFolderDecoratedAction;
@@ -4470,7 +4470,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Sets the enabled status to false of all actions that  could conflict with JUnit while its is running a test.
    *  This method saves aside the previous enable state of each action so that when the test is finished, any action
-   *  dissabled before the test will remain dissabled afterward.
+   *  disabled before the test will remain disabled afterward.
    */
   private void _disableJUnitActions() {
     // _compileProjectActionEnabled = _compileProjectAction.isEnabled();
