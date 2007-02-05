@@ -319,8 +319,12 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     // Wait for console input to begin
     completionMonitor.waitOne();
         
-    _controller.insertConsoleText("test-text");
-    _controller.interruptConsoleInput();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        _controller.insertConsoleText("test-text"); 
+        _controller.interruptConsoleInput();
+      }
+    });
     
     // Make sure the buffer 'buf' is updated
     synchronized(bufLock) {

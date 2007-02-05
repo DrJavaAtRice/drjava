@@ -117,11 +117,6 @@ public class InteractionsController extends AbstractConsoleController {
     * <b>NOTE:</b> This command must be executed on swing's event handling thread.
     */
   private volatile Runnable _inputCompletionCommand;
-    
-  /** A lock used to ensure that the _insertTextCommand and 
-    * _inputCompletionCommand are set synchronously
-    */
-  private volatile Object _consoleInputCommandLock = new Object();
   
   /** Default implementation of the insert text command */
   private static final Lambda<String, String> _defaultInsertTextCommand = 
@@ -134,14 +129,14 @@ public class InteractionsController extends AbstractConsoleController {
   /** Default implementation of the input completion command */
   private static final Runnable _defaultInputCompletionCommand = 
     new Runnable() { public void run() { /* Do nothing */ }  };
-  
+
   /** Listens for input requests from System.in, displaying an input box as needed. */
   protected volatile InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
       final InputBox box = new InputBox();
       final CompletionMonitor completionMonitor = new CompletionMonitor();
       
-      Runnable inputCompletionCommand = new Runnable() {
+      final Runnable inputCompletionCommand = new Runnable() {
         public void run() {
           // Reset the commands to their default inactive state
           _setConsoleInputCommands(_defaultInputCompletionCommand, _defaultInsertTextCommand);
@@ -157,16 +152,16 @@ public class InteractionsController extends AbstractConsoleController {
         }
       };
       
-      Lambda<String,String> insertTextCommand = box.makeInsertTextCommand();
-      
-      box.setInputCompletionCommand(inputCompletionCommand);
-      
-      _setConsoleInputCommands(inputCompletionCommand, insertTextCommand);
+      final Lambda<String,String> insertTextCommand = box.makeInsertTextCommand();
       
       // Embed the input box into the interactions pane.
       // This operation must be performed in the UI thread
       SwingUtilities.invokeLater(new Runnable() {
-        public void run() {       
+        public void run() { 
+          
+          box.setInputCompletionCommand(inputCompletionCommand);
+      
+          _setConsoleInputCommands(inputCompletionCommand, insertTextCommand);
           
           _pane.setEditable(true);
           
@@ -187,9 +182,7 @@ public class InteractionsController extends AbstractConsoleController {
             // and insert the symbol for the input box with the correct style
             _doc.insertBeforeLastPrompt(INPUT_BOX_SYMBOL, INPUT_BOX_STYLE);
           }
-          finally {
-            inputAttributes.removeAttributes(inputAttributes);
-          }
+          finally { inputAttributes.removeAttributes(inputAttributes); }
           
           _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
           
@@ -308,13 +301,11 @@ public class InteractionsController extends AbstractConsoleController {
     */
   public void interruptConsoleInput() { SwingUtilities.invokeLater(_inputCompletionCommand); }
   
-  /** Inserts text into the console.  This method is thread safe.
+  /** Inserts text into the console.  Can only be called from the event thread.  ONLY used in unit tests.
     * @param input The text to insert into the console input box
     * @throws UnsupportedOperationException If the the interactions pane is not receiving console input
     */
-  public void insertConsoleText(String input) {
-    synchronized(_consoleInputCommandLock) { _insertTextCommand.apply(input); }
-  }
+  public void insertConsoleText(String input) { _insertTextCommand.apply(input); }
 
   /** Accessor method for the InteractionsModel.
     * @return the interactions model
@@ -427,16 +418,10 @@ public class InteractionsController extends AbstractConsoleController {
     });
   }
   
-  /**
-   * Sets the commands used to manipulate the console input process.  Since the console
-   * is accessed from multiple threads, all access to these commands is protected by
-   * the _consoleInputCommandLock.
-   */
+  /** Sets the commands used to manipulate the console input process.  Only runs in the event thread. */
   private void _setConsoleInputCommands(Runnable inputCompletionCommand, Lambda<String,String> insertTextCommand) {
-    synchronized(_consoleInputCommandLock) {
-      _insertTextCommand = insertTextCommand;
-      _inputCompletionCommand = inputCompletionCommand;
-    }
+    _insertTextCommand = insertTextCommand;
+    _inputCompletionCommand = inputCompletionCommand;
   }
 
   // The fields below were made package private for testing purposes.
