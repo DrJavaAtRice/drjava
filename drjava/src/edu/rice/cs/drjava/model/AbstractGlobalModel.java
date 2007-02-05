@@ -1625,14 +1625,32 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     ArrayList<DocFile> projFiles = new ArrayList<DocFile>();
     DocFile active = null;
+    ArrayList<DocumentRegion> expiredBookmarks = new ArrayList<DocumentRegion>();
+    ArrayList<Breakpoint> expiredBreakpoints = new ArrayList<Breakpoint>();
     for (DocFile f: srcFiles) {
-      if (f.lastModified() > f.getSavedModDate()) f.setSavedModDate (f.lastModified());
+      if (f.lastModified() > f.getSavedModDate()) {
+        for (DocumentRegion r: getBookmarkManager().getRegions())
+          if (r.getFile().equals( f )) expiredBookmarks.add( r );
+        for (Breakpoint r: getBreakpointManager().getRegions())
+          if (r.getFile().equals( f )) expiredBreakpoints.add( r );
+        f.setSavedModDate (f.lastModified());
+      }
       projFiles.add(f);
     }
     for (DocFile f: auxFiles) {
-      if (f.lastModified() > f.getSavedModDate()) f.setSavedModDate (f.lastModified());
+      if (f.lastModified() > f.getSavedModDate()) {
+        for (DocumentRegion r: getBookmarkManager().getRegions())
+          if (r.getFile().equals( f )) expiredBookmarks.add( r );
+        for (Breakpoint r: getBreakpointManager().getRegions())
+          if (r.getFile().equals( f )) expiredBreakpoints.add( r );
+        f.setSavedModDate (f.lastModified());
+      }
       projFiles.add(f);
     }
+    // Remove bookmarks and breakpoints for files that were modified outside of DrJava
+    for (DocumentRegion r: expiredBookmarks) getBookmarkManager().removeRegion( r );
+    for (Breakpoint r: expiredBreakpoints) getBreakpointManager().removeRegion( r );
+    
     // Insert active file as last file on list.
     if (active != null) projFiles.add(active);
     

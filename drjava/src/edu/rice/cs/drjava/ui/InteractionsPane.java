@@ -166,6 +166,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   
   /** Enable anti-aliased text by overriding paintComponent. */
   protected void paintComponent(Graphics g) {
+    if (g==null) return;
     if (CodeStatus.DEVELOPMENT) {
       if (_antiAliasText && g instanceof Graphics2D) {
         Graphics2D g2d = (Graphics2D)g;
