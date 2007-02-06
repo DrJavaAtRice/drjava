@@ -211,9 +211,9 @@ public class ConsoleDocument implements EditDocumentInterface {
   }
 
   /** Inserts the given string with the given attributes just before the most recent prompt.
-   *  @param text String to insert
-   *  @param style name of style to format the string
-   */
+    * @param text String to insert
+    * @param style name of style to format the string
+    */
   public void insertBeforeLastPrompt(String text, String style) {
     acquireWriteLock();
     try {
@@ -227,11 +227,11 @@ public class ConsoleDocument implements EditDocumentInterface {
   }
 
   /** Inserts a string into the document at the given offset and named style, if the edit condition allows it.
-   *  @param offs Offset into the document
-   *  @param str String to be inserted
-   *  @param style Name of the style to use.  Must have been added using addStyle.
-   *  @throws EditDocumentException if the offset is illegal
-   */
+    * @param offs Offset into the document
+    * @param str String to be inserted
+    * @param style Name of the style to use.  Must have been added using addStyle.
+    * @throws EditDocumentException if the offset is illegal
+    */
   public void insertText(int offs, String str, String style) throws EditDocumentException {
     acquireWriteLock();
     try {
@@ -245,10 +245,10 @@ public class ConsoleDocument implements EditDocumentInterface {
   }
   
   /** Appends a string to this in the given named style, if the edit condition allows it.
-   *  @param str String to be inserted
-   *  @param style Name of the style to use.  Must have been added using addStyle.
-   *  @throws EditDocumentException if the offset is illegal
-   */
+    * @param str String to be inserted
+    * @param style Name of the style to use.  Must have been added using addStyle.
+    * @throws EditDocumentException if the offset is illegal
+    */
   public void append(String str, String style) throws EditDocumentException {
     acquireWriteLock();
     try {

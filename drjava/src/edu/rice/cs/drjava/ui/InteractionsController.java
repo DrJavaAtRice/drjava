@@ -83,7 +83,7 @@ import edu.rice.cs.util.UnexpectedException;
 
 /** This class installs listeners and actions between an InteractionsDocument in the model and an InteractionsPane 
  *  in the view.  We may want to refactor this class into a different package. <p>
- *  (The PopupConsole was introduced in version 1.29 of this file)
+ *  (The PopupConsole was introduced in version 1.29 of this file.)
  *
  *  @version $Id$
  */
@@ -129,37 +129,40 @@ public class InteractionsController extends AbstractConsoleController {
   /** Default implementation of the input completion command */
   private static final Runnable _defaultInputCompletionCommand = 
     new Runnable() { public void run() { /* Do nothing */ }  };
+  
+  private volatile InputBox _box;
 
   /** Listens for input requests from System.in, displaying an input box as needed. */
   protected volatile InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
-      final InputBox box = new InputBox();
       final CompletionMonitor completionMonitor = new CompletionMonitor();
-      
-      final Runnable inputCompletionCommand = new Runnable() {
-        public void run() {
-          // Reset the commands to their default inactive state
-          _setConsoleInputCommands(_defaultInputCompletionCommand, _defaultInsertTextCommand);
-          
-          box.disableInputs();
-                    
-          completionMonitor.set();
-          
-          // Move the cursor back to the end of the interactions pane
-          _pane.setEditable(true);
-          _pane.setCaretPosition(_doc.getLength());
-          _pane.requestFocus();
-        }
-      };
-      
-      final Lambda<String,String> insertTextCommand = box.makeInsertTextCommand();
       
       // Embed the input box into the interactions pane.
       // This operation must be performed in the UI thread
       SwingUtilities.invokeLater(new Runnable() {
         public void run() { 
           
-          box.setInputCompletionCommand(inputCompletionCommand);
+          _box = new InputBox();
+          // These commands only run in the event thread
+          final Lambda<String,String> insertTextCommand = _box.makeInsertTextCommand();  // command for testing
+          
+          final Runnable inputCompletionCommand = new Runnable() {  // command for terminating interactions 
+            public void run() {
+              // Reset the commands to their default inactive state
+              _setConsoleInputCommands(_defaultInputCompletionCommand, _defaultInsertTextCommand);
+              
+              _box.disableInputs();
+              
+              completionMonitor.set();
+              
+              // Move the cursor back to the end of the interactions pane
+              _pane.setEditable(true);
+              _pane.setCaretPosition(_doc.getLength());
+              _pane.requestFocus();
+            }
+          };
+          
+          _box.setInputCompletionCommand(inputCompletionCommand);
       
           _setConsoleInputCommands(inputCompletionCommand, insertTextCommand);
           
@@ -170,10 +173,11 @@ public class InteractionsController extends AbstractConsoleController {
            
           javax.swing.text.MutableAttributeSet inputAttributes = _pane.getInputAttributes();
           inputAttributes.removeAttributes(inputAttributes);
-          StyleConstants.setComponent(inputAttributes, box);
+          StyleConstants.setComponent(inputAttributes, _box);
           try {
             DefaultStyledDocument.ElementSpec[] specs = new DefaultStyledDocument.ElementSpec[]{ 
-              new DefaultStyledDocument.ElementSpec(inputAttributes, DefaultStyledDocument.ElementSpec.ContentType, INPUT_BOX_SYMBOL.toCharArray(), 0, 11)
+              new DefaultStyledDocument.ElementSpec(inputAttributes, DefaultStyledDocument.ElementSpec.ContentType, 
+                                                    INPUT_BOX_SYMBOL.toCharArray(), 0, 11)
             };
             
             // update input box style
@@ -186,8 +190,8 @@ public class InteractionsController extends AbstractConsoleController {
           
           _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
           
-          box.setVisible(true);
-          box.requestFocus();
+          _box.setVisible(true);
+          _box.requestFocus();
 
           _pane.setEditable(false);
         }
@@ -197,7 +201,7 @@ public class InteractionsController extends AbstractConsoleController {
       // Wait for the inputCompletionCommand to be invoked
       completionMonitor.waitOne();
             
-      String text = box.getText() + "\n";
+      String text = _box.getText() + "\n";
       fireConsoleInputCompleted(text);
       
       return text;
@@ -230,25 +234,22 @@ public class InteractionsController extends AbstractConsoleController {
   };
 
   /** Glue together the given model and a new view.
-   *  @param model An InteractionsModel
-   *  @param adapter InteractionsDJDocument being used by the model's doc
-   */
+    * @param model An InteractionsModel
+    * @param adapter InteractionsDJDocument being used by the model's doc
+    */
   public InteractionsController(final InteractionsModel model, InteractionsDJDocument adapter) {
     this(model, adapter, 
          new InteractionsPane(adapter) { 
-           public int getPromptPos() { 
-             return model.getDocument().getPromptPos(); 
-           }
+           public int getPromptPos() { return model.getDocument().getPromptPos(); }
          }); 
   }
 
   /** Glue together the given model and view.
-   *  @param model An InteractionsModel
-   *  @param adapter InteractionsDJDocument being used by the model's doc
-   *  @param pane An InteractionsPane
-   */
-  public InteractionsController(InteractionsModel model, InteractionsDJDocument adapter, 
-                                InteractionsPane pane) {
+    * @param model An InteractionsModel
+    * @param adapter InteractionsDJDocument being used by the model's doc
+    * @param pane An InteractionsPane
+    */
+  public InteractionsController(InteractionsModel model, InteractionsDJDocument adapter, InteractionsPane pane) {
     super(adapter, pane);
     DefaultEditorKit d = pane.EDITOR_KIT;
     
@@ -290,7 +291,7 @@ public class InteractionsController extends AbstractConsoleController {
     for(ConsoleStateListener listener : _consoleStateListeners) { listener.consoleInputCompleted(text, this); }
   }
   
-  /** Gets the input listener for console input requests.
+  /** Gets the input listener for console input requests.  ONLY used in unit tests.
    * @return the input listener for console input requests.
    */
   public InputListener getInputListener() { return _inputListener; }
@@ -312,10 +313,9 @@ public class InteractionsController extends AbstractConsoleController {
     */
   public InteractionsModel getInteractionsModel() {  return _model; }
 
-  /**
-   * Allows the abstract superclass to use the document.
-   * @return the InteractionsDocument
-   */
+  /** Allows the abstract superclass to use the document.
+    * @return the InteractionsDocument
+    */
   public ConsoleDocument getConsoleDoc() { return _doc; }
 
   /** Accessor method for the InteractionsDocument. */
@@ -655,9 +655,7 @@ public class InteractionsController extends AbstractConsoleController {
       
       // Add the input listener for <Shift+Enter>
       Action newLineAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-           insert("\n", getCaretPosition());
-        }
+        public void actionPerformed(ActionEvent e) { insert("\n", getCaretPosition()); }
       };
       
       InputMap im = getInputMap(WHEN_FOCUSED);
@@ -678,29 +676,27 @@ public class InteractionsController extends AbstractConsoleController {
     /** Enable anti-aliased text by overriding paintComponent. */
     protected void paintComponent(Graphics g) {
       if (_antiAliasText && g instanceof Graphics2D) {
-        Graphics2D g2d = (Graphics2D)g;
+        Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
       }
       super.paintComponent(g);
     }
     
     /** Specifies what to do when the <Enter> key is hit. */
-    public void setInputCompletionCommand(final Runnable command) {
+    void setInputCompletionCommand(final Runnable command) {
       InputMap im = getInputMap(WHEN_FOCUSED);
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
       
       ActionMap am = getActionMap();
       am.put(INPUT_ENTERED_NAME, new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-          command.run();
-        }
+        public void actionPerformed(ActionEvent e) { command.run(); }
       });
     }
     
-    /** Generates a lambda that can be used to insert text into this input box
+    /** Generates a lambda that can be used to insert text into this input box.  Only runs in event thread.
       * @return A lambda that inserts the given text into the textbox when applied
       */
-    public Lambda<String,String> makeInsertTextCommand() {
+    Lambda<String,String> makeInsertTextCommand() {
       return new Lambda<String, String>() {
         public String apply(String input) {
           insert(input, getCaretPosition());
@@ -712,7 +708,7 @@ public class InteractionsController extends AbstractConsoleController {
     /** Behaves somewhat like setEnable(false) in that it disables all
       * input to the text box, but it does not change the appearance of the text.
       */
-    public void disableInputs() {
+    void disableInputs() {
       setEditable(false);
       
       ActionMap am = getActionMap();
@@ -728,9 +724,8 @@ public class InteractionsController extends AbstractConsoleController {
     }
   }
   
-  /** A listener interface that allows for others outside the interactions
-    * controller to be notified when the input console is enabled in the
-    * interactions pane.
+  /** A listener interface that allows for others outside the interactions controller to be notified when the input
+    * console is enabled in the interactions pane.
     */
   public interface ConsoleStateListener extends EventListener {
     

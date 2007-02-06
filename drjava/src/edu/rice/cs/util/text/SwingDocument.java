@@ -125,12 +125,12 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   }
 
   /** Inserts a string into the document at the given offset and the given named style, regardless of the edit 
-   *  condition.
-   *  @param offs Offset into the document
-   *  @param str String to be inserted
-   *  @param style Name of the style to use.  Must have been added using addStyle.
-   *  @throws EditDocumentException if the offset is illegal
-   */
+    * condition.
+    * @param offs Offset into the document
+    * @param str String to be inserted
+    * @param style Name of the style to use.  Must have been added using addStyle.
+    * @throws EditDocumentException if the offset is illegal
+    */
   public void forceInsertText(int offs, String str, String style) {
     AttributeSet s = null;
     if (style != null) s = getDocStyle(style);

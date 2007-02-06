@@ -482,10 +482,8 @@ public class ConfigFrame extends JFrame {
                                                "The font used in the list of open documents."));
     addOptionComponent(panel, new FontOptionComponent(OptionConstants.FONT_TOOLBAR, "Toolbar Font", this,
                                                "The font used in the toolbar buttons."));
-    if (CodeStatus.DEVELOPMENT) {
-      addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text", this,
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text", this,
                                                     "Whether to graphically smooth the text."));
-    }
     panel.displayComponents();
   }
 

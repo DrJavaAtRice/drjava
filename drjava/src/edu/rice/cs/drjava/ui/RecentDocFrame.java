@@ -96,12 +96,9 @@ public class RecentDocFrame extends JWindow {
     _label = new JLabel("...") {
       // Enable anti-aliased text by overriding paintComponent.
       protected void paintComponent(Graphics g) {
-        if (CodeStatus.DEVELOPMENT) {
-          if (_antiAliasText && g instanceof Graphics2D) {
-            Graphics2D g2d = (Graphics2D)g;
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-          }
+        if (_antiAliasText && g instanceof Graphics2D) {
+          Graphics2D g2d = (Graphics2D)g;
+          g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         }
         super.paintComponent(g);
       }
@@ -111,11 +108,9 @@ public class RecentDocFrame extends JWindow {
     _textpane = new JTextPane() {
       // Enable anti-aliased text by overriding paintComponent.
       protected void paintComponent(Graphics g) {
-        if (CodeStatus.DEVELOPMENT) {
-          if (_antiAliasText && g instanceof Graphics2D) {
-            Graphics2D g2d = (Graphics2D)g;
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-          }
+        if (_antiAliasText && g instanceof Graphics2D) {
+          Graphics2D g2d = (Graphics2D)g;
+          g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         }
         super.paintComponent(g);
       }
@@ -148,8 +143,7 @@ public class RecentDocFrame extends JWindow {
     Color fontColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
     /* make it bigger */
     Font titleFont = mainFont.deriveFont((float) (mainFont.getSize() + 3));
-    if (CodeStatus.DEVELOPMENT)
-      _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS).booleanValue();
+    _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS).booleanValue();
     
     _label.setForeground(fontColor);
     _panel.setBackground(backColor);

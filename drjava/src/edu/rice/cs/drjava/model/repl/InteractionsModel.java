@@ -371,9 +371,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       _debugPort = -1;
     }
     _debugPortSet = true;
-    if (CodeStatus.DEVELOPMENT) {
-      System.setProperty("drjava.debug.port", String.valueOf(_debugPort));
-    }
+    System.setProperty("drjava.debug.port", String.valueOf(_debugPort));
   }
 
   /** Sets the port number to use for debugging the interactions JVM.

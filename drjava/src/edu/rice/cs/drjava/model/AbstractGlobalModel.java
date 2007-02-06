@@ -237,11 +237,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** The document adapter used in the console document. */
   protected final InteractionsDJDocument _consoleDocAdapter;
  
-  /** A lock object to prevent print calls to System.out or System.err from flooding the JVM, ensuring the UI
-   *  remains responsive.
-   */
-  private final Object _systemWriterLock = new Object();
- 
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls.
    *  TODO: why is this here, and why is it public?
    */
@@ -2123,19 +2118,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  @param style the style to print with
    */
   protected void _docAppend(ConsoleDocument doc, String s, String style) {
-    synchronized(_systemWriterLock) {
+    /** A lock object to prevent print calls from flooding the JVM, ensuring the UI remains responsive. */
+    final Object systemWriterLock = new Object();
+    
+    synchronized(systemWriterLock) {
       try {
         doc.insertBeforeLastPrompt (s, style);
-        
-        // Wait to prevent being flooded with println's
-        _systemWriterLock.wait(WRITE_DELAY);
+        systemWriterLock.wait(WRITE_DELAY);  // Wait to prevent being print flooding
       }
-      catch (InterruptedException e) {
-        // It's ok, we'll go ahead and resume
-      }
+      catch (InterruptedException e) { /* Ignore and resume */ }
     }
   }
-
 
   /** Prints System.out to the DrJava console. */
   public void systemOutPrint(String s) {_docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE); }
@@ -2151,12 +2144,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
   }
 
-
   /** throw new UnsupportedOperationException */
   public void waitForInterpreter() {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
-
 
   /** throws new UnsupportedOperationException */
   public ClassPathVector getInteractionsClassPath() {
@@ -2466,7 +2457,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean isCurrentRegionLast() { return (getIndexOf(_current) == _regions.size() - 1);  }
 
     /** Set the current region. 
-     *  @param region new current region */
+      * @param region new current region */
     public void setCurrentRegion(R region) {
 //      if (!_regions.contains(_current)) _current = null;
       _current = region;
@@ -2637,8 +2628,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       
       /** Apply the given command to the specified region to change it.
-       *  @param region the region to find and change
-       *  @param cmd command that mutates the region. */
+        * @param region the region to find and change
+        * @param cmd command that mutates the region. */
       public void changeRegion(R region, Lambda<Object,R> cmd) {
         _superSetManager.changeRegion(region, cmd);
       }
@@ -2654,8 +2645,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
 
       /** All filtered listeners that are listening to this subset. Accesses to this collection are protected by the
-       *  ReaderWriterLock. The collection must be synchronized, since multiple readers could access it at once.
-       */
+        * ReaderWriterLock. The collection must be synchronized, since multiple readers could access it at once.
+        */
       protected final LinkedList<FilteredRegionManagerListener<R>> _filters = new LinkedList<FilteredRegionManagerListener<R>>();
     
       /** Provides synchronization primitives for solving the readers/writers problem.  In EventNotifier, adding and
@@ -2705,13 +2696,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         finally { _lock.endWrite(); }
       }
       
-      /** @return the current region or null if none selected */
+      /** @return the current region or null if none selected. */
       public R getCurrentRegion() {
         // TODO
         throw new UnsupportedOperationException("SubsetRegionManager.getCurrentRegion not supported");
       }
       
-      /** @return the index of the current region or -1 if none selected */
+      /** @return the index of the current region or -1 if none selected. */
       public int getCurrentRegionIndex() {
         // TODO
         throw new UnsupportedOperationException("SubsetRegionManager.getCurrentRegionIndex not supported");

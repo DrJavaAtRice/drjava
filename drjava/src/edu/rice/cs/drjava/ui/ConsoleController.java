@@ -55,7 +55,7 @@ public class ConsoleController extends AbstractConsoleController implements Seri
   private Object _inputWaitObject = new Object();
 
   /** State so that the Enter action will only take place if the console is actually waiting for input. */
-  private boolean _blockedForConsoleInput;
+  private volatile boolean _blockedForConsoleInput;
 
   public ConsoleController(final ConsoleDocument doc, InteractionsDJDocument adapter) {
     super(adapter, new InteractionsPane("CONSOLE_KEYMAP", adapter) {

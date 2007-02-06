@@ -103,7 +103,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     _model.systemInEcho(s);
     return s; 
   }
-
   
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
    *  @param t The Throwable thrown by System.exit
@@ -137,8 +136,8 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
 
   /** Notifies listeners that the interpreter has changed.
-   *  @param inProgress Whether the new interpreter is currently in progress.
-   */
+    * @param inProgress Whether the new interpreter is currently in progress.
+    */
   protected void _notifyInterpreterChanged(final boolean inProgress) {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterChanged(inProgress); } });
   }

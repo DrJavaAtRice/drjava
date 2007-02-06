@@ -66,15 +66,9 @@ public class HelpFrame extends HTMLFrame {
     super(frameName, introUrl, indexUrl, iconString);
   }
   
-
   protected String getErrorText(URL url) {
     // The help files are made available by running "ant docs"
-    String errorText = "The Help files are currently unavailable.";
-    if (CodeStatus.DEVELOPMENT) {  // don't show this message in stable
-      errorText += "\n\nTo generate the help files, run the \"ant docs\" target" +
-        " after compiling DrJava.";
-    }
-    return errorText;
+    return "The Help files are currently unavailable.";
   }
 
   /** Shows the page selected by the hyperlink event.  Changed to anonymous inner class for 

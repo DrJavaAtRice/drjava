@@ -465,7 +465,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   
 //    this.setEditorKit(new StyledEditorKit());
 
-    if (CodeStatus.DEVELOPMENT) _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
+    _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
 
     OptionListener<Color> temp;
     Pair<Option<Color>, OptionListener<Color>> pair;
@@ -518,12 +518,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _colorOptionListeners.add(pair);
     DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR, temp);
 
-    if (CodeStatus.DEVELOPMENT) {
-      OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
-      Pair<Option<Boolean>, OptionListener<Boolean>> aaPair = new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, aaTemp);
-      _booleanOptionListeners.add(aaPair);
-      DrJava.getConfig().addOptionListener( OptionConstants.TEXT_ANTIALIAS, aaTemp);
-    }
+    OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
+    Pair<Option<Boolean>, OptionListener<Boolean>> aaPair = new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, aaTemp);
+    _booleanOptionListeners.add(aaPair);
+    DrJava.getConfig().addOptionListener( OptionConstants.TEXT_ANTIALIAS, aaTemp);
 
     createPopupMenu();
 
@@ -648,11 +646,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** Enable anti-aliased text by overriding paintComponent. */
   protected void paintComponent(Graphics g) {
-    if (CodeStatus.DEVELOPMENT) {
-      if (_antiAliasText && g instanceof Graphics2D) {
-        Graphics2D g2d = (Graphics2D)g;
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-      }
+    if (_antiAliasText && g instanceof Graphics2D) {
+      Graphics2D g2d = (Graphics2D)g;
+      g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     }
     super.paintComponent(g);
   }

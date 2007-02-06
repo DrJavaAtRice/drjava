@@ -64,9 +64,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   
   static StyledEditorKit EDITOR_KIT;
   
-  static {
-    EDITOR_KIT = new InteractionsEditorKit();    
-  }
+  static { EDITOR_KIT = new InteractionsEditorKit();  }
   
   /** A runnable object that causes the editor to beep. */
   protected Runnable _beep = new Runnable() {
@@ -108,19 +106,15 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     setHighlighter(new ReverseHighlighter());
     _highlightManager = new HighlightManager(this);
     
-    if (CodeStatus.DEVELOPMENT) {
-      _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
-    }
+    _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
     
     // Setup color listeners.
     
     new ForegroundColorListener(this);
     new BackgroundColorListener(this);
-    
-    if (CodeStatus.DEVELOPMENT) {
-      OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
-      DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaTemp);
-    }
+
+    OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
+    DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaTemp);
   }
   
   /** We lost ownership of what we put in the clipboard. */
@@ -138,9 +132,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     // we don't want multiple keys bound to the same action
     KeyStroke[] keys = _keymap.getKeyStrokesForAction(action);
     if (keys != null) {
-      for (int i = 0; i < keys.length; i++) {
-        _keymap.removeKeyStrokeBinding(keys[i]);
-      }
+      for (int i = 0; i < keys.length; i++) _keymap.removeKeyStrokeBinding(keys[i]);
     }
     _keymap.addActionForKeyStroke(stroke, action);
     setKeymap(_keymap);
@@ -166,12 +158,10 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   
   /** Enable anti-aliased text by overriding paintComponent. */
   protected void paintComponent(Graphics g) {
-    if (g==null) return;
-    if (CodeStatus.DEVELOPMENT) {
-      if (_antiAliasText && g instanceof Graphics2D) {
-        Graphics2D g2d = (Graphics2D)g;
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-      }
+    if (g == null) return;  // Addresses bug 1651914
+    if (_antiAliasText && g instanceof Graphics2D) {
+      Graphics2D g2d = (Graphics2D)g;
+      g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     }
     super.paintComponent(g);
   }
