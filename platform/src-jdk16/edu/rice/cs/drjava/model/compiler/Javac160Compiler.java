@@ -65,11 +65,8 @@ import com.sun.tools.javac.util.Position;
 // import com.sun.tools.javac.util.List; Clashes with java.util.List
 import com.sun.tools.javac.util.Log;
 
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.newjvm.ExecJVM;
-import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** An implementation of the CompilerInterface that supports compiling with the java 1.6.0 compiler.  Must be compiled
  *  using javac 1.6.0.  
@@ -83,9 +80,13 @@ public class Javac160Compiler implements CompilerInterface {
 
   public static final String COMPILER_CLASS_NAME = "com.sun.tools.javac.main.JavaCompiler";
   
+  private final JavaVersion.FullVersion _version;
+  private final List<? extends File> _defaultBootClassPath;
+  
   /** Constructor for Javac160Compiler will throw a RuntimeException if an invalid version of the JDK is in use. */ 
-  private Javac160Compiler() {
-    if (! _isValidVersion()) throw new RuntimeException("Invalid version of Java 1.6 compiler.");
+  public Javac160Compiler(JavaVersion.FullVersion version, List<? extends File> defaultBootClassPath) {
+    _version = version;
+    _defaultBootClassPath = defaultBootClassPath;
   }
   
   /** Uses reflection on the class Diagnostic, introduced in the Java 1.6 compiler, to confirm
@@ -126,6 +127,7 @@ public class Javac160Compiler implements CompilerInterface {
   public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
                                                List<? extends File> sourcePath, File destination, 
                                                List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+    if (bootClassPath == null) { bootClassPath = _defaultBootClassPath; }
     Context context = _createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
     new CompilerErrorListener(context, errors);
@@ -146,7 +148,7 @@ public class Javac160Compiler implements CompilerInterface {
   }
   
   
-  public String toString() { return "JDK 1.6"; }
+  public String toString() { return "JDK " + _version.versionString(); }
   
   public String getName() { return toString(); }
 

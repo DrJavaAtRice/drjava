@@ -333,8 +333,8 @@
        Jar Targets
        *********** -->
        
-  <target name="jar" depends="resolve-version-tag" description="Create the jar file with all classes and libs">
-    <jar jarfile="${ant.project.name}.jar">
+  <target name="jar-full" depends="resolve-version-tag" description="Create the jar file with all classes and libs">
+    <jar jarfile="${ant.project.name}-full.jar">
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
@@ -349,8 +349,8 @@
     </jar>
   </target>
 
-  <target name="jar-base" depends="resolve-version-tag" description="Create the jar file without any support libs">
-    <jar jarfile="${ant.project.name}-base.jar">
+  <target name="jar" depends="resolve-version-tag" description="Create the jar file without any support libs">
+    <jar jarfile="${ant.project.name}.jar">
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />

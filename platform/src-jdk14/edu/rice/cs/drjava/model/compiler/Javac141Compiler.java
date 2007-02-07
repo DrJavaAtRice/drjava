@@ -69,10 +69,7 @@ import com.sun.tools.javac.v8.util.Hashtable;
 //import com.sun.tools.javac.v8.util.List; Clashes with java.util.List
 import com.sun.tools.javac.v8.util.Log;
 
-//import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.ClassPathVector;
-import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 /**
  * An implementation of the CompilerInterface that supports compiling with
@@ -85,9 +82,6 @@ import edu.rice.cs.util.UnexpectedException;
  */
 public class Javac141Compiler implements CompilerInterface {
   
-  /** Singleton instance. */
-  public static final CompilerInterface ONLY = new Javac141Compiler();
-
   public static final String COMPILER_CLASS_NAME =
     "com.sun.tools.javac.v8.JavaCompiler";
   
@@ -103,15 +97,14 @@ public class Javac141Compiler implements CompilerInterface {
    */
   private static final PrintWriter NULL_PRINT_WRITER =
     new PrintWriter(NULL_WRITER);
+  
+  
+  private JavaVersion.FullVersion _version;
+  private List/*<? extends File>*/ _defaultBootClassPath;
 
-  /**
-   * Constructor for Javac141Compiler will throw a RuntimeException if an invalid version
-   * of the JDK is in use. 
-   */ 
-  protected Javac141Compiler() {
-    if (!_isValidVersion()) {
-      throw new RuntimeException("Invalid version of Java compiler.");
-    } 
+  public Javac141Compiler(JavaVersion.FullVersion version, List/*<? extends File>*/ defaultBootClassPath) {
+    _version = version;
+    _defaultBootClassPath = defaultBootClassPath;
   }
   
 /** Compile the given files.
@@ -129,6 +122,7 @@ public class Javac141Compiler implements CompilerInterface {
   public List/*<? extends CompilerError>*/ compile(List/*<? extends File>*/ files, List/*<? extends File>*/ classPath, 
                                                    List/*<? extends File>*/ sourcePath, File destination, 
                                                    List/*<? extends File>*/ bootClassPath, String sourceVersion, boolean showWarnings) {
+    if (bootClassPath == null) { bootClassPath = _defaultBootClassPath; }
     Context context = _createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     OurLog log = new OurLog(context);
     JavaCompiler compiler = JavaCompiler.make(context);
@@ -168,7 +162,7 @@ public class Javac141Compiler implements CompilerInterface {
   }
 
   public String getName() {
-    return "javac 1.4.x";
+    return "JDK " + _version.versionString();
   }
 
   public String toString() {

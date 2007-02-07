@@ -66,11 +66,9 @@ import com.sun.tools.javac.util.Position;
 //import com.sun.tools.javac.util.List; Clashes with java.util.List
 import com.sun.tools.javac.util.Log;
 
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.newjvm.ExecJVM;
-import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.plt.debug.DebugUtil;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 /**
  * An implementation of the CompilerInterface that supports compiling with
@@ -85,12 +83,11 @@ import edu.rice.cs.util.swing.Utilities;
  */
 public class Javac150Compiler implements CompilerInterface {
   
-  private boolean _isJSR14v2_4;
+  private boolean _supportsJSR14v2_4;
   private boolean _isJSR14v2_5;
+  private final JavaVersion.FullVersion _version;
+  private final List<? extends File> _defaultBootClassPath;
     
-  /** Singleton instance. */
-  public static final CompilerInterface ONLY = new Javac150Compiler();
-
   public static final String COMPILER_CLASS_NAME = "com.sun.tools.javac.main.JavaCompiler";
   
   /** A writer that discards its input. */
@@ -104,13 +101,11 @@ public class Javac150Compiler implements CompilerInterface {
   private static final PrintWriter NULL_PRINT_WRITER = new PrintWriter(NULL_WRITER);
 
 
-  /** Constructor for Javac150Compiler will throw a RuntimeException if an invalid version of the JDK is in use.  */ 
-  protected Javac150Compiler() {
-    if (!_isValidVersion()) {
-      throw new RuntimeException("Invalid version of Java compiler.");
-    }
+  public Javac150Compiler(JavaVersion.FullVersion version, List<? extends File> defaultBootClassPath) {
     _isJSR14v2_5 = false;
-    _isJSR14v2_4 = _isJSR14v2_4();
+    _supportsJSR14v2_4 = _supportsJSR14v2_4();
+    _version = version;
+    _defaultBootClassPath = defaultBootClassPath;
   }
   
   /** Uses reflection on the Log object to deduce which JDK is being used. If the constructor for Log in this JDK 
@@ -153,6 +148,11 @@ public class Javac150Compiler implements CompilerInterface {
   public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
                                                List<? extends File> sourcePath, File destination, 
                                                List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+    DebugUtil.debug.logStart("compile()");
+    DebugUtil.debug.logValues(new String[]{ "files", "classPath", "sourcePath", "destination", "bootClassPath", 
+                                          "sourceVersion", "showWarnings" },
+                              files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+    if (bootClassPath == null) { bootClassPath = _defaultBootClassPath; }
     Context context = _createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     OurLog log = new OurLog(context);
     JavaCompiler compiler = _makeCompiler(context);
@@ -172,9 +172,11 @@ public class Javac150Compiler implements CompilerInterface {
       
       LinkedList<CompilerError> errors = log.getErrors();
       errors.addFirst(new CompilerError("Compile exception: " + t, false));
+      DebugUtil.debug.logEnd("compile() (caught an exception)");
       return errors;
     }
     
+    DebugUtil.debug.logEnd("compile()");
     return log.getErrors();
   }
   
@@ -196,8 +198,8 @@ public class Javac150Compiler implements CompilerInterface {
 
   public String getName() {
     if (_isJSR14v2_5) return "JSR-14 v2.5";
-    else if (_isJSR14v2_4) return "JSR-14 v2.4";
-    else return "JSR-14 v2.0/2.2";// + com.sun.tools.javac.Main.class.getResource("Main.class");
+    // We could try to distinguish between different JSR-14 versions, but does anyone care anymore?
+    else return "JDK " + _version.versionString();
   }
 
   public String toString() { return getName(); }
@@ -243,7 +245,7 @@ public class Javac150Compiler implements CompilerInterface {
       Context.class
     };
     Method m;    
-    if (_isJSR14v2_4) {    
+    if (_supportsJSR14v2_4) {    
       try { 
         m = javaCompilerClass.getMethod("instance", validArgs1);
         return (JavaCompiler)m.invoke(null, new Object[] {context});
@@ -267,8 +269,8 @@ public class Javac150Compiler implements CompilerInterface {
     }
   }
   
-  /** Check if we're using JSR14v2.4 or 2.5 (skipping version 2.3 because it will never be officially released). */
-  private boolean _isJSR14v2_4() {
+  /** Check if we're using JSR14v2.4, JSR14v2.5, or JDK 5 (skipping version 2.3 because it will never be officially released). */
+  private boolean _supportsJSR14v2_4() {
     try {
       Class.forName("com.sun.tools.javac.main.Main$14");
       return true;
