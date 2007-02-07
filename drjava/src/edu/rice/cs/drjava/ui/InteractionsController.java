@@ -33,17 +33,29 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+import java.awt.Toolkit;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.RenderingHints;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import java.io.File;
+
+import java.util.EventListener;
+import java.util.Vector;
+
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
 import javax.swing.InputMap;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-
 import javax.swing.border.Border;
-
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
@@ -52,24 +64,10 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.DefaultStyledDocument;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.Toolkit;
-import java.awt.Color;
-import java.awt.RenderingHints;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-
-import java.io.File;
-
-import java.util.EventListener;
-import java.util.Vector;
-
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
-
 import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
@@ -150,8 +148,9 @@ public class InteractionsController extends AbstractConsoleController {
           // These commands only run in the event thread
           final Lambda<String,String> insertTextCommand = _box.makeInsertTextCommand();  // command for testing
           
-          final Runnable inputCompletionCommand = new Runnable() {  // command for terminating interactions 
+          final Runnable inputCompletionCommand = new Runnable() {  // command for terminating each input interaction
             public void run() {
+              assert EventQueue.isDispatchThread();
               // Reset the commands to their default inactive state
               _setConsoleInputCommands(_defaultInputCompletionCommand, _defaultInsertTextCommand);
               
@@ -172,7 +171,7 @@ public class InteractionsController extends AbstractConsoleController {
           
           _pane.setEditable(true);
           
-          int pos = _doc.getPositionBeforePrompt();
+//          int pos = _doc.getPositionBeforePrompt();
           _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
           
           // create an empty MutableAttributeSet for _box
@@ -209,6 +208,7 @@ public class InteractionsController extends AbstractConsoleController {
       completionMonitor.waitOne();
             
       String text = _box.getText() + "\n";
+      
       fireConsoleInputCompleted(text);
       
       return text;
@@ -690,10 +690,10 @@ public class InteractionsController extends AbstractConsoleController {
     
     /** Specifies what to do when the <Enter> key is hit. */
     void setInputCompletionCommand(final Runnable command) {
-      InputMap im = getInputMap(WHEN_FOCUSED);
+      final InputMap im = getInputMap(WHEN_FOCUSED);
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
       
-      ActionMap am = getActionMap();
+      final ActionMap am = getActionMap();
       am.put(INPUT_ENTERED_NAME, new AbstractAction() {
         public void actionPerformed(ActionEvent e) { command.run(); }
       });
