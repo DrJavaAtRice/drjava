@@ -358,10 +358,10 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   }
 
   /** Resumes the debugger asynchronously so as to avoid getting notified before we start waiting for notifies. */
-  protected void _asyncStep(final int whatKind) {
+  protected void _asyncStep(final Debugger.StepType type) {
     new Thread("asyncStep Thread") {
       public void run() {
-        try { _debugger.step(whatKind); }
+        try { _debugger.step(type); }
         catch(DebugException dbe) {
           dbe.printStackTrace();
           listenerFail("Debugger couldn't be resumed!\n" + dbe);

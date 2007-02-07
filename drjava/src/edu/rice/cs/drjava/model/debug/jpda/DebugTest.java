@@ -308,7 +308,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     StepTestListener stepTestListener = new StepTestListener();
     _debugger.addListener(stepTestListener);
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_INTO);
+      _asyncStep(Debugger.StepType.STEP_INTO);
       _setPendingNotifies(2); // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
@@ -527,7 +527,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
 
     // Step into bar() method
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_INTO);
+      _asyncStep(Debugger.StepType.STEP_INTO);
       _setPendingNotifies(2);  // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
@@ -541,7 +541,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
 
     // Step to next line
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       _setPendingNotifies(2);  // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
@@ -558,7 +558,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
 
     // Step to next line
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       _setPendingNotifies(2);  // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
@@ -573,12 +573,12 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
 
     // Step twice to print last line in Foo
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       _setPendingNotifies(2);  // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       _setPendingNotifies(2);  // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
@@ -595,7 +595,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread
       while (_pendingNotifies > 0) _notifierLock.wait();
@@ -647,7 +647,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
 
     // Step into bar() method
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_INTO);
+      _asyncStep(Debugger.StepType.STEP_INTO);
       _setPendingNotifies(2);  // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
@@ -661,7 +661,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
 
     // Step out of method
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_OUT);
+      _asyncStep(Debugger.StepType.STEP_OUT);
       _setPendingNotifies(2);  // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
@@ -722,7 +722,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
 
     // Step over once
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       _setPendingNotifies(2);  // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
@@ -737,7 +737,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
 
     // Step over again
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       _setPendingNotifies(2);  // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }

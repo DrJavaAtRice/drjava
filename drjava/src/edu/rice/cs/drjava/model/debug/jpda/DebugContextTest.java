@@ -77,7 +77,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step into bar() method
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_INTO);
+      _asyncStep(Debugger.StepType.STEP_INTO);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     // Source is highlighted because file is in source root set
@@ -92,7 +92,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step to next line
     synchronized(_notifierLock) {
       _setPendingNotifies(1);  // suspended
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     // Source is not highlighted
@@ -110,7 +110,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
 
     // Step to next line
     synchronized(_notifierLock) {
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       _setPendingNotifies(2);  // suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
@@ -168,7 +168,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step to next line
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
@@ -259,7 +259,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step over once
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
@@ -273,7 +273,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step over again
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
@@ -361,7 +361,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step over once
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
@@ -377,7 +377,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step over again
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 //    _log.log("****"+getInteractionsText());
@@ -448,7 +448,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step to line 11
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
@@ -487,7 +487,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step to line 12
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
@@ -502,7 +502,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step to line 13
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(3);  // fires (don't wait)
@@ -517,7 +517,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step to line 14
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(4);  // fires (don't wait)
@@ -532,7 +532,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step to line 15
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_OVER);
+      _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(5);  // fires (don't wait)
@@ -562,7 +562,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     // Step into static method
     synchronized(_notifierLock) {
       _setPendingNotifies(2);  // suspended, updated
-      _asyncStep(Debugger.STEP_INTO);
+      _asyncStep(Debugger.StepType.STEP_INTO);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(6);  // fires (don't wait)

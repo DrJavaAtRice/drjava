@@ -418,21 +418,21 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     Action stepIntoAction = new AbstractAction("Step Into") {
       public void actionPerformed(ActionEvent ae) {
-        _frame.debuggerStep(Debugger.STEP_INTO);
+        _frame.debuggerStep(Debugger.StepType.STEP_INTO);
       }
     };
     _stepIntoButton = new JButton(stepIntoAction);
 
     Action stepOverAction = new AbstractAction("Step Over") {
       public void actionPerformed(ActionEvent ae) {
-        _frame.debuggerStep(Debugger.STEP_OVER);
+        _frame.debuggerStep(Debugger.StepType.STEP_OVER);
       }
     };
     _stepOverButton = new JButton(stepOverAction);
 
     Action stepOutAction = new AbstractAction( "Step Out" ) {
       public void actionPerformed(ActionEvent ae) {
-        _frame.debuggerStep(Debugger.STEP_OUT);
+        _frame.debuggerStep(Debugger.StepType.STEP_OUT);
       }
     };
     _stepOutButton = new JButton(stepOutAction);

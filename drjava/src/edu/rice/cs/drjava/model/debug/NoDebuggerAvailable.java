@@ -82,11 +82,8 @@ public class NoDebuggerAvailable implements Debugger {
    */
   public void resume(DebugThreadData data) { }
 
-  /** Steps into the execution of the currently loaded document.
-   *  @param flag The flag denotes what kind of step to take. The following mark valid options:
-   *  StepRequest.STEP_INTO, StepRequest.STEP_OVER, StepRequest.STEP_OUT
-   */
-  public void step(int flag) throws DebugException { }
+  /** Steps the execution of the currently loaded document. */
+  public void step(StepType type) throws DebugException { }
 
   /** Called from interactionsEnded in MainFrame in order to clear any current StepRequests that remain. */
   public void clearCurrentStepRequest() { }

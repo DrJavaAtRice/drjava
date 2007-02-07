@@ -695,23 +695,18 @@ public class JPDADebugger implements Debugger {
     if (! fromStep && ! _suspendedThreads.isEmpty()) _switchToSuspendedThread();
   }
 
-  /**
-   * Steps the currently suspended thread.
-   * @param flag The flag denotes what kind of step to take.
-   * The following are the valid options:
-   * StepRequest.STEP_INTO, StepRequest.STEP_OVER, StepRequest.STEP_OUT
-   */
-  public synchronized void step(int flag) throws DebugException {
+  /** Steps the execution of the currently loaded document. */
+  public synchronized void step(StepType type) throws DebugException {
     _ensureReady();
-    _stepHelper(flag, true);
+    _stepHelper(type, true);
   }
 
   /** Performs a step in the currently suspended thread, only generating a step event if shouldNotify if true.  Assumes
    *  that lock is already held.
-   *  @param flag The type of step to perform (see step())
+   *  @param type The type of step to perform
    *  @param shouldNotify Whether to generate a step event
    */
-  private void _stepHelper(int flag, boolean shouldNotify) throws DebugException {
+  private void _stepHelper(StepType type, boolean shouldNotify) throws DebugException {
     if (_suspendedThreads.size() <= 0 || _runningThread != null) {
       throw new IllegalStateException("Cannot step if the current thread is not suspended.");
     }
@@ -731,7 +726,7 @@ public class JPDADebugger implements Debugger {
 
     // If there's already a step request for the current thread, delete
     //  it first
-    List<StepRequest> steps = _eventManager.stepRequests();  // Added parameterization <StepRequest>. JDK 1.5 will eliminate this type warning
+    List<StepRequest> steps = _eventManager.stepRequests();
     for (int i = 0; i < steps.size(); i++) {
       StepRequest step = steps.get(i);
       if (step.thread().equals(thread)) {
@@ -741,8 +736,13 @@ public class JPDADebugger implements Debugger {
     }
 
     _log.log(this + " Issued step request");
-    //Step step =
-    new Step(this, StepRequest.STEP_LINE, flag);
+    int stepFlag = Integer.MIN_VALUE; // should always be changed, but compiler doesn't check that
+    switch (type) {
+      case STEP_INTO: stepFlag = StepRequest.STEP_INTO; break;
+      case STEP_OVER: stepFlag = StepRequest.STEP_OVER; break;
+      case STEP_OUT: stepFlag = StepRequest.STEP_OUT; break;
+    }
+    new Step(this, StepRequest.STEP_LINE, stepFlag);
     if (shouldNotify) notifyStepRequested();
     _log.log(this + " About to resume");
     _resumeFromStep();

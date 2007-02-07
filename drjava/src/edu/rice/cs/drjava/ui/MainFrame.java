@@ -2039,18 +2039,18 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Steps into the next method call */
   private final Action _stepIntoDebugAction = new AbstractAction("Step Into") {
-    public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.STEP_INTO); }
+    public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.StepType.STEP_INTO); }
   };
   
   /** Runs the next line, without stepping into methods */
   private final Action _stepOverDebugAction = new AbstractAction("Step Over") {
-    public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.STEP_OVER); }
+    public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.StepType.STEP_OVER); }
   };
   
   /** Steps out of the next method call */
   private final Action _stepOutDebugAction = new AbstractAction("Step Out") {
     public void actionPerformed(ActionEvent ae) {
-      debuggerStep(Debugger.STEP_OUT);
+      debuggerStep(Debugger.StepType.STEP_OUT);
     }
   };
   
@@ -4551,9 +4551,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Steps in the debugger. */
-  void debuggerStep(int flag) {
+  void debuggerStep(Debugger.StepType type) {
     if (isDebuggerReady()) {
-      try { _model.getDebugger().step(flag); }
+      try { _model.getDebugger().step(type); }
       catch (IllegalStateException ise) {
         // This may happen if the user if stepping very frequently,
         // and is even more likely if they are using both hotkeys
