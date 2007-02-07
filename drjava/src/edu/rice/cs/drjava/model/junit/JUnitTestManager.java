@@ -154,10 +154,10 @@ public class JUnitTestManager {
       
       _jmc.testSuiteEnded(errors);
     }
-    catch(Throwable t) { 
+    catch(Exception e) { 
       JUnitError[] errors = new JUnitError[1];
-      errors[0] = new JUnitError(null, -1, -1, t.getMessage(),
-                                 false, "", "", StringOps.getStackTrace(t));
+      errors[0] = new JUnitError(null, -1, -1, e.getMessage(),
+                                 false, "", "", StringOps.getStackTrace(e));
       _jmc.testSuiteEnded(errors);
 //      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
       

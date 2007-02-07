@@ -1099,7 +1099,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         _storeInCache(key, lineText);
       }
     }
-    catch(Throwable t) { throw new UnexpectedException(t); }
+    catch(Exception e) { throw new UnexpectedException(e); }
     finally { releaseReadLock(); }
     
     return lineText;

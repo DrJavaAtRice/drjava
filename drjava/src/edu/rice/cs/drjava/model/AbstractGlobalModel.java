@@ -3047,7 +3047,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _documentNavigator.refreshDocument(this, path);
         return true;
       }
-      catch(Throwable t) { return false; }
+      catch(Exception e) { return false; }
 //      catch(DocumentFileClosed e) { /* not clear what to do here */ }
     }
     

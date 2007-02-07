@@ -100,9 +100,9 @@ public abstract class AbstractSlaveJVM implements SlaveRemote, Serializable {
           }
           shutdown();
         }
-        catch (Throwable th) { 
+        catch(Throwable t) { 
           _log.log(this + ".quit() failed!");
-          quitFailed(th); 
+          quitFailed(t); 
         }
       }
     };

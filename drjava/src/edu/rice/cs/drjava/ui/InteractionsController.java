@@ -155,13 +155,13 @@ public class InteractionsController extends AbstractConsoleController {
               _setConsoleInputCommands(_defaultInputCompletionCommand, _defaultInsertTextCommand);
               
               _box.disableInputs();
-              
-              completionMonitor.set();
-              
+                           
               // Move the cursor back to the end of the interactions pane
               _pane.setEditable(true);
               _pane.setCaretPosition(_doc.getLength());
               _pane.requestFocus();
+              
+              completionMonitor.set();
             }
           };
           
