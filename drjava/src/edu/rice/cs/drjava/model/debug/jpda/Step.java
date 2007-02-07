@@ -31,10 +31,12 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+package edu.rice.cs.drjava.model.debug.jpda;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.model.debug.DebugException;
+
 import java.util.StringTokenizer;
 
 import com.sun.jdi.*;

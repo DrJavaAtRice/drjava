@@ -62,6 +62,8 @@ public interface Debugger {
    *  used, which is indicated by isReady().
    */
   public boolean isAvailable();
+  
+  public DebugModelCallback callback();
 
   /** Attaches the debugger to the Interactions JVM to prepare for debugging. */
   public void startUp() throws DebugException;

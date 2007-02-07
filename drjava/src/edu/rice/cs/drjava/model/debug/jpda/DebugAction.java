@@ -31,10 +31,11 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+package edu.rice.cs.drjava.model.debug.jpda;
 
 import com.sun.jdi.request.*;
 import java.util.Vector;
+import edu.rice.cs.drjava.model.debug.DebugException;
 
 /** Keeps track of information about any request to the debugger, such as Breakpoints.
  *  @version $Id$

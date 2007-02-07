@@ -31,19 +31,20 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+package edu.rice.cs.drjava.model.debug.jpda;
 
 import java.io.*;
 
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.debug.*;
 
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests the JPDA-based debugger.
  *  @version $Id$
  */
-public final class DebugTest extends DebugTestCase implements OptionConstants {
+public final class DebugTest extends JPDADebugTestCase implements OptionConstants {
   
   /** Tests startUp and shutdown, ensuring that all appropriate fields are initialized.  Ensures multiple startups
    *  and shutdowns work, even after a reset, which changes the debug port.
@@ -183,16 +184,16 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
       _setPendingNotifies(6); // (suspended, updated, breakpointReached) * 2
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
-    DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
-    DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
+    DebugThreadData threadA = new JPDAThreadData(_debugger.getCurrentThread());
+    DebugThreadData threadB = new JPDAThreadData(_debugger.getThreadAt(1));
     synchronized(_notifierLock) {
       _asyncDoSetCurrentThread(threadB);
       _setPendingNotifies(2);  // updated, suspended
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    DebugThreadData thread1 = new DebugThreadData(_debugger.getThreadAt(1));
-    DebugThreadData thread2 = new DebugThreadData(_debugger.getCurrentThread());
+    DebugThreadData thread1 = new JPDAThreadData(_debugger.getThreadAt(1));
+    DebugThreadData thread2 = new JPDAThreadData(_debugger.getCurrentThread());
 
     // make sure threads have switched places
     assertTrue(thread1.getUniqueID() == threadA.getUniqueID());
@@ -280,7 +281,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    DebugThreadData thread = new DebugThreadData(_debugger.getCurrentThread());
+    DebugThreadData thread = new JPDAThreadData(_debugger.getCurrentThread());
     // Resumes one thread, finishing it and switching to the next break point
     synchronized(_notifierLock) {
       _asyncResume();
@@ -290,7 +291,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    DebugThreadData thread2 = new DebugThreadData(_debugger.getCurrentThread());
+    DebugThreadData thread2 = new JPDAThreadData(_debugger.getCurrentThread());
     assertTrue("testMultiThreadedBreakPoint thread references should not be equal",
                !thread.getName().equals(thread2.getName()));
 
@@ -314,7 +315,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     stepTestListener.assertStepRequestedCount(1);
     _debugger.removeListener(stepTestListener);
 
-    DebugThreadData thread3 = new DebugThreadData(_debugger.getCurrentThread());
+    DebugThreadData thread3 = new JPDAThreadData(_debugger.getCurrentThread());
     assertEquals("testMultiThreadedBreakPoint thread references should be equal",
                  thread2.getName(), thread3.getName());
 

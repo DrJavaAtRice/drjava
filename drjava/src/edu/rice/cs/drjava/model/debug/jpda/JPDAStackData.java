@@ -5,7 +5,7 @@
  *
  * DrJava Open Source License
  * 
- * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
+ * Copyright (C) 2001-2006 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
  * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
  * 
@@ -31,15 +31,25 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+package edu.rice.cs.drjava.model.debug.jpda;
 
-import edu.rice.cs.drjava.model.DocumentRegion;
+import com.sun.jdi.StackFrame;
+import edu.rice.cs.drjava.model.debug.DebugStackData;
 
-public interface Breakpoint extends DebugBreakpointData, DocumentRegion {
+/**
+ * Class for keeping track of a stack frame in the debugger.
+ * @version $Id: DebugStackData.java 3901 2006-06-30 05:28:11Z rcartwright $
+ */
+public class JPDAStackData extends DebugStackData {
+  /**
+   * Object for keeping track of a stack frame.
+   * @param frame JPDA's reference to the stack frame
+   */
+  public JPDAStackData(StackFrame frame) {
+    super(methodName(frame), frame.location().lineNumber());
+  }
   
-  public String getClassName();
-
-  /** Enable/disable the breakpoint. */
-  public void setEnabled(boolean isEnabled);
-  
+  private static String methodName(StackFrame frame) {
+    return frame.location().declaringType().name() + "." + frame.location().method().name();
+  }
 }

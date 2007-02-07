@@ -50,7 +50,7 @@ import koala.dynamicjava.interpreter.context.*;
  *
  * NOTE: The tests at the bottom are disabled for now, since nothing needs to be done on an assignment.  (We 
  * just copy back when the thread is resumed.)
- *
+ * 
  * @version $Id$
  */
 public final class JavaDebugInterpreterTest extends DebugTestCase {

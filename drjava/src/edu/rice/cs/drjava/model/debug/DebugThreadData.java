@@ -33,61 +33,19 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-import com.sun.jdi.*;
-
 /**
  * Class for keeping track of the currently running threads.
  * @version $Id$
  */
-public class DebugThreadData {
-  private final ThreadReference _thread;
+public abstract class DebugThreadData {
   private final String _name;
   private final String _status;
   private final long _uniqueID;
   
-  /**
-   * Object for keeping track of a thread in the debuggee JVM.
-   * @param thread JPDA's reference to the thread
-   */
-  public DebugThreadData(ThreadReference thread) {
-    _thread = thread;
-    String name;
-    try {
-      name = _thread.name();
-    }
-    catch(VMDisconnectedException e) {
-      name = "";
-    }
+  public DebugThreadData(String name, String status, long uniqueID) {
     _name = name;
-    String status = "(unknown)";
-    try{
-      switch (_thread.status()) {
-        case ThreadReference.THREAD_STATUS_MONITOR: 
-          status = "MONITOR"; break;
-        case ThreadReference.THREAD_STATUS_NOT_STARTED:
-          status = "NOT STARTED"; break;
-        case ThreadReference.THREAD_STATUS_RUNNING:
-          status = "RUNNING"; break;
-        case ThreadReference.THREAD_STATUS_SLEEPING:
-          status = "SLEEPING"; break;
-        case ThreadReference.THREAD_STATUS_UNKNOWN:
-          status = "UNKNOWN"; break;
-        case ThreadReference.THREAD_STATUS_WAIT:
-          status = "WAIT"; break;
-        case ThreadReference.THREAD_STATUS_ZOMBIE:
-          status = "ZOMBIE"; break;
-      }
-    }
-    catch (VMDisconnectedException e) {
-      // status will be set to unknown
-    }
-    if ( isSuspended() && status.equals("RUNNING") ) {
-      _status = "SUSPENDED";
-    }
-    else{
-      _status = status;
-    }
-    _uniqueID = _thread.uniqueID();
+    _status = status;
+    _uniqueID = uniqueID;
   }
   
   /**
@@ -112,15 +70,6 @@ public class DebugThreadData {
    * Tells whether or not the thread is suspended.
    * @return true iff the thread is suspended
    */
-  public boolean isSuspended() {
-    try {
-      return _thread.isSuspended();
-    }
-    catch (ObjectCollectedException oce) {
-      return false;
-    }
-    catch (VMDisconnectedException vmde) {
-      return false;
-    }
-  }
+  public abstract boolean isSuspended();
+  
 }

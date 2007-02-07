@@ -98,7 +98,7 @@ public class DebugWatchData {
    * Sets a new name for this field or variable.
    * @param name Name of the field or variable
    */
-  void setName(String name) {
+  public void setName(String name) {
     _name = name;
   }
 
@@ -106,7 +106,7 @@ public class DebugWatchData {
    * Sets the most recently determined value for this field or variable.
    * @param value Value of the field or variable
    */
-  void setValue(Object value) {
+  public void setValue(Object value) {
     _showValue = true;
     String valString = String.valueOf(value);
     if (!valString.equals(_value)) {
@@ -121,7 +121,7 @@ public class DebugWatchData {
   /**
    * Hides the value for this watch (when no thread is suspended).
    */
-  void hideValueAndType() {
+  public void hideValueAndType() {
     _showValue = false;
     _showType = false;
     _changed = false;
@@ -130,7 +130,7 @@ public class DebugWatchData {
   /**
    * Called to indicate that this watch has no value in the current scope.
    */
-  void setNoValue() {
+  public void setNoValue() {
     _showValue = true;
     _value = NO_VALUE;
     _changed = false;
@@ -140,7 +140,7 @@ public class DebugWatchData {
    * Sets the most recently determined type of this field or variable.
    * @param type Type of the field or variable
    */
-  void setType(String type) {
+  public void setType(String type) {
     _showType = true;
     _type = type;
   }
@@ -148,7 +148,7 @@ public class DebugWatchData {
   /**
    * Called to indicate that this watch has no type in the current scope.
    */
-  void setNoType() {
+  public void setNoType() {
     _showType = true;
     _type = NO_TYPE;
   }
@@ -156,7 +156,7 @@ public class DebugWatchData {
   /**
    * Called to indicate that this watch's type has not been loaded.
    */
-  void setTypeNotLoaded() {
+  public void setTypeNotLoaded() {
     _showType = true;
     _type = NOT_LOADED;
   }

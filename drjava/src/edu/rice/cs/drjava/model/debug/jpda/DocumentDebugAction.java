@@ -31,7 +31,7 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+package edu.rice.cs.drjava.model.debug.jpda;
 
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
@@ -42,6 +42,8 @@ import java.io.File;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
+import edu.rice.cs.drjava.model.debug.DebugException;
+import edu.rice.cs.drjava.model.debug.LineNotExecutableException;
 import javax.swing.text.BadLocationException;
 
 /** Superclasses all DebugActions that are associated with specific OpenDefinitionsDocuments.

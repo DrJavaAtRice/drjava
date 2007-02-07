@@ -31,7 +31,7 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+package edu.rice.cs.drjava.model.debug.jpda;
 
 import java.io.*;
 import java.util.Enumeration;
@@ -56,6 +56,7 @@ import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.drjava.model.debug.*;
 
 import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
@@ -73,7 +74,7 @@ import javax.swing.SwingUtilities;
  *
  *  @version $Id$
  */
-public class JPDADebugger implements Debugger, DebugModelCallback {
+public class JPDADebugger implements Debugger {
   
   /** A log for recording messages in a file. */
   private static final Log _log = new Log("GlobalModelTest.txt", false);
@@ -173,6 +174,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    *  debugger is ready to be used, which is indicated by isReady().
    */
   public boolean isAvailable() { return true; }
+  
+  public DebugModelCallback callback() { return new DebugModelCallback() {}; }
 
   /** Returns whether the debugger is currently enabled. */
   public boolean isReady() { return _vm != null; }
@@ -246,7 +249,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _model.getBreakpointManager().clearRegions();
       for (int i = 0; i < oldBreakpoints.size(); i++) {
         Breakpoint bp = oldBreakpoints.get(i);        
-        setBreakpoint(new Breakpoint(bp.getDocument(), bp.getOffset(), bp.getLineNumber(), bp.isEnabled(), this));
+        setBreakpoint(new JPDABreakpoint(bp.getDocument(), bp.getOffset(), bp.getLineNumber(), bp.isEnabled(), this));
       }
     }
 
@@ -831,7 +834,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         Utilities.show("Cannot set a breakpoint on an empty line.");
       }
       else {
-        try { setBreakpoint(new Breakpoint (doc, offset, lineNum, isEnabled, this)); }
+        try { setBreakpoint(new JPDABreakpoint (doc, offset, lineNum, isEnabled, this)); }
         catch(LineNotExecutableException lnee) { Utilities.show(lnee.getMessage()); }
       }
     }
@@ -850,29 +853,33 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
  /** Removes a breakpoint. Called from toggleBreakpoint -- even with BPs that are not active.
   *  @param breakpoint The breakpoint to remove.
   */
-  public synchronized void removeBreakpoint(final Breakpoint breakpoint) throws DebugException {
-    Vector<BreakpointRequest> requests = breakpoint.getRequests();
-    if (requests.size() > 0 && _eventManager != null) {
-      // Remove all event requests for this breakpoint
-      try {
-        for (int i=0; i < requests.size(); i++) {
-          _eventManager.deleteEventRequest(requests.get(i));
+  public synchronized void removeBreakpoint(Breakpoint bp) throws DebugException {
+    if (!(bp instanceof JPDABreakpoint)) { throw new IllegalArgumentException("Unsupported breakpoint"); }
+    else {
+      JPDABreakpoint breakpoint = (JPDABreakpoint) bp;
+      Vector<BreakpointRequest> requests = breakpoint.getRequests();
+      if (requests.size() > 0 && _eventManager != null) {
+        // Remove all event requests for this breakpoint
+        try {
+          for (int i=0; i < requests.size(); i++) {
+            _eventManager.deleteEventRequest(requests.get(i));
+          }
+        }
+        catch (VMMismatchException vme) {
+          // Not associated with this VM; probably from a previous session.
+          // Ignore and make sure it gets removed from the document.
+          _log("VMMismatch when removing breakpoint.", vme);
+        }
+        catch (VMDisconnectedException vmde) {
+          // The VM has already disconnected for some reason
+          // Ignore it and make sure the breakpoint gets removed from the document
+          _log("VMDisconnected when removing breakpoint.", vmde);
         }
       }
-      catch (VMMismatchException vme) {
-        // Not associated with this VM; probably from a previous session.
-        // Ignore and make sure it gets removed from the document.
-        _log("VMMismatch when removing breakpoint.", vme);
-      }
-      catch (VMDisconnectedException vmde) {
-        // The VM has already disconnected for some reason
-        // Ignore it and make sure the breakpoint gets removed from the document
-        _log("VMDisconnected when removing breakpoint.", vmde);
-      }
+      
+      // Always remove from pending request, since it's always there
+      _pendingRequestManager.removePendingRequest(breakpoint);
     }
-
-    // Always remove from pending request, since it's always there
-    _pendingRequestManager.removePendingRequest(breakpoint);
   }
 
   /** Called when a breakpoint is reached.  The Breakpoint object itself should be stored in the 
@@ -882,8 +889,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   synchronized void reachedBreakpoint(BreakpointRequest request) {
 //    Utilities.showDebug("JPDADebugger.reachedBreakPoint(" + request + ") called");
     Object property = request.getProperty("debugAction");
-    if ( (property != null) && (property instanceof Breakpoint) ) {
-      final Breakpoint breakpoint = (Breakpoint) property;
+    if ( (property != null) && (property instanceof JPDABreakpoint) ) {
+      final JPDABreakpoint breakpoint = (JPDABreakpoint) property;
       printMessage("Breakpoint hit in class " + breakpoint.getClassName() + "  [line " + breakpoint.getLineNumber() + "]");
 
       Utilities.invokeLater(new Runnable() { public void run() { _notifier.breakpointReached(breakpoint); } });
@@ -920,7 +927,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     Vector<DebugThreadData> threads = new Vector<DebugThreadData>();
     while (iter.hasNext()) {
       try {
-        threads.add(new DebugThreadData(iter.next()));
+        threads.add(new JPDAThreadData(iter.next()));
       }
       catch (ObjectCollectedException e) {
         // this thread just died, we don't want to list it anyway
@@ -949,7 +956,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       Iterator<StackFrame> iter = thread.frames().iterator();  // Added <StackFrame> parameterization; warning will go away in JDK 1.5
       Vector<DebugStackData> frames = new Vector<DebugStackData>();
       while (iter.hasNext()) {
-        frames.add(new DebugStackData(iter.next()));
+        frames.add(new JPDAStackData(iter.next()));
       }
       return frames;
     }
@@ -1808,7 +1815,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     // Anytime a thread is suspended, it becomes the current thread.
     // This makes sure the debug panel will correctly put the
     // current thread in bold.
-    _notifier.currThreadSet(new DebugThreadData(currThread));
+    _notifier.currThreadSet(new JPDAThreadData(currThread));
 
     try {
       if (currThread.frameCount() > 0) {

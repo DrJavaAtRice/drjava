@@ -76,7 +76,6 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.DebugException;
-import edu.rice.cs.drjava.model.debug.JPDADebugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.debug.DebugListener;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
@@ -543,8 +542,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    */
   private void _createDebugger() {
     try {
-      _debugger = new JPDADebugger(this);
-      _jvm.setDebugModel((JPDADebugger) _debugger);
+      _debugger = new edu.rice.cs.drjava.model.debug.jpda.JPDADebugger(this); // TODO: load dynamically
+      _jvm.setDebugModel(_debugger.callback());
 
       // add listener to set the project file to "changed" when a breakpoint or watch is added, removed, or changed
       getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {

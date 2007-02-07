@@ -54,7 +54,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   protected volatile int _pendingNotifies = 0;
   protected final Object _notifierLock = new Object();
 
-  protected volatile JPDADebugger _debugger;
+  protected volatile Debugger _debugger;
 
   protected static final String DEBUG_CLASS =
     /*  1 */ "class DrJavaDebugClass {\n" +
@@ -240,7 +240,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   public void setUp() throws Exception {
     _log.log("Setting up (DebugTestCase)" + this);
     super.setUp();
-    _debugger = (JPDADebugger) _model.getDebugger();
+    _debugger = _model.getDebugger();
     assertNotNull("Debug Manager should not be null", _debugger);
   }
 
@@ -417,6 +417,8 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     protected volatile int currThreadDiedCount = 0;
     protected volatile int currThreadSetCount = 0;
     protected volatile int nonCurrThreadDiedCount = 0;
+    
+    public DebugTestListener() {}
 
     public void assertDebuggerStartedCount(int i) {
       assertEquals("number of times debuggerStarted fired", i, debuggerStartedCount);
@@ -526,6 +528,9 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
   /** DebugTestListener for all tests starting the debugger. */
   protected class DebugStartAndStopListener extends DebugTestListener {
+    
+    public DebugStartAndStopListener() {}
+    
     public void debuggerStarted() {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
@@ -546,7 +551,9 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
   /** DebugTestListener for all tests setting breakpoints. */
   protected class BreakpointTestListener extends DebugStartAndStopListener {
+    
     public BreakpointTestListener() { }
+    
     public void breakpointReached(Breakpoint bp) {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
@@ -613,6 +620,9 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
 
   /** DebugTestListener for all tests using the stepper. */
   protected class StepTestListener extends BreakpointTestListener {
+    
+    public StepTestListener() {}
+    
     public void stepRequested() {
       // Manager's thread: test shouldn't wait
       stepRequestedCount++;
@@ -623,6 +633,9 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   /** TestListener that listens for an interpretation to end, and then notifies anyone waiting on it.  
    *  (Necessary to prevent tests from overlapping.) */
   protected class InterpretListener extends TestListener {
+    
+    public InterpretListener() {}
+    
     public void interactionStarted() {
       synchronized(_notifierLock) {
         interactionStartCount++;

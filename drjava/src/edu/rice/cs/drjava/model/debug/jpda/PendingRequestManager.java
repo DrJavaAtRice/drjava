@@ -31,7 +31,7 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+package edu.rice.cs.drjava.model.debug.jpda;
 
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
@@ -40,8 +40,9 @@ import com.sun.jdi.event.*;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
-
 import java.io.*;
+
+import edu.rice.cs.drjava.model.debug.DebugException;
 
 /** Keeps track of DocumentDebugActions that are waiting to be resolved when the classes they corresponed to are 
  *  prepared.  (Only DocumentDebugActions have reference types which can be prepared.)

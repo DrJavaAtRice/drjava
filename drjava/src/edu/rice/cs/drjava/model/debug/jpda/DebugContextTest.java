@@ -31,7 +31,7 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+package edu.rice.cs.drjava.model.debug.jpda;
 
 import java.io.*;
 import java.util.Vector;
@@ -39,12 +39,13 @@ import java.util.Vector;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.util.swing.Utilities;
 
 /** More tests over the JPDA debugger.
  *  @version $Id$
  */
-public final class DebugContextTest extends DebugTestCase {
+public final class DebugContextTest extends JPDADebugTestCase {
   
   
 //  inherits _log from GlobalModelTestCase 
@@ -343,8 +344,8 @@ public final class DebugContextTest extends DebugTestCase {
     }
 
     // TODO: Why is this call being made?
-    DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
-    DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
+    DebugThreadData threadA = new JPDAThreadData(_debugger.getCurrentThread());
+    DebugThreadData threadB = new JPDAThreadData(_debugger.getThreadAt(1));
 //    _log.log("----After breakpoint:\n" + getInteractionsText());
 
     // Ensure breakpoint is hit

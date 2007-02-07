@@ -31,15 +31,21 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+package edu.rice.cs.drjava.model.debug.jpda;
 
-import edu.rice.cs.drjava.model.DocumentRegion;
+import edu.rice.cs.drjava.model.debug.DebugTestCase;
 
-public interface Breakpoint extends DebugBreakpointData, DocumentRegion {
-  
-  public String getClassName();
+/** A DebugTestCase whose debugger is a {@code JPDADebugger}.
+ *  @version $Id: DebugTestCase.java 4069 2007-01-18 17:11:59Z dlsmith $
+ */
+public abstract class JPDADebugTestCase extends DebugTestCase {
 
-  /** Enable/disable the breakpoint. */
-  public void setEnabled(boolean isEnabled);
-  
+  protected volatile JPDADebugger _debugger;
+
+  public void setUp() throws Exception {
+    super.setUp();
+    // This cast will fail if the debugger has an unexpected type
+    _debugger = (JPDADebugger) super._debugger;
+  }
+
 }

@@ -31,7 +31,7 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.debug;
+package edu.rice.cs.drjava.model.debug.jpda;
 
 import edu.rice.cs.util.Log;
 
@@ -40,6 +40,7 @@ import com.sun.jdi.event.*;
 import com.sun.jdi.request.*;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.drjava.model.debug.DebugException;
 
 /** A thread that listens and responds to events from JPDA when the debugger has attached to another JVM.
  *  @version $Id$
