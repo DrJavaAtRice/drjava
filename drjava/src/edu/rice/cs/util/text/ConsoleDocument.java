@@ -81,8 +81,8 @@ public class ConsoleDocument implements EditDocumentInterface {
   /** Creates a new ConsoleDocument with the given EditDocumentInterface.
    *  @param adapter the EditDocumentInterface to use
    */
-  public ConsoleDocument(EditDocumentInterface adapter) {
-    _document = adapter;
+  public ConsoleDocument(EditDocumentInterface doc) {
+    _document = doc;
     
     _beep = new Runnable() { public void run() { } };
     _promptPos = 0;

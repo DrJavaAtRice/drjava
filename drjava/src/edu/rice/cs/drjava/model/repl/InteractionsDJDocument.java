@@ -50,8 +50,8 @@ import javax.swing.text.AbstractDocument;
 
 import static edu.rice.cs.drjava.model.definitions.ColoringView.*;
 
-/** Represents the Interactions Document Adapter. Extends from the Abstract DrJava Document, 
- *  which contains shared code between the interactions and definitions documents.
+/** Represents a Swing-based InteractionsDocument. Extends AbstractDJDocument 
+ *  which contains shared code between the Swing interactions and definitions documents.
  */
 public class InteractionsDJDocument extends AbstractDJDocument {
   

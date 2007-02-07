@@ -47,6 +47,7 @@ import javax.swing.border.Border;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.DefaultStyledDocument;
@@ -79,15 +80,18 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
-/** This class installs listeners and actions between an InteractionsDocument in the model and an InteractionsPane 
- *  in the view.  We may want to refactor this class into a different package. <p>
- *  (The PopupConsole was introduced in version 1.29 of this file.)
+/** This class installs listeners and actions between an InteractionsDocument (the model) and an InteractionsPane 
+ *  (the view).  We may want to refactor this class into a different package. <p>
+ *  (The PopupConsole was introduced in version 1.29 of this file and subsequently removed.)
  *
  *  @version $Id$
  */
 public class InteractionsController extends AbstractConsoleController {
+  
+  private static final Log _log = new Log("ConsoleController.txt", false);
   
   private static final String INPUT_ENTERED_NAME = "Input Entered";
   private static final String INSERT_NEWLINE_NAME = "Insert Newline";
@@ -96,7 +100,7 @@ public class InteractionsController extends AbstractConsoleController {
   public static final String INPUT_BOX_STYLE = "input.box.style";
   
   /** The symbol used in the document for the input box. */
-  public static final String INPUT_BOX_SYMBOL = "[component]";
+  public static final String INPUT_BOX_SYMBOL = "[DrJava Input Box]";
   
   /** InteractionsModel to handle interpretation. */
   private volatile InteractionsModel _model;
@@ -136,13 +140,13 @@ public class InteractionsController extends AbstractConsoleController {
   protected volatile InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
       final CompletionMonitor completionMonitor = new CompletionMonitor();
+      _box = new InputBox();
       
       // Embed the input box into the interactions pane.
       // This operation must be performed in the UI thread
       SwingUtilities.invokeLater(new Runnable() {
         public void run() { 
           
-          _box = new InputBox();
           // These commands only run in the event thread
           final Lambda<String,String> insertTextCommand = _box.makeInsertTextCommand();  // command for testing
           
@@ -170,26 +174,29 @@ public class InteractionsController extends AbstractConsoleController {
           
           int pos = _doc.getPositionBeforePrompt();
           _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
+          
+          // create an empty MutableAttributeSet for _box
+          MutableAttributeSet inputAttributes = new SimpleAttributeSet();
            
-          javax.swing.text.MutableAttributeSet inputAttributes = _pane.getInputAttributes();
-          inputAttributes.removeAttributes(inputAttributes);
+//          javax.swing.text.MutableAttributeSet inputAttributes = _pane.getInputAttributes();
+//          _log.log("(start) inputAttributes = " + inputAttributes);
+//          inputAttributes.removeAttributes(inputAttributes);
+
+          // initialize MutableAttributeSet to the attributes of the _box component
           StyleConstants.setComponent(inputAttributes, _box);
-          try {
-            DefaultStyledDocument.ElementSpec[] specs = new DefaultStyledDocument.ElementSpec[]{ 
-              new DefaultStyledDocument.ElementSpec(inputAttributes, DefaultStyledDocument.ElementSpec.ContentType, 
-                                                    INPUT_BOX_SYMBOL.toCharArray(), 0, 11)
-            };
+//          try {
             
-            // update input box style
+            // bind INPUT_BOX_STYLE to inputAttributes in the associated InteractionsDJDocument 
             _adapter.setDocStyle(INPUT_BOX_STYLE, inputAttributes);
             
-            // and insert the symbol for the input box with the correct style
+            // and insert the symbol for the input box with the correct style (identifying it as our InputBox)
             _doc.insertBeforeLastPrompt(INPUT_BOX_SYMBOL, INPUT_BOX_STYLE);
-          }
-          finally { inputAttributes.removeAttributes(inputAttributes); }
+//          }
+//          finally { 
+//            inputAttributes.removeAttributes(inputAttributes); 
+//          }
           
           _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
-          
           _box.setVisible(true);
           _box.requestFocus();
 
@@ -270,7 +277,7 @@ public class InteractionsController extends AbstractConsoleController {
     _insertTextCommand = _defaultInsertTextCommand;
     _consoleStateListeners = new Vector<ConsoleStateListener>();
     
-    _init();
+    _init();  // residual superclass initialization
   }
   
   public void addConsoleStateListener(ConsoleStateListener listener) {
@@ -391,7 +398,6 @@ public class InteractionsController extends AbstractConsoleController {
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), historyReverseSearchAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, java.awt.Event.SHIFT_MASK),
                                 historyForwardSearchAction);
-
 
     // Left needs to be prevented from rolling cursor back before the prompt.
     // Both left and right should lock when caret is before the prompt.
@@ -654,14 +660,14 @@ public class InteractionsController extends AbstractConsoleController {
       });
       
       // Add the input listener for <Shift+Enter>
-      Action newLineAction = new AbstractAction() {
+      final Action newLineAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) { insert("\n", getCaretPosition()); }
       };
       
-      InputMap im = getInputMap(WHEN_FOCUSED);
+      final InputMap im = getInputMap(WHEN_FOCUSED);
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,java.awt.Event.SHIFT_MASK), INSERT_NEWLINE_NAME);
       
-      ActionMap am = getActionMap();
+      final ActionMap am = getActionMap();
       am.put(INSERT_NEWLINE_NAME, newLineAction);
        
     }
@@ -730,12 +736,12 @@ public class InteractionsController extends AbstractConsoleController {
   public interface ConsoleStateListener extends EventListener {
     
     /** Called when the input console is started in the interactions pane. <p>
-      * This method is called from the thread that initiated the console input
+      * This method is called from the thread that initiated the console input,
       */
     public void consoleInputStarted(InteractionsController c);
     
     /** Called when the console input is complete. <p>
-     * This method is called from the thread that initiated the console input
+     * This method is called from the thread that initiated the console input.
      * @param result The text that was inputted to the console
      */
     public void consoleInputCompleted(String result, InteractionsController c);
