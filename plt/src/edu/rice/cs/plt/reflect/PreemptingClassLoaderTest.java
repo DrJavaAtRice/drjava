@@ -15,16 +15,14 @@ public class PreemptingClassLoaderTest extends ClassLoaderTestCase {
     assertHasSameResource(BASE_LOADER, l, "edu/rice/cs/plt/iter/IterUtil.class");
     assertHasSameResource(BASE_LOADER, l, "edu/rice/cs/plt/reflect/PreemptingClassLoaderTest.class");
     assertHasSameResource(BASE_LOADER, l, "edu/rice/cs/plt/reflect/ReflectUtil.class");
-    assertHasSameResource(BASE_LOADER, l, "edu/rice/cs/plt/reflect/ReflectUtil$Version.class");
-    assertHasSameResource(BASE_LOADER, l, "edu/rice/cs/plt/reflect/ReflectUtil$Version$1.class");
   }
   
   public void testLoadsPreemptedClasses1() throws ClassNotFoundException {
-    PreemptingClassLoader l = new PreemptingClassLoader(BASE_LOADER, "edu.rice.cs.plt.reflect.ReflectUtil");
+    PreemptingClassLoader l = new PreemptingClassLoader(BASE_LOADER, "edu.rice.cs.plt.recur.RecurUtil");
     String[] names =
-    { "edu.rice.cs.plt.reflect.ReflectUtil",
-      "edu.rice.cs.plt.reflect.ReflectUtil$Version",
-      "edu.rice.cs.plt.reflect.ReflectUtil$Version$1" };
+    { "edu.rice.cs.plt.recur.RecurUtil",
+      "edu.rice.cs.plt.recur.RecurUtil$ArrayStringMode",
+      "edu.rice.cs.plt.recur.RecurUtil$ArrayStringMode$1" };
     
     for (String name : names) {
       assertLoadsClassAsLoader(l, name);
@@ -33,13 +31,13 @@ public class PreemptingClassLoaderTest extends ClassLoaderTestCase {
   }
   
   public void testLoadsPreemptedClasses2() throws ClassNotFoundException {
-    PreemptingClassLoader l = new PreemptingClassLoader(BASE_LOADER, "edu.rice.cs.plt.reflect.ReflectUtil$Version");
+    PreemptingClassLoader l = new PreemptingClassLoader(BASE_LOADER, "edu.rice.cs.plt.recur.RecurUtil$ArrayStringMode");
     
-    assertLoadsSameClass(BASE_LOADER, l, "edu.rice.cs.plt.reflect.ReflectUtil");
+    assertLoadsSameClass(BASE_LOADER, l, "edu.rice.cs.plt.recur.RecurUtil");
     
     String[] names = {
-      "edu.rice.cs.plt.reflect.ReflectUtil$Version", 
-      "edu.rice.cs.plt.reflect.ReflectUtil$Version$1" };
+      "edu.rice.cs.plt.recur.RecurUtil$ArrayStringMode", 
+      "edu.rice.cs.plt.recur.RecurUtil$ArrayStringMode$1" };
     
     for (String name : names) {
       assertLoadsClassAsLoader(l, name);

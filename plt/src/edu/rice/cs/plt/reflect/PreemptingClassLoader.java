@@ -1,7 +1,5 @@
 package edu.rice.cs.plt.reflect;
 
-import java.util.Set;
-import java.util.HashSet;
 import java.io.InputStream;
 import java.io.IOException;
 
@@ -27,35 +25,33 @@ import edu.rice.cs.plt.io.IOUtil;
  */
 public class PreemptingClassLoader extends ClassLoader {
   
-  private Set<String> _classNames;
+  private Iterable<String> _prefixes;
   
   /**
    * @param parent  The source of all classes and resources to be loaded
-   * @param classNames  A set of classes to be defined by this loader rather than a parent.
-   *                    (To simplify the interface, all inner classes will be loaded by this
-   *                    loader as well.)
+   * @param prefixes  A set of class name prefixes for which all matching classes will be defined by 
+   *                  this loader rather than a parent.  Each prefix must be a package or class name
+   *                  (partial names, like {@code "java.lang.Stri"}, will not match the full class name).
    */
-  public PreemptingClassLoader(ClassLoader parent, String... classNames) {
-    this(parent, IterUtil.arrayIterable(classNames));
+  public PreemptingClassLoader(ClassLoader parent, String... prefixes) {
+    this(parent, IterUtil.arrayIterable(prefixes));
   }
   
   /**
    * @param parent  The source of all classes and resources to be loaded
-   * @param classNames  A set of classes to be defined by this loader rather than a parent.
-   *                    (To simplify the interface, all inner classes will be loaded by this
-   *                    loader as well.)
+   * @param prefixes  A set of class name prefixes for which all matching classes will be defined by 
+   *                  this loader rather than a parent.  Each prefix must be a package or class name
+   *                  (partial names, like {@code "java.lang.Stri"}, will not match the full class name).
    */
-  public PreemptingClassLoader(ClassLoader parent, Iterable<? extends String> classNames) {
+  public PreemptingClassLoader(ClassLoader parent, Iterable<? extends String> prefixes) {
     super(parent);
-    _classNames = new HashSet<String>();
-    for (String s : classNames) { _classNames.add(s); }
+    _prefixes = IterUtil.snapshot(prefixes);
   }
   
   /**
    * Load a class by following the standard search strategy specified by 
-   * {@link ClassLoader#loadClass(String, boolean)}, with one exception: if the name is in the set
-   * of classes to preemptively load, or if it represents an inner class of one of those classes
-   * (that is, {@code name.startsWith(preemptName + "$")}), the corresponding class file will be
+   * {@link ClassLoader#loadClass(String, boolean)}, with one exception: if the name matches the set
+   * of prefixes to preemptively load, the corresponding class file will be
    * loaded as a resource and defined here rather than allowing the parent to define the class.
    */
   protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
@@ -85,11 +81,13 @@ public class PreemptingClassLoader extends ClassLoader {
   }
   
   private boolean shouldPreempt(String name) {
-    if (_classNames.contains(name)) { return true; }
-    int dollar = name.indexOf('$');
-    while (dollar != -1) {
-      if (_classNames.contains(name.substring(0, dollar))) { return true; }
-      dollar = name.indexOf('$', dollar + 1);
+    // TODO: improve efficiency by using a sorted data structure
+    for (String p : _prefixes) {
+      if (name.startsWith(p)) {
+        if (name.equals(p) || name.startsWith(p + ".") || name.startsWith(p + "$")) {
+          return true;
+        }
+      }
     }
     return false;
   }

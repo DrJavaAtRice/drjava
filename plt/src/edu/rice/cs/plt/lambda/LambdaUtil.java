@@ -445,6 +445,11 @@ public final class LambdaUtil {
     return and(IterUtil.makeIterable(p1, p2));
   }
   
+  /** @return  The conjunction ({@code &&}) of {@code p1}, {@code p2}, and {@code p3} */
+  public static <T> Predicate<T> and(Predicate<? super T> p1, Predicate<? super T> p2, Predicate<? super T> p3) {
+    return and(IterUtil.makeIterable(p1, p2, p3));
+  }
+  
   /** @return  The conjunction ({@code &&}) of the given predicates */
   public static <T> Predicate<T> and(final Iterable<? extends Predicate<? super T>> preds) {
     return new Predicate<T>() {
@@ -458,6 +463,11 @@ public final class LambdaUtil {
   /** @return  The disjunction ({@code ||}) of {@code p1} and {@code p2} */
   public static <T> Predicate<T> or(Predicate<? super T> p1, Predicate<? super T> p2) {
     return or(IterUtil.makeIterable(p1, p2));
+  }
+  
+  /** @return  The disjunction ({@code ||}) of {@code p1}, {@code p2}, and {@code p3} */
+  public static <T> Predicate<T> or(Predicate<? super T> p1, Predicate<? super T> p2, Predicate<? super T> p3) {
+    return or(IterUtil.makeIterable(p1, p2, p3));
   }
   
   /** @return  The disjunction ({@code ||}) of the given predicates */
@@ -483,6 +493,13 @@ public final class LambdaUtil {
     return and2(IterUtil.makeIterable(p1, p2));
   }
   
+  /** @return  The conjunction ({@code &&}) of {@code p1}, {@code p2}, and {@code p3} */
+  public static <T1, T2> Predicate2<T1, T2> and2(Predicate2<? super T1, ? super T2> p1, 
+                                                 Predicate2<? super T1, ? super T2> p2,
+                                                 Predicate2<? super T1, ? super T2> p3) {
+    return and2(IterUtil.makeIterable(p1, p2, p3));
+  }
+  
   /** @return  The conjunction ({@code &&}) of the given predicates */
   public static <T1, T2> 
     Predicate2<T1, T2> and2(final Iterable<? extends Predicate2<? super T1, ? super T2>> preds) {
@@ -500,6 +517,13 @@ public final class LambdaUtil {
   public static <T1, T2> Predicate2<T1, T2> or2(Predicate2<? super T1, ? super T2> p1, 
                                                 Predicate2<? super T1, ? super T2> p2) {
     return and2(IterUtil.makeIterable(p1, p2));
+  }
+  
+  /** @return  The disjunction ({@code ||}) of {@code p1}, {@code p2}, and {@code p3} */
+  public static <T1, T2> Predicate2<T1, T2> or2(Predicate2<? super T1, ? super T2> p1, 
+                                                Predicate2<? super T1, ? super T2> p2,
+                                                Predicate2<? super T1, ? super T2> p3) {
+    return and2(IterUtil.makeIterable(p1, p2, p3));
   }
   
   /** @return  The disjunction ({@code ||}) of the given predicates */
@@ -530,6 +554,14 @@ public final class LambdaUtil {
     return and3(IterUtil.makeIterable(p1, p2));
   }
   
+  /** @return  The conjunction ({@code &&}) of {@code p1}, {@code p2}, and {@code p3} */
+  public static <T1, T2, T3> 
+    Predicate3<T1, T2, T3> and3(Predicate3<? super T1, ? super T2, ? super T3> p1, 
+                                Predicate3<? super T1, ? super T2, ? super T3> p2,
+                                Predicate3<? super T1, ? super T2, ? super T3> p3) {
+    return and3(IterUtil.makeIterable(p1, p2, p3));
+  }
+  
   /** @return  The conjunction ({@code &&}) of the given predicates */
   public static <T1, T2, T3> 
     Predicate3<T1, T2, T3> and3(final Iterable<? extends Predicate3<? super T1, ? super T2, 
@@ -549,6 +581,14 @@ public final class LambdaUtil {
     Predicate3<T1, T2, T3> or3(Predicate3<? super T1, ? super T2, ? super T3> p1, 
                                Predicate3<? super T1, ? super T2, ? super T3> p2) {
     return and3(IterUtil.makeIterable(p1, p2));
+  }
+  
+  /** @return  The disjunction ({@code ||}) of {@code p1}, {@code p2}, and {@code p3} */
+  public static <T1, T2, T3> 
+    Predicate3<T1, T2, T3> or3(Predicate3<? super T1, ? super T2, ? super T3> p1, 
+                               Predicate3<? super T1, ? super T2, ? super T3> p2,
+                               Predicate3<? super T1, ? super T2, ? super T3> p3) {
+    return and3(IterUtil.makeIterable(p1, p2, p3));
   }
   
   /** @return  The disjunction ({@code ||}) of the given predicates */
@@ -580,6 +620,14 @@ public final class LambdaUtil {
     return and4(IterUtil.makeIterable(p1, p2));
   }
   
+  /** @return  The conjunction ({@code &&}) of {@code p1}, {@code p2}, and {@code p3} */
+  public static <T1, T2, T3, T4> 
+    Predicate4<T1, T2, T3, T4> and4(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p1,
+                                    Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p2,
+                                    Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p3) {
+    return and4(IterUtil.makeIterable(p1, p2, p3));
+  }
+  
   /** @return  The conjunction ({@code &&}) of the given predicates */
   public static <T1, T2, T3, T4> 
     Predicate4<T1, T2, T3, T4> and4(final Iterable<? extends Predicate4<? super T1, ? super T2, 
@@ -599,6 +647,14 @@ public final class LambdaUtil {
     Predicate4<T1, T2, T3, T4> or4(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p1,
                                    Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p2) {
     return and4(IterUtil.makeIterable(p1, p2));
+  }
+  
+  /** @return  The disjunction ({@code ||}) of {@code p1}, {@code p2}, and {@code p3} */
+  public static <T1, T2, T3, T4> 
+    Predicate4<T1, T2, T3, T4> or4(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p1,
+                                   Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p2,
+                                   Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p3) {
+    return and4(IterUtil.makeIterable(p1, p2, p3));
   }
   
   /** @return  The disjunction ({@code ||}) of the given predicates */

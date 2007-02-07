@@ -216,6 +216,15 @@ public final class IOUtil {
   }
   
   /**
+   * Make a best attempt at invoking {@link File#listFiles(FileFilter)}.  In the event of a 
+   * {@link SecurityException}, the result is {@code null}.  The given predicate is converted
+   * to a {@code FileFilter}.
+   */
+  public static File[] attemptListFiles(File f, Predicate<? super File> filter) {
+    return attemptListFiles(f, predicateFileFilter(filter));
+  }
+  
+  /**
    * Similar to {@link #attemptListFiles(File)}, but returns a non-null {@code Iterable}
    * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
    * the result here is an empty iterable.
@@ -235,6 +244,15 @@ public final class IOUtil {
     File[] result = attemptListFiles(f, filter);
     if (result == null) { return IterUtil.empty(); }
     else { return IterUtil.arrayIterable(result); }
+  }
+  
+  /**
+   * Similar to {@link #attemptListFiles(File, FileFilter)}, but returns a non-null {@code Iterable}
+   * rather than an array.  Where {@code attemptListFiles(f)} returns {@code null},
+   * the result here is an empty iterable.  The given predicate is converted to a {@code FileFilter}.
+   */
+  public static Iterable<File> attemptListFilesAsIterable(File f, Predicate<? super File> filter) {
+    return attemptListFilesAsIterable(f, predicateFileFilter(filter));
   }
   
   /**
@@ -1084,14 +1102,14 @@ public final class IOUtil {
     };
   }
                  
-  /** A predicate that tests whether {@code isFile()} holds for a file */
+  /** A predicate that tests whether {@link #attemptIsFile} holds for a file */
   public static final Predicate<File> IS_FILE = new Predicate<File>() {
-    public Boolean value(File f) { return f.isFile(); }
+    public Boolean value(File f) { return attemptIsFile(f); }
   };
   
-  /** A predicate that tests whether {@code isDirectory()} holds for a file */
+  /** A predicate that tests whether {@link attemptIsDirectory} holds for a file */
   public static final Predicate<File> IS_DIRECTORY = new Predicate<File>() {
-    public Boolean value(File f) { return f.isDirectory(); }
+    public Boolean value(File f) { return attemptIsDirectory(f); }
   };
   
   /** A {@code FileFilter} that always accepts */
@@ -1100,10 +1118,10 @@ public final class IOUtil {
   /** A {@code FileFilter} that always rejects */
   public static final FileFilter ALWAYS_REJECT = predicateFileFilter(Predicate.FALSE);
 
-  /** A {@code FileFilter} that only accepts files for which {@code isFile()} holds */
+  /** A {@code FileFilter} that only accepts files for which {@link #attemptIsFile} holds */
   public static final FileFilter ACCEPT_FILES = predicateFileFilter(IS_FILE);
 
-  /** A {@code FileFilter} that only accepts files for which {@code isDirectory()} holds */
+  /** A {@code FileFilter} that only accepts files for which {@link #attemptIsDirectory} holds */
   public static final FileFilter ACCEPT_DIRECTORIES = predicateFileFilter(IS_DIRECTORY);
   
 }

@@ -49,21 +49,6 @@ public class ReflectUtilTest extends TestCase {
     assertEquals(null, t.value());
   }
   
-  public void testIsSupported() {
-    // Exactly what is supported is platform-dependent, but all test platforms should
-    // support 1.1 through 1.4.
-    assertTrue(isSupported(Version.JAVA_1_1));
-    assertTrue(isSupported(Version.JAVA_1_2));
-    assertTrue(isSupported(Version.JAVA_1_3));
-    assertTrue(isSupported(Version.JAVA_1_4));
-  }
-  
-  public void testIsCurrent() {
-    // Exactly what is current is platform-dependent, but a test platform should
-    // have *one* of the following as its current platform
-    assertTrue(isCurrent(Version.JAVA_1_4) || isCurrent(Version.JAVA_5) || isCurrent(Version.JAVA_6));
-  }
-  
   public void testLoadObject() throws Exception {
     ReflectUtilTest t = (ReflectUtilTest) loadObject("edu.rice.cs.plt.reflect.ReflectUtilTest");
     PathClassLoader l = (PathClassLoader) loadObject("edu.rice.cs.plt.reflect.PathClassLoader",
@@ -83,7 +68,7 @@ public class ReflectUtilTest extends TestCase {
     try { loadObject("edu.rice.cs.plt.reflect.ReflectUtilTest", 23); }
     catch (ReflectException e) { assertCorrectException(e, "NoSuchMethod"); }
     
-    try { loadObject("java.lang.Iterable"); }
+    try { loadObject("java.lang.Comparable"); }
     catch (ReflectException e) { assertCorrectException(e, "NoSuchMethod"); }
     
     try { loadObject("edu.rice.cs.plt.lambda.LazyThunk", LambdaUtil.nullThunk()); }

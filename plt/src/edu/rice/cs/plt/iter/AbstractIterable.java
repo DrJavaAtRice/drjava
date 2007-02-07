@@ -15,11 +15,11 @@ public abstract class AbstractIterable<T> implements Iterable<T> {
    * {@code equals()}, since it would not necessarily be symmetric.  See {@link Collection#equals} for further
    * discussion.
    */
-  public boolean equals(Object obj) {
+  public final boolean equals(Object obj) {
     if (obj instanceof AbstractIterable<?>) { return IterUtil.isEqual(this, (AbstractIterable<?>) obj); }
     else { return false; }
   }
   
   /** Defers to {@link IterUtil#hashCode} */
-  public int hashCode() { return IterUtil.hashCode(this); }
+  public final int hashCode() { return IterUtil.hashCode(this); }
 }
