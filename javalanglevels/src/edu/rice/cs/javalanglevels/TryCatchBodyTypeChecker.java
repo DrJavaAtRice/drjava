@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import junit.framework.TestCase;
 
@@ -168,7 +169,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       _bd1.addEnclosingData(_sd1);
       _bd1.addFinalVars(((MethodData)_bd1).getParams());
       _tcbtc = new TryCatchBodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      _tcbtc._targetVersion = "1.5 version";
+      _tcbtc._targetVersion = JavaVersion.JAVA_5;
       _tcbtc._importedPackages.addFirst("java.lang");
     }
     

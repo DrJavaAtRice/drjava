@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import junit.framework.TestCase;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 /**
  * This is a high-level test to make sure that taking an Intermediate Level file from
@@ -80,7 +81,7 @@ public class IntermediateLevelTest extends TestCase {
 
     System.out.flush();
     
-    LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+    LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     result = llc.convert(testFiles);
     
@@ -122,13 +123,13 @@ public class IntermediateLevelTest extends TestCase {
     LanguageLevelConverter llc;
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     for (int i = 0; i<testFiles.length; i++) {
-      llc = new LanguageLevelConverter("1.5");
+      llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
       result = llc.convert(new File[] {testFiles[i]});
       assertTrue("should be parse exceptions or visitor exceptions in file " + testFiles[i].getName(), !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
     }
     
     /* Take care of the "references" directory */
-    llc = new LanguageLevelConverter("1.5");
+    llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
     File f = new File(new File(directory, "references"), "ReferencingClass.dj1");
     result = llc.convert(new File[] { f });
     assertTrue("should be parse exceptions or visitor exceptions in file " + f.getName(), !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
@@ -138,7 +139,7 @@ public class IntermediateLevelTest extends TestCase {
   /*Make sure that 1.4 augmentation rules are correctly followed for Yay.dj1*/
   public void test14Augmentation() {
         File[] arrayF = new File[]{ new File("testFiles/forIntermediateLevelTest/Yay.dj1")};
-      LanguageLevelConverter llc = new LanguageLevelConverter("1.4");
+      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_1_4);
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       result = llc.convert(arrayF);
       assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());

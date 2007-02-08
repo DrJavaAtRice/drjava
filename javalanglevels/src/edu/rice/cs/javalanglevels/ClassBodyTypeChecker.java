@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import junit.framework.TestCase;
 
@@ -401,7 +402,7 @@ public class ClassBodyTypeChecker extends Bob {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       symbolTable = new Symboltable();
       _cbbtc = new ClassBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      _cbbtc._targetVersion = "1.5";
+      _cbbtc._targetVersion = JavaVersion.JAVA_5;
       _cbbtc._importedPackages.addFirst("java.lang");
     }
     
@@ -524,7 +525,7 @@ public class ClassBodyTypeChecker extends Bob {
       md0.addVar(vd);
       
       _cbbtc = new ClassBodyTypeChecker(_sd1, _cbbtc._file, _cbbtc._package, _cbbtc._importedFiles, _cbbtc._importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      _cbbtc._targetVersion="1.5";
+      _cbbtc._targetVersion= JavaVersion.JAVA_5;
       cmd0.visit(_cbbtc);
       assertEquals("There should be 1 error", 1, errors.size());
       assertEquals("The error message should be correct", "You cannot use i because it may not have been given a value", errors.get(0).getFirst());

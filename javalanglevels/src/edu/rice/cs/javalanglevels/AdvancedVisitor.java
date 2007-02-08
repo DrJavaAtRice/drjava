@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import junit.framework.TestCase;
 
@@ -85,7 +86,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
    * @param targetVersion  The version of the Java compiler ("1.4", "1.5", etc) that the user is using.  Important for doing autoboxing.
 
    */
-  public AdvancedVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations, LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles, Hashtable<SymbolData, LanguageLevelVisitor> newSDs, String targetVersion) {
+  public AdvancedVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations, LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles, Hashtable<SymbolData, LanguageLevelVisitor> newSDs, JavaVersion targetVersion) {
     super(file, "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), continuations);
     this.targetVersion = targetVersion;
     this.errors = errors;
@@ -599,7 +600,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _av = new AdvancedVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), "1.5");
+      _av = new AdvancedVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), JavaVersion.JAVA_5);
       _av.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _av._resetNonStaticFields();
       _av._importedPackages.addFirst("java.lang");

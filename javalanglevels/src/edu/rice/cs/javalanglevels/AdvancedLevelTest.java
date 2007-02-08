@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import junit.framework.TestCase;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 /**
  * This is a high-level test to make sure that taking an Advanced Level file from
@@ -82,7 +83,7 @@ import java.io.*;
     });
     
     
-    LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+    LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     result = llc.convert(testFiles);
     
@@ -190,7 +191,7 @@ import java.io.*;
       public boolean accept(File pathName) {
         return pathName.getAbsolutePath().endsWith(".dj2");
       }});
-      LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       for (int i = 0; i<testFiles.length; i++) {
         result = llc.convert(new File[]{testFiles[i]});
@@ -210,7 +211,7 @@ import java.io.*;
         return pathName.getAbsolutePath().endsWith(".dj2");
       }});
 
-      LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       for (int i = 0; i<testFiles.length; i++) {
         LanguageLevelVisitor._errorAdded = false;
@@ -231,7 +232,7 @@ import java.io.*;
         return pathName.getAbsolutePath().endsWith("SwitchDoesntAssign.dj2");
       }});
 
-      LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       for (int i = 0; i<testFiles.length; i++) {
         result = llc.convert(new File[]{testFiles[i]});
@@ -251,7 +252,7 @@ import java.io.*;
 
           System.out.flush();
 
-      LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       result = llc.convert(testFiles);
       

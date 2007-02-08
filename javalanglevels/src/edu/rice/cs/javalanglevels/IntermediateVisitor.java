@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import junit.framework.TestCase;
 
@@ -76,7 +77,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
    * of LanguageLevelVisitor.
    */
   public IntermediateVisitor(File file) {
-    this(file, new LinkedList<Pair<String, JExpressionIF>>(), new Symboltable(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), "1.5");
+    this(file, new LinkedList<Pair<String, JExpressionIF>>(), new Symboltable(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), JavaVersion.JAVA_5);
   }
     
    /**
@@ -90,7 +91,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
    * @param newSDs  The new symbol datas we have created (that will need to have constructors created for them after this pass is finished)
    * @param targetVersion  The version of the Java compiler ("1.4", "1.5", etc) that the user is using.  Important for doing autoboxing.
    */
-  public IntermediateVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations, LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles, Hashtable<SymbolData, LanguageLevelVisitor> newSDs, String targetVersion) {
+  public IntermediateVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations, LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles, Hashtable<SymbolData, LanguageLevelVisitor> newSDs, JavaVersion targetVersion) {
     super(file, "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), continuations);
     this.targetVersion = targetVersion;
     this.errors = errors;
@@ -447,7 +448,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _iv = new IntermediateVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), "1.5");
+      _iv = new IntermediateVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), JavaVersion.JAVA_5);
       _iv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _iv._resetNonStaticFields();
       _iv._importedPackages.addFirst("java.lang");

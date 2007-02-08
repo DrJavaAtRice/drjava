@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import junit.framework.TestCase;
 
@@ -184,7 +185,7 @@ public class InterfaceBodyTypeChecker extends Bob {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       symbolTable = new Symboltable();
       _ibbtc = new InterfaceBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      _ibbtc._targetVersion = "version 1.5";
+      _ibbtc._targetVersion = JavaVersion.JAVA_5;
       _ibbtc._importedPackages.addFirst("java.lang");
     }
     

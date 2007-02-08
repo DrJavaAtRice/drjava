@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.File;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import junit.framework.TestCase;
 
@@ -271,7 +272,7 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       _lvtc._bob.errors = new LinkedList<Pair<String, JExpressionIF>>();
       _lvtc._bob.symbolTable = new Symboltable();
       LanguageLevelVisitor.symbolTable = _lvtc._bob.symbolTable;
-      _lvtc._bob._targetVersion = "1.5";
+      _lvtc._bob._targetVersion = JavaVersion.JAVA_5;
       _lvtc._bob._importedPackages.addFirst("java.lang");
     }
     

@@ -55,6 +55,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import edu.rice.cs.javalanglevels.parser.ParseException;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import junit.framework.TestCase;
 
@@ -93,7 +94,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   static boolean _errorAdded;
   
   /**The version of the compiler used.*/
-  static String targetVersion;
+  static JavaVersion targetVersion;
   
   /**The source file that is being compiled */
   File _file;
@@ -831,7 +832,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
             }
           }
           
-          sf.visit(new TypeChecker(sourceFile, newPackage, errors, symbolTable, lv._importedFiles, lv._importedPackages, "1.5"));
+          sf.visit(new TypeChecker(sourceFile, newPackage, errors, symbolTable, lv._importedFiles, lv._importedPackages, JavaVersion.JAVA_5));
         }
         
         // will this put entries into the symbol table that this class shouldn't be able to see?

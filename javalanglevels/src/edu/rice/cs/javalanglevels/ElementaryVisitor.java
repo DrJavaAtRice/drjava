@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import junit.framework.TestCase;
 
@@ -76,7 +77,7 @@ public class ElementaryVisitor extends LanguageLevelVisitor {
    * of LanguageLevelVisitor.
    */
   public ElementaryVisitor(File file) {
-    this(file, new LinkedList<Pair<String, JExpressionIF>>(), new Symboltable(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), "1.5");
+    this(file, new LinkedList<Pair<String, JExpressionIF>>(), new Symboltable(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), JavaVersion.JAVA_5);
   }
     
  /**
@@ -93,7 +94,7 @@ public class ElementaryVisitor extends LanguageLevelVisitor {
   public ElementaryVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable, 
                            Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations, 
                            LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles, 
-                           Hashtable<SymbolData, LanguageLevelVisitor> newSDs, String targetVersion) {
+                           Hashtable<SymbolData, LanguageLevelVisitor> newSDs, JavaVersion targetVersion) {
     super(file, "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), continuations);
     this.targetVersion = targetVersion;
     this.errors = errors;
@@ -424,7 +425,7 @@ public class ElementaryVisitor extends LanguageLevelVisitor {
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _bv = new ElementaryVisitor(new File(""), errors, symbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), "1.5");
+      _bv = new ElementaryVisitor(new File(""), errors, symbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), JavaVersion.JAVA_5);
       _bv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _bv._resetNonStaticFields();
       _bv._importedPackages.addFirst("java.lang");

@@ -50,6 +50,7 @@ import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 /**
  * This class represents the mechanism by which we convert a language level file to a .java file of the same name by
@@ -67,15 +68,15 @@ public class LanguageLevelConverter {
   private LinkedList<Pair<String, JExpressionIF>> _visitorErrors = new LinkedList<Pair<String, JExpressionIF>>();
   
   /**The java version of the compiler*/
-  private String _targetVersion;
+  private JavaVersion _targetVersion;
   
   /**By default, let the version be 1.4.2*/
   public LanguageLevelConverter() {
-    _targetVersion = "1.4.2";
+    _targetVersion = JavaVersion.JAVA_1_4;
   }
   
   /**Set the target version to what is specified by the user's compiler*/
-  public LanguageLevelConverter(String targetJavaVersion) {
+  public LanguageLevelConverter(JavaVersion targetJavaVersion) {
     _targetVersion = targetJavaVersion;
   }
   
@@ -389,34 +390,30 @@ public class LanguageLevelConverter {
   }
   
   /**Only certain versions of the java compiler support autoboxing*/
-  public static boolean versionSupportsAutoboxing(String version) {
-    return (version.indexOf("1.5") != -1) ||
-      (version.indexOf("JSR-14") != -1 &&
-               (version.indexOf("2.3") != -1 ||
-                version.indexOf("2.4") != -1 ||
-                version.indexOf("2.5") != -1 ||
-                version.indexOf("2.6") != -1));
+  public static boolean versionSupportsAutoboxing(JavaVersion version) {
+    return version.supports(JavaVersion.JAVA_5);
+    // If we care to support it, also allows JSR-14
   }
   
   /**Only certain versions of the java compiler support generics*/
-  public static boolean versionSupportsGenerics(String version) {
-    return (version.indexOf("1.5") != -1) ||
-      (version.indexOf("JSR-14") != -1);
+  public static boolean versionSupportsGenerics(JavaVersion version) {
+    return version.supports(JavaVersion.JAVA_5);
+    // If we care to support it, also allows JSR-14
   }
 
   /**Only 1.5 supports for each*/
-  public static boolean versionSupportsForEach(String version) {
-    return versionIs15(version);
+  public static boolean versionSupportsForEach(JavaVersion version) {
+    return version.supports(JavaVersion.JAVA_5);
   }
   
   /* @return true if the compiler version is 1.5 */
-  public static boolean versionIs15(String version) {
-    return (version.indexOf("1.5") != -1);
+  public static boolean versionIs15(JavaVersion version) {
+    return version.supports(JavaVersion.JAVA_5);
   }
   
   /**Do a conversion from the command line, to allow quick testing*/
   public static void main(String[] args) {
-    LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+    LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.CURRENT);
     File[] files = new File[args.length];
     for (int i = 0; i < args.length; i++) {
       files[i] = new File(args[i]);

@@ -50,6 +50,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import java.io.*;
 import java.util.*;
 import junit.framework.TestCase;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
   
@@ -72,7 +73,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
   static private LanguageLevelVisitor _llv;
   
   /** A string describing the target compiler.  Must include "1.5" to use 1.5 extensions in destination file. */
-  static private String _targetVersion;
+  static private JavaVersion _targetVersion;
   
   /** If true, generated toString, hashCode, & equals methods should correctly handle arrays & infinitely recursive structures */
   static private boolean _safeSupportCode;
@@ -91,7 +92,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
    * @param fileOut  A BufferedWriter corresponding to the .java file we should write to.
    * @param llv  The LanguageLevelVisitor that was used to traverse the language level file.
    */
-  public Augmentor(String targetVersion, boolean safeSupportCode, BufferedReader fileIn, BufferedWriter fileOut, LanguageLevelVisitor llv) {
+  public Augmentor(JavaVersion targetVersion, boolean safeSupportCode, BufferedReader fileIn, BufferedWriter fileOut, LanguageLevelVisitor llv) {
     _fileIn = fileIn;
     _fileInLine = 1;
     _fileInColumn = 1;
@@ -1537,7 +1538,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor_void {
     
     public void setUp() {
       LanguageLevelVisitor llv = new ElementaryVisitor(_f, new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), null);
-      _a = new Augmentor("", true, null, null, llv);
+      _a = new Augmentor(JavaVersion.JAVA_1_4, true, null, null, llv);
     }
 
     public void testFormalParameters2TypeDatas() {

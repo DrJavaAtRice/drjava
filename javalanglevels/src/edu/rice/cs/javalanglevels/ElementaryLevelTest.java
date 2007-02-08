@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import junit.framework.TestCase;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 /**
  * This is a high-level test to make sure that taking an Elementary Level file from
@@ -77,7 +78,7 @@ public class ElementaryLevelTest extends TestCase {
       }
     });
     
-    LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+    LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     result = llc.convert(testFiles);
     
@@ -114,7 +115,7 @@ public class ElementaryLevelTest extends TestCase {
         return pathName.getAbsolutePath().endsWith(".dj0");
       }});
 
-      LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       for (int i = 0; i<testFiles.length; i++) {
         result = llc.convert(new File[]{testFiles[i]});
@@ -133,7 +134,7 @@ public class ElementaryLevelTest extends TestCase {
         return pathName.getName().equals("UseOtherClassAsField.dj0") || pathName.getName().equals("SubClass.dj0");
       }});
       
-      LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       result = llc.convert(testFiles);
       
@@ -171,7 +172,7 @@ public class ElementaryLevelTest extends TestCase {
   public void testOrderMatters() {
     directory = new File(directory, "orderMatters");
     File[] files = new File[]{ new File(directory, "Empty.dj0"), new File(directory, "List.dj0"), new File(directory, "NonEmpty.dj0") };
-    LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+    LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     result = llc.convert(files);
     
@@ -187,7 +188,7 @@ public class ElementaryLevelTest extends TestCase {
   public void testEmptyFileNoAction() {
     directory = new File(directory, "emptyFile");
     File[] files = new File[]{ new File(directory, "EmptyFile.dj0")};
-    LanguageLevelConverter llc = new LanguageLevelConverter("1.5");
+    LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     result = llc.convert(files);
     
@@ -208,8 +209,9 @@ public class ElementaryLevelTest extends TestCase {
         return pathName.getAbsolutePath().endsWith(".dj0");
       }});
 
-      LanguageLevelConverter llc14 = new LanguageLevelConverter("JDK1.4.0");
-      LanguageLevelConverter llcJSR14 = new LanguageLevelConverter("JSR-14 2.4");
+      LanguageLevelConverter llc14 = new LanguageLevelConverter(JavaVersion.JAVA_1_4);
+      // JavaVersion doesn't support JSR-14, but if it did, we could modify this
+      LanguageLevelConverter llcJSR14 = new LanguageLevelConverter(JavaVersion.JAVA_5);
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       
       for (int i = 0; i<testFiles.length; i++) {

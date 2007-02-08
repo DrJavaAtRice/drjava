@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.File;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import junit.framework.TestCase;
 
@@ -1616,7 +1617,7 @@ public class ExpressionTypeChecker extends Bob {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       symbolTable = new Symboltable();
       _etc = new ExpressionTypeChecker(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      _etc._targetVersion = "1.5";
+      _etc._targetVersion = JavaVersion.JAVA_5;
       _etc._importedPackages.addFirst("java.lang");
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");

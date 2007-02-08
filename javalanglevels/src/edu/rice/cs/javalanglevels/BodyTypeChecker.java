@@ -49,6 +49,7 @@ import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import junit.framework.TestCase;
 
@@ -1085,7 +1086,7 @@ public class BodyTypeChecker extends Bob {
       _bd1.addVars(((MethodData)_bd1).getParams());
       _bd2.addVars(((MethodData)_bd2).getParams());
       _bbtc = new BodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData,JExpression>>());
-      _bbtc._targetVersion = "1.5";
+      _bbtc._targetVersion = JavaVersion.JAVA_5;
       _bbtc._importedPackages.addFirst("java.lang");
     }
     
