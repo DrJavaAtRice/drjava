@@ -75,9 +75,6 @@ import edu.rice.cs.plt.reflect.JavaVersion;
  */
 public class Javac160Compiler implements CompilerInterface {
   
-  /** Singleton instance. */
-  public static final CompilerInterface ONLY = new Javac160Compiler();
-
   public static final String COMPILER_CLASS_NAME = "com.sun.tools.javac.main.JavaCompiler";
   
   private final JavaVersion.FullVersion _version;
