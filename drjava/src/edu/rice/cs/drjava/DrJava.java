@@ -197,7 +197,7 @@ public class DrJava {
         }
       }
     }
-    catch (Throwable t) {
+    catch(Throwable t) {
       // Show any errors to the System.err and in an DrJavaErrorHandler
       System.out.println(t.getClass().getName() + ": " + t.getMessage());
       t.printStackTrace(System.err);System.out.println("error thrown");

@@ -187,11 +187,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       }
       _notifier.junitClassesStarted(); 
       try { _jvm.runTestSuite(); } 
-      catch(Throwable t) {
-//        System.err.println("Threw exception " + t);
+      catch(Exception e) {
+//        System.err.println("Threw exception " + e);
         _notifier.junitEnded();
         _testInProgress = false;
-        throw new UnexpectedException(t); 
+        throw new UnexpectedException(e); 
       }
     }
   }
@@ -408,9 +408,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         }
       }
     }
-    catch(Throwable t) {
-//      new ScrollableDialog(null, "UnexceptedExceptionThrown", t.toString(), "").show();
-      throw new UnexpectedException(t); 
+    catch(Exception e) {
+//      new ScrollableDialog(null, "UnexceptedExceptionThrown", e.toString(), "").show();
+      throw new UnexpectedException(e); 
     }
 //    finally { 
 //      new ScrollableDialog(null, "junit setup loop terminated", classNames.toString(), "").show();
@@ -438,12 +438,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         _jvm.runTestSuite();
         
       }
-      catch(Throwable t) {
+      catch(Exception e) {
         // Probably a java.rmi.UnmarshalException caused by the interruption of unit testing.
         // Swallow the exception and proceed.
         _notifier.junitEnded();  // balances junitStarted()
         _testInProgress = false;
-        throw new UnexpectedException(t);
+        throw new UnexpectedException(e);
       }
     }
   }

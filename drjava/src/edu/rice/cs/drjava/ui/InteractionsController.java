@@ -132,7 +132,10 @@ public class InteractionsController extends AbstractConsoleController {
   private static final Runnable _defaultInputCompletionCommand = 
     new Runnable() { public void run() { /* Do nothing */ }  };
   
+  /** A temporary variable used to hold a box allocated inside getConsoleInput below. */
   private volatile InputBox _box;
+  /** A temporary variable used to hold the text fetched from _box in getConsoleInput below. */
+  private volatile String _text;
 
   /** Listens for input requests from System.in, displaying an input box as needed. */
   protected volatile InputListener _inputListener = new InputListener() {
@@ -155,6 +158,7 @@ public class InteractionsController extends AbstractConsoleController {
               _setConsoleInputCommands(_defaultInputCompletionCommand, _defaultInsertTextCommand);
               
               _box.disableInputs();
+              _text = _box.getText() + "\n";
                            
               // Move the cursor back to the end of the interactions pane
               _pane.setEditable(true);
@@ -206,12 +210,10 @@ public class InteractionsController extends AbstractConsoleController {
       
       // Wait for the inputCompletionCommand to be invoked
       completionMonitor.waitOne();
-            
-      String text = _box.getText() + "\n";
       
-      fireConsoleInputCompleted(text);
+      fireConsoleInputCompleted(_text);
       
-      return text;
+      return _text;
     }
   };
   

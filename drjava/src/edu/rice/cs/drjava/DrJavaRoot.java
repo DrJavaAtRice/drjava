@@ -154,7 +154,7 @@ public class DrJavaRoot {
           // Show debug console if enabled
           if (DrJava.getShowDebugConsole()) showDrJavaDebugConsole(mf);
         }
-        catch (Throwable t) {
+        catch(Throwable t) {
           // Show any errors to the real System.err and in an DrJavaErrorHandler
           _consoleErr.println(t.getClass().getName() + ": " + t.getMessage());
           t.printStackTrace(_consoleErr);
