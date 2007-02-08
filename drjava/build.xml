@@ -327,41 +327,6 @@
        Testing Targets
        *************** -->
   
-  <!-- The following targets test if the "quiet" and "oneline" formatters
-       are available, and if so, selects one of them. Otherwise, the "brief"
-       formatter is used. -->
-  <target name="init-test-check-quiet-formatter">
-      <available property="quiet.present" classname="org.apache.tools.ant.taskdefs.optional.junit.QuietJUnitResultFormatter" />
-  </target>
-  <target name="init-test-check-oneline-formatter">
-      <available property="oneline.present" classname="org.apache.tools.ant.taskdefs.optional.junit.OneLineJUnitResultFormatter" />
-  </target>
-
-  <target name="init-test-set-quiet" 
-	  depends="init-test-check-quiet-formatter"
-	  if="quiet.present">
-    <property name="junit-formatter" value="quiet" />
-    <property name="junit-haltonfailure" value="no" />
-  </target>
-
-  <target name="init-test-set-oneline" 
-	  depends="init-test-check-oneline-formatter"
-	  if="oneline.present">
-    <property name="junit-formatter" value="oneline" />
-    <property name="junit-haltonfailure" value="no" />
-  </target>
-
-  <target name="init-test-set-brief"
-          depends="init-test-check-oneline-formatter"
-          unless="oneline.present">
-    <property name="junit-formatter" value="brief" />
-    <property name="junit-haltonfailure" value="yes" />
-  </target>
-
-  <target name="init-test"
-	  depends="init-test-set-oneline, init-test-set-brief">
-  </target>
-
   <target name="test" depends="test-15" description="Shortcut for 'test-15'">
   </target>
 
@@ -417,23 +382,25 @@
     </and>
   </selector>
  
-  <target name="do-test-15" depends="assert-15, resolve-java15-tools, init-test">
+  <target name="do-test-15" depends="assert-15, resolve-java15-tools">
     <echo message="Running all 5.0 tests matching '${test-filter-string}' under Java 5.0" />
     <junit haltonfailure="${junit-haltonfailure}"
 	   failureproperty="do-test-15-failed"
 	   fork="yes"
 	   forkmode="perTest"
 	   maxmemory="256M"
-	   dir="${basedir}">
+     includeAntRuntime="yes"
+ 	   dir="${basedir}">
       <classpath>
         <pathelement location="${java15-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
       </classpath>
-      <formatter type="${junit-formatter}" usefile="false" />
+      <formatter classname="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter" usefile="false" />
       <batchtest>
         <fileset dir="classes/test">
           <selector refid="tests-to-run" />
@@ -444,7 +411,7 @@
     <fail if="do-test-15-failed" message="One or more unit tests failed."/>
   </target>
 
-  <target name="do-test-14" depends="resolve-java14-exec, resolve-java14-tools, init-test">
+  <target name="do-test-14" depends="resolve-java14-exec, resolve-java14-tools">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
     <echo message="WARNING: 1.4-compatible test classes are (intentionally) not checked for Java 5 API references." />
     <echo message="If such references exist, these tests will probably fail." />
@@ -458,12 +425,13 @@
       <classpath>
         <pathelement location="${java14-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
-      <formatter type="${junit-formatter}" usefile="false" />
+      <formatter classname="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter" usefile="false" />
       <batchtest>
         <fileset dir="classes/test-14">
           <selector refid="tests-to-run" />
@@ -474,7 +442,7 @@
     <fail if="do-test-14-failed" message="One or more unit tests failed."/>
   </target>
 
-  <target name="do-test-14-in-15" depends="assert-15, resolve-java15-tools, init-test">
+  <target name="do-test-14-in-15" depends="assert-15, resolve-java15-tools">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
     <junit haltonfailure="${junit-haltonfailure}"
 	   failureproperty="do-test-14-in-15-failed"
@@ -485,12 +453,13 @@
       <classpath>
         <pathelement location="${java15-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
-      <formatter type="${junit-formatter}" usefile="false" />
+      <formatter classname="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter" usefile="false" />
       <batchtest>
         <fileset dir="classes/test-14">
           <selector refid="tests-to-run" />
