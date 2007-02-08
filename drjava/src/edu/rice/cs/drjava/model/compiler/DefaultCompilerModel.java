@@ -263,18 +263,19 @@ public class DefaultCompilerModel implements CompilerModel {
 
   /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. */
   private LinkedList<CompilerError> _parseExceptions2CompilerErrors(LinkedList<JExprParseException> pes) {
-    LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
+    final LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
     Iterator<JExprParseException> iter = pes.iterator();
     while (iter.hasNext()) {
       JExprParseException pe = iter.next();
-      errors.addLast(new CompilerError(pe.getFile(), pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, pe.getMessage(), false));
+      errors.addLast(new CompilerError(pe.getFile(), pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, 
+                                       pe.getMessage(), false));
     }
     return errors;
   }
   
   /** Converts errors thrown by the language level visitors to CompilerErrors. */
   private LinkedList<CompilerError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpressionIF>> visitorErrors) {
-    LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
+    final LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
     Iterator<Pair<String, JExpressionIF>> iter = visitorErrors.iterator();
     while (iter.hasNext()) {
       Pair<String, JExpressionIF> pair = iter.next();
@@ -312,7 +313,7 @@ public class DefaultCompilerModel implements CompilerModel {
       String bootProp = System.getProperty("drjava.bootclasspath");
       if (bootProp != null) { bootClassPath = IterUtil.asList(IOUtil.parsePath(bootProp)); }
       
-      List<CompilerError> errors = new LinkedList<CompilerError>();
+      final LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
       
       List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors);
       
@@ -342,7 +343,7 @@ public class DefaultCompilerModel implements CompilerModel {
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
-  private List<? extends File> _compileLanguageLevelsFiles(List<? extends File> files, List<? super CompilerError> errors) {
+  private List<? extends File> _compileLanguageLevelsFiles(List<? extends File> files, List<CompilerError> errors) {
     // TODO: The classpath (and sourcepath, bootclasspath) should be an argument passed to Language Levels.
     LanguageLevelConverter llc = new LanguageLevelConverter(getActiveCompiler().getName());
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
