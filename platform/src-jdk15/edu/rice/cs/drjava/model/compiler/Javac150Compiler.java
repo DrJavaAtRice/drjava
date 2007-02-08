@@ -202,6 +202,8 @@ public class Javac150Compiler implements CompilerInterface {
     else return "JDK " + _version.versionString();
   }
 
+  public JavaVersion version() { return _version.majorVersion(); }
+
   public String toString() { return getName(); }
 
 

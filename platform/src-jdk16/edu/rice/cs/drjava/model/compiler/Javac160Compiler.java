@@ -144,7 +144,8 @@ public class Javac160Compiler implements CompilerInterface {
     return errors;
   }
   
-  
+  public JavaVersion version() { return _version.majorVersion(); } 
+ 
   public String toString() { return "JDK " + _version.versionString(); }
   
   public String getName() { return toString(); }

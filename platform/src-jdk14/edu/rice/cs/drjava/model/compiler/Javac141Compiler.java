@@ -165,6 +165,8 @@ public class Javac141Compiler implements CompilerInterface {
     return "JDK " + _version.versionString();
   }
 
+  public JavaVersion version() { return _version.majorVersion(); }
+
   public String toString() {
     return getName();
   }
