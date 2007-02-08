@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.model;
 import  junit.framework.*;
 
 import edu.rice.cs.drjava.model.compiler.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 /**
  * Tests to ensure that compilation succeeds when expected.
@@ -71,5 +72,5 @@ public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestC
   protected String _name() { return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": "; }
 
   /** Returns whether the currently active compiler supports generics. */
-  protected boolean _isGenericCompiler() { return ! CompilerProxy.VERSION.equals("1.4"); }
+  protected boolean _isGenericCompiler() { return JavaVersion.CURRENT.supports(JavaVersion.JAVA_5); }
 }

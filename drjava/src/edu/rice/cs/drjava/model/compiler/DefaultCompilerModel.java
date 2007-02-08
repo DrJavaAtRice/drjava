@@ -43,7 +43,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -53,6 +52,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
@@ -68,6 +68,12 @@ import edu.rice.cs.javalanglevels.tree.*;
  */
 public class DefaultCompilerModel implements CompilerModel {
   
+  /** The available compilers */
+  private final List<CompilerInterface> _compilers;
+  
+  /** Current compiler -- one of _compilers, or a NoCompilerAvailable */
+  private CompilerInterface _active;
+
   /** Manages listeners to this model. */
   private final CompilerEventNotifier _notifier = new CompilerEventNotifier();
 
@@ -82,11 +88,18 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /** The lock providing mutual exclustion between compilation and unit testing */
   private Object _compilerLock = new Object();
-
+  
   /** Main constructor.  
     * @param m the GlobalModel that is the source of documents for this CompilerModel
+    * @param compilers  The compilers to use.  The first will be made active; all are assumed
+    *                   to be available.  An empty list is acceptable.
     */
-  public DefaultCompilerModel(GlobalModel m) {
+  public DefaultCompilerModel(GlobalModel m, Iterable<? extends CompilerInterface> compilers) {
+    _compilers = new ArrayList<CompilerInterface>();
+    for (CompilerInterface i : compilers) { _compilers.add(i); }
+    if (_compilers.size() > 0) { _active = _compilers.get(0); }
+    else { _active = NoCompilerAvailable.ONLY; }
+    
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new CompilerError[0], _model);
     _workDir = _model.getWorkingDirectory();
@@ -296,20 +309,15 @@ public class DefaultCompilerModel implements CompilerModel {
       
       // Temporary hack to allow a boot class path to be specified
       List<File> bootClassPath = null;
-      if (System.getProperty("drjava.bootclasspath") != null) {
-        bootClassPath = new LinkedList<File>();
-        StringTokenizer st = new StringTokenizer(System.getProperty("drjava.bootclasspath"), File.pathSeparator);
-        while (st.hasMoreTokens()) {
-          bootClassPath.add(new File(st.nextToken()));
-        }
-      }
+      String bootProp = System.getProperty("drjava.bootclasspath");
+      if (bootProp != null) { bootClassPath = IterUtil.asList(IOUtil.parsePath(bootProp)); }
       
       List<CompilerError> errors = new LinkedList<CompilerError>();
       
       List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors);
       
       if (errors.isEmpty()) {
-        CompilerInterface compiler = CompilerRegistry.ONLY.getActiveCompiler();
+        CompilerInterface compiler = getActiveCompiler();
         
         synchronized(_compilerLock) {
           if (preprocessedFiles == null) {
@@ -397,39 +405,47 @@ public class DefaultCompilerModel implements CompilerModel {
   //-------------------------- Compiler Management --------------------------//
 
   /**
-   * Returns all registered compilers that are actually available.
-   * That is, for all elements in the returned array, .isAvailable()
-   * is true.
-   * This method will never return null or a zero-length array.
-   * Instead, if no compiler is registered and available, this will return
-   * a one-element array containing an instance of
-   * {@link NoCompilerAvailable}.
-   *
-   * @see CompilerRegistry#getAvailableCompilers
+   * Returns all registered compilers that are actually available.  If there are none,
+   * the result is {@link NoCompilerAvailable#ONLY}.
    */
-  public CompilerInterface[] getAvailableCompilers() {
-    return CompilerRegistry.ONLY.getAvailableCompilers();
+  public Iterable<CompilerInterface> getAvailableCompilers() {
+    if (_compilers.isEmpty()) { return IterUtil.singleton(NoCompilerAvailable.ONLY); }
+    else { return IterUtil.snapshot(_compilers); }
   }
 
   /**
    * Gets the compiler that is the "active" compiler.
    *
    * @see #setActiveCompiler
-   * @see CompilerRegistry#getActiveCompiler
    */
-  public CompilerInterface getActiveCompiler() {
-    return CompilerRegistry.ONLY.getActiveCompiler();
-  }
+  public CompilerInterface getActiveCompiler() { return _active; }
 
   /**
    * Sets which compiler is the "active" compiler.
    *
    * @param compiler Compiler to set active.
+   * @throws IllegalArgumentException  If the compiler is not in the list of available compilers
    *
    * @see #getActiveCompiler
-   * @see CompilerRegistry#setActiveCompiler
    */
   public void setActiveCompiler(CompilerInterface compiler) {
-    CompilerRegistry.ONLY.setActiveCompiler(compiler);
+    if (_compilers.isEmpty() && compiler.equals(NoCompilerAvailable.ONLY)) {
+      // _active should be set correctly already
+    }
+    else if (_compilers.contains(compiler)) {
+      _active = compiler;
+    }
+    else {
+      throw new IllegalArgumentException("Compiler is not in the list of available compilers: " + compiler);
+    }
   }
+  
+  /** Add a compiler to the active list */
+  public void addCompiler(CompilerInterface compiler) {
+    if (_compilers.isEmpty()) {
+      _active = compiler;
+    }
+    _compilers.add(compiler);
+  }
+  
 }

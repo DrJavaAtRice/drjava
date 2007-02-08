@@ -51,6 +51,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 import java.util.StringTokenizer;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.SwingUtilities;
@@ -64,11 +66,14 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.newjvm.AbstractMasterJVM;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.ReverseIterable;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
+import edu.rice.cs.drjava.config.FileOption;
 
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
@@ -90,6 +95,7 @@ import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.DefaultCompilerModel;
+import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.ui.MainFrame;
@@ -192,17 +198,25 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /* Debugger Fields */
   
   /** Interface to the integrated debugger.  If unavailable, set NoDebuggerAvailable.ONLY. */
-  private volatile Debugger _debugger = NoDebuggerAvailable.ONLY;
+  private volatile Debugger _debugger;
   
   /* CONSTRUCTORS */
   
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
-//    AbstractMasterJVM._log.log(this + " has called contstructor for DefaultGlobal Model");
+    Iterable<? extends JDKToolsLibrary> tools = findLibraries();
+    List<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
+    _debugger = null;
+    for (JDKToolsLibrary t : tools) {
+      if (t.compiler().isAvailable()) { compilers.add(t.compiler()); }
+      if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
+    }
+    if (_debugger == null) { _debugger = NoDebuggerAvailable.ONLY; }
+    
     File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
     _jvm = new MainJVM(workDir);
 //    AbstractMasterJVM._log.log(this + " has created a new MainJVM");
-    _compilerModel = new DefaultCompilerModel(this);
+    _compilerModel = new DefaultCompilerModel(this, compilers);
     _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
     _javadocModel = new DefaultJavadocModel(this);
     _interactionsDocument = new InteractionsDJDocument();
@@ -218,7 +232,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       public void optionChanged(OptionEvent<String> oe) { _jvm.setOptionArgs(oe.value); }
     }); 
     
-    _createDebugger();
+    _setupDebugger();
         
     // Chain notifiers so that all events also go to GlobalModelListeners.
     _interactionsModel.addListener(_notifier);
@@ -237,6 +251,36 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
 //    _parsingControl = new DefaultLightWeightParsingControl(this);
+  }
+  
+  
+  private Iterable<JDKToolsLibrary> findLibraries() {
+    // Order to return: config setting, runtime (if different version), from search (if different versions)
+
+    // We could give priority to libraries that have both available compilers and debuggers, but since this will 
+    // almost always be true, it seems like more trouble than it is worth
+    
+    // map is sorted by version, lowest-to-highest
+    Map<JavaVersion, JDKToolsLibrary> results = new TreeMap<JavaVersion, JDKToolsLibrary>();
+    
+    File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
+    if (configTools != FileOption.NULL_FILE) {
+      JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this);
+      if (fromConfig.isValid()) { results.put(fromConfig.version().majorVersion(), fromConfig); }
+    }
+    
+    JDKToolsLibrary fromRuntime = JDKToolsLibrary.makeFromRuntime(this);
+    JavaVersion runtimeVersion = fromRuntime.version().majorVersion();
+    if (fromRuntime.isValid() && !results.containsKey(runtimeVersion)) { results.put(runtimeVersion, fromRuntime); }
+    
+    Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
+    for (JDKToolsLibrary t : fromSearch) {
+      JavaVersion tVersion = t.version().majorVersion();
+      // guaranteed to be valid
+      if (!results.containsKey(tVersion)) { results.put(tVersion, t); }
+    }
+    
+    return ReverseIterable.make(results.values());
   }
   
 
@@ -537,63 +581,45 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
   }
    
-  /** Instantiates the integrated debugger if the "debugger.enabled" config option is set to true.  Leaves it 
-   *  at null if not.
-   */
-  private void _createDebugger() {
-    try {
-      _debugger = new edu.rice.cs.drjava.model.debug.jpda.JPDADebugger(this); // TODO: load dynamically
-      _jvm.setDebugModel(_debugger.callback());
+  private void _setupDebugger() {
+    _jvm.setDebugModel(_debugger.callback());
 
-      // add listener to set the project file to "changed" when a breakpoint or watch is added, removed, or changed
-      getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
-        public void regionAdded(final Breakpoint bp, int index) { setProjectChanged(true); }
-        public void regionChanged(final Breakpoint bp, int index) { setProjectChanged(true); }
-        public void regionRemoved(final Breakpoint bp) { 
-          try {
-            getDebugger().removeBreakpoint(bp);
-          } catch(DebugException de) { /* just ignore it */ }
-          setProjectChanged(true);
-          }
-      });
-      getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() {
-        public void regionAdded(DocumentRegion r, int index) { setProjectChanged(true); }
-        public void regionChanged(DocumentRegion r, int index) { setProjectChanged(true); }
-        public void regionRemoved(DocumentRegion r) { setProjectChanged(true); }
-      });
+    // add listener to set the project file to "changed" when a breakpoint or watch is added, removed, or changed
+    getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
+      public void regionAdded(final Breakpoint bp, int index) { setProjectChanged(true); }
+      public void regionChanged(final Breakpoint bp, int index) { setProjectChanged(true); }
+      public void regionRemoved(final Breakpoint bp) { 
+        try {
+          getDebugger().removeBreakpoint(bp);
+        } catch(DebugException de) { /* just ignore it */ }
+        setProjectChanged(true);
+      }
+    });
+    getBookmarkManager().addListener(new RegionManagerListener<DocumentRegion>() {
+      public void regionAdded(DocumentRegion r, int index) { setProjectChanged(true); }
+      public void regionChanged(DocumentRegion r, int index) { setProjectChanged(true); }
+      public void regionRemoved(DocumentRegion r) { setProjectChanged(true); }
+    });
+    
+    _debugger.addListener(new DebugListener() {
+      public void watchSet(final DebugWatchData w) { setProjectChanged(true); }
+      public void watchRemoved(final DebugWatchData w) { setProjectChanged(true); }    
       
-      _debugger.addListener(new DebugListener() {
-        public void watchSet(final DebugWatchData w) { setProjectChanged(true); }
-        public void watchRemoved(final DebugWatchData w) { setProjectChanged(true); }    
-        
-        public void regionAdded(final Breakpoint bp, int index) { }
-        public void regionChanged(final Breakpoint bp, int index) { }
-        public void regionRemoved(final Breakpoint bp) { }
-        public void debuggerStarted() { }
-        public void debuggerShutdown() { }
-        public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
-        public void breakpointReached(final Breakpoint bp) { }
-        public void stepRequested() { }
-        public void currThreadSuspended() { }
-        public void currThreadResumed() { }
-        public void threadStarted() { }
-        public void currThreadDied() { }
-        public void nonCurrThreadDied() {  }
-        public void currThreadSet(DebugThreadData thread) { }
-      });
-    }
-    catch( NoClassDefFoundError ncdfe ) {
-      // JPDA not available, so we won't use it.
-      _debugger = NoDebuggerAvailable.ONLY;
-    }
-    catch( UnsupportedClassVersionError ucve ) {
-      // Wrong version of JPDA, so we won't use it.
-      _debugger = NoDebuggerAvailable.ONLY;
-    }
-    catch( Throwable t ) {
-      // Something went wrong in initialization, don't use debugger
-      _debugger = NoDebuggerAvailable.ONLY;
-    }
+      public void regionAdded(final Breakpoint bp, int index) { }
+      public void regionChanged(final Breakpoint bp, int index) { }
+      public void regionRemoved(final Breakpoint bp) { }
+      public void debuggerStarted() { }
+      public void debuggerShutdown() { }
+      public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
+      public void breakpointReached(final Breakpoint bp) { }
+      public void stepRequested() { }
+      public void currThreadSuspended() { }
+      public void currThreadResumed() { }
+      public void threadStarted() { }
+      public void currThreadDied() { }
+      public void nonCurrThreadDied() {  }
+      public void currThreadSet(DebugThreadData thread) { }
+    });
   }
 
   /** Get the class path to be used in all class-related operations.

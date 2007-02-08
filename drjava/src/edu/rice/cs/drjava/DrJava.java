@@ -74,24 +74,6 @@ public class DrJava {
   
   private static Log _log = new Log("DrJava.txt", false);
   
-  /** Class to probe to see if the debugger is available */
-  public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
-  /** Class to probe to see if the 1.4 compiler is available */
-  public static final String TEST_14_COMPILER_CLASS = "com.sun.tools.javac.v8.JavaCompiler";
-  /** Class to probe to see if the 1.5/1.6 compiler is available */
-  public static final String TEST_15_16_COMPILER_CLASS = "com.sun.tools.javac.main.JavaCompiler";
-  
-  /** Class to probe to see if the compiler is available; either TEST_14_COMPILER_CLASS or TEST_15_16_COMPILER_CLASS. */
-  public static final String TEST_COMPILER_CLASS;
-  static {
-    if (System.getProperty("java.version").startsWith("1.4")) {
-      TEST_COMPILER_CLASS = TEST_14_COMPILER_CLASS;
-    }
-    else {
-      TEST_COMPILER_CLASS = TEST_15_16_COMPILER_CLASS;
-    }
-  }
-  
   private static final String DEFAULT_MAX_HEAP_SIZE_ARG = "-Xmx128M";
   
   private static final ArrayList<String> _filesToOpen = new ArrayList<String>();
@@ -112,9 +94,6 @@ public class DrJava {
   /** Configuration object with all customized and default values.  Initialized from _propertiesFile.  */
   private static volatile FileConfiguration _config = _initConfig();
   
-  private static ToolsJarClassLoader _toolsLoader = new ToolsJarClassLoader(getConfig().getSetting(JAVAC_LOCATION));
-  private static final ClassLoader _thisLoader = DrJava.class.getClassLoader();
-
   /** Returns the properties file used by the configuration object. */
   public static File getPropertiesFile() { return _propertiesFile; }
 
@@ -141,14 +120,11 @@ public class DrJava {
   
   public static void configureAndLoadDrJavaRoot(String[] args) {
     try {
-      // handleCommandLineArgs will return true if the DrJava should be loaded
+      // handleCommandLineArgs will return true if DrJava should be loaded
       if (handleCommandLineArgs(args)) {
         
-        // Check that compiler and debugger are available on classpath (including tools.jar location)
-        boolean restart = !checkForCompilersAndDebugger(args);
-        
         // Restart if there are custom JVM args
-        restart |= getConfig().getSetting(MASTER_JVM_ARGS).length() > 0;
+        boolean restart = getConfig().getSetting(MASTER_JVM_ARGS).length() > 0;
         
         LinkedList<String> classArgsList = new LinkedList<String>();
         classArgsList.addAll(_filesToOpen);
@@ -165,14 +141,8 @@ public class DrJava {
         String[] classArgs = classArgsList.toArray(new String[0]);
         
         if (restart) {
-          // Determine classpath
-          String pathSep = System.getProperty("path.separator");
           String classPath = System.getProperty("java.class.path");
           
-          // Include both the javac location stored in .drjava prefences and the path proposed by ToolsJarClassLoader 
-          File toolsFromConfig = getConfig().getSetting(JAVAC_LOCATION);
-          classPath += pathSep + ToolsJarClassLoader.getToolsJarClassPath(toolsFromConfig);
-        
           // Run a new copy of DrJava and exit
           try {
 //          Utilities.showDebug("Starting DrJavaRoot with classArgs = " + Arrays.toString(classArgs) + "; classPath = " + classPath + 
@@ -227,7 +197,6 @@ public class DrJava {
         // arg.length > i+1 implying args list incudes config file name and perhaps files to open
         setPropertiesFile(args[argIndex++]);
         _config = _initConfig();  // read specified .djrava file into _config
-        _toolsLoader = new ToolsJarClassLoader(getConfig().getSetting(JAVAC_LOCATION));
       }
       
       else if (arg.startsWith("-X") || arg.startsWith("-D")) {
@@ -284,131 +253,73 @@ public class DrJava {
     System.out.print(buf.toString());
   }
   
-   /** Check to see if a compiler and the debugger are available in a tools.jar file.  If it can't find them, it 
-    *  prompts the user to optionally specify the location of a propert tools.jar file.
-    *  @param args Command line argument array, in case we need to restart
-    *  @return  {@code true} iff the compiler and debugger are available without restarting
-    */
-  static boolean checkForCompilersAndDebugger(String[] args) {
-    if (canLoad(_thisLoader, TEST_COMPILER_CLASS) && canLoad(_thisLoader, TEST_DEBUGGER_CLASS)) {
-      return true;
-    }
-    else {
-      boolean haveCompiler = canLoad(_thisLoader, TEST_COMPILER_CLASS) || 
-                             canLoad(_toolsLoader, TEST_COMPILER_CLASS);
-      boolean haveDebugger = canLoad(_thisLoader, TEST_DEBUGGER_CLASS) || 
-                             canLoad(_toolsLoader, TEST_DEBUGGER_CLASS);
-      if (!haveCompiler || !haveDebugger) { promptForToolsJar(!haveCompiler, !haveDebugger); }
-      return false;
-    }
-  }
-
-  /** Returns whether the debugger will be able to load successfully.  Checks for the ability to load the 
-   *  com.sun.jdi.Bootstrap class.
-   */
-  public static boolean hasAvailableDebugger() {
-    return canLoad(_thisLoader, TEST_DEBUGGER_CLASS) || canLoad(_toolsLoader, TEST_DEBUGGER_CLASS);
-  }
-  
-  public static boolean hasAvailableCompiler() {
-   return canLoad(_thisLoader, TEST_COMPILER_CLASS) || canLoad(_toolsLoader, TEST_COMPILER_CLASS);
-  }
-  
-  /* Tests whether the specified class loader can load the specifed class */
-   public static boolean canLoad(ClassLoader cl, String className) {
-    try {
-      cl.loadClass(className);
-      return true;
-    }
-    catch(ClassNotFoundException e) { return false; }
-    catch(UnsupportedClassVersionError e) { return false; }
-    catch(RuntimeException e) { return false; }
-  }
-  
-  /** Prompts the user that the location of tools.jar needs to be specified to be able to use the compiler and/or the
-   *  debugger.  
-   *  @param needCompiler whether DrJava needs tools.jar for a compiler
-   *  @param needDebugger whether DrJava needs tools.jar for the debugger
-   */
-  public static void promptForToolsJar(boolean needCompiler, boolean needDebugger) {
-    File selectedFile = getConfig().getSetting(JAVAC_LOCATION);
-    String selectedVersion = _getToolsJarVersion(selectedFile);
-    
-    final String[] text;
-    if (selectedVersion==null) {
-      text = new String[] {
-        "DrJava cannot find a 'tools.jar' file for the version of Java ",
-        "that is being used to run DrJava (Java version "+System.getProperty("java.version")+").",
-        "Would you like to specify the location of the requisite 'tools.jar' file?",
-        "If you say 'No', DrJava might be unable to compile or debug Java programs."
-      };
-    }
-    else {
-      text = new String[] {
-        "DrJava cannot find a 'tools.jar' file for the version of Java ",
-        "that is being used to run DrJava (Java version "+System.getProperty("java.version")+").",
-        "The file you have selected appears to be for version "+selectedVersion+".",
-        "Would you like to specify the ocation of the requisite 'tools.jar' file?",
-        "If you say 'No', DrJava might be unable to compile or debug Java programs.)"
-      };
-    }
-    
-    int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?", JOptionPane.YES_NO_OPTION);
-
-    if (result == JOptionPane.YES_OPTION) {
-      JFileChooser chooser = new JFileChooser();
-      chooser.setFileFilter(new ClassPathFilter() {
-        public boolean accept(File f) {
-          if (f.isDirectory()) return true;
-          String ext = getExtension(f);
-          return ext != null && ext.equals("jar");
-        }
-        public String getDescription() { return "Jar Files"; }
-      });
-
-      // Loop until we find a good tools.jar or the user gives up
-      do {
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-          File jar = chooser.getSelectedFile();
-
-          if (jar != null) {
-            // set the tools.jar property
-            getConfig().setSetting(JAVAC_LOCATION, jar);
-
-            // Adjust if we needed a compiler
-            if (needCompiler && classLoadersCanFind(TEST_COMPILER_CLASS)) needCompiler = false;
-
-            // Adjust if we need a debugger
-            if (needDebugger && classLoadersCanFind(TEST_DEBUGGER_CLASS)) needDebugger = false;
-          }
-        }
-//        Utilities.showDebug("need Compiler = " + needCompiler + "; needDebugger = " + needDebugger);
-      }
-      while ((needCompiler || needDebugger) && _userWantsToPickAgain());
-      
-      // Save config with good tools.jar if available
-      if ((! needCompiler) && (! needDebugger)) _saveConfig();
-    }
-  }
+//  /** Prompts the user that the location of tools.jar needs to be specified to be able to use the compiler and/or the
+//   *  debugger.  
+//   *  @param needCompiler whether DrJava needs tools.jar for a compiler
+//   *  @param needDebugger whether DrJava needs tools.jar for the debugger
+//   */
+//  public static void promptForToolsJar(boolean needCompiler, boolean needDebugger) {
+//    File selectedFile = getConfig().getSetting(JAVAC_LOCATION);
+//    String selectedVersion = _getToolsJarVersion(selectedFile);
+//    
+//    final String[] text;
+//    if (selectedVersion==null) {
+//      text = new String[] {
+//        "DrJava cannot find a 'tools.jar' file for the version of Java ",
+//        "that is being used to run DrJava (Java version "+System.getProperty("java.version")+").",
+//        "Would you like to specify the location of the requisite 'tools.jar' file?",
+//        "If you say 'No', DrJava might be unable to compile or debug Java programs."
+//      };
+//    }
+//    else {
+//      text = new String[] {
+//        "DrJava cannot find a 'tools.jar' file for the version of Java ",
+//        "that is being used to run DrJava (Java version "+System.getProperty("java.version")+").",
+//        "The file you have selected appears to be for version "+selectedVersion+".",
+//        "Would you like to specify the location of the requisite 'tools.jar' file?",
+//        "If you say 'No', DrJava might be unable to compile or debug Java programs.)"
+//      };
+//    }
+//    
+//    int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?", JOptionPane.YES_NO_OPTION);
+//
+//    if (result == JOptionPane.YES_OPTION) {
+//      JFileChooser chooser = new JFileChooser();
+//      chooser.setFileFilter(new ClassPathFilter() {
+//        public boolean accept(File f) {
+//          if (f.isDirectory()) return true;
+//          String ext = getExtension(f);
+//          return ext != null && ext.equals("jar");
+//        }
+//        public String getDescription() { return "Jar Files"; }
+//      });
+//
+//      // Loop until we find a good tools.jar or the user gives up
+//      do {
+//        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+//          File jar = chooser.getSelectedFile();
+//
+//          if (jar != null) {
+//            // set the tools.jar property
+//            getConfig().setSetting(JAVAC_LOCATION, jar);
+//
+//            // Adjust if we needed a compiler
+//            if (needCompiler && classLoadersCanFind(TEST_COMPILER_CLASS)) needCompiler = false;
+//
+//            // Adjust if we need a debugger
+//            if (needDebugger && classLoadersCanFind(TEST_DEBUGGER_CLASS)) needDebugger = false;
+//          }
+//        }
+////        Utilities.showDebug("need Compiler = " + needCompiler + "; needDebugger = " + needDebugger);
+//      }
+//      while ((needCompiler || needDebugger) && _userWantsToPickAgain());
+//      
+//      // Save config with good tools.jar if available
+//      if ((! needCompiler) && (! needDebugger)) _saveConfig();
+//    }
+//  }
   
  
-  /** Returns whether the debugger will be able to load successfully when we start the DrJava master JVM with
-   *  tools.jar on the classpath. Uses ToolsJarClassLoader to try to load com.sun.jdi.Bootstrap.
-   */
-  public static boolean classLoadersCanFind(String className) {
-    // First check the specified location
-    File jar = getConfig().getSetting(JAVAC_LOCATION);
-    if (jar != FileOption.NULL_FILE) {
-      try {
-        URL[] urls = new URL[] { FileOps.toURL(jar) };
-        URLClassLoader loader = new URLClassLoader(urls);
-        if (canLoad(loader, className)) return true;
-      }
-      catch(MalformedURLException e) { /* fall through */ }
-    }
-    return canLoad(_toolsLoader, className);
-  }
-    
   /** Switches the config object to use a custom config file. Ensures that Java source files aren't 
    *  accidentally used.
    */
@@ -453,77 +364,45 @@ public class DrJava {
     }
   }
 
-  /** Displays a prompt to the user indicating that tools.jar could not be found in the specified location, and asks
-   *  if he would like to specify a new location.
-   */
-  private static boolean _userWantsToPickAgain() {
-    File selectedFile = getConfig().getSetting(JAVAC_LOCATION);
-    String selectedVersion = _getToolsJarVersion(selectedFile);
-    
-    final String[] text;
-    if (selectedVersion==null) {
-      text = new String[] {
-        "The file you chose did not appear to be the correct 'tools.jar'",
-        "that is compatible with the version of Java that is used to",
-        "run DrJava (Java version "+System.getProperty("java.version")+").",
-        "Your choice might be an incompatible version of the file.",
-        "Would you like to pick again?  The 'tools.jar' file is ",
-        "generally located in the 'lib' subdirectory under your ",
-        "JDK installation directory.",
-        "(If you say 'No', DrJava might be unable to compile or ",
-        "debug programs.)"
-      };
-    }
-    else {
-      text = new String[] {
-        "The file you chose did not appear to be the correct 'tools.jar'",
-        "that is compatible with the version of Java that is used to",
-        "run DrJava (Java version "+System.getProperty("java.version")+").",
-        "The file you have selected appears to be for",
-        "Java version "+selectedVersion+".",
-        "Your choice might be an incompatible version of the file.",
-        "Would you like to pick again?  The 'tools.jar' file is ",
-        "generally located in the 'lib' subdirectory under your ",
-        "JDK installation directory.",
-        "If you say 'No', DrJava might be unable to compile or ",
-        "debug programs."
-      };
-    }
-
-    int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?", JOptionPane.YES_NO_OPTION);
-    return result == JOptionPane.YES_OPTION;
-  }
+//  /** Displays a prompt to the user indicating that tools.jar could not be found in the specified location, and asks
+//   *  if he would like to specify a new location.
+//   */
+//  private static boolean _userWantsToPickAgain() {
+//    File selectedFile = getConfig().getSetting(JAVAC_LOCATION);
+//    String selectedVersion = _getToolsJarVersion(selectedFile);
+//    
+//    final String[] text;
+//    if (selectedVersion==null) {
+//      text = new String[] {
+//        "The file you chose did not appear to be the correct 'tools.jar'",
+//        "that is compatible with the version of Java that is used to",
+//        "run DrJava (Java version "+System.getProperty("java.version")+").",
+//        "Your choice might be an incompatible version of the file.",
+//        "Would you like to pick again?  The 'tools.jar' file is ",
+//        "generally located in the 'lib' subdirectory under your ",
+//        "JDK installation directory.",
+//        "(If you say 'No', DrJava might be unable to compile or ",
+//        "debug programs.)"
+//      };
+//    }
+//    else {
+//      text = new String[] {
+//        "The file you chose did not appear to be the correct 'tools.jar'",
+//        "that is compatible with the version of Java that is used to",
+//        "run DrJava (Java version "+System.getProperty("java.version")+").",
+//        "The file you have selected appears to be for",
+//        "Java version "+selectedVersion+".",
+//        "Your choice might be an incompatible version of the file.",
+//        "Would you like to pick again?  The 'tools.jar' file is ",
+//        "generally located in the 'lib' subdirectory under your ",
+//        "JDK installation directory.",
+//        "If you say 'No', DrJava might be unable to compile or ",
+//        "debug programs."
+//      };
+//    }
+//
+//    int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?", JOptionPane.YES_NO_OPTION);
+//    return result == JOptionPane.YES_OPTION;
+//  }
   
-  /** @return a string with the suspected version of the tools.jar file, or null if an error occurred. */
-  private static String _getToolsJarVersion(File toolsJarFile) {
-    try {
-      JarFile jf = new JarFile(toolsJarFile);
-      Manifest mf = jf.getManifest();
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      mf.write(baos);
-      String str = baos.toString();
-      // the expected format of str is:
-      // Manifest-Version: 1.0
-      // Created-By: 1.5.0_07 (Sun Microsystems Inc.)
-      //
-      final String CB = "Created-By: ";
-      int beginPos = str.indexOf(CB);
-      if (beginPos >= 0) {
-        beginPos += CB.length();
-        int endPos = str.indexOf(System.getProperty("line.separator"), beginPos);
-        if (endPos >= 0) return str.substring(beginPos, endPos);
-        else {
-          endPos = str.indexOf(' ', beginPos);
-          if (endPos >= 0) return str.substring(beginPos, endPos);
-          else {
-            endPos = str.indexOf('\t', beginPos);
-            if (endPos >= 0) return str.substring(beginPos, endPos);
-          }
-        }
-      }
-    }
-    catch(Exception rte) { /* ignore, just return null */ }
-    return null;
-  }
 }
-

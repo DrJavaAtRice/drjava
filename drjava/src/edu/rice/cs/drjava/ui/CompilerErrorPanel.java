@@ -44,6 +44,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.SwingDocument;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -92,17 +93,19 @@ public class CompilerErrorPanel extends ErrorPanel {
     // is later changed somewhere else. This is because there is no way
     // to listen on the active compiler.
     final CompilerModel compilerModel = getModel().getCompilerModel();
-    _compilerChoiceBox = new JComboBox(compilerModel.getAvailableCompilers());
+    Iterable<CompilerInterface> iter = getModel().getCompilerModel().getAvailableCompilers();
+    _compilerChoiceBox = new JComboBox(IterUtil.asList(iter).toArray(new CompilerInterface[0]));
     _compilerChoiceBox.setEditable(false);
     _compilerChoiceBox.setSelectedItem(compilerModel.getActiveCompiler());
     _compilerChoiceBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        CompilerInterface compiler = (CompilerInterface) _compilerChoiceBox.getSelectedItem();
-        if (compiler == null) compiler = NoCompilerAvailable.ONLY;
-        compilerModel.setActiveCompiler(compiler);
-        compilerModel.resetCompilerErrors();
-        _compileHasOccurred = false;
-        reset();
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+          CompilerInterface compiler = (CompilerInterface) _compilerChoiceBox.getSelectedItem();
+          compilerModel.setActiveCompiler(compiler);
+          compilerModel.resetCompilerErrors();
+          _compileHasOccurred = false;
+          reset();
+        }
       }
     });
     
@@ -118,9 +121,8 @@ public class CompilerErrorPanel extends ErrorPanel {
     
     public void optionChanged(OptionEvent<T> oce) {
       _compilerChoiceBox.removeAllItems();
-      CompilerInterface[] availCompilers = getModel().getCompilerModel().getAvailableCompilers();
-      for (int i=0; i<availCompilers.length; i++) {
-        _compilerChoiceBox.addItem(availCompilers[i]);
+      for (CompilerInterface c : getModel().getCompilerModel().getAvailableCompilers()) {
+        _compilerChoiceBox.addItem(c);
       }
     }
   }
@@ -211,8 +213,6 @@ public class CompilerErrorPanel extends ErrorPanel {
           message = msgBuffer.toString();
         }
       }
-      else if (getModel().getCompilerModel().getAvailableCompilers().length == 0)
-        message = "No compiler is available.  Please specify one in\nthe Preferences dialog in the Edit menu.";
       else if (getModel().getCompilerModel().getActiveCompiler() == NoCompilerAvailable.ONLY)
         message = "No compiler available.";
       else 

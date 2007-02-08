@@ -48,7 +48,7 @@ import java.util.Vector;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.model.DefaultGlobalModel;
+import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
@@ -84,7 +84,7 @@ public class JPDADebugger implements Debugger {
   private static final int OBJECT_COLLECTED_TRIES = 5;
 
   /** Reference to DrJava's model. */
-  private volatile DefaultGlobalModel _model;
+  private volatile GlobalModel _model;
 
   /** VirtualMachine of the interactions JVM. */
   private volatile VirtualMachine _vm;
@@ -120,7 +120,7 @@ public class JPDADebugger implements Debugger {
   /** Builds a new JPDADebugger to debug code in the Interactions JVM, using the JPDA/JDI interfaces.
    *  Does not actually connect to the interpreterJVM until startUp().
    */
-  public JPDADebugger(DefaultGlobalModel model) {
+  public JPDADebugger(GlobalModel model) {
     _model = model;
     _vm = null;
     _eventManager = null;

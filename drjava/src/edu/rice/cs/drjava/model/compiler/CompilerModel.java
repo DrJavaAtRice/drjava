@@ -108,24 +108,30 @@ public interface CompilerModel {
   
   //-------------------------- Compiler Management --------------------------//
 
-  /** Returns all registered compilers that are actually available. That is, for all elements in the returned 
-   *  array, .isAvailable() is true. This method will never return null or a zero-length array.  Instead, if 
-   *  no compiler is registered and available, this will return a one-element array containing an instance of
-   *  {@link NoCompilerAvailable}.
-   *  @see CompilerRegistry#getAvailableCompilers
+  /**
+   * Returns all registered compilers that are actually available.  If there are none,
+   * the result is {@link NoCompilerAvailable#ONLY}.
    */
-  public CompilerInterface[] getAvailableCompilers();
+  public Iterable<CompilerInterface> getAvailableCompilers();
 
-  /** Gets the compiler is the "active" compiler.
+  /**
+   * Gets the compiler that is the "active" compiler.
+   *
    * @see #setActiveCompiler
-   * @see CompilerRegistry#getActiveCompiler
    */
   public CompilerInterface getActiveCompiler(); 
 
-  /** Sets which compiler is the "active" compiler.
-   *  @param compiler Compiler to set active.
-   *  @see #getActiveCompiler
-   *  @see CompilerRegistry#setActiveCompiler
+  /**
+   * Sets which compiler is the "active" compiler.
+   *
+   * @param compiler Compiler to set active.
+   * @throws IllegalArgumentException  If the compiler is not in the list of available compilers
+   *
+   * @see #getActiveCompiler
    */
   public void setActiveCompiler(CompilerInterface compiler);
+  
+  /** Add a compiler to the active list */
+  public void addCompiler(CompilerInterface compiler);
+  
 }

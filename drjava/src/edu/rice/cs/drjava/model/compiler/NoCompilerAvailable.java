@@ -65,7 +65,7 @@ public class NoCompilerAvailable implements CompilerInterface {
     return Arrays.asList(new CompilerError(MESSAGE, false));
   }
 
-  public boolean isAvailable() { return true; }
+  public boolean isAvailable() { return false; }
 
   public String getName() { return "(no compiler available)"; }
 
