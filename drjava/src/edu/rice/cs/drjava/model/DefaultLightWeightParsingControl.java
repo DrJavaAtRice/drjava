@@ -104,7 +104,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
         if (current>=_beginUpdates) {
           OpenDefinitionsDocument doc = _model.getActiveDocument();
           Long last = _lastUpdates.get(doc);
-          if ((last==null) || (last<_lastDelay)) {
+          if ((last == null) || (last < _lastDelay)) {
             update(doc);
             // _log.logTime("Update done.");
           }
@@ -137,7 +137,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
       _lastUpdates.put(doc, System.currentTimeMillis());
       final String old = _enclosingClassNames.get(doc);
       final String updated = doc.getEnclosingClassName(doc.getCaretPosition(), true);
-      if ((old==null) || (!old.equals(updated))) {
+      if ((old == null) || (!old.equals(updated))) {
         _enclosingClassNames.put(doc, updated);
         Utilities.invokeLater(new Runnable() {
           public void run() {

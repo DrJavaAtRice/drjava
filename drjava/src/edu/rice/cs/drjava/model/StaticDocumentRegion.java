@@ -48,8 +48,9 @@ public class StaticDocumentRegion implements DocumentRegion {
   protected final int _endOffset;
   protected final String _string;
   
-  /** Create a new static document region. */
+  /** Create a new static document region. Precondition: s != null. */
   public StaticDocumentRegion(OpenDefinitionsDocument doc, File file, int so, int eo, String s) {
+    assert s != null;
     _doc = doc;
     _file = file;
     _startOffset = so;
@@ -65,12 +66,12 @@ public class StaticDocumentRegion implements DocumentRegion {
 
   /** @return the start offset */
   public int getStartOffset() {
-    return ((_doc==null)||(_doc.getLength()>=_startOffset))?_startOffset:_doc.getLength();
+    return (_doc == null || _doc.getLength() >= _startOffset) ? _startOffset : _doc.getLength();
   }
 
   /** @return the end offset */
   public int getEndOffset() {
-    return ((_doc==null)||(_doc.getLength()>=_endOffset))?_endOffset:_doc.getLength();
+    return (_doc == null || _doc.getLength()>=_endOffset) ? _endOffset : _doc.getLength();
   }
   
   /** @return the string it was assigned */
@@ -78,18 +79,27 @@ public class StaticDocumentRegion implements DocumentRegion {
     return _string;
   }
   
+  private static boolean equals(OpenDefinitionsDocument doc1, OpenDefinitionsDocument doc2) {
+    if (doc1 == null) return (doc2 == null);
+    if (doc2 == null) return false;
+    return doc1.equals(doc2);
+  }
+  
+  private static boolean equals(File f1, File f2) {
+    if (f1 == null) return (f2 == null);
+    if (f2 == null) return false;
+    return f1.equals(f2);
+  }
+  
   /** @return true if the specified region is equal to this one. */
   public boolean equals(Object other) {
-    if (!(other instanceof StaticDocumentRegion) || (other==null)) return false;
-    StaticDocumentRegion o = (StaticDocumentRegion)other;
-    return ((((_doc==null) && (o._doc==null)) || (_doc.equals(o._doc))) &&
-            (((_file==null) && (o._file==null)) || (_file.equals(o._file))) &&
-            (_startOffset == o._startOffset) &&
-            (_endOffset == o._endOffset) &&
-            (_string.equals(o._string)));
+    if (other == null || !(other instanceof StaticDocumentRegion)) return false;
+    StaticDocumentRegion o = (StaticDocumentRegion) other;
+    return (equals(_doc, o._doc) && equals(_file, o._file) && _startOffset == o._startOffset &&
+            _endOffset == o._endOffset && _string.equals(o._string));
   }
   
   public String toString() {
-    return ((_doc!=null)?_doc.toString():"null") + " "+_startOffset+" .. "+_endOffset;
+    return (_doc != null ? _doc.toString() : "null") + " " + _startOffset + " .. " + _endOffset;
   }
 }

@@ -976,10 +976,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     public void actionPerformed(ActionEvent e) {
       if (e.getSource() instanceof JTextComponent) {
         JTextComponent tc = (JTextComponent)e.getSource();
-        if (tc.getSelectedText()!=null) {
+        if (tc.getSelectedText() != null) {
           super.actionPerformed(e);
           String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(FindReplacePanel.this);
-          if ((s!=null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
+          if (s != null && s.length() != 0){ ClipboardHistoryModel.singleton().put(s); }
         }
       }
     }
@@ -990,10 +990,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     public void actionPerformed(ActionEvent e) {
       if (e.getSource() instanceof JTextComponent) {
         JTextComponent tc = (JTextComponent)e.getSource();
-        if (tc.getSelectedText()!=null) {
+        if (tc.getSelectedText() != null) {
           super.actionPerformed(e);
           String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(FindReplacePanel.this);
-          if ((s!=null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
+          if (s != null && s.length() != 0) { ClipboardHistoryModel.singleton().put(s); }
         }
       }
     }

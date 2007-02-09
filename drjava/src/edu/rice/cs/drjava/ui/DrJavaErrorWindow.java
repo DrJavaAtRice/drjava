@@ -188,7 +188,7 @@ public class DrJavaErrorWindow extends JDialog {
   /** Update the buttons and text area after next or previous. */
   private void updateErrorInfo() {
     getContentPane().remove(_errorInfo);
-    if (_error!=null) {
+    if (_error != null) {
       final StringBuilder b = new StringBuilder();
       if (_error instanceof DrJavaErrorHandler.LoggedCondition) {
         b.append("Logged condition: ");
@@ -384,7 +384,7 @@ public class DrJavaErrorWindow extends JDialog {
       _copyAction.setEnabled(false);
       updateErrorInfo();
       JButton errorsButton = DrJavaErrorHandler.getButton();
-      if (errorsButton!=null) { errorsButton.setVisible(false); }
+      if (errorsButton != null) { errorsButton.setVisible(false); }
       _okAction.actionPerformed(e);
     }
   };

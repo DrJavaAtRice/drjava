@@ -372,6 +372,6 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   
   /** @return whether the next selection change is model-initiated (true) or user-initiated (false). */
   public boolean isNextChangeModelInitiated() {
-    return getClientProperty(MODEL_INITIATED_PROPERTY_NAME)!=null;
+    return getClientProperty(MODEL_INITIATED_PROPERTY_NAME) != null;
   }
 }

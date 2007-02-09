@@ -270,7 +270,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   public static JLabel createImageLabel(ImageInfo info, int align) {
     ImageIcon icon = MainFrame.getIcon(info.name);
-    if (icon==null) return null;
+    if (icon == null) return null;
     JLabel label = new JLabel(icon,align);
     label.setOpaque(true);
     label.setBackground(info.color);

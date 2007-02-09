@@ -776,7 +776,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       super.actionPerformed(e);
       if (_currentDefPane.hasFocus()) {
         String s = Utilities.getClipboardSelection(c);
-        if ((s!=null) && (s.length()!=0)) { ClipboardHistoryModel.singleton().put(s); }
+        if (s != null && s.length() != 0) { ClipboardHistoryModel.singleton().put(s); }
       }
       if (c != null) c.requestFocusInWindow();
     }
@@ -787,9 +787,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent e) {
       Component c = MainFrame.this.getFocusOwner();
       super.actionPerformed(e);
-      if (_currentDefPane.hasFocus() && (_currentDefPane.getSelectedText()!=null)) {
+      if (_currentDefPane.hasFocus() && _currentDefPane.getSelectedText() != null) {
         String s = Utilities.getClipboardSelection(c);
-        if ((s!=null) && (s.length()!=0)) { ClipboardHistoryModel.singleton().put(s); }
+        if (s != null && s.length() != 0) { ClipboardHistoryModel.singleton().put(s); }
       }
       if (c != null) c.requestFocusInWindow();
     }
@@ -851,7 +851,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           
           StringSelection ssel = new StringSelection(s);
           Clipboard cb = MainFrame.this.getToolkit().getSystemClipboard();
-          if (cb!=null) {
+          if (cb != null) {
             cb.setContents(ssel, MainFrame.this);
             pasteAction.actionPerformed(ae);
           }
@@ -1049,7 +1049,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             final OpenDefinitionsDocument newDoc = p.getItem().doc;
 //            final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
 //            if (docChanged) addToBrowserHistory();
-            _model.setActiveDocument(newDoc);
+            final boolean docSwitch = _model.getActiveDocument() != newDoc;
+            if (docSwitch) _model.setActiveDocument(newDoc);
             final int curLine = newDoc.getCurrentLine();
             final String t = p.getText();
             final int last = t.lastIndexOf(':');
@@ -1057,15 +1058,19 @@ public class MainFrame extends JFrame implements ClipboardOwner {
               try {
                 String end = t.substring(last + 1);
                 int val = Integer.parseInt(end);
-                int maxLines = p.getItem().doc.getNumberOfLines();
-                final int lineNum = Math.max(1, Math.min(maxLines, val));
-                SwingUtilities.invokeLater(new Runnable() {
+                
+                final int lineNum = Math.max(1, val);
+                Runnable command = new Runnable() {
                   public void run() {
                     try { _jumpToLine(lineNum); }
                     catch (RuntimeException e) { _jumpToLine(curLine); }
-//                    if (docChanged) addToBrowserHistory();
                   }
-                });
+                };
+                if (docSwitch) {
+                  // postpone running command until after document switch, which is pending in the event queue
+                  SwingUtilities.invokeLater(command);
+                }
+                else command.run();
               }
               catch(RuntimeException e) { /* ignore */ }
             }
@@ -1124,7 +1129,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) {
       initGotoFileDialog();
       List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-      if ((docs==null) || (docs.size() == 0)) {
+      if (docs == null || docs.size() == 0) {
         return; // do nothing
       }
       GoToFileListEntry currentEntry = null;
@@ -1316,7 +1321,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Initialize dialog if necessary. */
   void initOpenJavadocDialog() {
-    if (_openJavadocDialog==null) {
+    if (_openJavadocDialog == null) {
       PredictiveInputFrame.InfoSupplier<OpenJavadocListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<OpenJavadocListEntry>() {
         public String apply(OpenJavadocListEntry entry) {
@@ -1326,7 +1331,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       PredictiveInputFrame.CloseAction<OpenJavadocListEntry> okAction = 
         new PredictiveInputFrame.CloseAction<OpenJavadocListEntry>() {
         public Object apply(PredictiveInputFrame<OpenJavadocListEntry> p) {
-          if (p.getItem()!=null) {
+          if (p.getItem() != null) {
             PlatformFactory.ONLY.openURL(p.getItem().getURL());
           }
           hourglassOff();
@@ -1370,7 +1375,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Generate Javadoc class list. */
   void generateOpenJavadocList() {
-    if (_openJavadocList==null) {
+    if (_openJavadocList == null) {
       // generate list
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
       String base = "";
@@ -1393,7 +1398,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         URL url = new URL(base + "/allclasses-frame.html");
         BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
         String line = br.readLine();
-        while(line!=null) {
+        while(line != null) {
           final String aText = "<a href=\"";
           int aPos = line.toLowerCase().indexOf(aText);
           int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
@@ -1546,7 +1551,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     if (_completeWordDialog == null) {
       PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
-          if (p.getItem()!=null) {
+          if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
             try {
               String mask = "";
@@ -1622,7 +1627,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Complete the word the cursor is on. */
   void _completeWordUnderCursor() {
     List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-    if ((docs==null) || (docs.size() == 0)) return; // do nothing
+    if ((docs == null) || (docs.size() == 0)) return; // do nothing
     
     GoToFileListEntry currentEntry = null;
     ArrayList<GoToFileListEntry> list;
@@ -6544,7 +6549,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     Runnable command = new Runnable() {  
       public void run() {
         // get the line number after the switch of documents was made
-        int lineNumber = doc.getLineOfOffset(offset)+1;
+        int lineNumber = doc.getLineOfOffset(offset) + 1;
         
         // this block occurs if the documents is already open and as such has a positive size
         if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {      
@@ -6554,7 +6559,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                
         if (shouldHighlight) {
           _removeThreadLocationHighlight();
-          int startOffset = doc.getOffset(lineNumber);
+          int startOffset = doc.getOffset(lineNumber);  // Much faster to directly search back from offset!
           if (startOffset > -1) {
             int endOffset = doc.getLineEndPos(startOffset);
             if (endOffset > -1) {
@@ -7777,7 +7782,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     * @param popup the Popup window
     */
   public void setPopupLoc(Window popup) {
-    MainFrame.setPopupLoc(popup, (popup.getOwner()!=null)?popup.getOwner():this);
+    MainFrame.setPopupLoc(popup, (popup.getOwner() != null) ? popup.getOwner() : this);
   }
   
   /** Sets the location of the popup in a consistant way.  If the popup has an owner, the popup is centered over the
@@ -7792,7 +7797,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     Point ownerLoc = null;
     Dimension ownerSize = null;
-    if(owner!=null) {
+    if (owner != null) {
       ownerLoc = owner.getLocation();
       ownerSize = owner.getSize();
     }

@@ -278,7 +278,7 @@ public class HTMLFrame extends JFrame {
    *  @param url URL to display
    */
   private void _displayPage(URL url) {
-    if (url==null) return;
+    if (url == null) return;
     try {
       _mainDocPane.setPage(url);
       if (_baseURL != null) {

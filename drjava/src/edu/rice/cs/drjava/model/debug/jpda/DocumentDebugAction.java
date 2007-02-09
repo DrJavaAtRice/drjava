@@ -57,6 +57,8 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   protected volatile OpenDefinitionsDocument _doc;
   protected int _offset;
   
+  public final int SHORT_DOC_MAX_LENGTH = 20000;
+ 
   
   /** Creates a new DocumentDebugAction.  Automatically tries to create the EventRequest if a ReferenceType can be 
     * found, or else adds this object to the PendingRequestManager. Any subclass should automatically call
@@ -70,7 +72,7 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
     _exactClassName = null;
     try {
       if (offset >= 0) {
-        if (doc.getNumberOfLines() < 500) {
+        if (doc.getLength() < SHORT_DOC_MAX_LENGTH) {
           // only do this on short files
           // in long files, getEnclosingClassName might take too long
           _exactClassName = doc.getEnclosingClassName(offset, true);
@@ -137,7 +139,7 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
   protected void _initializeRequests(Vector<ReferenceType> refTypes) throws DebugException {
     if (refTypes.size() > 0) createRequests(refTypes);
     else {
-      if (_exactClassName!=null) {
+      if (_exactClassName != null) {
         List<ReferenceType> referenceTypes = _manager.getVM().classesByName(_exactClassName);
         if (referenceTypes.size()>0) {
           // class has been loaded, but couldn't find this line number

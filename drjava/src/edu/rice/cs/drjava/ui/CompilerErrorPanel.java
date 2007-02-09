@@ -208,7 +208,7 @@ public class CompilerErrorPanel extends ErrorPanel {
           final StringBuilder msgBuffer = 
             new StringBuilder("Compilation completed.  The following files were not compiled:\n");
           for (File f: _excludedFiles) {
-            if (f!=null) { msgBuffer.append("  ").append(f).append('\n'); } // do not print files from untitled docs
+            if (f != null) { msgBuffer.append("  ").append(f).append('\n'); } // do not print files from untitled docs
           }
           message = msgBuffer.toString();
         }

@@ -893,7 +893,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           }
         });
         
-        if (fs!=null) { // listFiles may return null if there's an IO error
+        if (fs != null) { // listFiles may return null if there's an IO error
           for (File kid: fs) { getClassFilesHelper(kid, acc); }
         }
         
@@ -2477,7 +2477,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Make the region that is less recent the current region.
      *  @return new current region */
     public R prevCurrentRegion() {
-      if (_current!=null) {
+      if (_current != null) {
         int index = getIndexOf(_current);
         if (index-1 >= 0) {
           _current = _regions.get(index-1);
@@ -3716,7 +3716,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
           // Make sure the package piece matches the directory name
           boolean equal;
-          if (grandParentDir!=null) {
+          if (grandParentDir != null) {
             // grand parent exists, compare File objects
             // this handles case-insensitivity for packages on Windows
             File packageDir = new File(grandParentDir,part);
@@ -4060,7 +4060,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    public int getLockState() { return getDocument().getLockState(); }
     
     /** @return the number of lines in this document. */
-    public int getNumberOfLines() { return getLineOfOffset(getEndPosition().getOffset()-1); }
+    public int getNumberOfLines() { return getLineOfOffset(getLength()); }
     
     /** Translates an offset into the components text to a line number.
      *  @param offset the offset >= 0

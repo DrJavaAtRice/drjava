@@ -242,7 +242,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
   protected ArrayList<R> getSelectedRegions() {
     ArrayList<R> regs = new ArrayList<R>();
     int[] indices = _list.getSelectedIndices();
-    if (indices!=null) {
+    if (indices != null) {
       for (int index: indices) {
         @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = ((RegionListUserObj<R>)_listModel.elementAt(index));
         R r = userObj.region();
@@ -257,7 +257,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
     ArrayList<R> r = getSelectedRegions();
     if (r.size() == 1) {
       RegionListUserObj<R> userObj = getUserObjForRegion(r.get(0));
-      if (userObj!=null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
+      if (userObj != null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
       _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), false);
     }
   }

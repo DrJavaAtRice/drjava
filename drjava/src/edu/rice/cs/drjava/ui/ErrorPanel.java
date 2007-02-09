@@ -387,10 +387,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** Default cut action. */
     Action cutAction = new DefaultEditorKit.CutAction() {
       public void actionPerformed(ActionEvent e) {
-        if (getSelectedText()!=null) {
+        if (getSelectedText() != null) {
           super.actionPerformed(e);
           String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
-          if ((s!=null) && (s.length()!=0)) { ClipboardHistoryModel.singleton().put(s); }
+          if ((s != null) && (s.length() != 0)) { ClipboardHistoryModel.singleton().put(s); }
         }
       }
     };
@@ -398,10 +398,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** Default copy action. */
     Action copyAction = new DefaultEditorKit.CopyAction() {
       public void actionPerformed(ActionEvent e) {
-        if (getSelectedText()!=null) {
+        if (getSelectedText() != null) {
           super.actionPerformed(e);
           String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
-          if ((s!=null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
+          if ((s != null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
         }
       }
     };

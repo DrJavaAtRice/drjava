@@ -86,10 +86,10 @@ public class DrJavaErrorHandler {
   /** Record the throwable in the errors list. */
   public static void record(Throwable thrown) {
     _errors.add(thrown);
-    if (_errorsButton!=null) {
+    if (_errorsButton != null) {
       _errorsButton.setVisible(true);
     }
-    if ((_errors.size()==1) && (DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue())) {
+    if (_errors.size() == 1 && DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue()) {
       DrJavaErrorPopup popup = new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown);
       MainFrame.setPopupLoc(popup, popup.getOwner());
       popup.setVisible(true);
@@ -97,9 +97,7 @@ public class DrJavaErrorHandler {
   }
   
   /** Log an unexpected situation. */
-  public static void log(String message) {
-    record(new LoggedCondition(message));
-  }
+  public static void log(String message) { record(new LoggedCondition(message)); }
   
   /** The throwable used for logging unexpected situations. */
   public static class LoggedCondition extends Throwable {

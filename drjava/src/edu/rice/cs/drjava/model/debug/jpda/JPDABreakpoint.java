@@ -145,7 +145,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
 
   public String toString() {
     String cn = getClassName();
-    if (_exactClassName!=null) { cn = _exactClassName.replace('$', '.'); }
+    if (_exactClassName != null) { cn = _exactClassName.replace('$', '.'); }
     if (_requests.size() > 0) {
       // All BreakpointRequests are identical-- one copy for each loaded
       //  class.  So just print info from the first one, and how many there are.

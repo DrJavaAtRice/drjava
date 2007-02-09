@@ -477,7 +477,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *  @param stackTrace The stack trace of the exception
    */
   public void replThrewException(String exceptionClass, String message, String stackTrace, String shortMessage) {
-    if (shortMessage!=null) {
+    if (shortMessage != null) {
       if (shortMessage.endsWith("<EOF>\"")) {
         interactionContinues();
         return;
@@ -497,7 +497,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
                                       int endRow, int endCol ) {
-    if (errorMessage!=null) {
+    if (errorMessage != null) {
       if (errorMessage.endsWith("<EOF>\"")) {
         interactionContinues();
         return;

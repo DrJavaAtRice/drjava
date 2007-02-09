@@ -238,7 +238,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    */
   public void setFrameState(FrameState ds) {
     _lastState = ds;
-    if (_lastState!=null) {
+    if (_lastState != null) {
       setSize(_lastState.getDimension());
       setLocation(_lastState.getLocation());
       int index = _lastState.getCurrentStrategyIndex();
@@ -257,7 +257,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   public void setFrameState(String s) {
     try { _lastState = new FrameState(s); }
     catch(IllegalArgumentException e) { _lastState = null; }
-    if (_lastState!=null) {
+    if (_lastState != null) {
       setSize(_lastState.getDimension());
       setLocation(_lastState.getLocation());
       int index = _lastState.getCurrentStrategyIndex();
@@ -347,7 +347,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     if (_force) {
       @SuppressWarnings("unchecked") 
         T item = (T)_matchList.getSelectedValue();
-      return (item==null)?"":_currentStrategy.force(item,_textField.getText());
+      return (item == null) ? "" : _currentStrategy.force(item,_textField.getText());
     }
     return _textField.getText();
   }
@@ -608,7 +608,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     
     contentPane.add(buttonPanel, c);
 
-    Dimension parentDim = (_owner!=null)?(_owner.getSize()):getToolkit().getScreenSize();
+    Dimension parentDim = (_owner !=null) ? _owner.getSize() : getToolkit().getScreenSize();
     int xs = (int)parentDim.getWidth()/3;
     int ys = (int)parentDim.getHeight()/4;
     setSize(Math.max(xs,400), Math.max(ys, 300));

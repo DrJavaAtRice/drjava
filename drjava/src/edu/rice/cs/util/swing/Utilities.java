@@ -163,7 +163,7 @@ public class Utilities {
       contentPane.add(textArea, BorderLayout.CENTER);
       contentPane.add(okButton, BorderLayout.SOUTH);
 
-      Dimension parentDim = (comp!=null)?(comp.getSize()):getToolkit().getScreenSize();
+      Dimension parentDim = (comp != null)?(comp.getSize()):getToolkit().getScreenSize();
       int xs = (int)parentDim.getWidth()/4;
       int ys = (int)parentDim.getHeight()/5;
       setSize(Math.max(xs,350), Math.max(ys, 250));
@@ -174,9 +174,9 @@ public class Utilities {
   /** @return a string with the current clipboard selection, or null if not available. */
   public static String getClipboardSelection(Component c) {
       Clipboard cb = c.getToolkit().getSystemClipboard();
-      if (cb==null) return null;
+      if (cb == null) return null;
       Transferable t = cb.getContents(null);
-      if (t==null) return null;
+      if (t == null) return null;
       String s = null;
       try {
         java.io.Reader r = DataFlavor.stringFlavor.getReaderForText(t);

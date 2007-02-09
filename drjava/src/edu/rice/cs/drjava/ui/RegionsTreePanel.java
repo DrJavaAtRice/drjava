@@ -324,7 +324,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   private void _initPopup() {
     _regionPopupMenu = new JPopupMenu(_title);
     AbstractAction[] acts = makePopupMenuActions();
-    if (acts!=null) {
+    if (acts != null) {
       for (AbstractAction a: acts) {
         _regionPopupMenu.add(a);
       }
@@ -338,7 +338,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   protected ArrayList<R> getSelectedRegions() {
     ArrayList<R> regs = new ArrayList<R>();
     TreePath[] paths = _regTree.getSelectionPaths();
-    if (paths!=null) {
+    if (paths != null) {
       for (TreePath path: paths) {
         if (path != null && path.getPathCount() == 3) {
           DefaultMutableTreeNode lineNode = (DefaultMutableTreeNode)path.getLastPathComponent();

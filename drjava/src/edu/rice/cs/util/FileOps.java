@@ -410,7 +410,7 @@ public abstract class FileOps {
 
     boolean ret = true;
     File[] childFiles = dir.listFiles();
-    if (childFiles!=null) { // listFiles may return null if there's an IO error
+    if (childFiles != null) { // listFiles may return null if there's an IO error
       for (File f: childFiles) { ret = ret && deleteDirectory(f); }
     }
     
@@ -481,7 +481,7 @@ public abstract class FileOps {
     while (! working.empty()) {
       PrefixAndFile current = working.pop();
       File [] subDirectories = current.root.listFiles(directoryFilter);
-      if (subDirectories!=null) { // listFiles may return null if there's an IO error
+      if (subDirectories != null) { // listFiles may return null if there's an IO error
         for (File dir: subDirectories) {
           PrefixAndFile paf;
 //         System.out.println("exploring " + dir);
@@ -492,7 +492,7 @@ public abstract class FileOps {
       }
       File [] javaFiles = current.root.listFiles(JAVA_FILE_FILTER);
 
-      if (javaFiles!=null) { // listFiles may return null if there's an IO error
+      if (javaFiles != null) { // listFiles may return null if there's an IO error
         //Only add package names if they have java files and are not the root package
         if (javaFiles.length != 0 && !current.prefix.equals("")) {
           output.add(current.prefix);
@@ -741,14 +741,14 @@ public abstract class FileOps {
     * @return a valid directory for use */
   public static File getValidDirectory(File file) {
     // if it's the NULL_FILE or null, use "user.home"
-    if ((file==FileOption.NULL_FILE)||(file==null)) {
+    if ((file==FileOption.NULL_FILE)||(file == null)) {
       file = new File(System.getProperty("user.home"));
     }
     while (!file.exists()) {
       // if the saved path doesn't exist anymore, try the parent
       file = file.getParentFile();
     }
-    if (file==null) {
+    if (file == null) {
       // somehow we ended up with null, use "user.home"
       file = new File(System.getProperty("user.home"));
     }

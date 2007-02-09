@@ -103,7 +103,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
       _model.getBrowserHistoryManager().setCurrentRegion(r.get(0));
       updateButtons();
       RegionListUserObj<DocumentRegion> userObj = getUserObjForRegion(r.get(0));
-      if (userObj!=null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
+      if (userObj != null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
       _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), false, false);
     }
   }
@@ -119,7 +119,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
     DocumentRegion r = rm.prevCurrentRegion();
     updateButtons();
     RegionListUserObj<DocumentRegion> userObj = getUserObjForRegion(r);
-    if (userObj!=null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
+    if (userObj != null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
     _frame.scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
   }
   
@@ -134,7 +134,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
     DocumentRegion r = rm.nextCurrentRegion();
     updateButtons();
     RegionListUserObj<DocumentRegion> userObj = getUserObjForRegion(r);
-    if (userObj!=null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
+    if (userObj != null) { _list.ensureIndexIsVisible(_listModel.indexOf(userObj)); }
     _frame.scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
   }
   

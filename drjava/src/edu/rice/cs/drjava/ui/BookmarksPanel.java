@@ -124,25 +124,19 @@ public class BookmarksPanel extends RegionsTreePanel<DocumentRegion> {
     ArrayList<DocumentRegion> regs = getSelectedRegions();
     _goToButton.setEnabled(regs.size()==1);
     _removeButton.setEnabled(regs.size()>0);
-    _removeAllButton.setEnabled((_regionRootNode!=null) && (_regionRootNode.getDepth()>0));
+    _removeAllButton.setEnabled(_regionRootNode != null && _regionRootNode.getDepth() > 0);
   }
   
   /** Makes the popup menu actions. Should be overridden if additional actions besides "Go to" and "Remove" are added. */
   protected AbstractAction[] makePopupMenuActions() {
     AbstractAction[] acts = new AbstractAction[] {
-      new AbstractAction("Go to") {
-        public void actionPerformed(ActionEvent e) {
-          goToRegion();
-        }
-      },
+      new AbstractAction("Go to") { public void actionPerformed(ActionEvent e) { goToRegion(); } },
         
-        new AbstractAction("Remove") {
-          public void actionPerformed(ActionEvent e) {
-            for (DocumentRegion r: getSelectedRegions()) {
-              _model.getBookmarkManager().removeRegion(r);
-            }
-          }
+      new AbstractAction("Remove") {
+        public void actionPerformed(ActionEvent e) {
+          for (DocumentRegion r: getSelectedRegions()) _model.getBookmarkManager().removeRegion(r);
         }
+      }
     };
     return acts;
   }

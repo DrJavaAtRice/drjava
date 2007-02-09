@@ -51,9 +51,7 @@ public class ClipboardHistoryModel {
   
   /** Singleton accessor. */
   public static synchronized ClipboardHistoryModel singleton() {
-    if (ONLY==null) {
-      ONLY = new ClipboardHistoryModel(10);
-    }
+    if (ONLY == null) ONLY = new ClipboardHistoryModel(10);
     return ONLY;
   }
   

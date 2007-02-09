@@ -308,10 +308,10 @@ public abstract class AbstractConsoleController implements Serializable {
   /** Default cut action. */
   Action cutAction = new DefaultEditorKit.CutAction() {
     public void actionPerformed(ActionEvent e) {
-      if (_pane.getSelectedText()!=null) {
+      if (_pane.getSelectedText() != null) {
         super.actionPerformed(e);
         String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(_pane);
-        if ((s!=null) && (s.length()!=0)) { ClipboardHistoryModel.singleton().put(s); }
+        if (s != null && s.length() != 0) { ClipboardHistoryModel.singleton().put(s); }
       }
     }
   };
@@ -319,10 +319,10 @@ public abstract class AbstractConsoleController implements Serializable {
   /** Default copy action. */
   Action copyAction = new DefaultEditorKit.CopyAction() {
     public void actionPerformed(ActionEvent e) {
-      if (_pane.getSelectedText()!=null) {
+      if (_pane.getSelectedText() != null) {
         super.actionPerformed(e);
         String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(_pane);
-        if ((s!=null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
+        if (s != null && s.length() != 0) { ClipboardHistoryModel.singleton().put(s); }
       }
     }
   };

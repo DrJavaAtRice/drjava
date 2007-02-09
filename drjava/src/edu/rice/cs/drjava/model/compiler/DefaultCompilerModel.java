@@ -240,7 +240,7 @@ public class DefaultCompilerModel implements CompilerModel {
     } 
     
     File buildDir = _model.getBuildDirectory();
-    if ((buildDir!=null) && !buildDir.exists() && !buildDir.mkdirs()) {
+    if ((buildDir != null) && !buildDir.exists() && !buildDir.mkdirs()) {
       throw new IOException("Could not create build directory: "+buildDir);
     }
 

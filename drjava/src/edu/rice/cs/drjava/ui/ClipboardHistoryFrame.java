@@ -156,7 +156,7 @@ public class ClipboardHistoryFrame extends JFrame {
    */
   public void setFrameState(FrameState ds) {
     _lastState = ds;
-    if (_lastState!=null) {
+    if (_lastState != null) {
       setSize(_lastState.getDimension());
       setLocation(_lastState.getLocation());
       validate();
@@ -169,13 +169,13 @@ public class ClipboardHistoryFrame extends JFrame {
   public void setFrameState(String s) {
     try { _lastState = new FrameState(s); }
     catch(IllegalArgumentException e) { _lastState = null; }
-    if (_lastState!=null) {
+    if (_lastState != null) {
       setSize(_lastState.getDimension());
       setLocation(_lastState.getLocation());
       validate();
     }
     else {
-      Dimension parentDim = (_mainFrame!=null)?(_mainFrame.getSize()):getToolkit().getScreenSize();
+      Dimension parentDim = (_mainFrame != null) ? _mainFrame.getSize() : getToolkit().getScreenSize();
       int xs = (int)parentDim.getWidth()/3;
       int ys = (int)parentDim.getHeight()/4;
       setSize(Math.max(xs,400), Math.max(ys, 400));
@@ -305,7 +305,7 @@ public class ClipboardHistoryFrame extends JFrame {
     c.weighty = 0.0;
     contentPane.add(buttonPanel, c);
 
-    Dimension parentDim = (_mainFrame!=null)?(_mainFrame.getSize()):getToolkit().getScreenSize();
+    Dimension parentDim = (_mainFrame != null) ? _mainFrame.getSize() : getToolkit().getScreenSize();
     int xs = (int)parentDim.getWidth()/3;
     int ys = (int)parentDim.getHeight()/4;
     setSize(Math.max(xs,400), Math.max(ys, 300));
@@ -403,7 +403,7 @@ public class ClipboardHistoryFrame extends JFrame {
     public String getFull() { return full; }
     public String toString() { return display; }
     public boolean equals(Object o) {
-      if ((o==null) || !(o instanceof ListItem)) return false;
+      if ((o == null) || !(o instanceof ListItem)) return false;
       return full.equals(((ListItem)o).full);
     }
   }

@@ -140,7 +140,7 @@ public class JarOptionsDialog extends JFrame {
    */
   public void setFrameState(FrameState ds) {
     _lastState = ds;
-    if (_lastState!=null) {
+    if (_lastState != null) {
       setLocation(_lastState.getLocation());
       validate();
     }
@@ -152,7 +152,7 @@ public class JarOptionsDialog extends JFrame {
   public void setFrameState(String s) {
     try { _lastState = new FrameState(s); }
     catch(IllegalArgumentException e) { _lastState = null; }
-    if (_lastState!=null) setLocation(_lastState.getLocation());
+    if (_lastState != null) setLocation(_lastState.getLocation());
     else MainFrame.setPopupLoc(this, _mainFrame);
     validate();
   }
@@ -541,7 +541,7 @@ public class JarOptionsDialog extends JFrame {
         };
 
         File[] files = dir.listFiles(classFilter);
-        if (files!=null) { // listFiles may return null if there's an IO error
+        if (files != null) { // listFiles may return null if there's an IO error
           for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
               jarFile.addDirectoryRecursive(files[i], files[i].getName(), classFilter);
@@ -551,7 +551,6 @@ public class JarOptionsDialog extends JFrame {
             }
           }
         }
-
         return true;
       }
 
