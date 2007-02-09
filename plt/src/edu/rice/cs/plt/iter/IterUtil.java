@@ -9,6 +9,7 @@ import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.tuple.*;
 import edu.rice.cs.plt.recur.RecurUtil;
 import edu.rice.cs.plt.collect.ConsList;
+import edu.rice.cs.plt.text.TextUtil;
 
 /**
  * A collection of static methods operating on iterables.
@@ -120,7 +121,7 @@ public final class IterUtil {
    * separate line; invokes {@link RecurUtil#safeToString(Object)} on each element
    */
   public static String multilineToString(Iterable<?> iter) {
-    return toString(iter, "", System.getProperty("line.separator"), "");
+    return toString(iter, "", TextUtil.NEWLINE, "");
   }
   
   /** 

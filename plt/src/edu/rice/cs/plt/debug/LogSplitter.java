@@ -59,8 +59,16 @@ public class LogSplitter implements Log {
     for (Log l : _logs) { l.logValue(name, value); }
   }
   
+  public void logValue(String message, String name, Object value) {
+    for (Log l : _logs) { l.logValue(message, name, value); }
+  }
+  
   public void logValues(String[] names, Object... values) {
     for (Log l : _logs) { l.logValues(names, values); }
+  }
+  
+  public void logValues(String message, String[] names, Object... values) {
+    for (Log l : _logs) { l.logValues(message, names, values); }
   }
   
 }

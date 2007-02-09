@@ -62,9 +62,10 @@ public enum JavaVersion {
   
   /**
    * Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
-   * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  See 
-   * {@link http://java.sun.com/j2se/versioning_naming.html}.  If the text cannot be parsed, a trivial
+   * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  If the text cannot be parsed, a trivial
    * version with major version UNRECOGNIZED is returned.
+   * 
+   * @see <a href="http://java.sun.com/j2se/versioning_naming.html">Sun's version specification</a>
    */
   public static FullVersion parseFullVersion(String text) {
     String number;
@@ -111,7 +112,8 @@ public enum JavaVersion {
   
   /**
    * A full Java version, implemented for the sake of comparison between version numbers.
-   * See {@link http://java.sun.com/j2se/versioning_naming.html}.
+   * 
+   * @see <a href="http://java.sun.com/j2se/versioning_naming.html">Sun's version specification</a>
    */
   public class FullVersion implements Comparable<FullVersion> {
     private int _maintenance;

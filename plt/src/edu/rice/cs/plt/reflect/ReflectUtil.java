@@ -73,12 +73,13 @@ public final class ReflectUtil {
    * uses the concrete runtime types of the objects, which may be more specific than what is needed.  It is
    * impossible, for example, to use this method to invoke a constructor whose parameters include
    * interface, abstract class, or primitive types.  In such cases, 
-   * {@link loadObject(String, Class[], Object[])} should be used instead.</p>
+   * {@link #loadObject(String, Class[], Object[])} should be used instead.</p>
    * 
    * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
    * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
    * can by made to that object's class or any of the library's classes in the main body of code 
-   * (otherwise, a {@link NoClassDefError} may occur), reflection must be used to load the object.</p>
+   * (otherwise, a {@link java.lang.reflect.NoClassDefError} may occur), reflection must be used to load 
+   * the object.</p>
    * 
    * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
    * 
@@ -96,7 +97,8 @@ public final class ReflectUtil {
    * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
    * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
    * can by made to that object's class or any of the library's classes in the main body of code 
-   * (otherwise, a {@link NoClassDefError} may occur), reflection must be used to load the object.</p>
+   * (otherwise, a {@link java.lang.reflect.NoClassDefError} may occur), reflection must be used to load 
+   * the object.</p>
    * 
    * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
    * 
@@ -116,12 +118,13 @@ public final class ReflectUtil {
    * uses the concrete runtime types of the objects, which may be more specific than what is needed.  It is
    * impossible, for example, to use this method to invoke a constructor whose parameters include
    * interface, abstract class, or primitive types.  In such cases, 
-   * {@link loadObject(ClassLoader, String, Class[], Object[])} should be used instead.</p>
+   * {@link #loadObject(ClassLoader, String, Class[], Object[])} should be used instead.</p>
    * 
    * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
    * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
    * can by made to that object's class or any of the library's classes in the main body of code 
-   * (otherwise, a {@link NoClassDefError} may occur), reflection must be used to load the object.</p>
+   * (otherwise, a {@link java.lang.reflect.NoClassDefError} may occur), reflection must be used to load 
+   * the object.</p>
    * 
    * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
    * 
@@ -141,7 +144,8 @@ public final class ReflectUtil {
    * <p>A typical use of this method is to instantiate an object that belongs to or directly refers to
    * a library that is not guaranteed to be statically available at runtime.  Since no direct reference
    * can by made to that object's class or any of the library's classes in the main body of code 
-   * (otherwise, a {@link NoClassDefError} may occur), reflection must be used to load the object.</p>
+   * (otherwise, a {@link java.lang.reflect.NoClassDefError} may occur), reflection must be used to load 
+   * the object.</p>
    * 
    * @param loader  A class loader used to load the specified class
    * @param className  The name of the class to be instantiated
@@ -197,7 +201,7 @@ public final class ReflectUtil {
    * signature is potentially error-prone, because it uses the concrete runtime types of the objects, which may be more 
    * specific than what is needed.  It is impossible, for example, to use this method to invoke a constructor whose parameters 
    * include interface, abstract class, or primitive types.  In such cases, 
-   * {@link loadLibraryAdapter(Iterable, String, Class[], Object[])} should be used instead.</p>
+   * {@link #loadLibraryAdapter(Iterable, String, Class[], Object[])} should be used instead.</p>
    * 
    * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
    * 
@@ -239,7 +243,7 @@ public final class ReflectUtil {
    * inference process for the constructor signature is potentially error-prone, because it uses the concrete runtime types 
    * of the objects, which may be more specific than what is needed.  It is impossible, for example, to use this method to 
    * invoke a constructor whose parameters include interface, abstract class, or primitive types.  In such cases, 
-   * {@link loadLibraryAdapter(ClassLoader, Iterable, String, Class[], Object[])} should be used instead.</p>
+   * {@link #loadLibraryAdapter(ClassLoader, Iterable, String, Class[], Object[])} should be used instead.</p>
    * 
    * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
    * 

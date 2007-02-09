@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
  * <p>An exception wrapper to simplify interactions with reflection libraries.  Most documented
  * exceptions (but not errors) thrown by reflection methods may be wrapped by a subclass of
  * {@code ReflectException}.  The wrapped exception may be caught and handled directly,
- * or unwrapped with a {@link ReflectionExceptionVisitor}.</p>
+ * or unwrapped with a {@link ReflectExceptionVisitor}.</p>
  * 
  * <p>Like most of the exceptions it wraps, {@code ReflectException} is a checked exception.</p>
  */

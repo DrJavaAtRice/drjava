@@ -11,6 +11,14 @@ import edu.rice.cs.plt.recur.RecurUtil;
 
 public final class TextUtil {
   
+  public static final String NEWLINE;
+  
+  static {
+    String newline = System.getProperty("line.separator");
+    if (newline == null) { newline = "\n"; }
+    NEWLINE = newline;
+  }
+  
   /** Prevents instance creation */
   private TextUtil() {}
   
@@ -60,5 +68,14 @@ public final class TextUtil {
     Arrays.fill(result, c);
     return String.valueOf(result);
   }
+  
+  /** Determine if the given character occurs in {@code s}.  Defined in terms of {@link String#indexOf(int)}. */
+  public static boolean contains(String s, int character) { return s.indexOf(character) >= 0; }
+  
+  /**
+   * Determine if the given string occurs in {@code s}.  Defined in terms of {@link String#indexOf(String)}.
+   * This is also defined as {@link String#contains}, but is defined here for legacy support.
+   */
+  public static boolean contains(String s, String piece) { return s.indexOf(piece) >= 0; }  
   
 }

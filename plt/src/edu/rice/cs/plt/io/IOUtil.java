@@ -221,7 +221,7 @@ public final class IOUtil {
    * to a {@code FileFilter}.
    */
   public static File[] attemptListFiles(File f, Predicate<? super File> filter) {
-    return attemptListFiles(f, predicateFileFilter(filter));
+    return attemptListFiles(f, asFileFilter(filter));
   }
   
   /**
@@ -252,7 +252,7 @@ public final class IOUtil {
    * the result here is an empty iterable.  The given predicate is converted to a {@code FileFilter}.
    */
   public static Iterable<File> attemptListFilesAsIterable(File f, Predicate<? super File> filter) {
-    return attemptListFilesAsIterable(f, predicateFileFilter(filter));
+    return attemptListFilesAsIterable(f, asFileFilter(filter));
   }
   
   /**
@@ -452,6 +452,21 @@ public final class IOUtil {
    * Produce a list of the recursive contents of a file.  The result is a list beginning with
    * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
    * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
+   * the presense of loops in the system.  If an error occurs in listing a directory, that
+   * directory will be skipped.
+   * 
+   * @param f  A file (generally a directory) to be listed recursively
+   * @param filter  A filter for the list -- files that do not match will not be included
+   *                (but directories that do not match will still be traversed)
+   */
+  public static Iterable<File> listFilesRecursively(File f, Predicate<? super File> filter) {
+    return listFilesRecursively(f, asFileFilter(filter));
+  }
+  
+  /** 
+   * Produce a list of the recursive contents of a file.  The result is a list beginning with
+   * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
+   * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
    * the presense of loops in the system.
    * 
    * @param f  A file (generally a directory) to be listed recursively
@@ -462,6 +477,23 @@ public final class IOUtil {
    */
   public static Iterable<File> listFilesRecursively(File f, FileFilter filter, FileFilter recursionFilter) {
     return listFilesRecursively(f, filter, recursionFilter, new RecursionStack<File>(Wrapper.<File>factory()));
+  }
+  
+  /** 
+   * Produce a list of the recursive contents of a file.  The result is a list beginning with
+   * {@code f}, followed (if {@code f} is a directory with a canonical path}) by a recursive 
+   * listing of each of the files belonging to {@code f}.  The recursion will halt cleanly in 
+   * the presense of loops in the system.
+   * 
+   * @param f  A file (generally a directory) to be listed recursively
+   * @param filter  A filter for the list -- files that do not match will not be included
+   *                (but directories that do not match will still be traversed)
+   * @param recursionFilter  A filter controlling recursion -- directories that are rejected will
+   *                         not be traversed.
+   */
+  public static Iterable<File> listFilesRecursively(File f, Predicate<? super File> filter, 
+                                                    Predicate<? super File> recursionFilter) {
+    return listFilesRecursively(f, asFileFilter(filter), asFileFilter(recursionFilter));
   }
   
   /** Helper method for {@code listFilesRecursively} */
@@ -490,7 +522,9 @@ public final class IOUtil {
   }
   
   /**
-   * Reads the entire contents of a file and return it as a StringBuffer
+   * Reads the entire contents of a file and return it as a StringBuffer.  (We use a StringBuffer rather than a
+   * StringBuilder because that is what {@link StringWriter} supports.)
+   * 
    * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during reading
    * @throws  SecurityException  If read access to the file is denied
    */
@@ -879,7 +913,8 @@ public final class IOUtil {
 
   /**
    * Create a StringBuffer with the contents of the given {@code Reader}.  The method will not return
-   * until and end of stream has been reached.
+   * until and end of stream has been reached.  (We use a StringBuffer rather than a
+   * StringBuilder because that is what {@link StringWriter} supports.)
    */
   public static StringBuffer toStringBuffer(Reader r) throws IOException {
     StringWriter out = new StringWriter();
@@ -1015,7 +1050,7 @@ public final class IOUtil {
   
 
   /** Define a {@code FileFilter} in terms of a {@code Predicate} */
-  public static FileFilter predicateFileFilter(final Predicate<? super File> p) {
+  public static FileFilter asFileFilter(final Predicate<? super File> p) {
     return new FileFilter() {
       public boolean accept(File f) { return p.value(f); }
     };
@@ -1025,21 +1060,9 @@ public final class IOUtil {
    * Define a {@code Predicate} in terms of a {@code FileFilter} (this provides access
    * to predicate operations like {@code and} and {@code or})
    */
-  public static Predicate<File> fileFilterPredicate(final FileFilter filter) {
+  public static Predicate<File> asPredicate(final FileFilter filter) {
     return new Predicate<File>() {
       public Boolean value(File f) { return filter.accept(f); }
-    };
-  }
-  
-  /**
-   * Define a Swing file filter (for use with {@link javax.swing.JFileChooser}s) in terms if a 
-   * {@code FileFilter}
-   */
-  public static javax.swing.filechooser.FileFilter swingFileFilter(final FileFilter filter, 
-                                                                   final String description) {
-    return new javax.swing.filechooser.FileFilter() {
-      public boolean accept(File f) { return filter.accept(f); }
-      public String getDescription() { return description; }
     };
   }
   
@@ -1048,7 +1071,7 @@ public final class IOUtil {
    * a regular expression.
    */
   public static FileFilter regexpFileFilter(String regexp) {
-    return predicateFileFilter(regexpFilePredicate(regexp));
+    return asFileFilter(regexpFilePredicate(regexp));
   }
 
   /**
@@ -1066,7 +1089,7 @@ public final class IOUtil {
    * canonical case (see {@link #canonicalCase}) match a regular expression.
    */
   public static FileFilter regexpCanonicalCaseFileFilter(String regexp) {
-    return predicateFileFilter(regexpCanonicalCaseFilePredicate(regexp));
+    return asFileFilter(regexpCanonicalCaseFilePredicate(regexp));
   }
                                                     
   /**
@@ -1085,7 +1108,7 @@ public final class IOUtil {
    * end in {@code .txt})
    */
   public static FileFilter extensionFileFilter(String extension) {
-    return predicateFileFilter(extensionFilePredicate(extension));
+    return asFileFilter(extensionFilePredicate(extension));
   }
   
   /**
@@ -1107,21 +1130,21 @@ public final class IOUtil {
     public Boolean value(File f) { return attemptIsFile(f); }
   };
   
-  /** A predicate that tests whether {@link attemptIsDirectory} holds for a file */
+  /** A predicate that tests whether {@link #attemptIsDirectory} holds for a file */
   public static final Predicate<File> IS_DIRECTORY = new Predicate<File>() {
     public Boolean value(File f) { return attemptIsDirectory(f); }
   };
   
   /** A {@code FileFilter} that always accepts */
-  public static final FileFilter ALWAYS_ACCEPT = predicateFileFilter(Predicate.TRUE);
+  public static final FileFilter ALWAYS_ACCEPT = asFileFilter(Predicate.TRUE);
 
   /** A {@code FileFilter} that always rejects */
-  public static final FileFilter ALWAYS_REJECT = predicateFileFilter(Predicate.FALSE);
+  public static final FileFilter ALWAYS_REJECT = asFileFilter(Predicate.FALSE);
 
   /** A {@code FileFilter} that only accepts files for which {@link #attemptIsFile} holds */
-  public static final FileFilter ACCEPT_FILES = predicateFileFilter(IS_FILE);
+  public static final FileFilter ACCEPT_FILES = asFileFilter(IS_FILE);
 
   /** A {@code FileFilter} that only accepts files for which {@link #attemptIsDirectory} holds */
-  public static final FileFilter ACCEPT_DIRECTORIES = predicateFileFilter(IS_DIRECTORY);
+  public static final FileFilter ACCEPT_DIRECTORIES = asFileFilter(IS_DIRECTORY);
   
 }

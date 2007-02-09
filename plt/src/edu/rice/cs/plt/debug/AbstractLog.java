@@ -152,6 +152,14 @@ public abstract class AbstractLog implements Log {
     }
   }
   
+  public void logValue(String message, String name, Object value) {
+    Thread th = Thread.currentThread();
+    StackTraceElement e = DebugUtil.getCaller();
+    if (_filter.value(th, e)) {
+      write(new Date(), th, e, IterUtil.compose(processText(message), processValue(name, value)));
+    }
+  }
+  
   /**
    * Record a message containing a line for each name-value pair.  Each line will look like {@code "x: 23"}.  Values
    * are converted to strings using {@link TextUtil#toString}.  If the value is an array or an iterable that doesn't 
@@ -162,19 +170,19 @@ public abstract class AbstractLog implements Log {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
     if (_filter.value(th, e)) {
-      if (names.length == values.length) {
-        Iterable<String> namesIter = IterUtil.arrayIterable(names);
-        Iterable<Object> valuesIter = IterUtil.arrayIterable(values);
-        SizedIterable<SizedIterable<String>> messages = BinaryMappedIterable.make(namesIter, valuesIter, PROCESS_VALUE);
-        write(new Date(), th, e, IterUtil.collapse(messages));
-      }
-      else {
-        String err = "Invalid invocation of logValues() with " + names.length + " names and "  + values.length + " values";
-        write(new Date(), th, e, IterUtil.singleton(err));
-      }
+      write(new Date(), th, e, processValues(names, values));
     }
   }
   
+  public void logValues(String message, String[] names, Object... values) {
+    Thread th = Thread.currentThread();
+    StackTraceElement e = DebugUtil.getCaller();
+    if (_filter.value(th, e)) {
+      write(new Date(), th, e, IterUtil.compose(processText(message), processValues(names, values)));
+    }
+  }
+  
+
   private static SizedIterable<String> processText(String text) {
     SizedIterable<String> result = TextUtil.getLines(text);
     if (result.size() == 0) { return EMPTY_MESSAGE; }
@@ -186,6 +194,7 @@ public abstract class AbstractLog implements Log {
   }
   
   private static SizedIterable<String> processThrowable(Throwable t, boolean asCause) {
+    if (t == null) { return IterUtil.singleton("null"); }
     SizedIterable<String> result;
     if (asCause) { result = IterUtil.makeIterable("", "Caused by " + t, "at"); }
     else { result = IterUtil.makeIterable(t.toString(), "at"); }
@@ -240,6 +249,19 @@ public abstract class AbstractLog implements Log {
     new Lambda2<String, Object, SizedIterable<String>>() {
     public SizedIterable<String> value(String name, Object val) { return processValue(name, val); }
   };
+  
+  private static SizedIterable<String> processValues(String[] names, Object... values) {
+    if (names.length == values.length) {
+      Iterable<String> namesIter = IterUtil.arrayIterable(names);
+      Iterable<Object> valuesIter = IterUtil.arrayIterable(values);
+      SizedIterable<SizedIterable<String>> messages = BinaryMappedIterable.make(namesIter, valuesIter, PROCESS_VALUE);
+      return IterUtil.collapse(messages);
+    }
+    else {
+      String err = "Invalid invocation of logValues() with " + names.length + " names and "  + values.length + " values";
+      return IterUtil.singleton(err);
+    }
+  }
   
   /** Convert a time to a string of the form {@code "12:23:03.013"} */
   protected String formatTime(Date time) {

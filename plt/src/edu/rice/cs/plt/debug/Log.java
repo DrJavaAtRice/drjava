@@ -12,10 +12,10 @@ public interface Log {
   /** Record the given message */
   public void log(String message);
   
-  /** Record the given exception (or other throwable) */
+  /** Record the given exception (or other throwable); may be {@code null} */
   public void log(Throwable t);
   
-  /** Record the given exception (or other throwable) with a descriptive message */
+  /** Record the given exception (or other throwable) with a descriptive message; {@code t} may be {@code null} */
   public void log(String message, Throwable t);
   
   /**
@@ -51,13 +51,29 @@ public interface Log {
   /** Record the current thread's stack trace with a descriptive message */
   public void logStack(String message);
   
-  /** Record the name and value of some variable or expression */
+  /** Record the name and value of some variable or expression; {@code value} may be {@code null} */
   public void logValue(String name, Object value);
+
+  /**
+   * Record the name and value of some variable or expression with a descriptive message; {@code value}
+   * may be {@code null}
+   */
+  public void logValue(String message, String name, Object value);
 
   /**
    * Record the names and values of a list of variables or expressions.  The two arrays are assumed
    * to have the same length, although implementations are encouraged to handle violations of this 
-   * assumption cleanly by, for example, logging an error message.
+   * assumption cleanly by, for example, logging an error message.  Any member of {@code values}
+   * may be {@code null}.
    */
   public void logValues(String[] names, Object... values);
+
+  /**
+   * Record the names and values of a list of variables or expressions with a descriptive message.
+   * The two arrays are assumed to have the same length, although implementations are encouraged to 
+   * handle violations of this assumption cleanly by, for example, logging an error message.  Any member
+   * of {@code values} may be {@code null}.
+   */
+  public void logValues(String message, String[] names, Object... values);
+
 }

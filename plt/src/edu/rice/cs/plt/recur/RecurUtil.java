@@ -7,6 +7,7 @@ import edu.rice.cs.plt.lambda.Predicate2;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.collect.TotalMap;
 import edu.rice.cs.plt.reflect.ReflectUtil;
+import edu.rice.cs.plt.text.TextUtil;
 
 /**
  * TODO: Is the extra overhead required to check for infinite loops enough to justify non-checking
@@ -879,19 +880,17 @@ public final class RecurUtil {
     /** Arrays are printed with a single entry on each line; nested arrays use {@link #DEEP_BRACED} */
     DEEP_MULTILINE {
       protected String prefix() { return ""; }
-      protected String delimiter() { return _newline; }
+      protected String delimiter() { return TextUtil.NEWLINE; }
       protected String suffix() { return ""; }
       protected ArrayStringMode nestedMode() { return DEEP_BRACED; }
     },
     /** Arrays are printed with a single entry on each line; nested arrays use {@link #SHALLOW_BRACED} */
     SHALLOW_MULTILINE {
       protected String prefix() { return ""; }
-      protected String delimiter() { return _newline; }
+      protected String delimiter() { return TextUtil.NEWLINE; }
       protected String suffix() { return ""; }
       protected ArrayStringMode nestedMode() { return SHALLOW_BRACED; }
     }; 
-    
-    private static final String _newline = System.getProperty("line.separator");
     
     protected abstract String prefix();
     protected abstract String delimiter();
