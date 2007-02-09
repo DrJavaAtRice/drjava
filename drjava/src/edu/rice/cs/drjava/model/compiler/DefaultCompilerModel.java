@@ -345,7 +345,7 @@ public class DefaultCompilerModel implements CompilerModel {
     */
   private List<? extends File> _compileLanguageLevelsFiles(List<? extends File> files, List<CompilerError> errors) {
     // TODO: The classpath (and sourcepath, bootclasspath) should be an argument passed to Language Levels.
-    LanguageLevelConverter llc = new LanguageLevelConverter(getActiveCompiler().getName());
+    LanguageLevelConverter llc = new LanguageLevelConverter(getActiveCompiler().version());
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
       llc.convert(files.toArray(new File[0]));
     

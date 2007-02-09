@@ -37,6 +37,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Arrays;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** A CompilerInterface implementation for signifying that no compiler is available.
  *  @version $Id$
@@ -68,6 +69,8 @@ public class NoCompilerAvailable implements CompilerInterface {
   public boolean isAvailable() { return false; }
 
   public String getName() { return "(no compiler available)"; }
+  
+  public JavaVersion version() { return JavaVersion.UNRECOGNIZED; }
 
   public String toString() { return getName(); }
 

@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.model.compiler;
 
 import  java.io.File;
 import java.util.List;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** The minimum interface that a compiler must meet to be used by DrJava.
  *  @version $Id$
@@ -65,6 +66,9 @@ public interface CompilerInterface {
 
   /** Returns the name of this compiler, appropriate to show to the user. */
   String getName();
+  
+  /** The latest version of Java supported by the compiler */
+  JavaVersion version();
 
   /** Should return info about compiler, at least including name. */
   String toString();
