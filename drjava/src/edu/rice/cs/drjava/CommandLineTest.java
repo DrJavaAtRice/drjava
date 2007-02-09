@@ -33,6 +33,12 @@
 
 package edu.rice.cs.drjava;
 
+import javax.swing.text.BadLocationException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
+
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
@@ -41,12 +47,7 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
-import javax.swing.text.BadLocationException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-
+import edu.rice.cs.plt.debug.DebugUtil;
 /**
  * Tests opening/creating files specified as command line arguments.
  * @version $Id$

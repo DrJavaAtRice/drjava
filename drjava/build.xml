@@ -15,19 +15,18 @@
   <property name="java14-home" value="${env.JAVA14_HOME}" />
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
   
-  <!-- Testing defaults -->
+  <!-- Default settings for properties -->
   <property name="test-spec" value="" />
   <property name="test-repeat" value="1" /> <!-- TODO: Use this value -->
   <property name="test-timeout" value="1440" />
+  <property name="test-formatter" value="oneline" />
+  <property name="clean-can-fail" value="yes" /> 
+  <property name="force-server" value="no" />
+  <property name="plt.debug.log" value="void" />
+  <property name="plt.error.log" value="popup" />
   
-  <!-- By default, clean can fail -->
-  <property name="clean-can-fail" value="yes" />
- 
-  <!-- By default, don't append anything extra to the tag -->
-  <property name="tag-append" value="" />
-  
-  <!-- By default, generate development (non-stable) build products -->
-  <property name="is-development" value="yes" />
+  <property name="is-development" value="yes" /> <!-- Development or stable release -->
+  <property name="tag-append" value="" /> <!-- "stable", "beta", or none -->
   
   <!-- Don't use or inherit the CLASSPATH environment variable for anything -->
   <property name="build.sysclasspath" value="ignore" />
@@ -56,6 +55,26 @@
     <echo message="${readable-project-name} Build Scripts" />
     <echo message="--------------------------------------------------------------------" />
     <echo message="Type 'ant -projecthelp' or 'ant -p' to see the list of targets." />
+    <echo message="" />
+    <echo message="The following properties may be defined (using '-Dname=value') for" />
+    <echo message="custom behavior:" />
+    <echo message="" />
+    <echo message="test-spec: A matching string to filter the tests to be run; may" />
+    <echo message="           be comma-delimited to run multiple test sets." />
+    <echo message="           (Default: empty string)" />
+    <echo message="test-timeout: A time limit (in minutes) for running a test set." />
+    <echo message="              (Default: 1440)" />
+    <echo message="test-formatter: The kind of formatter to use for test results:" />
+    <echo message="                one of 'quiet', 'oneline', 'brief', 'plain', or" />
+    <echo message="                'xml'. (Default: oneline)" />
+    <echo message="clean-can-fail: Whether the failure of a 'clean' operation can halt" />
+    <echo message="                the build. (Default: yes)" />
+    <echo message="force-server: Whether the '-server' option should always be used when" />
+    <echo message="              running or testing. (Default: no)" />
+    <echo message="plt.debug.log: System property used to initialize the debug log when" />
+    <echo message="               running or testing. (Default: void)" />
+    <echo message="plt.error.log: System property used to initialize the error log when" />
+    <echo message="               running or testing. (Default: popup)" />
     <echo message="" />
     <echo message="For this build file to function properly, the following environment " />
     <echo message="variables should be defined:" />
@@ -382,14 +401,14 @@
     </and>
   </selector>
  
-  <target name="do-test-15" depends="assert-15, resolve-java15-tools">
+  <target name="do-test-15"
+          depends="assert-15, resolve-java15-tools, resolve-jvm-args, resolve-test-formatter-class">
     <echo message="Running all 5.0 tests matching '${test-filter-string}' under Java 5.0" />
     <junit haltonfailure="${junit-haltonfailure}"
 	   failureproperty="do-test-15-failed"
 	   fork="yes"
 	   forkmode="perTest"
 	   maxmemory="256M"
-     includeAntRuntime="yes"
  	   dir="${basedir}">
       <classpath>
         <pathelement location="${java15-tools}" />
@@ -400,18 +419,25 @@
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
       </classpath>
-      <formatter classname="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter" usefile="false" />
+      <assertions>
+        <enable />
+      </assertions>
+      <syspropertyset>
+        <propertyref prefix="plt." />
+      </syspropertyset>
+      <jvmarg line="${jvm-args}" />
+      <formatter classname="${test-formatter-class}" usefile="false" />
       <batchtest>
         <fileset dir="classes/test">
           <selector refid="tests-to-run" />
         </fileset>
       </batchtest>
-      <jvmarg value="-ea"/> 
     </junit>
     <fail if="do-test-15-failed" message="One or more unit tests failed."/>
   </target>
 
-  <target name="do-test-14" depends="resolve-java14-exec, resolve-java14-tools">
+  <target name="do-test-14"
+          depends="resolve-java14-exec, resolve-java14-tools, resolve-jvm-args, resolve-test-formatter-class">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
     <echo message="WARNING: 1.4-compatible test classes are (intentionally) not checked for Java 5 API references." />
     <echo message="If such references exist, these tests will probably fail." />
@@ -431,19 +457,26 @@
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
-      <formatter classname="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter" usefile="false" />
+      <assertions>
+        <enable />
+      </assertions>
+      <syspropertyset>
+        <propertyref prefix="plt." />
+      </syspropertyset>
+      <jvmarg line="${jvm-args}" />
+      <formatter classname="${test-formatter-class}" usefile="false" />
       <batchtest>
         <fileset dir="classes/test-14">
           <selector refid="tests-to-run" />
         </fileset>
       </batchtest>
-      <jvmarg value="-ea"/> 
     </junit>
     <fail if="do-test-14-failed" message="One or more unit tests failed."/>
   </target>
 
-  <target name="do-test-14-in-15" depends="assert-15, resolve-java15-tools">
-    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
+  <target name="do-test-14-in-15"
+          depends="assert-15, resolve-java15-tools, resolve-jvm-args, resolve-test-formatter-class">
+    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />    
     <junit haltonfailure="${junit-haltonfailure}"
 	   failureproperty="do-test-14-in-15-failed"
 	   fork="yes"
@@ -459,13 +492,19 @@
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
-      <formatter classname="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter" usefile="false" />
+      <assertions>
+        <enable />
+      </assertions>
+      <syspropertyset>
+        <propertyref prefix="plt." />
+      </syspropertyset>
+      <jvmarg line="${jvm-args}" />
+      <formatter classname="${test-formatter-class}" usefile="false" />
       <batchtest>
         <fileset dir="classes/test-14">
           <selector refid="tests-to-run" />
         </fileset>
       </batchtest>
-      <jvmarg value="-ea"/> 
     </junit>
     <fail if="do-test-14-in-15-failed" message="One or more unit tests failed."/>
   </target>
@@ -474,7 +513,7 @@
   <target name="run" depends="run-15" description="Shortcut for 'run-15'">
   </target>
   
-  <target name="run-15" depends="compile-15, assert-15, resolve-java15-tools"
+  <target name="run-15" depends="compile-15, assert-15, resolve-java15-tools, resolve-jvm-args"
           description="Run the main class (5.0 version) under Java 5.0 (after compiling)">
     <echo message="Running the DrJava application (5.0 classes in Java 5.0)" />
     <java classname="${main-class}" fork="yes" spawn="yes">
@@ -483,10 +522,17 @@
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
       </classpath>
+      <assertions>
+        <enable />
+      </assertions>
+      <syspropertyset>
+        <propertyref prefix="plt." />
+      </syspropertyset>
+      <jvmarg line="${jvm-args}" />
     </java>
   </target>
         
-  <target name="run-14" depends="compile-14, resolve-java14-exec, resolve-java14-tools"
+  <target name="run-14" depends="compile-14, resolve-java14-exec, resolve-java14-tools, resolve-jvm-args"
           description="Run the main class (1.4 version) under Java 1.4 (after compiling)">
     <echo message="Running the DrJava application (1.4 classses in Java 1.4)" />
     <java classname="${main-class}" jvm="${java14-exec}" fork="yes" spawn="yes">
@@ -495,10 +541,17 @@
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
+      <assertions>
+        <enable />
+      </assertions>
+      <syspropertyset>
+        <propertyref prefix="plt." />
+      </syspropertyset>
+      <jvmarg line="${jvm-args}" />
     </java>
   </target>
         
-  <target name="run-14-in-15" depends="compile-14, assert-15, resolve-java15-tools"
+  <target name="run-14-in-15" depends="compile-14, assert-15, resolve-java15-tools, resolve-jvm-args"
           description="Run the main class (1.4 version) under Java 5.0 (after compiling)">
     <echo message="Running the DrJava application (1.4 classses in Java 5.0)" />
     <java classname="${main-class}" fork="yes" spawn="yes">
@@ -507,6 +560,13 @@
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
+      <assertions>
+        <enable />
+      </assertions>
+      <syspropertyset>
+        <propertyref prefix="plt." />
+      </syspropertyset>
+      <jvmarg line="${jvm-args}" />
     </java>
   </target>
         
@@ -985,6 +1045,40 @@
     </condition>
     <!-- else... -->
     <property name="development-value" value="false" />
+  </target>
+  
+  <target name="resolve-jvm-args">
+    <condition property="jvm-args" value="-server">
+      <istrue value="${force-server}" />
+    </condition>
+    <!-- else... -->
+    <property name="jvm-args" value="" />
+  </target>
+  
+  <target name="resolve-test-formatter-class">
+    <condition property="test-formatter-class"
+               value="edu.rice.cs.plt.ant.QuietJUnitResultFormatter">
+      <equals arg1="quiet" arg2="${test-formatter}" />
+    </condition>
+    <condition property="test-formatter-class"
+               value="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter">
+      <equals arg1="oneline" arg2="${test-formatter}" />
+    </condition>
+    <condition property="test-formatter-class"
+               value="org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter">
+      <equals arg1="brief" arg2="${test-formatter}" />
+    </condition>
+    <condition property="test-formatter-class"
+               value="org.apache.tools.ant.taskdefs.optional.junit.PlainJUnitResultFormatter">
+      <equals arg1="plain" arg2="${test-formatter}" />
+    </condition>
+    <condition property="test-formatter-class"
+               value="org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter">
+      <equals arg1="xml" arg2="${test-formatter}" />
+    </condition>
+    <!-- else... -->
+    <property name="test-formatter-class"
+              value="edu.rice.cs.plt.ant.OneLineJUnitResultFormatter" />
   </target>
   
   <target name="resolve-version-tag">

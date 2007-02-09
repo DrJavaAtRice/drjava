@@ -62,6 +62,7 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 import edu.rice.cs.util.newjvm.ExecJVM;
+import edu.rice.cs.plt.debug.DebugUtil;
 
 /** Startup class for DrJava consisting entirely of static members.  The main method reads the .drjava file (creating 
  *  one if none exists) to get the critical information required to start the main JVM for DrJava: 
@@ -113,6 +114,9 @@ public class DrJava {
     // Platform-specific UI setup.
     PlatformFactory.ONLY.beforeUISetup();
     
+    DebugUtil.error.log("This is the error log");
+    DebugUtil.debug.log("This is the debug log");
+
     new SplashScreen().flash();
 //    Utilities.showDebug("Calling configureAndLoadDrJavaRoot with args = " + args);
     configureAndLoadDrJavaRoot(args); 
