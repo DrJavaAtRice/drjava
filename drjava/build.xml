@@ -6,6 +6,27 @@
      
 <project name="drjava" default="help">
 
+  <!-- Extension containing various tools, including "for" and "if" -->
+  <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
+
+  <!-- Check if a property file has been specified, and if so, load it -->
+  <!-- The following is is a no-op if drjava-props has been set on the
+       command line or ANT_OPTS environment variable -->
+  <property name="drjava-props" value=""/>
+  <if>
+    <not>
+      <equals arg1="${drjava-props}" arg2=""/>
+    </not>
+    <then>
+      <!-- drjava-props has been set, make sure the file exists -->
+      <available property="drjava-props-exists" file="${drjava-props}"/>
+      <fail message="Can't find property file ${drjava-props}." unless="drjava-props-exists" />
+      <!-- Load the property file -->
+      <!-- <echo message="Loading property file ${drjava-props}." /> -->
+      <property file="${drjava-props}"/>
+    </then>
+  </if>
+
   <property name="readable-project-name" value="DrJava" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
   <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
@@ -16,6 +37,9 @@
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
   
   <!-- Default settings for properties -->
+  <!-- If test-halt is set to true, testing will stop after the first
+       failure; if it's set to false, then all unit tests will be run. -->
+  <property name="test-halt" value="false" />
   <property name="test-spec" value="" />
   <property name="test-repeat" value="1" /> <!-- TODO: Use this value -->
   <property name="test-timeout" value="1440" />
@@ -42,9 +66,6 @@
        as long as it's not, we can use this extension from the Clover developers. -->
   <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
   <extendclasspath path="lib/buildlib/junit.jar" />
-
-  <!-- Extension containing various tools, including "for" and "if" -->
-  <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
                  
   <!-- ***********
        Help Target
@@ -59,6 +80,11 @@
     <echo message="The following properties may be defined (using '-Dname=value') for" />
     <echo message="custom behavior:" />
     <echo message="" />
+    <echo message="drjava-props: An external properties file that is loaded at the" />
+    <echo message="              beginning of the Ant session. The file should be" />
+    <echo message="              a plain text file with 'name=value' pairs, one per" />
+    <echo message="              line. They work the same was as the properties" />
+    <echo message="              specified on the command line using '-Dname=value'." />
     <echo message="test-spec: A matching string to filter the tests to be run; may" />
     <echo message="           be comma-delimited to run multiple test sets." />
     <echo message="           (Default: empty string)" />
@@ -67,6 +93,9 @@
     <echo message="test-formatter: The kind of formatter to use for test results:" />
     <echo message="                one of 'quiet', 'oneline', 'brief', 'plain', or" />
     <echo message="                'xml'. (Default: oneline)" />
+    <echo message="test-halt: Set to 'true' to make unit testing stop after the" />
+    <echo message="           first failure; default is 'false', which runs all" />
+    <echo message="           unit tests, even after failures or errors have occurred." />
     <echo message="clean-can-fail: Whether the failure of a 'clean' operation can halt" />
     <echo message="                the build. (Default: yes)" />
     <echo message="force-server: Whether the '-server' option should always be used when" />
@@ -404,7 +433,7 @@
   <target name="do-test-15"
           depends="assert-15, resolve-java15-tools, resolve-jvm-args, resolve-test-formatter-class">
     <echo message="Running all 5.0 tests matching '${test-filter-string}' under Java 5.0" />
-    <junit haltonfailure="${junit-haltonfailure}"
+    <junit haltonfailure="${test-halt}"
 	   failureproperty="do-test-15-failed"
 	   fork="yes"
 	   forkmode="perTest"
@@ -441,7 +470,7 @@
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
     <echo message="WARNING: 1.4-compatible test classes are (intentionally) not checked for Java 5 API references." />
     <echo message="If such references exist, these tests will probably fail." />
-    <junit haltonfailure="${junit-haltonfailure}"
+    <junit haltonfailure="${test-halt}"
 	   failureproperty="do-test-14-failed"
 	   fork="yes"
 	   forkmode="perTest"
@@ -477,7 +506,7 @@
   <target name="do-test-14-in-15"
           depends="assert-15, resolve-java15-tools, resolve-jvm-args, resolve-test-formatter-class">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />    
-    <junit haltonfailure="${junit-haltonfailure}"
+    <junit haltonfailure="${test-halt}"
 	   failureproperty="do-test-14-in-15-failed"
 	   fork="yes"
 	   forkmode="perTest"
