@@ -41,7 +41,7 @@
        failure; if it's set to false, then all unit tests will be run. -->
   <property name="test-halt" value="false" />
   <property name="test-spec" value="" />
-  <property name="test-repeat" value="1" /> <!-- TODO: Use this value -->
+  <property name="test-repeat" value="1" />
   <property name="test-timeout" value="1440" />
   <property name="test-formatter" value="oneline" />
   <property name="clean-can-fail" value="yes" /> 
@@ -65,6 +65,10 @@
   <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
        as long as it's not, we can use this extension from the Clover developers. -->
   <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
+
+  <!-- fornum task, used for test-repeat -->
+  <taskdef name="fornum" classname="edu.rice.cs.util.ant.ForNumTask" classpath="lib/buildlib/ant-fornum.jar" onerror="report"/>
+
   <extendclasspath path="lib/buildlib/junit.jar" />
                  
   <!-- ***********
@@ -90,6 +94,7 @@
     <echo message="           (Default: empty string)" />
     <echo message="test-timeout: A time limit (in minutes) for running a test set." />
     <echo message="              (Default: 1440)" />
+    <echo message="test-repeat: The number (>=1) of times the tests should be repeated." />
     <echo message="test-formatter: The kind of formatter to use for test results:" />
     <echo message="                one of 'quiet', 'oneline', 'brief', 'plain', or" />
     <echo message="                'xml'. (Default: oneline)" />
@@ -400,27 +405,43 @@
   </target>
   
   <target name="iterate-tests">
-    <if>
-      <equals arg1="${test-spec}" arg2="" />
-      <then>
-        <limit minutes="${test-timeout}" failonerror="true">
-          <antcall target="${do-test-target}">
-            <param name="test-filter-string" value="" />
-          </antcall>
-        </limit>
-      </then>
-      <else>
-        <for list="${test-spec}" param="test-filter-string-attribute">
-          <sequential>
-            <limit minutes="${test-timeout}" failonerror="true">
-              <antcall target="${do-test-target}">
-                <param name="test-filter-string" value="@{test-filter-string-attribute}" />
-              </antcall>
-            </limit>
-          </sequential>
-        </for>
-      </else>
-    </if>
+    <!-- Repeat tests 'test-repeat' times. -->
+    <fornum count="${test-repeat}" param="iteration"><sequential>
+      <!-- Unless 'test-repeat' is '1', output a status message stating the
+           current iteration and the total number of iterations. -->
+      <if>
+        <not>
+          <equals arg1="${test-repeat}" arg2="1"/>
+        </not>
+        <then>
+          <!-- Add 1 to iteration number. -->
+          <math result="iteration1" operand1="@{iteration}" operation="+" operand2="1" datatype="int"/>
+          <!-- Output message. -->
+          <echo message="Running iteration ${iteration1} of ${test-repeat}..."/>
+        </then>
+      </if>
+      <if>
+        <equals arg1="${test-spec}" arg2="" />
+        <then>
+          <limit minutes="${test-timeout}" failonerror="true">
+            <antcall target="${do-test-target}">
+              <param name="test-filter-string" value="" />
+            </antcall>
+          </limit>
+        </then>
+        <else>
+          <for list="${test-spec}" param="test-filter-string-attribute">
+            <sequential>
+              <limit minutes="${test-timeout}" failonerror="true">
+                <antcall target="${do-test-target}">
+                  <param name="test-filter-string" value="@{test-filter-string-attribute}" />
+                </antcall>
+              </limit>
+            </sequential>
+          </for>
+        </else>
+      </if>
+    </sequential></fornum>
   </target>
   
   <selector id="tests-to-run">
@@ -500,18 +521,18 @@
         </fileset>
       </batchtest>
     </junit>
-    <fail if="do-test-14-failed" message="One or more unit tests failed."/>
+     <fail if="do-test-14-failed" message="One or more unit tests failed."/>
   </target>
 
   <target name="do-test-14-in-15"
           depends="assert-15, resolve-java15-tools, resolve-jvm-args, resolve-test-formatter-class">
     <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />    
     <junit haltonfailure="${test-halt}"
-	   failureproperty="do-test-14-in-15-failed"
-	   fork="yes"
-	   forkmode="perTest"
-	   maxmemory="256M"
-	   dir="${basedir}">
+	     failureproperty="do-test-14-in-15-failed"
+	     fork="yes"
+	     forkmode="perTest"
+	     maxmemory="256M"
+	     dir="${basedir}">
       <classpath>
         <pathelement location="${java15-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
