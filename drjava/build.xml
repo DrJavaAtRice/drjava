@@ -11,7 +11,7 @@
 
   <!-- Check if a property file has been specified, and if so, load it -->
   <!-- The following is is a no-op if drjava-props has been set on the
-       command line or ANT_OPTS environment variable -->
+       command line or ANT_ARGS environment variable -->
   <property name="drjava-props" value=""/>
   <if>
     <not>
