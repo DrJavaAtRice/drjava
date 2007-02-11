@@ -904,7 +904,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    *  @param selEnd the offset of the last character of the region to indent
    */
   public void indentLines(int selStart, int selEnd) {
-    try { indentLines(selStart, selEnd, Indenter.OTHER, null); }
+    try { indentLines(selStart, selEnd, Indenter.IndentReason.OTHER, null); }
     catch (OperationCanceledException oce) {
       // Indenting without a ProgressMonitor should never be cancelled!
       throw new UnexpectedException(oce);
@@ -920,7 +920,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    *        (indent logic may vary slightly based on the trigger action)
    *  @param pm used to display progress, null if no reporting is desired
    */
-  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
+  public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException {
     
     // Begins a compound edit.
@@ -962,7 +962,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    *        (indent logic may vary slightly based on the trigger action)
    *  @param pm used to display progress, null if no reporting is desired
    */
-  private void _indentBlock(final int start, final int end, int reason, ProgressMonitor pm)
+  private void _indentBlock(final int start, final int end, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException, BadLocationException {
     
     // Keep marker at the end. This Position will be the correct endpoint no matter how we change 
@@ -994,7 +994,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Indents a line using the Indenter.  Public ONLY for testing purposes. Assumes writeLock is already held.*/
-  public boolean _indentLine(int reason) { return getIndenter().indent(this, reason); }
+  public boolean _indentLine(Indenter.IndentReason reason) { return getIndenter().indent(this, reason); }
   
   /** Returns the "intelligent" beginning of line.  If currPos is to the right of the first 
    *  non-whitespace character, the position of the first non-whitespace character is returned.  

@@ -61,7 +61,7 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
   /** @param doc The AbstractDJDocument containing the current line.
    *  @return true iff the last block/expression-list opened before the start of the current line begins with '{'. 
    */
-  boolean applyRule(AbstractDJDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     // PRE: We are inside a {.
     
     int origin = doc.getCurrentLocation();

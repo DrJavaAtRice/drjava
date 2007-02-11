@@ -359,9 +359,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
 
     /** This method tells what the reason should be for spawning this indent event
-     *  Defaults to Indenter.OTHER
+     *  Defaults to Indenter.IndentReason.OTHER
      */
-    protected int getIndentReason() { return Indenter.OTHER; }
+    protected Indenter.IndentReason getIndentReason() { return Indenter.IndentReason.OTHER; }
 
     /** Handle the "key typed" event from the text field. Calls the default action to make sure the right things
      *  happen, then makes a call to indentLine().
@@ -391,7 +391,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     /* overriding this method is important so that pressing the enter key causes
      * different indentation than pressing other keys, for bug 681203
      */
-    protected int getIndentReason() { return Indenter.ENTER_KEY_PRESS; }
+    protected Indenter.IndentReason getIndentReason() { return Indenter.IndentReason.ENTER_KEY_PRESS; }
   };
 
   /** Likewise, regular text keys like '{', '}', and ':' do not have special actions that are returned by 
@@ -1086,7 +1086,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    *  @param reason - the reason for the indent
    *  @param pm - the ProgressMonitor used by the indenter
    */
-  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
+  protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
     //_mainFrame.hourglassOn();
     // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
     try {

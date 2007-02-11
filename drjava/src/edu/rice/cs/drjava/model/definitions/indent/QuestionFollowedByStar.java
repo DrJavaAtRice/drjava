@@ -61,7 +61,7 @@ public class QuestionFollowedByStar extends IndentRuleQuestion {
    *  @param doc AbstractDJDocument containing the line to be indented.
    *  @return true if this node's rule holds.
    */
-  boolean applyRule(AbstractDJDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     try {
       int charPos = doc.getFirstNonWSCharPos(doc.getCurrentLocation(), true);
       

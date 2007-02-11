@@ -62,11 +62,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
       "      )\n";
  
     _setDocText(_text);
-    _action.indentLine(_doc, 0, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 7, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 7, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 8, Indenter.OTHER); // Aligns second line.
+    _action.indentLine(_doc, 8, Indenter.IndentReason.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
   }
@@ -87,11 +87,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
      "             arg2, arg3) + 4;";
  
     _setDocText(_text);
-    _action.indentLine(_doc, 0, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 18, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 18, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 20, Indenter.OTHER); // Aligns second line.
+    _action.indentLine(_doc, 20, Indenter.IndentReason.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
     
@@ -107,11 +107,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
      "{}";
 
     _setDocText(_text);
-    _action.indentLine(_doc, 0, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 15, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 15, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 16, Indenter.OTHER); // Aligns second line.
+    _action.indentLine(_doc, 16, Indenter.IndentReason.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
  
@@ -129,11 +129,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
      "{}";
 
     _setDocText(_text);
-    _action.indentLine(_doc, 0, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 15, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 15, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 20, Indenter.OTHER); // Aligns second line.
+    _action.indentLine(_doc, 20, Indenter.IndentReason.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
  
     // (5) 
@@ -152,11 +152,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
      "      }]";
 
     _setDocText(_text);
-    _action.indentLine(_doc, 0, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 6, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 6, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 10, Indenter.OTHER); // Aligns second line.
+    _action.indentLine(_doc, 10, Indenter.IndentReason.OTHER); // Aligns second line.
     assertEquals("Line aligned to open bracket.", _aligned, _doc.getText()); 
 
   }
@@ -176,11 +176,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
      "               bar(), arg3) + 4;";
  
     _setDocText(_text);
-    _action.indentLine(_doc, 0, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 17, Indenter.OTHER); // Does nothing.
+    _action.indentLine(_doc, 17, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.indentLine(_doc, 25, Indenter.OTHER); // Aligns second line.
+    _action.indentLine(_doc, 25, Indenter.IndentReason.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
   }
@@ -208,13 +208,13 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
       "    k);";
  
     _setDocText(_text);
-    _action.indentLine(_doc, 14, Indenter.OTHER); // line 3
-    _action.indentLine(_doc, 27, Indenter.OTHER); // line 4
-    _action.indentLine(_doc, 43, Indenter.OTHER); // line 5
+    _action.indentLine(_doc, 14, Indenter.IndentReason.OTHER); // line 3
+    _action.indentLine(_doc, 27, Indenter.IndentReason.OTHER); // line 4
+    _action.indentLine(_doc, 43, Indenter.IndentReason.OTHER); // line 5
     assertEquals("Lines aligned plus one level.",
                  _aligned, _doc.getText());
     
-    _action.indentLine(_doc, 54, Indenter.OTHER); // after baz()
+    _action.indentLine(_doc, 54, Indenter.IndentReason.OTHER); // after baz()
     assertEquals("Cursor after baz().", _aligned, _doc.getText());
   }
 }

@@ -49,9 +49,10 @@ class QuestionCurrLineEmpty extends IndentRuleQuestion {
 
   /** Determines if the current line in the document is empty.
     * @param doc AbstractDJDocument containing the line to be indented.
+    * @param reason The reason that the the intentation is being done
     * @return true if this node's rule holds.
     */
-  boolean applyRule(AbstractDJDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     try {
       // Determine if there are only whitespace chars by seeing if the first non-WS char is the endOfLine
       int here = doc.getCurrentLocation();

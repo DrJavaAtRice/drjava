@@ -61,8 +61,8 @@ public final class IndentRuleWithTraceTest extends IndentRulesTestCase{
       "}\n";
 
     _setDocText(text);
-    rule1.indentLine(_doc, 23, Indenter.OTHER);
-    rule1.indentLine(_doc, 75, Indenter.OTHER);
+    rule1.indentLine(_doc, 23, Indenter.IndentReason.OTHER);
+    rule1.indentLine(_doc, 75, Indenter.IndentReason.OTHER);
 
     String[] expected = {"edu.rice.cs.drjava.model.definitions.indent.QuestionInsideComment No",
     "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsParenOrBracket No",

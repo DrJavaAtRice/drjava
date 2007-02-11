@@ -65,7 +65,7 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
    * @return True iff the current line in the document starts with the
    * character sequence specified by the String field _prefix.
    */
-  boolean applyRule(AbstractDJDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     try {
       // Find the first non-whitespace character on the current line.
       

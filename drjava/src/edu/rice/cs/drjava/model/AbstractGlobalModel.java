@@ -101,6 +101,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener ;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo ;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
@@ -3964,7 +3965,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().getIndentOfCurrStmt(pos, delims, whitespace);
     }
     
-    public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
+    public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
       throws OperationCanceledException {
       getDocument().indentLines(selStart, selEnd, reason, pm);
     }     

@@ -56,10 +56,11 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
   /** Properly indents the line that the caret is currently on. Replaces all whitespace characters at the beginning
     * of the line with the appropriate spacing or characters.
     * @param doc AbstractDJDocument containing the line to be indented.
+    * @param reason The reason that the indentition is taking place
     * @return true if the caller should update the current location itself,
     * false if the indenter has already handled this
     */
-  public boolean indentLine(AbstractDJDocument doc, int reason) {
+  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
 
     /** This method is simply a call to getIndentOfCurrStmt, which is fully tested in IndentHelperTest, so no additional

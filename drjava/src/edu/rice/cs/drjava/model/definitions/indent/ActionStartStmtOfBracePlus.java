@@ -63,10 +63,11 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc AbstractDJDocument containing the line to be indented.
+   * @param reason The reason that the indentation is taking place
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(AbstractDJDocument doc, int reason) {
+  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
     int pos = doc.getCurrentLocation();
 

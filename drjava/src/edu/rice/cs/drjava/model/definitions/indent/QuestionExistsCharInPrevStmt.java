@@ -54,7 +54,7 @@ public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
    * Searches through the previous statement to find if it has the current character not in a 
    * comment and not in a string
    */
-  boolean applyRule(AbstractDJDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     //Find the end of the previous line
     int endPreviousStatement;
     try {

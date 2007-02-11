@@ -53,7 +53,7 @@ public class ActionBracePlus extends IndentRuleAction {
     * @param doc AbstractDJDocument containing the line to be indented.
     * @return true if the caller should update the current location, false if the indenter has already done this.
     */
-  public boolean indentLine(AbstractDJDocument doc, int reason) {
+  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
     int here = doc.getCurrentLocation();
     int startLine = doc.getLineStartPos(here);

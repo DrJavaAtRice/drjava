@@ -139,10 +139,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(text, doc);
     doc.gotoLine(2);
     /* First test that indentation caused not by an enter press inserts no star */
-    doc._indentLine(Indenter.OTHER);
+    doc._indentLine(Indenter.IndentReason.OTHER);
     _assertContents(noStarAdded, doc);
     /* Now test that indentation caused by an enter press does insert a star */
-    doc._indentLine(Indenter.ENTER_KEY_PRESS);
+    doc._indentLine(Indenter.IndentReason.ENTER_KEY_PRESS);
     _assertContents(starAdded, doc);
   }
 
@@ -171,10 +171,10 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(text, doc);
     doc.gotoLine(3);
     /* First test that indentation caused not by an enter press inserts no star */
-    doc._indentLine(Indenter.OTHER);
+    doc._indentLine(Indenter.IndentReason.OTHER);
     _assertContents(noStarAdded, doc);
     /* Now test that indentation caused by an enter press does insert a star */
-    doc._indentLine(Indenter.ENTER_KEY_PRESS);
+    doc._indentLine(Indenter.IndentReason.ENTER_KEY_PRESS);
     _assertContents(starAdded, doc);
   }
 

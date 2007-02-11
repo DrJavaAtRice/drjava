@@ -94,11 +94,11 @@ public abstract class IndentRuleWithTrace implements IndentRule{
    *  line with the appropriate spacing or characters.
    *  @param doc AbstractDJDocument containing the line to be indented.
    *  @param pos ?
-   *  @param reason ?
+   *  @param reason The reason that the indentation is taking place
    *  @return true if the caller should update the current location itself,
    *          false if the indenter has already handled this
    */
-  public boolean indentLine(AbstractDJDocument doc, int pos, int reason) {
+  public boolean indentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     indentLine(doc, reason);
@@ -107,7 +107,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
     return false;
   }
 
-  public boolean indentLine(AbstractDJDocument doc, int reason) {
+  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
 
     //Add the next line, and every time something is indented, the indent trace will be printed

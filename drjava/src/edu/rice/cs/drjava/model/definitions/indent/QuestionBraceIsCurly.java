@@ -49,9 +49,10 @@ public class QuestionBraceIsCurly extends IndentRuleQuestion {
   public QuestionBraceIsCurly(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
   
   /** @param doc The AbstractDJDocument containing the current line.
+    * @param reason The reason that the indentation is taking place
     * @return True iff the last block/expression list opened before the start of the current line opened with '{'. 
     */
-  boolean applyRule(AbstractDJDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     // PRE: We are not inside a multiline comment.
     // PRE: The closest opening brace is not a '(' or a '['.
 

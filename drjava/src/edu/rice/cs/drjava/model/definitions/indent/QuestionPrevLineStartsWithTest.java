@@ -48,14 +48,14 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     
     // Open brace
     _setDocText("}\nfoo();\n}\n");
-    assertTrue("line after close brace (no open brace)", !rule.applyRule(_doc, 2, Indenter.OTHER));
-    assertTrue("line after text (no open brace)", !rule.applyRule(_doc, 9, Indenter.OTHER));
-    assertTrue("line after text (no open brace)", !rule.applyRule(_doc, 10, Indenter.OTHER));
+    assertTrue("line after close brace (no open brace)", !rule.applyRule(_doc, 2, Indenter.IndentReason.OTHER));
+    assertTrue("line after text (no open brace)", !rule.applyRule(_doc, 9, Indenter.IndentReason.OTHER));
+    assertTrue("line after text (no open brace)", !rule.applyRule(_doc, 10, Indenter.IndentReason.OTHER));
     
     // Star
     rule = new QuestionPrevLineStartsWith("*", null, null);
     _setDocText("{\nfoo();");
-    assertTrue("no star", !rule.applyRule(_doc, 6, Indenter.OTHER));
+    assertTrue("no star", !rule.applyRule(_doc, 6, Indenter.IndentReason.OTHER));
     
   }
   
@@ -65,8 +65,8 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     
     // Hits docstart
     _setDocText("\nfoo();");
-    assertTrue("first line", !rule.applyRule(_doc, 0, Indenter.OTHER));
-    assertTrue("second line", !rule.applyRule(_doc, 2, Indenter.OTHER));
+    assertTrue("first line", !rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertTrue("second line", !rule.applyRule(_doc, 2, Indenter.IndentReason.OTHER));
   }
   
   /** Tests prefix on current line. */
@@ -75,13 +75,13 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     
     // Prefix at start of current line
     _setDocText("} foo();");
-    assertTrue("before brace", !rule.applyRule(_doc, 0, Indenter.OTHER));
-    assertTrue("after brace", !rule.applyRule(_doc, 2, Indenter.OTHER));
+    assertTrue("before brace", !rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertTrue("after brace", !rule.applyRule(_doc, 2, Indenter.IndentReason.OTHER));
     
     // Prefix in middle of current line
     _setDocText("foo();\n bar(); } foo();");
-    assertTrue("before brace", !rule.applyRule(_doc, 7, Indenter.OTHER));
-    assertTrue("after brace", !rule.applyRule(_doc, 18, Indenter.OTHER));
+    assertTrue("before brace", !rule.applyRule(_doc, 7, Indenter.IndentReason.OTHER));
+    assertTrue("after brace", !rule.applyRule(_doc, 18, Indenter.IndentReason.OTHER));
   }
   
   /** Tests having prev line start with prefix, with text following */
@@ -90,16 +90,16 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
         
     // Prefix plus text (no space)
     _setDocText("}bar();\nfoo();\nbar();");
-    assertTrue("line of brace (no space)", !rule.applyRule(_doc, 2, Indenter.OTHER));
-    assertTrue("line after brace (no space)", rule.applyRule(_doc, 8, Indenter.OTHER));
-    assertTrue("two lines after brace (no space)", !rule.applyRule(_doc, 16, Indenter.OTHER));
+    assertTrue("line of brace (no space)", !rule.applyRule(_doc, 2, Indenter.IndentReason.OTHER));
+    assertTrue("line after brace (no space)", rule.applyRule(_doc, 8, Indenter.IndentReason.OTHER));
+    assertTrue("two lines after brace (no space)", !rule.applyRule(_doc, 16, Indenter.IndentReason.OTHER));
     
     // Prefix plus text (with space)
     rule = new QuestionPrevLineStartsWith("*", null, null);
     _setDocText("foo\n * comment\nbar");
-    assertTrue("just before star (with space)", !rule.applyRule(_doc, 4, Indenter.OTHER));
-    assertTrue("just after star (with space)", !rule.applyRule(_doc, 6, Indenter.OTHER));
-    assertTrue("line after star (with space)", rule.applyRule(_doc, 16, Indenter.OTHER));
+    assertTrue("just before star (with space)", !rule.applyRule(_doc, 4, Indenter.IndentReason.OTHER));
+    assertTrue("just after star (with space)", !rule.applyRule(_doc, 6, Indenter.IndentReason.OTHER));
+    assertTrue("line after star (with space)", rule.applyRule(_doc, 16, Indenter.IndentReason.OTHER));
   }
   
   /** Tests having prev line start with prefix, with no text following */
@@ -108,15 +108,15 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     
     // Prefix plus no text (no space)
     _setDocText("foo();\n*\nbar();\n}");
-    assertTrue("line of star (no space)", !rule.applyRule(_doc, 8, Indenter.OTHER));
-    assertTrue("line after star (no space)", rule.applyRule(_doc, 10, Indenter.OTHER));
-    assertTrue("two lines after star (no space)", !rule.applyRule(_doc, 16, Indenter.OTHER));
+    assertTrue("line of star (no space)", !rule.applyRule(_doc, 8, Indenter.IndentReason.OTHER));
+    assertTrue("line after star (no space)", rule.applyRule(_doc, 10, Indenter.IndentReason.OTHER));
+    assertTrue("two lines after star (no space)", !rule.applyRule(_doc, 16, Indenter.IndentReason.OTHER));
     
     // Prefix plus no text (with space)
     _setDocText("foo();\n   * \nbar();\n{");
-    assertTrue("line of star (with space)", !rule.applyRule(_doc, 7, Indenter.OTHER));
-    assertTrue("just after star (with space)", !rule.applyRule(_doc, 11, Indenter.OTHER));
-    assertTrue("line after star (with space)", rule.applyRule(_doc, 13, Indenter.OTHER));
+    assertTrue("line of star (with space)", !rule.applyRule(_doc, 7, Indenter.IndentReason.OTHER));
+    assertTrue("just after star (with space)", !rule.applyRule(_doc, 11, Indenter.IndentReason.OTHER));
+    assertTrue("line after star (with space)", rule.applyRule(_doc, 13, Indenter.IndentReason.OTHER));
   }
   
   /** Tests having a multiple character prefix. */
@@ -125,10 +125,10 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     
     // Multi-char prefix
     _setDocText("*\n *\n * \n * foo\nbar");
-    assertTrue("star", !rule.applyRule(_doc, 2, Indenter.OTHER));
-    assertTrue("space star", !rule.applyRule(_doc, 5, Indenter.OTHER));
-    assertTrue("space star space", rule.applyRule(_doc, 11, Indenter.OTHER));
-    assertTrue("space star space text", rule.applyRule(_doc, 16, Indenter.OTHER));
+    assertTrue("star", !rule.applyRule(_doc, 2, Indenter.IndentReason.OTHER));
+    assertTrue("space star", !rule.applyRule(_doc, 5, Indenter.IndentReason.OTHER));
+    assertTrue("space star space", rule.applyRule(_doc, 11, Indenter.IndentReason.OTHER));
+    assertTrue("space star space text", rule.applyRule(_doc, 16, Indenter.IndentReason.OTHER));
   }
   
   /** Tests having a commented prefix. */
@@ -137,10 +137,10 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     
     // Star in comment
     _setDocText("/**\n* \ncomment\n*/");
-    assertTrue("just before star", !rule.applyRule(_doc, 4, Indenter.OTHER));
-    assertTrue("just after star", !rule.applyRule(_doc, 6, Indenter.OTHER));
-    assertTrue("line after star", rule.applyRule(_doc, 7, Indenter.OTHER));
-    assertTrue("line after star", !rule.applyRule(_doc, 15, Indenter.OTHER));
+    assertTrue("just before star", !rule.applyRule(_doc, 4, Indenter.IndentReason.OTHER));
+    assertTrue("just after star", !rule.applyRule(_doc, 6, Indenter.IndentReason.OTHER));
+    assertTrue("line after star", rule.applyRule(_doc, 7, Indenter.IndentReason.OTHER));
+    assertTrue("line after star", !rule.applyRule(_doc, 15, Indenter.IndentReason.OTHER));
   }
   
   /** Tests a prefix that begins a comment. */
@@ -149,10 +149,10 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     
     // Star in comment
     _setDocText("/**\n* \ncomment\n*/");
-    assertTrue("just before star", rule.applyRule(_doc, 4, Indenter.OTHER));
-    assertTrue("just after star", rule.applyRule(_doc, 6, Indenter.OTHER));
-    assertTrue("line after star", !rule.applyRule(_doc, 7, Indenter.OTHER));
-    assertTrue("line after star", !rule.applyRule(_doc, 15, Indenter.OTHER));
+    assertTrue("just before star", rule.applyRule(_doc, 4, Indenter.IndentReason.OTHER));
+    assertTrue("just after star", rule.applyRule(_doc, 6, Indenter.IndentReason.OTHER));
+    assertTrue("line after star", !rule.applyRule(_doc, 7, Indenter.IndentReason.OTHER));
+    assertTrue("line after star", !rule.applyRule(_doc, 15, Indenter.IndentReason.OTHER));
   }
   
   /** Tests having text on a line before the prefix. */
@@ -161,7 +161,7 @@ public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
     
     // Star in text, not starting line
     _setDocText("foo(); *\nbar();\n");
-    assertTrue("line after star", !rule.applyRule(_doc, 10, Indenter.OTHER));
+    assertTrue("line after star", !rule.applyRule(_doc, 10, Indenter.IndentReason.OTHER));
   }
 
 

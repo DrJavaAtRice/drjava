@@ -691,7 +691,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     if (pos >= 0 && goodWing) {
       // Otherwise, remove the wings.
       remove(lineStart + pos, 2);
-      //_indentLine(Indenter.OTHER);
+      //_indentLine(Indenter.IndentReason.OTHER);
       return WING_COMMENT_OFFSET;
     }
     return NO_COMMENT_OFFSET;

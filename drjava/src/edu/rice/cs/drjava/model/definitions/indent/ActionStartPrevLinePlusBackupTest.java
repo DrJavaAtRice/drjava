@@ -116,7 +116,7 @@ public class ActionStartPrevLinePlusBackupTest extends ActionStartPrevLinePlusTe
     _doc.setCurrentLocation(before);  // end of bar line
     
     String suffix = "abc ";
-    makeBackupAction(suffix, position).indentLine(_doc, Indenter.OTHER);
+    makeBackupAction(suffix, position).indentLine(_doc, Indenter.IndentReason.OTHER);
     assertEquals("text length",
                  text.length() + deltaLen + suffix.length(),
                  _doc.getLength());

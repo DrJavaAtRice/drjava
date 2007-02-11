@@ -139,8 +139,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /** What is this for?  The override does not nothing! */ 
   public void moveCaretPosition(int pos) { super.moveCaretPosition(pos); }
   
-  /** Runs indent(int) with a default value of Indenter.OTHER */
-  public void indent() { indent(Indenter.OTHER); }
+  /** Runs indent(int) with a default value of Indenter.IndentReason.OTHER */
+  public void indent() { indent(Indenter.IndentReason.OTHER); }
 
   /** Perform an indent either on the current line or on the given selected box of text.  Calls are sent to GlobalModel
    *  which are then forwarded on to the document.  Hopefully the indent code will be fixed and corrected so this 
@@ -149,7 +149,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
    *  @param reason the action that spawned this indent action.  Enter presses are special, so that stars are inserted 
    *  when lines in a multiline comment are broken up.
    */
-  public void indent(final int reason) {
+  public void indent(final Indenter.IndentReason reason) {
 
     /** Because indent() is a function called directly by the Keymap, it does not go through the regular insertString
      *  channels and thus it may not be in sync with the document's position.  For that reason, we must grab the
@@ -185,7 +185,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
    *  @param reason - the reason for the indent
    *  @param pm - the ProgressMonitor used by the indenter
    */
-  protected abstract void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm);
+  protected abstract void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm);
      
   /**
    * Returns true if the indent is to be performed.

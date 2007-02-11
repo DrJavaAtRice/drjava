@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.model.FinalizationListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument.WrappedPosition;
 
 import edu.rice.cs.util.OperationCanceledException;
@@ -378,7 +379,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) throws OperationCanceledException {
+  public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) throws OperationCanceledException {
     throw new UnsupportedOperationException("Dummy method");
   }
   

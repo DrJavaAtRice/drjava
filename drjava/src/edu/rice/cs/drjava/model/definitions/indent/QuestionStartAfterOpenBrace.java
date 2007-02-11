@@ -53,7 +53,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
     * @return True the closest non-whitespace character before the start of the current line (excluding any 
     * characters inside comments or strings) is an open brace.
     */
-  boolean applyRule(AbstractDJDocument doc, int reason)  {
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason)  {
     
     int origin = doc.getCurrentLocation();
     //int origin = doc.getReduced().absOffset();

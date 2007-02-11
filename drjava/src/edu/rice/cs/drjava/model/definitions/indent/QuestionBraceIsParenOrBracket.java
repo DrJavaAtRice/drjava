@@ -53,11 +53,12 @@ public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion {
   
   /**
    * @param doc The AbstractDJDocument containing the current line.
+   * @param reason The reason the indentation is being done
    * @return True iff the last block or expression list opened previous 
    * to the start of the current line was opened by one of the characters 
    * '(' or '['. 
    */
-  boolean applyRule(AbstractDJDocument doc, int reason) {
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     // PRE: We are not inside a multiline comment.
 
     IndentInfo info = doc.getIndentInformation();

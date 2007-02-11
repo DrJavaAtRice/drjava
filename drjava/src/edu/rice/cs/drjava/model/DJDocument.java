@@ -37,6 +37,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.text.SwingDocumentInterface;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
 import java.util.Vector;
 import javax.swing.text.AttributeSet;
@@ -189,7 +190,7 @@ public interface DJDocument extends SwingDocumentInterface {
    *         to indicate the reason for the indent (indent logic may vary slightly based on the trigger action)
    *  @param pm used to display progress, null if no reporting is desired
    */
-  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
+  public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException;
   
   /**

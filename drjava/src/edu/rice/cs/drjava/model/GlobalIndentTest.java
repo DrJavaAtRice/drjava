@@ -77,7 +77,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(FOO_EX_1.length(), " " + FOO_EX_2, null);
     openDoc.setCurrentLocation(FOO_EX_1.length());
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
     _assertLocation(FOO_EX_1.length() + 2, openDoc);
   }
@@ -93,7 +93,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(FOO_EX_1.length(), " " + FOO_EX_2, null);
     openDoc.setCurrentLocation(FOO_EX_1.length() + 5);
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
     _assertLocation(FOO_EX_1.length() + 6, openDoc);
   }
@@ -109,7 +109,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(FOO_EX_1.length(), " " + FOO_EX_2, null);
     openDoc.setCurrentLocation(openDoc.getLength() - 1);
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
     _assertLocation(openDoc.getLength() - 1, openDoc);
   }
@@ -126,7 +126,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(FOO_EX_1.length(), "   " + FOO_EX_2, null);
     openDoc.setCurrentLocation(FOO_EX_1.length());
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
     _assertLocation(FOO_EX_1.length() + 2, openDoc);
   }
@@ -142,7 +142,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(FOO_EX_1.length(), "   " + FOO_EX_2, null);
     openDoc.setCurrentLocation(FOO_EX_1.length() + 5);
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
     _assertLocation(FOO_EX_1.length() + 4, openDoc);
   }
@@ -159,7 +159,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(FOO_EX_1.length(), "   " + FOO_EX_2, null);
     openDoc.setCurrentLocation(openDoc.getLength() - 1);
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(FOO_EX_1 + "  " + FOO_EX_2, openDoc);
     _assertLocation(openDoc.getLength() - 1, openDoc);
   }
@@ -174,7 +174,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(FOO_EX_2.length(), "   " + FOO_EX_2, null);
     openDoc.setCurrentLocation(FOO_EX_2.length());
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(FOO_EX_2 + FOO_EX_2, openDoc);
     _assertLocation(FOO_EX_2.length(), openDoc);
   }
@@ -189,7 +189,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(FOO_EX_2.length(), "   " + FOO_EX_2, null);
     openDoc.setCurrentLocation(openDoc.getLength() - 1);
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(FOO_EX_2 + FOO_EX_2, openDoc);
     _assertLocation(openDoc.getLength() - 1, openDoc);
   }
@@ -206,7 +206,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(BAR_CALL_1.length(), BAR_CALL_2, null);
     openDoc.setCurrentLocation(BAR_CALL_1.length());
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(BAR_CALL_1 + "    " + BAR_CALL_2, openDoc);
     _assertLocation(BAR_CALL_1.length() + 4, openDoc);
   }
@@ -221,7 +221,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(BAR_CALL_1.length(), BAR_CALL_2, null);
     openDoc.setCurrentLocation(openDoc.getLength() - 1);
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(BAR_CALL_1 + "    " + BAR_CALL_2, openDoc);
     _assertLocation(openDoc.getLength() - 1, openDoc);
   }
@@ -233,7 +233,7 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     openDoc.insertString(0, FOO_EX_2 + FOO_EX_2, null);
     openDoc.setCurrentLocation(openDoc.getLength() - 1);
     int loc = openDoc.getCurrentLocation();
-    openDoc.indentLines(loc, loc, Indenter.OTHER, null);
+    openDoc.indentLines(loc, loc, Indenter.IndentReason.OTHER, null);
     _assertContents(FOO_EX_2 + FOO_EX_2, openDoc);
     _assertLocation(openDoc.getLength() - 1, openDoc);
   }

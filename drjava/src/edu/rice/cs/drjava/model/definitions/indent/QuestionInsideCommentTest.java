@@ -65,37 +65,37 @@ public final class QuestionInsideCommentTest extends IndentRulesTestCase {
       
   
   public void testDocStart() throws javax.swing.text.BadLocationException {      
-    assertEquals(false, _rule.applyRule(_doc, 0, Indenter.OTHER));
+    assertEquals(false, _rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
   }
   public void testLineBeginsComment() throws javax.swing.text.BadLocationException {
-    assertEquals(false, _rule.applyRule(_doc, 3, Indenter.OTHER));
+    assertEquals(false, _rule.applyRule(_doc, 3, Indenter.IndentReason.OTHER));
   }
   public void testFooLine() throws javax.swing.text.BadLocationException {
-    assertEquals(true, _rule.applyRule(_doc, 6, Indenter.OTHER));
+    assertEquals(true, _rule.applyRule(_doc, 6, Indenter.IndentReason.OTHER));
   }
   public void testLineEndsComment() throws javax.swing.text.BadLocationException {
-    assertEquals(true, _rule.applyRule(_doc, 9, Indenter.OTHER));
+    assertEquals(true, _rule.applyRule(_doc, 9, Indenter.IndentReason.OTHER));
   }
   public void testBarLine() throws javax.swing.text.BadLocationException {
-    assertEquals(false, _rule.applyRule(_doc, 13, Indenter.OTHER));
+    assertEquals(false, _rule.applyRule(_doc, 13, Indenter.IndentReason.OTHER));
   }
   public void testSlashStarMidLineBefore() throws javax.swing.text.BadLocationException {
-    assertEquals(false, _rule.applyRule(_doc, 16, Indenter.OTHER));
+    assertEquals(false, _rule.applyRule(_doc, 16, Indenter.IndentReason.OTHER));
   }
   public void testSlashStarMidLineAfter() throws javax.swing.text.BadLocationException {
-    assertEquals(false, _rule.applyRule(_doc, 24, Indenter.OTHER));
+    assertEquals(false, _rule.applyRule(_doc, 24, Indenter.IndentReason.OTHER));
   }
   public void testCommentedOutSlashStar() throws javax.swing.text.BadLocationException {
-    assertEquals(true, _rule.applyRule(_doc, 30, Indenter.OTHER));
+    assertEquals(true, _rule.applyRule(_doc, 30, Indenter.IndentReason.OTHER));
   }
   public void testStarSlashMidLineBefore() throws javax.swing.text.BadLocationException {
-    assertEquals(true, _rule.applyRule(_doc, 33, Indenter.OTHER));
+    assertEquals(true, _rule.applyRule(_doc, 33, Indenter.IndentReason.OTHER));
   }
   public void testStarSlashMidLineAfter() throws javax.swing.text.BadLocationException {
-    assertEquals(true, _rule.applyRule(_doc, 41, Indenter.OTHER));
+    assertEquals(true, _rule.applyRule(_doc, 41, Indenter.IndentReason.OTHER));
   }
   public void testAfterCommentedOutSlashStar() throws javax.swing.text.BadLocationException {
-    assertEquals(false, _rule.applyRule(_doc, 49, Indenter.OTHER));
+    assertEquals(false, _rule.applyRule(_doc, 49, Indenter.IndentReason.OTHER));
   }
   
 }

@@ -57,10 +57,11 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
    * Indents the line according to the previous line, with the suffix string added.
    * If on the first line, indent is set to 0.
    * @param doc AbstractDJDocument containing the line to be indented.
+   * @param reason The reason that the indentation is taking place
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(AbstractDJDocument doc, int reason) {
+  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
     try {
       // Find start of line

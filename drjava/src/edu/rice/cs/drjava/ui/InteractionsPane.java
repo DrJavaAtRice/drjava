@@ -48,6 +48,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.drjava.model.DJDocument;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.*;
 
@@ -222,7 +223,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
    *  @param reason - the reason for the indent
    *  @param pm - the ProgressMonitor used by the indenter
    */
-  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
+  protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
       setCaretPosition(_doc.getCurrentLocation());

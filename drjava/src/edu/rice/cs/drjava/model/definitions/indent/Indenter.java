@@ -44,17 +44,19 @@ public class Indenter {
 
   public Indenter(int indentLevel) { buildTree(indentLevel); }
   
-  /* Indenting Reasons */
-
-  /** Indicates that an enter key press caused the indentation.  This is important for some rules dealing with stars
-    * at the line start in multiline comments
-    */
-  public static final int ENTER_KEY_PRESS = 1;
-
-  /** Indicates that indentation was started for some other reason.  This is important for some rules dealing with stars
-    * at the line start in multiline comments
-    */
-  public static final int OTHER = 0;
+  /** 
+   * Enumeration of reasons why indentation may be preformed.
+   * */
+  public enum IndentReason {
+    /** Indicates that an enter key press caused the indentation.  This is important for some rules dealing with stars
+      * at the line start in multiline comments
+      */
+    ENTER_KEY_PRESS,
+    /** Indicates that indentation was started for some other reason.  This is important for some rules dealing with stars
+      * at the line start in multiline comments
+      */
+    OTHER
+  }
 
   /** Root of decision tree. */
   protected IndentRule _topRule;
@@ -136,7 +138,7 @@ public class Indenter {
     * @param doc document containing line to be indented
     * @return true if the condition tested by the top rule holds, false otherwise
     */
-  public boolean indent(AbstractDJDocument doc, int reason) {
+  public boolean indent(AbstractDJDocument doc, Indenter.IndentReason reason) {
 //    Utilities.showDebug("Indenter.indent called on doc "  + doc);
     return _topRule.indentLine(doc, reason);
   }
