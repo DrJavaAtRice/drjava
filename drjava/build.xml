@@ -89,6 +89,12 @@
     <echo message="              a plain text file with 'name=value' pairs, one per" />
     <echo message="              line. They work the same was as the properties" />
     <echo message="              specified on the command line using '-Dname=value'." />
+    <echo message="test-drjava-config: Specifies which DrJava configuration file is used" />
+    <echo message="                    during tests (by setting the 'test.drjava.config'" />
+    <echo message="                    property. This is effective only during unit tests" />
+    <echo message="                    and is the equivalent to the '-config' command" />
+    <echo message="                    line option. If this option is not used, then the" />
+    <echo message="                    testFiles/drjava.basic.config file is used." />
     <echo message="test-spec: A matching string to filter the tests to be run; may" />
     <echo message="           be comma-delimited to run multiple test sets." />
     <echo message="           (Default: empty string)" />
@@ -1098,11 +1104,26 @@
   </target>
   
   <target name="resolve-jvm-args">
-    <condition property="jvm-args" value="-server">
+    <!-- First create individual parts of the 'jvm-args' line; note that the space at
+         the end of the strings is necessary to separate the values. -->
+
+    <!-- 'force-server' property -->
+    <condition property="jvm-args-force-server" value="-server ">
       <istrue value="${force-server}" />
     </condition>
     <!-- else... -->
-    <property name="jvm-args" value="" />
+    <property name="jvm-args-force-server" value="" />
+
+    <!-- 'test-drjava-config' property -->
+    <condition property="jvm-args-test-drjava-config" value="-Dtest.drjava.config=${test-drjava-config} ">
+      <isset property="test-drjava-config" />
+    </condition>
+    <!-- else... -->
+    <property name="jvm-args-test-drjava-config" value="-Dtest.drjava.config=${basedir}/testFiles/drjava.basic.config " />
+
+    <!-- Now assemble all arguments; no spaces between the individual arguments so
+         arguments not set disappear completely (without multiple spaces inbetween).  -->
+    <property name="jvm-args" value="${jvm-args-force-server}${jvm-args-test-drjava-config}" />
   </target>
   
   <target name="resolve-test-formatter-class">

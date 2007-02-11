@@ -41,7 +41,9 @@ import edu.rice.cs.util.swing.Utilities;
  *  system is correctly initialized for every test.
  */
 public class DrJavaTestCase extends TestCase {
-  
+  /** System property with the name of an alternative DrJava configuration file used during testing. */
+  public static final String TEST_DRJAVA_CONFIG_PROPERTY = "test.drjava.config";
+    
   /** Create a new DrJava test case. */
   public DrJavaTestCase() { super(); }
 
@@ -56,6 +58,11 @@ public class DrJavaTestCase extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     Utilities.TEST_MODE = true;
+    final String newName = System.getProperty(TEST_DRJAVA_CONFIG_PROPERTY);
+    if (newName!=null) {
+      DrJava.setPropertiesFile(newName);
+      DrJava._initConfig();
+    }
   }
 
   /** Clean up for every test case.
