@@ -86,6 +86,7 @@
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
       <fileset dir="classes" includes="**/*" />
+      <fileset dir="src" includes="**/*.xml" />
     </jar>
   </target>
 

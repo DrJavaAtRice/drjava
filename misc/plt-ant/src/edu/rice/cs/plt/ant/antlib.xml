@@ -1,0 +1,7 @@
+<antlib>
+    <!-- condition typedefs - these do not work for ant less than 1.6 -->
+    <taskdef
+        name="fornum"
+        classname="edu.rice.cs.plt.ant.ForNumTask"
+        onerror="report"/>
+</antlib>
