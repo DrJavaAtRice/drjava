@@ -136,6 +136,9 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** @return true if the documents file is saved in the current project file. */
   public boolean inProject();
   
+  /** Returns whether this document is resident in memory. */ 
+  public boolean isReady();
+  
   /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).
    *  @return true if the document is untitled and has no file
    */

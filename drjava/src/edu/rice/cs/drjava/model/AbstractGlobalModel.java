@@ -3369,6 +3369,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       throw new UnsupportedOperationException("AbstractGlobalModel does not support javadoc");
     }
     
+    /** Returns true if this document is resident in memory. _cacheAdapter should be non-null. */
+    public boolean isReady() { return _cacheAdapter != null && _cacheAdapter.isReady(); }
+    
     /** Determines if the document has been modified since the last save.
      *  @return true if the document has been modified
      */
@@ -3376,7 +3379,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       /* If the document has not been registered or it is virtualized (only stored on disk), then we know that
        * it is not modified. This method can be called by debugging code (via getName() on a
        * ConcreteOpenDefDoc) before the document has been registered (_cacheAdapter == null). */
-      if (_cacheAdapter != null && _cacheAdapter.isReady()) return getDocument().isModifiedSinceSave();
+      if (isReady()) return getDocument().isModifiedSinceSave();
       else return false;
     }
     
@@ -4065,8 +4068,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public int getNumberOfLines() { return getLineOfOffset(getLength()); }
     
     /** Translates an offset into the components text to a line number.
-     *  @param offset the offset >= 0
-     *  @return the line number >= 0 */
+      * @param offset the offset >= 0
+      * @return the line number >= 0 
+      */
     public int getLineOfOffset(int offset) {
       return getDefaultRootElement().getElementIndex(offset);
     }

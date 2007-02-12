@@ -275,12 +275,12 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     return new FindResultsRegionTreeUserObj(r);
   }
 
-  /** Class that gets put into the tree. The toString() method determines what's displayed in the three. */
+  /** Class that gets put into the tree. The toString() method determines what's displayed in the tree. */
   protected static class FindResultsRegionTreeUserObj extends RegionTreeUserObj<MovingDocumentRegion> {
     protected int _lineNumber;
     public FindResultsRegionTreeUserObj(MovingDocumentRegion r) {
       super(r);
-      _lineNumber = _region.getDocument().getLineOfOffset(_region.getStartOffset())+1;
+      _lineNumber = _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1;
     }
 //    public int lineNumber() {
 //      return _lineNumber;

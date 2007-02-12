@@ -142,9 +142,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
       
       String matchText = _matchText(from);
-      
-      if (matchText != null) _mainFrame.updateFileTitle("Matches: " + matchText);
-      else _mainFrame.updateFileTitle();
+   
+      if (matchText != null) _mainFrame.updateStatusField("Bracket matches: " + matchText);
+      else _mainFrame.updateStatusField();
     }
     
     // if this wasn't a close brace, check for an open brace
@@ -158,7 +158,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         _addHighlight(from - 1, to);
 //        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
       }
-      _mainFrame.updateFileTitle();         
+      _mainFrame.updateStatusField();         
     }
   }
   
@@ -1163,7 +1163,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         //         }
         _doc.getUndoManager().undo();
         _doc.updateModifiedSinceSave();
-        _mainFrame.updateFileTitle();
+        _mainFrame.updateStatusField();
       }
       catch (CannotUndoException ex) {
         throw new UnexpectedException(ex);
@@ -1211,7 +1211,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         //           setCaretPosition(pos);
         //         }
         _doc.updateModifiedSinceSave();
-        _mainFrame.updateFileTitle();
+        _mainFrame.updateStatusField();
       } catch (CannotRedoException ex) {
         throw new UnexpectedException(ex);
       }

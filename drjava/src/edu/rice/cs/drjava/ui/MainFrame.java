@@ -163,8 +163,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   // Status bar fields
   private final JPanel _statusBar = new JPanel(new BorderLayout()); //( layout );
-  private final JLabel _fileNameField = new JLabel();
-  private final JLabel _sbMessage = new JLabel();  //("This is the text for the center message");
+  private final JLabel _statusField = new JLabel();
+  private final JLabel _statusReport = new JLabel();  //("This is the text for the center message");
   private final JLabel _currLocationField = new JLabel();
   private final PositionListener _posListener = new PositionListener();
   
@@ -345,12 +345,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) { _moveToAuxiliary(); }
   };
   private final Action _removeAuxiliaryAction = new AbstractAction("Do Not Include With Project") {
-    {
-      putValue(Action.SHORT_DESCRIPTION, "Do not open this document next time this project is opened.");
-    }
+    { putValue(Action.SHORT_DESCRIPTION, "Do not open this document next time this project is opened."); }
     public void actionPerformed(ActionEvent ae) { _removeAuxiliary(); }
   };
-  /** Resets the document in the definitions pane to a blank one. */
+  /** Creates a new blank document and select it in the definitions pane. */
   private final Action _newAction = new AbstractAction("New") {
     public void actionPerformed(ActionEvent ae) {
 //      System.out.println("------------------new----------------------");
@@ -414,10 +412,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   };
   
-  /**
-   * Asks user for file name and and reads that file into
-   * the definitions pane.
-   */
+  /** Asks user for file name and and reads that file into the definitions pane. */
   private final Action _openAction = new AbstractAction("Open...") {
     public void actionPerformed(ActionEvent ae) {
       _open();
@@ -452,7 +447,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   private final Action _closeProjectAction = new AbstractAction("Close") {
     public void actionPerformed(ActionEvent ae) { 
-      _closeProject();
+      closeProject();
       _findReplace.updateFirstDocInSearch();
     }
   };
@@ -648,7 +643,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) { 
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes(); 
-      _compile(); 
+      updateStatusField("Compiling " + _fileTitle);
+      _compile();
+      updateStatusField("Compilation of current document completed");
     }
   };
   
@@ -657,8 +654,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
+      updateStatusField("Compiling all source files in open project");
       _compileProject(); 
       _findReplace.updateFirstDocInSearch();
+      updateStatusField("Compilation of open project completed");
     }
   };
   
@@ -667,8 +666,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) { 
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
+      updateStatusField("Compiling all sources in current folder");
       _compileFolder();
       _findReplace.updateFirstDocInSearch();
+      updateStatusField("Compilation of folder completed");
     }
   };
   
@@ -1789,6 +1790,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   private void _doResetInteractions() {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
+    updateStatusField("Resetting Interactions");
     
     // Lots of work, so use another thread
     new Thread(new Runnable() { 
@@ -1903,6 +1905,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Browse back in the browser history. */
   private final Action _browseBackAction = new AbstractAction("Browse Back") {
     public void actionPerformed(ActionEvent ae) {
+      updateStatusField("Browsing Back");
       this.setEnabled(false);
       if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
         _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
@@ -1924,6 +1927,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Browse forward in the browser history. */
   private final Action _browseForwardAction = new AbstractAction("Browse Forward") {
     public void actionPerformed(ActionEvent ae) {
+      updateStatusField("Browsing Forward");
       this.setEnabled(false);
       if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
         _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
@@ -2629,13 +2633,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //        if (oce.value) {
 //          _model.getParsingControl().addListener(new LightWeightParsingListener() {
 //            public void enclosingClassNameUpdated(OpenDefinitionsDocument doc, String old, String updated) {
-//              if (doc==_model.getActiveDocument()) { updateFileTitle(); }
+//              if (doc==_model.getActiveDocument()) { updateStatusField(); }
 //            }
 //          });
 //        }
 //        _model.getParsingControl().reset();
 //        _model.getParsingControl().setAutomaticUpdates(oce.value);
-//        updateFileTitle();
+//        updateStatusField();
 //      }
 //    };
 //    DrJava.getConfig().addOptionListener(LIGHTWEIGHT_PARSING_ENABLED, parsingEnabledListener);
@@ -2830,7 +2834,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     setBounds(x, y, width, height);
     
     _setUpPanes();
-    updateFileTitle();
+    updateStatusField();
     
     _promptBeforeQuit = config.getSetting(QUIT_PROMPT).booleanValue();
     
@@ -3188,7 +3192,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     assert EventQueue.isDispatchThread();
     // Make sure the debugger is available
     Debugger debugger = _model.getDebugger();
-    if (!debugger.isAvailable()) return;
+    if (! debugger.isAvailable()) return;
+    
+    updateStatusField("Toggling Debugger Mode");
     
     try { 
       if (isDebuggerReady()) debugger.shutdown();
@@ -3239,19 +3245,26 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _lastFocusOwner.requestFocusInWindow();
   }
   
-  public void updateFileTitle(String text) { _fileNameField.setText(text); }
+  /** ONLY executes in event thread. */
+  public void updateStatusField(String text) {
+     assert EventQueue.isDispatchThread();
+    _statusField.setText(text);
+    update(getGraphics());
+  }
   
-  /** Updates the title bar with the name of the active document. */
-  public void updateFileTitle() {
+  /** Updates the status field with the current status of the Definitions Pane. */
+  public void updateStatusField() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     String fileName = doc.getCompletePath();
     if (! fileName.equals(_fileTitle)) {
       _fileTitle = fileName;
-      setTitle("File: " + fileName);
+      setTitle(fileName);
       _model.getDocCollectionWidget().repaint();
     }
     
-    String fileTitle = doc.getCompletePath();
+    String path = doc.getCompletePath();
+    
+    String fileTitle = "Editing " + path;
 
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    if (DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()) {
@@ -3259,10 +3272,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //      if ((temp != null) && (temp.length() > 0)) { fileTitle = fileTitle + " - " + temp; }
 //    }
 
-    if (! _fileNameField.getText().equals(fileTitle)) { _fileNameField.setText(fileTitle); }
+    if (! _statusField.getText().equals(fileTitle)) { _statusField.setText(fileTitle); }
     
     //  Two files in different directories can have the same _fileTitle
-    _fileNameField.setToolTipText("Full path for file: " + doc.getCompletePath());
+    _statusField.setToolTipText("Full path for file: " + path);
+    repaint();
   }
   
   /** Prompt the user to select a place to open files from, then load them. Ask the user if they'd like to save 
@@ -3346,7 +3360,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //              _saveAction.setEnabled(true);
 //              if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
 //                _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-//              updateFileTitle();
+//              updateStatusField();
 //            }
 //          }
 //        });
@@ -3357,7 +3371,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             _saveAction.setEnabled(true);
             if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
               _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-//            updateFileTitle();  // title not changed by insert operation
+//            updateStatusField();  // file title not changed by insert operation
           }
         });
       }
@@ -3367,31 +3381,30 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             _saveAction.setEnabled(true);
             if (isDebuggerReady() && _debugPanel.getStatusText().equals(""))
               _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-//            updateFileTitle();  // title not changed by remove operation
+//            updateStatusField();  // file title not changed by remove operation
           }
         });
       }
     });
   }
   
-  
   /** Changes the message text toward the right of the status bar
    *  @param msg The message to place in the status bar
    */
-  public void setStatusMessage(String msg) { _sbMessage.setText(msg); }
+  public void setStatusMessage(String msg) { _statusReport.setText(msg); }
   
   /** Sets the message text in the status bar to the null string. */
-  public void clearStatusMessage() { _sbMessage.setText(""); }
+  public void clearStatusMessage() { _statusReport.setText(""); }
   
   /** Sets the font of the status bar message
    *  @param f The new font of the status bar message
    */
-  public void setStatusMessageFont(Font f) { _sbMessage.setFont(f); }
+  public void setStatusMessageFont(Font f) { _statusReport.setFont(f); }
   
   /** Sets the color of the text in the status bar message
    *  @param c The color of the text
    */
-  public void setStatusMessageColor(Color c) { _sbMessage.setForeground(c); }
+  public void setStatusMessageColor(Color c) { _statusReport.setForeground(c); }
   
   // Made package protected rather than private in order to facilitate the ProjectMenuTest.testSaveProject
   void _moveToAuxiliary() {
@@ -3420,11 +3433,20 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   }
   
-  private void _new() { _model.newFile(); }
+  private void _new() { 
+    updateStatusField("Creating a new Untitled Document");
+    _model.newFile(); 
+  }
   
-  private void _open() { open(_openSelector); }
+  private void _open() {
+    updateStatusField("Opening File");
+    open(_openSelector); 
+  }
   
-  private void _openFolder() { openFolder(_folderChooser); }
+  private void _openFolder() { 
+    openFolder(_folderChooser); 
+  }
+  
   
   private void _openFileOrProject() {
     try {
@@ -3468,22 +3490,25 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   public void openProject(FileOpenSelector projectSelector) {
     
-    try {
-      hourglassOn();
-      final File[] file = projectSelector.getFiles();
-      if (file.length < 1)
+    try { 
+      final File[] files = projectSelector.getFiles();
+      if (files.length < 1)
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
+      final File file = files[0];
       
-      // make sure there are no open projects
-      if (!_model.isProjectActive() || (_model.isProjectActive() && _closeProject())) _openProjectHelper(file[0]);
+      updateStatusField("Opening project " + file);
+      
+      try {
+        hourglassOn();
+        // make sure there are no open projects
+        if (!_model.isProjectActive() || (_model.isProjectActive() && _closeProject())) _openProjectHelper(file);
+      }
+      catch(Exception e) { e.printStackTrace(System.out); }
+      finally { hourglassOff(); } 
     }
-    catch(OperationCanceledException oce) {
-      /* do nothing, we just won't open anything */
-    }
-    catch(Exception e) { e.printStackTrace(System.out); }
-    finally { hourglassOff(); }    
-  }
-  
+    catch(OperationCanceledException oce) { /* do nothing, we just won't open anything */ }
+   
+  }  
   
   /** Oversees the opening of the project by delegating to the model to parse and initialize the project 
    *  while resetting the navigator pane and opening up the files itself.
@@ -3528,18 +3553,24 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   }
   
-  /** Closes project when DrJava is not in the process of quitting.
-   *   @return true if the project is closed, false if cancelled.
-   */
   boolean _closeProject() {
     _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
     return _closeProject(false);
   }
+    
+  
+  /** Closes project when DrJava is not in the process of quitting.
+    * @return true if the project is closed, false if cancelled.
+    */
+  boolean closeProject() {
+    updateStatusField("Closing current project");
+    return _closeProject();
+  }
   
   /** Saves the project file; closes all open project files; and calls _model.closeProject(quitting) the 
     * clean up the state of the global model.  It also restores the list view navigator
-    *   @ param quitting whether the project is being closed as part of quitting DrJava
-    *   @return true if the project is closed, false if cancelled
+    * @ param quitting whether the project is being closed as part of quitting DrJava
+    * @return true if the project is closed, false if cancelled
     */
   boolean _closeProject(boolean quitting) {
     if (_checkProjectClose()) {
@@ -3604,6 +3635,18 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param openSelector the selector that returns the files to open
    */
   public void open(FileOpenSelector openSelector) {
+    File[] files;
+    try { files = openSelector.getFiles(); }
+    catch(OperationCanceledException e) { return; }
+    
+    if (files.length < 1) return;  // Can this happen?
+    
+    /* Commented out becasuse this function is called by many different commands including openProject */   
+//    String file = files[0].getName();
+//    if (files.length > 1) file = "Multiple Files";
+//    
+//    updateStatusField("Opening " + file);
+    
     try {
       hourglassOn();
       _model.openFiles(openSelector);
@@ -3667,6 +3710,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     File dir = chooser.getSelectedDirectory();
     boolean rec = _openRecursiveCheckBox.isSelected();
     DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, Boolean.valueOf(rec));
+    updateStatusField("Opening folder " + dir);
     _openFolder(dir, rec);
   }
   
@@ -3694,7 +3738,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       
       String fileName = null;
       OpenDefinitionsDocument doc = _model.getActiveDocument();
-      try{
+      try {
         if (doc.isUntitled()) fileName = "File";
         else fileName = _model.getActiveDocument().getFile().getName();
       }
@@ -3707,9 +3751,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         JOptionPane.showOptionDialog(MainFrame.this, text,"Close " + fileName + "?", JOptionPane.YES_NO_OPTION,
                                      JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
       if (rc != JOptionPane.YES_OPTION) return;
+      
+      updateStatusField("Closing " + fileName);
       _model.setProjectChanged(true);
     }
-    
     //Either this is an external file or user actually wants to close it
     _model.closeFile(_model.getActiveDocument());
   }
@@ -3811,11 +3856,13 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   void closeAll() { _closeAll(); }
   
   private void _closeAll() {
+    updateStatusField("Closing All Files");
     if (!_model.isProjectActive() || _model.isProjectActive() && _closeProject())    
       _model.closeAllFiles();
   }
   
   private boolean _save() {
+    updateStatusField("Saving File");
     try {
       if (_model.getActiveDocument().saveFile(_saveSelector)) {
         _currentDefPane.hasWarnedAboutModified(false); 
@@ -3833,8 +3880,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   }
   
-  
   private boolean _saveAs() {
+    updateStatusField("Saving File Under New Name");
     try {
       boolean toReturn = _model.getActiveDocument().saveFileAs(_saveAsSelector);
       /** this highlights the document in the navigator */
@@ -3849,9 +3896,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 
   private boolean _rename() {
     try {
-      if (!_model.getActiveDocument().fileExists()) {
-        return _saveAs();
-      }
+      if (!_model.getActiveDocument().fileExists()) return _saveAs();
       else {
         File fileToDelete;
         try {
@@ -4328,6 +4373,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       try {
         final File f = _model.getMainClass();
         if (f != null) {
+          updateStatusField("Running Open Project");
           OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
           doc.runMain();
         }
@@ -4349,6 +4395,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Internal helper method to run the main method of the current document in the interactions pane. */
   private void _runMain() {
+    updateStatusField("Running main Method of Current Document");
     
     try { _model.getActiveDocument().runMain(); }
     
@@ -4393,6 +4440,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   private void _junitFolder() {
+    updateStatusField("Running Unit Tests in Current Folder");
     hourglassOn();  // turned off when JUnitStarted event is fired
     new Thread("Run JUnit on specified folder") {
       public void run() { 
@@ -4415,7 +4463,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Tests the documents in the project source tree. Assumes that DrJava is in project mode. */
-  private void _junitProject() { 
+  private void _junitProject() {
+    updateStatusField("Running JUnit Tests in Project");
     hourglassOn();  // turned off in JUnitStarted/NonTestCase event
      new Thread("Running Junit Tests") {
       public void run() {
@@ -4429,6 +4478,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Tests all open documents. */
   private void _junitAll() {
+    updateStatusField("Running All Open Unit Tests");
     hourglassOn();  // turned off in JUnitStarted/NonTestCase event
     new Thread("Running Junit Tests") {
       public void run() {
@@ -5625,12 +5675,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     // Initialize the 3 labels:
 
-    _fileNameField.setFont(_fileNameField.getFont().deriveFont(Font.PLAIN));
-    _sbMessage.setHorizontalAlignment(SwingConstants.RIGHT);
+    _statusField.setFont(_statusField.getFont().deriveFont(Font.PLAIN));
+    _statusReport.setHorizontalAlignment(SwingConstants.RIGHT);
     
     JPanel fileNameAndMessagePanel = new JPanel(new BorderLayout());
-    fileNameAndMessagePanel.add(_fileNameField, BorderLayout.CENTER);
-    fileNameAndMessagePanel.add(_sbMessage, BorderLayout.EAST);
+    fileNameAndMessagePanel.add(_statusField, BorderLayout.CENTER);
+    fileNameAndMessagePanel.add(_statusReport, BorderLayout.EAST);
 
     _currLocationField.setFont(_currLocationField.getFont().deriveFont(Font.PLAIN));
     _currLocationField.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -5649,11 +5699,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     getContentPane().add(_statusBar, BorderLayout.SOUTH);
     
 //     //Adjust constraints for the fileName label so it's next to the left edge.
-//     layout.getConstraints(_fileNameField).setX(Spring.constant(0));
+//     layout.getConstraints(_statusField).setX(Spring.constant(0));
 //     
 //     //Adjust constraints for the message label so it's spaced a bit from the right.
 //     //and doesn't interfere with the left-most label
-//     layout.putConstraint(SpringLayout.EAST, _sbMessage, -65,
+//     layout.putConstraint(SpringLayout.EAST, _statusReport, -65,
 //     SpringLayout.EAST, _statusBar);
 //     
 //     //Adjust constraints for the location label so it's next to the right edge.
@@ -6748,7 +6798,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           _saveAction.setEnabled(false);
           _renameAction.setEnabled(true);
           _revertAction.setEnabled(true);
-          updateFileTitle();
+          updateStatusField();
           _currentDefPane.requestFocusInWindow();
           try {
             File f = doc.getFile();
@@ -6803,7 +6853,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void fileReverted(OpenDefinitionsDocument doc) {
       Utilities.invokeLater(new Runnable() {
         public void run() {
-          updateFileTitle();
+          updateStatusField();
           _saveAction.setEnabled(false);
           _currentDefPane.resetUndo();
           _currentDefPane.hasWarnedAboutModified(false);
@@ -6844,7 +6894,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           _setCurrentDirectory(active);
           
           // Update title and position
-          updateFileTitle();
+          updateStatusField();
           _currentDefPane.requestFocusInWindow();
           _posListener.updateLocation();
           
@@ -7714,7 +7764,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /**For test purposes only. Returns the text in the status bar. Is used to test brace matching*/
-  public String getFileNameField() { return _fileNameField.getText(); }
+  public String getFileNameField() { return _statusField.getText(); }
   
   /**For test purposes only. Returns the edit menu*/
   public JMenu getEditMenu() { return _editMenu; }
