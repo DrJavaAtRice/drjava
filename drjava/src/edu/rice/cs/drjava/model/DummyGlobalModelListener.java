@@ -52,8 +52,8 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
 
   public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc) { }
   
-  /** Called when trying to open a file that does not exist. */
-  public void fileNotFound(File f) {  }
+  /** Called when trying to open one or more files that do not exist. */
+  public void filesNotFound(File... f) {  }
   
   /** Called when the project's build directory has changed. */
   public void projectBuildDirChanged() {  }

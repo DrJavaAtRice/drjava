@@ -60,8 +60,8 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
    */
   public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc);
   
-  /** Called when trying to open a file that does not exist. */
-  public void fileNotFound(File f);
+  /** Called when trying to open one or more files that do not exist. */
+  public void filesNotFound(File... f);
   
   /** Called after a new document is created. */
   public void newFileCreated(OpenDefinitionsDocument doc);

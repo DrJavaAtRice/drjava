@@ -1263,7 +1263,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _completeOpenFile(d); // contains view-related calls
     }
     //        SHOW_GETDOC = false;
-    for (File f: filesNotFound) { _notifier.fileNotFound(f); }
+    if (filesNotFound.size()>0)
+      _notifier.filesNotFound( filesNotFound.toArray( new File[filesNotFound.size()] ) );
     
     if (! alreadyOpenDocuments.isEmpty()) {
       for(OpenDefinitionsDocument d : alreadyOpenDocuments) {

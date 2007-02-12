@@ -73,9 +73,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  public void fileNotFound(File f) {
+  public void filesNotFound(File... f) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.fileNotFound(f); } }
+    try { for (GlobalModelListener l : _listeners) { l.filesNotFound(f); } }
     finally { _lock.endRead(); }
   }
   

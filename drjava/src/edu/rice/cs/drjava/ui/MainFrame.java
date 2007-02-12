@@ -3494,7 +3494,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     try {
       _mainListener.resetFNFCount();
       _model.openProject(projectFile);
-      if (_mainListener.filesNotFound()) _model.setProjectChanged(true);
+      if (_mainListener.someFilesNotFound()) _model.setProjectChanged(true);
       _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
     }
     catch(MalformedProjectFileException e) {
@@ -6729,11 +6729,15 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     private boolean resetFNFCount() { return _fnfCount == 0; }
     
-    private boolean filesNotFound() { return _fnfCount > 0; }
+    private boolean someFilesNotFound() { return _fnfCount > 0; }
     
-    public void fileNotFound(File f) {
-      _fnfCount++;
-      _showFileNotFoundError(new FileNotFoundException("File " + f + " cannot be found"));
+    public void filesNotFound(File... files) {
+      if (files.length==0) return;
+      _fnfCount+=files.length;
+      String fileNames = "";
+      for (File f: files) fileNames += "\n" + f.getPath();
+      if (files.length==1) JOptionPane.showMessageDialog(MainFrame.this, "The following file could not be found, and has been removed from the project." + fileNames, "File Not Found", JOptionPane.ERROR_MESSAGE);
+      else JOptionPane.showMessageDialog(MainFrame.this, "The following files could not be found, and have been removed from the project." + fileNames, "Files Not Found", JOptionPane.ERROR_MESSAGE);
     }
     
     public void fileSaved(final OpenDefinitionsDocument doc) {

@@ -414,7 +414,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
 
     //TestListener listener = new TestListener();
     TestListener listener = new TestFileIOListener(tempFile1) {
-      public synchronized void fileNotFound(File f) { fileNotFoundCount++; }
+      public synchronized void filesNotFound(File... f) { fileNotFoundCount++; }
     };
 
     _model.addListener(listener);
