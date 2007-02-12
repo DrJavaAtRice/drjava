@@ -67,7 +67,7 @@
   <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
 
   <!-- fornum task, used for test-repeat -->
-  <taskdef name="fornum" classname="edu.rice.cs.util.ant.ForNumTask" classpath="lib/buildlib/ant-fornum.jar" onerror="report"/>
+  <taskdef name="fornum" classname="edu.rice.cs.plt.ant.ForNumTask" classpath="lib/buildlib/plt-ant.jar" onerror="report"/>
 
   <extendclasspath path="lib/buildlib/junit.jar" />
                  
