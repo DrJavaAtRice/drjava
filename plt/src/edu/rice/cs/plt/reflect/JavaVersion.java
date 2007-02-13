@@ -62,8 +62,8 @@ public enum JavaVersion {
   
   /**
    * Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
-   * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  If the text cannot be parsed, a trivial
-   * version with major version UNRECOGNIZED is returned.
+   * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
+   * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
    * 
    * @see <a href="http://java.sun.com/j2se/versioning_naming.html">Sun's version specification</a>
    */
@@ -79,6 +79,7 @@ public enum JavaVersion {
     int dot2 = number.indexOf('.', dot1+1);
     if (dot2 == -1) { return UNRECOGNIZED.new FullVersion(0, 0, ReleaseType.STABLE, null); }
     int underscore = number.indexOf('_', dot2+1);
+    if (underscore == -1) { underscore = number.indexOf('.', dot2+1); }
     if (underscore == -1) { underscore = number.length(); }
     try {
       int major = Integer.parseInt(number.substring(0, dot1));

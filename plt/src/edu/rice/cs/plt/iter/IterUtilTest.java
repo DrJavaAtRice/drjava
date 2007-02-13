@@ -19,6 +19,18 @@ public class IterUtilTest extends TestCase {
     assertEquals(expected, actual.charValue());
   }
   
+  public void testAsArray() {
+    String[] strings;
+    
+    strings = asArray(IterUtil.<String>empty(), String.class);
+    assertTrue(Arrays.equals(new String[0], strings));
+    
+    strings = asArray(makeIterable("foo", "bar", "baz"), String.class);
+    assertTrue(Arrays.equals(new String[]{ "foo", "bar", "baz" }, strings));
+    try { ((Object[]) strings)[0] = new Object(); }
+    catch (ArrayStoreException e) { return; /* correct behavior */ }
+    fail("Stored an Object in a String[]");
+  }
 
   public void testArrayIterable() {
     assertTrue(isEmpty(arrayIterable(new String[0])));

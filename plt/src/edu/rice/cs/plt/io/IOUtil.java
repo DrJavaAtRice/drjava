@@ -708,7 +708,7 @@ public final class IOUtil {
   /** Produce a path string from a list of files.  Filenames in the result are delimited
     * by the system-dependent path separator character (':' in Unix, ';' in Windows).
     */
-  public static String pathToString(Iterable<File> path) {
+  public static String pathToString(Iterable<? extends File> path) {
     return IterUtil.toString(path, "", File.pathSeparator, "");
   }
 

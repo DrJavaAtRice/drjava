@@ -1,6 +1,7 @@
 package edu.rice.cs.plt.iter;
 
 import java.util.*;
+import java.lang.reflect.Array;
 import java.io.Reader;
 import java.io.InputStream;
 import java.io.IOException;
@@ -210,6 +211,24 @@ public final class IterUtil {
       }
       return result;
     }
+  }
+  
+  /**
+   * Make an array with the given elements.  Takes advantage of the (potentially optimized)
+   * {@link Collection#toArray} method where possible; otherwise, just iterates through
+   * {@code iter} to fill the array.
+   */
+  public static <T> T[] asArray(Iterable<? extends T> iter, Class<T> type) {
+    // Cast is safe because the result has the type of the variable "type"
+    @SuppressWarnings("unchecked") T[] result = (T[]) Array.newInstance(type, sizeOf(iter));
+    if (iter instanceof Collection<?>) {
+      result = ((Collection<? extends T>) iter).toArray(result);
+    }
+    else {
+      int i = 0;
+      for (T t : iter) { result[i] = t; i++; }
+    }
+    return result;
   }
   
   /**
