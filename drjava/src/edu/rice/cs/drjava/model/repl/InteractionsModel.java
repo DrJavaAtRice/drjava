@@ -118,7 +118,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _inputListener = NoInputListener.ONLY;
   }
 
-  /** Add a JavadocListener to the model.
+  /** Add an InteractionsListener to the model.
    *  @param listener a listener that reacts to Interactions events */
   public void addListener(InteractionsListener listener) { _notifier.addListener(listener); }
 

@@ -65,8 +65,9 @@ public class JDKToolsLibrary {
       String bootProp = System.getProperty("sun.boot.class.path");
       if (bootProp != null) { bootClassPath = IterUtil.asList(IOUtil.parsePath(bootProp)); }
       try {
-        CompilerInterface attempt = (CompilerInterface) 
-          ReflectUtil.loadObject(compilerAdapter, new Class[]{FullVersion.class, List.class}, version, bootClassPath);
+        Class[] sig = new Class[]{ FullVersion.class, String.class, List.class };
+        Object[] args = new Object[]{ version, "the runtime class path", bootClassPath };
+        CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadObject(compilerAdapter, sig, args);
         if (attempt.isAvailable()) { compiler = attempt; }
       }
       catch (ReflectException e) { /* can't load */ }

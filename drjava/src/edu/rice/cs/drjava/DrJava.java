@@ -114,9 +114,6 @@ public class DrJava {
     // Platform-specific UI setup.
     PlatformFactory.ONLY.beforeUISetup();
     
-    DebugUtil.error.log("This is the error log");
-    DebugUtil.debug.log("This is the debug log");
-
     new SplashScreen().flash();
 //    Utilities.showDebug("Calling configureAndLoadDrJavaRoot with args = " + args);
     configureAndLoadDrJavaRoot(args); 

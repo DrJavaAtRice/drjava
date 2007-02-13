@@ -76,9 +76,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Debugger debugger = NoDebuggerAvailable.ONLY;
     
     if (JavaVersion.CURRENT.supports(version.majorVersion())) {
-      Iterable<File> path = IterUtil.singleton(f);
       // block tools.jar classes, so that references don't point to a different version of the classes
       ClassLoader loader = new ShadowingClassLoader(JarJDKToolsLibrary.class.getClassLoader(), TOOLS_PACKAGES);
+      Iterable<File> path = IterUtil.singleton(f);
       
       String compilerAdapter = adapterForCompiler(version.majorVersion());
       if (compilerAdapter != null) {
@@ -93,9 +93,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           }
         }
         try {
-          Class[] sig = new Class[]{ FullVersion.class, List.class };
-          CompilerInterface attempt = (CompilerInterface) 
-            ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, sig, version, bootClassPath);
+          Class[] sig = new Class[]{ FullVersion.class, String.class, List.class };
+          Object[] args = new Object[]{ version, f.toString(), bootClassPath };
+          CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
+                                                                                         sig, args);
           if (attempt.isAvailable()) { compiler = attempt; }
         }
         catch (ReflectException e) { /* can't load */ }

@@ -94,7 +94,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     // to listen on the active compiler.
     final CompilerModel compilerModel = getModel().getCompilerModel();
     Iterable<CompilerInterface> iter = getModel().getCompilerModel().getAvailableCompilers();
-    _compilerChoiceBox = new JComboBox(IterUtil.asList(iter).toArray(new CompilerInterface[0]));
+    _compilerChoiceBox = new JComboBox(IterUtil.asArray(iter, CompilerInterface.class));
     _compilerChoiceBox.setEditable(false);
     _compilerChoiceBox.setSelectedItem(compilerModel.getActiveCompiler());
     _compilerChoiceBox.addItemListener(new ItemListener() {
@@ -213,10 +213,10 @@ public class CompilerErrorPanel extends ErrorPanel {
           message = msgBuffer.toString();
         }
       }
-      else if (getModel().getCompilerModel().getActiveCompiler() == NoCompilerAvailable.ONLY)
+      else if (!getModel().getCompilerModel().getActiveCompiler().isAvailable())
         message = "No compiler available.";
       else 
-        message = getModel().getCompilerModel().getActiveCompiler().getName() + " compiler ready.";
+        message = "Compiler ready: " + getModel().getCompilerModel().getActiveCompiler().getDescription() + ".";
       
       doc.insertString(0, message, NORMAL_ATTRIBUTES);
       setDocument(doc);

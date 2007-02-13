@@ -42,6 +42,12 @@ import edu.rice.cs.plt.reflect.JavaVersion;
  */
 public interface CompilerInterface {
   
+  /** Indicates whether this compiler is actually available. As in: Is it installed and located? This method 
+   *  should load the compiler class, which should hopefully prove whether the class can load.  If this 
+   *  method returns true, the {@link #compile} method should not fail due to class not being found.
+   */
+  boolean isAvailable();
+
   /** Compile the given files.
    *  @param files  Source files to compile.
    *  @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
@@ -58,19 +64,16 @@ public interface CompilerInterface {
                                         List<? extends File> sourcePath, File destination, 
                                         List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings);
   
-  /** Indicates whether this compiler is actually available. As in: Is it installed and located? This method 
-   *  should load the compiler class, which should hopefully prove whether the class can load.  If this 
-   *  method returns true, the {@link #compile} method should not fail due to class not being found.
-   */
-  boolean isAvailable();
-
-  /** Returns the name of this compiler, appropriate to show to the user. */
-  String getName();
-  
   /** The latest version of Java supported by the compiler */
   JavaVersion version();
+  
+  /** Returns the name of this compiler, appropriate to show to the user. */
+  String getName();
 
-  /** Should return info about compiler, at least including name. */
+  /** Returns a one-line description of the compiler (such as the name and file location) */
+  String getDescription();
+  
+  /** String to display in a combo box (generally {@code getName()}) */
   String toString();
   
 }
