@@ -8,6 +8,7 @@
      - Create a 'compile-foo' target (use Java 1.4 for compilation where possible)
      - Create a 'test-foo' target
      - Add the 'classes/base-foo' directory to the 'jar' and 'jar-base' targets
+     - Add the 'classes/test-foo' directory to the 'clean-intermediate' target
      -->
      
 <project name="platform" default="help">
@@ -62,9 +63,8 @@
     <echo message="JAVA15_HOME: Home folder of the Java 5 JDK" />
     <echo message="JAVA16_HOME: Home folder of the Java 6 JDK" />
     <echo message="DRJAVA_JAR: Location of the DrJava jar file.  Preferably, this file" />
-    <echo message="            should be 'drjava-base-15.jar', preventing problems due to" />
-    <echo message="            conflicts with previous 'platform.jar' files and interfaces" />
-    <echo message="            changed by Retroweaver." />
+    <echo message="            should be 'drjava-15.jar', preventing problems due to" />
+    <echo message="            interfaces changed by Retroweaver." />
     <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
     <echo message="" />
     <echo message="Some targets will also require that Ant be run under a specific Java " />
@@ -377,6 +377,18 @@
     <echo message="Deleting all intermediate build products" />
     
     <delete dir="classes/lib" failonerror="${clean-can-fail}" />
+    <delete dir="classes/test-jdk14" failonerror="${clean-can-fail}" />
+    <delete dir="classes/test-jdk15" failonerror="${clean-can-fail}" />
+    <delete dir="classes/test-jdk16" failonerror="${clean-can-fail}" />
+    <delete dir="classes/test-mac" failonerror="${clean-can-fail}" />
+    <delete dir="classes/test-windows" failonerror="${clean-can-fail}" />
+    
+    <delete failonerror="${clean-can-fail}">
+      <fileset dir="testFiles">
+        <include name="**/*.class" />
+        <!-- Additional test output files should be listed here -->
+      </fileset>
+    </delete>
     
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="${basedir}" defaultexcludes="no">

@@ -1,47 +1,35 @@
 /*BEGIN_COPYRIGHT_BLOCK
- *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
- *
- * DrJava Open Source License
- * 
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
- *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
- * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
- * OTHER DEALINGS WITH THE SOFTWARE.
- * 
-END_COPYRIGHT_BLOCK*/
+*
+* This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+* or http://sourceforge.net/projects/drjava/
+*
+* DrJava Open Source License
+* 
+* Copyright (C) 2001-2006 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
+*
+* Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+* 
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+* documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+* to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+* 
+*     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+*       following disclaimers.
+*     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+*       following disclaimers in the documentation and/or other materials provided with the distribution.
+*     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+*       endorse or promote products derived from this Software without specific prior written permission.
+*     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+*       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+* 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+* THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+* CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+* WITH THE SOFTWARE.
+* 
+*END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
 
@@ -67,8 +55,11 @@ import com.sun.tools.javac.util.Position;
 import com.sun.tools.javac.util.Log;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.plt.debug.DebugUtil;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.io.IOUtil;
+
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /**
  * An implementation of the CompilerInterface that supports compiling with
@@ -81,37 +72,47 @@ import edu.rice.cs.plt.reflect.JavaVersion;
  *
  * @version $Id$
  */
-public class Javac150Compiler implements CompilerInterface {
+public class Javac150Compiler extends JavacCompiler {
   
   private boolean _supportsJSR14v2_4;
   private boolean _isJSR14v2_5;
-  private final JavaVersion.FullVersion _version;
-  private final List<? extends File> _defaultBootClassPath;
     
   public static final String COMPILER_CLASS_NAME = "com.sun.tools.javac.main.JavaCompiler";
   
   /** A writer that discards its input. */
-  private static final Writer NULL_WRITER = new Writer() {
+  private static final PrintWriter NULL_WRITER = new PrintWriter(new Writer() {
     public void write(char cbuf[], int off, int len) throws IOException {}
     public void flush() throws IOException {}
     public void close() throws IOException {}
-  };
+  });
 
-  /** A no-op printwriter to pass to the compiler to print error messages. */
-  private static final PrintWriter NULL_PRINT_WRITER = new PrintWriter(NULL_WRITER);
-
-
-  public Javac150Compiler(JavaVersion.FullVersion version, List<? extends File> defaultBootClassPath) {
+  public Javac150Compiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
+    super(version, location, defaultBootClassPath);
     _isJSR14v2_5 = false;
     _supportsJSR14v2_4 = _supportsJSR14v2_4();
-    _version = version;
-    _defaultBootClassPath = defaultBootClassPath;
+  }
+  
+  public boolean isAvailable() {
+    try {
+      Class.forName("com.sun.tools.javac.main.JavaCompiler");
+      try { Class.forName("java.lang.Enum"); }
+      catch (Exception e) {
+        // If java.lang.Enum is not found, there's a chance the user specified JSR14v2.5 
+        // For some reason, java.lang.Enum got moved to collect.jar which we can't put on the
+        // bootclasspath.  Look for something 2.5 specific.
+        Class.forName("com.sun.tools.javac.main.Main$14");
+        _isJSR14v2_5 = true;
+      }
+      return _isValidVersion();
+    }
+    catch (Exception e) { return false; }
+    catch (LinkageError e) { return false; }
   }
   
   /** Uses reflection on the Log object to deduce which JDK is being used. If the constructor for Log in this JDK 
    *  does not match that of JSR-14 v2.0, then the version is not supported.
    */
-  protected boolean _isValidVersion() {
+  private boolean _isValidVersion() {
     
     Class log = com.sun.tools.javac.util.Log.class;
 
@@ -133,26 +134,26 @@ public class Javac150Compiler implements CompilerInterface {
     }
   }
   
-/** Compile the given files.
-  *  @param files  Source files to compile.
-  *  @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
-  *  @param sourcePath  Location of additional sources to be compiled on-demand.  If @code{null}, the default is used.
-  *  @param destination  Location (directory) for compiled classes.  If @code{null}, the default in-place location is used.
-  *  @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with @code{sourceVersion} 
-  *                        If @code{null}, the default is used.
-  *  @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  If @code{null},
-  *                        the default is used.
-  *  @param showWarnings  Whether compiler warnings should be shown or ignored.
-  *  @return Errors that occurred. If no errors, should be zero length (not null).
-  */
+  /** Compile the given files.
+    *  @param files  Source files to compile.
+    *  @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
+    *  @param sourcePath  Location of additional sources to be compiled on-demand.  If @code{null}, the default is used.
+    *  @param destination  Location (directory) for compiled classes.  If @code{null}, the default in-place location is used.
+    *  @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with @code{sourceVersion} 
+    *                        If @code{null}, the default is used.
+    *  @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  If @code{null},
+    *                        the default is used.
+    *  @param showWarnings  Whether compiler warnings should be shown or ignored.
+    *  @return Errors that occurred. If no errors, should be zero length (not null).
+    */
   public List<? extends CompilerError> compile(List<? extends File> files, List<? extends File> classPath, 
                                                List<? extends File> sourcePath, File destination, 
                                                List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
-    DebugUtil.debug.logStart("compile()");
-    DebugUtil.debug.logValues(new String[]{ "files", "classPath", "sourcePath", "destination", "bootClassPath", 
+    debug.logStart("compile()");
+    debug.logValues(new String[]{ "this", "files", "classPath", "sourcePath", "destination", "bootClassPath", 
                                           "sourceVersion", "showWarnings" },
-                              files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
-    if (bootClassPath == null) { bootClassPath = _defaultBootClassPath; }
+                    this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+    
     Context context = _createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     OurLog log = new OurLog(context);
     JavaCompiler compiler = _makeCompiler(context);
@@ -172,43 +173,26 @@ public class Javac150Compiler implements CompilerInterface {
       
       LinkedList<CompilerError> errors = log.getErrors();
       errors.addFirst(new CompilerError("Compile exception: " + t, false));
-      DebugUtil.debug.logEnd("compile() (caught an exception)");
+      error.log(t);
+      debug.logEnd("compile() (caught an exception)");
       return errors;
     }
     
-    DebugUtil.debug.logEnd("compile()");
+    debug.logEnd("compile()");
     return log.getErrors();
   }
   
-  public boolean isAvailable() {
-    try {
-      Class.forName(COMPILER_CLASS_NAME);
-      try { Class.forName("java.lang.Enum"); }
-      catch (Exception e) {
-        // If java.lang.Enum is not found, there's a chance the user specified JSR14v2.5 
-        // For some reason, java.lang.Enum got moved to collect.jar which we can't put on the
-        // bootclasspath.  Look for something 2.5 specific.
-        Class.forName("com.sun.tools.javac.main.Main$14");
-        _isJSR14v2_5 = true;
-      }
-      return _isValidVersion();
-    }
-    catch (Exception e) { return false; }
-  }
-
   public String getName() {
     if (_isJSR14v2_5) return "JSR-14 v2.5";
     // We could try to distinguish between different JSR-14 versions, but does anyone care anymore?
-    else return "JDK " + _version.versionString();
+    else return super.getName();
   }
+  
+  private Context _createContext(List<? extends File> classPath, List<? extends File> sourcePath, File destination, 
+                                 List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
 
-  public JavaVersion version() { return _version.majorVersion(); }
-
-  public String toString() { return getName(); }
-
-
-  protected Context _createContext(List<? extends File> classPath, List<? extends File> sourcePath, File destination, 
-                                   List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+    if (bootClassPath == null) { bootClassPath = _defaultBootClassPath; }
+    
     Context context = new Context();
     Options options = Options.instance(context);
     options.putAll(CompilerOptions.getOptions(showWarnings));
@@ -216,28 +200,20 @@ public class Javac150Compiler implements CompilerInterface {
     //Should be setable some day?
     options.put("-g", "");
 
-    if (classPath != null) { options.put("-classpath", _pathToString(classPath)); }
-    if (sourcePath != null) { options.put("-sourcepath", _pathToString(sourcePath)); }
+    if (classPath != null) { options.put("-classpath", IOUtil.pathToString(classPath)); }
+    if (sourcePath != null) { options.put("-sourcepath", IOUtil.pathToString(sourcePath)); }
     if (destination != null) { options.put("-d", destination.getPath()); }
-    if (bootClassPath != null) { options.put("-bootclasspath", _pathToString(bootClassPath)); }
+    if (bootClassPath != null) { options.put("-bootclasspath", IOUtil.pathToString(bootClassPath)); }
     if (sourceVersion != null) { options.put("-source", sourceVersion); }
     if (!showWarnings) { options.put("-nowarn", ""); }
     
+    // Bug fix: if "-target" is not present, Iterables in for-each loops cause compiler errors
+    if (sourceVersion != null) { options.put("-target", sourceVersion); }
+    else { options.put("-target", "1.5"); }
+
     return context;
   }
 
-  protected static String _pathToString(List<? extends File> path) {
-    StringBuffer result = new StringBuffer();
-    boolean first = true;
-    for (File f : path) {
-      if (!first) { result.append(File.pathSeparatorChar); }
-      first = false;
-      result.append(f.getPath());
-    }
-    return result.toString();
-  }
-  
-  
   protected JavaCompiler _makeCompiler(Context context) {
     // Using reflection to allow for JSR14v2.3 since the "make"
     // method was changed to "instance".
@@ -319,7 +295,7 @@ public class Javac150Compiler implements CompilerInterface {
     private LinkedList<CompilerError> _errors = new LinkedList<CompilerError>();
     private String _sourceName = "";
 
-    public OurLog(Context context) { super(context, NULL_PRINT_WRITER, NULL_PRINT_WRITER, NULL_PRINT_WRITER); }
+    public OurLog(Context context) { super(context, NULL_WRITER, NULL_WRITER, NULL_WRITER); }
 
     /** JSR14 uses this crazy signature on warning method because it localizes the warning message. */
     public void warning(int pos, String key, Object ... args) {
