@@ -451,11 +451,11 @@
        Jar Targets
        *********** -->
        
-  <target name="jar" depends="jar-15" description="Shortcut for 'jar-15'" />
+  <target name="jar" depends="jar-base-15" description="Shortcut for 'jar-base-15'" />
   
   <target name="jar-15" depends="compile-15, resolve-version-tag" 
           description="Create the 5.0 jar file with all classes and libs (compiling first)">
-    <jar jarfile="${ant.project.name}.jar">
+    <jar jarfile="${ant.project.name}-15.jar">
       <manifest>
         <attribute name="Main-Class" value="${main-class}" />
         <attribute name="Built-By" value="${user.name}" />
@@ -468,7 +468,7 @@
 
   <target name="jar-base-15" depends="compile-15, resolve-version-tag" 
           description="Create the 5.0 jar file without any support libs (compiling first)">
-    <jar jarfile="${ant.project.name}-base-15.jar">
+    <jar jarfile="${ant.project.name}.jar">
       <manifest>
         <attribute name="Main-Class" value="${main-class}" />
         <attribute name="Built-By" value="${user.name}" />
