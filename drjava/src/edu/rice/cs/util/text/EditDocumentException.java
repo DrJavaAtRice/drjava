@@ -53,7 +53,7 @@ public class EditDocumentException extends RuntimeException {
    * addition to <code>value.toString()</code>.
    */
   public EditDocumentException(Throwable value, String msg) {
-    super(msg + ": " + value.toString());
+    super(msg + ": " + value);
     _value = value;
   }
 

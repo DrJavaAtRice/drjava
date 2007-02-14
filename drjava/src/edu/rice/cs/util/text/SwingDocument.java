@@ -111,34 +111,43 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   }
   
 
-  /** Inserts a string into the document at the given offset and the given named style, if the edit condition 
-   *  allows it.
-   *  @param offs Offset into the document
-   *  @param str String to be inserted
-   *  @param style Name of the style to use.  Must have been added using addStyle.
-   *  @throws EditDocumentException if the offset is illegal
-   */
+  /** Inserts a string into the document at the given offset and style, if the edit condition allows it.
+    * @param offs Offset into the document
+    * @param str String to be inserted
+    * @param style Name of the style to use.  Must have been added using addStyle.
+    * @throws EditDocumentException if the offset is illegal
+    */
   public void insertText(int offs, String str, String style) {
     acquireWriteLock();
-    try { if (_condition.canInsertText(offs)) forceInsertText(offs, str, style); }
+    try { if (_condition.canInsertText(offs)) _forceInsertText(offs, str, style); }
     finally { releaseWriteLock(); }
   }
+  
+  /** Behaves exactly like forceInsertText except for assuming that WriteLock is already held. */
+  private void _forceInsertText(int offs, String str, String style) {
+    int len = getLength();
+    if ((offs < 0) || (offs > len)) {
+      String msg = "Offset " + offs + " passed to SwingDocument.forceInsertText is out of bounds [0, " + len + "]";
+      throw new EditDocumentException(null, msg);
+    }
+    AttributeSet s = null;
+    if (style != null) s = getDocStyle(style);
+    try { super.insertString(offs, str, s); }
+    catch (BadLocationException e) { throw new EditDocumentException(e); }
+  }
 
-  /** Inserts a string into the document at the given offset and the given named style, regardless of the edit 
-    * condition.
+  /** Inserts a string into the document at the given offset and style, regardless of the edit condition.
     * @param offs Offset into the document
     * @param str String to be inserted
     * @param style Name of the style to use.  Must have been added using addStyle.
     * @throws EditDocumentException if the offset is illegal
     */
   public void forceInsertText(int offs, String str, String style) {
-    AttributeSet s = null;
-    if (style != null) s = getDocStyle(style);
-    /* Using a writeLock is unnecessary because insertString is already thread-safe */
-    try { super.insertString(offs, str, s); }
-    catch (BadLocationException e) { throw new EditDocumentException(e); }
+    acquireWriteLock();
+    try { _forceInsertText(offs, str, style); }
+    finally { releaseWriteLock(); }
   }
-
+     
   /** Overrides superclass's insertString to impose the edit condition. The AttributeSet is ignored in the condition, 
    *  which sees a null style name.
    */

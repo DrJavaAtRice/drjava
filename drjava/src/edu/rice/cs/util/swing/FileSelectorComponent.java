@@ -42,12 +42,13 @@ import java.awt.event.FocusListener;
 import java.awt.event.FocusEvent;
 import java.io.*;
 
+import edu.rice.cs.util.UnexpectedException;
+
 /** A JPanel with a text box and a "..." button used to select a file or directory.  The file name is editable in the
- *  text box, and a JFileChooser is displayed if the user clicks the "..." button.
- *  TODO: make this inherit from FileSelectorStringComponent or factor the common code into an abstract class!  Duplicated code!
- *
- *  @version $Id$
- */
+  * text box, and a JFileChooser is displayed if the user clicks the "..." button.
+  * TODO: make this inherit from FileSelectorStringComponent or factor the common code into an abstract class!  Duplicated code!
+  * @version $Id$
+  */
 public class FileSelectorComponent extends JPanel {
   
   /** The default number of columns for the text box. */
@@ -69,13 +70,13 @@ public class FileSelectorComponent extends JPanel {
   protected final JFileChooser _chooser;
 
   /** File filter to use in the chooser. */
-  protected FileFilter _fileFilter;
+  protected volatile FileFilter _fileFilter;
   
   /** The current file */
-  protected File _file;
+  protected volatile File _file;
   
   /** True if file must exist. */
-  protected boolean _mustExist;
+  protected volatile boolean _mustExist;
 
   /** Creates a new FileSelectorComponent with default dimensions.
    *
@@ -99,13 +100,15 @@ public class FileSelectorComponent extends JPanel {
   
   /** Creates a new FileSelectorComponent.
    *
-   *  @param parent    Parent of this component.
+   *  @param parent    Parent of this component; may be null if the FileSelector is supposed to stand-alone.
    *  @param chooser   File chooser to display from the "..." button.
    *  @param numCols   Number of columns to display in the text field
    *  @param fontSize  Font size for the text field
    *  @param mustExist force selection of existing file
    */
   public FileSelectorComponent(Frame parent, JFileChooser chooser, int numCols, float fontSize, boolean mustExist) {
+    
+    if (chooser == null) throw new UnexpectedException("Error: called new FileSelectorComponent(...) with a null chooser!");
     
     _parent = parent;
     _chooser = chooser;

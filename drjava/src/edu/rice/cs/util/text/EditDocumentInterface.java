@@ -64,7 +64,7 @@ public interface EditDocumentInterface extends ReadersWritersLocking, Serializab
    */
   public void insertText(int offs, String str, String style);
 
-  /** Inserts a string into the document at the given offset and named style, regardless of the edit condition.
+  /** Inserts a string into the document at the given offset and style, regardless of the edit condition.
    *  @param offs Offset into the document
    *  @param str String to be inserted
    *  @param style Name of the style to use.  Must have been

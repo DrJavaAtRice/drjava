@@ -126,18 +126,18 @@ public class ConsoleDocument implements EditDocumentInterface {
    *  @param newPos the new position.
    */
   public void setPromptPos(int newPos) { 
-    acquireReadLock();
+    acquireWriteLock();
     _promptPos = newPos; 
-    releaseReadLock();
+    releaseWriteLock();
   }
 
   /** Sets a runnable action to use as a beep.
    *  @param beep Runnable beep command
    */
   public void setBeep(Runnable beep) { 
-    acquireReadLock();
+    acquireWriteLock();
     _beep = beep; 
-    releaseReadLock();
+    releaseWriteLock();
   }
 
   /** Resets the document to a clean state. */
@@ -259,13 +259,12 @@ public class ConsoleDocument implements EditDocumentInterface {
     finally { releaseWriteLock(); }
   }
   
-  /** Inserts a string into the document at the given offset and the given named style, regardless of the edit 
-   *  condition.
-   *  @param offs Offset into the document
-   *  @param str String to be inserted
-   *  @param style Name of the style to use.  Must have been added using addStyle.
-   *  @throws EditDocumentException if the offset is illegal
-   */
+  /** Inserts a string into the document at the given offset and  style, regardless of the edit condition.
+    * @param offs Offset into the document
+    * @param str String to be inserted
+    * @param style Name of the style to use.  Must have been added using addStyle.
+    * @throws EditDocumentException if the offset is illegal
+    */
   public void forceInsertText(int offs, String str, String style) throws EditDocumentException {
     acquireWriteLock();
     try {
