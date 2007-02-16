@@ -743,11 +743,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       endCompoundEdit();
 
       // if not in the selected area,
-      if ((viewToModel(e.getPoint()) < getSelectionStart()) ||
+      /*if ((viewToModel(e.getPoint()) < getSelectionStart()) ||
           (viewToModel(e.getPoint()) > getSelectionEnd()) ) {
         //move caret to clicked position, deselecting previous selection
         setCaretPosition(viewToModel(e.getPoint()));
-      }
+      }*/
     }
 
     protected void _popupAction(MouseEvent e) {
