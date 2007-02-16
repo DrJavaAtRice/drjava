@@ -3069,7 +3069,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         private volatile WeakHashMap< DefinitionsDocument.WrappedPosition, Integer> _positions =
           new WeakHashMap<DefinitionsDocument.WrappedPosition, Integer>();
         
-        public String getText() { return _image; }
+        public String getText() { 
+          if (_image!=null) return _image;
+          try {
+            _image = IOUtil.toString(_file);
+            return _image;
+          }
+          catch(IOException e) {
+            // Do nothing, return null
+          }
+          return null;
+        }
         
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException {
           
