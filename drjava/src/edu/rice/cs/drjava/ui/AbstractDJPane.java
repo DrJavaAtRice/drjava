@@ -179,19 +179,18 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
 
   }
 
-  /** Indent the given selection, for the given reason, in the current document.
-   *  @param selStart - the selection start
-   *  @param selEnd - the selection end
-   *  @param reason - the reason for the indent
-   *  @param pm - the ProgressMonitor used by the indenter
-   */
+  /** Indents the given selection, for the given reason, in the current document.
+    * @param selStart - the selection start
+    * @param selEnd - the selection end
+    * @param reason - the reason for the indent
+    * @param pm - the ProgressMonitor used by the indenter
+    */
   protected abstract void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm);
      
-  /**
-   * Returns true if the indent is to be performed.
-   * @param selStart - the selection start
-   * @param selEnd - the selection end
-   */
+  /** Returns true if the indent is to be performed.
+    * @param selStart - the selection start
+    * @param selEnd - the selection end
+    */
   protected abstract boolean shouldIndent(int selStart, int selEnd);
   
   /** Returns the DJDocument held by the pane. */

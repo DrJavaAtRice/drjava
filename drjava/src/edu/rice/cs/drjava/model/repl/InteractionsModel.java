@@ -535,7 +535,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (! _waitingForFirstInterpreter) {
       _document.acquireWriteLock();
       try {
-        _document.insertBeforeLastPrompt("Resetting Interactions..." + _newLine, InteractionsDocument.ERROR_STYLE);
+        _document.insertBeforeLastPrompt("Resetting Interactions ...\n", InteractionsDocument.ERROR_STYLE);
         _document.setInProgress(true);
       }
       finally { _document.releaseWriteLock(); }

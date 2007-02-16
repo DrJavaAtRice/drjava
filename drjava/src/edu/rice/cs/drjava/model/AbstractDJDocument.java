@@ -913,13 +913,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   
   /** Parameterized indentation for special-case handling.  If selStart == selEnd, then the line containing the
-   *  _currentLocation is indented.  The values of selStart and selEnd are ignored!
-   *  @param selStart the offset of the initial character of the region to indent
-   *  @param selEnd the offset of the last character of the region to indent
-   *  @param reason a flag from {@link Indenter} to indicate the reason for the indent
-   *        (indent logic may vary slightly based on the trigger action)
-   *  @param pm used to display progress, null if no reporting is desired
-   */
+    * _currentLocation is indented.  The values of selStart and selEnd are ignored!
+    * @param selStart the offset of the initial character of the region to indent
+    * @param selEnd the offset of the last character of the region to indent
+    * @param reason a flag from {@link Indenter} to indicate the reason for the indent
+    *        (indent logic may vary slightly based on the trigger action)
+    * @param pm used to display progress, null if no reporting is desired
+    */
   public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException {
     

@@ -2762,7 +2762,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //     private boolean _modifiedSinceSave;
     
     /** String image of document as last read from or written to disk; initially null */
-    private String _image;
+    private volatile String _image;
     private volatile File _file;
     private volatile long _timestamp;
     
@@ -3069,15 +3069,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         private volatile WeakHashMap< DefinitionsDocument.WrappedPosition, Integer> _positions =
           new WeakHashMap<DefinitionsDocument.WrappedPosition, Integer>();
         
-        public String getText() { 
-          if (_image!=null) return _image;
-          try {
+        public String getText() {
+          final String image = _image;
+          if (image != null) return image;
+          
+          // Document has not yet been read from disk; read it and set _image before returning text.
+          // Synchronization on this was eliminated because it does not prevent the returned string from becoming 
+          // inconsistent with _doc/_file in the presence of huge scheduling delays.  Of course, all getText operations 
+          // can return stale data in the presence of such delays. 
+          try { 
             _image = IOUtil.toString(_file);
             return _image;
           }
-          catch(IOException e) {
-            // Do nothing, return null
-          }
+          catch(IOException e) { /* do nothing; return null */ }  
           return null;
         }
         
@@ -3409,10 +3413,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return ret;
     }
     
+    
     /** Determines if document has a class file consistent with its current state.  If this document is unmodified,
-     *  this method examines the primary class file corresponding to this document and compares the timestamps of
-     *  the class file to that of the source file.  An empty untitled document is consider to be "in sync".
-     */
+      *  this method examines the primary class file corresponding to this document and compares the timestamps of
+      *  the class file to that of the source file.  An empty untitled document is consider to be "in sync".
+      */
     public boolean checkIfClassFileInSync() {
       _log.log("checkIfClassFileInSync() called for " + this);
       if (isUntitled()) return true; // unmodified, untitled document

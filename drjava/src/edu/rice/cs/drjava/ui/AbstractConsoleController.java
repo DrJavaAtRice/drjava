@@ -235,7 +235,7 @@ public abstract class AbstractConsoleController implements Serializable {
                 // Caret was on or after prompt, so move it right by the size
                 //  of the insert.
                 int size = promptPos - prevPromptPos;
-                if (size > 0)  moveTo(caretPos + size);
+                if (size > 0) moveTo(caretPos + size);
               }
             }
           }

@@ -218,11 +218,11 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   }
   
   /** Indent the given selection, for the given reason, in the current document.
-   *  @param selStart - the selection start
-   *  @param selEnd - the selection end
-   *  @param reason - the reason for the indent
-   *  @param pm - the ProgressMonitor used by the indenter
-   */
+    * @param selStart - the selection start
+    * @param selEnd - the selection end
+    * @param reason - the reason for the indent
+    * @param pm - the ProgressMonitor used by the indenter
+    */
   protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);

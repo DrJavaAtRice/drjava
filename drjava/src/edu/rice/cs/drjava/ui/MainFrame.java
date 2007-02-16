@@ -3248,8 +3248,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** ONLY executes in event thread. */
   public void updateStatusField(String text) {
      assert EventQueue.isDispatchThread();
-    _statusField.setText(text);
-    update(getGraphics());
+     if (! text.equals(_statusField.getText())) {
+       _statusField.setText(text);
+       update(getGraphics());
+     }
   }
   
   /** Updates the status field with the current status of the Definitions Pane. */

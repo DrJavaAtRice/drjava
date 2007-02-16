@@ -206,10 +206,10 @@ public class DocumentCache {
     public String getText() {
       final DefinitionsDocument doc = _doc;  // create a snapshot of _doc
       if (doc != null) return doc.getText();
+      String image = _rec.getText();  // There is a technical race here; _doc could be set and modified before here
+      if (image != null) return image;
       synchronized(_cacheLock) { // lock the state of this DocManager
         if (_doc != null) return _doc.getText(); // _doc may have changed since test outside of _cacheLock
-        String image = _rec.getText();
-        if (image != null) return image;
         return makeDocument().getText();
       }
     }
@@ -217,7 +217,7 @@ public class DocumentCache {
     /* Gets the specified substring of this document; throws an exception if the specification is ill-formed. */
     public String getText(int offset, int len) { 
       String text = getText();
-      _log.log("getText(" + offset + ", " + len + ") called on '" + text + "' which has " + text.length() + " chars");
+//      _log.log("getText(" + offset + ", " + len + ") called on '" + text + "' which has " + text.length() + " chars");
       
       return text.substring(offset, offset + len);
     }
