@@ -515,26 +515,26 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           continue;
         }
         
-        // get the original time stamp
-        long origts = fr.getDocument().getTimestamp();
+//        // get the original time stamp
+//        long origts = fr.getDocument().getTimestamp();
         
-        if (!_model.getActiveDocument().equals(fr.getDocument())) {
+        if (! _model.getActiveDocument().equals(fr.getDocument())) {
           _model.setActiveDocument(fr.getDocument());
         }
         else _model.refreshActiveDocument();
         
         final OpenDefinitionsDocument doc = _defPane.getOpenDefDocument();
         
-        // get the time stamp after making the document the active one
-        long newts = doc.getTimestamp();
-        if (newts != origts) {
-          // timestamps changed, document has been modified, so all our FindResults
-          // may not apply anymore. we are going to discard all FindResults for this
-          // document.
-          // add thi document to the list of reverted documents
-          reverted.add(doc);
-          continue;
-        }
+//        // get the time stamp after making the document the active one
+//        long newts = doc.getTimestamp();
+//        if (newts != origts) {
+//          // timestamps changed, document has been modified, so all our FindResults
+//          // may not apply anymore. we are going to discard all FindResults for this
+//          // document.
+//          // add thi document to the list of reverted documents
+//          reverted.add(doc);
+//          continue;
+//        }
         
         final StringBuilder sb = new StringBuilder();
         try {

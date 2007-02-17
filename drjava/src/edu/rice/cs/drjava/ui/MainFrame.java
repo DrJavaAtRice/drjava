@@ -3247,11 +3247,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** ONLY executes in event thread. */
   public void updateStatusField(String text) {
-     assert EventQueue.isDispatchThread();
-     if (! text.equals(_statusField.getText())) {
-       _statusField.setText(text);
-       update(getGraphics());
-     }
+    assert EventQueue.isDispatchThread();
+    _statusField.setText(text);
+    _statusField.update(getGraphics());
   }
   
   /** Updates the status field with the current status of the Definitions Pane. */
@@ -3263,22 +3261,21 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       setTitle(fileName);
       _model.getDocCollectionWidget().repaint();
     }
-    
     String path = doc.getCompletePath();
     
-    String fileTitle = "Editing " + path;
-
+    String text = "Editing " + path;
+    
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    if (DrJava.getConfig().getSetting(LIGHTWEIGHT_PARSING_ENABLED).booleanValue()) {
 //      String temp = _model.getParsingControl().getEnclosingClassName(doc);
-//      if ((temp != null) && (temp.length() > 0)) { fileTitle = fileTitle + " - " + temp; }
-//    }
-
-    if (! _statusField.getText().equals(fileTitle)) { _statusField.setText(fileTitle); }
+//      if ((temp != null) && (temp.length() > 0)) { text = text + " - " + temp; }
     
-    //  Two files in different directories can have the same _fileTitle
-    _statusField.setToolTipText("Full path for file: " + path);
-    repaint();
+//    _statusField.setToolTipText("Full path for file: " + path);
+    
+    if (! _statusField.getText().equals(text)) { 
+      _statusField.setText(text); 
+      _statusField.update(getGraphics());
+    }
   }
   
   /** Prompt the user to select a place to open files from, then load them. Ask the user if they'd like to save 
