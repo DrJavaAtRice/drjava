@@ -2182,6 +2182,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         HighlightManager.HighlightInfo highlight = highlights.get(r);
         if (highlight != null) highlight.remove();
         highlights.remove(r);
+        // close the panel when all regions have been removed.
+        if (rm.getRegions().size()==0) { panel._close(); }
       }
     });
     
