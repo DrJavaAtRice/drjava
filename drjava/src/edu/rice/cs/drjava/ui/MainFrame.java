@@ -383,12 +383,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   private final Action _jarProjectAction = new AbstractAction("Create Jar File from Project...") {
     public void actionPerformed(ActionEvent ae) {
-      new SwingWorker() {
-        public Object construct() {
-          _jarOptionsDialog.setVisible(true);
-          return null;
-        }
-      }.start();
+      _jarOptionsDialog.setVisible(true);
     }
   };
   
