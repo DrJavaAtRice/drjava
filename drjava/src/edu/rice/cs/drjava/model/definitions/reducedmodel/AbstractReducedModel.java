@@ -182,9 +182,6 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   
   /**
    * Make a copy of the token list's iterator.
-   * Be sure to dispose of the result of this method after you are
-   * finished with it, or there will be memory leaks as long as
-   * this ReducedModel is not garbage collected.
    */
   public TokenList.Iterator makeCopyCursor() {
     return _cursor._copy();
