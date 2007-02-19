@@ -262,6 +262,11 @@ public interface GlobalModel extends ILoadDocuments {
    *  TODO: remove ugly swing dependency.
    */
   public DocumentIterator getDocumentIterator();
+  
+  /**
+   * Re-runs the global listeners on the active document.
+   */
+  public void refreshActiveDocument();
 
   /*---------------------------------- I/O ----------------------------------*/
 

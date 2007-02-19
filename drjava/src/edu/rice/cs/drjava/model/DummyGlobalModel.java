@@ -310,6 +310,10 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call getDocumentIterator on a Dummy");
   }
 
+  public void refreshActiveDocument() {
+    throw new UnsupportedOperationException("Tried to call refreshActiveDocument on a Dummy");
+  }
+
   public ConsoleDocument getConsoleDocument() {
      throw new UnsupportedOperationException("Tried to call getConsoleDocument on a Dummy");
   }

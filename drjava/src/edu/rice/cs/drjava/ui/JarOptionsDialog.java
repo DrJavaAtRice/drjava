@@ -707,6 +707,7 @@ public class JarOptionsDialog extends JFrame {
           JOptionPane.showMessageDialog(JarOptionsDialog.this, "An error occured while creating the jar file. This could be because the file that you are writing to or the file you are reading from could not be opened.", "Error: File Access", JOptionPane.ERROR_MESSAGE);
           JarOptionsDialog.this.setVisible(false);
         }
+        _model.refreshActiveDocument();
       }
     };
     worker.start();
