@@ -175,44 +175,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
   // ----- FIELDS -----
  
-//  /** A list of files that are auxiliary files to the currently open project.  All accesses to this variable must be synchronized.
-//   *  TODO: make part of FileGroupingState. */
-//  private LinkedList<File> _auxiliaryFiles = new LinkedList<File>();
- 
   /** Adds a document to the list of auxiliary files.  The LinkedList class is not thread safe, so
    *  the add operation is synchronized.
    */
   public void addAuxiliaryFile(OpenDefinitionsDocument doc) { _state.addAuxFile(doc.getRawFile()); }
-//    if (! doc.inProject()) {
-//      File f;
-//      
-//      try { f = doc.getFile(); }
-//      catch(FileMovedException fme) { f = fme.getFile(); }
-//      
-//      synchronized(_auxiliaryFiles) { _auxiliaryFiles.add(f); }
-//      setProjectChanged(true);
-//    }
-//  }
- 
+
   /** Removes a document from the list of auxiliary files.  The LinkedList class is not thread safe, so
    *  operations on _auxiliaryFiles are synchronized.
    */
   public void removeAuxiliaryFile(OpenDefinitionsDocument doc) { _state.remAuxFile(doc.getRawFile()); }
-//    File file = doc.getRawFile();
-//    if (file == null) return;  // Should never happen unless doc is Untitled.
-//    String path = FileOps.getCanonicalPath(file);
-//    
-//    synchronized(_auxiliaryFiles) {
-//      ListIterator<File> it = _auxiliaryFiles.listIterator();
-//      while (it.hasNext()) {
-//        if (path.equals (FileOps.getCanonicalPath(it.next()))) {
-//          it.remove();
-//          setProjectChanged(true);
-//          break;
-//        }
-//      }
-//    }
-//  }
  
   /** Keeps track of all listeners to the model, and has the ability to notify them of some event.  Originally used
    *  a Command Pattern style, but this has been replaced by having EventNotifier directly implement all listener
@@ -227,7 +198,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected final DefinitionsEditorKit _editorKit = new DefinitionsEditorKit(_notifier);
  
   /** Collection for storing all OpenDefinitionsDocuments. */
-//  protected final OrderedHashSet<OpenDefinitionsDocument> 
   private final AbstractMap<File, OpenDefinitionsDocument> _documentsRepos = 
     new LinkedHashMap<File, OpenDefinitionsDocument>();
  
@@ -644,6 +614,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     volatile File _workDir;
     volatile File _projectFile;
     final File[] _projectFiles;
+    private final Object _auxFilesLock = new Object();
     volatile File[] _auxFiles;
     volatile ClassPathVector _projExtraClassPath;
     private boolean _isProjectChanged = false;
@@ -743,7 +714,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Adds File f to end of _auxFiles array. */
     public void addAuxFile(File f) {
-      synchronized(_auxFiles) {
+      synchronized(_auxFilesLock) {
         int n = _auxFiles.length;
         File[] newAuxFiles = new File[n + 1];
         System.arraycopy(_auxFiles, 0, newAuxFiles, 0, n);  // newAuxFiles[0:n-1] = _auxFiles[0:n-1]
@@ -755,7 +726,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Removes File f from _auxFiles array. Assumes that f is a member of _auxFiles.  If f is not found, throws an 
      *  UnexpectedException. */
     public void remAuxFile(File file) {
-      synchronized(_auxFiles) {
+      synchronized(_auxFilesLock) {
         int newLen = _auxFiles.length - 1;
         File[] newAuxFiles = new File[newLen];
         try {
@@ -803,7 +774,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try { path = f.getCanonicalPath();}
       catch(IOException ioe) { return false; }
       
-      synchronized(_auxFiles) {
+      synchronized(_auxFilesLock) {
         for (File file : _auxFiles) {
           try { if (file.getCanonicalPath().equals(path)) return true; }
           catch(IOException ioe) { /* ignore file */ }
@@ -3304,13 +3275,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           synchronized(_documentsRepos) {
             File f = getRawFile();
 //            OpenDefinitionsDocument d = _documentsRepos.get(f);
-            // d == this except in some unit tests where documents are not entered in _documentRepos
+            // d == this except in some unit tests where documents are not entered in _documentsRepos
 //            assert d == this;
             _documentsRepos.remove(f);
             _documentsRepos.put(file, this);
           }
-          setFile(file);
-          
+          setFile(file);         
           
           // this.getPackageName does not return "" if this is untitled and contains a legal package declaration     
 //          try {
