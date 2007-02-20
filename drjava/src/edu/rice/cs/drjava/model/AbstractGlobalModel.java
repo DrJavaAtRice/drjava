@@ -720,6 +720,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         System.arraycopy(_auxFiles, 0, newAuxFiles, 0, n);  // newAuxFiles[0:n-1] = _auxFiles[0:n-1]
         newAuxFiles[n] = f;
         _auxFiles = newAuxFiles;
+	setProjectChanged(true);
       }
     }
     
@@ -743,6 +744,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         catch(Exception e) { // negative array size or index out of bounds
           throw new UnexpectedException(e);
         }
+	setProjectChanged(true);
       }
     }
     

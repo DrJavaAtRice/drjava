@@ -3631,18 +3631,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    *  @param openSelector the selector that returns the files to open
    */
   public void open(FileOpenSelector openSelector) {
-    File[] files;
-    try { files = openSelector.getFiles(); }
-    catch(OperationCanceledException e) { return; }
-    
-    if (files.length < 1) return;  // Can this happen?
-    
-    /* Commented out becasuse this function is called by many different commands including openProject */   
-//    String file = files[0].getName();
-//    if (files.length > 1) file = "Multiple Files";
-//    
-//    updateStatusField("Opening " + file);
-    
     try {
       hourglassOn();
       _model.openFiles(openSelector);
