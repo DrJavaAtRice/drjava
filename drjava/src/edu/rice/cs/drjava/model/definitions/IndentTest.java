@@ -1262,7 +1262,113 @@ public final class IndentTest extends DrJavaTestCase {
     doc.indentLines(5,5);
     _assertContents(test2Correct, doc);
   }
+  
+  /**
+   * Tests that annotations do not change the indent level of the lines following.
+   * @throws BadLocationException
+   */
+  public void testAnnotationsAfterOpenCurly() throws BadLocationException {
+    String textToIndent =
+      "@Annotation\n" +
+      "public class TestClass {\n" +
+      "public TestClass() {}\n" +
+      "\n" +
+      "@Annotation(WithParens)\n" +
+      "private int _classField = 42;\n" +
+      "\n" +
+      "@Override\n" +
+      "public String toString() {\n" +
+      "@LocalVariableAnnotation\n" +
+      "String msg = \"hello\";\n" +
+      "return msg;\n" +
+      "}\n" +
+      "\n" +
+      "public int methodAfterAnnotation() {\n" +
+      "return 0;\n" +
+      "}\n" +
+      "}\n" +
+      "\n";
+    String textIndented = 
+      "@Annotation\n" +
+      "public class TestClass {\n" +
+      "  public TestClass() {}\n" +
+      "  \n" +
+      "  @Annotation(WithParens)\n" +
+      "  private int _classField = 42;\n" +
+      "  \n" +
+      "  @Override\n" +
+      "  public String toString() {\n" +
+      "    @LocalVariableAnnotation\n" +
+      "    String msg = \"hello\";\n" +
+      "    return msg;\n" +
+      "  }\n" +
+      "  \n" +
+      "  public int methodAfterAnnotation() {\n" +
+      "    return 0;\n" +
+      "  }\n" +
+      "}\n" +
+      "\n";
+    
+    doc.insertString(0, textToIndent, null);
+    _assertContents(textToIndent, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(textIndented, doc);
+  }
 
+  /**
+   * Tests that annotations do not change the indent level of the lines following.
+   * @throws BadLocationException
+   */
+  public void testAnnotationsAfterDefinition() throws BadLocationException {
+    String textToIndent =
+      "@Annotation\n" +
+      "public class TestClass {\n" +
+      "public TestClass() {}\n" +
+      "\n" +
+      "private int _classField = 0;\n" +
+      "\n" +
+      "@Annotation(WithParens)\n" +
+      "private int _classField2 = 42;\n" +
+      "\n" +
+      "@Override\n" +
+      "public String toString() {\n" +
+      "@LocalVariableAnnotation\n" +
+      "String msg = \"hello\";\n" +
+      "return msg;\n" +
+      "}\n" +
+      "\n" +
+      "public int methodAfterAnnotation() {\n" +
+      "return 0;\n" +
+      "}\n" +
+      "}\n";
+    String textIndented = 
+      "@Annotation\n" +
+      "public class TestClass {\n" +
+      "  public TestClass() {}\n" +
+      "  \n" +
+      "  private int _classField = 0;\n" +
+      "  \n" +
+      "  @Annotation(WithParens)\n" +
+      "  private int _classField2 = 42;\n" +
+      "  \n" +
+      "  @Override\n" +
+      "  public String toString() {\n" +
+      "    @LocalVariableAnnotation\n" +
+      "    String msg = \"hello\";\n" +
+      "    return msg;\n" +
+      "  }\n" +
+      "  \n" +
+      "  public int methodAfterAnnotation() {\n" +
+      "    return 0;\n" +
+      "  }\n" +
+      "}\n";
+    
+    doc.insertString(0, textToIndent, null);
+    _assertContents(textToIndent, doc);
+    doc.indentLines(0, doc.getLength());
+    _assertContents(textIndented, doc);
+  }
+  
   /**
    * tests that an if statment nested in a switch will be indented properly
    * this, as opposed to the previous test, does not have any code in that case

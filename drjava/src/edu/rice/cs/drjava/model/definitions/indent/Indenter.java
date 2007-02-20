@@ -73,6 +73,7 @@ public class Indenter {
     
     IndentRule
       // Main tree
+      rule60 = new ActionStartPrevLinePlus(""),
       rule37 = new ActionStartCurrStmtPlus(oneLevel),
       rule36 = new ActionStartStmtOfBracePlus(oneLevel),
       rule35 = rule37,
@@ -88,14 +89,14 @@ public class Indenter {
       rule27 = new QuestionExistsCharInStmt('?', ':', rule28, rule29),
       rule26 = new QuestionLineContains(':', rule27, rule30),
       rule25 = new QuestionStartingNewStmt(rule26, rule31),  // no preceding open brace
-      rule24 = rule25,
+      rule24 = new QuestionPrevLineStartsWith("@", rule60, rule25),
       rule23 = rule36,
       rule22 = new QuestionHasCharPrecedingOpenBrace(new char[] {'=',',','{'},rule23,rule24),
       rule21 = rule36,
       rule20 = new QuestionStartAfterOpenBrace(rule21, rule22),
       rule19 = new ActionStartStmtOfBracePlus(""),
       rule18 = new QuestionCurrLineStartsWithSkipComments("}", rule19, rule20),  // ANONYMOUS inner class formatting breaks here
-      rule17 = new QuestionBraceIsCurly(rule18, rule25),  // enclosing block/expr-list opens with '{'?
+      rule17 = new QuestionBraceIsCurly(rule18, rule24),  // enclosing block/expr-list opens with '{'?
       rule16 = new ActionBracePlus(" " + oneLevel),
       rule15 = new ActionBracePlus(" "),
       rule38 = new QuestionCurrLineStartsWith(")", rule30, rule15), // does current line start with ')'?
