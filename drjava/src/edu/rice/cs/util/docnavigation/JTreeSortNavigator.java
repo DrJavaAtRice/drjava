@@ -42,6 +42,7 @@ import javax.swing.tree.*;
 import java.io.File;
 import java.awt.*;
 import java.util.*;
+import java.io.File;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.swing.*;
 
@@ -110,7 +111,8 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     _renderer = new CustomTreeCellRenderer();
     _renderer.setOpaque(false);
     setCellRenderer(_renderer);
-    getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    //getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
     setRowHeight(18);
 //    System.err.println(isEditable());
   }
@@ -139,7 +141,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    *  @param doc the document to be added into this navigator.
    */
   public void addDocument(ItemT doc) {
-    assert EventQueue.isDispatchThread();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     addDocument(doc, "");
 //    GroupNode _root = null;
 //    synchronized(_model) {
@@ -168,7 +170,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     *         <code>contains</code> method.
     */
   public void addDocument(ItemT doc, String path) {
-    assert EventQueue.isDispatchThread();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     synchronized(_model) { // lock for mutation
       
       /* Identify root matching doc if any */
@@ -227,7 +229,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   private void addTopLevelGroupToRoot(InnerNode<?, ItemT> parent) {
-    assert EventQueue.isDispatchThread();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     synchronized(_model) { // lock for mutation
       int indexInRoots = _roots.indexOf(parent);
       int num = _model.getChildCount(_model.getRoot());
@@ -308,7 +310,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    *  @throws IllegalArgumentException if this navigator contains no document equal to doc
    */
   public ItemT removeDocument(ItemT doc) {
-    assert EventQueue.isDispatchThread();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     synchronized(_model) { // lock for mutation
       LeafNode<ItemT> toRemove = getNodeForDoc(doc);
       if (toRemove == null) return null;
@@ -349,7 +351,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     return node.getData();
   }
   
-  /** If the given node is an InnerNode with no childrne, it removes it from the tree.  If the given node is a leaf or
+  /** If the given node is an InnerNode with no children, it removes it from the tree.  If the given node is a leaf or
     * the root, it does nothing to it.  Assumes that _model lock is already held.  Only executes in the event thread.
     */
   private void cleanFolderNode(DefaultMutableTreeNode node) {
@@ -374,7 +376,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     * @throws IllegalArgumentException if this navigator contains no document equal to doc.
     */
   public void refreshDocument(ItemT doc, String path) {
-    assert EventQueue.isDispatchThread();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
 //    synchronized(_model) {
       LeafNode<ItemT> node = _doc2node.get(doc);
       InnerNode<?, ?> oldParent;
@@ -426,7 +428,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   
   /** Sets the specified document to be active (current).  Only executes in the event thread. */
   public void setActiveDoc(ItemT doc) {
-    assert EventQueue.isDispatchThread();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
 //    synchronized (_model) {  // lock out mutation
       DefaultMutableTreeNode node = _doc2node.get(doc);
       if (node == null) return; // doc is not in the navigator
@@ -535,6 +537,33 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     return list.elements();
   }
   
+  /** Returns all the <code>IDocuments</code> contained in the specified bin.
+    * @param binName name of bin
+    * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
+    */
+  public Enumeration<ItemT> getDocumentsInBin(String binName) {
+    final Vector<ItemT> list = new Vector<ItemT>();
+    
+    synchronized(_model) { // locks out mutation
+      for(GroupNode<ItemT> gn: _roots) {
+        if (gn.getData().equals(binName)) {
+          // found the bin with the right name
+          // e has a raw type because depthFirstEnumeration() has a raw type signature
+          Enumeration e = gn.depthFirstEnumeration();
+          
+          while(e.hasMoreElements()) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
+            if (node.isLeaf() && node != _model.getRoot()) {
+              list.add(getNodeUserObject(node));
+            }
+          }
+        }
+      }
+    }
+    
+    return list.elements();
+  }
+  
   /** Returns the number of <code>IDocuments</code> contained by this <code>IDocumentNavigator</code>
     * Not synchronized on the assumption that size field of a HashMap always has a legitimate
     * value (either the size of the current state or the size of its state before some concurrent
@@ -551,7 +580,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   
   /** Removes all <code>IDocuments</code> from this <code>IDocumentNavigator</code>.  Only executes in event thread. */
   public void clear() {
-    assert EventQueue.isDispatchThread();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     synchronized(_model) {
       _doc2node.clear();
       ((DefaultMutableTreeNode)_model.getRoot()).removeAllChildren();
@@ -564,7 +593,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     * @param listener the listener to be added to this navigator.
     */
   public void addNavigationListener(INavigationListener<? super ItemT> listener) {
-    assert EventQueue.isDispatchThread();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     synchronized(_model) { navListeners.add(listener); }  // locks out access during mutation
   }
   
@@ -574,7 +603,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     * @param listener the listener to be removed from this navigator
     */
   public void removeNavigationListener(INavigationListener<? super ItemT> listener) {
-    assert EventQueue.isDispatchThread();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     synchronized(_model) { navListeners.remove(listener); }
   }
   
@@ -674,37 +703,141 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
 //    }
   }
   
-  /** @return true if a group if INavigatorItems selected.  Only runs in event thread. */
-  public boolean isGroupSelected() {
-//    synchronized (_model) {
-      TreePath p = getSelectionPath();
-      TreeNode n = (TreeNode) p.getLastPathComponent();
-      return (n instanceof InnerNode);
-//    }
+  /** Returns true if the item at the x,y coordinate of the navigator pane is currently selected.
+    * Only runs in event thread. O
+    * @param x the x coordinate of the navigator pane
+    * @param y the y coordinate of the navigator pane
+    * @return true if the item is currently selected
+    */
+  public boolean isSelectedAt(int x, int y) {
+    TreePath path = getPathForLocation(x, y);
+    if (path == null) return false;
+    TreePath[] ps = getSelectionPaths();
+    if (ps==null) { return false; }
+    for(TreePath p: ps) {
+      if (path.equals(p)) { return true; }
+    }
+    return false;
   }
   
-  /** Returns true if a top level group is selected.  Only runs in event thread. */
+  /** @return true if at least one group of INavigatorItems is selected.  Only runs in event thread. */
+  public boolean isGroupSelected() { return getGroupSelectedCount()!=0; }
+  
+  /** @return the number of groups selected. Only runs in event thread. */
+  public int getGroupSelectedCount() {
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    int count = 0;
+    TreePath[] ps = getSelectionPaths();
+    if (ps==null) { return 0; }
+    for(TreePath p: ps) {
+      TreeNode n = (TreeNode) p.getLastPathComponent();
+      if (n instanceof InnerNode) { ++count; }
+    }
+    return count;
+  }
+  
+  /** @return the folders currently selected. Only runs in event thread. */
+  public java.util.List<File> getSelectedFolders() {
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    ArrayList<File> l = new ArrayList<File>();
+    TreePath[] ps = getSelectionPaths();
+    if (ps==null) { return l; }
+    for(TreePath p: ps) {
+      TreeNode n = (TreeNode) p.getLastPathComponent();
+      if (n instanceof FileNode) {
+        l.add(((FileNode)n).getData());
+      }
+    }
+    return l;
+  }
+
+  /** @return true if at least one document is selected.  Only runs in event thread. */
+  public boolean isDocumentSelected() { return getDocumentSelectedCount()!=0; }
+  
+  /** @return the number of documents selected. Only runs in event thread. */
+  public int getDocumentSelectedCount() {
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    int count = 0;
+    TreePath[] ps = getSelectionPaths();
+    if (ps==null) { return 0; }
+    for(TreePath p: ps) {
+      TreeNode n = (TreeNode) p.getLastPathComponent();
+      if (n instanceof LeafNode) {
+        ++count;
+      }
+    }
+    return count;
+  }
+
+  /** @return the documents currently selected. Only runs in event thread. */
+  @SuppressWarnings("unchecked") public java.util.List<ItemT> getSelectedDocuments() {
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    ArrayList<ItemT> l = new ArrayList<ItemT>();
+    TreePath[] ps = getSelectionPaths();
+    if (ps==null) { return l; }
+    for(TreePath p: ps) {
+      TreeNode n = (TreeNode) p.getLastPathComponent();
+      if (n instanceof LeafNode) {
+        l.add((ItemT)((LeafNode)n).getData());
+      }
+    }
+    return l;
+  }
+  
+  /** Returns true if at least one top level group is selected.  Only runs in event thread. */
   public boolean isTopLevelGroupSelected() {
-//    synchronized (_model) {
-      TreePath p = getSelectionPath();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    TreePath[] ps = getSelectionPaths();
+    if (ps==null) { return false; }
+    for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
-      return (n instanceof GroupNode);
-//    }
+      if (n instanceof GroupNode) { return true; }
+    }
+    return false;
   }
   
-  /** Returns the name of the top level group that the selected item descends from.  Only runs in event thread. */
-  public String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException {
-    assert EventQueue.isDispatchThread();
-    
-      TreePath p = getSelectionPath();
+  /** Returns true if the root is selected. Only runs in event thread. */
+  public boolean isRootSelected() {
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    TreePath[] ps = getSelectionPaths();
+    if (ps==null) { return false; }
+    for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
-      
-      if (n == _model.getRoot())
-        throw new GroupNotSelectedException("there is no top level group for the root of the tree");
-      
-      while (! _roots.contains(n)) { n = n.getParent(); }
-      
-      return ((GroupNode<?>)n).getData();
+      if (n == _model.getRoot()) { return true; }
+    }
+    return false;
+  }
+  
+  /** Returns the names of the top level groups that the selected items descend from.  Only runs in event thread. */
+  public java.util.Set<String> getNamesOfSelectedTopLevelGroup() throws GroupNotSelectedException {
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    
+    HashSet<String> names = new HashSet<String>();
+    LinkedList<GroupNode<ItemT>> roots = new LinkedList<GroupNode<ItemT>>(_roots);
+    
+    TreePath[] ps = getSelectionPaths();
+    if (ps!=null) {
+      for(TreePath p: ps) {
+        if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
+          DefaultMutableTreeNode n = (DefaultMutableTreeNode) p.getLastPathComponent();
+          
+          for(GroupNode<ItemT> gn: roots) {
+            if (gn.isNodeDescendant(n)) {
+              // n is a descendent of gn; add the name of the group node
+              names.add(gn.getData());
+              // this group node definitely contains selected items, no need to check it again;
+              // remove it from the list of roots to consider
+              roots.remove(gn);
+              break;
+            }
+          }
+        }
+      }
+    }
+    
+    if (names.isEmpty()) { throw new GroupNotSelectedException("there is no top level group for the root of the tree"); }
+    
+    return names;
   }
   
   /** Returns the currently selected leaf node, or null if the selected node is not a leaf. Only reads a single
@@ -724,10 +857,14 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     public ItemT itemCase(ItemT ini, Object... p){ return ini; }
   };
   
-  /** @return true if the INavigatorItem is in the selected group.  Only runs in event thread. */
+  /** @return true if the INavigatorItem is in a selected group, if at least
+    * one group is selected.  Only runs in event thread. */
   public boolean isSelectedInGroup(ItemT i) {
-//    synchronized (_model) {
-      TreePath p = getSelectionPath();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    
+    TreePath[] ps = getSelectionPaths();
+    if (ps==null) { return false; }
+    for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
       TreeNode l = _doc2node.get(i);
       
@@ -737,13 +874,15 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
         if(l.getParent() == n) return true;
         l = l.getParent();
       }
+    }
       
-      return false;
-//    }
+    return false;
   }
   
   /** Adds a top level group to the navigator.  Only runs in event thread. */
   public void addTopLevelGroup(String name, INavigatorItemFilter<? super ItemT> f){
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    
     if (f == null)
       throw new IllegalArgumentException("parameter 'f' is not allowed to be null");
     GroupNode<ItemT> n = new GroupNode<ItemT>(name, f);
@@ -752,14 +891,18 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   
   /******* Methods that handle expansion/collapsing of folders in tree **********/
   
-  /**  Called whenever an item in the tree has been collapsed.   Only runs in event thread. */
+  /**  Called whenever an item in the tree has been collapsed.   Only runs in event thread (except when testing). */
   public void treeCollapsed(TreeExpansionEvent event) {
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    
     Object o = event.getPath().getLastPathComponent();
     if (o instanceof InnerNode) ((InnerNode<?, ?>)o).setCollapsed(true);
   }
   
   /** Called whenever an item in the tree has been expanded.  Only runs in event thread. */
   public void treeExpanded(TreeExpansionEvent event) {
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    
     Object o = event.getPath().getLastPathComponent();
     if (o instanceof InnerNode) ((InnerNode<?, ?>)o).setCollapsed(false);
   }
@@ -770,7 +913,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     * @param paths A hash set of path strings. 
     */
   public void collapsePaths(String[] paths) {
-    assert EventQueue.isDispatchThread();
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     
     HashSet<String> set = new HashSet<String>();
     for (String s : paths) { set.add(s); }
@@ -801,9 +944,11 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   
   /** @return an array of path strings corresponding to the paths of the tree nodes that
     * are currently collapsed. See the documentation of <code>generatePathString</code>
-    * for information on the format of the path strings.  Only runs in event thread.
+    * for information on the format of the path strings.  Only runs in event thread (except when testing).
     */
   public String[] getCollapsedPaths() {
+    assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
+    
     ArrayList<String> list = new ArrayList<String>();
 //    synchronized (_model) {
       DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();

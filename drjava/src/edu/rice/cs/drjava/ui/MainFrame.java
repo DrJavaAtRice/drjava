@@ -197,11 +197,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private volatile JMenuItem _debuggerEnabledMenuItem;
   
   // Popup menus
-  private JPopupMenu _navPanePopupMenu;
-  private JPopupMenu _navPanePopupMenuForExternal;
-  private JPopupMenu _navPanePopupMenuForAuxiliary;
-  private JPopupMenu _navPanePopupMenuForRoot;
-  private JPopupMenu _navPaneFolderPopupMenu;
   private JPopupMenu _interactionsPanePopupMenu;
   private JPopupMenu _consolePanePopupMenu;
   
@@ -348,6 +343,21 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     { putValue(Action.SHORT_DESCRIPTION, "Do not open this document next time this project is opened."); }
     public void actionPerformed(ActionEvent ae) { _removeAuxiliary(); }
   };
+  private final Action _moveAllToAuxiliaryAction = new AbstractAction("Include All With Project") {
+    { /* initalization block */
+      String msg = 
+      "<html>Open these documents each time this project is opened.<br>"+
+      "These files would then be compiled and tested with the<br>"+
+      "rest of the project.</html>";
+      putValue(Action.SHORT_DESCRIPTION, msg);
+    }
+    public void actionPerformed(ActionEvent ae) { _moveAllToAuxiliary(); }
+  };
+  private final Action _removeAllAuxiliaryAction = new AbstractAction("Do Not Include Any With Project") {
+    { putValue(Action.SHORT_DESCRIPTION, "Do not open these documents next time this project is opened."); }
+    public void actionPerformed(ActionEvent ae) { _removeAllAuxiliary(); }
+  };
+  
   /** Creates a new blank document and select it in the definitions pane. */
   private final Action _newAction = new AbstractAction("New") {
     public void actionPerformed(ActionEvent ae) {
@@ -475,12 +485,19 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Opens all the files in the current folder. */
   private final Action _openAllFolderAction = new AbstractAction("Open All Files") {
     public void actionPerformed(ActionEvent ae) {
+      // now works with multiple selected folders
+      java.util.List<File> l= _model.getDocumentNavigator().getSelectedFolders();
+      for(File f: l) {
+        File fAbs = new File(_model.getProjectRoot(), f.toString());
+        _openFolder(fAbs, false);  
+      }
       
+      // The following does not apply anymore:
       // Get the Folder that was clicked on by the user. When the user clicks on a directory component in the 
       // navigation pane, the current directory is updated in the openChooser JFileChooser component.  So the 
       // clicked on directory is obtained in this way
-      File dir = _openChooser.getCurrentDirectory();
-      _openFolder(dir, false);  
+      // File dir = _openChooser.getCurrentDirectory();
+      // _openFolder(dir, false);  
       _findReplace.updateFirstDocInSearch();
     }
   };
@@ -556,8 +573,17 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) {
       String title = "Revert to Saved?";
       
-      String message = "Are you sure you want to revert the current " +
-        "file to the version on disk?";
+      // update message to reflect the number of files
+      int count = _model.getDocumentNavigator().getDocumentSelectedCount();
+      String message;
+      if (count==1) {
+        message = "Are you sure you want to revert the current " +
+          "file to the version on disk?";
+      }
+      else {
+        message = "Are you sure you want to revert the " + count +
+          " selected files to the versions on disk?";
+      }
       
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              message,
@@ -3404,36 +3430,87 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   // Made package protected rather than private in order to facilitate the ProjectMenuTest.testSaveProject
   void _moveToAuxiliary() {
-    OpenDefinitionsDocument d = _model.getDocumentNavigator().getCurrent();
-    if (d != null) {
-      if (! d.isUntitled()) {
-        _model.addAuxiliaryFile(d);
-        try{
-          _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+    // now works with multiple files
+    java.util.List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();
+    for (OpenDefinitionsDocument d: l) {
+      if (d != null) {
+        if (! d.isUntitled()) {
+          _model.addAuxiliaryFile(d);
+          try{
+            _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+          }
+          catch(IOException e) { /* do nothing */ }
         }
-        catch(IOException e) { /* do nothing */ }
       }
     }
   }
   
   private void _removeAuxiliary() {
-    OpenDefinitionsDocument d = _model.getDocumentNavigator().getCurrent();
-    if (d != null) {
-      if (! d.isUntitled()) {
-        _model.removeAuxiliaryFile(d);
-        try{
-          _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+    // now works with multiple files
+    
+    for(OpenDefinitionsDocument d: _model.getDocumentNavigator().getSelectedDocuments()) {
+      // OpenDefinitionsDocument d = _model.getDocumentNavigator().getCurrent();
+      if (d != null) {
+        if (! d.isUntitled()) {
+          _model.removeAuxiliaryFile(d);
+          try{
+            _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+          }
+          catch(IOException e) { /* do nothing */ }
         }
-        catch(IOException e) { /* do nothing */ }
       }
     }
+  }
+
+  void _moveAllToAuxiliary() {
+    // move all external files to auxiliary files
+    OpenDefinitionsDocument d;
+    Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().
+      getDocumentsInBin(_model.getExternalBinTitle());
+    while (e.hasMoreElements()) {
+      d = e.nextElement();
+      if (d != null) {
+        if (! d.isUntitled()) {
+          _model.addAuxiliaryFile(d);
+          try{
+            _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+          }
+          catch(IOException ex) { /* do nothing */ }
+        }
+      }
+    }
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument()); }
+    });
+  }
+  
+  private void _removeAllAuxiliary() {
+    // move all auxiliary files to external files
+    OpenDefinitionsDocument d;
+    Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().
+      getDocumentsInBin(_model.getAuxiliaryBinTitle());
+    while (e.hasMoreElements()) {
+      d = e.nextElement();
+      if (d != null) {
+        if (! d.isUntitled()) {
+          _model.removeAuxiliaryFile(d);
+          try{
+            _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+          }
+          catch(IOException ex) { /* do nothing */ }
+        }
+      }
+    }
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument()); }
+    });
   }
   
   private void _new() { 
     updateStatusField("Creating a new Untitled Document");
     _model.newFile(); 
   }
-  
+    
   private void _open() {
     updateStatusField("Opening File");
     open(_openSelector); 
@@ -3717,30 +3794,49 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     //    l.add(_model.getActiveDocument());
     //    _model.closeFiles(l);
     
-    if ((_model.isProjectActive() && _model.getActiveDocument().inProjectPath()) ||
-        _model.getActiveDocument().isAuxiliaryFile()) {
-      
-      String fileName = null;
-      OpenDefinitionsDocument doc = _model.getActiveDocument();
-      try {
-        if (doc.isUntitled()) fileName = "File";
-        else fileName = _model.getActiveDocument().getFile().getName();
+    // this works with multiple selected files now
+    java.util.List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();
+    boolean queryNecessary = false; // is a query necessary because the files are project or auxiliary files?
+    for (OpenDefinitionsDocument doc: l) {
+      if ((_model.isProjectActive() && doc.inProjectPath()) || doc.isAuxiliaryFile()) {
+        queryNecessary = true;
+        break;
       }
-      catch(FileMovedException e) { fileName = e.getFile().getName(); }
-      String text = "Closing this file will permanently remove it from the current project." + 
-        "\nAre you sure that you want to close this file?";
-      
+    }
+    if (queryNecessary) {
+      int rc;
+      String fileName = null;
       Object[] options = {"Yes", "No"};
-      int rc = 
-        JOptionPane.showOptionDialog(MainFrame.this, text,"Close " + fileName + "?", JOptionPane.YES_NO_OPTION,
-                                     JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+      if (l.size()==1) {
+        OpenDefinitionsDocument doc = l.get(0);
+        try {
+          if (doc.isUntitled()) fileName = "File";
+          else fileName = _model.getActiveDocument().getFile().getName();
+        }
+        catch(FileMovedException e) { fileName = e.getFile().getName(); }
+        String text = "Closing this file will permanently remove it from the current project." + 
+          "\nAre you sure that you want to close this file?";
+        
+        rc = JOptionPane.showOptionDialog(MainFrame.this, text,"Close " + fileName + "?", JOptionPane.YES_NO_OPTION,
+                                          JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+      }
+      else {
+        fileName = l.size()+" files";
+        String text = "Closing these "+fileName+" will permanently remove them from the current project." + 
+          "\nAre you sure that you want to close these files?";
+        
+        rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Close "+l.size()+" files?", JOptionPane.YES_NO_OPTION,
+                                          JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+      }
       if (rc != JOptionPane.YES_OPTION) return;
       
       updateStatusField("Closing " + fileName);
       _model.setProjectChanged(true);
     }
-    //Either this is an external file or user actually wants to close it
-    _model.closeFile(_model.getActiveDocument());
+    // Either this is an external file or user actually wants to close it
+    for(OpenDefinitionsDocument doc: l) {
+      _model.closeFile(doc);
+    }
   }
   
   private void _closeFolder() {
@@ -3848,15 +3944,27 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private boolean _save() {
     updateStatusField("Saving File");
     try {
-      if (_model.getActiveDocument().saveFile(_saveSelector)) {
-        _currentDefPane.hasWarnedAboutModified(false); 
-        
-        /**This highlights the document in the navigator */
-        _model.setActiveDocument(_model.getActiveDocument());
-        
-        return true;
+      // now works with multiple files
+      List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();
+      boolean error = true;
+      for(OpenDefinitionsDocument doc: l) {
+        if (doc.saveFile(_saveSelector)) {
+          getDefPaneGivenODD(doc).hasWarnedAboutModified(false);
+        }
+        else {
+          error = true;
+        }
       }
-      else return false;
+      return error;
+//      if (_model.getActiveDocument().saveFile(_saveSelector)) {
+//        _currentDefPane.hasWarnedAboutModified(false); 
+//        
+//        /**This highlights the document in the navigator */
+//        _model.setActiveDocument(_model.getActiveDocument());
+//        
+//        return true;
+//      }
+//      else return false;
     }
     catch (IOException ioe) { 
       _showIOError(ioe);
@@ -4043,12 +4151,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   private void _revert() {
-    _revert(_model.getActiveDocument());
+    // this works with multiple selected files now
+    java.util.List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();
+    for(OpenDefinitionsDocument d: l) { _revert(d); }
   }
   
   private void _revert(OpenDefinitionsDocument doc) {
     try {
-      _model.getActiveDocument().revertFile();
+      doc.revertFile();
     }
     catch (FileMovedException fme) {
       _showFileMovedError(fme);
@@ -4179,17 +4289,14 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private void _cleanUpForCompile() { if (isDebuggerReady()) _model.getDebugger().shutdown(); }
   
   private void _compile() {
+    // now works with multiple files
     _cleanUpForCompile();
     hourglassOn();
     try {
-      final OpenDefinitionsDocument doc = _model.getActiveDocument();
-//      new Thread("Compile Document") {
-//        public void run() {
-          try { _model.getCompilerModel().compile(doc); }
-          catch (FileMovedException fme) { _showFileMovedError(fme); }
-          catch (IOException ioe) { _showIOError(ioe); }
-//        }
-//      }.start();
+//      final OpenDefinitionsDocument doc = _model.getActiveDocument();
+      try { _model.getCompilerModel().compile(_model.getDocumentNavigator().getSelectedDocuments()); }
+      catch (FileMovedException fme) { _showFileMovedError(fme); }
+      catch (IOException ioe) { _showIOError(ioe); }
     }
     finally { hourglassOff();}
 //    update(getGraphics());
@@ -4401,15 +4508,16 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     new Thread("Run JUnit on Current Document") {
       public void run() {
         _disableJUnitActions();
+        // now also works with multiple documents
 //        hourglassOn();  // moved into the prelude before this thread start  
         try { 
-          _model.getJUnitModel().junit(_model.getActiveDocument()); 
+          _model.getJUnitModel().junitDocs(_model.getDocumentNavigator().getSelectedDocuments()); 
 //          _model.getActiveDocument().startJUnit();  // Equivalent to preceding
         }
 
-        catch (FileMovedException fme) { _showFileMovedError(fme); }
-        catch (IOException ioe) { _showIOError(ioe); }
-        catch (ClassNotFoundException cnfe) { _showClassNotFoundError(cnfe); }
+//        catch (FileMovedException fme) { _showFileMovedError(fme); }
+//        catch (IOException ioe) { _showIOError(ioe); }
+//        catch (ClassNotFoundException cnfe) { _showClassNotFoundError(cnfe); }
         catch (NoClassDefFoundError ncde) { _showNoClassDefError(ncde); }
         catch (ExitingNotAllowedException enae) {
           JOptionPane.showMessageDialog(MainFrame.this,
@@ -5862,9 +5970,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Sets up the context menu to show in the document pane. */
-  private void _setUpContextMenus() {
+  private void _setUpContextMenus() {      
     // pop-up menu for a folder in tree view
-    _navPaneFolderPopupMenu = new JPopupMenu();
+//    _navPaneFolderPopupMenu = new JPopupMenu();
     /*
      * Phil Repicky -smallproj
      * 2/14/2005
@@ -5872,107 +5980,309 @@ public class MainFrame extends JFrame implements ClipboardOwner {
      * _navPaneFolderPopupMenu.add("Open a File in this Folder Action");
      * _navPaneFolderPopupMenu.add("Make a New File in this Folder Action");
      */
-    _navPaneFolderPopupMenu.add(_newFileFolderAction);
-    _navPaneFolderPopupMenu.add(_openOneFolderAction);
-    _navPaneFolderPopupMenu.add(_openAllFolderAction);
-    _navPaneFolderPopupMenu.add(_closeFolderAction);
-    _navPaneFolderPopupMenu.add(_compileFolderAction);
-    _navPaneFolderPopupMenu.add(_junitFolderAction);
+//    _navPaneFolderPopupMenu.add(_newFileFolderAction);
+//    _navPaneFolderPopupMenu.add(_openOneFolderAction);
+//    _navPaneFolderPopupMenu.add(_openAllFolderAction);
+//    _navPaneFolderPopupMenu.add(_closeFolderAction);
+//    _navPaneFolderPopupMenu.add(_compileFolderAction);
+//    _navPaneFolderPopupMenu.add(_junitFolderAction);
     
-    _navPanePopupMenuForRoot = new JPopupMenu();
-    _navPanePopupMenuForRoot.add(_saveProjectAction);
-    _navPanePopupMenuForRoot.add(_closeProjectAction);
-    _navPanePopupMenuForRoot.addSeparator();
-    _navPanePopupMenuForRoot.add(_compileProjectAction);
-    _navPanePopupMenuForRoot.add(_runProjectAction);
-    _navPanePopupMenuForRoot.add(_junitProjectAction);
-    _navPanePopupMenuForRoot.addSeparator();
-    _navPanePopupMenuForRoot.add(_projectPropertiesAction);
+//    _navPanePopupMenuForRoot = new JPopupMenu();
+//    _navPanePopupMenuForRoot.add(_saveProjectAction);
+//    _navPanePopupMenuForRoot.add(_closeProjectAction);
+//    _navPanePopupMenuForRoot.addSeparator();
+//    _navPanePopupMenuForRoot.add(_compileProjectAction);
+//    _navPanePopupMenuForRoot.add(_runProjectAction);
+//    _navPanePopupMenuForRoot.add(_junitProjectAction);
+//    _navPanePopupMenuForRoot.addSeparator();
+//    _navPanePopupMenuForRoot.add(_projectPropertiesAction);
     
-    _navPanePopupMenuForExternal = new JPopupMenu();
-    _navPanePopupMenuForExternal.add(_saveAction);
-    _navPanePopupMenuForExternal.add(_saveAsAction);
-    _navPanePopupMenuForExternal.add(_renameAction);
-    _navPanePopupMenuForExternal.add(_revertAction);
-    _navPanePopupMenuForExternal.addSeparator();
-    _navPanePopupMenuForExternal.add(_closeAction);
-    _navPanePopupMenuForExternal.addSeparator();
-    _navPanePopupMenuForExternal.add(_printDefDocAction);
-    _navPanePopupMenuForExternal.add(_printDefDocPreviewAction);
-    _navPanePopupMenuForExternal.addSeparator();
-    _navPanePopupMenuForExternal.add(_compileAction);
-    _navPanePopupMenuForExternal.add(_junitAction);
-    _navPanePopupMenuForExternal.add(_javadocCurrentAction);
-    _navPanePopupMenuForExternal.add(_runAction);
-    _navPanePopupMenuForExternal.addSeparator();
-    _navPanePopupMenuForExternal.add(_moveToAuxiliaryAction);
+//    _navPanePopupMenuForExternal = new JPopupMenu();
+//    _navPanePopupMenuForExternal.add(_saveAction);
+//    _navPanePopupMenuForExternal.add(_saveAsAction);
+//    _navPanePopupMenuForExternal.add(_renameAction);
+//    _navPanePopupMenuForExternal.add(_revertAction);
+//    _navPanePopupMenuForExternal.addSeparator();
+//    _navPanePopupMenuForExternal.add(_closeAction);
+//    _navPanePopupMenuForExternal.addSeparator();
+//    _navPanePopupMenuForExternal.add(_printDefDocAction);
+//    _navPanePopupMenuForExternal.add(_printDefDocPreviewAction);
+//    _navPanePopupMenuForExternal.addSeparator();
+//    _navPanePopupMenuForExternal.add(_compileAction);
+//    _navPanePopupMenuForExternal.add(_junitAction);
+//    _navPanePopupMenuForExternal.add(_javadocCurrentAction);
+//    _navPanePopupMenuForExternal.add(_runAction);
+//    _navPanePopupMenuForExternal.addSeparator();
+//    _navPanePopupMenuForExternal.add(_moveToAuxiliaryAction);
     
-    _navPanePopupMenuForAuxiliary = new JPopupMenu();
-    _navPanePopupMenuForAuxiliary.add(_saveAction);
-    _navPanePopupMenuForAuxiliary.add(_saveAsAction);
-    _navPanePopupMenuForAuxiliary.add(_renameAction);
-    _navPanePopupMenuForAuxiliary.add(_revertAction);
-    _navPanePopupMenuForAuxiliary.addSeparator();
-    _navPanePopupMenuForAuxiliary.add(_closeAction);
-    _navPanePopupMenuForAuxiliary.addSeparator();
-    _navPanePopupMenuForAuxiliary.add(_printDefDocAction);
-    _navPanePopupMenuForAuxiliary.add(_printDefDocPreviewAction);
-    _navPanePopupMenuForAuxiliary.addSeparator();
-    _navPanePopupMenuForAuxiliary.add(_compileAction);
-    _navPanePopupMenuForAuxiliary.add(_junitAction);
-    _navPanePopupMenuForAuxiliary.add(_javadocCurrentAction);
-    _navPanePopupMenuForAuxiliary.add(_runAction);
-    _navPanePopupMenuForAuxiliary.addSeparator();
-    _navPanePopupMenuForAuxiliary.add(_removeAuxiliaryAction);
+//    _navPanePopupMenuForAuxiliary = new JPopupMenu();
+//    _navPanePopupMenuForAuxiliary.add(_saveAction);
+//    _navPanePopupMenuForAuxiliary.add(_saveAsAction);
+//    _navPanePopupMenuForAuxiliary.add(_renameAction);
+//    _navPanePopupMenuForAuxiliary.add(_revertAction);
+//    _navPanePopupMenuForAuxiliary.addSeparator();
+//    _navPanePopupMenuForAuxiliary.add(_closeAction);
+//    _navPanePopupMenuForAuxiliary.addSeparator();
+//    _navPanePopupMenuForAuxiliary.add(_printDefDocAction);
+//    _navPanePopupMenuForAuxiliary.add(_printDefDocPreviewAction);
+//    _navPanePopupMenuForAuxiliary.addSeparator();
+//    _navPanePopupMenuForAuxiliary.add(_compileAction);
+//    _navPanePopupMenuForAuxiliary.add(_junitAction);
+//    _navPanePopupMenuForAuxiliary.add(_javadocCurrentAction);
+//    _navPanePopupMenuForAuxiliary.add(_runAction);
+//    _navPanePopupMenuForAuxiliary.addSeparator();
+//    _navPanePopupMenuForAuxiliary.add(_removeAuxiliaryAction);
     
     // NavPane menu
-    _navPanePopupMenu = new JPopupMenu();
-    _navPanePopupMenu.add(_saveAction);
-    _navPanePopupMenu.add(_saveAsAction);
-    _navPanePopupMenu.add(_renameAction);
-    _navPanePopupMenu.add(_revertAction);
-    _navPanePopupMenu.addSeparator();
-    _navPanePopupMenu.add(_closeAction);
-    _navPanePopupMenu.addSeparator();
-    _navPanePopupMenu.add(_printDefDocAction);
-    _navPanePopupMenu.add(_printDefDocPreviewAction);
-    _navPanePopupMenu.addSeparator();
-    _navPanePopupMenu.add(_compileAction);
-    _navPanePopupMenu.add(_junitAction);
-    _navPanePopupMenu.add(_javadocCurrentAction);
-    _navPanePopupMenu.add(_runAction);
+//    _navPanePopupMenu = new JPopupMenu();
+//    _navPanePopupMenu.add(_saveAction);
+//    _navPanePopupMenu.add(_saveAsAction);
+//    _navPanePopupMenu.add(_renameAction);
+//    _navPanePopupMenu.add(_revertAction);
+//    _navPanePopupMenu.addSeparator();
+//    _navPanePopupMenu.add(_closeAction);
+//    _navPanePopupMenu.addSeparator();
+//    _navPanePopupMenu.add(_printDefDocAction);
+//    _navPanePopupMenu.add(_printDefDocPreviewAction);
+//    _navPanePopupMenu.addSeparator();
+//    _navPanePopupMenu.add(_compileAction);
+//    _navPanePopupMenu.add(_junitAction);
+//    _navPanePopupMenu.add(_javadocCurrentAction);
+//    _navPanePopupMenu.add(_runAction);
+    
     _model.getDocCollectionWidget().addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
-        if (_model.getDocumentNavigator().selectDocumentAt(e.getX(), e.getY())) {
-          if (_model.getDocumentNavigator().isGroupSelected())
-            _navPaneFolderPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+        boolean showContextMenu = true;
+        if (!_model.getDocumentNavigator().isSelectedAt(e.getX(), e.getY())) {
+          // click on a item that wasn't selected, change selection
+          showContextMenu = _model.getDocumentNavigator().selectDocumentAt(e.getX(), e.getY());
+        }
+        if (showContextMenu) {
+          boolean rootSelected = _model.getDocumentNavigator().isRootSelected();
+          boolean folderSelected = false;
+          boolean docSelected = false;
+          boolean externalSelected = false;
+          boolean auxiliarySelected = false;
+          boolean externalBinSelected = false;
+          boolean auxiliaryBinSelected = false;
           
-          else {
-            try {
-              String groupName = _model.getDocumentNavigator().getNameOfSelectedTopLevelGroup();
-              if (groupName.equals(_model.getSourceBinTitle()))
-                _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
-              else if (groupName.equals(_model.getExternalBinTitle())) {
-                INavigatorItem n = _model.getDocumentNavigator().getCurrent();
-                if (n != null) {
-                  OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
-                  if (d.isUntitled()) { _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY()); }
-                  else _navPanePopupMenuForExternal.show(e.getComponent(), e.getX(), e.getY());
+          final int docSelectedCount = _model.getDocumentNavigator().getDocumentSelectedCount();          
+          final int groupSelectedCount = _model.getDocumentNavigator().getGroupSelectedCount();
+          try {
+            java.util.Set<String> groupNames = _model.getDocumentNavigator().getNamesOfSelectedTopLevelGroup();
+            
+            if (docSelectedCount>0) {
+              // when documents are selected, ignore all other options and only deal with documents
+              rootSelected = false;
+              if (groupNames.contains(_model.getSourceBinTitle())) {
+                // a document in the "[ Source Files ]" bin is selected
+                docSelected = true;
+              }
+              if (groupNames.contains(_model.getExternalBinTitle())) {
+                // a document in the "[ External Files ]" bin is selected
+                externalSelected = true;
+              }
+              if (groupNames.contains(_model.getAuxiliaryBinTitle())) {
+                // a document in the "[ Included External Files ]" bin is selected
+                auxiliarySelected = true;
+              }
+            }
+            else {
+              // no document selected, check other options
+              if (groupSelectedCount>0) {
+                // at least one folder is selected
+                if (!_model.getDocumentNavigator().isTopLevelGroupSelected()) {
+                  // it is really a folder and not a top level bin, e.g. "[ Source Files ]"
+                  folderSelected = true;
+                }
+                else {
+                  // it is a top level bin, e.g. "[ Source Files ]"
+                  if (groupNames.contains(_model.getSourceBinTitle())) {
+                    // the "[ Source Files ]" bin is selected, treat as normal folder
+                    folderSelected = true;
+                  }
+                  if (groupNames.contains(_model.getExternalBinTitle())) {
+                    // the "[ External Files ]" bin is selected
+                    externalBinSelected = true;
+                  }
+                  if (groupNames.contains(_model.getAuxiliaryBinTitle())) {
+                    // the "[ Included External Files ]" bin is selected
+                    auxiliaryBinSelected = true;
+                  }
                 }
               }
-              else if (groupName.equals(_model.getAuxiliaryBinTitle()))
-                _navPanePopupMenuForAuxiliary.show(e.getComponent(), e.getX(), e.getY());
-            }
-            catch(GroupNotSelectedException ex) {
-              // we're looking at the root of the tree, or we're in list view...
-              if (_model.isProjectActive())
-                _navPanePopupMenuForRoot.show(e.getComponent(), e.getX(), e.getY());
-              else  _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
             }
           }
+          catch(GroupNotSelectedException ex) {
+            // we're looking at the root of the tree, or we're in list view...
+            if (_model.isProjectActive()) {
+              // project view, so the root has been selected
+              rootSelected = true;
+            }
+            else {
+              // list view, so treat it as simple documents
+              docSelected = true;
+              rootSelected = false;
+              folderSelected = false;
+              externalSelected = false;
+              auxiliarySelected = false;
+              externalBinSelected = false;
+              auxiliaryBinSelected = false;
+            }
+          }
+          
+          if (!rootSelected && !folderSelected && !docSelected && !externalSelected &&
+              !auxiliarySelected && !externalBinSelected && !auxiliaryBinSelected) {
+            // nothing selected, don't display anything
+            return;
+          }
+          
+          final JPopupMenu m = new JPopupMenu();
+          if (docSelectedCount==0) { docSelected = externalSelected = auxiliarySelected = false; }
+          if (groupSelectedCount==0) { folderSelected = false; }
+          
+          if (rootSelected) {
+            // root selected
+            m.add(Utilities.createDelegateAction("Save Project", _saveProjectAction));
+            m.add(Utilities.createDelegateAction("Close Project", _closeProjectAction));
+            m.add(_compileProjectAction);
+            m.add(_runProjectAction);
+            m.add(_junitProjectAction);
+            m.add(_projectPropertiesAction);
+          }
+          if (folderSelected) {
+            // folder selected
+            if (m.getComponentCount()>0) { m.addSeparator(); }
+            if (groupSelectedCount==1) {
+              // "New File in Folder" and "Open File in Folder" only work if exactly
+              // one folder is selected
+              m.add(_newFileFolderAction);
+              m.add(_openOneFolderAction);
+              
+              // get singular/plural right
+              m.add(Utilities.createDelegateAction("Open All Files in Folder", _openAllFolderAction));
+              m.add(_closeFolderAction);
+              m.add(_compileFolderAction);
+              m.add(_junitFolderAction);
+            }
+            else if (groupSelectedCount>1) {
+              if (!externalBinSelected && !auxiliaryBinSelected) {
+                // open only makes sense if it's real folders, and not
+                // the external or auxiliary bins
+                m.add(Utilities.createDelegateAction("Open All Files in All Folders ("+groupSelectedCount+")",
+                                                     _openAllFolderAction));
+              }
+              m.add(Utilities.createDelegateAction("Close All Folders ("+groupSelectedCount+")",
+                                                   _closeFolderAction));
+              m.add(Utilities.createDelegateAction("Compile All Folders ("+groupSelectedCount+")",
+                                                   _compileFolderAction));
+              m.add(Utilities.createDelegateAction("Test All Folders ("+groupSelectedCount+")",
+                                                   _junitFolderAction));
+              
+            }
+          }
+          if (docSelected || externalSelected || auxiliarySelected) {
+            // some kind of document selected
+            if (m.getComponentCount()>0) { m.addSeparator(); }
+            if (docSelectedCount==1) {
+              m.add(Utilities.createDelegateAction("Save File", _saveAction));
+              m.add(Utilities.createDelegateAction("Save File As...", _saveAsAction));
+              m.add(Utilities.createDelegateAction("Rename File", _renameAction));
+              m.add(Utilities.createDelegateAction("Revert File to Saved", _revertAction));
+              m.add(Utilities.createDelegateAction("Close File", _closeAction));
+              m.add(Utilities.createDelegateAction("Print File...", _printDefDocAction));
+              m.add(Utilities.createDelegateAction("Print File Preview...", _printDefDocPreviewAction));
+              m.add(Utilities.createDelegateAction("Compile File", _compileAction));
+              m.add(Utilities.createDelegateAction("Test File", _junitAction));
+              m.add(Utilities.createDelegateAction("Preview Javadoc for File", _javadocCurrentAction));
+              m.add(Utilities.createDelegateAction("Run File's Main Method", _runAction));
+            }
+            else if (docSelectedCount>1) {
+              m.add(Utilities.createDelegateAction("Save All Files ("+docSelectedCount+")", _saveAction));
+              m.add(Utilities.createDelegateAction("Revert All Files to Saved ("+docSelectedCount+")", _revertAction));
+              m.add(Utilities.createDelegateAction("Close All Files  ("+docSelectedCount+")", _closeAction));
+              m.add(Utilities.createDelegateAction("Compile All Files ("+docSelectedCount+")", _compileAction));
+              m.add(Utilities.createDelegateAction("Test All Files ("+docSelectedCount+")", _junitAction));
+            }
+          }
+          if (externalSelected && !docSelected && !auxiliarySelected) {
+            // external document selected, but no regular or auxiliary documents
+            if (m.getComponentCount()>0) { m.addSeparator(); }
+            if (docSelectedCount==1) {
+              m.add(Utilities.createDelegateAction("Include File With Project",
+                                                   _moveToAuxiliaryAction));
+            }
+            else if (docSelectedCount>1) {
+              m.add(Utilities.createDelegateAction("Include All Files With Project ("+docSelectedCount+")",
+                                                   _moveToAuxiliaryAction));
+            }
+          }
+          if (auxiliarySelected && !docSelected && !externalSelected) {
+            // auxiliary document selected, but no regular or external documents
+            if (m.getComponentCount()>0) { m.addSeparator(); }
+            if (docSelectedCount==1) {
+              m.add(Utilities.createDelegateAction("Do Not Include File With Project",
+                                                   _removeAuxiliaryAction));
+            }
+            else if (docSelectedCount>1) {
+              m.add(Utilities.createDelegateAction("Do Not Include Any Files With Project ("+docSelectedCount+")",
+                                                   _removeAuxiliaryAction));
+            }
+          }
+          if (!folderSelected && (externalBinSelected || auxiliaryBinSelected)) {
+            // external or auxiliary bin selected, but no regular folder
+            if (m.getComponentCount()>0) { m.addSeparator(); }
+            m.add(Utilities.createDelegateAction("Close All Files", _closeFolderAction));
+            m.add(Utilities.createDelegateAction("Compile All Files", _compileFolderAction));
+            m.add(Utilities.createDelegateAction("Test All Files", _junitFolderAction));
+          }
+          if (externalBinSelected && !auxiliaryBinSelected) {
+            // external bin selected
+            m.add(Utilities.createDelegateAction("Include All Files With Project",
+                                                 _moveAllToAuxiliaryAction));
+          }
+          if (auxiliaryBinSelected && !externalBinSelected) {
+            // auxiliary bin selected
+            m.add(Utilities.createDelegateAction("Do Not Include Any Files With Project",
+                                                 _removeAllAuxiliaryAction));
+          }
+          
+          m.show(e.getComponent(), e.getX(), e.getY());
         }
       }
     });
+//    _model.getDocCollectionWidget().addMouseListener(new RightClickMouseAdapter() {
+//      protected void _popupAction(MouseEvent e) {
+//        if (_model.getDocumentNavigator().selectDocumentAt(e.getX(), e.getY())) {
+//          if (_model.getDocumentNavigator().isGroupSelected())
+//            _navPaneFolderPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+//          
+//          else {
+//            try {
+//              String groupName = _model.getDocumentNavigator().getNameOfSelectedTopLevelGroup();
+//              if (groupName.equals(_model.getSourceBinTitle()))
+//                _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+//              else if (groupName.equals(_model.getExternalBinTitle())) {
+//                INavigatorItem n = _model.getDocumentNavigator().getCurrent();
+//                if (n != null) {
+//                  OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
+//                  if (d.isUntitled()) { _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY()); }
+//                  else _navPanePopupMenuForExternal.show(e.getComponent(), e.getX(), e.getY());
+//                }
+//              }
+//              else if (groupName.equals(_model.getAuxiliaryBinTitle()))
+//                _navPanePopupMenuForAuxiliary.show(e.getComponent(), e.getX(), e.getY());
+//            }
+//            catch(GroupNotSelectedException ex) {
+//              // we're looking at the root of the tree, or we're in list view...
+//              if (_model.isProjectActive())
+//                _navPanePopupMenuForRoot.show(e.getComponent(), e.getX(), e.getY());
+//              else  _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+//            }
+//          }
+//        }
+//      }
+//    });
     
     // Interactions pane menu
     _interactionsPanePopupMenu = new JPopupMenu();

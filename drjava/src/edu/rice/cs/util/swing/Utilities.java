@@ -189,4 +189,11 @@ public class Utilities {
       catch(java.io.IOException ioe) { /* ignore, return null */ }
       return s;
   }
+  
+  /** @return an action with a new name that delegates to another action. */
+  public static AbstractAction createDelegateAction(String newName, final Action delegate) {
+    return new AbstractAction(newName) {
+      public void actionPerformed(ActionEvent ae) { delegate.actionPerformed(ae); }
+    };
+  }
 }

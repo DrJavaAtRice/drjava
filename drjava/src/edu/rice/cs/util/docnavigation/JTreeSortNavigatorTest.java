@@ -37,6 +37,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
+import java.util.Enumeration;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.io.File;
@@ -50,7 +51,15 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
   protected DefaultMutableTreeNode folder1;
   protected DefaultMutableTreeNode folder2;
   protected String projName;
-  DummyINavigatorItem i1, i2, i3, i4;
+  protected DummyINavigatorItem i1, i2, i3, i4;
+  
+  protected DefaultMutableTreeNode aux;
+  protected DefaultMutableTreeNode auxFolder1;
+  protected DefaultMutableTreeNode auxFolder2;
+  protected DummyINavigatorItem auxi1, auxi2, auxi3, auxi4, auxi5;
+  
+  protected final String SOURCE_BIN_NAME = "[ Source Files ]";
+  protected final String EXTERNAL_BIN_NAME = "[ External Files ]";
   
   public void setUp() throws Exception {
     super.setUp();
@@ -62,22 +71,40 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
           File f = File.createTempFile("project-",".pjt").getCanonicalFile();
           tree = new JTreeSortNavigator<DummyINavigatorItem>(f.getCanonicalPath());
           
-          tree.addTopLevelGroup("[ Source Files ]", new INavigatorItemFilter<INavigatorItem>(){
-            public boolean accept(INavigatorItem n) { return true; }
+          tree.addTopLevelGroup(SOURCE_BIN_NAME, new INavigatorItemFilter<INavigatorItem>(){
+            public boolean accept(INavigatorItem n) { return !n.getName().startsWith("aux"); }
           });
-          i1 = new DummyINavigatorItem("item1");
-          i2 = new DummyINavigatorItem("item2");
-          i3 = new DummyINavigatorItem("item1");
-          i4 = new DummyINavigatorItem("item2");
+          tree.addTopLevelGroup(EXTERNAL_BIN_NAME, new INavigatorItemFilter<INavigatorItem>(){
+            public boolean accept(INavigatorItem n) { return n.getName().startsWith("aux"); }
+          });
+
+          i1 = new DummyINavigatorItem("item11");
+          i2 = new DummyINavigatorItem("item12");
+          i3 = new DummyINavigatorItem("item21");
+          i4 = new DummyINavigatorItem("item22");
           tree.addDocument(i1, "folder1");
           tree.addDocument(i2, "folder1");
           tree.addDocument(i3, "folder2");
           tree.addDocument(i4, "folder2");
           
+          auxi1 = new DummyINavigatorItem("auxitem11");
+          auxi2 = new DummyINavigatorItem("auxitem12");
+          auxi3 = new DummyINavigatorItem("auxitem21");
+          auxi4 = new DummyINavigatorItem("auxitem22");
+          auxi5 = new DummyINavigatorItem("auxitem23");
+          tree.addDocument(auxi1, "auxfolder1");
+          tree.addDocument(auxi2, "auxfolder1");
+          tree.addDocument(auxi3, "auxfolder2");
+          tree.addDocument(auxi4, "auxfolder2");
+          tree.addDocument(auxi5, "auxfolder2");
+          
           root = (DefaultMutableTreeNode)tree.getModel().getRoot();
           source = (DefaultMutableTreeNode)root.getChildAt(0);
           folder1 = (DefaultMutableTreeNode)source.getChildAt(0);
           folder2 = (DefaultMutableTreeNode)source.getChildAt(1);
+          aux = (DefaultMutableTreeNode)root.getChildAt(1);
+          auxFolder1 = (DefaultMutableTreeNode)aux.getChildAt(0);
+          auxFolder2 = (DefaultMutableTreeNode)aux.getChildAt(1);
           
           projName = root.toString();
         }
@@ -87,9 +114,9 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
   }
   
   public void testTraversalOps() {
-    assertEquals("doc count test", 4, tree.getDocumentCount());
+    assertEquals("doc count test", 9, tree.getDocumentCount());
     assertSame("getFirst test", i1, tree.getFirst());
-    assertSame("getLast test", i4, tree.getLast());
+    assertSame("getLast test", auxi5, tree.getLast());
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
@@ -183,5 +210,231 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
     assertEquals("should have been renamed", newName, newNode.toString());
     assertEquals("node should have same parent", folder3, newNode.getParent());
     Utilities.invokeAndWait(new Runnable() { public void run() { tree.removeDocument(newItem); } });
+  }
+  
+  /**
+   * Test the enumeration of items based on top-level bins.
+   */
+  public void testGetDocumentsInBin() {
+    Enumeration<DummyINavigatorItem> e = tree.getDocumentsInBin(SOURCE_BIN_NAME);
+    DummyINavigatorItem d;
+    assertTrue(SOURCE_BIN_NAME+" bin should not have 0 items", e.hasMoreElements());
+    d = e.nextElement();
+    assertEquals("Wrong item 1", i1, d);
+    assertTrue(SOURCE_BIN_NAME+" bin should not have 1 item", e.hasMoreElements());
+    d = e.nextElement();
+    assertEquals("Wrong item 2", i2, d);
+    assertTrue(SOURCE_BIN_NAME+" bin should not have 2 items", e.hasMoreElements());
+    d = e.nextElement();
+    assertEquals("Wrong item 3", i3, d);
+    assertTrue(SOURCE_BIN_NAME+" bin should not have 3 items", e.hasMoreElements());
+    d = e.nextElement();
+    assertEquals("Wrong item 4", i4, d);
+    assertFalse(SOURCE_BIN_NAME+" bin should not have 4 items", e.hasMoreElements());
+    
+    e = tree.getDocumentsInBin(EXTERNAL_BIN_NAME);
+    assertTrue(EXTERNAL_BIN_NAME+" bin should not have 0 items", e.hasMoreElements());
+    d = e.nextElement();
+    assertEquals("Wrong item 1", auxi1, d);
+    assertTrue(EXTERNAL_BIN_NAME+" bin should not have 1 item", e.hasMoreElements());
+    d = e.nextElement();
+    assertEquals("Wrong item 2", auxi2, d);
+    assertTrue(EXTERNAL_BIN_NAME+" bin should not have 2 items", e.hasMoreElements());
+    d = e.nextElement();
+    assertEquals("Wrong item 3", auxi3, d);
+    assertTrue(EXTERNAL_BIN_NAME+" bin should not have 3 items", e.hasMoreElements());
+    d = e.nextElement();
+    assertEquals("Wrong item 4", auxi4, d);
+    assertTrue(EXTERNAL_BIN_NAME+" bin should not have 4 items", e.hasMoreElements());
+    d = e.nextElement();
+    assertEquals("Wrong item 5", auxi5, d);
+    assertFalse(EXTERNAL_BIN_NAME+" bin should not have 5 items", e.hasMoreElements());
+  }
+  
+  /**
+   * Test of getting the list of selected items.
+   */
+  public void testGetSelectedDocuments() {
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 3, 4 });
+    java.util.List<DummyINavigatorItem> l = tree.getSelectedDocuments();
+    assertEquals("Two items should be selected", 2, l.size());
+    assertEquals("Wrong item 1", i1, l.get(0));
+    assertEquals("Wrong item 2", i2, l.get(1));
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 3, 4, 6, 7 });
+    l = tree.getSelectedDocuments();
+    assertEquals("Four items should be selected", 4, l.size());
+    assertEquals("Wrong item 1", i1, l.get(0));
+    assertEquals("Wrong item 2", i2, l.get(1));
+    assertEquals("Wrong item 3", i3, l.get(2));
+    assertEquals("Wrong item 4", i4, l.get(3));
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 1, 2, 3, 4, 5, 6, 7 });
+    l = tree.getSelectedDocuments();
+    assertEquals("Four items should be selected", 4, l.size());
+    assertEquals("Wrong item 1", i1, l.get(0));
+    assertEquals("Wrong item 2", i2, l.get(1));
+    assertEquals("Wrong item 3", i3, l.get(2));
+    assertEquals("Wrong item 4", i4, l.get(3));
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 1, 2, 3, 5, 6 });
+    l = tree.getSelectedDocuments();
+    assertEquals("Two items should be selected", 2, l.size());
+    assertEquals("Wrong item 1", i1, l.get(0));
+    assertEquals("Wrong item 2", i3, l.get(1));
+    
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 10, 11 });
+    l = tree.getSelectedDocuments();
+    assertEquals("Two items should be selected", 2, l.size());
+    assertEquals("Wrong item 1", auxi1, l.get(0));
+    assertEquals("Wrong item 2", auxi2, l.get(1));
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 10, 11, 13, 14, 15 });
+    l = tree.getSelectedDocuments();
+    assertEquals("Five items should be selected", 5, l.size());
+    assertEquals("Wrong item 1", auxi1, l.get(0));
+    assertEquals("Wrong item 2", auxi2, l.get(1));
+    assertEquals("Wrong item 3", auxi3, l.get(2));
+    assertEquals("Wrong item 4", auxi4, l.get(3));
+    assertEquals("Wrong item 5", auxi5, l.get(4));
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 8, 9, 10, 11, 12, 13, 14, 15 });
+    l = tree.getSelectedDocuments();
+    assertEquals("Five items should be selected", 5, l.size());
+    assertEquals("Wrong item 1", auxi1, l.get(0));
+    assertEquals("Wrong item 2", auxi2, l.get(1));
+    assertEquals("Wrong item 3", auxi3, l.get(2));
+    assertEquals("Wrong item 4", auxi4, l.get(3));
+    assertEquals("Wrong item 5", auxi5, l.get(4));
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 8, 9, 10, 12, 13 });
+    l = tree.getSelectedDocuments();
+    assertEquals("Two items should be selected", 2, l.size());
+    assertEquals("Wrong item 1", auxi1, l.get(0));
+    assertEquals("Wrong item 2", auxi3, l.get(1));
+  }
+  
+  /**
+   * Test of getting the list of selected items.
+   */
+  public void testGetNamesOfSelectedTopLevelGroup() {
+    java.util.Set<String> s = null;
+    
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 3, 4 });
+    try {
+      s = tree.getNamesOfSelectedTopLevelGroup();
+    }
+    catch(GroupNotSelectedException e) {
+      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+    }
+    assertEquals("Only one top-level group should be selected", 1, s.size());
+    assertTrue("Wrong top-level group", s.contains(SOURCE_BIN_NAME));
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 3, 4, 6, 7 });
+    try {
+      s = tree.getNamesOfSelectedTopLevelGroup();
+    }
+    catch(GroupNotSelectedException e) {
+      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+    }
+    assertEquals("Only one top-level group should be selected", 1, s.size());
+    assertTrue("Wrong top-level group", s.contains(SOURCE_BIN_NAME));
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 1, 2, 3, 4, 5, 6, 7 });
+    try {
+      s = tree.getNamesOfSelectedTopLevelGroup();
+    }
+    catch(GroupNotSelectedException e) {
+      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+    }
+    assertEquals("Only one top-level group should be selected", 1, s.size());
+    assertTrue("Wrong top-level group", s.contains(SOURCE_BIN_NAME));
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 1, 2, 3, 5, 6 });
+    try {
+      s = tree.getNamesOfSelectedTopLevelGroup();
+    }
+    catch(GroupNotSelectedException e) {
+      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+    }
+    assertEquals("Only one top-level group should be selected", 1, s.size());
+    assertTrue("Wrong top-level group", s.contains(SOURCE_BIN_NAME));
+    
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 10, 11 });
+    try {
+      s = tree.getNamesOfSelectedTopLevelGroup();
+    }
+    catch(GroupNotSelectedException e) {
+      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+    }
+    assertEquals("Only one top-level group should be selected", 1, s.size());
+    assertEquals("Wrong top-level group 1", EXTERNAL_BIN_NAME, s.toArray()[0]);
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 10, 11, 13, 14, 15 });
+    try {
+      s = tree.getNamesOfSelectedTopLevelGroup();
+    }
+    catch(GroupNotSelectedException e) {
+      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+    }
+    assertEquals("Only one top-level group should be selected", 1, s.size());
+    assertEquals("Wrong top-level group 1", EXTERNAL_BIN_NAME, s.toArray()[0]);
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 8, 9, 10, 11, 12, 13, 14, 15 });
+    try {
+      s = tree.getNamesOfSelectedTopLevelGroup();
+    }
+    catch(GroupNotSelectedException e) {
+      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+    }
+    assertEquals("Only one top-level group should be selected", 1, s.size());
+    assertEquals("Wrong top-level group 1", EXTERNAL_BIN_NAME, s.toArray()[0]);
+
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 8, 9, 10, 12, 13 });
+    try {
+      s = tree.getNamesOfSelectedTopLevelGroup();
+    }
+    catch(GroupNotSelectedException e) {
+      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+    }
+    assertEquals("Only one top-level group should be selected", 1, s.size());
+    assertEquals("Wrong top-level group 1", EXTERNAL_BIN_NAME, s.toArray()[0]);
+    
+    tree.clearSelection();
+    tree.addSelectionRows(new int[] { 3, 13 });
+    try {
+      s = tree.getNamesOfSelectedTopLevelGroup();
+    }
+    catch(GroupNotSelectedException e) {
+      fail("getNamesOfSelectedTopLevelGroup threw "+e);
+    }
+    assertEquals("Two top-level groups should be selected", 2, s.size());
+    assertTrue("Wrong top-level group", s.contains(SOURCE_BIN_NAME));
+    assertTrue("Wrong top-level group", s.contains(EXTERNAL_BIN_NAME));
+    
+    tree.clearSelection();
+    try {
+      s = tree.getNamesOfSelectedTopLevelGroup();
+      fail("Didn't through");
+    }
+    catch(Exception e) {
+      assertEquals("Exception isn't a GroupNotSelectedException", GroupNotSelectedException.class, e.getClass());
+    }
   }
 }

@@ -46,6 +46,7 @@
 
 package edu.rice.cs.util.docnavigation;
 
+import java.io.File;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.event.*;
@@ -256,6 +257,12 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
     }
   }
   
+  /** Returns all the <code>IDocuments</code> contained in the specified bin. Always empty.
+    * @param binName name of bin
+    * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
+    */
+  public Enumeration<ItemT> getDocumentsInBin(String binName) { return (new Vector<ItemT>()).elements(); }
+  
   /** @return the number of documents in the navigator. */
   public int getDocumentCount() { return _model.size(); }
   
@@ -310,14 +317,46 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
       return false;
     }
   }
-    
+  
+  /** Returns true if the item at the x,y coordinate of the navigator pane is currently selected.
+    * Only runs in event thread. O
+    * @param x the x coordinate of the navigator pane
+    * @param y the y coordinate of the navigator pane
+    * @return true if the item is currently selected
+    */
+  public boolean isSelectedAt(int x, int y) { return false; }
 
   /** @return the renderer for this object. */
   public Component getRenderer(){ return _renderer; }
   
-  /** @return true if a group if INavigatorItems selected. */
-  public boolean isGroupSelected() { return false; }
+  /** @return the number of selected items. Always 1 for JListSortNavigator */
+  public int getSelectionCount() { return 1; }
   
+  /** @return true if at least one group of INavigatorItems is selected; always false for JListNavigator */
+  public boolean isGroupSelected() { return false; }
+      
+  /** @return the number of groups selected. Always 0 for JListSortNavigator */
+  public int getGroupSelectedCount() { return 0; }
+
+  /** @return the folders currently selected. Always empty for JListSortNavigator */
+  public java.util.List<File> getSelectedFolders() { return new ArrayList<File>(); }
+
+  /** @return true if at least one document is selected; always true for JListNavigator */
+  public boolean isDocumentSelected() { return true; }
+  
+  /** @return the number of documents selected. Always 1 for JListSortNavigator */
+  public int getDocumentSelectedCount() { return 1; }
+
+  /** @return the documents currently selected. Only runs in event thread. */
+  @SuppressWarnings("unchecked") public java.util.List<ItemT> getSelectedDocuments() {
+    ArrayList<ItemT> l = new ArrayList<ItemT>(1);
+    l.add((ItemT)getSelectedValue());
+    return l;
+  }
+  
+  /** Returns true if the root is selected. Only runs in event thread. */
+  public boolean isRootSelected() { return false; }
+
   /** @return true if the INavigatorItem is in the selected group, if a group is selected. */
   public boolean isSelectedInGroup(ItemT i) { return false; }
   
@@ -325,7 +364,10 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   
   public boolean isTopLevelGroupSelected() { return false; }
   
-  public String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException{
+  /** Returns the names of the top level groups that the selected items descend from.
+    * Always throws a GroupNotSelectedException for JListSortNavigator
+    */
+  public java.util.Set<String> getNamesOfSelectedTopLevelGroup() throws GroupNotSelectedException{
     throw new GroupNotSelectedException("A top level group is not selected");
   }
   

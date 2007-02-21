@@ -614,8 +614,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     volatile File _workDir;
     volatile File _projectFile;
     final File[] _projectFiles;
-    private final Object _auxFilesLock = new Object();
-    volatile File[] _auxFiles;
+    volatile Vector<File> _auxFiles;
     volatile ClassPathVector _projExtraClassPath;
     private boolean _isProjectChanged = false;
     volatile File _createJarFile;
@@ -636,7 +635,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _workDir = wd;
       _projectFile = project;
       _projectFiles = srcFiles;
-      _auxFiles = auxFiles;
+      _auxFiles = new Vector<File>(auxFiles.length);
+      for(File f: auxFiles) { _auxFiles.add(f); }
       _projExtraClassPath = cp;
       
       if (_projectFiles != null) try {  for (File file : _projectFiles) { _projFilePaths.add( file.getCanonicalPath()); } }
@@ -712,37 +712,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //      System.err.println("Project root set to " + f);
     }
     
-    /** Adds File f to end of _auxFiles array. */
+    /** Adds File f to end of _auxFiles vector. */
     public void addAuxFile(File f) {
-      synchronized(_auxFilesLock) {
-        int n = _auxFiles.length;
-        File[] newAuxFiles = new File[n + 1];
-        System.arraycopy(_auxFiles, 0, newAuxFiles, 0, n);  // newAuxFiles[0:n-1] = _auxFiles[0:n-1]
-        newAuxFiles[n] = f;
-        _auxFiles = newAuxFiles;
+      synchronized(_auxFiles) {
+        if (_auxFiles.add(f)) {
+          setProjectChanged(true);
+        }
 	setProjectChanged(true);
       }
     }
     
-    /** Removes File f from _auxFiles array. Assumes that f is a member of _auxFiles.  If f is not found, throws an 
-     *  UnexpectedException. */
+    /** Removes File f from _auxFiles list. */
     public void remAuxFile(File file) {
-      synchronized(_auxFilesLock) {
-        int newLen = _auxFiles.length - 1;
-        File[] newAuxFiles = new File[newLen];
-        try {
-          int j = 0;
-          for (File f: _auxFiles) {
-            if (! f.equals(file)) {
-              newAuxFiles[j] = file;
-              j++;
-            }
-          }
-          if (j < newLen) throw new IllegalStateException("auxFiles list contain two copies of " + file);
-          _auxFiles = newAuxFiles;
-        }
-        catch(Exception e) { // negative array size or index out of bounds
-          throw new UnexpectedException(e);
+      synchronized(_auxFiles) {
+        if (_auxFiles.remove(file)) {
+          setProjectChanged(true);
         }
 	setProjectChanged(true);
       }
@@ -776,7 +760,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try { path = f.getCanonicalPath();}
       catch(IOException ioe) { return false; }
       
-      synchronized(_auxFilesLock) {
+      synchronized(_auxFiles) {
         for (File file : _auxFiles) {
           try { if (file.getCanonicalPath().equals(path)) return true; }
           catch(IOException ioe) { /* ignore file */ }
@@ -1787,6 +1771,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     doc.getBookmarkManager().clearRegions();
     for (RegionManager<MovingDocumentRegion> rm: doc.getFindResultsManagers())  rm.clearRegions();
     doc.getBrowserHistoryManager().clearRegions();
+    
+    // if the document was an auxiliary file, remove it from the list
+    if (doc.isAuxiliaryFile()) { removeAuxiliaryFile(doc); }
     
     Utilities.invokeLater (new SRunnable() {
       public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread

@@ -33,6 +33,7 @@
 
 package edu.rice.cs.util.docnavigation;
 
+import java.io.File;
 import java.util.*;
 import java.awt.Container;
 import java.awt.event.FocusEvent;
@@ -108,6 +109,12 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
    */
   public Enumeration<ItemT> getDocuments();
   
+  /** Returns all the <code>IDocuments</code> contained in the specified bin.
+    * @param binName name of bin
+    * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
+    */
+  public Enumeration<ItemT> getDocumentsInBin(String binName);
+  
   /** Tests to see if a given document is contained in this navigator.
    *  @param doc the document to test for containment.
    *  @return <code>true</code> if this contains a document "equal" (<code>.equals(...)</code> method)
@@ -161,6 +168,13 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
    *  @param y the y coordinate of the navigator pane
    */
   public boolean selectDocumentAt(int x, int y);
+      
+  /** Returns true if the item at the x,y coordinate of the navigator pane is currently selected.
+    * @param x the x coordinate of the navigator pane
+    * @param y the y coordinate of the navigator pane
+    * @return true if the item is currently selected
+    */
+  public boolean isSelectedAt(int x, int y);
   
   /** Visitor pattern hook method.
    *  @param algo the algorithm to run on this navigator
@@ -168,22 +182,44 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
    */
   public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<ItemT, InType, ReturnType> algo, InType input);
   
-  /** @return true if a group if INavigatorItems selected. */
+  /** @return the number of selected items. */
+  public int getSelectionCount();
+  
+  /** @return true if at least one group of INavigatorItems is selected. */
   public boolean isGroupSelected();
   
-  /** @return true if the INavigatorItem is in the selected group, if a group is selected. */
+    /** @return the number of groups selected. */
+  public int getGroupSelectedCount();
+  
+  /** @return the folders currently selected. */
+  public java.util.List<File> getSelectedFolders();
+  
+  /** @return true if at least one document is selected. */
+  public boolean isDocumentSelected();
+  
+  /** @return the number of documents selected. */
+  public int getDocumentSelectedCount();
+  
+  /** @return the documents currently selected. */
+  public java.util.List<ItemT> getSelectedDocuments();
+  
+  /** Returns true if the root is selected. Only runs in event thread. */
+  public boolean isRootSelected();
+  
+  /** @return true if the INavigatorItem is in a selected group, if
+    * at least one group is selected. */
   public boolean isSelectedInGroup(ItemT i);
   
   /** Adds the top level group with the specified name and filter. */
   public void addTopLevelGroup(String name, INavigatorItemFilter<? super ItemT> f);
   
-  /** Returns true if a top level group is selected, false otherwise. */
+  /** Returns true if at least one top level group is selected, false otherwise. */
   public boolean isTopLevelGroupSelected();
   
-  /** Returns the name of the top level group that is selected, throws
-   *  a GroupNotSelectedException if a top level group is not selected
-   */
-  public String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException;
+  /** Returns the names of the top level groups that the selected items descend from.
+    * Throws a GroupNotSelectedException if no top level group is selected
+    */
+  public java.util.Set<String> getNamesOfSelectedTopLevelGroup() throws GroupNotSelectedException;
   
   /** Switches the selection to the given INavigatorItem if the current selection is not already on an 
    *  INavigatorItem.  Since it may be possible that the currently selected item in the navigator does not 
@@ -192,7 +228,6 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
    *  nothing.
    *  @param i The suggested current INavigatorItem.
    */
-  
    public void requestSelectionUpdate(ItemT i);
    
    /** The standard swing repaint() method. */
