@@ -1978,31 +1978,31 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     }
   };
   
-  /** Go to the closing brace. */
+  /** Go to the closing brace.  ReadLock omitted because it only runs on definitions documents in the event thread. */
   private final Action _gotoClosingBraceAction =  new AbstractAction("Go to Closing Brace") {
     public void actionPerformed(ActionEvent ae) {
         OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-        odd.acquireReadLock();
+//        odd.acquireReadLock();
         try {
           int pos = odd.findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
-          if (pos!=AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
+          if (pos != AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
         }
         catch(BadLocationException ble) { /* just ignore and don't move */ }
-        finally { odd.releaseReadLock(); }
+//        finally { odd.releaseReadLock(); }
     }
   };
   
-  /** Go to the opening brace. */
+  /** Go to the opening brace.  ReadLock omitted because it only runs on definitions documents in the event thread. */
   private final Action _gotoOpeningBraceAction =  new AbstractAction("Go to Opening Brace") {
     public void actionPerformed(ActionEvent ae) {
         OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-        odd.acquireReadLock();
+//        odd.acquireReadLock();
         try {
           int pos = odd.findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
-          if (pos!=AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
+          if (pos != AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
         }
         catch(BadLocationException ble) { /* just ignore and don't move */ }
-        finally { odd.releaseReadLock(); }
+//        finally { odd.releaseReadLock(); }
     }
   };
   
@@ -2013,9 +2013,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private void _switchToPane(Component c) {
     Component newC = c;
     if (c == _interactionsContainer) newC = _interactionsPane;
-    
     if (c == _consoleScroll) newC = _consolePane;
-    
     showTab(newC);
   }
   
@@ -2140,15 +2138,16 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 
   /** Toggle a bookmark. */
   public void toggleBookmark() {
+    assert EventQueue.isDispatchThread();
     addToBrowserHistory();
     final OpenDefinitionsDocument doc = _model.getActiveDocument();
     
     int startSel = _currentDefPane.getSelectionStart();
     int endSel = _currentDefPane.getSelectionEnd();
-    doc.acquireReadLock();
+//    doc.acquireReadLock();
     try {
       if (startSel>endSel) { int temp = startSel; startSel = endSel; endSel = temp; }
-      else if (startSel==endSel) {
+      else if (startSel == endSel) {
         // nothing selected
         endSel = doc.getLineEndPos(startSel);
         startSel = doc.getLineStartPos(startSel);
@@ -2170,7 +2169,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
     }
-    finally { doc.releaseReadLock(); }
+//    finally { doc.releaseReadLock(); }
   }
   
   /** Add the current location to the browser history. */
@@ -6977,6 +6976,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     /* Must be executed in event thread. */
     public void currThreadDied() {
+      assert EventQueue.isDispatchThread();
       _disableStepTimer();
       
       if (isDebuggerReady()) {

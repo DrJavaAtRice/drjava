@@ -50,15 +50,15 @@ import javax.swing.text.AbstractDocument;
 
 import static edu.rice.cs.drjava.model.definitions.ColoringView.*;
 
-/** Represents a Swing-based InteractionsDocument. Extends AbstractDJDocument 
- *  which contains shared code between the Swing interactions and definitions documents.
- */
+/** Represents a Swing-based InteractionsDocument. Extends AbstractDJDocument which contains code shared by
+  * the Swing interactions and definitions documents.
+  */
 public class InteractionsDJDocument extends AbstractDJDocument {
   
   /** Holds a flag telling the adapter that the interpreter was recently reset, and to reset the styles list 
-   *  the next  time a style is added. Cannot reset immediately because then the styles would be lost while 
-   *  the interactions pane is resetting.
-   */
+    * the next  time a style is added. Cannot reset immediately because then the styles would be lost while 
+    * the interactions pane is resetting.
+    */
   private boolean _toClear = false;
   
   /** Standard constructor. Currently does nothing */

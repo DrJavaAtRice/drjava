@@ -254,16 +254,16 @@ public class JUnitPanel extends ErrorPanel {
       String fullName = className + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
       SwingDocument doc = getSwingDocument();
-      int index = doc.getLength();
-
+      doc.acquireWriteLock();
       try {
+        int index = doc.getLength();
         // Insert the classname if it has changed
         if (! className.equals(_runningTestName)) {
           _runningTestName = className;
           doc.insertString(index, "  " + className + "\n", NORMAL_ATTRIBUTES);
           index = doc.getLength();
         }
-
+        
         // Insert the test name, remembering its position
         doc.insertString(index, "    ", NORMAL_ATTRIBUTES);
         index = doc.getLength();
@@ -276,6 +276,7 @@ public class JUnitPanel extends ErrorPanel {
         // Inserting at end, shouldn't happen
         throw new UnexpectedException(ble);
       }
+      finally { doc.releaseWriteLock(); }
     }
 
     /** Displays the results of a test that has finished. */

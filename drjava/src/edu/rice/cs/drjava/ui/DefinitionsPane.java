@@ -706,9 +706,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     JMenuItem toggleBookmarkItem = new JMenuItem("Toggle Bookmark");
     toggleBookmarkItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        if (getSelectionStart()==getSelectionEnd()) { // nothing selected
+        if (getSelectionStart() == getSelectionEnd()) { // nothing selected
           // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
-          setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
+          setCaretPos(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
         }
         _mainFrame.toggleBookmark();
       }
@@ -723,7 +723,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       breakpointItem.addActionListener( new AbstractAction() {
         public void actionPerformed( ActionEvent ae ) {
           // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
-          setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
+          setCaretPos(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
           _mainFrame.debuggerToggleBreakpoint();
         }
       });
@@ -792,7 +792,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   public void setPositionAndScroll(int pos) {
     try {
-      setCaretPosition(pos);
+      setCaretPos(pos);
       scrollRectToVisible(modelToView(pos));
     }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
@@ -897,9 +897,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
     
   /** This function is called when switching a pane to be the active document pane.  It allows the pane to do whatever 
-   *  "startUp" is required.  Since setInactive swapped out the document for a dummy document, we need to reload the 
-   *  actual document and reset its caret position to the saved location.  Only runs in event thread.
-   */
+    * "startUp" is required.  Since setInactive swapped out the document for a dummy document, we need to reload the 
+    * actual document and reset its caret position to the saved location.  Only runs in event thread.
+    */
   public void notifyActive() {
     assert ! _mainFrame.isVisible() || EventQueue.isDispatchThread();
     super.setDocument(_doc);
@@ -998,7 +998,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       }
 //      removeSetSizeListener();  // Why?  None was added
 
-      setCaretPosition(offset);
+      setCaretPos(offset);
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
@@ -1010,15 +1010,18 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     this.centerViewOnOffset(offset);
   }
 
-  /** This method overrides a broken version in JTextComponent.  It allows
-   *  selection to proceed backwards as well as forwards.  If selection is backwards,
-   *  then the caret will end up at the start of the selection rather than the end.
-   */
+  /** This method overrides a broken version in JTextComponent.  It allows selection to proceed backwards as well as 
+    * forwards.  If selection is backwards, then the caret ends up at the start of the selection rather than the end.
+    */
   public void select(int selectionStart, int selectionEnd) {
-    if (selectionStart < 0) selectionStart = 0;
-    if (selectionEnd < 0) selectionEnd = 0;
-    setCaretPosition(selectionStart);
-    moveCaretPosition(selectionEnd);  // What about the caret position in the reduced model?  It is now inconsistent!
+    _doc.acquireReadLock();
+    try {
+//      if (selectionStart < 0) selectionStart = 0;
+//      if (selectionEnd < 0) selectionEnd = 0;
+      setCaretPosition(selectionStart);
+      moveCaretPosition(selectionEnd);  // What about the caret position in the reduced model?  It is updated by a listener.
+    }
+    finally { _doc.releaseReadLock(); }
   }
 
   /** Reset the document Undo list. */
@@ -1079,36 +1082,35 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     return true;
   }
   
-  
   /** Indent the given selection, for the given reason, in the current document.
-   *  @param selStart - the selection start
-   *  @param selEnd - the selection end
-   *  @param reason - the reason for the indent
-   *  @param pm - the ProgressMonitor used by the indenter
-   */
+    * @param selStart - the selection start
+    * @param selEnd - the selection end
+    * @param reason - the reason for the indent
+    * @param pm - the ProgressMonitor used by the indenter
+    */
   protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
     //_mainFrame.hourglassOn();
     // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
+    _doc.acquireWriteLock();
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
       endCompoundEdit();
+      setCaretPosition(_doc.getCurrentLocation());
     }
-    catch (OperationCanceledException oce) {
+    catch(OperationCanceledException oce) {
       // if canceled, undo the indent; but first, end compound edit
       endCompoundEdit();
       _doc.getUndoManager().undo();
       // pm = null, so cancel can't be pressed
       throw new UnexpectedException(oce);
     }
-    catch (RuntimeException e) {
-      /* Catches the exception to turn off the the hourglass and close the compound edit before throwing out to the
-       * main frame. */
-      endCompoundEdit();
-      throw e;
-    }
-    
-    //_doc.setCurrentLocation(caretPos);
-    setCaretPosition(_doc.getCurrentLocation());
+//    catch (RuntimeException e) {
+//      /* Catches the exception to turn off the the hourglass and close the compound edit before throwing out to the
+//       * main frame. */
+//      endCompoundEdit();
+//      throw e;
+//    }
+    finally { _doc.releaseWriteLock(); }
   }
     
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */

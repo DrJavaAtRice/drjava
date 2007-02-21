@@ -656,15 +656,14 @@ public class JPDADebugger implements Debugger {
     _resumeThread(thread, false);
   }
 
-  /**
-   * Resumes the given thread, only copying variables from its debug interpreter
-   * if shouldCopyBack is true.
-   * @param thread Thread to resume
-   * @param fromStep Whether to copy back the variables from
-   * the current debug interpreter and switch to the next
-   * suspended thread.
-   * @throws IllegalArgumentException if thread is null
-   */
+  /** Resumes the given thread, only copying variables from its debug interpreter if shouldCopyBack is true.  Assumes
+    * lock on this is already held.
+    * @param thread Thread to resume
+    * @param fromStep Whether to copy back the variables from
+    * the current debug interpreter and switch to the next
+    * suspended thread.
+    * @throws IllegalArgumentException if thread is null
+    */
   private void _resumeThread(ThreadReference thread, boolean fromStep) throws DebugException {
     if (thread == null) {
       throw new IllegalArgumentException("Cannot resume a null thread");
@@ -749,10 +748,9 @@ public class JPDADebugger implements Debugger {
   }
 
 
-  /**
-   * Adds a watch on the given field or variable.
-   * @param field the name of the field we will watch
-   */
+  /** Adds a watch on the given field or variable.
+    * @param field the name of the field we will watch
+    */
   public synchronized void addWatch(String field) throws DebugException {
     // _ensureReady();
 
@@ -901,22 +899,17 @@ public class JPDADebugger implements Debugger {
     }
   }
 
-  /** Returns all currently watched fields and variables. */
-  public synchronized Vector<DebugWatchData> getWatches() throws DebugException {
+  /** Returns all currently watched fields and variables. No synchronization required because _watches is final. */
+  public Vector<DebugWatchData> getWatches() throws DebugException {
     //_ensureReady();
     return _watches;
   }
 
-  /**
-   * Returns a list of all threads being tracked by the debugger.
-   * Does not return any threads known to be dead.
-   */
+  /** Returns a list of all threads being tracked by the debugger. Does not return any threads known to be dead. */
   public synchronized Vector<DebugThreadData> getCurrentThreadData() throws DebugException {
     if (! isReady()) { return new Vector<DebugThreadData>(); }
     List<ThreadReference> listThreads; // Add parameterization <ThreadReference> to listThreads.
-    try {
-      listThreads = _vm.allThreads();  // JDK 1.5 will eliminate this type warning
-    }
+    try { listThreads = _vm.allThreads(); }
     catch (VMDisconnectedException vmde) {
       // We're quitting, just pass back an empty Vector
       return new Vector<DebugThreadData>();
@@ -942,9 +935,7 @@ public class JPDADebugger implements Debugger {
    * are no suspended threads
    * TO DO: Config option for hiding DrJava subset of stack trace
    */
-  public synchronized Vector<DebugStackData> getCurrentStackFrameData()
-    throws DebugException
-  {
+  public synchronized Vector<DebugStackData> getCurrentStackFrameData() throws DebugException {
     if (! isReady()) return new Vector<DebugStackData>();
 
     if (_runningThread != null || _suspendedThreads.size() <= 0) {
@@ -974,11 +965,11 @@ public class JPDADebugger implements Debugger {
     }
   }
 
-  /** Takes the location of event e, opens the document corresponding to its class
-   *  and centers the definition pane's view on the appropriate line number
-   *  @param e LocatableEvent containing location to display
-   */
-  synchronized void scrollToSource(LocatableEvent e) {
+  /** Takes the location of event e, opens the document corresponding to its class and centers the definition pane's
+    * view on the appropriate line number.  Assumes lock on this is already held.
+    * @param e LocatableEvent containing location to display
+    */
+  private void scrollToSource(LocatableEvent e) {
     Location location = e.location();
 
     // First see if doc is stored
@@ -990,13 +981,13 @@ public class JPDADebugger implements Debugger {
     else  scrollToSource(location);
   }
 
-  /** Scroll to the location specified by location */
-  synchronized void scrollToSource(Location location) {
+  /** Scroll to the location specified by location  Assumes lock on this is already held */
+  private void scrollToSource(Location location) {
     scrollToSource(location, true);
   }
 
-  /** Scroll to the location specified by location */
-  synchronized void scrollToSource(Location location, boolean shouldHighlight) {
+  /** Scroll to the location specified by location.  Assumes lock on this is already held. */
+  private void scrollToSource(Location location, boolean shouldHighlight) {
     OpenDefinitionsDocument doc = null;
 
     // No stored doc, look on the source root set (later, also the sourcepath)
@@ -1045,11 +1036,10 @@ public class JPDADebugger implements Debugger {
     openAndScroll(doc, location, shouldHighlight);
   }
 
-  /**
-   * Scrolls to the source location specified by the the debug stack data.
-   * @param stackData Stack data containing location to display
-   * @throws DebugException if current thread is not suspended
-   */
+  /** Scrolls to the source location specified by the the debug stack data.
+    * @param stackData Stack data containing location to display
+    * @throws DebugException if current thread is not suspended
+    */
   public synchronized void scrollToSource(DebugStackData stackData) throws DebugException {
     _ensureReady();
     if (_runningThread != null) {
@@ -1083,8 +1073,8 @@ public class JPDADebugger implements Debugger {
   }
 
   /** Scrolls to the source of the given breakpoint.
-   *  @param bp the breakpoint
-   */
+    * @param bp the breakpoint
+    */
   public synchronized void scrollToSource(Breakpoint bp) {
     openAndScroll(bp.getDocument(), bp.getLineNumber(), bp.getClassName(), false);
   }
@@ -1108,24 +1098,22 @@ public class JPDADebugger implements Debugger {
     return null;
   }
 
-  /**
-   * Opens a document and scrolls to the appropriate location.  If
-   * doc is null, a message is printed indicating the source file
-   * could not be found.
-   * @param doc Document to open
-   * @param location Location to display
-   */
-  synchronized void openAndScroll(OpenDefinitionsDocument doc, Location location, boolean shouldHighlight) {
+  /** Opens a document and scrolls to the appropriate location.  If doc is null, a message is printed indicating the 
+    * source file could not be found.  Assumes lock on this is already held.
+    * @param doc Document to open
+    * @param location Location to display
+    */
+  private void openAndScroll(OpenDefinitionsDocument doc, Location location, boolean shouldHighlight) {
     openAndScroll(doc, location.lineNumber(), location.declaringType().name(), shouldHighlight);
   }
 
-  /**  Opens a document and scrolls to the appropriate location.  If doc is null, a message is printed indicating the
-   *  source file could not be found.
-   *  @param doc Document to open
-   *  @param line the line number to display
-   *  @param className the name of the appropriate class
-   */
-  synchronized void openAndScroll(final OpenDefinitionsDocument doc, final int line, String className, final boolean shouldHighlight) {
+  /** Opens a document and scrolls to the appropriate location.  If doc is null, a message is printed indicating the
+    * source file could not be found.  Assumes lock on this is already held.
+    * @param doc Document to open
+    * @param line the line number to display
+    * @param className the name of the appropriate class
+    */
+  private void openAndScroll(final OpenDefinitionsDocument doc, final int line, String className, final boolean shouldHighlight) {
     // Open and scroll if doc was found
     if (doc != null) { 
       doc.checkIfClassFileInSync();
@@ -1136,15 +1124,12 @@ public class JPDADebugger implements Debugger {
     else printMessage("  (Source for " + className + " not found.)");
   }
 
-  /**
-   * Returns the relative directory (from the source root) that the source
-   * file with this qualifed name will be in, given its package.
-   * Returns the empty string for classes without packages.
-   *
-   * TO DO: Move this to a static utility class
-   * @param className The fully qualified class name
-   */
-  String getPackageDir(String className) {
+  /** Returns the relative directory (from the source root) that the source file with this qualifed name will be in, 
+    * given its package. Returns the empty string for classes without packages.
+    * TO DO: Move this to a static utility class
+    * @param className The fully qualified class name
+    */
+  static String getPackageDir(String className) {
     // Only keep up to the last dot
     int lastDotIndex = className.lastIndexOf(".");
     if (lastDotIndex == -1) {
@@ -1160,20 +1145,18 @@ public class JPDADebugger implements Debugger {
     }
   }
 
-  /**
-   * Prints a message in the Interactions Pane.
-   * @param message Message to display
-   */
-  synchronized void printMessage(String message) {
+  /** Prints a message in the Interactions Pane.  Not synchronized on this on this because no local state is accessed.
+    * @param message Message to display
+    */
+  void printMessage(String message) {
     _model.printDebugMessage(message);
   }
 
-  /**
-   * Returns whether the given className corresponds to a class
-   * that is anonymous or has an anonymous enclosing class.
-   * @param rt the ReferenceType to check
-   * @return whether the class is anonymous
-   */
+  /** Returns whether the given className corresponds to a class
+    * that is anonymous or has an anonymous enclosing class.
+    * @param rt the ReferenceType to check
+    * @return whether the class is anonymous
+    */
   private boolean hasAnonymous(ReferenceType rt) {
     String className = rt.name();
     StringTokenizer st = new StringTokenizer(className, "$");
@@ -1205,18 +1188,18 @@ public class JPDADebugger implements Debugger {
     }
   }
 
-  /**
-   * Hides all of the values of the watches and their types. Called
-   * when there is no debug information.
-   */
-  private synchronized void _hideWatches() {
+  /** Hides all of the values of the watches and their types. Called when there is no debug information.  Assumes lock
+    * is already held.
+    */
+  private void _hideWatches() {
     for (int i = 0; i < _watches.size(); i++) {
       DebugWatchData currWatch = _watches.get(i);
       currWatch.hideValueAndType();
     }
   }
 
-  /** Updates the stored value of each watched field and variable. */
+  /** Updates the stored value of each watched field and variable. Synchronization is necessary because this method is 
+    * called from unsynchronized listeners. */
   private synchronized void _updateWatches() throws DebugException {
     if (! isReady()) return;
       
@@ -1775,7 +1758,9 @@ public class JPDADebugger implements Debugger {
                              " could not be defined in the debug interpreter");
   }
 
-  /** Notifies all listeners that the current thread has been suspended. */
+  /** Notifies all listeners that the current thread has been suspended. Synchronization is necessary because it is 
+    * called from unsynchronized listeners and other classes (in same package). 
+    */
   synchronized void currThreadSuspended() {
     try {
       try {
@@ -2053,14 +2038,12 @@ public class JPDADebugger implements Debugger {
     }
   }
 
-  /**
-   * This method is called to remove the current debug interpreter upon resuming
-   * the current thread.
-   * @param fromStep If true, switch to the default interpreter since we don't want
-   * to switch to the next debug interpreter and display its watch data. We would like
-   * to just not have an active interpreter and put up an hourglass over the
-   * interactions pane, but the interpreterJVM must have an active interpreter.
-   */
+  /** This method is called to remove the current debug interpreter upon resuming the current thread.  Assumes that 
+    * lock on this is alaredy held.
+    * @param fromStep If true, switch to the default interpreter since we don't want to switch to the next debug 
+    *   interpreter and display its watch data. We would like to just not have an active interpreter and put up an 
+    *   hourglass over the interactions pane, but the interpreterJVM must have an active interpreter.
+    */
   private void _removeCurrentDebugInterpreter(boolean fromStep) {
     DefaultInteractionsModel interactionsModel =
       _model.getInteractionsModel();
@@ -2076,30 +2059,32 @@ public class JPDADebugger implements Debugger {
     interactionsModel.removeInterpreter(oldInterpreterName);
   }
 
-  /** Notifies all listeners that the current thread has been resumed.
-   *  Precondition: Assumes that the current thread hasn't yet been resumed
-   */
-  synchronized void currThreadResumed() throws DebugException {
+  /** Notifies all listeners that the current thread has been resumed.  Synchronization dropped because invokeLater runs
+    * asynchronously.
+    *  Precondition: Assumes that the current thread hasn't yet been resumed
+    */
+  private void currThreadResumed() throws DebugException {
     _log.log(this + " is executing currThreadResumed()");
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.currThreadResumed(); } });
   }
 
-  /** Switches the current interpreter to the one corresponding to threadRef.
-   *  @param threadRef The ThreadRefernce corresponding to the interpreter to switch to
-   */
+  /** Switches the current interpreter to the one corresponding to threadRef.  Assumes lock on this is already held.
+    * @param threadRef The ThreadRefernce corresponding to the interpreter to switch to
+    */
   private void _switchToInterpreterForThreadReference(ThreadReference threadRef) {
     String threadName = _getUniqueThreadName(threadRef);
     String prompt = _getPromptString(threadRef);
     _model.getInteractionsModel().setActiveInterpreter(threadName, prompt);
   }
 
-  synchronized void threadStarted() {
+  /** Not synchronized because invokeLater is asynchronous. */
+  void threadStarted() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.threadStarted(); } });
   }
 
   /** Notifies all listeners that the current thread has died.  updateThreads is set to true if the threads and stack
-   *  tables need to be updated, false if there are no suspended threads
-   */
+    * tables need to be updated, false if there are no suspended threads
+    */
   synchronized void currThreadDied() throws DebugException {
     printMessage("The current thread has finished.");
     _runningThread = null;
@@ -2169,7 +2154,7 @@ public class JPDADebugger implements Debugger {
     }
 
     public synchronized boolean contains(long id) {
-      for(int i = 0; i < size(); i++) {
+      for (int i = 0; i < size(); i++) {
         if (get(i).uniqueID() == id) return true;
       }
       return false;

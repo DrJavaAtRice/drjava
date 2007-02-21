@@ -355,7 +355,7 @@ public class ClipboardHistoryFrame extends JFrame {
     String text = "";
     if (_historyList.getModel().getSize()>0) {
       int index = _historyList.getSelectedIndex();
-      if (index!=-1) {
+      if (index != -1) {
         text = ((ListItem)_historyList.getModel().getElementAt(_historyList.getSelectedIndex())).getFull();
       }
     }

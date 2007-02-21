@@ -107,7 +107,7 @@ public final class SlaveJVMRunner {
       // Make sure RMI doesn't use an IP address that might change
       System.setProperty("java.rmi.server.hostname", "127.0.0.1");
       
-      if (args.length != 3 && args.length != 2) System.exit(1);
+      assert (args.length == 3) || (args.length == 2);
       
       _notDone = true;
         

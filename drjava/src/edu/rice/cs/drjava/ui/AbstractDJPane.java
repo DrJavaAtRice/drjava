@@ -123,21 +123,40 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     }
   }
   
-  /** Be sure to update the document (and thus the reduced model) any time the caret position changes.
-   *  @param pos
-   */
+  /** Immediately updates the current location in the reduced model. */
   public void setCaretPosition(int pos) {
     super.setCaretPosition(pos);
-    getDJDocument().setCurrentLocation(pos);
-//    _doc.setCurrentLocation(pos);
+    getDJDocument().setCurrentLocation(pos); 
   }
   
+  /** A checked version of setCaretPostion(int pos) that ensures pos is within the DJDocument. */
+  public void setCaretPos(int pos) {
+    DJDocument doc = getDJDocument();
+    doc.acquireReadLock();
+    try {
+      if (pos < 0) {
+        setCaretPosition(0);
+        return;
+      }
+      int len = doc.getLength();
+      if (pos > len) {
+        setCaretPosition(len);
+        return;
+      }
+      setCaretPosition(pos);
+    }
+    finally { doc.releaseReadLock(); }
+  }
+  
+   /** Immediately updates the current location in the reduced model. */ 
+  public void moveCaretPosition(int pos) { 
+    super.moveCaretPosition(pos);
+    getDJDocument().setCurrentLocation(pos); 
+  }
+
   public int getScrollableUnitIncrement(Rectangle visibleRectangle, int orientation, int direction) {
     return (int) (visibleRectangle.getHeight() * SCROLL_UNIT);
   }
-  
-  /** What is this for?  The override does not nothing! */ 
-  public void moveCaretPosition(int pos) { super.moveCaretPosition(pos); }
   
   /** Runs indent(int) with a default value of Indenter.IndentReason.OTHER */
   public void indent() { indent(Indenter.IndentReason.OTHER); }

@@ -226,7 +226,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
-      setCaretPosition(_doc.getCurrentLocation());
+      setCaretPos(_doc.getCurrentLocation());
     }
     catch (OperationCanceledException oce) { throw new UnexpectedException(oce); }
   }

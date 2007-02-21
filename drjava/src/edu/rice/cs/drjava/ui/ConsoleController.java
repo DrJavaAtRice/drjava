@@ -165,11 +165,15 @@ public class ConsoleController extends AbstractConsoleController implements Seri
   AbstractAction moveLeftAction = new LeftAction();
   private class LeftAction extends AbstractAction implements Serializable {
     public void actionPerformed(ActionEvent e) {
-      int position = _pane.getCaretPosition();
-      if (position < _doc.getPromptPos()) moveToPrompt();
-      else if (position == _doc.getPromptPos())_pane.getBeep().run();
-      else // position > _doc.getPromptPos()
-        _pane.setCaretPosition(position - 1);
+      _doc.acquireReadLock(); 
+      try {
+        int position = _pane.getCaretPosition();
+        if (position < _doc.getPromptPos()) moveToPrompt();
+        else if (position == _doc.getPromptPos())_pane.getBeep().run();
+        else // position > _doc.getPromptPos()
+          _pane.setCaretPosition(position - 1);
+      }
+      finally { _doc.releaseReadLock(); }
     }
   }
 
@@ -178,11 +182,15 @@ public class ConsoleController extends AbstractConsoleController implements Seri
   
   private class RightAction extends AbstractAction implements Serializable {
     public void actionPerformed(ActionEvent e) {
-      int position = _pane.getCaretPosition();
-      if (position < _doc.getPromptPos()) moveToEnd();
-      else if (position >= _doc.getLength()) _pane.getBeep().run();
-      else // position between prompt and end
-        _pane.setCaretPosition(position + 1);
+      _doc.acquireReadLock();
+      try {
+        int position = _pane.getCaretPosition();
+        if (position < _doc.getPromptPos()) moveToEnd();
+        else if (position >= _doc.getLength()) _pane.getBeep().run();
+        else // position between prompt and end
+          _pane.setCaretPosition(position + 1);
+      }
+      finally { _doc.releaseReadLock(); }
     }
   }
 
@@ -193,9 +201,13 @@ public class ConsoleController extends AbstractConsoleController implements Seri
   AbstractAction moveUpDownAction = new UpDownAction();
   private class UpDownAction extends AbstractAction implements Serializable {
     public void actionPerformed(ActionEvent e) {
-      int position = _pane.getCaretPosition();
-      if (position < _doc.getPromptPos()) moveToPrompt();
-      else _pane.getBeep().run();
+      _doc.acquireReadLock();
+      try {
+        int position = _pane.getCaretPosition();
+        if (position < _doc.getPromptPos()) moveToPrompt();
+        else _pane.getBeep().run();
+      }
+      finally { _doc.releaseReadLock(); }
     }
   }
 }

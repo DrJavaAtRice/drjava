@@ -76,7 +76,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   
   private String _projFileText = null;
   
-  /** Setup method for each JUnit test case. */
+  /** Setup method for each JUnit test case in this Test class. */
   public void setUp() throws Exception {
     super.setUp();
     
