@@ -90,7 +90,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   private void init(DefaultListModel m) {
     _model = m;
     setModel(m);
-    setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     addListSelectionListener(new ListSelectionListener() {
       /** Called when the list value has changed. Should only run in the event thread.
        *  @param e the event corresponding to the change
@@ -324,13 +324,19 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
     * @param y the y coordinate of the navigator pane
     * @return true if the item is currently selected
     */
-  public boolean isSelectedAt(int x, int y) { return false; }
+  public boolean isSelectedAt(int x, int y) {
+    synchronized(_model) {
+      final int idx = locationToIndex(new java.awt.Point(x,y));
+      if (idx == -1) return false;
+      return isSelectedIndex(idx);
+    }
+  }
 
   /** @return the renderer for this object. */
   public Component getRenderer(){ return _renderer; }
   
-  /** @return the number of selected items. Always 1 for JListSortNavigator */
-  public int getSelectionCount() { return 1; }
+  /** @return the number of selected items. */
+  public int getSelectionCount() { return getSelectedIndices().length; }
   
   /** @return true if at least one group of INavigatorItems is selected; always false for JListNavigator */
   public boolean isGroupSelected() { return false; }
@@ -344,13 +350,14 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   /** @return true if at least one document is selected; always true for JListNavigator */
   public boolean isDocumentSelected() { return true; }
   
-  /** @return the number of documents selected. Always 1 for JListSortNavigator */
-  public int getDocumentSelectedCount() { return 1; }
+  /** @return the number of documents selected. Same as getSelectionCount for JListSortNavigator. */
+  public int getDocumentSelectedCount() { return getSelectionCount(); }
 
   /** @return the documents currently selected. Only runs in event thread. */
   @SuppressWarnings("unchecked") public java.util.List<ItemT> getSelectedDocuments() {
-    ArrayList<ItemT> l = new ArrayList<ItemT>(1);
-    l.add((ItemT)getSelectedValue());
+    Object[] selected = getSelectedValues();
+    ArrayList<ItemT> l = new ArrayList<ItemT>(selected.length);
+    for (Object o: selected) { l.add((ItemT)o); }
     return l;
   }
   
