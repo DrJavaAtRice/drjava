@@ -3954,6 +3954,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           error = true;
         }
       }
+      _model.setActiveDocument(_model.getActiveDocument());
       return error;
 //      if (_model.getActiveDocument().saveFile(_saveSelector)) {
 //        _currentDefPane.hasWarnedAboutModified(false); 
