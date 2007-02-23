@@ -90,7 +90,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   private void init(DefaultListModel m) {
     _model = m;
     setModel(m);
-    setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     addListSelectionListener(new ListSelectionListener() {
       /** Called when the list value has changed. Should only run in the event thread.
        *  @param e the event corresponding to the change
@@ -319,24 +319,25 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   }
   
   /** Returns true if the item at the x,y coordinate of the navigator pane is currently selected.
-    * Only runs in event thread. O
+    * Always false for JListSortNavigator
+    * Only runs in event thread.
     * @param x the x coordinate of the navigator pane
     * @param y the y coordinate of the navigator pane
     * @return true if the item is currently selected
     */
-  public boolean isSelectedAt(int x, int y) {
-    synchronized(_model) {
-      final int idx = locationToIndex(new java.awt.Point(x,y));
-      if (idx == -1) return false;
-      return isSelectedIndex(idx);
-    }
+  public boolean isSelectedAt(int x, int y) { return false;
+//    synchronized(_model) {
+//      final int idx = locationToIndex(new java.awt.Point(x,y));
+//      if (idx == -1) return false;
+//      return isSelectedIndex(idx);
+//    }
   }
 
   /** @return the renderer for this object. */
   public Component getRenderer(){ return _renderer; }
   
-  /** @return the number of selected items. */
-  public int getSelectionCount() { return getSelectedIndices().length; }
+  /** @return the number of selected items. Always 1 for JListNavigator */
+  public int getSelectionCount() { return 1; } // return getSelectedIndices().length; }
   
   /** @return true if at least one group of INavigatorItems is selected; always false for JListNavigator */
   public boolean isGroupSelected() { return false; }
@@ -355,9 +356,11 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
 
   /** @return the documents currently selected. Only runs in event thread. */
   @SuppressWarnings("unchecked") public java.util.List<ItemT> getSelectedDocuments() {
-    Object[] selected = getSelectedValues();
-    ArrayList<ItemT> l = new ArrayList<ItemT>(selected.length);
-    for (Object o: selected) { l.add((ItemT)o); }
+//    Object[] selected = getSelectedValues();
+//    ArrayList<ItemT> l = new ArrayList<ItemT>(selected.length);
+//    for (Object o: selected) { l.add((ItemT)o); }
+    ArrayList<ItemT> l = new ArrayList<ItemT>(1);
+    l.add((ItemT)getSelectedValue());
     return l;
   }
   

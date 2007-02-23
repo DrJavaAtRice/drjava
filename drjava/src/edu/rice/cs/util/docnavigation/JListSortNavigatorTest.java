@@ -94,48 +94,49 @@ public class JListSortNavigatorTest extends DrJavaTestCase {
   
   /**
    * Test of getting the list of selected items.
+   * Commented out when changes from revision 4171 were reverted.
    */
-  public void testGetSelectedDocuments() {
-    list.clearSelection();
-    list.addSelectionInterval(0, 1);
-    assertEquals("Two items should be selected", 2, list.getSelectionCount());
-    assertEquals("Two items should be selected", 2, list.getDocumentSelectedCount());
-    assertEquals("Zero groups should be selected", 0, list.getGroupSelectedCount());
-    java.util.List<DummyINavigatorItem> l = list.getSelectedDocuments();
-    assertEquals("Two items should be selected", 2, l.size());
-    assertEquals("Wrong item 1", i1, l.get(0));
-    assertEquals("Wrong item 2", i2, l.get(1));
-
-    list.clearSelection();
-    list.addSelectionInterval(0, 3);
-    assertEquals("Four items should be selected", 4, list.getSelectionCount());
-    assertEquals("Four items should be selected", 4, list.getDocumentSelectedCount());
-    assertEquals("Zero groups should be selected", 0, list.getGroupSelectedCount());
-    l = list.getSelectedDocuments();
-    assertEquals("Four items should be selected", 4, l.size());
-    assertEquals("Wrong item 1", i1, l.get(0));
-    assertEquals("Wrong item 2", i2, l.get(1));
-    assertEquals("Wrong item 3", i3, l.get(2));
-    assertEquals("Wrong item 4", i4, l.get(3));
-
-    list.clearSelection();
-    list.addSelectionInterval(0, 1);
-    list.addSelectionInterval(2, 3);
-    assertEquals("Four items should be selected", 4, list.getSelectionCount());
-    assertEquals("Four items should be selected", 4, list.getDocumentSelectedCount());
-    assertEquals("Zero groups should be selected", 0, list.getGroupSelectedCount());
-    l = list.getSelectedDocuments();
-    assertEquals("Four items should be selected", 4, l.size());
-    assertEquals("Wrong item 1", i1, l.get(0));
-    assertEquals("Wrong item 2", i2, l.get(1));
-    assertEquals("Wrong item 3", i3, l.get(2));
-    assertEquals("Wrong item 4", i4, l.get(3));
-    
-    list.clearSelection();
-    assertEquals("Zero items should be selected", 0, list.getSelectionCount());
-    assertEquals("Zero items should be selected", 0, list.getDocumentSelectedCount());
-    assertEquals("Zero groups should be selected", 0, list.getGroupSelectedCount());
-    l = list.getSelectedDocuments();
-    assertEquals("Zero items should be selected", 0, l.size());
-  }
+//  public void testGetSelectedDocuments() {
+//    list.clearSelection();
+//    list.addSelectionInterval(0, 1);
+//    assertEquals("Two items should be selected", 2, list.getSelectionCount());
+//    assertEquals("Two items should be selected", 2, list.getDocumentSelectedCount());
+//    assertEquals("Zero groups should be selected", 0, list.getGroupSelectedCount());
+//    java.util.List<DummyINavigatorItem> l = list.getSelectedDocuments();
+//    assertEquals("Two items should be selected", 2, l.size());
+//    assertEquals("Wrong item 1", i1, l.get(0));
+//    assertEquals("Wrong item 2", i2, l.get(1));
+//
+//    list.clearSelection();
+//    list.addSelectionInterval(0, 3);
+//    assertEquals("Four items should be selected", 4, list.getSelectionCount());
+//    assertEquals("Four items should be selected", 4, list.getDocumentSelectedCount());
+//    assertEquals("Zero groups should be selected", 0, list.getGroupSelectedCount());
+//    l = list.getSelectedDocuments();
+//    assertEquals("Four items should be selected", 4, l.size());
+//    assertEquals("Wrong item 1", i1, l.get(0));
+//    assertEquals("Wrong item 2", i2, l.get(1));
+//    assertEquals("Wrong item 3", i3, l.get(2));
+//    assertEquals("Wrong item 4", i4, l.get(3));
+//
+//    list.clearSelection();
+//    list.addSelectionInterval(0, 1);
+//    list.addSelectionInterval(2, 3);
+//    assertEquals("Four items should be selected", 4, list.getSelectionCount());
+//    assertEquals("Four items should be selected", 4, list.getDocumentSelectedCount());
+//    assertEquals("Zero groups should be selected", 0, list.getGroupSelectedCount());
+//    l = list.getSelectedDocuments();
+//    assertEquals("Four items should be selected", 4, l.size());
+//    assertEquals("Wrong item 1", i1, l.get(0));
+//    assertEquals("Wrong item 2", i2, l.get(1));
+//    assertEquals("Wrong item 3", i3, l.get(2));
+//    assertEquals("Wrong item 4", i4, l.get(3));
+//    
+//    list.clearSelection();
+//    assertEquals("Zero items should be selected", 0, list.getSelectionCount());
+//    assertEquals("Zero items should be selected", 0, list.getDocumentSelectedCount());
+//    assertEquals("Zero groups should be selected", 0, list.getGroupSelectedCount());
+//    l = list.getSelectedDocuments();
+//    assertEquals("Zero items should be selected", 0, l.size());
+//  }
 }
