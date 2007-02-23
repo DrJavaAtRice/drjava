@@ -40,23 +40,25 @@ import java.util.ArrayList;
 import java.net.URL;
 
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.text.EditDocumentInterface;
+import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** A model which can serve as the glue between an InteractionsDocument and a JavaInterpreter.  This 
- *  abstract class provides common functionality for all such models.
- *  @version $Id$
- */
+  * abstract class provides common functionality for all such models.
+  * @version $Id$
+  */
 public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Banner prefix. */
   public static final String BANNER_PREFIX = "Welcome to DrJava.";
-  
+ 
   /** Keeps track of any listeners to the model. */
   protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
 
@@ -94,7 +96,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** The input listener to listen for requests to System.in. */
   protected volatile InputListener _inputListener;
 
-  protected final EditDocumentInterface _adapter;
+  /** The embedded interactions document (a SwingDocument in native DrJava) */
+  protected final ConsoleDocumentInterface _adapter;
   
   /** Banner displayed at top of the interactions document */
   private volatile String _banner;
@@ -105,7 +108,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *  @param historySize Number of lines to store in the history
    *  @param writeDelay Number of milliseconds to wait after each println
    */
-  public InteractionsModel(EditDocumentInterface adapter, File wd, int historySize, int writeDelay) {
+  public InteractionsModel(ConsoleDocumentInterface adapter, File wd, int historySize, int writeDelay) {
     _writeDelay = writeDelay;
     _document = new InteractionsDocument(adapter, historySize, getBanner(wd));
     _adapter = adapter;
@@ -583,8 +586,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _banner = getBanner(wd);
     return _banner;
   }
-  
-  //TODO: use _workingDirectory field rather than passing wd?
 
   /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady(File wd) {

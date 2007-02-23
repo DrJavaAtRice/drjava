@@ -557,23 +557,23 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   }
   
   
-  private volatile int _finalCount;
-  private volatile int _finalDocCount;
+  private volatile int _finalPaneCt;
+  private volatile int _finalDocCt;
   
   public void testDocumentPaneMemoryLeak()  throws InterruptedException, java.io.IOException{
-    _finalCount = 0;
-    _finalDocCount = 0;
+    _finalPaneCt = 0;
+    _finalDocCt = 0;
     
     FinalizationListener<DefinitionsPane> fl = new FinalizationListener<DefinitionsPane>() {
       public void finalized(FinalizationEvent<DefinitionsPane> e) {
-        _finalCount++;
+        _finalPaneCt++;
 //        System.out.println("Finalizing: " + e.getObject().hashCode());
       }
     };
     
     FinalizationListener<DefinitionsDocument> fldoc = new FinalizationListener<DefinitionsDocument>() {
       public void finalized(FinalizationEvent<DefinitionsDocument> e) {
-        _finalDocCount++;
+        _finalDocCt++;
       }
     };
     
@@ -601,32 +601,33 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     
     _model.closeAllFiles();
     
-    _ct = 0;
-    do { _cleanup(); }
-    while (_finalDocCount != 6 || _finalCount != 6);
+    int ct = 0;
+    do {  
+      // make sure that the event queue is empty
+      Utilities.clearEventQueue();
+      Utilities.clearEventQueue();
+      
+      System.gc();
+      System.runFinalization();
+      System.gc();
+      ct++; 
+    }
+    while(ct < 10 && (_finalDocCt != 6 || _finalPaneCt != 6));
     
-    if (_ct > 1) System.out.println("testDocumentPaneMemoryLeak required " + _ct + " iterations");
+    if (ct == 10) fail("Failed to reclaim all documents; panes left = " + (6-_finalPaneCt) + "; docs left = " + 
+                       (6 - _finalDocCt));
+    
+    if (ct > 1) System.out.println("testDocumentPaneMemoryLeak required " + ct + " iterations");
     
 //    System.out.println("Current: " + _frame.getCurrentDefPane().hashCode());
     
 //    System.out.println("Foo");
 //    System.in.read();
-    assertEquals("all the defdocs should have been garbage collected", 6, _finalDocCount);
-    assertEquals("all the panes should have been garbage collected", 6, _finalCount);
-//    System.err.println("_finalCount = " + _finalCount);
+    assertEquals("all the defdocs should have been garbage collected", 6, _finalDocCt);
+    assertEquals("all the panes should have been garbage collected", 6, _finalPaneCt);
+//    System.err.println("_finalPaneCt = " + _finalPaneCt);
     
     _log.log("testDocumentPaneMemoryLeak completed");
-  }
-  
-  private int _ct = 0;
-  private void _cleanup() {
-    // make sure that the event queue is empty
-    Utilities.clearEventQueue();
-    Utilities.clearEventQueue();
-    System.gc();
-    System.runFinalization();
-    System.gc();
-    _ct++;
   }
   
   // This testcase checks that we do no longer discard Alt keys that would be used to make the {,},[,] chars that the french keyboards has.

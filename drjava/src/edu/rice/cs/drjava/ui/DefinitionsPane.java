@@ -708,9 +708,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       public void actionPerformed( ActionEvent ae) {
         if (getSelectionStart() == getSelectionEnd()) { // nothing selected
           // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
-          setCaretPos(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
+          // Omit locking since Defintions documents are not accessed from other threads (?)
+//          _doc.acquireReadLock();
+//          try { 
+            setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
+            _mainFrame.toggleBookmark();
+//          }
+//          finally {_doc.releaseReadLock(); }
         }
-        _mainFrame.toggleBookmark();
       }
     });
     _popMenu.add(toggleBookmarkItem);
@@ -723,8 +728,13 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       breakpointItem.addActionListener( new AbstractAction() {
         public void actionPerformed( ActionEvent ae ) {
           // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
-          setCaretPos(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
+          // Omit locking since Defintions documents are not accessed from other threads (?)
+//          _doc.acquireReadLock();
+//          try { 
+          setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
           _mainFrame.debuggerToggleBreakpoint();
+//          }
+//          finally
         }
       });
       _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
@@ -1095,7 +1105,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
       endCompoundEdit();
-      setCaretPosition(_doc.getCurrentLocation());
+      setCaretPosition(_doc.getCurrentLocation());  // redundant?  
     }
     catch(OperationCanceledException oce) {
       // if canceled, undo the indent; but first, end compound edit

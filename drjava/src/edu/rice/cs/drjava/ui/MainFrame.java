@@ -111,8 +111,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     " Current document is out of sync with the debugger and should be recompiled!";
   
   /** Number of milliseconds to wait before displaying "Stepping..." message after a step is requested in 
-   *  the debugger.
-   */
+    * the debugger.
+    */
   private static final int DEBUG_STEP_TIMER_VALUE = 2000;
   
   /** The model which controls all logic in DrJava. */
@@ -2146,7 +2146,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     int endSel = _currentDefPane.getSelectionEnd();
 //    doc.acquireReadLock();
     try {
-      if (startSel>endSel) { int temp = startSel; startSel = endSel; endSel = temp; }
+      if (startSel > endSel) { int temp = startSel; startSel = endSel; endSel = temp; }
       else if (startSel == endSel) {
         // nothing selected
         endSel = doc.getLineEndPos(startSel);
@@ -2276,9 +2276,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   };
   
   /** Returns the "intelligent" beginning of line.  If the caret is to fhe right of the first non-whitespace character,
-   *  the position of the first non-whitespace character is returned.  If the caret is on or to the left of the first 
-   *  non-whitespace character, the beginning of the line is returned.
-   */
+    * the position of the first non-whitespace character is returned.  If the caret is on or to the left of the first 
+    * non-whitespace character, the beginning of the line is returned.
+    */
   private int _getBeginLinePos() {
     try {
       int currPos = _currentDefPane.getCaretPosition();
@@ -2578,21 +2578,21 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /* ----------------------- Constructor is here! --------------------------- */
   
-  /** Creates the main window, and shows it. */
+  /** Creates the main window, and shows it. */ 
   public MainFrame() {
     
     // Cache the config object, since we use it many, many times.
     final Configuration config = DrJava.getConfig();
-   
-  
+    
+    
 //    Utilities.show("MainFrame starting");
     
     // create our model
     _model = new DefaultGlobalModel();
-
+    
     _showDebugger = _model.getDebugger().isAvailable();
     _findReplace = new FindReplacePanel(this, _model);
- 
+    
     if (_showDebugger) {
       _debugPanel = new DebugPanel(this);
       _breakpointsPanel = new BreakpointsPanel(this);
@@ -2601,7 +2601,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _debugPanel = null;
       _breakpointsPanel = null; 
     }
-        
+    
     _compilerErrorPanel = new CompilerErrorPanel(_model, this);
     _consoleController = new ConsoleController(_model.getConsoleDocument(), _model.getSwingConsoleDocument());
     _consolePane = _consoleController.getPane();
@@ -2612,6 +2612,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     _interactionsController =
       new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument());
+    
     _interactionsPane = _interactionsController.getPane();
     
     _interactionsContainer = new JPanel(new BorderLayout()) {
@@ -3954,7 +3955,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           error = true;
         }
       }
-      _model.setActiveDocument(_model.getActiveDocument());
+      _model.refreshActiveDocument();
       return error;
 //      if (_model.getActiveDocument().saveFile(_saveSelector)) {
 //        _currentDefPane.hasWarnedAboutModified(false); 
@@ -5810,22 +5811,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Inner class to handle updating the current position in the document.  Registered with the DefinitionsPane. **/
   private class PositionListener implements CaretListener {
     
-    public void caretUpdate(final CaretEvent ce ) {
-      final OpenDefinitionsDocument doc = _model.getActiveDocument();
-      // The following block of code does not appear to require running in the event thread
-//      Utilities.invokeLater(new Runnable() { 
-//        public void run() { 
-          doc.acquireReadLock();
-          try {
-            doc.setCurrentLocation(ce.getDot());  
-            int line = doc.getCurrentLine();
-            int col = doc.getCurrentCol();
-            updateLocation(line, col);
-          }
-          finally { doc.releaseReadLock(); }
-//        } 
-//      });
-    }
+    // The following method does not need to run in the event thread
+    public void caretUpdate(final CaretEvent ce) { updateLocation(); }
     
     // This method appears safe outside the event thread
     public void updateLocation() {
@@ -5835,7 +5822,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       finally { doc.releaseReadLock(); }
     }
     
-    private void updateLocation(int line, int col) {
+    private void updateLocation(int line, int col) { // Not run in event thread because setText is thread safe.
       _currLocationField.setText(line + ":" + col +" \t");  // Space before "\t" required on Mac to avoid obscuring
 //      Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //      _model.getParsingControl().delay();
@@ -5909,7 +5896,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         clearStatusMessage();
         
         if (_tabbedPane.getSelectedComponent() == _consoleScroll)
-          // Use SwingUtilities because this action must execute AFTER all pending events in the 33
+          // Use SwingUtilities because this action must execute AFTER all pending events in the event queue
           SwingUtilities.invokeLater(new Runnable() { public void run() { _consolePane.requestFocusInWindow(); } });
           
         // Update error highlights?
@@ -6363,13 +6350,11 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   };
   
   
-  /** Create a new DefinitionsPane and JScrollPane for an open definitions document.
-   *  @param doc The open definitions document to wrap
-   *  @return JScrollPane containing a DefinitionsPane for the given document.
-   */
+  /** Create a new DefinitionsPane and JScrollPane for an open definitions document.  Package private for testing purposes.
+    * @param doc The open definitions document to wrap
+    * @return JScrollPane containing a DefinitionsPane for the given document.
+    */
   JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
-    // made this package private to allow testing of disabling editing during compile and successful switching
-    // on and off of ability to edit
     DefinitionsPane pane = new DefinitionsPane(this, doc);
   
     pane.addKeyListener(_historyListener);
@@ -6383,7 +6368,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     // Limiting line numbers to just lines existing in the document.
     doc.addDocumentListener(new DocumentUIListener() {
       private void updateUI() {
-        SwingUtilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {  // ?? Why SwingUtilities?
           public void run() {
             // revalidateLineNums();
             if ((_breakpointsPanel != null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
@@ -6484,9 +6469,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
 //    Utilities.showDebug("_switchDefScrollPane called");
 //    Utilities.showDebug("Right before getting the scrollPane");
-    JScrollPane scroll = _defScrollPanes.get(_model.getActiveDocument());
+    OpenDefinitionsDocument doc = _model.getActiveDocument();
+    JScrollPane scroll = _defScrollPanes.get(doc);
     
-    if (scroll == null)  scroll = _createDefScrollPane(_model.getActiveDocument());
+    if (scroll == null) scroll = _createDefScrollPane(doc);
     // Fix OS X scrollbar bug before switching
     
     _reenableScrollBar();
@@ -7131,7 +7117,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 
     /** NOTE: Makes certain that this action occurs in the event dispatching thread */
     public void fileClosed(final OpenDefinitionsDocument doc) {      
-      Utilities.invokeLater(new Runnable() {public void run() { _fileClosed(doc); } });
+      Utilities.invokeLater(new Runnable() { public void run() { _fileClosed(doc); } });
     }
     
     /** Does the work of closing a file */

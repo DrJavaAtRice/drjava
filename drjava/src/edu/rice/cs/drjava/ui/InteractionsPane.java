@@ -66,6 +66,11 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   static StyledEditorKit EDITOR_KIT;
   
   static { EDITOR_KIT = new InteractionsEditorKit();  }
+ 
+  protected void matchUpdate(int offset) {
+    if (! _doc.hasPrompt()) return;
+    super.matchUpdate(offset);
+  }
   
   /** A runnable object that causes the editor to beep. */
   protected Runnable _beep = new Runnable() {
@@ -204,6 +209,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** Adds the position to the list of prompt positions. package private for tests. Does not necessarily run in
     * event thread. _listOfPrompt is a Vector which is thread safe. */
   void addToPromptList(int pos) {
+//    System.err.println("Adding " + pos + " PromptList");
     if (! _listOfPrompt.contains(new Integer(pos))) _listOfPrompt.add(new Integer(pos));
   }
   

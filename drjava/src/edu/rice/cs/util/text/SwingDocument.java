@@ -45,8 +45,8 @@ import javax.swing.text.BadLocationException;
 
 import java.util.Hashtable;
 
-/** A swing implementation of the toolkit-independent EditDocumentInterface.  This class is instantiated only
- *  by test code. This document must use the readers/writers locking protocol established in its superclasses.
+/** A swing implementation of the toolkit-independent EditDocumentInterface.  This document must use the readers/writers
+  * locking protocol established in its superclasses.
  *  TODO: create a separate DummySwingDocument class for testing and make SwingDocument abstract.
  *  @version $Id$
  */
@@ -124,7 +124,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   }
   
   /** Behaves exactly like forceInsertText except for assuming that WriteLock is already held. */
-  private void _forceInsertText(int offs, String str, String style) {
+  public void _forceInsertText(int offs, String str, String style) {
     int len = getLength();
     if ((offs < 0) || (offs > len)) {
       String msg = "Offset " + offs + " passed to SwingDocument.forceInsertText is out of bounds [0, " + len + "]";

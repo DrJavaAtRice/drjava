@@ -247,7 +247,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     acquireReadLock();
     try {
       synchronized(_reduced) {
-        setCurrentLocation(start);
+        _setCurrentLocation(start);
         /* Now ask reduced model for highlight status for chars till end */
         v = _reduced.getHighlightStatus(start, end - start);
         
@@ -429,20 +429,24 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int getCurrentLocation() { return  _currentLocation; }
 
   /** Change the current location of the document
-   *  @param loc the new absolute location 
-   */
+    * @param loc the new absolute location 
+    */
   public void setCurrentLocation(int loc)  { 
     acquireReadLock();
-    try {
-      synchronized(_reduced) {
-        int dist = loc - _currentLocation;  // _currentLocation and _reduced can be updated asynchronously
-        _currentLocation = loc;
-        _reduced.move(dist);
-      }
-    }
+    try { _setCurrentLocation(loc); }
     finally { releaseReadLock(); }
   }  
   
+  /** Change the current location of the document assuming that ReadLock is already held
+    * @param loc the new absolute location 
+    */
+  private void _setCurrentLocation(int loc) {
+    synchronized(_reduced) {
+      int dist = loc - _currentLocation;  // _currentLocation and _reduced can be updated asynchronously
+      _currentLocation = loc;
+      _reduced.move(dist);
+    }
+  }
   
   /** The actual cursor movement logic.  Helper for setCurrentLocation(int).
    *  @param dist the distance from the current location to the new location.
@@ -936,7 +940,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           // Indent, updating current location if necessary.
 //          Utilities.showDebug("Indenting line at offset " + selStart);
           if (_indentLine(reason)) {
-            setCurrentLocation(oldCurrentPosition.getOffset());
+            _setCurrentLocation(oldCurrentPosition.getOffset());
             if (onlyWhiteSpaceBeforeCurrent()) {
               int space = getWhiteSpace();
               move(space);
@@ -971,7 +975,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     // Iterate, line by line, until we get to/past the end
     int walker = start;
     while (walker < endPos.getOffset()) {
-      setCurrentLocation(walker);
+      _setCurrentLocation(walker);
       // Keep pointer to walker position that will stay current
       // regardless of how indentLine changes things
       Position walkerPos = this.createUnwrappedPosition(walker);
@@ -979,7 +983,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       // We ignore current location info from each line, because it probably doesn't make sense in a block context.
       _indentLine(reason);  // this operation is atomic
       // Move back to walker spot
-      setCurrentLocation(walkerPos.getOffset());
+      _setCurrentLocation(walkerPos.getOffset());
       walker = walkerPos.getOffset();
       
       if (pm != null) {
@@ -1699,7 +1703,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       acquireReadLock();
       try {
         synchronized(_reduced) { 
-          setCurrentLocation(_offset);
+          _setCurrentLocation(_offset);
           _reduced.delete(_length);    
           _styleChanged();
         }

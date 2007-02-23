@@ -34,17 +34,17 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
+import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.util.ClassPathVector;
-import edu.rice.cs.util.text.EditDocumentInterface;
+import edu.rice.cs.util.text.ConsoleDocumentInterface;
 
 import java.net.URL;
 import java.io.File;
 
-/**
- * An InteractionsModel which can serve as the glue between a local
- * InteractionsDocument and a remote JavaInterpreter in another JVM.
- * @version $Id$
- */
+/** An InteractionsModel which can serve as the glue between a local InteractionsDocument and a remote JavaInterpreter
+  * in another JVM.
+  * @version $Id$
+  */
 public abstract class RMIInteractionsModel extends InteractionsModel {
 
   /** RMI interface to the remote Java interpreter.*/
@@ -56,19 +56,19 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    *  @param historySize Number of lines to store in the history
    *  @param writeDelay Number of milliseconds to wait after each println
    */
-  public RMIInteractionsModel(MainJVM jvm, EditDocumentInterface adapter, File wd, int historySize, int writeDelay) {
+  public RMIInteractionsModel(MainJVM jvm, ConsoleDocumentInterface adapter, File wd, int historySize, int writeDelay) {
     super(adapter, wd, historySize, writeDelay);
     _jvm = jvm;
   }
 
   /** Interprets the given command.
-   *  @param toEval command to be evaluated
-   */
+    * @param toEval command to be evaluated
+    */
   protected void _interpret(String toEval) { _jvm.interpret(toEval); }
 
   /** Gets the string representation of the value of a variable in the current interpreter.
-   *  @param var the name of the variable
-   */
+    * @param var the name of the variable
+    */
   public String getVariableToString(String var) { return _jvm.getVariableToString(var); }
 
   /**

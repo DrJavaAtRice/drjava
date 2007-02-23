@@ -181,19 +181,14 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
                  _pane.getCaretPosition());
   }
 
-  /** Tests that the caret catches up to the prompt if it is before it and
-   *  output is displayed.
-   */
+  /** Tests that the caret catches up to the prompt if it is before it and output is displayed. */
   public void testCaretMovesUpToPromptAfterInsert() throws EditDocumentException {
     _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(1); } });
-//    System.err.println("caretPostion = " + _pane.getCaretPosition());
     _doc.insertBeforeLastPrompt("simulated output", InteractionsDocument.DEFAULT_STYLE);
-//     System.err.println("caretPostion = " + _pane.getCaretPosition());
     Utilities.clearEventQueue();
-//     System.err.println("caretPostion = " + _pane.getCaretPosition());
     assertEquals("Caret is at the prompt after output inserted.", _doc.getPromptPos(), _pane.getCaretPosition());
-
+    
     _doc.insertPrompt();
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(1); } });
     _doc.insertBeforeLastPrompt("simulated output", InteractionsDocument.DEFAULT_STYLE);
@@ -201,10 +196,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     assertEquals("Caret is at the end after output inserted.", _doc.getPromptPos(), _pane.getCaretPosition());
   }
 
-  /**
-   * Tests that the caret is moved properly when the current interaction
-   * is cleared.
-   */
+  /** Tests that the caret is moved properly when the current interaction is cleared. */
   public void testClearCurrentInteraction() throws EditDocumentException {
     _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { public void run() { _controller.moveToEnd(); } });
@@ -230,12 +222,14 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   /** Tests that the caret is put in the correct position after an insert. */
   public void testCaretUpdatedOnInsert() throws EditDocumentException {
     _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
+    Utilities.clearEventQueue();
+    assertEquals("caret should be at end of document", _doc.getLength(), _pane.getCaretPosition());
+       
     final int pos = _doc.getLength() - 5;
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(pos); } });
-
     // Insert text before the prompt
     _doc.insertBeforeLastPrompt("aa", InteractionsDocument.DEFAULT_STYLE);
-     Utilities.clearEventQueue();
+    Utilities.clearEventQueue();
     assertEquals("caret should be in correct position", pos + 2, _pane.getCaretPosition());
 
     // Move caret to prompt and insert more text
@@ -253,10 +247,11 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     // Move caret after prompt and insert more text
     final int newPos = _doc.getPromptPos();
     // simulate a keystroke by putting caret just *after* pos of insert
-    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(newPos+1); } });
+    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(newPos + 1); } });
+    Utilities.clearEventQueue();
     _doc.insertText(newPos, "d", InteractionsDocument.DEFAULT_STYLE);
     Utilities.clearEventQueue();
-    assertEquals("caret should be immediately after the d", newPos + 1, _pane.getCaretPosition());
+    assertEquals("caret should be one char after the d", newPos + 2, _pane.getCaretPosition());
   }
 
 //   public void testSystemIn() {
@@ -337,7 +332,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   private volatile boolean _resetDone;
   
   public void testPromptListClearedOnReset() throws Exception {
-    // Can't use the fields declared in setUp - it doesn't use a real InteractionsModel
+    // Can't use the fields declared in setUp; we need a real InteractionsModel
     final MainFrame _mf = new MainFrame();
     final Object _resetLock = new Object();
     
@@ -407,10 +402,13 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     
     Utilities.invokeAndWait(new Runnable() {
-      public void run() { _size = _pane.getPromptList().size(); }
+      public void run() { 
+        _size = _pane.getPromptList().size(); 
+      }
     });
-    
-//    System.err.println(_pane.getPromptList());
+    Utilities.clearEventQueue();
+    Utilities.clearEventQueue();
+//    System.err.println("PromptList for pane " + _pane.hashCode() + " is " + _pane.getPromptList());
     
     assertEquals("PromptList after reset should contain one element", 1, _size);
   }

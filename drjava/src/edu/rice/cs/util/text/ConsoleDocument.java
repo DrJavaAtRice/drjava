@@ -38,12 +38,17 @@ import java.awt.print.*;
 import edu.rice.cs.drjava.model.print.DrJavaBook;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.EditDocumentInterface;
+import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.DocumentEditCondition;
 import edu.rice.cs.util.text.EditDocumentException;
 
-/** @version $Id$ */
-public class ConsoleDocument implements EditDocumentInterface {
+/** A GUI-toolkit agnostic interface to a console document.  This class assumes that the embedded document supports 
+  * readers/writers locking and uses that locking protocol to ensure the integrity of the data added in this class
+  * @version $Id$ */
+public class ConsoleDocument implements ConsoleDocumentInterface {
+  
+  /** The default prompt to use in the console. */
+  public static final String DEFAULT_CONSOLE_PROMPT = "";
   
   /** Default text style. */
   public static final String DEFAULT_STYLE = "default";
@@ -57,11 +62,8 @@ public class ConsoleDocument implements EditDocumentInterface {
   /** Style for System.in */
   public static final String SYSTEM_IN_STYLE = "System.in";
 
-  /** The default prompt to use in the console. */
-  public static final String DEFAULT_CONSOLE_PROMPT = "";
-
-  /** The document storing the text for this console model. */
-  protected final EditDocumentInterface _document;
+  /** The embedded document storing the text and _hasPrompt property for this console model. */
+  protected final ConsoleDocumentInterface _document;
 
   /** A runnable command to use for a notification beep. */
   protected volatile Runnable _beep;
@@ -72,29 +74,32 @@ public class ConsoleDocument implements EditDocumentInterface {
   /** String to use for the prompt. */
   protected volatile String _prompt;
 
-  /** Whether the document currently has a prompt and is ready to accept input. */
-  protected volatile boolean _hasPrompt;
-  
   /** The book object used for printing that represents several pages */
-  protected DrJavaBook _book;
+  protected volatile DrJavaBook _book;
 
-  /** Creates a new ConsoleDocument with the given EditDocumentInterface.
-   *  @param adapter the EditDocumentInterface to use
+  /** Creates a new ConsoleDocument with the given embedded ConsoleDocumentInterface (a SwingDocument in native DrJava).
+   *  @param doc the embedded ConsoleDocumentInterface object
    */
-  public ConsoleDocument(EditDocumentInterface doc) {
+  public ConsoleDocument(ConsoleDocumentInterface doc) {
     _document = doc;
     
     _beep = new Runnable() { public void run() { } };
     _promptPos = 0;
     _prompt = DEFAULT_CONSOLE_PROMPT;
-    _hasPrompt = false;
+    _document.setHasPrompt(false);
    
     // Prevent any edits before the prompt!
     _document.setEditCondition(new ConsoleEditCondition());
   }
 
   /** @return true iff this document has a prompt and is ready to accept input. */
-  public boolean hasPrompt() { return _hasPrompt; }
+  public boolean hasPrompt() { return _document.hasPrompt(); }
+  
+  public void setHasPrompt(boolean val) {
+    acquireWriteLock();    // Is this overkill?
+    try { _document.setHasPrompt(val); }
+    finally { releaseWriteLock(); }
+  }
 
   /** Accessor for the string used for the prompt. */
   public String getPrompt() { return _prompt; }
@@ -103,7 +108,7 @@ public class ConsoleDocument implements EditDocumentInterface {
    *  @param prompt String to use for the prompt.
    */
   public void setPrompt(String prompt) { 
-    acquireWriteLock();
+    acquireWriteLock();  
     _prompt = prompt;
     releaseWriteLock();
   }
@@ -161,8 +166,7 @@ public class ConsoleDocument implements EditDocumentInterface {
 //      _hasPrompt = true;
       forceInsertText(_document.getLength(), _prompt, DEFAULT_STYLE);
       _promptPos = _document.getLength();
-      _hasPrompt = true;
-       
+      _document.setHasPrompt(true);
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e);  }
     finally { releaseWriteLock(); }
@@ -172,7 +176,7 @@ public class ConsoleDocument implements EditDocumentInterface {
   public void disablePrompt() {
     acquireWriteLock();
     try {
-    _hasPrompt = false;
+    _document.setHasPrompt(false);
     _promptPos = _document.getLength();
     }
     finally { releaseWriteLock(); }
@@ -201,7 +205,7 @@ public class ConsoleDocument implements EditDocumentInterface {
     acquireReadLock();
     int len = _document.getLength();
     try {
-      if (_hasPrompt) {
+      if (_document.hasPrompt()) {
         int promptStart = _promptPos - _prompt.length();
         return (promptStart < len && promptStart >= 0) ? promptStart : len;  // ensure position is within document 
       }
@@ -220,7 +224,7 @@ public class ConsoleDocument implements EditDocumentInterface {
       int pos = getPositionBeforePrompt();
       _promptPos += text.length();
       _addToStyleLists(pos, text, style);
-      _document.forceInsertText(pos, text, style);
+      _document._forceInsertText(pos, text, style);
     }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
     finally { releaseWriteLock(); }
@@ -267,11 +271,16 @@ public class ConsoleDocument implements EditDocumentInterface {
     */
   public void forceInsertText(int offs, String str, String style) throws EditDocumentException {
     acquireWriteLock();
-    try {
-      _addToStyleLists(offs, str, style);
-      _document.forceInsertText(offs, str, style);
-    }
+    try { _forceInsertText(offs, str, style); }
     finally { releaseWriteLock(); }
+  }
+  
+  /** Inserts a string into the document exactly like forceInsertText above except that it assumes the WriteLock
+    * is already held.
+    */
+  public void _forceInsertText(int offs, String str, String style) throws EditDocumentException {      
+    _addToStyleLists(offs, str, style);
+     _document.forceInsertText(offs, str, style);
   }
   
   private void _addToStyleLists(int offs, String str, String style) {

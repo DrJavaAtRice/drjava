@@ -718,7 +718,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if (_auxFiles.add(f)) {
           setProjectChanged(true);
         }
-	setProjectChanged(true);
+ setProjectChanged(true);
       }
     }
     
@@ -728,7 +728,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if (_auxFiles.remove(file)) {
           setProjectChanged(true);
         }
-	setProjectChanged(true);
+ setProjectChanged(true);
       }
     }
     
@@ -2726,7 +2726,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private volatile File _file;
     private volatile long _timestamp;
     
-    /** Caret position, as set by the view. */
+    /** Caret position, as set by the view. (What does this mean?  Only updated explicitly by setCurrentLocation(...) */
     private volatile int _caretPosition;
     
     /** The folder containing this document */

@@ -40,6 +40,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 
 import java.io.*;
@@ -53,16 +54,33 @@ import static edu.rice.cs.drjava.model.definitions.ColoringView.*;
 /** Represents a Swing-based InteractionsDocument. Extends AbstractDJDocument which contains code shared by
   * the Swing interactions and definitions documents.
   */
-public class InteractionsDJDocument extends AbstractDJDocument {
+public class InteractionsDJDocument extends AbstractDJDocument implements ConsoleDocumentInterface {
+
+  /** Whether the document currently has a prompt and is ready to accept input. */
+  private volatile boolean _hasPrompt;
   
   /** Holds a flag telling the adapter that the interpreter was recently reset, and to reset the styles list 
     * the next  time a style is added. Cannot reset immediately because then the styles would be lost while 
     * the interactions pane is resetting.
     */
-  private boolean _toClear = false;
+  private volatile boolean _toClear = false;
   
-  /** Standard constructor. Currently does nothing */
-  public InteractionsDJDocument() { super(); }  
+  /** Standard constructor. */
+  public InteractionsDJDocument() { 
+    super(); 
+    _hasPrompt = false;
+  } 
+  
+  public boolean hasPrompt() { return _hasPrompt; }
+  
+  /** Sets the _hasPrompt property. 
+   *  @param val new boolean value for _hasPrompt.
+   */
+  public void setHasPrompt(boolean val) { 
+    acquireWriteLock();
+    _hasPrompt = val;
+    releaseWriteLock();
+  }
   
   protected int startCompoundEdit() { return 0; /* Do nothing */ }
   protected void endCompoundEdit(int key) { /* Do nothing */ }

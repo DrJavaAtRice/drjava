@@ -33,13 +33,16 @@
 
 package edu.rice.cs.drjava.ui;
 
+
+import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
+import java.awt.Font;
+
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
-import java.awt.event.ActionEvent;
-import java.awt.Color;
-import java.awt.Font;
 
 import java.io.Serializable;
 
@@ -195,72 +198,104 @@ public abstract class AbstractConsoleController implements Serializable {
    */
   class CaretUpdateListener implements DocumentListener {
     public void insertUpdate(final DocumentEvent e) {
-      // Queue an asynchronous task in the event thread to update the document pane; Use SwingUtilities to ensure that
-      // the caret update is performed after the document update listeners have run.  Fixes (?) bug #1571405.
-      SwingUtilities.invokeLater(new Runnable() { 
-        public void run() {
+      // Update caret position when text is inserted in document.  Fixes (?) bug #1571405.
           
           ConsoleDocument doc = getConsoleDoc();
-          doc.acquireReadLock(); // Grab read lock because this code is NOT run as part of document listener!
-          try {
-            int caretPos = _pane.getCaretPosition();
-            int promptPos = doc.getPromptPos();
-            int len = doc.getLength();
+          int pos;
+          final int docLen = doc.getLength();
+          // if document has no prompt, place caret at end
+          if (! doc.hasPrompt()) pos = docLen;
+          else {
             
-//          System.err.println("insertUpdate called; caretPos = " + caretPos + " docLength = " + length);
-            
-            // Figure out where the prompt was before the update
-            int prevPromptPos = promptPos;
-            if (e.getOffset() < promptPos) {
-              // Insert happened before prompt,
-              //  so previous position was further back
-              prevPromptPos = promptPos - e.getLength();
+            final int caretPos = _pane.getCaretPosition();
+            final int promptPos = doc.getPromptPos();
+            final int insertPos = e.getOffset();
+            final int insertLen = e.getLength();
+            final int prevPromptPos = (insertPos < promptPos) ? promptPos - insertLen : promptPos;
+            // Figure out where the prompt was before the insertion
+
+          
+            if (caretPos < prevPromptPos /* || insertPos < promptPos */) {
+              // Caret was behind prompt before insertion or insertion preceded the prompt  (why check for former?)
+              pos = promptPos;  // place caret at prompt
             }
-            
-            if (! doc.hasPrompt()) {
-//            System.err.println("Scrolling to end of document");
-              // Scroll to the end of the document, since output has been inserted after the prompt.
-              moveToEnd();
-            }
-            // Do not to move caret during a reset, when the prompt pos is temporarily far greater than the length.
-            else if (promptPos <= len) {
-              if (caretPos < prevPromptPos) {
-                // Caret has fallen behind prompt, so make it catch up so
-                //  the new input is visible.
-                moveToPrompt();
-              }
-              else {
-                // Caret was on or after prompt, so move it right by the size
-                //  of the insert.
-                int size = promptPos - prevPromptPos;
-                if (size > 0) {
-                  int newCaretPos = caretPos + size;
-                  if (newCaretPos > len) newCaretPos = len;
-                  _pane.setCaretPosition(newCaretPos);
-                }
-              }
+            else {
+              // Caret and insertion were on or after prompt
+              pos = Math.min(caretPos + insertLen, docLen);  // advance cursor by insertion size (but within document)
             }
           }
-          finally { doc.releaseReadLock(); }
-        }
-      });
+
+          final int newPos = pos;  // make a final copy of pos that can appear in a closure
+          if (EventQueue.isDispatchThread()) _pane.setCaretPosition(newPos);
+          else EventQueue.invokeLater(new Runnable() { public void run() { 
+//            System.err.println("Deferred setting caretPos to " + newPos);
+            _pane.setCaretPos(newPos); 
+          } });
+            
+//          System.err.println("insertUpdate called; caretPos = " + caretPos + " docLength = " + length);
+          
+          /* Old Code: */
+//      // Queue an asynchronous task in the event thread to update the document pane; Use SwingUtilities to ensure that
+//      // the caret update is performed after the document update listeners have run.  Fixes (?) bug #1571405.
+//      SwingUtilities.invokeLater(new Runnable() { 
+//        public void run() {
+//          
+//          ConsoleDocument doc = getConsoleDoc();
+//          doc.acquireReadLock(); // Grab read lock because this code is NOT run as part of document listener!
+//          try {
+//            int caretPos = _pane.getCaretPosition();
+//            int promptPos = doc.getPromptPos();
+//            int len = doc.getLength();
+//            
+////          System.err.println("insertUpdate called; caretPos = " + caretPos + " docLength = " + length);
+//            
+//            // Figure out where the prompt was before the update
+//            int prevPromptPos = promptPos;
+//            if (e.getOffset() < promptPos) {
+//              // Insert happened before prompt,
+//              //  so previous position was further back
+//              prevPromptPos = promptPos - e.getLength();
+//            }
+//            
+//            if (! doc.hasPrompt()) {
+////            System.err.println("Scrolling to end of document");
+//              // Scroll to the end of the document, since output has been inserted after the prompt.
+//              moveToEnd();
+//            }
+//            // Do not to move caret during a reset, when the prompt pos is temporarily far greater than the length.
+//            else if (promptPos <= len) {
+//              if (caretPos < prevPromptPos) {
+//                // Caret has fallen behind prompt, so make it catch up so
+//                //  the new input is visible.
+//                moveToPrompt();
+//              }
+//              else {
+//                // Caret was on or after prompt, so move it right by the size
+//                //  of the insert.
+//                int size = promptPos - prevPromptPos;
+//                if (size > 0) {
+//                  int newCaretPos = caretPos + size;
+//                  if (newCaretPos > len) newCaretPos = len;
+//                  _pane.setCaretPosition(newCaretPos);
+//                }
+//              }
+//            }
+//          }
+//          finally { doc.releaseReadLock(); }
+//        }
+//      });
     }
 
     public void removeUpdate(DocumentEvent e) { _ensureLegalCaretPos(); }
     public void changedUpdate(DocumentEvent e) { _ensureLegalCaretPos(); }
     
+    /** Moves the caret to the nearest legal position.  Assumes that the ReadLock is alreay held, which it is when these 
+      * listener methods are run.
+      */
     protected void _ensureLegalCaretPos() {
-      Utilities.invokeLater(new Runnable() {
-        public void run() { 
-          ConsoleDocument doc = getConsoleDoc();
-          doc.acquireReadLock();
-          try {
-            int len = doc.getLength();
-            if (_pane.getCaretPosition() > len) _pane.setCaretPosition(len);
-          }
-          finally { doc.releaseReadLock(); }
-        }
-      });
+      ConsoleDocument doc = getConsoleDoc();
+      int len = doc.getLength();
+      if (_pane.getCaretPosition() > len) _pane.setCaretPosition(len);
     }
   }
 
@@ -307,9 +342,16 @@ public abstract class AbstractConsoleController implements Serializable {
     });
   }
   
+  /** Clears and resets the view (other than features derived from the model. */
+  public void resetView() {
+    _pane.resetPrompts(); 
+//    System.err.println("Prompts.reset" + "Prompts for pane " + _pane.hashCode() + " is " + _pane.getPromptList());
+  }
+  
   /** Default cut action. */
   Action cutAction = new DefaultEditorKit.CutAction() {
     public void actionPerformed(ActionEvent e) {
+      
       if (_pane.getSelectedText() != null) {
         super.actionPerformed(e);
         String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(_pane);
@@ -378,17 +420,33 @@ public abstract class AbstractConsoleController implements Serializable {
   /** Selects to the current prompt. */
   AbstractAction selectToPromptPosAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
+      assert EventQueue.isDispatchThread();
+      ConsoleDocument doc = getConsoleDoc();
       // Selects the text between the old pos and the prompt
-      _pane.moveCaretPosition(getConsoleDoc().getPromptPos());
+      doc.acquireReadLock();
+      try { _pane.moveCaretPosition(getConsoleDoc().getPromptPos()); }
+      finally {doc.releaseReadLock(); }
     }
   };
 
-  /** Moves the pane's caret to the end of the document. Only affects reduced_model not the document model. */
-  void moveToEnd() { _pane.setCaretPos(getConsoleDoc().getLength()); }
+  /** Moves the pane's caret to the end of the document. Only affects reduced_model not the document model.  */
+  void moveToEnd() { 
+    assert EventQueue.isDispatchThread();
+    ConsoleDocument doc = getConsoleDoc();
+    doc.acquireReadLock();
+    try { _pane.setCaretPosition(getConsoleDoc().getLength()); }
+    finally {doc.releaseReadLock(); }
+  }
   
   /** Moves the pane's caret to the document's prompt. Only affects reduced_model not the document model. */
-  void moveToPrompt() { _pane.setCaretPos(getConsoleDoc().getPromptPos()); }
-  
+  void moveToPrompt() { 
+    assert EventQueue.isDispatchThread();
+    ConsoleDocument doc = getConsoleDoc();
+    doc.acquireReadLock();
+    try { _pane.setCaretPosition(getConsoleDoc().getPromptPos()); }
+    finally {doc.releaseReadLock(); }
+  }
+    
 //  /** Moves the pane's caret to the given position. Assumes that readLock on document is already held. */
 //  private void moveTo(int pos) {
 //    assert EventQueue.isDispatchThread();

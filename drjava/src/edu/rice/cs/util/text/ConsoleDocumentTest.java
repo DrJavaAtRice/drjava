@@ -33,8 +33,8 @@
 
 package edu.rice.cs.util.text;
 
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.DrJavaTestCase;
-
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
@@ -46,7 +46,7 @@ public class ConsoleDocumentTest extends DrJavaTestCase {
   
   public void setUp() throws Exception {
     super.setUp();
-    _doc = new ConsoleDocument(new SwingDocument());
+    _doc = new ConsoleDocument(new InteractionsDJDocument());
   }
   
   public void tearDown() throws Exception {

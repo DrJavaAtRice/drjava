@@ -74,10 +74,9 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int getCurrentLocation();
   
-  /**
-   * Change the current location of the document
-   * @param loc the new absolute location
-   */
+  /** Change the current location of the document
+    * @param loc the new absolute location
+    */
   public void setCurrentLocation(int loc);
   
   /**

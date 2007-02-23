@@ -40,14 +40,16 @@ import edu.rice.cs.drjava.model.print.DrJavaBook;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.EditDocumentInterface;
+import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.drjava.config.OptionListener;
 
-/** Toolkit-independent document that provides console-like interaction with a Java interpreter.
- *  @version $Id$
- */
+/** A GUI toolkit-agnostic document that supports console-like interaction with a Java interpreter.
+  * This class assumes that the embedded document supports readers/writers locking and uses that locking
+  * protocol to ensure the integrity of the data added in this class 
+  * @version $Id$
+  */
 public class InteractionsDocument extends ConsoleDocument {
 
   /** Default prompt. */
@@ -75,40 +77,38 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Reset the document on startUp.  Uses a history with configurable size.
    *  @param document the edit document to use for the model
    */
-  public InteractionsDocument(EditDocumentInterface document, String banner) { this(document, new History(), banner); }
+  public InteractionsDocument(ConsoleDocumentInterface document, String banner) { 
+    this(document, new History(), banner); 
+  }
 
-  /** Reset the document on startUp.  Uses a history with the given
-   *  maximum size.  This history will not use the config framework.
-   *  @param document EditDocumentInterface to use for the model
-   *  @param maxHistorySize Number of commands to remember in the history
-   */
-  public InteractionsDocument(EditDocumentInterface document, int maxHistorySize, String banner) {
+  /** Reset the document on startUp.  Uses a history with the given maximum size.  This history will not use the config
+    * framework.
+    * @param document EditDocumentInterface to use for the model
+    * @param maxHistorySize Number of commands to remember in the history
+    */
+  public InteractionsDocument(ConsoleDocumentInterface document, int maxHistorySize, String banner) {
     this(document, new History(maxHistorySize), banner);
   }
   
   /** Creates and resets the interactions document on DrJava startUp.  Uses the given history.  
-   *  @param document EditDocumentInterface to use for the model
-   *  @param history History of commands
-   */
-  public InteractionsDocument(EditDocumentInterface document, History history, String banner) {
-    super(document);
+    * @param document EditDocumentInterface to use for the model
+    * @param history History of commands
+    */
+  public InteractionsDocument(ConsoleDocumentInterface document, History history, String banner) {
+    super(document);  // initializes _document = document;
     _history = history;
-    _hasPrompt = true;
+    _document.setHasPrompt(true);
     _prompt = DEFAULT_PROMPT;
     reset(banner);
   }
 
   /** Lets this document know whether an interaction is in progress.
-   *  @param inProgress whether an interaction is in progress
-   */
-  public void setInProgress(boolean inProgress) { 
-    acquireWriteLock();
-    _hasPrompt = ! inProgress;
-    releaseWriteLock();
-  }
+    * @param inProgress whether an interaction is in progress
+    */
+  public void setInProgress(boolean inProgress) { _document.setHasPrompt(! inProgress); }
 
-  /** Returns whether an interaction is currently in progress. */
-  public boolean inProgress() { return ! _hasPrompt; }
+  /** Returns whether an interaction is currently in progress. Should use ReadLock? */
+  public boolean inProgress() { return ! _document.hasPrompt(); }
 
   /** Resets the document to a clean state.  Does not reset the history. */
   public void reset(String banner) {
@@ -126,11 +126,13 @@ public class InteractionsDocument extends ConsoleDocument {
 
   /** Replaces any text entered past the prompt with the current item in the history. */
   private void _replaceCurrentLineFromHistory() {
+    acquireWriteLock();
     try {
       _clearCurrentInputText();
       append(_history.getCurrent(), DEFAULT_STYLE);
     }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
+    finally { releaseWriteLock(); }
   }
 
   /** Accessor method for the history of commands. */
@@ -144,8 +146,8 @@ public class InteractionsDocument extends ConsoleDocument {
   }
 
   /** Saves the unedited version of the current history to a file
-   *  @param selector File to save to
-   */
+    * @param selector File to save to
+    */
   public void saveHistory(FileSaveSelector selector) throws IOException {
     acquireReadLock();  // does not modify state of document including history
     try { _history.writeToFile(selector); }

@@ -73,18 +73,13 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /** Looks for changes in the caret position to see if a paren/brace/bracket highlight is needed. */
   protected final CaretListener _matchListener = new CaretListener() {
     
-    /** Checks caret position to see if it needs to set or remove a highlight from the document. When the cursor
-      * is immediately right of ')', '}', or ']', it highlights up to the matching open paren/brace/bracket.
-      * This method must execute as part of the document update. If deferred using invokeLater, it does not work.
+    /** Checks caret position to see if it needs to set or remove a highlight from the document.
       * Only modifies the document--not any GUI classes.
       * @param e the event fired by the caret position change
       */
-    public void caretUpdate(CaretEvent e) { 
-      getDJDocument().setCurrentLocation(getCaretPosition());  
-      _removePreviousHighlight();
-      _updateMatchHighlight();
-    }
+    public void caretUpdate(CaretEvent e) { matchUpdate(e.getDot()); }
   };
+  
   
   /** Our current paren/brace/bracket matching highlight. */
   protected volatile HighlightManager.HighlightInfo _matchHighlight = null;
@@ -111,6 +106,18 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     _matchHighlight = _highlightManager.addHighlight(from, to, MATCH_PAINTER);
   }
   
+  /** Checks caret position to see if it needs to set or remove a highlight from the document. When the cursor
+    * is immediately right of ')', '}', or ']', it highlights up to the matching open paren/brace/bracket.
+    * This method must execute as part of the document update. If deferred using invokeLater, it does not work.
+    * Only modifies the document--not any GUI classes.
+    * @param offset the new offset of the caret
+    */
+  protected void matchUpdate(int offset) {
+    getDJDocument().setCurrentLocation(offset);  
+    _removePreviousHighlight();
+    _updateMatchHighlight();
+  }
+
   protected abstract void _updateMatchHighlight();
 
   /** Removes the previous highlight so document is cleared when caret position changes.  Can be executed from outside
@@ -123,11 +130,11 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     }
   }
   
-  /** Immediately updates the current location in the reduced model. */
-  public void setCaretPosition(int pos) {
-    super.setCaretPosition(pos);
-    getDJDocument().setCurrentLocation(pos); 
-  }
+//  /** Immediately updates the current location in the reduced model. */
+//  public void setCaretPosition(int pos) {
+//    super.setCaretPosition(pos);
+//    getDJDocument().setCurrentLocation(pos); 
+//  }
   
   /** A checked version of setCaretPostion(int pos) that ensures pos is within the DJDocument. */
   public void setCaretPos(int pos) {
@@ -148,11 +155,11 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     finally { doc.releaseReadLock(); }
   }
   
-   /** Immediately updates the current location in the reduced model. */ 
-  public void moveCaretPosition(int pos) { 
-    super.moveCaretPosition(pos);
-    getDJDocument().setCurrentLocation(pos); 
-  }
+//   /** Immediately updates the current location in the reduced model. */ 
+//  public void moveCaretPosition(int pos) { 
+//    super.moveCaretPosition(pos);
+//    getDJDocument().setCurrentLocation(pos); 
+//  }
 
   public int getScrollableUnitIncrement(Rectangle visibleRectangle, int orientation, int direction) {
     return (int) (visibleRectangle.getHeight() * SCROLL_UNIT);

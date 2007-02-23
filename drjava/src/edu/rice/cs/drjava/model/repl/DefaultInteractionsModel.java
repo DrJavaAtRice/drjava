@@ -41,15 +41,17 @@ import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
+import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.ConsoleDocument;
-import edu.rice.cs.util.text.*;
+import edu.rice.cs.util.text.ConsoleDocumentInterface;
+//import edu.rice.cs.util.text.*;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Interactions model which can notify GlobalModelListeners on events.
- *  TODO: remove invokeLater wrappers here and enforce the policy that all of the listener methods must use them
- *  @version $Id$
- */
+  * TODO: remove invokeLater wrappers here and enforce the policy that all of the listener methods must use them
+  * @version $Id$
+  */
 public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** Message to signal that input is required from the console. */
 //  public static final String INPUT_REQUIRED_MESSAGE =
@@ -59,12 +61,12 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected final DefaultGlobalModel _model;
 
   /** Creates a new InteractionsModel.
-   *  @param model DefaultGlobalModel to do the interpretation
-   *  @param control RMI interface to the Interpreter JVM
-   *  @param adapter InteractionsDJDocument to use for the document
-   */
-  public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM control, EditDocumentInterface adapter, File wd) {
-    super(control, adapter, wd, DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
+    * @param model DefaultGlobalModel to do the interpretation
+    * @param control RMI interface to the Interpreter JVM
+    * @param adapter InteractionsDJDocument to use for the document
+    */
+  public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM jvm, ConsoleDocumentInterface adapter, File wd) {
+    super(jvm, adapter, wd, DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
           DefaultGlobalModel.WRITE_DELAY);
     _model = model;
     // Set whether to allow "assert" statements to be run in the remote JVM.
@@ -85,8 +87,8 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    *  @param s String to print
    */
   public void replSystemOutPrint(String s) {
-    super.replSystemOutPrint(s);
-    _model.systemOutPrint(s);
+    super.replSystemOutPrint(s); // Print s to interactions pane
+    _model.systemOutPrint(s);    // Print s to console
   }
 
   /** Called when the repl prints to System.err.

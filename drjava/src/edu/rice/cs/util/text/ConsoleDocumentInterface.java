@@ -5,7 +5,7 @@
  *
  * DrJava Open Source License
  * 
- * Copyright (C) 2001-2006 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
  * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
  * 
@@ -31,40 +31,20 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.util.text;
 
-/** Main controller class for DrJava.  This class sets up all of the appropriate cross-references between components at 
-  * runtime.  Almost all of the functionality of DrJava is hidden in components with extremely high-level interfaces.
-  * This class ensures that each component is registered with all other components that need to call its methods.  In 
-  * essence, this class manages component associations.  Any details more low-level than who talks to who should be
-  * handled by components through their interfaces.
-  * @version $Id$
+import java.awt.print.Pageable;
+import java.awt.print.PrinterException;
+import java.io.Serializable;
+
+/** A GUI-toolkit agnostic extension of EditDocumentInterface that adds a console input state property.
+  * @version $Id: ConsoleDocumentInterface.java 4157 2007-02-14 21:39:26Z rcartwright $
   */
-public class MainController {
-  /*
-   * Things that MainController needs to manage:
-   *   DJWindow [aka: MainFrame] (register view components)
-   *   Menu Bar Manager (register with DJWindow [+ ViewerWindows + AboutWindow on Mac])
-   *     Menus (register with MBM, add Actions)
-   *       File, Edit, Tools, Debugger, View, Documents, Help
-   *   Tool Bar (register with DJWindow, add Actions)
-   *   Document List (register with DJWindow + View Menu + Documents Menu)
-   *   Document Pane (register with DJWindow + DocumentList + Documents Menu + Debugger)
-   *   Tab Manager (register with DJWindow + View Menu, add Tabs)
-   *     Tabs (register with TM)
-   *       Interactions, Console, Compiler, JUnit, Javadoc, FindBugs, Find/Replace
-   *   Debugger (register with DJWindow [or maybe TM?])
-   *   ViewerWindow
-   *     Help, Javadoc HTML
-   *   AboutWindow
-   *   PreferencesWindow (to be refactored in another pass)
-   *   Configuration
-   * 
-   *   All CompilerErrorCaretListeners need to be aware of each other.
-   * 
-   * Behaviors that MainController will support:
-   *   Lock edits
-   *   Display Message (warning, error)
-   *   Display File Dialog (open, save, select directory)
-   */
-}
+public interface ConsoleDocumentInterface extends EditDocumentInterface {
+  
+  /** @return true iff this document has a prompt and is ready to accept input. */
+  public boolean hasPrompt();
+
+  /** Setter for the _hasPrompt property. */
+  public void setHasPrompt(boolean val);
+  }
