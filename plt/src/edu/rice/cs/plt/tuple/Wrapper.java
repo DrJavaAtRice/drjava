@@ -1,5 +1,6 @@
 package edu.rice.cs.plt.tuple;
 
+import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
 
@@ -40,10 +41,15 @@ public class Wrapper<T> extends Option<T> implements Thunk<T> {
   public static <T> Wrapper<T> make(T value) { return new Wrapper<T>(value); }
   
   /** Produce a lambda that invokes the constructor */
-  public static <T> Lambda<T, Wrapper<T>> factory() {
-    return new Lambda<T, Wrapper<T>>() {
-      public Wrapper<T> value(T value) { return new Wrapper<T>(value); }
-    };
+  @SuppressWarnings("unchecked") public static <T> Lambda<T, Wrapper<T>> factory() {
+    return (Factory<T>) Factory.INSTANCE;
   }
+  
+  private static final class Factory<T> implements Lambda<T, Wrapper<T>>, Serializable {
+    public static final Factory<Object> INSTANCE = new Factory<Object>();
+    private Factory() {}
+    public Wrapper<T> value(T val) { return new Wrapper<T>(val); }
+  }
+  
   
 }

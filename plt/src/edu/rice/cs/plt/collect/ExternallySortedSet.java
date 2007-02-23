@@ -1,6 +1,7 @@
 package edu.rice.cs.plt.collect;
 
 import java.util.*;
+import edu.rice.cs.plt.iter.SizedIterable;
 
 /**
  * <p>A container class that <em>almost</em> implements the {@link java.util.SortedSet} interface;
@@ -19,7 +20,7 @@ import java.util.*;
  * <p>Note: the implementation relies heavily on hashing, so good performance is
  * dependent on elements of the set having an efficient {@code hashCode()} implementation.</p>
  */
-public class ExternallySortedSet<T, C extends Comparable<? super C>> implements Iterable<T> {
+public class ExternallySortedSet<T, C extends Comparable<? super C>> implements SizedIterable<T> {
 
   /**
    * The sorted set of elements.  Note that operations involving elements
@@ -64,6 +65,13 @@ public class ExternallySortedSet<T, C extends Comparable<? super C>> implements 
   }
   
   public int size() { return _set.size(); }
+  
+  public int size(int bound) {
+    int result = _set.size();
+    return result <= bound ? result : bound;
+  }
+ 
+  public boolean isFixed() { return false; }
   
   public boolean isEmpty() { return _set.isEmpty(); }
   

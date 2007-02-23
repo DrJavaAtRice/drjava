@@ -10,8 +10,11 @@ import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.LazyThunk;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.WrappedException;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.tuple.Wrapper;
 import edu.rice.cs.plt.recur.RecursionStack;
+
+import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /**
  * Provides additional operations on {@link File}s, {@link InputStream}s, {@link OutputStream}s,
@@ -232,7 +235,7 @@ public final class IOUtil {
   public static Iterable<File> attemptListFilesAsIterable(File f) {
     File[] result = attemptListFiles(f);
     if (result == null) { return IterUtil.empty(); }
-    else { return IterUtil.arrayIterable(result); }
+    else { return IterUtil.asIterable(result); }
   }
   
   /**
@@ -243,7 +246,7 @@ public final class IOUtil {
   public static Iterable<File> attemptListFilesAsIterable(File f, FileFilter filter) {
     File[] result = attemptListFiles(f, filter);
     if (result == null) { return IterUtil.empty(); }
-    else { return IterUtil.arrayIterable(result); }
+    else { return IterUtil.asIterable(result); }
   }
   
   /**
@@ -934,13 +937,13 @@ public final class IOUtil {
   }
   
   /** If {@code r} is a {@code BufferedReader}, cast it as such; otherwise, wrap it in a {@code BufferedReader} */
-  public static BufferedReader makeBuffered(Reader r) {
+  public static BufferedReader asBuffered(Reader r) {
     if (r instanceof BufferedReader) { return (BufferedReader) r; }
     else { return new BufferedReader(r); }
   }
   
   /** If {@code w} is a {@code BufferedWriter}, cast it as such; otherwise, wrap it in a {@code BufferedWriter} */
-  public static BufferedWriter makeBuffered(Writer w) {
+  public static BufferedWriter asBuffered(Writer w) {
     if (w instanceof BufferedWriter) { return (BufferedWriter) w; }
     else { return new BufferedWriter(w); }
   }
@@ -949,7 +952,7 @@ public final class IOUtil {
    * If {@code in} is a {@code BufferedInputStream}, cast it as such; otherwise, wrap it in a 
    * {@code BufferedInputStream}
    */
-  public static BufferedInputStream makeBuffered(InputStream in) {
+  public static BufferedInputStream asBuffered(InputStream in) {
     if (in instanceof BufferedInputStream) { return (BufferedInputStream) in; }
     else { return new BufferedInputStream(in); }
   }
@@ -958,7 +961,7 @@ public final class IOUtil {
    * If {@code out} is a {@code BufferedOutputStream}, cast it as such; otherwise, wrap it in a 
    * {@code BufferedOutputStream}
    */
-  public static BufferedOutputStream makeBuffered(OutputStream out) {
+  public static BufferedOutputStream asBuffered(OutputStream out) {
     if (out instanceof BufferedOutputStream) { return (BufferedOutputStream) out; }
     else { return new BufferedOutputStream(out); }
   }
@@ -1136,15 +1139,82 @@ public final class IOUtil {
   };
   
   /** A {@code FileFilter} that always accepts */
-  public static final FileFilter ALWAYS_ACCEPT = asFileFilter(Predicate.TRUE);
+  public static final FileFilter ALWAYS_ACCEPT = asFileFilter(LambdaUtil.TRUE);
 
   /** A {@code FileFilter} that always rejects */
-  public static final FileFilter ALWAYS_REJECT = asFileFilter(Predicate.FALSE);
+  public static final FileFilter ALWAYS_REJECT = asFileFilter(LambdaUtil.FALSE);
 
   /** A {@code FileFilter} that only accepts files for which {@link #attemptIsFile} holds */
   public static final FileFilter ACCEPT_FILES = asFileFilter(IS_FILE);
 
   /** A {@code FileFilter} that only accepts files for which {@link #attemptIsDirectory} holds */
   public static final FileFilter ACCEPT_DIRECTORIES = asFileFilter(IS_DIRECTORY);
+  
+  
+  private static final LinkedList<PrintStream> SYSTEM_OUT_STACK = new LinkedList<PrintStream>();
+  private static final LinkedList<PrintStream> SYSTEM_ERR_STACK = new LinkedList<PrintStream>();
+  private static final LinkedList<InputStream> SYSTEM_IN_STACK = new LinkedList<InputStream>();
+  
+  /**
+   * Replace {@code System.out} with the given stream and remember the current stream.  This call
+   * should always be matched by a subsequent call to {@link #revertSystemOut}.
+   */
+  public static void replaceSystemOut(OutputStream substitute) {
+    SYSTEM_OUT_STACK.addLast(System.out);
+    if (substitute instanceof PrintStream) { System.setOut((PrintStream) substitute); }
+    else { System.setOut(new PrintStream(substitute)); }
+  }
+  
+  /**
+   * Set {@code System.out} to its value before the last call to {@link #replaceSystemOut}.  This call
+   * should always follow a call to {@code replaceSystemOut()}.  Assuming all calls are properly
+   * paired, and that multiple threads do not concurrently invoke these methods, the stream after this
+   * call will be the stream that was replaced by {@code replaceSystemOut()}.
+   */
+  public static void revertSystemOut() {
+    if (SYSTEM_OUT_STACK.isEmpty()) { error.logStack("Unbalanced call to revertSystemOut"); }
+    else { System.setOut(SYSTEM_OUT_STACK.removeLast()); }
+  }
+    
+  /**
+   * Replace {@code System.err} with the given stream and remember the current stream.  This call
+   * should always be matched by a subsequent call to {@link #revertSystemErr}.
+   */
+  public static void replaceSystemErr(OutputStream substitute) {
+    SYSTEM_ERR_STACK.addLast(System.err);
+    if (substitute instanceof PrintStream) { System.setErr((PrintStream) substitute); }
+    else { System.setErr(new PrintStream(substitute)); }
+  }
+    
+  /**
+   * Set {@code System.err} to its value before the last call to {@link #replaceSystemErr}.  This call
+   * should always follow a call to {@code replaceSystemErr()}.  Assuming all calls are properly
+   * paired, and that multiple threads do not concurrently invoke these methods, the stream after this
+   * call will be the stream that was replaced by {@code replaceSystemErr()}.
+   */
+  public static void revertSystemErr() {
+    if (SYSTEM_ERR_STACK.isEmpty()) { error.logStack("Unbalanced call to revertSystemErr"); }
+    else { System.setErr(SYSTEM_ERR_STACK.removeLast()); }
+  }
+  
+  /**
+   * Replace {@code System.in} with the given stream and remember the current stream.  This call
+   * should always be matched by a subsequent call to {@link #revertSystemIn}.
+   */
+  public static void replaceSystemIn(InputStream substitute) {
+    SYSTEM_IN_STACK.addLast(System.in);
+    System.setIn(substitute);
+  }
+  
+  /**
+   * Set {@code System.in} to its value before the last call to {@link #replaceSystemIn}.  This call
+   * should always follow a call to {@code replaceSystemIn()}.  Assuming all calls are properly
+   * paired, and that multiple threads do not concurrently invoke these methods, the stream after this
+   * call will be the stream that was replaced by {@code replaceSystemIn()}.
+   */
+  public static void revertSystemIn() {
+    if (SYSTEM_IN_STACK.isEmpty()) { error.logStack("Unbalanced call to revertSystemIn"); }
+    else { System.setIn(SYSTEM_IN_STACK.removeLast()); }
+  }
   
 }

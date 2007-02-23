@@ -4,15 +4,27 @@ package edu.rice.cs.plt.tuple;
  * An arbitrary 5-tuple of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
  * and {@link #hashCode()}.
  */
-public class Quint<T1, T2, T3, T4, T5> extends Quad<T1, T2, T3, T4> {
+public class Quint<T1, T2, T3, T4, T5> extends Tuple {
   
+  protected final T1 _first;
+  protected final T2 _second;
+  protected final T3 _third;
+  protected final T4 _fourth;
   protected final T5 _fifth;
   
   public Quint(T1 first, T2 second, T3 third, T4 fourth, T5 fifth) {
-    super(first, second, third, fourth);
+    _first = first;
+    _second = second;
+    _third = third;
+    _fourth = fourth;
     _fifth = fifth;
   }
   
+  public T1 first() { return _first; }
+  public T2 second() { return _second; }
+  public T3 third() { return _third; }
+  public T4 fourth() { return _fourth; }
+
   public T5 fifth() { return _fifth; }
 
   public String toString() {

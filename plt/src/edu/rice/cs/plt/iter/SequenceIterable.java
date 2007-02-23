@@ -1,5 +1,6 @@
 package edu.rice.cs.plt.iter;
 
+import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.recur.RecurUtil;
 
@@ -7,13 +8,12 @@ import edu.rice.cs.plt.recur.RecurUtil;
  * <p>An iterable representing an infinite sequence.  The sequence is defined by an initial
  * value and a successor function (described by a {@link Lambda}).</p>
  * 
- * <p>Note that the infinite nature of this list makes it impossible to implement 
- * {@link SizedIterable} or to use the standard {@code toString}, {@code equals}, and 
- * {@code hashCode} implementations (in {@link AbstractIterable}).  Care must
+ * <p>Note that the infinite nature of this list makes it impossible to use the standard {@code toString}, 
+ * {@code equals}, and {@code hashCode} implementations (in {@link AbstractIterable}).  Care must
  * also be taken in invoking many iterable-handling methods that assume finite length, 
  * such as those in {@code IterUtil}.</p>
  */
-public class SequenceIterable<T> implements Iterable<T> {
+public class SequenceIterable<T> implements SizedIterable<T>, Serializable {
   
   private final T _initial;
   private final Lambda<? super T, ? extends T> _successor;
@@ -29,6 +29,10 @@ public class SequenceIterable<T> implements Iterable<T> {
   
   /** Create a new {@link SequenceIterator} based on this iterable's parameters */
   public SequenceIterator<T> iterator() { return new SequenceIterator<T>(_initial, _successor); }
+  
+  public int size() { return Integer.MAX_VALUE; }
+  public int size(int bound) { return bound; }
+  public boolean isFixed() { return false; }
 
   /** @return  A string listing the first few elements of the sequence */
   public String toString() {

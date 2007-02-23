@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.reflect;
 
+import java.io.Serializable;
+
 /** A representation of a major Java version, with methods for parsing version number strings. */
 public enum JavaVersion {
   UNRECOGNIZED { public String versionString() { return "?"; } },
@@ -16,10 +18,10 @@ public enum JavaVersion {
    * at runtime.  However, we do not attempt to (and cannot, in general) guarantee that the boot class path or  
    * Java installation have not been modified to only support certain API classes.
    */
-  public static final JavaVersion CURRENT = parseClassVersion(System.getProperty("java.class.version"));
+  public static final JavaVersion CURRENT = parseClassVersion(System.getProperty("java.class.version", ""));
   
   /** The currently-available Java version, based on the {@code "java.version"} property. */
-  public static final JavaVersion.FullVersion CURRENT_FULL = parseFullVersion(System.getProperty("java.version"));
+  public static final JavaVersion.FullVersion CURRENT_FULL = parseFullVersion(System.getProperty("java.version", ""));
   
   /**
    * {@code true} iff this version is at least as recent as {@code v}, and thus can be expected to 
@@ -75,9 +77,9 @@ public enum JavaVersion {
     else { number = text.substring(0, dash); typeString = text.substring(dash+1); }
     
     int dot1 = number.indexOf('.');
-    if (dot1 == -1) { return UNRECOGNIZED.new FullVersion(0, 0, ReleaseType.STABLE, null); }
+    if (dot1 == -1) { return new FullVersion(UNRECOGNIZED, 0, 0, ReleaseType.STABLE, null); }
     int dot2 = number.indexOf('.', dot1+1);
-    if (dot2 == -1) { return UNRECOGNIZED.new FullVersion(0, 0, ReleaseType.STABLE, null); }
+    if (dot2 == -1) { return new FullVersion(UNRECOGNIZED, 0, 0, ReleaseType.STABLE, null); }
     int underscore = number.indexOf('_', dot2+1);
     if (underscore == -1) { underscore = number.indexOf('.', dot2+1); }
     if (underscore == -1) { underscore = number.length(); }
@@ -106,9 +108,9 @@ public enum JavaVersion {
         }
       }
       
-      return version.new FullVersion(maintenance, update, type, typeString);
+      return new FullVersion(version, maintenance, update, type, typeString);
     }
-    catch (NumberFormatException e) { return UNRECOGNIZED.new FullVersion(0, 0, ReleaseType.STABLE, null); }
+    catch (NumberFormatException e) { return new FullVersion(UNRECOGNIZED, 0, 0, ReleaseType.STABLE, null); }
   }
   
   /**
@@ -116,14 +118,16 @@ public enum JavaVersion {
    * 
    * @see <a href="http://java.sun.com/j2se/versioning_naming.html">Sun's version specification</a>
    */
-  public class FullVersion implements Comparable<FullVersion> {
+  public static class FullVersion implements Comparable<FullVersion>, Serializable {
+    private JavaVersion _majorVersion;
     private int _maintenance;
     private int _update;
     private ReleaseType _type;
     private String _typeString;
     
     /** Assumes {@code typeString} is {@code null} iff {@code type} is {@code STABLE} */
-    private FullVersion(int maintenance, int update, ReleaseType type, String typeString) {
+    private FullVersion(JavaVersion majorVersion, int maintenance, int update, ReleaseType type, String typeString) {
+      _majorVersion = majorVersion;
       _maintenance = maintenance;
       _update = update;
       _type = type;
@@ -131,7 +135,10 @@ public enum JavaVersion {
     }
     
     /** Get the major version associated with this full version */
-    public JavaVersion majorVersion() { return JavaVersion.this; }
+    public JavaVersion majorVersion() { return _majorVersion; }
+    
+    /** Convenience method calling {@code majorVersion().supports(v)} */
+    public boolean supports(JavaVersion v) { return _majorVersion.supports(v); }
     
     /**
      * Compare two versions.  Major, maintenance, and update numbers are ordered sequentially.  When comparing
@@ -139,7 +146,7 @@ public enum JavaVersion {
      * release candidates and stable releases.
      */
     public int compareTo(FullVersion v) {
-      int result = majorVersion().compareTo(v.majorVersion());
+      int result = _majorVersion.compareTo(v._majorVersion);
       if (result == 0) {
         result = _maintenance - v._maintenance;
         if (result == 0) {
@@ -160,7 +167,7 @@ public enum JavaVersion {
       else if (!(o instanceof FullVersion)) { return false; }
       else {
         FullVersion v = (FullVersion) o;
-        return majorVersion().equals(v.majorVersion()) &&
+        return _majorVersion.equals(v._majorVersion) &&
           _maintenance == v._maintenance &&
           _update == v._update &&
           _type.equals(v._type) &&
@@ -170,7 +177,7 @@ public enum JavaVersion {
     
     public int hashCode() {
       int stringHash = _typeString == null ? 0 : _typeString.hashCode();
-      return majorVersion().hashCode() ^ (_maintenance << 1) ^ (_update << 2) ^ (_type.hashCode() << 3) ^ stringHash;
+      return _majorVersion.hashCode() ^ (_maintenance << 1) ^ (_update << 2) ^ (_type.hashCode() << 3) ^ stringHash;
     }
     
     private String stringSuffix() {
@@ -182,9 +189,9 @@ public enum JavaVersion {
     }
     
     /** Produce a string representing version number */
-    public String versionString() { return majorVersion().versionString() + stringSuffix(); }
+    public String versionString() { return _majorVersion.versionString() + stringSuffix(); }
 
-    public String toString() { return majorVersion() + stringSuffix(); }
+    public String toString() { return _majorVersion + stringSuffix(); }
     
   }
     

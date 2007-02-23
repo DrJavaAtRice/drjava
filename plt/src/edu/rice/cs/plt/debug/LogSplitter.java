@@ -12,7 +12,11 @@ public class LogSplitter implements Log {
   
   /** Create a log that will send its messages to each of {@code logs} */
   public LogSplitter(Log... logs) {
-    _logs = IterUtil.arrayIterable(logs);
+    _logs = IterUtil.asIterable(logs);
+  }
+  
+  public LogSplitter(Iterable<? extends Log> logs) {
+    _logs = IterUtil.snapshot(logs);
   }
   
   public void log() {

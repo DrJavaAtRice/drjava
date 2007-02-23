@@ -14,11 +14,5 @@ package edu.rice.cs.plt.lambda;
  * @see Lambda3
  */
 public interface Runnable3<T1, T2, T3> {
-  
   public void run(T1 arg1, T2 arg2, T3 arg3);
-  
-  /** A Runnable3 that does nothing */
-  public static final Runnable3<Object, Object, Object> EMPTY = 
-    new Runnable3<Object, Object, Object>() { public void run(Object a1, Object a2, Object a3) {} };
-
 }

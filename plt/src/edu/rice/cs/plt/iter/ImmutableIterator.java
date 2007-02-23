@@ -15,7 +15,7 @@ public class ImmutableIterator<T> extends ReadOnlyIterator<T> {
   public T next() { return _i.next(); }
   
   /** Call the constructor (allows {@code T} to be inferred) */
-  public static <T> ImmutableIterator<T> make(ImmutableIterator<? extends T> i) {
+  public static <T> ImmutableIterator<T> make(Iterator<? extends T> i) {
     return new ImmutableIterator<T>(i);
   }
 }

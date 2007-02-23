@@ -25,7 +25,7 @@ public class IterUtilTest extends TestCase {
     strings = asArray(IterUtil.<String>empty(), String.class);
     assertTrue(Arrays.equals(new String[0], strings));
     
-    strings = asArray(makeIterable("foo", "bar", "baz"), String.class);
+    strings = asArray(make("foo", "bar", "baz"), String.class);
     assertTrue(Arrays.equals(new String[]{ "foo", "bar", "baz" }, strings));
     try { ((Object[]) strings)[0] = new Object(); }
     catch (ArrayStoreException e) { return; /* correct behavior */ }
@@ -33,33 +33,33 @@ public class IterUtilTest extends TestCase {
   }
 
   public void testArrayIterable() {
-    assertTrue(isEmpty(arrayIterable(new String[0])));
-    assertTrue(isEmpty(arrayIterable(new boolean[0])));
-    assertTrue(isEmpty(arrayIterable(new char[0])));
-    assertTrue(isEmpty(arrayIterable(new byte[0])));
-    assertTrue(isEmpty(arrayIterable(new short[0])));
-    assertTrue(isEmpty(arrayIterable(new int[0])));
-    assertTrue(isEmpty(arrayIterable(new long[0])));
-    assertTrue(isEmpty(arrayIterable(new float[0])));
-    assertTrue(isEmpty(arrayIterable(new double[0])));
+    assertTrue(isEmpty(asIterable(new String[0])));
+    assertTrue(isEmpty(asIterable(new boolean[0])));
+    assertTrue(isEmpty(asIterable(new char[0])));
+    assertTrue(isEmpty(asIterable(new byte[0])));
+    assertTrue(isEmpty(asIterable(new short[0])));
+    assertTrue(isEmpty(asIterable(new int[0])));
+    assertTrue(isEmpty(asIterable(new long[0])));
+    assertTrue(isEmpty(asIterable(new float[0])));
+    assertTrue(isEmpty(asIterable(new double[0])));
     
-    assertTrue(isEmpty(arrayIterable((Object) new String[0])));
-    assertTrue(isEmpty(arrayIterable((Object) new boolean[0])));
-    assertTrue(isEmpty(arrayIterable((Object) new char[0])));
-    assertTrue(isEmpty(arrayIterable((Object) new byte[0])));
-    assertTrue(isEmpty(arrayIterable((Object) new short[0])));
-    assertTrue(isEmpty(arrayIterable((Object) new int[0])));
-    assertTrue(isEmpty(arrayIterable((Object) new long[0])));
-    assertTrue(isEmpty(arrayIterable((Object) new float[0])));
-    assertTrue(isEmpty(arrayIterable((Object) new double[0])));
+    assertTrue(isEmpty(arrayAsIterable((Object) new String[0])));
+    assertTrue(isEmpty(arrayAsIterable((Object) new boolean[0])));
+    assertTrue(isEmpty(arrayAsIterable((Object) new char[0])));
+    assertTrue(isEmpty(arrayAsIterable((Object) new byte[0])));
+    assertTrue(isEmpty(arrayAsIterable((Object) new short[0])));
+    assertTrue(isEmpty(arrayAsIterable((Object) new int[0])));
+    assertTrue(isEmpty(arrayAsIterable((Object) new long[0])));
+    assertTrue(isEmpty(arrayAsIterable((Object) new float[0])));
+    assertTrue(isEmpty(arrayAsIterable((Object) new double[0])));
     try {
-      arrayIterable(new Object());
+      arrayAsIterable(new Object());
       fail("Expected an IllegalArgumentException");
     }
     catch (IllegalArgumentException e) {}
     
     int[] ints = { 1, 1, 2, 3, 5 };
-    Iterator<Integer> intIter = arrayIterable(ints).iterator();
+    Iterator<Integer> intIter = asIterable(ints).iterator();
     assertTrue(intIter.hasNext());
     assertEquals(1, intIter.next());
     assertTrue(intIter.hasNext());
@@ -74,9 +74,9 @@ public class IterUtilTest extends TestCase {
   }
   
   public void testCharSequenceIterable() {
-    assertTrue(isEmpty(charSequenceIterable("")));
+    assertTrue(isEmpty(asIterable("")));
 
-    Iterator<Character> iter = charSequenceIterable("Happy day").iterator();
+    Iterator<Character> iter = asIterable("Happy day").iterator();
     assertTrue(iter.hasNext());
     assertEquals('H', iter.next());
     assertTrue(iter.hasNext());

@@ -11,13 +11,7 @@ import edu.rice.cs.plt.recur.RecurUtil;
 
 public final class TextUtil {
   
-  public static final String NEWLINE;
-  
-  static {
-    String newline = System.getProperty("line.separator");
-    if (newline == null) { newline = "\n"; }
-    NEWLINE = newline;
-  }
+  public static final String NEWLINE = System.getProperty("line.separator", "\n");
   
   /** Prevents instance creation */
   private TextUtil() {}
@@ -33,7 +27,8 @@ public final class TextUtil {
   
   /**
    * Break a string into a list of lines.  {@code "\n"}, {@code "\r"}, and {@code "\r\n"}
-   * are considered line delimiters.  The empty string is taken to contain 0 lines.
+   * are considered line delimiters.  The empty string is taken to contain 0 lines.  An optional final
+   * trailing newline will be ignored.
    */
   public static SizedIterable<String> getLines(String s) {
     SizedIterable<String> result = IterUtil.<String>empty();
@@ -76,6 +71,15 @@ public final class TextUtil {
    * Determine if the given string occurs in {@code s}.  Defined in terms of {@link String#indexOf(String)}.
    * This is also defined as {@link String#contains}, but is defined here for legacy support.
    */
-  public static boolean contains(String s, String piece) { return s.indexOf(piece) >= 0; }  
+  public static boolean contains(String s, String piece) { return s.indexOf(piece) >= 0; }
+  
+  /**
+   * Determine if the given string occurs in {@code s}, ignoring differences in case.  Unlike 
+   * {@link String#equalsIgnoreCase}, this test only compares the lower-case conversion of {@code s} to the lower-case
+   * conversion of {@code piece}.
+   */
+  public static boolean containsIgnoreCase(String s, String piece) {
+    return s.toLowerCase().indexOf(piece.toLowerCase()) >= 0;
+  }
   
 }

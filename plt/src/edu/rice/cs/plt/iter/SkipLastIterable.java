@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.iter;
 
+import java.io.Serializable;
+
 /**
  * Contains all but the last element of a wrapped iterable.  (If the wrapped iterable is
  * empty, this is empty as well.)  Changes made to the underlying list are reflected here.
@@ -9,7 +11,7 @@ package edu.rice.cs.plt.iter;
  * will have poor performance in comparison to other solutions.  For better performance or recursive 
  * list-decomposing algorithms, use a {@link edu.rice.cs.plt.collect.ConsList}.
  */
-public class SkipLastIterable<T> extends AbstractIterable<T> implements SizedIterable<T> {
+public class SkipLastIterable<T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
   
   private final Iterable<? extends T> _iterable;
   
@@ -19,9 +21,18 @@ public class SkipLastIterable<T> extends AbstractIterable<T> implements SizedIte
   
   public int size() {
     int nestedSize = IterUtil.sizeOf(_iterable);
-    return (nestedSize == 0) ? 0 : nestedSize - 1;
+    if (nestedSize == 0) { return 0; }
+    else if (nestedSize == Integer.MAX_VALUE) { return Integer.MAX_VALUE; }
+    else { return nestedSize - 1; }
   }
   
+  public int size(int bound) {
+    if (bound == Integer.MAX_VALUE) { return size(); }
+    else {
+      int nestedSize = IterUtil.sizeOf(_iterable, bound + 1);
+      return (nestedSize == 0) ? 0 : nestedSize - 1;
+    }
+  }
   public boolean isFixed() { return IterUtil.isFixed(_iterable); }
   
   /** Call the constructor (allows {@code T} to be inferred) */

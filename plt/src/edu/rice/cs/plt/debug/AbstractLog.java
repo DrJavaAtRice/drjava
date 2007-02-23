@@ -11,6 +11,7 @@ import edu.rice.cs.plt.iter.BinaryMappedIterable;
 import edu.rice.cs.plt.iter.SkipFirstIterable;
 import edu.rice.cs.plt.lambda.Predicate2;
 import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.recur.RecurUtil;
 import edu.rice.cs.plt.recur.RecurUtil.ArrayStringMode;
 import edu.rice.cs.plt.text.TextUtil;
@@ -44,7 +45,7 @@ public abstract class AbstractLog implements Log {
   
   /** Create a log that performs no filtering */
   protected AbstractLog() {
-    _filter = Predicate2.TRUE;
+    _filter = LambdaUtil.TRUE;
   }
   
   /** Create a log that only records messages for which the given filter returns {@code true}. */
@@ -86,8 +87,8 @@ public abstract class AbstractLog implements Log {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
     if (_filter.value(th, e)) {
-      push();
       write(new Date(), th, e, START_MESSAGE);
+      push();
     }
   }
   
@@ -96,8 +97,8 @@ public abstract class AbstractLog implements Log {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
     if (_filter.value(th, e)) {
-      push();
       write(new Date(), th, e, processText(message));
+      push();
     }
   }
   
@@ -106,8 +107,8 @@ public abstract class AbstractLog implements Log {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
     if (_filter.value(th, e)) {
-      write(new Date(), th, e, END_MESSAGE);
       pop();
+      write(new Date(), th, e, END_MESSAGE);
     }
   }
   
@@ -116,8 +117,8 @@ public abstract class AbstractLog implements Log {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
     if (_filter.value(th, e)) {
-      write(new Date(), th, e, processText(message));
       pop();
+      write(new Date(), th, e, processText(message));
     }
   }
   
@@ -196,9 +197,9 @@ public abstract class AbstractLog implements Log {
   private static SizedIterable<String> processThrowable(Throwable t, boolean asCause) {
     if (t == null) { return IterUtil.singleton("null"); }
     SizedIterable<String> result;
-    if (asCause) { result = IterUtil.makeIterable("", "Caused by " + t, "at"); }
-    else { result = IterUtil.makeIterable(t.toString(), "at"); }
-    result = IterUtil.compose(result, processStack(IterUtil.arrayIterable(t.getStackTrace())));
+    if (asCause) { result = IterUtil.make("", "Caused by " + t, "at"); }
+    else { result = IterUtil.make(t.toString(), "at"); }
+    result = IterUtil.compose(result, processStack(IterUtil.asIterable(t.getStackTrace())));
     if (t.getCause() != null) {
       result = IterUtil.compose(result, processThrowable(t.getCause()));
     }
@@ -208,7 +209,7 @@ public abstract class AbstractLog implements Log {
   private static SizedIterable<String> processCurrentStack() {
     StackTraceElement[] stackArray = new Throwable().getStackTrace();
     // Skip two entries: one for this method, and one for the calling log method
-    SizedIterable<StackTraceElement> stack = SkipFirstIterable.make(SkipFirstIterable.make(IterUtil.arrayIterable(stackArray)));
+    SizedIterable<StackTraceElement> stack = IterUtil.skipFirst(IterUtil.skipFirst(IterUtil.asIterable(stackArray)));
     return processStack(stack);
   }
   
@@ -252,8 +253,8 @@ public abstract class AbstractLog implements Log {
   
   private static SizedIterable<String> processValues(String[] names, Object... values) {
     if (names.length == values.length) {
-      Iterable<String> namesIter = IterUtil.arrayIterable(names);
-      Iterable<Object> valuesIter = IterUtil.arrayIterable(values);
+      Iterable<String> namesIter = IterUtil.asIterable(names);
+      Iterable<Object> valuesIter = IterUtil.asIterable(values);
       SizedIterable<SizedIterable<String>> messages = BinaryMappedIterable.make(namesIter, valuesIter, PROCESS_VALUE);
       return IterUtil.collapse(messages);
     }
@@ -274,15 +275,25 @@ public abstract class AbstractLog implements Log {
    */
   protected String formatThread(Thread thread) {
     // Ideally, we should use the thread's ID, but that is only available since Java 5.
-    return thread.getName() + "@" + System.identityHashCode(thread);
+    return thread.getName() + " " + System.identityHashCode(thread);
   }
   
   /**
    * Convert a location to a string of the form
-   * {@code "edu.rice.cs.plt.debug.AbstractLog.formatLocation(AbstractLog.java:247)"}
+   * {@code "edu.rice.cs.plt.debug.AbstractLog.formatLocation(247)"}
    */
   protected String formatLocation(StackTraceElement location) {
-    return location.toString();
+    StringBuilder result = new StringBuilder();
+    result.append(location.getClassName());
+    result.append(".");
+    result.append(location.getMethodName());
+    result.append("(");
+    int line = location.getLineNumber();
+    if (line >= 0) { result.append(line); }
+    else if (location.isNativeMethod()) { result.append("native"); }
+    else { result.append("unknown"); }
+    result.append(")");
+    return result.toString();
   }
   
   /**

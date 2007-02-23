@@ -19,13 +19,13 @@ public class WriterLog extends TextLog {
   /** Create a writer-based log without filtering */
   public WriterLog(Writer w) {
     super();
-    _w = IOUtil.makeBuffered(w);
+    _w = IOUtil.asBuffered(w);
   }
   
   /** Create a writer-based log with the given filter */
   public WriterLog(Writer w, Predicate2<? super Thread, ? super StackTraceElement> filter) {
     super(filter);
-    _w = IOUtil.makeBuffered(w);
+    _w = IOUtil.asBuffered(w);
   }
   
   protected synchronized void write(Date time, Thread thread, StackTraceElement location, 

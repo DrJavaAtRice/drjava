@@ -4,15 +4,32 @@ package edu.rice.cs.plt.tuple;
  * An arbitrary 7-tuple of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
  * and {@link #hashCode()}.
  */
-public class Septet<T1, T2, T3, T4, T5, T6, T7> extends Sextet<T1, T2, T3, T4, T5, T6> {
+public class Septet<T1, T2, T3, T4, T5, T6, T7> extends Tuple {
   
+  protected final T1 _first;
+  protected final T2 _second;
+  protected final T3 _third;
+  protected final T4 _fourth;
+  protected final T5 _fifth;
+  protected final T6 _sixth;
   protected final T7 _seventh;
   
   public Septet(T1 first, T2 second, T3 third, T4 fourth, T5 fifth, T6 sixth, T7 seventh) {
-    super(first, second, third, fourth, fifth, sixth);
+    _first = first;
+    _second = second;
+    _third = third;
+    _fourth = fourth;
+    _fifth = fifth;
+    _sixth = sixth;
     _seventh = seventh;
   }
   
+  public T1 first() { return _first; }
+  public T2 second() { return _second; }
+  public T3 third() { return _third; }
+  public T4 fourth() { return _fourth; }
+  public T5 fifth() { return _fifth; }
+  public T6 sixth() { return _sixth; }
   public T7 seventh() { return _seventh; }
 
   public String toString() {

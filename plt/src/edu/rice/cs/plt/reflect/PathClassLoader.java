@@ -19,7 +19,7 @@ public class PathClassLoader extends URLClassLoader {
    * Create a path class loader with the default parent ({@link ClassLoader#getSystemClassLoader})
    * and the specified path.
    */
-  public PathClassLoader(File... path) { this(IterUtil.arrayIterable(path)); }
+  public PathClassLoader(File... path) { this(IterUtil.asIterable(path)); }
   
   /**
    * Create a path class loader with the default parent ({@link ClassLoader#getSystemClassLoader})
@@ -28,7 +28,7 @@ public class PathClassLoader extends URLClassLoader {
   public PathClassLoader(Iterable<? extends File> path) { super(makeURLs(path)); }
   
   /** Create a path class loader with the given parent and path */
-  public PathClassLoader(ClassLoader parent, File... path) { this(parent, IterUtil.arrayIterable(path)); }
+  public PathClassLoader(ClassLoader parent, File... path) { this(parent, IterUtil.asIterable(path)); }
   
   /** Create a path class loader with the given parent and path */
   public PathClassLoader(ClassLoader parent, Iterable<? extends File> path) {

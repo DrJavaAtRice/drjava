@@ -1,5 +1,6 @@
 package edu.rice.cs.plt.iter;
 
+import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Predicate;
 
 /**
@@ -7,7 +8,7 @@ import edu.rice.cs.plt.lambda.Predicate;
  * Predicate holds.  Because the size cannot be determined without traversing the list,
  * does not implement {@code SizedIterable}.
  */
-public class FilteredIterable<T> extends AbstractIterable<T> implements Iterable<T> {
+public class FilteredIterable<T> extends AbstractIterable<T> implements Iterable<T>, Serializable {
   
   private Iterable<? extends T> _iterable;
   private Predicate<? super T> _predicate;

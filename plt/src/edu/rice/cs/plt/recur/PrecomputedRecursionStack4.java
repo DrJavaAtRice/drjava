@@ -88,7 +88,7 @@ public class PrecomputedRecursionStack4<T1, T2, T3, T4, R> {
    * @throws IllegalArgumentException  If the arguments are already on the stack
    */
   public void push(T1 arg1, T2 arg2, T3 arg3, T4 arg4, R value) {
-    push(arg1, arg2, arg3, arg4, LambdaUtil.valueLambda4(value));
+    push(arg1, arg2, arg3, arg4, (Lambda4<Object, Object, Object, Object, R>) LambdaUtil.valueLambda(value));
   }
   
   /**
@@ -97,8 +97,7 @@ public class PrecomputedRecursionStack4<T1, T2, T3, T4, R> {
    * @throws IllegalArgumentException  If the arguments are already on the stack
    */
   public void push(T1 arg1, T2 arg2, T3 arg3, T4 arg4, Thunk<? extends R> value) {
-    push(arg1, arg2, arg3, arg4, 
-         LambdaUtil.promote(LambdaUtil.promote(LambdaUtil.promote(LambdaUtil.promote(value)))));
+    push(arg1, arg2, arg3, arg4, (Lambda4<Object, Object, Object, Object, ? extends R>) LambdaUtil.promote(value));
   }
   
   /**

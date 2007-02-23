@@ -1,5 +1,6 @@
 package edu.rice.cs.plt.iter;
 
+import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda2;
 
 /**
@@ -11,7 +12,7 @@ import edu.rice.cs.plt.lambda.Lambda2;
  * @param R  The element type of the result list
  */
 public class BinaryMappedIterable<T1, T2, R> extends AbstractIterable<R> 
-                                             implements SizedIterable<R> {
+                                             implements SizedIterable<R>, Serializable {
   
   private final Iterable<? extends T1> _source1;
   private final Iterable<? extends T2> _source2;
@@ -29,6 +30,7 @@ public class BinaryMappedIterable<T1, T2, R> extends AbstractIterable<R>
   }
   
   public int size() { return IterUtil.sizeOf(_source1); }
+  public int size(int bound) { return IterUtil.sizeOf(_source1, bound); }
   public boolean isFixed() { return IterUtil.isFixed(_source1); }
   
   /** Call the constructor (allows the type arguments to be inferred) */

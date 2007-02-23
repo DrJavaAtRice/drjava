@@ -1,5 +1,6 @@
 package edu.rice.cs.plt.tuple;
 
+import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda2;
 
 /**
@@ -38,12 +39,14 @@ public class IdentityPair<T1, T2> extends Pair<T1, T2> {
   }
   
   /** Produce a lambda that invokes the constructor */
-  public static <T1, T2> Lambda2<T1, T2, Pair<T1, T2>> factory() {
-    return new Lambda2<T1, T2, Pair<T1, T2>>() {
-      public Pair<T1, T2> value(T1 first, T2 second) {
-        return new IdentityPair<T1, T2>(first, second);
-      }
-    };
+  @SuppressWarnings("unchecked") public static <T1, T2> Lambda2<T1, T2, Pair<T1, T2>> factory() {
+    return (Factory<T1, T2>) Factory.INSTANCE;
+  }
+  
+  private static final class Factory<T1, T2> implements Lambda2<T1, T2, Pair<T1, T2>>, Serializable {
+    public static final Factory<Object, Object> INSTANCE = new Factory<Object, Object>();
+    private Factory() {}
+    public Pair<T1, T2> value(T1 first, T2 second) { return new IdentityPair<T1, T2>(first, second); }
   }
   
 }

@@ -1,11 +1,13 @@
 package edu.rice.cs.plt.iter;
 
+import java.io.Serializable;
+
 /**
  * Contains, for some value {@code size}, the first {@code size} elements of a nested iterable.
  * (If the nested list has less than {@code size} elements, this iterable is identical.)
  * Changes made to the underlying list are reflected here.
  */
-public class TruncatedIterable<T> extends AbstractIterable<T> implements SizedIterable<T> {
+public class TruncatedIterable<T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
   
   private final Iterable<? extends T> _iterable;
   protected final int _size;
@@ -26,6 +28,8 @@ public class TruncatedIterable<T> extends AbstractIterable<T> implements SizedIt
    */
   public int size() { return IterUtil.sizeOf(_iterable, _size); }
   
+  public int size(int bound) { return IterUtil.sizeOf(_iterable, _size <= bound ? _size : bound); }
+    
   public boolean isFixed() { return IterUtil.isFixed(_iterable); }
   
   /** Call the constructor (allows {@code T} to be inferred) */

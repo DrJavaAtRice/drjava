@@ -28,8 +28,14 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
   
   public abstract Iterator<T> iterator();
   
-  /** Compute the size of the list.  Note this is a linear -- not constant-time -- operation. */
+  /** Compute the size of the list.  Note that this is a linear &mdash; not constant-time &mdash; operation. */
   public abstract int size();
+  
+  /**
+   * Compute the size of the list, up to a given bound.  Note that this is a linear &mdash; not 
+   * constant-time &mdash; operation.
+   */
+  public abstract int size(int bound);
   
   /** @return  {@code true}: cons lists have a fixed size */
   public boolean isFixed() { return true; }
@@ -81,7 +87,7 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
     /** Force use of {@link #make} */
     private Empty() {}
     
-    private static final Empty<?> INSTANCE = new Empty<Object>();
+    private static final Empty<Void> INSTANCE = new Empty<Void>();
     
     /**
      * Creates an empty list.  The result is a singleton, cast (unsafe formally, but safe in 
@@ -100,6 +106,9 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
     
     /** @return {@code 0} */
     public int size() { return 0; }
+    
+    /** @return {@code 0} */
+    public int size(int bound) { return 0; }
     
   }
   
@@ -148,6 +157,12 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
     
     /** @return {code 1 + rest.size()} */
     public int size() { return 1 + _rest.size(); }
+    
+    /** @return {code 1 + rest.size(bound - 1)}, or {@code 0} if {@code bound == 0} */
+    public int size(int bound) {
+      if (bound == 0) { return 0; }
+      else { return 1 + _rest.size(bound - 1); }
+    }
     
   }
 

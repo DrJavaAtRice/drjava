@@ -17,101 +17,82 @@ public abstract class ReflectException extends Exception {
   
   /** Wraps a {@link ClassNotFoundException} */
   public static class ClassNotFoundReflectException extends ReflectException {
-    
     public ClassNotFoundReflectException(ClassNotFoundException e) { super(e); }
-
     public <T> T apply(ReflectExceptionVisitor<T> v) {
       return v.forClassNotFound((ClassNotFoundException) getCause());
     }
-    
   }
   
   /** Wraps a {@link NoSuchFieldException} */
   public static class NoSuchFieldReflectException extends ReflectException {
-    
     public NoSuchFieldReflectException(NoSuchFieldException e) { super(e); }
-
     public <T> T apply(ReflectExceptionVisitor<T> v) {
       return v.forNoSuchField((NoSuchFieldException) getCause());
     }
-    
   }
   
   /** Wraps a {@link NoSuchMethodException} */
   public static class NoSuchMethodReflectException extends ReflectException {
-    
     public NoSuchMethodReflectException(NoSuchMethodException e) { super(e); }
-
     public <T> T apply(ReflectExceptionVisitor<T> v) {
       return v.forNoSuchMethod((NoSuchMethodException) getCause());
     }
-    
   }
+  
+  /** Wraps a {@link NullPointerException} */
+  public static class NullPointerReflectException extends ReflectException {
+    public NullPointerReflectException(NullPointerException e) { super(e); }
+    public <T> T apply(ReflectExceptionVisitor<T> v) {
+      return v.forNullPointer((NullPointerException) getCause());
+    }
+  }    
   
   /** Wraps an {@link IllegalArgumentException} */
   public static class IllegalArgumentReflectException extends ReflectException {
-    
     public IllegalArgumentReflectException(IllegalArgumentException e) { super(e); }
-
     public <T> T apply(ReflectExceptionVisitor<T> v) {
       return v.forIllegalArgument((IllegalArgumentException) getCause());
     }
-    
   }
   
   /** Wraps a {@link ClassCastException} */
   public static class ClassCastReflectException extends ReflectException {
-    
     public ClassCastReflectException(ClassCastException e) { super(e); }
-    
     public <T> T apply(ReflectExceptionVisitor<T> v) {
       return v.forClassCast((ClassCastException) getCause());
     }
-    
   }
   
   /** Wraps an {@link InvocationTargetException} */
   public static class InvocationTargetReflectException extends ReflectException {
-    
     public InvocationTargetReflectException(InvocationTargetException e) { super(e); }
-
     public <T> T apply(ReflectExceptionVisitor<T> v) {
       return v.forInvocationTarget((InvocationTargetException) getCause());
     }
-    
   }
   
   /** Wraps an {@link InstantiationException} */
   public static class InstantiationReflectException extends ReflectException {
-    
     public InstantiationReflectException(InstantiationException e) { super(e); }
-
     public <T> T apply(ReflectExceptionVisitor<T> v) {
       return v.forInstantiation((InstantiationException) getCause());
     }
-    
   }
   
   /** Wraps an {@link IllegalAccessException} */
   public static class IllegalAccessReflectException extends ReflectException {
-    
     public IllegalAccessReflectException(IllegalAccessException e) { super(e); }
-
     public <T> T apply(ReflectExceptionVisitor<T> v) {
       return v.forIllegalAccess((IllegalAccessException) getCause());
     }
-    
   }
   
   /** Wraps an {@link SecurityException} */
   public static class SecurityReflectException extends ReflectException {
-    
     public SecurityReflectException(SecurityException e) { super(e); }
-
     public <T> T apply(ReflectExceptionVisitor<T> v) {
       return v.forSecurity((SecurityException) getCause());
     }
-    
   }
   
 }

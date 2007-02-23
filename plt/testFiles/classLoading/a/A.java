@@ -1,4 +1,5 @@
 public class A implements IntBox {
-public int get() { return 1; }
+  public static String NAME = "A";
+  public static String getName() { return NAME; }
+  public int get() { return 1; }
 }
-

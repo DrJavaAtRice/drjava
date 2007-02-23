@@ -18,7 +18,5 @@ package edu.rice.cs.plt.lambda;
  * </p>
  */
 public class WrappedException extends RuntimeException {
-  
   public WrappedException(Throwable cause) { super(cause); }
-  
 }

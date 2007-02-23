@@ -24,7 +24,7 @@ public class ShadowingClassLoader extends ClassLoader {
    *                  {@code "java.lang.Stri"}, will not match the full class name).
    */
   public ShadowingClassLoader(ClassLoader parent, String... prefixes) {
-    this(parent, IterUtil.arrayIterable(prefixes));
+    this(parent, IterUtil.asIterable(prefixes));
   }
   
   /**

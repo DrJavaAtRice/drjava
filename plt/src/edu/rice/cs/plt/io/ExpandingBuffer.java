@@ -4,6 +4,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.io.Serializable;
 import java.util.LinkedList;
 
 /**
@@ -16,7 +17,7 @@ import java.util.LinkedList;
  * this class provide the necessary tools.  Synchronization should occur on the ExpandingBuffer
  * object to prevent conflicts between threads before invoking any of this class's helper methods.
  */
-public abstract class ExpandingBuffer<T> {
+public abstract class ExpandingBuffer<T> implements Serializable {
   
   protected static final int BUFFER_SIZE = 1024;
   

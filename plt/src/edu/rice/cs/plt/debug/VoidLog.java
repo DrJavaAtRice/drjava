@@ -5,7 +5,7 @@ public final class VoidLog implements Log {
   
   public static final VoidLog INSTANCE = new VoidLog();
   
-  private VoidLog() {}
+  protected VoidLog() {} // allow for subclassing, if desired
   
   public void log() {}
   public void log(String message) {}

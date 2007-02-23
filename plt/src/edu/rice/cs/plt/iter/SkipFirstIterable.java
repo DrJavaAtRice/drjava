@@ -1,6 +1,7 @@
 package edu.rice.cs.plt.iter;
 
 import java.util.Iterator;
+import java.io.Serializable;
 
 /**
  * Contains all but the first element of a wrapped iterable.  (If the wrapped iterable is
@@ -12,7 +13,7 @@ import java.util.Iterator;
  * comparison to other solutions.  For better performance or recursive list-decomposing 
  * algorithms, use a {@link edu.rice.cs.plt.collect.ConsList}.
  */
-public class SkipFirstIterable<T> extends AbstractIterable<T> implements SizedIterable<T> {
+public class SkipFirstIterable<T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
   
   private final Iterable<T> _iterable;
   
@@ -26,8 +27,18 @@ public class SkipFirstIterable<T> extends AbstractIterable<T> implements SizedIt
   
   public int size() {
     int nestedSize = IterUtil.sizeOf(_iterable);
-    return (nestedSize == 0) ? 0 : nestedSize - 1;
-  }    
+    if (nestedSize == 0) { return 0; }
+    else if (nestedSize == Integer.MAX_VALUE) { return Integer.MAX_VALUE; }
+    else { return nestedSize - 1; }
+  }
+  
+  public int size(int bound) {
+    if (bound == Integer.MAX_VALUE) { return size(); }
+    else {
+      int nestedSize = IterUtil.sizeOf(_iterable, bound + 1);
+      return (nestedSize == 0) ? 0 : nestedSize - 1;
+    }
+  }
   
   public boolean isFixed() { return IterUtil.isFixed(_iterable); }
   

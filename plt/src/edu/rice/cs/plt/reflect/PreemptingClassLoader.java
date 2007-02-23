@@ -34,7 +34,7 @@ public class PreemptingClassLoader extends ClassLoader {
    *                  (partial names, like {@code "java.lang.Stri"}, will not match the full class name).
    */
   public PreemptingClassLoader(ClassLoader parent, String... prefixes) {
-    this(parent, IterUtil.arrayIterable(prefixes));
+    this(parent, IterUtil.asIterable(prefixes));
   }
   
   /**
@@ -59,7 +59,7 @@ public class PreemptingClassLoader extends ClassLoader {
     if (result == null) {
       if (shouldPreempt(name)) {
         String filename = name.replace('.', '/') + ".class";
-        InputStream in = IOUtil.makeBuffered(getResourceAsStream(filename));
+        InputStream in = IOUtil.asBuffered(getResourceAsStream(filename));
         if (in == null) { throw new ClassNotFoundException("Resource not found: " + filename); }
         try {
           byte[] data = IOUtil.toByteArray(in);

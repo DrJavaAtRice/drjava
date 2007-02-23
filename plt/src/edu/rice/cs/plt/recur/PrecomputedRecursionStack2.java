@@ -83,7 +83,9 @@ public class PrecomputedRecursionStack2<T1, T2, R> {
    * Add the given arguments to the top of the stack with the given infinite-case result.
    * @throws IllegalArgumentException  If the arguments are already on the stack
    */
-  public void push(T1 arg1, T2 arg2, R value) { push(arg1, arg2, LambdaUtil.valueLambda2(value)); }
+  public void push(T1 arg1, T2 arg2, R value) {
+    push(arg1, arg2, (Lambda2<Object, Object, R>) LambdaUtil.valueLambda(value));
+  }
   
   /**
    * Add the given arguments to the top of the stack with the given thunk producing their 
@@ -91,7 +93,7 @@ public class PrecomputedRecursionStack2<T1, T2, R> {
    * @throws IllegalArgumentException  If the arguments are already on the stack
    */
   public void push(T1 arg1, T2 arg2, Thunk<? extends R> value) {
-    push(arg1, arg2, LambdaUtil.promote(LambdaUtil.promote(value)));
+    push(arg1, arg2, (Lambda2<Object, Object, ? extends R>) LambdaUtil.promote(value));
   }
   
   /**

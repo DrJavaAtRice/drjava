@@ -12,3 +12,6 @@ alphabet.
 For compatibility with running under 1.4 JVMs, tests should be compiled with the
 options "-source 1.4 -target 1.4".
 
+Example compile command:
+javac -verbose -source 1.4 -target 1.4 -cp a:b:c:d:intbox D/d.java
+

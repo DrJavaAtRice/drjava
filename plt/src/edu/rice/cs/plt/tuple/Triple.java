@@ -1,20 +1,26 @@
 package edu.rice.cs.plt.tuple;
 
+import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda3;
 
 /**
  * An arbitrary 3-tuple of objects; overrides {@link #toString()}, {@link #equals(Object)}, 
  * and {@link #hashCode()}.
  */
-public class Triple<T1, T2, T3> extends Pair<T1, T2> {
+public class Triple<T1, T2, T3> extends Tuple {
   
+  protected final T1 _first;
+  protected final T2 _second;
   protected final T3 _third;
   
   public Triple(T1 first, T2 second, T3 third) { 
-    super(first, second);
+    _first = first;
+    _second = second;
     _third = third;
   }
   
+  public T1 first() { return _first; }
+  public T2 second() { return _second; }
   public T3 third() { return _third; }
 
   public String toString() {
@@ -51,12 +57,16 @@ public class Triple<T1, T2, T3> extends Pair<T1, T2> {
   }
   
   /** Produce a lambda that invokes the constructor */
-  public static <T1, T2, T3> Lambda3<T1, T2, T3, Triple<T1, T2, T3>> factory() {
-    return new Lambda3<T1, T2, T3, Triple<T1, T2, T3>>() {
-      public Triple<T1, T2, T3> value(T1 first, T2 second, T3 third) {
-        return new Triple<T1, T2, T3>(first, second, third);
-      }
-    };
+  @SuppressWarnings("unchecked") public static <T1, T2, T3> Lambda3<T1, T2, T3, Triple<T1, T2, T3>> factory() {
+    return (Factory<T1, T2, T3>) Factory.INSTANCE;
   }
   
+  private static final class Factory<T1, T2, T3> implements Lambda3<T1, T2, T3, Triple<T1, T2, T3>>, Serializable {
+    public static final Factory<Object, Object, Object> INSTANCE = new Factory<Object, Object, Object>();
+    private Factory() {}
+    public Triple<T1, T2, T3> value(T1 first, T2 second, T3 third) {
+      return new Triple<T1, T2, T3>(first, second, third);
+    }
+  }
+
 }

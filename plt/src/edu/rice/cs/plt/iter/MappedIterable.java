@@ -1,5 +1,6 @@
 package edu.rice.cs.plt.iter;
 
+import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda;
 
 /**
@@ -9,7 +10,7 @@ import edu.rice.cs.plt.lambda.Lambda;
  * @param S  The element type of the original list
  * @param T  The element type of the transformed list
  */
-public class MappedIterable<S, T> extends AbstractIterable<T> implements SizedIterable<T> {
+public class MappedIterable<S, T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
   
   private final Iterable<? extends S> _source;
   private final Lambda<? super S, ? extends T> _map;
@@ -24,6 +25,7 @@ public class MappedIterable<S, T> extends AbstractIterable<T> implements SizedIt
   }
   
   public int size() { return IterUtil.sizeOf(_source); }
+  public int size(int bound) { return IterUtil.sizeOf(_source, bound); }
   public boolean isFixed() { return IterUtil.isFixed(_source); }
   
   /** Call the constructor (allows the type arguments to be inferred) */

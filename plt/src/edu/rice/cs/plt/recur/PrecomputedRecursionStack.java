@@ -80,13 +80,15 @@ public class PrecomputedRecursionStack<T, R> {
    * Add {@code arg} to the top of the stack with the given infinite-case result.
    * @throws IllegalArgumentException  If {@code arg} is already on the stack
    */
-  public void push(T arg, R value) { push(arg, LambdaUtil.valueLambda(value)); }
+  public void push(T arg, R value) { push(arg, (Lambda<Object, R>) LambdaUtil.valueLambda(value)); }
   
   /**
    * Add {@code arg} to the top of the stack with the given thunk producing its infinite-case result.
    * @throws IllegalArgumentException  If {@code arg} is already on the stack
    */
-  public void push(T arg, Thunk<? extends R> value) { push(arg, LambdaUtil.promote(value)); }
+  public void push(T arg, Thunk<? extends R> value) {
+    push(arg, (Lambda<Object, ? extends R>) LambdaUtil.promote(value));
+  }
   
   /**
    * Add {@code arg} to the top of the stack with the given lambda producing its infinite-case result.

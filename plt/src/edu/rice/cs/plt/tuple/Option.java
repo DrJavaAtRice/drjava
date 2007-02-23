@@ -25,7 +25,9 @@ public abstract class Option<T> extends Tuple {
    */
   @SuppressWarnings("unchecked")
   public static <T> Option<T> none() {
-    Option<Object> result = Null.INSTANCE;
+    // Compiler doesn't like this (!):
+    // return (Option<T>) Null.INSTANCE;
+    Option<Void> result = Null.INSTANCE;
     return (Option<T>) result;
   }
   
@@ -35,7 +37,7 @@ public abstract class Option<T> extends Tuple {
    * @throws RuntimeException  If {@code opt} is a "none"
    */
   public static <T> T unwrap (Option<T> opt, RuntimeException forNone) {
-    return unwrap(opt, LambdaUtil.valueThunk(forNone));
+    return unwrap(opt, LambdaUtil.valueLambda(forNone));
   }
   
   /**
@@ -47,7 +49,11 @@ public abstract class Option<T> extends Tuple {
   public static <T> T unwrap(Option<T> opt, final Thunk<? extends RuntimeException> forNone) {
     return opt.apply(new OptionVisitor<T, T>() {
       public T forSome(T value) { return value; }
-      public T forNone() { throw forNone.value(); }
+      public T forNone() {
+        RuntimeException e = forNone.value();
+        e.fillInStackTrace();
+        throw e;
+      }
     });
   }
   

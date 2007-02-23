@@ -86,7 +86,7 @@ public final class DebugUtil {
   /**
    * Create a filter for use with logging that will reject all calls made from a location starting with
    * one of the given prefixes (that is, {@code (className + "." + methodName).startsWith(prefix)}).
-   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and2(Predicate2, Predicate2)},
+   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and(Predicate2, Predicate2)},
    * etc.
    */
   public static Predicate2<Thread, StackTraceElement> blackListLocationFilter(final String... prefixes) {
@@ -104,7 +104,7 @@ public final class DebugUtil {
   /**
    * Create a filter for use with logging that will reject all calls <emph>not</emph> made from a location starting 
    * with one of the given prefixes (that is, {@code (className + "." + methodName).startsWith(prefix)}).
-   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and2(Predicate2, Predicate2)},
+   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and(Predicate2, Predicate2)},
    * etc.
    */
   public static Predicate2<Thread, StackTraceElement> whiteListLocationFilter(final String... prefixes) {
@@ -121,7 +121,7 @@ public final class DebugUtil {
   
   /**
    * Create a filter for use with logging that will reject all calls made from the given thread(s).
-   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and2(Predicate2, Predicate2)},
+   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and(Predicate2, Predicate2)},
    * etc.
    */
   public static Predicate2<Thread, StackTraceElement> blackListThreadFilter(final Thread... threads) {
@@ -137,7 +137,7 @@ public final class DebugUtil {
   
   /**
    * Create a filter for use with logging that will reject all calls <emph>not</emph> made from the given thread(s).
-   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and2(Predicate2, Predicate2)},
+   * More complex filters may be produced using {@link edu.rice.cs.plt.lambda.LambdaUtil#and(Predicate2, Predicate2)},
    * etc.
    */
   public static Predicate2<Thread, StackTraceElement> whiteListThreadFilter(final Thread... threads) {

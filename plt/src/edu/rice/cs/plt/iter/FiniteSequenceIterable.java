@@ -23,7 +23,7 @@ public class FiniteSequenceIterable<T> extends TruncatedIterable<T> {
   }
   
   public int size() { return _size; }
-  
+  public int size(int bound) { return _size <= bound ? _size : bound; }
   public boolean isFixed() { return true; }
   
   /** Call the constructor (allows {@code T} to be inferred) */
@@ -48,10 +48,10 @@ public class FiniteSequenceIterable<T> extends TruncatedIterable<T> {
    */
   public static FiniteSequenceIterable<Integer> makeIntegerSequence(int start, int end) {
     if (start <= end) {
-      return new FiniteSequenceIterable<Integer>(start, Lambda.INCREMENT_INT, end-start+1);
+      return new FiniteSequenceIterable<Integer>(start, LambdaUtil.INCREMENT_INT, end-start+1);
     }
     else {
-      return new FiniteSequenceIterable<Integer>(start, Lambda.DECREMENT_INT, start-end+1);
+      return new FiniteSequenceIterable<Integer>(start, LambdaUtil.DECREMENT_INT, start-end+1);
     }
   }
   

@@ -1,5 +1,7 @@
 package edu.rice.cs.plt.iter;
 
+import java.io.Serializable;
+
 /**
  * An enumeration of all permutations of the given list.  The size of the enumeration, where 
  * the original list has size n, is n! (and is thus guaranteed to be >= 1).  The order of the 
@@ -13,18 +15,20 @@ package edu.rice.cs.plt.iter;
  *           {@code Iterable<T>}s, not {@code T}s.
  */
 public class PermutationIterable<T> extends AbstractIterable<Iterable<T>> 
-                                    implements SizedIterable<Iterable<T>> {
+                                    implements SizedIterable<Iterable<T>>, Serializable {
   
   private final Iterable<? extends T> _original;
   
   public PermutationIterable(Iterable<? extends T> original) { _original = original; }
   public PermutationIterator<T> iterator() { return new PermutationIterator<T>(_original); }
 
-  public int size() {
-    int n = IterUtil.sizeOf(_original);
-    int result = 1;
-    for (int i = 2; i < n; i++) { result *= i; }
-    return result;
+  public int size() { return size(Integer.MAX_VALUE); }
+  
+  public int size(int bound) {
+    int n = IterUtil.sizeOf(_original, bound);
+    long result = 1; // won't overflow -- worst case is 2^31 * 2^31 = 2^62 < 2^63
+    for (int i = 2; i < n && result < bound; i++) { result *= i; }
+    return result <= bound ? (int) result : bound;
   }
   
   public boolean isFixed() { return IterUtil.isFixed(_original); }

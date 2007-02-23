@@ -4,6 +4,8 @@ import java.util.Date;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
+import edu.rice.cs.plt.collect.TotalMap;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Predicate2;
 import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.iter.SizedIterable;
@@ -17,18 +19,22 @@ public abstract class TextLog extends AbstractLog {
   
   private static final String HANGING_INDENT = "    ";
   
-  private final Indenter _indent;
+  private static final Lambda<Thread, Indenter> MAKE_INDENTER = new Lambda<Thread, Indenter>() {
+    public Indenter value(Thread t) { return new Indenter(); }
+  };
+  
+  private final TotalMap<Thread, Indenter> _indenters;
   
   /** Create a log without a filter */
   protected TextLog() {
     super();
-    _indent = new Indenter();
+    _indenters = new TotalMap<Thread, Indenter>(MAKE_INDENTER, true);
   }
   
   /** Create a log using the given filter */
   protected TextLog(Predicate2<? super Thread, ? super StackTraceElement> filter) {
     super(filter);
-    _indent = new Indenter();
+    _indenters = new TotalMap<Thread, Indenter>(MAKE_INDENTER, true);
   }
   
   /** 
@@ -40,11 +46,12 @@ public abstract class TextLog extends AbstractLog {
   protected void writeText(BufferedWriter w, Date time, Thread thread, StackTraceElement location, 
                            SizedIterable<? extends String> messages) {
     try {
-      w.write(_indent.indentString());
+      Indenter indent = _indenters.get(thread);
+      w.write(indent.indentString());
       w.write("[" + formatLocation(location) + " - " + formatThread(thread) + " - " + formatTime(time) + "]");
       w.newLine();
       for (String s : messages) {
-        w.write(_indent.indentString());
+        w.write(indent.indentString());
         w.write(HANGING_INDENT);
         w.write(s);
         w.newLine();
@@ -58,8 +65,8 @@ public abstract class TextLog extends AbstractLog {
     }
   }
   
-  protected void push() { _indent.push(); }
+  protected void push() { _indenters.get(Thread.currentThread()).push(); }
   
-  protected void pop() { _indent.pop(); }
+  protected void pop() { _indenters.get(Thread.currentThread()).pop(); }
   
 }

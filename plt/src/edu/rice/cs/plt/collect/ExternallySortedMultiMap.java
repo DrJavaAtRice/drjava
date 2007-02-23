@@ -1,7 +1,9 @@
 package edu.rice.cs.plt.collect;
 
 import java.util.*;
-import edu.rice.cs.plt.iter.*;
+import edu.rice.cs.plt.iter.EmptyIterator;
+import edu.rice.cs.plt.iter.ImmutableIterator;
+import edu.rice.cs.plt.iter.IterUtil;
 
 /**
  * Maps from a key to a set of values; a key may be added multiple times 
@@ -24,8 +26,6 @@ public class ExternallySortedMultiMap<K, V, C extends Comparable<? super C>> {
    */
   private int _size;
   
-  private final Iterator<V> _emptyIterator = new EmptyIterator<V>();
-  
   /** Create an empty map. */
   public ExternallySortedMultiMap() {
     _map = new HashMap<K, ExternallySortedSet<V, C>>();
@@ -34,6 +34,9 @@ public class ExternallySortedMultiMap<K, V, C extends Comparable<? super C>> {
   
   /** @return  The current number of (key, value) pairs in the map. */
   public int size() { return _size; }
+  
+  /** @return  The current number of (key, value) pairs in the map, or {@code bound} if it is less. */
+  public int size(int bound) { return _size <= bound ? _size : bound; }
   
   /** @return  {@code true} iff {@code size() == 0}. */
   public boolean isEmpty() { return _size == 0; }
@@ -65,8 +68,8 @@ public class ExternallySortedMultiMap<K, V, C extends Comparable<? super C>> {
     return new Iterable<V>() {
       public Iterator<V> iterator() {
         ExternallySortedSet<V, C> set = _map.get(key);
-        if (set == null) { return _emptyIterator; }
-        else { return new ImmutableIterator<V>(set.iterator()); }
+        if (set == null) { return EmptyIterator.make(); }
+        else { return ImmutableIterator.make(set.iterator()); }
       }
     };
   }
@@ -153,23 +156,13 @@ public class ExternallySortedMultiMap<K, V, C extends Comparable<? super C>> {
    *          value in this map.  {@link Iterator#remove()} is not supported.
    */
   public Iterable<K> keys() {
-    return new ImmutableIterable<K>(_map.keySet());
+    return IterUtil.immutable(_map.keySet());
   }
   
   /**
    * @return  A dynamically-updating iterable of all values associated with any key
    *          in this map.  {@link Iterator#remove()} is not supported.
    */
-  public Iterable<V> values() {
-    return new Iterable<V>() {
-      public Iterator<V> iterator() {
-        Iterator<V> result = _emptyIterator;
-        for (ExternallySortedSet<V, C> set : _map.values()) {
-          result = new ComposedIterator<V>(set.iterator(), result);
-        }
-        return new ImmutableIterator<V>(result);
-      }
-    };
-  }
+  public Iterable<V> values() { return IterUtil.immutable(IterUtil.collapse(_map.values())); }
   
-}  
+}

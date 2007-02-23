@@ -41,6 +41,12 @@ public abstract class ReflectExceptionVisitor<T> {
   public T forIllegalArgument(IllegalArgumentException e) { return defaultCase(e); }
   
   /**
+   * Handle a {@code NullPointerException}, which can occur when statically accessing a non-static
+   * member, or when attempting to access a member of the object {@code null}.
+   */
+  public T forNullPointer(NullPointerException e) { return defaultCase(e); }
+  
+  /**
    * Handle a {@code ClassCastException}, which can occur when attempting to dynamically cast
    * an object to the generic type of a class object.
    * @see ReflectUtil#cast

@@ -570,7 +570,7 @@ public final class RecurUtil {
    * 
    */
   public static boolean safeEquals(Object obj1, Object obj2) {
-    return safeEquals(obj1, obj2, Predicate2.TRUE);
+    return safeEquals(obj1, obj2, LambdaUtil.TRUE);
   }
   
   /**

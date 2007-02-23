@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import edu.rice.cs.plt.lambda.Predicate;
-import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.lambda.LambdaUtil;
 import static edu.rice.cs.plt.collect.ConsList.*;
 
 /** Tests the ConsList and ConsVisitor methods and visitors */
@@ -88,10 +88,10 @@ public class ConsListTest extends TestCase {
   }
   
   public void testMap() {
-    assertEquals(emptyStrings, map(emptyNumbers, Lambda.TO_STRING));
-    assertEquals(singleton("23"), map(singletonNumbers, Lambda.TO_STRING));
-    assertEquals(cons("14.0", singleton("11")), map(twoNumbers, Lambda.TO_STRING));
-    assertEquals(cons("-1", cons("-2.0", singleton("-3.0"))), map(threeNumbers, Lambda.TO_STRING));
+    assertEquals(emptyStrings, map(emptyNumbers, LambdaUtil.TO_STRING));
+    assertEquals(singleton("23"), map(singletonNumbers, LambdaUtil.TO_STRING));
+    assertEquals(cons("14.0", singleton("11")), map(twoNumbers, LambdaUtil.TO_STRING));
+    assertEquals(cons("-1", cons("-2.0", singleton("-3.0"))), map(threeNumbers, LambdaUtil.TO_STRING));
     
     ConsList<String> reverse2 = cons("mom", singleton("hi"));
     ConsList<String> reverse3 = cons("sandwich", cons("a", singleton("eat")));
