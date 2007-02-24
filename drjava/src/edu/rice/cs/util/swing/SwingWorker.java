@@ -35,30 +35,19 @@ package edu.rice.cs.util.swing;
 
 import javax.swing.SwingUtilities;
 
-/**
- * SwingWorker, adapted from Sun's Java Tutorial.
- *
- * This is the 3rd version of SwingWorker (also known as
- * SwingWorker 3), an abstract class that you subclass to
- * perform GUI-related work in a dedicated thread.  For
- * instructions on using this class, see:
- *
- * http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html
- *
- * Note that the API changed slightly in the 3rd version:
- * You must now invoke start() on the SwingWorker after
- * creating it.
- *
- * @version $Id$
- */
+/** SwingWorker, adapted from Sun's Java Tutorial.  This is the 3rd version of SwingWorker (also known as 
+  * SwingWorker 3), an abstract class that you subclass to perform GUI-related work in a dedicated thread.  For
+  * instructions on using this class, see: http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html
+  *
+  * Note that the API changed slightly in the 3rd version: you must now invoke start() on the SwingWorker after
+  * creating it.
+  * @version $Id$
+  */
 public abstract class SwingWorker {
   private volatile Object _value;  // see getValue(), setValue()
 //  private Thread _thread;
 
-  /**
-   * Class to maintain reference to current worker thread
-   * under separate synchronization control.
-   */
+  /** Class to maintain reference to current worker thread under separate synchronization control. */
   private static class ThreadVar {
     private volatile Thread _thread;
     ThreadVar(Thread t) { _thread = t; }
@@ -68,9 +57,7 @@ public abstract class SwingWorker {
 
   private volatile ThreadVar _threadVar;
 
-  /** Gets the value produced by the worker thread, or null if it
-   *  hasn't been constructed yet.
-   */
+  /** Gets the value produced by the worker thread, or null if it hasn't been constructed yet. */
   protected Object getValue() { return _value; }
 
   /** Sets the value produced by worker thread. */
@@ -79,9 +66,9 @@ public abstract class SwingWorker {
   /** Compute the value to be returned by the <code>get</code> method. */
   public abstract Object construct();
 
-  /** Called on the event dispatching thread (not on the worker thread)
-   *  after the <code>construct</code> method has returned.
-   */
+  /** Called from the event dispatching thread (not on the worker thread) after the <code>construct</code> method
+    * has returned.
+    */
   public void finished() { }
 
   /** A new method that interrupts the worker thread.  Call this method to force the worker to stop what it's doing. */
@@ -92,10 +79,9 @@ public abstract class SwingWorker {
   }
 
   /** Return the value created by the <code>construct</code> method.  Returns null if either the constructing thread 
-   *  or the current thread was interrupted before a value was produced.
-   *
-   * @return the value created by the <code>construct</code> method
-   */
+    * or the current thread was interrupted before a value was produced.
+    * @return the value created by the <code>construct</code> method
+    */
   public Object get() {
     while (true) {
       Thread t = _threadVar.get();

@@ -5811,8 +5811,15 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** Inner class to handle updating the current position in the document.  Registered with the DefinitionsPane. **/
   private class PositionListener implements CaretListener {
     
-    // The following method does not need to run in the event thread
-    public void caretUpdate(final CaretEvent ce) { updateLocation(); }
+    // The following method only runs in the event thread because it is called from DefinitionsPane
+    public void caretUpdate(final CaretEvent ce) {
+      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      int offset = ce.getDot();
+      Element root = doc.getDefaultRootElement();
+      int line = root.getElementIndex(offset);
+      int col = offset - root.getElement(line).getStartOffset();
+      updateLocation(line + 1, col);  // line numbers are 1-based
+    }
     
     // This method appears safe outside the event thread
     public void updateLocation() {

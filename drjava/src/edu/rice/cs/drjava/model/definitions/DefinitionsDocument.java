@@ -414,74 +414,20 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Return the current column of the cursor position. Uses a 0 based index. */
   public int getCurrentCol() {
-    // throwErrorHuh();`
-    int here = _currentLocation;
-    int startOfLine = getLineStartPos(here);
-    return here - startOfLine;
+    acquireReadLock();
+    try {
+      Element root = getDefaultRootElement();
+      int line = root.getElementIndex(_currentLocation);
+      return _currentLocation - root.getElement(line).getStartOffset();
+    }
+    finally { releaseReadLock(); }
   }
 
   /** Return the current line of the cursor position.  Uses a 1-based index. */
   public int getCurrentLine() {
     acquireReadLock();
-    try {
-      synchronized(_reduced) {
-        int here = _currentLocation;
-        if (_cachedLocation > getLength()) {
-          // we can't know the last line number after a delete; starting over.
-          _cachedLocation = 0;
-          _cachedLineNum = 1;
-        }
-        if (_cachedNextLineLoc > getLength()) _cachedNextLineLoc = -1;
-        // let's see if we get off easy
-        if ( ! (_cachedPrevLineLoc < here && here < _cachedNextLineLoc )) {
-          
-          // this if improves performance when moving from the end of the document to the beginnning.
-          // in essence, it calculates the line number from scratch
-          if (_cachedLocation - here > here) {
-            _cachedLocation = 0;
-            _cachedLineNum = 1;
-          }
-          int lineOffset = _getRelativeLine();
-          _cachedLineNum = _cachedLineNum + lineOffset;
-          
-        }
-        _cachedLocation = here;
-        _cachedPrevLineLoc = getLineStartPos(here);
-        _cachedNextLineLoc = getLineEndPos(here);
-        return _cachedLineNum;
-      }
-    }
+    try { return getDefaultRootElement().getElementIndex(_currentLocation) + 1; } // line indices are 1-based
     finally { releaseReadLock(); }
-  }
-
-  /** This method returns the relative offset of line number from the previous location in the document. 
-    * Assumes the readLock is already held. 
-    */
-  private int _getRelativeLine() {
-    
-    int count = 0;
-    int currLoc = _currentLocation;
-    setCurrentLocation(_cachedLocation);
-
-    if (_cachedLocation > currLoc) {
-      // we moved backward
-      int prevLineLoc = getLineStartPos( _cachedLocation );
-      while (prevLineLoc > currLoc) {
-        count--;
-        prevLineLoc = getLineStartPos( prevLineLoc - 1 );
-      }
-    }
-
-    else {
-      // we moved forward
-      int nextLineLoc = getLineEndPos( _cachedLocation );
-      while (nextLineLoc < currLoc) {
-        count++;
-        nextLineLoc = getLineEndPos( nextLineLoc + 1 );
-      }
-    }
-    setCurrentLocation(currLoc);
-    return count;
   }
 
   /** Returns the offset corresponding to the first character of the given line number,
