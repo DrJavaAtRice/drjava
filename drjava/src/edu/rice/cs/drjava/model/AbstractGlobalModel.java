@@ -3590,8 +3590,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      */
     public int gotoLine(int line) {
       DefinitionsDocument dd = getDocument();
-      dd.gotoLine(line);
-      return dd.getCurrentLocation();
+      final int offset = getOffsetOfLine(line-1);
+      setCurrentLocation(offset);
+      return offset;
     }
 
     /** Forwarding method to sync the definitions with whatever view component is representing them. */
@@ -4047,6 +4048,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       */
     public int getLineOfOffset(int offset) {
       return getDefaultRootElement().getElementIndex(offset);
+    }
+
+    /** Translates a line number into an offset.
+      * @param line number >= 0
+      * @return offset >= 0 
+      */
+    public int getOffsetOfLine(int line) {
+      final int count = getDefaultRootElement().getElementCount();
+      if (line>=count) { line = count-1; }
+      return getDefaultRootElement().getElement(line).getStartOffset();
     }
   } /* End of ConcreteOpenDefDoc */
 

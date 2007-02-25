@@ -341,6 +341,12 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    *  @return the line number >= 0 */
   public int getLineOfOffset(int offset);
   
+  /** Translates a line number into an offset.
+    * @param line number >= 0
+    * @return offset >= 0 
+    */
+  public int getOffsetOfLine(int line);
+  
   /** @return the caret position as set by the view. */
   public int getCaretPosition();
   

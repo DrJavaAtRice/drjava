@@ -442,6 +442,12 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    *  @exception BadLocationException thrown if the offset is less than zero or greater than the document length. */
   public int getLineOfOffset(int offset) { throw new UnsupportedOperationException("Dummy method"); }
  
+  /** Translates a line number into an offset.
+    * @param line number >= 0
+    * @return offset >= 0 
+    */
+  public int getOffsetOfLine(int line) { throw new UnsupportedOperationException("Dummy method"); } 
+  
   /** @return the caret position as set by the view. */
   public int getCaretPosition() { return 0; }
   
