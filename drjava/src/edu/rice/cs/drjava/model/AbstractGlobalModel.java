@@ -1022,9 +1022,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @return The new open document
     */
   public OpenDefinitionsDocument newFile(File parentDir) {
-    final ConcreteOpenDefDoc doc = _createOpenDefinitionsDocument();
+    final ConcreteOpenDefDoc doc = _createOpenDefinitionsDocument(new NullFile());
     doc.setParentDirectory(parentDir);
-    doc.setFile(new NullFile());
     addDocToNavigator(doc);
     _notifier.newFileCreated(doc);
     return doc;
@@ -2765,8 +2764,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      */
     ConcreteOpenDefDoc(File f) { this(f, f.getParentFile(), f.lastModified()); }
     
-     /* Standard constructor for a new document (no associated file). */
-    ConcreteOpenDefDoc() { this(null, null, 0L); }
+     /* Standard constructor for a new document (associated file is NullFile which does not exit in file system). */
+    ConcreteOpenDefDoc(NullFile f) { this(f, null, 0L); }
     
     /* General constructor.  Only used privately. */
     private ConcreteOpenDefDoc(File f, File dir, long stamp) {
@@ -2778,9 +2777,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _id = ID_COUNTER++;
       
       try {
-//        System.out.println("about to make reconstructor " + this);
         DDReconstructor ddr = makeReconstructor();
-//        System.out.println("finished making reconstructor " + this);
+//        System.err.println("Registering " + this);
         _cacheAdapter = _cache.register(this, ddr);
       } catch(IllegalStateException e) { throw new UnexpectedException(e); }
 
@@ -2894,7 +2892,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Returns the name of this file, or "(Untitled)" if no file. */
     public String getFileName() {
-      if (isUntitled()) return "(Untitled)";
+      if (_file == null) return "(Untitled)";
+//      if (isUntitled()) return "(Untitled)";
       return _file.getName(); 
     }
 
@@ -3030,19 +3029,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           new WeakHashMap<DefinitionsDocument.WrappedPosition, Integer>();
         
         public String getText() {
-          final String image = _image;
+          String image = _image;
           if (image != null) return image;
           
           // Document has not yet been read from disk; read it and set _image before returning text.
           // Synchronization on this was eliminated because it does not prevent the returned string from becoming 
           // inconsistent with _doc/_file in the presence of huge scheduling delays.  Of course, all getText operations 
           // can return stale data in the presence of such delays. 
-          try { 
-            _image = IOUtil.toString(_file);
-            return _image;
-          }
-          catch(IOException e) { /* do nothing; return null */ }  
-          return null;
+          try { image = IOUtil.toString(_file); }
+          catch(IOException e) {  image = ""; }  
+//          System.err.println("Returning image '" + image + " for file " + _file);
+          _image = image;
+          return _image;
         }
         
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException {
@@ -3051,16 +3049,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           DefinitionsDocument newDefDoc = new DefinitionsDocument(_notifier);
           newDefDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
           
-          if (_image != null) {
-            _editorKit.read(new StringReader(_image), newDefDoc, 0);
-            _log.log("Reading from image for " + _file + " containing " + _image.length() + " chars");
-          }
-          else if (! isUntitled()) {
-            final InputStreamReader reader = new FileReader(_file);
-            _editorKit.read(reader, newDefDoc, 0);
-            reader.close(); // win32 needs readers closed explicitly!
-          }
-          _loc = Math.min(_loc, newDefDoc.getLength()); // make sure not past end
+          /* Initialize doc contents */
+          String image = getText();
+          if (image.length() > 0) newDefDoc.insertString(0, image, null);  // Do not call insertString on an empty doc
+//          else if (! isUntitled()) {
+//            final InputStreamReader reader = new FileReader(_file);
+//            _editorKit.read(reader, newDefDoc, 0);
+//            reader.close(); // win32 needs readers closed explicitly!
+//          }
+          _loc = Math.min(_loc, image.length()); // make sure not past end
           _loc = Math.max(_loc, 0); // make sure not less than 0
           newDefDoc.setCurrentLocation(_loc);
           for (DocumentListener d : _list) {
@@ -3151,7 +3148,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           String text = doc.getText();
           if (text.length() > 0) {
             _image = text;  
-            _log.log("Saving image containing " + _image.length() + " chars for " + _file);
+//            _log.log("Saving image containing " + _image.length() + " chars for " + _file);
           }
           _loc = doc.getCurrentLocation();
           _list = doc.getDocumentListeners();
@@ -3302,7 +3299,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
- 
     /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
     public void preparePrintJob() throws BadLocationException, FileMovedException {
       String fileName = "(Untitled)";
@@ -3320,7 +3316,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (printJob.printDialog()) printJob.print();
       cleanUpPrintJob();
     }
-
 
     /** throws UnsupportedOperationException */
     public void startCompile() throws IOException {
@@ -3356,7 +3351,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       else return false;
     }
     
-    public void documentSaved() { _cacheAdapter.documentSaved(getFileName()); }
+    public void documentSaved() { _cacheAdapter.documentSaved(); }
     
     public void documentModified() { _cacheAdapter.documentModified(); }
     
@@ -3371,7 +3366,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (! AbstractGlobalModel.isUntitled(f)) ret = (f.lastModified() > _timestamp);
       return ret;
     }
-    
     
     /** Determines if document has a class file consistent with its current state.  If this document is unmodified,
       *  this method examines the primary class file corresponding to this document and compares the timestamps of
@@ -3734,7 +3728,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
 
     public String toString() { return getFileName(); }
-    
+ 
     /** Orders ODDs by their id's. */
     public int compareTo(OpenDefinitionsDocument o) { return _id - o.id(); }
     
@@ -3772,13 +3766,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public Position getEndPosition() { return getDocument().getEndPosition(); }
     
-    public int getLength() { 
-//      synchronized(_cache._cacheLock) { // lock down the cache 
-//        if (_cacheAdapter.isReady() || _image == null) 
-          return getDocument().getLength();
-//        return _image.length();
-//      }
-    }
+    public int getLength() { return _cacheAdapter.getLength(); }
 
     public Object getProperty(Object key) { return getDocument().getProperty(key); }
     
@@ -4070,13 +4058,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
   }
   
-  /** Creates a ConcreteOpenDefDoc for a new DefinitionsDocument.
+  /** Creates a ConcreteOpenDefDoc for a NullFile object f (corresponding to a new empty document)
    *  @return OpenDefinitionsDocument object for a new document
    */
-  protected ConcreteOpenDefDoc _createOpenDefinitionsDocument() { return new ConcreteOpenDefDoc(); }
+  protected ConcreteOpenDefDoc _createOpenDefinitionsDocument(NullFile f) { return new ConcreteOpenDefDoc(f); }
  
-  /** Creates a ConcreteOpenDefDoc for a given file f
+  /** Creates a ConcreteOpenDefDoc for an existing file f.
    *  @return OpenDefinitionsDocument object for f
+   *  @throws FileNotFoundException if file f does not exist
    */
   protected ConcreteOpenDefDoc _createOpenDefinitionsDocument(File f) throws IOException {
     if (! f.exists()) throw new FileNotFoundException("file " + f + " cannot be found");

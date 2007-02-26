@@ -150,7 +150,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
   public void testNewDocumentsInAndOutOfTheCache() throws BadLocationException, IOException {
     assertEquals("Wrong Cache Size", 4, _cache.getCacheSize());
     
-    // The documents are activated soon after creation by a getLength operation done somewhere
+    // The documents are activated soon after creation by a getCurrentLine operation done somewhere
     // but they are not entered in the cache because they are new
     
     OpenDefinitionsDocument doc1 =  _model.newFile();
@@ -191,13 +191,17 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     
     // Reactivate all documents 
-    doc1.getLength();
-    doc2.getLength();
-    doc3.getLength();
-    doc4.getLength();
-    doc5.getLength();
-    doc6.getLength();
+    doc1.getCurrentLine();
+    doc2.getCurrentLine();
+    doc3.getCurrentLine();
+    doc4.getCurrentLine();
+    doc5.getCurrentLine();
+    doc6.getCurrentLine();
     
+//    System.err.println("Is doc1 untitled? " + doc1.isUntitled());
+    
+//    System.err.println("Cache contents = " + _cache);
+//    System.err.println("Document 1 is " + doc1);
     assertTrue("Document 1 should be ready", _adapterTable.get(doc1).isReady());
     assertTrue("Document 2 should be ready", _adapterTable.get(doc2).isReady());
     assertTrue("Document 3 should be ready", _adapterTable.get(doc3).isReady());
@@ -222,22 +226,22 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     // opening a document makes it active
     OpenDefinitionsDocument doc1 = openFile(file1);
-    doc1.getLength();  // forces document to be read into memory
+    doc1.getCurrentLine();  // forces document to be read into memory
     assertEquals("There should be 1 document in the cache", 1, _cache.getNumInCache());
     OpenDefinitionsDocument doc2 = openFile(file2);
-    doc2.getLength();  // forces document to be read into memory
+    doc2.getCurrentLine();  // forces document to be read into memory
     assertEquals("There should be 2 documents in the cache", 2, _cache.getNumInCache());
     OpenDefinitionsDocument doc3 = openFile(file3);
-    doc3.getLength();  // forces document to be read into memory
+    doc3.getCurrentLine();  // forces document to be read into memory
     assertEquals("There should be 3 documents in the cache", 3, _cache.getNumInCache());
     OpenDefinitionsDocument doc4 = openFile(file4);
-    doc4.getLength();  // forces document to be read into memory
+    doc4.getCurrentLine();  // forces document to be read into memory
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     OpenDefinitionsDocument doc5 = openFile(file5);
-    doc5.getLength();  // forces document to be read into memory
+    doc5.getCurrentLine();  // forces document to be read into memory
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     OpenDefinitionsDocument doc6 = openFile(file6);
-    doc6.getLength();  // forces document to be read into memory
+    doc6.getCurrentLine();  // forces document to be read into memory
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     
     assertEquals("Wrong Cache Size", 4, _cache.getCacheSize());
@@ -265,10 +269,10 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     // Rectivate all documents and make sure that the right ones get kicked out
  
-    doc1.getLength();
-    doc2.getLength();
-    doc3.getLength();
-    doc4.getLength();
+    doc1.getCurrentLine();
+    doc2.getCurrentLine();
+    doc3.getCurrentLine();
+    doc4.getCurrentLine();
     
    // cache = [1 2 3 4]
     
@@ -277,12 +281,12 @@ public class DocumentCacheTest extends DrJavaTestCase {
     assertTrue("Document 3 should be ready", _adapterTable.get(doc3).isReady());
     assertTrue("Document 4 should be ready", _adapterTable.get(doc4).isReady());
     
-    doc5.getLength();
+    doc5.getCurrentLine();
     // cache -> 2 3 4 5
     assertFalse("Document 1 is not longer ready", _adapterTable.get(doc1).isReady());
     assertTrue("Document 5 should be ready", _adapterTable.get(doc5).isReady());
     
-    doc6.getLength();
+    doc6.getCurrentLine();
     // cache -> 3 4 5 6
     assertFalse("Document 2 is not longer ready", _adapterTable.get(doc2).isReady());
     assertTrue("Document 6 should be ready", _adapterTable.get(doc6).isReady());
@@ -290,47 +294,47 @@ public class DocumentCacheTest extends DrJavaTestCase {
     assertTrue("Document 4 should be ready", _adapterTable.get(doc4).isReady());
     assertTrue("Document 5 should be ready", _adapterTable.get(doc5).isReady());
     
-    doc1.getLength(); // 4 5 6 1
+    doc1.getCurrentLine(); // 4 5 6 1
     assertTrue("The document 1 should should now be in the cache", _adapterTable.get(doc1).isReady());    
     assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache()); 
     assertFalse("The document 3 should have been kicked out of the cache", _adapterTable.get(doc3).isReady());
     
-    doc2.getLength(); // 5 6 1 2
+    doc2.getCurrentLine(); // 5 6 1 2
     assertTrue("The document 2 should should now be in the cache", _adapterTable.get(doc2).isReady());
     assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
     assertFalse("The document 4 should have been kicked out of the cache", _adapterTable.get(doc4).isReady());
     
-    doc3.getLength(); // 6 1 2 3
+    doc3.getCurrentLine(); // 6 1 2 3
     assertTrue("The document 3 should should now be in the cache", _adapterTable.get(doc3).isReady());
     assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
     assertFalse("The document 5 should have been kicked out of the cache", _adapterTable.get(doc5).isReady());
     
-    doc4.getLength(); // 1 2 3 4
+    doc4.getCurrentLine(); // 1 2 3 4
     assertTrue("The document 4 should should now be in the cache", _adapterTable.get(doc4).isReady());
     assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
     assertFalse("The document 6 should have been kicked out of the cache", _adapterTable.get(doc6).isReady());
     
-    doc5.getLength(); // 2 3 4 5
+    doc5.getCurrentLine(); // 2 3 4 5
     assertTrue("The document 5 should should now be in the cache", _adapterTable.get(doc5).isReady());
     assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
     assertFalse("The document 1 should have been kicked out of the cache", _adapterTable.get(doc1).isReady());
     
-    doc6.getLength(); // 3 4 5 6
+    doc6.getCurrentLine(); // 3 4 5 6
     assertTrue("The document 6 should should now be in the cache", _adapterTable.get(doc6).isReady());
     assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
     assertFalse("The document 2 should have been kicked out of the cache", _adapterTable.get(doc2).isReady());
     
     // Load documents out of order
-    doc4.getLength(); // 3 4 5 6
+    doc4.getCurrentLine(); // 3 4 5 6
     assertTrue("The document 3 should should still be in the cache", _adapterTable.get(doc3).isReady());    
     assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
-    doc5.getLength(); // 3 4 5 6
+    doc5.getCurrentLine(); // 3 4 5 6
     assertTrue("The document 3 should should still be in the cache", _adapterTable.get(doc3).isReady());    
     assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
-    doc3.getLength(); // 3 4 5 6
+    doc3.getCurrentLine(); // 3 4 5 6
     assertTrue("The document 6 should should still be in the cache", _adapterTable.get(doc6).isReady());    
     assertEquals("There should still be 4 documents in the cache", 4, _cache.getNumInCache());
-    doc4.getLength(); // 3 4 5 6
+    doc4.getCurrentLine(); // 3 4 5 6
     assertTrue("The document 6 should should still be in the cache", _adapterTable.get(doc6).isReady());    
     
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
@@ -342,7 +346,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
     assertEquals("The cache size should now be 5", 5, _cache.getCacheSize());
     assertEquals("There should still only be 4 files in the cache", 4, _cache.getNumInCache());
     
-    doc2.getLength(); // 3 4 5 6 2
+    doc2.getCurrentLine(); // 3 4 5 6 2
     assertTrue("The document 2 should now be in the cache", _adapterTable.get(doc2).isReady());
     assertFalse("The document 1 should still be out of the cache", _adapterTable.get(doc1).isReady());
     assertEquals("There should be 5 documents in the cache", 5, _cache.getNumInCache());
@@ -369,33 +373,33 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     // opening a document should set it as active
     OpenDefinitionsDocument doc1 = openFile(file1);
-    doc1.getLength();  // forces document to be read into memory
+    doc1.getCurrentLine();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc1).isReady());
     assertEquals("There should be 1 documents in the cache", 1, _cache.getNumInCache());
     
     OpenDefinitionsDocument doc2 = openFile(file2);
-    doc2.getLength();  // forces document to be read into memory
+    doc2.getCurrentLine();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc2).isReady());
     assertEquals("There should be 2 documents in the cache", 2, _cache.getNumInCache());
     
     OpenDefinitionsDocument doc3 = openFile(file3);
-    doc3.getLength();  // forces document to be read into memory
+    doc3.getCurrentLine();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc3).isReady());
     assertEquals("There should be 3 documents in the cache", 3, _cache.getNumInCache());
     
     OpenDefinitionsDocument doc4 = openFile(file4);
-    doc4.getLength();  // forces document to be read into memory
+    doc4.getCurrentLine();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc4).isReady());
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     
     OpenDefinitionsDocument doc5 = openFile(file5);
-    doc5.getLength();  // forces document to be read into memory
+    doc5.getCurrentLine();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc5).isReady());
     assertFalse("The document should not start out in the cache", _adapterTable.get(doc1).isReady());
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
     
     OpenDefinitionsDocument doc6 = openFile(file6);
-    doc6.getLength();  // forces document to be read into memory
+    doc6.getCurrentLine();  // forces document to be read into memory
     assertTrue("The document should not start out in the cache", _adapterTable.get(doc6).isReady());
     assertFalse("The document should not start out in the cache", _adapterTable.get(doc2).isReady());
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
@@ -449,16 +453,16 @@ public class DocumentCacheTest extends DrJavaTestCase {
    int numDocListeners = doc1.getDocumentListeners().length;
    int numUndoListeners = doc1.getUndoableEditListeners().length;
    
-   doc1.getLength();
-   doc2.getLength();
-   doc3.getLength();
-   doc4.getLength();
+   doc1.getCurrentLine();
+   doc2.getCurrentLine();
+   doc3.getCurrentLine();
+   doc4.getCurrentLine();
 
    // this will kick document one out of the cache
-   doc5.getLength();
+   doc5.getCurrentLine();
  
    // this will reconstruct document 1
-   doc1.getLength();
+   doc1.getCurrentLine();
    
    assertEquals("the number of document listeners is the same after reconstruction", numDocListeners, 
                 doc1.getDocumentListeners().length);
@@ -511,17 +515,17 @@ public class DocumentCacheTest extends DrJavaTestCase {
     assertFalse("doc1 should be the one that's not ready", _adapterTable.get(doc1).isReady());
     assertEquals("One doc should have been collected", 1, _memLeakCounter);
     
-    doc1.getLength(); // kick 2
+    doc1.getCurrentLine(); // kick 2
     
     // make sure doc1 has it's finalization listener still
     List<FinalizationListener<DefinitionsDocument>> list = doc1.getFinalizationListeners();
     assertEquals("There should only be one finalization listener", 1, list.size());
     assertEquals("The finalization listener should be fl", fl, list.get(0));
     
-    doc2.getLength(); // kick 3
-    doc3.getLength(); // kick 4
-    doc4.getLength(); // kick 5
-    doc5.getLength(); // kick 1
+    doc2.getCurrentLine(); // kick 3
+    doc3.getCurrentLine(); // kick 4
+    doc4.getCurrentLine(); // kick 5
+    doc5.getCurrentLine(); // kick 1
     
     System.gc();
     Thread.sleep(100);

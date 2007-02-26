@@ -61,6 +61,7 @@ import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.NullFile;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.newjvm.AbstractMasterJVM;
@@ -461,7 +462,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     ConcreteOpenDefDoc(File f) { super(f); }
     
     /* Standard constructor for a new document (no associated file) */
-    ConcreteOpenDefDoc() { super(); }
+    ConcreteOpenDefDoc(NullFile f) { super(f); }
     
     /** Starting compiling this document.  Used only for unit testing */
     public void startCompile() throws IOException { _compilerModel.compile(ConcreteOpenDefDoc.this); }
@@ -551,7 +552,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Creates a ConcreteOpenDefDoc for a new DefinitionsDocument.
    *  @return OpenDefinitionsDocument object for a new document
    */
-  protected ConcreteOpenDefDoc _createOpenDefinitionsDocument() { return new ConcreteOpenDefDoc(); }
+  protected ConcreteOpenDefDoc _createOpenDefinitionsDocument(NullFile f) { return new ConcreteOpenDefDoc(f); }
   
    /** Creates a ConcreteOpenDefDoc for a given file f
    *  @return OpenDefinitionsDocument object for f

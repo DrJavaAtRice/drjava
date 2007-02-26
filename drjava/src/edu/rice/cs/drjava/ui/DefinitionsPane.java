@@ -954,19 +954,19 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     else return _scrollPane.getHorizontalScrollBar().getValue();
   }
   
-  public int getCurrentLine() {
-    try {
-      int pos = getCaretPosition();
-      FontMetrics metrics = getFontMetrics(getFont());
-      Rectangle startRect = modelToView(pos);
-      if (startRect == null) return 1;
-      //top left position is (3,3), so font size<=6 will be off
-      return (new Double (startRect.getY() / metrics.getHeight()).intValue() + 1);
-    } catch (BadLocationException e) {
-      // This shouldnt happen b/c we retrieve the caret pos before calling modelToView
-      throw new UnexpectedException(e);
-    }
-  }
+  public int getCurrentLine() { return _doc.getLineOfOffset(getCaretPosition()); }
+//    try {
+//      int pos = getCaretPosition();
+//      FontMetrics metrics = getFontMetrics(getFont());
+//      Rectangle startRect = modelToView(pos);
+//      if (startRect == null) return 1;
+//      //top left position is (3,3), so font size<=6 will be off
+//      return (new Double (startRect.getY() / metrics.getHeight()).intValue() + 1);
+//    } catch (BadLocationException e) {
+//      // This shouldnt happen b/c we retrieve the caret pos before calling modelToView
+//      throw new UnexpectedException(e);
+//    }
+//  }
 
   /** Determines current line using logic in DefinitionsDocument.  Does it differ from getCurrentLine()? */
   public int getCurrentLinefromDoc() { return _doc.getCurrentLine(); }  

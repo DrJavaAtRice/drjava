@@ -39,9 +39,18 @@ import java.io.Serializable;
   * The equals method is overridden so that distinct NullFile objects (which all have the same path) are unequal. 
   */
 public class NullFile extends File implements Serializable {
+  
+  private static volatile int ct = 0;
 
-  public NullFile() { super(""); }
+  public NullFile() { 
+    super("*NullFile<" + ct + ">"); 
+    ct++;
+  }
+  
+  /* The following two method hide the fact that the name field of this file has the form "*NullFile<ct>".  They can
+   * be commented out for debugging purposes. */
   public String toString() { return "(Untitled)"; }
+  public String getName() { return "(Untitled)"; }
   
   /**  All distinct objects of type NullFile are unequal. */
   public boolean equals(Object o) {

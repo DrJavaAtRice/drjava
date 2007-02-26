@@ -227,6 +227,7 @@ public final class CommandLineTest extends DrJavaTestCase {
 //    _log.log("got OpenDefDocs");
     assertEquals("Only one document opened?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
+//    System.err.println("Doc text = " + doc.getText());
     assertEquals("Correct length of file?", f1_contents.length(), doc.getLength());
 //    _log.log("Ready to perform getText operation");
     assertEquals("Do the contents match?", f1_contents, doc.getText(0,f1_contents.length()));

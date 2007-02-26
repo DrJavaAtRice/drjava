@@ -103,7 +103,7 @@ public class DocumentCache {
    *  @return an adapter that allows its owner to access its definitions document
    */
   public DCacheAdapter register(OpenDefinitionsDocument odd, DDReconstructor rec) {
-    DocManager mgr = new DocManager(rec, odd.toString(), odd.isUntitled());
+    DocManager mgr = new DocManager(rec, odd.isUntitled());
     notifyRegistrationListeners(odd, mgr);  // runs synchronously; only used in tests
 //    System.err.println("register(" + odd + ", " + rec + ") called");
     return mgr;
@@ -136,6 +136,7 @@ public class DocumentCache {
   public int getCacheSize() { return CACHE_SIZE; }
   public int getNumInCache() { return _residentQueue.size(); }
     
+  public String toString() { return _residentQueue.toString(); }
   
   
   ///////////////////////////// DocManager //////////////////////////
@@ -155,18 +156,17 @@ public class DocumentCache {
     private final DDReconstructor _rec;
     private volatile int _stat; // I know, this is not very OO
     private volatile DefinitionsDocument _doc;
-    private volatile String _fileName;
     
     /** Instantiates a manager for the documents that are produced by the given document reconstructor.
      *  @param rec The reconstructor used to create the document
      */
-    public DocManager(DDReconstructor rec, String fn, boolean isUntitled) {
+    public DocManager(DDReconstructor rec, boolean isUntitled) {
 //      Utilities.showDebug("DocManager(" + rec + ", " + fn + ", " + isUntitled + ")");
       _rec = rec;
       if (isUntitled) _stat = UNTITLED; 
       else _stat = NOT_IN_QUEUE;
       _doc = null;
-     _fileName = fn;
+//      System.err.println(this + " constructed");
     }
     
     /** Adds DocumentListener to the reconstructor. */
@@ -180,13 +180,15 @@ public class DocumentCache {
       }
       catch(Exception e) { throw new UnexpectedException(e); }
 //        Utilities.showDebug("Document " + _doc + " reconstructed; _stat = " + _stat);
+//      System.err.println("Making document for " + this);
       if (_stat == NOT_IN_QUEUE) add();       // add this to queue 
       return _doc;
     }
     
-    /** Gets the physical document (DD) for this manager.  If DD is not in memory, it loads it into memory and returns
-     *  it.  If the document has been modified in memory since it was last fetched, make it "unmanaged", removing it from 
-     *  the queue.  It will remain in memory until saved.  If a document is not in the queue, add it.
+    /** Gets the physical document (DD) for this manager.  If DD is not in memory, it loads it from its image in its
+      * DDReconstructor and returns it.  If the document has been modified in memory since it was last fetched, make 
+      * it "unmanaged", removing it from the queue.  It will remain in memory until saved.  If a document is not in 
+      * the queue, add it.
      *  @return the physical document that is managed by this adapter
      */
     public DefinitionsDocument getDocument() throws IOException, FileMovedException {
@@ -201,17 +203,26 @@ public class DocumentCache {
       }
     }
     
+    /** Gets the length of this document using (i) cached _doc or (ii) reconstructor (which may force the document
+      * to be loaded. */
+    public int getLength() {
+      final DefinitionsDocument doc = _doc;  // create a snapshot of _doc
+      if (doc != null) return doc.getLength();
+      return _rec.getText().length();  // There is a technical race here; _doc could be set and modified before here
+    }
+    
+    
     /** Gets the text of this document using in order of preference (i) cached _doc; (ii) cached reconstructor _image; 
       * and (iii) the document after forcing it to be loaded. */
     public String getText() {
       final DefinitionsDocument doc = _doc;  // create a snapshot of _doc
       if (doc != null) return doc.getText();
-      String image = _rec.getText();  // There is a technical race here; _doc could be set and modified before here
-      if (image != null) return image;
-      synchronized(_cacheLock) { // lock the state of this DocManager
-        if (_doc != null) return _doc.getText(); // _doc may have changed since test outside of _cacheLock
-        return makeDocument().getText();
-      }
+      return _rec.getText();  // There is a technical race here; _doc could be set and modified before here
+//      if (image != null) return image;
+//      synchronized(_cacheLock) { // lock the state of this DocManager
+//        if (_doc != null) return _doc.getText(); // _doc may have changed since test outside of _cacheLock
+//        return makeDocument().getText();
+//      }
     }
     
     /* Gets the specified substring of this document; throws an exception if the specification is ill-formed. */
@@ -250,11 +261,11 @@ public class DocumentCache {
     }
      
     /** Updates status of this document in the cache. */
-    public void documentSaved(String fileName) {
-//      Utilities.showDebug("Document " + _doc + " has been saved as " + fileName);
+    public void documentSaved() {
+//      Utilities.showDebug("Document " + _doc + " has been saved");
+//      System.err.println("Document " + _doc + " has been saved");
       synchronized(_cacheLock) {  // lock the document manager so that document manager fields can be updated
         if (isUnmanagedOrUntitled()) {
-          _fileName = fileName;
           add();  // add formerly unmanaged/untitled document to queue
         }
       }
@@ -263,6 +274,7 @@ public class DocumentCache {
     /** Adds this DocManager to the queue and sets status to IN_QUEUE.  Assumes _cacheLock is already held. */
     private void add() {
 //      Utilities.showDebug("add " + this + " to the QUEUE\n" + "QUEUE = " + _residentQueue);
+//      System.err.println("adding " + this + " to the QUEUE\n" + "QUEUE = " + _residentQueue);
       if (! _residentQueue.contains(this)) {
         _residentQueue.add(this);
         _stat = IN_QUEUE;
@@ -304,7 +316,7 @@ public class DocumentCache {
       _stat = NOT_IN_QUEUE;
     }
     
-    public String toString() { return _fileName; } 
+    public String toString() { return "DocManager for " + _rec.toString() + "[stat = " + _stat + "]"; } 
   }
   
   ////////////////////////////////////////

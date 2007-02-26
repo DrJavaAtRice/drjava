@@ -50,6 +50,8 @@ public interface DCacheAdapter {
    */
   public DefinitionsDocument getDocument() throws IOException, FileMovedException;
   
+  public int getLength();
+  
   /* Gets the entire text of this document. */
   public String getText();
   
@@ -71,7 +73,7 @@ public interface DCacheAdapter {
   public void addDocumentListener(DocumentListener l);
   
   /* Method for notifying the DCacheAdapter that this document has been saved to a file. */
-  public void documentSaved(String fileName);
+  public void documentSaved();
   
   /* Method for notifying the DCacheAdapter that this document has been modified. */
   public void documentModified();

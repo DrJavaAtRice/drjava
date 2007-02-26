@@ -559,7 +559,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public void killInterpreter(File wd) {
     synchronized(_masterJVMLock) {
 //        Utilities.showDebug("MainJVM: killInterpreter called with working directory = " + wd);
-      System.out.println("Killing Interpreter for working directory " + wd);
+//      System.err.println("Killing Interpreter for working directory " + wd);
         _workDir = wd;
         _restart = (wd != null);
         _cleanlyRestarting = true;

@@ -47,8 +47,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 
-/** This class is misnamed!!!  The associated document is NOT necessarily a DJDocument!  It
- *  can be a ConsoleDocument. */
+/** This pane class for a SwingDocument. */
 public abstract class AbstractDJPane extends JTextPane implements OptionConstants {
   
   // ------------ FIELDS -----------
@@ -73,8 +72,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /** Looks for changes in the caret position to see if a paren/brace/bracket highlight is needed. */
   protected final CaretListener _matchListener = new CaretListener() {
     
-    /** Checks caret position to see if it needs to set or remove a highlight from the document.
-      * Only modifies the document--not any GUI classes.
+    /** Checks caret position to see if it needs to set or remove a highlight from the document. Only modifies the 
+      * document--not any GUI classes.
       * @param e the event fired by the caret position change
       */
     public void caretUpdate(CaretEvent e) { matchUpdate(e.getDot()); }
@@ -106,10 +105,10 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     _matchHighlight = _highlightManager.addHighlight(from, to, MATCH_PAINTER);
   }
   
-  /** Checks caret position to see if it needs to set or remove a highlight from the document. When the cursor
-    * is immediately right of ')', '}', or ']', it highlights up to the matching open paren/brace/bracket.
-    * This method must execute as part of the document update. If deferred using invokeLater, it does not work.
-    * Only modifies the document--not any GUI classes.
+  /** Updates the document location and checks caret position to see if it needs to set or remove a highlight from the 
+    * document.  When the cursor is immediately right of a ')', '}', or ']', it highlights up to the matching '(', '{",
+    * or '[', respectively.  This method must execute directly as part of the document update. If cannot be deferred 
+    * using invokeLater.  Only modifies fields added to DefaultStyledDocument)---not any Swing library classes.
     * @param offset the new offset of the caret
     */
   protected void matchUpdate(int offset) {
@@ -130,12 +129,6 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     }
   }
   
-//  /** Immediately updates the current location in the reduced model. */
-//  public void setCaretPosition(int pos) {
-//    super.setCaretPosition(pos);
-//    getDJDocument().setCurrentLocation(pos); 
-//  }
-  
   /** A checked version of setCaretPostion(int pos) that ensures pos is within the DJDocument. */
   public void setCaretPos(int pos) {
     DJDocument doc = getDJDocument();
@@ -154,12 +147,6 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     }
     finally { doc.releaseReadLock(); }
   }
-  
-//   /** Immediately updates the current location in the reduced model. */ 
-//  public void moveCaretPosition(int pos) { 
-//    super.moveCaretPosition(pos);
-//    getDJDocument().setCurrentLocation(pos); 
-//  }
 
   public int getScrollableUnitIncrement(Rectangle visibleRectangle, int orientation, int direction) {
     return (int) (visibleRectangle.getHeight() * SCROLL_UNIT);
@@ -178,10 +165,10 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   public void indent(final Indenter.IndentReason reason) {
 
     /** Because indent() is a function called directly by the Keymap, it does not go through the regular insertString
-     *  channels and thus it may not be in sync with the document's position.  For that reason, we must grab the
-     *  caretPostion and set the current location to that value before calling the insertLine operation.  The logic
-     *  for a single line insert is very dependent on the current location.
-     */
+      * channels.  Thus it may not be in sync with the document's internal position.  For that reason, we grab the
+      * caretPostion and set the current location to that value before calling the insertLine operation.  The logic
+      * for a single line insert is very dependent on the current location.
+      */
     
     // Is this action still necessary?  Answer: yes!  Without this line, the caret often moves when the user hits "tab"
     getDJDocument().setCurrentLocation(getCaretPosition());
