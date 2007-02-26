@@ -44,6 +44,7 @@
   <property name="test-repeat" value="1" />
   <property name="test-timeout" value="1440" />
   <property name="test-formatter" value="oneline" />
+  <property name="test-output-to-file" value="false" />
   <property name="clean-can-fail" value="yes" /> 
   <property name="force-server" value="no" />
   <property name="plt.debug.log" value="void" />
@@ -482,7 +483,7 @@
         <propertyref prefix="plt." />
       </syspropertyset>
       <jvmarg line="${jvm-args}" />
-      <formatter classname="${test-formatter-class}" usefile="false" />
+      <formatter classname="${test-formatter-class}" usefile="${test-output-to-file}" />
       <batchtest>
         <fileset dir="classes/test">
           <selector refid="tests-to-run" />
@@ -753,6 +754,77 @@
       </files>
     </clover-setup>
   </target>
+  
+  
+  <target name="benchmark">
+    <antcall target="test">
+      <param name="test-formatter" value="xml" />
+      <param name="test-output-to-file" value="yes" />
+    </antcall>
+    <mkdir dir="docs/benchmark/current" />
+    <move todir="docs/benchmark/current">
+      <fileset dir="${basedir}">
+        <include name="TEST*" />
+      </fileset>
+    </move>
+    
+    <mkdir dir="benchmark-sources" />
+    
+    <exec executable="svn" failonerror="yes">
+      <arg value="checkout" />
+      <arg value="${svn-repository}/trunk/${ant.project.name}" />
+      <arg value="benchmark-sources" />
+    </exec>
+    <!-- Change the build script text for builds that don't support test-output-to-file -->
+    <replaceregexp file="benchmark-sources/build.xml" flags="g"
+                   match="&lt;formatter.*usefile=&quot;false&quot;.*/&gt;"
+                   replace="&lt;formatter type=&quot;xml&quot; usefile=&quot;true&quot;/&gt;" />
+    <ant dir="benchmark-sources" target="test">
+      <property name="test-formatter" value="xml" />
+      <property name="test-output-to-file" value="yes" />
+    </ant>
+    <ant dir="benchmark-sources" target="clean" />
+    <exec executable="svn" dir="benchmark-sources" failonerror="yes">
+      <arg value="revert" />
+      <arg value="build.xml" />
+    </exec>
+    <mkdir dir="docs/benchmark/head" />
+    <move todir="docs/benchmark/head">
+      <fileset dir="benchmark-sources">
+        <include name="TEST*" />
+      </fileset>
+    </move>
+    
+    <exec executable="svn" dir="benchmark-sources" failonerror="yes">
+      <arg value="update" />
+      <arg value="--revision" />
+      <arg value="PREV" />
+    </exec>
+    <!-- Change the build script text for builds that don't support test-output-to-file -->
+    <replaceregexp file="benchmark-sources/build.xml"
+                   match="&lt;formatter.*usefile=&quot;false&quot;.*/&gt;"
+                   replace="&lt;formatter type=&quot;xml&quot; usefile=&quot;true&quot;/&gt;" />
+    <ant dir="benchmark-sources" target="test">
+      <property name="test-formatter" value="xml" />
+      <property name="test-output-to-file" value="yes" />
+    </ant>
+    <ant dir="benchmark-sources" target="clean" />
+    <exec executable="svn" dir="benchmark-sources" failonerror="yes">
+      <arg value="revert" />
+      <arg value="build.xml" />
+    </exec>
+    <mkdir dir="docs/benchmark/prev1" />
+    <move todir="docs/benchmark/prev1">
+      <fileset dir="benchmark-sources">
+        <include name="TEST*" />
+      </fileset>
+    </move>
+    
+    <antcall target="clean-intermediate">
+      <param name="clean-can-fail" value="no" />
+    </antcall>
+    
+  </target>
 
   
   <!-- *************
@@ -768,6 +840,7 @@
     
     <delete dir="classes" failonerror="${clean-can-fail}" />
     <delete dir="cloverdb" failonerror="${clean-can-fail}" />
+    <delete dir="benchmark-sources" failonerror="${clean-can-fail}" />
 
     <delete failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
