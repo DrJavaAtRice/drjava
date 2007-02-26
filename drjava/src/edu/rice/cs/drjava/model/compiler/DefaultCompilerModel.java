@@ -53,7 +53,6 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
@@ -306,7 +305,7 @@ public class DefaultCompilerModel implements CompilerModel {
       /* Canonicalize buildDir */
       if (buildDir != null) buildDir = IOUtil.attemptCanonicalFile(buildDir);
       
-      List<File> classPath = _model.getClassPath().asFileVector();
+      List<File> classPath = IterUtil.asList(_model.getClassPath());
       
       // Temporary hack to allow a boot class path to be specified
       List<File> bootClassPath = null;

@@ -11,7 +11,7 @@ dynamicjava.jar:          Updated 2005-10-11
 javalanglevels.jar:       javalanglevels-20070213-2052
 junit.jar:                JUnit 3.8.1
 platform.jar:             platform-20070213-2003
-plt.jar:                  plt-20070213-2138
+plt.jar:                  plt-20070223-2125
 retroweaver-rt-1.2.3.jar: Retroweaver 1.2.3
 winlaf-0.5.1.jar:         WinLAF 0.5.1
 

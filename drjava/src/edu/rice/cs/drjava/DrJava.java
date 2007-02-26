@@ -60,7 +60,6 @@ import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
-import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.plt.debug.DebugUtil;
 

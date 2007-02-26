@@ -41,6 +41,8 @@ import java.util.zip.*;
 
 import edu.rice.cs.util.FileOps;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** A custom classloader for use in running test cases. this will load all classes for the test case.  This loader also
  *  provides an excludes list. any class that matches  an entry in the list will be loaded by the system class loader
  *  instead.

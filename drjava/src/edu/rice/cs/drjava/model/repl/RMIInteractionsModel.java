@@ -35,10 +35,8 @@ package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.ui.InteractionsController;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 
-import java.net.URL;
 import java.io.File;
 
 /** An InteractionsModel which can serve as the glue between a local InteractionsDocument and a remote JavaInterpreter
@@ -87,18 +85,18 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 //    _interpreterControl.addClassPath(path);
 //  }
 //  
-  public void addProjectClassPath(URL path) { _jvm.addProjectClassPath(path); }
+  public void addProjectClassPath(File f) { _jvm.addProjectClassPath(f); }
 
-  public void addBuildDirectoryClassPath(URL path) { _jvm.addBuildDirectoryClassPath(path); }
+  public void addBuildDirectoryClassPath(File f) { _jvm.addBuildDirectoryClassPath(f); }
   
-  public void addProjectFilesClassPath(URL path) { 
+  public void addProjectFilesClassPath(File f) { 
 //    System.err.println("Adding " + path + " to projectFilesClassPath in the slave JVM");
-    _jvm.addProjectFilesClassPath(path); 
+    _jvm.addProjectFilesClassPath(f); 
   }
   
-  public void addExternalFilesClassPath(URL path) { _jvm.addExternalFilesClassPath(path); }
+  public void addExternalFilesClassPath(File f) { _jvm.addExternalFilesClassPath(f); }
   
-  public void addExtraClassPath(URL path) { _jvm.addExtraClassPath(path); }
+  public void addExtraClassPath(File f) { _jvm.addExtraClassPath(f); }
   
   /** Resets the Java interpreter. */
   protected void _resetInterpreter(File wd) { _jvm.killInterpreter(wd); }
@@ -180,5 +178,5 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Gets the interpreter classpath from the interpreter jvm.
    * @return a vector of classpath elements
    */
-  public ClassPathVector getClassPath() { return _jvm.getClassPath(); }
+  public Iterable<File> getClassPath() { return _jvm.getClassPath(); }
 }

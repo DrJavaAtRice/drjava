@@ -33,74 +33,67 @@
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
+import java.io.File;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.MalformedURLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.lang.ClassLoader;
-import edu.rice.cs.drjava.model.ClassPathEntry;
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.drjava.model.DeadClassLoader;
 import edu.rice.cs.drjava.model.BrainClassLoader;
 
-import edu.rice.cs.util.ClassPathVector;
+import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /* This class runs in the Main JVM, but it accessed from the Slave JVM via RMI.  All public methods are synchronzed. */
-public class ClassPathManager{
+public class ClassPathManager {
   
-  private LinkedList<ClassPathEntry> projectCP;              /* The custom project classpath. */
-  private LinkedList<ClassPathEntry> buildCP;                /* The build directory. */
-  private LinkedList<ClassPathEntry> projectFilesCP;         /* The open project files. */
-  private LinkedList<ClassPathEntry> externalFilesCP;        /* The open external files. */
-  private LinkedList<ClassPathEntry> extraCP;                /* The extra preferences classpath. */ 
+  private LinkedList<File> projectCP;              /* The custom project classpath. */
+  private LinkedList<File> buildCP;                /* The build directory. */
+  private LinkedList<File> projectFilesCP;         /* The open project files. */
+  private LinkedList<File> externalFilesCP;        /* The open external files. */
+  private LinkedList<File> extraCP;                /* The extra preferences classpath. */ 
   
-//  private volatile LinkedList<ClassPathEntry> systemCP;               /* The system classpath. */
-//  private List<ClasspathEntry> openFilesCP;                           /* Open files classpath (for nonproject mode) */
+//  private volatile LinkedList<File> systemCP;               /* The system classpath. */
+//  private List<File> openFilesCP;                           /* Open files classpath (for nonproject mode) */
   
   public ClassPathManager() {
-    projectCP = new LinkedList<ClassPathEntry>();
-    buildCP = new LinkedList<ClassPathEntry>();
-    projectFilesCP = new LinkedList<ClassPathEntry>();
-    externalFilesCP = new LinkedList<ClassPathEntry>();
-    extraCP = new LinkedList<ClassPathEntry>();
-//    systemCP = new LinkedList<ClassPathEntry>();
-//    openFilesCP = new LinkedList<ClasspathEntry>();
+    projectCP = new LinkedList<File>();
+    buildCP = new LinkedList<File>();
+    projectFilesCP = new LinkedList<File>();
+    externalFilesCP = new LinkedList<File>();
+    extraCP = new LinkedList<File>();
+//    systemCP = new LinkedList<File>();
+//    openFilesCP = new LinkedList<File>();
   }
   
   /** Adds the entry to the front of the project classpath
    *  (this is the classpath specified in project properties)
    */
-  public synchronized void addProjectCP(URL f) { projectCP.add(0, new ClassPathEntry(f)); }
+  public synchronized void addProjectCP(File f) { projectCP.add(f); }
   
-  public synchronized ClassPathEntry[] getProjectCP() { 
-    return projectCP.toArray(new ClassPathEntry[projectCP.size()]); 
-  }
+  public synchronized Iterable<File> getProjectCP() { return IterUtil.reverse(projectCP); }
   
   /** Adds the entry to the front of the build classpath. */
-  public synchronized void addBuildDirectoryCP(URL f) {
-    buildCP.addFirst(new ClassPathEntry(f));
-  }
+  public synchronized void addBuildDirectoryCP(File f) { buildCP.add(f); }
 
-  public synchronized ClassPathEntry[] getBuildDirectoryCP() { 
-    return buildCP.toArray(new ClassPathEntry[buildCP.size()]); 
-  }
+  public synchronized Iterable<File> getBuildDirectoryCP() { return IterUtil.reverse(buildCP); }
   
   /** Adds the entry to the front of the project files classpath (this is the classpath for all open project files). */
-  public synchronized void addProjectFilesCP(URL f) { projectFilesCP.addFirst(new ClassPathEntry(f)); }
+  public synchronized void addProjectFilesCP(File f) { projectFilesCP.add(f); }
   
-  public synchronized ClassPathEntry[] getProjectFilesCP() { 
-    return projectFilesCP.toArray(new ClassPathEntry[projectFilesCP.size()]); 
-  }
+  public synchronized Iterable<File> getProjectFilesCP() { return IterUtil.reverse(projectFilesCP); }
   
   /** Adds new entry containing f to the front of the external classpath. */
-  public void addExternalFilesCP(URL f) { externalFilesCP.add(0, new ClassPathEntry(f)); }
+  public void addExternalFilesCP(File f) { externalFilesCP.add(f); }
   
-  public ClassPathEntry[] getExternalFilesCP() { 
-    return externalFilesCP.toArray(new ClassPathEntry[externalFilesCP.size()]); 
-  }
+  public Iterable<File> getExternalFilesCP() { return IterUtil.reverse(externalFilesCP); }
   
   /** Adds the entry to the front of the extra classpath. */
-  public synchronized void addExtraCP(URL f) { extraCP.addFirst(new ClassPathEntry(f)); }
+  public synchronized void addExtraCP(File f) { extraCP.add(f); }
   
-  public ClassPathEntry[] getExtraCP() { return extraCP.toArray(new ClassPathEntry[extraCP.size()]); }
+  public Iterable<File> getExtraCP() { return IterUtil.reverse(extraCP); }
   
   /** Returns a new classloader that represents the custom classpath. */
   public synchronized ClassLoader getClassLoader() {
@@ -112,26 +105,16 @@ public class ClassPathManager{
   }
   
   /** Builds a new classloader for the list of classpath entries. */
-  private ClassLoader buildClassLoader(List<ClassPathEntry>locpe) {
-    ClassLoader c = new DeadClassLoader();
-    for(ClassPathEntry cpe: locpe) { c = cpe.getClassLoader(c); }
-    return c;
-  }
-
-  /** Returns a copy of the list of unique entries on the classpath. */
-  public synchronized ClassPathVector getAugmentedClassPath() {
-    ClassPathVector ret = new ClassPathVector();
-  
-    for (ClassPathEntry e: getProjectCP()) { ret.add(e.getEntry()); }
-
-    for (ClassPathEntry e: getBuildDirectoryCP()) { ret.add(e.getEntry()); }
-
-    for (ClassPathEntry e: getProjectFilesCP()) { ret.add(e.getEntry()); }
-
-    for (ClassPathEntry e: getExternalFilesCP()) { ret.add(e.getEntry()); }
-
-    for (ClassPathEntry e: getExtraCP()) { ret.add(e.getEntry()); }
-    return ret;
+  private ClassLoader buildClassLoader(List<File> path) {
+    List<URL> urls = new LinkedList<URL>();
+    for (File f : path) {
+      try {
+        URL u = f.toURI().toURL();
+        urls.add(u);
+      }
+      catch (MalformedURLException e) { error.log("Can't convert file to URL", e); }
+    }
+    return new URLClassLoader(urls.toArray(new URL[urls.size()]), new DeadClassLoader());
   }
 
 }

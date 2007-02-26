@@ -38,7 +38,6 @@ import java.util.List;
 import java.io.File;
 
 import edu.rice.cs.util.newjvm.*;
-import edu.rice.cs.util.ClassPathVector;
 
 /**
  * This interface specifies the methods that the interpreter JVM exposes
@@ -97,7 +96,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   public boolean setToDefaultInterpreter() throws RemoteException;
 
   /** Returns a copy of the list of unique entries on the classpath. */
-  public ClassPathVector getAugmentedClassPath() throws RemoteException;
+  public Iterable<File> getAugmentedClassPath() throws RemoteException;
 
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable
@@ -124,34 +123,29 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
    */
   public void interpret(String s) throws RemoteException;
   
-  /** Adds the given path to the classpath shared by ALL Java interpreters.  This method <b>cannot</b> take multiple 
-   *  paths separated by a path separator; it must be called separately for each path. Only unique paths are added.
-   *  @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters.  Only unique paths are added.
+   *  @param f Entry to add to the accumulated classpath
    */
-  public void addProjectClassPath(String s) throws RemoteException;
+  public void addProjectClassPath(File f) throws RemoteException;
   
-  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple 
-   *  paths separated by a path separator; it must be called separately for each path. Only unique paths are added.
-   *  @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters. Only unique paths are added.
+   *  @param f Entry to add to the accumulated classpath
    */
-  public void addBuildDirectoryClassPath(String s) throws RemoteException;
+  public void addBuildDirectoryClassPath(File f) throws RemoteException;
   
-  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple 
-   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
-   *  @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters. Only unique paths are added.
+   *  @param f Entry to add to the accumulated classpath
    */
-  public void addProjectFilesClassPath(String s) throws RemoteException;
+  public void addProjectFilesClassPath(File f) throws RemoteException;
   
-  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple 
-   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
-   *  @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters. Only unique paths are added.
+   *  @param f Entry to add to the accumulated classpath
    */
-  public void addExternalFilesClassPath(String s) throws RemoteException;
+  public void addExternalFilesClassPath(File f) throws RemoteException;
   
-  /** Adds the given path to the classpath shared by ALL Java interpreters.  This method <b>cannot</b> take multiple 
-   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
-   *  @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters.  Only unique paths are added.
+   *  @param f Entry to add to the accumulated classpath
    */
-  public void addExtraClassPath(String s) throws RemoteException;
+  public void addExtraClassPath(File f) throws RemoteException;
   
 }

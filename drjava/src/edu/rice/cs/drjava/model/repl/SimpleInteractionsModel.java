@@ -33,7 +33,6 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.net.URL;
 import java.io.File;
 
 
@@ -113,27 +112,27 @@ public class SimpleInteractionsModel extends InteractionsModel {
   /** Adds the given path to the interpreter's classpath.
    *  @param path Path to add
    */
-  public void addProjectClassPath(URL path) { _interpreter.addProjectClassPath(path); }
+  public void addProjectClassPath(File path) { _interpreter.addProjectClassPath(path); }
 
   /** Adds the given path to the interpreter's classpath.
    *  @param path Path to add
    */
-  public void addBuildDirectoryClassPath(URL path) { _interpreter.addBuildDirectoryClassPath(path); }
+  public void addBuildDirectoryClassPath(File path) { _interpreter.addBuildDirectoryClassPath(path); }
 
   /** Adds the given path to the interpreter's classpath.
    *  @param path Path to add
    */
-  public void addProjectFilesClassPath(URL path) { _interpreter.addProjectFilesClassPath(path); }
+  public void addProjectFilesClassPath(File path) { _interpreter.addProjectFilesClassPath(path); }
 
   /** Adds the given path to the interpreter's classpath.
    *  @param path Path to add
    */
-  public void addExternalFilesClassPath(URL path) { _interpreter.addExternalFilesClassPath(path); }
+  public void addExternalFilesClassPath(File path) { _interpreter.addExternalFilesClassPath(path); }
 
   /** Adds the given path to the interpreter's classpath.
    *  @param path Path to add
    */
-  public void addExtraClassPath(URL path) { _interpreter.addExtraClassPath(path); }
+  public void addExtraClassPath(File path) { _interpreter.addExtraClassPath(path); }
 
 
   /** Defines a variable in the interpreter to the given value. */

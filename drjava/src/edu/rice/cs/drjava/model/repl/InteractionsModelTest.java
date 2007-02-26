@@ -47,8 +47,6 @@ import edu.rice.cs.util.text.EditDocumentException;
 import java.io.File;
 import java.io.IOException;
 
-import java.net.URL;
-
 import java.rmi.RemoteException;
 
 /** Tests the functionality of an InteractionsModel.
@@ -471,11 +469,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       return null;
     }
     
-    public void addProjectClassPath(URL path) { fail("cannot add to classpath in a test"); }
-    public void addBuildDirectoryClassPath(URL path) { fail("cannot add to classpath in a test"); }
-    public void addProjectFilesClassPath(URL path) { fail("cannot add to classpath in a test"); }
-    public void addExternalFilesClassPath(URL path) { fail("cannot add to classpath in a test"); }
-    public void addExtraClassPath(URL path) { fail("cannot add to classpath in a test"); }
+    public void addProjectClassPath(File path) { fail("cannot add to classpath in a test"); }
+    public void addBuildDirectoryClassPath(File path) { fail("cannot add to classpath in a test"); }
+    public void addProjectFilesClassPath(File path) { fail("cannot add to classpath in a test"); }
+    public void addExternalFilesClassPath(File path) { fail("cannot add to classpath in a test"); }
+    public void addExtraClassPath(File path) { fail("cannot add to classpath in a test"); }
     protected void _resetInterpreter(File wd) { fail("cannot reset interpreter in a test"); }
     
     protected void _notifyInteractionStarted() { }

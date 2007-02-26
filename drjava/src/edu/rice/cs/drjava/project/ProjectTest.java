@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.project;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import static edu.rice.cs.util.StringOps.convertToLiteral;
 
@@ -115,7 +116,7 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("number of source files", 7, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
-    assertEquals("number of classpaths", 1, pfir.getClassPaths().length);
+    assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
     File base = f.getParentFile();
     assertEquals("first source filename", new File(base,"src/sexp/Atom.java").getPath(), pfir.getSourceFiles()[0].getPath());
     assertEquals("mod-date value", 
@@ -131,7 +132,7 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("work-dir name", new File(base, "src").getCanonicalPath(), 
                  pfir.getWorkingDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
-                 pfir.getClassPaths()[0].getCanonicalPath());
+                 IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
     assertEquals("main-class name", new File(base, "src/sexp/SEList.java").getCanonicalPath(), 
                  pfir.getMainClass().getCanonicalPath());
   }
@@ -176,7 +177,7 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("number of source files", 7, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
-    assertEquals("number of classpaths", 1, pfir.getClassPaths().length);
+    assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
     File base = f.getParentFile();
     File root = new File(base, "src");
     assertEquals("proj-root-and-base", root.getPath(), pfir.getProjectRoot().getPath());
@@ -194,7 +195,7 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("work-dir name", new File(base, "src").getCanonicalPath(), 
                  pfir.getWorkingDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(base, "src/edu/rice/cs/lib").getCanonicalPath(), 
-                 pfir.getClassPaths()[0].getCanonicalPath());
+                 IterUtil.first(pfir.getClassPaths()).getCanonicalPath());
     assertEquals("main-class name", new File(root, "sexp/SEList.java").getCanonicalPath(), 
                  pfir.getMainClass().getCanonicalPath());
   }
@@ -250,7 +251,7 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("number of source files", 5, pfir.getSourceFiles().length);
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 1, pfir.getCollapsedPaths().length);
-    assertEquals("number of classpaths", 1, pfir.getClassPaths().length);
+    assertEquals("number of classpaths", 1, IterUtil.sizeOf(pfir.getClassPaths()));
 
     String base = pf.getParent();
     
@@ -263,7 +264,7 @@ public class ProjectTest extends DrJavaTestCase {
     assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);
     assertEquals("build-dir name", buildDir, pfir.getBuildDirectory());
     assertEquals("work-dir name", srcDir, pfir.getWorkingDirectory());
-    assertEquals("classpath name", new File(parent,"lib"), pfir.getClassPaths()[0]);
+    assertEquals("classpath name", new File(parent,"lib"), IterUtil.first(pfir.getClassPaths()));
     assertEquals("main-class name", new File(parent,"/dir1/testfile1.java"), pfir.getMainClass());
     pf.delete();
   }

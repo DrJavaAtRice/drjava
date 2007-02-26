@@ -47,7 +47,6 @@ import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.newjvm.ExecJVM;
-import edu.rice.cs.util.classloader.ToolsJarClassLoader;
 import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.drjava.ui.MainFrame;

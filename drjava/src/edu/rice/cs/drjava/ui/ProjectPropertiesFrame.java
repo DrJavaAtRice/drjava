@@ -49,7 +49,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.config.*;
 
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
@@ -198,8 +198,8 @@ public class ProjectPropertiesFrame extends JFrame {
     if (mc == null) mcTextField.setText("");
     else _mainDocumentSelector.setFileField(mc);
 
-    ClassPathVector cp = _model.getExtraClassPath();
-    _extraClassPathList.setValue(cp.asFileVector());
+    Vector<File> cp = new Vector<File>(IterUtil.asList(_model.getExtraClassPath()));
+    _extraClassPathList.setValue(cp);
     _applyButton.setEnabled(false);
   }
 
@@ -228,9 +228,7 @@ public class ProjectPropertiesFrame extends JFrame {
     _model.setMainClass(mc);
 
     Vector<File> extras = _extraClassPathList.getValue();
-    ClassPathVector cpv = new ClassPathVector();
-    for (File cf : extras) { cpv.add(cf); }
-    _model.setExtraClassPath(cpv);
+    _model.setExtraClassPath(IterUtil.snapshot(extras));
 
     //    _mainFrame.saveProject();
     if (projRootChanged) {

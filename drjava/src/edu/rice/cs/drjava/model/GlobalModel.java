@@ -50,7 +50,6 @@ import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.docnavigation.IDocumentNavigator;
@@ -245,10 +244,10 @@ public interface GlobalModel extends ILoadDocuments {
    *  @param fileName Name of the source file to look for
    *  @param paths An array of directories to search
    */
-  public File findFileInPaths(String fileName, List<File> paths);
+  public File findFileInPaths(String fileName, Iterable<File> paths);
 
-  /** Gets an array of all sourceRoots for the open definitions documents, without duplicates. */
-  public File[] getSourceRootSet();
+  /** Gets a list of all sourceRoots for the open definitions documents, without duplicates. */
+  public Iterable<File> getSourceRootSet();
 
 //  /** Return the absolute path of the file with the given index, or "(untitled)" if no file exists. */
 //  public String getDisplayFullPath(int index);
@@ -315,7 +314,7 @@ public interface GlobalModel extends ILoadDocuments {
   /** Returns the current classpath in use by the Interpreter JVM. This includes the original jvm classpath, the global
    *  drjava extra classpaths, and the project extra classpaths.
    */
-  public ClassPathVector getInteractionsClassPath();
+  public Iterable<File> getInteractionsClassPath();
 
   // TODO: Move history methods to a more appropriate home.
 
@@ -364,7 +363,7 @@ public interface GlobalModel extends ILoadDocuments {
   /** Get the class path to be used in all class-related operations.
    *  TODO: Insure that this is used wherever appropriate.
    */
-  public ClassPathVector getClassPath();
+  public Iterable<File> getClassPath();
 
   // TODO: comment
   public PageFormat getPageFormat();
@@ -449,12 +448,12 @@ public interface GlobalModel extends ILoadDocuments {
   /** Returns only the project's extra classpaths.
     *  @return The classpath entries loaded along with the project
     */
-  public ClassPathVector getExtraClassPath();
+  public Iterable<File> getExtraClassPath();
   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
     *  project preferences.
     */
-  public void setExtraClassPath(ClassPathVector cp);
+  public void setExtraClassPath(Iterable<File> cp);
   
   /** Sets the create jar file of the project. */
   public void setCreateJarFile(File f);

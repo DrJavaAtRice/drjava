@@ -62,7 +62,7 @@ public interface ProjectFileIR {
   public String[] getCollapsedPaths();
     
   /** @return an array full of all the classpath path elements in the classpath for this project file */
-  public File[] getClassPaths();
+  public Iterable<File> getClassPaths();
   
   /** @return the name of the file that holds the Jar main class associated with this project */
   public File getMainClass();
@@ -91,7 +91,7 @@ public interface ProjectFileIR {
   public void setSourceFiles(List<DocFile> sf);
   public void setAuxiliaryFiles(List<DocFile> aux);
   public void setCollapsedPaths(List<String> paths);
-  public void setClassPaths(List<? extends File> cp);
+  public void setClassPaths(Iterable<? extends File> cp);
   public void setBuildDirectory(File dir);
   public void setWorkingDirectory(File dir);
   public void setMainClass(File main);

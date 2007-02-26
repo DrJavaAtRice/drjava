@@ -77,7 +77,8 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.project.*;
 
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.util.ClassPathVector;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -771,7 +772,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         JavadocModel jm = _model.getJavadocModel();
         File suggestedDir = jm.suggestJavadocDestination(_model.getActiveDocument());
         _javadocSelector.setSuggestedDir(suggestedDir);
-        String cps = _model.getClassPath().toString();
+        String cps = IOUtil.pathToString(_model.getClassPath());
         jm.javadocAll(_javadocSelector, _saveSelector, cps);
       }
       catch (IOException ioe) { _showIOError(ioe); }
@@ -1827,15 +1828,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Displays the interactions classpath. */  
   public void viewInteractionsClassPath() {
-    final StringBuilder cpBuf = new StringBuilder();
-    ClassPathVector classPathElements = _model.getInteractionsClassPath();
-    for(int i = 0; i < classPathElements.size(); i++) {
-      cpBuf.append(classPathElements.get(i).getPath());
-      if (i + 1 < classPathElements.size()) cpBuf.append("\n");
-    }
-    String classPath = cpBuf.toString();
-    
-    new DrJavaScrollableDialog(this, "Interactions Classpath", "Current Interpreter Classpath", classPath).show();
+    String cp = IterUtil.multilineToString(_model.getInteractionsClassPath());
+    new DrJavaScrollableDialog(this, "Interactions Classpath", "Current Interpreter Classpath", cp).show();
   }
  
   /** Shows the user documentation. */

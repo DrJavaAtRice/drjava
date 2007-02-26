@@ -44,6 +44,7 @@ import java.io.*;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.FileOps;
@@ -127,7 +128,7 @@ public class ProjectProfile implements ProjectFileIR {
   public String[] getCollapsedPaths() { return _collapsedPaths.toArray(new String[_collapsedPaths.size()]); }
     
   /** @return an array full of all the classpath path elements in the classpath for this project file */
-  public File[] getClassPaths() { return _classPathFiles.toArray(new File[_classPathFiles.size()]); }
+  public Iterable<File> getClassPaths() { return _classPathFiles; }
   
   /** @return the name of the file that holds the Jar main class associated with this project */
   public File getMainClass() { return _mainClass; }
@@ -182,7 +183,10 @@ public class ProjectProfile implements ProjectFileIR {
   public void setWorkingDirectory(File dir) { _workDir = FileOps.validate(dir); }
   public void setMainClass(File main) { _mainClass = main;  }
   public void setSourceFiles(List<DocFile> sf) { _sourceFiles = new ArrayList<DocFile>(sf); }
-  public void setClassPaths(List<? extends File> cpf) { _classPathFiles = new ArrayList<File>(cpf); }
+  public void setClassPaths(Iterable<? extends File> cpf) {
+    _classPathFiles = new ArrayList<File>();
+    for (File f : cpf) { _classPathFiles.add(f); }
+  }
   public void setCollapsedPaths(List<String> cp) { _collapsedPaths = new ArrayList<String>(cp); }
   public void setAuxiliaryFiles(List<DocFile> af) { _auxFiles = new ArrayList<DocFile>(af); }
 

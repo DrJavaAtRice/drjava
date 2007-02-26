@@ -35,11 +35,15 @@ package edu.rice.cs.util.newjvm;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 
 import java.rmi.*;
 import java.rmi.server.*;
 import java.io.*;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Properties;
+import java.util.Map;
 
 /** An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
  *  machine. This class is used by subclassing it. (See package documentation for more details.)
@@ -182,6 +186,17 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     
     final String[] args = new String[] { _masterStubFile.getAbsolutePath(), _slaveClassName };
     
+    LinkedList<String> fullJVMArgs = new LinkedList<String>(Arrays.asList(jvmArgs));
+    Properties propagate = ConcurrentUtil.getProperties("plt.", "drjava.", "edu.rice.cs.");
+    if (propagate.containsKey("plt.debug.log") || propagate.containsKey("plt.error.log") || 
+        propagate.containsKey("plt.log.factory")) {
+      propagate.put("plt.log.working.dir", System.getProperty("user.dir", ""));
+    }
+    for (Map.Entry<Object, Object> entry : propagate.entrySet()) {
+      fullJVMArgs.addFirst("-D" + entry.getKey() + "=" + entry.getValue());
+    }
+    final String[] jvmArgsArray = fullJVMArgs.toArray(new String[0]);
+    
     // Start a thread to create the slave JVM and wait for it to die.  When it dies, delegate what to do (restart?) 
     // to subclass
     _monitorThread = new Thread(_waitForQuitThreadName) {
@@ -190,7 +205,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
           
           _log.log(AbstractMasterJVM.this + " is STARTING a Slave JVM with args " + Arrays.asList(args));
           
-          final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs, workDir);
+          final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgsArray, workDir);
           _log.log(AbstractMasterJVM.this + " CREATED Slave JVM process " + process + " with " + asString());
           
           int status = process.waitFor();

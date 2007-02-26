@@ -59,7 +59,6 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 //import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.text.SwingDocument;
@@ -68,6 +67,7 @@ import edu.rice.cs.util.swing.Utilities;
 import org.apache.bcel.classfile.*;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Manages unit testing via JUnit.
   * @version $Id$
@@ -200,12 +200,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Runs JUnit on the current document.  Forces the user to compile all open source documents before proceeding. */
   public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {
+    debug.logStart("junit(doc)");
 //    new ScrollableDialog(null, "junit(" + doc + ") called in DefaultJunitModel", "", "").show();
     File testFile;
     try { 
       testFile = doc.getFile(); 
       if (testFile == null) {  // document is untitiled: abort unit testing and return
         nonTestCase(false);
+        debug.logEnd("junit(doc): no corresponding file");
         return;
       }
     } 
@@ -214,6 +216,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
     lod.add(doc);
     junitOpenDefDocs(lod, false);
+    debug.logEnd("junit(doc)");
   }
   
   /** Ensures that all documents have been compiled since their last modification and then delegates the actual testing
@@ -232,11 +235,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     // Gets system classpaths from the main JVM so that junit tests can find every class file.
     // Given as one long String, this separates the paths into a list of strings. 3/12/05
 
-//    LinkedList<String> classpaths = separateClasspath(getClasspath().toString());
+//    LinkedList<String> classpaths = separateClasspath(IOUtil.pathToString(getClasspath()));
     
     // new ScrollableDialog(null, "classpaths assembled in junitOpenDefDocs: " + classpaths, "", "").show();
     
-    if (_model.hasOutOfSyncDocuments() || _model.hasModifiedDocuments()) { 
+    if (_model.hasOutOfSyncDocuments() || _model.hasModifiedDocuments()) {
       /* hasOutOfSyncDocments() can return false when some documents have not been successfully compiled; the granularity
          of time-stamping and the presence of multiple classes in a file (some of which compile successfully) can produce 
          \false reports.  */
@@ -273,7 +276,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Runs all TestCases in the document list lod; assumes all documents have been compiled. It finds the TestCase 
    *  classes by searching the build directories for the documents. */
   private void _rawJUnitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests) {
-
     File buildDir = _model.getBuildDirectory();
 //    System.err.println("Build directory is " + buildDir);
     
@@ -426,7 +428,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       catch(IOException e) { throw new UnexpectedException(e); }
       
       if (tests == null || tests.isEmpty()) {
-//        Utilities.show("Set of test classes is empty!");
         nonTestCase(allTests);
         return;
       }
@@ -516,7 +517,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public File getFileForClassName(String className) { return _model.getSourceFile(className + ".java"); }
   
   /** Returns the current classpath in use by the JUnit JVM, in the form of a path-separator delimited string. */
-  public ClassPathVector getClassPath() {  return _jvm.getClassPath(); }
+  public Iterable<File> getClassPath() {  return _jvm.getClassPath(); }
   
   /** Called when the JVM used for unit tests has registered. */
   public void junitJVMReady() {

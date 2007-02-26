@@ -41,9 +41,6 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import java.rmi.RemoteException;
 
 import java.util.ArrayList;
@@ -57,10 +54,8 @@ import java.util.TreeMap;
 import javax.swing.text.BadLocationException;
 import javax.swing.SwingUtilities;
 
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.drjava.model.FileSaveSelector;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.NullFile;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
@@ -68,7 +63,8 @@ import edu.rice.cs.util.newjvm.AbstractMasterJVM;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.ReverseIterable;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.io.IOUtil;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -140,12 +136,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       File buildDir = _state.getBuildDirectory();
       if (buildDir != null) {
         //        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
-        try {
-          _jvm.addBuildDirectoryClassPath(FileOps.toURL(new File(buildDir.getAbsolutePath())));
-        } catch(MalformedURLException murle) {
-          // edit this later! this is bad! we should handle this exception better!
-          throw new RuntimeException(murle);
-        }
+        _jvm.addBuildDirectoryClassPath(IOUtil.attemptAbsoluteFile(buildDir));
       }
     }
     
@@ -281,7 +272,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       if (!results.containsKey(tVersion)) { results.put(tVersion, t); }
     }
     
-    return ReverseIterable.make(results.values());
+    return IterUtil.reverse(results.values());
   }
   
 
@@ -299,14 +290,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _state.setBuildDirectory(f);
     if (f != null) {
       //      System.out.println("adding: " + f.getAbsolutePath());
-      try {
-        _jvm.addBuildDirectoryClassPath(FileOps.toURL(new File(f.getAbsolutePath())));
-      }
-      catch(MalformedURLException murle) {
-        // TODO! change this! we should handle this exception better!
-        // show a popup like "invalide build directory" or something
-        throw new RuntimeException(murle);
-      }
+      _jvm.addBuildDirectoryClassPath(IOUtil.attemptAbsoluteFile(f));
     }
     
     _notifier.projectBuildDirChanged();
@@ -360,22 +344,16 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    *  if a valid directory cannot be determined.  In that case, the former working directory is used.
    */
   public void resetInteractions(File wd, boolean forceReset) {
-//    _log.log("DefaultGlobalModel.resetInteractions called");
     File workDir = _interactionsModel.getWorkingDirectory();
     if (wd == null) { wd = workDir; }
-//    _log.log("New working directory = " + wd +"; current working directory = " + workDir + ";");
 
     if (! forceReset && ! _jvm.slaveJVMUsed() && ! isClassPathChanged() && wd.equals(workDir)) {
     // Eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
-//      _log.log("Suppressing resetting of interactions pane");
       _interactionsModel._notifyInterpreterReady(wd);
       return; 
     }
-//    _log.log("Resetting interactions with working directory = " + wd);
-    if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {    
-      // update the setting
-      DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
-    }
+    // update the setting
+    DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
     _interactionsModel.resetInterpreter(wd);
   }
 
@@ -433,7 +411,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 
 
   /** Returns the current classpath in use by the Interpreter JVM. */
-  public ClassPathVector getInteractionsClassPath() { return _jvm.getClassPath(); }
+  public Iterable<File> getInteractionsClassPath() { return _jvm.getClassPath(); }
   
   /** Sets whether or not the Interactions JVM will be reset after a compilation succeeds.  This should ONLY be used 
    *  in tests!  This method is not supported by AbstractGlobalModel.
@@ -537,7 +515,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       */
     public void generateJavadoc(FileSaveSelector saver) throws IOException {
       // Use the model's classpath, and use the EventNotifier as the listener
-      _javadocModel.javadocDocument(this, saver, getClassPath().toString());
+      _javadocModel.javadocDocument(this, saver, IOUtil.pathToString(getClassPath()));
     }
 
     /** Called to indicate the document is being closed, so to remove all related state from the debug manager. */
@@ -567,15 +545,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    */
   protected void addDocToClassPath(OpenDefinitionsDocument doc) {
     try {
-      File classPath = doc.getSourceRoot();
-      try {
-        URL pathURL = FileOps.toURL(classPath);
-        if (doc.isAuxiliaryFile())
-          _interactionsModel.addProjectFilesClassPath(pathURL);
-        else _interactionsModel.addExternalFilesClassPath(pathURL);
-        setClassPathChanged(true);
-      }
-      catch(MalformedURLException murle) {  /* fail silently */ }
+      File sourceRoot = doc.getSourceRoot();
+      if (doc.isAuxiliaryFile()) { _interactionsModel.addProjectFilesClassPath(sourceRoot); }
+      else { _interactionsModel.addExternalFilesClassPath(sourceRoot); }
+      setClassPathChanged(true);
     }
     catch (InvalidPackageException e) {
       // Invalid package-- don't add it to classpath
@@ -626,12 +599,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Get the class path to be used in all class-related operations.
    *  TODO: Insure that this is used wherever appropriate.
    */
-  public ClassPathVector getClassPath() {
-    ClassPathVector result = new ClassPathVector();
+  public Iterable<File> getClassPath() {
+    Iterable<File> result = IterUtil.empty();
     
     if (isProjectActive()) {
       File buildDir = getBuildDirectory();
-      if (buildDir != null) { _addFileToClassPath(buildDir, result); }
+      if (buildDir != null) { result = IterUtil.compose(result, buildDir); }
       
       /* We prefer to assume the project root is the project's source root, rather than
        * checking *every* file in the project for its source root.  This is a bit problematic,
@@ -641,69 +614,45 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
        * Interactions.
        */
       File projRoot = getProjectRoot();
-      if (projRoot != null) { _addFileToClassPath(projRoot, result); }
+      if (projRoot != null) { result = IterUtil.compose(result, projRoot); }
       
-      ClassPathVector projectExtras = getExtraClassPath();
-      if (projectExtras != null) { result.addAll(projectExtras); }
+      Iterable<File> projectExtras = getExtraClassPath();
+      if (projectExtras != null) { result = IterUtil.compose(result, projectExtras); }
     }
-    else {
-      for (File f : getSourceRootSet()) { _addFileToClassPath(f, result); }
-    }
-      
+    else { result = IterUtil.compose(result, getSourceRootSet()); }
+    
     Vector<File> globalExtras = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
-    if (globalExtras != null) {
-      for (File f : globalExtras) { _addFileToClassPath(f, result); }
-    }
+    if (globalExtras != null) { result = IterUtil.compose(result, globalExtras); }
     
     /* We must add JUnit to the class path.  We do so by including the current JVM's class path.
      * This is not ideal, because all other classes on the current class path (including all of DrJava's
      * internal classes) are also included.  But we're probably stuck doing something like this if we
      * want to continue bundling JUnit with DrJava.
      */
-    String currentClassPath = System.getProperty("java.class.path");
-    if (currentClassPath != null) {
-      // TODO: Parsing this string needs to only happen once, not every time this method is invoked.
-      StringTokenizer tokens = new StringTokenizer(currentClassPath, File.pathSeparator);
-      while (tokens.hasMoreTokens()) {
-        _addFileToClassPath(new File(tokens.nextToken()), result);
-      }
-    }
+    // TODO: Parsing this string needs to only happen once, not every time this method is invoked.
+    String systemPath = System.getProperty("java.class.path", "");
+    result = IterUtil.compose(result, IOUtil.attemptAbsoluteFiles(IOUtil.parsePath(systemPath)));
     
     return result;
   }
     
-  /** Helper for getClassPath: add a File, rather than a URL, to the given path */
-  private void _addFileToClassPath(File f, ClassPathVector cp) {
-    /* TODO: This conversion should be done somewhere where errors can be reported to the user --
-      for example, when a file is selected in the preferences dialog. */
-    try { cp.add(FileOps.toURL(f)); }
-    catch (MalformedURLException e) { /* ignore */ }
-  }
-  
   /** Adds the project root (if a project is open), the source roots for other open documents, the paths in the 
     * "extra classpath" config option, as well as any project-specific classpaths to the interpreter's classpath. 
     * This method is called in DefaultInteractionsModel when the interpreter becomes ready.
     */
   public void resetInteractionsClassPath() {
-    ClassPathVector projectExtras = getExtraClassPath();
+    Iterable<File> projectExtras = getExtraClassPath();
     //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
-    if (projectExtras != null)  for (URL cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
+    if (projectExtras != null)  for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
     
     Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if (cp != null) {
-      for (File f : cp) {
-        try { _interactionsModel.addExtraClassPath(FileOps.toURL(f)); }
-        catch(MalformedURLException murle) {
-          System.out.println("File " + f + " in your extra classpath could not be parsed to a URL; " +
-                             "it may contain un-URL-encodable characters.");
-        }
-      }
+      for (File f : cp) { _interactionsModel.addExtraClassPath(f); }
     }
     
     for (OpenDefinitionsDocument odd: getAuxiliaryDocuments()) {
       // this forwards directly to InterpreterJVM.addClassPath(String)
-      try { _interactionsModel.addProjectFilesClassPath(FileOps.toURL(odd.getSourceRoot())); }
-      catch(MalformedURLException murle) { /* fail silently */ }
+      try { _interactionsModel.addProjectFilesClassPath(odd.getSourceRoot()); }
       catch(InvalidPackageException e) {  /* ignore it */ }
     }
     
@@ -711,16 +660,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // this forwards directly to InterpreterJVM.addClassPath(String)
       try { 
         File sourceRoot = odd.getSourceRoot();
-        if (sourceRoot != null) _interactionsModel.addExternalFilesClassPath(FileOps.toURL(sourceRoot)); 
+        if (sourceRoot != null) _interactionsModel.addExternalFilesClassPath(sourceRoot); 
       }
-      catch(MalformedURLException murle) { /* ignore it */ }
       catch(InvalidPackageException e) { /* ignore it */ }
     }
     
     // add project source root to projectFilesClassPath.  All files in project tree have this root.
     
-    try { _interactionsModel.addProjectFilesClassPath(FileOps.toURL(getProjectRoot())); }
-    catch(MalformedURLException murle) { /* fail silently */ } 
+    _interactionsModel.addProjectFilesClassPath(getProjectRoot());
     setClassPathChanged(false);  // reset classPathChanged state
   }
   

@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.iter.ReverseIterable;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.Predicate;
@@ -260,7 +259,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         else { results.put(v, IterUtil.singleton(lib)); }
       }
     }
-    return ReverseIterable.make(IterUtil.collapse(results.values()));
+    return IterUtil.reverse(IterUtil.collapse(results.values()));
   }
   
   /** Add a canonicalized {@code f} to the given set if it is an existing directory */

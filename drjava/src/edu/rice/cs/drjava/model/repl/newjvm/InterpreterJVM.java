@@ -39,18 +39,17 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
+import java.util.LinkedHashSet;
 import java.io.*;
 
 import java.rmi.*;
-import java.net.URL;
-import java.net.MalformedURLException;
 
 
 // NOTE: Do NOT import/use the config framework in this class!
 //  (This class runs in a different JVM, and will not share the config object)
 
 
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
@@ -58,13 +57,13 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.newjvm.*;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.ClassPathEntry;
 
 // For Windows focus fix
 import javax.swing.JDialog;
@@ -97,7 +96,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private final Hashtable<String,InterpreterData> _interpreters;
  
   /** The currently accumulated classpath for all Java interpreters.  List contains unqiue entries. */
-  private final ClassPathVector _classPath;
+  private final Set<File> _classPath;
   
   /** Responsible for running JUnit tests in this JVM. */
   private final JUnitTestManager _junitTestManager;
@@ -123,7 +122,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Private constructor; use the singleton ONLY instance. */
   private InterpreterJVM() {
 
-    _classPath = new ClassPathVector();
+    _classPath = new LinkedHashSet<File>();
     _classPathManager = new ClassPathManager();
     _defaultInterpreter = new InterpreterData(new DynamicJavaAdapter(_classPathManager));
     _interpreters = new Hashtable<String,InterpreterData>();
@@ -566,7 +565,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    *  @return the class names that are actually test cases
    */
   public List<String> findTestClasses(List<String> classNames, List<File> files) throws RemoteException {
-    // new ScrollableDialog(null, "InterpterJVM.findTestClasses invoked", "", "").show();
     return _junitTestManager.findTestClasses(classNames, files);
   }
   
@@ -575,7 +573,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    *  @return false if no test suite is cached; true otherwise
    */
   public boolean runTestSuite() throws RemoteException {
-    // new ScrollableDialog(null, "InterpreterJVM.runTestSuite() called!", "", "").show();
     return _junitTestManager.runTestSuite();
   }
   
@@ -677,33 +674,31 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   protected /* synchronized */ void _updateInterpreterClassPath(JavaInterpreter interpreter) {
     
-    for (ClassPathEntry e: _classPathManager.getProjectCP())
-      interpreter.addProjectClassPath(e.getEntry());
+    for (File f : _classPathManager.getProjectCP())
+      interpreter.addProjectClassPath(f);
     
-    for (ClassPathEntry e: _classPathManager.getBuildDirectoryCP())
-      interpreter.addBuildDirectoryClassPath(e.getEntry());
+    for (File f : _classPathManager.getBuildDirectoryCP())
+      interpreter.addBuildDirectoryClassPath(f);
     
-    for (ClassPathEntry e: _classPathManager.getProjectFilesCP())
-      interpreter.addProjectFilesClassPath(e.getEntry());
+    for (File f : _classPathManager.getProjectFilesCP())
+      interpreter.addProjectFilesClassPath(f);
     
-    for (ClassPathEntry e: _classPathManager.getExternalFilesCP())
-      interpreter.addExternalFilesClassPath(e.getEntry());
+    for (File f : _classPathManager.getExternalFilesCP())
+      interpreter.addExternalFilesClassPath(f);
     
-    for (ClassPathEntry e: _classPathManager.getExtraCP())
-      interpreter.addExtraClassPath(e.getEntry());
+    for (File f : _classPathManager.getExtraCP())
+      interpreter.addExtraClassPath(f);
   }
   
-  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple
-   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
-   *  @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters.  Only unique paths are added.
+   *  @param f  Entry to add to the accumulated classpath
    */
-  public synchronized void addExtraClassPath(URL s) {
-    //_dialog("add classpath: " + s);
-    if (_classPath.contains(s)) return;    // Don't add it again
+  public synchronized void addExtraClassPath(File f) {
+    if (_classPath.contains(f)) return;    // Don't add it again
     
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
-      ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addExtraClassPath(s);
+      ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addExtraClassPath(f);
     }
     
     // Add to any named JavaInterpreters to be consistent
@@ -711,25 +706,23 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     while (interpreters.hasMoreElements()) {
       Interpreter interpreter = interpreters.nextElement().getInterpreter();
       if (interpreter instanceof JavaInterpreter) {
-        ((JavaInterpreter)interpreter).addExtraClassPath(s);
+        ((JavaInterpreter)interpreter).addExtraClassPath(f);
       }
     }
     
     // Keep this entry on the accumulated classpath
-    _classPath.add(s);
+    _classPath.add(f);
   }
  
-  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple 
-   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
-   *  @param s Entry to add to the accumulated classpath
+  /** Adds the given file to the classpath shared by ALL Java interpreters.  Only unique paths are added.
+   *  @param f  Entry to add to the accumulated classpath
    */
-  public synchronized void addProjectClassPath(URL s) {
-    //_dialog("add classpath: " + s);
-    if (_classPath.contains(s)) return;  // Don't add it again
+  public synchronized void addProjectClassPath(File f) {
+    if (_classPath.contains(f)) return;  // Don't add it again
     
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
-      ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addProjectClassPath(s);
+      ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addProjectClassPath(f);
     }
     
     // Add to any named JavaInterpreters to be consistent
@@ -737,25 +730,23 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     while (interpreters.hasMoreElements()) {
       Interpreter interpreter = interpreters.nextElement().getInterpreter();
       if (interpreter instanceof JavaInterpreter) {
-        ((JavaInterpreter)interpreter).addProjectClassPath(s);
+        ((JavaInterpreter)interpreter).addProjectClassPath(f);
       }
     }
     
     // Keep this entry on the accumulated classpath
-    _classPath.add(s);
+    _classPath.add(f);
   }
  
-  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple 
-   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
-   *  @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters. Only unique paths are added.
+   *  @param f  Entry to add to the accumulated classpath
    */
-  public synchronized void addBuildDirectoryClassPath(URL s) {
-    //_dialog("add classpath: " + s);
-    if (_classPath.contains(s)) return;  // Don't add it again
+  public synchronized void addBuildDirectoryClassPath(File f) {
+    if (_classPath.contains(f)) return;  // Don't add it again
     
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
-      ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addBuildDirectoryClassPath(s);
+      ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addBuildDirectoryClassPath(f);
     }
     
     // Add to any named JavaInterpreters to be consistent
@@ -763,26 +754,24 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     while (interpreters.hasMoreElements()) {
       Interpreter interpreter = interpreters.nextElement().getInterpreter();
       if (interpreter instanceof JavaInterpreter) {
-        ((JavaInterpreter)interpreter).addBuildDirectoryClassPath(s);
+        ((JavaInterpreter)interpreter).addBuildDirectoryClassPath(f);
       }
     }
     
     // Keep this entry on the accumulated classpath
-    _classPath.add(s);
+    _classPath.add(f);
   }
   
  
-  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple 
-   *  paths separated by a path separator; it must be called separately for each path.  Only unique paths are added.
-   *  @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters. Only unique paths are added.
+   *  @param f  Entry to add to the accumulated classpath
    */
-  public synchronized void addProjectFilesClassPath(URL s) {
-    //_dialog("add classpath: " + s);
-    if (_classPath.contains(s)) return;  // Don't add it again
+  public synchronized void addProjectFilesClassPath(File f) {
+    if (_classPath.contains(f)) return;  // Don't add it again
     
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
-      ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addProjectFilesClassPath(s);
+      ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addProjectFilesClassPath(f);
     }
     
     // Add to any named JavaInterpreters to be consistent
@@ -790,25 +779,23 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     while (interpreters.hasMoreElements()) {
       Interpreter interpreter = interpreters.nextElement().getInterpreter();
       if (interpreter instanceof JavaInterpreter) {
-        ((JavaInterpreter)interpreter).addProjectFilesClassPath(s);
+        ((JavaInterpreter)interpreter).addProjectFilesClassPath(f);
       }
     }
     
     // Keep this entry on the accumulated classpath
-    _classPath.add(s);
+    _classPath.add(f);
   }
  
-  /** Adds the given path to the classpath shared by ALL Java interpreters. This method <b>cannot</b> take multiple
-   *  paths separated by a path separator; it must be called separately for each path. Only unique paths are added.
-   * @param s Entry to add to the accumulated classpath
+  /** Adds the given path to the classpath shared by ALL Java interpreters. Only unique paths are added.
+   * @param f  Entry to add to the accumulated classpath
    */
-  public synchronized void addExternalFilesClassPath(URL s) {
-    //_dialog("add classpath: " + s);
-    if (_classPath.contains(s)) return;  // Don't add it again
+  public synchronized void addExternalFilesClassPath(File f) {
+    if (_classPath.contains(f)) return;  // Don't add it again
     
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
-      ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addExternalFilesClassPath(s);
+      ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addExternalFilesClassPath(f);
     }
     
     // Add to any named JavaInterpreters to be consistent
@@ -816,87 +803,28 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     while (interpreters.hasMoreElements()) {
       Interpreter interpreter = interpreters.nextElement().getInterpreter();
       if (interpreter instanceof JavaInterpreter) {
-        ((JavaInterpreter)interpreter).addExternalFilesClassPath(s);
+        ((JavaInterpreter)interpreter).addExternalFilesClassPath(f);
       }
     }
     
     // Keep this entry on the accumulated classpath
-    _classPath.add(s);
+    _classPath.add(f);
   }
   
-  /** Returns a copy of the list of unique entries on the classpath.
-   *  @return a vector of strings so that RMI doesn't have to serialize the URL object. Serializing URL objects fails
-   *  when using jsr14.
-   */
-  public synchronized ClassPathVector getAugmentedClassPath() {
-    ClassPathVector ret = new ClassPathVector();
-
-    for (ClassPathEntry e: _classPathManager.getProjectCP())  ret.add(e.getEntry().toString());
-
-    for (ClassPathEntry e: _classPathManager.getBuildDirectoryCP()) 
-      ret.add(e.getEntry().toString());
-    
-    for (ClassPathEntry e: _classPathManager.getProjectFilesCP())
-      ret.add(e.getEntry().toString());
-
-    for (ClassPathEntry e: _classPathManager.getExternalFilesCP())
-      ret.add(e.getEntry().toString());
-
-    for (ClassPathEntry e: _classPathManager.getExtraCP())
-      ret.add(e.getEntry().toString());
-
-    return ret;
+  public synchronized Iterable<File> getClassPath() {
+    Iterable<File> result = IterUtil.empty();
+    result = IterUtil.compose(result, _classPathManager.getProjectCP());
+    result = IterUtil.compose(result, _classPathManager.getBuildDirectoryCP());
+    result = IterUtil.compose(result, _classPathManager.getProjectFilesCP());
+    result = IterUtil.compose(result, _classPathManager.getExternalFilesCP());
+    result = IterUtil.compose(result, _classPathManager.getExtraCP());
+    return result;
   }
   
-  //// The following methods convert strings received
-  //// from RMI to URL objects since URL objects cannot
-  //// be successfully serialized when using JSR14.
+  public Iterable<File> getAugmentedClassPath() { return getClassPath(); }
   
-  public void addExtraClassPath(String s) {
-    try { addExtraClassPath(new URL(s)); } 
-    catch(MalformedURLException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
-  }
-  
-  public void addProjectClassPath(String s) {
-    try { addProjectClassPath(new URL(s)); } 
-    catch(MalformedURLException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
-  }
-  
-  public void addBuildDirectoryClassPath(String s) {
-    try { addBuildDirectoryClassPath(new URL(s)); } 
-    catch(MalformedURLException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
-  }
-  
-  public void addProjectFilesClassPath(String s) {
-    try { addProjectFilesClassPath(new URL(s)); } 
-    catch(MalformedURLException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
-  }
-  
-  public void addExternalFilesClassPath(String s) { 
-    try { addExternalFilesClassPath(new URL(s)); } 
-    catch(MalformedURLException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
-  }
-  
-  /** Returns the vector of URL objects as a ClasspathVector which has an intelligent toString().  The toString()
-   *  method of ClasspathVector is usable as the classpath command line argument for java, javac javadoc, and junit.
-   *  @return a vector of URLs with an intelligent toString();
-   */
-  public synchronized ClassPathVector getClassPath() {
-    ClassPathVector ret = new ClassPathVector();
-    
-    for (ClassPathEntry e: _classPathManager.getProjectCP()) ret.add(e.getEntry());
-    
-    for (ClassPathEntry e: _classPathManager.getBuildDirectoryCP()) ret.add(e.getEntry());
-    
-    for (ClassPathEntry e: _classPathManager.getProjectFilesCP()) ret.add(e.getEntry());
-    
-    for (ClassPathEntry e: _classPathManager.getExternalFilesCP()) ret.add(e.getEntry());
-    
-    for (ClassPathEntry e: _classPathManager.getExtraCP()) ret.add(e.getEntry());
-    
-    return ret;
-  } 
 }
+
 
 /** Bookkeeping class to maintain information about each interpreter, such as whether it is currently in progress. */
 class InterpreterData {

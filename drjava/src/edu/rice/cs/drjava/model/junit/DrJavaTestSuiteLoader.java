@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.model.junit;
 
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.plt.io.IOUtil;
 import junit.runner.*;
 
 /** Loads test cases from the DrJava classpath.
@@ -47,7 +48,7 @@ public class DrJavaTestSuiteLoader implements TestSuiteLoader, OptionConstants {
   
   public DrJavaTestSuiteLoader(JUnitModelCallback jmc) {
     _jmc = jmc;
-    String classPath = _jmc.getClassPath().toString();
+    String classPath = IOUtil.pathToString(_jmc.getClassPath());
     classPath += System.getProperty("path.separator");
     classPath += System.getProperty("java.class.path");
     _loader = new DrJavaTestCaseClassLoader(classPath);

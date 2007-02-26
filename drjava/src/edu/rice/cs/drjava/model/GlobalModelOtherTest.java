@@ -37,6 +37,7 @@ import java.io.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.event.*;
 import java.util.Vector;
+import java.util.Iterator;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -45,6 +46,7 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.plt.iter.IterUtil;
 
 /** A test on the GlobalModel that does deals with everything outside of simple file operations, e.g., compile, quit.
  *  @version $Id$
@@ -306,8 +308,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   public void testGetSourceRootDefaultPackage() throws BadLocationException, IOException {
 
     // Get source root (current directory only)
-    File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 0, roots.length);
+    Iterable<File> roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 0, IterUtil.sizeOf(roots));
 
      // Create temp directory
     File baseTempDir = tempDirectory();
@@ -328,9 +330,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Get source roots
     roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 1, roots.length);
+    assertEquals("number of source roots", 1, IterUtil.sizeOf(roots));
     // Get the source root for the new file in directory subdir
-    assertEquals("source root", subdir, roots[0]);
+    assertEquals("source root", subdir, IterUtil.first(roots));
     
     _log.log("testGetSourceRootDefaultPackage() completed");
   }
@@ -355,9 +357,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(new TestListener());
 
     // Since we had the package statement the source root should be base dir
-    File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir.getCanonicalFile(), roots[0].getCanonicalFile());
+    Iterable<File> roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 1, IterUtil.sizeOf(roots));
+    assertEquals("source root", baseTempDir.getCanonicalFile(), IterUtil.first(roots).getCanonicalFile());
     
     _log.log("testGetSourceRootPackageThreeDeepValid() completed");
   }
@@ -383,9 +385,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(new TestListener());
 
     // Since we had the package statement the source root should be base dir
-    File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir.getCanonicalFile(), roots[0].getCanonicalFile());
+    Iterable<File> roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 1, IterUtil.sizeOf(roots));
+    assertEquals("source root", baseTempDir.getCanonicalFile(), IterUtil.first(roots).getCanonicalFile());
     
     _log.log("testGetSourceRootPackageThreeDeepValidRelative() completed");
   }
@@ -410,8 +412,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(new TestListener());
 
     // The package name is wrong so this should return only currDir
-    File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 0, roots.length);
+    Iterable<File> roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 0, IterUtil.sizeOf(roots));
     
     _log.log("testGetSourceRootPackageThreeDeepInvalid() completed");
   }
@@ -433,9 +435,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(new TestListener());
 
     // Since we had the package statement the source root should be base dir
-    File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir.getCanonicalFile(), roots[0].getCanonicalFile());
+    Iterable<File> roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 1, IterUtil.sizeOf(roots));
+    assertEquals("source root", baseTempDir.getCanonicalFile(), IterUtil.first(roots).getCanonicalFile());
     
     _log.log("testGetSourceRootPackageOneDeepValid() completed");
   }
@@ -472,10 +474,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(new TestListener());
 
     // Get source roots (should be 2: no duplicates)
-    File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 2, roots.length);
-    File root1 = roots[0];
-    File root2 = roots[1];
+    Iterable<File> roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 2, IterUtil.sizeOf(roots));
+    Iterator<File> i = roots.iterator();
+    File root1 = i.next();
+    File root2 = i.next();
 
     // Make sure both source roots are in set
     // But we don't care about the order

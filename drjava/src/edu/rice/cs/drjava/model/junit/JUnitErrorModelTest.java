@@ -39,6 +39,8 @@ import edu.rice.cs.util.swing.Utilities;
 
 import java.io.File;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /**
  * A test on the GlobalModel for JUnit testing.
  *
@@ -140,6 +142,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 
   /** Tests that the errors array contains all encountered failures and error in the right order. */
   public void testErrorsArrayInOrder() throws Exception {
+    debug.logStart();
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
@@ -157,8 +160,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     listener.assertJUnitStartCount(1);
     // Clear document so we can make sure it's written to after startJUnit
-    _model.getJUnitModel().getJUnitDocument().remove
-      (0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
+    _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
     //final TestResult testResults = doc.startJUnit();
 
     //_m = new JUnitErrorModel(doc.getDocument(), "MonkeyTestFail", testResults);
@@ -174,6 +176,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 
     assertEquals("test case has one failure reported" + _m.getError(1).message(), _m.getError(1).isWarning(), true);
     //_model.setResetAfterCompile(true);
+    debug.logEnd();
   }
 
   /**
@@ -231,7 +234,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
    */
 
   public void testLanguageLevelJUnitErrorLine() throws Exception {
-    
+    debug.logStart();
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     OpenDefinitionsDocument doc = setupDocument(LANGUAGE_LEVEL_TEST);
     final File file = new File(_tempDir, "MyTest.dj0");
@@ -260,12 +263,13 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("the test results should have one failure "+_m.getNumErrors(), 1, _m.getNumErrors());
 
     assertEquals("the error line should be line number 2", 2, _m.getError(0).lineNumber());
-    
+    debug.logEnd();
   }
 
 
   /** Test errors that occur in superclass. */
   public void testErrorInSuperClass() throws Exception {
+    debug.logStart();
     OpenDefinitionsDocument doc1 = setupDocument(TEST_ONE);
     OpenDefinitionsDocument doc2 = setupDocument(TEST_TWO);
     final File file1 = new File(_tempDir, "TestOne.java");
@@ -278,7 +282,6 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     _model.getCompilerModel().compileAll();
 //        doc1.startCompile();
 //        doc2.startCompile();
-    
     
     listener.waitCompileDone();
     listener.runJUnit(doc1);
@@ -308,7 +311,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
 
     _model.removeListener(listener);
-    
+    debug.logEnd();
   }
 }
 

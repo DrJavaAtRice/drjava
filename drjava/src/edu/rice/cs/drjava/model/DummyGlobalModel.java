@@ -71,7 +71,6 @@ import java.util.ListIterator;
 import java.util.Vector;
 
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
@@ -290,11 +289,11 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call getSourceFile on a Dummy");
   }
 
-  public File findFileInPaths(String fileName, List<File> paths) {
+  public File findFileInPaths(String fileName, Iterable<File> paths) {
      throw new UnsupportedOperationException("Tried to call getSourceFileFromPaths on a Dummy");
   }
 
-  public File[] getSourceRootSet() {
+  public Iterable<File> getSourceRootSet() {
      throw new UnsupportedOperationException("Tried to call getSourceRootSet on a Dummy");
   } 
   
@@ -362,7 +361,7 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call interpretCurrentInteraction on a Dummy");
   }
 
-  public ClassPathVector getInteractionsClassPath() {
+  public Iterable<File> getInteractionsClassPath() {
      throw new UnsupportedOperationException("Tried to call getInteractionsClasspath on a Dummy");
   }
 
@@ -403,7 +402,7 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call getDebugPort on a Dummy");
   }
   
-  public ClassPathVector getClassPath() {
+  public Iterable<File> getClassPath() {
     throw new UnsupportedOperationException("Tried to call getClassPath on a Dummy");
   }
 
@@ -503,11 +502,11 @@ public class DummyGlobalModel implements GlobalModel {
      throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
   }
   
-  public ClassPathVector getExtraClassPath() {
+  public Iterable<File> getExtraClassPath() {
     throw new UnsupportedOperationException("Tried to call getExtraClasspath on a Dummy");
   }
   
-  public void setExtraClassPath(ClassPathVector cp) {
+  public void setExtraClassPath(Iterable<File> cp) {
     throw new UnsupportedOperationException("Tried to call setExtraClasspath on a Dummy");
   }
   

@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.model.repl;
 import java.util.List;
 import java.io.StringReader;
 import java.io.Reader;
+import java.io.File;
 import java.net.URL;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import koala.dynamicjava.interpreter.*;
@@ -131,15 +132,15 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 //    _djInterpreter.addClassPath(path);
 //  }
 
-  public void addProjectClassPath(URL path) { cpm.addProjectCP(path); }
+  public void addProjectClassPath(File path) { cpm.addProjectCP(path); }
 
-  public void addBuildDirectoryClassPath(URL path) { cpm.addBuildDirectoryCP(path); }
+  public void addBuildDirectoryClassPath(File path) { cpm.addBuildDirectoryCP(path); }
 
-  public void addProjectFilesClassPath(URL path) { cpm.addProjectFilesCP(path); }
+  public void addProjectFilesClassPath(File path) { cpm.addProjectFilesCP(path); }
 
-  public void addExternalFilesClassPath(URL path) { cpm.addExternalFilesCP(path); }
+  public void addExternalFilesClassPath(File path) { cpm.addExternalFilesCP(path); }
   
-  public void addExtraClassPath(URL path) { cpm.addExtraCP(path); }
+  public void addExtraClassPath(File path) { cpm.addExtraCP(path); }
   
   /** Set the scope for unqualified names to the given package.
    *  @param packageName Package to assume scope of.

@@ -35,7 +35,6 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.rmi.*;
 import java.io.*;
-import java.net.URL;
 import java.net.MalformedURLException;
 
 import java.util.List;
@@ -52,18 +51,20 @@ import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 
 import edu.rice.cs.util.ArgumentTokenizer;
-import edu.rice.cs.util.ClassPathVector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.ScrollableDialog;
 import koala.dynamicjava.parser.wrapper.*;
+
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Manages a remote JVM.
  *  @version $Id$
@@ -250,66 +251,59 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //    }
 //  }
   
-  public void addProjectClassPath(URL path) {
+  public void addProjectClassPath(File f) {
     if (! _restart) return;
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
     
-    try { slave.addProjectClassPath(path.toString()); }
+    try { slave.addProjectClassPath(f); }
     catch(RemoteException re) { _threwException(re); }
   }
   
-  public void addBuildDirectoryClassPath(URL path) {
+  public void addBuildDirectoryClassPath(File f) {
     if (! _restart) return;
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
     
-    try { slave.addBuildDirectoryClassPath(path.toString()); }
+    try { slave.addBuildDirectoryClassPath(f); }
     catch(RemoteException re) { _threwException(re); }
   }
   
-  public void addProjectFilesClassPath(URL path) {
+  public void addProjectFilesClassPath(File f) {
     if (! _restart) return;
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
     
-    try { slave.addProjectFilesClassPath(path.toString()); }
+    try { slave.addProjectFilesClassPath(f); }
     catch(RemoteException re) { _threwException(re); }
   }
   
-  public void addExternalFilesClassPath(URL path) {
+  public void addExternalFilesClassPath(File f) {
     if (! _restart) return;
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
     
-    try { slave.addExternalFilesClassPath(path.toString()); }
+    try { slave.addExternalFilesClassPath(f); }
     catch(RemoteException re) { _threwException(re); }
   }
   
-  public void addExtraClassPath(URL path) {
+  public void addExtraClassPath(File f) {
     if (! _restart) return;
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
     
-    try { slave.addExtraClassPath(path.toString()); }
+    try { slave.addExtraClassPath(f); }
     catch(RemoteException re) { _threwException(re); }
   }
   
   /** Returns the current classpath of the interpreter as a list of
    *  unique entries.  The list is empty if a remote exception occurs.
    */
-  public ClassPathVector getClassPath() {
+  public Iterable<File> getClassPath() {
     // silently fail if disabled. see killInterpreter docs for details.
     if (_restart) {
       
       InterpreterJVMRemoteI slave = ensureInterpreterConnected();
       
-      try {
-        ClassPathVector classPath = slave.getAugmentedClassPath();  // returns fresh copy
-        for (File f : _startupClassPath) {
-          try { classPath.add(FileOps.toURL(f)); }
-          catch (MalformedURLException e) { /* just ignore bad classpath entry */ }
-        }
-        return classPath;
-      }
-      catch (RemoteException re) { _threwException(re); return new ClassPathVector(); }
+      try { return IterUtil.compose(slave.getAugmentedClassPath(), _startupClassPath); }
+      catch (RemoteException re) { _threwException(re); return IterUtil.empty(); }
     }
-    else { return new ClassPathVector(); }
+    else { return IterUtil.empty(); }
   }
   
   
@@ -558,8 +552,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
   public void killInterpreter(File wd) {
     synchronized(_masterJVMLock) {
-//        Utilities.showDebug("MainJVM: killInterpreter called with working directory = " + wd);
-//      System.err.println("Killing Interpreter for working directory " + wd);
         _workDir = wd;
         _restart = (wd != null);
         _cleanlyRestarting = true;
@@ -844,7 +836,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void testEnded(String testName, boolean wasSuccessful, boolean causedError) { }
     public void testSuiteEnded(JUnitError[] errors) { }
     public File getFileForClassName(String className) { return null; }
-    public ClassPathVector getClassPath() { return new ClassPathVector(); }
+    public Iterable<File> getClassPath() { return IterUtil.empty(); }
     public void junitJVMReady() { }
   }
   

@@ -17,7 +17,7 @@
  *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
  *       following disclaimers.
  *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
- *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *       following disclaimers in tURLhe documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
  *       endorse or promote products derived from this Software without specific prior written permission.
  *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
@@ -33,7 +33,7 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.net.URL;
+import java.io.File;
 
 /** Interface for an interpreter of Java source code.
  *  @version $Id$
@@ -44,11 +44,11 @@ public interface JavaInterpreter extends Interpreter {
    *  @param path Path to add
    */
   //public void addClassPath(String path);
-  public void addProjectClassPath(URL path);
-  public void addBuildDirectoryClassPath(URL path);
-  public void addProjectFilesClassPath(URL path);
-  public void addExternalFilesClassPath(URL path);
-  public void addExtraClassPath(URL path);
+  public void addProjectClassPath(File path);
+  public void addBuildDirectoryClassPath(File path);
+  public void addProjectFilesClassPath(File path);
+  public void addExternalFilesClassPath(File path);
+  public void addExtraClassPath(File path);
   
   /** Set the scope for unqualified names to be the given package.
    *  @param packageName Package to use for the current scope.

@@ -37,8 +37,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import edu.rice.cs.util.ClassPathVector;
-
 /** This state pattern is used by the global model to store any information pertaining to the currently open project.  
  *  The state pattern is used because most project information is not needed in list view. (Elspeth Rocks)
  * 
@@ -146,9 +144,9 @@ public interface FileGroupingState {
   /** Returns a collection of classpath entries specific to the current project.
    *  @return the project's extra classpath
    */
-  public ClassPathVector getExtraClassPath();
+  public Iterable<File> getExtraClassPath();
   
   /** Sets the list of project-specific classpath entries. */
-  public void setExtraClassPath(ClassPathVector cp);
+  public void setExtraClassPath(Iterable<File> cp);
   
 }

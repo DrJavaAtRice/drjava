@@ -37,7 +37,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.util.List;
 import java.util.ArrayList;
-import java.net.URL;
 
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.ui.InteractionsController;
@@ -216,11 +215,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** These add the given path to the classpaths used in the interpreter.
    *  @param path Path to add
    */
-  public abstract void addProjectClassPath(URL path);
-  public abstract void addBuildDirectoryClassPath(URL path);
-  public abstract void addProjectFilesClassPath(URL path);
-  public abstract void addExternalFilesClassPath(URL path);
-  public abstract void addExtraClassPath(URL path);
+  public abstract void addProjectClassPath(File f);
+  public abstract void addBuildDirectoryClassPath(File f);
+  public abstract void addProjectFilesClassPath(File f);
+  public abstract void addExternalFilesClassPath(File f);
+  public abstract void addExtraClassPath(File f);
  
   /** Handles a syntax error being returned from an interaction
    *  @param offset the first character of the error in the InteractionsDocument

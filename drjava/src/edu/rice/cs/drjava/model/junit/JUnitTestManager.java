@@ -49,6 +49,9 @@ import edu.rice.cs.util.swing.ScrollableDialog;
 
 import java.lang.reflect.Modifier;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import static edu.rice.cs.plt.debug.DebugUtil.error;
+
 /** Runs in the InterpreterJVM. Runs tests given a classname and formats the results into a (serializable) array of 
  *  JUnitError that can be passed back to the MainJVM.
  *  @version $Id$
@@ -81,9 +84,9 @@ public class JUnitTestManager {
     * @param files the files corresponding to classNames
     */
   public List<String> findTestClasses(final List<String> classNames, final List<File> files) {
-
-    //Utilities.showDebug("InterpreterJVM.findTestClasses(" + classNames + ", " + files + ") called");
-
+    //debug.logStart("findTestClasses");
+    //debug.logValues(new String[]{"classNames", "files"}, classNames, files);
+    
     if (_testClassNames != null && ! _testClassNames.isEmpty()) 
       throw new IllegalStateException("Test suite is still pending!");
     
@@ -109,7 +112,7 @@ public class JUnitTestManager {
           }
         }
         catch(LinkageError e) { 
-          //new ScrollableDialog(null, "LinkageError(" + e + ") encountered in JUnitTestManager", "", "").show();
+          //debug.log(e);
           _jmc.classFileError(new ClassFileError(cName, files.get(i).getCanonicalPath(), e));
         }
       }
@@ -117,6 +120,7 @@ public class JUnitTestManager {
     catch(IOException e) { throw new UnexpectedException(e); }
     //new ScrollableDialog(null, "TestClassNames are: " + _testClassNames, "", "").show();
      
+    //debug.logEnd("findTestClasses");
     return _testClassNames;
   }
     
@@ -175,18 +179,19 @@ public class JUnitTestManager {
    *  @return true iff the given class is an instance of junit.framework.Test
    */
   private boolean _isJUnitTest(Class c) {
-    //new ScrollableDialog(null, "_isJUnitTestCase called on " + c, "", "").show();
-
-    return Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && 
-      !Modifier.isInterface(c.getModifiers());
+    boolean result = Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && 
+                     !Modifier.isInterface(c.getModifiers());
+    //debug.logValues(new String[]{"c", "isJUnitTest(c)"}, c, result);
+    return result;
   }
 
   /** Checks whether the given file name corresponds to a valid JUnit Test. */
   private boolean _isTestCase(String className) {
     try { return _isJUnitTest(_testRunner.getLoader().load(className)); }
     catch (ClassNotFoundException cnfe) {
-              //new ScrollableDialog(null, "ClassNotFoundException: "+ className, cnfe.getStackTrace().toString(), "").show();
-        return false; }
+      error.log(cnfe);
+      return false;
+    }
   }
   
   /** Constructs a new JUnitError from a TestFailure

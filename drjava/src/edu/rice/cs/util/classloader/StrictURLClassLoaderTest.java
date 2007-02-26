@@ -69,22 +69,4 @@ public class StrictURLClassLoaderTest extends DrJavaTestCase {
     assertTrue("should not have found resource", resource == null);
   }
 
-  /** Make sure this loader can load from the given URLs. */
-  public void testWillLoadClassFromGivenURLs() throws Throwable {
-    String logResource = "com/sun/tools/javac/Main.class";
-    String compilerClass = "com.sun.tools.javac.Main";
-    URL[] urls = ToolsJarClassLoader.getToolsJarURLs();
-
-    if (urls.length > 0) {
-      //System.out.println("testing urls");
-      StrictURLClassLoader loader = new StrictURLClassLoader(urls);
-
-      Class c = loader.loadClass(compilerClass);
-      assertEquals("loaded class", compilerClass, c.getName());
-
-    
-      URL resource = loader.getResource(logResource);
-      assertTrue("resource found", resource != null);
-    }
-  }
 }
