@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
@@ -1069,6 +1070,12 @@ public interface OptionConstants {
    */
   public static final IntegerOption WINDOW_Y = new IntegerOption("window.y", new Integer(Integer.MAX_VALUE));
 
+  /** The window state (maxamized or normal). The current window state
+    * is saved on shutdown.
+    */
+  public static final IntegerOption WINDOW_STATE =
+    new IntegerOption("window.state", new Integer(Frame.MAXIMIZED_BOTH));
+  
   /** Width of DocList at startUp.  Must be less than WINDOW_WIDTH. Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption DOC_LIST_WIDTH =
     new NonNegativeIntegerOption("doc.list.width",new Integer(150));

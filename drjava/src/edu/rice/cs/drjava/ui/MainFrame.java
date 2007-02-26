@@ -2823,6 +2823,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     int y = config.getSetting(WINDOW_Y).intValue();
     int width = config.getSetting(WINDOW_WIDTH).intValue();
     int height = config.getSetting(WINDOW_HEIGHT).intValue();
+    int state = config.getSetting(WINDOW_STATE).intValue();
     
     // Bounds checking.
     // suggested from zaq@nosi.com, to keep the frame on the screen!
@@ -2847,8 +2848,27 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     if ((y + height) > (bounds.y + bounds.height))  y = bounds.height - height + bounds.y; 
                                                                                // Too far down, move to bottom edge.
     
+    //ensure that we don't set window state to minimized
+    state &= ~Frame.ICONIFIED;
+    
+    if (!Toolkit.getDefaultToolkit().isFrameStateSupported(state)) {
+      //we have a bad state, so reset to default
+      state = WINDOW_STATE.getDefault();
+    }
+
     // Set to the new correct size and location
     setBounds(x, y, width, height);
+    
+    //Work-aroung for Java bug #6365898?
+    //setExtendedState does not work until the window in shown on Linux.
+    final int stateCopy = state;
+    addWindowListener(new WindowAdapter() {
+      public void windowOpened(WindowEvent e) {
+        setExtendedState(stateCopy);
+        //this is a one-off listener
+        removeWindowListener(this);
+      }
+    });
     
     _setUpPanes();
     updateStatusField();
@@ -4227,6 +4247,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       config.setSetting(WINDOW_WIDTH, new Integer(bounds.width));
       config.setSetting(WINDOW_X, new Integer(bounds.x));
       config.setSetting(WINDOW_Y, new Integer(bounds.y));
+      config.setSetting(WINDOW_STATE, new Integer(getExtendedState()));
     }
     else {
       // Reset to defaults to restore pristine behavior.
@@ -4234,6 +4255,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       config.setSetting(WINDOW_WIDTH, WINDOW_WIDTH.getDefault());
       config.setSetting(WINDOW_X, WINDOW_X.getDefault());
       config.setSetting(WINDOW_Y, WINDOW_Y.getDefault());
+      config.setSetting(WINDOW_STATE, WINDOW_STATE.getDefault());
     }
     
     // "Go to File" dialog position and size.
