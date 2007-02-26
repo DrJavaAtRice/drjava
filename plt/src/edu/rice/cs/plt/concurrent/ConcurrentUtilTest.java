@@ -73,7 +73,7 @@ public class ConcurrentUtilTest extends TestCase {
     final CompletionMonitor monitor = new CompletionMonitor();
     Thunk<Thread> task = new Thunk<Thread>() {
       public Thread value() {
-        monitor.attemptInsureSignalled();
+        monitor.attemptEnsureSignalled();
         _obj = Thread.currentThread();
         return Thread.currentThread();
       }
@@ -140,11 +140,11 @@ public class ConcurrentUtilTest extends TestCase {
     public void useMonitor() { _monitor.reset(); _useMonitor = true; }
     public boolean isFinished() { return !_intermediates.hasNext(); }
     public I step() {
-      if (_useMonitor) { _monitor.attemptInsureSignalled(); _monitor.reset(); }
+      if (_useMonitor) { _monitor.attemptEnsureSignalled(); _monitor.reset(); }
       return _intermediates.next();
     }
     public R value() {
-      if (_useMonitor) { _monitor.attemptInsureSignalled(); _monitor.reset(); }
+      if (_useMonitor) { _monitor.attemptEnsureSignalled(); _monitor.reset(); }
       return _finalResult;
     }
   }

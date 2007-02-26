@@ -11,7 +11,7 @@ public class CompletionMonitorTest extends TestCase {
     assertTrue("Flag should start out as true", as.isSignalled());
     
     DelayedInterrupter interrupter = new DelayedInterrupter(50);
-    as.insureSignalled();
+    as.ensureSignalled();
     interrupter.abort();
   }
   
@@ -23,20 +23,20 @@ public class CompletionMonitorTest extends TestCase {
     new Thread() { public void run() { ConcurrentUtil.sleep(100); _flag = true; as.signal(); } }.start();
     assertFalse(_flag);
     assertFalse(as.isSignalled());
-    as.insureSignalled();
+    as.ensureSignalled();
     assertTrue(_flag);
     interrupter1.abort();
     assertTrue(as.isSignalled());
     
     DelayedInterrupter interrupter2 = new DelayedInterrupter(10);
     assertTrue(as.isSignalled());
-    as.insureSignalled(); // should not block
+    as.ensureSignalled(); // should not block
     interrupter2.abort();
     
     as.reset();
     assertFalse(as.isSignalled());
     DelayedInterrupter interrupter3 = new DelayedInterrupter(50);
-    try { as.insureSignalled(); fail("Monitor should not be signalled"); }
+    try { as.ensureSignalled(); fail("Monitor should not be signalled"); }
     catch (InterruptedException e) { /* expected behavior */ }
   }
   

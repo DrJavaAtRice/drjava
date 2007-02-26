@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Wraps an iterable in an immutable interface, thus allowing internal data structures to be treated 
  * by clients as iterables without allowing access (via casting) to their mutating methods.  
- * Also insures that the {@link java.util.Iterator#remove()} method of the provided Iterator is not 
+ * Also ensures that the {@link java.util.Iterator#remove()} method of the provided Iterator is not 
  * supported.  Note that only only <em>this</em> interface with the data is immutable --
  * if the original data structure is mutable, a client with direct access to that structure can
  * still mutate it.  To guarantee that no mutation will take place, use a {@link SnapshotIterable} instead,

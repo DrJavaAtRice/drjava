@@ -5,7 +5,7 @@ import java.io.Writer;
 import java.io.IOException;
 
 /**
- * Coordinates reading and writing from the same source.  Insures
+ * Coordinates reading and writing from the same source.  Ensures
  * that the given Writer will never write past the location of the
  * Reader, potentially corrupting its contents.  When the Writer needs
  * to write more characters than have been read, a buffer is used to

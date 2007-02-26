@@ -1,5 +1,6 @@
 package edu.rice.cs.plt.collect;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import edu.rice.cs.plt.iter.AbstractIterable;
@@ -22,7 +23,7 @@ import edu.rice.cs.plt.lambda.Lambda;
  * client code.  A static import ({@code import static edu.rice.cs.plt.collect.ConsList.*})
  * will eliminate the need for explicit name qualifiers when using these methods.</p>
  */
-public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIterable<T> {
+public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
   
   public abstract <Ret> Ret apply(ConsVisitor<? super T, ? extends Ret> visitor);
   

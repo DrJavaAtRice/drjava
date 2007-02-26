@@ -3,6 +3,8 @@ package edu.rice.cs.plt.debug;
 import java.io.File;
 import edu.rice.cs.plt.lambda.Predicate2;
 import edu.rice.cs.plt.text.TextUtil;
+import edu.rice.cs.plt.reflect.ReflectUtil;
+import edu.rice.cs.plt.reflect.ReflectException;
 
 /** A collection of utility fields and methods to facilitate code-embedded debugging and logging */
 public final class DebugUtil {
@@ -32,6 +34,9 @@ public final class DebugUtil {
    */
   public static volatile Log error;
   
+  private static final File DEFAULT_DEBUG_FILE = new File("debug-log.txt");
+  private static final File DEFAULT_ERROR_FILE = new File("error-log.txt");
+  
   static {
     initializeLogs();
   }
@@ -44,43 +49,79 @@ public final class DebugUtil {
    * <li>{@code stdout}: An alias for {@code System.out}</li>
    * <li>{@code System.err}: A {@link SystemErrLog}</li>
    * <li>{@code stderr}: An alias for {@code System.err}</li>
-   * <li>{@code file}: A {@link FileLog} writing to {@code debug-log.txt} or {@code error-log.txt}</li>
+   * <li>{@code file}: A {@link FileLog}, by default writing to {@code debug-log.txt} or 
+   *     {@code error-log.txt}; specific files can be specified, as well: {@code file:my-log.txt}.  A working
+   *     directory can be set with {@code plt.log.working.dir}.</li>
    * <li>{@code assert}: An {@link AssertEmptyLog}</li>
    * <li>{@code popup}: A {@link PopupLog}</li>
    * <li>{@code void}: A {@link VoidLog}</li>
    * </ul>
+   * The property may also be a comma-delimited list of types, for which a {@link LogSplitter} will be created.
+   * If the system property for a log is not set or is unrecognized, a {@code VoidLog} is used.</p>
    * 
-   * The property may also be a comma-delimited list of types, for a which a {@link LogSplitter} will be created.
-   * If the system property for a log is not set or is unrecognized, a {@code VoidLog} is used.  Clients wishing to
-   * create more sophisticated or custom logs may simply set the log fields directly, after default initialization.</p>
+   * <p>The property {@code plt.log.factory} may also be used to override or extend the default set of properties.
+   * The property must be the name of a static method taking two {@code String} arguments: a {@code type},
+   * which is a name such as those listed above, and a {@code tag}, which is one of {@code "Debug"} or 
+   * {@code "Error"}.  Comma-delimited lists will be processed before invoking the method.
+   * The return value should be a {@code Log}.  The method can delegate to the default behavior by returning 
+   * {@code null}.</p>
    * 
-   * <p>This method is run automatically when the {@code DebugUtil} class is loaded.</p>
+   * <p>This method is run automatically when the {@code DebugUtil} class is loaded.  If desired, it may be
+   * re-invoked at any time.</p>
    */
   public static void initializeLogs() {
-    debug = makeLog(System.getProperty("plt.debug.log"), "Debug");
-    error = makeLog(System.getProperty("plt.error.log"), "Error");
+    debug = makeLog(System.getProperty("plt.debug.log", "void"), "Debug");
+    error = makeLog(System.getProperty("plt.error.log", "void"), "Error");
   }
   
-  /** Produce a log corresponding to the given type string.  {@code type} may be {@code null}. */
+  /** Produce a log corresponding to the given type string. */
   private static Log makeLog(String type, String tag) {
-    if (type == null) { return VoidLog.INSTANCE; }
-    else if (TextUtil.contains(type, ',')) {
+    if (type != null && TextUtil.contains(type, ',')) {
       String[] types = type.split(",");
-      if (types.length == 0) { return VoidLog.INSTANCE; }
+      if (types.length == 0) { return makeLog(null, tag); }
       else {
         Log[] logs = new Log[types.length];
         for (int i = 0; i < logs.length; i++) { logs[i] = makeLog(types[i], tag); }
         return new LogSplitter(logs);
       }
     }
-    else if (type.equals("System.out")) { return new SystemOutLog(); }
-    else if (type.equals("stdout")) { return new SystemOutLog(); }
-    else if (type.equals("System.err")) { return new SystemErrLog(); }
-    else if (type.equals("stderr")) { return new SystemErrLog(); }
-    else if (type.equals("file")) { return new FileLog(new File(tag.toLowerCase() + "-log.txt")); }
-    else if (type.equals("assert")) { return new AssertEmptyLog(); }
-    else if (type.equals("popup")) { return new PopupLog(tag + " Log"); }
-    else { return VoidLog.INSTANCE; }
+    else {
+      Log result = null;
+      String factoryName = System.getProperty("plt.log.factory");
+      if (factoryName != null) {
+        int dot = factoryName.lastIndexOf('.');
+        if (dot >= 0) {
+          String className = factoryName.substring(0, dot);
+          String methodName = factoryName.substring(dot+1);
+          try { result = (Log) ReflectUtil.invokeStaticMethod(className, methodName); }
+          catch (ReflectException e) {
+            System.err.println("Unable to invoke plt.log.factory: " + e.getCause());
+          }
+          catch (ClassCastException e) {
+            System.err.println("Unable to invoke plt.log.factory: " + e);
+          }
+        }
+      }
+      if (result == null) {
+        if (type.equals("void")) { result = VoidLog.INSTANCE; }
+        else if (type.equals("System.out")) { result = new SystemOutLog(); }
+        else if (type.equals("stdout")) { result = new SystemOutLog(); }
+        else if (type.equals("System.err")) { result = new SystemErrLog(); }
+        else if (type.equals("stderr")) { result = new SystemErrLog(); }
+        else if (type.equals("file")) { result = makeFileLog(tag.toLowerCase() + "-log.txt"); }
+        else if (type.startsWith("file:")) { result = makeFileLog(type.substring(5)); }
+        else if (type.equals("assert")) { result = new AssertEmptyLog(); }
+        else if (type.equals("popup")) { result = new PopupLog(tag + " Log"); }
+        else { result = VoidLog.INSTANCE; }
+      }
+      return result;
+    }
+  }
+  
+  private static Log makeFileLog(String name) {
+    String workingDir = System.getProperty("plt.log.working.dir");
+    if (workingDir == null) { return new FileLog(new File(name)); }
+    else { return new FileLog(new File(workingDir, name)); }
   }
   
   /**

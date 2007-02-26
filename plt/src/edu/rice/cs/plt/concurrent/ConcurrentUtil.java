@@ -224,7 +224,7 @@ public final class ConcurrentUtil {
       if (!_continueMonitor.isSignalled()) {
         _status = Status.PAUSED;
         debug.log("Waiting for signal to continue");
-        _continueMonitor.insureSignalled();
+        _continueMonitor.ensureSignalled();
         debug.log("Received signal to continue");
         _status = Status.RUNNING;
       }
@@ -721,6 +721,26 @@ public final class ConcurrentUtil {
       // If nothing works, use the system path
       return "java";
     }
+  }
+  
+  
+  /**
+   * Get a subset of the system properties for names that match at least one of the given prefixes.
+   * @throws SecurityException  As in {@link System#getProperties}.
+   */
+  public static Properties getProperties(String... prefixes) {
+    Properties result = new Properties();
+    // Properties should be a Map<String, String>, but it's not defined that way.  Depending on the
+    // implementation, it may even allow clients to put non-string entries.
+    for (Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
+      for (String prefix : prefixes) {
+        if (entry.getKey() instanceof String && ((String) entry.getKey()).startsWith(prefix)) {
+          result.put(entry.getKey(), entry.getValue());
+          break;
+        }
+      }
+    }
+    return result;
   }
   
 }

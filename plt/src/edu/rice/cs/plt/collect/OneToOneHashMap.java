@@ -96,7 +96,7 @@ public class OneToOneHashMap<K, V> extends AbstractMap<K, V> implements OneToOne
 
           public void remove() {
             V val = _forward.get(_last);
-            forwardIter.remove(); // insures that _last is initialized and in the map
+            forwardIter.remove(); // ensures that _last is initialized and in the map
             _backward.remove(val);
           }
         };
@@ -128,7 +128,7 @@ public class OneToOneHashMap<K, V> extends AbstractMap<K, V> implements OneToOne
   
   /**
    * Provide access to the set of entries in this map.  Follows the contract of
-   * {@link Map#entrySet}, and insures that changes made to the set are reflected
+   * {@link Map#entrySet}, and ensures that changes made to the set are reflected
    * consistently in this map.  Note that the {@link java.util.Map.Entry#setValue} method
    * is not supported.
    */
@@ -148,7 +148,7 @@ public class OneToOneHashMap<K, V> extends AbstractMap<K, V> implements OneToOne
           }
           
           public void remove() {
-            forwardIter.remove(); // insures that _last is initialized and in the map
+            forwardIter.remove(); // ensures that _last is initialized and in the map
             _backward.remove(_last.getValue());
           }
           

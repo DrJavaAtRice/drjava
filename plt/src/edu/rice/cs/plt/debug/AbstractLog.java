@@ -97,7 +97,7 @@ public abstract class AbstractLog implements Log {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
     if (_filter.value(th, e)) {
-      write(new Date(), th, e, processText(message));
+      write(new Date(), th, e, processText("Start " + message));
       push();
     }
   }
@@ -118,7 +118,7 @@ public abstract class AbstractLog implements Log {
     StackTraceElement e = DebugUtil.getCaller();
     if (_filter.value(th, e)) {
       pop();
-      write(new Date(), th, e, processText(message));
+      write(new Date(), th, e, processText("End " + message));
     }
   }
   
@@ -298,7 +298,7 @@ public abstract class AbstractLog implements Log {
   
   /**
    * Record the given message, which occured at a certain time while running in a certain thread at the given location
-   * in the code.  Each element of {@code messages} is a line of text.  Subclasses should insure that the effects of
+   * in the code.  Each element of {@code messages} is a line of text.  Subclasses should ensure that the effects of
    * this method are atomic (at least within the context of concurrent invocations of this method).  This can be 
    * trivially achieved by declaring the method {@code synchronized}.
    */

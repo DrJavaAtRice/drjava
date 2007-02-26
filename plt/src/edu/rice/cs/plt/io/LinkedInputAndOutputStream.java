@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 
 /**
- * Coordinates reading and writing from the same source.  Insures
+ * Coordinates reading and writing from the same source.  Ensures
  * that the given OutputStream will never write past the location of the
  * InputStream, potentially corrupting its contents.  When the OutputStream needs
  * to write more bytes than have been read, a buffer is used to

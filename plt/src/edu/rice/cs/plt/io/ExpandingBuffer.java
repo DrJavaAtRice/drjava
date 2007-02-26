@@ -77,7 +77,7 @@ public abstract class ExpandingBuffer<T> implements Serializable {
   
   
   /**
-   * Allocate space in the buffer if none is available.  Insures that there is room for at least
+   * Allocate space in the buffer if none is available.  Ensures that there is room for at least
    * one new element (and that {@code _buffers} is nonempty).  Should be called <em>before</em>
    * a write is attempted.
    * @return  The amount of space now available at the end of the buffer ({@code > 0})

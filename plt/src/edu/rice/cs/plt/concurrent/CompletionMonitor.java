@@ -14,7 +14,7 @@ public class CompletionMonitor {
   
   /**
    * Create a completion monitor in the given initial state.  If signalled is {@code true}, invocations of
-   * {@link #insureSignalled} will not block until {@link #reset} is invoked.
+   * {@link #ensureSignalled} will not block until {@link #reset} is invoked.
    */
   public CompletionMonitor(boolean signalled) { _signal = signalled; }
   
@@ -30,17 +30,17 @@ public class CompletionMonitor {
     this.notifyAll();
   }
   
-  /** Insures that the monitor has been signalled before continuing.  Blocks if necessary. */
-  synchronized public void insureSignalled() throws InterruptedException {
+  /** Ensures that the monitor has been signalled before continuing.  Blocks if necessary. */
+  synchronized public void ensureSignalled() throws InterruptedException {
     while (!_signal) { this.wait(); }
   }
   
   /**
-   * Insures that the monitor has been signalled before continuing.  Blocks if necessary.  If the wait is interrupted,
+   * Ensures that the monitor has been signalled before continuing.  Blocks if necessary.  If the wait is interrupted,
    * returns {@code false}.
    */
-  public boolean attemptInsureSignalled() {
-    try { insureSignalled(); return true; }
+  public boolean attemptEnsureSignalled() {
+    try { ensureSignalled(); return true; }
     catch (InterruptedException e) { return false; }
   }
   

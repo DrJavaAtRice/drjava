@@ -1120,7 +1120,7 @@ public final class IOUtil {
    * end in {@code .txt})
    */
   public static Predicate<File> extensionFilePredicate(String extension) {
-    // Insure that the extension is in the canonical case
+    // Ensure that the extension is in the canonical case
     extension = canonicalCase(new File(extension)).getName();
     final String suffix = "." + extension;
     return new Predicate<File>() {
