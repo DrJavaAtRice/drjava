@@ -95,8 +95,11 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
     */
   public boolean setToDefaultInterpreter() throws RemoteException;
 
-  /** Returns a copy of the list of unique entries on the classpath. */
-  public Iterable<File> getAugmentedClassPath() throws RemoteException;
+  /**
+   * Returns a copy of the list of unique entries on the classpath. (List rather than Iterable to avoid
+   * conflicts between RMI and Retroweaver.)
+   */
+  public List<File> getAugmentedClassPath() throws RemoteException;
 
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable

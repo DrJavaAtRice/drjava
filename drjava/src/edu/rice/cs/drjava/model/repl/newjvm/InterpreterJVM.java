@@ -821,7 +821,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     return result;
   }
   
-  public Iterable<File> getAugmentedClassPath() { return getClassPath(); }
+  public List<File> getAugmentedClassPath() { return IterUtil.asList(getClassPath()); }
   
 }
 
