@@ -424,7 +424,7 @@ public class JUnitPanel extends ErrorPanel {
       ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           _frame.setPopupLoc(_stackFrame);
-          _stackFrame.setVisible(true);
+          _stackFrame.setVisible(false);
         }
       };
       JButton closeButton = new JButton("Close");
