@@ -2,10 +2,13 @@ package edu.rice.cs.plt.concurrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.InputStreamReader;
 import java.util.Properties;
 import java.util.Map;
 import java.util.List;
@@ -440,7 +443,10 @@ public final class ConcurrentUtil {
     
     protected void doStart() {
       _status = Status.RUNNING;
-      try { _process.value(); /* initialize the process */ }
+      try {
+        _process.value(); /* initialize the process */
+        discardProcessErr(_process.value()); /* prevent the err buffer from filling up */
+      }
       catch (WrappedException e) {
         if (e.getCause() instanceof IOException) {
           _exception = (IOException) e.getCause();
@@ -723,7 +729,123 @@ public final class ConcurrentUtil {
     }
   }
   
+  /**
+   * Create two threads to continually discard the contents of the given process's output and error streams.
+   * If, instead, the streams are simply ignored, the system buffers may fill up, causing the process to block (see 
+   * the class documentation for {@link Process}; experimentation under Java 5 shows the buffer size to be
+   * approximately 4 Kb).
+   */
+  public static void discardProcessOutput(Process p) {
+    copyProcessOut(p, VoidOutputStream.INSTANCE);
+    copyProcessErr(p, VoidOutputStream.INSTANCE);
+  }
   
+  /**
+   * Create two threads to continually copy the contents of the given process's output and error streams to 
+   * the given destinations.  This is a convenience method that invokes {@link #copyProcessOut(Process, OutputStream)}
+   * and {@link #copyProcessErr(Process, OutputStream)}.
+   */
+  public static void copyProcessOutput(Process p, OutputStream out, OutputStream err) {
+    copyProcessOut(p, out);
+    copyProcessErr(p, err);
+  }
+  
+  /**
+   * Create a thread that will continually discard the contents of the given process's standard output.
+   * If, instead, the stream is simply ignored, the system buffer may fill up, causing the process to block (see 
+   * the class documentation for {@link Process}; experimentation under Java 5 shows the buffer size to be
+   * approximately 4 Kb).
+   */
+  public static void discardProcessOut(Process p) { copyProcessOut(p, VoidOutputStream.INSTANCE); }
+  
+  /**
+   * Create a thread that will continually copy the contents of the given process's standard output to another
+   * output stream.  This is a convenience method that sets {@code closeStream} to {@code false}.
+   * @return  The thread performing the copy operation, already started.
+   */
+  public static Thread copyProcessOut(Process p, OutputStream out) { return copyProcessOut(p, out, false); }
+  
+  /**
+   * Create a thread that will continually copy the contents of the given process's standard output to another
+   * output stream.  Processing continues until the end-of-file is reached.  If {@code close} is {@code true},
+   * {@code out} will then be closed.
+   * @return  The thread performing the copy operation, already started.
+   */
+  public static Thread copyProcessOut(Process p, OutputStream out, boolean close) {
+    Thread result = new Thread(new CopyStream(p.getInputStream(), out, close));
+    result.start();
+    return result;
+  }
+
+  /**
+   * Create a task providing access to the given process's standard output as a string.  The result is not 
+   * available until an end-of-file is reached, but it is buffered locally to prevent blocking.
+   */
+  public static TaskController<String> processOutAsString(Process p) {
+    return computeInThread(new StreamToString(p.getInputStream()));
+  }
+  
+  /**
+   * Create a thread that will continually discard the contents of the given process's standard output.
+   * If, instead, the stream is simply ignored, the system buffer may fill up, causing the process to block (see 
+   * the class documentation for {@link Process}; experimentation under Java 5 shows the buffer size to be
+   * approximately 4 Kb).
+   */
+  public static void discardProcessErr(Process p) { copyProcessErr(p, VoidOutputStream.INSTANCE); }
+  
+  /**
+   * Create a thread that will continually copy the contents of the given process's error output to another
+   * output stream.  This is a convenience method that sets {@code closeStream} to {@code false}.
+   * @return  The thread performing the copy operation, already started.
+   */
+  public static Thread copyProcessErr(Process p, OutputStream err) { return copyProcessErr(p, err, false); }
+  
+  /**
+   * Create a thread that will continually copy the contents of the given process's error output to another
+   * output stream.  Processing continues until the end-of-file is reached.  If {@code close} is {@code true},
+   * {@code out} will then be closed.
+   * @return  The thread performing the copy operation, already started.
+   */
+  public static Thread copyProcessErr(Process p, OutputStream err, boolean close) {
+    Thread result = new Thread(new CopyStream(p.getErrorStream(), err, close));
+    result.start();
+    return result;
+  }
+  
+  /**
+   * Create a task providing access to the given process's error output as a string.  The result is not 
+   * available until an end-of-file is reached, but it is buffered locally to prevent blocking.
+   */
+  public static TaskController<String> processErrAsString(Process p) {
+    return computeInThread(new StreamToString(p.getErrorStream()));
+  }
+  
+  /** Shared code for copying and closing a stream */
+  private static final class CopyStream implements Runnable, Serializable {
+    private final InputStream _in;
+    private final OutputStream _out;
+    private final boolean _close;
+    public CopyStream(InputStream in, OutputStream out, boolean close) { _in = in; _out = out; _close = close; }
+    public void run() {
+      try {
+        try { IOUtil.copyInputStream(_in, _out); }
+        finally { if (_close) _out.close(); }
+      }
+      catch (IOException e) { error.log(e); }
+    }
+  }
+
+  /** Shared code for reading a stream as a string */
+  private static final class StreamToString implements Thunk<String> {
+    private final InputStream _stream;
+    public StreamToString(InputStream stream) { _stream = stream; }
+    public String value() {
+      try { return IOUtil.toString(new InputStreamReader(_stream)); }
+      catch (IOException e) { throw new WrappedException(e); }
+    }
+  }
+    
+    
   /**
    * Get a subset of the system properties for names that match at least one of the given prefixes.
    * @throws SecurityException  As in {@link System#getProperties}.

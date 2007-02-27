@@ -74,12 +74,92 @@ public final class TextUtil {
   public static boolean contains(String s, String piece) { return s.indexOf(piece) >= 0; }
   
   /**
+   * Determine if <em>any</em> of the given characters occurs in {@code s}.  Defined in terms of
+   * {@link String#indexOf(int)}.
+   */
+  public static boolean containsAny(String s, int... characters) {
+    for (int c: characters) { if (contains(s, c)) { return true; } }
+    return false;
+  }
+  
+  /**
+   * Determine if <em>any</em> of the given strings occurs in {@code s}.  Defined in terms of
+   * {@link String#indexOf(String)}.
+   */
+  public static boolean containsAny(String s, String... pieces) {
+    for (String piece: pieces) { if (contains(s, piece)) { return true; } }
+    return false;
+  }
+  
+  /**
+   * Determine if <em>all</em> of the given characters occur in {@code s}.  Defined in terms of
+   * {@link String#indexOf(int)}.
+   */
+  public static boolean containsAll(String s, int... characters) {
+    for (int c: characters) { if (!contains(s, c)) { return false; } }
+    return true;
+  }
+  
+  /**
+   * Determine if <em>all</em> of the given strings occur in {@code s}.  Defined in terms of
+   * {@link String#indexOf(String)}.
+   */
+  public static boolean containsAll(String s, String... pieces) {
+    for (String piece: pieces) { if (!contains(s, piece)) { return false; } }
+    return true;
+  }
+  
+  /**
    * Determine if the given string occurs in {@code s}, ignoring differences in case.  Unlike 
    * {@link String#equalsIgnoreCase}, this test only compares the lower-case conversion of {@code s} to the lower-case
    * conversion of {@code piece}.
    */
   public static boolean containsIgnoreCase(String s, String piece) {
     return s.toLowerCase().indexOf(piece.toLowerCase()) >= 0;
+  }
+  
+  /**
+   * Determine if <em>any</em> of the given strings occurs in {@code s}, ignoring differences in case.  Defined in 
+   * terms of {@link #containsIgnoreCase}.
+   */
+  public static boolean containsAnyIgnoreCase(String s, String... pieces) {
+    for (String piece: pieces) { if (contains(s, piece)) { return true; } }
+    return false;
+  }
+  
+  /**
+   * Determine if <em>all</em> of the given strings occur in {@code s}, ignoring differences in case.  Defined in 
+   * terms of {@link #containsIgnoreCase}.
+   */
+  public static boolean containsAllIgnoreCase(String s, String... pieces) {
+    for (String piece: pieces) { if (!contains(s, piece)) { return false; } }
+    return true;
+  }
+  
+  /**
+   * Find the first occurance of any of the given characters in {@code s}.  If none are present, the result is 
+   * {@code -1}.  Defined in terms of {@link String#indexOf(int)}.
+   */
+  public static int indexOfFirst(String s, int... characters) {
+    int result = -1;
+    for (int c : characters) {
+      int index = s.indexOf(c);
+      if (index >= 0 && (result < 0 || index < result)) { result = index; }
+    }
+    return result;
+  }
+  
+  /**
+    * Find the first occurance of any of the given strings in {@code s}.  If none are present, the result is 
+   * {@code -1}.  Defined in terms of {@link String#indexOf(String)}.
+   */
+  public static int indexOfFirst(String s, String... pieces) {
+    int result = -1;
+    for (String piece : pieces) {
+      int index = s.indexOf(piece);
+      if (index >= 0 && (result < 0 || index < result)) { result = index; }
+    }
+    return result;
   }
   
 }

@@ -37,9 +37,7 @@ public final class DebugUtil {
   private static final File DEFAULT_DEBUG_FILE = new File("debug-log.txt");
   private static final File DEFAULT_ERROR_FILE = new File("error-log.txt");
   
-  static {
-    initializeLogs();
-  }
+  static { initializeLogs(); }
   
   /**
    * <p>Initialize the logs based on the settings of system properties {@code plt.debug.log} and {@code plt.error.log}.
