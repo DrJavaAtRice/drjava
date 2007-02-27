@@ -31,7 +31,7 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.drjava.model.javadoc;
 
 import java.io.File;
 

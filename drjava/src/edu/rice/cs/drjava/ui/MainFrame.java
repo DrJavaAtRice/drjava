@@ -68,6 +68,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
@@ -772,8 +773,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         JavadocModel jm = _model.getJavadocModel();
         File suggestedDir = jm.suggestJavadocDestination(_model.getActiveDocument());
         _javadocSelector.setSuggestedDir(suggestedDir);
-        String cps = IOUtil.pathToString(_model.getClassPath());
-        jm.javadocAll(_javadocSelector, _saveSelector, cps);
+        jm.javadocAll(_javadocSelector, _saveSelector);
       }
       catch (IOException ioe) { _showIOError(ioe); }
       finally {

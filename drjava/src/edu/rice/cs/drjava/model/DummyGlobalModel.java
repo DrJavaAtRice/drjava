@@ -110,6 +110,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.Debugger;
+import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;

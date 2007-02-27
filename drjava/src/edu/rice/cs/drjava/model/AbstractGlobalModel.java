@@ -84,7 +84,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.OptionEvent ;
+import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.cache.DCacheAdapter;
 import edu.rice.cs.drjava.model.cache.DDReconstructor;
@@ -96,6 +96,7 @@ import edu.rice.cs.drjava.model.debug.DebugException ;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException ;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
@@ -3399,6 +3400,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      *  system classpath, and the "extra.classpath ".  Returns null if the class file could not be found.
      */
     private File _locateClassFile() {
+      // TODO: define in terms of GlobalModel.getClassPath()
+      
       if (isUntitled()) return null;
       
       String className;
@@ -3452,20 +3455,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       _log.log(this + " not found on path of source roots");
       // Class not on source root set, check system classpath
-      String cp = System.getProperty("java.class.path");
-      String pathSeparator = System.getProperty("path.separator");
-      Vector<File> cpVector = new Vector<File>();
-      int i = 0;
-      while (i < cp.length()) {
-        int nextSeparator = cp.indexOf(pathSeparator, i);
-        if (nextSeparator == -1) {
-          cpVector.add(new File(cp.substring(i, cp.length())));
-          break;
-        }
-        cpVector.add(new File(cp.substring(i, nextSeparator)));
-        i = nextSeparator + 1;
-      }
-      classFile = findFileInPaths(fileName, cpVector);
+      classFile = findFileInPaths(fileName, RUNTIME_CLASS_PATH);
       
       if (classFile != null) return classFile;
       

@@ -132,7 +132,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _interactionsModel = new DummyInteractionsModel();
     _junitModel = new DummyJUnitModel();
     _debugModel = new DummyDebugModel();
-    _startupClassPath = IOUtil.attemptCanonicalFiles(IOUtil.parsePath(System.getProperty("java.class.path")));
+    _startupClassPath = GlobalModel.RUNTIME_CLASS_PATH;
     _optionArgs = new ArrayList<String>();
   }
   

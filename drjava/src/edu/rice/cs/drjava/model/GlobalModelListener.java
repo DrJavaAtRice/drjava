@@ -37,6 +37,7 @@ import java.io.File;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.junit.JUnitListener;
+import edu.rice.cs.drjava.model.javadoc.JavadocListener;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.swing.AsyncTask;

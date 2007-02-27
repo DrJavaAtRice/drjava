@@ -14,17 +14,23 @@ import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+import edu.rice.cs.drjava.model.javadoc.JavadocModel;
+import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
+import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 
 public class JDKToolsLibrary {
   
   private final FullVersion _version;
   private final CompilerInterface _compiler;
   private final Debugger _debugger;
+  private final JavadocModel _javadoc;
   
-  protected JDKToolsLibrary(FullVersion version, CompilerInterface compiler, Debugger debugger) {
+  protected JDKToolsLibrary(FullVersion version, CompilerInterface compiler, Debugger debugger,
+                            JavadocModel javadoc) {
     _version = version;
     _compiler = compiler;
     _debugger = debugger;
+    _javadoc = javadoc;
   }
   
   public FullVersion version() { return _version; }
@@ -33,9 +39,13 @@ public class JDKToolsLibrary {
   
   public Debugger debugger() { return _debugger; }
   
-  public boolean isValid() { return _compiler.isAvailable() || _debugger.isAvailable(); }
+  public JavadocModel javadoc() { return _javadoc; }
   
-  public String toString() { return "JDK library " + version(); }
+  public boolean isValid() {
+    return _compiler.isAvailable() || _debugger.isAvailable() || _javadoc.isAvailable();
+  }
+  
+  public String toString() { return "JDK library " + _version.versionString(); }
   
   protected static String adapterForCompiler(JavaVersion version) {
     switch (version) {
@@ -85,7 +95,15 @@ public class JDKToolsLibrary {
       catch (LinkageError e) { /* can't load */ }
     }
     
-    return new JDKToolsLibrary(version, compiler, debugger);
+    JavadocModel javadoc = new NoJavadocAvailable(model);
+    try {
+      Class.forName("com.sun.tools.javadoc.Main");
+      javadoc = new DefaultJavadocModel(model, null, GlobalModel.RUNTIME_CLASS_PATH);
+    }
+    catch (ClassNotFoundException e) { /* can't load */ }
+    catch (LinkageError e) { /* can't load (probably not necessary, but might as well catch it) */ }
+    
+    return new JDKToolsLibrary(version, compiler, debugger, javadoc);
   }
   
 }

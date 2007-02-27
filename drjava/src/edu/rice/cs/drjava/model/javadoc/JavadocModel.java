@@ -31,11 +31,13 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.drjava.model.javadoc;
 
 import java.io.File;
 import java.io.IOException;
 
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.DirectorySelector;
 
@@ -50,6 +52,9 @@ public interface JavadocModel {
    * source root of one of the open documents.  (Value is "doc".)
    */
   public static final String SUGGESTED_DIR_NAME = "doc";
+  
+  /** {@code true} iff the classes to run javadoc are available */
+  public boolean isAvailable();
   
   /**
    * Add a JavadocListener to the model.
@@ -90,13 +95,10 @@ public interface JavadocModel {
    * @param select a command object for selecting a directory and warning a user
    *        about bad input
    * @param saver a command object for saving a document (if it moved/changed)
-   * @param classPath a collection of classpath elements to be used by Javadoc
    * 
    * @throws IOException if there is a problem manipulating files
    */
-  public void javadocAll(DirectorySelector select, FileSaveSelector saver,
-                         String classPath)
-    throws IOException;
+  public void javadocAll(DirectorySelector select, FileSaveSelector saver) throws IOException;
   
   /**
    * Generates Javadoc for the given document only, after ensuring it is saved.
@@ -105,12 +107,8 @@ public interface JavadocModel {
    * 
    * @param doc Document to generate Javadoc for
    * @param saver a command object for saving the document (if it moved/changed)
-   * @param classPath a collection of classpath elements to be used by Javadoc
    * 
    * @throws IOException if there is a problem manipulating files
    */
-  public void javadocDocument(final OpenDefinitionsDocument doc,
-                              final FileSaveSelector saver,
-                              final String classPath)
-    throws IOException;
+  public void javadocDocument(OpenDefinitionsDocument doc, FileSaveSelector saver) throws IOException;
 }

@@ -31,9 +31,13 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.drjava.model.javadoc;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.DummyGlobalModel;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.DummyOpenDefDoc;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 import java.io.File;
@@ -59,7 +63,8 @@ public class JavadocModelTest extends DrJavaTestCase {
         return false; // pretend no docs are untitled
       }
     };
-    JavadocModel jModel = new DefaultJavadocModel(getDocs);
+    // TODO: define so that tools.jar doesn't need to be on the class path
+    JavadocModel jModel = new DefaultJavadocModel(getDocs, null, GlobalModel.RUNTIME_CLASS_PATH);
     final File file = new File(System.getProperty("user.dir"));
     OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
       public File getSourceRoot() throws InvalidPackageException { return file; }
@@ -79,7 +84,7 @@ public class JavadocModelTest extends DrJavaTestCase {
         return true;  // pretend doc is unsaved
       }
     };
-    JavadocModel jModel = new DefaultJavadocModel(getDocs);
+    JavadocModel jModel = new DefaultJavadocModel(getDocs, null, GlobalModel.RUNTIME_CLASS_PATH);
     final File file = new File(System.getProperty("user.dir"));
 
     // Make sure it doesn't return a file until it's saved.
@@ -105,7 +110,7 @@ public class JavadocModelTest extends DrJavaTestCase {
       public boolean hasModifiedDocuments() { return false;  /* pretend all docs are saved */ }
       public boolean hasUntitledDocuments() { return false;  /* pretend no docs are untitled */ }
     };
-    JavadocModel jModel = new DefaultJavadocModel(getDocs);
+    JavadocModel jModel = new DefaultJavadocModel(getDocs, null, null);
 //    final File file = new File(System.getProperty("user.dir"));
     OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
       public File getSourceRoot() throws InvalidPackageException {

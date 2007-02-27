@@ -31,7 +31,7 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.drjava.model.javadoc;
 
 /**
  * Indicates that an error has occured while attempting to create javadoc.

@@ -24,6 +24,9 @@ import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
+import edu.rice.cs.drjava.model.javadoc.JavadocModel;
+import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
+import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 
 public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
@@ -60,8 +63,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
   private final File _location;
   
-  private JarJDKToolsLibrary(File location, FullVersion version, CompilerInterface compiler, Debugger debugger) {
-    super(version, compiler, debugger);
+  private JarJDKToolsLibrary(File location, FullVersion version, CompilerInterface compiler, Debugger debugger,
+                             JavadocModel javadoc) {
+    super(version, compiler, debugger, javadoc);
     _location = location;
   }
   
@@ -73,11 +77,12 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     FullVersion version = guessVersion(f);
     CompilerInterface compiler = NoCompilerAvailable.ONLY;
     Debugger debugger = NoDebuggerAvailable.ONLY;
+    JavadocModel javadoc = new NoJavadocAvailable(model);
     
     if (JavaVersion.CURRENT.supports(version.majorVersion())) {
       // block tools.jar classes, so that references don't point to a different version of the classes
       ClassLoader loader = new ShadowingClassLoader(JarJDKToolsLibrary.class.getClassLoader(), TOOLS_PACKAGES);
-      Iterable<File> path = IterUtil.singleton(f);
+      Iterable<File> path = IterUtil.singleton(IOUtil.attemptAbsoluteFile(f));
       
       String compilerAdapter = adapterForCompiler(version.majorVersion());
       if (compilerAdapter != null) {
@@ -108,16 +113,27 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         try {
           Class[] sig = new Class[]{ GlobalModel.class };
           // can't use loadLibraryAdapter because we need to preempt the whole package
-          ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(path), debuggerPackage);
+          ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
           Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        
           if (attempt.isAvailable()) { debugger = attempt; }
         }
         catch (ReflectException e) { /* can't load */ }
         catch (LinkageError e) { /* can't load */ }
       }
+      
+      try {
+        new PathClassLoader(loader, path).loadClass("com.sun.tools.javadoc.Main");
+        File bin = new File(f.getParentFile(), "../bin");
+        if (!IOUtil.attemptIsDirectory(bin)) { bin = new File(f.getParentFile(), "../Home/bin"); }
+        if (!IOUtil.attemptIsDirectory(bin)) { bin = new File(System.getProperty("java.home", f.getParent())); }
+        javadoc = new DefaultJavadocModel(model, bin, path);
+      }
+      catch (ClassNotFoundException e) { /* can't load */ }
+      catch (LinkageError e) { /* can't load (probably not necessary, but might as well catch it) */ }
+        
     }
     
-    return new JarJDKToolsLibrary(f, version, compiler, debugger);
+    return new JarJDKToolsLibrary(f, version, compiler, debugger, javadoc);
   }
   
   private static FullVersion guessVersion(File f) {

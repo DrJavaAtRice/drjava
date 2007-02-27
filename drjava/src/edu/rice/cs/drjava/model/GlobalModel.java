@@ -48,8 +48,10 @@ import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
+import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.docnavigation.IDocumentNavigator;
@@ -72,6 +74,9 @@ import edu.rice.cs.util.text.ConsoleDocument;
  *  @version $Id$
  */
 public interface GlobalModel extends ILoadDocuments {
+  
+  public static final Iterable<File> RUNTIME_CLASS_PATH =
+    IOUtil.attemptAbsoluteFiles(IOUtil.parsePath(System.getProperty("java.class.path", "")));
 
   //-------------------------- Listener Management --------------------------//
 

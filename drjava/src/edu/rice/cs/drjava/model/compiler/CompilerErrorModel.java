@@ -129,9 +129,8 @@ public class CompilerErrorModel {
     // TODO: If we move to NextGen-style generics, ensure _errors is non-null.
     _errors = errors;
     
-    // Next two lines are order-dependent!
     _numErrors = errors.length;
-    _positions = new Position[_numErrors];
+    _positions = new Position[errors.length];
     
     _numWarnings =0;
     _numCompilerErrors = 0;
