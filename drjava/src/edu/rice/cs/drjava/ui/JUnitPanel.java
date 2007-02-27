@@ -206,6 +206,7 @@ public class JUnitPanel extends ErrorPanel {
     }
     _stackTextArea.setText(e.stackTrace());
     _stackTextArea.setCaretPosition(0);
+    _frame.setPopupLoc(_stackFrame);
     _stackFrame.setVisible(true);
   }
 
@@ -423,7 +424,6 @@ public class JUnitPanel extends ErrorPanel {
 
       ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          _frame.setPopupLoc(_stackFrame);
           _stackFrame.setVisible(false);
         }
       };
