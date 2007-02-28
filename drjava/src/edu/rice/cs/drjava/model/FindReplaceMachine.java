@@ -60,7 +60,8 @@ public class FindReplaceMachine {
   /* Visible machine state; manipulated directly or indirectly by FindReplacePanel. */
   private OpenDefinitionsDocument _doc;      // Current search document 
   private OpenDefinitionsDocument _firstDoc; // First document where searching started (when searching all documents)
-  private Position _current;                 // Position of the cursor in _doc when machine is stopped
+//  private Position _current;                 // Position of the cursor in _doc when machine is stopped
+  private int _current;                 // Position of the cursor in _doc when machine is stopped
 //  private Position _start;                   // Position in _doc from which searching started or will start.
   private String _findWord;                  // Word to find. */
   private String _replaceWord;               // Word to replace _findword.
@@ -85,6 +86,7 @@ public class FindReplaceMachine {
 //    _allDocsWrapped = false;
     _model = model;
     _docIterator = docIterator;
+    _current = -1;
     setFindAnyOccurrence();
     setFindWord("");
     setReplaceWord("");
@@ -141,12 +143,16 @@ public class FindReplaceMachine {
   public void setPosition(int pos) {
 //    System.err.println("Setting position " + pos + " in doc [" + _doc.getText() + "]");
 //    assert (pos >= 0) && (pos <= _doc.getLength());
-    try { _current = _doc.createPosition(pos); }
-    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    //try { //_current = _doc.createPosition(pos);
+      _current = pos;
+    //}
+    //catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
 
   /** Gets the character offset to which this machine is currently pointing. */
-  public int getCurrentOffset() { return _current.getOffset(); }
+  public int getCurrentOffset() { //return _current.getOffset(); 
+    return _current;
+  }
 
   public String getFindWord() { return _findWord; }
 
@@ -183,7 +189,7 @@ public class FindReplaceMachine {
     String findWord = _findWord;
     int wordLen, off;
     
-    if(_current == null) return false;
+    if(_current == -1) return false;
     
     wordLen = findWord.length();
     if (_isForward) off = getCurrentOffset() - wordLen;
@@ -223,7 +229,7 @@ public class FindReplaceMachine {
       _doc.remove(offset, _findWord.length());
 
 //      if (position == 0) atStart = true;
-      _doc.insertString(getCurrentOffset(), _replaceWord, null);
+      _doc.insertString(offset, _replaceWord, null);
       
       // update _current Position
       if (_isForward) setPosition(offset + _replaceWord.length());
@@ -487,9 +493,9 @@ public class FindReplaceMachine {
     try { 
 
 //      if (wrapped && allWrapped) Utilities.show(start +", " + len + ", " + docLen + ", doc = '" + doc.getText() + "'");
-      doc.acquireReadLock(); 
-      try { text = doc.getText(start, len); }
-      finally { doc.releaseReadLock(); }
+      //doc.acquireReadLock(); 
+      text = doc.getText(start, len);
+      //finally { doc.releaseReadLock(); }
       
       if (! _matchCase) {
         text = text.toLowerCase();
@@ -538,7 +544,8 @@ public class FindReplaceMachine {
         assert foundLocation > -1;
         if (_shouldIgnore(foundLocation, doc)) continue;
         
-        _current = doc.createPosition(matchLocation);   // formerly doc.createPosition(...)
+        //_current = doc.createPosition(matchLocation);   // formerly doc.createPosition(...)
+        setPosition(matchLocation);
         
 //        System.err.println("Returning result = " + new FindResult(doc, matchLocation, wrapped, allWrapped));
 
