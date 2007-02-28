@@ -39,12 +39,10 @@ import java.util.Set;
 /* TODO: convert ModelList representation to a doubly linked circular list;
    separate head and tail nodes are ugly and unnecessary. */
 
-/**
- * A list class with some extra features.
- * Allows multiple iterators to make modifications to the same list
- * without failing like the iterators for java.util.*List.
- * @version $Id$
- */
+/** A list class with some extra features. Allows multiple iterators to make modifications to the same list
+  * without failing like the iterators for java.util.*List.
+  * @version $Id$
+  */
 class ModelList<T> {
   private Node<T> _head;
   private Node<T> _tail;
@@ -53,15 +51,10 @@ class ModelList<T> {
   /** a set of objects that can trigger and listen for updates to the list */
   private Set<Iterator> _listeners;
 
-  /**
-   * Constructor.
-   * Initializes the head and tail nodes, as well as the listener table
-   * and the length variable.
-   */
+  /** Constructor.  Initializes the head and tail nodes, as well as the listener table and the length variable. */
   ModelList() {
     // This node is the only node that exists in an empty list.
-    // If an Iterator points to this node, the iterator is considered
-    // to be in "initial position."
+    // If an Iterator points to this node, the iterator is considered to be in "initial position."
     _head = new Node<T>();
     _tail = new Node<T>();
     _head.pred = null;
@@ -69,23 +62,18 @@ class ModelList<T> {
     _tail.pred = _head;
     _tail.succ = null;
     _length = 0;
-    /*
-     * We use a WeakHashSet so that listeners do not leak. That is, even
-     * if the dispose method is not called, when they are no longer
-     * strongly referenced, they will be automatically removed from the
-     * listener set.
-     */
+    
+    /* We use a WeakHashSet so that listeners do not leak. That is, even if the dispose method is not called, when they
+     * are no longer strongly referenced, they will be automatically removed from the listener set. */
     _listeners = new WeakHashSet<Iterator>();
   }
 
-  /**
-   * Insert an item before a certain node in the list.
-   * Can never be called on head node.
-   */
+  /** Insert an item before a certain node in the list.  Can never be called on head node. */
   private void insert(Node<T> point, T item) {
-    Node<T> ins = new Node<T>(item, point.pred, point);
-    point.pred.succ = ins;
-    point.pred = ins;
+    Node<T> before = point.pred;
+    Node<T> newNode = new Node<T>(item, before, point);
+    before.succ = newNode;
+    point.pred = newNode;
     _length++;
   }
 
@@ -95,52 +83,35 @@ class ModelList<T> {
     it.dispose();
   }
 
-  /**
-   * Remove a node from the list.
-   * Can't remove head or tail node - exception thrown.
-   */
+  /** Remove a node from the list. Can't remove head or tail node - exception thrown. */
   private void remove(Node<T> point) {
-    if ((point == _head) || (point == _tail))
-      throw new RuntimeException("Can't remove head.");
-    else
-    {
-      point.succ.pred = point.pred;
-      point.pred.succ = point.succ;
+    if ((point == _head) || (point == _tail)) throw new RuntimeException("Can't remove sentinel node.");
+    else {
+      Node<T> before = point.pred;
+      Node<T> after = point.succ;
+      after.pred = before;
+      before.succ = after;
       _length--;
     }
   }
 
-  private void addListener(Iterator thing) {
-    this._listeners.add(thing);
-  }
+  private void addListener(Iterator that) { _listeners.add(that); }
 
-  private void removeListener(Iterator thing) {
-    this._listeners.remove(thing);
-  }
+  private void removeListener(Iterator that) { _listeners.remove(that); }
 
-  public int listenerCount() {
-    return _listeners.size();
-  }
-  /**
-   * Returns true if the list is empty.
-   */
-  public boolean isEmpty() {
-    return (_head.succ == _tail);
-  }
+  public int listenerCount() { return _listeners.size(); }
+  
+  /** Returns true if the list is empty. */
+  public boolean isEmpty() { return _head.succ == _tail; }
 
-  public int length() {
-    return _length;
-  }
+  public int length() { return _length; }
 
   /**
    * Create a new iterator for this list.  The constructor for the
    * iterator adds itself to the list's listeners.  The iterator
    * must be notified of changes so it does not become out-of-date.
    */
-  public Iterator getIterator() {
-    return new Iterator();
-  }
-
+  public Iterator getIterator() { return new Iterator(); }
 
   /**
    * A node class for the list.
@@ -160,15 +131,13 @@ class ModelList<T> {
       succ = this;
     }
 
-    Node(T item, Node<T> previous, Node<T> successor) {
+    Node(T item, Node<T> before, Node<T> after) {
       _item = item;
-      pred = previous;
-      succ = successor;
+      pred = before;
+      succ = after;
     }
 
-    T getItem() {
-      return _item;
-    }
+    T getItem() { return _item; }
   }
 
   /**
@@ -187,9 +156,9 @@ class ModelList<T> {
      * Initializes an iterator to point to its list's head.
      */
     public Iterator() {
-      _point = ModelList.this._head;
+      _point = _head;
       _pos = 0;
-      ModelList.this.addListener(this);
+      addListener(this);
     }
 
     /**
@@ -200,222 +169,159 @@ class ModelList<T> {
     public Iterator(Iterator iter) {
       _point = iter._point;
       _pos = iter._pos;
-      ModelList.this.addListener(this);
+      addListener(this);
     }
 
-    public Iterator copy() {
-      return new Iterator(this);
-    }
+    public Iterator copy() { return new Iterator(this); }
 
-    /**
-     * an equals test
-     */
-    public boolean eq(Object thing) {
-      return this._point == ((Iterator)(thing))._point;
-    }
+    /** Tests that for equality. */
+    public boolean eq(Iterator that) { return _point == that._point; }
 
-    /**
-     * Force this iterator to take the values of the given iterator.
-     */
+    /** Force this iterator to take the values of the given iterator. */
     public void setTo(Iterator it) {
-      this._point = it._point;
-      this._pos = it._pos;
+      _point = it._point;
+      _pos = it._pos;
     }
 
-    /**
-     * Disposes of an iterator by removing it from the list's set of
-     * listeners.  When an iterator is no longer necessary, it
-     * should be disposed of. If the iterator is not disposed, it will
-     * automatically be removed from the listener set when it is no
-     * longer reachable except via the listener set.
-     */
-    public void dispose() { ModelList.this.removeListener(this); }
+    /** Disposes of an iterator by removing it from the list's set of listeners.  When an iterator is no longer necessary, it
+      * should be disposed of. If the iterator is not disposed, it will automatically be removed from the listener set when it
+      * is no longer reachable except via the listener set.
+      */
+    public void dispose() { removeListener(this); }
 
     /** Return true if we're pointing at the head.*/
-    public boolean atStart() { return (_point == ModelList.this._head); }
+    public boolean atStart() { return _point == _head; }
 
     /** Return true if we're pointing at the tail. */
-    public boolean atEnd() { return (_point == ModelList.this._tail); }
+    public boolean atEnd() { return _point == _tail; }
 
     /** Return true if we're pointing at the node after the head. */
-    public boolean atFirstItem() { return (_point.pred == ModelList.this._head); }
+    public boolean atFirstItem() { return _point.pred == _head; }
 
     /** Return true if we're pointing at the node before the tail. */
-    public boolean atLastItem() { return (_point.succ == ModelList.this._tail); }
+    public boolean atLastItem() { return _point.succ == _tail; }
 
     /** Return the item associated with the current node. */
     public T current() {
-      if (atStart())
-        throw new RuntimeException("Attempt to call current on an " +
-                                   "iterator in the initial position");
-      if (atEnd())
-        throw new RuntimeException("Attempt to call current on an " +
-                                   "iterator in the final position");
+      if (atStart()) throw new RuntimeException("Attempt to call current on an iterator in the initial position");
+      if (atEnd()) throw new RuntimeException("Attempt to call current on an iterator in the final position");
       return _point.getItem();
     }
 
-    /**
-     * Return the item associated with the node before the current node.
-     */
+    /** Returns the item associated with the node before the current node. */
     public T prevItem() {
-      if (atFirstItem() || atStart() || ModelList.this.isEmpty())
-        throw new RuntimeException("No more previous items.");
+      if (atStart() || isEmpty() || atFirstItem()) throw new RuntimeException("No more previous items.");
       return _point.pred.getItem();
     }
 
-    /**
-     * Return the item associated with the node after the current node.
-     */
+    /** Returns the item associated with the node after the current node. */
     public T nextItem() {
-      if (atLastItem() || atEnd() || ModelList.this.isEmpty())
-        throw new RuntimeException("No more following items.");
+      if (atEnd() || isEmpty() || atLastItem()) throw new RuntimeException("No more following items.");
       return _point.succ.getItem();
     }
+    
+    public int pos() { return _pos; }
 
-    /**
-     * Insert an item before the current item.
-     * If at the containing list's head, we need to move to the next node
-     * to perform the insert properly.  Otherwise, we'll get a null pointer
-     * exception because the function will try to insert the new item
-     * before the head.
-     *
-     * Ends pointing to inserted item.
-     */
+    /** Inserts an item before the current item.  If current is head, we need to move to the next node
+      * to perform the insert properly.  Otherwise, we'll get a null pointer exception because the function will try 
+      * to insert the new item before the head.  Ends pointing to inserted item.
+      */
     public void insert(T item) {
       //so as not to insert at head
-      if (this.atStart()) next();
+      if (atStart()) next();
       ModelList.this.insert(_point, item);
       _point = _point.pred; //puts pointer on inserted item
+      int savPos = _pos;
       notifyOfInsert(_pos);
 
-      //because notifyOfInsert will change the position of this iterator
-      //we must change it back.
-      _pos -= 1;
+      _pos = savPos;  // this._pos is incremented by notify; reverse this change
     }
 
-    /**
-     * Remove the current item from the list.
-     * Ends pointing to the node following the removed node.
-     * Throws exception if performed atStart() or atEnd().
-     */
+    /** Removes the current item from the list.  Ends pointing to the node following the removed node.
+      * Throws exception if performed atStart() or atEnd().
+      */
     public void remove() {
-      Node<T> tempNode = _point.succ;
+      Node<T> after = _point.succ;
       ModelList.this.remove(_point);
-      _point = tempNode;
-      notifyOfRemove(_pos, _point);
+      _point = after;
+      notifyOfRemove(_pos, after);
     }
 
-    /**
-     * Move to the previous node.
-     * Throws exception atStart().
-     */
+    /** Moves to the previous node. Throws exception atStart(). */
     public void prev() {
-      if (atStart()) {
-        throw new RuntimeException("Can't cross list boundary.");
-      }
+      if (atStart()) { throw new RuntimeException("Can't cross list boundary."); }
       _point = _point.pred;
       _pos--;
     }
 
-    /**
-     * Move to the next node.
-     * Throws exception atEnd().
-     */
+    /** Moves to the next node. Throws exception atEnd(). */
     public void next() {
       if (atEnd()) throw new RuntimeException("Can't cross list boundary.");
       _point = _point.succ;
       _pos++;
     }
 
-    /**
-     * Delete all nodes between the current position of this and the
-     * current position of the given iterator.
-     *
-     * 1)Two iterators pointing to same node: do nothing
-     * 2)Iterator 2 is before iterator 1    : remove between iterator 2 and
-     *                                       iterator 1
-     * 3)Iterator 1 is before iterator 2    : remove between iterator 1 and
-     *                                       iterator 2
-     *
-     * Does not remove points iterators point to.
-     */
+    /** Delete all nodes between the current position of this and the current position of the given iterator.
+      * 1) Two iterators pointing to same node: do nothing
+      * 2) Iterator 2 is before iterator 1: remove between iterator 2 and iterator 1
+      * 3) Iterator 1 is before iterator 2: remove between iterator 1 and iterator 2
+      * Does not remove points iterators point to.
+      */
     public void collapse(Iterator iter) {
-      int leftPos;
-      int rightPos;
-      Node<T> rightPoint;
-
-      if (this._pos > iter._pos) {
-        leftPos = iter._pos;
-        rightPos = this._pos;
-        rightPoint = this._point;
-
-        this._point.pred = iter._point;
-        iter._point.succ = this._point;
-        //determine new length
-        ModelList.this._length -= this._pos - iter._pos - 1;
-        notifyOfCollapse(leftPos, rightPos, rightPoint);
+      int itPos = iter._pos;
+      int diff = Math.abs(_pos - itPos);
+      if (diff <= 1) return; // _pos and iter.pos are either equal or adjacent
+      
+      int leftPos, rightPos;
+      Node<T> leftPoint, rightPoint;
+      
+      if (_pos > itPos) {
+        leftPos = itPos;
+        leftPoint = iter._point;
+        rightPos = _pos;
+        rightPoint = _point;
       }
-      else if (this._pos < iter._pos) {
-        leftPos = this._pos;
-        rightPos = iter._pos;
+      else /* _pos < iter._pos */ {
+        leftPos = _pos;
+        leftPoint = _point;
+        rightPos = itPos;
         rightPoint = iter._point;
-
-        iter._point.pred = this._point;
-        this._point.succ = iter._point;
-
-        ModelList.this._length -= iter._pos - this._pos - 1;
-        notifyOfCollapse(leftPos, rightPos, rightPoint);
       }
-      else { // this._pos == iter._pos
-      }
+      
+      rightPoint.pred = leftPoint;
+      leftPoint.succ = rightPoint;
+      _length -= rightPos - leftPos - 1;  //determine new length
+      notifyOfCollapse(leftPos, rightPos, rightPoint);
     }
 
-    /** When an iterator inserts an item, it notifies other iterators
-     *  in the set of listeners so they can stay updated.
-     */
+    /** Notifies the iterators in _listeners that a node has been inserted. */
     private void notifyOfInsert(int pos) {
-      for (Iterator listener : ModelList.this._listeners) {
-        if ( listener._pos < pos ) {
-          // do nothing
-        }
-        else { // ( next._pos == pos ) || next._pos > pos
-          listener._pos += 1;
-        }
+      for (Iterator listener : _listeners) {
+        int lisPos = listener._pos;
+        if (lisPos >= pos) listener._pos = lisPos + 1;
       } 
     }
 
-    /**
-     * When an iterator removes an item, it notifies other iterators
-     * in the set of listeners so they can stay updated.
-     */
+    /** Notifies the iterators in _listeners that a node has been removed. */
     private void notifyOfRemove(int pos, Node<T> point) {
-      for (Iterator listener : ModelList.this._listeners) {
-        if ( listener._pos < pos ) {
-          // do nothing
-        }
-        else if ( listener._pos == pos ) {
-          listener._point = point;
-        }
-        else { // next._pos > pos
-          listener._pos -= 1;
-        }
+      for (Iterator listener : _listeners) {
+        int lisPos = listener._pos;
+        if (lisPos == pos) listener._point = point;
+        else if (lisPos > pos) listener._pos = lisPos - 1;
       }
     }
 
-    /** When an iterator collapses part of the list, it notifies other iterators
-     *  in the set of listeners so they can stay updated.
-     */
+    /** Notifies the iterators in _listeners that a range of nodes has been collapsed. */
     private void notifyOfCollapse(int leftPos, int rightPos, Node<T> rightPoint) {
-      for (Iterator listener : ModelList.this._listeners) {
-        if ( listener._pos <= leftPos ) {
-          // do nothing
-        }
-        else if (( listener._pos > leftPos ) && ( listener._pos <= rightPos )) {
+      for (Iterator listener : _listeners) {
+        int lisPos = listener._pos;
+        if (lisPos <= leftPos) continue;
+        if (lisPos < rightPos) {
           listener._pos = leftPos + 1;
           listener._point = rightPoint;
         }
-        else { // next._pos > rightPos
-          listener._pos -= (rightPos - leftPos - 1);
+        else { // lisPos >+ rightPos
+          listener._pos = lisPos - (rightPos - leftPos - 1);
         }
       }
     }

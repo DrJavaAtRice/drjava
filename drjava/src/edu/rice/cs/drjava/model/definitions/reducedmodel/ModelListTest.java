@@ -220,17 +220,17 @@ public final class ModelListTest extends DrJavaTestCase {
       itFull.nextItem();
       assertTrue(false);
     }
-    catch (Exception e) {
-    }
+    catch (Exception e) { }
 
     itFull.insert(new Integer(0));
     try {
       itFull.nextItem();
       assertTrue(false);
     }
-    catch (Exception e) {
-    }
+    catch (Exception e) { /* should reach here */ }
+    assertEquals("#0.2", new Integer(0), itFull.current());
     itFull.insert(new Integer(1));
+    assertEquals("#0.1", new Integer(1), itFull.current());
     assertEquals("#0.0", new Integer(0), itFull.nextItem());
   }
   
@@ -239,17 +239,26 @@ public final class ModelListTest extends DrJavaTestCase {
     ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
     ModelList<Integer>.Iterator itEmpty2 = itEmpty.copy();
     assertEquals("#0.0", 0, fEmpty.length());
+    assertEquals("#0.1", 0, itEmpty.pos());
     itEmpty.collapse(itEmpty2);
     assertEquals("#0.0", 0, fEmpty.length());
+    assertEquals("#0.2", 0, itFull.pos());
 
     itFull.insert(new Integer(6));
+    assertEquals("#0.3", 1, itFull.pos());
     ModelList<Integer>.Iterator itFull2 = itFull.copy();
+    assertEquals("#0.4", 1, itFull2.pos());
+    
     assertEquals("#1.0", 1, fFull.length());
     itFull.collapse(itFull2);
     assertEquals("#1.1", 1, fFull.length());
+    assertEquals("#1.2", 1, itFull2.pos());
+    assertEquals("#1.3", 1, itFull.pos());
 
     itFull.insert(new Integer(5));
     assertEquals("#2.0", 2, fFull.length());
+    assertEquals("#2.2", 1, itFull.pos());
+    assertEquals("#2.3", 2, itFull2.pos());
     itFull.collapse(itFull2);
     assertEquals("#2.1", 2, fFull.length());
 
@@ -258,7 +267,12 @@ public final class ModelListTest extends DrJavaTestCase {
     assertEquals("#3.0", 3, fFull.length());
     assertEquals("#3.0b",new Integer(4),itFull.current());
     assertEquals("#3.0a", new Integer(6), itFull2.current());
+    assertEquals("#3.0h", 3, itFull2.pos());
     itFull.collapse(itFull2);
+    assertEquals("3.0d", new Integer(6), itFull2.current());
+    assertEquals("3.0e", 2, itFull2.pos());
+    assertEquals("3.0f", new Integer(4), itFull.current());
+    assertEquals("3.0g", 1, itFull.pos());
     itFull.next();
     assertEquals("#3.0c",new Integer(6),itFull.current());
     assertEquals("#3.1", 2, fFull.length());
@@ -295,6 +309,7 @@ public final class ModelListTest extends DrJavaTestCase {
     itFull2.insert(new Integer(0));
     itFull2.insert(new Integer(1));
     itFull.next();
+    assertEquals("#0.1", new Integer(1), itFull.current());
     itFull2.remove();
     assertEquals("#0.0", new Integer(0), itFull.current());
   }
