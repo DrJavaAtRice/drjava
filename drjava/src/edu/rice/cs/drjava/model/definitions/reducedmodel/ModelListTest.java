@@ -88,12 +88,6 @@ public final class ModelListTest extends DrJavaTestCase {
     assertTrue("#0.0", fEmpty.isEmpty());
     assertEquals("#0.1", 0, fEmpty.length());
     assertEquals("#0.2", 0, fFull.length());
-    try {
-      itEmpty.remove();
-      assertTrue("#1.0", false);
-    }
-    catch (Exception e) {
-    }
 
     itFull.insert(new Integer(5));
     assertTrue("#2.0", !fFull.isEmpty());
@@ -107,15 +101,6 @@ public final class ModelListTest extends DrJavaTestCase {
     ModelList<Integer>.Iterator itFull = fFull.getIterator();
     ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
 
-    //test going past end of list
-    try {
-      itEmpty.next();
-      itEmpty.next();
-      assertTrue("#0.0", false);
-    }
-    catch (Exception e) {
-    }
-
     itFull.insert(new Integer(6));
     itFull.insert(new Integer(5));
     itFull.insert(new Integer(4));
@@ -126,24 +111,11 @@ public final class ModelListTest extends DrJavaTestCase {
     itFull.next();
     assertEquals("#1.2", new Integer(6), itFull.current());
     itFull.next();
-    try {
-      itFull.next();
-      assertTrue("#1.4", false);
-    }
-    catch (Exception f) {
-    }
   }
 
   public void testPrev() {
     ModelList<Integer>.Iterator itFull = fFull.getIterator();
     ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
-
-    try {
-      itEmpty.prev();
-      assertTrue("#0.0", false);
-    }
-    catch (Exception e) {
-    }
 
     itFull.insert(new Integer(6));
     itFull.insert(new Integer(5));
@@ -159,56 +131,16 @@ public final class ModelListTest extends DrJavaTestCase {
     itFull.prev();
     assertEquals("#1.3", new Integer(4), itFull.current());
     itFull.prev();
-
-    try {
-      itFull.prev();
-      assertTrue("#1.5", false);
-    }
-    catch (Exception f) {
-    }
   }
 
   public void testCurrent() {
     ModelList<Integer>.Iterator itFull = fFull.getIterator();
-    try {
-      itFull.current();
-      fail("Current call in initial position did not fail.");
-    }
-    catch (RuntimeException e) {
-      //This call was supposed to throw an exception
-            assertEquals("current() throws exception when at end",
-                   e.getMessage(),
-                   "Attempt to call current on an iterator in the initial position");
-    }
     itFull.next();
-    try {
-      itFull.current();
-      fail("Current call in final position did not fail.");
-    }
-    catch (RuntimeException e) {
-      //This call was supposed to throw an exception
-      assertEquals("current() throws exception when at end",
-                   e.getMessage(),
-                   "Attempt to call current on an iterator in the final position");
-    }
   }
 
   public void testPrevItem() {
     ModelList<Integer>.Iterator itFull = fFull.getIterator();
-    try {
-      itFull.prevItem();
-      assertTrue(false);
-    }
-    catch (Exception e) {
-    }
-
     itFull.insert(new Integer(0));
-    try {
-      itFull.prevItem();
-      assertTrue(false);
-    }
-    catch (Exception e) {
-    }
     itFull.insert(new Integer(1));
     itFull.next();
     assertEquals("#0.0", new Integer(1), itFull.prevItem());
@@ -216,18 +148,7 @@ public final class ModelListTest extends DrJavaTestCase {
 
   public void testNextItem() {
     ModelList<Integer>.Iterator itFull = fFull.getIterator();
-    try {
-      itFull.nextItem();
-      assertTrue(false);
-    }
-    catch (Exception e) { }
-
     itFull.insert(new Integer(0));
-    try {
-      itFull.nextItem();
-      assertTrue(false);
-    }
-    catch (Exception e) { /* should reach here */ }
     assertEquals("#0.2", new Integer(0), itFull.current());
     itFull.insert(new Integer(1));
     assertEquals("#0.1", new Integer(1), itFull.current());
