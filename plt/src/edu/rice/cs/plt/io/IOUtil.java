@@ -1106,28 +1106,50 @@ public final class IOUtil {
   }
   
   /**
-   * Define a {@code FileFilter} that accepts files with the given extension (that is,
-   * for extension {@code txt}, files whose canonical-case names (see {@link #canonicalCase}) 
+   * Define a {@code FileFilter} that accepts file objects with the given extension (that is,
+   * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
    * end in {@code .txt})
    */
   public static FileFilter extensionFileFilter(String extension) {
-    return asFileFilter(extensionFilePredicate(extension));
+    return asFileFilter(extensionFilePredicate(extension, LambdaUtil.TRUE));
   }
   
   /**
-   * Define a {@code Predicate} that accepts files with the given extension (that is,
-   * for extension {@code txt}, files whose canonical-case names (see {@link #canonicalCase}) 
+   * Define a {@code FileFilter} that accepts file objects with the given extension (that is,
+   * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
+   * end in {@code .txt})
+   * @param extension  File extension
+   * @param also  Additional filter that must be satisfied (for example, {@link ACCEPT_FILES})
+   */
+  public static FileFilter extensionFileFilter(String extension, FileFilter also) {
+    return asFileFilter(extensionFilePredicate(extension, asPredicate(also)));
+  }
+  
+  /**
+   * Define a {@code Predicate} that accepts file objects with the given extension (that is,
+   * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
    * end in {@code .txt})
    */
   public static Predicate<File> extensionFilePredicate(String extension) {
+    return extensionFilePredicate(extension, LambdaUtil.TRUE);
+  }
+                 
+  /**
+   * Define a {@code Predicate} that accepts file objects with the given extension (that is,
+   * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
+   * end in {@code .txt})
+   * @param extension  File extension
+   * @param also  Additional predicate that must be satisfied (for example, {@link IS_FILE})
+   */
+  public static Predicate<File> extensionFilePredicate(String extension, final Predicate<? super File> also) {
     // Ensure that the extension is in the canonical case
     extension = canonicalCase(new File(extension)).getName();
     final String suffix = "." + extension;
     return new Predicate<File>() {
-      public Boolean value(File f) { return canonicalCase(f).getName().endsWith(suffix); }
+      public Boolean value(File f) { return canonicalCase(f).getName().endsWith(suffix) && also.value(f); }
     };
   }
-                 
+  
   /** A predicate that tests whether {@link #attemptIsFile} holds for a file */
   public static final Predicate<File> IS_FILE = new Predicate<File>() {
     public Boolean value(File f) { return attemptIsFile(f); }

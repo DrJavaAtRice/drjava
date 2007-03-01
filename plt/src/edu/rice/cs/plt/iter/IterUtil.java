@@ -618,6 +618,78 @@ public final class IterUtil {
     }
   }
   
+  /** Produce an iterable of size 0 or 1 from an {@code Option}. */
+  public static <T> SizedIterable<T> asIterable(Option<? extends T> option) {
+    return option.apply(new OptionVisitor<T, SizedIterable<T>>() {
+      public SizedIterable<T> forSome(T val) { return new SingletonIterable<T>(val); }
+      @SuppressWarnings("unchecked")
+      public SizedIterable<T> forNone() { return (EmptyIterable<T>) EmptyIterable.INSTANCE; }
+    });
+  }
+
+  /** Produce an iterable of size 1 from a {@code Wrapper}. */
+  public static <T> SizedIterable<T> asIterable(Wrapper<? extends T> tuple) {
+    return new SingletonIterable<T>(tuple.value());
+  }
+  
+  /** Produce an iterable of size 2 from a {@code Pair}. */
+  public static <T> SizedIterable<T> asIterable(Pair<? extends T, ? extends T> tuple) {
+    @SuppressWarnings("unchecked")
+    T[] values = (T[]) new Object[]{ tuple.first(), tuple.second() };
+    return new ObjectArrayWrapper<T>(values);
+  }
+  
+  /** Produce an iterable of size 3 from a {@code Triple}. */
+  public static <T> SizedIterable<T> asIterable(Triple<? extends T, ? extends T, ? extends T> tuple) {
+    @SuppressWarnings("unchecked")
+    T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third() };
+    return new ObjectArrayWrapper<T>(values);
+  }
+  
+  /** Produce an iterable of size 4 from a {@code Quad}. */
+  public static <T> SizedIterable<T> asIterable(Quad<? extends T, ? extends T, ? extends T, ? extends T> tuple) {
+    @SuppressWarnings("unchecked")
+    T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third(), tuple.fourth() };
+    return new ObjectArrayWrapper<T>(values);
+  }
+
+  /** Produce an iterable of size 5 from a {@code Quint}. */
+  public static <T> SizedIterable<T>
+    asIterable(Quint<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
+    @SuppressWarnings("unchecked")
+    T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third(), tuple.fourth(), 
+                                     tuple.fifth() };
+    return new ObjectArrayWrapper<T>(values);
+  }
+  
+  /** Produce an iterable of size 6 from a {@code Sextet}. */
+  public static <T> SizedIterable<T>
+  asIterable(Sextet<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
+    @SuppressWarnings("unchecked")
+    T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third(), tuple.fourth(),
+                                     tuple.fifth(), tuple.sixth() };
+    return new ObjectArrayWrapper<T>(values);
+  }
+  
+  /** Produce an iterable of size 7 from a {@code Septet}. */
+  public static <T> SizedIterable<T>
+  asIterable(Septet<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
+    @SuppressWarnings("unchecked")
+    T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third(), tuple.fourth(),
+                                     tuple.fifth(), tuple.sixth(), tuple.seventh() };
+    return new ObjectArrayWrapper<T>(values);
+  }
+  
+  /** Produce an iterable of size 8 from an {@code Octet}. */
+  public static <T> SizedIterable<T> asIterable(Octet<? extends T, ? extends T, ? extends T, ? extends T,
+                                                      ? extends T, ? extends T, ? extends T, ? extends T> tuple) {
+    @SuppressWarnings("unchecked")
+    T[] values = (T[]) new Object[]{ tuple.first(), tuple.second(), tuple.third(), tuple.fourth(),
+                                     tuple.fifth(), tuple.sixth(), tuple.seventh(), tuple.eighth() };
+    return new ObjectArrayWrapper<T>(values);
+  }
+  
+  
   /**
    * Make a {@code List} with the given elements.  If the input <em>is</em> a {@code List},
    * casts it as such; otherwise, creates a new list.  In the second case, changes made to
@@ -740,6 +812,124 @@ public final class IterUtil {
   /** Produce an iterable that skips the last element of {@code iter} (if it exists) */
   public static <T> SkipLastIterable<T> skipLast(Iterable<? extends T> iter) {
     return new SkipLastIterable<T>(iter);
+  }
+  
+  /**
+   * Convert an iterable of 0 or 1 elements to an {@code Option}.
+   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   */
+  public static <T> Option<T> asOption(Iterable<? extends T> iter) {
+    int size = sizeOf(iter);
+    if (size == 0) { return Option.none(); }
+    else if (size == 1) { return Option.some(first(iter)); }
+    else {
+      throw new IllegalArgumentException("Iterable has more than 1 element: size == " + size);
+    }
+  }
+  
+  /**
+   * Convert an iterable of 1 element to a {@code Wrapper}.
+   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   */
+  public static <T> Wrapper<T> asWrapper(Iterable<? extends T> iter) {
+    int size = sizeOf(iter);
+    if (size != 1) {
+      throw new IllegalArgumentException("Iterable does not have 1 element: size == " + size);
+    }
+    Iterator<? extends T> i = iter.iterator();
+    return new Wrapper<T>(i.next());
+  }
+  
+  /**
+   * Convert an iterable of 2 elements to a {@code Pair}.
+   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   */
+  public static <T> Pair<T, T> asPair(Iterable<? extends T> iter) {
+    int size = sizeOf(iter);
+    if (size != 2) {
+      throw new IllegalArgumentException("Iterable does not have 2 elements: size == " + size);
+    }
+    Iterator<? extends T> i = iter.iterator();
+    return new Pair<T, T>(i.next(), i.next());
+  }
+  
+  /**
+   * Convert an iterable of 3 elements to a {@code Triple}.
+   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   */
+  public static <T> Triple<T, T, T> asTriple(Iterable<? extends T> iter) {
+    int size = sizeOf(iter);
+    if (size != 3) {
+      throw new IllegalArgumentException("Iterable does not have 3 elements: size == " + size);
+    }
+    Iterator<? extends T> i = iter.iterator();
+    return new Triple<T, T, T>(i.next(), i.next(), i.next());
+  }
+  
+  /**
+   * Convert an iterable of 4 elements to a {@code Quad}.
+   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   */
+  public static <T> Quad<T, T, T, T> asQuad(Iterable<? extends T> iter) {
+    int size = sizeOf(iter);
+    if (size != 4) {
+      throw new IllegalArgumentException("Iterable does not have 4 elements: size == " + size);
+    }
+    Iterator<? extends T> i = iter.iterator();
+    return new Quad<T, T, T, T>(i.next(), i.next(), i.next(), i.next());
+  }
+  
+  /**
+   * Convert an iterable of 5 elements to a {@code Quint}.
+   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   */
+  public static <T> Quint<T, T, T, T, T> asQuint(Iterable<? extends T> iter) {
+    int size = sizeOf(iter);
+    if (size != 5) {
+      throw new IllegalArgumentException("Iterable does not have 5 elements: size == " + size);
+    }
+    Iterator<? extends T> i = iter.iterator();
+    return new Quint<T, T, T, T, T>(i.next(), i.next(), i.next(), i.next(), i.next());
+  }
+  
+  /**
+   * Convert an iterable of 6 elements to a {@code Sextet}.
+   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   */
+  public static <T> Sextet<T, T, T, T, T, T> asSextet(Iterable<? extends T> iter) {
+    int size = sizeOf(iter);
+    if (size != 6) {
+      throw new IllegalArgumentException("Iterable does not have 6 elements: size == " + size);
+    }
+    Iterator<? extends T> i = iter.iterator();
+    return new Sextet<T, T, T, T, T, T>(i.next(), i.next(), i.next(), i.next(), i.next(), i.next());
+  }
+  
+  /**
+   * Convert an iterable of 7 elements to a {@code Septet}.
+   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   */
+  public static <T> Septet<T, T, T, T, T, T, T> asSeptet(Iterable<? extends T> iter) {
+    int size = sizeOf(iter);
+    if (size != 7) {
+      throw new IllegalArgumentException("Iterable does not have 7 elements: size == " + size);
+    }
+    Iterator<? extends T> i = iter.iterator();
+    return new Septet<T, T, T, T, T, T, T>(i.next(), i.next(), i.next(), i.next(), i.next(), i.next(), i.next());
+  }
+  
+  /**
+   * Convert an iterable of 8 elements to an {@code Octet}.
+   * @throws IllegalArgumentException  If the iterator is not of the appropriate size.
+   */
+  public static <T> Octet<T, T, T, T, T, T, T, T> asOctet(Iterable<? extends T> iter) {
+    int size = sizeOf(iter);
+    if (size != 8) {
+      throw new IllegalArgumentException("Iterable does not have 8 elements: size == " + size);
+    }
+    Iterator<? extends T> i = iter.iterator();
+    return new Octet<T, T, T, T, T, T, T, T>(i.next(), i.next(), i.next(), i.next(), i.next(), i.next(), i.next(),
+                                             i.next());
   }
   
   /**
