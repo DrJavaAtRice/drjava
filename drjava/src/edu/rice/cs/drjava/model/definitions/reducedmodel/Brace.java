@@ -161,12 +161,13 @@ class Brace extends ReducedToken implements ReducedModelStates {
     * @param other the brace to compare
     * @return true if this is a match for other.
     */
-  public boolean isMatch(ReducedToken other) {
-    if (! (other instanceof Brace)) return false;
-    int otherType = ((Brace) other)._type;
+  public boolean isMatch(Brace other) {
     int off = isOpen() ? 1 : -1;
-    return _type + off == otherType;
+    return _type + off == other._type;
   }
+  
+  /** Determines if this Brace is matchable (one of "{", "}", "(", ")", "[", "]"). */
+  public boolean isMatchable() { return _type < BLK_CMT_BEG_TYPE; }
 
   /** @return true if this is a double quote */
   public boolean isDoubleQuote() { return _type == DOUBLE_QUOTE_TYPE; }

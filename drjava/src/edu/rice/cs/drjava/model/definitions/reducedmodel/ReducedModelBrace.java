@@ -43,7 +43,7 @@ import java.util.Stack;
  */
 public class ReducedModelBrace extends AbstractReducedModel {
 
-  private ReducedModelControl _parent;
+  private ReducedModelControl _parent;  // contains the walker which is moved by moveWalkerGetState
 
   public ReducedModelBrace(ReducedModelControl parent) {
     super();
@@ -138,16 +138,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
   *  This means it is ignored on balancing and on next/prev brace finding.
   *  All other braces are matchable.
   */
-  private boolean _isCurrentBraceMatchable() {
-    String type = _cursor.current().getType();
-    return (((type.equals("{")) ||
-             (type.equals("}")) ||
-             (type.equals("(")) ||
-             (type.equals(")")) ||
-             (type.equals("[")) ||
-             (type.equals("]"))) &&
-            (_parent.getStateAtCurrent() == FREE));
-  }
+  private boolean _isCurrentBraceMatchable() { return _cursor.current().isMatchable(); }
 
   /**
    *Returns distance from current location of cursor to the location of the
@@ -243,12 +234,11 @@ public class ReducedModelBrace extends AbstractReducedModel {
     */
   public int balanceForward() {
     //System.out.println("-------------------------------------------");
-    Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
+    Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
-    int relDistance;
-    int distance = 0;
-    if (iter.atStart() || iter.atFirstItem() || !openBraceImmediatelyLeft()) {
+    
+    if (iter.atStart() || iter.atFirstItem() || ! openBraceImmediatelyLeft()) {
 //      System.out.println("openBraceImmediatelyLeft(): "+openBraceImmediatelyLeft());
       iter.dispose();
 //      System.out.println("! atStart, atFirstItem, or no closed brace");
@@ -256,64 +246,54 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
 
     iter.prev();
-    relDistance = -iter.current().getSize();
-    // here we check to make sure there is an open significant brace
-    // immediately to the left of the cursor
-    if (iter.current().isOpenBrace()) {
-      if (moveWalkerGetState(relDistance) == FREE) {
-        // initialize the stack with the first brace, the one we are balancing
-        braceStack.push(iter.current());
+    ReducedToken curToken = iter.current();
+    
+    assert curToken instanceof Brace; // In fact, it is a significant matchable open brace.
+    
+    int openBraceDistance = - curToken.getSize();
+  
+    moveWalkerGetState(openBraceDistance);
+    braceStack.push((Brace) curToken);
+    iter.next();
+    moveWalkerGetState(-openBraceDistance);
+    
+    int relDistance = 0;  // distance to closest preceding Brace (non-gap)
+    int distance = 0;     // distance to end of original open Brace (immediately left of cursor on entry)
+   
 
-        // reset the walker and iter to where we started
-        iter.next();
-        moveWalkerGetState(-relDistance);
-        relDistance = 0;
-      }
-      else {
-        // the open brace is in a comment or quotation => ignore it
-        iter.dispose();
-//        System.out.println("! state at relative location != FREE");
-        return -1;
-      }
-    }
-    else {
-      // this isn't an open brace => ignore it
-      iter.dispose();
-//      System.out.println("! no open brace to immediate left of cursor");
-      return -1;
-    }
-    // either we get a match and the stack is empty
-    // or we reach the end of a file and haven't found a match
-    // or we have a close brace that doesn't have a match,
-    // so we abort
-    while (!iter.atEnd() && !braceStack.isEmpty()) {
-      if (!iter.current().isGap()) {
+    /* Loop until either:
+     * (i)   we get a match and the stack is empty (success);
+     * (ii)  we reach the end of a file and haven't found a match and abort; or
+     * (iii) we reach a close brace that doesn't have a match and abort.
+     */
+    while (! iter.atEnd() && ! braceStack.isEmpty()) {
+      curToken = iter.current(); // a ReducedToken is either a Gap or a Brace
+      if (! curToken.isGap()) {  // curToken is a Brace
+        Brace curBrace = (Brace) curToken;
         if (moveWalkerGetState(relDistance) == FREE) {
-              // check for closed brace
-              if (iter.current().isClosedBrace()) {
-                ReducedToken popped = braceStack.pop();
-                if (!iter.current().isMatch(popped)) {
-                  iter.dispose();
+          // check for closed brace
+          if (curBrace.isClosedBrace()) {
+            Brace popped = braceStack.pop();
+            if (! curBrace.isMatch(popped)) {
+              iter.dispose();
 //                  System.out.println("! encountered closed brace that didn't match");
-                  return -1;
-                }
-              }
-              // otherwise, this must be an open brace
-              else {
-                braceStack.push(iter.current());
-              }
+              return -1;
             }
-        relDistance = 0;
+          }
+          // otherwise, this must be an open brace
+          else braceStack.push(curBrace);
+        }
+        relDistance = 0; // we moved the walker back to the right edge of the curBrace
       }
-      // no matter what, we always want to increase the distance
-      // by the size of the token we have just gone over
-        distance += iter.current().getSize();
-        relDistance += iter.current().getSize();
-        iter.next();
+      // increment distances of size of current token
+      int size = curToken.getSize();
+      distance += size;
+      relDistance += size;
+      iter.next();
     }
-
-    // we couldn't find a match
-    if (!braceStack.isEmpty()) {
+    
+    // check if we exited because of failure
+    if (! braceStack.isEmpty()) {
       iter.dispose();
 //      System.out.println("! ran to end of file. distance: " + distance);
       return -1;
@@ -339,9 +319,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
 //  }
 
   public boolean openBraceImmediatelyLeft() {
-    if (_cursor.atStart() || _cursor.atFirstItem()) {
-      return false;
-    }
+    if (_cursor.atStart() || _cursor.atFirstItem()) return false;
     else {
       _cursor.prev();
       /*
@@ -400,12 +378,11 @@ public class ReducedModelBrace extends AbstractReducedModel {
    */
   public int balanceBackward() {
     //System.out.println("-------------------------------------------");
-    Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
+    Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
-    int relDistance;
-    int distance = 0;
-    if (iter.atStart() || iter.atFirstItem() || !closedBraceImmediatelyLeft()) {
+ 
+    if (iter.atStart() || iter.atFirstItem() || ! closedBraceImmediatelyLeft()) {
       //System.out.println("closedBraceImmediatelyLeft(): "+closedBraceImmediatelyLeft());
       iter.dispose();
       //System.out.println("! atStart, atFirstItem, or no closed brace");
@@ -413,68 +390,46 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
 
     iter.prev();
-    relDistance = iter.current().getSize();
-    // here we check to make sure there is an open significant brace
-    // immediately to the right of the cursor
-    if (iter.current().isClosedBrace()) {
-      if (moveWalkerGetState(-relDistance) == FREE) {
-        // initialize the distance and the stack with the first brace,
-        // the one we are balancing
+    assert iter.current() instanceof Brace;  // In fact, it is a significant closed brace.
+    
+    int relDistance = 0; // distance to right edge of nearest brace 
+    int distance = 0;    // distance to original cursor       
 
-        braceStack.push(iter.current());
-        distance += iter.current().getSize();
-        iter.prev();
-        if (!iter.atStart()) {
-          distance += iter.current().getSize();
-          relDistance = iter.current().getSize();
-        }
-      }
-      else {
-        iter.dispose();
-        //System.out.println("! state at relative location != FREE");
-        return -1;
-      }
-    }
-    else {
-      iter.dispose();
-      //System.out.println("! no open brace to immediate right of cursor");
-      return -1;
-    }
-    // either we get a match and the stack is empty
-    // or we reach the start of a file and haven't found a match
-    // or we have a open brace that doesn't have a match,
-    // so we abort
-    while (!iter.atStart() && !braceStack.isEmpty()) {
-      if (!iter.current().isGap()) {
-        if (moveWalkerGetState(-relDistance) ==
-            FREE) {
-              // open
-              if (iter.current().isOpenBrace()) {
-                ReducedToken popped = braceStack.pop();
-                if (!iter.current().isMatch(popped)) {
-                  iter.dispose();
-                  //System.out.println("! encountered open brace that didn't match");
-                  return -1;
-                }
-              }
-              // closed
-              else {
-                braceStack.push(iter.current());
-              }
+    /* We loop until:
+     * (i)   we get a match and the stack is empty and report success
+     * (ii)  we reach the start of a file and haven't found a match and aborrt
+     * (iii) we reach an open brace that doesn't have a match and abort
+     */
+    do {
+      ReducedToken curToken = iter.current();
+      int size = curToken.getSize();
+      distance += size;
+      relDistance += size;
+      
+      if (! curToken.isGap()) {  // curToken is a Brace
+        Brace curBrace = (Brace) curToken;
+        if (moveWalkerGetState(- relDistance) == FREE) {
+          if (curBrace.isOpenBrace()) {
+            Brace popped = braceStack.pop();
+            if (! curBrace.isMatch(popped)) {
+              iter.dispose();
+              //System.out.println("! encountered open brace that didn't match");
+              return -1;
             }
+          }
+          // closed
+          else braceStack.push(curBrace);
+        }
         relDistance = 0;
       }
-      // no matter what, we always want to increase the distance
-      // by the size of the token we have just gone over
+      
       iter.prev();
-      if (!iter.atStart() && !braceStack.isEmpty()) {
-        distance += iter.current().getSize();
-        relDistance += iter.current().getSize();
-      }
     }
+    while (! iter.atStart() && ! braceStack.isEmpty());
 
-    // we couldn't find a match
-    if (!braceStack.isEmpty()) {
+
+    // test to see if we exited without a match
+    if (! braceStack.isEmpty()) {
       iter.dispose();
       //System.out.println("! ran to end of brace stack");
       return -1;
@@ -499,7 +454,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     * this variable is only to the space in front of the newline hence you must move back that distance + 1.
     */
   protected void getDistToEnclosingBrace(IndentInfo braceInfo) {
-    Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
+    Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
     // this is the distance to in front of the previous newline.
@@ -530,32 +485,34 @@ public class ReducedModelBrace extends AbstractReducedModel {
     // or we reach the start of a file and haven't found a match
     // or we have a open brace that doesn't have a match,
     // so we abort
-    while (!iter.atStart()) {
+    while (! iter.atStart()) {
+            
+      ReducedToken curToken = iter.current();
+      int size = curToken.getSize();
+      distance += size;
+      relDistance += size;
 
-      distance += iter.current().getSize();
-      relDistance += iter.current().getSize();
-
-      if (!iter.current().isGap()) {
+      if (! curToken.isGap()) {
+        
+        Brace curBrace = (Brace) curToken;
 
         if (moveWalkerGetState(-relDistance) == FREE) {
               // open
-              if (iter.current().isOpenBrace()) {
+              if (curBrace.isOpenBrace()) {
                 if (braceStack.isEmpty()) {
-                  braceInfo.braceType = iter.current().getType();
+                  braceInfo.braceType = curBrace.getType();
                   braceInfo.distToBrace = distance;
                   iter.dispose();
                   return;
                 }
-                ReducedToken popped = braceStack.pop();
-                if (!iter.current().isMatch(popped)) {
+                Brace popped = braceStack.pop();
+                if (! curBrace.isMatch(popped)) {
                   iter.dispose();
                   return;
                 }
               }
               // closed
-              else {
-                braceStack.push(iter.current());
-              }
+              else braceStack.push(curBrace);
             }
         relDistance = 0;
       }
@@ -573,7 +530,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
    * Find the enclosing brace enclosing our current location.
    */
   protected void getDistToEnclosingBraceCurrent(IndentInfo braceInfo) {
-    Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
+    Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
     int relDistance = 0;
@@ -603,30 +560,30 @@ public class ReducedModelBrace extends AbstractReducedModel {
     // so we abort
     while (!iter.atStart()) {
 
-      distance += iter.current().getSize();
-      relDistance += iter.current().getSize();
+      ReducedToken curToken = iter.current();
+      int size = curToken.getSize();
+      distance += size;
+      relDistance += size;
 
-      if (!iter.current().isGap()) {
-
+      if (! curToken.isGap()) {
+        Brace curBrace = (Brace) curToken;
         if (moveWalkerGetState(-relDistance) == FREE) {
               // open
-              if (iter.current().isOpenBrace()) {
+              if (curBrace.isOpenBrace()) {
                 if (braceStack.isEmpty()) {
-    braceInfo.braceTypeCurrent = iter.current().getType();
+                  braceInfo.braceTypeCurrent = curBrace.getType();
                   braceInfo.distToBraceCurrent = distance;
                   iter.dispose();
                   return;
                 }
-                ReducedToken popped = braceStack.pop();
-                if (!iter.current().isMatch(popped)) {
+                Brace popped = braceStack.pop();
+                if (! curBrace.isMatch(popped)) {
                   iter.dispose();
                   return;
                 }
               }
               // closed
-              else {
-                braceStack.push(iter.current());
-              }
+              else braceStack.push(curBrace);
             }
         relDistance = 0;
       }

@@ -33,8 +33,7 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/** The representation of document text in the reduced model.
- *  It is the core atomic piece.
+/** The representation of document text in the reduced model. ReducedToken ::= Brace | Gap
  *  @version $Id$
  */
 public abstract class ReducedToken implements ReducedModelStates {
@@ -66,7 +65,10 @@ public abstract class ReducedToken implements ReducedModelStates {
    *  @param other another ReducedToken
    *  @return true if there is a match
    */
-  public abstract boolean isMatch(ReducedToken other);
+  public abstract boolean isMatch(Brace other);
+  
+  /** Return true iff this ReducedToken is a matchable, i.e. is one of "{", "}", "(", ")", "[", "]" */
+  public abstract boolean isMatchable();
 
   /** Get the shadowing state of the token.
    *  @return FREE | INSIDE_SINGLE_QUOTE | INSIDE_DOUBLE_QUOTE | INSIDE_LINE_COMMENT| INSIDE_BLOCK_COMMENT

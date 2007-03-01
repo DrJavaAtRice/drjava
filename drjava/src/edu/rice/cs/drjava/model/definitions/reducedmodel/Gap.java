@@ -174,24 +174,21 @@ class Gap extends ReducedToken {
    */
   public boolean isOpen() { return false; }
 
-  /** Determines that this is not closed.
-   *  @return <code>false</code>
-   */
+  /** Determines that this is not closed. */
   public boolean isClosed() { return false; }
 
   /** Determines that this is not a match.
    *  @param other the token to compare to
    *  @return <code>false</code>
    */
-  public boolean isMatch(ReducedToken other) { return false; }
+  public boolean isMatch(Brace other) { return false; }
+  
+  /** Determines that this ReducedToken is not matchable (one of "{", "}", "(", ")", "[", "]") */
+  public boolean isMatchable() { return false; }
 
-  /** Determines that this is not an open brace.
-   *  @return <code>false</code>
-   */
+  /** Determines that this is not an open brace. */
   public boolean isOpenBrace() { return false; }
 
-  /** Determines that this is not a closed brace.
-   *  @return <code>false</code>
-   */
+  /** Determines that this is not a closed brace. */
   public boolean isClosedBrace() { return false; }
 }

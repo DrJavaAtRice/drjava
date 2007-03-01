@@ -8197,7 +8197,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       GraphicsConfiguration gc = gd.getDefaultConfiguration();
       Rectangle isect = frameRect.intersection(gc.getBounds());
       int gcArea = isect.width*isect.height;
-      if (gcArea>gcBestArea) {
+      if (gcArea > gcBestArea) {
         gcBest = gc;
         gcBestArea = gcArea;
       }
