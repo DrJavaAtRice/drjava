@@ -43,8 +43,13 @@ import java.util.WeakHashMap;
 import java.lang.ref.WeakReference;
 
 import java.io.File;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.IOException;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import koala.dynamicjava.parser.Parser;
+import koala.dynamicjava.parser.ParseException;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
@@ -120,9 +125,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private volatile int _cachedPrevLineLoc;
   /** Cached location of next line. */
   private volatile int _cachedNextLineLoc;
-
-  /** The package name last extracted from this document. */
-  private volatile String _packageName;
   
   private volatile File _classFile;
 
@@ -990,8 +992,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *          returns "" as the package name.
    */
   public String getPackageName() {
-    try { return getStrictPackageName(); }
-    catch(InvalidPackageException e) { return ""; }
+    Reader r;
+    acquireReadLock();
+    try { r = new StringReader(getText()); }
+    finally { releaseReadLock(); }
+    try { return new Parser(r).packageDeclaration().getName(); }
+    catch (ParseException e) { return ""; }
+    finally {
+      try { r.close(); }
+      catch (IOException e) { /* ignore */ }
+    }
   }
  
   /**
@@ -1075,100 +1085,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    oldLog = log;
     return index;
   }
-
-  /** Gets the name of the package this source file claims it's in (with the package keyword). It does this by 
-   *  minimally parsing the source file to find the package statement.
-   *  @return The name of package declared for this source file OR the empty string if there is no package 
-   *          statement (and thus the source file is in the empty package).
-   *  @exception InvalidPackageException if there is some sort of a <TT>package</TT> statement but the defined 
-   *             package does not match or exist.
-   */
-  protected String getStrictPackageName() throws InvalidPackageException {
-    
-//    Utilities.show("getPackageName() called on " + this);
-    /* Buffer for constructing the package name. */
-    final StringBuilder buf = new StringBuilder();
-    int oldLocation = 0;  // javac requires this bogus initialization
-    
-    acquireReadLock();
-    try {
-      final String text = getText();
-      final int docLength = text.length();
-      if (docLength == 0) return "";
-      
-      // perturbing reduced model, which is reset in finally clause
-      synchronized(_reduced) {
-        oldLocation = _currentLocation;
-        try {
-          setCurrentLocation(0);
-          
-          /* The location of the first non-whitespace character that is not inside a string or comment. */
-          int firstNormalLocation = 0;
-          while (firstNormalLocation < docLength) {
-            setCurrentLocation(firstNormalLocation);
-            
-            if (_reduced.currentToken().getHighlightState() == HighlightStatus.NORMAL) {
-              // OK, it's normal -- so if it's not whitespace, we found the spot
-              char curChar = text.charAt(firstNormalLocation);
-              if (! Character.isWhitespace(curChar)) break;
-            }
-            firstNormalLocation++;
-          }
-          
-          // Now there are two possibilities: firstNormalLocation is at the first spot of a non-whitespace character 
-          // that's NORMAL, or it's at the end of the document.
-          
-          if (firstNormalLocation == docLength) return "";
-          
-          final int strlen = "package".length();
-          
-          final int endLocation = firstNormalLocation + strlen;
-          
-          if ((firstNormalLocation + strlen > docLength) ||
-              ! text.substring(firstNormalLocation, endLocation).equals("package")) {
-            // The first normal text is not "package" or there is not enough text for there to be a package statement.
-            // Thus, there is no valid package statement.
-            return "";
-          }
-          
-          // OK, we must have found a package statement.
-          // Now let's find the semicolon. Again, the semicolon must be free.
-          int afterPackage = firstNormalLocation + strlen;
-          
-          int semicolonLocation = afterPackage;
-          do {
-            semicolonLocation = text.indexOf(";", semicolonLocation + 1);
-            if (semicolonLocation == -1)
-              throw new InvalidPackageException(firstNormalLocation,
-                                                "No semicolon found to terminate package statement!");
-            setCurrentLocation(semicolonLocation);
-          }
-          while (_reduced.currentToken().getHighlightState() != HighlightStatus.NORMAL);
-          
-          // Now we have semicolon location. We'll gather text in between one character at a time for simplicity. 
-          for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
-            setCurrentLocation(walk);
-            if (_reduced.currentToken().getHighlightState() == HighlightStatus.NORMAL) {
-              char curChar = text.charAt(walk);
-              if (! Character.isWhitespace(curChar)) buf.append(curChar);
-            }
-          }
-          
-          String toReturn = buf.toString();
-          if (toReturn.equals(""))
-            throw new InvalidPackageException(firstNormalLocation,
-                                              "Package name was not specified after the package keyword!");
-          return toReturn;
-        }
-        finally { // reset oldLocation
-          setCurrentLocation(0);  // Why?
-          setCurrentLocation(oldLocation);
-        }
-      }
-    }
-    finally { releaseReadLock(); }
-  }
-
+  
   /** Returns the name of the class or interface enclosing the caret position at the top level.
    *  @return Name of enclosing class or interface
    *  @throws ClassNameNotFoundException if no enclosing class found

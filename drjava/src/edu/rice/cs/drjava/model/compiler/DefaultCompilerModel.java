@@ -228,33 +228,46 @@ public class DefaultCompilerModel implements CompilerModel {
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
     ArrayList<File> filesToCompile = new ArrayList<File>();
     ArrayList<File> excludedFiles = new ArrayList<File>();
+    ArrayList<CompilerError> packageErrors = new ArrayList<CompilerError>();
     for (OpenDefinitionsDocument doc : docs) {
       if (doc.isSourceFile()) {
         File f = doc.getFile();
         // Check for null in case the file is untitled (not sure this is the correct check)
         if (f != null) { filesToCompile.add(f); }
         doc.setCachedClassFile(null); // clear cached class file
+        
+        try { doc.getSourceRoot(); }
+        catch (InvalidPackageException e) {
+          packageErrors.add(new CompilerError(f, e.getMessage(), false));
+        }
       }
       else excludedFiles.add(doc.getFile());
-    } 
-    
-    File buildDir = _model.getBuildDirectory();
-    if ((buildDir != null) && !buildDir.exists() && !buildDir.mkdirs()) {
-      throw new IOException("Could not create build directory: "+buildDir);
     }
-
-    File workDir = _model.getWorkingDirectory(); 
-    if ((workDir != null) && ! workDir.exists() && ! workDir.mkdirs()) {
-      throw new IOException("Could not create working directory: "+workDir);
-    }
-     
+      
     _notifier.compileStarted();
-    try { _compileFiles(filesToCompile, buildDir); }
-    catch (Throwable t) {
-      CompilerError err = new CompilerError(t.toString(), false);
-      _distributeErrors(Arrays.asList(err));
+    try {
+      if (!packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
+      else {
+        try {
+          File buildDir = _model.getBuildDirectory();
+          if ((buildDir != null) && !buildDir.exists() && !buildDir.mkdirs()) {
+            throw new IOException("Could not create build directory: "+buildDir);
+          }
+          
+          File workDir = _model.getWorkingDirectory(); 
+          if ((workDir != null) && ! workDir.exists() && ! workDir.mkdirs()) {
+            throw new IOException("Could not create working directory: "+workDir);
+          }
+          
+          _compileFiles(filesToCompile, buildDir);
+        }
+        catch (Throwable t) {
+          CompilerError err = new CompilerError(t.toString(), false);
+          _distributeErrors(Arrays.asList(err));
+        }
+      }
     }
-    finally { _notifier.compileEnded(workDir, excludedFiles); }
+    finally { _notifier.compileEnded(_model.getWorkingDirectory(), excludedFiles); }
   }
   
 

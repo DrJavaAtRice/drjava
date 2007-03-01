@@ -31,7 +31,6 @@
  * 
  *END_COPYRIGHT_BLOCK*/
 
-// TODO: should this be in the compiler package?
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.IOException;

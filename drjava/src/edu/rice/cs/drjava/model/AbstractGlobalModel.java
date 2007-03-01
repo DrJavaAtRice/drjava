@@ -399,61 +399,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     getBrowserHistoryManager().setMaximumSize(DrJava.getConfig().getSetting(BROWSER_HISTORY_MAX_SIZE).intValue());
   }
  
-  /** Returns a source root given a package and filename. */
-  protected File getSourceRoot(String packageName, File sourceFile) throws InvalidPackageException {
-//    Utilities.show("getSourceRoot(" + packageName + ", " + sourceFile + " called");
-    if (packageName.equals("")) {
-//      Utilities.show("Source root of " + sourceFile + " is: " + sourceFile.getParentFile());
-      return sourceFile.getParentFile();
-    }
-    
-    ArrayList<String> packageStack = new ArrayList<String>();
-    int dotIndex = packageName.indexOf('.');
-    int curPartBegins = 0;
-    
-    while (dotIndex != -1) {
-      packageStack.add (packageName.substring(curPartBegins, dotIndex));
-      curPartBegins = dotIndex + 1;
-      dotIndex = packageName.indexOf('.', dotIndex + 1);
-    }
-    
-    // Now add the last package component
-    packageStack.add (packageName.substring(curPartBegins));
-    
-    // Must use the canonical path, in case there are dots in the path
-    //  (which will conflict with the package name)
-    try {
-      File parentDir = sourceFile.getCanonicalFile ();
-      while (! packageStack.isEmpty()) {
-        String part = pop(packageStack);
-        parentDir = parentDir.getParentFile();
-        if (parentDir == null) throw new UnexpectedException("parent dir is null!");
-        
-        // Make sure the package piece matches the directory name
-        if (! part.equals(parentDir.getName())) {
-          String msg = "The source file " + sourceFile.getAbsolutePath() +
-            " is in the wrong directory or in the wrong package. " +
-            "The directory name " + parentDir.getName() +
-            " does not match the package component " + part + ".";
-          
-          throw new InvalidPackageException(-1, msg);
-        }
-      }
-      
-      // OK, now parentDir points to the directory of the first component of the
-      // package name. The parent of that is the root.
-      parentDir = parentDir.getParentFile();
-      if (parentDir == null) {
-        throw new RuntimeException("parent dir of first component of package name is null!");
-      }
-      return parentDir;
-    }
-    catch (IOException ioe) {
-      String msg = "Could not locate directory of the source file: " + ioe;
-      throw new InvalidPackageException(-1, msg);
-    }
-  }
- 
   // ----- STATE -----
 
   /** Specifies the state of the navigator pane.  The global model delegates the compileAll command to the _state, a 
@@ -1124,7 +1069,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Utilities.showDebug("File " + file + " opened");
     // Make sure this is on the classpath
     try {
-      File classPath = odd.getSourceRoot ();
+      File classPath = odd.getSourceRoot();
       addDocToClassPath(odd);
       setClassPathChanged(true);
     }
@@ -2897,7 +2842,37 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      *  @throws InvalidPackageException if the package statement is invalid,
      *  or if it does not match up with the location of the source file.
      */
-    public File getSourceRoot() throws InvalidPackageException { return _getSourceRoot(_packageName); }
+    public File getSourceRoot() throws InvalidPackageException { 
+      if (isUntitled())
+        throw new InvalidPackageException(-1, "Can not get source root for unsaved file. Please save.");
+      
+      try {
+        String[] packages = _packageName.split("\\.");
+        if (packages.length == 1 && packages[0].equals("")) {
+          packages = new String[0]; // split should do this, but it doesn't
+        }
+        File dir = getFile().getParentFile();
+        for (String p : IterUtil.reverse(IterUtil.asIterable(packages))) {
+          if (dir == null || !dir.getName().equals(p)) {
+            String m = "File is in the wrong directory or is declared part of the wrong package.  " +
+            "Directory name " + ((dir == null) ? "(root)" : "'" + dir.getName() + "'") +
+            " does not match package name '" + p + "'.";
+            throw new InvalidPackageException(-1, m);
+          }
+          dir = dir.getParentFile();
+        }
+        if (dir == null) {
+          // should not happen in typical cases -- requires the first package name to match the root's name,
+          // which is usually not a valid identifier (like "" or "C:")
+          throw new InvalidPackageException(-1, "File is in a directory tree with a null root");
+        }
+        return dir;
+      }
+      catch (FileMovedException fme) {
+        throw new
+          InvalidPackageException(-1, "File has been moved or deleted from its previous location. Please save.");
+      }
+    }
     
     /**  @return the name of the package at the time of the most recent save or load operation. */
     public String getPackageName() { return _packageName; }
@@ -3606,89 +3581,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
     /** throws UnsupportedOperationException */
     public void removeFromDebugger() { /* do nothing because it is called in methods in this class */ }        
-
-    /** Finds the root directory of the source file.
-     *  @param packageName Package name, already fetched from the document
-     *  @return The root directory of the source file based on the package statement.
-     *  @throws InvalidPackageException If the package statement is invalid, or if it does not match up with the
-     *          location of the source file.
-     */
-    File _getSourceRoot(String packageName) throws InvalidPackageException {
-      
-      if (isUntitled())
-        throw new InvalidPackageException(-1, "Can not get source root for unsaved file. Please save.");
-      
-      File sourceFile;
-      try { sourceFile = getFile(); }
-      catch (FileMovedException fme) {
-        throw new
-          InvalidPackageException(-1, "File has been moved or deleted from its previous location. Please save.");
-      }
-      
-      if (packageName.equals("")) { return sourceFile.getParentFile(); }
-      
-      ArrayList<String> packageStack = new ArrayList<String>();
-      int dotIndex = packageName.indexOf('.');
-      int curPartBegins = 0;
-      
-      while (dotIndex != -1) {
-        packageStack.add(packageName.substring(curPartBegins, dotIndex));
-        curPartBegins = dotIndex + 1;
-        dotIndex = packageName.indexOf ('.', dotIndex + 1);
-      }
-      
-      // Now add the last package component
-      packageStack.add(packageName.substring(curPartBegins));
-      
-      // Must use the canonical path, in case there are dots in the path (which will conflict with the package name)
-      try {
-        File parentDir = sourceFile.getCanonicalFile();
-        File grandParentDir;
-        while (! packageStack.isEmpty()) {
-          String part = pop(packageStack);
-          parentDir = parentDir.getParentFile();
-          grandParentDir = parentDir.getParentFile();
-
-          if (parentDir == null) throw new RuntimeException("parent dir is null!");
-
-          // Make sure the package piece matches the directory name
-          boolean equal;
-          if (grandParentDir != null) {
-            // grand parent exists, compare File objects
-            // this handles case-insensitivity for packages on Windows
-            File packageDir = new File(grandParentDir,part);
-            equal = packageDir.equals(parentDir);
-          }
-          else {
-            // grand parent does not exist, so we can't create a File object
-            // with the package's name. Just compare names; this doesn't
-            // handle case-insensitivity for packages on Windows
-            equal = part.equals(parentDir.getName()); 
-          }
-          if (!equal) {
-            String msg = "The source file " + sourceFile.getAbsolutePath() +
-              " is in the wrong directory or in the wrong package. " +
-              "The directory name " + parentDir.getName() +
-              " does not match the package component " + part + ".";
-
-            throw new InvalidPackageException(-1, msg);
-          }
-        }
-
-        // OK, now parentDir points to the directory of the first component of the
-        // package name. The parent of that is the root.
-        parentDir = parentDir.getParentFile();
-        if (parentDir == null) {
-          throw new RuntimeException("parent dir of first component is null?!");
-        }
-
-        return parentDir;
-      }
-      catch (IOException ioe) {
-        String msg = "Could not locate directory of the source file: " + ioe;
-        throw new InvalidPackageException(-1, msg);
-      }
-    }
 
     public String toString() { return getFileName(); }
  
