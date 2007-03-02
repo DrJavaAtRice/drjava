@@ -1249,7 +1249,7 @@
     </exec>
     <condition property="is-modified">
       <not>
-        <equals arg1="${svn-status}" arg2="">
+        <equals arg1="${svn-status}" arg2="" />
       </not>
     </condition>
     <echo message="is-modified: ${is-modified}" />
