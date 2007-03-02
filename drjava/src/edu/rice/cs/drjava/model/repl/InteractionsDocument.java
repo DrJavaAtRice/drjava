@@ -124,15 +124,14 @@ public class InteractionsDocument extends ConsoleDocument {
     finally { releaseWriteLock(); }
   }
 
-  /** Replaces any text entered past the prompt with the current item in the history. */
+  /** Replaces any text entered past the prompt with the current item in the history. Assumes that WriteLock is 
+    * already held! */
   private void _replaceCurrentLineFromHistory() {
-    acquireWriteLock();
     try {
       _clearCurrentInputText();
       append(_history.getCurrent(), DEFAULT_STYLE);
     }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-    finally { releaseWriteLock(); }
   }
 
   /** Accessor method for the history of commands. */
@@ -219,19 +218,11 @@ public class InteractionsDocument extends ConsoleDocument {
    finally { releaseWriteLock(); }
   }
   
-  /** Returns whether there is a previous command in the history. */
-  public boolean hasHistoryPrevious() { 
-    acquireReadLock();
-    try { return _history.hasPrevious(); }
-    finally { releaseReadLock(); }
-  }
+  /** Returns whether there is a previous command in the history.  Assumes that WriteLock is already held!*/
+  private boolean hasHistoryPrevious() { return _history.hasPrevious(); }
 
-  /** Returns whether there is a next command in the history. */
-  public boolean hasHistoryNext() { 
-    acquireReadLock();
-    try { return _history.hasNext(); }
-    finally { releaseReadLock(); }
-  }
+  /** Returns whether there is a next command in the history.  Assumes that WriteLock is already held!*/
+  public boolean hasHistoryNext() { return _history.hasNext(); }
   
   /** Reverse searches the history for the given string.
    *  @param searchString the string to search for
@@ -258,19 +249,15 @@ public class InteractionsDocument extends ConsoleDocument {
   }
   
   /** Gets the previous interaction in the history and replaces whatever is on the current interactions input
-   *  line with this interaction.
+   *  line with this interaction.  Assumes that the WriteLock is already held!
    */
-  public boolean recallPreviousInteractionInHistory() {
-    acquireWriteLock();
-    try {    
-      if (hasHistoryPrevious()) {
-        moveHistoryPrevious(getCurrentInteraction());
-        return true;
-      }
-      _beep.run();
-      return false;
+  public boolean recallPreviousInteractionInHistory() {   
+    if (hasHistoryPrevious()) {
+      moveHistoryPrevious(getCurrentInteraction());
+      return true;
     }
-    finally { releaseWriteLock(); }
+    _beep.run();
+    return false;
   }
   
   /** Gets the next interaction in the history and replaces whatever is on the current interactions input line 

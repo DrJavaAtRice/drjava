@@ -57,7 +57,7 @@ public class History implements OptionConstants, Serializable {
   public static final String INTERACTION_SEPARATOR = "//End of Interaction//";
 
   // Not final because it may be updated by config
-  private int _maxSize;
+  private volatile int _maxSize;
 
   /** Version flag at the beginning of saved history file format
    *  If this is not present in a saved history, it is assumed to be the original format.
@@ -65,14 +65,14 @@ public class History implements OptionConstants, Serializable {
   public static final String HISTORY_FORMAT_VERSION_2 =
     "// DrJava saved history v2" + System.getProperty("line.separator");
 
-  private Vector<String> _vector = new Vector<String>();
-  private int _cursor = -1;
+  private final Vector<String> _vector = new Vector<String>();
+  private volatile int _cursor = -1;
 
   /** A hashmap for edited entries in the history. */
-  private HashMap<Integer, String> _editedEntries = new HashMap<Integer, String>();
+  private final HashMap<Integer, String> _editedEntries = new HashMap<Integer, String>();
 
   /** A placeholder for the current search string. */
-  private String _currentSearchString = "";
+  private volatile String _currentSearchString = "";
 
   /** Constructor, so we can add a listener to the Config item being used. */
   public History() {
@@ -84,9 +84,9 @@ public class History implements OptionConstants, Serializable {
    *  @param maxSize Number of lines to remember in the history.
    */
   public History(int maxSize) {
-    _maxSize = maxSize;
     // Sanity check on _maxSize
-    if (_maxSize < 0) _maxSize = 0;
+    if (maxSize < 0) maxSize = 0;
+    _maxSize = maxSize;
   }
 
   /** Adds an item to the history and moves the cursor to point to the place after it.
