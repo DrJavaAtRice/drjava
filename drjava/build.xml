@@ -6,58 +6,12 @@
      
 <project name="drjava" default="help">
 
-  <!-- Extension containing various tools, including "for" and "if" -->
-  <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
-
-  <!-- Check if a property file has been specified, and if so, load it -->
-  <!-- The following is is a no-op if drjava-props has been set on the
-       command line or ANT_ARGS environment variable -->
-  <property name="drjava-props" value=""/>
-  <if>
-    <not>
-      <equals arg1="${drjava-props}" arg2=""/>
-    </not>
-    <then>
-      <!-- drjava-props has been set, make sure the file exists -->
-      <available property="drjava-props-exists" file="${drjava-props}"/>
-      <fail message="Can't find property file ${drjava-props}." unless="drjava-props-exists" />
-      <!-- Load the property file -->
-      <!-- <echo message="Loading property file ${drjava-props}." /> -->
-      <property file="${drjava-props}"/>
-    </then>
-  </if>
-
-  <property name="readable-project-name" value="DrJava" />
-  <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
-  <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
-  <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
-
-  <property environment="env" />
-  <property name="java14-home" value="${env.JAVA14_HOME}" />
-  <property name="clover-jar" value="${env.CLOVER_JAR}" />
-  
-  <!-- Default settings for properties -->
-  <!-- If test-halt is set to true, testing will stop after the first
-       failure; if it's set to false, then all unit tests will be run. -->
-  <property name="test-halt" value="false" />
-  <property name="test-spec" value="" />
-  <property name="test-repeat" value="1" />
-  <property name="test-timeout" value="1440" />
-  <property name="test-formatter" value="oneline" />
-  <property name="test-output-to-file" value="false" />
-  <property name="clean-can-fail" value="yes" /> 
-  <property name="force-server" value="no" />
-  <property name="plt.debug.log" value="void" />
-  <property name="plt.error.log" value="popup" />
-  
-  <property name="is-development" value="yes" /> <!-- Development or stable release -->
-  <property name="tag-append" value="" /> <!-- "stable", "beta", or none -->
-  
   <!-- Don't use or inherit the CLASSPATH environment variable for anything -->
   <property name="build.sysclasspath" value="ignore" />
   
-  <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
-  
+  <!-- Extension containing various tools, including "for" and "if" -->
+  <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
+
   <!-- Retroweaver task, used to convert Java 5.0 class files to be compatible with an earlier JVM;
        also checks class references to insure that there are no dependencies on 1.5 APIs -->
   <taskdef name="retroweaver" classpath="lib/buildlib/retroweaver-all-1.2.3.jar" 
@@ -72,63 +26,113 @@
 
   <extendclasspath path="lib/buildlib/junit.jar" />
                  
-  <!-- ***********
-       Help Target
-       *********** -->
+
+  <!-- Load the property file if it exists -->
+  <if>
+    <isset property="drjava-props" />
+    <then>
+      <!-- drjava-props has been set, make sure the file exists -->
+      <available property="drjava-props-exists" file="${drjava-props}"/>
+      <fail message="Can't find property file ${drjava-props}." unless="drjava-props-exists" />
+      <property file="${drjava-props}"/>
+    </then>
+  </if>
+
+
+  <property name="readable-project-name" value="DrJava" />
+  <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
+  <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
+  <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
+  <property name="is-development" value="yes" /> <!-- Development or stable release -->
+  <property name="tag-append" value="" /> <!-- "stable", "beta", or none -->
+
+  <property environment="env" />
+  <property name="java14-home" value="${env.JAVA14_HOME}" />
+  <property name="clover-jar" value="${env.CLOVER_JAR}" />
+  
+  <!-- Default settings for properties -->
+  <property name="test-spec" value="" />
+  <property name="test-repeat" value="1" />
+  <property name="test-timeout" value="1440" />
+  <property name="test-formatter" value="oneline" />
+  <property name="test-halt" value="false" />
+  <property name="test-drjava-config" value="testFiles/drjava.basic.config" />
+  <property name="test.drjava.config" value="${test.drjava.config}" />
+  <property name="benchmark-count" value="5" />
+  <property name="benchmark-skip" value="1" />
+  <property name="force-server" value="no" />
+  <property name="debug" value="void" />
+  <property name="plt.debug.log" value="${debug}" />
+  <property name="error" value="popup" />
+  <property name="plt.error.log" value="${error}" />
+  <property name="svn-working-dir" value="${basedir}" />
+  <property name="clean-can-fail" value="yes" /> 
+  
+  <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
+  
+  
+  <!-- ************
+       Help Targets
+       ************ -->
   
   <target name="help" description="Print general build script information">
-    <echo message="--------------------------------------------------------------------" />
+    <echo message="----------------------------------------------------------------------" />
     <echo message="${readable-project-name} Build Scripts" />
-    <echo message="--------------------------------------------------------------------" />
+    <echo message="----------------------------------------------------------------------" />
     <echo message="Type 'ant -projecthelp' or 'ant -p' to see the list of targets." />
+    <echo message="Type 'ant options' to see the list of customizable options." />
     <echo message="" />
-    <echo message="The following properties may be defined (using '-Dname=value') for" />
-    <echo message="custom behavior:" />
-    <echo message="" />
-    <echo message="drjava-props: An external properties file that is loaded at the" />
-    <echo message="              beginning of the Ant session. The file should be" />
-    <echo message="              a plain text file with 'name=value' pairs, one per" />
-    <echo message="              line. They work the same was as the properties" />
-    <echo message="              specified on the command line using '-Dname=value'." />
-    <echo message="test-drjava-config: Specifies which DrJava configuration file is used" />
-    <echo message="                    during tests (by setting the 'test.drjava.config'" />
-    <echo message="                    property. This is effective only during unit tests" />
-    <echo message="                    and is the equivalent to the '-config' command" />
-    <echo message="                    line option. If this option is not used, then the" />
-    <echo message="                    testFiles/drjava.basic.config file is used." />
-    <echo message="test-spec: A matching string to filter the tests to be run; may" />
-    <echo message="           be comma-delimited to run multiple test sets." />
-    <echo message="           (Default: empty string)" />
-    <echo message="test-timeout: A time limit (in minutes) for running a test set." />
-    <echo message="              (Default: 1440)" />
-    <echo message="test-repeat: The number (>=1) of times the tests should be repeated." />
-    <echo message="test-formatter: The kind of formatter to use for test results:" />
-    <echo message="                one of 'quiet', 'oneline', 'brief', 'plain', or" />
-    <echo message="                'xml'. (Default: oneline)" />
-    <echo message="test-halt: Set to 'true' to make unit testing stop after the" />
-    <echo message="           first failure; default is 'false', which runs all" />
-    <echo message="           unit tests, even after failures or errors have occurred." />
-    <echo message="clean-can-fail: Whether the failure of a 'clean' operation can halt" />
-    <echo message="                the build. (Default: yes)" />
-    <echo message="force-server: Whether the '-server' option should always be used when" />
-    <echo message="              running or testing. (Default: no)" />
-    <echo message="plt.debug.log: System property used to initialize the debug log when" />
-    <echo message="               running or testing. (Default: void)" />
-    <echo message="plt.error.log: System property used to initialize the error log when" />
-    <echo message="               running or testing. (Default: popup)" />
-    <echo message="" />
-    <echo message="For this build file to function properly, the following environment " />
-    <echo message="variables should be defined:" />
+    <echo message="For this build file to function properly, the following environment" />
+    <echo message="variables may need to be defined (depending on the target invoked):" />
     <echo message="JAVA14_HOME: Home folder of the Java 1.4 JRE or J2SDK" />
     <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
-    <echo message="CLOVER_JAR: Location of the Clover jar file (necessary only if " />
-    <echo message="            Clover targets will be used)"/>
+    <echo message="CLOVER_JAR: Location of the Clover jar file" />
     <echo message="" />
-    <echo message="Additionally, Ant must be run under Java 5.0 or later.  If that is " />
-    <echo message="not the system default, it may be set for Ant by using JAVA_HOME." />
-    <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
-    <echo message="CLASSPATH will be ignored -- classes on the system classpath will " />
-    <echo message="not be visible during the build process." />
+    <echo message="Ant may also require the following, depending on your platform:" />
+    <echo message="JAVA_HOME: Location of the JDK (many targets here require Java 5+)" />
+    <echo message="ANT_HOME: Location of Ant" />
+    <echo message="Note that CLASSPATH will be ignored -- classes on the system classpath" />
+    <echo message="will not be visible during the build process." />
+  </target>
+  
+  <target name="options" description="Print the list of customizable options">
+    <echo message="----------------------------------------------------------------------" />
+    <echo message="${readable-project-name} Build Script Customizable Options" />
+    <echo message="----------------------------------------------------------------------" />
+    <echo message="The following properties may be defined on the command line or in the" />
+    <echo message="ANT_ARGS environment variable (using '-Dname=value') for custom" />
+    <echo message="behavior:" />
+    <echo message="" />
+    <echo message="drjava-props: An external file defining a collection of properties to" />
+    <echo message="              load.  The file contains 'name=value' pairs, one per" />
+    <echo message="              line, equivalent to '-Dname=value' at the command line" />
+    <echo message="test-drjava-config: Location of the DrJava configuration file to use" />
+    <echo message="                    in tests (equivalent to setting the property" />
+    <echo message="                    'test.drjava.config';" />
+    <echo message="                    default: testFiles/drjava.basic.config)" />
+    <echo message="test-spec: A matching string for filtering the tests to be run; may be" />
+    <echo message="           comma-delimited to run multiple test sets" />
+    <echo message="test-repeat: The number (&gt;=1) of times the tests should be repeated" />
+    <echo message="test-timeout: A time limit (in minutes) for running a test set" />
+    <echo message="test-formatter: The kind of formatter to use for test results: one of" />
+    <echo message="                 'quiet', 'oneline', 'brief', 'plain', or 'xml'" />
+    <echo message="                (default: oneline)" />
+    <echo message="test-halt: Whether unit testing should stop after the *first* failure"/>
+    <echo message="           (default: no)" />
+    <echo message="benchmark-count: Number of revisions to test during benchmarking"/>
+    <echo message="                 (default: 5)" />
+    <echo message="benchmark-skip: Number of 'PREV' updates to perform between benchmark" />
+    <echo message="                runs (default: 1)" />
+    <echo message="force-server: Whether the '-server' option should always be used when" />
+    <echo message="              running or testing (Default: no)" />
+    <echo message="debug: Type of the debug log when running or testing: one of 'stdout'," />
+    <echo message="       'stderr', 'file', 'assert', 'popup', or 'void' (equivalent to" />
+    <echo message="       setting the property 'plt.debug.log'; default: void)" />
+    <echo message="error: Type of the error log when running or testing: one of 'stdout'," />
+    <echo message="       'stderr', 'file', 'assert', 'popup', or 'void' (equivalent to" />
+    <echo message="       setting the property 'plt.error.log'; default: popup)" />
+    <echo message="clean-can-fail: Whether the failure of a 'clean' operation can halt" />
+    <echo message="                the build (default: yes)" />
   </target>
   
   
@@ -411,44 +415,60 @@
     </antcall>
   </target>
   
-  <target name="iterate-tests">
+  <target name="iterate-tests" depends="resolve-test-formatter-class">
+    <condition property="test-iteration-message">
+      <not>
+        <equals arg1="${test-repeat}" arg2="1" />
+      </not>
+    </condition>
+    <condition property="test-output-to-file" value="yes" else="no">
+      <equals arg1="${test-formatter}" arg2="xml" />
+    </condition>
     <!-- Repeat tests 'test-repeat' times. -->
-    <fornum count="${test-repeat}" param="iteration"><sequential>
-      <!-- Unless 'test-repeat' is '1', output a status message stating the
-           current iteration and the total number of iterations. -->
-      <if>
-        <not>
-          <equals arg1="${test-repeat}" arg2="1"/>
-        </not>
-        <then>
-          <!-- Add 1 to iteration number. -->
-          <math result="iteration1" operand1="@{iteration}" operation="+" operand2="1" datatype="int"/>
-          <!-- Output message. -->
-          <echo message="Running iteration ${iteration1} of ${test-repeat}..."/>
-        </then>
-      </if>
-      <if>
-        <equals arg1="${test-spec}" arg2="" />
-        <then>
-          <limit minutes="${test-timeout}" failonerror="true">
-            <antcall target="${do-test-target}">
-              <param name="test-filter-string" value="" />
-            </antcall>
-          </limit>
-        </then>
-        <else>
-          <for list="${test-spec}" param="test-filter-string-attribute">
-            <sequential>
-              <limit minutes="${test-timeout}" failonerror="true">
-                <antcall target="${do-test-target}">
-                  <param name="test-filter-string" value="@{test-filter-string-attribute}" />
-                </antcall>
-              </limit>
-            </sequential>
-          </for>
-        </else>
-      </if>
-    </sequential></fornum>
+    <fornum count="${test-repeat}" param="iteration">
+      <sequential>
+        <math result="iteration1" datatype="int"
+              operand1="@{iteration}" operation="+" operand2="1" />
+        <if>
+          <isset property="test-iteration-message" />
+          <then>
+            <!-- Output message -->
+            <echo message="" />
+            <echo message="Running iteration ${iteration1} of ${test-repeat}..." />
+          </then>
+        </if>
+        
+        <trycatch>
+        
+          <try>
+            <for list="${test-spec}" param="test-filter-string-iter">
+              <sequential>
+                <limit minutes="${test-timeout}" failonerror="true">
+                  <antcall target="${do-test-target}">
+                    <param name="test-filter-string" value="@{test-filter-string-iter}" />
+                  </antcall>
+                </limit>
+              </sequential>
+            </for>
+            <if>
+              <istrue value="${test-output-to-file}" />
+              <then>
+                <mkdir dir="testResults/@{iteration}" />
+              </then>
+            </if>
+          </try>
+          
+          <finally>
+            <move todir="testResults/@{iteration}">
+              <fileset dir="${basedir}">
+                <include name="TEST*" />
+              </fileset>
+            </move>
+          </finally>
+          
+        </trycatch>
+      </sequential>
+    </fornum>
   </target>
   
   <selector id="tests-to-run">
@@ -459,7 +479,7 @@
   </selector>
  
   <target name="do-test-15"
-          depends="assert-15, resolve-java15-tools, resolve-jvm-args, resolve-test-formatter-class">
+          depends="assert-15, resolve-java15-tools, resolve-jvm-args">
     <echo message="Running all 5.0 tests matching '${test-filter-string}' under Java 5.0" />
     <junit haltonfailure="${test-halt}"
 	   failureproperty="do-test-15-failed"
@@ -756,80 +776,129 @@
   </target>
   
   
-  <target name="benchmark" depends="benchmark-current">
+  <target name="benchmark" depends="benchmark-current, benchmark-previous, benchmark-report"
+          description="Generate a test performance report">
+  </target>
+  
+  <target name="benchmark-current" depends="resolve-is-modified" if="is-modified">
+    <echo message="*****************************************" />
+    <echo message="Running benchmark tests on the local copy" />
+    <echo message="*****************************************" />
+    <mkdir dir="benchmarkResults/local" />
+    <trycatch>
+      <try>
+        <antcall target="compile-15" />
+        <antcall target="iterate-tests">
+          <param name="do-test-target" value="do-test-15" />
+          <param name="test-formatter" value="xml" />
+        </antcall>
+      </try>
+      <catch />
+    </trycatch>
+    <move todir="benchmarkResults/local" file="testResults" />
+  </target>
+
+  <target name="benchmark-previous">
+    <mkdir dir="benchmarkSources" />
     
-    <mkdir dir="benchmark-sources" />
-    
+    <echo message="Checking out the Subversion head revision" />
     <exec executable="svn" failonerror="yes">
       <arg value="checkout" />
       <arg value="--quiet" />
       <arg value="--revision" />
       <arg value="HEAD" />
       <arg value="${svn-repository}/trunk/${ant.project.name}" />
-      <arg value="benchmark-sources" />
+      <arg value="benchmarkSources" />
     </exec>
-    <!-- Change the build script text for builds that don't support test-output-to-file -->
-    <replaceregexp file="benchmark-sources/build.xml" flags="g"
-                   match="&lt;formatter.*usefile=&quot;false&quot;.*/&gt;"
-                   replace="&lt;formatter type=&quot;xml&quot; usefile=&quot;true&quot;/&gt;" />
-    <ant dir="benchmark-sources" target="test">
-      <property name="test-formatter" value="xml" />
-      <property name="test-output-to-file" value="yes" />
-    </ant>
-    <ant dir="benchmark-sources" target="clean" />
-    <exec executable="svn" dir="benchmark-sources" failonerror="yes">
-      <arg value="revert" />
-      <arg value="build.xml" />
-    </exec>
-    <mkdir dir="docs/benchmark/head" />
-    <move todir="docs/benchmark/head">
-      <fileset dir="benchmark-sources">
-        <include name="TEST*" />
-      </fileset>
-    </move>
-    
-    <exec executable="svn" dir="benchmark-sources" failonerror="yes">
-      <arg value="update" />
-      <arg value="--revision" />
-      <arg value="PREV" />
-    </exec>
-    <!-- Change the build script text for builds that don't support test-output-to-file -->
-    <replaceregexp file="benchmark-sources/build.xml"
-                   match="&lt;formatter.*usefile=&quot;false&quot;.*/&gt;"
-                   replace="&lt;formatter type=&quot;xml&quot; usefile=&quot;true&quot;/&gt;" />
-    <ant dir="benchmark-sources" target="test">
-      <property name="test-formatter" value="xml" />
-      <property name="test-output-to-file" value="yes" />
-    </ant>
-    <ant dir="benchmark-sources" target="clean" />
-    <exec executable="svn" dir="benchmark-sources" failonerror="yes">
-      <arg value="revert" />
-      <arg value="build.xml" />
-    </exec>
-    <mkdir dir="docs/benchmark/prev1" />
-    <move todir="docs/benchmark/prev1">
-      <fileset dir="benchmark-sources">
-        <include name="TEST*" />
-      </fileset>
-    </move>
-    
-    <antcall target="clean-intermediate">
-      <param name="clean-can-fail" value="no" />
+    <antcall target="benchmark-single-previous">
+      <param name="svn-working-dir" location="benchmarkSources" />
     </antcall>
     
+    <math result="remaining-benchmark-count" datatype="int"
+          operand1="${benchmark-count}" operation="-" operand2="1" />
+    <fornum count="${remaining-benchmark-count}" param="iteration">
+      <sequential>
+        <antcall target="benchmark-revert" />
+        <antcall target="benchmark-single-previous">
+          <param name="svn-working-dir" location="benchmarkSources" />
+        </antcall>
+      </sequential>
+    </fornum>
+    
+    <delete dir="benchmarkSources" />
   </target>
   
-  <target name="benchmark-current" depends="resolve-is-modified" unless="is-modified">
-    <antcall target="test">
-      <param name="test-formatter" value="xml" />
-      <param name="test-output-to-file" value="yes" />
-    </antcall>
-    <mkdir dir="docs/benchmark/current" />
-    <move todir="docs/benchmark/current">
-      <fileset dir="${basedir}">
-        <include name="TEST*" />
-      </fileset>
-    </move>
+  <target name="benchmark-single-previous" depends="resolve-svn-revision">
+    <echo message="*****************************************" />
+    <echo message="Running benchmark tests on revision ${svn-revision}" />
+    <echo message="*****************************************" />
+    <!-- Change the build script text for builds that don't support test-output-to-file -->
+    <replaceregexp file="benchmarkSources/build.xml" flags="g"
+                   match="&lt;formatter.*usefile=&quot;false&quot;.*/&gt;"
+                   replace="&lt;formatter type=&quot;xml&quot; usefile=&quot;true&quot;/&gt;" />
+    <!-- Eliminate taskdefs, which are apparently inherited (Ant complains otherwise) -->
+    <replaceregexp file="benchmarkSources/build.xml" flags="gs"
+                   match="&lt;taskdef[^&gt;]*&gt;" replace="" />
+    <mkdir dir="benchmarkResults/${svn-revision}" />
+    <trycatch>
+      <try>
+        <!-- Must iterate tests *here* to support scripts that don't do test-repeat -->
+        <antcall target="iterate-tests">
+          <param name="do-test-target" value="do-test-previous" />
+          <param name="test-formatter" value="xml" />
+          <!-- test-output-to-file is not inferred in some build scripts -->
+          <param name="test-output-to-file" value="yes" />
+        </antcall>
+        <ant dir="benchmarkSources" target="clean" />
+      </try>
+      <catch />
+    </trycatch>
+    <exec executable="svn" dir="benchmarkSources" failonerror="yes">
+      <arg value="revert" />
+      <arg value="--quiet" />
+      <arg value="build.xml" />
+    </exec>
+    <move todir="benchmarkResults/${svn-revision}" file="testResults" />
+  </target>
+  
+  <target name="do-test-previous">
+    <trycatch>
+      <try>
+        <ant dir="benchmarkSources">
+          <!-- compile in case it doesn't happen automatically -->
+          <target name="compile" />
+          <target name="test" />
+          <property name="test-repeat" value="1" />
+        </ant>
+      </try>
+      <finally>
+        <move todir="${basedir}">
+          <fileset dir="benchmarkSources">
+            <include name="TEST*" />
+          </fileset>
+        </move>
+      </finally>
+    </trycatch>
+  </target>
+  
+  <target name="benchmark-revert">
+    <echo message="Updating benchmarkSources to a previous revision" />
+    <fornum count="${benchmark-skip}" param="iteration">
+      <sequential>
+        <exec executable="svn" dir="benchmarkSources" failonerror="yes">
+          <arg value="update" />
+          <arg value="--revision" />
+          <arg value="PREV" />
+        </exec>
+      </sequential>
+    </fornum>
+  </target>
+  
+  <target name="benchmark-report">
+    <mkdir dir="docs/benchmark" />
+    <!-- report should be generated in docs/benchmark -->
+    <echo message="Report generation not yet implemented" />
+    <delete dir="benchmarkResults" />
   </target>
 
   
@@ -846,8 +915,10 @@
     
     <delete dir="classes" failonerror="${clean-can-fail}" />
     <delete dir="cloverdb" failonerror="${clean-can-fail}" />
-    <delete dir="benchmark-sources" failonerror="${clean-can-fail}" />
-
+    <delete dir="testResults" failonerror="${clean-can-fail}" />
+    <delete dir="benchmarkSources" failonerror="${clean-can-fail}" />
+    <delete dir="benchmarkResults" failonerror="${clean-can-fail}" />
+    
     <delete failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
         <exclude name="**" />
@@ -863,6 +934,7 @@
     
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="${basedir}" defaultexcludes="no">
+        <include name="TEST*" />
         <include name="src/**/*.class" />
         <!-- We could get rid of backups, but "update" ignores them, so they're okay.
              (doesn't work if defaultexcludes is "yes") -->
@@ -898,10 +970,10 @@
   
   <target name="update" depends="clean" description="Reconcile source with the Subversion archive">
     <echo message="Running Subversion update" />
-    <exec executable="svn" failonerror="yes">
+    <exec executable="svn" dir="${svn-working-dir}" failonerror="yes">
       <arg value="update" />
     </exec>
-    <exec executable="svn" failonerror="yes">
+    <exec executable="svn" dir="${svn-working-dir}" failonerror="yes">
       <arg value="status" />
     </exec>
   </target>
@@ -911,13 +983,13 @@
     <antcall target="clean-intermediate"> <!-- Clean up after the latest build -->
       <param name="clean-can-fail" value="no" />
     </antcall>
-    <exec executable="svn" failonerror="yes">
+    <exec executable="svn" dir="${svn-working-dir}" failonerror="yes">
       <arg value="status" />
     </exec>
     <input message="Please enter a log message for the commit: "
            addproperty="svn-commit-message" />
     <echo message="Running Subversion commit" />
-    <exec executable="svn" failonerror="yes">
+    <exec executable="svn" dir="${svn-working-dir}" failonerror="yes">
       <arg value="commit" />
       <arg value="-m" />
       <arg value="${svn-commit-message}" />
@@ -1242,9 +1314,9 @@
               value="${ant.project.name}${tag-append}-${DSTAMP}-${TSTAMP}" />
   </target>  
   
-  
-  <target name="resolve-is-modified">
-    <exec executable="svn" failonerror="yes" outputproperty="svn-status">
+  <!-- Sets is-modified if "svn status" has non-empty output.  Runs svn in svn-working-dir. -->
+  <target name="resolve-is-modified" depends="clean">
+    <exec executable="svn" dir="${svn-working-dir}" failonerror="yes" outputproperty="svn-status">
       <arg value="status" />
     </exec>
     <condition property="is-modified">
@@ -1252,8 +1324,22 @@
         <equals arg1="${svn-status}" arg2="" />
       </not>
     </condition>
-    <echo message="is-modified: ${is-modified}" />
-    <echo message="svn-status: ${svn-status}" />
+  </target>
+  
+  <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info".  Runs svn in svn-working-dir. -->
+  <target name="resolve-svn-revision">
+    <exec executable="svn" dir="${svn-working-dir}" failonerror="yes" output="svn-info.txt">
+      <arg value="info" />
+    </exec>
+    <loadfile property="svn-revision" srcfile="svn-info.txt">
+      <filterchain>
+        <linecontains>
+          <contains value="Last Changed Rev: " />
+        </linecontains>
+        <replacestring from="Last Changed Rev: " to="" />
+      </filterchain>
+    </loadfile>
+    <delete file="svn-info.txt" />
   </target>
   
 
