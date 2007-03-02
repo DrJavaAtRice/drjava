@@ -756,22 +756,15 @@
   </target>
   
   
-  <target name="benchmark">
-    <antcall target="test">
-      <param name="test-formatter" value="xml" />
-      <param name="test-output-to-file" value="yes" />
-    </antcall>
-    <mkdir dir="docs/benchmark/current" />
-    <move todir="docs/benchmark/current">
-      <fileset dir="${basedir}">
-        <include name="TEST*" />
-      </fileset>
-    </move>
+  <target name="benchmark" depends="benchmark-current">
     
     <mkdir dir="benchmark-sources" />
     
     <exec executable="svn" failonerror="yes">
       <arg value="checkout" />
+      <arg value="--quiet" />
+      <arg value="--revision" />
+      <arg value="HEAD" />
       <arg value="${svn-repository}/trunk/${ant.project.name}" />
       <arg value="benchmark-sources" />
     </exec>
@@ -824,6 +817,19 @@
       <param name="clean-can-fail" value="no" />
     </antcall>
     
+  </target>
+  
+  <target name="benchmark-current" depends="resolve-is-modified" unless="is-modified">
+    <antcall target="test">
+      <param name="test-formatter" value="xml" />
+      <param name="test-output-to-file" value="yes" />
+    </antcall>
+    <mkdir dir="docs/benchmark/current" />
+    <move todir="docs/benchmark/current">
+      <fileset dir="${basedir}">
+        <include name="TEST*" />
+      </fileset>
+    </move>
   </target>
 
   
@@ -1235,6 +1241,21 @@
     <property name="version-tag"
               value="${ant.project.name}${tag-append}-${DSTAMP}-${TSTAMP}" />
   </target>  
+  
+  
+  <target name="resolve-is-modified">
+    <exec executable="svn" failonerror="yes" outputproperty="svn-status">
+      <arg value="status" />
+    </exec>
+    <condition property="is-modified">
+      <not>
+        <equals arg1="${svn-status}" arg2="">
+      </not>
+    </condition>
+    <echo message="is-modified: ${is-modified}" />
+    <echo message="svn-status: ${svn-status}" />
+  </target>
+  
 
   <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
        otherwise, the out-of-date target file is deleted (if it exists).  Note that, since
