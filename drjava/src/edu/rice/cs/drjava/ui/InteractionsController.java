@@ -475,7 +475,7 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction moveUpAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
-        _doc.acquireReadLock();
+        _doc.acquireWriteLock();
         try {
           if (_shouldGoIntoHistory(_doc.getPromptPos(), _pane.getCaretPosition())) 
             historyPrevAction.actionPerformed(e);
@@ -484,7 +484,7 @@ public class InteractionsController extends AbstractConsoleController {
             if (! _isCursorAfterPrompt()) moveToPrompt();
           }
         }
-        finally { _doc.releaseReadLock(); }
+        finally { _doc.releaseWriteLock(); }
       }
     }
   };
@@ -495,9 +495,13 @@ public class InteractionsController extends AbstractConsoleController {
   AbstractAction moveDownAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (! _busy()) {
-        if (_shouldGoIntoHistory(_pane.getCaretPosition(), _adapter.getLength()))
-          historyNextAction.actionPerformed(e);
-        else defaultDownAction.actionPerformed(e);
+        _doc.acquireWriteLock();
+        try {
+          if (_shouldGoIntoHistory(_pane.getCaretPosition(), _adapter.getLength())) {
+            historyNextAction.actionPerformed(e);
+          } else { defaultDownAction.actionPerformed(e); }
+        }
+        finally { _doc.releaseWriteLock(); }
       }
     }
   };
