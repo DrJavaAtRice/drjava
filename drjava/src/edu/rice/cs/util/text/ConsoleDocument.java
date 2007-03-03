@@ -69,7 +69,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   protected volatile Runnable _beep;
 
   /** Index in the document of the first place that is editable. */
-  protected volatile int _promptPos;
+  private volatile int _promptPos;
 
   /** String to use for the prompt. */
   protected volatile String _prompt;
@@ -164,8 +164,11 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
 //      append(_prompt, DEFAULT_STYLE);  // need forceAppend!
 //      _promptPos = _document.getLength();
 //      _hasPrompt = true;
-      forceInsertText(_document.getLength(), _prompt, DEFAULT_STYLE);
-      _promptPos = _document.getLength();
+      int len = _document.getLength();
+      // Update _promptPos before updating _document because insertText runs insertUpdate to adjust caret
+      _promptPos = len + _prompt.length();
+      forceInsertText(len, _prompt, DEFAULT_STYLE);
+
       _document.setHasPrompt(true);
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e);  }

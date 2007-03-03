@@ -198,92 +198,36 @@ public abstract class AbstractConsoleController implements Serializable {
    */
   class CaretUpdateListener implements DocumentListener {
     public void insertUpdate(final DocumentEvent e) {
-      // Update caret position when text is inserted in document.  Fixes (?) bug #1571405.
-          
+      /* Update caret position when text is inserted at end of document.  Fixes (?) bug #1571405.  The promptPos is
+       * before the insertion is made so that this listener will see the udpated position. NOTE: The promptPos is NOT
+       * a Swing Position; it is an int offset maintianed by ConsoleDocument.
+       */
           ConsoleDocument doc = getConsoleDoc();
-          int pos;
-          final int docLen = doc.getLength();
-          // if document has no prompt, place caret at end
-          if (! doc.hasPrompt()) pos = docLen;
-          else {
-            
-            final int caretPos = _pane.getCaretPosition();
-            final int promptPos = doc.getPromptPos();
-            final int insertPos = e.getOffset();
-            final int insertLen = e.getLength();
-            final int prevPromptPos = (insertPos < promptPos) ? promptPos - insertLen : promptPos;
-            // Figure out where the prompt was before the insertion
-
-          
-            if (caretPos < prevPromptPos /* || insertPos < promptPos */) {
-              // Caret was behind prompt before insertion or insertion preceded the prompt  (why check for former?)
-              pos = promptPos;  // place caret at prompt
-            }
-            else {
-              // Caret and insertion were on or after prompt
-              pos = Math.min(caretPos + insertLen, docLen);  // advance cursor by insertion size (but within document)
-            }
-          }
-
-          final int newPos = pos;  // make a final copy of pos that can appear in a closure
+          final int newPos = getNewCaretPos(e, doc);
+          // Update the caret position as part of the insertion if possible (running in event thread)
           if (EventQueue.isDispatchThread()) _pane.setCaretPosition(newPos);
-          else EventQueue.invokeLater(new Runnable() { public void run() { 
-//            System.err.println("Deferred setting caretPos to " + newPos);
-            _pane.setCaretPos(newPos); 
-          } });
-            
-//          System.err.println("insertUpdate called; caretPos = " + caretPos + " docLength = " + length);
-          
-          /* Old Code: */
-//      // Queue an asynchronous task in the event thread to update the document pane; Use SwingUtilities to ensure that
-//      // the caret update is performed after the document update listeners have run.  Fixes (?) bug #1571405.
-//      SwingUtilities.invokeLater(new Runnable() { 
-//        public void run() {
-//          
-//          ConsoleDocument doc = getConsoleDoc();
-//          doc.acquireReadLock(); // Grab read lock because this code is NOT run as part of document listener!
-//          try {
-//            int caretPos = _pane.getCaretPosition();
-//            int promptPos = doc.getPromptPos();
-//            int len = doc.getLength();
-//            
-////          System.err.println("insertUpdate called; caretPos = " + caretPos + " docLength = " + length);
-//            
-//            // Figure out where the prompt was before the update
-//            int prevPromptPos = promptPos;
-//            if (e.getOffset() < promptPos) {
-//              // Insert happened before prompt,
-//              //  so previous position was further back
-//              prevPromptPos = promptPos - e.getLength();
-//            }
-//            
-//            if (! doc.hasPrompt()) {
-////            System.err.println("Scrolling to end of document");
-//              // Scroll to the end of the document, since output has been inserted after the prompt.
-//              moveToEnd();
-//            }
-//            // Do not to move caret during a reset, when the prompt pos is temporarily far greater than the length.
-//            else if (promptPos <= len) {
-//              if (caretPos < prevPromptPos) {
-//                // Caret has fallen behind prompt, so make it catch up so
-//                //  the new input is visible.
-//                moveToPrompt();
-//              }
-//              else {
-//                // Caret was on or after prompt, so move it right by the size
-//                //  of the insert.
-//                int size = promptPos - prevPromptPos;
-//                if (size > 0) {
-//                  int newCaretPos = caretPos + size;
-//                  if (newCaretPos > len) newCaretPos = len;
-//                  _pane.setCaretPosition(newCaretPos);
-//                }
-//              }
-//            }
-//          }
-//          finally { doc.releaseReadLock(); }
-//        }
-//      });
+          // Otherwise update it with a length filter in case the document has been shortedn (as in resetInteractions)
+          else EventQueue.invokeLater(new Runnable() { public void run() { _pane.setCaretPos(newPos); } });
+    }
+    private int getNewCaretPos(DocumentEvent e, ConsoleDocument doc) {
+      final int docLen = doc.getLength();
+      // if document has no prompt, place caret at end
+      if (! doc.hasPrompt()) return docLen;
+ 
+      final int promptPos = doc.getPromptPos();
+      if (promptPos == docLen) return docLen;
+      
+      final int caretPos = _pane.getCaretPosition();
+      final int insertPos = e.getOffset();
+      final int insertLen = e.getLength();
+      // Figure out where the prompt was before the insertion
+      final int prevPromptPos = (insertPos <= promptPos) ? promptPos - insertLen : promptPos;
+      // If caret was at previous prompt (or before), move it to the new prompPos.
+      if (caretPos <= prevPromptPos) return promptPos;
+      /* Otherwise, caret was embedded in pending input following the previous prompt, advance it to preserve its
+       * relative position to the prompt. */
+      final int diff = caretPos - prevPromptPos;
+      return Math.min(promptPos + diff, docLen);  
     }
 
     public void removeUpdate(DocumentEvent e) { _ensureLegalCaretPos(); }

@@ -160,9 +160,13 @@ public class InteractionsController extends AbstractConsoleController {
               _box.disableInputs();
               _text = _box.getText() + "\n";
                            
-              // Move the cursor back to the end of the interactions pane
-              _pane.setEditable(true);
-              _pane.setCaretPos(_doc.getLength());
+              /* Move the cursor back to the end of the interactions pane while preventing _doc from changing in the 
+               * interim. */
+              _doc.acquireReadLock();
+              try { 
+                _pane.setEditable(true);
+                _pane.setCaretPosition(_doc.getLength()); }
+              finally { _doc.releaseReadLock(); }
               _pane.requestFocus();
               
               completionMonitor.set();

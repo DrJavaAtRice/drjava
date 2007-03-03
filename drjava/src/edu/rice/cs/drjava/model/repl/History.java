@@ -243,7 +243,7 @@ public class History implements OptionConstants, Serializable {
 
       int numToDelete = size() - newSize;
 
-      for (int i = 0; i< numToDelete; i++) { _vector.remove(0); }
+      for (int i = 0; i < numToDelete; i++) { _vector.remove(0); }
 
       moveEnd();
     }

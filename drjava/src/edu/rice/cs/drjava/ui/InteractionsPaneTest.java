@@ -168,14 +168,16 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   }
 
   public void testCaretStaysAtEndDuringInteraction() throws EditDocumentException {
-    
+    System.err.println("start caret pos = " + _pane.getCaretPosition());
+    System.err.println("start prompt pos = " + _doc.getPromptPos());
     _doc.setInProgress(true);
 //    System.err.println(_pane.getCaretPosition());
     _doc.append("simulated output", InteractionsDocument.DEFAULT_STYLE);
     Utilities.clearEventQueue();
     _doc.setInProgress(false);
-//    System.err.println(_pane.getCaretPosition());
-//    System.err.println("Document = |" + _doc.getDocText(0, _doc.getLength()) + "|");
+    System.err.println("caret pos = " + _pane.getCaretPosition());
+    System.err.println("prompt pos = " + _doc.getPromptPos());
+    System.err.println("Document = |" + _doc.getDocText(0, _doc.getLength()) + "|");
     assertEquals("Caret is at the end after output while in progress.",
                  _doc.getLength(),
                  _pane.getCaretPosition());

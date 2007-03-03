@@ -129,15 +129,11 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     }
   }
   
-  /** A checked version of setCaretPostion(int pos) that ensures pos is within the DJDocument. */
+  /** A length checked version of setCaretPostion(int pos) that ensures pos is within the DJDocument. */
   public void setCaretPos(int pos) {
     DJDocument doc = getDJDocument();
     doc.acquireReadLock();
     try {
-      if (pos < 0) {
-        setCaretPosition(0);
-        return;
-      }
       int len = doc.getLength();
       if (pos > len) {
         setCaretPosition(len);
