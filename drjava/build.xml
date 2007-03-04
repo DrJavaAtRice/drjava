@@ -51,7 +51,7 @@
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
   
   <!-- Default settings for properties -->
-  <property name="test-spec" value="" />
+  <property name="test-spec" value="*" />
   <property name="test-repeat" value="1" />
   <property name="test-timeout" value="1440" />
   <property name="test-formatter" value="oneline" />
