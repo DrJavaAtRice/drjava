@@ -37,6 +37,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
 
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.rmi.RemoteException;
@@ -48,8 +49,13 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
   
   private static Log _log = new Log("MasterSlave.txt", false);
   
-  final TestMasterJVM _testMaster = new TestMasterJVM(); // JUnit ensures separate copy for each test
+  volatile TestMasterJVM _testMaster = _newTestMasterJVM(); // JUnit ensures separate copy for each test
  
+  private TestMasterJVM _newTestMasterJVM()  { 
+    try { return new TestMasterJVM(); }
+    catch(RemoteException e) { throw new UnexpectedException(e); }
+  }
+  
   public void tearDown() throws Exception {
     _testMaster.dispose();
     super.tearDown();
@@ -85,7 +91,7 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     
     private volatile String _currentTest = "";
 
-    public TestMasterJVM() { super(CounterSlave.class.getName()); }
+    public TestMasterJVM() throws RemoteException { super(CounterSlave.class.getName()); }
 
     /** In util-20020414-0647, if quitSlave were called between the time the slave was invoked and the time it 
      *  registered, an IllegalStateException was thrown. The correct behavior, which we test for here, is for the
@@ -211,12 +217,17 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
    */
   public static class CounterSlave extends AbstractSlaveJVM implements TestSlaveRemote {
     
-    public static final CounterSlave ONLY = new CounterSlave();
+    public static final CounterSlave ONLY = newCounterSlave();
     
     private volatile int _counter = 0;
     private volatile TestMasterRemote _master = null;
     
-    private CounterSlave() { }
+    private CounterSlave() throws RemoteException { }
+    
+    private static CounterSlave newCounterSlave() {
+      try { return new CounterSlave(); }
+      catch(RemoteException e) { throw new UnexpectedException(e); }
+    }
 
     public synchronized int getNumber() { return _counter++; }
 

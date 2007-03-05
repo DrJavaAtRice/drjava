@@ -183,7 +183,7 @@
   <target name="compile" depends="compile-15" description="Shortcut for 'compile-15'">
   </target>
   
-  <target name="compile-15" depends="generate-source, check-rmi-compile, do-compile, rmi-compile, copy-resources, unjar-libs"
+  <target name="compile-15" depends="generate-source, do-compile, copy-resources, unjar-libs"
           description="Compile all source files (after generating the source)">
   </target>
   

@@ -81,7 +81,7 @@ import koala.dynamicjava.parser.*;
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
 
   /** Singleton instance of this class. */
-  public static final InterpreterJVM ONLY = new InterpreterJVM();
+  public static final InterpreterJVM ONLY = newInterpreterJVM(); 
   
   private static final Log _log = new Log("MasterSlave.txt", false);
   private static final boolean printMessages = false;
@@ -120,7 +120,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private volatile boolean _messageOnResetFailure;
   
   /** Private constructor; use the singleton ONLY instance. */
-  private InterpreterJVM() {
+  private InterpreterJVM() throws RemoteException {
 
     _classPath = new LinkedHashSet<File>();
     _classPathManager = new ClassPathManager();
@@ -137,6 +137,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     try { _activeInterpreter.getInterpreter().interpret("0"); }
     catch (ExceptionReturnedException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
+  }
+  
+  private static InterpreterJVM newInterpreterJVM() {
+    try { return new InterpreterJVM(); }
+    catch(Exception e) { throw new UnexpectedException(e); }
   }
 
   private static void _dialog(String s) {

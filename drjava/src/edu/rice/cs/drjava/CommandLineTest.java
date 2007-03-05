@@ -330,9 +330,9 @@ public final class CommandLineTest extends DrJavaTestCase {
   }
 
   /** A regression test for bug #542747, which related to opening a file via the command line using a relative path.
-   *  The problem was that getSourceRoot() would fail on the document, because the filename was not absolute. (The
-   *  fix will be to absolutize file paths when opening files.)
-   */
+    * The problem was that getSourceRoot() would fail on the document, because the filename was not absolute. (The
+    * fix will be to absolutize file paths when opening files.)
+    */
   public void testRelativePath() throws IOException, InvalidPackageException {
     String funnyName = "DrJava_automatically_deletes_this_1";
     File newDirectory = mkTempDir(funnyName);
@@ -347,8 +347,8 @@ public final class CommandLineTest extends DrJavaTestCase {
   }
 
   /** Tests paths with "." and ".." in them.  Windows will blow up if you use one in a JFileChooser without
-   *  converting it to a canonical filename.
-   */
+    * converting it to a canonical filename.
+    */
   public void testDotPaths() {
     String funnyName = "DrJava_automatically_deletes_this_2";
     File newDirectory = mkTempDir(funnyName);
@@ -375,7 +375,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     // strange. If this directory happens to exist, it'll be deleted.
     File newDirectory = new File(funnyName);
     if (newDirectory.exists()) IOUtil.deleteOnExitRecursively(newDirectory);
-
+    System.err.println("newDirectory.exists() = " + newDirectory.exists());
     assertTrue("directory created OK", newDirectory.mkdir());
 //    _log.log("Temporary directory " + funnyName + " created");
     return newDirectory;

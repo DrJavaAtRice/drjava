@@ -50,7 +50,7 @@ import java.util.Map;
  *  This class runs in both the master and the slave JVMs.
  *  @version $Id$
  */
-public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
+public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ extends UnicastRemoteObject
   implements MasterRemote/*<SlaveType>*/ {
   
   public static final Log _log  = new Log("MasterSlave.txt", false);
@@ -106,7 +106,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    *  class must implement the interface specified by this class's type parameter, which must be a subclass 
    *  of {@link SlaveRemote}.
    */
-  protected AbstractMasterJVM(String slaveClassName) {
+  protected AbstractMasterJVM(String slaveClassName) throws RemoteException {
+    super();
     _slaveClassName = slaveClassName;
     _slave = null;
     _monitorThread = null;
@@ -164,7 +165,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
      *****************************************************************************************************/
 
     if (_masterStub == null) {
-      try { _masterStub = (MasterRemote) UnicastRemoteObject.exportObject(this); }
+      try { _masterStub = (MasterRemote) toStub(this); }
       catch (RemoteException re) {
         javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
         _log.log(this + " threw " + re);

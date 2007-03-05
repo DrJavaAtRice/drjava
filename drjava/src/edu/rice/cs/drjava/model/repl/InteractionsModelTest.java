@@ -116,7 +116,8 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   }
 
   // Why do we create a new model (and slave JVM) for each of this trivial tests?
-  public void testInterpretCurrentInteractionWithIncompleteInput() throws EditDocumentException, InterruptedException {
+  public void testInterpretCurrentInteractionWithIncompleteInput() throws EditDocumentException, InterruptedException,
+    RemoteException {
     _log.log("testInterpretCurrentInteractionWithIncompleteInput started");
     _model = new IncompleteInputInteractionsModel(_adapter);   // override the one initialized in setUp()
     assertReplThrewContinuationException("void m() {");
@@ -506,7 +507,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     }
 
     /** Constructs a new IncompleteInputInteractionsModel. */
-    public IncompleteInputInteractionsModel(InteractionsDJDocument adapter) {
+    public IncompleteInputInteractionsModel(InteractionsDJDocument adapter) throws RemoteException {
       // MainJVM, Adapter, history size, write delay
       super(new MainJVM(null), adapter, new File(System.getProperty("user.dir")), 1000, 25);
       _jvm.setInteractionsModel(this); // _jvm is set to MainJVM(null) by super call;
@@ -514,7 +515,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       continuationException = false;
       syntaxException = false;
     }
-    
+
     protected void _notifyInteractionStarted() { }
     protected void _notifyInteractionEnded() { 
       _log.log("_notifyInteractionEnded called.");

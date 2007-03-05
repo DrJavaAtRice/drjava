@@ -98,9 +98,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   protected DefinitionsDocument getDocument() { throw new UnsupportedOperationException("Dummy method"); }
   
-  public boolean isModifiedSinceSave() {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+  public boolean isModifiedSinceSave() { throw new UnsupportedOperationException("Dummy method"); }
   
   public int balanceForward() { throw new UnsupportedOperationException("Dummy method"); }
   
@@ -164,6 +162,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public boolean isUntitled() { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean isSourceFile() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  public boolean isEmpty() { throw new UnsupportedOperationException("Dummy method"); }
   
   public File getSourceRoot() throws InvalidPackageException {
     throw new UnsupportedOperationException("Dummy method");
@@ -276,6 +276,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int getCurrentLine() { throw new UnsupportedOperationException("Dummy method"); }
   public int getCurrentCol() { throw new UnsupportedOperationException("Dummy method"); }
   public boolean getClassFileInSync() { throw new UnsupportedOperationException("Dummy method"); }
+  public void setClassFileInSync(boolean val) { throw new UnsupportedOperationException("Dummy method"); }
  
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");

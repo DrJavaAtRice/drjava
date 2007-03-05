@@ -160,7 +160,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     for (OpenDefinitionsDocument doc : _model.getOpenDefinitionsDocuments()) { 
       if (doc.inProjectPath())  lod.add(doc);
     }
-    junitDocs(lod);
+    junitOpenDefDocs(lod, true);
   }
   
   /** Forwards the classnames and files to the test manager to test all of them; does not notify 
@@ -229,27 +229,20 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     // Check_testInProgress flag
     if (_testInProgress) return; 
 
-    //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
+    // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-
-    // Gets system classpaths from the main JVM so that junit tests can find every class file.
-    // Given as one long String, this separates the paths into a list of strings. 3/12/05
-
-//    LinkedList<String> classpaths = separateClasspath(IOUtil.pathToString(getClasspath()));
     
-    // new ScrollableDialog(null, "classpaths assembled in junitOpenDefDocs: " + classpaths, "", "").show();
-    
-    if (_model.hasOutOfSyncDocuments() || _model.hasModifiedDocuments()) {
-      /* hasOutOfSyncDocments() can return false when some documents have not been successfully compiled; the granularity
-         of time-stamping and the presence of multiple classes in a file (some of which compile successfully) can produce 
-         \false reports.  */
+    if (_model.hasOutOfSyncDocuments(lod) || _model.hasModifiedDocuments(lod)) {
+      /* hasOutOfSyncDocments(lod) can return false when some documents have not been successfully compiled; the 
+       * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 
+       * successfully) can produce false reports.  */
 //      System.err.println("Out of sync documents exist");
         
         CompilerListener testAfterCompile = new DummyCompilerListener() {
           @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
             final CompilerListener listenerThis = this;
             try {
-              if (_model.hasOutOfSyncDocuments() || _model.getNumCompErrors() > 0) {
+              if (_model.hasOutOfSyncDocuments(lod) || _model.getNumCompErrors() > 0) {
                 if (! Utilities.TEST_MODE) 
                   JOptionPane.showMessageDialog(null, "All open files must be compiled before running a unit test", 
                                               "Must Compile All Before Testing", JOptionPane.ERROR_MESSAGE); 

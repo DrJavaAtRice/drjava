@@ -47,7 +47,7 @@ import java.rmi.server.UnicastRemoteObject;
  *  checks if the master is still alive and automatically quits if not.
  *  @version $Id$
  */
-public abstract class AbstractSlaveJVM implements SlaveRemote, Serializable {
+public abstract class AbstractSlaveJVM extends UnicastRemoteObject implements SlaveRemote {
   public static final int CHECK_MAIN_VM_ALIVE_SECONDS = 1;
   
   protected static final Log _log  = new Log("MasterSlave.txt", false);
@@ -66,6 +66,8 @@ public abstract class AbstractSlaveJVM implements SlaveRemote, Serializable {
   private final Object _slaveJVMLock = new Object();
   
   private volatile boolean _slaveExited = false;
+  
+  public AbstractSlaveJVM() throws RemoteException { }
   
   private void shutdown() {
 //    try { 

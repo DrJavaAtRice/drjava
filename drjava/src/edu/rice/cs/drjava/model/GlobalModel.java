@@ -489,6 +489,9 @@ public interface GlobalModel extends ILoadDocuments {
   /** @return true iff no open document is out of sync with its primary class file. */
   public boolean hasOutOfSyncDocuments();
   
+  /** @return true iff no document in given list is out of sync with its primary class file. */
+  public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod);
+  
   /** Cleans the build directory. */
   public void cleanBuildDirectory();
   
@@ -496,20 +499,25 @@ public interface GlobalModel extends ILoadDocuments {
   public List<File> getClassFiles();
   
   /** Returns a collection of all documents currently open for editing.  This is equivalent to the results of 
-   *  getDocumentForFile for the set of all files for which isAlreadyOpen returns true.  The order of documents 
-   *  is the same as in the display of documents in the view.
-   *  @return a List of the open definitions documents.
-   */
+    * getDocumentForFile for the set of all files for which isAlreadyOpen returns true.  The order of documents 
+    * is the same as in the display of documents in the view.
+    * @return a List of the open definitions documents.
+    */
   public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments();
   
   /** Checks if any open definitions documents have been modified since last being saved.
-   *  @return whether any documents have been modified
-   */
+    * @return whether any documents have been modified
+    */
    public boolean hasModifiedDocuments();
    
+   /** Checks if any of the given documents have been modified since last being saved.
+     * @return whether any documents have been modified
+     */
+   public boolean hasModifiedDocuments(List<OpenDefinitionsDocument> lod);
+   
    /** Checks if any open definitions documents are untitled.
-   *  @return whether any documents are untitled
-   */
+     *  @return whether any documents are untitled
+     */
   public boolean hasUntitledDocuments();
   
    /** Returns the OpenDefinitionsDocument for the specified File, opening a new copy if one is not already open.

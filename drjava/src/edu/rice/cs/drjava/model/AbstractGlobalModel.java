@@ -598,23 +598,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean inProjectPath(OpenDefinitionsDocument doc) {
       if (doc.isUntitled()) return false;
       
-      // If the file does not exist, we still want to tell if it's in the correct
-      // path.  The file may have been in at one point and had been removed, in which
-      // case we should treat it as an untitled project file that should be resaved.
+      /* If the file does not exist, we still want to tell if it's path lies within the project source tree.  The file 
+       * may have existed previously at one point and then removed, in which case we should treat it as an untitled 
+       * project file that should be resaved. */
       File f;
       try { f = doc.getFile(); }
       catch(FileMovedException fme) { f = fme.getFile(); }
       return inProjectPath(f);
     }
     
-    /** Determines whether the specified file in within the project file tree.
-     *  No synchronization is required because only immutable data is accessed.
-     */
+    /** Determines whether the specified file in within the project file tree. No synchronization is required because
+      * only immutable data is accessed.
+      */
     public boolean inProjectPath(File f) { return IOUtil.isMember(f, getProjectRoot()); }
     
-    /** @return the absolute path to the project file.  Since projectFile is final, no synchronization
-     *  is necessary.
-     */
+    /** @return the absolute path to the project file.  Since projectFile is final, no synchronization is necessary.*/
     public File getProjectFile() { return _projectFile; }
     
     public boolean inProject(File f) {
@@ -1907,20 +1905,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public int getOpenDefinitionsDocumentsSize() { synchronized(_documentsRepos) { return _documentsRepos.size(); } }
  
   /** @return true if all open documents are in sync with their primary class files. */
-  public boolean hasOutOfSyncDocuments() {
-    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
-      if (doc.isSourceFile() && ! doc.checkIfClassFileInSync()) {
-//          Utilities.show("Out of sync document is: " + doc);
-        return true;
-      }
+  public boolean hasOutOfSyncDocuments() { return hasOutOfSyncDocuments(getOpenDefinitionsDocuments()); }
+  
+  public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
+    for (OpenDefinitionsDocument doc: lod) {
+      if (doc.isSourceFile() && ! doc.checkIfClassFileInSync()) return true;
     }
     return false;
   }
  
-  /**
-   * Set the indent tab size for all definitions documents.
-   * @param indent the number of spaces to make per level of indent
-   */
+  /** Set the indent tab size for all definitions documents.
+    * @param indent the number of spaces to make per level of indent
+    */
   void setDefinitionsIndent(int indent) {
     for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) { doc.setIndent(indent); }
   }
@@ -2093,13 +2089,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Checks if any open definitions documents have been modified since last being saved.
    *  @return whether any documents have been modified
    */
-  public boolean hasModifiedDocuments() {
-    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) {
+  public boolean hasModifiedDocuments() { return hasModifiedDocuments(getOpenDefinitionsDocuments()); }
+ 
+   /** Checks if any given documents have been modified since last being saved.
+   *  @return whether any documents have been modified
+   */
+  public boolean hasModifiedDocuments(List<OpenDefinitionsDocument> lod) {
+    for (OpenDefinitionsDocument doc: lod) {
       if (doc.isModifiedSinceSave()) return true;  
     }
     return false;
   }
- 
+  
   /** Checks if any open definitions documents are untitled.
    *  @return whether any documents are untitled
    */
@@ -2620,12 +2621,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         throw new UnsupportedOperationException("SubsetRegionManager.isCurrentRegionLast not supported");        
       }
       
-      /**
-       * Set the maximum number of regions that can be stored in this manager.
-       * If the maximum capacity has been reached and another region is added, the region at the end farther
-       * away from the insertion location will be discarded.
-       * @param size maximum number of regions, or 0 if no maximum
-       */
+      /** Sets the maximum number of regions that can be stored in this manager.  If a region is added exceeding this 
+        * capacity, the region at the end farther away from the insertion location will be discarded.
+        * @param size maximum number of regions, or 0 if no maximum
+        */
       public void setMaximumSize(int size) {
         throw new UnsupportedOperationException("SubsetRegionManager.setMaximumSize not supported");
       }
@@ -2648,6 +2647,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** The folder containing this document */
     private volatile File _parentDir;
+    
+    /** The cached class file for the document */
+    private volatile File _classFile;
+    
+    /** Specifies if classFile is in sync with current state of the document */
+    private volatile boolean _classFileInSync = false;
     
     /** The package name embedded in the document the last time is was loaded, reconstructed, or saved.  When loading a
      *  project, this information is extracted from the project file eliminating the need to read every document file.  
@@ -2690,6 +2695,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
       _file = f;
       _parentDir = dir;
+      _classFile = null;
       _timestamp = stamp;
       _image = null;
       _id = ID_COUNTER++;
@@ -2736,6 +2742,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Returns the timestamp. */
     public long getTimestamp() { return _timestamp; }
+    
+    public void setClassFileInSync(boolean inSync) { _classFileInSync = inSync; }
+    
+    public boolean getClassFileInSync() { return _classFileInSync; }
+    
+    public void setCachedClassFile(File classFile) { _classFile = classFile; }
+    
+    public File getCachedClassFile() { return _classFile; }
     
     /** Whenever this document has been saved, this method should be called to update its "isModified" information. */
     public void resetModification() {
@@ -2916,6 +2930,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
     /** A file is in the project if it is explicitly listed as part of the project. */
     public boolean inProject() { return ! isUntitled() && _state.inProject(_file); }
+    
+    /** Determines if the document is empty. */
+    public boolean isEmpty() { return getLength() == 0; }
     
     /** @return true if this is an auxiliary file. */
     public boolean isAuxiliaryFile() { return ! isUntitled() && _state.isAuxiliaryFile(_file); }
@@ -3223,7 +3240,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //            _packageName = getDocument().getPackageName();
 //          }
 //          catch(InvalidPackageException e) { _packageName = null; }
-          getDocument().setCachedClassFile(null);
+          setCachedClassFile(null);
           checkIfClassFileInSync();
           
 //          Utilities.showDebug("ready to fire fileSaved for " + this);
@@ -3301,7 +3318,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void documentSaved() { _cacheAdapter.documentSaved(); }
     
-    public void documentModified() { _cacheAdapter.documentModified(); }
+    public void documentModified() { 
+      _cacheAdapter.documentModified();
+      _classFileInSync = false;
+    }
     
     public void documentReset() { _cacheAdapter.documentReset(); }
     
@@ -3316,33 +3336,33 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Determines if document has a class file consistent with its current state.  If this document is unmodified,
-      *  this method examines the primary class file corresponding to this document and compares the timestamps of
-      *  the class file to that of the source file.  An empty untitled document is consider to be "in sync".
+      * this method examines the primary class file corresponding to this document and compares the timestamps of
+      * the class file to that of the source file.  An empty untitled document is consider to be "in sync".
       */
     public boolean checkIfClassFileInSync() {
       _log.log("checkIfClassFileInSync() called for " + this);
-      if (isUntitled()) return true; // unmodified, untitled document
+      if (isEmpty()) return true;
       
       // If modified, then definitely out of sync
-      DefinitionsDocument dd = getDocument();
+
       if (isModifiedSinceSave()) {
-        dd.setClassFileInSync(false);
+        setClassFileInSync(false);
 //        _log.log("checkIfClassFileInSync = false because isModifiedSinceSave()");
         return false;
       }
       
       // Look for cached class file
-      File classFile = dd.getCachedClassFile();
+      File classFile = getCachedClassFile();
 //      _log.log("In checkIfClassFileInSync cacched value of classFile = " + classFile);
       if (classFile == null) {
         // Not cached, so locate the file
         classFile = _locateClassFile();
 //        _log.log(this + ": in checkIfClassFileInSync _locateClassFile() = " + classFile);
-        dd.setCachedClassFile(classFile);
+        setCachedClassFile(classFile);
         if ((classFile == null) || (! classFile.exists())) {
           // couldn't find the class file
 //          _log.log(this + ": Could not find class file");
-          dd.setClassFileInSync(false);
+          setClassFileInSync(false);
           return false;
         }
       }
@@ -3352,7 +3372,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File sourceFile;
       try { sourceFile = getFile(); }
       catch (FileMovedException fme) {
-        dd.setClassFileInSync(false);
+        setClassFileInSync(false);
 //        _log.log(this + ": File moved");
         return false;
       }
@@ -3361,12 +3381,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _log.log(classFile + " has timestamp " + classFile.lastModified());
       }
       if (sourceFile == null || sourceFile.lastModified() > classFile.lastModified()) {  // assert sourceFile != null 
-        dd.setClassFileInSync(false);
+        setClassFileInSync(false);
 //        _log.log(this + ": date stamps indicate modification");
         return false;
       }
       else {
-        dd.setClassFileInSync (true);
+        setClassFileInSync(true);
         return true;
       }
     }
@@ -3699,8 +3719,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public int getCurrentCol() { return getDocument().getCurrentCol(); }
     
-    public boolean getClassFileInSync() { return getDocument().getClassFileInSync(); }
-    
     public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
       return getDocument().getIntelligentBeginLinePos(currPos);
     }
@@ -3721,10 +3739,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       // if it's not in the cache, the undo manager will be reset when it's reconstructed
       if (_cacheAdapter.isReady()) getDocument().resetUndoManager();
     }
-      
-    public File getCachedClassFile() { return getDocument().getCachedClassFile(); }
-      
-    public void setCachedClassFile(File f) { getDocument().setCachedClassFile(f); }
     
     public DocumentListener[] getDocumentListeners() { return getDocument().getDocumentListeners(); }
     

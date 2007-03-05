@@ -115,8 +115,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private static boolean _tabsRemoved = true;
   /** Specifies if the document has been modified since the last save. */
   private volatile boolean _isModifiedSinceSave = false;
-  /** Specifies if classFile is in sync with current state of the document */
-  private volatile boolean _classFileInSync = false;
   /** Cached location, aides in determining line number. */
   private volatile int _cachedLocation;
   /** Cached current line number. */
@@ -125,8 +123,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private volatile int _cachedPrevLineLoc;
   /** Cached location of next line. */
   private volatile int _cachedNextLineLoc;
-  
-  private volatile File _classFile;
 
   /** This reference to the OpenDefinitionsDocument is needed so that the document iterator 
    * (the DefaultGlobalModel) can find the next ODD given a DD. */
@@ -193,7 +189,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _cachedLineNum = 1;
     _cachedPrevLineLoc = -1;
     _cachedNextLineLoc = -1;
-    _classFile = null;
     _cacheInUse = false;
   }
   
@@ -312,14 +307,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return packageName;
   }
 
-  public void setClassFileInSync(boolean inSync) { _classFileInSync = inSync; }
-
-  public boolean getClassFileInSync() { return _classFileInSync; }
-
-  public void setCachedClassFile(File classFile) { _classFile = classFile; }
-
-  public File getCachedClassFile() { return _classFile; }
-
   /** Inserts a string of text into the document.  This is not where we do custom processing of the insert; that is
    *  done in {@link #insertUpdate}.
    */
@@ -386,7 +373,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private void setModifiedSinceSave() {
     if (! _isModifiedSinceSave) {
       _isModifiedSinceSave = true;
-      _classFileInSync = false;
       if (_odd != null) _odd.documentModified();
     }    
   }

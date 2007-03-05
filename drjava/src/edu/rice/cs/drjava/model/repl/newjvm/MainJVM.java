@@ -122,7 +122,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  global model.  The MainJVM but does not automatically start the Interpreter JVM.  Callers must set the
    *  InteractionsModel and JUnitModel and then call startInterpreterJVM().
    */
-  public MainJVM(File wd) {
+  public MainJVM(File wd) throws RemoteException {
     super(SLAVE_CLASS_NAME);
 //    Utilities.show("Starting the slave JVM");
     _workDir = wd;

@@ -69,6 +69,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public int commentLines(int selStart, int selEnd);
   public int uncommentLines(int selStart, int selEnd);
   public boolean getClassFileInSync();
+  public void setClassFileInSync(boolean val);
   public int getCurrentLine();
   public int getCurrentCol();
   public int getOffset(int lineNum);
@@ -126,6 +127,9 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   
   /** Determines if this document in the file system tree below the specified root. */
   public boolean inNewProjectPath(File root);
+  
+  /** Determines if the document is empty. */
+  public boolean isEmpty();
   
   /** @return true if the document's file is a project auxiliary file. */
   public boolean isAuxiliaryFile();
