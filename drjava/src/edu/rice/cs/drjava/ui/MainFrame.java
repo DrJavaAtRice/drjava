@@ -43,6 +43,7 @@ import java.awt.print.*;
 import java.beans.*;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.List;
@@ -7101,12 +7102,31 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     private boolean someFilesNotFound() { return _fnfCount > 0; }
     
     public void filesNotFound(File... files) {
-      if (files.length==0) return;
-      _fnfCount+=files.length;
-      String fileNames = "";
-      for (File f: files) fileNames += "\n" + f.getPath();
-      if (files.length==1) JOptionPane.showMessageDialog(MainFrame.this, "The following file could not be found, and has been removed from the project." + fileNames, "File Not Found", JOptionPane.ERROR_MESSAGE);
-      else JOptionPane.showMessageDialog(MainFrame.this, "The following files could not be found, and have been removed from the project." + fileNames, "Files Not Found", JOptionPane.ERROR_MESSAGE);
+      if (files.length == 0) return;
+      _fnfCount += files.length;
+      
+      if (files.length == 1) {
+        JOptionPane.showMessageDialog(MainFrame.this,
+                                      "The following file could not be found and has been removed from the project.\n"
+                                        + files[0].getPath(),
+                                      "File Not Found",
+                                      JOptionPane.ERROR_MESSAGE);
+      }
+      else {
+        final Collection<String> filePaths = new ArrayList<String>();
+        for (File f : files) {
+          filePaths.add(f.getPath());
+        }
+
+        ScrollableListDialog dialog = new ScrollableListDialog(MainFrame.this,
+                                                               "Files Not Found",
+                                                               "The following files could not be found and have been removed from the project.",
+                                                               filePaths,
+                                                               JOptionPane.ERROR_MESSAGE);
+        
+        setPopupLoc(dialog);
+        dialog.showDialog();
+      }
     }
     
     public void fileSaved(final OpenDefinitionsDocument doc) {
