@@ -551,9 +551,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /** Takes in any keyboard input, checks to see if it is in the keyToActionMap in KeybindingManager, if so 
-   *  executes the action, otherwise checks if it contains the current platform's menu shortcut modifier and 
-   *  if so, ignores that command (this disallows the execution of the UI's default actions such as 
-   *  cut/copy/paste/select all), otherwise does whatever normally would be done.
+   * executes the action, otherwise checks if it contains the current platform's menu shortcut modifier and 
+   * if so, ignores that command (this disallows the execution of the UI's default actions such as 
+   * cut/copy/paste/select all), otherwise does whatever normally would be done.
    */
   public void processKeyEvent(KeyEvent e) {
     if (_mainFrame.getAllowKeyEvents()) {

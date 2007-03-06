@@ -35,6 +35,9 @@ package edu.rice.cs.drjava.ui;
 
 
 import java.io.File;
+import java.awt.event.InputEvent;
+  import java.awt.event.KeyEvent;
+  
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.model.GlobalModel;
@@ -48,11 +51,19 @@ import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.CompletionMonitor;
+import java.util.Date;
 
 /** Test functions of InteractionsPane.
  *  @version $Id$
  */
 public final class InteractionsPaneTest extends DrJavaTestCase {
+  
+  private static final char UNDEFINED = KeyEvent.CHAR_UNDEFINED;
+  private static final int PRESSED = KeyEvent.KEY_PRESSED;
+  private static final int RELEASED = KeyEvent.KEY_RELEASED;
+  private static final int SHIFT = InputEvent.SHIFT_MASK;
+  private static final int TYPED = KeyEvent.KEY_TYPED;
+  private static final int VK_UNDEF = KeyEvent.VK_UNDEFINED;
 
   protected volatile InteractionsDJDocument _adapter;
   protected volatile InteractionsModel _model;
@@ -168,19 +179,17 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   }
 
   public void testCaretStaysAtEndDuringInteraction() throws EditDocumentException {
-    System.err.println("start caret pos = " + _pane.getCaretPosition());
-    System.err.println("start prompt pos = " + _doc.getPromptPos());
+//    System.err.println("start caret pos = " + _pane.getCaretPosition());
+//    System.err.println("start prompt pos = " + _doc.getPromptPos());
     _doc.setInProgress(true);
 //    System.err.println(_pane.getCaretPosition());
     _doc.append("simulated output", InteractionsDocument.DEFAULT_STYLE);
     Utilities.clearEventQueue();
     _doc.setInProgress(false);
-    System.err.println("caret pos = " + _pane.getCaretPosition());
-    System.err.println("prompt pos = " + _doc.getPromptPos());
-    System.err.println("Document = |" + _doc.getDocText(0, _doc.getLength()) + "|");
-    assertEquals("Caret is at the end after output while in progress.",
-                 _doc.getLength(),
-                 _pane.getCaretPosition());
+//    System.err.println("caret pos = " + _pane.getCaretPosition());
+//    System.err.println("prompt pos = " + _doc.getPromptPos());
+//    System.err.println("Document = |" + _doc.getDocText(0, _doc.getLength()) + "|");
+    assertEquals("Caret is at the end after output while in progress.", _doc.getLength(), _pane.getCaretPosition());
   }
 
   /** Tests that the caret catches up to the prompt if it is before it and output is displayed. */
@@ -223,15 +232,47 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
 
   /** Tests that the caret is put in the correct position after an insert. */
   public void testCaretUpdatedOnInsert() throws EditDocumentException {
-    _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        
+        // Type 'T'
+        _pane.processKeyEvent(new KeyEvent(_pane, PRESSED, (new Date()).getTime(), SHIFT, KeyEvent.VK_T, UNDEFINED));
+        _pane.processKeyEvent(new KeyEvent(_pane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, 'T'));
+        _pane.processKeyEvent(new KeyEvent(_pane, RELEASED, (new Date()).getTime(), SHIFT, KeyEvent.VK_T, UNDEFINED));
+        
+        // Type 'Y'
+        _pane.processKeyEvent(new KeyEvent(_pane, PRESSED, (new Date()).getTime(), SHIFT, KeyEvent.VK_Y, UNDEFINED));
+        _pane.processKeyEvent(new KeyEvent(_pane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, 'Y'));
+        _pane.processKeyEvent(new KeyEvent(_pane, RELEASED, (new Date()).getTime(), SHIFT, KeyEvent.VK_Y, UNDEFINED));
+        
+         // Type 'P'
+        _pane.processKeyEvent(new KeyEvent(_pane, PRESSED, (new Date()).getTime(), SHIFT, KeyEvent.VK_P, UNDEFINED));
+        _pane.processKeyEvent(new KeyEvent(_pane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, 'P'));
+        _pane.processKeyEvent(new KeyEvent(_pane, RELEASED, (new Date()).getTime(), SHIFT, KeyEvent.VK_P, UNDEFINED));
+        
+         // Type 'E'
+        _pane.processKeyEvent(new KeyEvent(_pane, PRESSED, (new Date()).getTime(), SHIFT, KeyEvent.VK_E, UNDEFINED));
+        _pane.processKeyEvent(new KeyEvent(_pane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, 'E'));
+        _pane.processKeyEvent(new KeyEvent(_pane, RELEASED, (new Date()).getTime(), SHIFT, KeyEvent.VK_E, UNDEFINED));
+        
+         // Type 'D'
+        _pane.processKeyEvent(new KeyEvent(_pane, PRESSED, (new Date()).getTime(), SHIFT, KeyEvent.VK_D, UNDEFINED));
+        _pane.processKeyEvent(new KeyEvent(_pane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, 'D'));
+        _pane.processKeyEvent(new KeyEvent(_pane, RELEASED, (new Date()).getTime(), SHIFT, KeyEvent.VK_D, UNDEFINED));
+      }
+    });
+//    System.err.println("Document = '" + _doc.getText() + "'");
     Utilities.clearEventQueue();
     assertEquals("caret should be at end of document", _doc.getLength(), _pane.getCaretPosition());
        
     final int pos = _doc.getLength() - 5;
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(pos); } });
+//    System.err.println("docLength = " +  _doc.getLength() + " caretPos = " + _pane.getCaretPosition());
+    
     // Insert text before the prompt
     _doc.insertBeforeLastPrompt("aa", InteractionsDocument.DEFAULT_STYLE);
     Utilities.clearEventQueue();
+//    System.err.println("Document = '" + _doc.getText() + "'");
     assertEquals("caret should be in correct position", pos + 2, _pane.getCaretPosition());
 
     // Move caret to prompt and insert more text
@@ -249,44 +290,18 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     // Move caret after prompt and insert more text
     final int newPos = _doc.getPromptPos();
     // simulate a keystroke by putting caret just *after* pos of insert
-    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(newPos + 1); } });
+    _pane.setCaretPosition(newPos + 1);
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        // Type 'D'
+        _pane.processKeyEvent(new KeyEvent(_pane, PRESSED, (new Date()).getTime(), SHIFT, KeyEvent.VK_D, UNDEFINED));
+        _pane.processKeyEvent(new KeyEvent(_pane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, 'D'));
+        _pane.processKeyEvent(new KeyEvent(_pane, RELEASED, (new Date()).getTime(), SHIFT, KeyEvent.VK_D, UNDEFINED));
+      } 
+    });
     Utilities.clearEventQueue();
-    _doc.insertText(newPos, "d", InteractionsDocument.DEFAULT_STYLE);
-    Utilities.clearEventQueue();
-    assertEquals("caret should be one char after the d", newPos + 2, _pane.getCaretPosition());
+    assertEquals("caret should be one char after the inserted D", newPos + 2, _pane.getCaretPosition());
   }
-
-//   public void testSystemIn() {
-//     final Object lock = new Object();
-//     final StringBuffer buf = new StringBuffer();
-//     synchronized(_controller._inputEnteredAction) {
-//       new Thread("Testing System.in") {
-//         public void run() {
-//           synchronized(_controller._inputEnteredAction) {
-//             _controller._inputEnteredAction.notify();
-//             synchronized(lock) {
-//               buf.append(_controller._inputListener.getConsoleInput());
-//             }
-//           }
-//         }
-//       }.start();
-//       try {
-//         _controller._inputEnteredAction.wait();
-//       }
-//       catch (InterruptedException ie) {
-//       }
-//     }
-//     try {
-//       Thread.sleep(2000);
-//     }
-//     catch (InterruptedException ie) {
-//     }
-//     _controller._insertNewlineAction.actionPerformed(null);
-//     _controller._inputEnteredAction.actionPerformed(null);
-//     synchronized(lock) {
-//       assertEquals("Should have returned the correct text.", "\n\n", buf.toString());
-//     }
-//   }
   
   public void testSystemIn() {
     final Object bufLock = new Object();

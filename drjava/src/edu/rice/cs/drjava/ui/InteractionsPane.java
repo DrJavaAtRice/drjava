@@ -128,6 +128,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     // ignore
   }
 
+  /** Widens the visibilitly of the processKeyEvent method; it is protected in the superclass. */
   public void processKeyEvent(KeyEvent e) { super.processKeyEvent(e); }
   
   /** Assigns the given keystroke to the given action in this pane.

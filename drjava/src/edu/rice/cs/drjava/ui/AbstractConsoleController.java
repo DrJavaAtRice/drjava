@@ -82,6 +82,7 @@ public abstract class AbstractConsoleController implements Serializable {
 
   /** Action to change focus to next pane. */
   volatile Action switchToNextPaneAction;
+  
 
   /** Initializes the document adapter and interactions pane. Subclasses *must* call _init() at the end 
    *  of their constructors.
@@ -193,20 +194,23 @@ public abstract class AbstractConsoleController implements Serializable {
   protected abstract void _setupModel();
 
   /** Ensures that the caret always stays on or after the prompt, so that output is always scrolled to the bottom.
-   *  (The prompt is always at the bottom.)  This listener must not modify the console document itself.  It is given
-   *  read access to the document by Swing when it is run as a listener immediately after a document update.
+   *  (The prompt is always at the bottom.)  This listener must not modify the console document itself, only the pane.
+   *  It is given read access to the document by Swing when it is run as a listener immediately after a document update.
    */
   class CaretUpdateListener implements DocumentListener {
     public void insertUpdate(final DocumentEvent e) {
       /* Update caret position when text is inserted at end of document.  Fixes (?) bug #1571405.  The promptPos is
-       * before the insertion is made so that this listener will see the udpated position. NOTE: The promptPos is NOT
-       * a Swing Position; it is an int offset maintianed by ConsoleDocument.
+       * moved before the insertion is made so that this listener will see the udpated position. NOTE: The promptPos
+       * is NOT a Swing Position; it is an int offset maintianed by ConsoleDocument.
+       * The updating of the caretPosition is a confusing issue.  This code has been written assuming that the
+       * processing of keyboard input advances the cursor automatically and it appears to work, but other program
+       * test suites (e.g. DefinitionsPaneTest) move the cursor manually.
        */
           ConsoleDocument doc = getConsoleDoc();
           final int newPos = getNewCaretPos(e, doc);
           // Update the caret position as part of the insertion if possible (running in event thread)
           if (EventQueue.isDispatchThread()) _pane.setCaretPosition(newPos);
-          // Otherwise update it with a length filter in case the document has been shortedn (as in resetInteractions)
+          // Otherwise update it with a length filter in case the document has been shortened (as in resetInteractions)
           else EventQueue.invokeLater(new Runnable() { public void run() { _pane.setCaretPos(newPos); } });
     }
     private int getNewCaretPos(DocumentEvent e, ConsoleDocument doc) {
@@ -220,12 +224,12 @@ public abstract class AbstractConsoleController implements Serializable {
       final int caretPos = _pane.getCaretPosition();
       final int insertPos = e.getOffset();
       final int insertLen = e.getLength();
-      // Figure out where the prompt was before the insertion
-      final int prevPromptPos = (insertPos <= promptPos) ? promptPos - insertLen : promptPos;
-      // If caret was at previous prompt (or before), move it to the new prompPos.
+      // Figure out where the prompt was before the insertion; printed output precedes the prompt
+      final int prevPromptPos = (insertPos < promptPos) ? promptPos - insertLen : promptPos;
+      // If caret was at previous prompt (or before), move it to the new prompPos.  
       if (caretPos <= prevPromptPos) return promptPos;
       /* Otherwise, caret was embedded in pending input following the previous prompt, advance it to preserve its
-       * relative position to the prompt. */
+       * relative position to the prompt. (On keyboard input, prevPromptPos == promptPos, making this a no-op. */
       final int diff = caretPos - prevPromptPos;
       return Math.min(promptPos + diff, docLen);  
     }

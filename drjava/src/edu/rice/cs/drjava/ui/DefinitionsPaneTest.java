@@ -383,25 +383,29 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
         defPane.processKeyEvent(new KeyEvent(defPane, PRESSED, (new Date()).getTime(), 0, KeyEvent.VK_A, UNDEFINED));
         defPane.processKeyEvent(new KeyEvent(defPane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, 'a'));
         defPane.processKeyEvent(new KeyEvent(defPane, RELEASED, (new Date()).getTime(), 0, KeyEvent.VK_A, UNDEFINED));
-        defPane.setCaretPosition(doc.getLength());
+//        defPane.setCaretPosition(doc.getLength());
+        assertEquals("caret at line end", doc.getLength(), defPane.getCaretPosition());
         
         // Type '!'
         defPane.processKeyEvent(new KeyEvent(defPane, PRESSED, (new Date()).getTime(), 0, BANG, UNDEFINED));
         defPane.processKeyEvent(new KeyEvent(defPane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, '!'));
         defPane.processKeyEvent(new KeyEvent(defPane, RELEASED, (new Date()).getTime(), 0, BANG, UNDEFINED));
-        defPane.setCaretPosition(doc.getLength());
+//        defPane.setCaretPosition(doc.getLength());
+        assertEquals("caret at line end", doc.getLength(), defPane.getCaretPosition());
         
         // Type 'B'
         defPane.processKeyEvent(new KeyEvent(defPane, PRESSED, (new Date()).getTime(), SHIFT, KeyEvent.VK_B, UNDEFINED));
         defPane.processKeyEvent(new KeyEvent(defPane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, 'B'));
         defPane.processKeyEvent(new KeyEvent(defPane, RELEASED, (new Date()).getTime(), SHIFT, KeyEvent.VK_B, UNDEFINED));
-        defPane.setCaretPosition(doc.getLength());
+//        defPane.setCaretPosition(doc.getLength());
+        assertEquals("caret at line end", doc.getLength(), defPane.getCaretPosition());
         
         // Type '9'
         defPane.processKeyEvent(new KeyEvent(defPane, PRESSED, (new Date()).getTime(), 0, KeyEvent.VK_9, UNDEFINED));
         defPane.processKeyEvent(new KeyEvent(defPane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, '9'));
         defPane.processKeyEvent(new KeyEvent(defPane, RELEASED, (new Date()).getTime(), 0, KeyEvent.VK_9, UNDEFINED));
-        defPane.setCaretPosition(doc.getLength());
+//        defPane.setCaretPosition(doc.getLength());
+        assertEquals("caret at line end", doc.getLength(), defPane.getCaretPosition());
         _frame.validate();
       } 
     });
@@ -711,14 +715,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
       public void run() { 
         doc.append("test", null);
         defPane.setCaretPosition(4);
-        int backspaceCode = KeyEvent.VK_BACK_SPACE;
+        final int VK_BKSP = KeyEvent.VK_BACK_SPACE;
         // The following is the sequence of key events for backspace
-        defPane.processKeyEvent(new KeyEvent(defPane, PRESSED, (new Date()).getTime(), 0, 
-                                                 backspaceCode, UNDEFINED));
-        defPane.processKeyEvent(new KeyEvent(defPane, RELEASED, (new Date()).getTime(), 0,
-                                                 backspaceCode, UNDEFINED));
-        defPane.processKeyEvent(new KeyEvent(defPane, TYPED, (new Date()).getTime(), 0,
-                                                 VK_UNDEF, '\b'));
+        defPane.processKeyEvent(new KeyEvent(defPane, PRESSED, (new Date()).getTime(), 0, VK_BKSP, UNDEFINED));
+        defPane.processKeyEvent(new KeyEvent(defPane, RELEASED, (new Date()).getTime(), 0, VK_BKSP, UNDEFINED));
+        defPane.processKeyEvent(new KeyEvent(defPane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, '\b'));
         _frame.validate();
       }
     });

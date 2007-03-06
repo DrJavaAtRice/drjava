@@ -184,10 +184,10 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     }
     finally { releaseWriteLock(); }
   }
-
+  
   /** Inserts a new line at the given position.
-   *  @param pos Position to insert the new line
-   */
+    * @param pos Position to insert the new line
+    */
   public void insertNewLine(int pos) {
     // Correct the position if necessary
     acquireWriteLock();

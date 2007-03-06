@@ -3392,8 +3392,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
 
     /** Returns the class file for this source document by searching the source roots of open documents, the
-     *  system classpath, and the "extra.classpath ".  Returns null if the class file could not be found.
-     */
+      * system classpath, and the "extra.classpath ".  Returns null if the class file could not be found.
+      */
     private File _locateClassFile() {
       // TODO: define in terms of GlobalModel.getClassPath()
       
