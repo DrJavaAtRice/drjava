@@ -62,9 +62,7 @@ public class SimpleInteractionsWindow extends JFrame {
     //_rmiModel = new SimpleRMIInteractionsModel(_adapter);
     _model = new SimpleInteractionsModel(_adapter);
     _pane = new InteractionsPane(_adapter) {
-      public int getPromptPos() {
-        return _model.getDocument().getPromptPos();
-      }
+      public int getPromptPos() { return _model.getDocument().getPromptPos(); }
     };
     _controller = new InteractionsController(_model, _adapter, _pane);
 

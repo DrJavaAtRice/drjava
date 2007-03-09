@@ -119,8 +119,12 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     */
   public void insertText(int offs, String str, String style) {
     acquireWriteLock();
-    try { if (_condition.canInsertText(offs)) _forceInsertText(offs, str, style); }
+    try { _insertText(offs, str, style); }
     finally { releaseWriteLock(); }
+  }
+  
+  public void _insertText(int offs, String str, String style) {
+    if (_condition.canInsertText(offs)) _forceInsertText(offs, str, style); 
   }
   
   /** Behaves exactly like forceInsertText except for assuming that WriteLock is already held. */

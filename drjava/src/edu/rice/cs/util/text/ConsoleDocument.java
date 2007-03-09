@@ -226,8 +226,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     try {
       int pos = getPositionBeforePrompt();
       _promptPos += text.length();
-      _addToStyleLists(pos, text, style);
-      _document._forceInsertText(pos, text, style);
+      _forceInsertText(pos, text, style);
     }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
     finally { releaseWriteLock(); }
@@ -241,15 +240,17 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public void insertText(int offs, String str, String style) throws EditDocumentException {
     acquireWriteLock();
-    try {
-      if (offs < _promptPos) _beep.run();
-      else {
-        _addToStyleLists(offs, str, style);
-        _document.insertText(offs, str, style);
-      }
-    }
+    try { _insertText(offs, str, style); }
     finally { releaseWriteLock(); }
   }
+  
+  public void _insertText(int offs, String str, String style) throws EditDocumentException {
+    if (offs < _promptPos) _beep.run();
+    else {
+      _addToStyleLists(offs, str, style);
+      _document.insertText(offs, str, style);
+    }
+  }   
   
   /** Appends a string to this in the given named style, if the edit condition allows it.
     * @param str String to be inserted
@@ -261,7 +262,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     try {
       int offs = _document.getLength();
       _addToStyleLists(offs, str, style);
-      _document.insertText(offs, str, style);
+      _document._insertText(offs, str, style);
     }
     finally { releaseWriteLock(); }
   }
@@ -283,7 +284,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     */
   public void _forceInsertText(int offs, String str, String style) throws EditDocumentException {      
     _addToStyleLists(offs, str, style);
-     _document.forceInsertText(offs, str, style);
+    _document._forceInsertText(offs, str, style);
   }
   
   private void _addToStyleLists(int offs, String str, String style) {

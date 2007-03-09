@@ -63,6 +63,9 @@ public interface EditDocumentInterface extends ReadersWritersLocking, Serializab
     */
   public void insertText(int offs, String str, String style);
   
+  /** Inserts a string into "this" exactly like insertText except that it assumes the WriteLock is already held. */
+  public void _insertText(int offs, String str, String style);
+  
   /** Inserts a string into the document at the given offset and style, regardless of the edit condition.
     * @param offs Offset into the document
     * @param str String to be inserted
@@ -72,8 +75,7 @@ public interface EditDocumentInterface extends ReadersWritersLocking, Serializab
     */
   public void forceInsertText(int offs, String str, String style);
   
-  /** Inserts a string into the document exactly like forceInsertText except that it assumes the the WriteLock is 
-    * already held. */
+  /** Inserts a string into "this" exactly like forceInsertText except that it assumes the WriteLock is already held. */
   public void _forceInsertText(int offs, String str, String style);
   
   /** Removes a portion of the document, if the edit condition allows it.

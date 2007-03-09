@@ -478,7 +478,7 @@ public class InteractionsController extends AbstractConsoleController {
     */
   AbstractAction moveUpAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      if (!_busy()) {
+      if (! _busy()) {
         _doc.acquireWriteLock();
         try {
           if (_shouldGoIntoHistory(_doc.getPromptPos(), _pane.getCaretPosition())) 
@@ -564,10 +564,11 @@ public class InteractionsController extends AbstractConsoleController {
       if (! _busy()) {
         _doc.acquireReadLock(); 
         try {
-          int position = _pane.getCaretPosition();
-          if (position < _doc.getPromptPos()) moveToPrompt();
-          else if (position == _doc.getPromptPos()) moveToEnd(); // Wrap around to the end
-          else _pane.setCaretPosition(position - 1); // position > _doc.getPromptPos()
+          int promptPos = _doc.getPromptPos();
+          int pos = _pane.getCaretPosition();
+          if (pos < promptPos) moveToPrompt();
+          else if (pos == promptPos) moveToEnd(); // Wrap around to the end
+          else _pane.setCaretPosition(pos - 1); // pos > promptPos
         }
         finally { _doc.releaseReadLock(); }
       }

@@ -58,6 +58,7 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 
 /** Abstract class to handle hooking up a console document with its pane.
+  * TODO: move interactions specific functionality to InteractionsController
   * @version $Id$
   */
 public abstract class AbstractConsoleController implements Serializable {
@@ -82,7 +83,6 @@ public abstract class AbstractConsoleController implements Serializable {
 
   /** Action to change focus to next pane. */
   volatile Action switchToNextPaneAction;
-  
 
   /** Initializes the document adapter and interactions pane. Subclasses *must* call _init() at the end 
    *  of their constructors.
@@ -192,7 +192,19 @@ public abstract class AbstractConsoleController implements Serializable {
 
   /** Sets up the model.*/
   protected abstract void _setupModel();
-
+  
+  /** Cached caret position from last invocation of CaretUpdateListener */
+  private volatile int _cachedCaretPos = 0;
+  
+   /** Cached prompt position from last invocation of CaretUpdateListener */
+  private volatile int _cachedPromptPos = 0;
+  
+  /** Must be called when new document is created if caret position != 0. */
+  public void setCachedCaretPos(int pos) { _cachedCaretPos = pos; }
+  
+   /** Must be called when new document is created if prompt position != 0. */
+  public void setCachedPromptPos(int pos) { _cachedPromptPos = pos; }
+  
   /** Ensures that the caret always stays on or after the prompt, so that output is always scrolled to the bottom.
    *  (The prompt is always at the bottom.)  This listener must not modify the console document itself, only the pane.
    *  It is given read access to the document by Swing when it is run as a listener immediately after a document update.
@@ -206,13 +218,17 @@ public abstract class AbstractConsoleController implements Serializable {
        * processing of keyboard input advances the cursor automatically and it appears to work, but other program
        * test suites (e.g. DefinitionsPaneTest) move the cursor manually.
        */
-          ConsoleDocument doc = getConsoleDoc();
-          final int newPos = getNewCaretPos(e, doc);
-          // Update the caret position as part of the insertion if possible (running in event thread)
-          if (EventQueue.isDispatchThread()) _pane.setCaretPosition(newPos);
-          // Otherwise update it with a length filter in case the document has been shortened (as in resetInteractions)
-          else EventQueue.invokeLater(new Runnable() { public void run() { _pane.setCaretPos(newPos); } });
+      ConsoleDocument doc = getConsoleDoc();
+      final int newPos = getNewCaretPos(e, doc);
+      _cachedCaretPos = newPos;
+//      System.err.println("Setting cached caretpos to " + newPos);  // uncommented this creates deadlock!
+      // Update the caret position as part of the insertion if possible (running in event thread)
+//      if (EventQueue.isDispatchThread()) _pane.setCaretPosition(newPos);
+//      // Otherwise update it with a length filter in case the document has been shortened (as in resetInteractions)
+//      else 
+      EventQueue.invokeLater(new Runnable() { public void run() { _pane.setCaretPos(newPos); } });
     }
+    
     private int getNewCaretPos(DocumentEvent e, ConsoleDocument doc) {
       final int docLen = doc.getLength();
       // if document has no prompt, place caret at end
@@ -221,19 +237,21 @@ public abstract class AbstractConsoleController implements Serializable {
       final int promptPos = doc.getPromptPos();
       if (promptPos == docLen) return docLen;
       
-      final int caretPos = _pane.getCaretPosition();
+      final int oldCaretPos = _cachedCaretPos;
+      final int oldPromptPos = _cachedPromptPos;
+      // If caret preceded the previous prompt, move it to the new prompPos.  
+      if (oldCaretPos < oldPromptPos) return promptPos;
       final int insertPos = e.getOffset();
       final int insertLen = e.getLength();
-      // Figure out where the prompt was before the insertion; printed output precedes the prompt
-      final int prevPromptPos = (insertPos < promptPos) ? promptPos - insertLen : promptPos;
-      // If caret was at previous prompt (or before), move it to the new prompPos.  
-      if (caretPos <= prevPromptPos) return promptPos;
-      /* Otherwise, caret was embedded in pending input following the previous prompt, advance it to preserve its
-       * relative position to the prompt. (On keyboard input, prevPromptPos == promptPos, making this a no-op. */
-      final int diff = caretPos - prevPromptPos;
-      return Math.min(promptPos + diff, docLen);  
+//      System.err.println("oldPromptPos = " + oldPromptPos + " oldCaretPos = " + oldCaretPos + " insertPos = " + insertPos
+//                           + " insertLen = " + insertLen + " promptPos = " + promptPos + " caretPos = " + 
+//                         _pane.getCaretPosition()); 
+ 
+      // Advance caret by insertion length (works both for echoed keyboard input and for writes to System.out
+      int newCaretPos = oldCaretPos + insertLen;
+      return Math.min(newCaretPos, docLen);
     }
-
+    
     public void removeUpdate(DocumentEvent e) { _ensureLegalCaretPos(); }
     public void changedUpdate(DocumentEvent e) { _ensureLegalCaretPos(); }
     
@@ -243,10 +261,12 @@ public abstract class AbstractConsoleController implements Serializable {
     protected void _ensureLegalCaretPos() {
       ConsoleDocument doc = getConsoleDoc();
       int len = doc.getLength();
-      if (_pane.getCaretPosition() > len) _pane.setCaretPosition(len);
+      if (_pane.getCaretPosition() > len) {
+        _cachedCaretPos = len;
+        _pane.setCaretPosition(len);
+      }
     }
   }
-
 
   /** Sets up the view. */
   protected void _setupView() {
@@ -372,7 +392,7 @@ public abstract class AbstractConsoleController implements Serializable {
       ConsoleDocument doc = getConsoleDoc();
       // Selects the text between the old pos and the prompt
       doc.acquireReadLock();
-      try { _pane.moveCaretPosition(getConsoleDoc().getPromptPos()); }
+      try { _pane.moveCaretPosition(doc.getPromptPos()); }
       finally {doc.releaseReadLock(); }
     }
   };
@@ -382,7 +402,7 @@ public abstract class AbstractConsoleController implements Serializable {
     assert EventQueue.isDispatchThread();
     ConsoleDocument doc = getConsoleDoc();
     doc.acquireReadLock();
-    try { _pane.setCaretPosition(getConsoleDoc().getLength()); }
+    try { _pane.setCaretPosition(doc.getLength()); }
     finally {doc.releaseReadLock(); }
   }
   
@@ -391,7 +411,7 @@ public abstract class AbstractConsoleController implements Serializable {
     assert EventQueue.isDispatchThread();
     ConsoleDocument doc = getConsoleDoc();
     doc.acquireReadLock();
-    try { _pane.setCaretPosition(getConsoleDoc().getPromptPos()); }
+    try { _pane.setCaretPosition(doc.getPromptPos()); }
     finally {doc.releaseReadLock(); }
   }
     

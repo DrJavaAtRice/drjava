@@ -78,13 +78,13 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     _model = new TestInteractionsModel(_adapter);
     _doc = _model.getDocument();
     _pane = new InteractionsPane(_adapter) {
-      public int getPromptPos() {
-       return _model.getDocument().getPromptPos();
-      }
+      public int getPromptPos() { return _model.getDocument().getPromptPos(); }
     };
     // Make tests silent
     _pane.setBeep(new TestBeep());
     _controller = new InteractionsController(_model, _adapter, _pane);
+    _controller.setCachedCaretPos(_pane.getCaretPosition());
+    _controller.setCachedPromptPos(_doc.getPromptPos());
 //    System.err.println("_controller = " + _controller);
   }
 
@@ -196,6 +196,8 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   public void testCaretMovesUpToPromptAfterInsert() throws EditDocumentException {
     _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(1); } });
+    _controller.setCachedCaretPos(1);
+    System.err.println("caretPos = " + _pane.getCaretPosition() + " cached caretPos = 1");
     _doc.insertBeforeLastPrompt("simulated output", InteractionsDocument.DEFAULT_STYLE);
     Utilities.clearEventQueue();
     assertEquals("Caret is at the prompt after output inserted.", _doc.getPromptPos(), _pane.getCaretPosition());
@@ -263,10 +265,12 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     });
 //    System.err.println("Document = '" + _doc.getText() + "'");
     Utilities.clearEventQueue();
+    Utilities.clearEventQueue();
     assertEquals("caret should be at end of document", _doc.getLength(), _pane.getCaretPosition());
        
     final int pos = _doc.getLength() - 5;
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(pos); } });
+    _controller.setCachedCaretPos(pos);
 //    System.err.println("docLength = " +  _doc.getLength() + " caretPos = " + _pane.getCaretPosition());
     
     // Insert text before the prompt
@@ -291,6 +295,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     final int newPos = _doc.getPromptPos();
     // simulate a keystroke by putting caret just *after* pos of insert
     _pane.setCaretPosition(newPos + 1);
+    _controller.setCachedCaretPos(newPos + 1);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
         // Type 'D'

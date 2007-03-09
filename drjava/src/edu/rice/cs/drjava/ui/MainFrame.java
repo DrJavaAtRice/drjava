@@ -2609,6 +2609,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument());
     
     _interactionsPane = _interactionsController.getPane();
+    _interactionsController.setCachedCaretPos(0);
+    _interactionsController.setCachedPromptPos(_model.getConsoleDocument().getPromptPos());
     
     _interactionsContainer = new JPanel(new BorderLayout()) {
       public boolean requestFocusInWindow() { return _interactionsPane.requestFocusInWindow(); }
