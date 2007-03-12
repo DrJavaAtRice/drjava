@@ -329,12 +329,22 @@ public class CompilerErrorModel {
         while ((curError < _numErrors) && // we still have errors to find
                file.equals(_errors[curError].file()) &&  // the next error is in this file
                (offset <= defsLength)) { // we haven't gone past the end of the file
-
-          // create new positions for all errors on this line
-          while ((curError < _numErrors) && file.equals(_errors[curError].file()) &&  // we are still in this file
-                 (_errors[curError].lineNumber() == curLine)) {
-            _positions[curError] = document.createPosition(offset + _errors[curError].startColumn());
-            curError++;
+          // create new positions for all errors on this line          
+          boolean didNotAdvance = false;
+          if (_errors[curError].lineNumber() != curLine) {
+            // if this happens, then we will not advance to the next error in the loop below.
+            // that means we have to advance curError when we reach the end of the document
+            // or we get stuck in an infinite loop (bug 1679178)
+            // this seems to be a problem with incompatible line endings (Windows vs. Unix)
+            didNotAdvance = true;
+          }
+          else {
+            while ((curError < _numErrors) &&
+                   file.equals(_errors[curError].file()) &&  // we are still in this file
+                   (_errors[curError].lineNumber() == curLine)) {
+              _positions[curError] = document.createPosition(offset + _errors[curError].startColumn());
+              curError++;
+            }
           }
 
           // At this point, offset is the starting index of the previous error's line.
@@ -352,6 +362,20 @@ public class CompilerErrorModel {
               if (nextNewline != -1) {
                 curLine++;
                 offset = nextNewline + 1;
+              }
+              else {
+                // we're at the end of the document
+                if (didNotAdvance) {
+                  // we did not advance to the next error above, so unless we want to
+                  // get stuck in an infinite loop (bug 1679178), we have to advance now.
+                  // otherwise we would never leave the while loop and keep processing
+                  // the same error.
+                  // this situation probably means that the line number information of the
+                  // compiler is different from our line number information;
+                  // probably a Windows vs. Unix line ending problem
+                  _positions[curError] = null;
+                  curError++;
+                }
               }
             }
           }
