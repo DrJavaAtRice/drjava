@@ -954,7 +954,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     else return _scrollPane.getHorizontalScrollBar().getValue();
   }
   
-  public int getCurrentLine() { return _doc.getLineOfOffset(getCaretPosition()); }
+  /** Returns the current line of the definitions pane. This is a 1-based number.
+    * @return current line of the definitions pane, >=1 */
+  public int getCurrentLine() { return _doc.getLineOfOffset(getCaretPosition())+1; }
 //    try {
 //      int pos = getCaretPosition();
 //      FontMetrics metrics = getFontMetrics(getFont());
