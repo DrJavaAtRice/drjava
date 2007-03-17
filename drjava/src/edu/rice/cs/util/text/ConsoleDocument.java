@@ -84,8 +84,8 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     _document = doc;
     
     _beep = new Runnable() { public void run() { } };
-    _promptPos = 0;
     _prompt = DEFAULT_CONSOLE_PROMPT;
+    _promptPos = DEFAULT_CONSOLE_PROMPT.length();
     _document.setHasPrompt(false);
    
     // Prevent any edits before the prompt!
@@ -127,7 +127,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   /** Returns the first location in the document where editing is allowed. */
   public int getPromptPos() { return _promptPos; }
 
-  /** Sets the prompt position.
+  /** Sets the prompt position. Only used in tests.
    *  @param newPos the new position.
    */
   public void setPromptPos(int newPos) { 
@@ -150,8 +150,8 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     acquireWriteLock();
     try {
       forceRemoveText(0, _document.getLength());
-      forceInsertText(0, banner, DEFAULT_STYLE);
-      _promptPos = 0;
+      _forceInsertText(0, banner, DEFAULT_STYLE);
+      _promptPos = banner.length();
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
     finally { releaseWriteLock(); }
@@ -161,14 +161,10 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   public void insertPrompt() {
     acquireWriteLock();
     try {
-//      append(_prompt, DEFAULT_STYLE);  // need forceAppend!
-//      _promptPos = _document.getLength();
-//      _hasPrompt = true;
       int len = _document.getLength();
       // Update _promptPos before updating _document because insertText runs insertUpdate to adjust caret
       _promptPos = len + _prompt.length();
-      forceInsertText(len, _prompt, DEFAULT_STYLE);
-
+      _forceInsertText(len, _prompt, DEFAULT_STYLE); // need forceAppend!
       _document.setHasPrompt(true);
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e);  }
@@ -203,18 +199,15 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     finally { releaseWriteLock(); }
   }
 
-  /** Gets the position immediately before the prompt, or the doc length if there is no prompt. */
-  public int getPositionBeforePrompt() {
-    acquireReadLock();
+  /** Gets the position immediately before the prompt, or the doc length if there is no prompt. Assumes that ReadLock or
+    * WriteLock is already held.*/
+  private int _getPositionBeforePrompt() {
     int len = _document.getLength();
-    try {
-      if (_document.hasPrompt()) {
-        int promptStart = _promptPos - _prompt.length();
-        return (promptStart < len && promptStart >= 0) ? promptStart : len;  // ensure position is within document 
-      }
-      return len;
+    if (_document.hasPrompt()) {
+      int promptStart = _promptPos - _prompt.length();
+      return (promptStart < len && promptStart >= 0) ? promptStart : len;  // ensure position is within document 
     }
-    finally { releaseReadLock(); }
+    return len;
   }
 
   /** Inserts the given string with the given attributes just before the most recent prompt.
@@ -224,8 +217,8 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   public void insertBeforeLastPrompt(String text, String style) {
     acquireWriteLock();
     try {
-      int pos = getPositionBeforePrompt();
-      _promptPos += text.length();
+      int pos = _getPositionBeforePrompt();
+      _promptPos = _promptPos + text.length();
       _forceInsertText(pos, text, style);
     }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
@@ -244,6 +237,8 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     finally { releaseWriteLock(); }
   }
   
+  /** Inserts a string into the document at the given offset and named style, if the edit condition allows it., as
+    * above.  Assumes WriteLock is held. */
   public void _insertText(int offs, String str, String style) throws EditDocumentException {
     if (offs < _promptPos) _beep.run();
     else {
@@ -291,20 +286,24 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     if (_document instanceof SwingDocument) 
       ((SwingDocument)_document).addColoring(offs, offs + str.length(), style);
   }
-  /** Removes a portion of the document, if the edit condition allows it.
+  
+  /** Removes a portion of the document, if the edit condition (including promptPos) allows it.
    *  @param offs Offset to start deleting from
    *  @param len Number of characters to remove
    *  @throws EditDocumentException if the offset or length are illegal
    */
   public void removeText(int offs, int len) throws EditDocumentException {
     acquireWriteLock();
-    try {
-      if (offs < _promptPos) _beep.run();
-      else _document.removeText(offs, len);
-    }
+    try { _removeText(offs, len); }
     finally { releaseWriteLock(); }
   }
 
+  /** Removes a portion of the document, if the edit condition allows it, as above.  Assumes that WriteLock is held. */
+  public void _removeText(int offs, int len) throws EditDocumentException {
+    if (offs < _promptPos) _beep.run();
+    else _document._removeText(offs, len);
+  }
+  
   /** Removes a portion of the document, regardless of the edit condition.
    *  @param offs Offset to start deleting from
    *  @param len Number of characters to remove
@@ -331,9 +330,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
    */
   public String getText() {
     acquireWriteLock();
-    try {
-      return _document.getDocText(0, getLength());
-    }
+    try { return _document.getDocText(0, getLength()); }
     finally { releaseWriteLock(); }
   }
   

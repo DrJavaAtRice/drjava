@@ -57,12 +57,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Banner prefix. */
   public static final String BANNER_PREFIX = "Welcome to DrJava.";
+  
+  public static final String _newLine = "\n";
  
   /** Keeps track of any listeners to the model. */
   protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
-
-  /** System-dependent newline string. */
-  protected static final String _newLine = System.getProperty("line.separator");
 
   /** InteractionsDocument containing the commands and history. */
   protected final InteractionsDocument _document;
@@ -76,9 +75,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** A lock object to prevent multiple threads from interpreting at once. */
   private final Object _interpreterLock;
 
-  /** A lock object to prevent print calls to System.out or System.err from flooding 
-   *  the JVM, ensuring the UI remains responsive. */
-  private final Object _writerLock;
+  /** A lock object to prevent print calls to System.out or System.err from flooding the JVM, ensuring the UI remains
+    * responsive.  Only public for testing purposes. */
+  public final Object _writerLock;
 
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls. */
   private final int _writeDelay;
@@ -384,18 +383,20 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _debugPortSet = true;
   }
 
-  /** Called when the repl prints to System.out.
+  /** Called when the repl prints to System.out.  Includes a delay to prevent flooding the interactions document.
    *  @param s String to print
    */
   public void replSystemOutPrint(String s) {
     _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_OUT_STYLE);
+    _writerDelay();
   }
 
-  /** Called when the repl prints to System.err.
+  /** Called when the repl prints to System.err.  Includes a delay to prevent flooding the interactions document.
    *  @param s String to print
    */
   public void replSystemErrPrint(String s) {
     _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
+    _writerDelay();
   }
 
   /** Returns a line of text entered by the user at the equivalent of System.in. */
@@ -427,12 +428,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
 
   /** Any common behavior when an interaction ends. Subclasses might want to additionally notify listeners 
-   *  here. (Do this after calling super())
-   */
-  protected void _interactionIsOver() {
-    _document.addToHistory(_toAddToHistory);
-    _document.setInProgress(false);
-    _document.insertPrompt();
+    * here. (Do this after calling super()),  public for testing purposes.
+    */
+  public void _interactionIsOver() {
+    _document.acquireWriteLock(); // TODO: encapsulate as method of InteractionsDocument
+    try {
+      _document.addToHistory(_toAddToHistory);
+      _document.setInProgress(false);
+      _document.insertPrompt();
+    }
+    finally { _document.releaseWriteLock(); }
+      
     _notifyInteractionEnded();
   }
 
@@ -446,17 +452,19 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *  @param styleName Name of the style to use for s
    */
   public void append(String s, String styleName) {
+    _document.append(s, styleName);
+    _writerDelay();
+  }
+  
+  /** Waits for a small amount of time on a shared writer lock. */
+  public void _writerDelay() {
     synchronized(_writerLock) {
       try {
-        _document.append(s, styleName);
-        
         // Wait to prevent being flooded with println's
         _writerLock.wait(_writeDelay);
       }
       catch (EditDocumentException e) { throw new UnexpectedException(e); }
-      catch (InterruptedException e) {
-        // It's ok, we'll go ahead and resume
-      }
+      catch (InterruptedException e) { /* Not a problem. continue */}
     }
   }
 
@@ -464,12 +472,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void replReturnedVoid() { _interactionIsOver(); }
 
   /** Signifies that the most recent interpretation completed successfully, returning a value.
-   *
    *  @param result The .toString-ed version of the value that was returned by the interpretation. We must return the 
    *         String form because returning the Object directly would require the data type to be serializable.
    */
   public void replReturnedResult(String result, String style) {
-    append(result + _newLine, style);
+    append(result + "\n", style);
     _interactionIsOver();
   }
 
@@ -588,7 +595,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
   /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady(File wd) {
-//    System.out.println("interpreterReady(" + wd + ") called in InteractionsModel");  // DEBUG
+//    System.err.println("interpreterReady(" + wd + ") called in InteractionsModel");  // DEBUG
 //    System.out.println("_waitingForFirstInterpreter = " + _waitingForFirstInterpreter);  // DEBUG
     if (! _waitingForFirstInterpreter) {
       _document.reset(generateBanner(wd));

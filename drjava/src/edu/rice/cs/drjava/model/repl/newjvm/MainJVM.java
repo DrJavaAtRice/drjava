@@ -221,7 +221,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public void interpretResult(InterpretResult result) throws RemoteException {
     try {
       _log.log(this + ".interpretResult(" + result + ")");
-      
       result.apply(getResultHandler());
     }
     catch (Throwable t) {
@@ -544,21 +543,25 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public String getCurrentInterpreterName() { return _currentInterpreterName; }
   
   /** Kills the running interpreter JVM, and restarts with working directory wd if wd != null.  If wd == null, the
-   *  interpreter is not restarted.
-   *  Note: If the interpreter is not restarted, all of the methods that delegate to the interpreter will 
-   *  silently fail! Therefore, killing without restarting should be used with extreme care and only in 
-   *  carefully controlled test cases or when DrJava is quitting anyway.
+   * interpreter is not restarted.  Note: If the interpreter is not restarted, all of the methods that delegate to the
+   * interpreter will silently fail!  Therefore, killing without restarting should be used with extreme care and only in 
+   * carefully controlled test cases or when DrJava is quitting anyway.
    */
 
   public void killInterpreter(File wd) {
+    boolean restart;
     synchronized(_masterJVMLock) {
-        _workDir = wd;
-        _restart = (wd != null);
-        _cleanlyRestarting = true;
-        if (_restart) _interactionsModel.interpreterResetting();
-      }
-    /* Dropped lock before making remote call. */
-    try { quitSlave(); } // new slave JVM is restarted by call on startInterpreterJVM on death of current slave
+      _workDir = wd;
+      _restart = (wd != null);
+      _cleanlyRestarting = true;
+      restart = _restart;
+    }
+      
+    /* Dropping lock before performing operations on the interactions document/pane and making remote call. */
+    try { 
+      if (restart) _interactionsModel.interpreterResetting();
+      quitSlave(); 
+    } // new slave JVM is restarted by call on startInterpreterJVM on death of current slave
     catch (RemoteException e) {
       _log.log(this + "could not connect to the interpreterJVM while trying to kill it.  Threw " + e);
     }
@@ -637,8 +640,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     super.slaveQuitDuringStartup(status);
     if (Utilities.TEST_MODE) return;  // Some tests kill the slave immediately after it starts.
 
-//    // The slave JVM is not enabled after this.
-//    _restart = false;
+    // The slave JVM is not enabled after this.
+    _restart = false;
     
     // Signal that an internal error occurred
     String msg = "Interpreter JVM exited before registering, status: " + status;
@@ -682,7 +685,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _log.log("Main JVM Thread for slave connection is: " + Thread.currentThread());
     
     // notify a thread that is waiting in ensureInterpreterConnected
-    synchronized(_interpreterLock) { _interpreterLock.notify(); }
+    synchronized(_interpreterLock) { _interpreterLock.notifyAll(); } 
   }
 
   
@@ -731,9 +734,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         /* Now we silently fail if interpreter is disabled instead of throwing an exception. This situation
          * occurs only in test cases and when DrJava is about to quit. 
          */
-        //if (! _restart) {
-        //throw new IllegalStateException("Interpreter is disabled");
-        //}
+        if (! _restart) { throw new IllegalStateException("Interpreter is disabled"); }
         InterpreterJVMRemoteI slave = _interpreterJVM();
         while (slave == null) {
 //          _log.log("interpreter is null in Main JVM, waiting for it to register");
@@ -759,10 +760,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * from a call to interpret back to the GlobalModel.
    */
   private class ResultHandler implements InterpretResultVisitor<Object> {
-    /**
-     * Lets the model know that void was returned.
-     * @return null
-     */
+    /** Lets the model know that void was returned.
+      * @return null
+      */
     public Object forVoidResult(VoidResult that) {
       _interactionsModel.replReturnedVoid();
       return null;

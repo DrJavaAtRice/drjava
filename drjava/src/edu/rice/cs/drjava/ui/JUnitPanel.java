@@ -257,21 +257,21 @@ public class JUnitPanel extends ErrorPanel {
       SwingDocument doc = getSwingDocument();
       doc.acquireWriteLock();
       try {
-        int index = doc.getLength();
+        int len = doc.getLength();
         // Insert the classname if it has changed
         if (! className.equals(_runningTestName)) {
           _runningTestName = className;
-          doc.insertString(index, "  " + className + "\n", NORMAL_ATTRIBUTES);
-          index = doc.getLength();
+          doc.insertString(len, "  " + className + "\n", NORMAL_ATTRIBUTES);
+          len = doc.getLength();
         }
         
         // Insert the test name, remembering its position
-        doc.insertString(index, "    ", NORMAL_ATTRIBUTES);
-        index = doc.getLength();
-        doc.insertString(index, testName + "\n", NORMAL_ATTRIBUTES);
-        Position pos = doc.createPosition(index);
+        doc.insertString(len, "    ", NORMAL_ATTRIBUTES);
+        len = doc.getLength();
+        doc.insertString(len, testName + "\n", NORMAL_ATTRIBUTES);
+        Position pos = doc.createPosition(len);
         _runningTestNamePositions.put(fullName, pos);
-        setCaretPosition(index);
+        setCaretPosition(len);
       }
       catch (BadLocationException ble) {
         // Inserting at end, shouldn't happen

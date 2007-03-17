@@ -65,7 +65,7 @@ import java.util.List;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  protected static final Log _log  = new Log("GlobalModel.txt", false);
+  protected static final Log _log  = new Log("GlobalModel.txt", true);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile File _tempDir;

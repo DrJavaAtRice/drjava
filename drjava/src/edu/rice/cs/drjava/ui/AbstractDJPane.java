@@ -108,19 +108,14 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /** Updates the document location and checks caret position to see if it needs to set or remove a highlight from the 
     * document.  When the cursor is immediately right of a ')', '}', or ']', it highlights up to the matching '(', '{",
     * or '[', respectively.  This method must execute directly as part of the document update. If cannot be deferred 
-    * using invokeLater.  Only modifies fields added to DefaultStyledDocument)---not any Swing library classes.
+    * using invokeLater.  Only modifies fields added to DefaultStyledDocument)---not any Swing library classes.  Can be
+    * executed outside the event thread.
     * @param offset the new offset of the caret
     */
-  protected void matchUpdate(int offset) {
-    getDJDocument().setCurrentLocation(offset);  
-    _removePreviousHighlight();
-    _updateMatchHighlight();
-  }
+  protected abstract void matchUpdate(int offset);
 
-  protected abstract void _updateMatchHighlight();
-
-  /** Removes the previous highlight so document is cleared when caret position changes.  Can be executed from outside
-    * the event thread. */
+  /** Removes the previous highlight so document is cleared when caret position changes.  Assumes ReadLock is already
+    * held.  Can be executed from outside the event thread. */
   protected void _removePreviousHighlight() {
     if (_matchHighlight != null) {
       _matchHighlight.remove();

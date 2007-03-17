@@ -133,9 +133,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   /** The filename currently being displayed. */
   private volatile String _fileTitle = "";
   
-  // These fields should be final but can't be, as the code is currently
-  // organized, because they are set in helper methods, not the constructor
-  
   // Tabbed panel fields
   public final LinkedList<TabbedPanel>  _tabs = new LinkedList<TabbedPanel>();
     
@@ -4775,9 +4772,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             break;
             
           case JOptionPane.NO_OPTION:
-            if (dialog.getCheckBoxValue()) {
-                DrJava.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
-            }
+            if (dialog.getCheckBoxValue())  DrJava.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
             return;
             
           case JOptionPane.CANCEL_OPTION:
@@ -4788,7 +4783,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           default:
             throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
         }
-        
       }
       
       try {
@@ -4967,7 +4961,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   private void _selectAll() { _currentDefPane.selectAll(); }
   
-  /** Jump to the specified line and return the offset.
+  /** Jump to the specified line and return the offset.  Only runs in event thread.
    * @return offset */
   private int _jumpToLine(int lineNum) {   
     int pos = _model.getActiveDocument().gotoLine(lineNum);
@@ -6336,6 +6330,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       }
     });
     
+    // This listener updates the _cachedCaretPosition in the _interactionsController when the cursor is manually set.
+    _interactionsPane.addMouseListener(new MouseInputAdapter() {
+      public void mouseClicked(MouseEvent e) { 
+        _interactionsController.setCachedCaretPos(_interactionsPane.viewToModel(e.getPoint()));
+      }
+    });
     _consolePanePopupMenu = new JPopupMenu();
     _consolePanePopupMenu.add(_clearConsoleAction);
     _consolePanePopupMenu.addSeparator();
@@ -6836,7 +6836,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     Utilities.invokeLater(command);
   }
   
-  // Comment out current selection using wing commenting.  Non-private for testing purposes only. */
+  // Comment out current selection using wing commenting.  Non-private for testing purposes only. Only runs in event thread. */
   void commentLines() {
     // Delegate everything to the DefinitionsDocument.
     OpenDefinitionsDocument openDoc = _model.getActiveDocument();
@@ -6852,7 +6852,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     if (start != end) _currentDefPane.moveCaretPosition(newEnd);
   }
   
-  // Uncomment out current selection using wing commenting.  Public for testing purposes only. */
+  // Uncomment out current selection using wing commenting.  Public for testing purposes only. Only runs in event thread. */
   public void uncommentLines() {
     // Delegate everything to the DefinitionsDocument.
     OpenDefinitionsDocument openDoc = _model.getActiveDocument();
@@ -6870,13 +6870,18 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     
     int startOffset = startPos.getOffset();        
-    int newEnd = openDoc.uncommentLines(start, end);
+    final int newEnd = openDoc.uncommentLines(start, end);
 //    _currentDefPane.notifyActive();
-    if (startOffset != startPos.getOffset()) start -= 2;      
-    _currentDefPane.setCaretPosition(start);
-    if (start != end) _currentDefPane.moveCaretPosition(newEnd);
+    if (startOffset != startPos.getOffset()) start -= 2;
+    final int f_start = start;
+    final boolean moveSelection = start != end;
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        _currentDefPane.setCaretPosition(f_start);
+        if (moveSelection) _currentDefPane.moveCaretPosition(newEnd);
+      } 
+    });   
   }
-  
   
   /** Blocks access to DrJava while the hourglass cursor is on. */
   private static class GlassPane extends JComponent {

@@ -168,10 +168,15 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
    */
   public void removeText(int offs, int len) {
     acquireWriteLock();  // locking is used to make the test and modification atomic
-    try { if (_condition.canRemoveText(offs)) forceRemoveText(offs, len); }
+    try { _removeText(offs, len); }
     finally { releaseWriteLock(); }
   }
 
+  /** Removes a portion of the document, if the edit condition allows it, as above.  Assume sthat WriteLock is held */
+  public void _removeText(int offs, int len) {
+    if (_condition.canRemoveText(offs)) forceRemoveText(offs, len); 
+  }
+  
   /** Removes a portion of the document, regardless of the edit condition.
    *  @param offs Offset to start deleting from
    *  @param len Number of characters to remove

@@ -366,8 +366,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       }
     }); 
     Utilities.clearEventQueue();
-    
-    // Moving this statement to the event thread breaks "Undo should have restored ..."  Why?
+    // Moving this statement to the event thread breaks "Undo should have restored ..."  Why?  Timing.  
+    // Inserting Thread.sleep(500) does the same thing
     doc.getUndoManager().undo();
     
     assertEquals("Should have undone.", text, doc.getText());

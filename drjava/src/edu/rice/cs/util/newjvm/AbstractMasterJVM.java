@@ -210,10 +210,10 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ exten
           _log.log(AbstractMasterJVM.this + " CREATED Slave JVM process " + process + " with " + asString());
           
           int status = process.waitFor();
-          _log.log(process + " DIED under control of " + asString() + " with status " + status);
+//          System.err.println(process + " DIED under control of " + asString() + " with status " + status);
           synchronized(_masterJVMLock) {
             if (_startupInProgress) {
-              _log.log("Process " + process + " died while starting up");
+//              System.err.println("Process " + process + " died while starting up");
               /* If we get here, the process died without registering.  One possible cause is the intermittent funky 3 minute
                * pause in readObject in RUNNER.  Other possible causes are errors in the classpath or the absence of a 
                * debug port.  Proper behavior in this case is unclear, so we'll let our subclasses decide. */

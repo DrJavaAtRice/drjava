@@ -35,24 +35,16 @@ package edu.rice.cs.util;
 
 import java.io.*;
 
-/**
- * Allows an output stream, such as System.out and System.err,
- * to be redirected to another stream.
- *
+/** Allows an output stream, such as System.out and System.err, to be redirected to another stream.
  * @version $Id$
  */
 public abstract class OutputStreamRedirector extends OutputStream {
-  public final void write(int b) {
-    write(new byte[] { (byte) b }, 0, 1);
-  }
+  
+  public final void write(int b) { write(new byte[] { (byte) b }, 0, 1); }
 
-  public final void write(byte[] b) {
-    print(new String(b));
-  }
+  public final void write(byte[] b) { print(new String(b)); }
 
-  public final void write(byte[] b, int off, int len) {
-    print(new String(b, off, len));
-  }
+  public final void write(byte[] b, int off, int len) { print(new String(b, off, len)); }
 
   /** Implement this method to print to the appropriate destination.
     * @param s The string to be printed to the new destination.

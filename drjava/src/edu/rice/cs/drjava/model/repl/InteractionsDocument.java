@@ -114,11 +114,16 @@ public class InteractionsDocument extends ConsoleDocument {
   public void reset(String banner) {
     acquireWriteLock();
     try {
-      forceRemoveText(0, _document.getLength());
-      forceInsertText(0, banner, OBJECT_RETURN_STYLE);
+//      System.err.println("Resetting the interactions document with banner '" + banner + "'");
+      // Clear interactions document
+      setHasPrompt(false);
+      setPromptPos(0);
+      removeText(0, _document.getLength());
+      insertText(0, banner, OBJECT_RETURN_STYLE);
+//      System.err.println("Inserting prompt in cleared interactions pane");
       insertPrompt();
       _history.moveEnd();
-      setInProgress(false);
+      setInProgress(false);  // redundant? also done in InteractionsDocument.interpreterReady(...)
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }
     finally { releaseWriteLock(); }

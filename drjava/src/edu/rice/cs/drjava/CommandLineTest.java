@@ -375,7 +375,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     // strange. If this directory happens to exist, it'll be deleted.
     File newDirectory = new File(funnyName);
     if (newDirectory.exists()) IOUtil.deleteOnExitRecursively(newDirectory);
-    System.err.println("newDirectory.exists() = " + newDirectory.exists());
+//    System.err.println("newDirectory.exists() = " + newDirectory.exists());
     assertTrue("directory created OK", newDirectory.mkdir());
 //    _log.log("Temporary directory " + funnyName + " created");
     return newDirectory;

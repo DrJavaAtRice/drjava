@@ -2004,7 +2004,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     synchronized(systemWriterLock) {
       try {
-        doc.insertBeforeLastPrompt (s, style);
+        doc.insertBeforeLastPrompt(s, style);
         systemWriterLock.wait(WRITE_DELAY);  // Wait to prevent being print flooding
       }
       catch (InterruptedException e) { /* Ignore and resume */ }
@@ -3548,7 +3548,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
 
     /** Forwarding method to sync the definitions with whatever view component is representing them. */
-    public void setCurrentLocation(int location) { _caretPosition = location; getDocument().setCurrentLocation(location); }
+    public void setCurrentLocation(int location) { 
+      _caretPosition = location; 
+      getDocument().setCurrentLocation(location); 
+    }
 
     /** Get the location of the cursor in the definitions according to the definitions document. */
     public int getCurrentLocation() { return getDocument().getCurrentLocation(); }
@@ -3913,7 +3916,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       */
     public int getOffsetOfLine(int line) {
       final int count = getDefaultRootElement().getElementCount();
-      if (line>=count) { line = count-1; }
+      if (line >= count) { line = count - 1; }
       return getDefaultRootElement().getElement(line).getStartOffset();
     }
   } /* End of ConcreteOpenDefDoc */

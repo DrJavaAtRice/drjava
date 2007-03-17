@@ -131,7 +131,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInteractionEnded() { 
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionEnded(); } });
   }
-
+  
   /** Notifies listeners that an error was present in the interaction. */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionErrorOccurred(offset,length); } });

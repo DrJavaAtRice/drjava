@@ -85,6 +85,9 @@ public interface EditDocumentInterface extends ReadersWritersLocking, Serializab
     */
   public void removeText(int offs, int len);
   
+  /** Removes a portion of the document, if the edit condition allows it, as above.  Assumes that WriteLock is held. */
+  public void _removeText(int offs, int len);
+  
   /** Removes a portion of the document, regardless of the edit condition.
     * @param offs Offset to start deleting from
     * @param len Number of characters to remove

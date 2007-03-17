@@ -130,19 +130,23 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** The name of the keymap added to the super class (saved so it can be removed). */
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
-
-  /** Updates the highlight if there is any. Not necessarily executed in event thread. */
-  protected void _updateMatchHighlight() {
+  
+  /** Updates match highlights.  Only runs in the event thread except in some unit tests. */
+  protected void matchUpdate(int offset) { 
+    _doc.setCurrentLocation(offset);  
+    _removePreviousHighlight();
+    
+    // Update the highlight if there is any. Not necessarily executed in event thread
     int to = getCaretPosition();
-    int from = _doc.balanceBackward(); //_doc()._reduced.balanceBackward();
+    int from = _doc.balanceBackward();
     if (from > -1) {
       // Found a matching open brace to this close brace
       from = to - from;
       _addHighlight(from, to);
-      //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+      //     Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
       
       String matchText = _matchText(from);
-   
+      
       if (matchText != null) _mainFrame.updateStatusField("Bracket matches: " + matchText);
       else _mainFrame.updateStatusField();
     }
@@ -151,7 +155,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     else {
       // (getCaretPosition will be the start of the highlight)
       from = to;
-
+      
       to = _doc.balanceForward();
       if (to > -1) {
         to = to + from;
@@ -705,6 +709,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     /* Toggle bookmark */
     JMenuItem toggleBookmarkItem = new JMenuItem("Toggle Bookmark");
     toggleBookmarkItem.addActionListener ( new AbstractAction() {
+      /** Toggle the selected line as a bookmark.  Only runs in event thread. */
       public void actionPerformed( ActionEvent ae) {
         if (getSelectionStart() == getSelectionEnd()) { // nothing selected
           // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
@@ -796,11 +801,13 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** Access to the pane's HighlightManager */
   public HighlightManager getHighlightManager() { return _highlightManager; }
-
-  /** Set the caret position and also scroll to make sure the location is visible.
-   *  @param pos Location to scroll to.
-   */
+  
+  /** Set the caret position and also scroll to make sure the location is visible.  Should only run in the event
+    * thread.  
+    *  @param pos Location to scroll to.
+    */
   public void setPositionAndScroll(int pos) {
+    assert EventQueue.isDispatchThread();
     try {
       setCaretPos(pos);
       scrollRectToVisible(modelToView(pos));
@@ -983,6 +990,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //  public void addSetSizeListener(ActionListener listener) { _setSizeListener = listener; }
 //  public void removeSetSizeListener() { _setSizeListener = null; }
 
+  /** Centers the view (pane) on the specified offset. */
   public void centerViewOnOffset(int offset) {
     assert EventQueue.isDispatchThread();
     try {

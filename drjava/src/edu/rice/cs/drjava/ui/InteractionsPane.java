@@ -67,11 +67,6 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   
   static { EDITOR_KIT = new InteractionsEditorKit();  }
  
-  protected void matchUpdate(int offset) {
-    if (! _doc.hasPrompt()) return;
-    super.matchUpdate(offset);
-  }
-  
   /** A runnable object that causes the editor to beep. */
   protected Runnable _beep = new Runnable() {
     public void run() { Toolkit.getDefaultToolkit().beep(); }
@@ -173,14 +168,18 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     super.paintComponent(g);
   }
 
-  /** Returns the DJDocument held by the pane */
+  /** Returns the DJDocument held by the pane. */
   public DJDocument getDJDocument() { return _doc; }
   
-  /** Updates the highlight if there is any. */
-  protected void _updateMatchHighlight() {
-    addToPromptList(getPromptPos());
+  /** Updates the current location and highlight (if one exists). Adds prompt position to prompt list. */
+  protected void matchUpdate(int offset) {
+    if (! _doc.hasPrompt()) return;
+    _doc.setCurrentLocation(offset); 
+    _removePreviousHighlight();
+    
+//    addToPromptList(getPromptPos()); // NOT USED
     int to = getCaretPosition();
-    int from = getDJDocument().balanceBackward(); //_doc()._reduced.balanceBackward();
+    int from = _doc.balanceBackward(); //_doc()._reduced.balanceBackward();
     if (from > -1) {
       // Found a matching open brace to this close brace
       from = to - from;
@@ -201,18 +200,21 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     }
   }
   
-  /** Returns the list of prompts. Used for tests. */
-  List<Integer> getPromptList() {  return _listOfPrompt; }
+//  /** Returns the list of prompts. Used for tests. */
+//  List<Integer> getPromptList() {  return _listOfPrompt; }  // NOT USED
   
   /** Resets the list of prompts. Called when the interactions pane is reset. */
-  public void resetPrompts() { _listOfPrompt.clear(); }
-  
-  /** Adds the position to the list of prompt positions. package private for tests. Does not necessarily run in
-    * event thread. _listOfPrompt is a Vector which is thread safe. */
-  void addToPromptList(int pos) {
-//    System.err.println("Adding " + pos + " PromptList");
-    if (! _listOfPrompt.contains(new Integer(pos))) _listOfPrompt.add(new Integer(pos));
+  public void resetPrompts() {
+//    System.err.println("Clearing prompt list");
+    _listOfPrompt.clear(); 
   }
+  
+  // NOT USED
+//  /** Adds the position to the list of prompt positions. package private for tests. Does not necessarily run in
+//    * event thread. _listOfPrompt is a Vector which is thread safe. */
+//  void addToPromptList(int pos) {
+//    if (! _listOfPrompt.contains(new Integer(pos))) _listOfPrompt.add(new Integer(pos));
+//  }
   
   /** Returns true if the two locations do not have a prompt between them. */
   private boolean _notCrossesPrompt(int to, int from) {
@@ -224,13 +226,14 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     return toReturn;
   }
   
-  /** Indent the given selection, for the given reason, in the current document.
+  /** Indent the given selection, for the given reason, in the current document.  Should only run in the event queuel
     * @param selStart - the selection start
     * @param selEnd - the selection end
     * @param reason - the reason for the indent
     * @param pm - the ProgressMonitor used by the indenter
     */
   protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
+    assert EventQueue.isDispatchThread();
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
       setCaretPos(_doc.getCurrentLocation());

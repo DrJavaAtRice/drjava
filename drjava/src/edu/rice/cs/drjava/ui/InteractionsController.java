@@ -56,6 +56,8 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.event.CaretListener;
+import javax.swing.event.CaretEvent;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
@@ -89,7 +91,7 @@ import edu.rice.cs.util.UnexpectedException;
  */
 public class InteractionsController extends AbstractConsoleController {
   
-  private static final Log _log = new Log("ConsoleController.txt", false);
+  private static final Log _log = new Log("ConsoleController.txt", true);
   
   private static final String INPUT_ENTERED_NAME = "Input Entered";
   private static final String INSERT_NEWLINE_NAME = "Insert Newline";
@@ -248,7 +250,8 @@ public class InteractionsController extends AbstractConsoleController {
     this(model, adapter, 
          new InteractionsPane(adapter) { 
            public int getPromptPos() { return model.getDocument().getPromptPos(); }
-         }); 
+         }
+    );
   }
 
   /** Glue together the given model and view.
@@ -276,6 +279,12 @@ public class InteractionsController extends AbstractConsoleController {
     _inputCompletionCommand = _defaultInputCompletionCommand;
     _insertTextCommand = _defaultInsertTextCommand;
     _consoleStateListeners = new Vector<ConsoleStateListener>();
+//    _pane.addCaretListener(new CaretListener() {  // Update the cachedCaretPostion 
+//      public void caretUpdate(CaretEvent e) { 
+//        _log.log("Caret Event: " + e + " from source " + e.getSource());
+////        setCachedCaretPos(e.getDot()); 
+//      }
+//    }); 
     
     _init();  // residual superclass initialization
   }
@@ -568,7 +577,10 @@ public class InteractionsController extends AbstractConsoleController {
           int pos = _pane.getCaretPosition();
           if (pos < promptPos) moveToPrompt();
           else if (pos == promptPos) moveToEnd(); // Wrap around to the end
-          else _pane.setCaretPosition(pos - 1); // pos > promptPos
+          else {
+            _pane.setCaretPosition(pos - 1); // pos > promptPos
+            setCachedCaretPos(pos - 1);
+          }
         }
         finally { _doc.releaseReadLock(); }
       }
@@ -580,10 +592,13 @@ public class InteractionsController extends AbstractConsoleController {
     public void actionPerformed(ActionEvent e) {
       _doc.acquireReadLock();
       try {
-        int position = _pane.getCaretPosition();
-        if (position < _doc.getPromptPos()) moveToEnd();
-        else if (position >= _doc.getLength()) moveToPrompt(); // Wrap around to the star
-        else _pane.setCaretPosition(position + 1); // position between prompt and end
+        int pos = _pane.getCaretPosition();
+        if (pos < _doc.getPromptPos()) moveToEnd();
+        else if (pos >= _doc.getLength()) moveToPrompt(); // Wrap around to the star
+        else {
+          _pane.setCaretPosition(pos + 1); // position between prompt and end
+          setCachedCaretPos(pos + 1);
+        }
       }
       finally { _doc.releaseReadLock(); }
     }
