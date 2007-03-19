@@ -91,7 +91,7 @@ import edu.rice.cs.util.UnexpectedException;
  */
 public class InteractionsController extends AbstractConsoleController {
   
-  private static final Log _log = new Log("ConsoleController.txt", true);
+  private static final Log _log = new Log("ConsoleController.txt", false);
   
   private static final String INPUT_ENTERED_NAME = "Input Entered";
   private static final String INSERT_NEWLINE_NAME = "Insert Newline";
