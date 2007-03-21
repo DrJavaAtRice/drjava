@@ -58,7 +58,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Banner prefix. */
   public static final String BANNER_PREFIX = "Welcome to DrJava.";
   
-  public static final String _newLine = "\n";
+  public static final String _newLine = System.getProperty("line.separator");
  
   /** Keeps track of any listeners to the model. */
   protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
