@@ -3016,12 +3016,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           
           /* Initialize doc contents */
           String image = getText();
-          if (image.length() > 0) newDefDoc.insertString(0, image, null);  // Do not call insertString on an empty doc
+          //if (image.length() > 0) newDefDoc.insertString(0, image, null);  // Do not call insertString on an empty doc
+          
 //          else if (! isUntitled()) {
 //            final InputStreamReader reader = new FileReader(_file);
 //            _editorKit.read(reader, newDefDoc, 0);
 //            reader.close(); // win32 needs readers closed explicitly!
 //          }
+          
+          if (image != null) {
+            _editorKit.read(new StringReader(image), newDefDoc, 0);
+            _log.log("Reading from image for " + _file + " containing " + _image.length() + " chars");    
+          }
+          
           _loc = Math.min(_loc, image.length()); // make sure not past end
           _loc = Math.max(_loc, 0); // make sure not less than 0
           newDefDoc.setCurrentLocation(_loc);
