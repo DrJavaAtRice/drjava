@@ -291,13 +291,12 @@ public abstract class FileOps {
     char pred = (char) 0; // initialize as null character
     while (reader.ready()) {
       char c = (char) reader.read();
-      char newPred = c;
+      
       if (c == '\n' && pred == '\r') { } // do nothing ignoring second character of "\r\n";
-      else {
-        if (c == '\r') c = '\n';  // always convert '\r' to '\n' even when it is first char of "\r\n" newLine sequence
-        buf.append(c);
-      }
-      pred = newPred;
+      else if (c == '\r') buf.append('\n');
+      else buf.append(c);
+      
+      pred = c;
     }
 
     reader.close();
