@@ -34,6 +34,7 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** Tests the functionality of the InteractionsDocument.  Most history functionality is tested in HistoryTest.
@@ -94,7 +95,7 @@ public final class InteractionsDocumentTest extends DrJavaTestCase {
     _doc.insertText(origLength, "command", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("current interaction before newline", "command", _doc.getCurrentInteraction());
     _doc.insertNewLine(origLength + 2);
-    assertEquals("current interaction after newline", "co" + System.getProperty("line.separator") + "mmand",
+    assertEquals("current interaction after newline", "co" + "\n" /* formerly StringOps.EOL */ + "mmand",
                  _doc.getCurrentInteraction());
   }
 

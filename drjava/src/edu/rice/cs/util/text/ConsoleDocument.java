@@ -37,6 +37,7 @@ import java.awt.print.*;
 
 import edu.rice.cs.drjava.model.print.DrJavaBook;
 
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.DocumentEditCondition;
@@ -192,7 +193,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
       if (pos > len)  pos = len;
       else if (pos < 0) pos = 0;
       
-      String newLine = System.getProperty("line.separator");
+      String newLine = "\n";  // Was StringOps.EOL; but Swing uses '\n' for newLine
       insertText(pos, newLine, DEFAULT_STYLE);
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e); }

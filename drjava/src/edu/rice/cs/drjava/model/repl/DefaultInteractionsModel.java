@@ -102,6 +102,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** Returns a line of text entered by the user at the equivalent of System.in. */
   public String getConsoleInput() { 
     String s = super.getConsoleInput();
+//    System.err.println("Returning '" + s + "' as console input");
     _model.systemInEcho(s);
     return s; 
   }

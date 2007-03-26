@@ -159,7 +159,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     // redirect stdin
     System.setIn(new InputStreamRedirector() {
       protected String _getInput() {  // NOT synchronized on InterpreterJVM.this.  _mainJVM is immutable.
-        try { return _mainJVM.getConsoleInput(); }
+        try { 
+          String s = _mainJVM.getConsoleInput();
+//          System.err.println("InterpreterJVM.getConsoleInput() = '" + s + "'");
+          return s;
+        }
         catch(RemoteException re) {
           // blow up if no MainJVM found
           _log.log("System.in: " + re.toString());
@@ -516,7 +520,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     // OK, now rebuild string
     final StringBuilder buf = new StringBuilder();
     final ListIterator itor = traceItems.listIterator();
-    final String newLine = System.getProperty("line.separator");
+    final String newLine = StringOps.EOL;  // intended for output to system? (as opposed to Swing text)
     boolean first = true;
     while (itor.hasNext()) {
       if (first) first = false; else buf.append(newLine);

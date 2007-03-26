@@ -97,9 +97,9 @@ public class ConsoleDocumentTest extends DrJavaTestCase {
     assertEquals("insertText should be accepted", "initia2l", _doc.getText());
     _doc.forceInsertText(2, "3", null);
     assertEquals("forceInsertText should be accepted", "in3itia2l", _doc.getText());
-    System.err.println(_doc.getText());
+//    System.err.println(_doc.getText());
     _doc.removeText(3, 1);
-    System.err.println(_doc.getText());
+//    System.err.println(_doc.getText());
     assertEquals("removeText should be rejected", "in3itia2l", _doc.getText());
     _doc.removeText(6, 1);
     assertEquals("remove should be rejected", "in3itia2l", _doc.getText());

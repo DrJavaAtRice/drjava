@@ -39,6 +39,7 @@ import java.io.File;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -76,8 +77,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     try {
       Object result = _interpreter.interpret(toEval);
       if (result != Interpreter.NO_RESULT) {
-        append(String.valueOf(result) + System.getProperty("line.separator"),
-                   InteractionsDocument.OBJECT_RETURN_STYLE);
+        append(String.valueOf(result) + "\n" /* formerly StringOps.EOL*/, InteractionsDocument.OBJECT_RETURN_STYLE);
       }
     }
     catch (ExceptionReturnedException e) {

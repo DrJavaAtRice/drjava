@@ -179,4 +179,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * @return a vector of classpath elements
    */
   public Iterable<File> getClassPath() { return _jvm.getClassPath(); }
+  
+  /** Enables restarting of slave JVM. */
+  public void enableRestart() { _jvm.enableRestart(); }
 }

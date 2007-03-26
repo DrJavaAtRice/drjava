@@ -36,6 +36,7 @@ package edu.rice.cs.drjava.model.repl;
 import java.util.Vector;
 import java.util.HashMap;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
@@ -62,8 +63,7 @@ public class History implements OptionConstants, Serializable {
   /** Version flag at the beginning of saved history file format
    *  If this is not present in a saved history, it is assumed to be the original format.
    */
-  public static final String HISTORY_FORMAT_VERSION_2 =
-    "// DrJava saved history v2" + System.getProperty("line.separator");
+  public static final String HISTORY_FORMAT_VERSION_2 = "// DrJava saved history v2" + StringOps.EOL;
 
   private final Vector<String> _vector = new Vector<String>();
   private volatile int _cursor = -1;
@@ -160,7 +160,7 @@ public class History implements OptionConstants, Serializable {
    */
   public String getHistoryAsStringWithSemicolons() {
     final StringBuilder s = new StringBuilder();
-    final String delimiter = INTERACTION_SEPARATOR + System.getProperty("line.separator");
+    final String delimiter = INTERACTION_SEPARATOR + StringOps.EOL;
     for (int i = 0; i < _vector.size(); i++) {
       String nextLine = _vector.get(i);
 //      int nextLength = nextLine.length();
@@ -179,7 +179,7 @@ public class History implements OptionConstants, Serializable {
    */
   public String getHistoryAsString() {
     final StringBuilder sb = new StringBuilder();
-    final String delimiter = System.getProperty("line.separator");
+    final String delimiter = StringOps.EOL;
     for (String s: _vector) sb.append(s).append(delimiter);
     return sb.toString();
   }
@@ -213,7 +213,7 @@ public class History implements OptionConstants, Serializable {
             String file = HISTORY_FORMAT_VERSION_2 + editedVersion;
 //            if (PlatformFactory.ONLY.isWindowsPlatform()) {
 //              StringBuffer buf = new StringBuffer();
-//              String lineSep = System.getProperty("line.separator");
+//              String lineSep = StringOps.EOL;
 //              int last = 0;
 //              for (int i = file.indexOf('\n'); i != -1; i = file.indexOf('\n', last)) {
 //                buf.append(file.substring(last, i));

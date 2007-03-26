@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
@@ -75,8 +76,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
       "        }\n" +
       "}";
 
-  private static final String FIND_MULTI_LINE_SEARCH_STR =
-      "{" + System.getProperty("line.separator");
+  private static final String FIND_MULTI_LINE_SEARCH_STR = "{" + StringOps.EOL;
   
   private static final String IGNORE_TEXT =
     //edge cases (each require special code to take care of it)

@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.GlobalModelTestCase;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
@@ -108,7 +109,7 @@ public final class ConsoleControllerTest extends GlobalModelTestCase {
     assertEquals("read() returns the correct character", expected, result);
     result = interpret("System.in.read()");
     assertEquals("second read() should get the end-of-line character",
-                 String.valueOf((int) System.getProperty("line.separator").charAt(0)), result);
+                 String.valueOf((int) '\n' /* formerly StringOps.EOL.charAt(0) */), result);
   }
 
   /**

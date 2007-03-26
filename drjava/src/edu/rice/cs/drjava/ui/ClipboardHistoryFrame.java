@@ -48,6 +48,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.StringOps;
 
 /** Frame with history of clipboard. */
 public class ClipboardHistoryFrame extends JFrame {
@@ -396,7 +397,7 @@ public class ClipboardHistoryFrame extends JFrame {
       full = s;
       int index1 = s.indexOf('\n');
       if (index1==-1) index1 = s.length();
-      int index2 = s.indexOf(System.getProperty("line.separator"));
+      int index2 = s.indexOf(StringOps.EOL);
       if (index2==-1) index2 = s.length();
       display = s.substring(0, Math.min(index1, index2));
     }

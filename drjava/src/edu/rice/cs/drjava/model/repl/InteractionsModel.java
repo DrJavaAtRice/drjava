@@ -42,6 +42,7 @@ import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.swing.Utilities;
@@ -58,7 +59,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Banner prefix. */
   public static final String BANNER_PREFIX = "Welcome to DrJava.";
   
-  public static final String _newLine = System.getProperty("line.separator");
+  public static final String _newLine = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
  
   /** Keeps track of any listeners to the model. */
   protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
@@ -271,10 +272,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
               // This behavior can be buggy; that's why the format was changed.
               text.append(s);
               if (s.charAt(sl - 1) != ';') text.append(';');
-              text.append(_newLine);
+              text.append(StringOps.EOL);
               break;
             case (2):
-              if (!firstLine) text.append(s).append(_newLine); // omit version string from output
+              if (!firstLine) text.append(s).append(StringOps.EOL); // omit version string from output
               break;
           }
           firstLine = false;
@@ -315,9 +316,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
 
   /** Interprets the files selected in the FileOpenSelector. Assumes all strings have no trailing whitespace.
-   *  Interprets the array all at once so if there are any errors, none of the statements after the first 
-   *  erroneous one are processed.
-   */
+    * Interprets the array all at once so if there are any errors, none of the statements after the first 
+    * erroneous one are processed.
+    */
   public void loadHistory(FileOpenSelector selector) throws IOException {
     ArrayList<String> histories;
     try { histories = _getHistoryText(selector); }
@@ -332,7 +333,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         int len = curr.length();
         buf.append(curr);
         if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
-        buf.append(_newLine);
+        buf.append(StringOps.EOL);
       }
     }
     append(buf.toString().trim(), InteractionsDocument.DEFAULT_STYLE);
@@ -402,14 +403,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Returns a line of text entered by the user at the equivalent of System.in. */
   public String getConsoleInput() { return _inputListener.getConsoleInput(); }
 
-  /** Sets the listener for any type of single-source input event.
-   *  The listener can only be changed with the changeInputListener method.
-   *  @param listener a listener that reacts to input requests
-   *  @throws IllegalStateException if the input listener is locked
-   */
+  /** Sets the listener for any type of single-source input event. The listener can only be changed with the 
+    * changeInputListener method.
+    * @param listener a listener that reacts to input requests
+    * @throws IllegalStateException if the input listener is locked
+    */
   public void setInputListener(InputListener listener) {
-    if (_inputListener == NoInputListener.ONLY) _inputListener = listener;
-    else  throw new IllegalStateException("Cannot change the input listener until it is released.");
+    if (_inputListener == NoInputListener.ONLY) { _inputListener = listener; }
+    else throw new IllegalStateException("Cannot change the input listener until it is released.");
   }
 
   /** Changes the input listener. Takes in the old listener to ensure that the owner
@@ -476,6 +477,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *         String form because returning the Object directly would require the data type to be serializable.
    */
   public void replReturnedResult(String result, String style) {
+//    System.err.println("InteractionsModel.replReturned(...) passed '" + result + "'");
     append(result + "\n", style);
     _interactionIsOver();
   }

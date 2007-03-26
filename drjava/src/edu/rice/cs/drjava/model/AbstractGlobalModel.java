@@ -73,7 +73,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException ;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Element;
 import javax.swing.text.Position;
 import javax.swing.text.Segment;
@@ -3001,7 +3002,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           // Synchronization on this was eliminated because it does not prevent the returned string from becoming 
           // inconsistent with _doc/_file in the presence of huge scheduling delays.  Of course, all getText operations 
           // can return stale data in the presence of such delays. 
-          try { image = IOUtil.toString(_file); }
+          try { image = FileOps.readFileAsSwingText(_file); }
           catch(IOException e) {  image = ""; }  
 //          System.err.println("Returning image '" + image + " for file " + _file);
           _image = image;
@@ -3026,6 +3027,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           
           if (image != null) {
             _editorKit.read(new StringReader(image), newDefDoc, 0);
+            //  Set document property to write out document using newLine conventions of the host platform.
+            newDefDoc.putProperty(DefaultEditorKit.EndOfLineStringProperty, StringOps.EOL);
             _log.log("Reading from image for " + _file + " containing " + _image.length() + " chars");    
           }
           

@@ -41,6 +41,8 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedToken;
+import edu.rice.cs.util.StringOps;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -1208,7 +1210,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertFalse("Document should no longer be modified after redo.", _defModel.isModifiedSinceSave());
   }
 
-  protected final String NEWLINE = System.getProperty("line.separator");
+  protected final String NEWLINE = "\n"; // Was StringOps.EOL;but swing usees '\n' for newLine
   
   protected final String NESTED_CLASSES_TEXT =
     "/*bof*/package Temp;" + NEWLINE +

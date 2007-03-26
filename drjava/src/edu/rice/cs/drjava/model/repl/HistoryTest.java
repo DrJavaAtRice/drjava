@@ -39,6 +39,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.OverwriteException;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.WarningFileSelector;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.io.File;
@@ -169,7 +170,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     Utilities.clearEventQueue();
     assertEquals("testGetHistoryAsString:", "", _history.getHistoryAsString());
 
-    String newLine = System.getProperty("line.separator");
+    String newLine = StringOps.EOL;
 
     _history.add("some text");
     assertEquals("testGetHistoryAsString:", "some text" + newLine, _history.getHistoryAsString());

@@ -103,6 +103,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   private volatile boolean _cleanlyRestarting = false;
   
+  /** Number of previous attempts to start slave JVM in this startup. */
+  private volatile int _numAttempts = 0;
+  
+  /** Number of slave startup failures allowed before aborting the startup process. */
+  private static final int MAX_COUNT = 3;
+  
   /** Instance of inner class to handle interpret result. */
   private final ResultHandler _handler = new ResultHandler();
   
@@ -434,8 +440,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    public void notifyDebugInterpreterAssignment(String name) {
    }*/
   
-  /**Accessor for the remote interface to the Interpreter JVM. */
-  private InterpreterJVMRemoteI _interpreterJVM() { return (InterpreterJVMRemoteI) getSlave(); }
+  /**Accessor for the remote interface to the Interpreter JVM; _slave is protected field of the supserclass. */
+  private InterpreterJVMRemoteI _interpreterJVM() { return (InterpreterJVMRemoteI) _slave; }
   
 //  /** Updates the security manager in slave JVM */
 //  public void enableSecurityManager() throws RemoteException {
@@ -601,6 +607,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     for (int i = 0; i < jvmArgs.size(); i++) { jvmArgsArray[i] = jvmArgs.get(i); }
     
     // Create and invoke the Interpreter JVM
+    _numAttempts = 0;
     try {
      // _startupClasspath is sent in as the interactions classpath
 //      Utilities.show("Calling invokeSlave(" + jvmArgs + ", " + _startupClassPath + ", " +  _workDir +")");
@@ -631,6 +638,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _cleanlyRestarting = false;
   }
   
+  
+  
   /** Action to take if the slave JVM quits before registering.  Assumes _masterJVMLock is held.
    *  @param status Status code of the JVM
    *  TODO: revise the unit tests that kill the slave prematurely (by making them wait until the
@@ -638,9 +647,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   protected void slaveQuitDuringStartup(int status) {
     super.slaveQuitDuringStartup(status);
-    if (Utilities.TEST_MODE) return;  // Some tests kill the slave immediately after it starts.
+    _numAttempts++;  // no synchronization since this is the only place that _numAttempts is modified
+    if (Utilities.TEST_MODE || _numAttempts < MAX_COUNT) return;  // Some tests kill the slave immediately after it starts.
 
-    // The slave JVM is not enabled after this.
+    // The slave JVM is not enabled after this to prevent an infinite loop of attempted startups
     _restart = false;
     
     // Signal that an internal error occurred
@@ -688,6 +698,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     synchronized(_interpreterLock) { _interpreterLock.notifyAll(); } 
   }
 
+  /** ReEnables restarting the slave if it has been turned off by repeated startup failures. */
+  public void enableRestart() { _restart = true; }
   
   /** Returns the visitor to handle an InterpretResult. */
   protected InterpretResultVisitor<Object> getResultHandler() { return _handler; }
@@ -749,11 +761,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (InterruptedException ie) { throw new UnexpectedException(ie); }
   }
   
-  /**
-   * Asks the main jvm for input from the console.
-   * @return the console input
-   */
-  public String getConsoleInput() { return _interactionsModel.getConsoleInput();  }
+  /** Asks the main jvm for input from the console.
+    * @return the console input
+    */
+  public String getConsoleInput() { 
+    String s = _interactionsModel.getConsoleInput(); 
+//    System.err.println("MainJVM.getConsoleInput() returns '" + s + "'");
+    return s; 
+  }
   
   /**
    * Peforms the appropriate action to return any type of result

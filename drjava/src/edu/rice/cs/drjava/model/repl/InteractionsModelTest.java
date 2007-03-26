@@ -41,6 +41,7 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 
@@ -281,7 +282,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     // Set up a sample history
     String line1 = "System.out.println(\"hi\")";
     String line2 = "System.out.println(\"bye\")";
-//    String delim = History.INTERACTION_SEPARATOR + System.getProperty("line.separator");
+//    String delim = History.INTERACTION_SEPARATOR + StringOps.EOL;
     final File temp = File.createTempFile("drjava-test", ".hist").getCanonicalFile();
     temp.deleteOnExit();
     History history = new History(5);
@@ -428,8 +429,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     //Simulate result
     _model.replReturnedSyntaxError("Encountered Unexpected \"<EOF>\"", "public class A {\n", -1, -1, -1, -1);
 
-    assertEquals("Current interaction should still be there - should not have interpreted", "public class A {\n" + System.getProperty("line.separator"),
-                 doc.getCurrentInteraction());
+    String expected = "public class A {\n" + "\n";  // last term was StringOps.EOL but Swing uses '\n' for newLIne
+    String result = doc.getCurrentInteraction();
+//    System.err.println("expected = '" + expected + "' length = " + expected.length());
+//    System.err.println("result = '" + result + "' length = " + result.length());
+    assertEquals("Current interaction should still be there - should not have interpreted", expected, result);
     History h = doc.getHistory();
     assertEquals("History should be empty", 0, h.size());
 

@@ -67,7 +67,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ exten
   private static final String RUNNER = SlaveJVMRunner.class.getName();
   
   /** The slave JVM remote stub if it's connected; null if not connected. */
-  private volatile SlaveRemote _slave;
+  protected volatile SlaveRemote _slave;
 
   /** Is slave JVM in the process of starting up?  INVARIANT: _startupInProgess => _slave == null. */
   private volatile boolean _startupInProgress = false;

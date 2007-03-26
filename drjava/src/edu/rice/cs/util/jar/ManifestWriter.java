@@ -33,6 +33,7 @@
 
 package edu.rice.cs.util.jar;
 
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import java.util.jar.Manifest;
 import java.util.jar.Attributes;
@@ -41,9 +42,7 @@ import java.util.List;
 import java.util.Iterator;
 import java.io.*;
 
-/**
- * Writes manifest objects. Useful for creating Manifest files without writing them to files
- */
+/** Writes manifest objects.  Useful for creating Manifest files without writing them to files. */
 public class ManifestWriter {
   private List<String> _classPaths;
   private String _mainClass;
@@ -70,8 +69,7 @@ public class ManifestWriter {
     _mainClass = mainClass;
   }
 
-  /**
-   * Get an input stream to the contents of the manifest file
+  /** Get an input stream to the contents of the manifest file
    * @return an InputStream whose contents are the contents of the Manifest file
    */
   protected InputStream getInputStream() {
@@ -79,7 +77,7 @@ public class ManifestWriter {
 
     final StringBuilder sbuf = new StringBuilder();
     sbuf.append(Attributes.Name.MANIFEST_VERSION.toString());
-    sbuf.append(": 1.0"+System.getProperty("line.separator"));
+    sbuf.append(": 1.0" + StringOps.EOL);
     if( !_classPaths.isEmpty() ) {
       Iterator<String> iter = _classPaths.iterator();
       sbuf.append(Attributes.Name.CLASS_PATH.toString());
@@ -88,20 +86,16 @@ public class ManifestWriter {
         sbuf.append(" ");
         sbuf.append(iter.next());
       }
-      sbuf.append(System.getProperty("line.separator"));
+      sbuf.append(StringOps.EOL);
     }
     if( _mainClass != null ) {
       sbuf.append(Attributes.Name.MAIN_CLASS.toString());
       sbuf.append(": ");
       sbuf.append(_mainClass);
-      sbuf.append(System.getProperty("line.separator"));
+      sbuf.append(StringOps.EOL);
     }
-    try {
-      return new ByteArrayInputStream(sbuf.toString().getBytes("UTF-8"));
-    }
-    catch (UnsupportedEncodingException e) {
-      throw new UnexpectedException(e);
-    }
+    try { return new ByteArrayInputStream(sbuf.toString().getBytes("UTF-8")); }
+    catch (UnsupportedEncodingException e) { throw new UnexpectedException(e); }
   }
 
   /**

@@ -1812,6 +1812,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     updateStatusField("Resetting Interactions");
     
+    _model.getInteractionsModel().enableRestart();
     // Lots of work, so use another thread
     new Thread(new Runnable() { 
       public void run() {_model.resetInteractions(_model.getWorkingDirectory(), true);

@@ -46,10 +46,12 @@ import java.text.DecimalFormat;
  */
 
 public abstract class StringOps {
-  /**
-   * Takes theString fullString and replaces all instances of toReplace with
-   * replacement
-   */
+  
+  public static final String EOL = System.getProperty("line.separator");
+  
+  /** Takes theString fullString and replaces all instances of toReplace with replacement. 
+    * TODO: deprecate and used corresponding String method added in Java 5.0. 
+    */
   public static String replace (String fullString, String toReplace, String replacement) {
     int index = 0;
     int pos;
@@ -476,7 +478,7 @@ public abstract class StringOps {
     s = StringOps.replace(s, "&", "&amp;");
     s = StringOps.replace(s, "<", "&lt;");
     s = StringOps.replace(s, ">", "&gt;");
-    s = StringOps.replace(s, System.getProperty("line.separator"),"<br>");
+    s = StringOps.replace(s, EOL,"<br>");
     s = StringOps.replace(s, "\n","<br>");
     return s;
   }

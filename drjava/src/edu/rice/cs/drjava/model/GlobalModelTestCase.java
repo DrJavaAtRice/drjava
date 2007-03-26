@@ -39,6 +39,7 @@ import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
@@ -65,7 +66,7 @@ import java.util.List;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  protected static final Log _log  = new Log("GlobalModel.txt", true);
+  protected static final Log _log  = new Log("GlobalModel.txt", false);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile File _tempDir;
@@ -100,7 +101,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _log.log("Global model created for " + this);
     DrJava.getConfig().resetToDefaults();
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
+    _tempDir = /* IOUtil.createAndMarkTempDirectory */ FileOps.createTempDirectory("DrJava-test-" + user /*, ""*/);
     // Wait until model has connected to slave JVM
     _log.log("Ensuring that interpreter is connected in " + this);
     _model._jvm.ensureInterpreterConnected();
@@ -258,13 +259,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   /** Puts the given input into the interactions document and then interprets it, returning the result that was put
-   *  into the interactions document. This assumes the interactions document is in a state with no text after the 
-   *  prompt. To be sure this is the case, you can reset interactions first.  This method provides its own listener
-   *  to synchronized with the completion of the interaction.
-   *
-   *  @param input text to interpret
-   *  @return The output from this interpretation, in String form, as it was printed to the interactions document.
-   */
+    * into the interactions document. This assumes the interactions document is in a state with no text after the 
+    * prompt. To be sure this is the case, you can reset interactions first.  This method provides its own listener
+    * to synchronized with the completion of the interaction.
+    *
+    * @param input text to interpret
+    * @return The output from this interpretation, in String form, as it was printed to the interactions document.
+    */
   protected String interpret(String input) throws EditDocumentException {
     
     InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
@@ -276,7 +277,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     Utilities.clearEventQueue();
 
     // skip the right length for the newline
-    final int newLineLen = System.getProperty("line.separator").length();
+    final int newLineLen = 1; // Was StringOps.EOL.length(); but Swing uses '\n' for newLine
     final int resultsStartLocation = interactionsDoc.getLength() + newLineLen;
 
     InteractionListener listener = new InteractionListener();
@@ -300,8 +301,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       final int resultsEndLocation = interactionsDoc.getLength() - newLineLen - interactionsDoc.getPrompt().length();
       
       final int resultsLen = resultsEndLocation - resultsStartLocation;
-      //System.out.println("resultsStartLoc = " + resultsStartLocation + " resultsEndLocation = " + resultsEndLocation);
-      // There was no output from this interaction
+      _log.log("resultsStartLoc = " + resultsStartLocation + " resultsEndLocation = " + resultsEndLocation);
+      _log.log("Contents = '" + interactionsDoc.getDocText(0, resultsEndLocation+1) + "'");
       if (resultsLen <= 0) return "";
       return interactionsDoc.getDocText(resultsStartLocation, resultsLen);
     }

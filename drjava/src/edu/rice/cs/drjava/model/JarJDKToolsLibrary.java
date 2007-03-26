@@ -174,7 +174,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
 //      int beginPos = str.indexOf(CB);
 //      if (beginPos >= 0) {
 //        beginPos += CB.length();
-//        int endPos = str.indexOf(System.getProperty("line.separator"), beginPos);
+//        int endPos = str.indexOf(StringOps.EOL, beginPos);
 //        if (endPos >= 0) return str.substring(beginPos, endPos);
 //        else {
 //          endPos = str.indexOf(' ', beginPos);

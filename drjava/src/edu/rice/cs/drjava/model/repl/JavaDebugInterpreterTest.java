@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -54,7 +55,7 @@ import koala.dynamicjava.interpreter.context.*;
  * @version $Id$
  */
 public final class JavaDebugInterpreterTest extends DebugTestCase {
-  private static final String _newLine = System.getProperty("line.separator");
+  private static final String _newLine = "\n"; // was StringOps.EOL;
   private JavaDebugInterpreter _debugInterpreter;
 
 //  private String _assignedInterpreterName;
@@ -235,10 +236,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
                       n);
   }
 
-  /**
-   * Tests that the user can access fields of outer classes
-   * in the debug interpreter.
-   */
+  /** Tests that the user can access fields of outer classes in the debug interpreter. */
   public void testAccessFieldsAndMethodsOfOuterClasses()
     throws DebugException, BadLocationException, EditDocumentException, IOException, InterruptedException {
     File file = new File(_tempDir, "MonkeyStuff.java");
@@ -285,7 +283,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
               "finally {System.out.println(MonkeyInner.MonkeyTwoDeep.this.twoDeepFoo);}");
     assertInteractionsDoesNotMatch(".*^18$.*");
     assertInteractionsDoesNotMatch(".*^6$.*");
-    assertInteractionsMatches(".*^8" + _newLine + "13$.*");
+    assertInteractionsMatches(".*^8" + StringOps.EOL + "13$.*"); // EOL by System.out.println is platform-dependent
     
     // Tests that the debugger has the correct notion of
     interpret("foo");
@@ -432,6 +430,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
+//    System.err.println("Passed first set of notifications");
     // Set one breakpoint
     int index = MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;");
     _debugger.toggleBreakpoint(doc,index,10,true);
@@ -445,6 +444,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
        while (_pendingNotifies > 0) _notifierLock.wait();
      }
 
+//    System.err.println("Passed second set of notifications");
+    
     // Test accessing a field initialized to null
     assertEquals("nullString should be null", "null", interpret("nullString"));
     interpret("nullString = new Integer(3)");
@@ -459,6 +460,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
       _setPendingNotifies(3);  // breakpointReached, suspended, updated
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
+    
+//    System.err.println("Passed third set of notifications");
     // Test accessing final local variables
     assertEquals("Should be able to access localVar", "11", interpret("localVar"));
     interpret("localVar = 5");

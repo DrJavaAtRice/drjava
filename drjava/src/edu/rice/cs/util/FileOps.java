@@ -42,6 +42,7 @@ import edu.rice.cs.drjava.config.FileOption;
 
 import edu.rice.cs.util.Log;
 
+import edu.rice.cs.plt.io.IOUtil;
 /** A class to provide some convenient file operations as static methods.
  *  It's abstract to prevent (useless) instantiation, though it can be subclassed
  *  to provide convenient namespace importation of its methods.
@@ -280,6 +281,28 @@ public abstract class FileOps {
     stream.close();
     return out.toByteArray();
   }
+  
+  /** Reads the entire contents of a file and return them as canonicalized Swing Document text. All newLine sequences,
+    * including "\n", "\r", and "\r\n" are converted to "\n". */
+  public static String readFileAsSwingText(final File file) throws IOException {
+    FileReader reader = new FileReader(file);
+    final StringBuilder buf = new StringBuilder();
+
+    char pred = (char) 0; // initialize as null character
+    while (reader.ready()) {
+      char c = (char) reader.read();
+      char newPred = c;
+      if (c == '\n' && pred == '\r') { } // do nothing ignoring second character of "\r\n";
+      else {
+        if (c == '\r') c = '\n';  // always convert '\r' to '\n' even when it is first char of "\r\n" newLine sequence
+        buf.append(c);
+      }
+      pred = newPred;
+    }
+
+    reader.close();
+    return buf.toString();
+  }
 
   /** Reads the entire contents of a file and return them as a String.
     * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#toString(File)} instead, which provides the same functionality.
@@ -366,10 +389,11 @@ public abstract class FileOps {
    *  (To delete it recursively on exit, use deleteDirectoryOnExit.)
    *  @param name Non-unique portion of the name of the directory to create.
    *  @return File representing the directory that was created.
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempDirectory(String, String)} instead.
-   *               Example: {@code IOUtil.createAndMarkTempDirectory(name, "")}.
    */
-  @Deprecated public static File createTempDirectory(final String name) throws IOException {
+//   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempDirectory(String, String)} instead.
+//   *               Example: {@code IOUtil.createAndMarkTempDirectory(name, "")}.
+
+/*  @Deprecated */ public static File createTempDirectory(final String name) throws IOException {
     return createTempDirectory(name, null);
   }
 
@@ -380,16 +404,23 @@ public abstract class FileOps {
    *  @param name Non-unique portion of the name of the directory to create.
    *  @param parent Parent directory to contain the new directory
    *  @return File representing the directory that was created.
-   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempDirectory(String, String, File)} instead.
-   *               Example: {@code IOUtil.createAndMarkTempDirectory(name, "", parent)}.
    */
-  @Deprecated public static File createTempDirectory(final String name, final File parent) throws IOException {
-    File file =  File.createTempFile(name, "", parent);
-    file.delete();
-    file.mkdir();
-    file.deleteOnExit();
+//   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempDirectory(String, String, File)} instead.
+//   *               Example: {@code IOUtil.createAndMarkTempDirectory(name, "", parent)}.
 
-    return file;
+  /* @Deprecated */ public static File createTempDirectory(/* final */ String name, /* final */ File parent) throws IOException {
+    File result = File.createTempFile(name, "", parent);
+    boolean success = result.delete();
+    success = success && result.mkdir();
+    if (! success) { throw new IOException("Attempt to create directory failed"); }
+    IOUtil.attemptDeleteOnExit(result);
+    return result;
+//    File file =  File.createTempFile(name, "", parent);
+//    file.delete();
+//    file.mkdir();
+//    file.deleteOnExit();
+//
+//    return file;
   }
 
   /** Delete the given directory including any files and directories it contains.

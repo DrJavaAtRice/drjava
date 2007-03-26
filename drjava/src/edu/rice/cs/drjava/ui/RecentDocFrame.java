@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.swing.DisplayManager;
+import edu.rice.cs.util.StringOps;
 
 /** This class extends a Swing view class.  Hence it should only be accessed from the event-handling thread. */
 public class RecentDocFrame extends JWindow {
@@ -218,7 +219,7 @@ public class RecentDocFrame extends JWindow {
   
   private String getTextFor(OpenDefinitionsDocument doc) {
     DefinitionsPane pane = _frame.getDefPaneGivenODD(doc);
-    String endl = System.getProperty("line.separator");
+    String endl = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
     int loc = pane.getCaretPosition();
     int start = loc;
     int end = loc;

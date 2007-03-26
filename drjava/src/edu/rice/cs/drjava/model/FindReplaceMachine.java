@@ -168,14 +168,14 @@ public class FindReplaceMachine {
    *  @param word the new word to seek
    */
   public void setFindWord(String word) {  
-    _findWord = StringOps.replace(word, System.getProperty("line.separator"), "\n"); 
+    _findWord = StringOps.replace(word, StringOps.EOL, "\n"); 
   }
 
   /** Change the replacing word.
    *  @param word the new replacing word
    */
   public void setReplaceWord(String word) { 
-    _replaceWord = StringOps.replace(word, System.getProperty("line.separator"),"\n"); 
+    _replaceWord = StringOps.replace(word, StringOps.EOL,"\n"); 
   }
 
   /** Determine if the machine is on an instance of the find word.  Only executes in event thread except for

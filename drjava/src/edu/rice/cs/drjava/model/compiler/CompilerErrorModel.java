@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
 
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.drjava.model.FileGroupingState;
@@ -55,7 +56,7 @@ import edu.rice.cs.drjava.model.FileMovedException;
  * @version $Id$
  */
 public class CompilerErrorModel {
-  private static final String newLine = System.getProperty("line.separator");
+  private static final String newLine = StringOps.EOL;
   /** An array of errors to be displayed in the CompilerErrorPanel associated with this model.  After model
    *  construction, this array should be sorted in this order:
    *   (i) Errors with no file.
