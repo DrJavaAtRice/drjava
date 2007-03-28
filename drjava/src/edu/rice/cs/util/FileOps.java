@@ -774,14 +774,19 @@ public abstract class FileOps {
     if ((file==FileOption.NULL_FILE)||(file == null)) {
       file = new File(System.getProperty("user.home"));
     }
-    while (!file.exists()) {
+    assert file != null;    
+    
+    while (file != null && !file.exists()) {
       // if the saved path doesn't exist anymore, try the parent
+      //NB: getParentFile() may return null
       file = file.getParentFile();
     }
     if (file == null) {
       // somehow we ended up with null, use "user.home"
       file = new File(System.getProperty("user.home"));
     }
+    assert file != null;
+    
     // if it's not a directory, try the parent
     if (!file.isDirectory()) {
       if (file.getParent() != null) file = file.getParentFile();
