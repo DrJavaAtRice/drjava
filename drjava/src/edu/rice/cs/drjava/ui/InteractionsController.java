@@ -169,7 +169,7 @@ public class InteractionsController extends AbstractConsoleController {
                 _pane.setEditable(true);
                 _pane.setCaretPosition(_doc.getLength()); }
               finally { _doc.releaseReadLock(); }
-              _pane.requestFocus();
+              _pane.requestFocusInWindow();
               
               completionMonitor.set();
             }
@@ -201,7 +201,7 @@ public class InteractionsController extends AbstractConsoleController {
           finally { _doc.releaseWriteLock(); }
           
           _box.setVisible(true);
-          _box.requestFocus();
+          SwingUtilities.invokeLater(new Runnable() { public void run() { _box.requestFocusInWindow(); } });
 
           _pane.setEditable(false);
         }
@@ -221,7 +221,7 @@ public class InteractionsController extends AbstractConsoleController {
   
   private InteractionsListener _viewListener = new InteractionsListener() {
     public void interactionStarted() { }
-    public void interactionEnded() { }    
+    public void interactionEnded() { _pane.requestFocusInWindow(); }    
     public void interactionErrorOccurred(int offset, int length) { }    
     
     public void interpreterResetting() {
