@@ -73,6 +73,8 @@ public class ReverseHighlighter extends DefaultHighlighter {
     component = null;
   }
   
+  //static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("highlighter.txt",true);
+  
   /** Adds a highlight to the view.  Returns a tag that can be used to refer to the highlight.
     * @param p0   the start offset of the range to highlight >= 0
     * @param p1   the end offset of the range to highlight >= p0
@@ -90,18 +92,44 @@ public class ReverseHighlighter extends DefaultHighlighter {
     i.p0 = doc.createPosition(p0);
     i.p1 = doc.createPosition(p1);
 
-    int insertPos = 0;
-    if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
+    int insertPos = highlights.size();
+    /*if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
       // insert solid painters after the frame and underline painters
-      for(HighlightInfo hli: highlights) {
+      while (insertPos>0) {
+        HighlightInfo hli = highlights.elementAt( insertPos-1 );
         if ((! (hli.getPainter() instanceof DefaultFrameHighlightPainter)) && 
             (! (hli.getPainter() instanceof DefaultUnderlineHighlightPainter))) {
           break;
         }
-        ++insertPos;
+        --insertPos;
       }
+    }*/
+    if (p instanceof DrJavaHighlightPainter) {
+      while (insertPos>0) {
+        HighlightInfo hli = highlights.elementAt( insertPos-1 );
+        if (hli.getPainter() instanceof DrJavaHighlightPainter)
+          --insertPos;
+        else break;
+      }
+    } else if (p instanceof DefaultHighlightPainter) {
+      while (insertPos>0) {
+        HighlightInfo hli = highlights.elementAt( insertPos-1 );
+        if (hli.getPainter() instanceof DefaultHighlightPainter)
+          --insertPos;
+        else break;
+      }
+    } else if (p instanceof DefaultFrameHighlightPainter) {
+      while (insertPos>0) {
+        HighlightInfo hli = highlights.elementAt( insertPos-1 );
+        if (hli.getPainter() instanceof DefaultHighlightPainter || hli.getPainter() instanceof DefaultFrameHighlightPainter)
+          --insertPos;
+        else break;
+      }
+    } else {
+      insertPos = 0;
     }
     highlights.add(insertPos, i);
+    //_log.log(p.toString() + ", pos: " + insertPos);
     safeDamageRange(p0, p1);
     return i;
   }
@@ -617,6 +645,19 @@ public class ReverseHighlighter extends DefaultHighlighter {
   }
   
   
+  /**
+   * This class is a wrapper for the DefaultHighlightPainter that allows us to tell whether a highlight was
+   * requested by DrJava or by Swing (as in selected text).
+   */
+  public static class DrJavaHighlightPainter extends DefaultHighlightPainter {
+    
+    public DrJavaHighlightPainter(Color c) {
+      super(c);
+    }
+    
+  }
+  
+    
   /**
    * LayeredHighlightPainter is used when a drawsLayeredHighlights is
    * true. It maintains a rectangle of the region to paint.

@@ -56,16 +56,16 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   private static final double SCROLL_UNIT = .05;
   
   /** Paren/brace/bracket matching highlight color. */
-  static ReverseHighlighter.DefaultHighlightPainter MATCH_PAINTER;
+  static ReverseHighlighter.DrJavaHighlightPainter MATCH_PAINTER;
 
   static {
     Color highColor = DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR);
-    MATCH_PAINTER = new ReverseHighlighter.DefaultHighlightPainter(highColor);
+    MATCH_PAINTER = new ReverseHighlighter.DrJavaHighlightPainter(highColor);
   }
   
   /** Highlight painter for selected errors in the defs doc. */
-  static ReverseHighlighter.DefaultHighlightPainter ERROR_PAINTER =
-    new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
+  static ReverseHighlighter.DrJavaHighlightPainter ERROR_PAINTER =
+    new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   protected volatile HighlightManager _highlightManager;
   

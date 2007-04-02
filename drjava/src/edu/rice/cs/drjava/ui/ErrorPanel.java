@@ -101,8 +101,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   private JButton _prevErrorButton;
   
   /** Highlight painter for selected list items. */
-  static ReverseHighlighter.DefaultHighlightPainter _listHighlightPainter =
-    new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
+  static ReverseHighlighter.DrJavaHighlightPainter _listHighlightPainter =
+    new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   protected static final SimpleAttributeSet _getBoldAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
@@ -805,7 +805,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     private class CompilerErrorColorOptionListener implements OptionListener<Color> {
       
       public void optionChanged(OptionEvent<Color> oce) {
-        _listHighlightPainter = new ReverseHighlighter.DefaultHighlightPainter(oce.value);
+        _listHighlightPainter = new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
         if (_listHighlightTag != null) {
           _listHighlightTag.refresh(_listHighlightPainter);
         }

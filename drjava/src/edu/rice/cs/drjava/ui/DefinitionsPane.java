@@ -117,16 +117,16 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   static volatile int[] FIND_RESULTS_PAINTERS_USAGE = new int[FIND_RESULTS_COLORS.length];
 
   /** Highlight painter for breakpoints. */
-  static ReverseHighlighter.DefaultHighlightPainter BREAKPOINT_PAINTER =
-    new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
+  static ReverseHighlighter.DrJavaHighlightPainter BREAKPOINT_PAINTER =
+    new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
 
   /** Highlight painter for disabled breakpoints. */
-  static volatile ReverseHighlighter.DefaultHighlightPainter DISABLED_BREAKPOINT_PAINTER =
-    new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
+  static volatile ReverseHighlighter.DrJavaHighlightPainter DISABLED_BREAKPOINT_PAINTER =
+    new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
 
   /** Highlight painter for thread's current location. */
-  static volatile ReverseHighlighter.DefaultHighlightPainter THREAD_PAINTER =
-    new ReverseHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
+  static volatile ReverseHighlighter.DrJavaHighlightPainter THREAD_PAINTER =
+    new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
 
   /** The name of the keymap added to the super class (saved so it can be removed). */
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
@@ -202,7 +202,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The OptionListener for DEFINITIONS_MATCH_COLOR. */
   private class MatchColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      MATCH_PAINTER = new ReverseHighlighter.DefaultHighlightPainter(oce.value);
+      MATCH_PAINTER = new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
       if (_matchHighlight != null) {
         int start = _matchHighlight.getStartOffset();
         int end = _matchHighlight.getEndOffset();
@@ -215,7 +215,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The OptionListener for COMPILER_ERROR_COLOR. */
   private class ErrorColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      ERROR_PAINTER = new ReverseHighlighter.DefaultHighlightPainter(oce.value);
+      ERROR_PAINTER = new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
       if (_errorHighlightTag != null) {
         int start = _errorHighlightTag.getStartOffset();
         int end = _errorHighlightTag.getEndOffset();
@@ -246,7 +246,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The OptionListener for DEBUG_BREAKPOINT_COLOR. */
   private class BreakpointColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      BREAKPOINT_PAINTER = new ReverseHighlighter.DefaultHighlightPainter(oce.value);
+      BREAKPOINT_PAINTER = new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
       _mainFrame.refreshBreakpointHighlightPainter();
     }
   }
@@ -254,7 +254,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The OptionListener for DEBUG_BREAKPOINT_DISABLED_COLOR. */
   private class DisabledBreakpointColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      DISABLED_BREAKPOINT_PAINTER =  new ReverseHighlighter.DefaultHighlightPainter(oce.value);
+      DISABLED_BREAKPOINT_PAINTER =  new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
       _mainFrame.refreshBreakpointHighlightPainter();
     }
   }
@@ -262,7 +262,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The OptionListener for DEBUG_THREAD_COLOR. */
   private static class ThreadColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
-      THREAD_PAINTER = new ReverseHighlighter.DefaultHighlightPainter(oce.value);
+      THREAD_PAINTER = new ReverseHighlighter.DrJavaHighlightPainter(oce.value);
     }
   }
 

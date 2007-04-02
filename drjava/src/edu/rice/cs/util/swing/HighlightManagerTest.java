@@ -65,9 +65,9 @@ public class HighlightManagerTest extends DrJavaTestCase {
     jtc = new JTextField();
     jtc.setHighlighter(new ReverseHighlighter());
     
-    p = new ReverseHighlighter.DefaultHighlightPainter(Color.BLACK);
+    p = new ReverseHighlighter.DrJavaHighlightPainter(Color.BLACK);
     p1 = new ReverseHighlighter.DefaultFrameHighlightPainter(Color.RED, 2);
-    p2 = new ReverseHighlighter.DefaultHighlightPainter(Color.BLACK);
+    p2 = new ReverseHighlighter.DrJavaHighlightPainter(Color.BLACK);
     
     hm = new HighlightManager(jtc);
     
