@@ -76,6 +76,7 @@ public class ScrollableListDialog extends JDialog {
    * @param listItems The items to display in the list.
    * @param messageType The type of dialog message.
    * 
+   * @throws IllegalArgumentException if {@code listItems} is {@code null.}
    * @throws IllegalArgumentException if the message type is unknown or {@code listItems} is {@code null.}
    */
   public ScrollableListDialog(Frame owner, String dialogTitle, String leaderText, Collection<?> listItems, int messageType) {
@@ -103,6 +104,7 @@ public class ScrollableListDialog extends JDialog {
    * @param height The height of the dialog box.
    * @param icon The icon to display. May be {@code null}.
    * 
+   * @throws IllegalArgumentException if {@code listItems} is {@code null.}
    * @throws IllegalArgumentException if the message type is unknown or {@code listItems} is {@code null.}
    */
   public ScrollableListDialog(Frame owner, String dialogTitle, String leaderText, Collection<?> listItems, int messageType, int width, int height, Icon icon) {
@@ -129,8 +131,9 @@ public class ScrollableListDialog extends JDialog {
    * @param width The width of the dialog box.
    * @param height The height of the dialog box.
    * @param icon The icon to display. May be {@code null}.
-   * @param fitToScreen If {@code true}, the width and height of the dialog will be calculated using the screen dimensions, {@link WIDTH_RATIO}, and {@link HEIGHT_RATIO}. If {@code false}, the provided width and height will be used.
+   * @param fitToScreen If {@code true}, the width and height of the dialog will be calculated using the screen dimensions, {@link #WIDTH_RATIO}, and {@link #HEIGHT_RATIO}. If {@code false}, the provided width and height will be used.
    * 
+   * @throws IllegalArgumentException if {@code listItems} is {@code null.}
    * @throws IllegalArgumentException if the message type is unknown or {@code listItems} is {@code null.}
    */
   private ScrollableListDialog(Frame owner, String dialogTitle, String leaderText, Collection<?> listItems, int messageType, int width, int height, Icon icon, boolean fitToScreen) {
@@ -193,7 +196,7 @@ public class ScrollableListDialog extends JDialog {
     /* create the button panel */
     final JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-    //allow children to add additional buttons, if overridded
+    //allow children to add additional buttons, if overridden
     _addButtons(buttonPanel);
     
     /* create the dialog */
@@ -276,7 +279,7 @@ public class ScrollableListDialog extends JDialog {
   
   /**
    * Adds buttons to the bottom of the dialog. By default, a single
-   * &quot;OK&quot; button is added that calls {@link closeDialog}. It
+   * &quot;OK&quot; button is added that calls {@link #closeDialog}. It
    * is also set as the dialog's default button.
    *
    * Inheritors should feel free the change settings of the panel such
@@ -306,8 +309,8 @@ public class ScrollableListDialog extends JDialog {
   }
   
   /**
-   * Called when the dialog should be closed. The default implementation
-   * simply hides the dialog.
+   * Should be called when the dialog should be closed. The default
+   * implementation simply hides the dialog.
    */
   protected void closeDialog() {
     setVisible(false);
