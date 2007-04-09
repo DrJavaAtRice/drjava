@@ -281,17 +281,17 @@ public class ScrollableListSelectionDialog extends JDialog {
     assert selectedItems.size() == dataAsStrings.size();
     
     tableModel = new AbstractTableModel() {
-      @Override
+      //@Override - uncomment when we start compiling with Java 6
       public int getRowCount() {
         return numItems;
       }
       
-      @Override
+      //@Override - uncomment when we start compiling with Java 6
       public int getColumnCount() {
         return NUM_COLUMNS;
       }
       
-      @Override
+      //@Override - uncomment when we start compiling with Java 6
       public Object getValueAt(int row, int column) {
         if (column == CHECKBOXES_COLUMN_INDEX) {
           assert row >= 0;
