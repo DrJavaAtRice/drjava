@@ -985,8 +985,10 @@ public class JPDADebugger implements Debugger {
     scrollToSource(location, true);
   }
 
-  /** Scroll to the location specified by location.  Assumes lock on this is already held. */
-  private void scrollToSource(Location location, boolean shouldHighlight) {
+  /** Return the document associated with this location. A document is preloaded when a debugger step is
+    * made to avoid the deadlock described in [ 1696060 ] Debugger Infinite Loop.
+    */
+  public OpenDefinitionsDocument preloadDocument(Location location) {
     OpenDefinitionsDocument doc = null;
 
     // No stored doc, look on the source root set (later, also the sourcepath)
@@ -1012,18 +1014,6 @@ public class JPDADebugger implements Debugger {
 
     // Check source root set (open files)
     File f = _model.getSourceFile(fileName);
-//    File[] sourceRoots = _model.getSourceRootSet();
-//    Vector<File> roots = new Vector<File>();
-//    for (int i=0; i < sourceRoots.length; i++) {
-//      roots.add(sourceRoots[i]);
-//    }
-//    File f = _model.getSourceFileFromPaths(filename, roots);
-//    if (f == null) {
-//      Vector<File> sourcepath =
-//        DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
-//      f = _model.getSourceFileFromPaths(filename, sourcepath);
-//    }
-
     if (f != null) {
       // Get a document for this file, forcing it to open
       try { doc = _model.getDocumentForFile(f); }
@@ -1031,7 +1021,12 @@ public class JPDADebugger implements Debugger {
         // No doc, so don't notify listener
       }
     }
-
+    return doc;
+  }
+  
+  /** Scroll to the location specified by location.  Assumes lock on this is already held. */
+  private void scrollToSource(Location location, boolean shouldHighlight) {
+    OpenDefinitionsDocument doc = preloadDocument(location);
     openAndScroll(doc, location, shouldHighlight);
   }
 

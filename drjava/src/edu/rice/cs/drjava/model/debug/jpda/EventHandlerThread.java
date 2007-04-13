@@ -170,6 +170,12 @@ public class EventHandlerThread extends Thread {
    *  @param e step event from JPDA
    */
   private void _handleStepEvent(StepEvent e) throws DebugException {
+    // preload document without holding _debugger lock to avoid deadlock
+    // in bug [ 1696060 ] Debugger Infinite Loop
+    // if the document is not already open, the event thread may load the document and then call a
+    // synchronized method in the debugger, so we must do this before we hold the _debugger lock
+    _debugger.preloadDocument(e.location());
+    // now acquire _debugger lock, the event thread won't need tge _debugger lock anymore
     synchronized(_debugger) {
       if (_isSuspendedWithFrames(e.thread()) && _debugger.setCurrentThread(e.thread())) {
         _debugger.printMessage("Stepped to " + e.location().declaringType().name() + "." + e.location().method().name()
