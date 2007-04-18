@@ -769,7 +769,9 @@ public abstract class FileOps {
     * 2) the closest parent of file, if file is not a directory or does not exist
     * 3) "user.home"
     * @return a valid directory for use */
-  public static File getValidDirectory(File file) {
+  public static File getValidDirectory(final File origFile) {
+    File file = origFile;
+  
     // if it's the NULL_FILE or null, use "user.home"
     if ((file==FileOption.NULL_FILE)||(file == null)) {
       file = new File(System.getProperty("user.home"));
@@ -799,7 +801,10 @@ public abstract class FileOps {
     
     // ye who enter here, abandon all hope...
     // the saved path didn't work, and neither did "user.home"
-    throw new UnexpectedException(new IOException("File's parent file is null"));
+    throw new UnexpectedException(new IOException(origFile.getPath()
+                                                    + " is not a valid directory, and all attempts "
+                                                    + "to locate a valid directory have failed. "
+                                                    + "Check your configuration."));
   }
   
   /** Converts the abstract pathname for f into a URL.  This method is included in class java.io.File as f.toURL(), but

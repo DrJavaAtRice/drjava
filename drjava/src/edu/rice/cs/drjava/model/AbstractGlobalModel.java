@@ -521,7 +521,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     catch (RuntimeException e) {
       // something went wrong, clear the setting and use "user.home"
       DrJava.getConfig().setSetting(LAST_DIRECTORY, FileOption.NULL_FILE);
-      file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_DIRECTORY));
+      file = FileOps.getValidDirectory(new File(System.getProperty("user.home", ".")));
     }
     // update the setting and return it
     DrJava.getConfig().setSetting(LAST_DIRECTORY, file);
