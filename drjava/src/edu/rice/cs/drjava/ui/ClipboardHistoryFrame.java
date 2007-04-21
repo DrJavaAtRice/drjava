@@ -233,9 +233,7 @@ public class ClipboardHistoryFrame extends JFrame {
         return c;
       }
     });
-    _historyList.addFocusListener(new FocusListener() {
-      public void focusGained(FocusEvent e) {
-      }
+    _historyList.addFocusListener(new FocusAdapter() {
 
       public void focusLost(FocusEvent e) {
         if ((e.getOppositeComponent()!=_previewArea) && 

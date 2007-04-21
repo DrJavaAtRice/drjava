@@ -104,8 +104,14 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   /** Called when a new active document is selected */
   public void activeDocumentChanged(OpenDefinitionsDocument active);
   
+  /** Called when the active document is refreshed */
+  public void activeDocumentRefreshed(OpenDefinitionsDocument active);
+  
   /** Called when the focus must be changed to the active document in the definitions pane */
   public void focusOnDefinitionsPane();
+  
+  /** Restores the focus in the main frame to the last focus owner. */
+  public void focusOnLastFocusOwner();
   
   /** Called when the selection in the navigator changes the current directory without changing the active document. */
   public void currentDirectoryChanged(File dir);

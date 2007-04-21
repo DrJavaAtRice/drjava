@@ -156,9 +156,8 @@ public class RecentDocFrame extends JWindow {
     _scroller.setBorder(new EmptyBorder(0,0,0,0));
     _panel.setBorder(new LineBorder(fontColor, 1));
   }
-  /** Moves the document d to the beginning of the list
-   *  if it's already in the list, or it adds it to the
-   *  beginning if its not already in the list
+  /** Moves the document d to the beginning of the list if it's already in the list, or it adds it to the
+   *  beginning if its not already in the list.
    */
   public void pokeDocument(OpenDefinitionsDocument d) {
     if (_docs.contains(d)) {

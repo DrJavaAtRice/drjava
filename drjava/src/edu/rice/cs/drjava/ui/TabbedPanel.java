@@ -123,11 +123,11 @@ public abstract class TabbedPanel extends JPanel {
     return _mainPanel;
   }
 
-  /**
-   * This is overridden so that when switch previous pane focus is called
-   * on the currentDefPane, the caret will move here on the first call.
-   */
+  /** This is overridden so that when switch previous pane focus is called
+    * on the currentDefPane, the caret will move here on the first call.
+    */
   public boolean requestFocusInWindow() {
+//    System.err.println("requestFocusInWindow called on TabbedPanel");
     super.requestFocusInWindow();
     return _mainPanel.requestFocusInWindow();
   }

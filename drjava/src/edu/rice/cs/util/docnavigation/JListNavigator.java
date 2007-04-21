@@ -227,13 +227,14 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
    *  @param doc the document to select
    */
   public void setActiveDoc(ItemT doc) { 
+    boolean found;
     synchronized(_model) {
       if (_current == doc) return; // doc is already _current (the active doc)
-      if (_model.contains(doc)) {
-        setSelectedValue(doc, true);   
-//        _current = doc;  // already done by ListSelectionEvent listener created in init()
-      }
+      found = _model.contains(doc);
     }
+    if (found) setSelectedValue(doc, true);   
+//        _current = doc;  // already done by ListSelectionEvent listener created in init()
+//    }
   }
     
   /** Returns whether or not the navigator contains the document
@@ -402,17 +403,16 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   private static class CustomListCellRenderer extends DefaultListCellRenderer {
     
     /** Rreturns the renderer component for a cell
-     *  @param list
-     *  @param value
-     *  @param index
-     *  @param isSelected
-     *  @param hasFocus
-     */
+      * @param list
+      * @param value
+      * @param index
+      * @param isSelected
+      * @param hasFocus
+      */
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
 
       super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
       setText(((INavigatorItem)value).getName());
-//      repaint();  // appears to be required to repaint the text for this list item; inconsistent with JTree analog
       return this;
     }
   }

@@ -120,8 +120,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       setBorder(new CompoundBorder(new MatteBorder(2, 10, 2, 10, Color.white), new LineBorder(Color.black)));
     }
     
-    public Component getListCellRendererComponent(JList list, Object value,
-                                                  int row, boolean sel, boolean hasFocus) {
+    public Component getListCellRendererComponent(JList list, Object value, int row, boolean sel, boolean hasFocus) {
       Component renderer;
       if (value instanceof Color) {
         m_c = (Color) value;
@@ -239,14 +238,12 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _removeButton.setEnabled(regs.size()>0);
   }
   
-  /** Makes the popup menu actions. Should be overridden if additional actions besides "Go to" and "Remove" are added. */
+  /** Makes popup menu actions. Should be overridden if additional actions besides "Go to" and "Remove" are added. */
   protected AbstractAction[] makePopupMenuActions() {
     AbstractAction[] acts = new AbstractAction[] {
       new AbstractAction("Go to") { public void actionPerformed(ActionEvent e) { goToRegion(); } },
-        
-        new AbstractAction("Bookmark") { public void actionPerformed(ActionEvent e) { _bookmark(); } },
-          
-          new AbstractAction("Remove") { public void actionPerformed(ActionEvent e) { _remove(); } }
+      new AbstractAction("Bookmark") { public void actionPerformed(ActionEvent e) { _bookmark(); } },
+      new AbstractAction("Remove") { public void actionPerformed(ActionEvent e) { _remove(); } }
     };
     return acts;
   }
@@ -282,9 +279,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       super(r);
       _lineNumber = _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1;
     }
-//    public int lineNumber() {
-//      return _lineNumber;
-//    }
+
     public String toString() {
       final StringBuilder sb = new StringBuilder();
       sb.append("<html>");

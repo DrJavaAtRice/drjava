@@ -109,6 +109,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 public class MainFrame extends JFrame implements ClipboardOwner {
 
   private static final int INTERACTIONS_TAB = 0;
+  private static final int CONSOLE_TAB = 1;
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
   private static final String DEBUGGER_OUT_OF_SYNC =
     " Current document is out of sync with the debugger and should be recompiled!";
@@ -139,10 +140,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   private final JTabbedPane _tabbedPane;
   private final CompilerErrorPanel _compilerErrorPanel;
   private final InteractionsPane _consolePane;
-  private final JScrollPane _consoleScroll;
+  private final JScrollPane _consoleScroll;  // redirects focus to embedded _consolePane
   private final ConsoleController _consoleController;  // move to controller
   private final InteractionsPane _interactionsPane;
-  private final JPanel _interactionsContainer;
+  private final JPanel _interactionsContainer;  // redirects focus to embedded _interactionsPane
   private final InteractionsController _interactionsController;  // move to controller
   private final JUnitPanel _junitErrorPanel;
   private final JavadocErrorPanel _javadocErrorPanel;
@@ -973,7 +974,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void actionPerformed(ActionEvent ae) {
       _showFindReplaceTab();
       // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
-      SwingUtilities.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
+      EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
     }
   };
   
@@ -983,7 +984,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _showFindReplaceTab();
       if (!DrJava.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
         // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
-        SwingUtilities.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
+        EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
       }
       _findReplace.findNext();
       _currentDefPane.requestFocusInWindow();  
@@ -997,7 +998,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _showFindReplaceTab();
       if (!DrJava.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
         // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
-        SwingUtilities.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
+        EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
       }
       _findReplace.findPrevious();
       _currentDefPane.requestFocusInWindow();
@@ -1089,7 +1090,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
                 };
                 if (docSwitch) {
                   // postpone running command until after document switch, which is pending in the event queue
-                  SwingUtilities.invokeLater(command);
+                  EventQueue.invokeLater(command);
                 }
                 else command.run();
               }
@@ -1097,7 +1098,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             }
 //            if (docChanged) {
 //              // defer executing this code until after active document switch (if any) is complete
-//              SwingUtilities.invokeLater(new Runnable() {
+//              EventQueue.invokeLater(new Runnable() {
 //                public void run() {
 //                  addToBrowserHistory();
 //                }
@@ -1254,7 +1255,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         _model.setActiveDocument(pim.getCurrentItem().doc);
 //        if (docChanged) {
 //          // defer executing this code until after active document switch (if any) is complete
-//          SwingUtilities.invokeLater(new Runnable() {
+//          EventQueue.invokeLater(new Runnable() {
 //            public void run() { addToBrowserHistory(); } });
 //        }
       }
@@ -1270,7 +1271,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           _model.setActiveDocument(pim.getCurrentItem().doc);
 //          if (docChanged) {
 //            // defer executing this code until after active document switch (if any) is complete
-//            SwingUtilities.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+//            EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
 //          }
         }
       }
@@ -1462,7 +1463,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   void _openJavadocUnderCursor() {
     generateOpenJavadocList();
     if (_openJavadocList == null) {
-      Utilities.show("Cannot load Java API class list. No network connectivity?");
+//      Utilities.show("Cannot load Java API class list. No network connectivity?");
       return;
     }
     PredictiveInputModel<OpenJavadocListEntry> pim =
@@ -1886,7 +1887,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _findReplace.updateFirstDocInSearch();
       this.setEnabled(true);
 //      // defer executing this code until after active document switch (if any) is complete
-//      SwingUtilities.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+//      EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
     }
   };
   
@@ -1901,7 +1902,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _findReplace.updateFirstDocInSearch();
       this.setEnabled(true);
 //      // defer executing this code until after active document switch (if any) is complete
-//      SwingUtilities.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+//      EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
     }
   };
   
@@ -2005,8 +2006,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
    */
   private void _switchToPane(Component c) {
     Component newC = c;
-    if (c == _interactionsContainer) newC = _interactionsPane;
-    if (c == _consoleScroll) newC = _consolePane;
+//    if (c == _interactionsContainer) newC = _interactionsPane;
+//    if (c == _consoleScroll) newC = _consolePane;
     showTab(newC);
   }
   
@@ -2017,8 +2018,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     int numTabs = _tabbedPane.getTabCount();
 
     /* If next, then we go to the next tab */
-    if (next) _switchToPane(_tabbedPane.getComponentAt((numTabs+_tabbedPane.getSelectedIndex()+1)%numTabs));
-    else _switchToPane(_tabbedPane.getComponentAt((numTabs+_tabbedPane.getSelectedIndex()-1)%numTabs));
+    if (next) _switchToPane(_tabbedPane.getComponentAt((numTabs + _tabbedPane.getSelectedIndex() +1 ) % numTabs));
+    else _switchToPane(_tabbedPane.getComponentAt((numTabs + _tabbedPane.getSelectedIndex() - 1) % numTabs));
   }
   
   /** Calls the ConfigFrame to edit preferences */
@@ -2105,7 +2106,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _breakpointsPanel.setVisible(true);
       _tabbedPane.setSelectedComponent(_breakpointsPanel);
       // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _breakpointsPanel has been selected
-      SwingUtilities.invokeLater(new Runnable() { public void run() { _breakpointsPanel.requestFocusInWindow(); } });
+      EventQueue.invokeLater(new Runnable() { public void run() { _breakpointsPanel.requestFocusInWindow(); } });
     }
   };
 
@@ -2120,7 +2121,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       _bookmarksPanel.setVisible(true);
       _tabbedPane.setSelectedComponent(_bookmarksPanel);
       // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the _bookmarksPanel has been selected
-      SwingUtilities.invokeLater(new Runnable() { public void run() { _bookmarksPanel.requestFocusInWindow(); } });
+      EventQueue.invokeLater(new Runnable() { public void run() { _bookmarksPanel.requestFocusInWindow(); } });
     }
   };
   
@@ -2218,7 +2219,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     panel.setVisible(true);
     _tabbedPane.setSelectedComponent(panel);
     // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
-    SwingUtilities.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
   };
   
   /** Cuts from the caret to the end of the current line to the clipboard. */
@@ -2600,7 +2601,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _consolePane = _consoleController.getPane();
     
     _consoleScroll = new BorderlessScrollPane(_consolePane) {
-      public boolean requestFocusInWindow() { return _consolePane.requestFocusInWindow(); }
+      public boolean requestFocusInWindow() { 
+        super.requestFocusInWindow();
+        return _consolePane.requestFocusInWindow(); 
+      } 
     };
     
     _interactionsController =
@@ -2610,9 +2614,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _interactionsController.setCachedCaretPos(0);
     _interactionsController.setCachedPromptPos(_model.getConsoleDocument().getPromptPos());
     
-    _interactionsContainer = new JPanel(new BorderLayout()) {
-      public boolean requestFocusInWindow() { return _interactionsPane.requestFocusInWindow(); }
-    };
+    _interactionsContainer = new JPanel(new BorderLayout()); /* {
+      public boolean requestFocusInWindow() { 
+        super.requestFocusInWindow();
+        return _interactionsPane.requestFocusInWindow(); 
+      } 
+    };*/
     
     _junitErrorPanel = new JUnitPanel(_model, this);
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
@@ -2635,6 +2642,18 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     /* Other panes */
      _tabbedPane = new JTabbedPane();
+     _tabbedPane.addFocusListener(new FocusListener() {
+       public void focusGained(FocusEvent e) {
+         Component c = _tabbedPane.getSelectedComponent();
+//         System.err.println("focus gained in tabbed pane with selected tab " + c + " with paramString " + e.paramString());
+         if (c == _interactionsContainer) {
+           _interactionsContainer.requestFocusInWindow();
+//           System.err.println("Selected tab was interactions container");
+         }
+         else if (c == _findReplace) _findReplace.getFindField().requestFocusInWindow();
+       }
+       public void focusLost(FocusEvent e) { }
+     });
      
      JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     
@@ -5836,16 +5855,19 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     public void caretUpdate(final CaretEvent ce) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       int offset = ce.getDot();
-      String text = doc.getText();
-      if (offset == _offset + 1 && text.charAt(_offset) != '\n') {
-        _col += 1;
+      try {
+        if (offset == _offset + 1 && doc.getText(_offset, 1).charAt(0) != '\n') {
+          _col += 1;
+          updateLocation(_line, _col); 
+          return;
+        }
       }
-      else {
-        Element root = doc.getDefaultRootElement();
-        int line = root.getElementIndex(offset); 
-        _line = line + 1;     // line numbers are 1-based
-        _col = offset - root.getElement(line).getStartOffset();
-      }
+      catch(BadLocationException e) { /* fall through */ }
+        
+      Element root = doc.getDefaultRootElement();
+      int line = root.getElementIndex(offset); 
+      _line = line + 1;     // line numbers are 1-based
+      _col = offset - root.getElement(line).getStartOffset();
       updateLocation(_line, _col);  
     }
     
@@ -5928,13 +5950,20 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {
-//        Utilities.showDebug("MainFrame.stateChanged called with event");
+//        Utilities.show("_tabbedPane.stateChanged called with event");
         clearStatusMessage();
         
-        if (_tabbedPane.getSelectedComponent() == _consoleScroll)
+        if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
           // Use SwingUtilities because this action must execute AFTER all pending events in the event queue
-          SwingUtilities.invokeLater(new Runnable() { public void run() { _consolePane.requestFocusInWindow(); } });
-          
+//          System.err.println("Interactions Container Selected");
+          _interactionsContainer.setVisible(true);  // kluge to overcome subtle focus bug
+          EventQueue.invokeLater(new Runnable() { public void run() { _interactionsContainer.requestFocusInWindow(); } });
+        }
+        else if (_tabbedPane.getSelectedIndex() == CONSOLE_TAB) {
+          // Use SwingUtilities because this action must execute AFTER all pending events in the event queue
+//          System.err.println("Console Scroll Selected");
+          EventQueue.invokeLater(new Runnable() { public void run() { _consoleScroll.requestFocusInWindow(); } });
+        }
         // Update error highlights?
         if (_currentDefPane != null) {
           int pos = _currentDefPane.getCaretPosition();
@@ -5958,6 +5987,17 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _tabs.addLast(_findReplace);
     if (_showDebugger) { _tabs.addLast(_breakpointsPanel); }
     _tabs.addLast(_bookmarksPanel);
+    
+    _interactionsContainer.addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) { 
+        EventQueue.invokeLater(new Runnable() { 
+          public void run() {
+//            System.err.println("Requesting focus in interactions pane");
+            _interactionsPane.requestFocusInWindow(); 
+          }
+        });
+      }
+    });
     
     _interactionsPane.addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = _interactionsContainer; }
@@ -5989,7 +6029,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     // Show compiler output pane by default
     showTab(_compilerErrorPanel);
     
-    _tabbedPane.setSelectedIndex(0);
+    _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
   }
   
   /** Sets up the context menu to show in the document pane. */
@@ -6410,7 +6450,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     // Limiting line numbers to just lines existing in the document.
     doc.addDocumentListener(new DocumentUIListener() {
       private void updateUI() {
-        SwingUtilities.invokeLater(new Runnable() {  // ?? Why SwingUtilities?
+        EventQueue.invokeLater(new Runnable() {  // ?? Why EventQueue?
           public void run() {
             // revalidateLineNums();
             if ((_breakpointsPanel != null) && (_breakpointsPanel.isDisplayed())) { _breakpointsPanel.repaint(); }
@@ -6430,7 +6470,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     // add a listener to update line and column.
     pane.addCaretListener(_posListener);
     
-    // add a focus listener to the pane.
+    // add a focus listener to this definitions pane.
     pane.addFocusListener(new LastFocusListener());
     
     // Add to a scroll pane
@@ -6543,6 +6583,47 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _updateDebugStatus();
   }
   
+  /** Refresh the JScrollPane containing the DefinitionsPane for the active document. Must run in event thread.*/
+  private void _refreshDefScrollPane() {
+    // demoted to package private protection to test the disabling editing while compiling functionality.
+    // and to support brute force fix to DefinitionsPane bug on return from compile with errors
+    // Added 2004-May-27
+    // Notify the definitions pane that is being replaced (becoming inactive)
+//    _currentDefPane.notifyInactive();
+    
+//    Utilities.showDebug("_switchDefScrollPane called");
+//    Utilities.showDebug("Right before getting the scrollPane");
+    OpenDefinitionsDocument doc = _model.getActiveDocument();
+    JScrollPane scroll = _defScrollPanes.get(doc);
+    
+//    if (scroll == null) scroll = _createDefScrollPane(doc);
+    // Fix OS X scrollbar bug before switching
+    
+    _reenableScrollBar();
+    
+    int oldLocation = _docSplitPane.getDividerLocation();
+    _docSplitPane.setRightComponent(scroll); //crazy line
+    _docSplitPane.setDividerLocation(oldLocation);
+    
+//    // if the current def pane is uneditable, that means we arrived here from a compile with errors.  We're
+//    // guaranteed to make it editable again when we return from the compilation, so we take the state
+//    // with us.  We guarantee only one definitions pane is un-editable at any time.
+//    if (_currentDefPane.isEditable()) {
+//      _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
+//      _currentDefPane.notifyActive();
+//    }
+//    else {
+//      try { _currentDefPane.setEditable(true); }
+//      catch(NoSuchDocumentException e) { /* It's OK */ }
+//      
+//      _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
+//      _currentDefPane.notifyActive();
+//      _currentDefPane.setEditable(false);
+//    }
+//    // reset the undo/redo menu items
+//    resetUndo();
+    _updateDebugStatus();
+  }
   /** Resets the undo/redo menu items */
   public void resetUndo() {
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
@@ -6945,22 +7026,23 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             }
           }
         }
-
-        if (shouldHighlight) {
+        
+        if (_showDebugger) {
           // Give the interactions pane focus so we can debug
           _interactionsPane.requestFocusInWindow();
+//          System.err.println("Showing Interactions Tab" );
           showTab(_interactionsPane);
+          _updateDebugStatus();
         }
-        _updateDebugStatus();
 
 //        if (shouldAddToHistory) { addToBrowserHistory(); }    
       }
     };
     
     /* Comment by mgricken: If ! toSameDoc, the _currentDefPane hasn't been created yet for a new document.   
-     * Consequently, we need to use SwingUtilities.invokeLater if ! toSameDoc. */
-    if (toSameDoc) Utilities.invokeLater(command);  
-    else SwingUtilities.invokeLater(command);
+     * Consequently, we need to use EventQueue.invokeLater if ! toSameDoc. */
+    /* if (toSameDoc) Utilities.invokeLater(command);  
+    else */ EventQueue.invokeLater(command);
   }
   
   /** Listens to events from the debugger. */
@@ -7085,7 +7167,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
      _model.setActiveDocument(doc);
      
 //     // defer executing this code until after active document switch (if any) is complete
-//     SwingUtilities.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
+//     EventQueue.invokeLater(new Runnable() { public void run() { addToBrowserHistory(); } });
      
      // Prompt to revert if modified
      if (doc.isModifiedSinceSave()) {
@@ -7219,8 +7301,22 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       });
     }
     
+    public void activeDocumentRefreshed(final OpenDefinitionsDocument active) {
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+//          System.err.println("activeDocumentRefreshed");
+          _refreshDefScrollPane();
+          
+           // Update error highlights
+          int pos = _currentDefPane.getCaretPosition();
+          _currentDefPane.getErrorCaretListener().updateHighlight(pos);
+          focusOnLastFocusOwner();
+        }
+      });
+    }
+
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
-//      Utilities.showDebug("MainFrame Listener: ActiveDocument changed to " + active);
+//      Utilities.show("MainFrame Listener: ActiveDocument changed to " + active);
       // code that accesses the GUI must run in the event-dispatching thread. 
       Utilities.invokeLater(new Runnable() {  // invokeAndWait can create occasional deadlocks.
         public void run() {
@@ -7229,9 +7325,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           
           boolean isModified = active.isModifiedSinceSave();
           boolean canCompile = (! isModified && ! active.isUntitled());
+          boolean hasName = ! active.isUntitled();
           _saveAction.setEnabled(! canCompile);
-          _renameAction.setEnabled(! active.isUntitled());
-          _revertAction.setEnabled(! active.isUntitled());
+          _renameAction.setEnabled(hasName);
+          _revertAction.setEnabled(hasName);
           
           // Update error highlights
           int pos = _currentDefPane.getCaretPosition();
@@ -7242,7 +7339,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
           
           // Update title and position
           updateStatusField();
-          _currentDefPane.requestFocusInWindow();
           _posListener.updateLocation();
           
           // update display (adding "*") in navigatgorPane
@@ -7259,13 +7355,23 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             //uninstallFindReplaceDialog(_findReplace);
             //installFindReplaceDialog(_findReplace);
           }
+          _lastFocusOwner = _currentDefPane;
+          EventQueue.invokeLater(new Runnable() { public void run() { 
+            _lastFocusOwner = _currentDefPane;
+//            System.err.println("Requesting focus on new active document");
+            _currentDefPane.requestFocusInWindow(); 
+          } });
         }
       });
     }
     
-    public void focusOnDefinitionsPane() {
-      _currentDefPane.requestFocusInWindow();
+    public void focusOnLastFocusOwner() {
+//      System.err.println("focusOnLastFocusOwner() called; _lastFocusOwner = " + _lastFocusOwner);
+      _lastFocusOwner.requestFocusInWindow();
     }
+    
+    /** Moves focus in MainFrame to teh definitions pane. */
+    public void focusOnDefinitionsPane() { _currentDefPane.requestFocusInWindow(); }
     
     public void interactionStarted() {
       Utilities.invokeLater(new Runnable() {
@@ -7959,13 +8065,22 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     * @param c the component to show in the tabbedPane
     */
   public void showTab(final Component c) {
-    
-    // This retarded method doesn't work for our two always-on tabs, so here's a temporary kludge.
+    // TODO: put all of the _tabbedPane components in _tabs. eliminating special cases for interactions, console (which 
+    // are always displayed)
     Utilities.invokeLater(new Runnable() {
       public void run() {
-        int numVisible = 0;
-        if (c == _interactionsPane) _tabbedPane.setSelectedIndex(0);
-        else if (c == _consolePane) _tabbedPane.setSelectedIndex(1);
+        int numVisible = 0;      
+//        System.err.println("showTab called with c = " + c);
+
+        if (c == _interactionsContainer) {
+//          Utilities.show("InteractionsTab selected");
+          _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
+          c.requestFocusInWindow();
+        }
+        else if (c == _consoleScroll) {
+          _tabbedPane.setSelectedIndex(CONSOLE_TAB);
+          c.requestFocusInWindow();
+        }
         else {
           for (TabbedPanel tp: _tabs) {
             if (tp == c) {
@@ -8175,7 +8290,10 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   private class LastFocusListener extends FocusAdapter {
-    public void focusGained(FocusEvent e) { _lastFocusOwner = e.getComponent(); }
+    public void focusGained(FocusEvent e) { 
+      _lastFocusOwner = e.getComponent(); 
+//      System.err.println("_lastFocusOwner = " + _lastFocusOwner);
+    }
   };
   
   

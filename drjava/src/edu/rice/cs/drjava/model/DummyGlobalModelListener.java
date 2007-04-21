@@ -190,6 +190,10 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   
   public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   
+  public void activeDocumentRefreshed(OpenDefinitionsDocument active) { }
+  
+  public void focusOnLastFocusOwner() { }
+  
   public void focusOnDefinitionsPane() { }
   
   public void documentNotFound(OpenDefinitionsDocument d, File f) { }

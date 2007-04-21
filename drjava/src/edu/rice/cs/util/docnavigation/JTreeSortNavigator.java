@@ -63,14 +63,6 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   /** Maps path's to nodes and nodes to paths. */
   private final BidirectionalHashMap<String, InnerNode<?, ItemT>> _path2node = new BidirectionalHashMap<String, InnerNode<?, ItemT>>();
   
-//  /** The node corresponding to the [external files] node in the tree this will hold files that are not in 
-//   *  the project directory
-//   */
-//  private StringNode<ItemT> _nonProjRoot = new StringNode<ItemT>("[External Files]");
-  
-//  /** Flag indicating if the nonproject node has children. */
-//  private boolean _hasNonProjFilesOpen = false;
-  
   /** The collection of INavigationListeners listening to this JListNavigator */
   private final Vector<INavigationListener<? super ItemT>> navListeners = new Vector<INavigationListener<? super ItemT>>();
   
@@ -83,23 +75,24 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   private java.util.List<GroupNode<ItemT>> _roots = new LinkedList<GroupNode<ItemT>>();
   
   /** Sets the foreground color of this JTree
-   *  @param c the color to set to
-   */
+    * @param c the color to set to
+    */
   public void setForeground(Color c) {
     super.setForeground(c);
     if (_renderer != null) _renderer.setTextNonSelectionColor(c);
   }
   
   /** Sets the background color of this tree
-   *  @param c the color for the background */
+    * @param c the color for the background 
+    */
   public void setBackground(Color c) {
     super.setBackground(c);
     if (_renderer != null) _renderer.setBackgroundNonSelectionColor(c);
   }
   
   /** Standard constructor.
-   *  @param projRoot the path identifying the root node for the project
-   */
+    * @param projRoot the path identifying the root node for the project
+    */
   public JTreeSortNavigator(String projRoot) {
     
     super(new DefaultTreeModel(new RootNode<ItemT>(projRoot.substring(projRoot.lastIndexOf(File.separator) + 1))));
@@ -111,16 +104,16 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     _renderer = new CustomTreeCellRenderer();
     _renderer.setOpaque(false);
     setCellRenderer(_renderer);
-    //getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+//    getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
     setRowHeight(18);
 //    System.err.println(isEditable());
   }
   
   /** Alternate constructor specifying the display manager that provides icons for the navigator.
-   *  @param projRoot the path identifying the root node for the project
-   *  @param dm the display manager for the navigagtor
-   */
+    * @param projRoot the path identifying the root node for the project
+    * @param dm the display manager for the navigagtor
+    */
   public JTreeSortNavigator(String projRoot, DisplayManager<? super ItemT> dm) {
     this(projRoot);
     _displayManager = dm;
@@ -143,23 +136,6 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   public void addDocument(ItemT doc) {
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     addDocument(doc, "");
-//    GroupNode _root = null;
-//    synchronized(_model) {
-//      for (GroupNode r: _roots) {
-//        if (r.getFilter().accept(doc)) {
-//          _root = r;
-//          break;
-//        }
-//      }
-//      if (_root == null) return;
-//      
-//      LeafNode node = new LeafNode(doc);
-//      //_root.add(node);
-//      insertNodeSortedInto(node, _root);
-//      this.expandPath(new TreePath(_root.getPath()));
-//      _doc2node.put(doc, node);
-//      _hasNonProjFilesOpen = true;
-//    }
   }
   /** Adds an <code>INavigatorItem</code> into this navigator in the position specified by path. 
     * The actual behavior of the navigator and the position associated with a path are left up 
@@ -302,13 +278,13 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Removes a given <code>INavigatorItem<code> from this navigator. Removes all <code>INavigatorItem</code>s
-   *  from this navigator that are "equal" (using <code>.equals(...)</code>) to the passed argument. Any of
-   *  the removed documents may be returned by this method. If the NavigatorItem is found in the navigator, null
-   *  is returned.  Only executes from event thread.
-   *  @param doc the docment to be removed
-   *  @return doc a document removed from this navigator as a result of invoking this method.
-   *  @throws IllegalArgumentException if this navigator contains no document equal to doc
-   */
+    * from this navigator that are "equal" (using <code>.equals(...)</code>) to the passed argument. Any of
+    * the removed documents may be returned by this method. If the NavigatorItem is found in the navigator, null
+    * is returned.  Only executes from event thread.
+    * @param doc the docment to be removed
+    * @return doc a document removed from this navigator as a result of invoking this method.
+    * @throws IllegalArgumentException if this navigator contains no document equal to doc
+    */
   public ItemT removeDocument(ItemT doc) {
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     synchronized(_model) { // lock for mutation
@@ -331,23 +307,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
     _model.removeNodeFromParent(node);
     _doc2node.remove(node.getData());
-    
     cleanFolderNode(parent);
-    //    // check all elements of the tree and remove incomplete items
-    //    Enumeration enumeration = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
-    //    while(enumeration.hasMoreElements()) {
-    //      TreeNode next = (TreeNode)enumeration.nextElement();
-    //      if(next.getChildCount() == 0 &&
-    //         !_doc2node.containsValue(next) && 
-    //         next != _model.getRoot())
-    //      {
-    //        _model.removeNodeFromParent((MutableTreeNode)next);
-    //        _path2node.removeKey((InnerNode)next);
-    //      }
-    //    }
-    
-    
-//    if (_nonProjRoot.getChildCount() == 0) _hasNonProjFilesOpen = false;
     return node.getData();
   }
   
@@ -355,7 +315,6 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     * the root, it does nothing to it.  Assumes that _model lock is already held.  Only executes in the event thread.
     */
   private void cleanFolderNode(DefaultMutableTreeNode node) {
-//    synchronized(_model) {
       if (node instanceof InnerNode && node.getChildCount() == 0) {
         DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
         _model.removeNodeFromParent(node);
@@ -363,7 +322,6 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
         _path2node.removeKey(typedNode);
         cleanFolderNode(parent);
       }
-//    }
   }
   
   /** Resets a given <code>INavigatorItem<code> in the tree.  Updates the placement of the item and its display
@@ -382,13 +340,11 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       InnerNode<?, ?> oldParent;
       if (node == null) { // document has not yet been entered in tree
         addDocument(doc, path);
-//        oldParent = null;
-        return; // inserted because the sequel simply removes node and adds it back again!
+        return;
       }
-//      else { // commented out after insertion of return above
+      
       InnerNode<?, ?> p = (InnerNode<?, ?>) node.getParent();
       oldParent = p;
-//      }
       
       // Check to see if the new parent (could be same) exists already
       String newPath = path;
@@ -400,16 +356,10 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       
       InnerNode<?, ItemT> newParent = _path2node.getValue(newPath); // node that should be parent
       
-      //    System.out.println("path="+path);
-      //    System.out.println("newPath="+newPath);
-      //    System.out.println("oldParent="+oldParent);
-      //    System.out.println("newParent="+newParent);
-      //    System.out.println(_path2node);
-      
       if (newParent == oldParent) { // no mutation has occurred before this point because oldParent != null
         if (! node.toString().equals(doc.getName())) { // document has changed name?
           synchronized(_model) {
-            LeafNode<ItemT> newLeaf= new LeafNode<ItemT>(doc);
+            LeafNode<ItemT> newLeaf = new LeafNode<ItemT>(doc);
             _doc2node.put(doc, newLeaf);
             insertNodeSortedInto(newLeaf, newParent);
             _model.removeNodeFromParent(node);
@@ -469,9 +419,9 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Returns the previous document in the collection (using enumeration order).  Executes in any thread.
-   *  @param doc the INavigatorItem of interest
-   *  @return the INavigatorItem which comes before doc
-   */
+    * @param doc the INavigatorItem of interest
+    * @return the INavigatorItem which comes before doc
+    */
   public ItemT getPrevious(ItemT doc) {
     synchronized(_model) { // locks out mutation
       DefaultMutableTreeNode node = _doc2node.get(doc);
@@ -516,9 +466,9 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   public boolean _contains(ItemT doc) { return _doc2node.containsKey(doc); }
   
   /** Returns all the <code>IDocuments</code> contained in this navigator. Does not assert any type of ordering on 
-   *  the returned structure.  Executes in any thread.
-   *  @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
-   */
+    * the returned structure.  Executes in any thread.
+    * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
+    */
   public Enumeration<ItemT> getDocuments() {
     
     final Vector<ItemT> list = new Vector<ItemT>(getDocumentCount()); // Use Vector because it implements an Enumeration
@@ -608,8 +558,8 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Returns a collection of all navigator listeners. Note: this is a dangerous method since it exposes a shared data 
-   *  structure that must be synchronized with _model.
-   */
+    * structure that must be synchronized with _model.
+    */
   public Collection<INavigationListener<? super ItemT>> getNavigatorListeners() { return navListeners; }
   
   /** Standard visitor pattern.   Only used within this class.
@@ -621,12 +571,11 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Called whenever the value of the selection changes.  Only runs in event thread. Runs _gainVisitor in global model
-   *  @param e the event that characterizes the change.
-   */
+    * @param e the event that characterizes the change.
+    */
   public void valueChanged(TreeSelectionEvent e) {
-//    synchronized (_model) {
       Object treeNode = this.getLastSelectedPathComponent();
-      if (treeNode == null || !(treeNode instanceof NodeData)) return;
+      if (treeNode == null || ! (treeNode instanceof NodeData)) return;
       @SuppressWarnings("unchecked") NodeData<ItemT> newSelection = (NodeData<ItemT>) treeNode;
       if (_current != newSelection) {
         for(INavigationListener<? super ItemT> listener : navListeners) {
@@ -637,7 +586,6 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       }
 
       setNextChangeModelInitiated(false);
-//    }
   }
   
   /** Returns a renderer for this object. */
@@ -647,12 +595,13 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   private class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
     
     /** Rreturns the component for a cell
-     *  @param tree
-     */
+      * @param tree
+      */
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean isExpanded,
                                                   boolean leaf, int row, boolean hasFocus) {
       
-      super.getTreeCellRendererComponent(tree, value, sel, isExpanded, leaf, row, hasFocus);
+      // changing last argument from hasFocus to false appears to fix a focus bug when selecting a new document
+      super.getTreeCellRendererComponent(tree, value, sel, isExpanded, leaf, row, false);  
       
       DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
       if (node instanceof RootNode && _rootIcon != null) setIcon(_rootIcon);
@@ -667,7 +616,6 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
       return this;
     }
   }
-  
   
   /** Selects the document at the x,y coordinate of the navigator pane and sets it to be the currently active 
    *  document.  Only runs in event thread. O
@@ -841,7 +789,8 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Returns the currently selected leaf node, or null if the selected node is not a leaf. Only reads a single
-    * volatile field that always has a valid value.  Thread safe. */
+    * volatile field that always has a valid value.  Thread safe. 
+    */
   public ItemT getCurrent() {
     NodeData<ItemT> current = _current;
     if (current == null) return null;

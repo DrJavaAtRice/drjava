@@ -50,13 +50,13 @@ class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<It
   /* Relies on the standard default constructor */
  
   /** Adds the document to the list.  Should only be executed from event thread.
-   *  @param doc the document to add
-   */
+    * @param doc the document to add
+    */
   public void addDocument(ItemT doc) { insertDoc(doc); }
  
   /** Inserts the document into its sorted position. Should only be executed in the event thread.
-   *  @param doc the document to add
-   */
+    * @param doc the document to add
+    */
   private int insertDoc(ItemT doc) {
     int i;
     synchronized(_model) {
@@ -69,7 +69,5 @@ class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<It
     return i;
   }
   
-  public String toString() { 
-    synchronized(_model) { return _model.toString(); } 
-  }
+  public String toString() { synchronized(_model) { return _model.toString(); } }
 }

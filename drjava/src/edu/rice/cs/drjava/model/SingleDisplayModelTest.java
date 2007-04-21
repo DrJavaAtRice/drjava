@@ -397,6 +397,10 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
       fail("activeDocumentChanged fired unexpectedly");
     }
     
+    public void activeDocumentRefreshed(OpenDefinitionsDocument doc) {
+      fail("activeDocumentRefreshed fired unexpectedly");
+    }
+    
     public int getInterpreterReadyCount() { return interpreterReadyCount; }
   }
 }

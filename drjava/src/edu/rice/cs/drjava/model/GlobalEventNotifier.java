@@ -284,10 +284,24 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-   /** Called to shift the focus to the Definitions Pane. */
+  /** Called when the active document is refreshed.  */
+  public void activeDocumentRefreshed(OpenDefinitionsDocument active) {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.activeDocumentRefreshed(active); } }
+    finally { _lock.endRead(); }
+  }
+  
+  /** Called to shift the focus to the Definitions Pane. */
   public void focusOnDefinitionsPane() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.focusOnDefinitionsPane(); } }
+    finally { _lock.endRead(); }
+  }
+  
+   /** Called to shift the focus to the last focus owner among the main frame panes. */
+  public void focusOnLastFocusOwner() {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.focusOnLastFocusOwner(); } }
     finally { _lock.endRead(); }
   }
 //  /** Called to demand that all files be saved before running the main method of a document. It is up to the caller

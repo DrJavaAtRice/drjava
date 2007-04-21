@@ -616,7 +616,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
       System.gc();
       ct++; 
     }
-    while(ct < 10 && (_finalDocCt != 6 || _finalPaneCt != 6));
+    while (ct < 10 && (_finalDocCt != 6 || _finalPaneCt != 6));
     
     if (ct == 10) fail("Failed to reclaim all documents; panes left = " + (6-_finalPaneCt) + "; docs left = " + 
                        (6 - _finalDocCt));

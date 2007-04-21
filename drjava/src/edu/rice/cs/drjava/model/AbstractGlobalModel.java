@@ -224,7 +224,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  Maintained by the _gainVisitor with a navigation listener.
    */
   private volatile OpenDefinitionsDocument _activeDocument;
- 
+  
   /** A pointer to the active directory, which is not necessarily the parent of the active document
    *  The user may click on a folder component in the navigation pane and that will set this field without
    *  setting the active document.  It is used by the newFile method to place new files into the active directory.
@@ -328,7 +328,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private void _init() {
 
     /** This visitor is invoked by the DocumentNavigator to update _activeDocument among other things */
-    final NodeDataVisitor<OpenDefinitionsDocument, Boolean> _gainVisitor = new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
+    final NodeDataVisitor<OpenDefinitionsDocument, Boolean>  _gainVisitor = new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
       public Boolean itemCase(OpenDefinitionsDocument doc, Object... p) {
         Boolean modelInitiated = (Boolean)p[0];
 //        if (!modelInitiated) {
@@ -362,17 +362,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public Boolean stringCase(String s, Object... p) { return Boolean.valueOf(false); }
     };
     
+    /** Listener that invokes the _gainVisitor when a selection is made in the document navigator. */
     _documentNavigator.addNavigationListener(new INavigationListener<OpenDefinitionsDocument>() {
       public void gainedSelection(NodeData<? extends OpenDefinitionsDocument> dat, boolean modelInitiated) {
         dat.execute(_gainVisitor, modelInitiated); }
       public void lostSelection(NodeData<? extends OpenDefinitionsDocument> dat, boolean modelInitiated) {
         /* not important, only one document selected at a time */ }
     });
-    
+
+    // The document navigator gets the focus in 
     _documentNavigator.addFocusListener(new FocusListener() {
       public void focusGained(FocusEvent e) {
-//        Utilities.show("focusGained called with event " + e);
-        if (_documentNavigator.getCurrent() != null) // past selection is leaf node
+//        System.err.println("_documentNavigator.focusGained(...) called");
+//        if (_documentNavigator.getCurrent() != null) // past selection is leaf node
           _notifier.focusOnDefinitionsPane();
       }
       public void focusLost(FocusEvent e) { }
@@ -4188,21 +4190,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
  
   private void _setActiveDoc(INavigatorItem idoc) {
-//    synchronized (this) {
-      _activeDocument = (OpenDefinitionsDocument) idoc;
-//    }
-    refreshActiveDocument();
+    try { idoc.checkIfClassFileInSync(); } 
+    catch(DocumentClosedException dce) { /* do nothing */ }
+    _activeDocument = (OpenDefinitionsDocument) idoc;
+     // notify single display model listeners   
+    installActiveDocument();
   }
  
   /** Invokes the activeDocumentChanged method in the global listener on the argument _activeDocument.  This process
-   *  sets up _activeDocument as the document in the definitions pane.  It is also necessary after an "All Documents"
-   *  search that wraps around. */
-  public void refreshActiveDocument() {
-    try {
-      _activeDocument.checkIfClassFileInSync();
-      // notify single display model listeners   // notify single display model listeners
-      _notifier.activeDocumentChanged(_activeDocument);
-    } catch(DocumentClosedException dce) { /* do nothing */ }
-  }
+   *  sets up _activeDocument as the document in the definitions pane. */
+  public void installActiveDocument() { _notifier.activeDocumentChanged(_activeDocument); }
+  
+  /** Invokes the activedocumentRefreshed method in the global listener on the argument _activeDocument.  This process
+   *  refreshes the state of the _activeDocument as the document in the definitions pane. */
+  public void refreshActiveDocument() { _notifier.activeDocumentRefreshed(_activeDocument); }
 }
 
