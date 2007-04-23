@@ -18,6 +18,9 @@ import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 
+/** The class that provides methods for interfacing to facilities in tools.jar that do not have published interfaces
+  * (or did not have published interfaces at the time DrJava was originally written). 
+  */
 public class JDKToolsLibrary {
   
   private final FullVersion _version;

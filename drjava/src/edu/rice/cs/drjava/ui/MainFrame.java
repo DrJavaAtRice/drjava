@@ -2209,13 +2209,12 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     return panel;
   }
   
-  /** Shows a find results tab. */
+  /** Shows a find results tab. Only runs in event thread. */
   public void showFindResultsPanel(final FindResultsPanel panel) {
+    assert EventQueue.isDispatchThread();
     if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
       _mainSplit.resetToPreferredSizes(); 
-    if (! panel.isDisplayed()) {
-      showTab(panel);
-    }
+    if (! panel.isDisplayed()) showTab(panel);
     panel.setVisible(true);
     _tabbedPane.setSelectedComponent(panel);
     // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
@@ -2647,7 +2646,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
          Component c = _tabbedPane.getSelectedComponent();
 //         System.err.println("focus gained in tabbed pane with selected tab " + c + " with paramString " + e.paramString());
          if (c == _interactionsContainer) {
-           _interactionsContainer.requestFocusInWindow();
+           _interactionsPane.requestFocusInWindow();
 //           System.err.println("Selected tab was interactions container");
          }
          else if (c == _findReplace) _findReplace.getFindField().requestFocusInWindow();
@@ -3306,7 +3305,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   public void updateStatusField(String text) {
     assert EventQueue.isDispatchThread();
     _statusField.setText(text);
-    _statusField.update(getGraphics());
+    _statusField.paint(getGraphics());  // force an immediate repaint
   }
   
   /** Updates the status field with the current status of the Definitions Pane. */
@@ -3331,7 +3330,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     if (! _statusField.getText().equals(text)) { 
       _statusField.setText(text); 
-      _statusField.update(getGraphics());
+      _statusField.paint(getGraphics());  // force immediate painting of the _statusField
     }
   }
   
@@ -5950,7 +5949,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {
-//        Utilities.show("_tabbedPane.stateChanged called with event");
+//        System.err.println("_tabbedPane.stateChanged called with event " + e);
         clearStatusMessage();
         
         if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
@@ -5972,11 +5971,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         }
       }
     });
-    
-    //_interactionsWithSyncPanel = new JPanel(new BorderLayout());
-    //_syncStatus = new JLabel("Testing");
-    //_interactionsWithSyncPanel.add(new BorderlessScrollPane(_interactionsPane), BorderLayout.CENTER);
-    //_interactionsWithSyncPanel.add(_syncStatus, BorderLayout.SOUTH);
     
     _tabbedPane.add("Interactions", _interactionsContainer);
     _tabbedPane.add("Console", _consoleScroll);
@@ -6025,11 +6019,23 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     _bookmarksPanel.getMainPanel().addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = _bookmarksPanel; }
     });
+  }
+  
+  /** Realizes this MainFrame by setting it visibile and configures the tabbed Pane. */
+  public void start() {
     
-    // Show compiler output pane by default
-    showTab(_compilerErrorPanel);
-    
-    _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
+    // Make the MainFrame visible and show the compiler tab
+    EventQueue.invokeLater(new Runnable() { 
+      public void run() { 
+        setVisible(true);
+        _compilerErrorPanel.setVisible(true);
+        showTab(_compilerErrorPanel); 
+        /* The following two step sequence was laboriously developed by trial and error; without it the _tabbedPane
+         * does not display properly. */
+        _tabbedPane.invalidate();
+        _tabbedPane.repaint();
+      } 
+    });
   }
   
   /** Sets up the context menu to show in the document pane. */
@@ -6621,7 +6627,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //      _currentDefPane.setEditable(false);
 //    }
 //    // reset the undo/redo menu items
-//    resetUndo();
+    resetUndo();
     _updateDebugStatus();
   }
   /** Resets the undo/redo menu items */
@@ -7305,6 +7311,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       Utilities.invokeLater(new Runnable() {
         public void run() {
 //          System.err.println("activeDocumentRefreshed");
+          _recentDocFrame.pokeDocument(active);
           _refreshDefScrollPane();
           
            // Update error highlights
@@ -7355,7 +7362,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             //uninstallFindReplaceDialog(_findReplace);
             //installFindReplaceDialog(_findReplace);
           }
-          _lastFocusOwner = _currentDefPane;
+//          _lastFocusOwner = _currentDefPane;
           EventQueue.invokeLater(new Runnable() { public void run() { 
             _lastFocusOwner = _currentDefPane;
 //            System.err.println("Requesting focus on new active document");
@@ -7536,6 +7543,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     /** Fire just before javadoc asynchronous thread is started. Only runs in the event thread. */
     public void javadocStarted() {
+      
+      assert EventQueue.isDispatchThread();
       
 //      // Only change GUI from event-dispatching thread
 //      Runnable command = new Runnable() {
@@ -8061,14 +8070,15 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   }
   
   /** Shows the components passed in in the appropriate place in the tabbedPane depending on the position of
-    * the component in the _tabs list.
+    * the component in the _tabs list.  Only runs in the event thread.
     * @param c the component to show in the tabbedPane
     */
-  public void showTab(final Component c) {
+  private void showTab(final Component c) {
     // TODO: put all of the _tabbedPane components in _tabs. eliminating special cases for interactions, console (which 
     // are always displayed)
-    Utilities.invokeLater(new Runnable() {
-      public void run() {
+    assert EventQueue.isDispatchThread();
+//    Utilities.invokeLater(new Runnable() {
+//      public void run() {
         int numVisible = 0;      
 //        System.err.println("showTab called with c = " + c);
 
@@ -8088,7 +8098,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
               // interactions & console
               if (! tp.isDisplayed()) {
                 _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
+                tp.setVisible(true);
                 tp.setDisplayed(true);
+                tp.repaint();
               }
               _tabbedPane.setSelectedIndex(numVisible + 2);
               
@@ -8098,8 +8110,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
             if (tp.isDisplayed()) numVisible++;
           }
         }
-      }
-    });
+//      }
+//    });
   }
   
   /**

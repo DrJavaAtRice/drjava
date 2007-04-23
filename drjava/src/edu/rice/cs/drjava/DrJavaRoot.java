@@ -137,7 +137,7 @@ public class DrJavaRoot {
            * is set visible.  When this was not done, we occasionally encountered a NullPointerException on start up when 
            * specifying a file (ex: java -jar drjava.jar somefile.java)
            */
-          SwingUtilities.invokeLater(new Runnable(){ public void run(){ mf.setVisible(true); } });
+          SwingUtilities.invokeLater(new Runnable(){ public void run(){ mf.start(); } });
           
           // redirect stdout to DrJava's console
           System.setOut(new PrintStream(new OutputStreamRedirector() {

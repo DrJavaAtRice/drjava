@@ -60,11 +60,10 @@ public abstract class TabbedPanel extends JPanel {
   // string to be displayed on the tab
   private String _name;
 
-  /**
-   * Constructor.
-   * @param frame MainFrame displaying the tab
-   * @param name Name to display for the tab
-   */
+  /** Constructor.
+    * @param frame MainFrame displaying the tab
+    * @param name Name to display for the tab
+    */
   public TabbedPanel(MainFrame frame, String name) {
     _frame = frame;
     _name = name;
@@ -72,10 +71,9 @@ public abstract class TabbedPanel extends JPanel {
     _displayed = false;
   }
 
-  /**
-   * Puts the close panel in the east of this panel and puts the main panel in the
-   * center. Also adds the action to the close button.
-   */
+  /** Puts the close panel in the east of this panel and puts the main panel in the
+    * center. Also adds the action to the close button.
+    */
   private void _setUpPanes() {
     this.setFocusCycleRoot(true);
     this.setLayout(new BorderLayout());
@@ -105,23 +103,13 @@ public abstract class TabbedPanel extends JPanel {
   /** @return whether this tabbedPanel is displayed in a tab */
   public boolean isDisplayed() { return _displayed; }
 
-  /**
-   * @return the display name of this tab
-   */
-  public String getName() {
-    return _name;
-  }
+  /** @return the display name of this tab. */
+  public String getName() { return _name; }
 
-  /**
-   * Sets whether the tab is displayed.  Doesn't actually show or hide the tab.
-   */
-  public void setDisplayed(boolean displayed) {
-    _displayed = displayed;
-  }
+  /** Sets whether the tab is displayed.  Doesn't actually show or hide the tab. */
+  public void setDisplayed(boolean displayed) { _displayed = displayed; }
 
-  JPanel getMainPanel() {
-    return _mainPanel;
-  }
+  JPanel getMainPanel() { return _mainPanel; }
 
   /** This is overridden so that when switch previous pane focus is called
     * on the currentDefPane, the caret will move here on the first call.

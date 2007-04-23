@@ -198,14 +198,17 @@ public abstract class AbstractConsoleController implements Serializable {
   /** Cached caret position from last invocation of CaretUpdateListener */
   private volatile int _cachedCaretPos = 0;
   
-   /** Cached prompt position from last invocation of CaretUpdateListener */
+  /** Cached prompt position from last invocation of CaretUpdateListener */
   private volatile int _cachedPromptPos = 0;
   
   /** Must be called when new document is created if caret position != 0. */
   public void setCachedCaretPos(int pos) { _cachedCaretPos = pos; }
   
-   /** Must be called when new document is created if prompt position != 0. */
+  /** Must be called when new document is created if prompt position != 0. */
   public void setCachedPromptPos(int pos) { _cachedPromptPos = pos; }
+  
+  /** Gets the current caret position. */
+  public int getCachedCaretPos() { return _cachedCaretPos; }
   
   /** Ensures that the caret always stays on or after the prompt, so that output is always scrolled to the bottom.
    *  (The prompt is always at the bottom.)  This listener must not modify the console document itself, only the pane.
