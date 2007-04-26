@@ -791,7 +791,15 @@ public abstract class FileOps {
     
     // if it's not a directory, try the parent
     if (!file.isDirectory()) {
-      if (file.getParent() != null) file = file.getParentFile();
+      if (file.getParent() != null) { 
+        file = file.getParentFile();
+        //NB: getParentFile() may return null
+        if (file == null) {
+          // somehow we ended up with null, use "user.home"
+          file = new File(System.getProperty("user.home"));
+        }
+        assert file != null;
+      }
     }
     
     // this should be an existing directory now
