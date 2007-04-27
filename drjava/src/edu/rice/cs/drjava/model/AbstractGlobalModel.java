@@ -641,8 +641,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public File getWorkingDirectory() {
       try {
-        if (_workDir == null || _workDir == FileOption.NULL_FILE)
-          return _projectFile.getParentFile().getCanonicalFile(); // default is project root
+        if (_workDir == null || _workDir == FileOption.NULL_FILE) {
+          File parentDir = _projectFile.getParentFile();
+          if (parentDir!=null) {
+            return parentDir.getCanonicalFile(); // default is project root
+          }
+          else return new File(System.getProperty("user.dir"));
+        }
         return _workDir.getCanonicalFile();
       }
       catch(IOException e) { /* fall through */ }
