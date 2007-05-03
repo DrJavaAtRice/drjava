@@ -2620,6 +2620,8 @@ public class MainFrame extends JFrame implements ClipboardOwner {
       } 
     };*/
     
+    _lastFocusOwner = _interactionsContainer;
+    
     _junitErrorPanel = new JUnitPanel(_model, this);
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
     
@@ -5954,7 +5956,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         
         if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
           // Use SwingUtilities because this action must execute AFTER all pending events in the event queue
-//          System.err.println("Interactions Container Selected");
+//        System.err.println("Interactions Container Selected");
           _interactionsContainer.setVisible(true);  // kluge to overcome subtle focus bug
           EventQueue.invokeLater(new Runnable() { public void run() { _interactionsContainer.requestFocusInWindow(); } });
         }
@@ -6486,13 +6488,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     pane.setScrollPane(scroll);
     //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
     
-    // can be used to make sure line wrapping occurs
-    /*scroll.getViewport().addChangeListener(new ChangeListener() {
-     public void stateChanged(ChangeEvent e) {
-     pane.setSize(scroll.getViewport().getWidth(), pane.getHeight());
-     }
-     });*/
-    
     if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
       scroll.setRowHeaderView(new LineEnumRule(pane));
     }
@@ -6591,11 +6586,9 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Refresh the JScrollPane containing the DefinitionsPane for the active document. Must run in event thread.*/
   private void _refreshDefScrollPane() {
-    // demoted to package private protection to test the disabling editing while compiling functionality.
-    // and to support brute force fix to DefinitionsPane bug on return from compile with errors
     // Added 2004-May-27
     // Notify the definitions pane that is being replaced (becoming inactive)
-//    _currentDefPane.notifyInactive();
+    _currentDefPane.notifyInactive();
     
 //    Utilities.showDebug("_switchDefScrollPane called");
 //    Utilities.showDebug("Right before getting the scrollPane");
@@ -6616,7 +6609,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //    // with us.  We guarantee only one definitions pane is un-editable at any time.
 //    if (_currentDefPane.isEditable()) {
 //      _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
-//      _currentDefPane.notifyActive();
+      _currentDefPane.notifyActive();
 //    }
 //    else {
 //      try { _currentDefPane.setEditable(true); }

@@ -225,13 +225,12 @@ public class InteractionsController extends AbstractConsoleController {
     public void interactionErrorOccurred(int offset, int length) { }    
     
     public void interpreterResetting() {
-      Runnable command = new Runnable() { 
+      Utilities.invokeLater(new Runnable() { 
         public void run() { 
           _adapter.clearColoring();
-          _pane.resetPrompts();
+//          _pane.resetPrompts();  // NOT USED
         }
-      };
-      Utilities.invokeLater(command);
+      });
     }
     
     public void interpreterReady(File wd) { }

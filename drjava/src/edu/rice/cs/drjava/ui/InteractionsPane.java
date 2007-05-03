@@ -85,18 +85,18 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
 
   private InteractionsDJDocument _doc;
   
-  private List<Integer> _listOfPrompt = new Vector<Integer>();  // Vector used because it is synchronized.
+//  private List<Integer> _listOfPrompt = new Vector<Integer>(); // Vector used because it is synchronized. // NOT USED
     
   /** Creates an InteractionsPane with the given document.
-   *  Uses default keymap name ("INTERACTIONS_KEYMAP")
-   *  @param doc StyledDocument containing the interactions history.
-   */
+    * Uses default keymap name ("INTERACTIONS_KEYMAP")
+    * @param doc StyledDocument containing the interactions history.
+    */
   public InteractionsPane(InteractionsDJDocument doc) { this("INTERACTIONS_KEYMAP", doc); }
 
   /** Creates an InteractionsPane with the given document.
-   *  @param keymapName the name of the keymap for this pane
-   *  @param doc StyledDocument containing the interactions history.
-   */
+    * @param keymapName the name of the keymap for this pane
+    * @param doc StyledDocument containing the interactions history.
+    */
   public InteractionsPane(String keymapName, InteractionsDJDocument doc) {
     super(doc);
     _doc = doc;
@@ -183,7 +183,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     if (from > -1) {
       // Found a matching open brace to this close brace
       from = to - from;
-      if (_notCrossesPrompt(to,from)) _addHighlight(from, to);
+      /* if (_notCrossesPrompt(to,from)) */ _addHighlight(from, to);  // _listOfPrompt NOT USED
       //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
     }
     // if this wasn't a close brace, check for an open brace
@@ -194,7 +194,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
       
       if (to > -1) {
         to = to + from;
-        if (_notCrossesPrompt(to,from)) _addHighlight(from - 1, to);
+        /* if (_notCrossesPrompt(to,from)) */ _addHighlight(from - 1, to);  // _listOfPrompt NOT USED
 //        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
       }
     }
@@ -203,11 +203,11 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
 //  /** Returns the list of prompts. Used for tests. */
 //  List<Integer> getPromptList() {  return _listOfPrompt; }  // NOT USED
   
-  /** Resets the list of prompts. Called when the interactions pane is reset. */
-  public void resetPrompts() {
-//    System.err.println("Clearing prompt list");
-    _listOfPrompt.clear(); 
-  }
+//  /** Resets the list of prompts. Called when the interactions pane is reset. */  // NOT USED
+//  public void resetPrompts() {
+////    System.err.println("Clearing prompt list");
+//    _listOfPrompt.clear(); 
+//  }
   
   // NOT USED
 //  /** Adds the position to the list of prompt positions. package private for tests. Does not necessarily run in
@@ -216,15 +216,15 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
 //    if (! _listOfPrompt.contains(new Integer(pos))) _listOfPrompt.add(new Integer(pos));
 //  }
   
-  /** Returns true if the two locations do not have a prompt between them. */
-  private boolean _notCrossesPrompt(int to, int from) {
-//    DrJava.consoleErr().println("To: " + to + " , From: " + from);
-    boolean toReturn = true;
-    for (Integer prompt : _listOfPrompt) {
-      toReturn &= ((to >= prompt && from >= prompt) || (to <= prompt && from <= prompt));      
-    }
-    return toReturn;
-  }
+//  /** Returns true if the two locations do not have a prompt between them. */  // NOT USED
+//  private boolean _notCrossesPrompt(int to, int from) {
+////    DrJava.consoleErr().println("To: " + to + " , From: " + from);
+//    boolean toReturn = true;
+//    for (Integer prompt : _listOfPrompt) {
+//      toReturn &= ((to >= prompt && from >= prompt) || (to <= prompt && from <= prompt));      
+//    }
+//    return toReturn;
+//  }
   
   /** Indent the given selection, for the given reason, in the current document.  Should only run in the event queuel
     * @param selStart - the selection start
