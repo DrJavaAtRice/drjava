@@ -231,74 +231,6 @@
   </target>
   
   
-  <!-- Matches base class files that should be RMI compiled.  Search is relative to "classes/base". -->
-  <patternset id="rmi-base-classes">
-    <include name="edu/rice/cs/drjava/model/repl/newjvm/InterpreterJVM.class" />
-    <include name="edu/rice/cs/drjava/model/repl/newjvm/MainJVM.class" />
-    <!-- Additional base RMI classes should be listed here -->
-  </patternset>
-  
-  <!-- Matches test class files that should be RMI compiled.  Search is relative to "classes/test". -->
-  <patternset id="rmi-test-classes">
-    <include name="edu/rice/cs/util/newjvm/IntegratedMasterSlaveTest$TestMasterJVM.class" />
-    <include name="edu/rice/cs/util/newjvm/IntegratedMasterSlaveTest$CounterSlave.class" />
-    <!-- Additional test RMI classes should be listed here -->
-  </patternset>
-  
-  <!-- This check has to happen *before* do-compile; otherwise, the rmi class files will
-       always be up to date -->
-  <target name="check-rmi-compile">
-    <condition property="rmi-classes-uptodate">
-      <and>
-        <available file="classes/base" type="dir" />
-        <available file="classes/test" type="dir" />
-        <not>
-          <or>
-            <!-- If a source is "up to date" with respect to its class file
-                (reversing the usual order), the class file is out of date.  This
-                allows for a one-to-many relationship between a source and its classes.  -->
-            <uptodate>
-              <srcfiles dir="classes/base">
-                <patternset refid="rmi-base-classes" />
-              </srcfiles>
-              <!-- Regular expression copied from the Ant manual; they say it maps from
-                   classes to their sources -->
-              <mapper type="regexp" from="^(.*?)(\$$[^/\\\.]*)?\.class$$" to="\1.java" />
-            </uptodate>
-            <uptodate>
-              <srcfiles dir="classes/test">
-                <patternset refid="rmi-test-classes" />
-              </srcfiles>
-              <mapper type="regexp" from="^(.*?)(\$$[^/\\\.]*)?\.class$$" to="\1.java" />
-            </uptodate>
-          </or>
-        </not>
-      </and>
-    </condition>
-  </target>
-  
-  <target name="rmi-compile" depends="check-rmi-compile, resolve-java15-tools" unless="rmi-classes-uptodate">
-    <echo message="Compiling RMI classes" />
-    <rmic base="classes/base" includeAntRuntime="no">
-      <patternset refid="rmi-base-classes" />
-      <classpath>
-        <pathelement location="${java15-tools}" />
-        <fileset refid="libs" />
-        <pathelement location="classes/base" />
-      </classpath>
-    </rmic>
-    <rmic base="classes/test" includeAntRuntime="no">
-      <patternset refid="rmi-test-classes" />
-      <classpath>
-        <pathelement location="${java15-tools}" />
-        <fileset refid="libs" />
-        <pathelement location="classes/base" />
-        <pathelement location="classes/test" />
-      </classpath>
-    </rmic>
-  </target>
-  
-  
   <target name="copy-resources">
     <copy todir="classes/base">
       <fileset dir="src">
@@ -384,6 +316,31 @@
       <fileset dir="classes/test" excludes="**/*.class" />
     </copy>
     
+    <!-- Invoke rmic -->
+    <rmic base="classes/base-14" includeAntRuntime="no">
+      <include name="edu/rice/cs/drjava/model/repl/newjvm/InterpreterJVM.class" />
+      <include name="edu/rice/cs/drjava/model/repl/newjvm/MainJVM.class" />
+      <!-- Additional base RMI classes should be listed here -->
+      <classpath>
+        <pathelement location="${java14-tools}" />
+        <pathelement location="${clover-jar}" />
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+      </classpath>
+    </rmic>
+    <rmic base="classes/test-14" includeAntRuntime="no">
+      <include name="edu/rice/cs/util/newjvm/IntegratedMasterSlaveTest$TestMasterJVM.class" />
+      <include name="edu/rice/cs/util/newjvm/IntegratedMasterSlaveTest$CounterSlave.class" />
+      <!-- Additional test RMI classes should be listed here -->
+      <classpath>
+        <pathelement location="${java14-tools}" />
+        <pathelement location="${clover-jar}" />
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/test-14" />
+        <pathelement location="classes/lib-14" />
+      </classpath>
+    </rmic>
+
   </target>
 
 
