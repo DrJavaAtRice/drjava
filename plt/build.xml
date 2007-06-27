@@ -661,6 +661,24 @@
     </fixcrlf>
   </target>
   
+  <target name="relicense" description="Paste the contents of LICENSE in all source files">
+    <loadfile property="license" srcfile="LICENSE" />
+    
+    <!-- First, add an empty block to files that don't have a license block. -->
+    <replaceregexp match="^package"
+                   replace="/*BEGIN_COPYRIGHT_BLOCK* *END_COPYRIGHT_BLOCK*/${line.separator}${line.separator}package">
+      <fileset dir="src">
+        <include name="**/*.java" />
+      </fileset>
+    </replaceregexp>
+    <replaceregexp flags="s" match="BEGIN_COPYRIGHT_BLOCK.*END_COPYRIGHT_BLOCK"
+                   replace="BEGIN_COPYRIGHT_BLOCK*${line.separator}${line.separator}${license}${line.separator}*END_COPYRIGHT_BLOCK">
+      <fileset dir="src">
+        <include name="**/*.java" />
+      </fileset>
+    </replaceregexp>
+  </target>
+  
   
   <!-- ***************************
        Property-resolution Targets 
