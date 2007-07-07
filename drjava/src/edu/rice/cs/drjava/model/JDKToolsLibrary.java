@@ -68,11 +68,30 @@ public class JDKToolsLibrary {
     }
   }
   
+  protected static String compilerMainClass(JavaVersion version) {
+    switch (version) {
+      case JAVA_6: return "com.sun.tools.javac.main.JavaCompiler";
+      case JAVA_5: return "com.sun.tools.javac.main.JavaCompiler";
+      case JAVA_1_4: return "com.sun.tools.javac.v7.JavaCompiler";
+      default: return null;
+    }
+  } 
   public static JDKToolsLibrary makeFromRuntime(GlobalModel model) {
     FullVersion version = JavaVersion.CURRENT_FULL;
-
     CompilerInterface compiler = NoCompilerAvailable.ONLY;
-    String compilerAdapter = adapterForCompiler(version.majorVersion());
+    String compilerAdapter = null;
+    
+    // force DrJava to try to load the javac main class;
+    // if tools.jar isn't on the class path, this will fail
+    // having tools.jar on the class path is not sufficient
+    try {
+      ReflectUtil.class.getClassLoader().loadClass(compilerMainClass(JavaVersion.CURRENT));
+      compilerAdapter = adapterForCompiler(version.majorVersion());
+    }
+    catch(ClassNotFoundException e) { /* keep compilerAdapter == null */ }
+    catch(UnsupportedClassVersionError e) { /* keep compilerAdapter == null */ }
+    catch(RuntimeException e) { /* keep compilerAdapter == null */ }  
+
     if (compilerAdapter != null) {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
