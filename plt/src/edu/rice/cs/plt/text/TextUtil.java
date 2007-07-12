@@ -252,7 +252,7 @@ public final class TextUtil {
   }
   
   /** Shared code for Unicode escaping and unescaping algorithms */
-  private abstract static class UnicodeTranslator extends StringTranslator {
+  private static abstract class UnicodeTranslator extends StringTranslator {
     private static enum State { START, BACKSLASH, U, DIG1, DIG2, DIG3 };
 
     private State _state;
@@ -418,8 +418,9 @@ public final class TextUtil {
           case '\\': _result.append("\\\\"); _changed = true; break;
           default:
             if (c < ' ' || c == '\u007f') {
+              // must use 3 digits so that unescaping doesn't consume too many chars ("\12" vs. "\0012")
               _result.append('\\');
-              _result.append(Integer.toOctalString(c));
+              _result.append(padLeft(Integer.toOctalString(c), '0', 3));
               _changed = true;
             }
             else { _result.append(c); }
@@ -517,7 +518,7 @@ public final class TextUtil {
    * mnemonic escape for control characters exists, it is used; otherwise, the hexadecimal {@code \xhh}
    * notation is used.
    */
-  public String regexEscape(String s) {
+  public static String regexEscape(String s) {
     return new StringTranslator() {
       protected void processChar(char c) {
         switch (c) {
@@ -552,7 +553,7 @@ public final class TextUtil {
    * {@code entities} will be translated to their corrresponding entity names; if {@code convertToAscii} is
    * {@code true}, all other non-ASCII characters will be converted to numeric references.
    */
-  public String sgmlEscape(String s, final Map<Character, String> entities, final boolean convertToAscii) {
+  public static String sgmlEscape(String s, final Map<Character, String> entities, final boolean convertToAscii) {
     return new StringTranslator() {
       protected void processChar(char c) {
         String entity = entities.get(c);
@@ -580,7 +581,7 @@ public final class TextUtil {
    * Interpret all SGML character entities in the given string according to the provided name-character mapping.
    * @throws  IllegalArgumentException  If the string contains a malformed or unrecognized character entity
    */
-  public String sgmlUnescape(String s, final Map<String, Character> entities) {
+  public static String sgmlUnescape(String s, final Map<String, Character> entities) {
     return new StringTranslator() {
 
       private SGMLState _state = SGMLState.START;
@@ -641,7 +642,7 @@ public final class TextUtil {
    * ({@code "}, {@code &}, {@code '}, {@code <}, and {@code >}) will be replaced with named references
    * (such as {@code &quot;}), and all non-ASCII characters will be replaced with numeric references.
    */
-  public String xmlEscape(String s) { return sgmlEscape(s, XML_ENTITIES.value(), true); }
+  public static String xmlEscape(String s) { return sgmlEscape(s, XML_ENTITIES.value(), true); }
 
  /**
   * Convert the given string to an escaped form compatible with XML.  The standard XML named entities
@@ -649,7 +650,7 @@ public final class TextUtil {
   * (such as {@code &quot;}); if {@code convertToAscii} is {@code true}, all non-ASCII characters 
   * will be replaced with numeric references.
   */
-  public String xmlEscape(String s, boolean convertToAscii) {
+  public static String xmlEscape(String s, boolean convertToAscii) {
     return sgmlEscape(s, XML_ENTITIES.value(), convertToAscii);
   }
 
@@ -657,7 +658,7 @@ public final class TextUtil {
    * Interpret all XML character entities in the given string.
    * @throws  IllegalArgumentException  If the string contains a malformed or unrecognized character entity
   */
-  public String xmlUnescape(String s) { return sgmlUnescape(s, XML_ENTITIES.value().reverse()); }
+  public static String xmlUnescape(String s) { return sgmlUnescape(s, XML_ENTITIES.value().reverse()); }
 
   /**
    * Convert the given string to an escaped form compatible with HTML.  All named entities
@@ -665,13 +666,13 @@ public final class TextUtil {
    * characters will be replaced with numeric references.  The {@code '} character will also
    * be replaced with a numeric refererence.
    */
-  public String htmlEscape(String s) { return sgmlEscape(s, HTML_ENTITIES.value(), true); }
+  public static String htmlEscape(String s) { return sgmlEscape(s, HTML_ENTITIES.value(), true); }
 
  /**
    * Interpret all HTML character entities in the given string.
    * @throws  IllegalArgumentException  If the string contains a malformed or unrecognized character entity
   */
-  public String htmlUnescape(String s) { return sgmlUnescape(s, HTML_ENTITIES.value().reverse()); }
+  public static String htmlUnescape(String s) { return sgmlUnescape(s, HTML_ENTITIES.value().reverse()); }
 
   
   /** Entity names for XML; declared lazily to prevent creation when it is not used */
