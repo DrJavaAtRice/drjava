@@ -175,6 +175,14 @@ public final class LambdaUtil {
     public String value(Object obj) { return RecurUtil.safeToString(obj); }
   }
   
+  /** Concatenate the result of {@link RecurUtil#safeToString(Object)} from both inputs. */
+  public static final Lambda2<Object, Object, String> STRING_CONCAT = new StringConcatLambda();
+  
+  private static final class StringConcatLambda implements Lambda2<Object, Object, String>, Serializable {
+    private StringConcatLambda() {}
+    public String value(Object o1, Object o2) { return RecurUtil.safeToString(o1) + RecurUtil.safeToString(o2); }
+  }
+  
   /** Calls {@link RecurUtil#safeHashCode(Object)} on the input. */
   public static final Lambda<Object, Integer> HASH_CODE = new HashCodeLambda();
   
@@ -292,6 +300,18 @@ public final class LambdaUtil {
     public T value(Object arg1, Object arg2, Object arg3, Object arg4) { return _val; }
   }
   
+  /** Create a lambda that applies its first argument to its second argument. */
+  @SuppressWarnings("unchecked")
+  public static <T, R> Lambda2<Lambda<? super T, ? extends R>, T, R> applicationLambda() {
+    // for some reason I have to convert to a raw type before the cast, or it's an error, not a warning
+    return (Lambda2<Lambda<? super T, ? extends R>, T, R>) (Lambda2) ApplicationLambda.INSTANCE;
+  }
+  
+  private static final class ApplicationLambda implements Lambda2<Lambda<Object, ?>, Object, Object>, Serializable {
+    private static final ApplicationLambda INSTANCE = new ApplicationLambda();
+    private ApplicationLambda() {}
+    public Object value(Lambda<Object, ?> lambda, Object arg) { return lambda.value(arg); }
+  }
 
   /** Create a {@code GeneralRunnable} equivalent to {@code r} that ignores any arguments. */
   public static GeneralRunnable promote(Runnable r) { return new PromotedGeneralRunnable(r); }
@@ -1005,7 +1025,7 @@ public final class LambdaUtil {
     return new NegationPredicate<T>(pred);
   }
   
-  public static final class NegationPredicate<T> implements Predicate<T>, Serializable {
+  private static final class NegationPredicate<T> implements Predicate<T>, Serializable {
     private final Predicate<? super T> _p;
     public NegationPredicate(Predicate<? super T> p) { _p = p; }
     public Boolean value(T arg) { return !_p.value(arg); }
@@ -1016,7 +1036,7 @@ public final class LambdaUtil {
     return new NegationPredicate2<T1, T2>(pred);
   }
   
-  public static final class NegationPredicate2<T1, T2> implements Predicate2<T1, T2>, Serializable {
+  private static final class NegationPredicate2<T1, T2> implements Predicate2<T1, T2>, Serializable {
     private final Predicate2<? super T1, ? super T2> _p;
     public NegationPredicate2(Predicate2<? super T1, ? super T2> p) { _p = p; }
     public Boolean value(T1 arg1, T2 arg2) { return !_p.value(arg1, arg2); }
@@ -1027,7 +1047,7 @@ public final class LambdaUtil {
     return new NegationPredicate3<T1, T2, T3>(pred);
   }
   
-  public static final class NegationPredicate3<T1, T2, T3> implements Predicate3<T1, T2, T3>, Serializable {
+  private static final class NegationPredicate3<T1, T2, T3> implements Predicate3<T1, T2, T3>, Serializable {
     private final Predicate3<? super T1, ? super T2, ? super T3> _p;
     public NegationPredicate3(Predicate3<? super T1, ? super T2, ? super T3> p) { _p = p; }
     public Boolean value(T1 arg1, T2 arg2, T3 arg3) { return !_p.value(arg1, arg2, arg3); }
@@ -1039,7 +1059,7 @@ public final class LambdaUtil {
     return new NegationPredicate4<T1, T2, T3, T4>(pred);
   }
   
-  public static final class NegationPredicate4<T1, T2, T3, T4> implements Predicate4<T1, T2, T3, T4>, Serializable {
+  private static final class NegationPredicate4<T1, T2, T3, T4> implements Predicate4<T1, T2, T3, T4>, Serializable {
     private final Predicate4<? super T1, ? super T2, ? super T3, ? super T4> _p;
     public NegationPredicate4(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> p) { _p = p; }
     public Boolean value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { return !_p.value(arg1, arg2, arg3, arg4); }

@@ -277,15 +277,55 @@ public final class IterUtil {
     return new ComposedIterable<T>(first, rest);
   }
     
+  /** Produce a lambda that invokes {@link #compose(Object, Iterable)} */
+  public static <T> Lambda2<T, Iterable<? extends T>, Iterable<T>> composeLeftLambda() {
+    return (Lambda2<T, Iterable<? extends T>, Iterable<T>>) ComposeLeftLambda.INSTANCE;
+  }
+  
+  private static class ComposeLeftLambda implements Lambda2<Object, Iterable<?>, Iterable<Object>>, Serializable {
+    private static ComposeLeftLambda INSTANCE = new ComposeLeftLambda();
+    private ComposeLeftLambda() {}
+    public Iterable<Object> value(Object first, Iterable<?> rest) {
+      return new ComposedIterable<Object>(first, rest);
+    }
+  }
+  
   /** Create a {@link ComposedIterable} with the given arguments */
   public static <T> ComposedIterable<T> compose(Iterable<? extends T> rest, T last) {
     return new ComposedIterable<T>(rest, last);
   }
     
+  /** Produce a lambda that invokes {@link #compose(Iterable, Object)} */
+  public static <T> Lambda2<Iterable<? extends T>, T, Iterable<T>> composeRightLambda() {
+    return (Lambda2<Iterable<? extends T>, T, Iterable<T>>) ComposeRightLambda.INSTANCE;
+  }
+  
+  private static class ComposeRightLambda implements Lambda2<Iterable<?>, Object, Iterable<Object>>, Serializable {
+    private static ComposeRightLambda INSTANCE = new ComposeRightLambda();
+    private ComposeRightLambda() {}
+    public Iterable<Object> value(Iterable<?> rest, Object last) {
+      return new ComposedIterable<Object>(rest, last);
+    }
+  }
+  
   /** Create a {@link ComposedIterable} with the given arguments */
   public static <T> ComposedIterable<T> compose(Iterable<? extends T> i1, Iterable<? extends T> i2) {
     return new ComposedIterable<T>(i1, i2);
   }
+  
+  /** Produce a lambda that invokes {@link #compose(Object, Iterable)} */
+  public static <T> Lambda2<Iterable<? extends T>, Iterable<? extends T>, Iterable<T>> composeLambda() {
+    return (Lambda2<Iterable<? extends T>, Iterable<? extends T>, Iterable<T>>) ComposeLambda.INSTANCE;
+  }
+  
+  private static class ComposeLambda implements Lambda2<Iterable<?>, Iterable<?>, Iterable<Object>>, Serializable {
+    private static ComposeLambda INSTANCE = new ComposeLambda();
+    private ComposeLambda() {}
+    public Iterable<Object> value(Iterable<?> i1, Iterable<?> i2) {
+      return new ComposedIterable<Object>(i1, i2);
+    }
+  }
+  
   
   /** Create a {@link SnapshotIterable} with the given iterable */
   public static <T> SnapshotIterable<T> snapshot(Iterable<? extends T> iter) {
@@ -1172,6 +1212,109 @@ public final class IterUtil {
    */
   public static <S, T> SnapshotIterable<T> mapSnapshot(Iterable<? extends S> source, Lambda<? super S, ? extends T> map) {
     return new SnapshotIterable<T>(new MappedIterable<S, T>(source, map));
+  }
+  
+  /**
+   * Compute the left fold of the given list.  That is, for some combination function {@code #} (written here
+   * with infix notation), compute {@code base # iter.next() # iter.next() # ...}.
+   */
+  public static <T, R> R fold(Iterable<? extends T> iter, R base,
+                              Lambda2<? super R, ? super T, ? extends R> combiner) {
+    R result = base;
+    for (T elt : iter) { result = combiner.value(result, elt); }
+    return result;
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of two iterables.  Each pair of elements is combined by the 
+   * given function.  The order of results is defined by {@link CartesianIterable}.
+   */
+  public static <T1, T2, R> Iterable<R> cross(Iterable<? extends T1> left, Iterable<? extends T2> right,
+                                              Lambda2<? super T1, ? super T2, ? extends R> combiner) {
+    return new CartesianIterable<T1, T2, R>(left, right, combiner);
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of two iterables, wrapping each combination of elements in a 
+   * {@code Pair}.  The order of results is defined by {@link CartesianIterable}.
+   */
+  public static <T1, T2> Iterable<Pair<T1, T2>> cross(Iterable<? extends T1> left, Iterable<? extends T2> right) {
+    return cross(left, right, Pair.<T1, T2>factory());
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of three iterables.  Each triple of elements is combined by the 
+   * given function.  The order of results is defined by {@link CartesianIterable}.
+   */
+  public static <T1, T2, T3, R>
+    Iterable<R> cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, Iterable<? extends T3> iter3, 
+                      Lambda3<? super T1, ? super T2, ? super T3, ? extends R> combiner) {
+    Iterable<Lambda<T1, Lambda<T2, Lambda<T3, R>>>> r0 = singleton(LambdaUtil.<T1, T2, T3, R>curry(combiner));
+    Iterable<Lambda<T2, Lambda<T3, R>>> r1 =
+      CartesianIterable.make(r0, iter1, LambdaUtil.<T1, Lambda<T2, Lambda<T3, R>>>applicationLambda());
+    Iterable<Lambda<T3, R>> r2 =
+      CartesianIterable.make(r1, iter2,LambdaUtil.<T2, Lambda<T3, R>>applicationLambda());
+    return CartesianIterable.make(r2, iter3, LambdaUtil.<T3, R>applicationLambda());
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of three iterables, wrapping each combination of elements in a 
+   * {@code Triple}.  The order of results is defined by {@link CartesianIterable}.
+   */
+  public static <T1, T2, T3> Iterable<Triple<T1, T2, T3>>
+    cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, Iterable<? extends T3> iter3) {
+    return cross(iter1, iter2, iter3, Triple.<T1, T2, T3>factory());
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of four iterables.  Each quadruple of elements is combined by the 
+   * given function.  The order of results is defined by {@link CartesianIterable}.
+   */
+  public static <T1, T2, T3, T4, R>
+    Iterable<R> cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
+                      Iterable<? extends T3> iter3, Iterable<? extends T4> iter4,
+                      Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> combiner) {
+    Iterable<Lambda<T1, Lambda<T2, Lambda<T3, Lambda<T4, R>>>>> r0 =
+      singleton(LambdaUtil.<T1, T2, T3, T4, R>curry(combiner));
+    Iterable<Lambda<T2, Lambda<T3, Lambda<T4, R>>>> r1 =
+      CartesianIterable.make(r0, iter1, LambdaUtil.<T1, Lambda<T2, Lambda<T3, Lambda<T4, R>>>>applicationLambda());
+    Iterable<Lambda<T3, Lambda<T4, R>>> r2 =
+      CartesianIterable.make(r1, iter2, LambdaUtil.<T2, Lambda<T3, Lambda<T4, R>>>applicationLambda());
+    Iterable<Lambda<T4, R>> r3 =
+      CartesianIterable.make(r2, iter3,LambdaUtil.<T3, Lambda<T4, R>>applicationLambda());
+    return CartesianIterable.make(r3, iter4, LambdaUtil.<T4, R>applicationLambda());
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of four iterables, wrapping each combination of elements in a 
+   * {@code Quad}.  The order of results is defined by {@link CartesianIterable}.
+   */
+  public static <T1, T2, T3, T4>
+    Iterable<Quad<T1, T2, T3, T4>> cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
+                                         Iterable<? extends T3> iter3, Iterable<? extends T4> iter4) {
+    return cross(iter1, iter2, iter3, iter4, Quad.<T1, T2, T3, T4>factory());
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of an arbitrary number of iterables.  Each tuple in the result 
+   * is represented by an iterable.  If {@code iters} is empty, the result is a single empty iterable.
+   * The order of results is defined by {@link CartesianIterable}.
+   */
+  public static <T> Iterable<Iterable<T>> cross(Iterable<? extends Iterable<? extends T>> iters) {
+    return crossFold(iters, IterUtil.<T>empty(), IterUtil.<T>composeRightLambda());
+  }  
+  
+  /**
+   * Apply the given folding function to each tuple in the cartesian (cross) product of the given iterables.
+   * The order of results is defined by {@link CartesianIterable}.
+   */
+  public static <T, R> Iterable<R> crossFold(Iterable<? extends Iterable<? extends T>> iters, R base,
+                                             Lambda2<? super R, ? super T, ? extends R> combiner) {
+    Iterable<R> result = singleton(base);
+    for (Iterable<? extends T> iter : iters) {
+      result = new CartesianIterable<R, T, R>(result, iter, combiner);
+    }
+    return result;
   }
   
   /** Lazily create an iterable containing the values of the given thunks. */

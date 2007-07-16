@@ -1,0 +1,97 @@
+/*BEGIN_COPYRIGHT_BLOCK*
+
+PLT Utilities BSD License
+
+Copyright (c) 2007 JavaPLT group at Rice University
+All rights reserved.
+
+Developed by:   Java Programming Languages Team
+                Rice University
+                http://www.cs.rice.edu/~javaplt/
+
+Redistribution and use in source and binary forms, with or without modification, are permitted 
+provided that the following conditions are met:
+
+    - Redistributions of source code must retain the above copyright notice, this list of conditions 
+      and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright notice, this list of 
+      conditions and the following disclaimer in the documentation and/or other materials provided 
+      with the distribution.
+    - Neither the name of the JavaPLT group, Rice University, nor the names of the library's 
+      contributors may be used to endorse or promote products derived from this software without 
+      specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND 
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*END_COPYRIGHT_BLOCK*/
+
+package edu.rice.cs.plt.iter;
+
+import java.io.Serializable;
+import edu.rice.cs.plt.lambda.Lambda2;
+
+/**
+ * An enumeration of all permutations of the given list.  The size of the enumeration, where 
+ * the original list has size n, is n! (and is thus guaranteed to be >= 1).  The order of the 
+ * results is "lexicographical" where each element of the original list is taken to 
+ * lexicographically precede all of its successors.  (Thus, the original list is
+ * the first to be returned, and a reversed list is the last.)  Of course, due to the factorial
+ * complexity of enumerating all permutations, this class is probably not suitable
+ * for applications in which n is unbounded (or just intractably large).
+ * 
+ * @param T  The element type of the permuted lists; note that the iterator returns
+ *           {@code Iterable<T>}s, not {@code T}s.
+ */
+public class CartesianIterable<T1, T2, R> extends AbstractIterable<R>
+                                          implements SizedIterable<R>, Serializable {
+  
+  private final Iterable<? extends T1> _left;
+  private final Iterable<? extends T2> _right;
+  private final Lambda2<? super T1, ? super T2, ? extends R> _combiner;
+  
+  public CartesianIterable(Iterable<? extends T1> left, Iterable<? extends T2> right,
+                           Lambda2<? super T1, ? super T2, ? extends R> combiner) {
+    _left = left;
+    _right = right;
+    _combiner = combiner;
+  }
+  
+  public CartesianIterator<T1, T2, R> iterator() {
+    return new CartesianIterator<T1, T2, R>(_left.iterator(), _right, _combiner);
+  }
+
+  public int size() { return size(Integer.MAX_VALUE); }
+  
+  public int size(int bound) {
+    // won't overflow -- worst case is 2^31 * 2^31 = 2^62 < 2^63
+    long result = ((long) IterUtil.sizeOf(_left, bound)) * ((long) IterUtil.sizeOf(_right, bound));
+    return result <= bound ? (int) result : bound;
+  }
+  
+  public boolean isFixed() { return IterUtil.isFixed(_left) && IterUtil.isFixed(_right); }
+  
+  /** Call the constructor (allows the type arguments to be inferred) */
+  public static <T1, T2, R>
+    CartesianIterable<T1, T2, R> make(Iterable<? extends T1> left, Iterable<? extends T2> right,
+                                      Lambda2<? super T1, ? super T2, ? extends R> combiner) {
+    return new CartesianIterable<T1, T2, R>(left, right, combiner);
+  }
+  
+  /**
+   * Create a {@code CartesianIterable} and wrap it in a {@code SnapshotIterable}, forcing
+   * immediate evaluation of the permutations.
+   */
+  public static <T1, T2, R>
+    SnapshotIterable<R> makeSnapshot(Iterable<? extends T1> left, Iterable<? extends T2> right,
+                                     Lambda2<? super T1, ? super T2, ? extends R> combiner) {
+    return new SnapshotIterable<R>(new CartesianIterable<T1, T2, R>(left, right, combiner));
+  }
+  
+}
