@@ -83,6 +83,7 @@ public class Javac160Compiler extends JavacCompiler {
       // Diagnostic was intruced in the Java 1.6 compiler
       Class<?> diagnostic = Class.forName("javax.tools.Diagnostic");
       diagnostic.getMethod("getKind");
+      Class.forName("com.sun.tools.javac.main.JavaCompiler");
       return true;
     }
     catch (Exception e) { return false; }
