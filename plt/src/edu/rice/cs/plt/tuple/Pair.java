@@ -35,6 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.tuple;
 
 import java.io.Serializable;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Lambda2;
 
 /**
@@ -85,7 +86,7 @@ public class Pair<T1, T2> extends Tuple {
     return new Pair<T1, T2>(first, second);
   }
   
-  /** Produce a lambda that invokes the constructor */
+  /** Produce a lambda that invokes the constructor. */
   @SuppressWarnings("unchecked") public static <T1, T2> Lambda2<T1, T2, Pair<T1, T2>> factory() {
     return (Factory<T1, T2>) Factory.INSTANCE;
   }
@@ -96,4 +97,26 @@ public class Pair<T1, T2> extends Tuple {
     public Pair<T1, T2> value(T1 first, T2 second) { return new Pair<T1, T2>(first, second); }
   }
   
+  /** Produce a lambda that invokes {@link #first} on a provided pair. */
+  @SuppressWarnings("unchecked") public static <T> Lambda<Pair<? extends T, ?>, T> firstGetter() {
+    return (GetFirst<T>) GetFirst.INSTANCE;
+  }
+  
+  private static final class GetFirst<T> implements Lambda<Pair<? extends T, ?>, T>, Serializable {
+    public static final GetFirst<Void> INSTANCE = new GetFirst<Void>();
+    private GetFirst() {}
+    public T value(Pair<? extends T, ?> arg) { return arg.first(); }
+  }
+      
+  /** Produce a lambda that invokes {@link #second} on a provided pair. */
+  @SuppressWarnings("unchecked") public static <T> Lambda<Pair<?, ? extends T>, T> secondGetter() {
+    return (GetSecond<T>) GetSecond.INSTANCE;
+  }
+  
+  private static final class GetSecond<T> implements Lambda<Pair<?, ? extends T>, T>, Serializable {
+    public static final GetSecond<Void> INSTANCE = new GetSecond<Void>();
+    private GetSecond() {}
+    public T value(Pair<?, ? extends T> arg) { return arg.second(); }
+  }
+
 }

@@ -1153,7 +1153,7 @@ public final class IOUtil {
    * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
    * end in {@code .txt})
    * @param extension  File extension
-   * @param also  Additional filter that must be satisfied (for example, {@link ACCEPT_FILES})
+   * @param also  Additional filter that must be satisfied (for example, {@link #ACCEPT_FILES})
    */
   public static FileFilter extensionFileFilter(String extension, FileFilter also) {
     return asFileFilter(extensionFilePredicate(extension, asPredicate(also)));
@@ -1173,7 +1173,7 @@ public final class IOUtil {
    * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
    * end in {@code .txt})
    * @param extension  File extension
-   * @param also  Additional predicate that must be satisfied (for example, {@link IS_FILE})
+   * @param also  Additional predicate that must be satisfied (for example, {@link #IS_FILE})
    */
   public static Predicate<File> extensionFilePredicate(String extension, final Predicate<? super File> also) {
     // Ensure that the extension is in the canonical case

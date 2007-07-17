@@ -74,6 +74,14 @@ public class CollapsedIterable<T> extends AbstractIterable<T>
     return result <= bound ? result : bound;
   }
   
+  public boolean isInfinite() {
+    if (IterUtil.isInfinite(_iters)) { return true; }
+    for (Iterable<?> iter : _iters) {
+      if (IterUtil.isInfinite(iter)) { return true; }
+    }
+    return false;
+  }
+  
   public boolean isFixed() {
     if (!IterUtil.isFixed(_iters)) { return false; }
     for (Iterable<?> iter : _iters) {

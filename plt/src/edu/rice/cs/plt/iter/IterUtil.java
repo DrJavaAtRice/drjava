@@ -100,22 +100,33 @@ public final class IterUtil {
     }
   }
   
-  /** @return  {@code true} iff the given iterable is known to have a fixed size */
+  /** Return {@code true} iff the given iterable is known to have an infinite size. */
+  public static boolean isInfinite(Iterable<?> iter) {
+    if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).isInfinite(); }
+    else if (iter instanceof FilteredIterable<?>) { return ((FilteredIterable<?>) iter).isInfinite(); }
+    else { return false; }
+  }
+  
+  /**
+   * Return {@code true} iff the given iterable is known to have a fixed size.  Infinite iterables are considered
+   * fixed if they will never become finite.
+   */
   public static boolean isFixed(Iterable<?> iter) {
     if (iter instanceof SizedIterable<?>) { return ((SizedIterable<?>) iter).isFixed(); }
     else if (iter instanceof Collection<?>) { return isFixedCollection((Collection<?>) iter); }
     else { return false; }
   }
   
-  /** @return  {@code true} iff the given collection is known to have a fixed size */
+  /** Return {@code true} iff the given collection is known to have a fixed size. */
   private static boolean isFixedCollection(Collection<?> iter) {
     return (iter == Collections.EMPTY_SET) || (iter == Collections.EMPTY_LIST);
   }
   
   /** 
    * Generate a string representation of the given iterable, matching the {@link Collection}
-   * conventions (results like {@code "[foo, bar, baz]"}); invokes 
-   * {@link RecurUtil#safeToString(Object)} on each element
+   * conventions (results like {@code "[foo, bar, baz]"}).  Invokes 
+   * {@link RecurUtil#safeToString(Object)} on each element.  If the iterable is known to be
+   * infinite ({@link #isInfinite}), the string contains a few elements followed by {@code "..."}.
    */
   public static String toString(Iterable<?> iter) {
     return toString(iter, "[", ", ", "]");
@@ -123,7 +134,9 @@ public final class IterUtil {
   
   /** 
    * Generate a string representation of the given iterable where each element is listed on a
-   * separate line; invokes {@link RecurUtil#safeToString(Object)} on each element
+   * separate line.  Invokes {@link RecurUtil#safeToString(Object)} on each element.  If the iterable 
+   * is known to be infinite ({@link #isInfinite}), the string contains a few elements followed by 
+   * {@code "..."}.
    */
   public static String multilineToString(Iterable<?> iter) {
     return toString(iter, "", TextUtil.NEWLINE, "");
@@ -131,10 +144,12 @@ public final class IterUtil {
   
   /** 
    * Generate a string representation of the given iterable beginning with {@code prefix}, ending with
-   * {@code suffix}, and delimited by {@code delimiter}; invokes {@link RecurUtil#safeToString(Object)} 
-   * on each element
+   * {@code suffix}, and delimited by {@code delimiter}.  Invokes {@link RecurUtil#safeToString(Object)} 
+   * on each element.  If the iterable is known to be infinite ({@link #isInfinite}), the string contains 
+   * a few elements followed by {@code "..."}.
    */
   public static String toString(Iterable<?> iter, String prefix, String delimiter, String suffix) {
+    if (isInfinite(iter)) { iter = compose(new TruncatedIterable<Object>(iter, 8), "..."); }
     StringBuilder result = new StringBuilder();
     result.append(prefix);
     boolean first = true;
@@ -148,9 +163,9 @@ public final class IterUtil {
   }
   
   /**
-   * @return  {@code true} iff the lists are identical (according to {@code ==}), or they
-   *          have the same size (according to {@link #sizeOf}) and each corresponding 
-   *          element is equal (according to {@link LambdaUtil#EQUAL})
+   * Return {@code true} iff the lists are identical (according to {@code ==}), or they
+   * have the same size (according to {@link #sizeOf}) and each corresponding element is equal 
+   * (according to {@link LambdaUtil#EQUAL}).  Assumes that at least one of the iterables is finite.
    */
   public static boolean isEqual(Iterable<?> iter1, Iterable<?> iter2) {
     if (iter1 == iter2) { return true; }
@@ -159,10 +174,10 @@ public final class IterUtil {
   }
   
   /**
-   * @return  A hash code computed by xoring shifted copies of each element's hash code;
-   *          the result is consistent with {@link #isEqual}, but may not be consistent with
-   *          the input's {@code equals} and {@code hashCode} methods; invokes 
-   *          {@code RecurUtil#safeHashCode(Object)} on each element
+   * Return a hash code computed by xoring shifted copies of each element's hash code;
+   * the result is consistent with {@link #isEqual}, but may not be consistent with
+   * the input's {@code equals} and {@code hashCode} methods; invokes 
+   * {@code RecurUtil#safeHashCode(Object)} on each element. Assumes the iterable is finite.
    */
   public static int hashCode(Iterable<?> iter) {
     int result = Iterable.class.hashCode();
@@ -262,22 +277,22 @@ public final class IterUtil {
   }
   
   
-  /** Create an {@link EmptyIterable}; equivalent to {@link #make()} */
+  /** Create an {@link EmptyIterable}; equivalent to {@link #make()}. */
   @SuppressWarnings("unchecked") public static <T> EmptyIterable<T> empty() {
     return (EmptyIterable<T>) EmptyIterable.INSTANCE;
   }
   
-  /** Create a {@link SingletonIterable}; equivalent to {@link #make(Object)} */
+  /** Create a {@link SingletonIterable}; equivalent to {@link #make(Object)}. */
   public static <T> SingletonIterable<T> singleton(T value) {
     return new SingletonIterable<T>(value);
   }
   
-  /** Create a {@link ComposedIterable} with the given arguments */
+  /** Create a {@link ComposedIterable} with the given arguments. */
   public static <T> ComposedIterable<T> compose(T first, Iterable<? extends T> rest) {
     return new ComposedIterable<T>(first, rest);
   }
     
-  /** Produce a lambda that invokes {@link #compose(Object, Iterable)} */
+  /** Produce a lambda that invokes {@link #compose(Object, Iterable)}. */
   public static <T> Lambda2<T, Iterable<? extends T>, Iterable<T>> composeLeftLambda() {
     return (Lambda2<T, Iterable<? extends T>, Iterable<T>>) ComposeLeftLambda.INSTANCE;
   }
@@ -290,12 +305,12 @@ public final class IterUtil {
     }
   }
   
-  /** Create a {@link ComposedIterable} with the given arguments */
+  /** Create a {@link ComposedIterable} with the given arguments. */
   public static <T> ComposedIterable<T> compose(Iterable<? extends T> rest, T last) {
     return new ComposedIterable<T>(rest, last);
   }
     
-  /** Produce a lambda that invokes {@link #compose(Iterable, Object)} */
+  /** Produce a lambda that invokes {@link #compose(Iterable, Object)}. */
   public static <T> Lambda2<Iterable<? extends T>, T, Iterable<T>> composeRightLambda() {
     return (Lambda2<Iterable<? extends T>, T, Iterable<T>>) ComposeRightLambda.INSTANCE;
   }
@@ -308,12 +323,12 @@ public final class IterUtil {
     }
   }
   
-  /** Create a {@link ComposedIterable} with the given arguments */
+  /** Create a {@link ComposedIterable} with the given arguments. */
   public static <T> ComposedIterable<T> compose(Iterable<? extends T> i1, Iterable<? extends T> i2) {
     return new ComposedIterable<T>(i1, i2);
   }
   
-  /** Produce a lambda that invokes {@link #compose(Object, Iterable)} */
+  /** Produce a lambda that invokes {@link #compose(Object, Iterable)}. */
   public static <T> Lambda2<Iterable<? extends T>, Iterable<? extends T>, Iterable<T>> composeLambda() {
     return (Lambda2<Iterable<? extends T>, Iterable<? extends T>, Iterable<T>>) ComposeLambda.INSTANCE;
   }
@@ -327,23 +342,23 @@ public final class IterUtil {
   }
   
   
-  /** Create a {@link SnapshotIterable} with the given iterable */
+  /** Create a {@link SnapshotIterable} with the given iterable. */
   public static <T> SnapshotIterable<T> snapshot(Iterable<? extends T> iter) {
     return new SnapshotIterable<T>(iter);
   }
   
-  /** Create a {@link SnapshotIterable} with the given iterator */
+  /** Create a {@link SnapshotIterable} with the given iterator. */
   public static <T> SnapshotIterable<T> snapshot(Iterator<? extends T> iter) {
     return new SnapshotIterable<T>(iter);
   }
   
-  /** Create an {@link ImmutableIterable} with the given iterable */
+  /** Create an {@link ImmutableIterable} with the given iterable. */
   public static <T> ImmutableIterable<T> immutable(Iterable<? extends T> iter) {
     return new ImmutableIterable<T>(iter);
   }
     
   /**
-   * <p>Create a SizedIterable based on the given values or array.  Equivalent to {@link #asIterable(Object[])}.</p>
+   * <p>Create a SizedIterable based on the given values or array; equivalent to {@link #asIterable(Object[])}.</p>
    * 
    * <p>When used as a varargs method, an unchecked warning will occur at the call site when {@code T} is a 
    * non-reifiable (generic or variable) type.  As a workaround, the function is overloaded to take a range
@@ -418,6 +433,31 @@ public final class IterUtil {
     return new ObjectArrayWrapper<T>(values);
   }
   
+  /** Create an infinite sequence defined by an initial value and a successor function. */
+  public static <T> SequenceIterable<T> infiniteSequence(T initial, Lambda<? super T, ? extends T> successor) {
+    return new SequenceIterable<T>(initial, successor);
+  }
+  
+  /** Create a finite sequence of the given size defined by an initial value and a successor function. */
+  public static <T> FiniteSequenceIterable<T> finiteSequence(T initial, Lambda<? super T, ? extends T> successor, 
+                                                             int size) {
+    return new FiniteSequenceIterable<T>(initial, successor, size);
+  }
+  
+  /** 
+   * Create a simple sequence containing the numbers between {@code start} and {@code end}
+   * (inclusive).  {@code start} may be less than <em>or</em> greater than {@code end} (or even
+   * equal to it); the resulting iterator will increment or decrement as necessary.
+   */
+  public static FiniteSequenceIterable<Integer> integerSequence(int start, int end) {
+    return FiniteSequenceIterable.makeIntegerSequence(start, end);
+  }
+  
+  /** Create a sequence containing {@code copies} instances of the given value. */
+  public static <T> FiniteSequenceIterable<T> copy(T value, int copies) {
+    return FiniteSequenceIterable.makeCopies(value, copies);
+  }
+  
   /**
    * Create a SizedIterable wrapping the given array.  Subsequent changes to the array will be reflected in the
    * result.  (If that is not the desired behavior, {@link #snapshot(Iterable)} may be invoked on the result.)
@@ -432,6 +472,7 @@ public final class IterUtil {
     public ObjectArrayWrapper(T[] array) { _array = array; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return true; }
     public Iterator<T> iterator() {
       return new IndexedIterator<T>() {
@@ -455,6 +496,7 @@ public final class IterUtil {
     public BooleanArrayWrapper(boolean[] array) { _array = array; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return true; }
     public Iterator<Boolean> iterator() {
       return new IndexedIterator<Boolean>() {
@@ -478,6 +520,7 @@ public final class IterUtil {
     public CharArrayWrapper(char[] array) { _array = array; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return true; }
     public Iterator<Character> iterator() {
       return new IndexedIterator<Character>() {
@@ -501,6 +544,7 @@ public final class IterUtil {
     public ByteArrayWrapper(byte[] array) { _array = array; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return true; }
     public Iterator<Byte> iterator() {
       return new IndexedIterator<Byte>() {
@@ -524,6 +568,7 @@ public final class IterUtil {
     public ShortArrayWrapper(short[] array) { _array = array; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return true; }
     public Iterator<Short> iterator() {
       return new IndexedIterator<Short>() {
@@ -547,6 +592,7 @@ public final class IterUtil {
     public IntArrayWrapper(int[] array) { _array = array; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return true; }
     public Iterator<Integer> iterator() {
       return new IndexedIterator<Integer>() {
@@ -570,6 +616,7 @@ public final class IterUtil {
     public LongArrayWrapper(long[] array) { _array = array; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return true; }
     public Iterator<Long> iterator() {
       return new IndexedIterator<Long>() {
@@ -593,6 +640,7 @@ public final class IterUtil {
     public FloatArrayWrapper(float[] array) { _array = array; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return true; }
     public Iterator<Float> iterator() {
       return new IndexedIterator<Float>() {
@@ -616,6 +664,7 @@ public final class IterUtil {
     public DoubleArrayWrapper(double[] array) { _array = array; }
     public int size() { return _array.length; }
     public int size(int bound) { return _array.length <= bound ? _array.length : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return true; }
     public Iterator<Double> iterator() {
       return new IndexedIterator<Double>() {
@@ -626,7 +675,7 @@ public final class IterUtil {
   }
   
   /** 
-   * @return  An iterable that traverses the given array
+   * Returns an iterable that traverses the given array, which may contain primitives or references.
    * @throws IllegalArgumentException  If {@code array} is not an array
    */
   public static SizedIterable<?> arrayAsIterable(Object array) {
@@ -648,22 +697,23 @@ public final class IterUtil {
    * to the collection will be reflected in the result (if this is not the desired behavior,
    * {@link #snapshot(Iterable)} can be used instead).
    */
-  public static <T> SizedIterable<T> asIterable(Collection<T> coll) {
+  public static <T> SizedIterable<T> asSizedIterable(Collection<T> coll) {
     return new CollectionWrapper<T>(coll);
   }
   
   private static final class CollectionWrapper<T> extends AbstractIterable<T> 
-    implements SizedIterable<T>, Serializable {
+                                                  implements SizedIterable<T>, Serializable {
     private final Collection<T> _c;
     public CollectionWrapper(Collection<T> c) { _c = c; }
     public Iterator<T> iterator() { return _c.iterator(); }
     public int size() { return _c.size(); }
     public int size(int bound) { int result = _c.size(); return result <= bound ? result : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return isFixedCollection(_c); }
   }
   
 
-  /** Create an iterable that wraps the given {@code CharSequence} */
+  /** Create an iterable that wraps the given {@code CharSequence}. */
   public static SizedIterable<Character> asIterable(CharSequence sequence) {
     return new CharSequenceWrapper(sequence, false);
   }
@@ -683,6 +733,7 @@ public final class IterUtil {
     public CharSequenceWrapper(CharSequence s, boolean fixed) { _s = s; _fixed = fixed; }
     public int size() { return _s.length(); }
     public int size(int bound) { int result = _s.length(); return result <= bound ? result : bound; }
+    public boolean isInfinite() { return false; }
     public boolean isFixed() { return _fixed; }
     public Iterator<Character> iterator() {
       return new IndexedIterator<Character>() {
@@ -767,13 +818,13 @@ public final class IterUtil {
   /**
    * Make a {@code List} with the given elements.  If the input <em>is</em> a {@code List},
    * casts it as such; otherwise, creates a new list.  In the second case, changes made to
-   * one will necessarily not be reflected in the other.
+   * one will necessarily not be reflected in the other.  Assumes the iterable is finite.
    */
   public static <T> List<T> asList(Iterable<T> iter) {
     if (iter instanceof List<?>) { return (List<T>) iter; }
     else if (iter instanceof Collection<?>) { return new ArrayList<T>((Collection<T>) iter); }
     else {
-      LinkedList<T> result = new LinkedList<T>();
+      ArrayList<T> result = new ArrayList<T>(0); // minimize footprint of empty
       for (T e : iter) { result.add(e); }
       return result;
     }
@@ -782,13 +833,13 @@ public final class IterUtil {
   /**
    * Make an {@code ArrayList} with the given elements.  If the input <em>is</em> an {@code ArrayList},
    * casts it as such; otherwise, creates a new list.  In the second case, changes made to
-   * one will necessarily not be reflected in the other.
+   * one will necessarily not be reflected in the other.  Assumes the iterable is finite.
    */
   public static <T> ArrayList<T> asArrayList(Iterable<T> iter) {
     if (iter instanceof ArrayList<?>) { return (ArrayList<T>) iter; }
     else if (iter instanceof Collection<?>) { return new ArrayList<T>((Collection<T>) iter); }
     else {
-      ArrayList<T> result = new ArrayList<T>();
+      ArrayList<T> result = new ArrayList<T>(0); // minimize footprint of empty
       for (T e : iter) { result.add(e); }
       return result;
     }
@@ -797,7 +848,7 @@ public final class IterUtil {
   /**
    * Make a {@link LinkedList} with the given elements.  If the input <em>is</em> a {@code List},
    * casts it as such; otherwise, creates a new list.  In the second case, changes made to
-   * one will necessarily not be reflected in the other.
+   * one will necessarily not be reflected in the other.  Assumes the iterable is finite.
    */
   public static <T> LinkedList<T> asLinkedList(Iterable<T> iter) {
     if (iter instanceof LinkedList<?>) { return (LinkedList<T>) iter; }
@@ -812,7 +863,8 @@ public final class IterUtil {
   /**
    * Make a {@link ConsList} with the given elements.  If the input <em>is</em> a {@code ConsList},
    * casts it as such; otherwise, creates a new list.  Of course, since ConsLists are immutable,
-   * subsequent changes made to {@code iter} will not be reflected in the result.
+   * subsequent changes made to {@code iter} will not be reflected in the result.  Assumes the iterable
+   * is finite.
    */
   public static <T> ConsList<T> asConsList(Iterable<T> iter) {
     if (iter instanceof ConsList<?>) { return (ConsList<T>) iter; }
@@ -826,7 +878,8 @@ public final class IterUtil {
   /**
    * Make an array with the given elements.  Takes advantage of the (potentially optimized)
    * {@link Collection#toArray} method where possible; otherwise, just iterates through
-   * {@code iter} to fill the array.
+   * {@code iter} to fill the array.  If the size of the iterable is larger than {@code Integer.MAX_VALUE}
+   * or is infinite, it will be truncated to fit in an array.
    */
   public static <T> T[] asArray(Iterable<? extends T> iter, Class<T> type) {
     // Cast is safe because the result has the type of the variable "type"
@@ -836,7 +889,7 @@ public final class IterUtil {
     }
     else {
       int i = 0;
-      for (T t : iter) { result[i] = t; i++; }
+      for (T t : iter) { result[i] = t; i++; if (i < 0) break; }
     }
     return result;
   }
@@ -858,7 +911,7 @@ public final class IterUtil {
   /**
    * Access the last value in the given iterable.  With the exception of some special cases
    * ({@link OptimizedLastIterable}s, {@link SortedSet}s, or {@link List}s), this operation takes time on 
-   * the order of the length of the list.
+   * the order of the length of the list.  Assumes the iterable is finite.
    * @throws NoSuchElementException  If the iterable is empty
    */
   public static <T> T last(Iterable<? extends T> iter) {
@@ -883,7 +936,10 @@ public final class IterUtil {
     }
   }
   
-  /** Produce an iterable that skips the last element of {@code iter} (if it exists) */
+  /**
+   * Produce an iterable that skips the last element of {@code iter} (if it exists).  Assumes the iterable
+   * is finite.
+   */
   public static <T> SkipLastIterable<T> skipLast(Iterable<? extends T> iter) {
     return new SkipLastIterable<T>(iter);
   }
@@ -1006,6 +1062,7 @@ public final class IterUtil {
                                              i.next());
   }
   
+  
   /**
    * Produce a reverse-order iterable over the given elements.  Subsequent changes to {@code iter} will not
    * be reflected in the result.  Runs in linear time.
@@ -1023,7 +1080,7 @@ public final class IterUtil {
   public static <T> SizedIterable<T> shuffle(Iterable<T> iter) {
     ArrayList<T> result = asArrayList(iter);
     Collections.shuffle(result);
-    return asIterable(result);
+    return asSizedIterable(result);
   }
   
   /**
@@ -1033,7 +1090,7 @@ public final class IterUtil {
   public static <T> SizedIterable<T> shuffle(Iterable<T> iter, Random random) {
     ArrayList<T> result = asArrayList(iter);
     Collections.shuffle(result, random);
-    return asIterable(result);
+    return asSizedIterable(result);
   }
   
   /**
@@ -1043,7 +1100,7 @@ public final class IterUtil {
   public static <T extends Comparable<? super T>> SizedIterable<T> sort(Iterable<T> iter) {
     ArrayList<T> result = asArrayList(iter);
     Collections.sort(result);
-    return asIterable(result);
+    return asSizedIterable(result);
   }
   
   /**
@@ -1053,7 +1110,7 @@ public final class IterUtil {
   public static <T> SizedIterable<T> sort(Iterable<T> iter, Comparator<? super T> comp) {
     ArrayList<T> result = asArrayList(iter);
     Collections.sort(result, comp);
-    return asIterable(result);
+    return asSizedIterable(result);
   }
   
   
@@ -1062,7 +1119,7 @@ public final class IterUtil {
    * {@code iter} will belong to the first half; the rest will belong to the second half.
    * Where there are less than {@code index} values in {@code iter}, the first half will contain
    * them all and the second half will be empty.  Note that the result is a snapshot &mdash; later
-   * modifications to {@code iter} will not be reflected.
+   * modifications to {@code iter} will not be reflected.  Assumes the iterable is finite.
    */
   public static <T> Pair<SizedIterable<T>, SizedIterable<T>> split(Iterable<? extends T> iter, int index) {
     Iterator<? extends T> iterator = iter.iterator();
@@ -1074,10 +1131,18 @@ public final class IterUtil {
   }
   
   /**
+   * Truncate the given iterable.  The result will have size less than or equal to {@code size}.  Subsequent
+   * changes to {@code iter} <em>will</em> be reflected in the result.
+   */
+  public static <T> TruncatedIterable<T> truncate(Iterable<? extends T> iter, int size) {
+    return new TruncatedIterable<T>(iter, size);
+  }
+  
+  /**
    * Collapse a list of lists into a single list.  Subsequent changes to {@code iter} or its sublists
    * will be reflected in the result.
    */
-  public static <T> SizedIterable<T> collapse(Iterable<? extends Iterable<? extends T>> iters) {
+  public static <T> CollapsedIterable<T> collapse(Iterable<? extends Iterable<? extends T>> iters) {
     return new CollapsedIterable<T>(iters);
   }
   
@@ -1091,9 +1156,20 @@ public final class IterUtil {
     return new SnapshotIterable<T>(new FilteredIterable<T>(iter, pred));
   }
   
+  /**
+   * Compute the left fold of the given list.  That is, for some combination function {@code #} (written here
+   * with infix notation), compute {@code base # iter.next() # iter.next() # ...}.  Assumes the iterable is finite.
+   */
+  public static <T, R> R fold(Iterable<? extends T> iter, R base,
+                              Lambda2<? super R, ? super T, ? extends R> combiner) {
+    R result = base;
+    for (T elt : iter) { result = combiner.value(result, elt); }
+    return result;
+  }
+  
   /** 
    * Check whether the given predicate holds for all values in {@code iter}.  Computation halts immediately where the 
-   * predicate fails.
+   * predicate fails.  May never halt if the iterable is infinite.
    */
   public static <T> boolean and(Iterable<? extends T> iter, Predicate<? super T> pred) {
     for (T elt : iter) { if (!pred.value(elt)) { return false; } }
@@ -1102,7 +1178,7 @@ public final class IterUtil {
   
   /** 
    * Check whether the given predicate holds for some value in {@code iter}.  Computation halts immediately where the 
-   * predicate succeeds.
+   * predicate succeeds.  May never halt if the interable is infinite.
    */
   public static <T> boolean or(Iterable<? extends T> iter, Predicate<? super T> pred) {
     for (T elt : iter) { if (pred.value(elt)) { return true; } }
@@ -1112,6 +1188,7 @@ public final class IterUtil {
   /** 
    * Check whether the given predicate holds for all corresponding values in {@code iter1} and {@code iter2}.  The
    * iterables are assumed to have the same length; computation halts immediately where the predicate fails.
+   * May never halt if the iterables are infinite.
    */
   public static <T1, T2> boolean and(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
                                      Predicate2<? super T1, ? super T2> pred) {
@@ -1124,6 +1201,7 @@ public final class IterUtil {
   /** 
    * Check whether the given predicate holds for some corresponding values in {@code iter1} and {@code iter2}.  The
    * iterables are assumed to have the same length; computation halts immediately where the predicate succeeds.
+   * May never halt if the iterables are infinite.
    */
   public static <T1, T2> boolean or(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
                                     Predicate2<? super T1, ? super T2> pred) {
@@ -1136,6 +1214,7 @@ public final class IterUtil {
   /** 
    * Check whether the given predicate holds for all corresponding values in the given iterables.  The iterables
    * are assumed to all have the same length; computation halts immediately where the predicate fails.
+   * May never halt if the iterables are infinite.
    */
   public static <T1, T2, T3> boolean and(Iterable<? extends T1> iter1, 
                                          Iterable<? extends T2> iter2,
@@ -1151,6 +1230,7 @@ public final class IterUtil {
   /** 
    * Check whether the given predicate holds for some corresponding values in the given iterables.  The iterables
    * are assumed to all have the same length; computation halts immediately where the predicate fails.
+   * May never halt if the iterables are infinite.
    */
   public static <T1, T2, T3> boolean or(Iterable<? extends T1> iter1, 
                                         Iterable<? extends T2> iter2,
@@ -1166,6 +1246,7 @@ public final class IterUtil {
   /** 
    * Check whether the given predicate holds for all corresponding values in the given iterables.  The iterables
    * are assumed to all have the same length; computation halts immediately where the predicate fails.
+   * May never halt if the iterables are infinite.
    */
   public static <T1, T2, T3, T4> boolean and(Iterable<? extends T1> iter1, 
                                              Iterable<? extends T2> iter2,
@@ -1185,6 +1266,7 @@ public final class IterUtil {
   /** 
    * Check whether the given predicate holds for some corresponding values in the given iterables.  The iterables
    * are assumed to all have the same length; computation halts immediately where the predicate fails.
+   * May never halt if the iterables are infinite.
    */
   public static <T1, T2, T3, T4> boolean or(Iterable<? extends T1> iter1, 
                                             Iterable<? extends T2> iter2,
@@ -1201,35 +1283,96 @@ public final class IterUtil {
     return false;
   }
   
-  /** Create a {@code MappedIterable} with the given arguments */
-  public static <S, T> MappedIterable<S, T> map(Iterable<? extends S> source, Lambda<? super S, ? extends T> map) {
-    return new MappedIterable<S, T>(source, map);
+  
+  /** Lazily apply a map function to each element in an iterable. */
+  public static <T, R> SizedIterable<R> map(Iterable<? extends T> source, Lambda<? super T, ? extends R> map) {
+    return new MappedIterable<T, R>(source, map);
+  }
+  
+  /** Immediately apply a map function to each element in an iterable. */
+  public static <T, R> SnapshotIterable<R> mapSnapshot(Iterable<? extends T> source,
+                                                       Lambda<? super T, ? extends R> map) {
+    return new SnapshotIterable<R>(new MappedIterable<T, R>(source, map));
   }
   
   /**
-   * Create a {@link MappedIterable} and wrap it in a {@code SnapshotIterable}, forcing
-   * immediate evaluation of the mapping.
+   * Lazily apply a map function to each corresponding pair of elements in the given iterables. The input 
+   * iterables are assumed to have the same size.
    */
-  public static <S, T> SnapshotIterable<T> mapSnapshot(Iterable<? extends S> source, Lambda<? super S, ? extends T> map) {
-    return new SnapshotIterable<T>(new MappedIterable<S, T>(source, map));
+  public static <T1, T2, R> SizedIterable<R> map(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, 
+                                                 Lambda2<? super T1, ? super T2, ? extends R> map) {
+    return new BinaryMappedIterable<T1, T2, R>(iter1, iter2, map);
   }
   
   /**
-   * Compute the left fold of the given list.  That is, for some combination function {@code #} (written here
-   * with infix notation), compute {@code base # iter.next() # iter.next() # ...}.
+   * Immediately apply a map function to each corresponding pair of elements in the given iterables. The input 
+   * iterables are assumed to have the same size.
    */
-  public static <T, R> R fold(Iterable<? extends T> iter, R base,
-                              Lambda2<? super R, ? super T, ? extends R> combiner) {
-    R result = base;
-    for (T elt : iter) { result = combiner.value(result, elt); }
-    return result;
+  public static <T1, T2, R> SnapshotIterable<R> mapSnapshot(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
+                                                            Lambda2<? super T1, ? super T2, ? extends R> map) {
+    return new SnapshotIterable<R>(new BinaryMappedIterable<T1, T2, R>(iter1, iter2, map));
   }
+  
+  /**
+   * Lazily apply a map function to each corresponding triple of elements in the given iterables. The input 
+   * iterables are assumed to have the same size.
+   */
+  public static <T1, T2, T3, R> SizedIterable<R> map(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, 
+                                                     Iterable<? extends T3> iter3,
+                                                     Lambda3<? super T1, ? super T2, ? super T3, ? extends R> map) {
+    Iterable<Lambda<T1, Lambda<T2, Lambda<T3, R>>>> r0 = singleton(LambdaUtil.<T1, T2, T3, R>curry(map));
+    Iterable<Lambda<T2, Lambda<T3, R>>> r1 =
+      cross(r0, iter1, LambdaUtil.<T1, Lambda<T2, Lambda<T3, R>>>applicationLambda());
+    Iterable<Lambda<T3, R>> r2 =
+      BinaryMappedIterable.make(r1, iter2, LambdaUtil.<T2, Lambda<T3, R>>applicationLambda());
+    return BinaryMappedIterable.make(r2, iter3, LambdaUtil.<T3, R>applicationLambda());
+  }
+  
+  /**
+   * Immediately apply a map function to each corresponding triple of elements in the given iterables. The input 
+   * iterables are assumed to have the same size.
+   */
+  public static <T1, T2, T3, R> SnapshotIterable<R>
+    mapSnapshot(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, Iterable<? extends T3> iter3,
+                Lambda3<? super T1, ? super T2, ? super T3, ? extends R> map) {
+    return new SnapshotIterable<R>(map(iter1, iter2, iter3, map));
+  }
+  
+  /**
+   * Lazily apply a map function to each corresponding quadruple of elements in the given iterables. The input 
+   * iterables are assumed to have the same size.
+   */
+  public static <T1, T2, T3, T4, R> SizedIterable<R>
+    map(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, Iterable<? extends T3> iter3, 
+        Iterable<? extends T4> iter4, Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> map) {
+    Iterable<Lambda<T1, Lambda<T2, Lambda<T3, Lambda<T4, R>>>>> r0 = 
+      singleton(LambdaUtil.<T1, T2, T3, T4, R>curry(map));
+    Iterable<Lambda<T2, Lambda<T3, Lambda<T4, R>>>> r1 =
+      cross(r0, iter1, LambdaUtil.<T1, Lambda<T2, Lambda<T3, Lambda<T4, R>>>>applicationLambda());
+    Iterable<Lambda<T3, Lambda<T4, R>>> r2 =
+      BinaryMappedIterable.make(r1, iter2, LambdaUtil.<T2, Lambda<T3, Lambda<T4, R>>>applicationLambda());
+    Iterable<Lambda<T4, R>> r3 =
+      BinaryMappedIterable.make(r2, iter3, LambdaUtil.<T3, Lambda<T4, R>>applicationLambda());
+    return BinaryMappedIterable.make(r3, iter4, LambdaUtil.<T4, R>applicationLambda());
+  }
+  
+  /**
+   * Immediately apply a map function to each corresponding quadruple of elements in the given iterables. The input 
+   * iterables are assumed to have the same size.
+   */
+  public static <T1, T2, T3, T4, R> SnapshotIterable<R>
+    mapSnapshot(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, Iterable<? extends T3> iter3,
+                Iterable<? extends T4> iter4,
+                Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> map) {
+    return new SnapshotIterable<R>(map(iter1, iter2, iter3, iter4, map));
+  }
+  
   
   /**
    * Lazily produce the cartesian (cross) product of two iterables.  Each pair of elements is combined by the 
    * given function.  The order of results is defined by {@link CartesianIterable}.
    */
-  public static <T1, T2, R> Iterable<R> cross(Iterable<? extends T1> left, Iterable<? extends T2> right,
+  public static <T1, T2, R> SizedIterable<R> cross(Iterable<? extends T1> left, Iterable<? extends T2> right,
                                               Lambda2<? super T1, ? super T2, ? extends R> combiner) {
     return new CartesianIterable<T1, T2, R>(left, right, combiner);
   }
@@ -1238,8 +1381,26 @@ public final class IterUtil {
    * Lazily produce the cartesian (cross) product of two iterables, wrapping each combination of elements in a 
    * {@code Pair}.  The order of results is defined by {@link CartesianIterable}.
    */
-  public static <T1, T2> Iterable<Pair<T1, T2>> cross(Iterable<? extends T1> left, Iterable<? extends T2> right) {
+  public static <T1, T2> SizedIterable<Pair<T1, T2>> cross(Iterable<? extends T1> left, Iterable<? extends T2> right) {
     return cross(left, right, Pair.<T1, T2>factory());
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of two iterables.  Each pair of elements is combined by the 
+   * given function.  The order of results is defined by {@link DiagonalCartesianIterable}.
+   */
+  public static <T1, T2, R> SizedIterable<R> diagonalCross(Iterable<? extends T1> left, Iterable<? extends T2> right,
+                                                           Lambda2<? super T1, ? super T2, ? extends R> combiner) {
+    return new DiagonalCartesianIterable<T1, T2, R>(left, right, combiner);
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of two iterables, wrapping each combination of elements in a 
+   * {@code Pair}.  The order of results is defined by {@link DiagonalCartesianIterable}.
+   */
+  public static <T1, T2> SizedIterable<Pair<T1, T2>> diagonalCross(Iterable<? extends T1> left, 
+                                                                   Iterable<? extends T2> right) {
+    return diagonalCross(left, right, Pair.<T1, T2>factory());
   }
   
   /**
@@ -1247,8 +1408,8 @@ public final class IterUtil {
    * given function.  The order of results is defined by {@link CartesianIterable}.
    */
   public static <T1, T2, T3, R>
-    Iterable<R> cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, Iterable<? extends T3> iter3, 
-                      Lambda3<? super T1, ? super T2, ? super T3, ? extends R> combiner) {
+    SizedIterable<R> cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, Iterable<? extends T3> iter3, 
+                           Lambda3<? super T1, ? super T2, ? super T3, ? extends R> combiner) {
     Iterable<Lambda<T1, Lambda<T2, Lambda<T3, R>>>> r0 = singleton(LambdaUtil.<T1, T2, T3, R>curry(combiner));
     Iterable<Lambda<T2, Lambda<T3, R>>> r1 =
       CartesianIterable.make(r0, iter1, LambdaUtil.<T1, Lambda<T2, Lambda<T3, R>>>applicationLambda());
@@ -1261,9 +1422,33 @@ public final class IterUtil {
    * Lazily produce the cartesian (cross) product of three iterables, wrapping each combination of elements in a 
    * {@code Triple}.  The order of results is defined by {@link CartesianIterable}.
    */
-  public static <T1, T2, T3> Iterable<Triple<T1, T2, T3>>
+  public static <T1, T2, T3> SizedIterable<Triple<T1, T2, T3>>
     cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, Iterable<? extends T3> iter3) {
     return cross(iter1, iter2, iter3, Triple.<T1, T2, T3>factory());
+  }
+
+  /**
+   * Lazily produce the cartesian (cross) product of three iterables.  Each triple of elements is combined by the 
+   * given function.  The order of results is defined by {@link DiagonalCartesianIterable}.
+   */
+  public static <T1, T2, T3, R> SizedIterable<R>
+    diagonalCross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, Iterable<? extends T3> iter3, 
+                  Lambda3<? super T1, ? super T2, ? super T3, ? extends R> combiner) {
+    Iterable<Lambda<T1, Lambda<T2, Lambda<T3, R>>>> r0 = singleton(LambdaUtil.<T1, T2, T3, R>curry(combiner));
+    Iterable<Lambda<T2, Lambda<T3, R>>> r1 =
+      DiagonalCartesianIterable.make(r0, iter1, LambdaUtil.<T1, Lambda<T2, Lambda<T3, R>>>applicationLambda());
+    Iterable<Lambda<T3, R>> r2 =
+      DiagonalCartesianIterable.make(r1, iter2,LambdaUtil.<T2, Lambda<T3, R>>applicationLambda());
+    return DiagonalCartesianIterable.make(r2, iter3, LambdaUtil.<T3, R>applicationLambda());
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of three iterables, wrapping each combination of elements in a 
+   * {@code Triple}.  The order of results is defined by {@link DiagonalCartesianIterable}.
+   */
+  public static <T1, T2, T3> SizedIterable<Triple<T1, T2, T3>>
+    diagonalCross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2, Iterable<? extends T3> iter3) {
+    return diagonalCross(iter1, iter2, iter3, Triple.<T1, T2, T3>factory());
   }
   
   /**
@@ -1271,9 +1456,9 @@ public final class IterUtil {
    * given function.  The order of results is defined by {@link CartesianIterable}.
    */
   public static <T1, T2, T3, T4, R>
-    Iterable<R> cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
-                      Iterable<? extends T3> iter3, Iterable<? extends T4> iter4,
-                      Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> combiner) {
+    SizedIterable<R> cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
+                           Iterable<? extends T3> iter3, Iterable<? extends T4> iter4,
+                           Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> combiner) {
     Iterable<Lambda<T1, Lambda<T2, Lambda<T3, Lambda<T4, R>>>>> r0 =
       singleton(LambdaUtil.<T1, T2, T3, T4, R>curry(combiner));
     Iterable<Lambda<T2, Lambda<T3, Lambda<T4, R>>>> r1 =
@@ -1290,220 +1475,165 @@ public final class IterUtil {
    * {@code Quad}.  The order of results is defined by {@link CartesianIterable}.
    */
   public static <T1, T2, T3, T4>
-    Iterable<Quad<T1, T2, T3, T4>> cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
+    SizedIterable<Quad<T1, T2, T3, T4>> cross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
                                          Iterable<? extends T3> iter3, Iterable<? extends T4> iter4) {
     return cross(iter1, iter2, iter3, iter4, Quad.<T1, T2, T3, T4>factory());
   }
   
   /**
+   * Lazily produce the cartesian (cross) product of four iterables.  Each quadruple of elements is combined by the 
+   * given function.  The order of results is defined by {@link DiagonalCartesianIterable}.
+   */
+  public static <T1, T2, T3, T4, R>
+    SizedIterable<R> diagonalCross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
+                                   Iterable<? extends T3> iter3, Iterable<? extends T4> iter4,
+                                   Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> combiner) {
+    Iterable<Lambda<T1, Lambda<T2, Lambda<T3, Lambda<T4, R>>>>> r0 =
+      singleton(LambdaUtil.<T1, T2, T3, T4, R>curry(combiner));
+    Iterable<Lambda<T2, Lambda<T3, Lambda<T4, R>>>> r1 =
+      DiagonalCartesianIterable.make(r0, iter1, 
+                                     LambdaUtil.<T1, Lambda<T2, Lambda<T3, Lambda<T4, R>>>>applicationLambda());
+    Iterable<Lambda<T3, Lambda<T4, R>>> r2 =
+      DiagonalCartesianIterable.make(r1, iter2, LambdaUtil.<T2, Lambda<T3, Lambda<T4, R>>>applicationLambda());
+    Iterable<Lambda<T4, R>> r3 =
+      DiagonalCartesianIterable.make(r2, iter3,LambdaUtil.<T3, Lambda<T4, R>>applicationLambda());
+    return DiagonalCartesianIterable.make(r3, iter4, LambdaUtil.<T4, R>applicationLambda());
+  }
+  
+  /**
+   * Lazily produce the cartesian (cross) product of four iterables, wrapping each combination of elements in a 
+   * {@code Quad}.  The order of results is defined by {@link DiagonalCartesianIterable}.
+   */
+  public static <T1, T2, T3, T4>
+    SizedIterable<Quad<T1, T2, T3, T4>> diagonalCross(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
+                                                      Iterable<? extends T3> iter3, Iterable<? extends T4> iter4) {
+    return diagonalCross(iter1, iter2, iter3, iter4, Quad.<T1, T2, T3, T4>factory());
+  }
+  
+  /**
    * Lazily produce the cartesian (cross) product of an arbitrary number of iterables.  Each tuple in the result 
    * is represented by an iterable.  If {@code iters} is empty, the result is a single empty iterable.
-   * The order of results is defined by {@link CartesianIterable}.
+   * The order of results is defined by {@link CartesianIterable}.  The input iterable is assumed to be finite;
+   * the elements of this list, on the other hand, need not be.
    */
-  public static <T> Iterable<Iterable<T>> cross(Iterable<? extends Iterable<? extends T>> iters) {
+  public static <T> SizedIterable<Iterable<T>> cross(Iterable<? extends Iterable<? extends T>> iters) {
     return crossFold(iters, IterUtil.<T>empty(), IterUtil.<T>composeRightLambda());
   }  
   
   /**
-   * Apply the given folding function to each tuple in the cartesian (cross) product of the given iterables.
-   * The order of results is defined by {@link CartesianIterable}.
+   * Lazily produce the cartesian (cross) product of an arbitrary number of iterables.  Each tuple in the result 
+   * is represented by an iterable.  If {@code iters} is empty, the result is a single empty iterable.
+   * The order of results is defined by {@link DiagonalCartesianIterable}.  The input iterable is assumed 
+   * to be finite; the elements of this list, on the other hand, need not be.
    */
-  public static <T, R> Iterable<R> crossFold(Iterable<? extends Iterable<? extends T>> iters, R base,
-                                             Lambda2<? super R, ? super T, ? extends R> combiner) {
-    Iterable<R> result = singleton(base);
+  public static <T> SizedIterable<Iterable<T>> diagonalCross(Iterable<? extends Iterable<? extends T>> iters) {
+    return diagonalCrossFold(iters, IterUtil.<T>empty(), IterUtil.<T>composeRightLambda());
+  }  
+  
+  /**
+   * Lazily apply the given folding function to each tuple in the cartesian (cross) product of the given iterables.
+   * The order of results is defined by {@link CartesianIterable}.  The input iterable is assumed 
+   * to be finite; the elements of this list, on the other hand, need not be.
+   */
+  public static <T, R> SizedIterable<R> crossFold(Iterable<? extends Iterable<? extends T>> iters, R base,
+                                                  Lambda2<? super R, ? super T, ? extends R> combiner) {
+    SizedIterable<R> result = singleton(base);
     for (Iterable<? extends T> iter : iters) {
       result = new CartesianIterable<R, T, R>(result, iter, combiner);
     }
     return result;
   }
   
+  /**
+   * Lazily apply the given folding function to each tuple in the cartesian (cross) product of the given iterables.
+   * The order of results is defined by {@link DiagonalCartesianIterable}.  The input iterable is assumed 
+   * to be finite; the elements of this list, on the other hand, need not be.
+   */
+  public static <T, R> SizedIterable<R> diagonalCrossFold(Iterable<? extends Iterable<? extends T>> iters, R base,
+                                                          Lambda2<? super R, ? super T, ? extends R> combiner) {
+    SizedIterable<R> result = singleton(base);
+    for (Iterable<? extends T> iter : iters) {
+      result = new DiagonalCartesianIterable<R, T, R>(result, iter, combiner);
+    }
+    return result;
+  }
+  
+  
   /** Lazily create an iterable containing the values of the given thunks. */
   public static <R> Iterable<R> valuesOf(Iterable<? extends Thunk<? extends R>> iter) {
-    @SuppressWarnings("unchecked") ThunkValue<R> l = (ThunkValue<R>) ThunkValue.INSTANCE;
-    return new MappedIterable<Thunk<? extends R>, R>(iter, l);
+    return new MappedIterable<Thunk<? extends R>, R>(iter, LambdaUtil.<R>thunkValueLambda());
   }
   
-  private static final class ThunkValue<R> implements Lambda<Thunk<? extends R>, R>, Serializable {
-    public static final ThunkValue<Void> INSTANCE = new ThunkValue<Void>();
-    private ThunkValue() {}
-    public R value(Thunk<? extends R> t) { return t.value(); }
-  }
-    
   /** Lazily create an iterable containing the values of the application of the given lambdas. */
   public static <T, R> Iterable<R> valuesOf(Iterable<? extends Lambda<? super T, ? extends R>> iter, T arg) {
-    return new MappedIterable<Lambda<? super T, ? extends R>, R>(iter, new LambdaValue<T, R>(arg));
-  }
-  
-  private static final class LambdaValue<T, R> implements Lambda<Lambda<? super T, ? extends R>, R>, Serializable {
-    private final T _arg;
-    public LambdaValue(T arg) { _arg = arg; }
-    public R value(Lambda<? super T, ? extends R> l) { return l.value(_arg); }
+    Lambda<Lambda<? super T, ? extends R>, R> l = LambdaUtil.bindSecond(LambdaUtil.<T, R>applicationLambda(), arg);
+    return new MappedIterable<Lambda<? super T, ? extends R>, R>(iter, l);
   }
     
   /** Lazily create an iterable containing the values of the application of the given lambdas. */
   public static <T1, T2, R> Iterable<R> 
     valuesOf(Iterable<? extends Lambda2<? super T1, ? super T2, ? extends R>> iter, T1 arg1, T2 arg2) {
-    return new MappedIterable<Lambda2<? super T1, ? super T2, ? extends R>, R>
-                 (iter, new Lambda2Value<T1, T2, R>(arg1, arg2));
+    Lambda<Lambda2<? super T1, ? super T2, ? extends R>, R> l = 
+      LambdaUtil.bindSecond(LambdaUtil.bindThird(LambdaUtil.<T1, T2, R>binaryApplicationLambda(), arg2), arg1);
+    return new MappedIterable<Lambda2<? super T1, ? super T2, ? extends R>, R>(iter, l);
   }
   
-  private static final class Lambda2Value<T1, T2, R> 
-    implements Lambda<Lambda2<? super T1, ? super T2, ? extends R>, R>, Serializable {
-    private final T1 _arg1;
-    private final T2 _arg2;
-    public Lambda2Value(T1 arg1, T2 arg2) { _arg1 = arg1; _arg2 = arg2; }
-    public R value(Lambda2<? super T1, ? super T2, ? extends R> l) { return l.value(_arg1, _arg2); }
-  }
-    
   /** Lazily create an iterable containing the values of the application of the given lambdas. */
   public static <T1, T2, T3, R> Iterable<R>
     valuesOf(Iterable<? extends Lambda3<? super T1, ? super T2, ? super T3, ? extends R>> iter, 
              T1 arg1, T2 arg2, T3 arg3) {
-    return new MappedIterable<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, R>
-                 (iter, new Lambda3Value<T1, T2, T3, R>(arg1, arg2, arg3));
+    Lambda<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, R> l = 
+      LambdaUtil.bindSecond(LambdaUtil.bindThird(LambdaUtil.bindFourth(
+                            LambdaUtil.<T1, T2, T3, R>ternaryApplicationLambda(), arg3), arg2), arg1);
+    return new MappedIterable<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, R>(iter, l);
   }
   
-  private static final class Lambda3Value<T1, T2, T3, R> 
-    implements Lambda<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, R>, Serializable {
-    private final T1 _arg1;
-    private final T2 _arg2;
-    private final T3 _arg3;
-    public Lambda3Value(T1 arg1, T2 arg2, T3 arg3) { _arg1 = arg1; _arg2 = arg2; _arg3 = arg3; }
-    public R value(Lambda3<? super T1, ? super T2, ? super T3, ? extends R> l) {
-      return l.value(_arg1, _arg2, _arg3);
-    }
-  }
-    
-  /** Lazily create an iterable containing the values of the application of the given lambdas. */
-  public static <T1, T2, T3, T4, R> Iterable<R>
-    valuesOf(Iterable<? extends Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R>> iter, 
-             T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
-    return new MappedIterable<Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R>, R>
-                 (iter, new Lambda4Value<T1, T2, T3, T4, R>(arg1, arg2, arg3, arg4));
-  }
-  
-  private static final class Lambda4Value<T1, T2, T3, T4, R> 
-    implements Lambda<Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R>, R>, Serializable {
-    private final T1 _arg1;
-    private final T2 _arg2;
-    private final T3 _arg3;
-    private final T4 _arg4;
-    public Lambda4Value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
-      _arg1 = arg1; _arg2 = arg2; _arg3 = arg3; _arg4 = arg4;
-    }
-    public R value(Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> l) {
-      return l.value(_arg1, _arg2, _arg3, _arg4);
-    }
-  }
 
   /** Lazily create an iterable containing the first values of the given tuples. */
   public static <T> Iterable<T> pairFirsts(Iterable<? extends Pair<? extends T, ?>> iter) {
-    @SuppressWarnings("unchecked") PairFirst<T> getter = (PairFirst<T>) PairFirst.INSTANCE;
-    return new MappedIterable<Pair<? extends T, ?>, T>(iter, getter);
+    return new MappedIterable<Pair<? extends T, ?>, T>(iter, Pair.<T>firstGetter());
   }
   
-  private static final class PairFirst<T> implements Lambda<Pair<? extends T, ?>, T>, Serializable {
-    public static final PairFirst<Void> INSTANCE = new PairFirst<Void>();
-    private PairFirst() {}
-    public T value(Pair<? extends T, ?> arg) { return arg.first(); }
-  }
-      
   /** Lazily create an iterable containing the second values of the given tuples. */
   public static <T> Iterable<T> pairSeconds(Iterable<? extends Pair<?, ? extends T>> iter) {
-    @SuppressWarnings("unchecked") PairSecond<T> getter = (PairSecond<T>) PairSecond.INSTANCE;
-    return new MappedIterable<Pair<?, ? extends T>, T>(iter, getter);
+    return new MappedIterable<Pair<?, ? extends T>, T>(iter, Pair.<T>secondGetter());
   }
   
-  private static final class PairSecond<T> implements Lambda<Pair<?, ? extends T>, T>, Serializable {
-    public static final PairSecond<Object> INSTANCE = new PairSecond<Object>();
-    private PairSecond() {}
-    public T value(Pair<?, ? extends T> arg) { return arg.second(); }
-  }
-      
   /** Lazily create an iterable containing the first values of the given tuples. */
   public static <T> Iterable<T> tripleFirsts(Iterable<? extends Triple<? extends T, ?, ?>> iter) {
-    @SuppressWarnings("unchecked") TripleFirst<T> getter = (TripleFirst<T>) TripleFirst.INSTANCE;
-    return new MappedIterable<Triple<? extends T, ?, ?>, T>(iter, getter);
+    return new MappedIterable<Triple<? extends T, ?, ?>, T>(iter, Triple.<T>firstGetter());
   }
   
-  private static final class TripleFirst<T> implements Lambda<Triple<? extends T, ?, ?>, T>, Serializable {
-    public static final TripleFirst<Object> INSTANCE = new TripleFirst<Object>();
-    private TripleFirst() {}
-    public T value(Triple<? extends T, ?, ?> arg) { return arg.first(); }
-  }
-      
   /** Lazily create an iterable containing the second values of the given tuples. */
   public static <T> Iterable<T> tripleSeconds(Iterable<? extends Triple<?, ? extends T, ?>> iter) {
-    @SuppressWarnings("unchecked") TripleSecond<T> getter = (TripleSecond<T>) TripleSecond.INSTANCE;
-    return new MappedIterable<Triple<?, ? extends T, ?>, T>(iter, getter);
+    return new MappedIterable<Triple<?, ? extends T, ?>, T>(iter, Triple.<T>secondGetter());
   }
   
-  private static final class TripleSecond<T> implements Lambda<Triple<?, ? extends T, ?>, T>, Serializable {
-    public static final TripleSecond<Object> INSTANCE = new TripleSecond<Object>();
-    private TripleSecond() {}
-    public T value(Triple<?, ? extends T, ?> arg) { return arg.second(); }
-  }
-      
   /** Lazily create an iterable containing the third values of the given tuples. */
   public static <T> Iterable<T> tripleThirds(Iterable<? extends Triple<?, ?, ? extends T>> iter) {
-    @SuppressWarnings("unchecked") TripleThird<T> getter = (TripleThird<T>) TripleThird.INSTANCE;
-    return new MappedIterable<Triple<?, ?, ? extends T>, T>(iter, getter);
+    return new MappedIterable<Triple<?, ?, ? extends T>, T>(iter, Triple.<T>thirdGetter());
   }
   
-  private static final class TripleThird<T> implements Lambda<Triple<?, ?, ? extends T>, T>, Serializable {
-    public static final TripleThird<Object> INSTANCE = new TripleThird<Object>();
-    private TripleThird() {}
-    public T value(Triple<?, ?, ? extends T> arg) { return arg.third(); }
-  }
-      
   /** Lazily create an iterable containing the first values of the given tuples. */
   public static <T> Iterable<T> quadFirsts(Iterable<? extends Quad<? extends T, ?, ?, ?>> iter) {
-    @SuppressWarnings("unchecked") QuadFirst<T> getter = (QuadFirst<T>) QuadFirst.INSTANCE;
-    return new MappedIterable<Quad<? extends T, ?, ?, ?>, T>(iter, getter);
+    return new MappedIterable<Quad<? extends T, ?, ?, ?>, T>(iter, Quad.<T>firstGetter());
   }
   
-  private static final class QuadFirst<T> implements Lambda<Quad<? extends T, ?, ?, ?>, T>, Serializable {
-    public static final QuadFirst<Object> INSTANCE = new QuadFirst<Object>();
-    private QuadFirst() {}
-    public T value(Quad<? extends T, ?, ?, ?> arg) { return arg.first(); }
-  }
-      
   /** Lazily create an iterable containing the second values of the given tuples. */
   public static <T> Iterable<T> quadSeconds(Iterable<? extends Quad<?, ? extends T, ?, ?>> iter) {
-    @SuppressWarnings("unchecked") QuadSecond<T> getter = (QuadSecond<T>) QuadSecond.INSTANCE;
-    return new MappedIterable<Quad<?, ? extends T, ?, ?>, T>(iter, getter);
+    return new MappedIterable<Quad<?, ? extends T, ?, ?>, T>(iter, Quad.<T>secondGetter());
   }
   
-  private static final class QuadSecond<T> implements Lambda<Quad<?, ? extends T, ?, ?>, T>, Serializable {
-    public static final QuadSecond<Object> INSTANCE = new QuadSecond<Object>();
-    private QuadSecond() {}
-    public T value(Quad<?, ? extends T, ?, ?> arg) { return arg.second(); }
-  }
-      
   /** Lazily create an iterable containing the third values of the given tuples. */
   public static <T> Iterable<T> quadThirds(Iterable<? extends Quad<?, ?, ? extends T, ?>> iter) {
-    @SuppressWarnings("unchecked") QuadThird<T> getter = (QuadThird<T>) QuadThird.INSTANCE;
-    return new MappedIterable<Quad<?, ?, ? extends T, ?>, T>(iter, getter);
+    return new MappedIterable<Quad<?, ?, ? extends T, ?>, T>(iter, Quad.<T>thirdGetter());
   }
   
-  private static final class QuadThird<T> implements Lambda<Quad<?, ?, ? extends T, ?>, T>, Serializable {
-    public static final QuadThird<Object> INSTANCE = new QuadThird<Object>();
-    private QuadThird() {}
-    public T value(Quad<?, ?, ? extends T, ?> arg) { return arg.third(); }
-  }
-      
   /** Lazily create an iterable containing the fourth values of the given tuples. */
   public static <T> Iterable<T> quadFourths(Iterable<? extends Quad<?, ?, ?, ? extends T>> iter) {
-    @SuppressWarnings("unchecked") QuadFourth<T> getter = (QuadFourth<T>) QuadFourth.INSTANCE;
-    return new MappedIterable<Quad<?, ?, ?, ? extends T>, T>(iter, getter);
+    return new MappedIterable<Quad<?, ?, ?, ? extends T>, T>(iter, Quad.<T>fourthGetter());
   }
   
-  private static final class QuadFourth<T> implements Lambda<Quad<?, ?, ?, ? extends T>, T>, Serializable {
-    public static final QuadFourth<Object> INSTANCE = new QuadFourth<Object>();
-    private QuadFourth() {}
-    public T value(Quad<?, ?, ?, ? extends T> arg) { return arg.fourth(); }
-  }
-      
   
   /** 
    * Lazily create an iterable of {@code Pair}s of corresponding values from the given iterables (assumed to always 
@@ -1520,7 +1650,7 @@ public final class IterUtil {
   public static <T1, T2, T3> Iterable<Triple<T1, T2, T3>> zip(Iterable<? extends T1> iter1, 
                                                               Iterable<? extends T2> iter2,
                                                               Iterable<? extends T3> iter3) {
-    return new TernaryMappedIterable<T1, T2, T3, Triple<T1, T2, T3>>(iter1, iter2, iter3, Triple.<T1, T2, T3>factory());
+    return map(iter1, iter2, iter3, Triple.<T1, T2, T3>factory());
   }
     
   /** 
@@ -1531,8 +1661,7 @@ public final class IterUtil {
                                                                     Iterable<? extends T2> iter2,
                                                                     Iterable<? extends T3> iter3,
                                                                     Iterable<? extends T4> iter4) {
-    return new QuaternaryMappedIterable<T1, T2, T3, T4, Quad<T1, T2, T3, T4>>(iter1, iter2, iter3, iter4, 
-                                                                              Quad.<T1, T2, T3, T4>factory());
+    return map(iter1, iter2, iter3, iter4, Quad.<T1, T2, T3, T4>factory());
   }
   
 }

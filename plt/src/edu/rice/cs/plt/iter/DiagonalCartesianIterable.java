@@ -38,29 +38,33 @@ import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Lambda2;
 
 /**
- * Enumerates the elements of a cartesian (or cross) product.  For each element in the
- * iterable {@code left}, the result of a lambda {@code combiner}, applied to that element
- * and each of the elements of the iterable {@code right}, is produced.  Since iteration
- * of {@code right} occurs in an "inner loop," {@code right} must be finite (at least for 
- * most interesting results...).  The {@code combiner} function is used, rather than simply 
- * producing {@code Pair}s, in order to provide a greater degree of flexibility.
+ * <p>Enumerates the elements of a cartesian (or cross) product in diagonal order.  Where the
+ * "index" of the ith item in an iterator is i, this class produces all pairs of values with
+ * indices that sum to n before proceding to those with indices that sum to n+1.  This allows
+ * the cartesian product of two infinite iterables to be methodically traversed.  Within the
+ * set of pairs with indices summing to n, the order is lexographical in terms of the respective
+ * indices.  For example, {@code [0, 1, 2]} crossed with itself will produce (under string concatenation)
+ * {@code [00, 01, 10, 02, 11, 20, 12, 21, 22]}.  The {@code combiner} function is used, rather than simply 
+ * producing {@code Pair}s, in order to provide a greater degree of flexibility.</p>
+ * <p>In order to support this traversal, the set of previously-seen values must be cached in each iterator.
+ * The amount of space required by an iterator after n invocations of {@code next()} is in O(sqrt(n)).</p>
  */
-public class CartesianIterable<T1, T2, R> extends AbstractIterable<R>
-                                          implements SizedIterable<R>, Serializable {
+public class DiagonalCartesianIterable<T1, T2, R> extends AbstractIterable<R>
+                                                  implements SizedIterable<R>, Serializable {
   
   private final Iterable<? extends T1> _left;
   private final Iterable<? extends T2> _right;
   private final Lambda2<? super T1, ? super T2, ? extends R> _combiner;
   
-  public CartesianIterable(Iterable<? extends T1> left, Iterable<? extends T2> right,
-                           Lambda2<? super T1, ? super T2, ? extends R> combiner) {
+  public DiagonalCartesianIterable(Iterable<? extends T1> left, Iterable<? extends T2> right,
+                                   Lambda2<? super T1, ? super T2, ? extends R> combiner) {
     _left = left;
     _right = right;
     _combiner = combiner;
   }
   
-  public CartesianIterator<T1, T2, R> iterator() {
-    return new CartesianIterator<T1, T2, R>(_left.iterator(), _right, _combiner);
+  public DiagonalCartesianIterator<T1, T2, R> iterator() {
+    return new DiagonalCartesianIterator<T1, T2, R>(_left.iterator(), _right.iterator(), _combiner);
   }
 
   public int size() { return size(Integer.MAX_VALUE); }
@@ -77,19 +81,19 @@ public class CartesianIterable<T1, T2, R> extends AbstractIterable<R>
   
   /** Call the constructor (allows the type arguments to be inferred) */
   public static <T1, T2, R>
-    CartesianIterable<T1, T2, R> make(Iterable<? extends T1> left, Iterable<? extends T2> right,
-                                      Lambda2<? super T1, ? super T2, ? extends R> combiner) {
-    return new CartesianIterable<T1, T2, R>(left, right, combiner);
+    DiagonalCartesianIterable<T1, T2, R> make(Iterable<? extends T1> left, Iterable<? extends T2> right,
+                                              Lambda2<? super T1, ? super T2, ? extends R> combiner) {
+    return new DiagonalCartesianIterable<T1, T2, R>(left, right, combiner);
   }
   
   /**
-   * Create a {@code CartesianIterable} and wrap it in a {@code SnapshotIterable}, forcing
+   * Create a {@code DiagonalCartesianIterable} and wrap it in a {@code SnapshotIterable}, forcing
    * immediate evaluation of the permutations.
    */
   public static <T1, T2, R>
     SnapshotIterable<R> makeSnapshot(Iterable<? extends T1> left, Iterable<? extends T2> right,
                                      Lambda2<? super T1, ? super T2, ? extends R> combiner) {
-    return new SnapshotIterable<R>(new CartesianIterable<T1, T2, R>(left, right, combiner));
+    return new SnapshotIterable<R>(new DiagonalCartesianIterable<T1, T2, R>(left, right, combiner));
   }
   
 }

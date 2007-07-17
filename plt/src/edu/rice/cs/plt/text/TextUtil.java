@@ -319,7 +319,7 @@ public final class TextUtil {
    * Convert all non-ASCII characters in the string to Unicode escapes, as specified by JLS 3.3.
    * As suggested by JLS, an additional {@code u} is added to existing escapes in the string;
    * instances of {@code \} that precede a non-ASCII character or a malformed Unicode escape will
-   * be encoded as {@&#92;u005c}.  The original string may be safely reconstructed with 
+   * be encoded as {@code &#92;u005c}.  The original string may be safely reconstructed with 
    * {@link #unicodeUnescapeOnce}; to safely interpret <em>all</em> unicode escapes, including 
    * those in the original string, use {@link #unicodeUnescape} (in either case, this method
    * guarantees an absense of {@code IllegalArgumentException}s).
@@ -436,7 +436,7 @@ public final class TextUtil {
   /**
    * Convert a string potentially containing Java character escapes (as in {@link #javaEscape}) to its
    * unescaped equivalent.  Note that Unicode escapes are <em>not</em> interpreted (strings from Java source
-   * code should first be processed by {@link unicodeUnescape}).
+   * code should first be processed by {@link #unicodeUnescape}).
    * @throws IllegalArgumentException  If the character {@code \} is followed by an invalid escape character
    *                                   or the end of the string.
    */

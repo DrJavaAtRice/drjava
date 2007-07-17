@@ -86,6 +86,8 @@ public class ComposedIterable<T> extends AbstractIterable<T>
     return result <= bound ? result : bound;
   }
   
+  public boolean isInfinite() { return IterUtil.isInfinite(_i1) || IterUtil.isInfinite(_i2); }
+  
   public boolean isFixed() { return _i1Size >= 0 && _i2Size >= 0; }
   
   /**

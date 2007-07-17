@@ -89,7 +89,7 @@ public class FiniteSequenceIterable<T> extends TruncatedIterable<T> {
     }
   }
   
-  /** Create a sequence containing {@code copies} instances of the given value */
+  /** Create a sequence containing {@code copies} instances of the given value. */
   public static <T> FiniteSequenceIterable<T> makeCopies(T value, int copies) {
     return new FiniteSequenceIterable<T>(value, LambdaUtil.<T>identity(), copies);
   }

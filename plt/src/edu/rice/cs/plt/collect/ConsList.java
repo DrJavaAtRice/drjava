@@ -72,7 +72,10 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
    */
   public abstract int size(int bound);
   
-  /** @return  {@code true}: cons lists have a fixed size */
+  /** Return {@code false}: cons lists are not infinite */
+  public boolean isInfinite() { return false; }
+  
+  /** Return {@code true}: cons lists have a fixed size */
   public boolean isFixed() { return true; }
   
   

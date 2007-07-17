@@ -60,6 +60,7 @@ public class MappedIterable<S, T> extends AbstractIterable<T> implements SizedIt
   
   public int size() { return IterUtil.sizeOf(_source); }
   public int size(int bound) { return IterUtil.sizeOf(_source, bound); }
+  public boolean isInfinite() { return IterUtil.isInfinite(_source); }
   public boolean isFixed() { return IterUtil.isFixed(_source); }
   
   /** Call the constructor (allows the type arguments to be inferred) */

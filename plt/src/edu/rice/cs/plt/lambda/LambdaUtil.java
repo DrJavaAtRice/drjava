@@ -300,18 +300,64 @@ public final class LambdaUtil {
     public T value(Object arg1, Object arg2, Object arg3, Object arg4) { return _val; }
   }
   
+  
+  /** Create a lambda that applies its first argument to its second argument. */
+  @SuppressWarnings("unchecked")
+  public static <R> Lambda<Thunk<? extends R>, R> thunkValueLambda() {
+    return (Lambda<Thunk<? extends R>, R>) ThunkValueLambda.INSTANCE;
+  }
+  
+  private static final class ThunkValueLambda<R> implements Lambda<Thunk<? extends R>, R>, Serializable {
+    public static final ThunkValueLambda<Void> INSTANCE = new ThunkValueLambda<Void>();
+    private ThunkValueLambda() {}
+    public R value(Thunk<? extends R> t) { return t.value(); }
+  }
+    
   /** Create a lambda that applies its first argument to its second argument. */
   @SuppressWarnings("unchecked")
   public static <T, R> Lambda2<Lambda<? super T, ? extends R>, T, R> applicationLambda() {
-    // for some reason I have to convert to a raw type before the cast, or it's an error, not a warning
-    return (Lambda2<Lambda<? super T, ? extends R>, T, R>) (Lambda2) ApplicationLambda.INSTANCE;
+    return (Lambda2<Lambda<? super T, ? extends R>, T, R>) ApplicationLambda.INSTANCE;
   }
   
-  private static final class ApplicationLambda implements Lambda2<Lambda<Object, ?>, Object, Object>, Serializable {
-    private static final ApplicationLambda INSTANCE = new ApplicationLambda();
+  private static final class ApplicationLambda<T, R>
+    implements Lambda2<Lambda<? super T, ? extends R>, T, R>, Serializable {
+    private static final ApplicationLambda<Object, Void> INSTANCE = new ApplicationLambda<Object, Void>();
     private ApplicationLambda() {}
-    public Object value(Lambda<Object, ?> lambda, Object arg) { return lambda.value(arg); }
+    public R value(Lambda<? super T, ? extends R> lambda, T arg) { return lambda.value(arg); }
   }
+
+  /** Create a lambda that applies its first argument to its second argument. */
+  @SuppressWarnings("unchecked")
+  public static <T1, T2, R> Lambda3<Lambda2<? super T1, ? super T2, ? extends R>, T1, T2, R> binaryApplicationLambda() {
+    return (Lambda3<Lambda2<? super T1, ? super T2, ? extends R>, T1, T2, R>) BinaryApplicationLambda.INSTANCE;
+  }
+  
+  private static final class BinaryApplicationLambda<T1, T2, R>
+    implements Lambda3<Lambda2<? super T1, ? super T2, ? extends R>, T1, T2, R>, Serializable {
+    private static final BinaryApplicationLambda<Object, Object, Void> INSTANCE = 
+      new BinaryApplicationLambda<Object, Object, Void>();
+    private BinaryApplicationLambda() {}
+    public R value(Lambda2<? super T1, ? super T2, ? extends R> lambda, T1 a1, T2 a2) { return lambda.value(a1, a2); }
+  }
+
+  /** Create a lambda that applies its first argument to its second argument. */
+  @SuppressWarnings("unchecked")
+  public static <T1, T2, T3, R> 
+    Lambda4<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, T1, T2, T3, R> ternaryApplicationLambda() {
+    return (Lambda4<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, T1, T2, T3, R>) 
+      TernaryApplicationLambda.INSTANCE;
+  }
+  
+  private static final class TernaryApplicationLambda<T1, T2, T3, R>
+    implements Lambda4<Lambda3<? super T1, ? super T2, ? super T3, ? extends R>, T1, T2, T3, R>, Serializable {
+    private static final TernaryApplicationLambda<Object, Object, Object, Void> INSTANCE = 
+      new TernaryApplicationLambda<Object, Object, Object, Void>();
+    private TernaryApplicationLambda() {}
+    public R value(Lambda3<? super T1, ? super T2, ? super T3, ? extends R> lambda, T1 a1, T2 a2, T3 a3) {
+      return lambda.value(a1, a2, a3);
+    }
+  }
+
 
   /** Create a {@code GeneralRunnable} equivalent to {@code r} that ignores any arguments. */
   public static GeneralRunnable promote(Runnable r) { return new PromotedGeneralRunnable(r); }

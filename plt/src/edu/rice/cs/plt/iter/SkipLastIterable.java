@@ -54,6 +54,10 @@ public class SkipLastIterable<T> extends AbstractIterable<T> implements SizedIte
   public SkipLastIterator<T> iterator() { return new SkipLastIterator<T>(_iterable.iterator()); }
   
   public int size() {
+    // This can't be implemented correctly.  If the nestedSize is MAX_VALUE, that means the size
+    // of this iterable is >= MAX_VALUE-1.  If we return MAX_VALUE-1, we're asserting that it is
+    // *equal to* that size; if we return MAX_VALUE, we're asserting it's size is *greater than*
+    // that size.  There's no way to communicate the *greater than or equal* result.
     int nestedSize = IterUtil.sizeOf(_iterable);
     if (nestedSize == 0) { return 0; }
     else if (nestedSize == Integer.MAX_VALUE) { return Integer.MAX_VALUE; }
@@ -67,6 +71,9 @@ public class SkipLastIterable<T> extends AbstractIterable<T> implements SizedIte
       return (nestedSize == 0) ? 0 : nestedSize - 1;
     }
   }
+  
+  public boolean isInfinite() { return IterUtil.isInfinite(_iterable); }
+  
   public boolean isFixed() { return IterUtil.isFixed(_iterable); }
   
   /** Call the constructor (allows {@code T} to be inferred) */

@@ -35,9 +35,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.iter;
 
 /**
- * <p>Allows size calculations on {@code Iterable}s.  Implementing classes must
- * be able to calculate their size; ideally, this calculation should be done
- * in roughly constant time.  {@link IterUtil#sizeOf} uses this interface to
+ * <p>Allows size calculations on {@code Iterable}s.  Implementing classes must be able to calculate their size; 
+ * ideally, this calculation should be done in constant time.  {@link IterUtil#sizeOf} uses this interface to 
  * optimize size calculations.</p>
  * 
  * <p>In an ideal design, {@code java.util.Collection} would implement a {@code SizedIterable}
@@ -46,13 +45,13 @@ package edu.rice.cs.plt.iter;
  * modified and are too valuable to abandon, the {@code sizeOf} method provides a workaround that, 
  * through casting, calculates the size appropriately.  An alternative design would allow 
  * collections as components of {@code SizedIterable}s such as {@link ComposedIterable} only by manually
- * wrapping them in a bridge class (see {@link IterUtil#asIterable(java.util.Collection)}).</p>
+ * wrapping them in a bridge class (see {@link IterUtil#asSizedIterable}).</p>
  */
 public interface SizedIterable<T> extends Iterable<T> {
   /**
-   * Compute the number of elements in the iterable.  If the size is too large to be represented as an {@code int}, 
-   * {@code Integer.MAX_VALUE} should be returned.  Otherwise, {@code next()} may be safely invoked on the iterator 
-   * exactly this number of times.  
+   * Compute the number of elements in the iterable.  If the size is infinite or too large to be represented as an 
+   * {@code int}, {@code Integer.MAX_VALUE} should be returned.  Otherwise, {@code next()} may be safely invoked 
+   * on the iterator exactly this number of times.  
    */
   public int size();
   
@@ -64,8 +63,15 @@ public interface SizedIterable<T> extends Iterable<T> {
   public int size(int bound);
   
   /**
-   * {@code true} iff this iterable has a finite, fixed size.  This is the case if the iterable is immutable, or 
-   * if changes can only replace values, not remove or add them
+   * {@code true} if the iterable is known to have infinite size.  If true, an iterator over the iterable in its 
+   * current state will never return {@code true} from {@code hasNext()}.
+   */
+  public boolean isInfinite();
+  
+  /**
+   * {@code true} if this iterable is known to have a fixed size.  This is the case if the iterable is immutable, 
+   * or if changes can only replace values, not remove or add them.  An infinite iterable may be fixed if it
+   * is guaranteed to never become finite.
    */
   public boolean isFixed();
 }

@@ -65,6 +65,8 @@ public class PermutationIterable<T> extends AbstractIterable<Iterable<T>>
     return result <= bound ? (int) result : bound;
   }
   
+  public boolean isInfinite() { return IterUtil.isInfinite(_original); }
+  
   public boolean isFixed() { return IterUtil.isFixed(_original); }
   
   /** Call the constructor (allows {@code T} to be inferred) */

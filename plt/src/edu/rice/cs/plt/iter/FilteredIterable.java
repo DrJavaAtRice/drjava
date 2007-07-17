@@ -56,6 +56,12 @@ public class FilteredIterable<T> extends AbstractIterable<T> implements Iterable
     return new FilteredIterator<T>(_iterable.iterator(), _predicate);
   }
   
+  /**
+   * Determine whether this iterable is infinite.  While the exact size is expensive to determine, testing
+   * for infiniteness is not.  So despite not implementing {@code SizedIterable}, this class provides this method.
+   */
+  public boolean isInfinite() { return IterUtil.isInfinite(_iterable); }
+  
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> FilteredIterable<T> make(Iterable<? extends T> iterable, 
                                              Predicate<? super T> predicate) {

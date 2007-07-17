@@ -53,6 +53,7 @@ public class ImmutableIterable<T> extends AbstractIterable<T> implements SizedIt
   public ImmutableIterator<T> iterator() { return new ImmutableIterator<T>(_iterable.iterator()); }
   public int size() { return IterUtil.sizeOf(_iterable); }
   public int size(int bound) { return IterUtil.sizeOf(_iterable, bound); }
+  public boolean isInfinite() { return IterUtil.isInfinite(_iterable); }
   public boolean isFixed() { return IterUtil.isFixed(_iterable); }
   
   /** Call the constructor (allows {@code T} to be inferred) */

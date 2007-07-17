@@ -48,6 +48,7 @@ public class EmptyIterable<T> extends AbstractIterable<T> implements SizedIterab
   
   public int size() { return 0; }
   public int size(int bound) { return 0; }
+  public boolean isInfinite() { return false; }
   public boolean isFixed() { return true; }
   
   

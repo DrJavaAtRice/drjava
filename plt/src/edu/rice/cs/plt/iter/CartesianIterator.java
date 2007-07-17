@@ -43,7 +43,7 @@ import edu.rice.cs.plt.lambda.Lambda2;
  * iterator {@code left}, the result of a lambda {@code combiner}, applied to that element
  * and each of the elements of the iterable {@code right}, is produced.  Since iteration
  * of {@code right} occurs in an "inner loop," {@code right} must be finite (at least for 
- * interesting results...), and is an {@code Iterable} rather than an {@code Iterator}.
+ * most interesting results...), and is an {@code Iterable} rather than an {@code Iterator}.
  * The {@code combiner} function is used, rather than simply producing {@code Pair}s, in
  * order to provide a greater degree of flexibility.  {@link Iterator#remove} is not supported.
  */

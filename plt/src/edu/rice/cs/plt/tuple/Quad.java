@@ -35,6 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.tuple;
 
 import java.io.Serializable;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Lambda4;
 
 /**
@@ -112,4 +113,48 @@ public class Quad<T1, T2, T3, T4> extends Tuple {
     }
   }
   
+  /** Produce a lambda that invokes {@link #first} on a provided quad. */
+  @SuppressWarnings("unchecked") public static <T> Lambda<Quad<? extends T, ?, ?, ?>, T> firstGetter() {
+    return (GetFirst<T>) GetFirst.INSTANCE;
+  }
+  
+  private static final class GetFirst<T> implements Lambda<Quad<? extends T, ?, ?, ?>, T>, Serializable {
+    public static final GetFirst<Void> INSTANCE = new GetFirst<Void>();
+    private GetFirst() {}
+    public T value(Quad<? extends T, ?, ?, ?> arg) { return arg.first(); }
+  }
+      
+  /** Produce a lambda that invokes {@link #second} on a provided quad. */
+  @SuppressWarnings("unchecked") public static <T> Lambda<Quad<?, ? extends T, ?, ?>, T> secondGetter() {
+    return (GetSecond<T>) GetSecond.INSTANCE;
+  }
+  
+  private static final class GetSecond<T> implements Lambda<Quad<?, ? extends T, ?, ?>, T>, Serializable {
+    public static final GetSecond<Void> INSTANCE = new GetSecond<Void>();
+    private GetSecond() {}
+    public T value(Quad<?, ? extends T, ?, ?> arg) { return arg.second(); }
+  }
+
+  /** Produce a lambda that invokes {@link #third} on a provided quad. */
+  @SuppressWarnings("unchecked") public static <T> Lambda<Quad<?, ?, ? extends T, ?>, T> thirdGetter() {
+    return (GetThird<T>) GetThird.INSTANCE;
+  }
+  
+  private static final class GetThird<T> implements Lambda<Quad<?, ?, ? extends T, ?>, T>, Serializable {
+    public static final GetThird<Void> INSTANCE = new GetThird<Void>();
+    private GetThird() {}
+    public T value(Quad<?, ?, ? extends T, ?> arg) { return arg.third(); }
+  }
+
+  /** Produce a lambda that invokes {@link #fourth} on a provided quad. */
+  @SuppressWarnings("unchecked") public static <T> Lambda<Quad<?, ?, ?, ? extends T>, T> fourthGetter() {
+    return (GetFourth<T>) GetFourth.INSTANCE;
+  }
+  
+  private static final class GetFourth<T> implements Lambda<Quad<?, ?, ?, ? extends T>, T>, Serializable {
+    public static final GetFourth<Void> INSTANCE = new GetFourth<Void>();
+    private GetFourth() {}
+    public T value(Quad<?, ?, ?, ? extends T> arg) { return arg.fourth(); }
+  }
+
 }

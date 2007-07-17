@@ -35,32 +35,32 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.iter;
 
 import java.util.Iterator;
+import java.util.ArrayList;
 import java.io.Serializable;
 
 /**
- * Creates an iterable based on the result of immediately traversing some other
- * iterable; generated iterators will traverse those same values in the same order.  
- * Changes to the wrapped iterable will <em>not</em> be reflected.
+ * Creates an iterable based on the result of immediately traversing some other iterable (assumed to be finite); 
+ * generated iterators will traverse those same values in the same order.  Changes to the wrapped iterable will 
+ * <em>not</em> be reflected.
  */
 public class SnapshotIterable<T> extends AbstractIterable<T> implements SizedIterable<T>, Serializable {
   
-  private final SizedIterable<T> _values;
+  private final ArrayList<T> _values;
   
   public SnapshotIterable(Iterable<? extends T> iterable) {
-    @SuppressWarnings("unchecked") SizedIterable<T> vals = (EmptyIterable<T>) EmptyIterable.INSTANCE;
-    for (T e : iterable) { vals = new ComposedIterable<T>(vals, e); }
-    _values = vals;
+    _values = new ArrayList<T>(0); // minimize footprint of empty
+    for (T e : iterable) { _values.add(e); }
   }
   
   public SnapshotIterable(Iterator<? extends T> iterator) {
-    @SuppressWarnings("unchecked") SizedIterable<T> vals = (EmptyIterable<T>) EmptyIterable.INSTANCE;
-    while (iterator.hasNext()) { vals = new ComposedIterable<T>(vals, iterator.next()); }
-    _values = vals;
+    _values = new ArrayList<T>(0); // minimize footprint of empty
+    while (iterator.hasNext()) { _values.add(iterator.next()); }
   }
     
   public Iterator<T> iterator() { return _values.iterator(); }
   public int size() { return _values.size(); }
-  public int size(int bound) { return _values.size(bound); }
+  public int size(int bound) { int result = _values.size(); return result < bound ? result : bound; }
+  public boolean isInfinite() { return false; }
   public boolean isFixed() { return true; }
   
   /** Call the constructor (allows {@code T} to be inferred) */

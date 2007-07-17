@@ -105,6 +105,8 @@ public class ExternallySortedSet<T, C extends Comparable<? super C>> implements 
     return result <= bound ? result : bound;
   }
  
+  public boolean isInfinite() { return false; }
+  
   public boolean isFixed() { return false; }
   
   public boolean isEmpty() { return _set.isEmpty(); }

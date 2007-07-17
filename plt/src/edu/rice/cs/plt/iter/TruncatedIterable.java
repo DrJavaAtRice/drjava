@@ -63,6 +63,8 @@ public class TruncatedIterable<T> extends AbstractIterable<T> implements SizedIt
   public int size() { return IterUtil.sizeOf(_iterable, _size); }
   
   public int size(int bound) { return IterUtil.sizeOf(_iterable, _size <= bound ? _size : bound); }
+  
+  public boolean isInfinite() { return false; }
     
   public boolean isFixed() { return IterUtil.isFixed(_iterable); }
   

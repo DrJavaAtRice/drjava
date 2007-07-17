@@ -45,6 +45,7 @@ public class SingletonIterable<T> extends AbstractIterable<T> implements SizedIt
   public SingletonIterator<T> iterator() { return new SingletonIterator<T>(_element); }
   public int size() { return 1; }
   public int size(int bound) { return 1 <= bound ? 1 : bound; }
+  public boolean isInfinite() { return false; }
   public boolean isFixed() { return true; }
   
   /** Call the constructor (allows {@code T} to be inferred) */

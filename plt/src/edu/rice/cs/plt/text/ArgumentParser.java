@@ -84,7 +84,7 @@ public class ArgumentParser {
   /**
    * Add the given option name to the list of supported options.
    * @param name  The option name, excluding the "-" prefix.
-   * @param arguments  The number of arguments to follow the option.
+   * @param arity  The number of arguments to follow the option.
    * @throws IllegalArgumentException  If the option is already supported.
    */
   public void supportOption(String name, int arity) {
@@ -95,9 +95,9 @@ public class ArgumentParser {
   /**
    * Add the given option name to the list of supported options and record the given default argument set.
    * @param name  The option name, excluding the "-" prefix.
-   * @param arguments  The default arguments associated with the option.  Implicitly defines the arity
-   *                   of the option as well.  If the length is 0, no default will be set (otherwise, the
-   *                   nullary option would always appear to be present).
+   * @param defaultArguments  The default arguments associated with the option.  Implicitly defines the arity
+   *                          of the option as well.  If the length is 0, no default will be set (otherwise, 
+   *                          the nullary option would always appear to be present).
    * @throws IllegalArgumentException  If the option is already supported.
    */
   public void supportOption(String name, String... defaultArguments) {
@@ -162,7 +162,7 @@ public class ArgumentParser {
     for (String s : args) {
       if (currentOption != null && optionArgsCount == 0) {
         // convert to a SizedIterable to work around a Retroweaver bug (tests will fail)
-        options.put(currentOption, IterUtil.asIterable(currentOptionArgs));
+        options.put(currentOption, IterUtil.asSizedIterable(currentOptionArgs));
         currentOption = null;
       }
       
@@ -182,7 +182,7 @@ public class ArgumentParser {
         else {
           if (currentOption != null) {
             // convert to a SizedIterable to work around a Retroweaver bug (tests will fail)
-            options.put(currentOption, IterUtil.asIterable(currentOptionArgs));
+            options.put(currentOption, IterUtil.asSizedIterable(currentOptionArgs));
           }
           currentOption = opt;
           currentOptionArgs = new LinkedList<String>();
@@ -207,7 +207,7 @@ public class ArgumentParser {
     }
     if (currentOption != null) {
       // convert to a SizedIterable to work around a Retroweaver bug (tests will fail)
-      options.put(currentOption, IterUtil.asIterable(currentOptionArgs));
+      options.put(currentOption, IterUtil.asSizedIterable(currentOptionArgs));
     }
     
     if (params.size() < _requiredParams) {
@@ -235,13 +235,13 @@ public class ArgumentParser {
     
     /**
      * Get the arguments associated with the given option, or {@code null} if it is undefined.
-     * @param name  The option name, excluding the "-" prefix.
+     * @param opt  The option name, excluding the "-" prefix.
      */
     public Iterable<String> getOption(String opt) { return _options.get(opt); }
     
     /**
      * Test whether the given option was defined with 0 arguments.
-     * @param name  The option name, excluding the "-" prefix.
+     * @param opt  The option name, excluding the "-" prefix.
      */
     public boolean hasNullaryOption(String opt) {
       return _options.containsKey(opt) && IterUtil.isEmpty(_options.get(opt));
@@ -250,7 +250,7 @@ public class ArgumentParser {
     /**
      * Get the single argument associated with the given option, or {@code null} if it is undefined
      * or has a different number of arguments.
-     * @param name  The option name, excluding the "-" prefix.
+     * @param opt  The option name, excluding the "-" prefix.
      */
     public String getUnaryOption(String opt) {
       Iterable<String> result = _options.get(opt);
@@ -261,7 +261,7 @@ public class ArgumentParser {
     /**
      * Get the 2 arguments associated with the given option, or {@code null} if it is undefined
      * or has a different number of arguments.
-     * @param name  The option name, excluding the "-" prefix.
+     * @param opt  The option name, excluding the "-" prefix.
      */
     public Pair<String, String> getBinaryOption(String opt) {
       Iterable<String> result = _options.get(opt);
@@ -269,12 +269,22 @@ public class ArgumentParser {
       else { return IterUtil.asPair(result); }
     }
     
+    /**
+     * Get the 3 arguments associated with the given option, or {@code null} if it is undefined
+     * or has a different number of arguments.
+     * @param opt  The option name, excluding the "-" prefix.
+     */
     public Triple<String, String, String> getTernaryOption(String opt) {
       Iterable<String> result = _options.get(opt);
       if (result == null || IterUtil.sizeOf(result) != 3) { return null; }
       else { return IterUtil.asTriple(result); }
     }
     
+    /**
+     * Get the 4 arguments associated with the given option, or {@code null} if it is undefined
+     * or has a different number of arguments.
+     * @param opt  The option name, excluding the "-" prefix.
+     */
     public Quad<String, String, String, String> getQuaternaryOption(String opt) {
       Iterable<String> result = _options.get(opt);
       if (result == null || IterUtil.sizeOf(result) != 4) { return null; }

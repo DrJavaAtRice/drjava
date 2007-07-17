@@ -65,6 +65,7 @@ public class BinaryMappedIterable<T1, T2, R> extends AbstractIterable<R>
   
   public int size() { return IterUtil.sizeOf(_source1); }
   public int size(int bound) { return IterUtil.sizeOf(_source1, bound); }
+  public boolean isInfinite() { return IterUtil.isInfinite(_source1); }
   public boolean isFixed() { return IterUtil.isFixed(_source1); }
   
   /** Call the constructor (allows the type arguments to be inferred) */
