@@ -62,4 +62,11 @@ public class NoCompilerAvailable implements CompilerInterface {
   
   public String getDescription() { return getName(); }
   
+  /** The toString() of this class is displayed in the "Compiler" drop
+   *  down on the compiler tab.
+   * 
+   *  @return "None"
+   */
+  @Override
+  public String toString() { return "None"; }
 }
