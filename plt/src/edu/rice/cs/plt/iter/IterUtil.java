@@ -293,15 +293,15 @@ public final class IterUtil {
   }
     
   /** Produce a lambda that invokes {@link #compose(Object, Iterable)}. */
-  public static <T> Lambda2<T, Iterable<? extends T>, Iterable<T>> composeLeftLambda() {
+  @SuppressWarnings("unchecked") public static <T> Lambda2<T, Iterable<? extends T>, Iterable<T>> composeLeftLambda() {
     return (Lambda2<T, Iterable<? extends T>, Iterable<T>>) ComposeLeftLambda.INSTANCE;
   }
   
-  private static class ComposeLeftLambda implements Lambda2<Object, Iterable<?>, Iterable<Object>>, Serializable {
-    private static ComposeLeftLambda INSTANCE = new ComposeLeftLambda();
+  private static class ComposeLeftLambda<T> implements Lambda2<T, Iterable<? extends T>, Iterable<T>>, Serializable {
+    private static ComposeLeftLambda<Object> INSTANCE = new ComposeLeftLambda<Object>();
     private ComposeLeftLambda() {}
-    public Iterable<Object> value(Object first, Iterable<?> rest) {
-      return new ComposedIterable<Object>(first, rest);
+    public Iterable<T> value(T first, Iterable<? extends T> rest) {
+      return new ComposedIterable<T>(first, rest);
     }
   }
   
@@ -311,15 +311,15 @@ public final class IterUtil {
   }
     
   /** Produce a lambda that invokes {@link #compose(Iterable, Object)}. */
-  public static <T> Lambda2<Iterable<? extends T>, T, Iterable<T>> composeRightLambda() {
+  @SuppressWarnings("unchecked") public static <T> Lambda2<Iterable<? extends T>, T, Iterable<T>> composeRightLambda() {
     return (Lambda2<Iterable<? extends T>, T, Iterable<T>>) ComposeRightLambda.INSTANCE;
   }
   
-  private static class ComposeRightLambda implements Lambda2<Iterable<?>, Object, Iterable<Object>>, Serializable {
-    private static ComposeRightLambda INSTANCE = new ComposeRightLambda();
+  private static class ComposeRightLambda<T> implements Lambda2<Iterable<? extends T>, T, Iterable<T>>, Serializable {
+    private static ComposeRightLambda<Object> INSTANCE = new ComposeRightLambda<Object>();
     private ComposeRightLambda() {}
-    public Iterable<Object> value(Iterable<?> rest, Object last) {
-      return new ComposedIterable<Object>(rest, last);
+    public Iterable<T> value(Iterable<? extends T> rest, T last) {
+      return new ComposedIterable<T>(rest, last);
     }
   }
   
@@ -329,15 +329,17 @@ public final class IterUtil {
   }
   
   /** Produce a lambda that invokes {@link #compose(Object, Iterable)}. */
+  @SuppressWarnings("unchecked") 
   public static <T> Lambda2<Iterable<? extends T>, Iterable<? extends T>, Iterable<T>> composeLambda() {
     return (Lambda2<Iterable<? extends T>, Iterable<? extends T>, Iterable<T>>) ComposeLambda.INSTANCE;
   }
   
-  private static class ComposeLambda implements Lambda2<Iterable<?>, Iterable<?>, Iterable<Object>>, Serializable {
-    private static ComposeLambda INSTANCE = new ComposeLambda();
+  private static class ComposeLambda<T> 
+    implements Lambda2<Iterable<? extends T>, Iterable<? extends T>, Iterable<T>>, Serializable {
+    private static ComposeLambda<Object> INSTANCE = new ComposeLambda<Object>();
     private ComposeLambda() {}
-    public Iterable<Object> value(Iterable<?> i1, Iterable<?> i2) {
-      return new ComposedIterable<Object>(i1, i2);
+    public Iterable<T> value(Iterable<? extends T> i1, Iterable<? extends T> i2) {
+      return new ComposedIterable<T>(i1, i2);
     }
   }
   
@@ -885,7 +887,9 @@ public final class IterUtil {
     // Cast is safe because the result has the type of the variable "type"
     @SuppressWarnings("unchecked") T[] result = (T[]) Array.newInstance(type, sizeOf(iter));
     if (iter instanceof Collection<?>) {
-      result = ((Collection<? extends T>) iter).toArray(result);
+      // javac 6 doesn't like this -- Collection<? extends T> </: Iterable<capture extends T>
+      @SuppressWarnings("unchecked") T[] newResult = ((Collection<? extends T>) iter).toArray(result);
+      result = newResult; // redeclared for the sake of @SuppressWarnings
     }
     else {
       int i = 0;
@@ -916,16 +920,20 @@ public final class IterUtil {
    */
   public static <T> T last(Iterable<? extends T> iter) {
     if (iter instanceof OptimizedLastIterable<?>) {
-      return ((OptimizedLastIterable<? extends T>) iter).last();
+      // javac 6 doesn't like this -- OptimizedLastIterable<? extends T> </: Iterable<capture extends T>
+      @SuppressWarnings("unchecked") OptimizedLastIterable<? extends T> o = (OptimizedLastIterable<? extends T>) iter;
+      return o.last();
     }
     else if (iter instanceof List<?>) {
-      List<? extends T> l = (List<? extends T>) iter;
+      // javac 6 doesn't like this -- List<? extends T> </: Iterable<capture extends T>
+      @SuppressWarnings("unchecked") List<? extends T> l = (List<? extends T>) iter;
       int size = l.size();
       if (size == 0) { throw new NoSuchElementException(); }
       return l.get(size - 1);
     }
     else if (iter instanceof SortedSet<?>) {
-      SortedSet<? extends T> s = (SortedSet<? extends T>) iter;
+      // javac 6 doesn't like this -- SortedSet<? extends T> </: Iterable<capture extends T>
+      @SuppressWarnings("unchecked") SortedSet<? extends T> s = (SortedSet<? extends T>) iter;
       return s.last();
     }
     else {

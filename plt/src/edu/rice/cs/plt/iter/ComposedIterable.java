@@ -103,6 +103,8 @@ public class ComposedIterable<T> extends AbstractIterable<T>
     else { lastIterable = _i2; }
     
     while (lastIterable instanceof ComposedIterable<?>) {
+      // javac 6 doesn't like this -- ComposedIterable<? extends T> </: Iterable<capture extends T>
+      @SuppressWarnings("unchecked")
       ComposedIterable<? extends T> cast = (ComposedIterable<? extends T>) lastIterable;
       if (IterUtil.isEmpty(cast._i2)) { lastIterable = cast._i1; }
       else { lastIterable = cast._i2; }
