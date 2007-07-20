@@ -867,6 +867,140 @@ public final class LambdaUtil {
   }
   
   
+  /** Bind a fixed argument to the given binary predicate, producing a unary prediate. */
+  public static <T1, T2> Predicate<T2> bindFirst(Predicate2<? super T1, ? super T2> pred, T1 arg1) {
+    return new BindFirstPredicate<T1, T2>(pred, arg1);
+  }
+  
+  private static final class BindFirstPredicate<T1, T2> implements Predicate<T2>, Serializable {
+    private final Predicate2<? super T1, ? super T2> _pred;
+    private final T1 _arg1;
+    public BindFirstPredicate(Predicate2<? super T1, ? super T2> pred, T1 arg1) {
+      _pred = pred; _arg1 = arg1;
+    }
+    public Boolean value(T2 arg2) { return _pred.value(_arg1, arg2); }
+  }
+  
+  /** Bind a fixed argument to the given binary predicate, producing a unary predicate. */
+  public static <T1, T2> Predicate<T1> bindSecond(Predicate2<? super T1, ? super T2> pred, T2 arg2) {
+    return new BindSecondPredicate<T1, T2>(pred, arg2);
+  }
+  
+  private static final class BindSecondPredicate<T1, T2> implements Predicate<T1>, Serializable {
+    private final Predicate2<? super T1, ? super T2> _pred;
+    private final T2 _arg2;
+    public BindSecondPredicate(Predicate2<? super T1, ? super T2> pred, T2 arg2) {
+      _pred = pred; _arg2 = arg2;
+    }
+    public Boolean value(T1 arg1) { return _pred.value(arg1, _arg2); }
+  }
+  
+  /** Bind a fixed argument to the given ternary predicate, producing a binary predicate. */
+  public static <T1, T2, T3>
+    Predicate2<T2, T3> bindFirst(Predicate3<? super T1, ? super T2, ? super T3> pred, T1 arg1) {
+    return new BindFirstPredicate2<T1, T2, T3>(pred, arg1);
+  }
+  
+  private static final class BindFirstPredicate2<T1, T2, T3> implements Predicate2<T2, T3>, Serializable {
+    private final Predicate3<? super T1, ? super T2, ? super T3> _pred;
+    private final T1 _arg1;
+    public BindFirstPredicate2(Predicate3<? super T1, ? super T2, ? super T3> pred, T1 arg1) {
+      _pred = pred; _arg1 = arg1;
+    }
+    public Boolean value(T2 arg2, T3 arg3) { return _pred.value(_arg1, arg2, arg3); }
+  }
+  
+  /** Bind a fixed argument to the given ternary predicate, producing a binary predicate. */
+  public static <T1, T2, T3>
+    Predicate2<T1, T3> bindSecond(Predicate3<? super T1, ? super T2, ? super T3> pred, T2 arg2) {
+    return new BindSecondPredicate2<T1, T2, T3>(pred, arg2);
+  }
+  
+  private static final class BindSecondPredicate2<T1, T2, T3> implements Predicate2<T1, T3>, Serializable {
+    private final Predicate3<? super T1, ? super T2, ? super T3> _pred;
+    private final T2 _arg2;
+    public BindSecondPredicate2(Predicate3<? super T1, ? super T2, ? super T3> pred, T2 arg2) {
+      _pred = pred; _arg2 = arg2;
+    }
+    public Boolean value(T1 arg1, T3 arg3) { return _pred.value(arg1, _arg2, arg3); }
+  }
+  
+  /** Bind a fixed argument to the given ternary predicate, producing a binary predicate. */
+  public static <T1, T2, T3>
+    Predicate2<T1, T2> bindThird(Predicate3<? super T1, ? super T2, ? super T3> pred, T3 arg3) {
+    return new BindThirdPredicate2<T1, T2, T3>(pred, arg3);
+  }
+  
+  private static final class BindThirdPredicate2<T1, T2, T3> implements Predicate2<T1, T2>, Serializable {
+    private final Predicate3<? super T1, ? super T2, ? super T3> _pred;
+    private final T3 _arg3;
+    public BindThirdPredicate2(Predicate3<? super T1, ? super T2, ? super T3> pred, T3 arg3) {
+      _pred = pred; _arg3 = arg3;
+    }
+    public Boolean value(T1 arg1, T2 arg2) { return _pred.value(arg1, arg2, _arg3); }
+  }
+  
+  /** Bind a fixed argument to the given quaternary predicate, producing a ternary predicate. */
+  public static <T1, T2, T3, T4> Predicate3<T2, T3, T4> 
+    bindFirst(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T1 arg1) {
+    return new BindFirstPredicate3<T1, T2, T3, T4>(pred, arg1);
+  }
+  
+  private static final class BindFirstPredicate3<T1, T2, T3, T4> implements Predicate3<T2, T3, T4>, Serializable {
+    private final Predicate4<? super T1, ? super T2, ? super T3, ? super T4> _pred;
+    private final T1 _arg1;
+    public BindFirstPredicate3(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T1 arg1) {
+      _pred = pred; _arg1 = arg1;
+    }
+    public Boolean value(T2 arg2, T3 arg3, T4 arg4) { return _pred.value(_arg1, arg2, arg3, arg4); }
+  }
+  
+  /** Bind a fixed argument to the given quaternary predicate, producing a ternary predicate. */
+  public static <T1, T2, T3, T4> Predicate3<T1, T3, T4> 
+    bindSecond(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T2 arg2) {
+    return new BindSecondPredicate3<T1, T2, T3, T4>(pred, arg2);
+  }
+  
+  private static final class BindSecondPredicate3<T1, T2, T3, T4> implements Predicate3<T1, T3, T4>, Serializable {
+    private final Predicate4<? super T1, ? super T2, ? super T3, ? super T4> _pred;
+    private final T2 _arg2;
+    public BindSecondPredicate3(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T2 arg2) {
+      _pred = pred; _arg2 = arg2;
+    }
+    public Boolean value(T1 arg1, T3 arg3, T4 arg4) { return _pred.value(arg1, _arg2, arg3, arg4); }
+  }
+  
+  /** Bind a fixed argument to the given quaternary predicate, producing a ternary predicate. */
+  public static <T1, T2, T3, T4> Predicate3<T1, T2, T4> 
+    bindThird(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T3 arg3) {
+    return new BindThirdPredicate3<T1, T2, T3, T4>(pred, arg3);
+  }
+  
+  private static final class BindThirdPredicate3<T1, T2, T3, T4> implements Predicate3<T1, T2, T4>, Serializable {
+    private final Predicate4<? super T1, ? super T2, ? super T3, ? super T4> _pred;
+    private final T3 _arg3;
+    public BindThirdPredicate3(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T3 arg3) {
+      _pred = pred; _arg3 = arg3;
+    }
+    public Boolean value(T1 arg1, T2 arg2, T4 arg4) { return _pred.value(arg1, arg2, _arg3, arg4); }
+  }
+  
+  /** Bind a fixed argument to the given quaternary pred, producing a ternary pred. */
+  public static <T1, T2, T3, T4> Predicate3<T1, T2, T3> 
+    bindFourth(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T4 arg4) {
+    return new BindFourthPredicate3<T1, T2, T3, T4>(pred, arg4);
+  }
+  
+  private static final class BindFourthPredicate3<T1, T2, T3, T4> implements Predicate3<T1, T2, T3>, Serializable {
+    private final Predicate4<? super T1, ? super T2, ? super T3, ? super T4> _pred;
+    private final T4 _arg4;
+    public BindFourthPredicate3(Predicate4<? super T1, ? super T2, ? super T3, ? super T4> pred, T4 arg4) {
+      _pred = pred; _arg4 = arg4;
+    }
+    public Boolean value(T1 arg1, T2 arg2, T3 arg3) { return _pred.value(arg1, arg2, arg3, _arg4); }
+  }
+  
+  
   /** Bind a fixed argument to the given unary runnable, producing nullary runnable. */
   public static <T> Runnable bindFirst(Runnable1<? super T> runnable, T arg) {
     return new BindFirstRunnable<T>(runnable, arg);

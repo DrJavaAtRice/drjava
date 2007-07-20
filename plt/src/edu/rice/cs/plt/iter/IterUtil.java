@@ -1375,6 +1375,49 @@ public final class IterUtil {
     return new SnapshotIterable<R>(map(iter1, iter2, iter3, iter4, map));
   }
   
+  /** Apply the given runnable to every element in an iterable. */
+  public static <T> void run(Iterable<? extends T> iter, Runnable1<? super T> runnable) {
+    for (T elt : iter) { runnable.run(elt); }
+  }
+  
+  /**
+   * Apply the given runnable to every pair of corresponding elements in the given iterables.
+   * The iterables are assumed to have the same length. 
+   */
+  public static <T1, T2> void run(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
+                                  Runnable2<? super T1, ? super T2> runnable) {
+    Iterator<? extends T1> i1 = iter1.iterator();
+    Iterator<? extends T2> i2 = iter2.iterator();
+    while (i1.hasNext()) { runnable.run(i1.next(), i2.next()); }
+  }
+  
+  /**
+   * Apply the given runnable to every triple of corresponding elements in the given iterables.
+   * The iterables are assumed to have the same length. 
+   */
+  public static <T1, T2, T3> void run(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
+                                      Iterable<? extends T3> iter3, 
+                                      Runnable3<? super T1, ? super T2, ? super T3> runnable) {
+    Iterator<? extends T1> i1 = iter1.iterator();
+    Iterator<? extends T2> i2 = iter2.iterator();
+    Iterator<? extends T3> i3 = iter3.iterator();
+    while (i1.hasNext()) { runnable.run(i1.next(), i2.next(), i3.next()); }
+  }
+  
+  /**
+   * Apply the given runnable to every quadruple of corresponding elements in the given iterables.
+   * The iterables are assumed to have the same length. 
+   */
+  public static <T1, T2, T3, T4> void run(Iterable<? extends T1> iter1, Iterable<? extends T2> iter2,
+                                          Iterable<? extends T3> iter3, Iterable<? extends T4> iter4,
+                                          Runnable4<? super T1, ? super T2, ? super T3, ? super T4> runnable) {
+    Iterator<? extends T1> i1 = iter1.iterator();
+    Iterator<? extends T2> i2 = iter2.iterator();
+    Iterator<? extends T3> i3 = iter3.iterator();
+    Iterator<? extends T4> i4 = iter4.iterator();
+    while (i1.hasNext()) { runnable.run(i1.next(), i2.next(), i3.next(), i4.next()); }
+  }
+  
   
   /**
    * Lazily produce the cartesian (cross) product of two iterables.  Each pair of elements is combined by the 
