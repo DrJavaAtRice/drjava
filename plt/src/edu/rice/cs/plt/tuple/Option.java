@@ -46,27 +46,51 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
  */
 public abstract class Option<T> extends Tuple {
   
-  /** Calls the appropriate case in the visitor */
+  /** Calls the appropriate case in the visitor. */
   public abstract <Ret> Ret apply(OptionVisitor<? super T, ? extends Ret> visitor);
   
+  public abstract boolean isSome();
+  
+  public boolean isNone() { return !isSome(); }
+  
 
-  /** Create a "some" case wrapper for the given value */
+  /** Create a "some" case wrapper for the given value. */
   public static <T> Option<T> some(T val) { return new Wrapper<T>(val); }
   
   /** 
    * Return the "none" case singleton, cast (unsafe formally, but safe in practice) to the 
-   * appropriate type
+   * appropriate type.
    */
-  @SuppressWarnings("unchecked")
-  public static <T> Option<T> none() {
-    // Compiler doesn't like this (!):
-    // return (Option<T>) Null.INSTANCE;
-    Option<Void> result = Null.INSTANCE;
-    return (Option<T>) result;
+  @SuppressWarnings("unchecked") public static <T> Option<T> none() {
+    return (Option<T>) Null.INSTANCE;
+  }
+  
+  /**
+   * Treat a possibly-null value as an {@code Option}: if the value is {@code null}, produce
+   * a "none"; otherwise, produce a "some" wrapping the value.
+   */
+  @SuppressWarnings("unchecked") public static <T> Option<T> wrap(T val) {
+    if (val == null) { return (Option<T>) Null.INSTANCE; }
+    else { return new Wrapper<T>(val); }
   }
   
   /** 
-   * Access the value in the given {@code Option}, or throw the given exception in the "none" case
+   * Access the value in the given {@code Option}, or throw an exception in the "none" case.
+   * @return  The value of {@code opt} if it is a "some"
+   * @throws RuntimeException  If {@code opt} is a "none"
+   */
+  public static <T> T unwrap (Option<T> opt) {
+    return unwrap(opt, MAKE_UNWRAP_EXCEPTION);
+  }
+  
+  private static final Thunk<RuntimeException> MAKE_UNWRAP_EXCEPTION = new Thunk<RuntimeException>() {
+    public RuntimeException value() {
+      return new IllegalArgumentException("Cannot unwrap a none option");
+    }
+  };
+  
+  /** 
+   * Access the value in the given {@code Option}, or throw the given exception in the "none" case.
    * @return  The value of {@code opt} if it is a "some"
    * @throws RuntimeException  If {@code opt} is a "none"
    */
@@ -76,7 +100,7 @@ public abstract class Option<T> extends Tuple {
   
   /**
    * Access the value in the given {@code Option}, or throw the exception produced by {@code forNone}
-   * in the "none" case
+   * in the "none" case.
    * @return  The value of {@code opt} if it is a "some"
    * @throws RuntimeException  If {@code opt} is a "none"
    */

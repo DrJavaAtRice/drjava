@@ -75,19 +75,19 @@ public class Quad<T1, T2, T3, T4> extends Tuple {
     else {
       Quad<?, ?, ?, ?> cast = (Quad<?, ?, ?, ?>) o;
       return 
-        _first.equals(cast._first) &&
-        _second.equals(cast._second) &&
-        _third.equals(cast._third) &&
-        _fourth.equals(cast._fourth);
+        (_first == null ? cast._first == null : _first.equals(cast._first)) &&
+        (_second == null ? cast._second == null : _second.equals(cast._second)) &&
+        (_third == null ? cast._third == null : _third.equals(cast._third)) &&
+        (_fourth == null ? cast._fourth == null : _fourth.equals(cast._fourth));
     }
   }
   
   protected int generateHashCode() {
     return 
-      _first.hashCode() ^ 
-      (_second.hashCode() << 1) ^ 
-      (_third.hashCode() << 2) ^ 
-      (_fourth.hashCode() << 3) ^ 
+      (_first == null ? 0 : _first.hashCode()) ^ 
+      (_second == null ? 0 : _second.hashCode() << 1) ^ 
+      (_third == null ? 0 : _third.hashCode() << 2) ^ 
+      (_fourth == null ? 0 : _fourth.hashCode() << 3) ^ 
       getClass().hashCode();
   }
   

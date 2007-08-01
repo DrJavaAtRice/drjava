@@ -37,6 +37,7 @@ package edu.rice.cs.plt.lambda;
 import java.io.Serializable;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.recur.RecurUtil;
+import edu.rice.cs.plt.tuple.Option;
 
 /**
  * <p>A collection of constants and static methods that define or operate on lambdas, runnables, and 
@@ -164,6 +165,15 @@ public final class LambdaUtil {
   private static final class NotIdenticalPredicate implements Predicate2<Object, Object>, Serializable {
     private NotIdenticalPredicate() {} 
     public Boolean value(Object arg1, Object arg2) { return arg1 != arg2; }
+  }
+
+  
+  /** A predicate that returns {@code true} iff the first argument is an instance of the second argument. */
+  public static final Predicate2<Object, Class<?>> INSTANCE_OF = new InstanceOfPredicate();
+
+  private static final class InstanceOfPredicate implements Predicate2<Object, Class<?>>, Serializable {
+    private InstanceOfPredicate() {} 
+    public Boolean value(Object val, Class<?> c) { return c.isInstance(val); }
   }
 
   
@@ -1700,6 +1710,166 @@ public final class LambdaUtil {
     private final Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends Boolean> _l;
     public LambdaPredicate4(Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends Boolean> l) { _l = l; }
     public Boolean value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { return _l.value(arg1, arg2, arg3, arg4); }
+  }
+  
+  
+  /**
+   * Treat the given thunk as a partial function, where well-defined results have a "some" return type, and 
+   * undefined results map to "none".  The provided thunk is considered to be "undefined" if 
+   * it returns {@code null} and {@code filterNull} is {@code true}, or if it throws a {@code RuntimeException} 
+   * that is accepted by {@code filterException}.
+   */
+  public static <R> Thunk<Option<R>> wrapPartial(Thunk<? extends R> thunk, boolean filterNull,
+                                                 Predicate<? super RuntimeException> filterException) {
+    return new PartialThunk<R>(thunk, filterNull, filterException);
+  }
+  
+  private static final class PartialThunk<R> implements Thunk<Option<R>>, Serializable {
+    private final Thunk<? extends R> _thunk;
+    private final boolean _filterNull;
+    private final Predicate<? super RuntimeException> _filterException;
+    public PartialThunk(Thunk<? extends R> thunk, boolean filterNull,
+                        Predicate<? super RuntimeException> filterException) {
+      _thunk = thunk; _filterNull = filterNull; _filterException = filterException;
+    }
+    public Option<R> value() {
+      try {
+        if (_filterNull) { return Option.wrap(_thunk.value()); }
+        else { return Option.some(_thunk.value()); }
+      }
+      catch (RuntimeException e) {
+        if (_filterException.value(e)) { return Option.none(); }
+        else { throw e; }
+      }
+    }
+  }
+  
+  /**
+   * Treat the given lambda as a partial function, where well-defined results have a "some" return type, and 
+   * undefined results map to "none".  The provided lambda is considered to be "undefined" for some argument if 
+   * it returns {@code null} and {@code filterNull} is {@code true}, or if it throws a {@code RuntimeException} 
+   * that is accepted by {@code filterException}.
+   */
+  public static <T, R> Lambda<T, Option<R>> wrapPartial(Lambda<? super T, ? extends R> lambda, boolean filterNull,
+                                                        Predicate<? super RuntimeException> filterException) {
+    return new PartialLambda<T, R>(lambda, filterNull, filterException);
+  }
+  
+  private static final class PartialLambda<T, R> implements Lambda<T, Option<R>>, Serializable {
+    private final Lambda<? super T, ? extends R> _lambda;
+    private final boolean _filterNull;
+    private final Predicate<? super RuntimeException> _filterException;
+    public PartialLambda(Lambda<? super T, ? extends R> lambda, boolean filterNull,
+                         Predicate<? super RuntimeException> filterException) {
+      _lambda = lambda; _filterNull = filterNull; _filterException = filterException;
+    }
+    public Option<R> value(T arg) {
+      try {
+        if (_filterNull) { return Option.wrap(_lambda.value(arg)); }
+        else { return Option.some(_lambda.value(arg)); }
+      }
+      catch (RuntimeException e) {
+        if (_filterException.value(e)) { return Option.none(); }
+        else { throw e; }
+      }
+    }
+  }
+  
+  /**
+   * Treat the given lambda as a partial function, where well-defined results have a "some" return type, and 
+   * undefined results map to "none".  The provided lambda is considered to be "undefined" for some set of 
+   * arguments if it returns {@code null} and {@code filterNull} is {@code true}, or if it throws a 
+   * {@code RuntimeException} that is accepted by {@code filterException}.
+   */
+  public static <T1, T2, R>
+    Lambda2<T1, T2, Option<R>> wrapPartial(Lambda2<? super T1, ? super T2, ? extends R> lambda, boolean filterNull,
+                                           Predicate<? super RuntimeException> filterException) {
+    return new PartialLambda2<T1, T2, R>(lambda, filterNull, filterException);
+  }
+  
+  private static final class PartialLambda2<T1, T2, R> implements Lambda2<T1, T2, Option<R>>, Serializable {
+    private final Lambda2<? super T1, ? super T2, ? extends R> _lambda;
+    private final boolean _filterNull;
+    private final Predicate<? super RuntimeException> _filterException;
+    public PartialLambda2(Lambda2<? super T1, ? super T2, ? extends R> lambda, boolean filterNull,
+                          Predicate<? super RuntimeException> filterException) {
+      _lambda = lambda; _filterNull = filterNull; _filterException = filterException;
+    }
+    public Option<R> value(T1 arg1, T2 arg2) {
+      try {
+        if (_filterNull) { return Option.wrap(_lambda.value(arg1, arg2)); }
+        else { return Option.some(_lambda.value(arg1, arg2)); }
+      }
+      catch (RuntimeException e) {
+        if (_filterException.value(e)) { return Option.none(); }
+        else { throw e; }
+      }
+    }
+  }
+  
+  /**
+   * Treat the given lambda as a partial function, where well-defined results have a "some" return type, and 
+   * undefined results map to "none".  The provided lambda is considered to be "undefined" for some set of 
+   * arguments if it returns {@code null} and {@code filterNull} is {@code true}, or if it throws a 
+   * {@code RuntimeException} that is accepted by {@code filterException}.
+   */
+  public static <T1, T2, T3, R> Lambda3<T1, T2, T3, Option<R>>
+    wrapPartial(Lambda3<? super T1, ? super T2, ? super T3, ? extends R> lambda, boolean filterNull,
+                Predicate<? super RuntimeException> filterException) {
+    return new PartialLambda3<T1, T2, T3, R>(lambda, filterNull, filterException);
+  }
+  
+  private static final class PartialLambda3<T1, T2, T3, R> implements Lambda3<T1, T2, T3, Option<R>>, Serializable {
+    private final Lambda3<? super T1, ? super T2, ? super T3, ? extends R> _lambda;
+    private final boolean _filterNull;
+    private final Predicate<? super RuntimeException> _filterException;
+    public PartialLambda3(Lambda3<? super T1, ? super T2, ? super T3, ? extends R> lambda, boolean filterNull,
+                          Predicate<? super RuntimeException> filterException) {
+      _lambda = lambda; _filterNull = filterNull; _filterException = filterException;
+    }
+    public Option<R> value(T1 arg1, T2 arg2, T3 arg3) {
+      try {
+        if (_filterNull) { return Option.wrap(_lambda.value(arg1, arg2, arg3)); }
+        else { return Option.some(_lambda.value(arg1, arg2, arg3)); }
+      }
+      catch (RuntimeException e) {
+        if (_filterException.value(e)) { return Option.none(); }
+        else { throw e; }
+      }
+    }
+  }
+  
+  /**
+   * Treat the given lambda as a partial function, where well-defined results have a "some" return type, and 
+   * undefined results map to "none".  The provided lambda is considered to be "undefined" for some set of 
+   * arguments if it returns {@code null} and {@code filterNull} is {@code true}, or if it throws a 
+   * {@code RuntimeException} that is accepted by {@code filterException}.
+   */
+  public static <T1, T2, T3, T4, R> Lambda4<T1, T2, T3, T4, Option<R>>
+    wrapPartial(Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> lambda, boolean filterNull,
+                Predicate<? super RuntimeException> filterException) {
+    return new PartialLambda4<T1, T2, T3, T4, R>(lambda, filterNull, filterException);
+  }
+  
+  private static final class PartialLambda4<T1, T2, T3, T4, R>
+    implements Lambda4<T1, T2, T3, T4, Option<R>>, Serializable {
+    private final Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> _lambda;
+    private final boolean _filterNull;
+    private final Predicate<? super RuntimeException> _filterException;
+    public PartialLambda4(Lambda4<? super T1, ? super T2, ? super T3, ? super T4, ? extends R> lambda,
+                          boolean filterNull, Predicate<? super RuntimeException> filterException) {
+      _lambda = lambda; _filterNull = filterNull; _filterException = filterException;
+    }
+    public Option<R> value(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
+      try {
+        if (_filterNull) { return Option.wrap(_lambda.value(arg1, arg2, arg3, arg4)); }
+        else { return Option.some(_lambda.value(arg1, arg2, arg3, arg4)); }
+      }
+      catch (RuntimeException e) {
+        if (_filterException.value(e)) { return Option.none(); }
+        else { throw e; }
+      }
+    }
   }
   
 }

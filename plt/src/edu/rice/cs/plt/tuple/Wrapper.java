@@ -54,6 +54,8 @@ public class Wrapper<T> extends Option<T> implements Thunk<T> {
     return visitor.forSome(_value);
   }
   
+  public boolean isSome() { return true; }
+  
   public String toString() { return "(" + _value + ")"; }
   
   /**
@@ -65,11 +67,13 @@ public class Wrapper<T> extends Option<T> implements Thunk<T> {
     else if (! getClass().equals(o.getClass())) { return false; }
     else {
       Wrapper<?> cast = (Wrapper<?>) o;
-      return _value.equals(cast._value);
+      return _value == null ? cast._value == null : _value.equals(cast._value);
     }
   }
   
-  protected int generateHashCode() { return _value.hashCode() ^ getClass().hashCode(); }
+  protected int generateHashCode() {
+    return (_value == null ? 0 : _value.hashCode()) ^ getClass().hashCode();
+  }
   
   /** Call the constructor (allows {@code T} to be inferred) */
   public static <T> Wrapper<T> make(T value) { return new Wrapper<T>(value); }

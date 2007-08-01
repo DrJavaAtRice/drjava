@@ -69,15 +69,15 @@ public class Pair<T1, T2> extends Tuple {
     else {
       Pair<?, ?> cast = (Pair<?, ?>) o;
       return 
-        _first.equals(cast._first) &&
-        _second.equals(cast._second);
+        (_first == null ? cast._first == null : _first.equals(cast._first)) &&
+        (_second == null ? cast._second == null : _second.equals(cast._second));
     }
   }
   
   protected int generateHashCode() {
     return 
-      _first.hashCode() ^ 
-      (_second.hashCode() << 1) ^ 
+      (_first == null ? 0 : _first.hashCode()) ^ 
+      (_second == null ? 0 : _second.hashCode() << 1) ^ 
       getClass().hashCode();
   }
   

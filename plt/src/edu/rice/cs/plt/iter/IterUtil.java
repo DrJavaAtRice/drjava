@@ -122,6 +122,28 @@ public final class IterUtil {
     return (iter == Collections.EMPTY_SET) || (iter == Collections.EMPTY_LIST);
   }
   
+  /**
+   * Test whether the given object appears in an iteration of {@code iter}.  Uses the
+   * {@link Collection#contains} method where possible; otherwise, may take linear time.
+   */
+  public static boolean contains(Iterable<?> iter, Object o) {
+    if (iter instanceof Collection<?>) { return ((Collection<?>) iter).contains(o); }
+    else {
+      if (o == null) {
+        for (Object elt : iter) {
+          if (elt == null) { return true; }
+        }
+        return false;
+      }
+      else {
+        for (Object elt : iter) {
+          if (o.equals(elt)) { return true; }
+        }
+        return false;
+      }
+    }
+  }
+  
   /** 
    * Generate a string representation of the given iterable, matching the {@link Collection}
    * conventions (results like {@code "[foo, bar, baz]"}).  Invokes 

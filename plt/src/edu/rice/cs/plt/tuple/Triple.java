@@ -72,17 +72,17 @@ public class Triple<T1, T2, T3> extends Tuple {
     else {
       Triple<?, ?, ?> cast = (Triple<?, ?, ?>) o;
       return 
-        _first.equals(cast._first) &&
-        _second.equals(cast._second) &&
-        _third.equals(cast._third);
+        (_first == null ? cast._first == null : _first.equals(cast._first)) &&
+        (_second == null ? cast._second == null : _second.equals(cast._second)) &&
+        (_third == null ? cast._third == null : _third.equals(cast._third));
     }
   }
   
   protected int generateHashCode() {
     return 
-      _first.hashCode() ^ 
-      (_second.hashCode() << 1) ^ 
-      (_third.hashCode() << 2) ^
+      (_first == null ? 0 : _first.hashCode()) ^ 
+      (_second == null ? 0 : _second.hashCode() << 1) ^ 
+      (_third == null ? 0 : _third.hashCode() << 2) ^
       getClass().hashCode();
   }
   
