@@ -48,7 +48,7 @@ import edu.rice.cs.plt.iter.ImmutableIterator;
  * if the original data structure is mutable, a client with direct access to that structure can
  * still mutate it.
  */
-public class ImmutableRelation<T1, T2> extends AbstractSet<Pair<T1, T2>> implements Serializable {
+public class ImmutableRelation<T1, T2> extends AbstractSet<Pair<T1, T2>> implements Relation<T1, T2>, Serializable {
   
   private final Relation<T1, T2> _relation;
   
@@ -63,9 +63,13 @@ public class ImmutableRelation<T1, T2> extends AbstractSet<Pair<T1, T2>> impleme
   public boolean containsAll(Collection<?> c) { return _relation.containsAll(c); }
   
   public boolean contains(T1 first, T2 second) { return _relation.contains(first, second); }
+  public boolean add(T1 first, T2 second) { throw new UnsupportedOperationException(); }
+  public boolean remove(T1 first, T2 second) { throw new UnsupportedOperationException(); }
+  
   public Set<T1> firstSet() { return _relation.firstSet(); }
   public boolean containsFirst(T1 first) { return _relation.containsFirst(first); }
   public Set<T2> getSeconds(T1 first) { return _relation.getSeconds(first); }
+  
   public Set<T2> secondSet() { return _relation.secondSet(); }
   public boolean containsSecond(T2 second) { return _relation.containsSecond(second); }
   public Set<T1> getFirsts(T2 second) { return _relation.getFirsts(second); }
