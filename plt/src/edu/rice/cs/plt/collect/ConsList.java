@@ -95,6 +95,12 @@ public abstract class ConsList<T> extends AbstractIterable<T> implements SizedIt
   /** Determine if the given list is empty */
   public static boolean isEmpty(ConsList<?> list) { return list.apply(ConsVisitor.IS_EMPTY); }
   
+  /** Attempt to access the first of the given list (throws an exception in the empty case). */
+  public static <T> T first(ConsList<? extends T> list) { return list.apply(ConsVisitor.<T>first()); }
+  
+  /** Attempt to access the rest of the given list (throws an exception in the empty case). */
+  public static <T> ConsList<? extends T> rest(ConsList<? extends T> list) { return list.apply(ConsVisitor.<T>rest()); }
+  
   /** Reverse the given list */
   public static <T> ConsList<? extends T> reverse(ConsList<? extends T> list) {
     return list.apply(ConsVisitor.<T>reverse());
