@@ -539,18 +539,17 @@ public final class IOUtil {
                                                      final RecursionStack<File> stack) {
     Iterable<File> result = (filter.accept(f)) ? IterUtil.singleton(f) : IterUtil.<File>empty();
     if (f.isDirectory() && recursionFilter.accept(f)) {
-      try {
-        final File canonicalF = f.getCanonicalFile();
-        Thunk<Iterable<File>> getMembers = new Thunk<Iterable<File>>() {
-          public Iterable<File> value() {
-            Iterable<File> dirFiles = IterUtil.empty();
-            for (File child : attemptListFilesAsIterable(canonicalF)) {
-              dirFiles = IterUtil.compose(dirFiles, listFilesRecursively(child, filter, recursionFilter, stack));
-            }
-            return dirFiles;
+      Thunk<Iterable<File>> getMembers = new Thunk<Iterable<File>>() {
+        public Iterable<File> value() {
+          Iterable<File> dirFiles = IterUtil.empty();
+          for (File child : attemptListFilesAsIterable(f)) {
+            dirFiles = IterUtil.compose(dirFiles, listFilesRecursively(child, filter, recursionFilter, stack));
           }
-        };
-        result = IterUtil.compose(result, stack.apply(getMembers, IterUtil.<File>empty(), canonicalF));
+          return dirFiles;
+        }
+      };
+      try {
+        result = IterUtil.compose(result, stack.apply(getMembers, IterUtil.<File>empty(), f.getCanonicalFile()));
       }
       catch (IOException e) { /* ignore -- don't include directory's files */ }
       catch (SecurityException e) { /* ignore -- don't include directory's files */ }

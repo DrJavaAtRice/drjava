@@ -26,6 +26,11 @@ public final class CollectUtil {
     return (Map<K, V>) Collections.EMPTY_MAP;
   }
   
+  /** Wrap a relation in an immutable wrapper.  Analogous to {@link Collections#unmodifiableMap}. */
+  public static <T1, T2> unmodifiableRelation(Relation<T1, T2> r) {
+    return new ImmutableRelation<T1, T2>(r);
+  }
+  
   public static <T> Set<T> union(Set<? extends T> s1, Set<? extends T> s2) {
     return new UnionSet<T>(s1, s2);
   }
@@ -101,7 +106,7 @@ public final class CollectUtil {
     return graphClosure(base, neighbors);
   }
   
-  public static <T> Set<T> graphClosure(T base, Lambda<? super T, ? extends Set<? extends T>> neighbors) {
+  public static <T> Set<T> graphClosure(T base, Lambda<? super T, ? extends Iterable<? extends T>> neighbors) {
     return graphClosure(Collections.singleton(base), neighbors);
   }
   

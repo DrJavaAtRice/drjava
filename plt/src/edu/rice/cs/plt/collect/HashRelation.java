@@ -136,7 +136,7 @@ public class HashRelation<T1, T2> extends AbstractSet<Pair<T1, T2>>
     }
   }
 
-  public Set<T2> secondSet(T1 first) {
+  public Set<T2> secondSet() {
     if (_secondIndex != null) { return Collections.unmodifiableSet(_secondIndex.keySet()); }
     else { return CollectUtil.asSet(IterUtil.pairSeconds(_pairs)); }
   }
