@@ -37,7 +37,10 @@ package edu.rice.cs.plt.collect;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Iterator;
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.iter.ImmutableIterator;
 
 /**
  * Wraps a relation in an immutable interface.  Analogous to {@link java.util.Collections#unmodifiableMap}.

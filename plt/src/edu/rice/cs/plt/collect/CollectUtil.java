@@ -27,7 +27,7 @@ public final class CollectUtil {
   }
   
   /** Wrap a relation in an immutable wrapper.  Analogous to {@link Collections#unmodifiableMap}. */
-  public static <T1, T2> unmodifiableRelation(Relation<T1, T2> r) {
+  public static <T1, T2> ImmutableRelation<T1, T2> unmodifiableRelation(Relation<T1, T2> r) {
     return new ImmutableRelation<T1, T2>(r);
   }
   
