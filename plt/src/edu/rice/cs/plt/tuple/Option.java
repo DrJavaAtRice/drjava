@@ -79,7 +79,7 @@ public abstract class Option<T> extends Tuple {
    * @return  The value of {@code opt} if it is a "some"
    * @throws RuntimeException  If {@code opt} is a "none"
    */
-  public static <T> T unwrap (Option<T> opt) {
+  public static <T> T unwrap(Option<T> opt) {
     return unwrap(opt, MAKE_UNWRAP_EXCEPTION);
   }
   
@@ -89,12 +89,24 @@ public abstract class Option<T> extends Tuple {
     }
   };
   
+  /**
+   * Access the value in the given {@code Option}, or return the given default value in the
+   * "none" case.
+   * @return  The value of {@code opt} if it is a "some", and {@code forNone} otherwise
+   */
+  public static <T> T unwrap(Option<T> opt, final T forNone) {
+    return opt.apply(new OptionVisitor<T, T>() {
+      public T forSome(T value) { return value; }
+      public T forNone() { return forNone; }
+    });
+  }
+  
   /** 
    * Access the value in the given {@code Option}, or throw the given exception in the "none" case.
    * @return  The value of {@code opt} if it is a "some"
    * @throws RuntimeException  If {@code opt} is a "none"
    */
-  public static <T> T unwrap (Option<T> opt, RuntimeException forNone) {
+  public static <T> T unwrap(Option<T> opt, RuntimeException forNone) {
     return unwrap(opt, LambdaUtil.valueLambda(forNone));
   }
   
