@@ -35,6 +35,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package edu.rice.cs.plt.tuple;
 
 import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.IOException;
 
 /**
  * <p>Abstract parent of all tuple classes, providing lazy evaluation of the hash code.  See the 
@@ -45,8 +47,8 @@ import java.io.Serializable;
  */
 public abstract class Tuple implements Serializable {
 
-  private int _hashCode;
-  private boolean _validHashCode;
+  private transient int _hashCode;
+  private transient boolean _validHashCode;
   
   protected Tuple() {
     _validHashCode = false;
@@ -58,6 +60,12 @@ public abstract class Tuple implements Serializable {
   public int hashCode() {
     if (!_validHashCode) { _hashCode = generateHashCode(); _validHashCode = true; }
     return _hashCode;
+  }
+  
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+    _validHashCode = false;
+    // _hashCode's value doesn't matter yet
   }
 
 }
