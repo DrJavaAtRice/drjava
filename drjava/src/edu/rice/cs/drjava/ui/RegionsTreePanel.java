@@ -363,11 +363,11 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     * @param r the region
     */
   public void addRegion(final R r) {
-    String name = "";
-    try { name = r.getDocument().getQualifiedClassName(); }
-    catch (ClassNameNotFoundException cnnfe) { name = r.getDocument().toString(); }
+    File file = r.getDocument().getRawFile();
+//    try { name = r.getDocument().getQualifiedClassName(); }
+//    catch (ClassNameNotFoundException cnnfe) { name = r.getDocument().toString(); }
 
-    DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(name);
+    DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(file);
     
     // Look for matching document node
     // Raw type here due to Swing's use of raw types.
@@ -439,15 +439,9 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
       public void run() {
-        String name = "";
-        try {
-          name = r.getDocument().getQualifiedClassName();
-        }
-        catch (ClassNameNotFoundException cnnfe) {
-          name = r.getDocument().toString();
-        }
+        File file= r.getDocument().getRawFile();
         
-        DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(name);
+        DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(file);
         
         // Find the document node for this region
         Enumeration documents = _regionRootNode.children();
@@ -484,15 +478,9 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
       public void run() {
-        String name = "";
-        try {
-          name = odd.getQualifiedClassName();
-        }
-        catch (ClassNameNotFoundException cnnfe) {
-          name = odd.toString();
-        }
+        File file = odd.getRawFile();
         
-        DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(name);
+        DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(file);
         
         // Find the document node for this region
         Enumeration documents = _regionRootNode.children();

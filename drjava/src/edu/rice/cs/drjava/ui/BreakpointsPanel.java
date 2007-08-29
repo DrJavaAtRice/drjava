@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.ui;
 import java.util.Vector;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.io.File;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -98,15 +99,9 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         // Only change GUI from event-dispatching thread
         Runnable doCommand = new Runnable() {
           public void run() {
-            String name = "";
-            try {
-              name = bp.getDocument().getQualifiedClassName();
-            }
-            catch (ClassNameNotFoundException cnnfe) {
-              name = bp.getDocument().toString();
-            }
+            File file = bp.getDocument().getRawFile();
             
-            DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(name);
+            DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(file);
             
             // Find the document node for this region
             Enumeration documents = _regionRootNode.children();
