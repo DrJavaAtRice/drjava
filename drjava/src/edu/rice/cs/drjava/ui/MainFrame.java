@@ -3984,19 +3984,17 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     try {
       // now works with multiple files
       List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();
-      boolean error = true;
+      boolean success = false;
       for(OpenDefinitionsDocument doc: l) {
         if (doc.saveFile(_saveSelector)) {
           getDefPaneGivenODD(doc).hasWarnedAboutModified(false);
-        }
-        else {
-          error = true;
+          success = true;
         }
       }
       // _model.refreshActiveDocument() is not sufficient here; it does not re-select
       // the same document in flat-file mode
       _model.setActiveDocument(_model.getActiveDocument());
-      return error;
+      return success;
 //      if (_model.getActiveDocument().saveFile(_saveSelector)) {
 //        _currentDefPane.hasWarnedAboutModified(false); 
 //        
@@ -4245,6 +4243,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
     
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
+    if (! _model.closeAllFilesOnQuit()) { return; /* if user pressed cancel, do not quit */ }
     _storePositionInfo();
     
     // Save recent files, but only if there wasn't a problem at startUp

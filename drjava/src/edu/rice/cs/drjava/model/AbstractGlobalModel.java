@@ -1713,7 +1713,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     doc.close();
     return true;
   }
- 
+  
   /** Closes all open documents.  This operation can be cancelled by the user since it
    *  checks if all files can be abandoned BEFORE it actually modifies the project state.
    *  @return  {@code false} if the user cancelled
@@ -1726,14 +1726,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument retainedDoc = null;
   
     for (OpenDefinitionsDocument doc : docs) {
-      if (! doc.canAbandonFile()) { retainedDoc = doc; break; }
+      if (! doc.canAbandonFile()) { return false; }
     }
-    
-    if  (retainedDoc != null) { // the user did want to cancel
-//      _log.log("closeAllFilesOnQuit failed. Retained doc = " + retainedDoc);
-      return false; 
-    } 
-    
+   
     // user did not want to cancel, close all of them
     // All files are being closed, create a new file before starting in order to have
     // a potentially active file that is not in the list of closing files.

@@ -104,6 +104,8 @@ public interface SingleDisplayModel extends GlobalModel {
   /** Disposes of external resources, e.g. other VMs. */
   public void disposeExternalResources();
 
+  public boolean closeAllFilesOnQuit();
+  
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //  /** @return the parsing control */
 //  public LightWeightParsingControl getParsingControl();
