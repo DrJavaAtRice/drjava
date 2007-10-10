@@ -111,9 +111,6 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     catch (InterpreterInterruptedException iie) {
       return JavaInterpreter.NO_RESULT;
     }
-    catch (ExitingNotAllowedException enae) {
-      return JavaInterpreter.NO_RESULT;
-    }
 //    catch (Throwable ie) {
 //      System.err.print(new Date() + ": ");
 //      System.err.println(ie);

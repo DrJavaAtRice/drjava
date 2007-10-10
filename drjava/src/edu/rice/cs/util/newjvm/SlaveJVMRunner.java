@@ -49,7 +49,6 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.ScrollableDialog;
 import edu.rice.cs.util.swing.Utilities;
-//import edu.rice.cs.util.PreventExitSecurityManager;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 

@@ -1014,6 +1014,12 @@ public interface OptionConstants {
   /** Whether to force test classes in projects to end in "Test". */
   public static final BooleanOption FORCE_TEST_SUFFIX = new BooleanOption("force.test.suffix", Boolean.FALSE);
 
+  /** Whether remote control using sockets is enabled. */
+  public static final BooleanOption REMOTE_CONTROL_ENABLED = new BooleanOption("remote.control.enabled", Boolean.TRUE);
+
+  /** The port where DrJava will listen for remote control requests. */
+  public static final IntegerOption REMOTE_CONTROL_PORT = new IntegerOption("remote.control.port", new Integer(4444));
+  
   /* ---------- COMPILER OPTIONS ------------- */
   
   /** Whether to show unchecked warnings */

@@ -45,12 +45,16 @@ import javax.swing.tree.*;
 import java.io.File;
 import java.awt.*;
 import java.util.*;
+import java.awt.dnd.*;
+import java.awt.datatransfer.*;
 import java.io.File;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.swing.*;
+import edu.rice.cs.drjava.DrJavaRoot;
 
 public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree 
-  implements IDocumentNavigator<ItemT>, TreeSelectionListener, TreeExpansionListener {
+  implements IDocumentNavigator<ItemT>, TreeSelectionListener, TreeExpansionListener,
+  DropTargetListener {
   
   /** The model of the tree. */
   private final DefaultTreeModel _model;
@@ -961,5 +965,22 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   
 //  /** Unnecessary since "modified" mark is added by the cell renderer */
 //  public void activeDocumentModified() { }  
+
+  /** Drag and drop target. */
+  DropTarget dropTarget = new DropTarget(this, this);  
+
+  /** User dragged something into the component. */
+  public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
+    DrJavaRoot.dragEnter(dropTargetDragEvent);
+  }
+  
+  public void dragExit(DropTargetEvent dropTargetEvent) {}
+  public void dragOver(DropTargetDragEvent dropTargetDragEvent) {}
+  public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){}
+  
+  /** User dropped something on the component. */
+  public synchronized void drop(DropTargetDropEvent dropTargetDropEvent) {
+    DrJavaRoot.drop(dropTargetDropEvent);
+  }
 }
 

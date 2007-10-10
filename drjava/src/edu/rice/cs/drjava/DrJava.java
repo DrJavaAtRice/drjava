@@ -67,12 +67,12 @@ import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.plt.debug.DebugUtil;
 
 /** Startup class for DrJava consisting entirely of static members.  The main method reads the .drjava file (creating 
- *  one if none exists) to get the critical information required to start the main JVM for DrJava: 
- *  (i) the location of tools.jar in the Java JDK installed on this machine (so DrJava can invoke the javac compiler
- *      stored in tools.jar)
- *  (ii) the argument string for invoking the main JVM (notably -X options used to determine maximum heap size, etc.)
- *  @version $Id$
- */
+  *  one if none exists) to get the critical information required to start the main JVM for DrJava: 
+  *  (i) the location of tools.jar in the Java JDK installed on this machine (so DrJava can invoke the javac compiler
+  *      stored in tools.jar)
+  *  (ii) the argument string for invoking the main JVM (notably -X options used to determine maximum heap size, etc.)
+  *  @version $Id$
+  */
 public class DrJava {
   
   private static Log _log = new Log("DrJava.txt", false);
@@ -81,13 +81,17 @@ public class DrJava {
   
   private static final ArrayList<String> _filesToOpen = new ArrayList<String>();
   private static final ArrayList<String> _jvmArgs = new ArrayList<String>();
-
+  
   static volatile boolean _showDebugConsole = false;
+  
+  /** true if a new instance of DrJava should be started instead of
+    * connecting to an already running instance. */
+  static volatile boolean _forceNewInstance = false;
   
   /* Config objects can't be public static final, since we have to delay construction until we know the 
    * config file's location.  (Might be specified on command line.) Instead, use accessor methods to 
    * prevent others from assigning new values. */
-
+  
   /** Default properties file used by the configuration object, i.e. ".drjava" in the user's home directory. */
   public static final File DEFAULT_PROPERTIES_FILE = new File(System.getProperty("user.home"), ".drjava");
   
@@ -99,10 +103,10 @@ public class DrJava {
   
   /** Returns the properties file used by the configuration object. */
   public static File getPropertiesFile() { return _propertiesFile; }
-
+  
   /** Returns the configuration object with all customized and default values. */
   public static FileConfiguration getConfig() { return _config; }
-
+  
   /** @return an array of the files that were passed on the command line. */
   public static String[] getFilesToOpen() { return _filesToOpen.toArray(new String[0]); }
   
@@ -110,64 +114,100 @@ public class DrJava {
   public static boolean getShowDebugConsole() { return _showDebugConsole; }
   
   /** Starts running DrJava.
-   *  @param args Command line argument array
-   */
+    *  @param args Command line argument array
+    */
   public static void main(final String[] args) {
     // Platform-specific UI setup.
     PlatformFactory.ONLY.beforeUISetup();
     
-    new SplashScreen().flash();
+    // handleCommandLineArgs will return true if DrJava should be loaded
+    if (handleCommandLineArgs(args)) {
+      if (!_forceNewInstance && (_filesToOpen.size()>0)) {
+        try {
+          boolean ret = RemoteControlClient.openFile(null);
+          if (!RemoteControlClient.isServerRunning()) {
+            // server not running, display splash screen
+            new SplashScreen().flash();
+          }
+        }
+        catch(IOException ioe) {
+          // ignore
+        }
+      }
+      else {
+        // either forcing new instance or no files specified, display splash screen
+        new SplashScreen().flash();
+      }
+      
 //    Utilities.showDebug("Calling configureAndLoadDrJavaRoot with args = " + args);
-    configureAndLoadDrJavaRoot(args); 
+      configureAndLoadDrJavaRoot(args); 
+    }
   }
   
   public static void configureAndLoadDrJavaRoot(String[] args) {
     try {
-      // handleCommandLineArgs will return true if DrJava should be loaded
-      if (handleCommandLineArgs(args)) {
-        
-        // Restart if there are custom JVM args
-        boolean restart = getConfig().getSetting(MASTER_JVM_ARGS).length() > 0;
-        
-        LinkedList<String> classArgsList = new LinkedList<String>();
-        classArgsList.addAll(_filesToOpen);
-
-        // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
-        if (_showDebugConsole) { classArgsList.addFirst("-debugConsole"); }
-        
-        if (!_propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
-          // Placed in reversed order to get "-config filename"
-          classArgsList.addFirst(_propertiesFile.getAbsolutePath());
-          classArgsList.addFirst("-config");
+      // if there were files passed on the command line,
+      // try to open them in an existing instance
+      if (!_forceNewInstance &&
+          DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
+          (_filesToOpen.size()>0)) {
+        try {
+          boolean ret = RemoteControlClient.openFile(null);
+          if (RemoteControlClient.isServerRunning()) {
+            // existing instance is running and responding
+            for (int i=0; i<_filesToOpen.size(); ++i) {
+              RemoteControlClient.openFile(new File(_filesToOpen.get(i)));
+            }
+            // files opened in existing instance, quit
+            System.exit(0);
+          }
         }
-
-        String[] classArgs = classArgsList.toArray(new String[0]);
+        catch(IOException ioe) {
+          ioe.printStackTrace();
+        }      
+      }
+      
+      // Restart if there are custom JVM args
+      boolean restart = getConfig().getSetting(MASTER_JVM_ARGS).length() > 0;
+      
+      LinkedList<String> classArgsList = new LinkedList<String>();
+      classArgsList.addAll(_filesToOpen);
+      
+      // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
+      if (_showDebugConsole) { classArgsList.addFirst("-debugConsole"); }
+      
+      if (!_propertiesFile.equals(DEFAULT_PROPERTIES_FILE)) {
+        // Placed in reversed order to get "-config filename"
+        classArgsList.addFirst(_propertiesFile.getAbsolutePath());
+        classArgsList.addFirst("-config");
+      }
+      
+      String[] classArgs = classArgsList.toArray(new String[0]);
+      
+      if (restart) {
+        String classPath = System.getProperty("java.class.path");
         
-        if (restart) {
-          String classPath = System.getProperty("java.class.path");
-          
-          // Run a new copy of DrJava and exit
-          try {
+        // Run a new copy of DrJava and exit
+        try {
 //          Utilities.showDebug("Starting DrJavaRoot with classArgs = " + Arrays.toString(classArgs) + "; classPath = " + classPath + 
 //                             "; jvmArgs = " + _jvmArgs + "; workDir = " + workDir);
-            ExecJVM.runJVM("edu.rice.cs.drjava.DrJavaRoot", classArgs, classPath, _jvmArgs.toArray(new String[0]), null);
-          }
-          catch (IOException ioe) {
-            // Display error
-            final String[] text = {
-              "DrJava was unable to load its compiler and debugger.  Would you ",
-              "like to start DrJava without a compiler and debugger?", "\nReason: " + ioe.toString()
-            };
-            int result = JOptionPane.showConfirmDialog(null, text, "Could Not Load Compiler and Debugger",
-                                                       JOptionPane.YES_NO_OPTION);
-            if (result != JOptionPane.YES_OPTION) { System.exit(0); }
-          }
+          ExecJVM.runJVM("edu.rice.cs.drjava.DrJavaRoot", classArgs, classPath, _jvmArgs.toArray(new String[0]), null);
         }
-        
-        else {
-          // No restart -- just invoke DrJavaRoot.main.
-          DrJavaRoot.main(classArgs);
+        catch (IOException ioe) {
+          // Display error
+          final String[] text = {
+            "DrJava was unable to load its compiler and debugger.  Would you ",
+            "like to start DrJava without a compiler and debugger?", "\nReason: " + ioe.toString()
+          };
+          int result = JOptionPane.showConfirmDialog(null, text, "Could Not Load Compiler and Debugger",
+                                                     JOptionPane.YES_NO_OPTION);
+          if (result != JOptionPane.YES_OPTION) { System.exit(0); }
         }
+      }
+      
+      else {
+        // No restart -- just invoke DrJavaRoot.main.
+        DrJavaRoot.main(classArgs);
       }
     }
     catch(Throwable t) {
@@ -179,8 +219,8 @@ public class DrJava {
   }
   
   /** Handles any command line arguments that have been specified.
-   *  @return true if DrJava should load, false if not
-   */
+    *  @return true if DrJava should load, false if not
+    */
   static boolean handleCommandLineArgs(String[] args) {
     boolean heapSizeGiven = false;  // indicates whether args includes an argument of the form -Xmx<number>
     
@@ -209,6 +249,8 @@ public class DrJava {
       
       else if (arg.equals("-debugConsole")) _showDebugConsole = true;
       
+      else if (arg.equals("-new")) _forceNewInstance = true;
+      
       else if (arg.equals("-help") || arg.equals("-?")) {
         displayUsage();
         return false;
@@ -225,7 +267,7 @@ public class DrJava {
       if (arg.startsWith("-Xmx")) { heapSizeGiven = true; }
       _jvmArgs.add(arg);
     }
-
+    
     if (PlatformFactory.ONLY.isMacPlatform()) {
       String iconLoc = System.getProperty("edu.rice.cs.drjava.icon");
       if (iconLoc != null) { // we are running inside the Mac app wrapper
@@ -235,21 +277,23 @@ public class DrJava {
     }
     
     if (!heapSizeGiven) { _jvmArgs.add(DEFAULT_MAX_HEAP_SIZE_ARG); }
-        
+    
     _log.log("_jvmArgs = " + _jvmArgs);
-
+    
     // Open the remaining args as filenames
-
+    
     for (int i = argIndex; i < len; i++) { _filesToOpen.add(args[i]); }
     return true;
   }
-
+  
   /** Displays a usage message about the available options. */
   static void displayUsage() {
     final StringBuilder buf = new StringBuilder();
     buf.append("Usage: java -jar drjava.jar [OPTIONS] [FILES]\n\n");
     buf.append("where options include:\n");
     buf.append("  -config [FILE]        use a custom config file\n");
+    buf.append("  -new                  force the creation of a new DrJava instance;");
+    buf.append("                        do not connect to existing instance");
     buf.append("  -help | -?            print this help message\n");
     buf.append("  -X<jvmOption>         specify a JVM configuration option for the master DrJava JVM\n");      
     buf.append("  -D<name>[=<value>]    set a Java property for the master DrJava JVM\n");      
@@ -322,23 +366,23 @@ public class DrJava {
 //    }
 //  }
   
- 
+  
   /** Switches the config object to use a custom config file. Ensures that Java source files aren't 
-   *  accidentally used.
-   */
+    *  accidentally used.
+    */
   static void setPropertiesFile(String fileName) {
     if (!fileName.endsWith(".java"))  _propertiesFile = new File(fileName);
   }
   
   /** Initializes the configuration object with the current notion of the properties file.
-   *  @throws IllegalStateException if config has already been assigned
-   */
+    *  @throws IllegalStateException if config has already been assigned
+    */
   static FileConfiguration _initConfig() throws IllegalStateException {
 //    // Make sure someone doesn't try to change the config object.
 //    if (_config != null) throw new IllegalStateException("Can only call initConfig once!");
     
     FileConfiguration config;
-
+    
     try { _propertiesFile.createNewFile(); }               // be nice and ensure a config file if there isn't one
     catch (IOException e) { /* IOException occurred, continue without a real file */ }
     
@@ -352,7 +396,7 @@ public class DrJava {
     _config = config; // required to support calls on DrJava._initConfig() in unit tests
     return config;
   }
-
+  
   /** Saves the contents of the config file. TO DO: log any IOExceptions that occur. */
   protected static void _saveConfig() {
     try { getConfig().saveConfiguration(); }
@@ -366,7 +410,7 @@ public class DrJava {
       // TODO: log this error
     }
   }
-
+  
 //  /** Displays a prompt to the user indicating that tools.jar could not be found in the specified location, and asks
 //   *  if he would like to specify a new location.
 //   */
@@ -406,6 +450,5 @@ public class DrJava {
 //
 //    int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?", JOptionPane.YES_NO_OPTION);
 //    return result == JOptionPane.YES_OPTION;
-//  }
-  
+//  }  
 }

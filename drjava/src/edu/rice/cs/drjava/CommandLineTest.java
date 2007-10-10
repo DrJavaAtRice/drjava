@@ -209,7 +209,7 @@ public final class CommandLineTest extends DrJavaTestCase {
 
    /** Tests DrJava with no command line arguments. Should open a new, untitled document. */
   public void testNone() {
-    DrJavaRoot.openCommandLineFiles(_mf, new String[0]);
+    DrJavaRoot.openCommandLineFiles(_mf, new String[0],false);
     // ListModel<DefinitionsDocument> docs =
     // Wouldn't that be nice?
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
@@ -223,7 +223,7 @@ public final class CommandLineTest extends DrJavaTestCase {
   public void testOpenOne() throws BadLocationException {
     String[] list = new String[1];
     list[0] = f1_name;
-    DrJavaRoot.openCommandLineFiles(_mf, list);
+    DrJavaRoot.openCommandLineFiles(_mf, list,false);
 //    _log.log("openCommandLineFiles completed");
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
 //    Utilities.showDebug(docs.toString());
@@ -241,7 +241,7 @@ public final class CommandLineTest extends DrJavaTestCase {
   public void testNE() {
     String[] list = new String[1];
     list[0] = nof1_name;
-    DrJavaRoot.openCommandLineFiles(_mf, list);
+    DrJavaRoot.openCommandLineFiles(_mf, list, false);
 //    _log.log("openCommandLineFiles completed");
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly one document?", 1, docs.size());
@@ -256,7 +256,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     list[0] = f1_name;
     list[1] = f2_name;
     list[2] = f3_name;
-    DrJavaRoot.openCommandLineFiles(_mf, list);
+    DrJavaRoot.openCommandLineFiles(_mf, list, false);
 //    _log.log("openCommandLineFiles completed");
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
@@ -285,7 +285,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     list[3] = f5_name;
     list[4] = f6_name;
     list[5] = nof3_name;
-    DrJavaRoot.openCommandLineFiles(_mf, list);
+    DrJavaRoot.openCommandLineFiles(_mf, list, false);
 //    _log.log("openCommandLineFiles completed");
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
@@ -314,7 +314,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     list[3] = f8_name;
     list[4] = f8_name;
     list[5] = f7_name;
-    DrJavaRoot.openCommandLineFiles(_mf, list);
+    DrJavaRoot.openCommandLineFiles(_mf, list, false);
 //    _log.log("openCommandLineFiles in testDups completed");
     
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
@@ -390,7 +390,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     assertTrue("file exists", relativeFile.exists());
 
     String path = relativeFile.getCanonicalPath();
-    DrJavaRoot.openCommandLineFiles(_mf, new String[] { path });
+    DrJavaRoot.openCommandLineFiles(_mf, new String[] { path }, false);
 
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Number of open documents", 1, docs.size());

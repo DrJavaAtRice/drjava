@@ -38,13 +38,10 @@ package edu.rice.cs.util.newjvm;
 
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
-//import edu.rice.cs.util.PreventExitSecurityManager;
 
 import java.io.Serializable;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
-
-//import edu.rice.cs.util.PreventExitSecurityManager;
 
 /** A partial implementation of a {@link SlaveRemote} that provides the quit functionality and that also periodically 
  *  checks if the master is still alive and automatically quits if not.
@@ -140,7 +137,6 @@ public abstract class AbstractSlaveJVM extends UnicastRemoteObject implements Sl
 
     _checkMaster = new Thread(_pollMasterThreadName) {
       public void run() { // Note: this method is NOT synchronized; it runs in a different thread.
-//        PreventExitSecurityManager.activate();
         while (true) {
           try { Thread.sleep(CHECK_MAIN_VM_ALIVE_SECONDS*1000); }
           catch (InterruptedException ie) { }

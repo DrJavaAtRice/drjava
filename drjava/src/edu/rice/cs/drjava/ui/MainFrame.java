@@ -43,6 +43,7 @@ import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
+import java.awt.dnd.*;
 import java.beans.*;
 
 import java.io.*;
@@ -87,7 +88,6 @@ import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
@@ -109,7 +109,7 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 /** DrJava's main window. */
-public class MainFrame extends JFrame implements ClipboardOwner {
+public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListener {
 
   private static final int INTERACTIONS_TAB = 0;
   private static final int CONSOLE_TAB = 1;
@@ -3094,6 +3094,17 @@ public class MainFrame extends JFrame implements ClipboardOwner {
         return discardEvent;
       }
     });
+    
+    // start remote control server if no server is running
+    try {
+      if (!edu.rice.cs.drjava.RemoteControlClient.isServerRunning()) {
+        edu.rice.cs.drjava.RemoteControlServer rcServer =
+          new edu.rice.cs.drjava.RemoteControlServer(this);
+      }
+    }
+    catch(IOException ioe) {
+      // ignore
+    }
   }   // End of MainFrame constructor
   
   public void setVisible(boolean b) { 
@@ -4561,14 +4572,6 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 //        catch (IOException ioe) { _showIOError(ioe); }
 //        catch (ClassNotFoundException cnfe) { _showClassNotFoundError(cnfe); }
         catch (NoClassDefFoundError ncde) { _showNoClassDefError(ncde); }
-        catch (ExitingNotAllowedException enae) {
-          JOptionPane.showMessageDialog(MainFrame.this,
-                                        "An exception occurred while running JUnit, which could\n" +
-                                        "not be caught by DrJava.  Details about the exception should\n" +
-                                        "have been printed to your console.\n\n",
-                                        "Error Running JUnit",
-                                        JOptionPane.ERROR_MESSAGE);
-        }
       }
     }.start();
   }
@@ -4986,7 +4989,7 @@ public class MainFrame extends JFrame implements ClipboardOwner {
   
   /** Jump to the specified line and return the offset.  Only runs in event thread.
    * @return offset */
-  private int _jumpToLine(int lineNum) {   
+  public int _jumpToLine(int lineNum) {   
     int pos = _model.getActiveDocument().gotoLine(lineNum);
     _currentDefPane.setCaretPosition(pos);
     _currentDefPane.centerViewOnOffset(pos);
@@ -8382,5 +8385,112 @@ public class MainFrame extends JFrame implements ClipboardOwner {
 
     popup.setSize(frameRect.getSize());
     popup.setLocation(frameRect.getLocation());
+  }
+  
+  /** Drag and drop target. */
+  DropTarget dropTarget = new DropTarget(this, this);
+
+  /** Linux URI drag-and-drop data flavor. */
+  private static DataFlavor uriListFlavor;
+  static {
+    try {
+      uriListFlavor = new DataFlavor("text/uri-list;class=java.lang.String");
+    }
+    catch(ClassNotFoundException cnfe) {
+      uriListFlavor = null;
+    }
+  }
+  
+  /** User dragged something into the component. */
+  public void dragEnter(DropTargetDragEvent dropTargetDragEvent)
+  {
+    dropTargetDragEvent.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+  }
+  
+  public void dragExit(DropTargetEvent dropTargetEvent) {}
+  public void dragOver(DropTargetDragEvent dropTargetDragEvent) {}
+  public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){}
+  
+  /** User dropped something on the component. */
+  public synchronized void drop(DropTargetDropEvent dropTargetDropEvent) {
+    try {
+      Transferable tr = dropTargetDropEvent.getTransferable();
+      if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+          ((uriListFlavor!=null) && (tr.isDataFlavorSupported(uriListFlavor)))) {
+        dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+        java.util.List<File> fileList;
+        if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+          @SuppressWarnings("unchecked")
+          java.util.List<File> data = (java.util.List<File>)tr.getTransferData(DataFlavor.javaFileListFlavor);
+          fileList = data;
+        }
+        else {
+          // work-around for Linux drag-and-drop
+          // see Java bug 4899516
+          @SuppressWarnings("unchecked")
+          String data = (String)tr.getTransferData(uriListFlavor);
+          fileList = textURIListToFileList(data);
+        }
+        java.util.Iterator<File> iterator = fileList.iterator();
+        java.util.List<File> filteredFileList = new java.util.ArrayList<File>();
+        while (iterator.hasNext()) {
+          File file = (File)iterator.next();
+          if ((file.isFile()) && ((file.getName().endsWith(".java")) || 
+                                  (file.getName().endsWith(".dj0")) || 
+                                  (file.getName().endsWith(".dj1")) || 
+                                  (file.getName().endsWith(".dj2")) || 
+                                  (file.getName().endsWith(".dj0")) ||
+                                  (file.getName().endsWith(".txt")))) {
+            filteredFileList.add(file);
+          }
+        }
+        final File[] fileArray = filteredFileList.toArray(new File[filteredFileList.size()]);
+        FileOpenSelector fs = new FileOpenSelector() {
+          public File[] getFiles() { return fileArray; }
+        };
+        open(fs);
+        dropTargetDropEvent.getDropTargetContext().dropComplete(true);
+      }
+      else {
+        dropTargetDropEvent.rejectDrop();
+      }
+    }
+    catch(IOException ioe) {
+      ioe.printStackTrace();
+      dropTargetDropEvent.rejectDrop();
+    }
+    catch (UnsupportedFlavorException ufe) {
+      ufe.printStackTrace();
+      dropTargetDropEvent.rejectDrop();
+    }    
+  }
+  
+  /**
+   * Convert a string with URIs to a list of files.
+   * @param data string with URIs
+   * @return list of files
+   */
+  private static java.util.List<File> textURIListToFileList(String data) {
+    java.util.List<File> list = new java.util.ArrayList<File>();
+    java.util.StringTokenizer st = new java.util.StringTokenizer(data, "\r\n");
+    while(st.hasMoreTokens()) {
+      String s = st.nextToken();
+      if (s.startsWith("#")) {
+        // the line is a comment (as per the RFC 2483)
+        continue;
+      }
+      try {
+        java.net.URI uri = new java.net.URI(s);
+        java.io.File file = new java.io.File(uri);
+        list.add(file);
+      }
+      catch (java.net.URISyntaxException e) {
+        // malformed URI
+      }
+      catch (IllegalArgumentException e) {
+        // the URI is not a valid 'file:' URI
+      }
+    }
+    return list;
   }
 }

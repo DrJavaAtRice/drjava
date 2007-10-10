@@ -737,8 +737,8 @@ public class ConfigFrame extends JFrame {
                                                   "debugged has been modified since its last save.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_CHANGE_LAF,
                                                   "Warn to Restart to Change Look and Feel", this,
-                                                  "<html>Whether DrJava should warn the user that look and feel<br>" +
-                                                  "changes will not be applied until DrJava is restarted.</html>."));
+                                                  "<html>Whether DrJava should warn the user that look and feel.<br>" +
+                                                  "(Changes will not be applied until DrJava is restarted.)</html>."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WARN_PATH_CONTAINS_POUND,
                                                   "Warn if File's Path Contains a '#' Symbol", this,
                                                   "<html>Whether DrJava should warn the user if the file being<br>" +
@@ -804,6 +804,15 @@ public class ConfigFrame extends JFrame {
                                                   "Forcefully Quit DrJava", this,
                                                   "<html>On some platforms, DrJava does not shut down properly when files are open<br>"+
                                                   "(namely tablet PCs). Check this option to force DrJava to close.</html>"));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.REMOTE_CONTROL_ENABLED, 
+                                                  "Enable Remote Control", this,
+                                                  "<html>Whether DrJava should listen to a socket (see below) so it<br>"+
+                                                  "can be remote controlled and told to open files.<br>"+
+                                                  "(Changes will not be applied until DrJava is restarted.)</html>"));
+    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.REMOTE_CONTROL_PORT, 
+                                                  "Remote Control Port", this,
+                                                  "<html>A running instance of DrJava can be remote controlled and<br>"+
+                                                  "told to open files. This specifies the port used for remote control.</html>"));
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 

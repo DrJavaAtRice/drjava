@@ -49,9 +49,13 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import java.awt.dnd.*;
+import java.awt.datatransfer.*;
+import edu.rice.cs.drjava.DrJavaRoot;
 
 /** This pane class for a SwingDocument. */
-public abstract class AbstractDJPane extends JTextPane implements OptionConstants {
+public abstract class AbstractDJPane extends JTextPane
+  implements OptionConstants, DropTargetListener {
   
   // ------------ FIELDS -----------
   
@@ -202,4 +206,21 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   
   /** Returns the DJDocument held by the pane. */
   public abstract DJDocument getDJDocument();
+  
+  /** Drag and drop target. */
+  DropTarget dropTarget = new DropTarget(this, this);  
+
+  /** User dragged something into the component. */
+  public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
+    DrJavaRoot.dragEnter(dropTargetDragEvent);
+  }
+  
+  public void dragExit(DropTargetEvent dropTargetEvent) {}
+  public void dragOver(DropTargetDragEvent dropTargetDragEvent) {}
+  public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){}
+  
+  /** User dropped something on the component. */
+  public synchronized void drop(DropTargetDropEvent dropTargetDropEvent) {
+    DrJavaRoot.drop(dropTargetDropEvent);
+  }
 }

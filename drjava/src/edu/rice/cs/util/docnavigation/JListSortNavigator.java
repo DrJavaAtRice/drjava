@@ -36,7 +36,12 @@
 
 package edu.rice.cs.util.docnavigation;
 
-class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<ItemT> {
+import java.awt.dnd.*;
+import java.awt.datatransfer.*;
+import edu.rice.cs.drjava.DrJavaRoot;
+
+class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<ItemT> 
+  implements DropTargetListener {
   
   /* Relies on the standard default constructor */
  
@@ -61,4 +66,21 @@ class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<It
   }
   
   public String toString() { synchronized(_model) { return _model.toString(); } }
+  
+  /** Drag and drop target. */
+  DropTarget dropTarget = new DropTarget(this, this);  
+  
+  /** User dragged something into the component. */
+  public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
+    DrJavaRoot.dragEnter(dropTargetDragEvent);
+  }
+  
+  public void dragExit(DropTargetEvent dropTargetEvent) {}
+  public void dragOver(DropTargetDragEvent dropTargetDragEvent) {}
+  public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){}
+  
+  /** User dropped something on the component. */
+  public synchronized void drop(DropTargetDropEvent dropTargetDropEvent) {
+    DrJavaRoot.drop(dropTargetDropEvent);
+  }
 }

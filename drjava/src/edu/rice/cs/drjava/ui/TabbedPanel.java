@@ -39,6 +39,9 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.awt.dnd.*;
+import java.awt.datatransfer.*;
+import edu.rice.cs.drjava.DrJavaRoot;
 
 /**
  * Extended by all panels that can dynamically be added or removed from the
@@ -48,7 +51,8 @@ import java.awt.*;
  * needed.
  * @version $Id$
  */
-public abstract class TabbedPanel extends JPanel {
+public abstract class TabbedPanel extends JPanel 
+  implements DropTargetListener{
   // indicates whether this tab is displayed in the tabbed pane
   protected boolean _displayed;
   // button which removes this pane's tab
@@ -121,5 +125,22 @@ public abstract class TabbedPanel extends JPanel {
 //    System.err.println("requestFocusInWindow called on TabbedPanel");
     super.requestFocusInWindow();
     return _mainPanel.requestFocusInWindow();
+  }
+  
+  /** Drag and drop target. */
+  DropTarget dropTarget = new DropTarget(this, this);  
+
+  /** User dragged something into the component. */
+  public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
+    DrJavaRoot.dragEnter(dropTargetDragEvent);
+  }
+  
+  public void dragExit(DropTargetEvent dropTargetEvent) {}
+  public void dragOver(DropTargetDragEvent dropTargetDragEvent) {}
+  public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){}
+  
+  /** User dropped something on the component. */
+  public synchronized void drop(DropTargetDropEvent dropTargetDropEvent) {
+    DrJavaRoot.drop(dropTargetDropEvent);
   }
 }
