@@ -32,63 +32,42 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.plt.collect;
+package edu.rice.cs.plt.recur;
 
-import java.util.Set;
-import java.util.AbstractSet;
-import java.util.Iterator;
-import java.util.Collection;
-import edu.rice.cs.plt.iter.FilteredIterator;
-import edu.rice.cs.plt.lambda.Predicate;
-import edu.rice.cs.plt.lambda.LambdaUtil;
+import edu.rice.cs.plt.lambda.Lambda;
 
-/**
- * The complement of a set {@code excluded} in a domain {@code domain} (alternatively,
- * {@code domain - excluded}), constructed lazily and updated dynamically.
+/** 
+ * A continuation representing computation left to be done (in contrast to {@link ValueContinuation},
+ * which represents a completed computation).  This class provides default implementations of
+ * {@link #value}, {@link #isResolved}, and {@link #compose}.  Subclasses may be defined in one of two
+ * ways:<ul>
+ * <li>Simple tail calls may be represented by simply defining an anonymous subclass of
+ * {@code PendingContinuation}, where the {@code step()} method wraps the delayed recursive invocation.</li>
+ * <li>More complex cases may be handled by defining continuation classes that extend
+ * {@code PendingContinuation}.  {@link ComposedContinuation} is one example.</li>
+ * </ul>
  */
-public class ComplementSet<E> extends AbstractSet<E> {
+public abstract class PendingContinuation<T> implements Continuation<T> {
   
-  private final Set<? extends E> _domain;
-  private final Set<?> _excluded;
-  
-  public ComplementSet(Set<? extends E> domain, Set<?> excluded) {
-    _domain = domain;
-    _excluded = excluded;
+  /** Iteratively invoke {@code step()} until a resolved continuation is produced. */
+  public T value() {
+    Continuation<? extends T> k = this;
+    while (!k.isResolved()) { k = k.step(); }
+    return k.value();
   }
   
-  /** Traversing is linear in the size of {@code domain}. */
-  public Iterator<E> iterator() {
-    Predicate<Object> filter = LambdaUtil.negate(CollectUtil.containsPredicate(_excluded));
-    return new FilteredIterator<E>(_domain.iterator(), filter);
+  /** Return {@code false}. */
+  public boolean isResolved() { return false; }
+  
+  /** Create a {@code ComposedContinuation} in terms of this object and the provided function. */
+  public <R> Continuation<R> compose(Lambda<? super T, ? extends Continuation<? extends R>> c) {
+    return new ComposedContinuation<T, R>(this, c);
   }
   
-  /** Linear in the size of {@code domain}. */
-  public int size() {
-    int result = 0;
-    for (E elt : this) { result++; }
-    return result;
-  }
-  
-  /** Linear in the size of {@code domain}. */
-  public boolean isEmpty() {
-    if (_domain.isEmpty()) { return true; }
-    else if (_excluded.isEmpty()) { return false; }
-    else if (_domain == _excluded) { return true; }
-    else { return _excluded.containsAll(_domain); }
-  }
-  
-  public boolean contains(Object o) {
-    return _domain.contains(o) && !(_excluded.contains(o));
-  }
-  
-  public boolean containsAll(Collection<?> objs) {
-    if (_domain.containsAll(objs)) {
-      for (Object obj : objs) {
-        if (_excluded.contains(obj)) { return false; }
-      }
-      return true;
-    }
-    else { return false; }
-  }
+  /**
+   * Defines the next step of the continuation.  For simple tail calls, this is generally a recursive 
+   * invocation of the current method (or a related method).
+   */
+  public abstract Continuation<? extends T> step();
   
 }

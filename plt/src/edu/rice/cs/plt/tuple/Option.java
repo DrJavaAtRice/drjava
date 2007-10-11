@@ -80,51 +80,43 @@ public abstract class Option<T> extends Tuple {
    * @throws RuntimeException  If {@code opt} is a "none"
    */
   public static <T> T unwrap(Option<T> opt) {
-    return unwrap(opt, MAKE_UNWRAP_EXCEPTION);
+    if (opt instanceof Wrapper<?>) { return ((Wrapper<T>)opt).value(); }
+    else { throw new IllegalArgumentException("Cannot unwrap a none option"); }
   }
-  
-  private static final Thunk<RuntimeException> MAKE_UNWRAP_EXCEPTION = new Thunk<RuntimeException>() {
-    public RuntimeException value() {
-      return new IllegalArgumentException("Cannot unwrap a none option");
-    }
-  };
   
   /**
    * Access the value in the given {@code Option}, or return the given default value in the
    * "none" case.
    * @return  The value of {@code opt} if it is a "some", and {@code forNone} otherwise
    */
-  public static <T> T unwrap(Option<T> opt, final T forNone) {
-    return opt.apply(new OptionVisitor<T, T>() {
-      public T forSome(T value) { return value; }
-      public T forNone() { return forNone; }
-    });
+  public static <T> T unwrap(Option<T> opt, T forNone) {
+    if (opt instanceof Wrapper<?>) { return ((Wrapper<T>)opt).value(); }
+    else { return forNone; }
   }
   
   /** 
    * Access the value in the given {@code Option}, or throw the given exception in the "none" case.
    * @return  The value of {@code opt} if it is a "some"
-   * @throws RuntimeException  If {@code opt} is a "none"
+   * @throws RuntimeException  If {@code opt} is a "none"; fills in the stack trace
    */
   public static <T> T unwrap(Option<T> opt, RuntimeException forNone) {
-    return unwrap(opt, LambdaUtil.valueLambda(forNone));
+    if (opt instanceof Wrapper<?>) { return ((Wrapper<T>)opt).value(); }
+    else { forNone.fillInStackTrace(); throw forNone; }
   }
   
   /**
    * Access the value in the given {@code Option}, or throw the exception produced by {@code forNone}
    * in the "none" case.
    * @return  The value of {@code opt} if it is a "some"
-   * @throws RuntimeException  If {@code opt} is a "none"
+   * @throws RuntimeException  If {@code opt} is a "none"; fills in the stack trace
    */
   public static <T> T unwrap(Option<T> opt, final Thunk<? extends RuntimeException> forNone) {
-    return opt.apply(new OptionVisitor<T, T>() {
-      public T forSome(T value) { return value; }
-      public T forNone() {
-        RuntimeException e = forNone.value();
-        e.fillInStackTrace();
-        throw e;
-      }
-    });
+    if (opt instanceof Wrapper<?>) { return ((Wrapper<T>)opt).value(); }
+    else {
+      RuntimeException e = forNone.value();
+      e.fillInStackTrace();
+      throw e;
+    }
   }
   
 }

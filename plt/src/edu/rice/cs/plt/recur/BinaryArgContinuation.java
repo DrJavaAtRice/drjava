@@ -34,29 +34,40 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.recur;
 
-/** 
- * A continuation representing a tail call in a method &mdash; the result
- * of the method can be described as the result of some other method.
- * {@code TailContinuation}s may be created by defining a local class that
- * implements the {@link #step()} method; the body of {@code step} should
- * contain the delayed method call.
+import edu.rice.cs.plt.lambda.Lambda;
+
+/**
+ * A continuation for results that depend on a two recursive invocations, followed by some
+ * additional computation.  Instances must implement {@link #arg1}, which wraps the first recursive
+ * invocation, {@link #arg2}, which wraps the second, and {@link #apply}, which performs the remaining
+ * computation.
  */
-public abstract class TailContinuation<T> implements Continuation<T> {
+public abstract class BinaryArgContinuation<T1, T2, R> extends PendingContinuation<R> {
   
-  /** Iteratively resolve the continuation, returning the final result */
-  public T value() {
-    Continuation<? extends T> k = this;
-    while (!k.isResolved()) { k = k.step(); }
-    return k.value();
-  }
+  /** Produce a continuation computing the first result of a recursive invocation. */
+  protected abstract Continuation<? extends T1> arg1();
   
-  /** @return  {@code false} */
-  public boolean isResolved() { return false; }
+  /** Produce a continuation computing the second result of a recursive invocation. */
+  protected abstract Continuation<? extends T2> arg2();
   
   /**
-   * Defines the next step of the continuation, which is generally a recursive invocation
-   * of the current method (or a related method)
+   * Given the results of evaluating {@code arg1()} and {@code arg2()}, produce a continuation for 
+   * the ultimate result.
    */
-  public abstract Continuation<? extends T> step();
+  protected abstract Continuation<? extends R> apply(T1 arg1, T2 arg2);
+  
+  /**
+   * Create a {@link ComposedContinuation} in terms of the result of {@code arg1()} and a lambda
+   * that computes {@code arg2()} and ultimately invokes {@code apply()} with the results.
+   */
+  public Continuation<R> step() {
+    return new ComposedContinuation<T1, R>(arg1(), new Lambda<T1, Continuation<? extends R>>() {
+      public Continuation<? extends R> value(final T1 arg1) {
+        return new ComposedContinuation<T2, R>(arg2(), new Lambda<T2, Continuation<? extends R>>() {
+          public Continuation<? extends R> value(T2 arg2) { return apply(arg1, arg2); }
+        });
+      }
+    });
+  }
   
 }

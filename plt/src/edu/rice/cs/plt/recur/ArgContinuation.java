@@ -32,63 +32,31 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.plt.collect;
+package edu.rice.cs.plt.recur;
 
-import java.util.Set;
-import java.util.AbstractSet;
-import java.util.Iterator;
-import java.util.Collection;
-import edu.rice.cs.plt.iter.FilteredIterator;
-import edu.rice.cs.plt.lambda.Predicate;
-import edu.rice.cs.plt.lambda.LambdaUtil;
+import edu.rice.cs.plt.lambda.Lambda;
 
 /**
- * The complement of a set {@code excluded} in a domain {@code domain} (alternatively,
- * {@code domain - excluded}), constructed lazily and updated dynamically.
+ * A continuation for results that depend on a single recursive invocation, followed by some
+ * additional computation.  Instances must implement {@link #arg}, which wraps the recursive
+ * invocation, and {@link #apply}, which performs the remaining computation.
  */
-public class ComplementSet<E> extends AbstractSet<E> {
+public abstract class ArgContinuation<T, R> extends PendingContinuation<R> {
   
-  private final Set<? extends E> _domain;
-  private final Set<?> _excluded;
+  /** Produce a continuation computing the result of a recursive invocation. */
+  protected abstract Continuation<? extends T> arg();
   
-  public ComplementSet(Set<? extends E> domain, Set<?> excluded) {
-    _domain = domain;
-    _excluded = excluded;
-  }
+  /** Given the result of evaluating {@code arg()}, produce a continuation for the ultimate result. */
+  protected abstract Continuation<? extends R> apply(T arg);
   
-  /** Traversing is linear in the size of {@code domain}. */
-  public Iterator<E> iterator() {
-    Predicate<Object> filter = LambdaUtil.negate(CollectUtil.containsPredicate(_excluded));
-    return new FilteredIterator<E>(_domain.iterator(), filter);
-  }
-  
-  /** Linear in the size of {@code domain}. */
-  public int size() {
-    int result = 0;
-    for (E elt : this) { result++; }
-    return result;
-  }
-  
-  /** Linear in the size of {@code domain}. */
-  public boolean isEmpty() {
-    if (_domain.isEmpty()) { return true; }
-    else if (_excluded.isEmpty()) { return false; }
-    else if (_domain == _excluded) { return true; }
-    else { return _excluded.containsAll(_domain); }
-  }
-  
-  public boolean contains(Object o) {
-    return _domain.contains(o) && !(_excluded.contains(o));
-  }
-  
-  public boolean containsAll(Collection<?> objs) {
-    if (_domain.containsAll(objs)) {
-      for (Object obj : objs) {
-        if (_excluded.contains(obj)) { return false; }
-      }
-      return true;
-    }
-    else { return false; }
+  /**
+   * Create a {@link ComposedContinuation} in terms of the result of {@code arg()} and a lambda wrapper
+   * of {@code apply()}.
+   */
+  public Continuation<R> step() {
+    return new ComposedContinuation<T, R>(arg(), new Lambda<T, Continuation<? extends R>>() {
+      public Continuation<? extends R> value(T arg) { return apply(arg); }
+    });
   }
   
 }
