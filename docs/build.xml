@@ -66,6 +66,7 @@
       </manifest>
       <zipfileset dir="docs" prefix="edu/rice/cs/drjava/docs" includes="user/**" />
       <zipfileset dir="docs" prefix="edu/rice/cs/drjava/docs" includes="quickstart/**" />
+      <zipfileset dir="docs" prefix="edu/rice/cs/drjava/docs" includes="javaapi/**" />
     </jar>
   </target>
 
