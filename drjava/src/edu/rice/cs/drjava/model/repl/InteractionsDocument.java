@@ -151,6 +151,13 @@ public class InteractionsDocument extends ConsoleDocument {
     try { _history.add(text); } 
     finally { releaseWriteLock(); }
   }
+  
+  /** Returns the last history item and then removes it, or returns null if the history is empty. */
+  public String removeLastFromHistory() {
+    acquireWriteLock();
+    try { return _history.removeLast(); }
+    finally { releaseWriteLock(); }
+  }
 
   /** Saves the unedited version of the current history to a file
     * @param selector File to save to

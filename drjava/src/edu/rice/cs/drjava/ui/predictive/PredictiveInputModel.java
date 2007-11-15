@@ -56,6 +56,13 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
      */
     public boolean isMatch(X item, PredictiveInputModel<X> pim);
     
+    /** Returns true if the item is perfect a match.
+     *  @param item item to check
+     *  @param pim predictive input model
+     *  @return true if the item is a match
+     */
+    public boolean isPerfectMatch(X item, PredictiveInputModel<X> pim);
+    
     /** Returns true if the two items are equivalent under this matching strategy.
      *  @param item1 first item
      *  @param item2 second item
@@ -109,6 +116,11 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
       String b = (pim._ignoreCase)?(pim._mask.toLowerCase()):(pim._mask);
       return a.startsWith(b);
+    }
+    public boolean isPerfectMatch(X item, PredictiveInputModel<X> pim) {
+      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
+      String b = (pim._ignoreCase)?(pim._mask.toLowerCase()):(pim._mask);
+      return a.equals(b);
     }
     public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {
       String a = (pim._ignoreCase)?(item1.toString().toLowerCase()):(item1.toString());
@@ -183,6 +195,11 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       }
       return true;
     }
+    public boolean isPerfectMatch(X item, PredictiveInputModel<X> pim) {
+      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
+      String b = (pim._ignoreCase)?(pim._mask.toLowerCase()):(pim._mask);
+      return a.equals(b);
+    }
     public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {
       String a = (pim._ignoreCase)?(item1.toString().toLowerCase()):(item1.toString());
       String b = (pim._ignoreCase)?(item2.toString().toLowerCase()):(item2.toString());
@@ -222,6 +239,11 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
         return false;
       }
     }
+    public boolean isPerfectMatch(X item, PredictiveInputModel<X> pim) {
+      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
+      String b = (pim._ignoreCase)?(pim._mask.toLowerCase()):(pim._mask);
+      return a.equals(b);
+    }
     public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {
       String a = (pim._ignoreCase)?(item1.toString().toLowerCase()):(item1.toString());
       String b = (pim._ignoreCase)?(item2.toString().toLowerCase()):(item2.toString());
@@ -256,6 +278,15 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
       String b = (pim._ignoreCase)?(mask.toLowerCase()):(mask);
       return a.startsWith(b);
+    }
+    public boolean isPerfectMatch(X item, PredictiveInputModel<X> pim) {
+      int posB = pim._mask.lastIndexOf(':');
+      if (posB<0) { posB = pim._mask.length(); }
+      String mask = pim._mask.substring(0,posB);
+      
+      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
+      String b = (pim._ignoreCase)?(mask.toLowerCase()):(mask);
+      return a.equals(b);
     }
     public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {
       int posA = item1.toString().lastIndexOf(':');
@@ -377,6 +408,15 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       }
       return true;
     }
+    public boolean isPerfectMatch(X item, PredictiveInputModel<X> pim) {
+      int posB = pim._mask.lastIndexOf(':');
+      if (posB<0) { posB = pim._mask.length(); }
+      String mask = pim._mask.substring(0,posB);
+      
+      String a = (pim._ignoreCase)?(item.toString().toLowerCase()):(item.toString());
+      String b = (pim._ignoreCase)?(mask.toLowerCase()):(mask);
+      return a.equals(b);
+    }
     public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {
       int posA = item1.toString().lastIndexOf(':');
       if (posA<0) { posA = item1.toString().length(); }
@@ -444,6 +484,14 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
         return false;
       }
     }
+    public boolean isPerfectMatch(X item, PredictiveInputModel<X> pim) {
+      int posB = pim._mask.lastIndexOf(':');
+      if (posB<0) { posB = pim._mask.length(); }
+      String mask = pim._mask.substring(0,posB);
+      
+      String a = (pim._ignoreCase)?item.toString().toLowerCase():item.toString();
+      return a.equals((pim._ignoreCase)?mask.toLowerCase():mask);
+    }
     public boolean equivalent(X item1, X item2, PredictiveInputModel<X> pim) {
       int posA = item1.toString().lastIndexOf(':');
       if (posA<0) { posA = item1.toString().length(); }
@@ -480,7 +528,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim) {
       return pim._mask;
     }
-   public String force(X item, String mask) {
+    public String force(X item, String mask) {
       int pos = mask.lastIndexOf(':');
       if (pos<0) { 
         return item.toString();
@@ -610,7 +658,15 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
     for(T s: items) {
       if (_strategy.isMatch(s, this)) _matchingItems.add(s);
     }
-    if (_items.size() > 0)  setCurrentItem(_items.get(_index));
+    if (_items.size() > 0) {
+      for(int i=0; i<_items.size(); ++i) {
+        if (_strategy.isPerfectMatch(_items.get(i), this)) {
+          _index = i;
+          break;
+        }
+      }
+      setCurrentItem(_items.get(_index));
+    }
     else _index = 0;
   }
 

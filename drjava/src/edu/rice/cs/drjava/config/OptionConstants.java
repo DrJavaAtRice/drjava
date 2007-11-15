@@ -1143,6 +1143,13 @@ public interface OptionConstants {
   public static final BooleanOption DIALOG_OPENJAVADOC_STORE_POSITION =
     new BooleanOption("dialog.openjavadoc.store.position", Boolean.TRUE);
 
+  /** The last state of the "Auto Import" dialog. */
+  public static final StringOption DIALOG_AUTOIMPORT_STATE = new StringOption("dialog.autoimport.state", "default");
+
+  /** Whether to save and restore window size and position at startUp/shutdown. */
+  public static final BooleanOption DIALOG_AUTOIMPORT_STORE_POSITION =
+    new BooleanOption("dialog.autoimport.store.position", Boolean.TRUE);
+
   /** Number of entries in the browser history (0 for unlimited). */
   public static final NonNegativeIntegerOption BROWSER_HISTORY_MAX_SIZE =
     new NonNegativeIntegerOption("browser.history.max.size", new Integer(50));
@@ -1195,4 +1202,9 @@ public interface OptionConstants {
   /** Whether to use Runtime.halt to quit DrJava (see bugs 1550220 and 1478796). */
   public static final BooleanOption DRJAVA_USE_FORCE_QUIT =
     new BooleanOption("drjava.use.force.quit", Boolean.FALSE);
+
+  /** Whether to display the "Auto Import" dialog when an undefined class
+    * is encountered in the Interactions Pane. */
+  public static final BooleanOption DIALOG_AUTOIMPORT_ENABLED =
+    new BooleanOption("dialog.autoimport.enabled", Boolean.TRUE);
 }

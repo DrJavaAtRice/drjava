@@ -674,7 +674,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     _matchList.setSelectedValue(_pim.getCurrentItem(), true);
     updateExtensionLabel();
     updateInfo();
-    _okButton.setEnabled(_matchList.getModel().getSize()>0);
+    if (_force) {
+      _okButton.setEnabled(_matchList.getModel().getSize()>0);
+    }
   }
 
   /** Update the information. */
@@ -689,13 +691,15 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   
   /** Handle OK button. */
   private void okButtonPressed() {
-    if (_matchList.getModel().getSize()>0) {
+    if (_force && (_matchList.getModel().getSize()==0)) {
+      Toolkit.getDefaultToolkit().beep();
+    }
+    else {
       _buttonPressed = JOptionPane.OK_OPTION;
       _lastState = new FrameState(PredictiveInputFrame.this);
       setVisible(false);
       _okAction.apply(this);
     }
-    else Toolkit.getDefaultToolkit().beep();
   }
   
   /** Handle cancel button. */

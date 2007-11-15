@@ -112,6 +112,17 @@ public class History implements OptionConstants, Serializable {
       _editedEntries.clear();
     }
   }
+  
+  /**
+   * Returns the last element and removes it, or returns null if the history is empty.
+   * @return last element before it was removed, or null if history is empty
+   */
+  public String removeLast() {
+    if (_vector.size()==0) { return null; }
+    String last = _vector.remove(_vector.size()-1);
+    if (_cursor>_vector.size()) { _cursor = _vector.size()-1; }
+    return last;
+  }
 
   /** Move the cursor to just past the end. Thus, to access the last element, you must movePrevious. */
   public void moveEnd() { _cursor = _vector.size(); }

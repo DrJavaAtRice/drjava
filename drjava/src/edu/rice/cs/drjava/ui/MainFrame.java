@@ -1309,13 +1309,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   };
   
 
-  /** Wrapper class for the "Open Javadoc" dialog list entries.  Provides the ability to have the same class name in
-    * there multiple times in different packages.
+  /** Wrapper class for the "Open Javadoc" and "Auto Import" dialog list entries.
+    * Provides the ability to have the same class name in there multiple times in different packages.
     */
-  private static class OpenJavadocListEntry implements Comparable<OpenJavadocListEntry> {
+  private static class JavaAPIListEntry implements Comparable<JavaAPIListEntry> {
     private final String str, fullStr;
     private final URL url;
-    public OpenJavadocListEntry(String s, String full, URL u) {
+    public JavaAPIListEntry(String s, String full, URL u) {
       str = s;
       fullStr = full;
       url = u;
@@ -1323,12 +1323,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public String toString() { return str; }
     public String getFullString() { return fullStr; }
     public URL getURL() { return url; }
-    public int compareTo(OpenJavadocListEntry other) {
+    public int compareTo(JavaAPIListEntry other) {
       return str.toLowerCase().compareTo(other.str.toLowerCase());
     }
     public boolean equals(Object other) {
-      if (!(other instanceof OpenJavadocListEntry)) return false;
-      return fullStr.equals(((OpenJavadocListEntry)other).fullStr);
+      if (!(other instanceof JavaAPIListEntry)) return false;
+      return fullStr.equals(((JavaAPIListEntry)other).fullStr);
     }
     public int hashCode() {
       return fullStr.hashCode();
@@ -1347,15 +1347,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Initialize dialog if necessary. */
   void initOpenJavadocDialog() {
     if (_openJavadocDialog == null) {
-      PredictiveInputFrame.InfoSupplier<OpenJavadocListEntry> info = 
-        new PredictiveInputFrame.InfoSupplier<OpenJavadocListEntry>() {
-        public String apply(OpenJavadocListEntry entry) {
+      PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
+        new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
+        public String apply(JavaAPIListEntry entry) {
           return entry.getFullString();
         }
       };
-      PredictiveInputFrame.CloseAction<OpenJavadocListEntry> okAction = 
-        new PredictiveInputFrame.CloseAction<OpenJavadocListEntry>() {
-        public Object apply(PredictiveInputFrame<OpenJavadocListEntry> p) {
+      PredictiveInputFrame.CloseAction<JavaAPIListEntry> okAction = 
+        new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+        public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           if (p.getItem() != null) {
             PlatformFactory.ONLY.openURL(p.getItem().getURL());
           }
@@ -1363,28 +1363,28 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           return null;
         }
       };
-      PredictiveInputFrame.CloseAction<OpenJavadocListEntry> cancelAction = 
-        new PredictiveInputFrame.CloseAction<OpenJavadocListEntry>() {
-        public Object apply(PredictiveInputFrame<OpenJavadocListEntry> p) {
+      PredictiveInputFrame.CloseAction<JavaAPIListEntry> cancelAction = 
+        new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+        public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           hourglassOff();
           return null;
         }
       };
-      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<OpenJavadocListEntry>> strategies =
-        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<OpenJavadocListEntry>>();
-      strategies.add(new PredictiveInputModel.FragmentStrategy<OpenJavadocListEntry>());
-      strategies.add(new PredictiveInputModel.PrefixStrategy<OpenJavadocListEntry>());
-      strategies.add(new PredictiveInputModel.RegExStrategy<OpenJavadocListEntry>());
+      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<JavaAPIListEntry>> strategies =
+        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<JavaAPIListEntry>>();
+      strategies.add(new PredictiveInputModel.FragmentStrategy<JavaAPIListEntry>());
+      strategies.add(new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>());
+      strategies.add(new PredictiveInputModel.RegExStrategy<JavaAPIListEntry>());
       _openJavadocDialog = 
-        new PredictiveInputFrame<OpenJavadocListEntry>(MainFrame.this,
-                                                       "Open Java API Javadoc Webpage",
-                                                       true, // force
-                                                       true, // ignore case
-                                                       info,
-                                                       strategies,
-                                                       okAction,
-                                                       cancelAction,
-                                                       new OpenJavadocListEntry("dummy", "dummy", null)) {
+        new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this,
+                                                   "Open Java API Javadoc Webpage",
+                                                   true, // force
+                                                   true, // ignore case
+                                                   info,
+                                                   strategies,
+                                                   okAction,
+                                                   cancelAction,
+                                                   new JavaAPIListEntry("dummy", "dummy", null)) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
         }
@@ -1394,24 +1394,28 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       if (DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue()) {
         _openJavadocDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STATE));
       }
-      generateOpenJavadocList();
+      generateJavaAPIList();
     }
   }
   
-  /** Generate Javadoc class list. */
-  void generateOpenJavadocList() {
-    if (_openJavadocList == null) {
+  /** Generate Java API class list. */
+  public void generateJavaAPIList() {
+    if (_javaAPIList == null) {
       // generate list
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
       String base = "";
+      String suffix = "";
       if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
         base = DrJava.getConfig().getSetting(JAVADOC_1_3_LINK);
+        suffix = "/allclasses-1.3.html";
       }
       else if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
         base = DrJava.getConfig().getSetting(JAVADOC_1_4_LINK);
+        suffix = "/allclasses-1.4.html";
       }
       else if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
         base = DrJava.getConfig().getSetting(JAVADOC_1_5_LINK);
+        suffix = "/allclasses-1.5.html";
       }
       else {
         // no valid Javadoc URL
@@ -1419,8 +1423,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       // TODO: put this in an AsyncTask
       try {
-        _openJavadocList = new ArrayList<OpenJavadocListEntry>();
-        URL url = new URL(base + "/allclasses-frame.html");
+        _javaAPIList = new ArrayList<JavaAPIListEntry>();
+        URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
         BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
         String line = br.readLine();
         while(line != null) {
@@ -1434,7 +1438,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             int lastDot = fullClassName.lastIndexOf('.');
             if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
             try {
-              _openJavadocList.add(new OpenJavadocListEntry(simpleClassName, fullClassName, new URL(base + "/" + link + ".html")));
+              _javaAPIList.add(new JavaAPIListEntry(simpleClassName, fullClassName, new URL(base + "/" + link + ".html")));
             }
             catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
           }
@@ -1442,21 +1446,21 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
       }
       catch(IOException ioe) { /* ignore, we'll just have an incomplete list */ }
-      if (_openJavadocList.size()==0) { _openJavadocList = null; }
+      if (_javaAPIList.size()==0) { _javaAPIList = null; }
     }
   }
 
   /** The "Open Javadoc" dialog instance. */
-  PredictiveInputFrame<OpenJavadocListEntry> _openJavadocDialog = null;
+  PredictiveInputFrame<JavaAPIListEntry> _openJavadocDialog = null;
   
   /** The list of Java API classes. */
-  List<OpenJavadocListEntry> _openJavadocList = null;
+  List<JavaAPIListEntry> _javaAPIList = null;
  
   /** Asks the user for a file name and goes there. */
   private Action _openJavadocAction = new AbstractAction("Open Java API Javadoc...") {
     public void actionPerformed(ActionEvent ae) {
       initOpenJavadocDialog();     
-      _openJavadocDialog.setItems(true, _openJavadocList); // ignore case
+      _openJavadocDialog.setItems(true, _javaAPIList); // ignore case
       hourglassOn();
       _openJavadocDialog.setVisible(true);
     }
@@ -1464,15 +1468,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
    
   /** Opens the Javadoc specified by the word the cursor is on. */
   void _openJavadocUnderCursor() {
-    generateOpenJavadocList();
-    if (_openJavadocList == null) {
+    generateJavaAPIList();
+    if (_javaAPIList == null) {
 //      Utilities.show("Cannot load Java API class list. No network connectivity?");
       return;
     }
-    PredictiveInputModel<OpenJavadocListEntry> pim =
-      new PredictiveInputModel<OpenJavadocListEntry>(true,
-                                                     new PredictiveInputModel.PrefixStrategy<OpenJavadocListEntry>(),
-                                                     _openJavadocList);
+    PredictiveInputModel<JavaAPIListEntry> pim =
+      new PredictiveInputModel<JavaAPIListEntry>(true,
+                                                 new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>(),
+                                                 _javaAPIList);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     odd.acquireReadLock();
     String mask = "";
@@ -1521,7 +1525,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       else {
         // not exactly one match
         pim.setMask(mask);
-        OpenJavadocListEntry foundItem = null;
+        JavaAPIListEntry foundItem = null;
         int found = 0;
         if (pim.getMatchingItems().size() == 0) {
           // if there are no matches, shorten the mask until there is at least one
@@ -1534,7 +1538,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
         else {
           // there are several matches, see if there is an exact match
-          for(OpenJavadocListEntry e: pim.getMatchingItems()) {
+          for(JavaAPIListEntry e: pim.getMatchingItems()) {
             if (e.toString().equalsIgnoreCase(mask)) {
               ++found;
               foundItem = e;
@@ -3017,7 +3021,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // The OptionListener for JAVADOC_LINK_VERSION.
     OptionListener<String> choiceOptionListener = new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
-        _openJavadocList = null;
+        _javaAPIList = null;
         _openJavadocAction.setEnabled(!oce.value.equals(JAVADOC_NONE_TEXT));
         _openJavadocUnderCursorAction.setEnabled(!oce.value.equals(JAVADOC_NONE_TEXT));
       }
@@ -3029,7 +3033,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public void optionChanged(OptionEvent<String> oce) {
         String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
         if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
-          _openJavadocList = null;
+          _javaAPIList = null;
         }
       }
     };
@@ -3038,7 +3042,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public void optionChanged(OptionEvent<String> oce) {
         String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
         if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
-          _openJavadocList = null;
+          _javaAPIList = null;
         }
       }
     };
@@ -3047,7 +3051,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public void optionChanged(OptionEvent<String> oce) {
         String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
         if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
-          _openJavadocList = null;
+          _javaAPIList = null;
         }
       }
     };
@@ -7389,6 +7393,34 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     public void interactionEnded() {
+      InteractionsModel im = _model.getInteractionsModel();
+      edu.rice.cs.plt.tuple.Pair<String,String> lastError = im.getLastError();
+      if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DIALOG_AUTOIMPORT_ENABLED)) {
+        if (lastError!=null) {
+          // the interaction ended and there was an error
+          String exceptionClass = lastError.first();
+          String message = lastError.second();
+          edu.rice.cs.plt.tuple.Pair<String,String> secondToLastError = im.getSecondToLastError();
+          if ((secondToLastError==null) || // either there was no 2nd to last error
+              (!secondToLastError.first().equals(exceptionClass)) || // or it is different
+              (!secondToLastError.second().equals(message))) {
+            // this aborts the auto-importing if the same class comes up twice in a row
+            if ("koala.dynamicjava.interpreter.error.ExecutionError".equals(exceptionClass) &&
+                message != null &&
+                message.startsWith("Undefined class '") &&
+                message.endsWith("'")) {
+              // it was an "undefined class" exception
+              // show auto-import dialog
+              String undefinedClassName = message.substring(message.indexOf('\'')+1,message.lastIndexOf('\''));
+              _showAutoImportDialog(undefinedClassName);          
+            }
+          }
+        }
+      } else {
+        // reset the last errors, so the dialog works again if it is re-enabled
+        im.resetLastErrors();
+      }
+
       Utilities.invokeLater(new Runnable() {
         public void run() {
           _enableInteractionsPane();
@@ -8492,5 +8524,111 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
     return list;
+  }
+
+  /** Reset the position of the "Open Javadoc" dialog. */
+  public void resetAutoImportDialogPosition() {
+    initAutoImportDialog();
+    _autoImportDialog.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_AUTOIMPORT_STATE, "default");
+    }
+  }
+  
+  /** Initialize dialog if necessary. */
+  void initAutoImportDialog() {
+    if (_autoImportDialog == null) {
+      PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
+        new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
+        public String apply(JavaAPIListEntry entry) {
+          // show full class name as information
+          return entry.getFullString();
+        }
+      };
+      PredictiveInputFrame.CloseAction<JavaAPIListEntry> okAction = 
+        new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+        public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
+          String text;
+          if (p.getItem() != null) {
+            // if a class was selected...
+            text = p.getItem().getFullString();
+          }
+          else {
+            // otherwise use the text that was entered
+            text = p.getText();
+          }
+          final InteractionsModel im = _model.getInteractionsModel();
+          // get the last line (the one that caused the error)
+          // and remove it from the history
+          String lastLine = im.removeLastFromHistory();
+          // import the selected class...
+          String importLine = "import "+text+"; // auto-import";
+          // ...and try to do the last line again
+          final String code = importLine+((lastLine!=null)?("\n"+lastLine):"");
+          EventQueue.invokeLater(new Runnable() { public void run() {
+            // interpret with the added import
+            im.append(code, InteractionsDocument.DEFAULT_STYLE);
+            im.interpretCurrentInteraction();
+            hourglassOff();
+          } } );
+          return null;
+        }
+      };
+      PredictiveInputFrame.CloseAction<JavaAPIListEntry> cancelAction = 
+        new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+        public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
+          // if no class was selected, do nothing
+          // just reset the error information so the dialog box works next time
+          _model.getInteractionsModel().resetLastErrors();
+          hourglassOff();
+          return null;
+        }
+      };
+      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<JavaAPIListEntry>> strategies =
+        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<JavaAPIListEntry>>();
+      strategies.add(new PredictiveInputModel.FragmentStrategy<JavaAPIListEntry>());
+      strategies.add(new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>());
+      strategies.add(new PredictiveInputModel.RegExStrategy<JavaAPIListEntry>());
+      _autoImportDialog = 
+        new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this,
+                                                   "Auto Import Class",
+                                                   false, // force
+                                                   true, // ignore case
+                                                   info,
+                                                   strategies,
+                                                   okAction,
+                                                   cancelAction,
+                                                   new JavaAPIListEntry("dummy", "dummy", null)) {
+        public void setOwnerEnabled(boolean b) {
+          if (b) { hourglassOff(); } else { hourglassOn(); }
+        }
+      }; 
+      // putting one dummy entry in the list; it will be changed later anyway
+      
+      if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
+        _autoImportDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STATE));
+      }
+      generateJavaAPIList();
+    }
+  }
+  
+  /** The "Auto Import" dialog instance. */
+  PredictiveInputFrame<JavaAPIListEntry> _autoImportDialog = null;
+  
+  /** Imports a class. */
+  void _showAutoImportDialog(String s) {
+    generateJavaAPIList();
+    if (_javaAPIList == null) {
+      return;
+    }
+    PredictiveInputModel<JavaAPIListEntry> pim =
+      new PredictiveInputModel<JavaAPIListEntry>(true,
+                                                 new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>(),
+                                                 _javaAPIList);
+    pim.setMask(s);
+    initAutoImportDialog();
+    _autoImportDialog.setModel(true, pim); // ignore case
+    hourglassOn();
+    _autoImportDialog.setVisible(true);
   }
 }

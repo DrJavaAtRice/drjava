@@ -52,6 +52,7 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.plt.tuple.Pair;
 
 /** A model which can serve as the glue between an InteractionsDocument and a JavaInterpreter.  This 
   * abstract class provides common functionality for all such models.
@@ -103,6 +104,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Banner displayed at top of the interactions document */
   private volatile String _banner;
+  
+  /** Last error, or null if successful. */
+  protected volatile Pair<String,String> _lastError = null;
+  protected volatile Pair<String,String> _secondToLastError = null;
   
   /** Constructs an InteractionsModel.
    *  @param adapter DocumentAdapter to use in the InteractionsDocument
@@ -473,7 +478,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
 
   /** Signifies that the most recent interpretation completed successfully, returning no value. */
-  public void replReturnedVoid() { _interactionIsOver(); }
+  public void replReturnedVoid() {
+    _secondToLastError = _lastError;
+    _lastError = null;
+    _interactionIsOver();
+  }
 
   /** Signifies that the most recent interpretation completed successfully, returning a value.
    *  @param result The .toString-ed version of the value that was returned by the interpretation. We must return the 
@@ -481,6 +490,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   public void replReturnedResult(String result, String style) {
 //    System.err.println("InteractionsModel.replReturned(...) passed '" + result + "'");
+    _secondToLastError = _lastError;
+    _lastError = null;
     append(result + "\n", style);
     _interactionIsOver();
   }
@@ -498,6 +509,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
     }
     _document.appendExceptionResult(exceptionClass, message, stackTrace, InteractionsDocument.ERROR_STYLE);
+    _secondToLastError = _lastError;
+    _lastError = new Pair<String,String>(exceptionClass,message);
     _interactionIsOver();
   }
 
@@ -511,6 +524,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
                                       int endRow, int endCol ) {
+    _secondToLastError = _lastError;
+    _lastError = new Pair<String,String>("koala.dynamicjava.parser.ParserException",errorMessage);
     if (errorMessage != null) {
       if (errorMessage.endsWith("<EOF>\"")) {
         interactionContinues();
@@ -518,7 +533,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
     }
     
-    edu.rice.cs.plt.tuple.Pair<Integer,Integer> oAndL =
+    Pair<Integer,Integer> oAndL =
       StringOps.getOffsetAndLength(interaction, startRow, startCol, endRow, endCol);
 
     _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.first().intValue(),oAndL.second().intValue());
@@ -654,4 +669,24 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Gets the console tab document for this interactions model */
   public abstract ConsoleDocument getConsoleDocument();
+  
+  /** Return the last error as a pair (exception class name, message), or null if successful. */
+  public Pair<String,String> getLastError() {
+    return _lastError;
+  }
+
+  /** Return the second to last error as a pair (exception class name, message), or null if successful. */
+  public Pair<String,String> getSecondToLastError() {
+    return _secondToLastError;
+  }
+  
+  /** Reset the information about the last and second to last error. */
+  public void resetLastErrors() {
+    _lastError = _secondToLastError = null;
+  }
+  
+  /** Returns the last history item and then removes it, or returns null if the history is empty. */
+  public String removeLastFromHistory() {
+    return _document.removeLastFromHistory();
+  }
 }

@@ -470,6 +470,12 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetOpenJavadocDialogPosition(); }
     }, "Reset \"Open Javadoc\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_STORE_POSITION,
+                                                  "Save \"Auto Import\" Dialog Position", this,
+                                                  "Whether to save and restore the size and position of the \"Auto Import\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
+    }, "Reset \"Auto Import\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     panel.displayComponents();
   }
 
@@ -813,6 +819,10 @@ public class ConfigFrame extends JFrame {
                                                   "Remote Control Port", this,
                                                   "<html>A running instance of DrJava can be remote controlled and<br>"+
                                                   "told to open files. This specifies the port used for remote control.</html>"));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_ENABLED, 
+                                                  "Enable the \"Auto Import\" Dialog", this,
+                                                  "<html>Whether DrJava should open the \"Auto Import\" dialog when<br>"+
+                                                  "an undefined class is encountered in the Interactions Pane.</html>"));
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 
