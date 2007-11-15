@@ -134,6 +134,12 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   /** Text field for string input. */
   private final JTextField _textField = new JTextField();
   
+  /** Panel for additional options. */
+  protected JPanel _optionsPanel;
+  
+  /** Optional components for the _optionsPanel. */
+  protected JComponent[] _optionalComponents;
+  
   /** Label with "Tab completes:" string. */
   private final JLabel _tabCompletesLabel = new JLabel("Tab completes: ");
 
@@ -409,6 +415,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
         if ((e.getOppositeComponent() != _textField) && 
             (e.getOppositeComponent() != _okButton) && 
             (e.getOppositeComponent() != cancelButton)) {
+          for(JComponent c: _optionalComponents) {
+            if (e.getOppositeComponent() == c) { return; }
+          }
           _textField.requestFocus();
         }
       }
@@ -534,6 +543,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
         if ((e.getOppositeComponent() != _strategyBox) && 
             (e.getOppositeComponent() != _okButton) && 
             (e.getOppositeComponent() != cancelButton)) {
+          for(JComponent c: _optionalComponents) {
+            if (e.getOppositeComponent() == c) { return; }
+          }
           _textField.requestFocus();
         }
       }
@@ -595,6 +607,13 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     
     contentPane.add(_textField, c);
     
+    _optionalComponents = makeOptions();
+    if (_optionalComponents.length>0) {
+      _optionsPanel = new JPanel(new BorderLayout());
+      _setupOptionsPanel(_optionalComponents);
+      contentPane.add(_optionsPanel, c);
+    }
+    
     c.anchor = GridBagConstraints.SOUTH;
     
     JPanel buttonPanel = new JPanel(new GridBagLayout());
@@ -618,6 +637,39 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     updateTextField();
     addListener();
     updateList();
+  }
+  
+  /** Creates the optional components. Should be overridden. */
+  protected JComponent[] makeOptions() {        
+    return new JComponent[0];    
+  }
+  
+  /** Creates the panel with the optional components. */
+  private void _setupOptionsPanel(JComponent[] components) {
+    JPanel mainButtons = new JPanel();
+    JPanel emptyPanel = new JPanel();
+    GridBagLayout gbLayout = new GridBagLayout();
+    GridBagConstraints c = new GridBagConstraints();
+    mainButtons.setLayout(gbLayout);
+    
+    for (JComponent b: components) { mainButtons.add(b); }
+    mainButtons.add(emptyPanel);
+    
+    c.fill = GridBagConstraints.HORIZONTAL;
+    c.anchor = GridBagConstraints.NORTH;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.weightx = 1.0;
+
+    for (JComponent b: components) { gbLayout.setConstraints(b, c); }
+    
+    c.fill = GridBagConstraints.BOTH;
+    c.anchor = GridBagConstraints.SOUTH;
+    c.gridheight = GridBagConstraints.REMAINDER;
+    c.weighty = 1.0;
+    
+    gbLayout.setConstraints(emptyPanel, c);
+    
+    _optionsPanel.add(mainButtons, BorderLayout.CENTER);
   }
   
   /**
@@ -660,6 +712,11 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   private void updateTextField() {
     _textField.setText(_pim.getMask());
     _textField.setCaretPosition(_pim.getMask().length());
+  }
+  
+  /** Focus back in the text field. */
+  public void resetFocus() {
+    _textField.requestFocus();
   }
 
   /** Update the extension label based on the model. */

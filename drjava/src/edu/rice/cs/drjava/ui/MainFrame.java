@@ -8538,6 +8538,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Initialize dialog if necessary. */
   void initAutoImportDialog() {
     if (_autoImportDialog == null) {
+      final JCheckBox cbox = new JCheckBox("Import Package");
+      cbox.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          _autoImportDialog.resetFocus();
+        }
+      });
+      cbox.setMnemonic('p');
       PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
         public String apply(JavaAPIListEntry entry) {
@@ -8556,6 +8563,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           else {
             // otherwise use the text that was entered
             text = p.getText();
+          }
+          if (cbox.isSelected()) {
+            int lastDot = text.lastIndexOf('.');
+            if (lastDot>0) {
+              text = text.substring(0,lastDot+1)+"*";
+            }
           }
           final InteractionsModel im = _model.getInteractionsModel();
           // get the last line (the one that caused the error)
@@ -8601,6 +8614,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                    new JavaAPIListEntry("dummy", "dummy", null)) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
+        }
+        protected JComponent[] makeOptions() {
+          return new JComponent[] { cbox };
         }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
