@@ -8538,13 +8538,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Initialize dialog if necessary. */
   void initAutoImportDialog() {
     if (_autoImportDialog == null) {
-      final JCheckBox cbox = new JCheckBox("Import Package");
-      cbox.addActionListener(new ActionListener() {
+      _autoImportPackageCheckbox = new JCheckBox("Import Package");
+      _autoImportPackageCheckbox.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           _autoImportDialog.resetFocus();
         }
       });
-      cbox.setMnemonic('p');
+      _autoImportPackageCheckbox.setMnemonic('p');
       PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
         public String apply(JavaAPIListEntry entry) {
@@ -8564,7 +8564,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             // otherwise use the text that was entered
             text = p.getText();
           }
-          if (cbox.isSelected()) {
+          if (_autoImportPackageCheckbox.isSelected()) {
             int lastDot = text.lastIndexOf('.');
             if (lastDot>0) {
               text = text.substring(0,lastDot+1)+"*";
@@ -8616,7 +8616,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           if (b) { hourglassOff(); } else { hourglassOn(); }
         }
         protected JComponent[] makeOptions() {
-          return new JComponent[] { cbox };
+          return new JComponent[] { _autoImportPackageCheckbox };
         }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
@@ -8630,6 +8630,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** The "Auto Import" dialog instance. */
   PredictiveInputFrame<JavaAPIListEntry> _autoImportDialog = null;
+  JCheckBox _autoImportPackageCheckbox;
   
   /** Imports a class. */
   void _showAutoImportDialog(String s) {
@@ -8645,6 +8646,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     initAutoImportDialog();
     _autoImportDialog.setModel(true, pim); // ignore case
     hourglassOn();
+    _autoImportPackageCheckbox.setSelected(false);
     _autoImportDialog.setVisible(true);
   }
 }
