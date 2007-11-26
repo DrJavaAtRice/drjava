@@ -107,6 +107,7 @@ import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
+import edu.rice.cs.drjava.RemoteControlClient;
 
 /** DrJava's main window. */
 public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListener {
@@ -3099,16 +3100,43 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     });
     
-    // start remote control server if no server is running
-    try {
-      if (!edu.rice.cs.drjava.RemoteControlClient.isServerRunning()) {
-        edu.rice.cs.drjava.RemoteControlServer rcServer =
-          new edu.rice.cs.drjava.RemoteControlServer(this);
+    if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED)) {
+      // start remote control server if no server is running
+      try {
+        if (!RemoteControlClient.isServerRunning()) {
+          edu.rice.cs.drjava.RemoteControlServer rcServer =
+            new edu.rice.cs.drjava.RemoteControlServer(this);
+        }
       }
-    }
-    catch(IOException ioe) {
-      // ignore
-    }
+      catch(IOException ioe) {
+        try {
+          RemoteControlClient.openFile(null);
+        }
+        catch(IOException ignored) {
+          // ignore
+        }
+        if (!System.getProperty("user.name").equals(RemoteControlClient.getServerUser())) {
+          Object[] options = {"Disable","Ignore"};
+          String msg = "<html>Could not start DrJava's remote control server";
+          if (RemoteControlClient.getServerUser()!=null) {
+            msg += "<br>because user "+RemoteControlClient.getServerUser()+" is already using the same port";
+          }
+          msg += ".<br>Please select an unused port in the Preferences dialog.<br>"+
+            "In the meantime, do you want to disable the remote control feature?";
+          int n = JOptionPane.showOptionDialog(MainFrame.this,
+                                               msg,
+                                               "Could Not Start Remote Control Server",
+                                               JOptionPane.YES_NO_OPTION,
+                                               JOptionPane.QUESTION_MESSAGE,
+                                               null,
+                                               options,
+                                               options[1]);
+          if (n==JOptionPane.YES_OPTION) {
+            DrJava.getConfig().setSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED, false);
+          }
+        }
+      }
+     }
   }   // End of MainFrame constructor
   
   public void setVisible(boolean b) { 

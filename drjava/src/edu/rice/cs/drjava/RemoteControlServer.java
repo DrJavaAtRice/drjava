@@ -65,11 +65,17 @@ public class RemoteControlServer {
    * Prefix of a legitimate query by a client.
    */
   public static final String QUERY_PREFIX = "DrJava Remote Control?";
+
   /**
    * Prefix of a legitimate response by this server.
    */
-  public static final String RESPONSE_PREFIX = "DrJava Remote Control!";
-  
+  public static final String RESPONSE_PREFIX = "DrJava Remote Control ";
+
+  /**
+   * Prefix of a legitimate response by this server, including the user name.
+   */
+  public static final String RESPONSE_PREFIX_WITH_USER = RESPONSE_PREFIX+System.getProperty("user.name")+"!";
+
   /**
    * Create a new remote control server, running in its own daemon thread.
    * @param frame main frame
@@ -131,7 +137,7 @@ public class RemoteControlServer {
           // check if it was a legitimate query
           if (request.startsWith(QUERY_PREFIX)) {
             // construct response
-            String dString = RESPONSE_PREFIX;
+            String dString = RESPONSE_PREFIX_WITH_USER;
             request = request.substring(QUERY_PREFIX.length());
             
             // check if a file was specified

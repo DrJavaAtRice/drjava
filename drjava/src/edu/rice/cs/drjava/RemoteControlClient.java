@@ -50,6 +50,11 @@ public class RemoteControlClient {
   protected static boolean _serverRunning = false;
   
   /**
+   * Contains the name of the user running the server, or is null if no server is running.
+   */
+  protected static String _serverUser = null;
+  
+  /**
    * Time in ms until the client decides the server is not running.
    */
   public static int REMOTE_CONTROL_TIMEOUT = 250;
@@ -59,6 +64,12 @@ public class RemoteControlClient {
    * @return true if running
    */
   public static boolean isServerRunning() { return _serverRunning; }
+  
+  /**
+   * Return the name of the user running the server, or null if no server is running.
+   * @return user name or null
+   */
+  public static String getServerUser() { return _serverUser; }
   
   /**
    * Tell the existing DrJava instance to open a file.
@@ -90,9 +101,16 @@ public class RemoteControlClient {
       // display response
       String received = new String(packet.getData(), 0, packet.getLength());
       _serverRunning = received.startsWith(RemoteControlServer.RESPONSE_PREFIX);
+      if (_serverRunning) {
+        int pos = received.indexOf('!');
+        _serverUser = received.substring(RemoteControlServer.RESPONSE_PREFIX.length(), pos);
+      }
+      else {
+        _serverUser = null;
+      }
       socket.close();
       
-      return (received.equals(RemoteControlServer.RESPONSE_PREFIX));
+      return (received.equals(RemoteControlServer.RESPONSE_PREFIX_WITH_USER));
     }
     catch (SocketTimeoutException e) {
       _serverRunning = false;

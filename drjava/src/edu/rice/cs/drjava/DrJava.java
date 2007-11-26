@@ -122,7 +122,9 @@ public class DrJava {
     
     // handleCommandLineArgs will return true if DrJava should be loaded
     if (handleCommandLineArgs(args)) {
-      if (!_forceNewInstance && (_filesToOpen.size()>0)) {
+      if (!_forceNewInstance &&
+          DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
+          (_filesToOpen.size()>0)) {
         try {
           boolean ret = RemoteControlClient.openFile(null);
           if (!RemoteControlClient.isServerRunning()) {
