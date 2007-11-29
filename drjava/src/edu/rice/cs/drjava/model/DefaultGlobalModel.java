@@ -477,7 +477,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       final boolean wasDebuggerEnabled = getDebugger().isReady();
       
       _runMain = new DummyInteractionsListener() {
+        private boolean alreadyRun = false;
         public void interpreterReady(File wd) {
+          // prevent listener from running twice
+          if (alreadyRun) return; else alreadyRun = true;
           // Restart debugger if it was previously enabled and is now off
           if (wasDebuggerEnabled && (! getDebugger().isReady())) {
             try { getDebugger().startUp(); } catch(DebugException de) { /* ignore, continue without debugger */ }
@@ -490,14 +493,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           // Finally, execute the new interaction and record that event
           _interactionsModel.interpretCurrentInteraction();
           _notifier.runStarted(ConcreteOpenDefDoc.this);
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() { 
-              /* Remove _runMain listener AFTER this interpreterReady listener completes and DROPS it acquireReadLock on
-               * _interactionsModel._notifier. */
-              _interactionsModel.removeListener(_runMain);
-            }
-          });
           
+          // This used to be called using invokeLater, so that the listener would be removed
+          // after the read lock of the notifier had been released, but that was not always
+          // safe; the removal could still happen before the read lock was released
+          // Now removeListener has been rewritten and can be called even when the lock is
+          // held. In that case, the removal will be done as soon as possible.
+          _interactionsModel.removeListener(_runMain);
         }
       };
       

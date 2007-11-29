@@ -252,8 +252,8 @@ public class ReaderWriterLock {
    */
   private void _ensureNotAlreadyRunning() {
     if (_runningThreads.contains(Thread.currentThread())) {
-      throw new IllegalStateException("Same thread cannot read or write multiple " +
-                                      "times!  (Would cause deadlock.)");
+      throw new DeadlockException("Same thread cannot read or write multiple " +
+                                  "times!  (Would cause deadlock.)");
     }
   }
   
@@ -339,5 +339,14 @@ public class ReaderWriterLock {
   public class Writer extends ReaderWriterThread {
     public boolean isReader() { return false; }
     public boolean isWriter() { return true; }
+  }
+  
+  /** Class representing a reader-writer deadlock that would have occurred if the acquire operation
+    * had been executed. */
+  public class DeadlockException extends IllegalStateException {
+    public DeadlockException() { }
+    public DeadlockException(String s) { super(s); }
+    public DeadlockException(String s, Throwable t) { super(s,t); }
+    public DeadlockException(Throwable t) { super(t); }
   }
 }
