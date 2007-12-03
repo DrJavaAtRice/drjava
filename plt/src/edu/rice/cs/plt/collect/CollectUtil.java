@@ -50,6 +50,11 @@ public final class CollectUtil {
     return new HashSet<T>(Arrays.asList(members));
   }
   
+  /** Produce an empty list.  Equivalent to {@link Collections#emptyList}; defined here for Java 1.4 compatibility. */
+  @SuppressWarnings("unchecked") public static <T> List<T> emptyList() {
+    return (List<T>) Collections.EMPTY_LIST;
+  }
+  
   /** Produce an empty set.  Equivalent to {@link Collections#emptySet}; defined here for Java 1.4 compatibility. */
   @SuppressWarnings("unchecked") public static <T> Set<T> emptySet() {
     return (Set<T>) Collections.EMPTY_SET;
