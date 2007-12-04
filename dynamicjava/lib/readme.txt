@@ -5,7 +5,7 @@ buildlib/*.jar: Binaries used in the build process, but that should not be part
 
 VERSIONS:
 
-plt.jar: Generated 10 August 2006
+plt.jar: plt-20071203-2149
 retroweaver-rt-1.2.3.jar: Retroweaver 1.2.3
 buildlib/ant-contrib.jar: ANT Contrib 1.0b2
 buildlib/astgen.jar: astgen-20060419-1726
