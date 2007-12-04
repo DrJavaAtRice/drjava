@@ -45,10 +45,13 @@ public class ClassDeclaration extends TypeDeclaration {
    */
   public final static String SUPERCLASS = "superclass";
 
+  /** Default supertype */
+  private static final ReferenceTypeName OBJECT = new ReferenceTypeName("java", "lang", "Object");
+
   /**
    * The superclass of this class
    */
-  private String superclass;
+  private ReferenceTypeName superclass;
 
   /**
    * Creates a new class declaration
@@ -84,17 +87,14 @@ public class ClassDeclaration extends TypeDeclaration {
   public ClassDeclaration(int flags, String name, ReferenceTypeName ext, List<? extends ReferenceTypeName> impl, List<Node> body,
                           String fn, int bl, int bc, int el, int ec) {
     super(flags, name, impl, body, fn, bl, bc, el, ec);
-    if (ext == null) {
-      superclass = "java.lang.Object";
-    } else {
-      superclass = ext.getRepresentation();
-    }
+    superclass = (ext == null) ? OBJECT : ext;
   }
+  
 
   /**
    * Returns the name of the superclass of this class
    */
-  public String getSuperclass() {
+  public ReferenceTypeName getSuperclass() {
     return superclass;
   }
 
@@ -102,7 +102,7 @@ public class ClassDeclaration extends TypeDeclaration {
    * Sets the superclass name
    * @exception IllegalArgumentException if s is null
    */
-  public void setSuperclass(String s) {
+  public void setSuperclass(ReferenceTypeName s) {
     if (s == null) throw new IllegalArgumentException("s == null");
 
     firePropertyChange(SUPERCLASS, superclass, superclass = s);

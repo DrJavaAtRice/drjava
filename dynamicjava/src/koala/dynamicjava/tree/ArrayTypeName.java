@@ -38,71 +38,71 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ArrayTypeName extends TypeName {
-    /**
-     * The elementType property name
-     */
-    public final static String ELEMENT_TYPE = "elementType";
-
-   /**
-     * The type of the elements of the arrays represented by this type
-     */
-    private TypeName elementType;
-
-    /**
-     * Initializes the type
-     * @param et    the element type
-     * @param dim   the dimension of the arrays represented by this type (> 0)
-     * @exception IllegalArgumentException if et is null or dim < 1
-     */
-    public ArrayTypeName(TypeName et, int dim) {
- this(et, dim, null, 0, 0, 0, 0);
-    }
-
-    /**
-     * Initializes the type
-     * @param et    the element type
-     * @param dim   the dimension of the arrays represented by this type (> 0)
-     * @param fn    the filename
-     * @param bl    the begin line
-     * @param bc    the begin column
-     * @param el    the end line
-     * @param ec    the end column
-     * @exception IllegalArgumentException if et is null or dim < 1
-     */
-    public ArrayTypeName(TypeName et, int dim, String fn, int bl, int bc, int el, int ec) {
- super(fn, bl, bc, el, ec);
-
- if (et == null) throw new IllegalArgumentException("et == null");
- if (dim < 1)    throw new IllegalArgumentException("dim < 1");
-
- elementType = (dim > 1) ? new ArrayTypeName(et, dim - 1, fn, bl, bc, el, ec) : et;
-    }
-
-    /**
-     * Returns the type of the elements of the arrays represented by this type
-     */
-    public TypeName getElementType() {
- return elementType;
-    }
-
-    /**
-     * Sets the type of the elements of the arrays represented by this type
-     * @exception IllegalArgumentException if t is null
-     */
-    public void setElementType(TypeName t) {
- if (t == null) throw new IllegalArgumentException("t == null");
-
- firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);
-    }
-
-    /**
-     * Allows a visitor to traverse the tree
-     * @param visitor the visitor to accept
-     */
-    public <T> T acceptVisitor(Visitor<T> visitor) {
- return visitor.visit(this);
-    }
-       /**
+  /**
+   * The elementType property name
+   */
+  public final static String ELEMENT_TYPE = "elementType";
+  
+  /**
+   * The type of the elements of the arrays represented by this type
+   */
+  private TypeName elementType;
+  
+  /**
+   * Initializes the type
+   * @param et    the element type
+   * @param dim   the dimension of the arrays represented by this type (> 0)
+   * @exception IllegalArgumentException if et is null or dim < 1
+   */
+  public ArrayTypeName(TypeName et, int dim) {
+    this(et, dim, null, 0, 0, 0, 0);
+  }
+  
+  /**
+   * Initializes the type
+   * @param et    the element type
+   * @param dim   the dimension of the arrays represented by this type (> 0)
+   * @param fn    the filename
+   * @param bl    the begin line
+   * @param bc    the begin column
+   * @param el    the end line
+   * @param ec    the end column
+   * @exception IllegalArgumentException if et is null or dim < 1
+   */
+  public ArrayTypeName(TypeName et, int dim, String fn, int bl, int bc, int el, int ec) {
+    super(fn, bl, bc, el, ec);
+    
+    if (et == null) throw new IllegalArgumentException("et == null");
+    if (dim < 1)    throw new IllegalArgumentException("dim < 1");
+    
+    elementType = (dim > 1) ? new ArrayTypeName(et, dim - 1, fn, bl, bc, el, ec) : et;
+  }
+  
+  /**
+   * Returns the type of the elements of the arrays represented by this type
+   */
+  public TypeName getElementType() {
+    return elementType;
+  }
+  
+  /**
+   * Sets the type of the elements of the arrays represented by this type
+   * @exception IllegalArgumentException if t is null
+   */
+  public void setElementType(TypeName t) {
+    if (t == null) throw new IllegalArgumentException("t == null");
+    
+    firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
+  /**
    * Implementation of toString for use in unit testing
    */
   public String toString() {

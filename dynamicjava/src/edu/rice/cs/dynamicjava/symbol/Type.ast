@@ -1,0 +1,59 @@
+/**
+ * Represents a Java type.
+ */
+
+visitmethod apply;
+visitormethodprefix for;
+tabsize 2;
+outputdir type;
+allownulls no;
+addgetterprefixes no;
+
+package edu.rice.cs.dynamicjava.symbol.type;
+
+import edu.rice.cs.dynamicjava.symbol.*;
+
+begin ast;
+
+/**
+ * Represents types and similar objects.  For simplicity, void and wildcards, neither of
+ * which are strictly types, are defined here.
+ */
+abstract Type();
+
+  abstract ValidType();
+
+    abstract PrimitiveType();
+      BooleanType();
+      abstract NumericType();
+        abstract IntegralType();
+          CharType();
+          abstract IntegerType();
+            ByteType();
+            ShortType();
+            IntType();
+            LongType();
+        abstract FloatingPointType();
+          FloatType();
+          DoubleType();
+    
+    abstract ReferenceType();
+      NullType();
+      abstract ArrayType(Type ofType);
+        SimpleArrayType();
+        VarargArrayType();
+      abstract ClassType(DJClass ofClass);
+        SimpleClassType();
+        RawClassType();
+        ParameterizedClassType(Iterable<? extends Type> typeArguments);
+          
+    VariableType(BoundedSymbol symbol);
+    IntersectionType(Iterable<? extends Type> ofTypes);
+    UnionType(Iterable<? extends Type> ofTypes);
+    TopType();
+    BottomType();
+
+  VoidType();
+  Wildcard(BoundedSymbol symbol);
+    
+end;

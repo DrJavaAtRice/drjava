@@ -54,7 +54,8 @@ public class PolymorphicSimpleAllocation extends SimpleAllocation {
    * @param targs the type arguments of the constructor
    * @exception IllegalArgumentException if tp is null
    */
-  public PolymorphicSimpleAllocation(TypeName tp, List<Expression> args, List<TypeName> targs) {
+  public PolymorphicSimpleAllocation(ReferenceTypeName tp, List<? extends Expression> args, 
+                                     List<TypeName> targs) {
     this(tp, args, targs, null, 0, 0, 0, 0);
   }
   
@@ -69,8 +70,9 @@ public class PolymorphicSimpleAllocation extends SimpleAllocation {
    * @param ec    the end column
    * @exception IllegalArgumentException if tp is null
    */
-  public PolymorphicSimpleAllocation(TypeName tp, List<Expression> args, List<TypeName> targs,
-                          String fn, int bl, int bc, int el, int ec) {
+  public PolymorphicSimpleAllocation(ReferenceTypeName tp, List<? extends Expression> args, 
+                                     List<TypeName> targs,
+                                     String fn, int bl, int bc, int el, int ec) {
     super(tp, args, fn, bl, bc, el, ec);
     _typeArguments = targs;
   }
@@ -85,7 +87,7 @@ public class PolymorphicSimpleAllocation extends SimpleAllocation {
 //  /**
 //   * Sets the constructor arguments.
 //   */
-//  public void setArguments(List<Expression> l) {
+//  public void setArguments(List<? extends Expression> l) {
 //    firePropertyChange(ARGUMENTS, arguments, arguments = l);
 //  }
   

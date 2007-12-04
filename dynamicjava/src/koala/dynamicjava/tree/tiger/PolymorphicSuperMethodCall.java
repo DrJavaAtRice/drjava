@@ -34,13 +34,6 @@ import java.util.*;
 
 import koala.dynamicjava.tree.visitor.*;
 
-/**
- * This class represents the super method call nodes of the syntax tree
- *
- * @author  Stephane Hillion
- * @version 1.0 - 1999/04/24
- */
-
 public class PolymorphicSuperMethodCall extends SuperMethodCall {
   /**
    * The type arguments on which this method call applies
@@ -54,7 +47,7 @@ public class PolymorphicSuperMethodCall extends SuperMethodCall {
    * @param targs the type arguments
    * @exception IllegalArgumentException if mn is null
    */
-  public PolymorphicSuperMethodCall(String mn, List<Expression> args, List<TypeName> targs) {
+  public PolymorphicSuperMethodCall(String mn, List<? extends Expression> args, List<TypeName> targs) {
     this(mn, args, targs, null, 0, 0, 0, 0);
   }
   
@@ -70,7 +63,7 @@ public class PolymorphicSuperMethodCall extends SuperMethodCall {
    * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
-  public PolymorphicSuperMethodCall(String mn, List<Expression> args, List<TypeName> targs,
+  public PolymorphicSuperMethodCall(String mn, List<? extends Expression> args, List<TypeName> targs,
                          String fn, int bl, int bc, int el, int ec) {
     super(mn, args, fn, bl, bc, el, ec);
     _typeArgs = targs;

@@ -57,15 +57,7 @@ public class TypeParameter extends ReferenceTypeName {
    * @throw IllegalArgumentException if any parameter to the constructor is null.
    */
   public TypeParameter(SourceInfo in_sourceInfo, List<IdentifierToken> ids, ReferenceTypeName in_bound, List<ReferenceTypeName> in_interfaceBounds) {
-    this(in_sourceInfo, TreeUtilities.listToName(ids), in_bound, in_interfaceBounds);
-  }
-
-  /**
-   * Constructs a TypeParameter.
-   * @throw IllegalArgumentException if any parameter to the constructor is null.
-   */
-  public TypeParameter(SourceInfo in_sourceInfo, String rep, ReferenceTypeName in_bound, List<ReferenceTypeName> in_interfaceBounds) {
-    super(rep, in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(),
+    super(ids, in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(),
           in_sourceInfo.getStartColumn(), in_sourceInfo.getEndLine(), in_sourceInfo.getEndColumn());
 
     if (in_bound == null) {

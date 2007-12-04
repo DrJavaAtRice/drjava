@@ -46,34 +46,34 @@ public class TreeUtilitiesTest extends TestCase {
   
 
   /**
-   * Simple tests for the classToType method.
+   * Simple tests for the classToTypeName method.
    * There is one test for each case in the method.
    * It is assumed that the output of this method should be the same as if
    * a koala.dynamicjava.tree.TypeName was manually created.
    */ 
   public void testClassToType() {
     assertEquals("",true,new IntTypeName().
-                   equals(TreeUtilities.classToType(int.class)));
+                   equals(TreeUtilities.classToTypeName(int.class)));
     assertEquals("",true,new DoubleTypeName().
-                   equals(TreeUtilities.classToType(double.class)));
+                   equals(TreeUtilities.classToTypeName(double.class)));
     assertEquals("",true,new LongTypeName().
-                   equals(TreeUtilities.classToType(long.class)));
+                   equals(TreeUtilities.classToTypeName(long.class)));
     assertEquals("",true,new FloatTypeName().
-                   equals(TreeUtilities.classToType(float.class)));
+                   equals(TreeUtilities.classToTypeName(float.class)));
     assertEquals("",true,new CharTypeName().
-                   equals(TreeUtilities.classToType(char.class)));
+                   equals(TreeUtilities.classToTypeName(char.class)));
     assertEquals("",true,new ByteTypeName().
-                   equals(TreeUtilities.classToType(byte.class)));
+                   equals(TreeUtilities.classToTypeName(byte.class)));
     assertEquals("",true,new ShortTypeName().
-                   equals(TreeUtilities.classToType(short.class)));
+                   equals(TreeUtilities.classToTypeName(short.class)));
     assertEquals("",true,new BooleanTypeName().
-                   equals(TreeUtilities.classToType(boolean.class)));
+                   equals(TreeUtilities.classToTypeName(boolean.class)));
     assertEquals("",true,new VoidTypeName().
-                   equals(TreeUtilities.classToType(void.class)));
+                   equals(TreeUtilities.classToTypeName(void.class)));
     assertEquals("",true,new ArrayTypeName(new IntTypeName(),1).
-                   equals(TreeUtilities.classToType(int[].class)));
+                   equals(TreeUtilities.classToTypeName(int[].class)));
     assertEquals("",true,new ReferenceTypeName(Integer.class.getName()).
-                   equals(TreeUtilities.classToType(Integer.class)));
+                   equals(TreeUtilities.classToTypeName(Integer.class)));
   }
   
 }

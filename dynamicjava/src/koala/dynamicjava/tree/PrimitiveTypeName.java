@@ -69,7 +69,7 @@ public abstract class PrimitiveTypeName extends TypeName {
   /**
    * Returns the value of this node
    */
-  public Class<?> getValue() {
+  @Deprecated public Class<?> getValue() {
     return value;
   }
   
@@ -84,13 +84,6 @@ public abstract class PrimitiveTypeName extends TypeName {
   }
   
   /**
-   * Allows a visitor to traverse the tree
-   * @param visitor the visitor to accept
-   */
-  public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visit(this);
-  }
-     /**
    * Implementation of toString for use in unit testing
    */
   public String toString() {

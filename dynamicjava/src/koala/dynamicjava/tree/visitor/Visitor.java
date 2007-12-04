@@ -29,6 +29,8 @@
 package koala.dynamicjava.tree.visitor;
 
 import koala.dynamicjava.tree.*;
+import koala.dynamicjava.tree.tiger.GenericReferenceTypeName;
+import koala.dynamicjava.tree.tiger.HookTypeName;
 
 /**
  * This interface contains the methods a visitor of the AST must implement
@@ -174,10 +176,22 @@ public interface Visitor<T> {
   T visit(ThisExpression node);
   
   /**
-   * Visits a QualifiedName
+   * Visits a AmbiguousName
    * @param node the node to visit
    */
-  T visit(QualifiedName node);
+  T visit(AmbiguousName node);
+  
+  /**
+   * Visits a VariableAccess
+   * @param node the node to visit
+   */
+  T visit(VariableAccess node);
+  
+  /**
+   * Visits a SimpleFieldAccess
+   * @param node the node to visit
+   */
+  T visit(SimpleFieldAccess node);
   
   /**
    * Visits an ObjectFieldAccess
@@ -192,16 +206,16 @@ public interface Visitor<T> {
   T visit(StaticFieldAccess node);
   
   /**
-   * Visits a ArrayAccess
-   * @param node the node to visit
-   */
-  T visit(ArrayAccess node);
-  
-  /**
    * Visits a SuperFieldAccess
    * @param node the node to visit
    */
   T visit(SuperFieldAccess node);
+  
+  /**
+   * Visits a ArrayAccess
+   * @param node the node to visit
+   */
+  T visit(ArrayAccess node);
   
   /**
    * Visits an ObjectMethodCall
@@ -210,10 +224,10 @@ public interface Visitor<T> {
   T visit(ObjectMethodCall node);
   
   /**
-   * Visits a FunctionCall
+   * Visits a SimpleMethodCall
    * @param node the node to visit
    */
-  T visit(FunctionCall node);
+  T visit(SimpleMethodCall node);
   
   /**
    * Visits a StaticMethodCall
@@ -222,10 +236,10 @@ public interface Visitor<T> {
   T visit(StaticMethodCall node);
   
   /**
-   * Visits a ConstructorInvocation
+   * Visits a ConstructorCall
    * @param node the node to visit
    */
-  T visit(ConstructorInvocation node);
+  T visit(ConstructorCall node);
   
   /**
    * Visits a SuperMethodCall
@@ -234,10 +248,58 @@ public interface Visitor<T> {
   T visit(SuperMethodCall node);
   
   /**
-   * Visits a PrimitiveTypeName
+   * Visits a BooleanTypeName
    * @param node the node to visit
    */
-  T visit(PrimitiveTypeName node);
+  T visit(BooleanTypeName node);
+  
+  /**
+   * Visits a ByteTypeName
+   * @param node the node to visit
+   */
+  T visit(ByteTypeName node);
+  
+  /**
+   * Visits a ShortTypeName
+   * @param node the node to visit
+   */
+  T visit(ShortTypeName node);
+  
+  /**
+   * Visits a CharTypeName
+   * @param node the node to visit
+   */
+  T visit(CharTypeName node);
+  
+  /**
+   * Visits a IntTypeName
+   * @param node the node to visit
+   */
+  T visit(IntTypeName node);
+  
+  /**
+   * Visits a LongTypeName
+   * @param node the node to visit
+   */
+  T visit(LongTypeName node);
+  
+  /**
+   * Visits a FloatTypeName
+   * @param node the node to visit
+   */
+  T visit(FloatTypeName node);
+  
+  /**
+   * Visits a DoubleTypeName
+   * @param node the node to visit
+   */
+  T visit(DoubleTypeName node);
+  
+  /**
+   * Visits a VoidTypeName
+   * @param node the node to visit
+   */
+  T visit(VoidTypeName node);
   
   /**
    * Visits a ReferenceTypeName
@@ -300,10 +362,10 @@ public interface Visitor<T> {
   T visit(SimpleAllocation node);
   
   /**
-   * Visits a ClassAllocation
+   * Visits an AnonymousAllocation
    * @param node the node to visit
    */
-  T visit(ClassAllocation node);
+  T visit(AnonymousAllocation node);
   
   /**
    * Visits an InnerAllocation
@@ -312,10 +374,10 @@ public interface Visitor<T> {
   T visit(InnerAllocation node);
   
   /**
-   * Visits an InnerClassAllocation
+   * Visits an AnonymousInnerAllocation
    * @param node the node to visit
    */
-  T visit(InnerClassAllocation node);
+  T visit(AnonymousInnerAllocation node);
   
   /**
    * Visits a CastExpression

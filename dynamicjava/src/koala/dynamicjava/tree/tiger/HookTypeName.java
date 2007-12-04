@@ -39,7 +39,7 @@ package koala.dynamicjava.tree.tiger;
 import java.util.*;
 
 import koala.dynamicjava.tree.*;
-import koala.dynamicjava.tree.visitor.*;
+import koala.dynamicjava.tree.visitor.Visitor;
 
 /**
  * This class represents the HookTypeName (?) nodes of the syntax tree
@@ -71,7 +71,7 @@ public class HookTypeName extends ReferenceTypeName {
    * @exception IllegalArgumentException if type is null
    */
   public HookTypeName(ReferenceTypeName type, boolean _supered, String fn, int bl, int bc, int el, int ec) {
-    super("?", fn, bl, bc, el, ec);
+    super(Arrays.asList(new Identifier("?")), fn, bl, bc, el, ec);
 
     if (type == null) throw new IllegalArgumentException("type == null");
     hookedType = type;
@@ -85,6 +85,10 @@ public class HookTypeName extends ReferenceTypeName {
     if(supered) return "java.lang.Object";
     return hookedType.getRepresentation();
   }
+  
+  public ReferenceTypeName getHookedType() { return hookedType; }
+  
+  public boolean isSupered() { return supered; }
 
   /**
    * Allows a visitor to traverse the tree

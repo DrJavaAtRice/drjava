@@ -28,6 +28,8 @@
 
 package koala.dynamicjava.tree;
 
+import koala.dynamicjava.tree.visitor.Visitor;
+
 /**
  * This class represents the short type nodes of the syntax tree
  *
@@ -54,5 +56,13 @@ public class ShortTypeName extends PrimitiveTypeName {
     public ShortTypeName(String fn, int bl, int bc, int el, int ec) {
  super(short.class, fn, bl, bc, el, ec);
     }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
   
 }

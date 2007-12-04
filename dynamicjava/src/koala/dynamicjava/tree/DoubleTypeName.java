@@ -28,6 +28,8 @@
 
 package koala.dynamicjava.tree;
 
+import koala.dynamicjava.tree.visitor.Visitor;
+
 /**
  * This class represents the double type nodes of the syntax tree
  *
@@ -55,4 +57,12 @@ public class DoubleTypeName extends PrimitiveTypeName {
  super(double.class, fn, bl, bc, el, ec);
     }
    
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
+  
 }

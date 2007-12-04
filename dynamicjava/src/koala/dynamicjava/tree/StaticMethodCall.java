@@ -34,6 +34,7 @@ import koala.dynamicjava.tree.visitor.*;
 
 /**
  * This class represents the static method call nodes of the syntax tree.
+ * For example: "SomeClass.foo(x, y+3)"
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/05/01
@@ -59,7 +60,7 @@ public class StaticMethodCall extends MethodCall {
    * @param args  the arguments. Can be null.
    * @exception IllegalArgumentException if typ is null or mn is null
    */
-  public StaticMethodCall(TypeName typ, String mn, List<Expression> args) {
+  public StaticMethodCall(TypeName typ, String mn, List<? extends Expression> args) {
     this(typ, mn, args, null, 0, 0, 0, 0);
   }
 
@@ -75,7 +76,7 @@ public class StaticMethodCall extends MethodCall {
    * @param ec    the end column
    * @exception IllegalArgumentException if typ is null or mn is null
    */
-  public StaticMethodCall(TypeName typ, String mn, List<Expression> args,
+  public StaticMethodCall(TypeName typ, String mn, List<? extends Expression> args,
                           String fn, int bl, int bc, int el, int ec) {
     super(mn, args, fn, bl, bc, el, ec);
 

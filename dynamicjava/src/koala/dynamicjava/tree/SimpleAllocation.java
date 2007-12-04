@@ -33,17 +33,29 @@ import java.util.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
- * This class represents the regular allocation nodes of the syntax tree
+ * This class represents the regular allocation nodes of the syntax tree.
+ * Nodes are derived from syntax like "new Foo(x, y+3, z.method())"
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/04/25
  */
 
-public class SimpleAllocation extends Allocation implements ExpressionStatement {
+public class SimpleAllocation extends PrimaryExpression implements ExpressionStatement {
+
+  /**
+   * The creationType property name
+   */
+  public final static String CREATION_TYPE = "creationType";
+  
   /**
    * The arguments property name
    */
   public final static String ARGUMENTS = "arguments";
+  
+  /**
+   * The creationType
+   */
+  private ReferenceTypeName creationType;
   
   /**
    * The arguments to pass to the constructor
@@ -56,7 +68,7 @@ public class SimpleAllocation extends Allocation implements ExpressionStatement 
    * @param args  the arguments of the constructor
    * @exception IllegalArgumentException if tp is null
    */
-  public SimpleAllocation(TypeName tp, List<Expression> args) {
+  public SimpleAllocation(ReferenceTypeName tp, List<? extends Expression> args) {
     this(tp, args, null, 0, 0, 0, 0);
   }
   
@@ -71,12 +83,32 @@ public class SimpleAllocation extends Allocation implements ExpressionStatement 
    * @param ec    the end column
    * @exception IllegalArgumentException if tp is null
    */
-  public SimpleAllocation(TypeName tp, List<Expression> args,
+  public SimpleAllocation(ReferenceTypeName tp, List<? extends Expression> args,
                           String fn, int bl, int bc, int el, int ec) {
-    super(tp, fn, bl, bc, el, ec);
-    arguments = args;
+    super(fn, bl, bc, el, ec);
+
+    if (tp == null) throw new IllegalArgumentException("tp == null");
+    creationType = tp;
+    arguments = (args == null) ? null : new ArrayList<Expression>(args);
   }
   
+  /**
+   * Returns the creation type
+   */
+  public ReferenceTypeName getCreationType() {
+    return creationType;
+  }
+  
+  /**
+   * Sets the creation type
+   * @exception IllegalArgumentException if t is null
+   */
+  public void setCreationType(ReferenceTypeName t) {
+    if (t == null) throw new IllegalArgumentException("t == null");
+    
+    firePropertyChange(CREATION_TYPE, creationType, creationType = t);
+  }
+
   /**
    * Returns the constructor arguments
    */
@@ -87,8 +119,9 @@ public class SimpleAllocation extends Allocation implements ExpressionStatement 
   /**
    * Sets the constructor arguments.
    */
-  public void setArguments(List<Expression> l) {
-    firePropertyChange(ARGUMENTS, arguments, arguments = l);
+  public void setArguments(List<? extends Expression> l) {
+    firePropertyChange(ARGUMENTS, arguments, 
+                       arguments = (l == null) ? null : new ArrayList<Expression>(l));
   }
   
   /**

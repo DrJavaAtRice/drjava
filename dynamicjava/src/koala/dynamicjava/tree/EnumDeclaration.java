@@ -141,18 +141,14 @@ public class EnumDeclaration extends ClassDeclaration {
     List<Node> stmtsOf = new LinkedList<Node>();
     List<Node> init = new LinkedList<Node>();
     init.add(new VariableDeclaration(false, new IntTypeName(), "i", new IntegerLiteral("0")));
-    List<IdentifierToken> iIds = new LinkedList<IdentifierToken>();
-    iIds.add(new Identifier("i"));
-    QualifiedName iId = new QualifiedName(iIds);
+    AmbiguousName iId = new AmbiguousName("i");
     Expression cond = new LessExpression(iId, new ObjectFieldAccess(new StaticFieldAccess(enumType, "$VALUES"), "length"));
     List<Node> updt = new LinkedList<Node>();
     updt.add(new PostIncrement(iId));
     ArrayAccess arrCell = new ArrayAccess(new StaticFieldAccess(enumType, "$VALUES"), iId);
     List<Expression> args = new LinkedList<Expression>();
-    List<IdentifierToken> sIds = new LinkedList<IdentifierToken>();
-    sIds.add(new Identifier("s"));
-    QualifiedName sId = new QualifiedName(sIds);
-    args.add(new QualifiedName(sIds));
+    AmbiguousName sId = new AmbiguousName("s");
+    args.add(new AmbiguousName("s"));
     IfThenStatement bodyOf = new IfThenStatement(new ObjectMethodCall(new ObjectMethodCall(arrCell, "name", null), "equals", args), new ReturnStatement(arrCell));
     stmtsOf.add(new ForStatement(init, cond, updt, bodyOf));
     stmtsOf.add(new ThrowStatement(new SimpleAllocation(new ReferenceTypeName("IllegalArgumentException"), args)));
@@ -164,18 +160,13 @@ public class EnumDeclaration extends ClassDeclaration {
   static List<Node> HandleConstructors(String name, List<Node> body){
     Iterator<Node> it = body.listIterator();
 
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("$1"));
-    List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
-    idnt2.add(new Identifier("$2"));
-
     List<FormalParameter> addToConsDeclaration = new LinkedList<FormalParameter>();
     addToConsDeclaration.add(new FormalParameter(false, new ReferenceTypeName("String"), "$1"));
     addToConsDeclaration.add(new FormalParameter(false, new IntTypeName(),               "$2"));
 
     List<Expression> args = new LinkedList<Expression>();
-    args.add(new QualifiedName(idnt1));
-    args.add(new QualifiedName(idnt2));
+    args.add(new AmbiguousName("$1"));
+    args.add(new AmbiguousName("$2"));
 
     List<FormalParameter> consParams;
     boolean noConstructor = true;
@@ -193,14 +184,14 @@ public class EnumDeclaration extends ClassDeclaration {
 
         ((ConstructorDeclaration)current).setParameters(newConsParam);
 
-        ((ConstructorDeclaration)current).setConstructorInvocation(new ConstructorInvocation(null, args, true));
+        ((ConstructorDeclaration)current).setConstructorCall(new ConstructorCall(null, args, true));
       }
     }
 
     if (noConstructor) {
       body.add(new ConstructorDeclaration(java.lang.reflect.Modifier.PRIVATE, name, addToConsDeclaration,
                                           new LinkedList<ReferenceTypeName>(),
-                                          new ConstructorInvocation(null, args, true),
+                                          new ConstructorCall(null, args, true),
                                           new LinkedList<Node>()));
     }
     return body;
@@ -211,9 +202,9 @@ public class EnumDeclaration extends ClassDeclaration {
     List<Expression> args;
     List<Node> classBody;
 
-    public EnumConstant(String _name, List<Expression> _args, List<Node> _classBody) {
+    public EnumConstant(String _name, List<? extends Expression> _args, List<Node> _classBody) {
       name = _name;
-      args = _args;
+      args = (_args == null) ? null : new ArrayList<Expression>(_args);
       classBody = _classBody;
     }
 
@@ -251,7 +242,7 @@ public class EnumDeclaration extends ClassDeclaration {
 
     ReferenceTypeName enumType = new ReferenceTypeName(enumTypeName);
 
-    Allocation allocExpr = null;
+    SimpleAllocation allocExpr = null;
 
     Iterator<EnumConstant> it = consts.listIterator();
     int i = 0;
@@ -267,7 +258,7 @@ public class EnumDeclaration extends ClassDeclaration {
       }
 
       if (ec.getClassBody() != null){
-        allocExpr = new ClassAllocation(enumType, args, ec.getClassBody());
+        allocExpr = new AnonymousAllocation(enumType, args, ec.getClassBody());
       }
       else {
         allocExpr = new SimpleAllocation(enumType, args);

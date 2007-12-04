@@ -259,14 +259,14 @@ public class Parser {
     /**
      * The allocation expression
      */
-    public Allocation expression;
+    public SimpleAllocation alloc;
     
     /**
      * Creates a new suffix
      * @param exp the expression
      */
-    public DotAllocationSuffix(Allocation exp) {
-      expression = exp;
+    public DotAllocationSuffix(SimpleAllocation sa) {
+      alloc = sa;
     }
     
     /**
@@ -283,38 +283,42 @@ public class Parser {
           exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
         }
       }
-      if (expression instanceof SimpleAllocation) {
-        SimpleAllocation sa = (SimpleAllocation)expression;
-        if(sa instanceof PolymorphicSimpleAllocation){
-          return new PolymorphicInnerAllocation
-            (exp, sa.getCreationType(), sa.getArguments(), ((PolymorphicSimpleAllocation)sa).getTypeArguments(),
-             filename,
-             exp.getBeginLine(), exp.getBeginColumn(),
-             sa.getEndLine(),    sa.getEndColumn());
-        }
-        else {
-          return new InnerAllocation
-            (exp, sa.getCreationType(), sa.getArguments(),
-             filename,
-             exp.getBeginLine(), exp.getBeginColumn(),
-             sa.getEndLine(),    sa.getEndColumn());
-        }
-      } else {
-        ClassAllocation ca = (ClassAllocation)expression;
-        if(ca instanceof PolymorphicClassAllocation){
-          return new PolymorphicInnerClassAllocation
-            (exp, ca.getCreationType(), ca.getArguments(), ca.getMembers(), ((PolymorphicClassAllocation)ca).getTypeArguments(),
-             filename,
-             exp.getBeginLine(), exp.getBeginColumn(),
-             ca.getEndLine(),    ca.getEndColumn());
-        }
-        else {
-          return new InnerClassAllocation
-            (exp, ca.getCreationType(), ca.getArguments(), ca.getMembers(),
-             filename,
-             exp.getBeginLine(), exp.getBeginColumn(),
-             ca.getEndLine(),    ca.getEndColumn());
-        }
+      
+      ReferenceTypeName creationType = alloc.getCreationType();
+      String name = creationType.getRepresentation();
+      // TODO: Generate an appropriate error if name is qualified (contains '.')
+      List<? extends TypeName> classTargs = null;
+      if (creationType instanceof GenericReferenceTypeName) {
+        // TODO: We assume here that the typeArguments list has length 1; check that
+        // (or implement the whole thing without parsing a SimpleAllocation)
+        classTargs = ((GenericReferenceTypeName) creationType).getTypeArguments().get(0);
+      }
+      List<Expression> args = alloc.getArguments();
+      
+      if (alloc instanceof PolymorphicAnonymousAllocation) {
+        PolymorphicAnonymousAllocation cast = (PolymorphicAnonymousAllocation) alloc;
+        return new PolymorphicAnonymousInnerAllocation(exp, name, classTargs, args,
+                                                       cast.getMembers(), cast.getTypeArguments(),
+                                                       filename, exp.getBeginLine(), exp.getBeginColumn(),
+                                                       alloc.getEndLine(), alloc.getEndColumn());
+      }
+      else if (alloc instanceof AnonymousAllocation) {
+        return new AnonymousInnerAllocation(exp, name, classTargs, args,
+                                            ((AnonymousAllocation) alloc).getMembers(),
+                                            filename, exp.getBeginLine(), exp.getBeginColumn(),
+                                            alloc.getEndLine(), alloc.getEndColumn());
+      }
+      else if (alloc instanceof PolymorphicSimpleAllocation) {
+        return new PolymorphicInnerAllocation(exp, name, classTargs, args,
+                                              ((PolymorphicSimpleAllocation) alloc).getTypeArguments(),
+                                              filename, exp.getBeginLine(), exp.getBeginColumn(),
+                                              alloc.getEndLine(), alloc.getEndColumn());
+
+      }
+      else {
+        return new InnerAllocation(exp, name, classTargs, args,
+                                   filename, exp.getBeginLine(), exp.getBeginColumn(),
+                                   alloc.getEndLine(), alloc.getEndColumn());
       }
     }
   }
@@ -441,9 +445,9 @@ public class Parser {
           exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
         }
       }
-      if (exp instanceof QualifiedName) {
+      if (exp instanceof AmbiguousName) {
         return new ThisExpression
-          (((QualifiedName)exp).getIdentifiers(),
+          (((AmbiguousName)exp).getIdentifiers(),
            filename,
            exp.getBeginLine(), exp.getBeginColumn(),
            endLine, endColumn);
@@ -528,21 +532,27 @@ public class Parser {
           List<IdentifierToken>  l = ((CompileTimeQualifiedName)prefix).identifiers;
           Token f = (l.get(0)).getToken();
           Token t = (l.remove(l.size()-1)).getToken();
-          Expression exp = null;
           if (l.size() >= 1) {
-            exp = ((CompileTimeQualifiedName)prefix).
+            Expression exp = ((CompileTimeQualifiedName)prefix).
               createRuntimeExpression();
+            if(typeArgs != null && typeArgs.size() > 0)
+              return new PolymorphicObjectMethodCall(exp, t.image, arguments, typeArgs,
+                                                     filename,
+                                                     f.beginLine, f.beginColumn,
+                                                     endLine,   endColumn);
+            else
+              return new ObjectMethodCall(exp, t.image, arguments,
+                                          filename,
+                                          f.beginLine, f.beginColumn,
+                                          endLine,   endColumn);
           }
-          if(typeArgs != null && typeArgs.size() > 0)
-            return new PolymorphicObjectMethodCall(exp, t.image, arguments, typeArgs,
-                                                   filename,
-                                                   f.beginLine, f.beginColumn,
-                                                   endLine,   endColumn);
-          else
-            return new ObjectMethodCall(exp, t.image, arguments,
-                                        filename,
-                                        f.beginLine, f.beginColumn,
-                                        endLine,   endColumn);
+          else {
+            if (typeArgs != null && typeArgs.size() > 0) {
+              throw new IllegalArgumentException("Type arguments on simple method not supported");
+            }
+            return new SimpleMethodCall(t.image, arguments, filename, f.beginLine, f.beginColumn,
+                                        endLine, endColumn);
+          }
         } else if (prefix instanceof CompileTimeSuperExpression) {
           // Transform the super expression into a super method call
           CompileTimeSuperExpression se = (CompileTimeSuperExpression)prefix;
@@ -634,7 +644,7 @@ public class Parser {
     public Expression createFieldAccess() {
       if (identifiers.size() == 1) {
         Token t = (identifiers.get(0)).getToken();
-        return new QualifiedName(identifiers,
+        return new AmbiguousName(identifiers,
                                  filename,
                                  t.beginLine, t.beginColumn,
                                  t.endLine,   t.endColumn);
@@ -642,7 +652,7 @@ public class Parser {
         Token f = (identifiers.get(0)).getToken();
         Token t = (identifiers.remove(identifiers.size()-1)).getToken();;
         Token l = (identifiers.get(identifiers.size()-1)).getToken();
-        return new ObjectFieldAccess(new QualifiedName(identifiers,
+        return new ObjectFieldAccess(new AmbiguousName(identifiers,
                                                        filename,
                                                        f.beginLine, f.beginColumn,
                                                        l.endLine,   l.endColumn),
@@ -659,7 +669,7 @@ public class Parser {
     public Expression createRuntimeExpression() {
       Token first = (identifiers.get(0)).getToken();
       Token last  = (identifiers.get(identifiers.size()-1)).getToken();
-      return new QualifiedName(identifiers,
+      return new AmbiguousName(identifiers,
                                filename,
                                first.beginLine, first.beginColumn,
                                last.endLine,    last.endColumn);
@@ -1363,11 +1373,10 @@ PARSER_END(Parser)
                                      l.endLine(),   l.endColumn());
           }
         } else {
-          return new GenericReferenceTypeName(list,
+          return new GenericReferenceTypeName(list, allTypeArgs,
                                           filename,
                                           f.beginLine(), f.beginColumn(),
-                                          l.endLine(), l.endColumn(),
-                                          allTypeArgs);
+                                          l.endLine(), l.endColumn());
         }
       }
     }
@@ -1980,7 +1989,7 @@ PARSER_END(Parser)
     TypeParameter[]   typeParameters = null;
     List<FormalParameter> params;
     List<? extends ReferenceTypeName> exceptions = new LinkedList<ReferenceTypeName>();
-    ConstructorInvocation ci = null;
+    ConstructorCall ci = null;
     List<Node>            stmt;
     List<Node>            stmts = new LinkedList<Node>();
     int                   bl, bc;
@@ -1995,8 +2004,8 @@ PARSER_END(Parser)
         params=formalParameters()
         [ "throws" exceptions=ReferenceTypeNameList() ]
         "{"
-        [ LOOKAHEAD( explicitConstructorInvocationLookahead() )
-           ci=explicitConstructorInvocation() ]
+        [ LOOKAHEAD( explicitConstructorCallLookahead() )
+           ci=explicitConstructorCall() ]
         ( stmt=blockStatement()
            {
         stmts.addAll(stmt);
@@ -2033,9 +2042,9 @@ PARSER_END(Parser)
   
   /**
    * Parses a constructor invocation
-   * @see koala.dynamicjava.tree.ConstructorInvocation
+   * @see koala.dynamicjava.tree.ConstructorCall
    */
-  ConstructorInvocation explicitConstructorInvocation() :
+  ConstructorCall explicitConstructorCall() :
   {
     Token           b, e;
     ArgumentsSuffix args;
@@ -2054,7 +2063,7 @@ PARSER_END(Parser)
          b="super" args=arguments(typeArgs) e=";"
          )
       {
-        return new ConstructorInvocation(exp, args.arguments, b.image.equals("super"),
+        return new ConstructorCall(exp, args.arguments, b.image.equals("super"),
                                          filename,
                                          b.beginLine, b.beginColumn,
                                          e.endLine,   e.endColumn);
@@ -3018,7 +3027,7 @@ PARSER_END(Parser)
         }
   }
   
-  // Productions for Statements /////////////////////////////////////////////////////////
+  // Productions for Expressions /////////////////////////////////////////////////////////
   
   /**
    * Parses an expression
@@ -3731,7 +3740,7 @@ PARSER_END(Parser)
    */
   ExpressionSuffix dotAllocationExpression() :
   {
-    Allocation a;
+    SimpleAllocation a;
   }
   {
     "." a=simpleAllocationExpression()
@@ -3743,7 +3752,7 @@ PARSER_END(Parser)
   /**
    * Used internally to parse an expression
    */
-  Allocation simpleAllocationExpression() :
+  SimpleAllocation simpleAllocationExpression() :
   {
     Token           t;
     ReferenceTypeName   rt;
@@ -3772,19 +3781,19 @@ PARSER_END(Parser)
                                     as.endLine,  as.endColumn);
       } else {
         if(typeArgs.size() > 0)
-          return new PolymorphicClassAllocation(rt,
-                                                as.arguments,
-                                                cb.list,
-                                                typeArgs,
-                                                filename,
-                                                t.beginLine, t.beginColumn,
-                                                as.endLine, as.endColumn);
-        return new ClassAllocation(rt,
-                                   as.arguments,
-                                   cb.list,
-                                   filename,
-                                   t.beginLine, t.beginColumn,
-                                   cb.endLine,  cb.endColumn);
+          return new PolymorphicAnonymousAllocation(rt,
+                                                    as.arguments,
+                                                    cb.list,
+                                                    typeArgs,
+                                                    filename,
+                                                    t.beginLine, t.beginColumn,
+                                                    as.endLine, as.endColumn);
+        return new AnonymousAllocation(rt,
+                                       as.arguments,
+                                       cb.list,
+                                       filename,
+                                       t.beginLine, t.beginColumn,
+                                       cb.endLine,  cb.endColumn);
       }
     }
   }
@@ -4016,16 +4025,17 @@ PARSER_END(Parser)
   {
     Token t;
     ArrayAllocation.TypeDescriptor td;
-    TypeName            pt;
+    TypeName            primT;
+    ReferenceTypeName   refT;
     ArgumentsSuffix as;
     ClassBody       cb = null;
     List<TypeName> typeArgs = new LinkedList<TypeName>();
   }
   {
     ( LOOKAHEAD(2)
-       t="new" pt=primitiveType() td=arrayDimsAndInits()
+       t="new" primT=primitiveType() td=arrayDimsAndInits()
        {
-      return new ArrayAllocation(pt, td,
+      return new ArrayAllocation(primT, td,
                                  filename,
                                  t.beginLine, t.beginColumn,
                                  td.endLine,  td.endColumn);
@@ -4033,10 +4043,10 @@ PARSER_END(Parser)
      |
      t="new"
        [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments()]
-       pt = ReferenceTypeName()
+       refT = ReferenceTypeName()
        ( td=arrayDimsAndInits()
           {
-       return new ArrayAllocation(pt, td,
+       return new ArrayAllocation(refT, td,
                                   filename,
                                   t.beginLine, t.beginColumn,
                                   td.endLine, td.endColumn);
@@ -4044,15 +4054,15 @@ PARSER_END(Parser)
         | as=arguments(typeArgs) [ cb=classBody() ]
           {
           if (cb == null) {
-            return new SimpleAllocation(pt, as.arguments,
+            return new SimpleAllocation(refT, as.arguments,
                                         filename,
                                         t.beginLine, t.beginColumn,
                                         as.endLine,  as.endColumn);
           } else {
-            return new ClassAllocation(pt, as.arguments, cb.list,
-                                       filename,
-                                       t.beginLine, t.beginColumn,
-                                       cb.endLine,  cb.endColumn);
+            return new AnonymousAllocation(refT, as.arguments, cb.list,
+                                           filename,
+                                           t.beginLine, t.beginColumn,
+                                           cb.endLine,  cb.endColumn);
           }
         }
         )
@@ -4327,7 +4337,7 @@ PARSER_END(Parser)
   /**
    * Used internally for lookahead
    */
-  void explicitConstructorInvocationLookahead() :
+  void explicitConstructorCallLookahead() :
   {}
   {
     LOOKAHEAD( "this" argumentsLookahead() ";" )

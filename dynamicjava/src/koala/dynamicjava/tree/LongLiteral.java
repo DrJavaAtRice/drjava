@@ -64,42 +64,13 @@ public class LongLiteral extends Literal {
    * Parse the representation of an integer
    */
   private static Long parse(String s) {
-    if (s.startsWith("0x")) {
-      return parseHexadecimal(s.substring(2, s.length()));
-    } else if (s.startsWith("0")) {
-      return parseOctal(s);
-    } else {
-      return Long.valueOf(s);
-    }
+    int radix = 10;
+    int start = 0;
+    int end = s.length();
+    if (s.endsWith("l") || s.endsWith("L")) { end--; }
+    if (s.startsWith("0x")) { radix = 16; start += 2; }
+    else if (s.startsWith("0") && s.length() > 1) { radix = 8; start++; }
+    return Long.valueOf(s.substring(start, end), radix);
   }
   
-  /**
-   * Parses an hexadecimal number
-   */
-  private static Long parseHexadecimal(String s) {
-    long value = 0;
-    for (int i = 0; i < s.length(); i++) {
-      char c = Character.toLowerCase(s.charAt(i));
-      if ((value >>> 60) != 0) {
-        throw new NumberFormatException(s);
-      }
-      value = (value << 4) + c + ((c >= 'a' && c <= 'f') ? 10 - 'a' : - '0');
-    }
-    return new Long(value);
-  }
-  
-  /**
-   * Parses an octal number
-   */
-  private static Long parseOctal(String s) {
-    long value = 0;
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
-      if ((value >>> 61) != 0) {
-        throw new NumberFormatException(s);
-      }
-      value = (value << 3) + c - '0';
-    }
-    return new Long(value);
-  }
 }

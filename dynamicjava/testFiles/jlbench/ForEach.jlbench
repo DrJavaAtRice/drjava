@@ -1,0 +1,67 @@
+/** For-each works on a primitive array */
+test {
+  int[] array = new int[] { 1, 2, 3, 4 };
+  int sum = 0;
+  for (int x : array) { sum = sum + x; }
+  assert (sum == 10);
+}
+
+/** For-each works on an array of objects */
+test {
+  String[] array = new String[] { "Abc", "Def", "Ghi" };
+  String concat = "";
+  for (String s : array) { concat = concat + s; }
+  assert (concat.equals("AbcDefGhi"));
+}
+
+/** For-each works on a List */
+test {
+  java.util.List<String> l = new java.util.LinkedList<String>();
+  l.add("Abc");
+  l.add("Def");
+  l.add("Ghi");
+  String concat = "";
+  for (String s : l) { concat = concat + s; }
+  assert (concat.equals("AbcDefGhi"));
+}
+
+/** For-each works on a Collection */
+test {
+  java.util.Collection<String> l = new java.util.LinkedList<String>();
+  l.add("Abc");
+  l.add("Def");
+  l.add("Ghi");
+  String concat = "";
+  for (String s : l) { concat = concat + s; }
+  assert (concat.equals("AbcDefGhi"));
+}
+
+/** For-each works on an Iterable */
+test {
+  class Nums implements Iterable<Integer> {
+    public java.util.Iterator<Integer> iterator() {
+      java.util.List<Integer> l = new java.util.LinkedList<Integer>();
+      l.add(new Integer(1));
+      l.add(new Integer(2));
+      l.add(new Integer(3));
+      l.add(new Integer(4));
+      return l.iterator();
+    }
+  };
+  
+  Nums iterable = new Nums();
+  int sum = 0;
+  for (Integer i : iterable) { sum = sum + i.intValue(); }
+  assert (sum == 10);
+}
+
+/** Nested for-each works properly */
+test {
+  String result = "";
+  for (String s1 : new String[]{"a", "b", "c"}) {
+    for (String s2 : new String[]{"1", "2", "3"}) {
+      result = result + s1 + s2 + ".";
+    }
+  }
+  assert (result.equals("a1.a2.a3.b1.b2.b3.c1.c2.c3."));
+}

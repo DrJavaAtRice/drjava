@@ -28,6 +28,8 @@
 
 package koala.dynamicjava.tree;
 
+import koala.dynamicjava.tree.visitor.Visitor;
+
 /**
  * This class represents the void type nodes of the syntax tree
  *
@@ -60,4 +62,13 @@ public class VoidTypeName extends PrimitiveTypeName {
   public String toString() {
     return "("+getClass().getName()+": "+")";
   }
+
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
+  
 }

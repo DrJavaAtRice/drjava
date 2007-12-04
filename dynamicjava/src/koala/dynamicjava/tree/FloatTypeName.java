@@ -28,6 +28,8 @@
 
 package koala.dynamicjava.tree;
 
+import koala.dynamicjava.tree.visitor.Visitor;
+
 /**
  * This class represents the float type nodes of the syntax tree
  *
@@ -59,5 +61,13 @@ public class FloatTypeName extends PrimitiveTypeName {
     public FloatTypeName(String fn, int bl, int bc, int el, int ec) {
  super(float.class, fn, bl, bc, el, ec);
     }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
   
 }

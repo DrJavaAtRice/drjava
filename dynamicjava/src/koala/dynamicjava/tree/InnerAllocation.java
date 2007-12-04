@@ -39,54 +39,79 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/25
  */
 
-public class InnerAllocation extends Allocation implements ExpressionStatement,
-  ExpressionContainer {
+public class InnerAllocation extends PrimaryExpression implements ExpressionStatement, ExpressionContainer {
+
+  /**
+   * The className property name
+   */
+  public final static String CLASS_NAME = "className";
+  
+  /**
+   * The classTypeArguments property name
+   */
+  public final static String CLASS_TYPE_ARGUMENTS = "classTypeArguments";
+  
   /**
    * The arguments property name
    */
   public final static String ARGUMENTS = "arguments";
-  
+    
   /**
    * The outer object expression
    */
   private Expression expression;
   
   /**
-   * The arguments to pass to the constructor
+   * The inner class name
+   */
+  private String className;
+  
+  /**
+   * Type arguments to apply to the inner class, or null if none are provided
+   */
+  private List<TypeName> classTypeArguments;
+  
+  /**
+   * The arguments to pass to the constructor; may be null if none are provided
    */
   private List<Expression> arguments;
   
   /**
    * Initializes the expression
    * @param exp   the outer object
-   * @param tp    the type prefix
+   * @param cn    the inner class name
+   * @param ctargs the inner class's type arguments
    * @param args  the arguments of the constructor. null if no arguments.
    * @exception IllegalArgumentException if exp is null or tp is null
    */
-  public InnerAllocation(Expression exp, TypeName tp, List<Expression> args) {
-    this(exp, tp, args, null, 0, 0, 0, 0);
+  public InnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs, List<? extends Expression> args) {
+    this(exp, cn, ctargs, args, null, 0, 0, 0, 0);
   }
   
   /**
    * Initializes the expression
    * @param exp   the outer object
-   * @param tp    the type prefix
+   * @param cn    the inner class name
+   * @param ctargs the inner class's type arguments
    * @param args  the arguments of the constructor. null if no arguments.
    * @param fn    the filename
    * @param bl    the begin line
    * @param bc    the begin column
    * @param el    the end line
    * @param ec    the end column
-   * @exception IllegalArgumentException if exp is null or tp is null
+   * @exception IllegalArgumentException if exp is null or cn is null
    */
-  public InnerAllocation(Expression exp, TypeName tp, List<Expression> args,
+  public InnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs, List<? extends Expression> args,
                          String fn, int bl, int bc, int el, int ec) {
-    super(tp, fn, bl, bc, el, ec);
+    super(fn, bl, bc, el, ec);
     
+    if (cn == null) throw new IllegalArgumentException("cn == null");
     if (exp == null) throw new IllegalArgumentException("exp == null");
     
     expression = exp;
-    arguments  = args;
+    className = cn;
+    classTypeArguments = (ctargs == null) ? null : new ArrayList<TypeName>(ctargs);
+    arguments  = (args == null) ? null : new ArrayList<Expression>(args);
   }
   
   /**
@@ -102,8 +127,38 @@ public class InnerAllocation extends Allocation implements ExpressionStatement,
    */
   public void setExpression(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
     firePropertyChange(EXPRESSION, expression, expression = e);
+  }
+  
+  /**
+   * Returns the inner class name
+   */
+  public String getClassName() {
+    return className;
+  }
+  
+  /**
+   * Sets the inner class name
+   * @exception IllegalArgumentException if cn is null
+   */
+  public void setClassName(String cn) {
+    if (cn == null) throw new IllegalArgumentException("cn == null");
+    firePropertyChange(CLASS_NAME, className, className = cn);
+  }
+  
+  /**
+   * Returns the inner class type arguments.
+   * @return null if there is no argument.
+   */
+  public List<TypeName> getClassTypeArguments() {
+    return classTypeArguments;
+  }
+  
+  /**
+   * Sets the inner class type arguments.
+   */
+  public void setClassTypeArguments(List<TypeName> l) {
+    firePropertyChange(CLASS_TYPE_ARGUMENTS, classTypeArguments, classTypeArguments = l);
   }
   
   /**
@@ -117,8 +172,9 @@ public class InnerAllocation extends Allocation implements ExpressionStatement,
   /**
    * Sets the constructor arguments.
    */
-  public void setArguments(List<Expression> l) {
-    firePropertyChange(ARGUMENTS, arguments, arguments = l);
+  public void setArguments(List<? extends Expression> l) {
+    firePropertyChange(ARGUMENTS, arguments, 
+                       arguments = (l == null) ? null : new ArrayList<Expression>(l));
   }
   
   /**
@@ -132,6 +188,6 @@ public class InnerAllocation extends Allocation implements ExpressionStatement,
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getCreationType()+" "+getExpression()+" "+getArguments()+")";
+    return "("+getClass().getName()+": "+getClassName()+" "+getExpression()+" "+getArguments()+")";
   }
 }

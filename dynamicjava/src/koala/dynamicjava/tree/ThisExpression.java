@@ -33,7 +33,8 @@ import java.util.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
- * This class represents the 'this' expression nodes of the syntax tree
+ * This class represents the 'this' expression nodes of the syntax tree.  It may
+ * be unqualified (just "this") or qualified ("foo.bar.this").
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/04/24
@@ -67,6 +68,10 @@ public class ThisExpression extends PrimaryExpression {
     if (ids == null) throw new IllegalArgumentException("ids == null");
     
     className = TreeUtilities.listToName(ids);
+  }
+  
+  public ThisExpression() {
+    this(new LinkedList<IdentifierToken>(), null, 0, 0, 0, 0);
   }
   
   /**

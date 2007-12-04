@@ -41,7 +41,7 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.util.*;
 
 /**
- * This error is thrown when an NameVisitor encounters QualifiedName
+ * This error is thrown when an NameVisitor encounters AmbiguousName
  * that denotes ReferenceTypeName.  In most contexts, this is an error
  *
  * @author Java PLT

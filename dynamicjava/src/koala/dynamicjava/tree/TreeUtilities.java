@@ -42,12 +42,13 @@ public class TreeUtilities {
    * Creates TypeName node from a Class object
    * @param c     the class to use
    */
-  public static TypeName classToType(Class<?> c) {
-    return classToType(c, null, 0, 0, 0, 0);
+  public static TypeName classToTypeName(Class<?> c) {
+    return classToTypeName(c, null, 0, 0, 0, 0);
   }
   
   /**
    * Creates TypeName node from a Class object
+   * Note: this method breaks if the type c is null (the type of the expression "null").
    * @param c     the class to use
    * @param fn    the filename
    * @param bl    the begin line
@@ -55,7 +56,7 @@ public class TreeUtilities {
    * @param el    the end line
    * @param ec    the end column
    */
-  public static TypeName classToType(Class<?> c, String fn, int bl, int bc, int el, int ec) {
+  public static TypeName classToTypeName(Class<?> c, String fn, int bl, int bc, int el, int ec) {
     TypeName result;
     if (c == int.class) {
       result = new IntTypeName(fn, bl, bc, el, ec);
@@ -76,10 +77,12 @@ public class TreeUtilities {
     } else if (c == void.class) {
       result = new VoidTypeName(fn, bl, bc, el, ec);
     } else if (c.isArray()) {
-      result = new ArrayTypeName(classToType(c.getComponentType(), fn, bl, bc, el, ec),
+      result = new ArrayTypeName(classToTypeName(c.getComponentType(), fn, bl, bc, el, ec),
                              1, fn, bl, bc, el, ec);
     } else {
-      result = new ReferenceTypeName(c.getName(), fn, bl, bc, el, ec);
+      List<IdentifierToken> ids = new ArrayList<IdentifierToken>(1);
+      ids.add(new Identifier(c.getName()));
+      result = new ReferenceTypeName(ids, fn, bl, bc, el, ec);
     }
     return result;
   }
@@ -89,10 +92,10 @@ public class TreeUtilities {
    * @param l a list of token. l can be null.
    * @return "" if l is null.
    */
-  public static String listToName(List<IdentifierToken> l) {
+  public static String listToName(List<? extends IdentifierToken> l) {
     String   result = "";
     if (l != null) {
-      Iterator<IdentifierToken> it = l.iterator();
+      Iterator<? extends IdentifierToken> it = l.iterator();
       if (it.hasNext()) {
         result += it.next().image();
       }

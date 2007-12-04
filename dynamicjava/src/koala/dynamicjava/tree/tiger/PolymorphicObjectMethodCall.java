@@ -40,10 +40,6 @@ import koala.dynamicjava.tree.*;
 
 import java.util.*;
 
-/**
- * This class represents polymorphic method declarations in an AST
- */
-
 public class PolymorphicObjectMethodCall extends ObjectMethodCall {
   /**
    * The type arguments on which this method call applies
@@ -63,7 +59,7 @@ public class PolymorphicObjectMethodCall extends ObjectMethodCall {
    * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
-  public PolymorphicObjectMethodCall(Expression exp, String mn, List<Expression> args, List<TypeName> targs,
+  public PolymorphicObjectMethodCall(Expression exp, String mn, List<? extends Expression> args, List<TypeName> targs,
                           String fn, int bl, int bc, int el, int ec) {
     super(exp, mn, args, fn, bl, bc, el, ec);
     _typeArgs = targs;
@@ -81,20 +77,13 @@ public class PolymorphicObjectMethodCall extends ObjectMethodCall {
    * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
-  public PolymorphicObjectMethodCall(Expression exp, String mn, List<Expression> args, List<TypeName> targs) {
+  public PolymorphicObjectMethodCall(Expression exp, String mn, List<? extends Expression> args, List<TypeName> targs) {
     this(exp, mn, args, targs, null, 0, 0, 0, 0);
   }
 
   public List<TypeName> getTypeArguments(){ return _typeArgs; }
 
   public String toStringHelper() {
-//    List<TypeName> tp = getTypeArguments();
-//    String typeArgsStr = "";
-//    if(tp.size()>0)
-//      typeArgsStr = ""+tp.get(0);
-//    for(int i = 1; i < tp.size(); i++)
-//      typeArgsStr = typeArgsStr + " " + tp.get(i);
-
     return ""+getTypeArguments()+" "+super.toStringHelper();
   }
 }

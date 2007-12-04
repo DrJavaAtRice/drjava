@@ -33,7 +33,8 @@ import java.util.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
- * This class represents the method call nodes of the syntax tree
+ * This class represents the method call nodes of the syntax tree.
+ * For example: "obj.foo(x, y+3)"
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/04/24
@@ -57,9 +58,10 @@ public class ObjectMethodCall extends MethodCall implements ExpressionContainer 
    * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
-  public ObjectMethodCall(Expression exp, String mn, List<Expression> args,
+  public ObjectMethodCall(Expression exp, String mn, List<? extends Expression> args,
                           String fn, int bl, int bc, int el, int ec) {
     super(mn, args, fn, bl, bc, el, ec);
+    if (exp == null) { throw new IllegalArgumentException("exp == null"); }
     expression = exp;
   }
 
@@ -75,7 +77,7 @@ public class ObjectMethodCall extends MethodCall implements ExpressionContainer 
    * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
-  public ObjectMethodCall(Expression exp, String mn, List<Expression> args) {
+  public ObjectMethodCall(Expression exp, String mn, List<? extends Expression> args) {
     this(exp, mn, args, null, 0, 0, 0, 0);
   }
 
@@ -90,6 +92,7 @@ public class ObjectMethodCall extends MethodCall implements ExpressionContainer 
    * Sets the expression on which this method call applies
    */
   public void setExpression(Expression e) {
+    if (e == null) { throw new IllegalArgumentException("e == null"); }
     firePropertyChange(EXPRESSION, expression, expression = e);
   }
 

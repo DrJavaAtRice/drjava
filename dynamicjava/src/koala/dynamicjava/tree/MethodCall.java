@@ -31,10 +31,12 @@ package koala.dynamicjava.tree;
 import java.util.*;
 
 /**
- * This class represents the method call nodes of the syntax tree
- *
- * @author  Stephane Hillion
- * @version 1.0 - 1999/04/24
+ * An abstract parent for all method calls.  Concrete implementations include:<ul>
+ * <li>{@link SimpleMethodCall}</li>
+ * <li>{@link ObjectMethodCall}</li>
+ * <li>{@link StaticMethodCall}</li>
+ * <li>{@link SuperMethodCall}</li>
+ * </ul>
  */
 
 public abstract class MethodCall extends PrimaryExpression
@@ -70,7 +72,7 @@ public abstract class MethodCall extends PrimaryExpression
    * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
-  protected MethodCall(String mn, List<Expression> args,
+  protected MethodCall(String mn, List<? extends Expression> args,
                        String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
@@ -78,7 +80,7 @@ public abstract class MethodCall extends PrimaryExpression
     if (mn == null) throw new IllegalArgumentException("mn == null");
     
     methodName = mn;
-    arguments  = args;
+    arguments  = (args == null) ? null : new ArrayList<Expression>(args);
   }
   
   /**
@@ -109,7 +111,8 @@ public abstract class MethodCall extends PrimaryExpression
   /**
    * Sets the constructor arguments.
    */
-  public void setArguments(List<Expression> l) {
-    firePropertyChange(ARGUMENTS, arguments, arguments = l);
+  public void setArguments(List<? extends Expression> l) {
+    firePropertyChange(ARGUMENTS, arguments, 
+                       arguments = (l == null) ? null : new ArrayList<Expression>(l));
   }
 }

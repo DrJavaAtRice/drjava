@@ -44,8 +44,6 @@ import java.lang.reflect.*;
 import java.net.*;
 import java.util.*;
 
-import koala.dynamicjava.interpreter.context.*;
-import koala.dynamicjava.interpreter.error.*;
 import koala.dynamicjava.parser.wrapper.*;
 import koala.dynamicjava.parser.impl.*;
 import koala.dynamicjava.tree.*;
@@ -67,7 +65,7 @@ public class ForEachParsingTest extends TestCase {
       ListIterator    it = statements.listIterator();
       Object result = null;
       
-      assertEquals("[(koala.dynamicjava.tree.ForEachStatement: (koala.dynamicjava.tree.FormalParameter: false (koala.dynamicjava.tree.ReferenceTypeName: Integer) i) (koala.dynamicjava.tree.QualifiedName: crazyCollection) (koala.dynamicjava.tree.EmptyStatement: ))]", statements.toString());
+      assertEquals("[(koala.dynamicjava.tree.ForEachStatement: (koala.dynamicjava.tree.FormalParameter: false (koala.dynamicjava.tree.ReferenceTypeName: Integer) i) (koala.dynamicjava.tree.AmbiguousName: crazyCollection) (koala.dynamicjava.tree.EmptyStatement: ))]", statements.toString());
   }
   
   
@@ -87,7 +85,7 @@ public class ForEachParsingTest extends TestCase {
       ListIterator    it = statements.listIterator();
       Object result = null;
       
-      assertEquals("[(koala.dynamicjava.tree.ForEachStatement: (koala.dynamicjava.tree.FormalParameter: true (koala.dynamicjava.tree.ReferenceTypeName: Integer) i) (koala.dynamicjava.tree.QualifiedName: crazyCollection) (koala.dynamicjava.tree.EmptyStatement: ))]", statements.toString());
+      assertEquals("[(koala.dynamicjava.tree.ForEachStatement: (koala.dynamicjava.tree.FormalParameter: true (koala.dynamicjava.tree.ReferenceTypeName: Integer) i) (koala.dynamicjava.tree.AmbiguousName: crazyCollection) (koala.dynamicjava.tree.EmptyStatement: ))]", statements.toString());
   }
 
   /* tests the basic syntax of a foreach statement
@@ -139,13 +137,13 @@ public class ForEachParsingTest extends TestCase {
     Parser p = new Parser(new StringReader("for(int i=0;i<10;i++);"));
     List statements = p.parseStream();
 
-    assertEquals("[(koala.dynamicjava.tree.ForStatement: [(koala.dynamicjava.tree.VariableDeclaration: false (koala.dynamicjava.tree.IntTypeName: int) i (koala.dynamicjava.tree.IntegerLiteral: 0 0 int))] (koala.dynamicjava.tree.LessExpression: (koala.dynamicjava.tree.QualifiedName: i) (koala.dynamicjava.tree.IntegerLiteral: 10 10 int)) [(koala.dynamicjava.tree.PostIncrement: (koala.dynamicjava.tree.QualifiedName: i))] (koala.dynamicjava.tree.EmptyStatement: ))]", statements.toString());
+    assertEquals("[(koala.dynamicjava.tree.ForStatement: [(koala.dynamicjava.tree.VariableDeclaration: false (koala.dynamicjava.tree.IntTypeName: int) i (koala.dynamicjava.tree.IntegerLiteral: 0 0 int))] (koala.dynamicjava.tree.LessExpression: (koala.dynamicjava.tree.AmbiguousName: i) (koala.dynamicjava.tree.IntegerLiteral: 10 10 int)) [(koala.dynamicjava.tree.PostIncrement: (koala.dynamicjava.tree.AmbiguousName: i))] (koala.dynamicjava.tree.EmptyStatement: ))]", statements.toString());
   }
 
   public void testForWithStatement() throws ParseException{
     Parser p = new Parser(new StringReader("for(;;);System.out.println(i);"));
     List statements = p.parseStream();
     
-    assertEquals("[(koala.dynamicjava.tree.ForStatement: null null null (koala.dynamicjava.tree.EmptyStatement: )), (koala.dynamicjava.tree.ObjectMethodCall: println [(koala.dynamicjava.tree.QualifiedName: i)] (koala.dynamicjava.tree.QualifiedName: System.out))]", statements.toString());
+    assertEquals("[(koala.dynamicjava.tree.ForStatement: null null null (koala.dynamicjava.tree.EmptyStatement: )), (koala.dynamicjava.tree.ObjectMethodCall: println [(koala.dynamicjava.tree.AmbiguousName: i)] (koala.dynamicjava.tree.AmbiguousName: System.out))]", statements.toString());
   }
 }

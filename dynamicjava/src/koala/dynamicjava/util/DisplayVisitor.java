@@ -42,7 +42,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/24
  */
 
-public class DisplayVisitor extends VisitorObject<Void> {
+public class DisplayVisitor extends AbstractVisitor<Void> {
   /**
    * The output stream
    */
@@ -444,11 +444,11 @@ public class DisplayVisitor extends VisitorObject<Void> {
   }
   
   /**
-   * Visits a QualifiedName
+   * Visits a AmbiguousName
    * @param node the node to visit
    */
-  public Void visit(QualifiedName node) {
-    print("l."+node.getBeginLine()+" QualifiedName {");
+  public Void visit(AmbiguousName node) {
+    print("l."+node.getBeginLine()+" AmbiguousName {");
     print("representation:");
     indent();
     print(node.getRepresentation());
@@ -516,6 +516,21 @@ public class DisplayVisitor extends VisitorObject<Void> {
   }
   
   /**
+   * Visits a SimpleFieldAccess
+   * @param node the node to visit
+   */
+  public Void visit(SimpleFieldAccess node) {
+    print(indentation+"l."+node.getBeginLine()+" SimpleFieldAccess {");
+    print("fieldName:");
+    indent();
+    print(node.getFieldName());
+    unindent();
+    displayProperties(node);
+    print("}");
+    return null;
+  }
+  
+  /**
    * Visits a SuperFieldAccess
    * @param node the node to visit
    */
@@ -563,11 +578,11 @@ public class DisplayVisitor extends VisitorObject<Void> {
   }
   
   /**
-   * Visits a FunctionCall
+   * Visits a SimpleMethodCall
    * @param node the node to visit
    */
-  public Void visit(FunctionCall node) {
-    print("l."+node.getBeginLine()+" FunctionCall {");
+  public Void visit(SimpleMethodCall node) {
+    print("l."+node.getBeginLine()+" SimpleMethodCall {");
     print("methodName:");
     indent();
     print(node.getMethodName());
@@ -615,11 +630,11 @@ public class DisplayVisitor extends VisitorObject<Void> {
   }
   
   /**
-   * Visits a ConstructorInvocation
+   * Visits a ConstructorCall
    * @param node the node to visit
    */
-  public Void visit(ConstructorInvocation node) {
-    print("l."+node.getBeginLine()+" ConstructorInvocation {");
+  public Void visit(ConstructorCall node) {
+    print("l."+node.getBeginLine()+" ConstructorCall {");
     print("expression:");
     indent();
     if (node.getExpression() != null) {
@@ -668,14 +683,90 @@ public class DisplayVisitor extends VisitorObject<Void> {
     return null;
   }
   
-  /**
-   * Visits a PrimitiveTypeName
+    /**
+   * Visits a BooleanTypeName
    * @param node the node to visit
    */
-  public Void visit(PrimitiveTypeName node) {
-    print("l."+node.getBeginLine()+" PrimitiveTypeName <"+node.getValue()+">");
-    displayProperties(node);
+  public Void visit(BooleanTypeName node) {
+    handlePrimitiveTypeName(node, "boolean");
     return null;
+  }
+  
+  /**
+   * Visits a ByteTypeName
+   * @param node the node to visit
+   */
+  public Void visit(ByteTypeName node) {
+    handlePrimitiveTypeName(node, "byte");
+    return null;
+  }
+  
+  /**
+   * Visits a ShortTypeName
+   * @param node the node to visit
+   */
+  public Void visit(ShortTypeName node) {
+    handlePrimitiveTypeName(node, "short");
+    return null;
+  }
+  
+  /**
+   * Visits a CharTypeName
+   * @param node the node to visit
+   */
+  public Void visit(CharTypeName node) {
+    handlePrimitiveTypeName(node, "char");
+    return null;
+  }
+  
+  /**
+   * Visits a IntTypeName
+   * @param node the node to visit
+   */
+  public Void visit(IntTypeName node) {
+    handlePrimitiveTypeName(node, "int");
+    return null;
+  }
+  
+  /**
+   * Visits a LongTypeName
+   * @param node the node to visit
+   */
+  public Void visit(LongTypeName node) {
+    handlePrimitiveTypeName(node, "long");
+    return null;
+  }
+  
+  /**
+   * Visits a FloatTypeName
+   * @param node the node to visit
+   */
+  public Void visit(FloatTypeName node) {
+    handlePrimitiveTypeName(node, "float");
+    return null;
+  }
+  
+  /**
+   * Visits a DoubleTypeName
+   * @param node the node to visit
+   */
+  public Void visit(DoubleTypeName node) {
+    handlePrimitiveTypeName(node, "double");
+    return null;
+  }
+  
+  /**
+   * Visits a VoidTypeName
+   * @param node the node to visit
+   */
+  public Void visit(VoidTypeName node) {
+    handlePrimitiveTypeName(node, "void");
+    return null;
+  }
+
+  private void handlePrimitiveTypeName(PrimitiveTypeName node, String name) {
+    print("l."+node.getBeginLine()+" PrimitiveTypeName <"+name+">");
+    displayProperties(node);
   }
   
   /**
@@ -787,9 +878,9 @@ public class DisplayVisitor extends VisitorObject<Void> {
    */
   public Void visit(ArrayAllocation node) {
     print("l."+node.getBeginLine()+" ArrayAllocation {");
-    print("creationType:");
+    print("elementType:");
     indent();
-    node.getCreationType().acceptVisitor(this);
+    node.getElementType().acceptVisitor(this);
     unindent();
     print("dimension:");
     indent();
@@ -838,11 +929,11 @@ public class DisplayVisitor extends VisitorObject<Void> {
   }
   
   /**
-   * Visits an ClassAllocation
+   * Visits an AnonymousAllocation
    * @param node the node to visit
    */
-  public Void visit(ClassAllocation node) {
-    print("l."+node.getBeginLine()+" ClassAllocation {");
+  public Void visit(AnonymousAllocation node) {
+    print("l."+node.getBeginLine()+" AnonymousAllocation {");
     print("creationType:");
     indent();
     node.getCreationType().acceptVisitor(this);
@@ -878,9 +969,9 @@ public class DisplayVisitor extends VisitorObject<Void> {
     indent();
     node.getExpression().acceptVisitor(this);
     unindent();
-    print("creationType:");
+    print("className:");
     indent();
-    node.getCreationType().acceptVisitor(this);
+    print(node.getClassName());
     unindent();
     print("arguments:");
     indent();
@@ -897,18 +988,18 @@ public class DisplayVisitor extends VisitorObject<Void> {
   }
   
   /**
-   * Visits an InnerClassAllocation
+   * Visits an AnonymousInnerAllocation
    * @param node the node to visit
    */
-  public Void visit(InnerClassAllocation node) {
-    print("l."+node.getBeginLine()+" InnerClassAllocation {");
+  public Void visit(AnonymousInnerAllocation node) {
+    print("l."+node.getBeginLine()+" AnonymousInnerAllocation {");
     print("expression:");
     indent();
     node.getExpression().acceptVisitor(this);
     unindent();
     print("creationType:");
     indent();
-    node.getCreationType().acceptVisitor(this);
+    print(node.getClassName());
     unindent();
     print("arguments:");
     indent();
@@ -1337,14 +1428,14 @@ public class DisplayVisitor extends VisitorObject<Void> {
     unindent();
     print("superclass:");
     indent();
-    print(node.getSuperclass());
+    node.getSuperclass().acceptVisitor(this);
     unindent();
     print("interfaces:");
     indent();
     if (node.getInterfaces() != null) {
       Iterator it = node.getInterfaces().iterator();
       while (it.hasNext()) {
-        print((String)it.next());
+        ((Node)it.next()).acceptVisitor(this);
       }
     }
     unindent();
@@ -1375,7 +1466,7 @@ public class DisplayVisitor extends VisitorObject<Void> {
     if (node.getInterfaces() != null) {
       Iterator it = node.getInterfaces().iterator();
       while (it.hasNext()) {
-        print((String)it.next());
+        ((Node)it.next()).acceptVisitor(this);
       }
     }
     unindent();
@@ -1416,13 +1507,13 @@ public class DisplayVisitor extends VisitorObject<Void> {
     indent();
     it = node.getExceptions().iterator();
     while (it.hasNext()) {
-      print((String)it.next());
+      ((Node)it.next()).acceptVisitor(this);
     }
     unindent();
     print("constructorInvocation:");
     indent();
-    if (node.getConstructorInvocation() != null) {
-      node.getConstructorInvocation().acceptVisitor(this);
+    if (node.getConstructorCall() != null) {
+      node.getConstructorCall().acceptVisitor(this);
     }
     unindent();
     print("statements:");
@@ -1466,7 +1557,7 @@ public class DisplayVisitor extends VisitorObject<Void> {
     indent();
     it = node.getExceptions().iterator();
     while (it.hasNext()) {
-      print((String)it.next());
+      ((Node)it.next()).acceptVisitor(this);
     }
     unindent();
     print("body:");

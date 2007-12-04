@@ -83,12 +83,12 @@ public class ConstructorDeclaration extends Node {
   /**
    * The exceptions
    */
-  private List<String> exceptions;
+  private List<? extends ReferenceTypeName> exceptions;
 
   /**
    * The explicit constructor invocation
    */
-  private ConstructorInvocation constructorInvocation;
+  private ConstructorCall constructorInvocation;
 
   /**
    * The statements
@@ -110,7 +110,7 @@ public class ConstructorDeclaration extends Node {
    */
   public ConstructorDeclaration(int flags, String name,
                                 List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
-                                ConstructorInvocation eci, List<Node> stmts) {
+                                ConstructorCall eci, List<Node> stmts) {
     this(flags, name, params, excepts, eci, stmts, null, 0, 0, 0, 0);
   }
 
@@ -132,7 +132,7 @@ public class ConstructorDeclaration extends Node {
    */
   public ConstructorDeclaration(int flags, String name,
                                 List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
-                                ConstructorInvocation eci, List<Node> stmts,
+                                ConstructorCall eci, List<Node> stmts,
                                 String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
@@ -146,12 +146,7 @@ public class ConstructorDeclaration extends Node {
     parameters            = params;
     constructorInvocation = eci;
     statements            = stmts;
-    exceptions            = new LinkedList<String>();
-
-    ListIterator<? extends ReferenceTypeName> it = excepts.listIterator();
-    while (it.hasNext()) {
-      exceptions.add(it.next().getRepresentation());
-    }
+    exceptions            = excepts;
   }
 
   /**
@@ -203,16 +198,15 @@ public class ConstructorDeclaration extends Node {
    * Returns the list of the exception thrown by this method
    * @return a list of string
    */
-  public List getExceptions() {
+  public List<? extends ReferenceTypeName> getExceptions() {
     return exceptions;
   }
 
   /**
    * Sets the exceptions thrown by this method
-   * @param l a list of string
    * @exception IllegalArgumentException if l is null
    */
-  public void setExceptions(List<String> l) {
+  public void setExceptions(List<? extends ReferenceTypeName> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
 
     firePropertyChange(EXCEPTIONS, exceptions, exceptions = l);
@@ -221,14 +215,14 @@ public class ConstructorDeclaration extends Node {
   /**
    * The explicit constructor invocation if one or null
    */
-  public ConstructorInvocation getConstructorInvocation() {
+  public ConstructorCall getConstructorCall() {
     return constructorInvocation;
   }
 
   /**
    * Sets the constructor invocation
    */
-  public void setConstructorInvocation(ConstructorInvocation ci) {
+  public void setConstructorCall(ConstructorCall ci) {
     constructorInvocation = ci;
   }
 
@@ -268,6 +262,6 @@ public class ConstructorDeclaration extends Node {
   }
   
   public String toStringHelper() {
-    return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getConstructorInvocation()+" "+getStatements();
+    return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getConstructorCall()+" "+getStatements();
   }
 }

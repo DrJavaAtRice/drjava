@@ -64,45 +64,11 @@ public class IntegerLiteral extends Literal {
    * Parses the representation of an integer
    */
   private static Integer parse(String s) {
-    if (s.startsWith("0x")) {
-      return parseHexadecimal(s.substring(2, s.length()));
-    } 
-    else if (s.startsWith("0")) {
-      return parseOctal(s);
-    }
-    else {
-      return Integer.valueOf(s);
-    }
-  }
-  
-  /**
-   * Parses an hexadecimal number
-   */
-  private static Integer parseHexadecimal(String s) {
-    int value = 0;
-    for (int i = 0; i < s.length(); i++) {
-      char c = Character.toLowerCase(s.charAt(i));
-      if ((value >>> 28) != 0) {
-        throw new NumberFormatException(s);
-      }
-      value = (value << 4) + c + ((c >= 'a' && c <= 'f') ? 10 - 'a' : - '0');
-    }
-    return new Integer(value);
-  }
-  
-  /**
-   * Parses an octal number
-   */
-  private static Integer parseOctal(String s) {
-    int value = 0;
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
-      if ((value >>> 29) != 0) {
-        throw new NumberFormatException(s);
-      }
-      value = (value << 3) + c - '0';
-    }
-    return new Integer(value);
+    int radix = 10;
+    int start = 0;
+    if (s.startsWith("0x")) { radix = 16; start += 2; }
+    else if (s.startsWith("0") && s.length() > 1) { radix = 8; start++; }
+    return Integer.valueOf(s.substring(start), radix);
   }
   
 }

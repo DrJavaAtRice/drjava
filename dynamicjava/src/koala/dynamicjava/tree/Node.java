@@ -290,6 +290,9 @@ public abstract class Node {
    * @return null if the property was not previously set
    */
   public Object getProperty(String name) {
+    if (!properties.containsKey(name)) { 
+      throw new IllegalStateException("Property '" + name + "' is not initialized");
+    }
     return properties.get(name);
   }
   

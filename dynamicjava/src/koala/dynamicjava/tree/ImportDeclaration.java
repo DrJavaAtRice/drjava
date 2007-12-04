@@ -91,8 +91,6 @@ public class ImportDeclaration extends Node {
     super(fn, bl, bc, el, ec);
 
     if (ident == null) throw new IllegalArgumentException("ident == null");
-
-    if (sttc) TigerUtilities.assertTigerEnabled("Static Import is not supported before Java 1.5");
     pckage     = pkg;
     sttic      = sttc;
     name       = TreeUtilities.listToName(ident);

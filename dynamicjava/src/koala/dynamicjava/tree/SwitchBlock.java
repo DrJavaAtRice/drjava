@@ -46,7 +46,7 @@ public class SwitchBlock  extends Node implements ExpressionContainer {
   public final static String STATEMENTS = "statements";
   
   /**
-   * The expression
+   * The expression; null for a {@code default} block
    */
   private Expression expression;
   
@@ -64,6 +64,8 @@ public class SwitchBlock  extends Node implements ExpressionContainer {
   
   /**
    * Creates a new binding
+   * @param exp   the case expression, or {@code null} for a {@code default} block
+   * @param stmts the body
    * @param fn    the filename
    * @param bl    the begin line
    * @param bc    the begin column

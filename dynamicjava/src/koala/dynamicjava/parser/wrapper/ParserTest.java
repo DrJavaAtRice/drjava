@@ -164,19 +164,9 @@ public class ParserTest extends TestCase {
   
   public void testBlock() throws ParseException {
     List<Node> stmts = new LinkedList<Node> ();
-    
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("i"));
-    stmts.add(new SimpleAssignExpression(new QualifiedName(idnt1),new IntegerLiteral("3")));
-    
-    List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
-    idnt2.add(new Identifier("v"));
-    stmts.add(new SimpleAssignExpression(new QualifiedName(idnt2),new SimpleAllocation(new ReferenceTypeName("Vector"), null)));
-    
-    List<IdentifierToken> idnt3  = new LinkedList<IdentifierToken>();
-    idnt3.add(new Identifier("i"));
-    stmts.add(new PostDecrement(new QualifiedName(idnt3)));
-    
+    stmts.add(new SimpleAssignExpression(new AmbiguousName("i"),new IntegerLiteral("3")));
+    stmts.add(new SimpleAssignExpression(new AmbiguousName("v"),new SimpleAllocation(new ReferenceTypeName("Vector"), null)));
+    stmts.add(new PostDecrement(new AmbiguousName("i")));
     expectedAST.add(new BlockStatement(stmts));
     
     verifyOutput("{ (i=3); (v = new Vector()); (i)--; }", expectedAST);
@@ -184,23 +174,11 @@ public class ParserTest extends TestCase {
   
   public void testBlockWithEmptyStatements() throws ParseException {
     List<Node> stmts = new LinkedList<Node> ();
-    
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("i"));
-    stmts.add(new SimpleAssignExpression(new QualifiedName(idnt1),new IntegerLiteral("3")));
-    
+    stmts.add(new SimpleAssignExpression(new AmbiguousName("i"),new IntegerLiteral("3")));
     stmts.add(new EmptyStatement());
-    
-    List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
-    idnt2.add(new Identifier("v"));
-    stmts.add(new SimpleAssignExpression(new QualifiedName(idnt2),new SimpleAllocation(new ReferenceTypeName("Vector"), null)));
-    
-    List<IdentifierToken> idnt3  = new LinkedList<IdentifierToken>();
-    idnt3.add(new Identifier("i"));
-    stmts.add(new PostDecrement(new QualifiedName(idnt3)));
-    
+    stmts.add(new SimpleAssignExpression(new AmbiguousName("v"),new SimpleAllocation(new ReferenceTypeName("Vector"), null)));
+    stmts.add(new PostDecrement(new AmbiguousName("i")));
     stmts.add(new EmptyStatement());
-    
     expectedAST.add(new BlockStatement(stmts));
 
     verifyOutput("{ (i=3);; (v = new Vector()); (i)--;; }", expectedAST);
@@ -212,9 +190,7 @@ public class ParserTest extends TestCase {
   }
   
   public void testStatementExpression() throws ParseException {
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("o"));
-    expectedAST.add(new ObjectMethodCall(new QualifiedName(idnt1), "m", null, "", -1, -1, -1, -1));
+    expectedAST.add(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1));
     verifyOutput("o.m();", expectedAST);
   }  
   
@@ -229,9 +205,7 @@ public class ParserTest extends TestCase {
     List<SwitchBlock> cases = new LinkedList<SwitchBlock>();
     
     List<Node> stmts1 = new LinkedList<Node> ();
-    List<IdentifierToken> idnto  = new LinkedList<IdentifierToken>();
-    idnto.add(new Identifier("o"));
-    stmts1.add(new ObjectMethodCall(new QualifiedName(idnto), "m", null, "", -1, -1, -1, -1));
+    stmts1.add(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1));
     stmts1.add(new BreakStatement(null));
                  
     List<Node> stmts2 = new LinkedList<Node>();
@@ -244,9 +218,7 @@ public class ParserTest extends TestCase {
     cases.add(new SwitchBlock(new IntegerLiteral("1"), stmts2));
     cases.add(new SwitchBlock(new IntegerLiteral("2"), stmts3));    
     
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("i"));
-    expectedAST.add(new SwitchStatement(new QualifiedName(idnt1), cases, "", -1, -1, -1, -1));
+    expectedAST.add(new SwitchStatement(new AmbiguousName("i"), cases, "", -1, -1, -1, -1));
     verifyOutput("switch( i ) { case 0: o.m(); break; case 1: ; case 2: break; }", expectedAST);
   }
   
@@ -260,27 +232,15 @@ public class ParserTest extends TestCase {
     List<Node> stmts = new LinkedList<Node> ();
     stmts.add(new EmptyStatement());
     
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("o"));
-
-    List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
-    idnt2.add(new Identifier("o"));
-    
-    expectedAST.add(new IfThenElseStatement(new ObjectMethodCall(new QualifiedName(idnt1), "m", null, "", -1, -1, -1, -1), 
+    expectedAST.add(new IfThenElseStatement(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1), 
                                             new BlockStatement(stmts), 
-                                            new IfThenStatement(new BooleanLiteral(true),new ObjectMethodCall(new QualifiedName(idnt2), "m", null, "", -1, -1, -1, -1))));
+                                            new IfThenStatement(new BooleanLiteral(true),new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1))));
     verifyOutput("if (o.m()) { ; } else if (true) o.m();", expectedAST);
   }
   
   public void testIfStatement3() throws ParseException {
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("o"));
-    
-    List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
-    idnt2.add(new Identifier("SomeClass"));
-    
-    expectedAST.add(new IfThenStatement(new ObjectFieldAccess(new QualifiedName(idnt2), "CONSTANT"),
-                                        new IfThenElseStatement(new ObjectMethodCall(new QualifiedName(idnt1), "m", null, "", -1, -1, -1, -1), 
+    expectedAST.add(new IfThenStatement(new ObjectFieldAccess(new AmbiguousName("SomeClass"), "CONSTANT"),
+                                        new IfThenElseStatement(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1), 
                                                                 new ReturnStatement(new BooleanLiteral(true)), 
                                                                 new ReturnStatement(new BooleanLiteral(false)))));
     verifyOutput("if ( SomeClass.CONSTANT ) if ( o.m() ) return true; else return false; ", expectedAST);
@@ -290,61 +250,39 @@ public class ParserTest extends TestCase {
     List<Expression> args = new LinkedList<Expression> ();
     args.add(new StringLiteral("\"Infinite Loop\""));
     
-    List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("System.out"));
-
     List<Node> stmts = new LinkedList<Node> ();
-    stmts.add(new ObjectMethodCall(new QualifiedName(idnt), "println", args, "", -1, -1, -1, -1));
+    stmts.add(new ObjectMethodCall(new AmbiguousName("System", "out"), "println", args, "", -1, -1, -1, -1));
     
     expectedAST.add(new WhileStatement(new BooleanLiteral(true),new BlockStatement(stmts)));
     verifyOutput("while (true) { System.out.println(\"Infinite Loop\"); }", expectedAST);
   }
   
   public void testDoStatement() throws ParseException {
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("i"));
-    
-    List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
-    idnt2.add(new Identifier("i"));
-    
     List<Node> stmts = new LinkedList<Node> ();
-    stmts.add(new PostDecrement(new QualifiedName(idnt2)));
+    stmts.add(new PostDecrement(new AmbiguousName("i")));
     stmts.add(new EmptyStatement());
        
-    expectedAST.add(new DoStatement(new GreaterOrEqualExpression(new QualifiedName(idnt1), new IntegerLiteral("0")), new BlockStatement(stmts)));
+    expectedAST.add(new DoStatement(new GreaterOrEqualExpression(new AmbiguousName("i"), new IntegerLiteral("0")), new BlockStatement(stmts)));
     verifyOutput("do {(i)--; ; } while ( (i) >= (0) );", expectedAST);
   }
   
   public void testForStatement() throws ParseException {
-    
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("i"));
-    
-    List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
-    idnt2.add(new Identifier("something"));
-    
-    List<IdentifierToken> idnt3  = new LinkedList<IdentifierToken>();
-    idnt3.add(new Identifier("i"));
-    
-    List<IdentifierToken> idnt4  = new LinkedList<IdentifierToken>();
-    idnt4.add(new Identifier("o"));
-    
     List<Expression> args = new LinkedList<Expression> ();
-    args.add(new QualifiedName(idnt2));
+    args.add(new AmbiguousName("something"));
     
     List<Node> init = new LinkedList<Node> ();
     init.add(new VariableDeclaration(false, new IntTypeName(), "i", new IntegerLiteral("0")));
     
     List<Node> updt = new LinkedList<Node> ();
-    updt.add(new PostIncrement(new QualifiedName(idnt3)));
+    updt.add(new PostIncrement(new AmbiguousName("i")));
     
     List<Node> stmts = new LinkedList<Node> ();
     stmts.add(new EmptyStatement());
     stmts.add(new EmptyStatement());
-    stmts.add(new ObjectMethodCall(new QualifiedName(idnt4), "m", null, "", -1, -1, -1, -1));
+    stmts.add(new ObjectMethodCall(new AmbiguousName("o"), "m", null, "", -1, -1, -1, -1));
     
     expectedAST.add(new ForStatement(init,
-                                     new LessExpression(new QualifiedName(idnt1),new ObjectMethodCall(null, "sizeof", args, "", -1, -1, -1, -1)),
+                                     new LessExpression(new AmbiguousName("i"),new ObjectMethodCall(null, "sizeof", args, "", -1, -1, -1, -1)),
                                      updt,
                                      new BlockStatement(stmts)));
     verifyOutput("for( int i = 0; (i)<(sizeof(something)); (i)++ ){ ; ; o.m(); } ", expectedAST);
@@ -371,22 +309,13 @@ public class ParserTest extends TestCase {
   }
   
   public void testSynchronizedStatement() throws ParseException {
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("mutex"));
-    
-    List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
-    idnt2.add(new Identifier("i"));
-    
-    List<IdentifierToken> idnt3 = new LinkedList<IdentifierToken>();
-    idnt3.add(new Identifier("lock"));
-    
     List<Node> stmts = new LinkedList<Node>();
     stmts.add(new EmptyStatement());
-    stmts.add(new PostIncrement(new QualifiedName(idnt2)));
-    stmts.add(new ObjectMethodCall(new QualifiedName(idnt3), "release", null, "", -1, -1, -1, -1));
+    stmts.add(new PostIncrement(new AmbiguousName("i")));
+    stmts.add(new ObjectMethodCall(new AmbiguousName("lock"), "release", null, "", -1, -1, -1, -1));
     stmts.add(new EmptyStatement());
     
-    expectedAST.add(new SynchronizedStatement(new QualifiedName(idnt1),
+    expectedAST.add(new SynchronizedStatement(new AmbiguousName("mutex"),
                                               new BlockStatement(stmts),
                                               "", -1, -1, -1, -1));
     verifyOutput(" synchronized (mutex) { ; (i)++; lock.release(); ;} ", expectedAST);
@@ -411,13 +340,10 @@ public class ParserTest extends TestCase {
     List<Node> stmts1 = new LinkedList<Node>();
     stmts1.add(new ThrowStatement(new SimpleAllocation(new ReferenceTypeName("RuntimeException"), null)));
     
-    List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("ioe"));
-    
     List<Node> stmts2 = new LinkedList<Node>();
     stmts2.add(new EmptyStatement());
     stmts2.add(new EmptyStatement());
-    stmts2.add(new ThrowStatement(new QualifiedName(idnt)));
+    stmts2.add(new ThrowStatement(new AmbiguousName("ioe")));
 
     List<CatchStatement> catchSt = new LinkedList<CatchStatement>();
     catchSt.add(new CatchStatement(new FormalParameter(false, new ReferenceTypeName("IOException"), "ioe"), new BlockStatement(stmts2), "", -1, -1, -1, -1));
@@ -438,10 +364,7 @@ public class ParserTest extends TestCase {
   }
   
   public void testInstanceOfExpression() throws ParseException {
-    List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("v"));
-    
-    expectedAST.add(new InstanceOfExpression(new QualifiedName(idnt), new ReferenceTypeName("String")));
+    expectedAST.add(new InstanceOfExpression(new AmbiguousName("v"), new ReferenceTypeName("String")));
     verifyOutput( "((v) instanceof String)", expectedAST);
   }
   
@@ -456,49 +379,31 @@ public class ParserTest extends TestCase {
   }
   
   public void testBinaryOpExpression() throws ParseException {
-    List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("i"));
-    
-    expectedAST.add(new ShiftLeftExpression(new QualifiedName(idnt), new IntegerLiteral("5")));
+    expectedAST.add(new ShiftLeftExpression(new AmbiguousName("i"), new IntegerLiteral("5")));
 
     verifyOutput( " (i) << (5) ", expectedAST);
   }
   
   public void testNormalAssignment() throws ParseException {
-    List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("i"));
-    
-    expectedAST.add(new SimpleAssignExpression(new QualifiedName(idnt), new IntegerLiteral("3")));
+    expectedAST.add(new SimpleAssignExpression(new AmbiguousName("i"), new IntegerLiteral("3")));
     
     verifyOutput( " (i = 3) ", expectedAST);
   }
   
   public void testCompoundAssignment() throws ParseException {
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("i"));
-
-    List<IdentifierToken> idnt2  = new LinkedList<IdentifierToken>();
-    idnt2.add(new Identifier("j"));
-
-    expectedAST.add(new ExclusiveOrAssignExpression(new QualifiedName(idnt1), new QualifiedName(idnt2)));
+    expectedAST.add(new ExclusiveOrAssignExpression(new AmbiguousName("i"), new AmbiguousName("j")));
     
     verifyOutput( " (i ^= j) ", expectedAST);
   }
   
   public void testPreIncrementExpression() throws ParseException {
-    List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("x"));
-
-    expectedAST.add(new PreIncrement(new QualifiedName(idnt)));
+    expectedAST.add(new PreIncrement(new AmbiguousName("x")));
     
     verifyOutput( "++(x)", expectedAST);
   }
   
   public void testPostDecrementExpression() throws ParseException {
-    List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("l"));
-
-    expectedAST.add(new PostDecrement(new QualifiedName(idnt)));
+    expectedAST.add(new PostDecrement(new AmbiguousName("l")));
     
     verifyOutput( "(l)--", expectedAST);
   }
@@ -516,11 +421,8 @@ public class ParserTest extends TestCase {
   }
   
   public void testArrayAllocationExpression() throws ParseException {
-    List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("foo"));
-    
     List<Expression> sizes = new LinkedList<Expression> ();
-    sizes.add(new QualifiedName(idnt));
+    sizes.add(new AmbiguousName("foo"));
     
     expectedAST.add(new ArrayAllocation(new IntTypeName(), new ArrayAllocation.TypeDescriptor(sizes, 1, null, -1, -1)));
     
@@ -549,13 +451,10 @@ public class ParserTest extends TestCase {
   }
   
   public void testInnerInstanceAllocationExpression() throws ParseException {
-    List<IdentifierToken> idnt  = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("list"));
-    
     List<Expression> args = new LinkedList<Expression>();
     args.add(new IntegerLiteral("3"));
     
-    expectedAST.add(new InnerAllocation(new QualifiedName(idnt), new ReferenceTypeName("Iterator"), args)); 
+    expectedAST.add(new InnerAllocation(new AmbiguousName("list"), "Iterator", null, args)); 
     verifyOutput( "list.new Iterator(3)", expectedAST);
   }
   
@@ -565,21 +464,17 @@ public class ParserTest extends TestCase {
     List<FormalParameter> params = new LinkedList<FormalParameter>();
     List<? extends ReferenceTypeName> excepts = new LinkedList<ReferenceTypeName>();
     List<Node> stmts = new LinkedList<Node>();
-    List<IdentifierToken> idnt1  = new LinkedList<IdentifierToken>();
-    idnt1.add(new Identifier("o"));
-    stmts.add(new ObjectMethodCall(new QualifiedName(idnt1), "n", null, "", -1, -1, -1, -1));
+    stmts.add(new ObjectMethodCall(new AmbiguousName("o"), "n", null, "", -1, -1, -1, -1));
     BlockStatement body = new BlockStatement(stmts);
     
     members.add(new MethodDeclaration(accessFlags, new VoidTypeName(), "m", params, excepts, body));
     
-    expectedAST.add(new ClassAllocation(new ReferenceTypeName("C"), null, members)); 
+    expectedAST.add(new AnonymousAllocation(new ReferenceTypeName("C"), null, members)); 
     verifyOutput(" new C() { void m() { o.n(); } }", expectedAST);
   }
   
   public void testName() throws ParseException {
-    List<IdentifierToken> idnt = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("g"));
-    expectedAST.add( new QualifiedName(idnt));
+    expectedAST.add( new AmbiguousName("g"));
     verifyOutput("g", expectedAST);
   }
   
@@ -596,7 +491,7 @@ public class ParserTest extends TestCase {
     idnt.add(new Identifier("event"));
     idnt.add(new Identifier("ActionEvent"));
     
-    expectedAST.add(new ObjectFieldAccess(new QualifiedName(idnt), "x"));
+    expectedAST.add(new ObjectFieldAccess(new AmbiguousName(idnt), "x"));
     verifyOutput("X.java.awt.event.ActionEvent.x", expectedAST);
   }
   
@@ -607,7 +502,7 @@ public class ParserTest extends TestCase {
     idnt.add(new Identifier("event"));
     idnt.add(new Identifier("ActionEvent"));
 
-    expectedAST.add(new ObjectFieldAccess(new QualifiedName(idnt), "x"));
+    expectedAST.add(new ObjectFieldAccess(new AmbiguousName(idnt), "x"));
     verifyOutput("java.awt.event.ActionEvent.x", expectedAST);
   }
   
@@ -624,17 +519,12 @@ public class ParserTest extends TestCase {
   }
   
   public void testArrayAccess() throws ParseException {
-    List<IdentifierToken> ident = new LinkedList<IdentifierToken>();
-    ident.add(new Identifier("v"));
-    expectedAST.add(new ArrayAccess(new QualifiedName(ident), new IntegerLiteral("5")));
+    expectedAST.add(new ArrayAccess(new AmbiguousName("v"), new IntegerLiteral("5")));
     verifyOutput("v[5]", expectedAST);
   }
   
   public void testMemberAccess()  throws ParseException {
-    List<IdentifierToken> idnt = new LinkedList<IdentifierToken>();
-    idnt.add(new Identifier("r"));
-
-    expectedAST.add(new ObjectFieldAccess(new QualifiedName(idnt), "f"));
+    expectedAST.add(new ObjectFieldAccess(new AmbiguousName("r"), "f"));
     verifyOutput("r.f", expectedAST);
   }
   
@@ -644,14 +534,11 @@ public class ParserTest extends TestCase {
   }
   
   public void testMethodInvocation() throws ParseException {
-    List<IdentifierToken> ident = new LinkedList<IdentifierToken>();
-    ident.add(new Identifier("e"));
-    
     List<Expression> args = new LinkedList<Expression>();
     args.add(new SimpleAllocation(new ReferenceTypeName("Object"), null));
     args.add(new IntegerLiteral("5"));
     args.add(new BooleanLiteral(false));
-    expectedAST.add(new ObjectMethodCall(new QualifiedName(ident),"meth", args, null, -1, -1, -1, -1));
+    expectedAST.add(new ObjectMethodCall(new AmbiguousName("e"),"meth", args, null, -1, -1, -1, -1));
     verifyOutput("e.meth(new Object(), 5, false)", expectedAST);
   }
   
@@ -753,7 +640,7 @@ public class ParserTest extends TestCase {
 //   * Runtime error tests. Each test will cause a RuntimeException to be thrown.
 //   */
 //  
-//  public void testRepeatedAccessSpecifiers() {
+//  public void testRepeatedAccesss() {
 //    try {
 //      _parseInteraction("public public class ABC {}");
 //      fail("The parser should have rejected this class definition!");
@@ -763,7 +650,7 @@ public class ParserTest extends TestCase {
 //    }
 //  }
 //  
-//  public void testMultipleAccessSpecifiers() {
+//  public void testMultipleAccesss() {
 //    try {
 //      _parseInteraction("public class ABC { public private int foo = 5;}");
 //      fail("The parser should have rejected this class definition!");

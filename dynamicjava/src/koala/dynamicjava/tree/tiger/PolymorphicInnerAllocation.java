@@ -50,19 +50,20 @@ public class PolymorphicInnerAllocation extends InnerAllocation {
   /**
    * Initializes the expression
    * @param exp   the outer object
-   * @param tp    the type prefix
+   * @param cn    the inner class name
    * @param args  the arguments of the constructor. null if no arguments.
    * @param targs the type arguments of the constructor
    * @exception IllegalArgumentException if exp is null or tp is null
    */
-  public PolymorphicInnerAllocation(Expression exp, TypeName tp, List<Expression> args, List<TypeName> targs) {
-    this(exp, tp, args, targs, null, 0, 0, 0, 0);
+  public PolymorphicInnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs,
+                                    List<? extends Expression> args, List<TypeName> targs) {
+    this(exp, cn, ctargs, args, targs, null, 0, 0, 0, 0);
   }
   
   /**
    * Initializes the expression
    * @param exp   the outer object
-   * @param tp    the type prefix
+   * @param cn    the inner class name
    * @param args  the arguments of the constructor. null if no arguments.
    * @param targs the type arguments of the constructor
    * @param fn    the filename
@@ -72,10 +73,10 @@ public class PolymorphicInnerAllocation extends InnerAllocation {
    * @param ec    the end column
    * @exception IllegalArgumentException if exp is null or tp is null
    */
-  public PolymorphicInnerAllocation(Expression exp, TypeName tp, List<Expression> args, List<TypeName> targs,
-                         String fn, int bl, int bc, int el, int ec) {
-    super(exp, tp, args, fn, bl, bc, el, ec);
-
+  public PolymorphicInnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs,
+                                    List<? extends Expression> args, List<TypeName> targs,
+                                    String fn, int bl, int bc, int el, int ec) {
+    super(exp, cn, ctargs, args, fn, bl, bc, el, ec);
     _typeArguments = targs;
   }
   
@@ -97,6 +98,6 @@ public class PolymorphicInnerAllocation extends InnerAllocation {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getCreationType()+" "+getExpression()+" "+getArguments()+" "+getTypeArguments()+")";
+    return "("+getClass().getName()+": "+getClassName()+" "+getExpression()+" "+getArguments()+" "+getTypeArguments()+")";
   }
 }

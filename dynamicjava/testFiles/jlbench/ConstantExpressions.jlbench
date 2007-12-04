@@ -1,0 +1,81 @@
+/** Assignment of an in-range literal to a byte */
+test {
+  byte x = 26;
+}
+
+/** Assignment of an out-of-range literal to a byte */
+static error {
+  byte x = 128;
+}
+
+/** Assignment of an out-of-range negative literal to a byte */
+static error {
+  byte x = -129;
+}
+
+/** Assignment of an in-range literal to a short */
+test {
+  short x = 26;
+}
+
+/** Assignment of an out-of-range literal to a short */
+static error {
+  short x = 32768;
+}
+
+/** Assignment of an out-of-range negative literal to a short */
+static error {
+  short x = -32769;
+}
+
+/** Assignment of an in-range literal to a char */
+test {
+  char x = 26;
+}
+
+/** Assignment of an out-of-range literal to a char */
+static error {
+  char x = 65536;
+}
+
+/** Assignment of an out-of-range negative literal to a char */
+static error {
+  char x = -1;
+}
+
+/** Assignment of a cast constant expression to a byte */
+test {
+  byte x = (long) 26;
+}
+
+/** Assignment of an addition constant expression to a byte */
+test {
+  byte x = 23 + 55;
+}
+
+/** Assignment of an out-of-range constant expression to a byte */
+static error {
+  byte x = 127 + 3;
+}
+
+/** Assignment of a division constant expression to a byte */
+test {
+  byte x = 24 / 3;
+}
+
+/** Assignment of a ternary constant expression to a byte */
+test {
+  byte x = (47 > 33) ? 121 : -14;
+}
+
+/** Assignment of a static name constant expression to a byte */
+test {
+  byte x = Integer.MAX_VALUE + Integer.MIN_VALUE;
+}
+
+/** A static constant accessed through a variable is not a constant expression */
+static error {
+  Integer i = new Integer(33);
+  byte x = i.MAX_VALUE + Integer.MIN_VALUE;
+}
+

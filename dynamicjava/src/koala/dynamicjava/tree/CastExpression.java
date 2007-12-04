@@ -73,8 +73,8 @@ public class CastExpression extends UnaryExpression {
                         String fn, int bl, int bc, int el, int ec) {
     super(exp, fn, bl, bc, el, ec);
     
-    if (tt == null) throw new IllegalArgumentException("tt == null");
-    
+    //if (tt == null) throw new IllegalArgumentException("tt == null");
+    // tt can be null in a generated cast
     targetType = tt;
   }
   
@@ -90,7 +90,7 @@ public class CastExpression extends UnaryExpression {
    * @exception IllegalArgumentException if t is null
    */
   public void setTargetType(TypeName t) {
-    if (t == null) throw new IllegalArgumentException("t == null");
+    //if (t == null) throw new IllegalArgumentException("t == null");
     
     firePropertyChange(TARGET_TYPE, targetType, targetType = t);
   }

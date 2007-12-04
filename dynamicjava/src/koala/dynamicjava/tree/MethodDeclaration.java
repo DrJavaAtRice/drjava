@@ -93,7 +93,7 @@ public class MethodDeclaration extends Node {
   /**
    * The exceptions
    */
-  private List<String> exceptions;
+  private List<? extends ReferenceTypeName> exceptions;
 
   /**
    * The body of the method
@@ -147,13 +147,7 @@ public class MethodDeclaration extends Node {
     this.name   = name;
     parameters  = params;
     this.body   = body;
-
-    exceptions            = new LinkedList<String>();
-
-    ListIterator<? extends ReferenceTypeName> it = excepts.listIterator();
-    while (it.hasNext()) {
-      exceptions.add(it.next().getRepresentation());
-    }
+    exceptions = excepts;
   }
 
   /**
@@ -225,7 +219,7 @@ public class MethodDeclaration extends Node {
    * Returns the list of the exception thrown by this method
    * @return a list of string
    */
-  public List getExceptions() {
+  public List<? extends ReferenceTypeName> getExceptions() {
     return exceptions;
   }
 
@@ -233,7 +227,7 @@ public class MethodDeclaration extends Node {
    * Sets the exceptions list
    * @exception IllegalArgumentException if l is null
    */
-  public void setExceptions(List<String> l) {
+  public void setExceptions(List<? extends ReferenceTypeName> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
 
     firePropertyChange(EXCEPTIONS, exceptions, exceptions = l);

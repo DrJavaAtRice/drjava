@@ -33,7 +33,8 @@ import java.util.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
- * This class represents the super method call nodes of the syntax tree
+ * This class represents the super method call nodes of the syntax tree.
+ * For example: "super.foo(x, y+3)"
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/04/24
@@ -46,7 +47,7 @@ public class SuperMethodCall extends MethodCall {
    * @param args  the arguments. null if no arguments.
    * @exception IllegalArgumentException if mn is null
    */
-  public SuperMethodCall(String mn, List<Expression> args) {
+  public SuperMethodCall(String mn, List<? extends Expression> args) {
     this(mn, args, null, 0, 0, 0, 0);
   }
   
@@ -61,7 +62,7 @@ public class SuperMethodCall extends MethodCall {
    * @param ec    the end column
    * @exception IllegalArgumentException if mn is null
    */
-  public SuperMethodCall(String mn, List<Expression> args,
+  public SuperMethodCall(String mn, List<? extends Expression> args,
                          String fn, int bl, int bc, int el, int ec) {
     super(mn, args, fn, bl, bc, el, ec);
   }

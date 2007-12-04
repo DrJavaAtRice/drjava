@@ -73,7 +73,7 @@ public abstract class TypeDeclaration extends Node {
   /**
    * The implemented interfaces
    */
-  private List<String> interfaces;
+  private List<? extends ReferenceTypeName> interfaces;
 
   /**
    * The members
@@ -102,13 +102,7 @@ public abstract class TypeDeclaration extends Node {
 
     accessFlags = flags;    
     this.name = name;
-    if (impl != null) {
-      interfaces = new LinkedList<String>();
-      Iterator<? extends ReferenceTypeName> it = impl.iterator();
-      while (it.hasNext()) {
-        interfaces.add(it.next().getRepresentation());
-      }
-    }
+    interfaces = impl;
     members = body;
   }
 
@@ -139,12 +133,6 @@ public abstract class TypeDeclaration extends Node {
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
-    
-    
-    
-    
-    
     firePropertyChange(NAME, name, name = s);
   }
 
@@ -152,14 +140,14 @@ public abstract class TypeDeclaration extends Node {
    * Returns a list that contains the names (String) of the implemented interfaces.
    * Can be null.
    */
-  public List<String> getInterfaces() {
+  public List<? extends ReferenceTypeName> getInterfaces() {
     return interfaces;
   }
 
   /**
    * Sets the interfaces (a list of strings)
    */
-  public void setInterfaces(List<String> l) {
+  public void setInterfaces(List<? extends ReferenceTypeName> l) {
     firePropertyChange(INTERFACES, interfaces, interfaces = l);
   }
 

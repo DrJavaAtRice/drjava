@@ -1,0 +1,135 @@
+/** Primitive char addition produces an int, not a char */
+static error {
+  char a = 'A';
+  char b = 'B';
+  char x = a+b;
+}
+
+/** Primitive char addition */
+test {
+  char a = 'A';
+  char b = 'B';
+  int x = a+b;
+  assert (x == 131);
+}
+
+/** Primitive byte addition produces an int, not a byte */
+static error {
+  byte a = (byte) 3;
+  byte b = (byte) 4;
+  byte x = a+b;
+}
+
+/** Primitive byte addition */
+test {
+  byte a = (byte) 3;
+  byte b = (byte) 4;
+  int x = a+b;
+  assert (x == (byte) 7);
+}
+
+/** Primitive short addition produces an int, not a short */
+static error {
+  short a = (short) 3;
+  short b = (short) 4;
+  short x = a+b;
+}
+
+/** Primitive short addition */
+test {
+  short a = (short) 3;
+  short b = (short) 4;
+  int x = a+b;
+  assert (x == (short) 7);
+}
+
+/** Primitive integer addition */
+test {
+  int x = 2+3;
+  assert (x == 5);
+}
+
+/** Primitive long addition */
+test {
+  long x = 2l+3l;
+  assert (x == 5l);
+}
+
+/** Primitive float addition */
+test {
+  float x = 2.0f + 3.0f;
+  assert (x == 5.0f);
+}
+
+/** Primitive double addition */
+test {
+  double x = 2.0 + 3.0;
+  assert (x == 5.0);
+}
+
+// TODO: Mixed types on primitive operators (e.g., float + double)
+
+/** Post-increment an integer */
+test {
+  int x = 4;
+  int y = x++;
+  assert (x == 5);
+  assert (y == 4);
+}
+
+/** Pre-increment an integer */
+test {
+  int x = 4;
+  int y = ++x;
+  assert (x == 5);
+  assert (y == 5);
+}
+
+/** Post-decrement an integer */
+test {
+  int x = 4;
+  int y = x--;
+  assert (x == 3);
+  assert (y == 4);
+}
+
+/** Pre-decrement an integer */
+test {
+  int x = 4;
+  int y = --x;
+  assert (x == 3);
+  assert (y == 3);
+}
+
+/** Post-increment a float */
+test {
+  float x = 4.3f;
+  float y = x++;
+  assert (x == 5.3f);
+  assert (y == 4.3f);
+}
+
+/** Pre-increment a float */
+test {
+  float x = 4.3f;
+  float y = ++x;
+  assert (x == 5.3f);
+  assert (y == 5.3f);
+}
+
+/** Post-decrement a float */
+test {
+  float x = 4.3f;
+  float y = x--;
+  assert (x == 3.3f);
+  assert (y == 4.3f);
+}
+
+/** Pre-decrement a float */
+test {
+  float x = 4;
+  float y = --x;
+  assert (x == 3.3f);
+  assert (y == 3.3f);
+}
+

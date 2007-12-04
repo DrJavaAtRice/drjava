@@ -65,7 +65,7 @@ public class ArrayInitializer extends Expression {
    * @param cells the list of initialized cells
    * @exception IllegalArgumentException if cells is null
    */
-  public ArrayInitializer(List<Expression> cells) {
+  public ArrayInitializer(List<? extends Expression> cells) {
     this(cells, null, 0, 0, 0, 0);
   }
   
@@ -79,13 +79,13 @@ public class ArrayInitializer extends Expression {
    * @param ec    the end column
    * @exception IllegalArgumentException if cells is null
    */
-  public ArrayInitializer(List<Expression> cells,
+  public ArrayInitializer(List<? extends Expression> cells,
                           String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
     if (cells == null) throw new IllegalArgumentException("cells == null");
     
-    this.cells = cells;
+    this.cells = new ArrayList<Expression>(cells);
   }
   
   /**
@@ -99,10 +99,10 @@ public class ArrayInitializer extends Expression {
    * Sets the list of cell initialization expressions
    * @exception IllegalArgumentException if l is null
    */
-  public void setCells(List<Expression> l) {
+  public void setCells(List<? extends Expression> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
     
-    firePropertyChange(CELLS, cells, cells = l);
+    firePropertyChange(CELLS, cells, cells = new ArrayList<Expression>(l));
   }
   
   /**
@@ -116,7 +116,8 @@ public class ArrayInitializer extends Expression {
   }
   
   /**
-   * Sets the element type
+   * Sets the element type.  Also recursively sets the element type of any
+   * cells that are ArrayInitializers.
    * @exception IllegalArgumentException if t is null
    */
   public void setElementType(TypeName t) {
@@ -125,9 +126,7 @@ public class ArrayInitializer extends Expression {
     firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);
     if (t instanceof ArrayTypeName) {
       ArrayTypeName at = (ArrayTypeName)t;
-      Iterator  it = cells.iterator();
-      while (it.hasNext()) {
-        Object init = it.next();
+      for (Expression init : cells) {
         if (init instanceof ArrayInitializer) {
           ((ArrayInitializer)init).setElementType(at.getElementType());
         }

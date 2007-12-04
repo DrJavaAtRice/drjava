@@ -28,6 +28,8 @@
 
 package koala.dynamicjava.tree;
 
+import koala.dynamicjava.tree.visitor.Visitor;
+
 /**
  * This class represents the boolean type nodes of the syntax tree
  *
@@ -53,6 +55,14 @@ public class BooleanTypeName extends PrimitiveTypeName {
    */
   public BooleanTypeName(String fn, int bl, int bc, int el, int ec) {
     super(boolean.class, fn, bl, bc, el, ec);
+  }
+  
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
   }
   
 }

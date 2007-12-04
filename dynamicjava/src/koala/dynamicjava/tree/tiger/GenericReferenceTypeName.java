@@ -38,6 +38,7 @@ package koala.dynamicjava.tree.tiger;
 
 
 import koala.dynamicjava.tree.*;
+import koala.dynamicjava.tree.visitor.Visitor;
 
 import java.util.List;
 
@@ -56,18 +57,18 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
    * @exception IllegalArgumentException if ids is null
    */
   public GenericReferenceTypeName(List<IdentifierToken> ids, List<List<? extends TypeName>> typeArgs) {
-    this(ids, null, 0, 0, 0, 0, typeArgs);
+    this(ids, typeArgs, null, 0, 0, 0, 0);
   }
   
-  /**
-   * Initializes the type
-   * @param rep   the type name
-   * @param typeArgs the type arguments
-   * @exception IllegalArgumentException if rep is null
-   */
-  public GenericReferenceTypeName(String rep, List<List<? extends TypeName>> typeArgs) {
-    this(rep, null, 0, 0, 0, 0, typeArgs);
-  }
+//  /**
+//   * Initializes the type
+//   * @param rep   the type name
+//   * @param typeArgs the type arguments
+//   * @exception IllegalArgumentException if rep is null
+//   */
+//  public GenericReferenceTypeName(String rep, List<List<? extends TypeName>> typeArgs) {
+//    this(rep, typeArgs, null, 0, 0, 0, 0);
+//  }
   
   /**
    * Initializes the type
@@ -80,29 +81,13 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceTypeName(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec, List<List<? extends TypeName>> typeArgs) {
+  public GenericReferenceTypeName(List<IdentifierToken> ids, List<List<? extends TypeName>> typeArgs, String fn,  int bl, int bc, int el, int ec) {
     super(ids, fn, bl, bc, el, ec);
-    
+    if (ids.size() != typeArgs.size()) { throw new IllegalArgumentException("ids.size() != typeArgs.size()"); }
     _typeArguments = typeArgs;
   }
   
-  /**
-   * Initializes the type
-   * @param rep   the type name
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
-   * @param typeArgs the type arguments
-   * @exception IllegalArgumentException if rep is null
-   */
-  public GenericReferenceTypeName(String rep, String fn, int bl, int bc, int el, int ec, List<List<? extends TypeName>> typeArgs) {
-    super(rep, fn, bl, bc, el, ec);
-    
-    _typeArguments = typeArgs;
-  }
-  
+
   public List<List<? extends TypeName>> getTypeArguments(){ return _typeArguments; }
   
   public String toString() {
@@ -121,4 +106,5 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
     }    
     return super.toStringHelper()+" "+typeArgS;
   }
+  
 }

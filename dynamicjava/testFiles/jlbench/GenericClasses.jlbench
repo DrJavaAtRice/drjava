@@ -1,0 +1,155 @@
+/** Defines a generic class with an unbound variable, and another with a bound variable */
+declaration {
+  class Wrapper<T> {
+    private T _val;
+    public Wrapper(T val) { _val = val; }
+    public void set(T arg) { _val = arg; }
+    public T get() { return _val; }
+  }
+  
+  class NumWrapper<N extends Number> extends Wrapper<N> {
+    public NumWrapper(N val) { super(val); }
+  }
+  
+  class WrapperWrapper<T> extends Wrapper<Wrapper<T>> {
+    public WrapperWrapper(Wrapper<T> val) { super(val); }
+  }
+}
+
+/** Invoke a generic constructor followed by assignment */
+test {
+  Wrapper<String> w = new Wrapper<String>("foo");
+}
+
+/** Invoke a generic constructor with an argument that is a subtype of T */
+test {
+  Wrapper<Object> w = new Wrapper<Object>("foo");
+}
+
+/** Assign a generic type using covariant subtyping */
+static error {
+  Wrapper<Object> w = new Wrapper<String>("foo");
+}
+
+/** Assign a generic type using contravariant subtyping */
+static error {
+  Wrapper<String> w = new Wrapper<Object>("foo");
+}
+
+/** Invoke a generic constructor with the wrong argument type */
+static error {
+  new Wrapper<String>(Integer.MAX_VALUE);
+}
+
+/** Invoke a generic constructor with an in-bounds type argument */
+test {
+  NumWrapper<Integer> nw = new NumWrapper<Integer>(new Integer(23));
+}
+
+/** Invoke a generic constructor with a in-bounds type argument & an argument subtype of T */
+test {
+  NumWrapper<Number> nw = new NumWrapper<Number>(new Integer(23));
+  NumWrapper<Number> nw = new NumWrapper<Number>(null);
+}
+
+/** Declare a generic type out of its bound */
+static error {
+  NumWrapper<String> w;
+}
+
+/** Construct a generic type out of its bound */
+static error {
+  Object w = new NumWrapper<String>("foo");
+}
+
+/** Assign a simple generic subtype to its supertype */
+test {
+  Wrapper<Integer> w = new NumWrapper<Integer>(new Integer(23));
+  NumWrapper<Integer> nw = new NumWrapper<Integer>(new Integer(23));
+  w = nw;
+}
+
+/** Assign a simple generic subtype to an incorrect supertype */
+static error {
+  Wrapper<String> w = new NumWrapper<Integer>(new Integer(23));
+}
+
+/** Assign a simple generic subtype to an incorrect supertype (using a variable reference) */
+static error {
+  Wrapper<String> w;
+  NumWrapper<Integer> nw = new NumWrapper<Integer>(new Integer(23));
+  w = nw;
+}
+
+/** Assign a simple generic subtype to a covariant supertype */
+static error {
+  Wrapper<Number> w = new NumWrapper<Integer>(new Integer(23));
+}
+
+/** Assign a simple generic subtype to a contravariant supertype */
+static error {
+  Wrapper<Integer> w = new NumWrapper<Number>(new Integer(23));
+}
+
+/** Assign a generic subtype with a complex extends clause to its supertype */
+test {
+  Wrapper<Wrapper<String>> w = new WrapperWrapper<String>(new Wrapper<String>("foo"));
+  WrapperWrapper<String> ww = new WrapperWrapper<String>(new Wrapper<String>("foo"));
+  w = ww;
+}
+
+/** Invoke a generic method with T in the result type */
+test {
+  Wrapper<String> w = new Wrapper<String>("foo");
+  String s = w.get();
+  assert (s.equals("foo"));
+}
+
+/** Invoke a generic method with T in the argument type */
+test {
+  Wrapper<String> w = new Wrapper<String>("foo");
+  w.set("bar");
+  String s = w.get();
+  assert (s.equals("bar"));
+}
+
+/** Invoke a generic method with T in the argument type with an incorrect argument */
+static error {
+  Wrapper<String> w = new Wrapper<String>("foo");
+  w.set(new Integer(23));
+}
+
+/** Use an output T as an argument to an input T */
+test {
+  Wrapper<String> w = new Wrapper<String>("foo");
+  w.set(w.get());
+}
+
+/** Invoke a generic inherited method with T in the result type */
+test {
+  WrapperWrapper<String> ww = new WrapperWrapper<String>(new Wrapper<String>("foo"));
+  Wrapper<String> w = ww.get();
+  String s = w.get();
+  assert (s.equals("foo"));
+}
+
+/** Invoke a generic inherited method with T in the argument type */
+test {
+  WrapperWrapper<String> ww = new WrapperWrapper<String>(new Wrapper<String>("foo"));
+  ww.set(new Wrapper<String>("bar"));
+  String s = w.get();
+  assert (s.equals("bar"));
+}
+
+/** Invoke a generic inherited method with T in the argument type with an incorrect argument */
+test {
+  WrapperWrapper<String> ww = new WrapperWrapper<String>(new Wrapper<String>("foo"));
+  ww.set(new Wrapper<Integer>(new Integer(23)));
+}
+
+/** Use an output T from an inherited method as an argument to an input T */
+test {
+  WrapperWrapper<String> ww = new WrapperWrapper<String>(new Wrapper<String>("foo"));
+  ww.set(ww.get());
+}
+

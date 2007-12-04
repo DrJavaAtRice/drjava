@@ -31,7 +31,7 @@ package koala.dynamicjava.interpreter.error;
 import koala.dynamicjava.tree.*;
 
 /**
- * This error is thrown by an interpreted throw statement
+ * An exception that is thrown by the interpreted program
  *
  * @author Stephane Hillion
  * @version 1.0 - 1999/05/26
@@ -45,6 +45,28 @@ public class ThrownException extends ExecutionError {
   public ThrownException(Throwable e) {
     super("uncaught.exception");
     thrown = e;
+  }
+  
+  /**
+   * Constructs an <code>ThrownExceptionError</code> with no detail message.
+   * Filters the stack trace to remove the provided elements (in continuous order;
+   * if they don't match or don't correspond to the last elements of e's stack trace, 
+   * no filtering will occur)
+   */
+  public ThrownException(Throwable e, StackTraceElement[] filteredElements) {
+    super("uncaught.exception");
+    StackTraceElement[] original = e.getStackTrace();
+    int startMatch = original.length - filteredElements.length;
+    boolean matches = startMatch >= 0;
+    for (int i = 0; matches && i < filteredElements.length; i++) {
+      matches &= original[startMatch+i].equals(filteredElements[i]);
+    }
+    if (matches) {
+      StackTraceElement[] newStackTrace = new StackTraceElement[startMatch];
+      for (int i = 0; i < startMatch; i++) { newStackTrace[i] = original[i]; }
+      e.setStackTrace(newStackTrace);
+    }
+    thrown = e;    
   }
   
   /**
