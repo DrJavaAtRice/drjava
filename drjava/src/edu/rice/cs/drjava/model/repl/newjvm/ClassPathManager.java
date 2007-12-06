@@ -44,81 +44,94 @@ import java.util.LinkedList;
 import java.util.List;
 import java.lang.ClassLoader;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.drjava.model.DeadClassLoader;
-import edu.rice.cs.drjava.model.BrainClassLoader;
+import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.reflect.PathClassLoader;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/* This class runs in the Main JVM, but it accessed from the Slave JVM via RMI.  All public methods are synchronzed. */
+/**
+ * Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
+ * place in the list.  This class is used in the interpreter JVM, and may be accessed concurrently.
+ */
 public class ClassPathManager {
   
-  private LinkedList<File> projectCP;              /* The custom project classpath. */
-  private LinkedList<File> buildCP;                /* The build directory. */
-  private LinkedList<File> projectFilesCP;         /* The open project files. */
-  private LinkedList<File> externalFilesCP;        /* The open external files. */
-  private LinkedList<File> extraCP;                /* The extra preferences classpath. */ 
+  // For thread safety, all accesses to these lists are synchronized on this, and when they are made available
+  // to others (via getters or in the class loader), a snapshot is used.
   
-//  private volatile LinkedList<File> systemCP;               /* The system classpath. */
-//  private List<File> openFilesCP;                           /* Open files classpath (for nonproject mode) */
+  private final LinkedList<File> _projectCP;              /* The custom project classpath. */
+  private final LinkedList<File> _buildCP;                /* The build directory. */
+  private final LinkedList<File> _projectFilesCP;         /* The open project files. */
+  private final LinkedList<File> _externalFilesCP;        /* The open external files. */
+  private final LinkedList<File> _extraCP;                /* The extra preferences classpath. */
+  
+  // these can be accessed concurrently:
+  
+  private final Iterable<File> _fullPath;
+  private final ClassLoader _loader;
   
   public ClassPathManager() {
-    projectCP = new LinkedList<File>();
-    buildCP = new LinkedList<File>();
-    projectFilesCP = new LinkedList<File>();
-    externalFilesCP = new LinkedList<File>();
-    extraCP = new LinkedList<File>();
-//    systemCP = new LinkedList<File>();
-//    openFilesCP = new LinkedList<File>();
+    _projectCP = new LinkedList<File>();
+    _buildCP = new LinkedList<File>();
+    _projectFilesCP = new LinkedList<File>();
+    _externalFilesCP = new LinkedList<File>();
+    _extraCP = new LinkedList<File>();
+    _fullPath = IterUtil.collapse(IterUtil.map(IterUtil.make(_projectCP, _buildCP, _projectFilesCP,
+                                                             _externalFilesCP, _extraCP), _makeSafeSnapshot));
+    _loader = new PathClassLoader(_fullPath);
   }
+      
+  private final Lambda<List<File>, Iterable<File>> _makeSafeSnapshot =
+    new Lambda<List<File>, Iterable<File>>() {
+    public Iterable<File> value(List<File> arg) {
+      synchronized (ClassPathManager.this) { return IterUtil.snapshot(arg); }
+    }
+  };
   
   /** Adds the entry to the front of the project classpath
    *  (this is the classpath specified in project properties)
    */
-  public synchronized void addProjectCP(File f) { projectCP.add(f); }
+  public synchronized void addProjectCP(File f) { _projectCP.addFirst(f); }
   
-  public synchronized Iterable<File> getProjectCP() { return IterUtil.reverse(projectCP); }
+  public synchronized Iterable<File> getProjectCP() { return IterUtil.snapshot(_projectCP); }
   
   /** Adds the entry to the front of the build classpath. */
-  public synchronized void addBuildDirectoryCP(File f) { buildCP.add(f); }
+  public synchronized void addBuildDirectoryCP(File f) {
+    _buildCP.remove(f); // eliminate duplicates
+    _buildCP.addFirst(f);
+  }
 
-  public synchronized Iterable<File> getBuildDirectoryCP() { return IterUtil.reverse(buildCP); }
+  public synchronized Iterable<File> getBuildDirectoryCP() { return IterUtil.snapshot(_buildCP); }
   
   /** Adds the entry to the front of the project files classpath (this is the classpath for all open project files). */
-  public synchronized void addProjectFilesCP(File f) { projectFilesCP.add(f); }
+  public synchronized void addProjectFilesCP(File f) {
+    _projectFilesCP.remove(f); // eliminate duplicates
+    _projectFilesCP.addFirst(f);
+  }
   
-  public synchronized Iterable<File> getProjectFilesCP() { return IterUtil.reverse(projectFilesCP); }
+  public synchronized Iterable<File> getProjectFilesCP() { return IterUtil.snapshot(_projectFilesCP); }
   
   /** Adds new entry containing f to the front of the external classpath. */
-  public void addExternalFilesCP(File f) { externalFilesCP.add(f); }
+  public synchronized void addExternalFilesCP(File f) {
+    _externalFilesCP.remove(f); // eliminate duplicates
+    _externalFilesCP.addFirst(f);
+  }
   
-  public Iterable<File> getExternalFilesCP() { return IterUtil.reverse(externalFilesCP); }
+  public synchronized Iterable<File> getExternalFilesCP() { return IterUtil.snapshot(_externalFilesCP); }
   
   /** Adds the entry to the front of the extra classpath. */
-  public synchronized void addExtraCP(File f) { extraCP.add(f); }
-  
-  public Iterable<File> getExtraCP() { return IterUtil.reverse(extraCP); }
-  
-  /** Returns a new classloader that represents the custom classpath. */
-  public synchronized ClassLoader getClassLoader() {
-    return new BrainClassLoader(buildClassLoader(projectCP), 
-                                buildClassLoader(buildCP), 
-                                buildClassLoader(projectFilesCP), 
-                                buildClassLoader(externalFilesCP), 
-                                buildClassLoader(extraCP));
+  public synchronized void addExtraCP(File f) {
+    _extraCP.remove(f); // eliminate duplicates
+    _extraCP.addFirst(f);
   }
   
-  /** Builds a new classloader for the list of classpath entries. */
-  private ClassLoader buildClassLoader(List<File> path) {
-    List<URL> urls = new LinkedList<URL>();
-    for (File f : path) {
-      try {
-        URL u = f.toURI().toURL();
-        urls.add(u);
-      }
-      catch (MalformedURLException e) { error.log("Can't convert file to URL", e); }
-    }
-    return new URLClassLoader(urls.toArray(new URL[urls.size()]), new DeadClassLoader());
-  }
-
+  public Iterable<File> getExtraCP() { return IterUtil.snapshot(_extraCP); }
+  
+  /**
+   * Returns the class loader for this classpath.  The loader's path is dynamically updated as changes
+   * are made in this class.
+   */
+  public synchronized ClassLoader getClassLoader() { return _loader; }
+  
+  public synchronized Iterable<File> getClassPath() { return _fullPath; }
 }
-

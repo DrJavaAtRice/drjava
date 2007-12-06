@@ -65,10 +65,10 @@ public interface MainJVMRemoteI extends MasterRemote {
   public void systemOutPrint(String s) throws RemoteException;
 
   /**
-   * Called when a call to interpret has completed.
-   * @param result The result of the interpretation
+   * Asks the main jvm for input from the console.
+   * @return the console input
    */
-  public void interpretResult(InterpretResult result) throws RemoteException;
+  public String getConsoleInput() throws RemoteException;
 
   /** This method is called by the interpreter JVM if it cannot be exited (likely because of its having a security 
    *  manager)
@@ -131,9 +131,4 @@ public interface MainJVMRemoteI extends MasterRemote {
   public void notifyDebugInterpreterAssignment(String name) throws RemoteException;
   */
 
-  /**
-   * Asks the main jvm for input from the console.
-   * @return the console input
-   */
-  public String getConsoleInput() throws RemoteException;
 }

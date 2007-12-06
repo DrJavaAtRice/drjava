@@ -54,6 +54,8 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** Test I/O functions of the global model.
  *  @version $Id$
  */
@@ -954,12 +956,17 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // confirm that the history is clear
     assertEquals("History is not clear", "", _model.getHistoryAsString());
     
+    _model.resetInteractions(_model.getWorkingDirectory());
+    _model.resetConsole();
+    listener.waitResetDone();
+    
     listener.logInteractionStart();
     _model.loadHistory(fs);
    listener.waitInteractionDone();
    
     // check that output of loaded history is correct
     ConsoleDocument con = _model.getConsoleDocument();
+    debug.log(con.getDocText(0, con.getLength()).trim());
     assertEquals("Output of loaded history is not correct",
                  "x = 5",
                  con.getDocText(0, con.getLength()).trim());
@@ -1058,7 +1065,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertEquals("read() should prompt for input and return the first byte of \"input\"", expected, result);
 
     interpret("import java.io.*;");
-    interpret("br = new BufferedReader(new InputStreamReader(System.in))");
+    interpret("BufferedReader br = new BufferedReader(new InputStreamReader(System.in))");
     result = interpret("br.readLine()");
     assertEquals("readLine() should return the rest of \"input\" without prompting for input",
                  "\"nput\"", result);

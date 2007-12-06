@@ -55,29 +55,23 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   
   public boolean runTestSuite() throws RemoteException;
   
-  public void setPackageScope(String s) throws RemoteException;
-  //public void reset() throws RemoteException;
-
   /**
    * @param show Whether to show a message if a reset operation fails.
    */
   public void setShowMessageOnResetFailure(boolean show) throws RemoteException;
 
-  /**
-   * Adds a named DynamicJavaAdapter to the list of interpreters.
-   * @param name the unique name for the interpreter
-   * @throws IllegalArgumentException if the name is not unique
-   */
-  public void addJavaInterpreter(String name) throws RemoteException;
+  /** Sets whether to allow private access. */
+  public void setPrivateAccessible(boolean allow) throws RemoteException;
 
+
+  
+  
   /**
-   * Adds a named JavaDebugInterpreter to the list of interpreters.
+   * Adds a named Interpreter to the list.
    * @param name the unique name for the interpreter
-   * @param className the fully qualified class name of the class
-   * the debug interpreter is in
    * @throws IllegalArgumentException if the name is not unique
    */
-  public void addDebugInterpreter(String name, String className) throws RemoteException;
+  public void addInterpreter(String name) throws RemoteException;
 
   /**
    * Removes the interpreter with the given name, if it exists.
@@ -98,36 +92,19 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
     */
   public boolean setToDefaultInterpreter() throws RemoteException;
 
-  /**
-   * Returns a copy of the list of unique entries on the classpath. (List rather than Iterable to avoid
-   * conflicts between RMI and Retroweaver.)
-   */
-  public List<File> getAugmentedClassPath() throws RemoteException;
 
-  /** Gets the string representation of the value of a variable in the current interpreter.
-    * @param var the name of the variable
-    */
-  public String getVariableToString(String var) throws RemoteException;
-
-  /** Gets the class name of a variable in the current interpreter.
-    * @param var the name of the variable
-    */
-  public String getVariableClassName(String var) throws RemoteException;
-
-  /** Sets whether to allow private access. */
-  public void setPrivateAccessible(boolean allow) throws RemoteException;
-
-//  /** Updates the security manager in slave JVM. */
-//  public void enableSecurityManager() throws RemoteException;
-//  
-//  /** Updates the security manager in slave JVM. */
-//  public void disableSecurityManager() throws RemoteException;
- 
   /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVMRemoteI via
    *  the interpretResult method.
    *  @param s Source code to interpret.
    */
-  public void interpret(String s) throws RemoteException;
+  public InterpretResult interpret(String s) throws RemoteException;
+  
+  
+  /**
+   * Returns the current class path. (List rather than Iterable to avoid conflicts between RMI and 
+   * Retroweaver.)
+   */
+  public List<File> getClassPath() throws RemoteException;  
   
   /** Adds the given path to the classpath shared by ALL Java interpreters.  Only unique paths are added.
    *  @param f Entry to add to the accumulated classpath

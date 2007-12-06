@@ -7422,29 +7422,24 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     public void interactionEnded() {
       InteractionsModel im = _model.getInteractionsModel();
-      edu.rice.cs.plt.tuple.Pair<String,String> lastError = im.getLastError();
+      String lastError = im.getLastError();
       if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DIALOG_AUTOIMPORT_ENABLED)) {
-        if (lastError!=null) {
+        if (lastError != null) {
           // the interaction ended and there was an error
-          String exceptionClass = lastError.first();
-          String message = lastError.second();
-          edu.rice.cs.plt.tuple.Pair<String,String> secondToLastError = im.getSecondToLastError();
-          if ((secondToLastError==null) || // either there was no 2nd to last error
-              (!secondToLastError.first().equals(exceptionClass)) || // or it is different
-              (!secondToLastError.second().equals(message))) {
+          // check that this error is different than the last one (second to last may be null):
+          if (!lastError.equals(im.getSecondToLastError())) {
             // this aborts the auto-importing if the same class comes up twice in a row
-            if ("koala.dynamicjava.interpreter.error.ExecutionError".equals(exceptionClass) &&
-                message != null &&
-                message.startsWith("Undefined class '") &&
-                message.endsWith("'")) {
+            if (lastError.startsWith("Undefined class '") && lastError.endsWith("'")) {
               // it was an "undefined class" exception
               // show auto-import dialog
-              String undefinedClassName = message.substring(message.indexOf('\'')+1,message.lastIndexOf('\''));
-              _showAutoImportDialog(undefinedClassName);          
+              String undefinedClassName = lastError.substring(lastError.indexOf('\'')+1,
+                                                              lastError.lastIndexOf('\''));
+              _showAutoImportDialog(undefinedClassName);
             }
           }
         }
-      } else {
+      }
+      else {
         // reset the last errors, so the dialog works again if it is re-enabled
         im.resetLastErrors();
       }

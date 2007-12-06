@@ -90,10 +90,12 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
     }
     if (!stepInterpreter) {
       request.addClassExclusionFilter("koala.*");
+      request.addClassExclusionFilter("edu.rice.cs.dynamicjava.*");
     }
     if (!stepDrJava) {
       request.addClassExclusionFilter("edu.rice.cs.drjava.*");
       request.addClassExclusionFilter("edu.rice.cs.util.*");
+      request.addClassExclusionFilter("edu.rice.cs.plt.*");
     }
     StringTokenizer st = new StringTokenizer(exclude, ",");
     while (st.hasMoreTokens()) {

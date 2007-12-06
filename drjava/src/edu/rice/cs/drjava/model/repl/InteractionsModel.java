@@ -106,8 +106,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   private volatile String _banner;
   
   /** Last error, or null if successful. */
-  protected volatile Pair<String,String> _lastError = null;
-  protected volatile Pair<String,String> _secondToLastError = null;
+  protected volatile String _lastError = null;
+  protected volatile String _secondToLastError = null;
   
   /** Constructs an InteractionsModel.
    *  @param adapter DocumentAdapter to use in the InteractionsDocument
@@ -496,22 +496,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _interactionIsOver();
   }
 
-  /** Signifies that the most recent interpretation was ended due to an exception being thrown.
-   *  @param exceptionClass The name of the class of the thrown exception
-   *  @param message The exception's message
-   *  @param stackTrace The stack trace of the exception
-   */
-  public void replThrewException(String exceptionClass, String message, String stackTrace, String shortMessage) {
-    if (shortMessage != null) {
-      if (shortMessage.endsWith("<EOF>\"")) {
-        interactionContinues();
-        return;
-      }
+  /** Signifies that the most recent interpretation was ended due to an exception being thrown. */
+  public void replThrewException(String message) {
+    if (message.endsWith("<EOF>\"")) {
+      interactionContinues();
     }
-    _document.appendExceptionResult(exceptionClass, message, stackTrace, InteractionsDocument.ERROR_STYLE);
-    _secondToLastError = _lastError;
-    _lastError = new Pair<String,String>(exceptionClass,message);
-    _interactionIsOver();
+    else {
+      _document.appendExceptionResult(message, InteractionsDocument.ERROR_STYLE);
+      _secondToLastError = _lastError;
+      _lastError = message;
+      _interactionIsOver();
+    }
   }
 
   /** Signifies that the most recent interpretation was preempted by a syntax error.  The integer parameters
@@ -524,8 +519,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
                                       int endRow, int endCol ) {
+    // Note: this method is currently never called.  The highlighting functionality needs 
+    // to be restored.
     _secondToLastError = _lastError;
-    _lastError = new Pair<String,String>("koala.dynamicjava.parser.ParserException",errorMessage);
+    _lastError = errorMessage;
     if (errorMessage != null) {
       if (errorMessage.endsWith("<EOF>\"")) {
         interactionContinues();
@@ -547,7 +544,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Signifies that the most recent interpretation contained a call to System.exit.
    *  @param status The exit status that will be returned.
    */
-  public void replCalledSystemExit(int status) { 
+  public void replCalledSystemExit(int status) {
 //    Utilities.showDebug("InteractionsModel: replCalledSystemExit(" + status + ") called");
     _notifyInterpreterExited(status); 
   }
@@ -670,13 +667,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Gets the console tab document for this interactions model */
   public abstract ConsoleDocument getConsoleDocument();
   
-  /** Return the last error as a pair (exception class name, message), or null if successful. */
-  public Pair<String,String> getLastError() {
+  /** Return the last error, or null if successful. */
+  public String getLastError() {
     return _lastError;
   }
 
-  /** Return the second to last error as a pair (exception class name, message), or null if successful. */
-  public Pair<String,String> getSecondToLastError() {
+  /** Return the second to last error, or null if successful. */
+  public String getSecondToLastError() {
     return _secondToLastError;
   }
   

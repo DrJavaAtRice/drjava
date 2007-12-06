@@ -1620,7 +1620,8 @@ public class JPDADebugger implements Debugger {
 
       // Name the new interpreter based on this thread
       String interpreterName = _getUniqueThreadName(suspendedThreadRef);
-      _model.getInteractionsModel().addDebugInterpreter(interpreterName, className);
+      // TODO: allow creation of the appropriate context for the new interpreter
+      _model.getInteractionsModel().addInterpreter(interpreterName);
       ObjectReference debugInterpreter = _getDebugInterpreter();
       _log.log(this + " executing: frame = suspendedThreadRef.frame(0);");
       frame = suspendedThreadRef.frame(0);

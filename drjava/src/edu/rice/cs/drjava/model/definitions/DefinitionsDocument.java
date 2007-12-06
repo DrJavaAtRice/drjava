@@ -51,8 +51,8 @@ import java.io.StringReader;
 import java.io.IOException;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
-import koala.dynamicjava.parser.Parser;
-import koala.dynamicjava.parser.ParseException;
+import koala.dynamicjava.parser.impl.Parser;
+import koala.dynamicjava.parser.impl.ParseException;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;

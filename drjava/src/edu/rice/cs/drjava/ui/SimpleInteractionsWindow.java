@@ -110,12 +110,6 @@ public class SimpleInteractionsWindow extends JFrame {
   /** Accessor for the controller. */
   public InteractionsController getController() { return _controller; }
 
-  /** Defines a variable in this window to the given value. */
-  public void defineVariable(String name, Object value) { _model.defineVariable(name, value); }
-
-  /** Defines a final variable in this window to the given value. */
-  public void defineConstant(String name, Object value) { _model.defineConstant(name, value); }
-
   /** Sets whether protected and private variables and methods can be accessed from within the interpreter. */
   public void setInterpreterPrivateAccessible(boolean accessible) {
     _model.setInterpreterPrivateAccessible(accessible);
@@ -125,8 +119,9 @@ public class SimpleInteractionsWindow extends JFrame {
   public static void main(String[] args) {
     SimpleInteractionsWindow w = new SimpleInteractionsWindow();
     if (args.length > 0 && args[0].equals("-debug")) {
-      w.defineVariable("FRAME", w);
-      w.defineVariable("CONTROLLER", w.getController());
+      // TODO: define apropriate context
+//      w.defineVariable("FRAME", w);
+//      w.defineVariable("CONTROLLER", w.getController());
       w.setInterpreterPrivateAccessible(true);
     }
     w.setVisible(true);

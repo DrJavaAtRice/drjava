@@ -214,82 +214,15 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   }
   
   /** Inserts the given exception data into the document with the given style.
-   *  @param exceptionClass Name of the exception that was thrown
    *  @param message Message contained in the exception
-   *  @param stackTrace String representation of the stack trace
    *  @param styleName name of the style for formatting the exception
    */
-  public void appendExceptionResult(String exceptionClass, String message, String stackTrace, String styleName) {
-    
-    String c = exceptionClass;
-    if (c.indexOf('.') != -1) c = c.substring(c.lastIndexOf('.') + 1, c.length());
-    
+  public void appendExceptionResult(String message, String styleName) {
+    // Note that there is similar code in InteractionsDocument.  Something should be refactored.
     acquireWriteLock();
-    try {
-      insertText(getLength(), c + ": " + message + "\n", styleName);
-      
-      // An example stack trace:
-      //
-      // java.lang.IllegalMonitorStateException:
-      // at java.lang.Object.wait(Native Method)
-      // at java.lang.Object.wait(Object.java:425)
-      if (! stackTrace.trim().equals("")) {
-        BufferedReader reader = new BufferedReader(new StringReader(stackTrace));
-        
-        String line;
-        // a line is parsable if it has ( then : then ), with some
-        // text between each of those
-        while ((line = reader.readLine()) != null) {
-          String fileName;
-          int lineNumber;
-          
-          // TODO:  Why is this stuff here??
-          int openLoc = line.indexOf('(');
-          if (openLoc != -1) {
-            int closeLoc = line.indexOf(')', openLoc + 1);
-            
-            if (closeLoc != -1) {
-              int colonLoc = line.indexOf(':', openLoc + 1);
-              if ((colonLoc > openLoc) && (colonLoc < closeLoc)) {
-                // ok this line is parsable!
-                String lineNumStr = line.substring(colonLoc + 1, closeLoc);
-                try {
-                  lineNumber = Integer.parseInt(lineNumStr);
-                  fileName = line.substring(openLoc + 1, colonLoc);
-                }
-                catch (NumberFormatException nfe) {
-                  // do nothing; we failed at parsing
-                }
-              }
-            }
-          }
-          
-          insertText(getLength(), line, styleName);
-          
-          // OK, now if fileName != null we did parse out fileName
-          // and lineNumber.
-          // Here's where we'd add the button, etc.
-          /*
-           if (fileName != null) {
-           JButton button = new JButton("go");
-           button.addActionListener(new ExceptionButtonListener(fileName, lineNumber));
-           SimpleAttributeSet buttonSet = new SimpleAttributeSet(set);
-           StyleConstants.setComponent(buttonSet, button);
-           insertString(getLength(), "  ", null);
-           insertString(getLength() - 1, " ", buttonSet);
-           JOptionPane.showMessageDialog(null, "button in");
-           insertString(getLength(), " ", null);
-           JOptionPane.showMessageDialog(null, "extra space");
-           }*/
-          
-          //JOptionPane.showMessageDialog(null, "\\n");
-          insertText(getLength(), "\n", styleName);
-          
-        } // end the while
-      }
-    }
-    catch (IOException ioe) { throw new UnexpectedException(ioe); }
+    try { insertText(getLength(), message + "\n", styleName); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
     finally { releaseWriteLock(); }
-  }  
+  }
+  
 }

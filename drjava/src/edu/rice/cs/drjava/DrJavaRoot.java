@@ -277,9 +277,10 @@ public class DrJavaRoot {
           _debugConsole = null;
         }
       };
-      _debugConsole.defineConstant("mainFrame", mf);
-      _debugConsole.defineConstant("model", mf.getModel());
-      _debugConsole.defineConstant("config", DrJava.getConfig());
+      // TODO: define appropriate context
+//      _debugConsole.defineConstant("mainFrame", mf);
+//      _debugConsole.defineConstant("model", mf.getModel());
+//      _debugConsole.defineConstant("config", DrJava.getConfig());
       _debugConsole.setInterpreterPrivateAccessible(true);
       _debugConsole.setVisible(true);
     }

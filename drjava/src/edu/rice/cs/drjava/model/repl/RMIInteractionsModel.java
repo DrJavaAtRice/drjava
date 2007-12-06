@@ -104,20 +104,11 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Resets the Java interpreter. */
   protected void _resetInterpreter(File wd) { _jvm.killInterpreter(wd); }
 
-  /** Adds a named DynamicJavaAdapter to the list of interpreters.
+  /** Adds a named interpreter to the list.
    *  @param name the unique name for the interpreter
    *  @throws IllegalArgumentException if the name is not unique
    */
-  public void addJavaInterpreter(String name) { _jvm.addJavaInterpreter(name); }
-
-  /** Adds a named JavaDebugInterpreter to the list of interpreters.
-   *  @param name the unique name for the debug interpreter
-   *  @param className the fully qualified class name of the class the debug interpreter is in
-   *  @throws IllegalArgumentException if the name is not unique
-   */
-  public void addDebugInterpreter(String name, String className) {
-    _jvm.addDebugInterpreter(name, className);
-  }
+  public void addInterpreter(String name) { _jvm.addInterpreter(name); }
 
   /** Removes the interpreter with the given name, if it exists.
    *  @param name Name of the interpreter to remove

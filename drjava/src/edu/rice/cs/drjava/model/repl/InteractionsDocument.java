@@ -313,84 +313,24 @@ public class InteractionsDocument extends ConsoleDocument {
   }
   
   /** Inserts the given exception data into the document with the given style.
-   *  @param exceptionClass Name of the exception that was thrown
    *  @param message Message contained in the exception
    *  @param stackTrace String representation of the stack trace
    *  @param styleName name of the style for formatting the exception
    */
-  public void appendExceptionResult(String exceptionClass, String message, String stackTrace, String styleName) {
+  public void appendExceptionResult(String message, String styleName) {
+    // Note that there is similar code in InteractionsDJDocument.  Something should be refactored.
+    
     // TODO: should probably log this error, or figure out what causes it
     // it does not seem to affect the program negatively, though
-    if (message != null && (message.equals("Connection refused to host: 127.0.0.1; nested exception is: \n" +
-                                           "\tjava.net.ConnectException: Connection refused: connect"))) return;
+    // I'm commenting out, just to see when it appears
+//    if (message != null && (message.equals("Connection refused to host: 127.0.0.1; nested exception is: \n" +
+//                                           "\tjava.net.ConnectException: Connection refused: connect"))) return;
 
-    if (null == message || "null".equals(message)) message = "";
-    
-    // Simplify the common error messages
-    if ("koala.dynamicjava.interpreter.error.ExecutionError".equals(exceptionClass) ||
-        "edu.rice.cs.drjava.model.repl.InteractionsException".equals(exceptionClass)) {
-      exceptionClass = "Error";
-    }
-    
-    // The following is an ugly hack that should be fixed ASAP.  The read/writelock methods need to be added to
-    // the EditDocumentInterface interface.  This cast and a similar one in ConsoleDocument must be removed because they
-    // defeat the purpose of the EditDocumentInterface interface.
-    
-    String c = exceptionClass;
-    if (c.indexOf('.') != -1) c = c.substring(c.lastIndexOf('.') + 1, c.length());
-    
     acquireWriteLock();
-    try {
-      append(c + ": " + message + "\n", styleName);
-      
-      // An example stack trace:
-      //
-      // java.lang.IllegalMonitorStateException:
-      // at java.lang.Object.wait(Native Method)
-      // at java.lang.Object.wait(Object.java:425)
-      if (! stackTrace.trim().equals("")) {
-        BufferedReader reader = new BufferedReader(new StringReader(stackTrace));
-        
-        String line;
-        // a line is parsable if it has ( then : then ), with some
-        // text between each of those
-        while ((line = reader.readLine()) != null) {
-          String fileName;
-          int lineNumber;
-          
-          // TODO:  Why is this stuff here??
-          int openLoc = line.indexOf('(');
-          if (openLoc != -1) {
-            int closeLoc = line.indexOf(')', openLoc + 1);
-            
-            if (closeLoc != -1) {
-              int colonLoc = line.indexOf(':', openLoc + 1);
-              if ((colonLoc > openLoc) && (colonLoc < closeLoc)) {
-                // ok this line is parsable!
-                String lineNumStr = line.substring(colonLoc + 1, closeLoc);
-                try {
-                  lineNumber = Integer.parseInt(lineNumStr);
-                  fileName = line.substring(openLoc + 1, colonLoc);
-                }
-                catch (NumberFormatException nfe) {
-                  // do nothing; we failed at parsing
-                }
-              }
-            }
-          }
-          
-          append(line, styleName);
-          
-          //JOptionPane.showMessageDialog(null, "\\n");
-          append("\n", styleName);
-          
-        } // end the while
-      }
-    }
-    catch (IOException ioe) { throw new UnexpectedException(ioe); }
+    try { append(message + "\n", styleName); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
     finally { releaseWriteLock(); }
-  }  
+  }
 
   public void appendSyntaxErrorResult(String message, String interaction, int startRow, int startCol,
                                       int endRow, int endCol, String styleName) {

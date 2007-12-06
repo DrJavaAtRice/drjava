@@ -65,7 +65,8 @@ import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.ScrollableDialog;
-import koala.dynamicjava.parser.wrapper.*;
+
+import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -177,19 +178,25 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
     
     // Spawn thread on InterpreterJVM side
-    //  (will receive result in the interpretResult(...) method)
     try {
-      _log.log(this + ".interpret(" + s + ")");
+      debug.logStart("Interpreting " + s);
       _slaveJVMUsed = true;
       _interactionsModel.slaveJVMUsed();
-      slave.interpret(s);
+      InterpretResult result = slave.interpret(s);
+      debug.logEnd();
+      debug.logValue("result", result);
+      result.apply(getResultHandler());
     }
-    catch (java.rmi.UnmarshalException ume) {
-      // Could not receive result from interpret; system probably exited.
-      // We will silently fail and let the interpreter restart.
-      _log.log(this + ".interpret threw UnmarshalException, so interpreter is dead:\n" + ume);
+    catch (UnmarshalException ume) {
+      debug.logEnd();
+      Throwable cause = ume.getCause();
+      if (cause != null && cause instanceof EOFException) {
+        // Interpreter JVM has disappeared (perhaps reset); just ignore error and wait
+        // for reset.
+      }
+      else { _threwException(ume); }
     }
-    catch (RemoteException re) { _threwException(re); }
+    catch (RemoteException re) { debug.logEnd(); _threwException(re); }
   }
   
   /** Gets the string representation of the value of a variable in the current interpreter.
@@ -201,7 +208,19 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
     
-    try { return slave.getVariableToString(var); }
+    try {
+      return slave.interpret(var).apply(new InterpretResult.Visitor<String>() {
+        public String forNoValue() { return ""; }
+        public String forStringValue(String s) { return '"' + s + '"'; }
+        public String forCharValue(Character c) { return "'" + c + "'"; }
+        public String forNumberValue(Number n) { return n.toString(); }
+        public String forBooleanValue(Boolean b) { return b.toString(); }
+        public String forObjectValue(String valString) { return valString; }
+        public String forException(String msg) { return ""; }
+        public String forUnexpectedException(Throwable t) { throw new UnexpectedException(t); }
+        public String forBusy() { return ""; }
+      });
+    }
     catch (RemoteException re) {
       _threwException(re);
       return null;
@@ -212,52 +231,18 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param var the name of the variable
    */
   public String getVariableClassName(String var) {
-    // silently fail if disabled. see killInterpreter docs for details.
-    if (! _restart) return null;
-    
-    InterpreterJVMRemoteI slave = ensureInterpreterConnected();
-      
-    try { return slave.getVariableClassName(var); }
-    catch (RemoteException re) {
-      _threwException(re);
-      return null;
-    }
-  }
-  
-  /** Called when a call to interpret has completed.
-   *  @param result The result of the interpretation
-   */
-  public void interpretResult(InterpretResult result) throws RemoteException {
-    try {
-      _log.log(this + ".interpretResult(" + result + ")");
-      result.apply(getResultHandler());
-    }
-    catch (Throwable t) {
-      _log.log(this + "interpretResult threw " + t.toString());
-    }
-  }
-  
-//  /**
-//   * Adds a single path to the Interpreter's class path.
-//   * This method <b>cannot</b> take multiple paths separated by
-//   * a path separator; it must be called separately for each path.
-//   * @param path Path to be added to classpath
-//   */
-//  public void addClassPath(String path) {
+    return null; // TODO: implement
 //    // silently fail if disabled. see killInterpreter docs for details.
-//    if (! _restart) return;
+//    if (! _restart) return null;
 //    
-//    ensureInterpreterConnected();
-//    
-//    try {
-//      //      System.err.println("addclasspath to " + _interpreterJVM() + ": " + path);
-//      //      System.err.println("full classpath: " + getClasspath());
-//      _interpreterJVM().addClassPath(path);
-//    }
+//    InterpreterJVMRemoteI slave = ensureInterpreterConnected();
+//      
+//    try { return slave.getVariableClassName(var); }
 //    catch (RemoteException re) {
 //      _threwException(re);
+//      return null;
 //    }
-//  }
+  }
   
   public void addProjectClassPath(File f) {
     if (! _restart) return;
@@ -308,7 +293,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       
       InterpreterJVMRemoteI slave = ensureInterpreterConnected();
       
-      try { return IterUtil.compose(slave.getAugmentedClassPath(), _startupClassPath); }
+      try { return IterUtil.compose(slave.getClassPath(), _startupClassPath); }
       catch (RemoteException re) { _threwException(re); return IterUtil.empty(); }
     }
     else { return IterUtil.empty(); }
@@ -324,7 +309,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
     
-    try { slave.setPackageScope(packageName); }
+    try { slave.interpret("package " + packageName + ";"); }
     catch (RemoteException re) { _threwException(re); }
   }
   
@@ -343,14 +328,18 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param s String that was printed in the other JVM
    */
   public void systemErrPrint(String s) throws RemoteException {
+    debug.logStart();
     _interactionsModel.replSystemErrPrint(s);
+    debug.logEnd();
   }
   
   /** Forwards a call to System.out from InterpreterJVM to the local InteractionsModel.
    *  @param s String that was printed in the other JVM
    */
   public void systemOutPrint(String s) throws RemoteException {
+    debug.logStart();
     _interactionsModel.replSystemOutPrint(s);
+    debug.logEnd();
   }
   
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCases
@@ -457,33 +446,18 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //  }
   
   
-  /** Adds a named DynamicJavaAdapter to the list of interpreters.
+  /** Adds a named interpreter to the list.
    *  @param name the unique name for the interpreter
    *  @throws IllegalArgumentException if the name is not unique
    */
-  public void addJavaInterpreter(String name) {
+  public void addInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
     if (! _restart) return;
     
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
     
-    try { slave.addJavaInterpreter(name);  }
+    try { slave.addInterpreter(name);  }
     catch (RemoteException re) { _threwException(re);  }
-  }
-  
-  /** Adds a named JavaDebugInterpreter to the list of interpreters.
-   *  @param name the unique name for the interpreter
-   *  @param className the fully qualified class name of the class the debug interpreter is in
-   *  @throws IllegalArgumentException if the name is not unique
-   */
-  public void addDebugInterpreter(String name, String className) {
-    // silently fail if disabled. see killInterpreter docs for details.
-    if (! _restart) return;
-    
-    InterpreterJVMRemoteI slave = ensureInterpreterConnected();
-    
-    try { slave.addDebugInterpreter(name, className); }
-    catch (RemoteException re) { _threwException(re); }
   }
   
   /** Removes the interpreter with the given name, if it exists.
@@ -705,7 +679,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public void enableRestart() { _restart = true; }
   
   /** Returns the visitor to handle an InterpretResult. */
-  protected InterpretResultVisitor<Object> getResultHandler() { return _handler; }
+  protected InterpretResult.Visitor<Void> getResultHandler() { return _handler; }
   
   /** Returns the debug port to use, as specified by the model. Returns -1 if no usable port could be found. */
   protected int getDebugPort() {
@@ -725,11 +699,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Lets the model know if any exceptions occur while communicating with the Interpreter JVM. */
   private void _threwException(Throwable t) {
-    String shortMsg = null;
-    if ((t instanceof ParseError) && ((ParseError) t).getParseException() != null) 
-      shortMsg = ((ParseError) t).getMessage();  // in this case, getMessage is equivalent to getShortMessage
-    _interactionsModel.replThrewException(t.getClass().getName(), t.getMessage(), StringOps.getStackTrace(t), shortMsg);                                    ;
-  } 
+    StringWriter msg = new StringWriter();
+    t.printStackTrace(new PrintWriter(msg));
+    _interactionsModel.replThrewException(msg.toString());
+  }
   
   /** Sets the interpreter to allow access to private members. TODO: synchronize? */
   public void setPrivateAccessible(boolean allow) {
@@ -777,46 +750,58 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * Peforms the appropriate action to return any type of result
    * from a call to interpret back to the GlobalModel.
    */
-  private class ResultHandler implements InterpretResultVisitor<Object> {
-    /** Lets the model know that void was returned.
-      * @return null
-      */
-    public Object forVoidResult(VoidResult that) {
+  private class ResultHandler implements InterpretResult.Visitor<Void> {
+    /** Lets the model know that void was returned. */
+    public Void forNoValue() {
       _interactionsModel.replReturnedVoid();
       return null;
     }
     
-    /** Returns a value result (as a String) back to the model.
-     *  @return null
-     */
-    public Object forValueResult(ValueResult that) {
-      String result = that.getValueStr();
-      String style = that.getStyle();
-      _interactionsModel.replReturnedResult(result, style);
+    /** Calls replReturnedResult() */
+    public Void forObjectValue(String objString) {
+      _interactionsModel.replReturnedResult(objString, InteractionsDocument.OBJECT_RETURN_STYLE);
       return null;
     }
     
-    /** Returns an exception back to the model.
-     *  @return null
-     */
-    public Object forExceptionResult(ExceptionResult that) { /**/
-      _interactionsModel.replThrewException(that.getExceptionClass(), that.getExceptionMessage(), that.getStackTrace(),
-                                            that.getSpecialMessage());
+    /** Calls replReturnedResult() */
+    public Void forStringValue(String s) {
+      _interactionsModel.replReturnedResult('"' + s + '"', InteractionsDocument.STRING_RETURN_STYLE);
       return null;
     }
     
-    /** Indicates there was a syntax error to the model.
-     *  @return null
-     */
-    public Object forSyntaxErrorResult(SyntaxErrorResult that) {
-      _interactionsModel.replReturnedSyntaxError(that.getErrorMessage(), that.getInteraction(), that.getStartRow(),
-                                                 that.getStartCol(), that.getEndRow(), that.getEndCol() );
+    /** Calls replReturnedResult() */
+    public Void forCharValue(Character c) {
+      _interactionsModel.replReturnedResult("'" + c + "'", InteractionsDocument.CHARACTER_RETURN_STYLE);
       return null;
     }
     
-    public Object forInterpreterBusy(InterpreterBusy that) {
+    /** Calls replReturnedResult() */
+    public Void forNumberValue(Number n) {
+      _interactionsModel.replReturnedResult(n.toString(), InteractionsDocument.NUMBER_RETURN_STYLE);
+      return null;
+    }
+    
+    /** Calls replReturnedResult() */
+    public Void forBooleanValue(Boolean b) {
+      _interactionsModel.replReturnedResult(b.toString(), InteractionsDocument.OBJECT_RETURN_STYLE);
+      return null;
+    }
+    
+    /** Calls replThrewException() */
+    public Void forException(String msg) {
+      // TODO: restore location/syntax highlighting functionality
+      _interactionsModel.replThrewException(msg);
+      return null;
+    }
+    
+    public Void forUnexpectedException(Throwable t) {
+      throw new UnexpectedException(t);
+    }
+    
+    public Void forBusy() {
       throw new UnexpectedException("MainJVM.interpret() called when InterpreterJVM was busy!");
     }
+    
   }
   
   /** InteractionsModel which does not react to events. */
@@ -835,7 +820,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     public void replReturnedVoid() { }
     public void replReturnedResult(String result, String style) { }
-    public void replThrewException(String exceptionClass, String message, String stackTrace, String specialMessage) { }
+    public void replThrewException(String message) { }
     public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol, int endRow,
                                         int endCol) { }
     public void replCalledSystemExit(int status) { }

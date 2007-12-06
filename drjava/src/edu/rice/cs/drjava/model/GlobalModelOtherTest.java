@@ -51,6 +51,8 @@ import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.plt.iter.IterUtil;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** A test on the GlobalModel that does deals with everything outside of simple file operations, e.g., compile, quit.
  *  @version $Id$
  */
@@ -96,7 +98,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
 
   /** Checks that System.exit is handled appropriately from interactions pane. */
-  public void testExitInteractions() throws EditDocumentException, InterruptedException{
+  public void testExitInteractions() throws EditDocumentException, InterruptedException {
     InteractionListener listener = new InteractionListener() {
 
 //      public void consoleReset() { consoleResetCount++; }
@@ -120,97 +122,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("exit status", 23, listener.getLastExitStatus());
 
     _log.log("testExitInteractions() completed");
-  }
-
-  /** Checks that the interpreter can be aborted and then work correctly later. Part of what we check here is that 
-   *  the interactions classpath is correctly reset after aborting interactions. That is, we ensure that the compiled
-   *  class is still visible after aborting. This was broken in drjava-20020108-0958 -- or so I thought. I can't 
-   *  consistently reproduce the problem in the UI (seems to show up using IBM's JDK only), and I can never reproduce 
-   *  it in the test case. Grr. <p> OK, now I found the explanation: We were in some cases running two new JVMs
-   *  on an abort. I fixed the problem in MainJVM#restartInterpreterJVM
-   *
-   *  The above method no longer exists...  Does anyone remember what this meant? -nrh
-   */
-  public void testInteractionAbort() throws BadLocationException, EditDocumentException, InterruptedException, 
-    IOException {
-    
-    doCompile(setupDocument(FOO_TEXT), tempFile());
-    
-    Utilities.clearEventQueue();
-
-    final String beforeAbort = interpret("DrJavaTestFoo.class.getName()"); /* interpret("17"); */
-    
-    _log.log("Completed initial interpret call");
-    
-    assertEquals("\"DrJavaTestFoo\"", beforeAbort);
-    
-    Utilities.clearEventQueue();
-
-    InteractionListener listener = new InteractionListener();
-
-    _model.addListener(listener);
-    listener.logInteractionStart();
-    _log.log("Starting infinite loop");
-    interpretIgnoreResult("while (true) {}");
-    Utilities.clearEventQueue();
-    
-    listener.assertInteractionStartCount(1);
-    
-    _log.log("Resetting interactions");
-    _model.resetInteractions(FileOption.NULL_FILE);
-    listener.waitResetDone();
-    
-    Utilities.clearEventQueue();
-
-    listener.assertInterpreterResettingCount(1);
-    listener.assertInterpreterReadyCount(1);
-    listener.assertInterpreterExitedCount(0);
-    listener.assertConsoleResetCount(0);
-
-    // now make sure it still works!
-    assertEquals("5", interpret("5"));
-    _model.removeListener(listener);
-
-    // make sure we can still see class foo
-    final String afterAbort = interpret("DrJavaTestFoo.class.getName()");
-    Utilities.clearEventQueue();
-    assertEquals("\"DrJavaTestFoo\"", afterAbort);
-    _log.log("testInteractionAbort() completed");
-  }
-
-  /** Checks that reset console works. */
-  public void testResetConsole() throws EditDocumentException, InterruptedException {
-    //System.err.println("Entering testResetConsole");
-    InteractionListener listener = new InteractionListener();
-
-    _model.addListener(listener);
-    
-    listener.logInteractionStart();
-
-    _model.resetConsole();
-    Utilities.clearEventQueue();
-    
-    assertEquals("Length of console text", 0, _model.getConsoleDocument().getLength());
-
-    listener.assertConsoleResetCount(1);
-    
-    listener.logInteractionStart();    // only resets the interactionDone and resetDone flags
-    listener.resetConsoleResetCount(); // resets the resetConsoleCount in the listener
-    
-    interpretIgnoreResult("System.out.print(\"a\");");
-    listener.waitInteractionDone();
-    
-    Utilities.clearEventQueue();
-    
-    assertEquals("Length of console text", 1, _model.getConsoleDocument().getLength());
-
-    _model.resetConsole();
-    
-    Utilities.clearEventQueue();
-    assertEquals("Length of console text", 0, _model.getConsoleDocument().getLength());
-
-    listener.assertConsoleResetCount(1);
-    _log.log("testResetConsole() completed");
   }
 
   /** Creates a new class, compiles it and then checks that the REPL can see it.  Then checks that a compiled class
@@ -266,7 +177,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     doCompile(doc1, file1);
 
     // This shouldn't cause an error (no output should be displayed)
-    assertEquals("interactions result", "", interpret("drJavaTestClass = new DrJavaTestClass();"));
+    assertEquals("interactions result", "", interpret("Object drJavaTestClass = new DrJavaTestClass();"));
     _log.log("testInteractionsVariableWithLowercaseClassName() completed");
   }
 
@@ -548,7 +459,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     DefaultInteractionsModel dim = _model.getInteractionsModel();
 
     // Create a new Java interpreter, and set it to be active
-    dim.addJavaInterpreter("testInterpreter");
+    dim.addInterpreter("testInterpreter");
     
     dim.setActiveInterpreter("testInterpreter", "myPrompt>");
     

@@ -545,23 +545,23 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     public ConsoleDocument getConsoleDocument() { return null; }
 
-    public void replThrewException(String exceptionClass, String message, String stackTrace, String shortMessage) {
+    @Override public void replThrewException(String message) {
       _log.log("replThrewException called");
-      if (shortMessage != null) {
-        if (shortMessage.endsWith("<EOF>\"")) {
+      if (message != null) {
+        if (message.endsWith("<EOF>\"")) {
           continuationException = true;
           syntaxException = false;
           _interactionIsOver();
           return;
         }
       }
-      syntaxException = true;
+      syntaxException = true; // ? -- Why is this a syntaxException?
       continuationException = false;
       _interactionIsOver();
     }
 
-    public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol, int endRow,
-                                        int endCol) {
+    @Override public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol, int endRow,
+                                                  int endCol) {
       _log.log("replReturnedSyntaxError called");
       if (errorMessage != null) {
         if (errorMessage.endsWith("<EOF>\"")) {

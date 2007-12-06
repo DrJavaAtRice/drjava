@@ -37,15 +37,22 @@
 package edu.rice.cs.drjava.model.repl;
 
 import java.io.File;
-
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
-
 import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.plt.tuple.Option;
+import edu.rice.cs.plt.text.TextUtil;
+
+import edu.rice.cs.dynamicjava.Options;
+import edu.rice.cs.dynamicjava.interpreter.Interpreter;
+import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
+import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
 /** A simple implementation of InteractionsModel, which uses a DynamicJavaAdapter directly (in the same JVM) to 
  *  interpret code.  It can be used in a standalone interface, such as edu.rice.cs.drjava.ui.SimpleInteractionsWindow.
@@ -56,8 +63,8 @@ public class SimpleInteractionsModel extends InteractionsModel {
   /** Milliseconds to wait after each println */
   protected static final int WRITE_DELAY = 5;
 
-  /** An interpreter to evaluate interactions. */
-  protected JavaInterpreter _interpreter;
+  protected ClassPathManager _classPathManager;
+  protected Interpreter _interpreter;
 
   /** Creates a new InteractionsModel using a InteractionsDJDocument. */
   public SimpleInteractionsModel() { this(new InteractionsDJDocument()); }
@@ -67,9 +74,9 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   public SimpleInteractionsModel(InteractionsDJDocument document) {
     super(document, new File(System.getProperty("user.dir")), 1000, WRITE_DELAY);
-    _interpreter = new DynamicJavaAdapter(new ClassPathManager());
-
-    _interpreter.defineVariable("INTERPRETER", _interpreter);
+    _classPathManager = new ClassPathManager();
+    _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.getClassLoader());
+    //_interpreter.defineVariable("INTERPRETER", _interpreter);
   }
 
   /**
@@ -78,18 +85,18 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   protected void _interpret(String toEval) {
     try {
-      Object result = _interpreter.interpret(toEval);
-      if (result != Interpreter.NO_RESULT) {
-        append(String.valueOf(result) + "\n" /* formerly StringOps.EOL*/, InteractionsDocument.OBJECT_RETURN_STYLE);
+      Option<Object> result = _interpreter.interpret(toEval);
+      if (result.isSome()) {
+        String objString = null;
+        try { objString = TextUtil.toString(Option.unwrap(result)); }
+        catch (Throwable t) { throw new EvaluatorException(t); }
+        append(objString + "\n", InteractionsDocument.OBJECT_RETURN_STYLE);
       }
     }
-    catch (ExceptionReturnedException e) {
-      Throwable t = e.getContainedException();
-      // getStackTrace should be a utility method somewhere...
-      _document.appendExceptionResult(t.getClass().getName(),
-                                      t.getMessage(),
-                                      InterpreterJVM.getStackTrace(t),
-                                      InteractionsDocument.DEFAULT_STYLE);
+    catch (InterpreterException e) {
+      StringWriter msg = new StringWriter();
+      e.printUserMessage(new PrintWriter(msg));
+      _document.appendExceptionResult(msg.toString(), InteractionsDocument.DEFAULT_STYLE);
     }
     finally { _interactionIsOver(); }
   }
@@ -99,8 +106,12 @@ public class SimpleInteractionsModel extends InteractionsModel {
    * @param var the name of the variable
    */
   public String getVariableToString(String var) {
-    Object value = _interpreter.getVariable(var);
-    return value.toString();
+    try {
+      Option<Object> value = _interpreter.interpret(var);
+      try { return TextUtil.toString(Option.unwrap(value, "")); }
+      catch (Throwable t) { throw new EvaluatorException(t); }
+    }
+    catch (InterpreterException e) { return ""; }
   }
 
   /**
@@ -108,44 +119,42 @@ public class SimpleInteractionsModel extends InteractionsModel {
    * @param var the name of the variable
    */
   public String getVariableClassName(String var) {
-    Class c = _interpreter.getVariableClass(var);
-    return c.getName();
+    return null; // TODO: implement
+//    Class c = _interpreter.getVariableClass(var);
+//    return c.getName();
   }
 
   /** Adds the given path to the interpreter's classpath.
    *  @param path Path to add
    */
-  public void addProjectClassPath(File path) { _interpreter.addProjectClassPath(path); }
+  public void addProjectClassPath(File path) { _classPathManager.addProjectCP(path); }
 
   /** Adds the given path to the interpreter's classpath.
    *  @param path Path to add
    */
-  public void addBuildDirectoryClassPath(File path) { _interpreter.addBuildDirectoryClassPath(path); }
+  public void addBuildDirectoryClassPath(File path) { _classPathManager.addBuildDirectoryCP(path); }
 
   /** Adds the given path to the interpreter's classpath.
    *  @param path Path to add
    */
-  public void addProjectFilesClassPath(File path) { _interpreter.addProjectFilesClassPath(path); }
+  public void addProjectFilesClassPath(File path) { _classPathManager.addProjectFilesCP(path); }
 
   /** Adds the given path to the interpreter's classpath.
    *  @param path Path to add
    */
-  public void addExternalFilesClassPath(File path) { _interpreter.addExternalFilesClassPath(path); }
+  public void addExternalFilesClassPath(File path) { _classPathManager.addExternalFilesCP(path); }
 
   /** Adds the given path to the interpreter's classpath.
    *  @param path Path to add
    */
-  public void addExtraClassPath(File path) { _interpreter.addExtraClassPath(path); }
+  public void addExtraClassPath(File path) { _classPathManager.addExtraCP(path); }
 
-
-  /** Defines a variable in the interpreter to the given value. */
-  public void defineVariable(String name, Object value) { _interpreter.defineVariable(name, value); }
-
-  /** Defines a final variable in the interpreter to the given value. */
-  public void defineConstant(String name, Object value) { _interpreter.defineConstant(name, value); }
 
   /** Sets whether protected and private variables and methods can be accessed from within the interpreter. */
-  public void setInterpreterPrivateAccessible(boolean accessible) { _interpreter.setPrivateAccessible(accessible); }
+  public void setInterpreterPrivateAccessible(boolean accessible) {
+    // TODO: implement this with the Options object
+    //_interpreter.setPrivateAccessible(accessible);
+  }
 
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
    *  @param t The Throwable thrown by System.exit
@@ -157,7 +166,8 @@ public class SimpleInteractionsModel extends InteractionsModel {
   /** Resets the Java interpreter. */
   protected void _resetInterpreter(File wd) {
     interpreterResetting();
-    _interpreter = new DynamicJavaAdapter(new ClassPathManager());
+    _classPathManager = new ClassPathManager();
+    _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.getClassLoader());
     interpreterReady(wd);
   }
 
