@@ -665,4 +665,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     return context;
   }
   
+  @Override public TypeContext visit(EmptyStatement node) {
+    return context;
+  }
+  
 }
