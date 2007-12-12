@@ -48,6 +48,7 @@ import edu.rice.cs.plt.iter.ComposedIterator;
 import edu.rice.cs.plt.io.IOUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
  * A class loader that mimics the standard application system loader by loading classes from
@@ -90,7 +91,7 @@ public class PathClassLoader extends ClassLoader {
   }
   
   protected Class<?> findClass(String name) throws ClassNotFoundException {
-    URL resource = findResource(name + ".class");
+    URL resource = findResource(name.replace('.', '/') + ".class");
     if (resource == null) { throw new ClassNotFoundException(); }
     else {
       try {
@@ -103,6 +104,7 @@ public class PathClassLoader extends ClassLoader {
   
   protected URL findResource(String name) {
     for (File f : _path) {
+      //debug.logValues(new String[]{"searching for resource","in file"}, name, _path);
       try {
         // We use URLClassLoader to find the resource, not because we care about
         // most of that class's functionality, but because it implements the core

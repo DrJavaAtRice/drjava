@@ -189,12 +189,12 @@ public class ReflectUtilTest extends TestCase {
     assertEquals(STATIC_FIELD, getStaticField("edu.rice.cs.plt.reflect.ReflectUtilTest", "STATIC_FIELD"));
     
     ClassLoader l = new PathClassLoader(INTBOX_DIR, A_DIR, B_DIR, C_DIR, D_DIR);
-    assertEquals("A", getStaticField(l, "A", "NAME"));
-    assertEquals("B", getStaticField(l, "B", "NAME"));
-    assertEquals("C", getStaticField(l, "C", "NAME"));
+    assertEquals("A", getStaticField(l, "pkg.A", "NAME"));
+    assertEquals("B", getStaticField(l, "bpkg.B", "NAME"));
+    assertEquals("C", getStaticField(l, "pkg.C", "NAME"));
     assertEquals("D", getStaticField(l, "D", "NAME"));
     
-    try { getStaticField("A", "NAME"); fail("expected exception"); }
+    try { getStaticField("pkg.A", "NAME"); fail("expected exception"); }
     catch (ReflectException e) { assertCorrectException(e, "ClassNotFound"); }
     
     try { getStaticField("fishing.boats", "foo"); fail("expected exception"); }
@@ -223,12 +223,12 @@ public class ReflectUtilTest extends TestCase {
     assertEquals("123", invokeStaticMethod("java.lang.String", "valueOf", new Class<?>[]{ int.class }, 123));
     
     ClassLoader l = new PathClassLoader(INTBOX_DIR, A_DIR, B_DIR, C_DIR, D_DIR);
-    assertEquals("A", invokeStaticMethod(l, "A", "getName"));
-    assertEquals("B", invokeStaticMethod(l, "B", "getName"));
-    assertEquals("C", invokeStaticMethod(l, "C", "getName"));
+    assertEquals("A", invokeStaticMethod(l, "pkg.A", "getName"));
+    assertEquals("B", invokeStaticMethod(l, "bpkg.B", "getName"));
+    assertEquals("C", invokeStaticMethod(l, "pkg.C", "getName"));
     assertEquals("D", invokeStaticMethod(l, "D", "getName"));
     
-    try { invokeStaticMethod("A", "getName"); fail("expected exception"); }
+    try { invokeStaticMethod("pkg.A", "getName"); fail("expected exception"); }
     catch (ReflectException e) { assertCorrectException(e, "ClassNotFound"); }
     
     try { invokeStaticMethod("fishing.boats", "foo"); fail("expected exception"); }

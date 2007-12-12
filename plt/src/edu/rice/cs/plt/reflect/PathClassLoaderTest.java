@@ -48,25 +48,25 @@ public class PathClassLoaderTest extends ClassLoaderTestCase {
   
   public void testLoadsPath() throws Exception {
     PathClassLoader l = new PathClassLoader(BASE_LOADER, INTBOX_DIR, A_DIR, B_DIR, C_DIR, D_DIR);
-    assertLoadsClassAsLoader(l, "IntBox");
-    assertLoadsClassAsLoader(l, "A");
-    assertLoadsClassAsLoader(l, "B");
-    assertLoadsClassAsLoader(l, "C");
+    assertLoadsClassAsLoader(l, "pkg.IntBox");
+    assertLoadsClassAsLoader(l, "pkg.A");
+    assertLoadsClassAsLoader(l, "bpkg.B");
+    assertLoadsClassAsLoader(l, "pkg.C");
     assertLoadsClassAsLoader(l, "D");
     assertLoadsSameClass(BASE_LOADER, l, "edu.rice.cs.plt.reflect.PathClassLoaderTest");
-    assertCanGet(l, "A", 1);
+    assertCanGet(l, "pkg.A", 1);
     assertCanGet(l, "D", 4);
   }
   
   public void testLoadsJumbledPath() throws Exception {
     PathClassLoader l = new PathClassLoader(BASE_LOADER, D_DIR, INTBOX_DIR, B_DIR, C_DIR, A_DIR);
-    assertLoadsClassAsLoader(l, "IntBox");
-    assertLoadsClassAsLoader(l, "A");
-    assertLoadsClassAsLoader(l, "B");
-    assertLoadsClassAsLoader(l, "C");
+    assertLoadsClassAsLoader(l, "pkg.IntBox");
+    assertLoadsClassAsLoader(l, "pkg.A");
+    assertLoadsClassAsLoader(l, "bpkg.B");
+    assertLoadsClassAsLoader(l, "pkg.C");
     assertLoadsClassAsLoader(l, "D");
     assertLoadsSameClass(BASE_LOADER, l, "edu.rice.cs.plt.reflect.PathClassLoaderTest");
-    assertCanGet(l, "A", 1);
+    assertCanGet(l, "pkg.A", 1);
     assertCanGet(l, "D", 4);
   }
   
@@ -77,37 +77,37 @@ public class PathClassLoaderTest extends ClassLoaderTestCase {
     PathClassLoader lC = new PathClassLoader(lB, C_DIR);
     PathClassLoader lD = new PathClassLoader(lC, D_DIR);
     
-    assertLoadsClassAsLoader(l, "IntBox");
-    assertDoesNotLoadClass(l, "A");
-    assertDoesNotLoadClass(l, "B");
-    assertDoesNotLoadClass(l, "C");
+    assertLoadsClassAsLoader(l, "pkg.IntBox");
+    assertDoesNotLoadClass(l, "pkg.A");
+    assertDoesNotLoadClass(l, "bpkg.B");
+    assertDoesNotLoadClass(l, "pkg.C");
     assertDoesNotLoadClass(l, "D");
     
-    assertLoadsSameClass(l, lA, "IntBox");
-    assertLoadsClassAsLoader(lA, "A");
-    assertDoesNotLoadClass(lA, "B");
-    assertDoesNotLoadClass(lA, "C");
+    assertLoadsSameClass(l, lA, "pkg.IntBox");
+    assertLoadsClassAsLoader(lA, "pkg.A");
+    assertDoesNotLoadClass(lA, "bpkg.B");
+    assertDoesNotLoadClass(lA, "pkg.C");
     assertDoesNotLoadClass(lA, "D");
     
-    assertLoadsSameClass(l, lB, "IntBox");
-    assertLoadsSameClass(lA, lB, "A");
-    assertLoadsClassAsLoader(lB, "B");
-    assertDoesNotLoadClass(lB, "C");
+    assertLoadsSameClass(l, lB, "pkg.IntBox");
+    assertLoadsSameClass(lA, lB, "pkg.A");
+    assertLoadsClassAsLoader(lB, "bpkg.B");
+    assertDoesNotLoadClass(lB, "pkg.C");
     assertDoesNotLoadClass(lB, "D");
     
-    assertLoadsSameClass(l, lC, "IntBox");
-    assertLoadsSameClass(lA, lC, "A");
-    assertLoadsSameClass(lB, lC, "B");
-    assertLoadsClassAsLoader(lC, "C");
+    assertLoadsSameClass(l, lC, "pkg.IntBox");
+    assertLoadsSameClass(lA, lC, "pkg.A");
+    assertLoadsSameClass(lB, lC, "bpkg.B");
+    assertLoadsClassAsLoader(lC, "pkg.C");
     assertDoesNotLoadClass(lC, "D");
     
-    assertLoadsSameClass(l, lD, "IntBox");
-    assertLoadsSameClass(lA, lD, "A");
-    assertLoadsSameClass(lB, lD, "B");
-    assertLoadsSameClass(lC, lD, "C");
+    assertLoadsSameClass(l, lD, "pkg.IntBox");
+    assertLoadsSameClass(lA, lD, "pkg.A");
+    assertLoadsSameClass(lB, lD, "bpkg.B");
+    assertLoadsSameClass(lC, lD, "pkg.C");
     assertLoadsClassAsLoader(lD, "D");
     
-    assertCanGet(lD, "A", 1);
+    assertCanGet(lD, "pkg.A", 1);
     assertCanGet(lD, "D", 4);
   }
   
@@ -117,7 +117,7 @@ public class PathClassLoaderTest extends ClassLoaderTestCase {
     PathClassLoader lD = new PathClassLoader(lAB, D_DIR);
     PathClassLoader lC = new PathClassLoader(lD, C_DIR);
     
-    assertCanGet(lC, "C", 3);
+    assertCanGet(lC, "pkg.C", 3);
     assertCannotGet(lC, "D");
   }
   
