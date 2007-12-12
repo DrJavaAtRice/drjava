@@ -104,6 +104,8 @@ import edu.rice.cs.drjava.ui.MainFrame;
 
 import java.io.*;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** Handles the bulk of DrJava's program logic. The UI components interface with the GlobalModel through its public
  *  methods, and the GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
  *  UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile

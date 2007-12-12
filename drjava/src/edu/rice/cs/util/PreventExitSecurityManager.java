@@ -69,7 +69,7 @@ public class PreventExitSecurityManager extends SecurityManager {
    *  @param parent SecurityManager to delegate permission to. This may be null, signifying to allow all.
    */
   private PreventExitSecurityManager(final SecurityManager parent) { _parent = parent;
-    edu.rice.cs.util.Log log = new edu.rice.cs.util.Log("secman.txt",true);
+    edu.rice.cs.util.Log log = new edu.rice.cs.util.Log("secman.txt",false);
     log.log("Creating new PreventExitSecurityManager");
   }
 

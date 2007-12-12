@@ -7429,7 +7429,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           // check that this error is different than the last one (second to last may be null):
           if (!lastError.equals(im.getSecondToLastError())) {
             // this aborts the auto-importing if the same class comes up twice in a row
-            if (lastError.startsWith("Undefined class '") && lastError.endsWith("'")) {
+            if (lastError.startsWith("Static Error: Undefined class '") && lastError.endsWith("'")) {
               // it was an "undefined class" exception
               // show auto-import dialog
               String undefinedClassName = lastError.substring(lastError.indexOf('\'')+1,
