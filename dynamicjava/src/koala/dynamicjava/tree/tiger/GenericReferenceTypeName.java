@@ -90,6 +90,14 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
 
   public List<List<? extends TypeName>> getTypeArguments(){ return _typeArguments; }
   
+  /**
+   * Allows a visitor to traverse the tree
+   * @param visitor the visitor to accept
+   */
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visit(this);
+  }
+
   public String toString() {
     return "("+getClass().getName()+": "+toStringHelper()+")";
   }

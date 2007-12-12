@@ -208,8 +208,6 @@ public class JavaClass implements DJClass {
     public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
     
     public Iterable<LocalVariable> declaredParameters() {
-      debug.logValue("params class", _params.getClass());
-      debug.logValue("params value class", _params.value().getClass());
       Iterable<LocalVariable> result = _params.value();
       if (_outerType != null) { result = IterUtil.skipFirst(result); }
       return result;

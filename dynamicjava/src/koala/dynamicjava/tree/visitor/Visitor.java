@@ -308,6 +308,12 @@ public interface Visitor<T> {
   T visit(ReferenceTypeName node);
   
   /**
+   * Visits a GenericReferenceTypeName
+   * @param node the node to visit
+   */
+  T visit(GenericReferenceTypeName node);
+  
+  /**
    * Visits a ArrayTypeName
    * @param node the node to visit
    */
