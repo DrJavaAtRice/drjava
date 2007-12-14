@@ -137,6 +137,18 @@ public interface TypeContext {
   public Type getSuperType(TypeSystem ts);
   
   /**
+   * The expected type of a {@code return} statement in the given context, or {@code null}
+   * if {@code return} statements should not appear here.
+   */
+  public Type getReturnType();
+  
+  /**
+   * The types that are allowed to be thrown in the current context.  If there is no
+   * such declaration, the list will be empty.
+   */
+  public Iterable<Type> getDeclaredThrownTypes();
+  
+  /**
    * Return the class loader for the current scope.  Allows class loaders to be defined in
    * later scopes with the returned loader as a parent.
    */

@@ -107,18 +107,7 @@ public class JavaClass implements DJClass {
   
   /** Convert a class object to a type */
   private static Type classAsType(Class<?> c) {
-    if (c.isPrimitive()) {
-      if (c.equals(boolean.class)) { return TypeSystem.BOOLEAN; }
-      else if (c.equals(int.class)) { return TypeSystem.INT; }
-      else if (c.equals(double.class)) { return TypeSystem.DOUBLE; }
-      else if (c.equals(char.class)) { return TypeSystem.CHAR; }
-      else if (c.equals(void.class)) { return TypeSystem.VOID; }
-      else if (c.equals(long.class)) { return TypeSystem.LONG; }
-      else if (c.equals(byte.class)) { return TypeSystem.BYTE; }
-      else if (c.equals(short.class)) { return TypeSystem.SHORT; }
-      else if (c.equals(float.class)) { return TypeSystem.FLOAT; }
-      else { throw new IllegalArgumentException("Unrecongized primitive: " + c); }
-    }
+    if (c.isPrimitive()) { return SymbolUtil.typeOfPrimitiveClass(c); }
     else if (c.isArray()) { return new SimpleArrayType(classAsType(c.getComponentType())); }
     else { return new SimpleClassType(new JavaClass(c)); }
   }

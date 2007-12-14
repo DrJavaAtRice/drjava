@@ -150,19 +150,31 @@ public class SymbolUtil {
   
   /**
    * Convert a {@code Class} object representing a primitive type to the corresponding
-   * {@link Type}.  This method is not strictly necessary, but simplifies interaction
-   * with older Class-based DynamicJava code.
+   * {@link Type}.  The class {@code void.class} is also handled.
+   * @throws IllegalArgumentException  If {@code !c.isPrimitive()}.
    */
   public static Type typeOfPrimitiveClass(Class<?> c) {
     if (c.equals(boolean.class)) { return TypeSystem.BOOLEAN; }
+    else if (c.equals(int.class)) { return TypeSystem.INT; }
+    else if (c.equals(double.class)) { return TypeSystem.DOUBLE; }
     else if (c.equals(char.class)) { return TypeSystem.CHAR; }
+    else if (c.equals(void.class)) { return TypeSystem.VOID; }
+    else if (c.equals(long.class)) { return TypeSystem.LONG; }
     else if (c.equals(byte.class)) { return TypeSystem.BYTE; }
     else if (c.equals(short.class)) { return TypeSystem.SHORT; }
-    else if (c.equals(int.class)) { return TypeSystem.INT; }
-    else if (c.equals(long.class)) { return TypeSystem.LONG; }
     else if (c.equals(float.class)) { return TypeSystem.FLOAT; }
-    else if (c.equals(double.class)) { return TypeSystem.DOUBLE; }
-    else { throw new IllegalArgumentException(); }
+    else { throw new IllegalArgumentException("Unrecognized primitive: " + c); }
+  }
+  
+  /**
+   * Create a type corresponding to an arbitrary reflection class, which may represent
+   * a primitive, an array, or a class/interface.  Class types are created by invoking
+   * {@link #wrapClass} and passing the result to {@link TypeSystem#makeClassType}.
+   */
+  public static Type typeOfGeneralClass(Class<?> c, TypeSystem ts) {
+    if (c.isPrimitive()) { return typeOfPrimitiveClass(c); }
+    else if (c.isArray()) { return new SimpleArrayType(typeOfGeneralClass(c.getComponentType(), ts)); }
+    else { return ts.makeClassType(wrapClass(c)); }
   }
   
   

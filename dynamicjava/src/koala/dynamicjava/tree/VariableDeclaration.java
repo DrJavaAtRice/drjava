@@ -107,7 +107,8 @@ public class VariableDeclaration extends Node {
                              String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
-    if (type == null) throw new IllegalArgumentException("type == null");
+    // TODO: restore this check? -- we're allowing an inferred type for now
+    //if (type == null) throw new IllegalArgumentException("type == null");
     if (name == null) throw new IllegalArgumentException("name == null");
     
     finalVariable = fin;

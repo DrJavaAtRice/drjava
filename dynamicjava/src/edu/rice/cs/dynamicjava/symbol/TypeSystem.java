@@ -11,6 +11,8 @@ import edu.rice.cs.plt.lambda.Lambda;
 
 import java.io.Serializable;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** A type system allows for variance in the typing rules of the system, while maintaining
   * a standard type checker.  It separates the type checker from most of the details of type
   * implementations.  For simplicity, it is also defined independently of most type-checker implementation

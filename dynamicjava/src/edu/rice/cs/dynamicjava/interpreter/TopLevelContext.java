@@ -332,6 +332,21 @@ public class TopLevelContext implements TypeContext {
    */
   public Type getSuperType(TypeSystem ts) { return null; }
   
+  /**
+   * The expected type of a {@code return} statement in the given context, or {@code null}
+   * if {@code return} statements should not appear here.
+   */
+  public Type getReturnType() { return null; }
+  
+  /**
+   * The types that are allowed to be thrown in the current context.  If there is no
+   * such declaration, the list will be empty.
+   */
+  public Iterable<Type> getDeclaredThrownTypes() {
+    // the top level "catches" anything that is thrown.
+    return IterUtil.<Type>singleton(TypeSystem.THROWABLE);
+  }
+  
   public ClassLoader getClassLoader() { return _loader; }
   
 }

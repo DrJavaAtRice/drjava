@@ -2,6 +2,7 @@ package edu.rice.cs.dynamicjava.interpreter;
 
 import java.util.Iterator;
 import edu.rice.cs.plt.iter.SequenceIterator;
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
@@ -127,6 +128,18 @@ public class ClassContext extends DelegatingContext {
     if (className.equals(_c.declaredName())) { return _c; }
     else { return super.getThis(className); }
   }
+  
+  /**
+   * The expected type of a {@code return} statement in the given context, or {@code null}
+   * if {@code return} statements should not appear here.
+   */
+  @Override public Type getReturnType() { return null; }
+  
+  /**
+   * The types that are allowed to be thrown in the current context.  If there is no
+   * such declaration, the list will be empty.
+   */
+  @Override public Iterable<Type> getDeclaredThrownTypes() { return IterUtil.empty(); }
   
   /**
    * Return the type referenced by {@code super} in the current context, or {@code null}

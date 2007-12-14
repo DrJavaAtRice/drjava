@@ -503,7 +503,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       }
       
       // TODO: Check accessibility of method
-      // TODO: Check for uncaught exceptions
+      checkThrownExceptions(inv.thrown(), node);
       node.setArguments(IterUtil.asList(inv.args()));
       setMethod(node, inv.method());
       Type result = ts.capture(inv.returnType());
@@ -565,7 +565,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       // Note: Changes made below may also need to be made in the TypeSystem's boxing & unboxing implementations
       TypeSystem.ObjectMethodInvocation inv = ts.lookupMethod(receiver, node.getMethodName(), targs, args);
       // TODO: Check accessibility of method
-      // TODO: Check for uncaught exceptions
+      checkThrownExceptions(inv.thrown(), node);
       node.setExpression(inv.object());
       node.setArguments(IterUtil.asList(inv.args()));
       setMethod(node, inv.method());
@@ -607,7 +607,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     try {
       TypeSystem.MethodInvocation inv = ts.lookupMethod(obj, node.getMethodName(), targs, args);
       // TODO: Check accessibility of method
-      // TODO: Check for uncaught exceptions
+      checkThrownExceptions(inv.thrown(), node);
       node.setArguments(IterUtil.asList(inv.args()));
       setMethod(node, inv.method());
       setDJClass(node, context.getThis());
@@ -645,7 +645,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       // Note: Changes made below may also need to be made in the TypeSystem's boxing & unboxing implementations
       TypeSystem.MethodInvocation inv = ts.lookupStaticMethod(t, node.getMethodName(), targs, args);
       // TODO: Check accessibility of method
-      // TODO: Check for uncaught exceptions
+      checkThrownExceptions(inv.thrown(), node);
       node.setArguments(IterUtil.asList(inv.args()));
       setMethod(node, inv.method());
       Type result = ts.capture(inv.returnType());
@@ -751,7 +751,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     try {
       TypeSystem.ConstructorInvocation inv = ts.lookupConstructor(t, targs, args);
       // TODO: Check accessibility of constructor
-      // TODO: Check for uncaught exceptions
+      checkThrownExceptions(inv.thrown(), node);
       node.setArguments(IterUtil.asList(inv.args()));
       setConstructor(node, inv.constructor());
       return setType(node, t);
@@ -790,7 +790,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       try {
         TypeSystem.ConstructorInvocation inv = ts.lookupConstructor(t, targs, args);
         // TODO: Check accessibility of constructor
-        // TODO: Check for uncaught exceptions
+        checkThrownExceptions(inv.thrown(), node);
         node.setArguments(IterUtil.asList(inv.args()));
       }
       catch (InvalidTypeArgumentException e) {
@@ -842,7 +842,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       try {
         TypeSystem.ConstructorInvocation inv = ts.lookupConstructor(t, targs, args);
         // TODO: Check accessibility of constructor
-        // TODO: Check for uncaught exceptions
+        checkThrownExceptions(inv.thrown(), node);
         node.setArguments(IterUtil.asList(inv.args()));
         setConstructor(node, inv.constructor());
         return setType(node, t);
@@ -896,7 +896,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       try {
         TypeSystem.ConstructorInvocation inv = ts.lookupConstructor(t, targs, args);
         // TODO: Check accessibility of constructor
-        // TODO: Check for uncaught exceptions
+        checkThrownExceptions(inv.thrown(), node);
         node.setArguments(IterUtil.asList(inv.args()));
       }
       catch (InvalidTypeArgumentException e) {
@@ -923,6 +923,25 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     setConstructor(node, IterUtil.first(c.declaredConstructors()));
     return setType(node, ts.makeClassType(c));
   }
+  
+  private void checkThrownExceptions(Iterable<? extends Type> thrownTypes, Node node) {
+    Iterable<Type> allowed = IterUtil.compose(TypeSystem.RUNTIME_EXCEPTION,
+                                              context.getDeclaredThrownTypes());
+    for (Type thrown : thrownTypes) {
+      if (ts.isAssignable(TypeSystem.EXCEPTION, thrown)) {
+        boolean valid = false;
+        for (Type t : allowed) {
+          if (ts.isAssignable(t, thrown)) { valid = true; break; }
+        }
+        if (!valid) {
+          setErrorStrings(node, ts.userRepresentation(thrown));
+          throw new ExecutionError("uncaught.exception", node);
+        }
+      }
+    }
+  }
+  
+  
 
   /**
    * Visits an ArrayAccess.  JLS 15.13.

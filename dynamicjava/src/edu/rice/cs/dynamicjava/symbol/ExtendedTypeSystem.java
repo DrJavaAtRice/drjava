@@ -2834,7 +2834,7 @@ public class ExtendedTypeSystem extends TypeSystem {
                                                         checker.typeArguments());
             // TODO: Handle the thrown types
             return new ConstructorInvocation(k, checker.typeArguments(), checker.arguments(), 
-                                             EMPTY_TYPE_ITERABLE);
+                                             k.thrownTypes());
           }
         };
         return findSignatureMatches(allConstructors, makeChecker, makeResult);
@@ -2857,7 +2857,7 @@ public class ExtendedTypeSystem extends TypeSystem {
           public ConstructorInvocation value(DJConstructor k, SignatureChecker checker) {
             // TODO: Handle the thrown types
             return new ConstructorInvocation(k, checker.typeArguments(), checker.arguments(), 
-                                             EMPTY_TYPE_ITERABLE);
+                                             k.thrownTypes());
           }
         };
         return findSignatureMatches(allConstructors, makeChecker, makeResult);
@@ -2883,7 +2883,7 @@ public class ExtendedTypeSystem extends TypeSystem {
           public ConstructorInvocation value(DJConstructor k, SignatureChecker checker) {
             // TODO: Handle the thrown types
             return new ConstructorInvocation(k, checker.typeArguments(), checker.arguments(), 
-                                             EMPTY_TYPE_ITERABLE);
+                                             k.thrownTypes());
           }
         };
         return findSignatureMatches(allConstructors, makeChecker, makeResult);
@@ -2987,7 +2987,7 @@ public class ExtendedTypeSystem extends TypeSystem {
             Type returned = substitute(m.returnType(), sigma);
             // TODO: Handle the thrown types
             return new ObjectMethodInvocation(m, returned, makeCast(t, object), checker.typeArguments(), 
-                                              checker.arguments(), EMPTY_TYPE_ITERABLE);
+                                              checker.arguments(), m.thrownTypes());
           }
         };
         return findSignatureMatches(methods, makeChecker, makeResult);
@@ -3010,7 +3010,7 @@ public class ExtendedTypeSystem extends TypeSystem {
             Type returned = erase(m.returnType());
             // TODO: Handle the thrown types
             return new ObjectMethodInvocation(m, returned, makeCast(t, object), checker.typeArguments(), 
-                                              checker.arguments(), EMPTY_TYPE_ITERABLE);
+                                              checker.arguments(), m.thrownTypes());
           }
         };
         return findSignatureMatches(methods, makeChecker, makeResult);
@@ -3038,7 +3038,7 @@ public class ExtendedTypeSystem extends TypeSystem {
             Type returned = substitute(substitute(rawReturned, classSigma), sigma);
             // TODO: Handle the thrown types
             return new ObjectMethodInvocation(m, returned, makeCast(t, object), checker.typeArguments(), 
-                                              checker.arguments(), EMPTY_TYPE_ITERABLE);
+                                              checker.arguments(), m.thrownTypes());
           }
         };
         return findSignatureMatches(methods, makeChecker, makeResult);
@@ -3107,7 +3107,7 @@ public class ExtendedTypeSystem extends TypeSystem {
             Type returned = substitute(m.returnType(), sigma);
             // TODO: Handle the thrown types
             return new StaticMethodInvocation(m, returned, checker.typeArguments(), checker.arguments(),
-                                              EMPTY_TYPE_ITERABLE);
+                                              m.thrownTypes());
           }
         };
         return findSignatureMatches(methods, makeChecker, makeResult);
@@ -3130,7 +3130,7 @@ public class ExtendedTypeSystem extends TypeSystem {
             Type returned = erase(m.returnType());
             // TODO: Handle the thrown types
             return new StaticMethodInvocation(m, returned, checker.typeArguments(), checker.arguments(),
-                                              EMPTY_TYPE_ITERABLE);
+                                              m.thrownTypes());
           }
         };
         return findSignatureMatches(methods, makeChecker, makeResult);
@@ -3159,7 +3159,7 @@ public class ExtendedTypeSystem extends TypeSystem {
             Type returned = substitute(substitute(rawReturned, classSigma), sigma);
             // TODO: Handle the thrown types
             return new StaticMethodInvocation(m, returned, checker.typeArguments(), 
-                                              checker.arguments(), EMPTY_TYPE_ITERABLE);
+                                              checker.arguments(), m.thrownTypes());
           }
         };
         return findSignatureMatches(methods, makeChecker, makeResult);

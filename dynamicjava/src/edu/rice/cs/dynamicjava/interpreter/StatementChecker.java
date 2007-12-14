@@ -75,6 +75,8 @@ package edu.rice.cs.dynamicjava.interpreter;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.LinkedList;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -122,7 +124,11 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   
   private TypeContext checkList(Iterable<? extends Node> l) {
     TypeContext c = context;
-    for (Node n : l) { c = n.acceptVisitor(new StatementChecker(c, opt)); }
+    for (Node n : l) {
+      // TODO: fix the parser so there aren't any Expressions here
+      if (n instanceof Expression) { n.acceptVisitor(new ExpressionChecker(c, opt)); }
+      else { c = n.acceptVisitor(new StatementChecker(c, opt)); }
+    }
     return c;
   }
 
@@ -262,24 +268,32 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   
   /** Checks the declaration's initializer and creates a new context */
   @Override public TypeContext visit(VariableDeclaration node) {
-    Type t = checkTypeName(node.getType());
-    LocalVariable v = new LocalVariable(node.getName(), t, node.isFinal());
-    setVariable(node, v);
-    TypeContext newContext = new LocalContext(context, v);
-    
-    if (node.getInitializer() != null) {
-      Type initT = checkType(node.getInitializer(), t);
-      try {
-        Expression newInit = ts.assign(t, node.getInitializer());
-        node.setInitializer(newInit);
-      }
-      catch (UnsupportedConversionException e) {
-        setErrorStrings(node, ts.userRepresentation(initT), ts.userRepresentation(t));
-        throw new ExecutionError("assignment.types", node);
-      }
+    if (node.getType() == null) {
+      // We infer the variable's type.  We can assume the initializer is non-null.
+      Type initT = checkType(node.getInitializer());
+      LocalVariable v = new LocalVariable(node.getName(), initT, node.isFinal());
+      setVariable(node, v);
+      return new LocalContext(context, v);
     }
-    
-    return newContext;
+    else {
+      Type t = checkTypeName(node.getType());
+      LocalVariable v = new LocalVariable(node.getName(), t, node.isFinal());
+      setVariable(node, v);
+      TypeContext newContext = new LocalContext(context, v);
+      
+      if (node.getInitializer() != null) {
+        Type initT = checkType(node.getInitializer(), t);
+        try {
+          Expression newInit = ts.assign(t, node.getInitializer());
+          node.setInitializer(newInit);
+        }
+        catch (UnsupportedConversionException e) {
+          setErrorStrings(node, ts.userRepresentation(initT), ts.userRepresentation(t));
+          throw new ExecutionError("assignment.types", node);
+        }
+      }
+      return newContext;
+    }
   }
   
   @Override public TypeContext visit(ClassDeclaration node) {
@@ -575,29 +589,32 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
    * Visits a TryStatement.  JLS 14.20.
    */
   @Override public TypeContext visit(TryStatement node) {
-    node.getTryBlock().acceptVisitor(this);
-    for (CatchStatement c : node.getCatchStatements()) { c.acceptVisitor(this); }
-    if (node.getFinallyBlock() != null) { node.getFinallyBlock().acceptVisitor(this); }
-    return context;
-  }
-
-  /**
-   * Visits a CatchStatement.  JLS 14.20.
-   */
-  @Override public TypeContext visit(CatchStatement node) {
-    FormalParameter p = node.getException();
-    Type paramT = checkTypeName(p.getType());
-    LocalVariable var = setVariable(p, new LocalVariable(p.getName(), paramT, p.isFinal()));
-    if (!ts.isAssignable(TypeSystem.THROWABLE, paramT)) {
-      setErrorStrings(node, ts.userRepresentation(paramT));
-      throw new ExecutionError("catch.type", node);
+    List<Type> caughtTypes = new LinkedList<Type>();
+    for (CatchStatement c : node.getCatchStatements()) {
+      FormalParameter p = c.getException();
+      Type caughtT = checkTypeName(p.getType());
+      if (!ts.isAssignable(TypeSystem.THROWABLE, caughtT)) {
+        setErrorStrings(c, ts.userRepresentation(caughtT));
+        throw new ExecutionError("catch.type", c);
+      }
+      if (!ts.isReifiable(caughtT)) {
+        throw new ExecutionError("reifiable.type", c);
+      }
+      setVariable(p, new LocalVariable(p.getName(), caughtT, p.isFinal()));
+      setErasedType(c, ts.erasedClass(caughtT));
+      caughtTypes.add(caughtT);
     }
-    if (!ts.isReifiable(paramT)) { throw new ExecutionError("reifiable.type", node); }
     
-    TypeContext newContext = new LocalContext(context, var);
-    node.getBlock().acceptVisitor(new StatementChecker(newContext, opt));
-
-    setErasedType(node, ts.erasedClass(paramT));
+    TypeContext tryContext = new TryBlockContext(context, caughtTypes);
+    node.getTryBlock().acceptVisitor(new StatementChecker(tryContext, opt));
+    
+    for (CatchStatement c : node.getCatchStatements()) {
+      TypeContext catchContext = new LocalContext(context, getVariable(c.getException()));
+      c.getBlock().acceptVisitor(new StatementChecker(catchContext, opt));
+    }
+    
+    if (node.getFinallyBlock() != null) { node.getFinallyBlock().acceptVisitor(this); }
+    
     return context;
   }
 
@@ -610,6 +627,18 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       setErrorStrings(node, ts.userRepresentation(thrown));
       throw new ExecutionError("throw.type", node);
     }
+    else if (ts.isAssignable(TypeSystem.EXCEPTION, thrown)) {
+      boolean valid = false;
+      Iterable<Type> allowed = IterUtil.compose(TypeSystem.RUNTIME_EXCEPTION,
+                                                context.getDeclaredThrownTypes());
+      for (Type t : allowed) {
+        if (ts.isAssignable(t, thrown)) { valid = true; break; }
+      }
+      if (!valid) {
+        setErrorStrings(node, ts.userRepresentation(thrown));
+        throw new ExecutionError("uncaught.exception", node);
+      }
+    }
     return context;
   }
 
@@ -617,8 +646,29 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
    * Visits a ReturnStatement
    */
   @Override public TypeContext visit(ReturnStatement node) {
-    // TODO: Check that the return type is correct (including the void case)
-    if (node.getExpression() != null) { checkType(node.getExpression()); }
+    Type expected = context.getReturnType();
+    if (expected == null) { throw new ExecutionError("return.not.allowed", node); }
+
+    if (node.getExpression() == null) {
+      if (!expected.equals(TypeSystem.VOID)) {
+        setErrorStrings(node, ts.userRepresentation(TypeSystem.VOID),
+                        ts.userRepresentation(expected));
+        throw new ExecutionError("return.type", node);
+      }
+    }
+    else {
+      checkType(node.getExpression(), expected);
+      try {
+        Expression newExp = ts.assign(expected, node.getExpression());
+        node.setExpression(newExp);
+      }
+      catch (UnsupportedConversionException e) {
+        setErrorStrings(node, ts.userRepresentation(getType(node.getExpression())),
+                        ts.userRepresentation(expected));
+        throw new ExecutionError("return.type", node);
+      }
+    }
+    
     return context;
   }
 
