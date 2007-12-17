@@ -158,16 +158,20 @@ public class TopLevelContext implements TypeContext {
     if (TextUtil.contains(name, '.')) {
       try { return SymbolUtil.wrapClass(_loader.loadClass(name)); }
       catch (ClassNotFoundException e) { return null; }
+      catch (LinkageError e) { return null; }
     }
     else {
       DJClass result = _importedTopLevelClasses.get(name);
       if (result == null) {
         try { result = SymbolUtil.wrapClass(_loader.loadClass(makeClassName(name))); }
-        catch (ClassNotFoundException e) {
+        catch (ClassNotFoundException e) { /* ignore -- class is not in the imported/default package */ }
+        catch (LinkageError e) { /* ignore -- class is not in the imported/default package */ }
+        if (result == null) {
           LinkedList<Class<?>> onDemandMatches = new LinkedList<Class<?>>();
           for (String p : _onDemandPackages) {
             try { onDemandMatches.add(_loader.loadClass(p + "." + name)); }
             catch (ClassNotFoundException e2) { /* ignore -- class is not in this package */ }
+            catch (LinkageError e) { /* ignore -- class is not in this package */ }
           }
           if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
           else if (onDemandMatches.size() == 1) { result = SymbolUtil.wrapClass(onDemandMatches.getFirst()); }
