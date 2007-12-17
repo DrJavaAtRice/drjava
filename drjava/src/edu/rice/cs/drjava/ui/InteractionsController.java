@@ -86,6 +86,8 @@ import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** This class installs listeners and actions between an InteractionsDocument (the model) and an InteractionsPane 
  *  (the view).  We may want to refactor this class into a different package. <p>
  *  (The PopupConsole was introduced in version 1.29 of this file and subsequently removed.)

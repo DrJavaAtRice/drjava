@@ -206,42 +206,21 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // silently fail if disabled. see killInterpreter docs for details.
     if (! _restart) return null;
     
-    InterpreterJVMRemoteI slave = ensureInterpreterConnected();
-    
-    try {
-      return slave.interpret(var).apply(new InterpretResult.Visitor<String>() {
-        public String forNoValue() { return ""; }
-        public String forStringValue(String s) { return '"' + s + '"'; }
-        public String forCharValue(Character c) { return "'" + c + "'"; }
-        public String forNumberValue(Number n) { return n.toString(); }
-        public String forBooleanValue(Boolean b) { return b.toString(); }
-        public String forObjectValue(String valString) { return valString; }
-        public String forException(String msg) { return ""; }
-        public String forUnexpectedException(Throwable t) { throw new UnexpectedException(t); }
-        public String forBusy() { return ""; }
-      });
-    }
-    catch (RemoteException re) {
-      _threwException(re);
-      return null;
-    }
+    InterpreterJVMRemoteI interpreter = ensureInterpreterConnected();
+    try { return interpreter.getVariableToString(var); }
+    catch (RemoteException e) { _threwException(e); return null; }
   }
   
   /** Gets the class name of a variable in the current interpreter.
    *  @param var the name of the variable
    */
-  public String getVariableClassName(String var) {
-    return null; // TODO: implement
-//    // silently fail if disabled. see killInterpreter docs for details.
-//    if (! _restart) return null;
-//    
-//    InterpreterJVMRemoteI slave = ensureInterpreterConnected();
-//      
-//    try { return slave.getVariableClassName(var); }
-//    catch (RemoteException re) {
-//      _threwException(re);
-//      return null;
-//    }
+  public String getVariableType(String var) {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (! _restart) return null;
+    
+    InterpreterJVMRemoteI interpreter = ensureInterpreterConnected();
+    try { return interpreter.getVariableType(var); }
+    catch (RemoteException e) { _threwException(e); return null; }
   }
   
   public void addProjectClassPath(File f) {

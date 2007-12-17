@@ -77,9 +77,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** The working directory for the current interpreter. */
   protected volatile File _workingDirectory;
 
-  /** A lock object to prevent multiple threads from interpreting at once. */
-  private final Object _interpreterLock;
-
   /** A lock object to prevent print calls to System.out or System.err from flooding the JVM, ensuring the UI remains
     * responsive.  Only public for testing purposes. */
   public final Object _writerLock;
@@ -121,7 +118,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _adapter = adapter;
     _waitingForFirstInterpreter = true;
     _workingDirectory = wd;
-    _interpreterLock = new Object();
     _writerLock = new Object();
     _debugPort = -1;
     _debugPortSet = false;
@@ -157,17 +153,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
   /** Interprets the current given text at the prompt in the interactions doc. */
   public void interpretCurrentInteraction() {
-    synchronized(_interpreterLock) {
-      // Don't start a new interaction while one is in progress
-      if (_document.inProgress()) return;
-      
-      String text = _document.getCurrentInteraction();
-      String toEval = text.trim();
-      if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
-
-      _prepareToInterpret(text);
-      interpret(toEval);
-    }
+    // Don't start a new interaction while one is in progress
+    if (_document.inProgress()) return;
+    
+    String text = _document.getCurrentInteraction();
+    String toEval = text.trim();
+    if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
+    
+    _prepareToInterpret(text);
+    interpret(toEval);
   }
 
   /** Performs pre-interpretation preparation of the interactions document and notifies the view. */
@@ -184,7 +178,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Interprets the given command.
    *  @param toEval command to be evaluated. */
   public final void interpret(String toEval) {
-    synchronized(_interpreterLock) { _interpret(toEval); }
+    _interpret(toEval);
   }
 
   /** Interprets the given command.  This should only be called from interpret, never directly.
@@ -200,13 +194,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
   /** Gets the string representation of the value of a variable in the current interpreter.
    *  @param var the name of the variable
+   *  @return A string representation of the value, or {@code null} if the variable is not defined.
    */
   public abstract String getVariableToString(String var);
 
   /** Gets the class name of a variable in the current interpreter.
    *  @param var the name of the variable
    */
-  public abstract String getVariableClassName(String var);
+  public abstract String getVariableType(String var);
 
   /** Resets the Java interpreter with working directry wd. */
   public final void resetInterpreter(File wd) {

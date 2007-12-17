@@ -118,7 +118,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    * Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
    */
-  public String getVariableClassName(String var) {
+  public String getVariableType(String var) {
     return null; // TODO: implement
 //    Class c = _interpreter.getVariableClass(var);
 //    return c.getName();

@@ -76,8 +76,8 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    * Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
    */
-  public String getVariableClassName(String var) {
-    return _jvm.getVariableClassName(var);
+  public String getVariableType(String var) {
+    return _jvm.getVariableType(var);
   }
 
   /**

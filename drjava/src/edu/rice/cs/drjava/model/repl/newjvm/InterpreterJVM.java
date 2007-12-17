@@ -42,11 +42,6 @@ import java.io.*;
 
 import java.rmi.*;
 
-import edu.rice.cs.dynamicjava.Options;
-import edu.rice.cs.dynamicjava.interpreter.Interpreter;
-import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
-import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
-
 // NOTE: Do NOT import/use the config framework in this class!
 //  (This class runs in a different JVM, and will not share the config object)
 
@@ -61,6 +56,7 @@ import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.OptionVisitor;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.text.TextUtil;
 
 import edu.rice.cs.drjava.platform.PlatformFactory;
@@ -68,6 +64,11 @@ import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.*;
+
+import edu.rice.cs.dynamicjava.Options;
+import edu.rice.cs.dynamicjava.interpreter.*;
+import edu.rice.cs.dynamicjava.symbol.*;
+import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 // For Windows focus fix
 import javax.swing.JDialog;
@@ -98,10 +99,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   // in synchronized versions.
   
   private final Options _interpreterOptions;
-  private volatile Interpreter _activeInterpreter;
+  private volatile Pair<String, Interpreter> _activeInterpreter;
   private final Interpreter _defaultInterpreter;
   private final Map<String, Interpreter> _interpreters;
   private final Set<Interpreter> _busyInterpreters;
+  private final Map<String, Pair<TypeContext, RuntimeBindings>> _environments;
   
   /** Responsible for running JUnit tests in this JVM. */
   private final JUnitTestManager _junitTestManager;
@@ -130,7 +132,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _defaultInterpreter = new Interpreter(_interpreterOptions, _classPathManager.getClassLoader());
     _interpreters = Collections.synchronizedMap(new HashMap<String,Interpreter>());
     _busyInterpreters = Collections.synchronizedSet(new HashSet<Interpreter>());
-    _activeInterpreter = _defaultInterpreter;
+    _environments =
+      Collections.synchronizedMap(new HashMap<String, Pair<TypeContext, RuntimeBindings>>());
+    _activeInterpreter = Pair.make("", _defaultInterpreter);
   }
   
   private static void _dialog(String s) {
@@ -162,28 +166,24 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     // redirect stdout
     System.setOut(new PrintStream(new OutputStreamRedirector() {
       public void print(String s) {
-        debug.logStart();
         try { _mainJVM.systemOutPrint(s); }
         catch (RemoteException re) {
           // nothing to do
           error.log(re);
           _log.log("System.out: " + re.toString());
         }
-        debug.logEnd();
       }
     }));
     
     // redirect stderr
     System.setErr(new PrintStream(new OutputStreamRedirector() {
       public void print(String s) {
-        debug.logStart();
         try { _mainJVM.systemErrPrint(s); }
         catch (RemoteException re) {
           // nothing to do
           error.log(re);
           _log.log("System.err: " + re.toString());
         }
-        debug.logEnd();
       }
     }));
     
@@ -222,7 +222,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    *  the interpretResult method.
    *  @param s Source code to interpret.
    */
-  public InterpretResult interpret(String s) { return interpret(s, _activeInterpreter); }
+  public InterpretResult interpret(String s) { return interpret(s, _activeInterpreter.second()); }
   
   /** Interprets the given string of source code with the given interpreter. The result is returned to
    *  MainJVM via the interpretResult method.
@@ -273,6 +273,46 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       }
     });
   }
+  
+  /** Get the value of the variable with the given name in the current interpreter.
+    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
+    * an array here is used as the return type rather than an {@code Option<Object>} --
+    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
+    */
+  public Object[] getVariable(String var) {
+    Pair<TypeContext, RuntimeBindings> env = _environments.get(_activeInterpreter.first());
+    if (env == null) { return new Object[0]; }
+    LocalVariable lv = env.first().getLocalVariable(var, _interpreterOptions.typeSystem());
+    if (lv == null) { return new Object[0]; }
+    return new Object[]{ env.second().get(lv) };
+  }
+  
+  
+  /** Gets the string representation of the value of a variable in the current interpreter.
+   *  @param var the name of the variable
+   *  @return null if the variable is not defined, "null" if the value is null; otherwise,
+   *          its string representation
+   */
+  public String getVariableToString(String var) {
+    Object[] val = getVariable(var);
+    if (val.length == 0) { return null; }
+    else {
+      try { return TextUtil.toString(val[0]); }
+      catch (Throwable t) { return "<error in toString()>"; }
+    }
+  }
+  
+  /** Gets the type of a variable in the current interpreter.
+   *  @param var the name of the variable
+   */
+  public String getVariableType(String var) {
+    Pair<TypeContext, RuntimeBindings> env = _environments.get(_activeInterpreter.first());
+    if (env == null) { return null; }
+    LocalVariable lv = env.first().getLocalVariable(var, _interpreterOptions.typeSystem());
+    if (lv == null) { return null; }
+    else { return _interpreterOptions.typeSystem().userRepresentation(lv.type()); }
+  }
+  
     
   /** Adds a named Interpreter to the list.
    *  @param name the unique name for the interpreter
@@ -282,13 +322,84 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     if (_interpreters.containsKey(name)) {
       throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
     }
-    Interpreter i = new Interpreter(Options.DEFAULT, _classPathManager.getClassLoader());
+    Interpreter i = new Interpreter(_interpreterOptions, _classPathManager.getClassLoader());
     _interpreters.put(name, i);
+  }
+  
+  /**
+   * Adds a named Interpreter in the given environment to the list.  Invoked reflectively by
+   * the debugger.
+   *  @param name  The unique name for the interpreter
+   *  @param thisVal  The value of {@code this} (may be null, implying this is a static context)
+   *  @param thisClass  The class in whose context the interpreter is to be created
+   *  @param localVars  Values of local variables
+   *  @param localVarNames  Names of the local variables
+   *  @param localVarClasses  Classes of the local variables.  To simplify the work callers must
+   *                          do, a value with a primitive type may have a {@code null} entry here.
+   *  @throws IllegalArgumentException if the name is not unique, or if the local var arrays
+   *                                   are not all of the same length
+   */
+  public void addInterpreter(String name, Object thisVal, Class<?> thisClass, Object[] localVars,
+                             String[] localVarNames, Class<?>[] localVarClasses) {
+    debug.logValues(new String[]{ "name", "thisVal", "thisClass", "localVars", "localVarNames",
+                    "localVarClasses" }, name, thisVal, thisClass, localVars, localVarNames, localVarClasses);
+    if (_interpreters.containsKey(name)) {
+      throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
+    }
+    if (localVars.length != localVarNames.length || localVars.length != localVarClasses.length) {
+      throw new IllegalArgumentException("Local variable arrays are inconsistent");
+    }
+    
+    // TODO: handle inner classes
+    // TODO: enforce final vars?
+    ClassLoader loader = _classPathManager.getClassLoader();
+    Package pkg = thisClass.getPackage();
+    DJClass c = SymbolUtil.wrapClass(thisClass);
+    List<LocalVariable> vars = new LinkedList<LocalVariable>();
+    for (int i = 0; i < localVars.length; i++) {
+      if (localVarClasses[i] == null) {
+        try { localVarClasses[i] = (Class<?>) localVars[i].getClass().getField("TYPE").get(null); }
+        catch (IllegalAccessException e) { throw new IllegalArgumentException(e); }
+        catch (NoSuchFieldException e) { throw new IllegalArgumentException(e); }
+      }
+      Type varT = SymbolUtil.typeOfGeneralClass(localVarClasses[i], _interpreterOptions.typeSystem());
+      vars.add(new LocalVariable(localVarNames[i], varT, false));
+    }
+    
+    TypeContext ctx = new TopLevelContext(loader);
+    if (pkg != null) { ctx = ctx.setPackage(pkg.getName()); }
+    ctx = new ClassSignatureContext(ctx, c, loader);
+    ctx = new ClassContext(ctx, c);
+    ctx = new DebugMethodContext(ctx, thisVal == null);
+    ctx = new LocalContext(ctx, vars);
+
+    RuntimeBindings bindings = RuntimeBindings.EMPTY;
+    if (thisVal != null) { bindings = new RuntimeBindings(bindings, c, thisVal); }
+    bindings = new RuntimeBindings(bindings, vars, IterUtil.make(localVars));
+    
+    Interpreter i = new Interpreter(_interpreterOptions, ctx, bindings);
+    _environments.put(name, Pair.make(ctx, bindings));
+    _interpreters.put(name, i);
+  }
+  
+  /** A custom context for interpreting within the body of a defined method. */
+  private static class DebugMethodContext extends DelegatingContext {
+    private final boolean _isStatic;
+    public DebugMethodContext(TypeContext next, boolean isStatic) { super(next); _isStatic = isStatic; }
+    protected TypeContext duplicate(TypeContext next) { return new DebugMethodContext(next, _isStatic); }
+    @Override public DJClass getThis() { return _isStatic ? null : super.getThis(); }
+    @Override public DJClass getThis(String className) { return _isStatic ? null : super.getThis(className); }
+    @Override public Type getSuperType(TypeSystem ts) { return _isStatic ? null : super.getSuperType(ts); }
+    @Override public Type getReturnType() { return null; }
+    @Override public Iterable<Type> getDeclaredThrownTypes() { return IterUtil.empty(); }
   }
   
   
   /** Removes the interpreter with the given name, if it exists. */
-  public void removeInterpreter(String name) { _interpreters.remove(name); }
+  public void removeInterpreter(String name) {
+    _interpreters.remove(name);
+    _environments.remove(name);
+  }
   
   
   /** Sets the current interpreter to be the one specified by the given name
@@ -298,7 +409,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public synchronized boolean setActiveInterpreter(String name) {
     Interpreter i = _interpreters.get(name);
     if (i == null) { throw new IllegalArgumentException("Interpreter '" + name + "' does not exist."); }
-    _activeInterpreter = i;
+    _activeInterpreter = Pair.make(name, i);
     return _busyInterpreters.contains(i);
   }
   
@@ -306,7 +417,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    *  @return Whether the new interpreter is currently in progress with an interaction
    */
   public synchronized boolean setToDefaultInterpreter() {
-    _activeInterpreter = _defaultInterpreter;
+    _activeInterpreter = Pair.make("", _defaultInterpreter);
     return _busyInterpreters.contains(_defaultInterpreter);
   }
   
