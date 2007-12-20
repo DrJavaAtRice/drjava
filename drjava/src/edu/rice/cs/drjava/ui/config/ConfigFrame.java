@@ -444,18 +444,14 @@ public class ConfigFrame extends JFrame {
     }, "Reset \"Go to File\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_FULLY_QUALIFIED,
                                                   "Display Fully-Qualified Class Names in \"Go to File\" Dialog", this,
-                                                  "Whether to also display fully-qualified class names in the \"Go to File\" dialog.\n"+
-                                                         "Enabling this option on network drives might cause the dialog to display after a slight delay."));
+                                                  "<html>Whether to also display fully-qualified class names in the \"Go to File\" dialog.<br>"+
+                                                         "Enabling this option on network drives might cause the dialog to display after a slight delay.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_WORD_STORE_POSITION,
                                                   "Save \"Auto-Complete Word\" Dialog Position", this,
                                                   "Whether to save and restore the size and position of the \"Auto-Complete Word\" dialog."));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetCompleteWordDialogPosition(); }
     }, "Reset \"Auto-Complete Word\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_SCAN_CLASS_FILES,
-                                                  "Scan Class Files For Auto-Completion After Each Compile", this,
-                                                  "Whether to scan the class files after a compile to generate auto-completion class names.\n"+
-                                                         "Enabling this option will slow compiles down."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_JAROPTIONS_STORE_POSITION,
                                                   "Save \"Create Jar File from Project\" Dialog Position", this,
                                                   "Whether to save and restore the position of the \"Create Jar File from Project\" dialog."));
@@ -476,6 +472,11 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
     }, "Reset \"Auto Import\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_SCAN_CLASS_FILES,
+                                                  "Scan Class Files After Each Compile For Auto-Completion and Auto-Import", this,
+                                                  "<html>Whether to scan the class files after a compile to generate class names<br>"+
+                                                         "used for auto-completion and auto-import.<br>"+
+                                                         "Enabling this option will slow compiles down.</html>"));
     panel.displayComponents();
   }
 

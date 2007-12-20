@@ -3709,6 +3709,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   boolean _closeProject() {
     _completeClassList = new ArrayList<GoToFileListEntry>(); // reset auto-completion list
+    _autoImportClassList = new ArrayList<JavaAPIListEntry>(); // reset auto-import list
     return _closeProject(false);
   }
     
@@ -4504,40 +4505,60 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 
   /** List with entries for the complete dialog. */
   ArrayList<GoToFileListEntry> _completeClassList = new ArrayList<GoToFileListEntry>();
+
+  /** List with entries for the auto-import dialog. */
+  ArrayList<JavaAPIListEntry> _autoImportClassList = new ArrayList<JavaAPIListEntry>();
   
   /** Scan the build directory for class files and update the auto-completion list. */
   private void _scanClassFiles() {
     Thread t = new Thread(new Runnable() {
       public void run() {
-        List<File> classFiles = _model.getClassFiles();
-        
-        HashSet<GoToFileListEntry> hs = new HashSet<GoToFileListEntry>(classFiles.size());
-        DummyOpenDefDoc dummyDoc = new DummyOpenDefDoc();
-        for(File f: classFiles) {          
-          String s = f.toString();
-          if (s.lastIndexOf(java.io.File.separatorChar)>=0) {
-            s = s.substring(s.lastIndexOf(java.io.File.separatorChar)+1);
-          }
-          s = s.substring(0, s.lastIndexOf(".class"));
-          s = s.replace('$', '.');
-          int pos = 0;
-          boolean ok = true;
-          while((pos=s.indexOf('.', pos)) >= 0) {
-            if ((s.length()<=pos+1) || (Character.isDigit(s.charAt(pos+1)))) {
-              ok = false;
-              break;
+        File buildDir = _model.getBuildDirectory();
+        HashSet<GoToFileListEntry> hs = new HashSet<GoToFileListEntry>();
+        HashSet<JavaAPIListEntry> hs2 = new HashSet<JavaAPIListEntry>();
+        if (buildDir!=null) {
+          List<File> classFiles = _model.getClassFiles();
+          DummyOpenDefDoc dummyDoc = new DummyOpenDefDoc();
+          for(File f: classFiles) {
+            String s = f.toString();
+            if (s.lastIndexOf(java.io.File.separatorChar)>=0) {
+              s = s.substring(s.lastIndexOf(java.io.File.separatorChar)+1);
             }
-            ++pos;
-          }
-          if (ok) {
-            if (s.lastIndexOf('.') >= 0) {
-              s = s.substring(s.lastIndexOf('.') + 1);
+            s = s.substring(0, s.lastIndexOf(".class"));
+            s = s.replace('$', '.');
+            int pos = 0;
+            boolean ok = true;
+            while((pos=s.indexOf('.', pos)) >= 0) {
+              if ((s.length()<=pos+1) || (Character.isDigit(s.charAt(pos+1)))) {
+                ok = false;
+                break;
+              }
+              ++pos;
             }
-            GoToFileListEntry entry = new GoToFileListEntry(dummyDoc, s);
-            hs.add(entry);
+            if (ok) {
+              if (s.lastIndexOf('.') >= 0) {
+                s = s.substring(s.lastIndexOf('.') + 1);
+              }
+              GoToFileListEntry entry = new GoToFileListEntry(dummyDoc, s);
+              hs.add(entry);
+              try {
+                File rel = FileOps.makeRelativeTo(f, buildDir);
+                String full = rel.toString().replace(java.io.File.separatorChar, '.');
+                full = full.substring(0, full.lastIndexOf(".class"));
+                if (full.indexOf('$')<0) {
+                  // no $ in the name means not an inner class
+                  // we do not support inner classes, because that would mean
+                  // having to determine public static scope
+                  hs2.add(new JavaAPIListEntry(s, full, null));
+                }
+              }
+              catch(IOException ioe) { /* ignore, just don't add this one */ }
+              catch(SecurityException se) { /* ignore, just don't add this one */ }
+            }
           }
         }
         _completeClassList = new ArrayList<GoToFileListEntry>(hs);
+        _autoImportClassList = new ArrayList<JavaAPIListEntry>(hs2);
       }
     });
     t.setPriority(Thread.MIN_PRIORITY);
@@ -8654,17 +8675,49 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** The "Auto Import" dialog instance. */
   PredictiveInputFrame<JavaAPIListEntry> _autoImportDialog = null;
   JCheckBox _autoImportPackageCheckbox;
-  
+
   /** Imports a class. */
   void _showAutoImportDialog(String s) {
     generateJavaAPIList();
     if (_javaAPIList == null) {
       return;
     }
+    List<JavaAPIListEntry> autoImportList = new ArrayList<JavaAPIListEntry>(_javaAPIList);
+    if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) &&
+        (_autoImportClassList.size()>0)) {
+      autoImportList.addAll(_autoImportClassList);
+    }
+    else {
+      File projectRoot = _model.getProjectRoot();
+      List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+      if (docs != null) {
+        for(OpenDefinitionsDocument d: docs) {
+          if (d.isUntitled()) continue;
+          try {
+            File rel = FileOps.makeRelativeTo(d.getRawFile(), projectRoot);
+            String full = rel.toString().replace(java.io.File.separatorChar, '.');
+            for (String ext: edu.rice.cs.drjava.model.compiler.CompilerModel.EXTENSIONS) {
+              if (full.endsWith(ext)) {
+                full = full.substring(0, full.lastIndexOf(ext));
+                break;
+              }
+            }
+            String simple = full;
+            if (simple.lastIndexOf('.')>=0) {
+              simple = simple.substring(simple.lastIndexOf('.')+1);
+            }
+            JavaAPIListEntry entry = new JavaAPIListEntry(simple, full, null);
+            if (!autoImportList.contains(entry)) { autoImportList.add(entry); }
+          }
+          catch(IOException ioe) { /* ignore, just don't add this one */ }
+          catch(SecurityException se) { /* ignore, just don't add this one */ }
+        }
+      }
+    }
     PredictiveInputModel<JavaAPIListEntry> pim =
       new PredictiveInputModel<JavaAPIListEntry>(true,
                                                  new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>(),
-                                                 _javaAPIList);
+                                                 autoImportList);
     pim.setMask(s);
     initAutoImportDialog();
     _autoImportDialog.setModel(true, pim); // ignore case
