@@ -156,7 +156,7 @@ public abstract class OptionComponent<T> implements Serializable {
       public void run() { 
         // Make a copy of _changeListeners to prevent potential ConcurrentModificationException
         ChangeListener[] listeners = _changeListeners.toArray(new ChangeListener[_changeListeners.size()]);
-        for (ChangeListener l: listeners)  l.apply(this); }
+        for (ChangeListener l: listeners)  l.apply(OptionComponent.this); }
     });
   }
   
