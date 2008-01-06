@@ -989,7 +989,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     catch (ParseException e) { return ""; }
     // addresses bug [ 1815387 ] Editor should discard parse errors for now
     // we should upgrade our parser to handle @
-    catch (koala.dynamicjava.parser.TokenMgrError e) { return ""; }
+    catch (koala.dynamicjava.parser.impl.TokenMgrError e) { return ""; }
     finally {
       try { r.close(); }
       catch (IOException e) { /* ignore */ }
