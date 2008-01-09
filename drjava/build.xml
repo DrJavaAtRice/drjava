@@ -25,7 +25,9 @@
   <taskdef name="fornum" classname="edu.rice.cs.plt.ant.ForNumTask" classpath="lib/buildlib/plt-ant.jar" onerror="report"/>
 
   <extendclasspath path="lib/buildlib/junit.jar" />
-                 
+  <extendclasspath path="lib/buildlib/findbugs-ant.jar" />
+
+  <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"/>
 
   <!-- Load the property file if it exists -->
   <if>
@@ -603,7 +605,27 @@
       <jvmarg line="${jvm-args}" />
     </java>
   </target>
-        
+
+  <!-- ***************
+       FindBugs Target
+       Need to have FindBugs 1.3.1 installed and set the
+       FINDBUGS_HOME environment variable to that directory.
+       *************** -->
+  <target name="findbugs" depends="jar">
+    <available property="findbugs-exists" file="${env.FINDBUGS_HOME}/lib/findbugs.jar" />
+    <fail message="FindBugs installation not found, or FINDBUGS_HOME environment variable not set."
+          unless="findbugs-exists" />
+    <delete file="${basedir}/findbugs.html" />
+    <findbugs home="${env.FINDBUGS_HOME}"
+              output="html"
+              jvmargs="-Xmx512M"
+              failOnError="true"
+              outputFile="${basedir}/findbugs.html">
+      <auxClasspath path="${java15-tools}"/>
+      <sourcePath path="${basedir}/src"/>
+      <class location="${basedir}/${ant.project.name}-15.jar"/>
+    </findbugs>
+  </target>        
 
   <!-- ***********
        Jar Targets
@@ -918,6 +940,8 @@
         <include name="${ant.project.name}-*" />
       </fileset>
     </delete>
+
+    <delete file="${basedir}/findbugs.html" />
   </target>
   
 
