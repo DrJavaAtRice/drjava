@@ -1,0 +1,5 @@
+<FindBugsFilter>
+  <Match>
+    <Bug code="Nm,Se,Bx,UPM,UrF,UuF,DLS"/>
+  </Match>
+</FindBugsFilter>

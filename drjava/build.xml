@@ -621,7 +621,8 @@
               jvmargs="-Xmx512M"
               failOnError="true"
               outputFile="${basedir}/findbugs.html"
-              timeout="1800000">
+              timeout="1800000"
+              excludeFilter="${basedir}/lib/buildlib/findbugs-filter.xml">
       <auxClasspath path="${java15-tools}"/>
       <sourcePath path="${basedir}/src"/>
       <class location="${basedir}/${ant.project.name}-15.jar"/>
@@ -743,7 +744,7 @@
   </target>
 
   <target name="setup-clover" depends="assert-clover-jar-exists">
-    <property name="clover.license.path" value="${basedir}/lib/buildlib/clover.license"/>
+    <!-- <property name="clover.license.path" value="${basedir}/lib/buildlib/clover.license"/> -->
     <extendclasspath path="${clover-jar}" />
     <taskdef resource="clovertasks" classpath="${clover-jar}" />
     <mkdir dir="cloverdb" />
