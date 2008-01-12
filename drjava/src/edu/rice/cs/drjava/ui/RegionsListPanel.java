@@ -388,10 +388,16 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
       return sb.toString();
     }
     public boolean equals(Object other) {
+      if ((other==null) || !(other instanceof RegionListUserObj)) { return false; }
       @SuppressWarnings("unchecked") RegionListUserObj<R> o = (RegionListUserObj<R>)other;
       return (o.region().getDocument().equals(region().getDocument())) &&
         (o.region().getStartOffset()==region().getStartOffset()) &&
         (o.region().getEndOffset()==region().getEndOffset());
+    }
+    public int hashCode() {
+      int result;
+      result = (_region != null ? _region.hashCode() : 0);
+      return result;
     }
   }
   

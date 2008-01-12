@@ -408,5 +408,11 @@ public class ClipboardHistoryFrame extends JFrame {
       if ((o == null) || !(o instanceof ListItem)) return false;
       return full.equals(((ListItem)o).full);
     }
+    public int hashCode() {
+      int result;
+      result = (full != null ? full.hashCode() : 0);
+      result = 31 * result + (display != null ? display.hashCode() : 0);
+      return result;
+    }
   }
 }

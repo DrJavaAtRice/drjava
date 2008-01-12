@@ -577,7 +577,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       public void regionRemoved(final Breakpoint bp) { 
         try {
           getDebugger().removeBreakpoint(bp);
-        } catch(DebugException de) { /* just ignore it */ }
+        } catch(DebugException de) {
+          /* just ignore it */
+          // TODO: should try to pop up dialog to give the user the option of restarting the debugger (mgricken)
+//          int result = JOptionPane.showConfirmDialog(null, "Could not remove breakpoint.", "Restart debugger?", JOptionPane.YES_NO_OPTION);
+//          if (result==JOptionPane.YES_OPTION) {
+//            getDebugger().shutdown();
+//            getDebugger().startUp();
+//          }
+        }
         setProjectChanged(true);
       }
     });

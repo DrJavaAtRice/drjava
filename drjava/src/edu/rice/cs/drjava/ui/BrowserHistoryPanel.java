@@ -266,7 +266,7 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
           sb.append(": ");
           int length = Math.min(120, _region.getEndOffset()-_region.getStartOffset());
           sb.append(_region.getDocument().getText(_region.getStartOffset(), length).trim());
-        } catch(BadLocationException bpe) { /* ignore, just don't display line */ }        
+        } catch(BadLocationException bpe) { /* ignore, just don't display line */ }
         if (_region.equals(_model.getBrowserHistoryManager().getCurrentRegion())) {
           sb.append("</font>");
         }
@@ -275,10 +275,16 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
       return sb.toString();
     }
     public boolean equals(Object other) {
+      if ((other==null) || !(other instanceof BrowserHistoryListUserObj)) { return false; }
       @SuppressWarnings("unchecked") BrowserHistoryListUserObj o = (BrowserHistoryListUserObj)other;
       return (o.region().getDocument().equals(region().getDocument())) &&
         (o.region().getStartOffset()==region().getStartOffset()) &&
         (o.region().getEndOffset()==region().getEndOffset());
+    }
+    public int hashCode() {
+      int result;
+      result = (_region != null ? _region.hashCode() : 0);
+      return result;
     }
   }
 }

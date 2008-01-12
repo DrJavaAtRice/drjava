@@ -269,11 +269,17 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
       return sb.toString();
     }
     public boolean equals(Object other) {
-      BreakpointRegionTreeUserObj o = (BreakpointRegionTreeUserObj)other;
+      if ((other==null) || !(other instanceof BreakpointRegionTreeUserObj)) { return false; }
+      @SuppressWarnings("unchecked") BreakpointRegionTreeUserObj o = (BreakpointRegionTreeUserObj)other;
       return (o.region().getDocument().equals(region().getDocument())) &&
         (o.region().getStartOffset()==region().getStartOffset()) &&
         (o.region().getEndOffset()==region().getEndOffset()) &&
         (o.region().isEnabled()==region().isEnabled());
+    }
+    public int hashCode() {
+      int result;
+      result = (_region != null ? _region.hashCode() : 0);
+      return result;
     }
   }
 }

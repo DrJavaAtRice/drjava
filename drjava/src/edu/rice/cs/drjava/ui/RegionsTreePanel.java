@@ -565,10 +565,16 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
       return sb.toString();
     }
     public boolean equals(Object other) {
+      if ((other==null) || !(other instanceof RegionTreeUserObj)) { return false; }
       @SuppressWarnings("unchecked") RegionTreeUserObj<R> o = (RegionTreeUserObj<R>)other;
       return (o.region().getDocument().equals(region().getDocument())) &&
         (o.region().getStartOffset()==region().getStartOffset()) &&
         (o.region().getEndOffset()==region().getEndOffset());
+    }
+    public int hashCode() {
+      int result;
+      result = (_region != null ? _region.hashCode() : 0);
+      return result;
     }
   }
 }

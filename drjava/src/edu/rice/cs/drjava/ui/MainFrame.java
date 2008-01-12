@@ -1426,24 +1426,35 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       try {
         _javaAPIList = new ArrayList<JavaAPIListEntry>();
         URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
-        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-        String line = br.readLine();
-        while(line != null) {
-          final String aText = "<a href=\"";
-          int aPos = line.toLowerCase().indexOf(aText);
-          int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
-          if ((aPos>=0) && (aEndPos>=0)) {
-            String link = line.substring(aPos+aText.length(), aEndPos);
-            String fullClassName = link.replace('/', '.');
-            String simpleClassName = fullClassName;
-            int lastDot = fullClassName.lastIndexOf('.');
-            if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
-            try {
-              _javaAPIList.add(new JavaAPIListEntry(simpleClassName, fullClassName, new URL(base + "/" + link + ".html")));
+        InputStream urls = url.openStream();
+        InputStreamReader is = null;
+        BufferedReader br = null;
+        try {
+          is = new InputStreamReader(urls);
+          br = new BufferedReader(is);
+          String line = br.readLine();
+          while(line != null) {
+            final String aText = "<a href=\"";
+            int aPos = line.toLowerCase().indexOf(aText);
+            int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
+            if ((aPos>=0) && (aEndPos>=0)) {
+              String link = line.substring(aPos+aText.length(), aEndPos);
+              String fullClassName = link.replace('/', '.');
+              String simpleClassName = fullClassName;
+              int lastDot = fullClassName.lastIndexOf('.');
+              if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
+              try {
+                _javaAPIList.add(new JavaAPIListEntry(simpleClassName, fullClassName, new URL(base + "/" + link + ".html")));
+              }
+              catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
             }
-            catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
+            line = br.readLine();
           }
-          line = br.readLine();
+        }
+        finally {
+	  if (br!=null) { br.close(); }
+          if (is!=null) { is.close(); }
+          if (urls!=null) { urls.close(); }
         }
       }
       catch(IOException ioe) { /* ignore, we'll just have an incomplete list */ }

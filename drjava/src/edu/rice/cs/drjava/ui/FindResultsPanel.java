@@ -282,7 +282,19 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       super(r);
       _lineNumber = _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1;
     }
-
+    public boolean equals(Object other) {
+      if ((other==null) || !(other instanceof FindResultsRegionTreeUserObj)) { return false; }
+      @SuppressWarnings("unchecked") FindResultsRegionTreeUserObj o = (FindResultsRegionTreeUserObj)other;
+      return (o.region().getDocument().equals(region().getDocument()) &&
+        (o.region().getStartOffset()==region().getStartOffset()) &&
+        (o.region().getEndOffset()==region().getEndOffset()) &&
+        (o._lineNumber==_lineNumber));
+    }
+    public int hashCode() {
+      int result;
+      result = (_region != null ? _region.hashCode() : 0);
+      return result;
+    }
     public String toString() {
       final StringBuilder sb = new StringBuilder();
       sb.append("<html>");

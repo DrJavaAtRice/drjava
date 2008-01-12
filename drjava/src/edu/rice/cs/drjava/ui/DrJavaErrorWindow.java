@@ -149,7 +149,7 @@ public class DrJavaErrorWindow extends JDialog {
     _stackTraceScroll = new BorderlessScrollPane(_stackTrace,
                                                  JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                                  JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-    _errorInfo = _errorInfo = new JEditorPane("text/html", HEADER_HTML+NO_ERRORS_HTML);
+    _errorInfo = new JEditorPane("text/html", HEADER_HTML+NO_ERRORS_HTML);
     _errorInfo.setEditable(false);
     _errorInfo.setBackground(getContentPane().getBackground());    
     final JPanel cp = new JPanel(new BorderLayout(5,5));

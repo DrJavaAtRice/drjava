@@ -102,6 +102,17 @@ public class StaticDocumentRegion implements DocumentRegion {
             _endOffset == o._endOffset && _string.equals(o._string));
   }
   
+  /** @return the hash code. */
+  public int hashCode() {
+    int result;
+    result = (_doc != null ? _doc.hashCode() : 0);
+    result = 31 * result + (_file != null ? _file.hashCode() : 0);
+    result = 31 * result + (_string != null ? _string.hashCode() : 0);
+    result = 31 * result + _startOffset;
+    result = 31 * result + _endOffset;
+    return result;
+  }
+  
   public String toString() {
     return (_doc != null ? _doc.toString() : "null") + " " + _startOffset + " .. " + _endOffset;
   }

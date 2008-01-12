@@ -199,12 +199,14 @@ public class JPDADebugger implements Debugger {
       try { _attachToVM(); }
       catch(DebugException e1) {  // We sometimes see ConnectExceptions stating that the connection was refused
         try { 
+          // TODO: holding a lock (this) while sleeping. try to release lock? (mgricken)
           try { Thread.sleep(100); } // Give any temporary connection problems a chance to resolve
           catch (InterruptedException e) { /* ignore */ }
           _attachToVM(); 
           error.log("Two attempts required for debugger to attach to slave JVM");
         }
         catch(DebugException e2) {
+          // TODO: holding a lock (this) while sleeping. try to release lock? (mgricken)
           try { Thread.sleep(100); } // Give any temporary connection problems a chance to resolve
           catch (InterruptedException e) { /* ignore */ }
           _attachToVM();

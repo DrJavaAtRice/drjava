@@ -103,7 +103,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   static volatile ReverseHighlighter.DefaultUnderlineHighlightPainter BOOKMARK_PAINTER =
     new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(BOOKMARK_COLOR), 3);
 
-  /** Highlight painter for find results. */
+  /** Highlight painter for find results.
+    * Keep in mind that, while the array is volatile, the elements inside of it are not! */
   static volatile ReverseHighlighter.DefaultUnderlineHighlightPainter[] FIND_RESULTS_PAINTERS;
   
   static {
@@ -116,7 +117,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         new ReverseHighlighter.DefaultUnderlineHighlightPainter(Color.WHITE, 0);
   }
   
-  /** How many find result panels are using the highlight painters. */
+  /** How many find result panels are using the highlight painters.
+    * Keep in mind that, while the array is volatile, the elements inside of it are not! */
   static volatile int[] FIND_RESULTS_PAINTERS_USAGE = new int[FIND_RESULTS_COLORS.length];
 
   /** Highlight painter for breakpoints. */

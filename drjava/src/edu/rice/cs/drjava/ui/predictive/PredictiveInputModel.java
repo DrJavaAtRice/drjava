@@ -150,7 +150,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       return longestMatch;
     }
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
-      String res = "";
+      StringBuilder res = new StringBuilder();
       String ext = "";
       if (items.size() == 0) {
         return ext;
@@ -170,11 +170,11 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
         }
         if (allMatching) {
           ext = ext + ch;
-          res = res + origCh;
+          res.append(origCh);
           ++len;
         }
       }
-      return res;
+      return res.toString();
     }
     public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim) {
       return pim._mask + getSharedMaskExtension(items, pim);
@@ -340,7 +340,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       return longestMatch;
     }
     public String getSharedMaskExtension(List<X> items, PredictiveInputModel<X> pim) {
-      String res = "";
+      StringBuilder res = new StringBuilder();
       String ext = "";
       if (items.size() == 0) {
         return ext;
@@ -365,11 +365,11 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
         }
         if (allMatching) {
           ext = ext + ch;
-          res = res + origCh;
+          res.append(origCh);
           ++len;
         }
       }
-      return res;
+      return res.toString();
     }
     public String getExtendedSharedMask(List<X> items, PredictiveInputModel<X> pim) {
       int pos = pim._mask.lastIndexOf(':');

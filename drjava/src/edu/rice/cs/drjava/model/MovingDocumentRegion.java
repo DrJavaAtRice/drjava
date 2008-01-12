@@ -85,12 +85,27 @@ public class MovingDocumentRegion implements DocumentRegion {
   /** @return true if the specified region is equal to this one. */
   public boolean equals(Object other) {
     if ((other == null) || ! (other instanceof MovingDocumentRegion)) return false;
-    MovingDocumentRegion o = (MovingDocumentRegion)other;
+    @SuppressWarnings("unchecked") MovingDocumentRegion o = (MovingDocumentRegion)other;
+    if ((_doc == null && o._doc != null) ||
+        (_doc != null && o._doc == null)) return false;
+    if ((_file == null && o._file != null) ||
+        (_file != null && o._file == null)) return false;
     return (((_doc == null && o._doc == null) || _doc.equals(o._doc)) &&
             ((_file == null && o._file == null) || _file.equals(o._file)) &&
             _startPosition.getOffset() == o._startPosition.getOffset() &&
             _endPosition.getOffset() == o._endPosition.getOffset() &&
             _string.equals(o._string));
+  }
+  
+  /** @return the hash code. */
+  public int hashCode() {
+    int result;
+    result = (_doc != null ? _doc.hashCode() : 0);
+    result = 31 * result + (_file != null ? _file.hashCode() : 0);
+    result = 31 * result + (_startPosition != null ? _startPosition.hashCode() : 0);
+    result = 31 * result + (_endPosition != null ? _endPosition.hashCode() : 0);
+    result = 31 * result + (_string != null ? _string.hashCode() : 0);
+    return result;
   }
   
   public String toString() {

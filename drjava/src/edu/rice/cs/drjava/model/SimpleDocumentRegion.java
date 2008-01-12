@@ -110,6 +110,18 @@ public class SimpleDocumentRegion implements DocumentRegion {
             _endPos.getOffset() == o._endPos.getOffset();
   }
   
+  /** @return the hash code. */
+  public int hashCode() {
+    int result;
+    result = (_doc != null ? _doc.hashCode() : 0);
+    result = 31 * result + (_file != null ? _file.hashCode() : 0);
+    result = 31 * result + (_startPos != null ? _startPos.hashCode() : 0);
+    result = 31 * result + (_endPos != null ? _endPos.hashCode() : 0);
+    result = 31 * result + _startOffset;
+    result = 31 * result + _endOffset;
+    return result;
+  }
+
   public String toString() {
     return (_doc != null ? _doc.toString() : "null") + " "+_startOffset+" .. "+_endOffset;
   }
