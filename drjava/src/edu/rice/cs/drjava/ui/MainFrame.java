@@ -261,6 +261,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public String getDescription() { return "DrJava Project Files (*.pjt)"; }
   };
   
+  /** Filter for any files (*.*) */
+  private final javax.swing.filechooser.FileFilter _anyFileFilter = new javax.swing.filechooser.FileFilter() {
+    public boolean accept(File f) { return true; }
+    public String getDescription() { return "All files (*.*)"; }
+  };
   
   /** Returns the files to open to the model (command pattern). */
   private final FileOpenSelector _openSelector = new FileOpenSelector() {
@@ -290,6 +295,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public File[] getFiles() throws OperationCanceledException {
       File[] retFiles = getOpenFiles(_openProjectChooser);
       return retFiles;
+    }
+  };
+
+  /** Returns the files to open. */
+  private final FileOpenSelector _openAnyFileSelector = new FileOpenSelector() {
+    public File[] getFiles() throws OperationCanceledException {
+      _openChooser.resetChoosableFileFilters();
+      _openChooser.setFileFilter(_anyFileFilter);
+      return getOpenFiles(_openChooser);
     }
   };
   
@@ -1452,7 +1466,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           }
         }
         finally {
-	  if (br!=null) { br.close(); }
+   if (br!=null) { br.close(); }
           if (is!=null) { is.close(); }
           if (urls!=null) { urls.close(); }
         }
@@ -5179,6 +5193,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                  "Auto-complete the word the cursor is currently located on");
     _setUpAction(_bookmarksPanelAction, "Bookmarks", "Display the bookmarks panel");
     _setUpAction(_toggleBookmarkAction, "Toggle Bookmark", "Toggle the bookmark at the current cursor location");
+    _setUpAction(_followFileAction, "Follow File", "Follow a file's updates");
+    _setUpAction(_executeExternalProcessAction, "Execute External", "Execute external process");
 
     _setUpAction(_findReplaceAction, "Find", "Find or replace text in the document");
     _setUpAction(_findNextAction, "Find Next", "Repeats the last find");
@@ -5472,6 +5488,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     toolsMenu.addSeparator();
     _addMenuItem(toolsMenu, _bookmarksPanelAction, KEY_BOOKMARKS_PANEL);
     _addMenuItem(toolsMenu, _toggleBookmarkAction, KEY_BOOKMARKS_TOGGLE);
+    
+    toolsMenu.addSeparator();
+    _addMenuItem(toolsMenu, _followFileAction, KEY_FOLLOW_FILE);
+    _addMenuItem(toolsMenu, _executeExternalProcessAction, KEY_EXEC_PROCESS);
     
     // Add the menus to the menu bar
     return toolsMenu;
@@ -8735,5 +8755,117 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     hourglassOn();
     _autoImportPackageCheckbox.setSelected(false);
     _autoImportDialog.setVisible(true);
+  }
+
+  /** Follow a file. */
+  private final Action _followFileAction = new AbstractAction("Follow File...") {
+    public void actionPerformed(ActionEvent ae) {
+      _followFile();
+    }
+  };
+  
+  // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("less.txt", true);
+  
+  /** Open a file for following (like using "less" and F). */
+  private void _followFile() {
+    updateStatusField("Opening File for Following");
+    // LOG.log("_followFile");
+    try {      
+      final File[] files = _openAnyFileSelector.getFiles();
+      // LOG.log("\tfiles = "+files);
+      if (files == null) { return; }
+      // LOG.log("\tlength = "+files.length);
+      for (final File f: files) {
+        if (f == null) continue;
+        // LOG.log("\tf = "+f);
+        String end = f.getName();
+        int lastIndex = end.lastIndexOf(File.separatorChar);
+        if (lastIndex>=0) {
+          end = end.substring(lastIndex+1);
+        }
+        final LessPanel panel = new LessPanel(this, "Follow: "+end, f);
+        _tabs.addLast(panel);
+        panel.getMainPanel().addFocusListener(new FocusAdapter() {
+          public void focusGained(FocusEvent e) { _lastFocusOwner = panel; }
+        });
+        panel.setVisible(true);
+        showTab(panel);
+        _tabbedPane.setSelectedComponent(panel);
+        // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
+        EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
+      }
+    }
+    catch(OperationCanceledException oce) { /* ignore */ }
+  }
+
+  /** Execute an externak process. */
+  private final Action _executeExternalProcessAction = new AbstractAction("External process...") {
+    public void actionPerformed(ActionEvent ae) {
+      _executeExternalProcess();
+    }
+  };
+  
+  /** Execute an external process and monitor its output. */
+  private void _executeExternalProcess() {
+    updateStatusField("Executing external process...");
+    // LOG.log("_executeExternalProcess");
+    String cmdline =  JOptionPane.showInputDialog(this, "Command line:");
+    if (cmdline==null) { return; }
+    // LOG.log("cmdline = "+cmdline);
+    StreamTokenizer tok = new StreamTokenizer(new StringReader(cmdline));
+    tok.resetSyntax();
+    tok.wordChars(0,255);
+    tok.whitespaceChars(0,32);
+    tok.quoteChar('\'');
+    tok.quoteChar('"');
+    tok.slashSlashComments(false);
+    tok.slashStarComments(false);
+    ArrayList<String> cmds = new ArrayList<String>();
+    
+    int next;
+    try {
+      while(((next=tok.nextToken())!=StreamTokenizer.TT_EOF) &&
+            (next!=StreamTokenizer.TT_EOL)) {
+        // LOG.log("token="+next);
+        switch(next) {
+          case StreamTokenizer.TT_WORD:
+            // LOG.log("\tsval="+tok.sval);
+            cmds.add(tok.sval);
+            break;
+          case StreamTokenizer.TT_NUMBER:
+            // LOG.log("\tnval="+tok.nval);
+            cmds.add(""+tok.nval);
+            break;
+          default:
+            // LOG.log("\tsomething weird");
+            JOptionPane.showMessageDialog(this,
+                                          "Unexpected part while separating command line into individual parts.",
+                                          "Invalid Command Line",
+                                          JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+      }
+    }
+    catch(IOException ioe) {
+      JOptionPane.showMessageDialog(this,
+                                    "Could not separate command line into individual parts.",
+                                    "Invalid Command Line",
+                                    JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+    
+    ProcessBuilder pb = new ProcessBuilder(cmds.toArray(new String[cmds.size()]));
+    String name = "External";
+    if (cmds.size()>0) { name += ": "+cmds.get(0); }
+    final ExternalProcessPanel panel = new ExternalProcessPanel(this, name, pb);
+    _tabs.addLast(panel);
+    panel.getMainPanel().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) { _lastFocusOwner = panel; }
+    });
+    panel.setVisible(true);
+    showTab(panel);
+    _tabbedPane.setSelectedComponent(panel);
+    // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
+    EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
   }
 }

@@ -824,6 +824,10 @@ public class ConfigFrame extends JFrame {
                                                   "Enable the \"Auto Import\" Dialog", this,
                                                   "<html>Whether DrJava should open the \"Auto Import\" dialog when<br>"+
                                                   "an undefined class is encountered in the Interactions Pane.</html>"));
+    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.FOLLOW_FILE_DELAY, 
+                                                  "Follow File Delay", this,
+                                                  "<html>The delay in milliseconds that has to elapse before DrJava will check<br>"+
+                                                  "if a file that is being followed has changed.</html>"));
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 

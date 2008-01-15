@@ -804,6 +804,19 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_DRJAVA_ERRORS = 
     new KeyStrokeOption("key.drjava.errors", KeyStrokeOption.NULL_KEYSTROKE);
 
+  /**
+   * The key binding for following a file, like using "less" and F.
+   */
+  public static final KeyStrokeOption KEY_FOLLOW_FILE =
+    new KeyStrokeOption("key.follow.file",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_L, mask | InputEvent.SHIFT_MASK));
+
+  /**
+   * The key binding for executing an external process.
+   */
+  public static final KeyStrokeOption KEY_EXEC_PROCESS =
+    new KeyStrokeOption("key.exec.process",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_X, mask | InputEvent.SHIFT_MASK));
   
   /* ---------- Find Replace Options ---------- */
   
@@ -1207,4 +1220,8 @@ public interface OptionConstants {
     * is encountered in the Interactions Pane. */
   public static final BooleanOption DIALOG_AUTOIMPORT_ENABLED =
     new BooleanOption("dialog.autoimport.enabled", Boolean.TRUE);
+  
+  /** Delay for following files. */
+  public static final NonNegativeIntegerOption FOLLOW_FILE_DELAY =
+    new NonNegativeIntegerOption("follow.file.delay", new Integer(300));
 }
