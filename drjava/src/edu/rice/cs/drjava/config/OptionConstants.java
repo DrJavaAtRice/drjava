@@ -1224,4 +1224,8 @@ public interface OptionConstants {
   /** Delay for following files. */
   public static final NonNegativeIntegerOption FOLLOW_FILE_DELAY =
     new NonNegativeIntegerOption("follow.file.delay", new Integer(300));
+  
+  /** Maximum lines to keep when following files, or 0 for unlimited. */
+  public static final NonNegativeIntegerOption FOLLOW_FILE_LINES =
+    new NonNegativeIntegerOption("follow.file.lines", new Integer(1000));
 }

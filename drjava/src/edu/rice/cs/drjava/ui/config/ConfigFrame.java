@@ -827,7 +827,11 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.FOLLOW_FILE_DELAY, 
                                                   "Follow File Delay", this,
                                                   "<html>The delay in milliseconds that has to elapse before DrJava will check<br>"+
-                                                  "if a file that is being followed has changed.</html>"));
+                                                  "if a file that is being followed or the output of an external process has changed.</html>"));
+    addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.FOLLOW_FILE_LINES, 
+                                                  "Maximum Lines in \"Follow File\" Window", this,
+                                                  "<html>The maximum number of lines to keep in a \"Follow File\"<br>"+
+                                                  "or \"External Process\" pane. Enter 0 for unlimited.</html>"));
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED, 

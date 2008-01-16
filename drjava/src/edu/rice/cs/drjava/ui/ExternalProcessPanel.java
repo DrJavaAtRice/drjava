@@ -234,6 +234,22 @@ public class ExternalProcessPanel extends AbortablePanel {
             if (changeCount>0) {
               // MainFrame.LOG.log("\tsetting text");
               _textArea.setText(sb.toString());
+              int maxLines = edu.rice.cs.drjava.DrJava.getConfig().
+                getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_LINES);
+              if (maxLines>0) { // if maxLines is 0, buffer is unlimited
+                try {
+                  int start = 0;
+                  int len = _textArea.getText().length();
+                  int curLines = _textArea.getLineCount();
+                  if (curLines>maxLines) {
+                    start = _textArea.getLineStartOffset(curLines-maxLines);
+                    len -= start;
+                    sb = new StringBuilder(_textArea.getText(start,len));
+                    _textArea.setText(sb.toString());
+                  }
+                }
+                catch(javax.swing.text.BadLocationException e) { /* ignore, do not truncate */ }
+              }
               // MainFrame.LOG.log("\ttext length = "+s.length());
             }
           }
