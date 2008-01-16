@@ -7119,7 +7119,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           // Give the interactions pane focus so we can debug
           _interactionsPane.requestFocusInWindow();
 //          System.err.println("Showing Interactions Tab" );
-          showTab(_interactionsPane);
+          showTab(_interactionsContainer);
           _updateDebugStatus();
         }
 
@@ -7563,7 +7563,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       Utilities.invokeLater(new Runnable() {
         public void run() {
           // Switch to the interactions pane to show results.
-          showTab(_interactionsPane);
+          showTab(_interactionsContainer);
         }
       });
     }
