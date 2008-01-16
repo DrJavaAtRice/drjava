@@ -7459,7 +7459,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       _lastFocusOwner.requestFocusInWindow();
     }
     
-    /** Moves focus in MainFrame to teh definitions pane. */
+    /** Moves focus in MainFrame to the definitions pane. */
     public void focusOnDefinitionsPane() { _currentDefPane.requestFocusInWindow(); }
     
     public void interactionStarted() {

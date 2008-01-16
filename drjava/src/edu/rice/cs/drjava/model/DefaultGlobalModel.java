@@ -354,17 +354,22 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    *  if a valid directory cannot be determined.  In that case, the former working directory is used.
    */
   public void resetInteractions(File wd, boolean forceReset) {
+    debug.logStart();
     File workDir = _interactionsModel.getWorkingDirectory();
     if (wd == null) { wd = workDir; }
 
     if (! forceReset && ! _jvm.slaveJVMUsed() && ! isClassPathChanged() && wd.equals(workDir)) {
+      debug.log();
     // Eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
       _interactionsModel._notifyInterpreterReady(wd);
+      debug.logEnd();
       return; 
     }
     // update the setting
+    debug.log();
     DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
     _interactionsModel.resetInterpreter(wd);
+    debug.logEnd();
   }
 
   /** Interprets the current given text at the prompt in the interactions pane. */
@@ -493,7 +498,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           iDoc.append("java " + className, null);
           
           // Finally, execute the new interaction and record that event
-          _interactionsModel.interpretCurrentInteraction();
+          new Thread("Running main method") {
+          public void run() { _interactionsModel.interpretCurrentInteraction(); }
+              
+          }.start();
           _notifier.runStarted(ConcreteOpenDefDoc.this);
           
           // This used to be called using invokeLater, so that the listener would be removed
