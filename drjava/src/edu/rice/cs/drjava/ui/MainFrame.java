@@ -108,6 +108,7 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 import edu.rice.cs.drjava.RemoteControlClient;
+import edu.rice.cs.util.ProcessCreator;
 
 /** DrJava's main window. */
 public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListener {
@@ -8854,10 +8855,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       return;
     }
     
-    ProcessBuilder pb = new ProcessBuilder(cmds.toArray(new String[cmds.size()]));
+    ProcessCreator pc = new ProcessCreator(cmds.toArray(new String[cmds.size()]));
     String name = "External";
     if (cmds.size()>0) { name += ": "+cmds.get(0); }
-    final ExternalProcessPanel panel = new ExternalProcessPanel(this, name, pb);
+    final ExternalProcessPanel panel = new ExternalProcessPanel(this, name, pc);
     _tabs.addLast(panel);
     panel.getMainPanel().addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = panel; }

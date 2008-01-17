@@ -55,6 +55,7 @@ import java.awt.*;
 
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.ProcessCreator;
 
 /** Panel for displaying some component with buttons, one of which is an "Abort" button.
   * This should be used to display the output of an external process.
@@ -67,7 +68,7 @@ public class ExternalProcessPanel extends AbortablePanel {
   /** Number of buffer reads before the event thread is allowed to do something else. */
   public final int BUFFER_READS_PER_TIMER = 5;
   protected JTextArea _textArea;
-  protected ProcessBuilder _pb = null;
+  protected ProcessCreator _pc = null;
   protected Process _p = null;
   protected InputStreamReader _is = null;
   protected JButton _updateNowButton;
@@ -82,24 +83,24 @@ public class ExternalProcessPanel extends AbortablePanel {
     * This is swing view class and hence should only be accessed from the event thread.
     * @param frame the MainFrame
     * @param title title of the pane
-    * @param pb the process builder to use
+    * @param pc the process creator to use
     */
-  public ExternalProcessPanel(MainFrame frame, String title, ProcessBuilder pb) {
+  public ExternalProcessPanel(MainFrame frame, String title, ProcessCreator pc) {
     super(frame, title);
     StringBuilder sb = new StringBuilder("Command line:");
-    for(String cmd: pb.command()) { sb.append(' '); sb.append(cmd); }
+    for(String cmd: pc.command()) { sb.append(' '); sb.append(cmd); }
     sb.append('\n');
     _header = sb.toString();
-    initThread(pb);
+    initThread(pc);
     _textArea.setText(_header);
     updateText(false);
     // MainFrame.LOG.log("\tProcessPanel ctor done");
   }
 
-  protected void initThread(ProcessBuilder pb) {
+  protected void initThread(ProcessCreator pc) {
     // MainFrame.LOG.log("\tProcessPanel ctor");
     try {
-      _pb = pb;
+      _pc = pc;
       _updateThread = new Thread(new Runnable() {
         public void run() {
           while(_is!=null) {
@@ -112,7 +113,7 @@ public class ExternalProcessPanel extends AbortablePanel {
           }
         }
       });
-      _p = _pb.start();
+      _p = _pc.start();
       _is = new InputStreamReader(_p.getInputStream());
       _updateThread.start();
       _updateNowButton.setEnabled(true);
