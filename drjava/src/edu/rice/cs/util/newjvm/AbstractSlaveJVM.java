@@ -145,7 +145,12 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
           catch (InterruptedException ie) { }
 //          _log.log(this + " polling " + master + " to confirm Master JVM is still alive");
           try { master.checkStillAlive(); }
-          catch (RemoteException re) { error.log(re); quit(); }  // Master JVM service is defunct. Quit! */
+          catch (RemoteException re) {
+            // TODO: This should always be an exceptional situation, but for now
+            // many tests abandon the slave without quitting cleanly.
+            // error.log(re);
+            quit(); // Master JVM service is defunct. Quit! */
+          }
         }
       }
     };
