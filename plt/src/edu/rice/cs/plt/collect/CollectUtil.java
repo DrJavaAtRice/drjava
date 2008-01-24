@@ -64,6 +64,10 @@ public final class CollectUtil {
   @SuppressWarnings("unchecked") public static <K, V> Map<K, V> emptyMap() {
     return (Map<K, V>) Collections.EMPTY_MAP;
   }
+
+  @SuppressWarnings("unchecked") public static <T1, T2> EmptyRelation<T1, T2> emptyRelation() {
+    return (EmptyRelation<T1, T2>) EmptyRelation.INSTANCE;
+  }
   
   /** Wrap a relation in an immutable wrapper.  Analogous to {@link Collections#unmodifiableMap}. */
   public static <T1, T2> ImmutableRelation<T1, T2> unmodifiableRelation(Relation<T1, T2> r) {
