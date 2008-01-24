@@ -43,11 +43,14 @@ import java.io.Serializable;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 
+import static edu.rice.cs.plt.debug.DebugUtil.error;
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** A partial implementation of a {@link SlaveRemote} that provides the quit functionality and that also periodically 
  *  checks if the master is still alive and automatically quits if not.
  *  @version $Id$
  */
-public abstract class AbstractSlaveJVM extends UnicastRemoteObject implements SlaveRemote {
+public abstract class AbstractSlaveJVM implements SlaveRemote {
   public static final int CHECK_MAIN_VM_ALIVE_SECONDS = 1;
   
   protected static final Log _log  = new Log("MasterSlave.txt", false);
@@ -142,7 +145,7 @@ public abstract class AbstractSlaveJVM extends UnicastRemoteObject implements Sl
           catch (InterruptedException ie) { }
 //          _log.log(this + " polling " + master + " to confirm Master JVM is still alive");
           try { master.checkStillAlive(); }
-          catch (RemoteException re) { quit(); }  // Master JVM service is defunct. Quit! */
+          catch (RemoteException re) { error.log(re); quit(); }  // Master JVM service is defunct. Quit! */
         }
       }
     };
@@ -154,6 +157,7 @@ public abstract class AbstractSlaveJVM extends UnicastRemoteObject implements Sl
     _log.log(_checkMaster + " created and STARTed by " + this);
 
     handleStart(master);  // master is passed as parameter because in some refactorings, _master is eliminated
+
   }
 
   /** Called when the slave JVM has started running.  Subclasses must implement this method. */

@@ -169,8 +169,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void setOptionArgs(String argString) { _optionArgs = ArgumentTokenizer.tokenize(argString); }
   
-  /** Interprets string s in slave JVM.  No masterJVMLock synchronization because reading _restart is the only
-   *  access.to master JVM state. */
+  /** Interprets string s in slave JVM.  Blocks until the interpreter is connected and evaluation completes.
+    * No masterJVMLock synchronization because reading _restart is the only access.to master JVM state.
+    */
   public void interpret(final String s) {
     // silently fail if disabled. see killInterpreter docs for details.
     if (! _restart) return;
@@ -200,6 +201,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Gets the string representation of the value of a variable in the current interpreter.
+   *  Blocks until the interpreter is connected.
    *  @param var the name of the variable
    */
   public String getVariableToString(String var) {
@@ -212,6 +214,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Gets the class name of a variable in the current interpreter.
+   *  Blocks until the interpreter is connected.
    *  @param var the name of the variable
    */
   public String getVariableType(String var) {
@@ -223,6 +226,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _threwException(e); return null; }
   }
   
+  /** Blocks until the interpreter is connected. */
   public void addProjectClassPath(File f) {
     if (! _restart) return;
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
@@ -231,6 +235,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch(RemoteException re) { _threwException(re); }
   }
   
+  /** Blocks until the interpreter is connected. */
   public void addBuildDirectoryClassPath(File f) {
     if (! _restart) return;
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
@@ -239,6 +244,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch(RemoteException re) { _threwException(re); }
   }
   
+  /** Blocks until the interpreter is connected. */
   public void addProjectFilesClassPath(File f) {
     if (! _restart) return;
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
@@ -247,6 +253,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch(RemoteException re) { _threwException(re); }
   }
   
+  /** Blocks until the interpreter is connected. */
   public void addExternalFilesClassPath(File f) {
     if (! _restart) return;
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
@@ -255,6 +262,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch(RemoteException re) { _threwException(re); }
   }
   
+  /** Blocks until the interpreter is connected. */
   public void addExtraClassPath(File f) {
     if (! _restart) return;
     InterpreterJVMRemoteI slave = ensureInterpreterConnected();
@@ -263,9 +271,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch(RemoteException re) { _threwException(re); }
   }
   
-  /** Returns the current classpath of the interpreter as a list of
-   *  unique entries.  The list is empty if a remote exception occurs.
-   */
+  /** Returns the current classpath of the interpreter as a list of unique entries.  The list
+    * is empty if a remote exception occurs.  Blocks until the interpreter is connected.
+    */
   public Iterable<File> getClassPath() {
     // silently fail if disabled. see killInterpreter docs for details.
     if (_restart) {
@@ -279,9 +287,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   
-  /** Sets the Interpreter to be in the given package.
-   *  @param packageName Name of the package to enter.
-   */
+  /** Sets the Interpreter to be in the given package.  Blocks until the interpreter is connected.
+    * @param packageName Name of the package to enter.
+    */
   public void setPackageScope(String packageName) {
     // silently fail if disabled. see killInterpreter docs for details.
     if (! _restart) return;
@@ -292,7 +300,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException re) { _threwException(re); }
   }
   
-  /** @param show Whether to show a message if a reset operation fails. */
+  /** Blocks until the interpreter is connected.
+    * @param show Whether to show a message if a reset operation fails.
+    */
   public void setShowMessageOnResetFailure(boolean show) {
     // silently fail if disabled. see killInterpreter docs for details.
     if (! _restart) return;
@@ -322,7 +332,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCases
-   *  classes (by loading them)
+   *  classes (by loading them).  Blocks until the interpreter is connected and the operation completes.
    *  @param classNames the class names to run in a test
    *  @param files the associated file
    *  @return the class names that are actually test cases
@@ -425,7 +435,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //  }
   
   
-  /** Adds a named interpreter to the list.
+  /** Adds a named interpreter to the list.  Blocks until the interpreter is connected.
    *  @param name the unique name for the interpreter
    *  @throws IllegalArgumentException if the name is not unique
    */
@@ -439,9 +449,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException re) { _threwException(re);  }
   }
   
-  /** Removes the interpreter with the given name, if it exists.
-   *  @param name Name of the interpreter to remove
-   */
+  /** Removes the interpreter with the given name, if it exists.  Blocks until the
+    * interpreter is connected.
+    *  @param name Name of the interpreter to remove
+    */
   public void removeInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
     if (!_restart)  return;
@@ -455,11 +466,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException re) { _threwException(re); }
   }
   
-  /** Sets the current interpreter to the one specified by name
-   *  @param name the unique name of the interpreter to set active
-   *  @return Whether the new interpreter is currently processing an interaction (i.e., whether an interactionEnded
-   *          event will be fired)
-   */
+  /** Sets the current interpreter to the one specified by name.  Blocks until the interpreter
+    * is connected.
+    *  @param name the unique name of the interpreter to set active
+    *  @return Whether the new interpreter is currently processing an interaction
+    */
   public boolean setActiveInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
     if (!_restart) return false;
@@ -476,10 +487,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
   }
   
-  /** Sets the default interpreter to be the current one.
-   *  @return Whether the new interpreter is currently in progress with an interaction (ie. whether an 
-   *          interactionEnded event will be fired)
-   */
+  /** Sets the default interpreter to be the current one.  Blocks until the interpreter is
+    * connected.
+    *  @return Whether the new interpreter is currently in progress with an interaction
+    */
   public boolean setToDefaultInterpreter() {
     // silently fail if disabled. see killInterpreter docs for details.
     if (! _restart) return false;
@@ -683,7 +694,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _interactionsModel.replThrewException(msg.toString());
   }
   
-  /** Sets the interpreter to allow access to private members. TODO: synchronize? */
+  /** Sets the interpreter to allow access to private members. Blocks until an interpreter
+    * is connected.  TODO: synchronize?
+    */
   public void setPrivateAccessible(boolean allow) {
     // silently fail if disabled. see killInterpreter docs for details.
     if (!_restart) return;

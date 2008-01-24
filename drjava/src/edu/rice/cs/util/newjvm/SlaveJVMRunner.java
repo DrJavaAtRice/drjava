@@ -166,7 +166,7 @@ public final class SlaveJVMRunner {
         
         //Export slave object to RMI, passing stub to the master JVM (how does stub get there?  Transitivity?
 //        _log.log("Slave JVM exporting " + slave + " to RMI");
-        SlaveRemote slaveRemote = (SlaveRemote) UnicastRemoteObject.toStub(slave);  
+        SlaveRemote slaveRemote = (SlaveRemote) UnicastRemoteObject.exportObject(slave, 0);
         _log.log("SlaveJVMRunner exported stub " + slaveRemote);
 
         // start the slave and then notify the master
