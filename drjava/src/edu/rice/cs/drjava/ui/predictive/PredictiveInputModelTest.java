@@ -1039,4 +1039,35 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     assertEquals("F", pim.getMask());
     assertEquals(2, pim.getMatchingItems().size());
   }
+  
+  public void testRegExStrategy() {
+    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
+                                                                        new PredictiveInputModel.RegExStrategy<String>(),
+                                                                        "AboutDialog.java",
+                                                                        "FileOps.java",
+                                                                        "FileOpsTest.java",
+                                                                        "Utilities.java",
+                                                                        "NewFileOps.java");
+    pim.setMask("^F.*");
+    assertEquals("FileOps.java", pim.getCurrentItem());
+    assertEquals("^F.*", pim.getMask());
+    assertEquals(2, pim.getMatchingItems().size());
+
+    pim.setCurrentItem(pim.getCurrentItem());
+    assertEquals("FileOps.java", pim.getCurrentItem());
+    assertEquals("^F.*", pim.getMask());
+    assertEquals(2, pim.getMatchingItems().size());
+
+    List<String> m = pim.getMatchingItems();
+    int i = m.indexOf(pim.getCurrentItem());
+    pim.setCurrentItem(m.get(i+1));
+    assertEquals("FileOpsTest.java", pim.getCurrentItem());
+    assertEquals("^F.*", pim.getMask());
+    assertEquals(2, pim.getMatchingItems().size());
+
+    pim.setMask("[^F].*F.*");
+    assertEquals("NewFileOps.java", pim.getCurrentItem());
+    assertEquals("[^F].*F.*", pim.getMask());
+    assertEquals(1, pim.getMatchingItems().size());
+  }
 }
