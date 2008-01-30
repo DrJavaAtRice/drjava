@@ -28,7 +28,7 @@
 
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2007, JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without

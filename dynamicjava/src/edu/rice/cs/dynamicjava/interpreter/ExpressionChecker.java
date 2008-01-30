@@ -33,7 +33,7 @@
  *
  * DrJava Open Source License
  * 
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (C) 2001-2008 JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
@@ -59,7 +59,7 @@
  *     - Products derived from this software may not be called "DrJava" nor
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
+ *       drjava@rice.edu.
  * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 

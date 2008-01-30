@@ -3,7 +3,7 @@
  * This file is a part of DrJava. Current versions of this project are available
  * at http://sourceforge.net/projects/drjava
  *
- * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (C) 2001-2008 JavaPLT group at Rice University (drjava@rice.edu)
  *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  * or see http://www.gnu.org/licenses/gpl.html
  *
  * In addition, as a special exception, the JavaPLT group at Rice University
- * (javaplt@rice.edu) gives permission to link the code of DrJava with
+ * (drjava@rice.edu) gives permission to link the code of DrJava with
  * the classes in the gj.util package, even if they are provided in binary-only
  * form, and distribute linked combinations including the DrJava and the
  * gj.util package. You must obey the GNU General Public License in all
