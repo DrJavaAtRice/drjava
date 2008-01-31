@@ -653,7 +653,7 @@ public class JarOptionsDialog extends JFrame {
         _processingFrame.dispose();
         JarOptionsDialog.this.setEnabled(true);
         if (_success) {
-          if (_makeExecutable.isSelected()) {
+          if (_jarClasses.isSelected() && _makeExecutable.isSelected()) {
              Object[] options = { "OK", "Run" };
              int res = JOptionPane.showOptionDialog(JarOptionsDialog.this, "Jar file successfully written to '"+_jarFileSelector.getFileFromField().getName()+"'",
                                                     "Jar Creation Successful", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
