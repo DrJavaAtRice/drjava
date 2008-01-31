@@ -558,6 +558,17 @@ public final class IOUtil {
   }
   
   /**
+   * Reads the entire contents of a file and return it as a byte array.
+   * @throws  IOException  If the file does not exist or cannot be opened, or if an error occurs during reading
+   * @throws  SecurityException  If read access to the file is denied
+   */
+  public static byte[] toByteArray(File file) throws IOException {
+    FileInputStream input = new FileInputStream(file);
+    try { return toByteArray(input); }
+    finally { input.close(); }
+  }
+  
+  /**
    * Reads the entire contents of a file and return it as a StringBuffer.  (We use a StringBuffer rather than a
    * StringBuilder because that is what {@link StringWriter} supports.)
    * 
