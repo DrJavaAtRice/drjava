@@ -73,7 +73,8 @@ public class ElementaryLevelTest extends TestCase {
     
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5,
+                                                IterUtil.make(new File("lib/buildlib/junit.jar"))));
     
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
     assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());

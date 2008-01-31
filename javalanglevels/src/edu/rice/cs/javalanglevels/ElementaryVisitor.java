@@ -416,7 +416,7 @@ public class ElementaryVisitor extends LanguageLevelVisitor {
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _bv = new ElementaryVisitor(new File(""), errors, symbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
       _bv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _bv._resetNonStaticFields();
       _bv._importedPackages.addFirst("java.lang");

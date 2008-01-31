@@ -593,7 +593,7 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _av = new AdvancedVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
       _av.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _av._resetNonStaticFields();
       _av._importedPackages.addFirst("java.lang");

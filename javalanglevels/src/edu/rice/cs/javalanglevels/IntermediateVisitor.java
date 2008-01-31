@@ -442,7 +442,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _iv = new IntermediateVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
       _iv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _iv._resetNonStaticFields();
       _iv._importedPackages.addFirst("java.lang");

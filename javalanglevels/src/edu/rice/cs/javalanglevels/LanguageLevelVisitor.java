@@ -36,17 +36,19 @@
 
 package edu.rice.cs.javalanglevels;
 
-import org.apache.bcel.Repository;
-import org.apache.bcel.classfile.*;
-import org.apache.bcel.util.*;
-
+import org.objectweb.asm.*;
 import edu.rice.cs.javalanglevels.tree.*;
-import edu.rice.cs.javalanglevels.tree.SourceFile; // Resolve ambiguity
+import edu.rice.cs.javalanglevels.tree.Type; // resove ambiguity
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import edu.rice.cs.javalanglevels.parser.ParseException;
 import java.util.*;
 import java.io.*;
+import java.lang.reflect.Modifier;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.reflect.PathClassLoader;
+import edu.rice.cs.plt.reflect.EmptyClassLoader;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.io.IOUtil;
 
 import junit.framework.TestCase;
 
@@ -223,135 +225,116 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   }
   
   /**
-   * Use the BCEL class reader to read the class file corresponding to the class in
-   * the specified directory, and use the information from BCEL to build a SymbolData corresponding
-   * to teh class.
+   * Use the ASM class reader to read the class file corresponding to the class in
+   * the specified directory, and use the information from ASM to build a SymbolData corresponding
+   * to the class.
    * @param qualifiedClassName  The fully qualified class name of the class we are looking up
    * @param directoryName  The directory where the class is located.
    */
   private SymbolData _classFile2SymbolData(String qualifiedClassName, String directoryName) {
-    if (directoryName != null) {
-      // Add the current directory to the class path bcel uses to find class files.
-      ClassPath cp = new ClassPath(ClassPath.SYSTEM_CLASS_PATH + System.getProperty("path.separator") + directoryName);
-      SyntheticRepository sr = SyntheticRepository.getInstance(cp);
-      Repository.setRepository(sr);
-    }
+    Iterable<File> searchPath = IterUtil.compose(LanguageLevelConverter.OPT.bootClassPath(),
+                                                 LanguageLevelConverter.OPT.classPath());
+    if (directoryName != null) { searchPath = IterUtil.compose(searchPath, new File(directoryName)); }
     
-    JavaClass jc = Repository.lookupClass(qualifiedClassName);
-    if (jc == null) {
-      return null;
+    ClassReader reader = null;
+    try {
+      /** We'll use this class loader to look up resources (*not* to load classes) */
+      PathClassLoader loader = new PathClassLoader(EmptyClassLoader.INSTANCE, searchPath);
+      InputStream stream = loader.getResourceAsStream(qualifiedClassName.replace('.', '/') + ".class");
+      if (stream == null) { return null; }
+      // Let IOUtil handle the stream here, because it closes it when it's done, unlike ASM.
+      reader = new ClassReader(IOUtil.toByteArray(stream));
     }
-    
+    catch (IOException e) { return null; }
     
     //This is done so that the SymbolData in the Symboltable is updated and returned.
-    SymbolData sd = symbolTable.get(qualifiedClassName); 
-    if (sd == null) {
+    final SymbolData sd;
+    SymbolData sdLookup = symbolTable.get(qualifiedClassName); 
+    if (sdLookup == null) {
       sd = new SymbolData(qualifiedClassName);
       symbolTable.put(qualifiedClassName, sd);
     }
+    else { sd = sdLookup; }
     
     //make it be a non-continuation, since we are filing it in
     sd.setIsContinuation(false);
     
-    // Set the modifiers and visibility
-    sd.setMav(_createMav(jc));
+    final SourceInfo lookupInfo = _makeSourceInfo(qualifiedClassName);
+    final String unqualifiedClassName = getUnqualifiedClassName(qualifiedClassName);
     
-    // Set the fields
-    Field[] fields = jc.getFields();
-    for (int i = 0; i < fields.length; i++) {
-      String typeString = fields[i].getType().toString();
-      SymbolData type;
-      type = getSymbolDataForClassFile(typeString, _makeSourceInfo(qualifiedClassName));
+    ClassVisitor extractData = new ClassVisitor() {
       
-      // I assume we do not have to check for duplicate field names here since we're in a class file.
-      // Pass in true for the second argument because we don't want to generate an accessor if it's from a class file.
-      sd.addVar(new VariableData(fields[i].getName(), _createMav(fields[i]), type, true, sd)); //True by default
-    }
-    
-    // Set the methods
-    String unqualifiedClassName = getUnqualifiedClassName(qualifiedClassName);
-    Method[] methods = jc.getMethods();
-    //We use a label here so that if a parameter's type can't be resolved, we skip this method.
-    methodLoop: for (int i = 0; i < methods.length; i++) {
-      SymbolData returnType;
-      String methodName = methods[i].getName();
-      // Check for a constructor, BCEL has them as void methods named <init>.
-      if (methodName.equals("<init>")) {
-        // rename the name of the method to the unqualified class name and the return type to this SymbolData.
-        methodName = unqualifiedClassName;
-        returnType = sd;
-      }
-      else {
-        //System.out.println("Trying to resolve method return type.");
-        returnType = getSymbolDataForClassFile(methods[i].getReturnType().toString(), _makeSourceInfo(qualifiedClassName));
-      }
-      ExceptionTable eTable = methods[i].getExceptionTable();
-      // Get parameters
-      org.apache.bcel.generic.Type[] paramTypes = methods[i].getArgumentTypes();
-      LinkedList<VariableData> vdsList = new LinkedList<VariableData>();
-      for (int j = 0; j < paramTypes.length; j++) {
-        SymbolData tempSd = getSymbolDataForClassFile(paramTypes[j].toString(), _makeSourceInfo(qualifiedClassName));
-        if (tempSd == null) {
-
-          // see getSymbolDataForClassFile's comments to see why this check is necessary.
-          continue methodLoop;
+      public void visit(int version, int access, String name, String sig, String sup, String[] interfaces) {
+        sd.setMav(_createMav(access));
+        sd.setInterface(Modifier.isInterface(access));
+        
+        int slash = name.lastIndexOf('/');
+        if (slash == -1) { sd.setPackage(""); }
+        else { sd.setPackage(name.substring(0, slash).replace('/', '.')); }
+        
+        if (sup == null) { sd.setSuperClass(null); }
+        else { sd.setSuperClass(getSymbolDataForClassFile(sup.replace('/', '.'), lookupInfo)); }
+        
+        if (interfaces != null) {
+          for (String iName : interfaces) {
+            SymbolData superInterface = getSymbolDataForClassFile(iName.replace('/', '.'), lookupInfo);
+            if (superInterface != null) { sd.addInterface(superInterface); }
+          }
         }
-        vdsList.addLast(new VariableData(tempSd)); // a VariableData with only one argument is a parameter
       }
       
-      VariableData[] vds = (VariableData[]) vdsList.toArray(new VariableData[vdsList.size()]);
+      public FieldVisitor visitField(int access, String name, String desc, String sig, Object value) {
+        String typeString = org.objectweb.asm.Type.getType(desc).getClassName();
+        SymbolData type = getSymbolDataForClassFile(typeString, lookupInfo);
+        if (type != null) { sd.addVar(new VariableData(name, _createMav(access), type, true, sd)); }
+        return null;
+      }
       
-      // Get thrown exceptions
-      String[] throwStrings;
-      if (eTable != null) { 
-        throwStrings = eTable.getExceptionNames();
+      public MethodVisitor visitMethod(int access, String name, String desc, String sig, String[] exceptions) {
+        boolean valid = true;
+        String methodName;
+        SymbolData returnType;
+        if (name.equals("<init>")) {
+          methodName = unqualifiedClassName;
+          returnType = sd;
+        }
+        else {
+          methodName = name;
+          String returnString = org.objectweb.asm.Type.getReturnType(desc).getClassName();
+          returnType = getSymbolDataForClassFile(returnString, lookupInfo);
+          valid = valid && (returnType != null);
+        }
+        org.objectweb.asm.Type[] argTypes = org.objectweb.asm.Type.getArgumentTypes(desc);
+        VariableData[] args = new VariableData[argTypes.length]; 
+        for (int i = 0; i < argTypes.length; i++) {
+          SymbolData argType = getSymbolDataForClassFile(argTypes[i].getClassName(), lookupInfo);
+          if (argType == null) { valid = false; }
+          else { args[i] = new VariableData(argType); }
+        }
+        if (exceptions == null) { exceptions = new String[0]; }
+        for (int i = 0; i < exceptions.length; i++) {
+          exceptions[i] = exceptions[i].replace('/', '.');
+        }
+        
+        if (valid) {
+          MethodData m = new MethodData(methodName, _createMav(access), new TypeParameter[0], returnType,
+                                        args, exceptions, sd, null);
+          for (VariableData arg : args) { arg.setEnclosingData(m); }
+          sd.addMethod(m, false, true);
+        }
+        return null;
       }
-      else {
-        throwStrings = new String[0];
-      }
-      MethodData newMethod = new MethodData(methodName, 
-                                  _createMav(methods[i]), 
-                                  new TypeParameter[0], 
-                                  returnType, 
-                                  vds,
-                                  throwStrings,
-                                  sd,
-                                  null); // no SourceInfo
+      
+      public void visitSource(String source, String debug) {}
+      public void visitOuterClass(String owner, String name, String desc) {}
+      public AnnotationVisitor visitAnnotation(String desc, boolean visible) { return null; }
+      public void visitAttribute(Attribute attr) {}
+      public void visitInnerClass(String name, String outerName, String innerName, int access) {}
+      public void visitEnd() {}
 
-      
-      for (int k = 0; k<newMethod.getParams().length; k++) {
-        newMethod.getParams()[k].setEnclosingData(newMethod);
-      }
-
-      
-      sd.addMethod(newMethod, false, true);
-      
-
-    }
- 
-    // Set the superclass
-    JavaClass superClass = jc.getSuperClass();
-    if (superClass == null) {
-      sd.setSuperClass(null);
-    }
-    else {
-      sd.setSuperClass(getSymbolDataForClassFile(superClass.getClassName(), _makeSourceInfo(qualifiedClassName)));
-    }
+    };
+    reader.accept(extractData, ClassReader.SKIP_CODE);
     
-    // Set the interfaces
-    JavaClass[] interfaces = jc.getInterfaces();
-    if (interfaces != null) {
-      for (int i = 0; i < interfaces.length; i++) {
-        sd.addInterface(getSymbolDataForClassFile(interfaces[i].getClassName(), _makeSourceInfo(qualifiedClassName)));
-      }
-    }
-    
-    //Set the package
-    String pakage = jc.getPackageName();
-    sd.setPackage(pakage);
-    
-    //set the isInterface field  (if it's not a class, then it is an interface)
-    sd.setInterface(!jc.isClass());
 
     //Remove the class from the list of continuations to resolve.
     continuations.remove(qualifiedClassName);
@@ -425,7 +408,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   
   /**
    * Set resolve to true since we're in a superclass and should be
-   * able to find the class.  If the result is null, give an error if this is not a java class.
+   * able to find the class.  If the result is null, give an error.
    * Remove the symbol data from the continuations list, and return it.
    * @return the result of trying to resolve className.
    */
@@ -433,22 +416,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     SymbolData sd = getSymbolDataHelper(className, si, true, true, true, false);
 
     if (sd == null) {
-      // This should typically never happen.  However, I am getting a case where bcel finds that
-      // java.net.URL has a method called openConnection which takes in a java.net.Proxy.
-      // This method and class Proxy don't appear in any API I can find.  This causes a NoClassDefFoundError.
-      // For now, the offending method will be skipped if it came from a java class file but an error will
-      // be thrown otherwise since a user may have deleted a class file and should be notified.      
-      // We know that className is already qualified because it's coming from a class file.
-      // Adding sun.* because we can't find sun.reflect.ConstantPool for some reason 3.28.2004 JH
-      if (isJavaLibraryClass(className)) {
-        // don't throw an error
-      }
-      else {
-        // This is an error in the user's class file so throw an error.
-        // The NullLiteral is a hack to get a JExpression with the correct SourceInfo inside.
-        _addAndIgnoreError("Class " + className + " not found.", new NullLiteral(si));
-      }
-      // return null to tell _classFile2SymbolData to skip this method.
+      // This is an error in the user's class file so throw an error.
+      // The NullLiteral is a hack to get a JExpression with the correct SourceInfo inside.
+      _addAndIgnoreError("Class " + className + " not found.", new NullLiteral(si));
       return null;
     }
     sd.setIsContinuation(false);
@@ -841,8 +811,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     if (classFile.exists()) {
       // read this classfile, create the SymbolData and return it
-      // This is the only place we are using BCEL right now.  If there's a better way, we
-      // can remove the bcel.jar.
       sd = _classFile2SymbolData(qualifiedClassName, directoryName);
       if (sd == null) {
         if (addError) {
@@ -1164,43 +1132,21 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   }
   
   /**
-   * Creates a ModifiersAndVisibility from the provided AccessFlags.
+   * Creates a ModifiersAndVisibility from the provided modifier flags.
    */
-  private ModifiersAndVisibility _createMav(AccessFlags af) {
+  private ModifiersAndVisibility _createMav(int flags) {
     LinkedList<String> strings = new LinkedList<String>();
-    if (af.isAbstract()) {
-      strings.addLast("abstract");
-    }
-    if (af.isFinal()) {
-      strings.addLast("final");
-    }
-    if (af.isNative()) {
-      strings.addLast("native");
-    }
-    if (af.isPrivate()) {
-      strings.addLast("private");
-    }
-    if (af.isProtected()) {
-      strings.addLast("protected");
-    }
-    if (af.isPublic()) {
-      strings.addLast("public");
-    }
-    if (af.isStatic()) {
-      strings.addLast("static");
-    }
-    if (af.isStrictfp()) {
-      strings.addLast("strictfp");
-    }
-    if (af.isSynchronized()) {
-      strings.addLast("synchronized");
-    }
-    if (af.isTransient()) {
-      strings.addLast("transient");
-    }
-    if (af.isVolatile()) {
-      strings.addLast("volatile");
-    }
+    if (Modifier.isAbstract(flags)) { strings.addLast("abstract"); }
+    if (Modifier.isFinal(flags)) { strings.addLast("final"); }
+    if (Modifier.isNative(flags)) { strings.addLast("native"); }
+    if (Modifier.isPrivate(flags)) { strings.addLast("private"); }
+    if (Modifier.isProtected(flags)) { strings.addLast("protected"); }
+    if (Modifier.isPublic(flags)) { strings.addLast("public"); }
+    if (Modifier.isStatic(flags)) { strings.addLast("static"); }
+    if (Modifier.isStrict(flags)) { strings.addLast("strictfp"); }
+    if (Modifier.isSynchronized(flags)) { strings.addLast("synchronized"); }
+    if (Modifier.isTransient(flags)) { strings.addLast("transient"); }
+    if (Modifier.isVolatile(flags)) { strings.addLast("volatile"); }
     return new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, strings.toArray(new String[strings.size()]));
   }
       
@@ -2396,12 +2342,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertFalse("Should return a non-continuation", _llv.getSymbolDataForClassFile("java.lang.String", 
                                                                                     JExprParser.NO_SOURCE_INFO).isContinuation());
 
-      // Test that passing a java class that can't be found returns null but doesn't add an error.
-      assertEquals("Should return null with a java class that can't be found",
-                   null,
-                   _llv.getSymbolDataForClassFile("java.lang.Marge", JExprParser.NO_SOURCE_INFO));
-      assertEquals("There should be no errors", 0, errors.size());
-      
       // Test that passing a userclass that can't be found returns null and adds an error.
       assertEquals("Should return null with a user class that can't be found",
                    null,
@@ -2790,8 +2730,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     
     public void test_forModifiersAndVisibility() {
-      // create a dummy method which will be used for its access flags.
-      Method m = new Method();
       // Test access specifiers.
       _llv.forModifiersAndVisibility(_publicMav);
       _llv.forModifiersAndVisibility(_protectedMav);
