@@ -111,7 +111,7 @@ public class PathClassLoader extends ClassLoader {
         // functionality we need in URLClassLoader.findResource()
         URL url = f.toURI().toURL();
         // TODO: would it be useful to cache created URLClassLoaders for better performance?
-        URL result = new URLClassLoader(new URL[]{ url }).findResource(name);
+        URL result = new URLClassLoader(new URL[]{ url }, EmptyClassLoader.INSTANCE).findResource(name);
         if (result != null) { return result; }
       }
       catch (IllegalArgumentException e) { error.log(e); }
