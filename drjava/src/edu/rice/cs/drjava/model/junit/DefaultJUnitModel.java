@@ -62,12 +62,14 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 //import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.lambda.Box;
+import edu.rice.cs.plt.lambda.SimpleBox;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.swing.Utilities;
 
-import org.apache.bcel.classfile.*;
+import org.objectweb.asm.*;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -366,15 +368,28 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             // Finding the source file is non-trivial because it may be a language-levels file
             
             try {
-              JavaClass clazz = new ClassParser(entry.getCanonicalPath()).parse();
-              String className = clazz.getClassName(); // get classfile name
-//              System.err.println("looking for source file for: " + className);
-              int indexOfDot = className.lastIndexOf('.');
-              
+              final Box<String> className = new SimpleBox<String>();
+              final Box<String> sourceName = new SimpleBox<String>();
+              new ClassReader(IOUtil.toByteArray(entry)).accept(new ClassVisitor() {
+                public void visit(int version, int access, String name, String sig, String sup, String[] inters) {
+                  className.set(name);
+                }
+                public void visitSource(String source, String debug) {
+                  sourceName.set(source);
+                }
+                public void visitOuterClass(String owner, String name, String desc) {}
+                public AnnotationVisitor visitAnnotation(String desc, boolean visible) { return null; }
+                public void visitAttribute(Attribute attr) {}
+                public void visitInnerClass(String name, String out, String in, int access) {}
+                public FieldVisitor visitField(int a, String n, String d, String s, Object v) { return null; }
+                public MethodVisitor visitMethod(int a, String n, String d, String s, String[] e) { return null; }
+                public void visitEnd() {}
+              }, 0);
+
               File rootDir = classDirsAndRoots.get(dir);
               
               /** The canonical pathname for the file (including the file name) */
-              String javaSourceFileName = rootDir.getCanonicalPath() + File.separator + clazz.getSourceFileName();
+              String javaSourceFileName = rootDir.getCanonicalPath() + File.separator + sourceName.value();
 //              System.err.println("Full java source fileName = " + javaSourceFileName);
               
               /* The index in fileName of the dot preceding the extension ".java", ".dj0*, ".dj1", or ".dj2" */
@@ -396,12 +411,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               else continue; // no matching source file is open
               
               File sourceFile = new File(sourceFileName);
-              classNames.add(className);
+              classNames.add(className.value());
               files.add(sourceFile);
 //              System.err.println("Class " + className + "added to classNames.   File " + sourceFileName + " added to files.");
             }
             catch(IOException e) { /* ignore it; can't read class file */ }
-            catch(ClassFormatException e) { /* ignore it; class file is bad */ }
           }
         }
       }

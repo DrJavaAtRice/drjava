@@ -330,7 +330,7 @@ public class DefaultCompilerModel implements CompilerModel {
       
       final LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
       
-      List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors);
+      List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors, classPath, bootClassPath);
       
       if (errors.isEmpty()) {
         CompilerInterface compiler = getActiveCompiler();
@@ -358,11 +358,14 @@ public class DefaultCompilerModel implements CompilerModel {
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
-  private List<? extends File> _compileLanguageLevelsFiles(List<? extends File> files, List<CompilerError> errors) {
-    // TODO: The classpath (and sourcepath, bootclasspath) should be an argument passed to Language Levels.
-    LanguageLevelConverter llc = new LanguageLevelConverter(getActiveCompiler().version());
+  private List<? extends File> _compileLanguageLevelsFiles(List<? extends File> files, List<CompilerError> errors,
+                                                           Iterable<File> classPath, Iterable<File> bootClassPath) {
+    LanguageLevelConverter llc = new LanguageLevelConverter();
+    Options llOpts;
+    if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
+    else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
-      llc.convert(files.toArray(new File[0]));
+      llc.convert(files.toArray(new File[0]), llOpts);
     
     /* Rename any .dj0 files in files to be .java files, so the correct thing is compiled.  The hashset is used to 
      * make sure we never send in duplicate files. This can happen if the java file was sent in along with the 
