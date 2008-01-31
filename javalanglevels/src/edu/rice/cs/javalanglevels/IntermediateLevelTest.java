@@ -41,6 +41,8 @@ import junit.framework.TestCase;
 import java.util.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.io.IOUtil;
 
 /**
  * This is a high-level test to make sure that taking an Intermediate Level file from
@@ -72,9 +74,9 @@ public class IntermediateLevelTest extends TestCase {
 
     System.out.flush();
     
-    LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
+    LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(testFiles);
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
     
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
     
@@ -90,8 +92,8 @@ public class IntermediateLevelTest extends TestCase {
       if (correctFile.exists()) {
         try {
           assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                       readFileAsString(correctFile),
-                       readFileAsString(resultingFile));
+                       IOUtil.toString(correctFile),
+                       IOUtil.toString(resultingFile));
         }
         catch (IOException ioe) {
           fail(ioe.getMessage());
@@ -114,15 +116,15 @@ public class IntermediateLevelTest extends TestCase {
     LanguageLevelConverter llc;
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     for (int i = 0; i<testFiles.length; i++) {
-      llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
-      result = llc.convert(new File[] {testFiles[i]});
+      llc = new LanguageLevelConverter();
+      result = llc.convert(new File[] {testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
       assertTrue("should be parse exceptions or visitor exceptions in file " + testFiles[i].getName(), !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
     }
     
     /* Take care of the "references" directory */
-    llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
+    llc = new LanguageLevelConverter();
     File f = new File(new File(directory, "references"), "ReferencingClass.dj1");
-    result = llc.convert(new File[] { f });
+    result = llc.convert(new File[] { f }, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
     assertTrue("should be parse exceptions or visitor exceptions in file " + f.getName(), !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
   }
   
@@ -130,9 +132,9 @@ public class IntermediateLevelTest extends TestCase {
   /*Make sure that 1.4 augmentation rules are correctly followed for Yay.dj1*/
   public void test14Augmentation() {
         File[] arrayF = new File[]{ new File("testFiles/forIntermediateLevelTest/Yay.dj1")};
-      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_1_4);
+      LanguageLevelConverter llc = new LanguageLevelConverter();
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-      result = llc.convert(arrayF);
+      result = llc.convert(arrayF, new Options(JavaVersion.JAVA_1_4, IterUtil.<File>empty()));
       assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
       
       assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
@@ -146,37 +148,13 @@ public class IntermediateLevelTest extends TestCase {
         
       try {
         assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                     readFileAsString(correctFile),
-                     readFileAsString(resultingFile));
+                     IOUtil.toString(correctFile),
+                     IOUtil.toString(resultingFile));
         }
       catch (IOException ioe) {
         fail(ioe.getMessage());
         // let JUnit throw the exception
       }
   }
-  
-
-  
-  
-  /**
-   * Read the entire contents of a file and return them.  Copied from DrJava's FileOps.
-   */
-  public static String readFileAsString(final File file) throws IOException {
-    BufferedReader reader = new BufferedReader(new FileReader(file));
-    StringBuffer buf = new StringBuffer();
-
-    while (reader.ready()) {
-//      char c = (char) reader.read();
-//      buf.append(c);
-      String s = reader.readLine();
-      buf.append(s);
-    }
     
-
-    reader.close();
-    return buf.toString();
-  }
-
-  
-  
 }

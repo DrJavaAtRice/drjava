@@ -41,6 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.File;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import junit.framework.TestCase;
 
@@ -56,9 +57,6 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   
   /**True if we have an error we can't recover from*/
   static boolean _errorAdded;
-  
-  /**String representing the compiler version*/
-  static JavaVersion _targetVersion;
   
   /**The source file we are type checking*/
   File _file;
@@ -79,16 +77,16 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
    * @param errors  The list of errors that are encountered during type checking
    * @param importedFiles  The specific classes imported in the source file
    * @param importedPackages  The list of package names that are imported
-   * @param targetVersion  The version of the compiler that is being used.  Used to determine whether or not to do autoboxing.
    */
-  public TypeChecker(File file, String packageName, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable, LinkedList<String> importedFiles, LinkedList<String> importedPackages, JavaVersion targetVersion) {
+  public TypeChecker(File file, String packageName, LinkedList<Pair<String, JExpressionIF>> errors,
+                     Symboltable symbolTable, LinkedList<String> importedFiles,
+                     LinkedList<String> importedPackages) {
     _file = file;
     _package = packageName;
     this.errors = errors;
     this.symbolTable = symbolTable;
     this._importedFiles = importedFiles;
     this._importedPackages = importedPackages;
-    this._targetVersion=targetVersion;
   }
   
   /**
@@ -447,8 +445,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       for (int i = 0; i < bestParams.length; i++) {
         SymbolData bp = best.getParams()[i].getType().getSymbolData();
         SymbolData cp = curr.getParams()[i].getType().getSymbolData();
-        boolean fromCurrToBest = cp.isAssignableTo(bp, _targetVersion);
-        boolean fromBestToCurr = bp.isAssignableTo(cp, _targetVersion);
+        boolean fromCurrToBest = cp.isAssignableTo(bp, LanguageLevelConverter.OPT.javaVersion());
+        boolean fromBestToCurr = bp.isAssignableTo(cp, LanguageLevelConverter.OPT.javaVersion());
         bestParams[i] = bp;
         currParams[i] = cp;
                   
@@ -466,8 +464,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         if (Arrays.equals(bestParams, currParams)) {
           SymbolData c1 = best.getSymbolData();
           SymbolData c2 = curr.getSymbolData();
-          boolean c1IsSuperOrSame = c2.isAssignableTo(c1, _targetVersion);
-          boolean c2IsSuperOrSame = c1.isAssignableTo(c2, _targetVersion);
+          boolean c1IsSuperOrSame = c2.isAssignableTo(c1, LanguageLevelConverter.OPT.javaVersion());
+          boolean c2IsSuperOrSame = c1.isAssignableTo(c2, LanguageLevelConverter.OPT.javaVersion());
           if (c1IsSuperOrSame && !c2IsSuperOrSame) { // c2 is more specific
             best = curr;
             continue;
@@ -797,7 +795,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   protected boolean _isAssignableFrom(SymbolData sdLeft, SymbolData sdRight) {
     
     if (sdRight == null) {return false;}
-    return sdRight.isAssignableTo(sdLeft, _targetVersion);
+    return sdRight.isAssignableTo(sdLeft, LanguageLevelConverter.OPT.javaVersion());
 
   }
   
@@ -1290,7 +1288,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       LanguageLevelVisitor.symbolTable = symbolTable;
 
       _btc = new TypeChecker(new File(""), "", new LinkedList<String>(), new LinkedList<String>());
-      _btc._targetVersion = JavaVersion.JAVA_5;
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
       _btc._importedPackages.addFirst("java.lang");
       _errorAdded = false;
       _sd1 = new SymbolData("i.like.monkey");
@@ -1729,9 +1727,6 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   
     
     public void test_isAssignableFrom() {
-      JavaVersion currentProperty = _targetVersion;
-      _targetVersion = JavaVersion.JAVA_5;
-      
       assertTrue("Should be assignable.", _btc._isAssignableFrom(SymbolData.DOUBLE_TYPE, symbolTable.get("java.lang.Double")));
       assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), SymbolData.FLOAT_TYPE));
       assertTrue("Should be assignable.", _btc._isAssignableFrom(SymbolData.DOUBLE_TYPE, symbolTable.get("java.lang.Long")));
@@ -1780,7 +1775,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 
       
       //System.setProperty("java.specification.version", "1.4");
-      _targetVersion = JavaVersion.JAVA_1_4;
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_1_4, IterUtil.<File>empty());
       assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), SymbolData.INT_TYPE));
       assertFalse("Should not be assignable.", _btc._isAssignableFrom(SymbolData.DOUBLE_TYPE, symbolTable.get("java.lang.Short")));
       assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), symbolTable.get("java.lang.Character")));
@@ -1800,8 +1795,6 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       myData.addInterface(yourData);
       yourData.setIsContinuation(false);
       assertTrue("Should be assignable", _btc._isAssignableFrom(yourData, myData));
-      
-      _targetVersion = currentProperty;
     }
     
     

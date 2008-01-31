@@ -36,59 +36,31 @@
 
 package edu.rice.cs.javalanglevels;
 
-import java.io.*;
-
-import edu.rice.cs.javalanglevels.tree.*;
-import edu.rice.cs.javalanglevels.parser.*;
-
-import junit.framework.TestCase;
+import java.io.File;
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
-/**
- * Test the JExprParser by trying to parse all files in the testFiles directory that end in .test,
- * writing the output to a file of the same name ending in .actual, and comparing that file to 
- * the file of the same name in the testFiles directory that ends with .expected
- */
-public class JExprParserTest extends TestCase {
+public class Options {
   
-  /**
-   * Takes an array of test files and feeds them into the JExprParser.  These files should
-   * succeed.
-   */
-  public void testParseSucceeds() throws IOException, ParseException {
-    File directory = new File("testFiles");
-
-    File[] testFiles = directory.listFiles(new FileFilter() {
-      public boolean accept(File pathName) {
-        return pathName.getAbsolutePath().endsWith(".test");
-      }
-    });
-
-    for(int i = 0; i < testFiles.length; i++) {
-      File currFile = testFiles[i];
-      SourceFile sf = null;
-      try {
-        sf = new JExprParser(currFile).SourceFile();
-      }
-      catch (ParseException pe) {
-        throw pe;
-      }
-
-      String path2 = currFile.getAbsolutePath();
-      int indexOfLastDot2 = path2.lastIndexOf('.');
-      String newPath2 = path2.substring(0, indexOfLastDot2) + ".actual";
-      FileWriter fw = new FileWriter(newPath2);
-      fw.write(sf.toString());
-      fw.close();
-      
-      // Get the corresponding expected String value for the toString of the SourceFile.
-      String path = currFile.getAbsolutePath();
-      int indexOfLastDot = path.lastIndexOf('.');
-      String newPath = path.substring(0, indexOfLastDot) + ".expected";
-      File f = new File(newPath);
-      String text = IOUtil.toString(f);
-      assertEquals("The resulting SourceFile generated from " + currFile + " is not correct.", text, sf.toString());
-    }
+  private final JavaVersion _javaVersion;
+  private final Iterable<? extends File> _bootClassPath;
+  private final Iterable<? extends File> _classPath;
+  
+  public static final Options DEFAULT = new Options(JavaVersion.JAVA_1_4, IterUtil.<File>empty());
+  
+  public Options(JavaVersion javaVersion, Iterable<? extends File> classPath) {
+    this(javaVersion, classPath, IOUtil.parsePath(System.getProperty("sun.boot.class.path", "")));
   }
-
+  
+  public Options(JavaVersion javaVersion, Iterable<? extends File> classPath,
+                 Iterable<? extends File> bootClassPath) {
+    _javaVersion = javaVersion;
+    _classPath = classPath;
+    _bootClassPath = bootClassPath;
+  }
+  
+  public JavaVersion javaVersion() { return _javaVersion; }
+  public Iterable<? extends File> bootClassPath() { return _bootClassPath; }
+  public Iterable<? extends File> classPath() { return _classPath; }
 }

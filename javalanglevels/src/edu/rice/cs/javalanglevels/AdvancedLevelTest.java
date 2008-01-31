@@ -41,6 +41,8 @@ import junit.framework.TestCase;
 import java.util.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.io.IOUtil;
 
 /**
  * This is a high-level test to make sure that taking an Advanced Level file from
@@ -74,9 +76,9 @@ import edu.rice.cs.plt.reflect.JavaVersion;
     });
     
     
-    LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
+    LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(testFiles);
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
     
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
     assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
@@ -93,8 +95,8 @@ import edu.rice.cs.plt.reflect.JavaVersion;
       if (correctFile.exists()) {
         try {
           assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                       readFileAsString(correctFile),
-                       readFileAsString(resultingFile));
+                       IOUtil.toString(correctFile),
+                       IOUtil.toString(resultingFile));
         }
         catch (IOException ioe) {
           fail(ioe.getMessage());
@@ -123,8 +125,8 @@ import edu.rice.cs.plt.reflect.JavaVersion;
         if (correctFile.exists()) {
           try {
             assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                         readFileAsString(correctFile),
-                         readFileAsString(resultingFile));
+                         IOUtil.toString(correctFile),
+                         IOUtil.toString(resultingFile));
           }
           catch (IOException ioe) {
             fail(ioe.getMessage());
@@ -157,8 +159,8 @@ import edu.rice.cs.plt.reflect.JavaVersion;
           if (correctFile.exists()) {
             try {
               assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                           readFileAsString(correctFile),
-                           readFileAsString(resultingFile));
+                           IOUtil.toString(correctFile),
+                           IOUtil.toString(resultingFile));
             }
             catch (IOException ioe) {
               fail(ioe.getMessage());
@@ -182,10 +184,10 @@ import edu.rice.cs.plt.reflect.JavaVersion;
       public boolean accept(File pathName) {
         return pathName.getAbsolutePath().endsWith(".dj2");
       }});
-      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
+      LanguageLevelConverter llc = new LanguageLevelConverter();
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       for (int i = 0; i<testFiles.length; i++) {
-        result = llc.convert(new File[]{testFiles[i]});
+        result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
         assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
       }
     
@@ -202,11 +204,11 @@ import edu.rice.cs.plt.reflect.JavaVersion;
         return pathName.getAbsolutePath().endsWith(".dj2");
       }});
 
-      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
+      LanguageLevelConverter llc = new LanguageLevelConverter();
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       for (int i = 0; i<testFiles.length; i++) {
         LanguageLevelVisitor._errorAdded = false;
-        result = llc.convert(new File[]{testFiles[i]});
+        result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
         assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
       }
   }
@@ -223,10 +225,10 @@ import edu.rice.cs.plt.reflect.JavaVersion;
         return pathName.getAbsolutePath().endsWith("SwitchDoesntAssign.dj2");
       }});
 
-      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
+      LanguageLevelConverter llc = new LanguageLevelConverter();
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
       for (int i = 0; i<testFiles.length; i++) {
-        result = llc.convert(new File[]{testFiles[i]});
+        result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
         assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
       }
   }  
@@ -243,31 +245,15 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 
           System.out.flush();
 
-      LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.JAVA_5);
+      LanguageLevelConverter llc = new LanguageLevelConverter();
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-      result = llc.convert(testFiles);
+      result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
       
       assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
       
       assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
 
       //don't worry about checking the .java files for correctness...just make sure there weren't any exceptions
-      }
-  
-  /**
-   * Read the entire contents of a file and return them.  Copied from DrJava's FileOps.
-   */
-  public static String readFileAsString(final File file) throws IOException {
-    BufferedReader reader = new BufferedReader(new FileReader(file));
-    StringBuffer buf = new StringBuffer();
-
-    while (reader.ready()) {
-      String s = reader.readLine();
-      buf.append(s);
-    }
-
-    reader.close();
-    return buf.toString();
   }
-
+  
 }

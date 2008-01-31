@@ -41,6 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import junit.framework.TestCase;
 
@@ -130,7 +131,7 @@ public class VoidMethodsNotAllowedClassBodyTypeChecker extends ClassBodyTypeChec
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       symbolTable = new Symboltable();
       _cbbtc = new VoidMethodsNotAllowedClassBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>(), "Intermediate");    
-      _cbbtc._targetVersion = JavaVersion.JAVA_5;
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
     }
     
     public void testForConcreteMethodDef() {

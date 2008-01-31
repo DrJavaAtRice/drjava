@@ -42,6 +42,7 @@ import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
 
 /**
  * This class represents the mechanism by which we convert a language level file to a .java file of the same name by
@@ -49,6 +50,9 @@ import edu.rice.cs.plt.reflect.JavaVersion;
  * ElementaryLevelTest, and IntermediateLevelTest.
  */
 public class LanguageLevelConverter {
+
+  public static Options OPT = Options.DEFAULT;
+    
   /* For Corky's version: set this to false */
   private static final boolean SAFE_SUPPORT_CODE = false;
   
@@ -57,19 +61,6 @@ public class LanguageLevelConverter {
   
   /**Holds any visitor exceptions that are encountered*/
   private LinkedList<Pair<String, JExpressionIF>> _visitorErrors = new LinkedList<Pair<String, JExpressionIF>>();
-  
-  /**The java version of the compiler*/
-  private JavaVersion _targetVersion;
-  
-  /**By default, let the version be 1.4.2*/
-  public LanguageLevelConverter() {
-    _targetVersion = JavaVersion.JAVA_1_4;
-  }
-  
-  /**Set the target version to what is specified by the user's compiler*/
-  public LanguageLevelConverter(JavaVersion targetJavaVersion) {
-    _targetVersion = targetJavaVersion;
-  }
   
   /***Add the parse exception to the list of parse exceptions*/
   private void _addParseException(ParseException pe) {
@@ -85,7 +76,9 @@ public class LanguageLevelConverter {
   }
   
   /**Parse, Visit, Type Check, and Convert any language level files in the array of files*/
-  public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> convert(File[] files) {
+  public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
+  convert(File[] files, Options options) {
+    OPT = options;
     LanguageLevelVisitor._newSDs=new Hashtable<SymbolData, LanguageLevelVisitor>(); /**initialize so we don't get null pointer exception*/
     // We need a LinkedList for errors to be shared by the visitors to each file.
     LinkedList<Pair<String, JExpressionIF>> languageLevelVisitorErrors = new LinkedList<Pair<String, JExpressionIF>>();
@@ -163,13 +156,13 @@ public class LanguageLevelConverter {
           //Now create a LanguageLevelVisitor to do the first pass over the file.
           LanguageLevelVisitor llv = null;
           if (isElementaryFile(f)) {
-            llv = new ElementaryVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), languageLevelVisitedFiles, languageLevelNewSDs, _targetVersion);
+            llv = new ElementaryVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), languageLevelVisitedFiles, languageLevelNewSDs);
           }
           else if (isIntermediateFile(f)) {
-            llv = new IntermediateVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), languageLevelVisitedFiles, languageLevelNewSDs, _targetVersion);
+            llv = new IntermediateVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), languageLevelVisitedFiles, languageLevelNewSDs);
           }
           else if (isAdvancedFile(f)) {
-            llv = new AdvancedVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), languageLevelVisitedFiles, languageLevelNewSDs, _targetVersion);
+            llv = new AdvancedVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), languageLevelVisitorSymbolTable, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), languageLevelVisitedFiles, languageLevelNewSDs);
           }
           else {
             throw new RuntimeException("Internal Bug: Invalid file format not caught initially.  Please report this bug.");
@@ -258,7 +251,7 @@ public class LanguageLevelConverter {
               
               
               // Type check.
-              TypeChecker btc = new TypeChecker(llv._file, llv._package, llv.errors, llv.symbolTable, llv._importedFiles, llv._importedPackages, _targetVersion);
+              TypeChecker btc = new TypeChecker(llv._file, llv._package, llv.errors, llv.symbolTable, llv._importedFiles, llv._importedPackages);
               sf.visit(btc);
               if (btc.errors.size() > 0) {
                 _visitorErrors.addAll(btc.errors);
@@ -339,7 +332,7 @@ public class LanguageLevelConverter {
             BufferedReader br = new BufferedReader(new FileReader(f));
             BufferedWriter bw = new BufferedWriter(new FileWriter(augmentedFile));
             
-            Augmentor a = new Augmentor(_targetVersion, SAFE_SUPPORT_CODE, br, bw, llv);
+            Augmentor a = new Augmentor(SAFE_SUPPORT_CODE, br, bw, llv);
             sf.visit(a);
             
             br.close();
@@ -404,14 +397,14 @@ public class LanguageLevelConverter {
   
   /**Do a conversion from the command line, to allow quick testing*/
   public static void main(String[] args) {
-    LanguageLevelConverter llc = new LanguageLevelConverter(JavaVersion.CURRENT);
+    LanguageLevelConverter llc = new LanguageLevelConverter();
     File[] files = new File[args.length];
     for (int i = 0; i < args.length; i++) {
       files[i] = new File(args[i]);
     }
     
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result = 
-        llc.convert(files);
+        llc.convert(files, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
     System.out.println(result.getFirst().size() + result.getSecond().size() + " errors.");
     for(JExprParseException p : result.getFirst()) {
       System.out.println(p);

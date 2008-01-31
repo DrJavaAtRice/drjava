@@ -84,9 +84,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /**True once we have encountered an error we cannot recover from.*/
   static boolean _errorAdded;
   
-  /**The version of the compiler used.*/
-  static JavaVersion targetVersion;
-  
   /**The source file that is being compiled */
   File _file;
   
@@ -757,13 +754,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         LanguageLevelVisitor lv;
         
         if (LanguageLevelConverter.isElementaryFile(sourceFile)) {
-          lv = new ElementaryVisitor(sourceFile, errors, symbolTable, continuations, visitedFiles, _newSDs, targetVersion);
+          lv = new ElementaryVisitor(sourceFile, errors, symbolTable, continuations, visitedFiles, _newSDs);
         }
         else if (LanguageLevelConverter.isIntermediateFile(sourceFile)) {
-          lv = new IntermediateVisitor(sourceFile, errors, symbolTable, continuations, visitedFiles, _newSDs, targetVersion);
+          lv = new IntermediateVisitor(sourceFile, errors, symbolTable, continuations, visitedFiles, _newSDs);
         }
         else if (LanguageLevelConverter.isAdvancedFile(sourceFile)) {
-          lv = new AdvancedVisitor(sourceFile, errors, symbolTable, continuations, visitedFiles, _newSDs, targetVersion);
+          lv = new AdvancedVisitor(sourceFile, errors, symbolTable, continuations, visitedFiles, _newSDs);
         }
         else {
           throw new RuntimeException("Internal Program Error: Invalid file format not caught initially" + sourceFile.getName() + ". Please report this bug");
@@ -823,7 +820,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
             }
           }
           
-          sf.visit(new TypeChecker(sourceFile, newPackage, errors, symbolTable, lv._importedFiles, lv._importedPackages, JavaVersion.JAVA_5));
+          sf.visit(new TypeChecker(sourceFile, newPackage, errors, symbolTable, lv._importedFiles, lv._importedPackages));
         }
         
         // will this put entries into the symbol table that this class shouldn't be able to see?
@@ -2371,7 +2368,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                                  new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
       
       // Use a ElementaryVisitor so lookupFromClassesToBeParsed will actually visit the ClassDef.
-      ElementaryVisitor bv = new ElementaryVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), targetVersion);
+      ElementaryVisitor bv = new ElementaryVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
       
       // Test that passing resolve equals false returns a continuation.
       assertTrue("Should return a continuation", _llv._lookupFromClassesToBeParsed("Lisa", JExprParser.NO_SOURCE_INFO, false).isContinuation());
@@ -2705,7 +2702,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       symbolTable.put("fully.qualified.Qwerty", sd);
       _llv._classNamesInThisFile.addLast("fully.qualified.Qwerty");
       // Use a ElementaryVisitor so lookupFromClassesToBeParsed will actually visit the ClassDef.
-      ElementaryVisitor bv = new ElementaryVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), _newSDs, targetVersion);
+      ElementaryVisitor bv = new ElementaryVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), _newSDs);
       bv._package = "fully.qualified";
       bv._file = new File("testFiles/fully/qualified/Fake.dj0");
       _llv._classesToBeParsed.put("fully.qualified.Qwerty", 

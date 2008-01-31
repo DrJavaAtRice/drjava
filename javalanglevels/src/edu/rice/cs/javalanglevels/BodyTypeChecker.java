@@ -41,6 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import junit.framework.TestCase;
 
@@ -248,7 +249,7 @@ public class BodyTypeChecker extends Bob {
       if (!condition_result.isInstanceType()) {
         _addError("This for-statement's conditional expression must be a boolean value. Instead, it is a class or interface name", that);
       }
-      else if (!condition_result.getSymbolData().isBooleanType(_targetVersion)) {
+      else if (!condition_result.getSymbolData().isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
         _addError("This for-statement's conditional expression must be a boolean value. Instead, its type is " + condition_result.getName(), that);
       }
     }
@@ -296,7 +297,7 @@ public class BodyTypeChecker extends Bob {
       if (!testExpression_result.isInstanceType()) {
         _addError("This if-then-statement's conditional expression must be a boolean value. Instead, it is a class or interface name", that);
       }
-      else if (!testExpression_result.getSymbolData().isBooleanType(_targetVersion)) {
+      else if (!testExpression_result.getSymbolData().isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
         _addError("This if-then-statement's conditional expression must be a boolean value. Instead, its type is " + testExpression_result.getName(), that.getTestExpression());
       }
     }
@@ -357,7 +358,7 @@ public class BodyTypeChecker extends Bob {
       if (!testExpression_result.isInstanceType()) {
         _addError("This if-then-else statement's conditional expression must be a boolean value. Instead, it is a class or interface name", that);
       }
-      else if (!testExpression_result.getSymbolData().isBooleanType(_targetVersion)) {
+      else if (!testExpression_result.getSymbolData().isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
         _addError("This if-then-else statement's conditional expression must be a boolean value. Instead, its type is " + testExpression_result.getName(), that.getTestExpression());
       }
     }
@@ -414,7 +415,7 @@ public class BodyTypeChecker extends Bob {
       if (!condition_result.isInstanceType()) {
         _addError("This while-statement's conditional expression must be a boolean value. Instead, it is a class or interface name", that);
       }
-      else if (!condition_result.getSymbolData().isBooleanType(_targetVersion)) {
+      else if (!condition_result.getSymbolData().isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
         _addError("This while-statement's conditional expression must be a boolean value. Instead, its type is " + condition_result.getName(), that.getCondition());
       }
     }
@@ -460,7 +461,7 @@ public class BodyTypeChecker extends Bob {
       if (!condition_result.isInstanceType()) {
         _addError("This do-statement's conditional expression must be a boolean value. Instead, it is a class or interface name", that.getCondition());
       }
-      else if (!condition_result.getSymbolData().isBooleanType(_targetVersion)) {
+      else if (!condition_result.getSymbolData().isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
         _addError("This do-statement's conditional expression must be a boolean value. Instead, its type is " + condition_result.getName(), that.getCondition());
       }
     }
@@ -1077,7 +1078,7 @@ public class BodyTypeChecker extends Bob {
       _bd1.addVars(((MethodData)_bd1).getParams());
       _bd2.addVars(((MethodData)_bd2).getParams());
       _bbtc = new BodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData,JExpression>>());
-      _bbtc._targetVersion = JavaVersion.JAVA_5;
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
       _bbtc._importedPackages.addFirst("java.lang");
     }
     

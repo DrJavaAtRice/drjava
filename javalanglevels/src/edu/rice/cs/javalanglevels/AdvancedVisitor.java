@@ -41,6 +41,7 @@ import edu.rice.cs.javalanglevels.parser.*;
 import java.util.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import junit.framework.TestCase;
 
@@ -74,12 +75,12 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
    * @param continuations  The table of classes we have encountered but still need to resolve
    * @param visitedFiles  The list of files we have visited
    * @param newSDs  The new symbol datas we have created (that will need to have constructors created for them after this pass is finished)
-   * @param targetVersion  The version of the Java compiler ("1.4", "1.5", etc) that the user is using.  Important for doing autoboxing.
-
    */
-  public AdvancedVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations, LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles, Hashtable<SymbolData, LanguageLevelVisitor> newSDs, JavaVersion targetVersion) {
+  public AdvancedVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable,
+                         Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
+                         LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles,
+                         Hashtable<SymbolData, LanguageLevelVisitor> newSDs) {
     super(file, "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), continuations);
-    this.targetVersion = targetVersion;
     this.errors = errors;
     this.symbolTable = symbolTable;
     this.visitedFiles= visitedFiles;//new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
@@ -591,7 +592,8 @@ public class AdvancedVisitor extends LanguageLevelVisitor {
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _av = new AdvancedVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>(), JavaVersion.JAVA_5);
+      _av = new AdvancedVisitor(new File(""), errors, symbolTable, continuations, new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
       _av.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _av._resetNonStaticFields();
       _av._importedPackages.addFirst("java.lang");

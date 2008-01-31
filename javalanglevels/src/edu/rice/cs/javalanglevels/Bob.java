@@ -41,6 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.File;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import junit.framework.TestCase;
 
@@ -364,7 +365,7 @@ public class Bob extends TypeChecker {
         thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); //incorporate the things that were assigned in the expression here
         if (result[i] != null) {
           if (assertFound(result[i], (JExpression) that.getItems()[i])) {
-            if (!result[i].getSymbolData().isAssignableTo(elementType, _targetVersion)) {
+            if (!result[i].getSymbolData().isAssignableTo(elementType, LanguageLevelConverter.OPT.javaVersion())) {
               _addError("The elements of this initializer should have type " + elementType.getName() + " but element " + i + " has type " + result[i].getSymbolData().getName(), (JExpression) that.getItems()[i]);
             }
             else {
@@ -587,8 +588,8 @@ public class Bob extends TypeChecker {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       symbolTable = new Symboltable();
       _b = new Bob(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      _b._targetVersion = JavaVersion.JAVA_5;
-      _b._importedPackages.addFirst("java.lang");
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+        _b._importedPackages.addFirst("java.lang");
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");
       _sd3 = new SymbolData("zebra");

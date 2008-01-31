@@ -41,6 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.File;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import junit.framework.TestCase;
 
@@ -98,7 +99,7 @@ public class ExpressionTypeChecker extends Bob {
         assertInstanceType(value_result, "You cannot use the type name " + value_result.getName() + " on the right hand side of an assignment", that)) {
       
       //make sure the rhs can be assigned to the lhs
-      if (!value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), _targetVersion)) {
+      if (!value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), LanguageLevelConverter.OPT.javaVersion())) {
         _addError("You cannot assign something of type " + value_result.getName() + " to something of type " + name_result.getName(), that);
       }
     }   
@@ -137,7 +138,7 @@ public class ExpressionTypeChecker extends Bob {
     //need to see if rhs is a String.
     SymbolData string = getSymbolData("java.lang.String", that, false, false);
 
-    if (name_result.getSymbolData().isAssignableTo(string, _targetVersion)) {
+    if (name_result.getSymbolData().isAssignableTo(string, LanguageLevelConverter.OPT.javaVersion())) {
       //the rhs is a String, so just make sure they are both instance types.
       assertInstanceType(name_result, "The arguments to a Plus Assignment Operator (+=) must both be instances, but you have specified a type name", that);
       assertInstanceType(value_result, "The arguments to a Plus Assignment Operator (+=) must both be instances, but you have specified a type name", that);
@@ -145,12 +146,13 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     else { //neither is a string, so they must both be numbers
-      if (!name_result.getSymbolData().isNumberType(_targetVersion) || !value_result.getSymbolData().isNumberType(_targetVersion)) {
+      if (!name_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion()) ||
+          !value_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
         _addError("The arguments to the Plus Assignment Operator (+=) must either include an instance of a String or both be numbers.  You have specified arguments of type " + name_result.getName() + " and " + value_result.getName(), that);
         return string.getInstanceData(); //return String by default
       }
       
-      else if (!value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), _targetVersion)) {
+      else if (!value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), LanguageLevelConverter.OPT.javaVersion())) {
         _addError("You cannot increment something of type " + name_result.getName() + " with something of type " + value_result.getName(), that);
       }
       
@@ -230,18 +232,18 @@ public class ExpressionTypeChecker extends Bob {
       
       boolean error = false;
       //make sure that both lhs and rhs are number types:
-      if (!name_result.getSymbolData().isNumberType(_targetVersion)) {
+      if (!name_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
         _addError("The left side of this expression is not a number.  Therefore, you cannot apply a numeric assignment (-=, %=, *=, /=) to it", that);
         error=true;
       }
-      if (!value_result.getSymbolData().isNumberType(_targetVersion)) {
+      if (!value_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
         _addError("The right side of this expression is not a number.  Therefore, you cannot apply a numeric assignment (-=, %=, *=, /=) to it", that);
         error = true;
       }
             
       //make sure the lhs is parent type of rhs  NOTE: technically, this is allowable in full java (try int i = 0; i+= 4.2), but it is inconsistent
       //with the fact that you cannot say int i = 0; i = i + 4.2;  To avoid student confusion, we will not allow it.
-      if (!error && !value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), _targetVersion)) {
+      if (!error && !value_result.getSymbolData().isAssignableTo(name_result.getSymbolData(), LanguageLevelConverter.OPT.javaVersion())) {
         _addError("You cannot use a numeric assignment (-=, %=, *=, /=) on something of type " + name_result.getName() + " with something of type " + value_result.getName(), that);
       }
     }  
@@ -279,13 +281,13 @@ public class ExpressionTypeChecker extends Bob {
     }
    
     if (assertInstanceType(left_result, "The left side of this expression is a type, not an instance", that) &&
-        !left_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, _targetVersion)) {
+        !left_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, LanguageLevelConverter.OPT.javaVersion())) {
       
       _addError("The left side of this expression is not a boolean value.  Therefore, you cannot apply a Boolean Operator (&&, ||) to it", that);
     }
     
     if (assertInstanceType(right_result, "The right side of this expression is a type, not an instance", that) &&
-        !right_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, _targetVersion)) {
+        !right_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, LanguageLevelConverter.OPT.javaVersion())) {
       
       _addError("The right side of this expression is not a boolean value.  Therefore, you cannot apply a Boolean Operator (&&, ||) to it", that);
     }
@@ -321,8 +323,10 @@ public class ExpressionTypeChecker extends Bob {
     
     //if either left or right are primitive, the must either be both numeric or both boolean
     if (left_result.getSymbolData().isPrimitiveType() || right_result.getSymbolData().isPrimitiveType()) {
-      if (!((left_result.getSymbolData().isNumberType(_targetVersion) && right_result.getSymbolData().isNumberType(_targetVersion)) ||
-            (left_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, _targetVersion) && right_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, _targetVersion)))) {
+      if (!((left_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion()) &&
+             right_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) ||
+            (left_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, LanguageLevelConverter.OPT.javaVersion())
+               && right_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, LanguageLevelConverter.OPT.javaVersion())))) {
         _addError("At least one of the arguments to this Equality Operator (==, !=) is primitive.  Therefore, they must either both be number types or both be boolean types.  You have specified expressions with type " + left_result.getName() + " and " + right_result.getName(), that);
       }
     }
@@ -352,14 +356,14 @@ public class ExpressionTypeChecker extends Bob {
     }
 
     
-    if (!left_result.getSymbolData().isNumberType(_targetVersion)) {
+    if (!left_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
       _addError("The left side of this expression is not a number.  Therefore, you cannot apply a Comparison Operator (<, >; <=, >=) to it", that);
     }
     else {
       assertInstanceType(left_result, "The left side of this expression is a type, not an instance", that);
     }
 
-    if (!right_result.getSymbolData().isNumberType(_targetVersion)) {
+    if (!right_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
       _addError("The right side of this expression is not a number.  Therefore, you cannot apply a Comparison Operator (<, >; <=, >=) to it", that);
     }
     else {
@@ -396,7 +400,8 @@ public class ExpressionTypeChecker extends Bob {
     
     SymbolData string = getSymbolData("java.lang.String", that, false, false);
 
-    if (left_result.getSymbolData().isAssignableTo(string, _targetVersion) || right_result.getSymbolData().isAssignableTo(string, _targetVersion)) {
+    if (left_result.getSymbolData().isAssignableTo(string, LanguageLevelConverter.OPT.javaVersion()) ||
+        right_result.getSymbolData().isAssignableTo(string, LanguageLevelConverter.OPT.javaVersion())) {
       //one of these is a String, so just make sure they are both instance types.
       assertInstanceType(left_result, "The arguments to the Plus Operator (+) must both be instances, but you have specified a type name", that);
       assertInstanceType(right_result, "The arguments to the Plus Operator (+) must both be instances, but you have specified a type name", that);
@@ -404,7 +409,8 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     else { //neither is a string, so they must both be numbers
-      if (!left_result.getSymbolData().isNumberType(_targetVersion) || !right_result.getSymbolData().isNumberType(_targetVersion)) {
+      if (!left_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion()) ||
+          !right_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
         _addError("The arguments to the Plus Operator (+) must either include an instance of a String or both be numbers.  You have specified arguments of type " + left_result.getName() + " and " + right_result.getName(), that);
         return string.getInstanceData(); //return String by default
       }
@@ -436,14 +442,14 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     if (assertInstanceType(left_result, "The left side of this expression is a type, not an instance", that) &&
-        !left_result.getSymbolData().isNumberType(_targetVersion)) {
+        !left_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
       
       _addError("The left side of this expression is not a number.  Therefore, you cannot apply a Numeric Binary Operator (*, /, -, %) to it", that);
       return right_result.getInstanceData();
     }
     
     if (assertInstanceType(right_result, "The right side of this expression is a type, not an instance", that) &&
-        !right_result.getSymbolData().isNumberType(_targetVersion)) {
+        !right_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
       
       _addError("The right side of this expression is not a number.  Therefore, you cannot apply a Numeric Binary Operator (*, /, -, %) to it", that);
       return left_result.getInstanceData();
@@ -507,7 +513,7 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     if (assertInstanceType(value_result, "You cannot increment or decrement " + value_result.getName() + ", because it is a class name not an instance", that)) {
-      if (!value_result.getSymbolData().isNumberType(_targetVersion)) {
+      if (!value_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
         _addError("You cannot increment or decrement something that is not a number type.  You have specified something of type " + value_result.getName(), that);
       }
     }
@@ -531,7 +537,7 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     if (assertInstanceType(value_result, "You cannot use a numeric unary operator (+, -) with " + value_result.getName() + ", because it is a class name, not an instance", that) &&
-        !value_result.getSymbolData().isNumberType(_targetVersion)) {
+        !value_result.getSymbolData().isNumberType(LanguageLevelConverter.OPT.javaVersion())) {
       
       _addError("You cannot apply this unary operator to something of type " + value_result.getName() + ".  You can only apply it to a numeric type such as double, int, or char", that);
       return value_result;
@@ -565,7 +571,7 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     if (assertInstanceType(value_result, "You cannot use the not (!) operator with " + value_result.getName() + ", because it is a class name, not an instance", that) &&
-        !value_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, _targetVersion)) {
+        !value_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, LanguageLevelConverter.OPT.javaVersion())) {
       
       _addError("You cannot use the not (!) operator with something of type " + value_result.getName() + ". Instead, it should be used with an expression of boolean type", that);
     }
@@ -613,7 +619,7 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     else if (assertInstanceType(value_result, "You are trying to cast " + value_result.getName() + ", which is a class or interface type, not an instance", that) &&
-             !value_result.getSymbolData().isCastableTo(type_result.getSymbolData(), _targetVersion)) {
+             !value_result.getSymbolData().isCastableTo(type_result.getSymbolData(), LanguageLevelConverter.OPT.javaVersion())) {
       
       _addError("You cannot cast an expression of type " + value_result.getName() + " to type " + type_result.getName() + " because they are not related", that);
     }
@@ -1124,7 +1130,7 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     if (assertInstanceType(index, "You have used a type name in place of an array index", that) &&
-        !index.getSymbolData().isAssignableTo(SymbolData.INT_TYPE, _targetVersion)) {
+        !index.getSymbolData().isAssignableTo(SymbolData.INT_TYPE, LanguageLevelConverter.OPT.javaVersion())) {
       _addError("You cannot reference an array element with an index of type " + index.getSymbolData().getName() + ".  Instead, you must use an int", that);
       
     }
@@ -1297,19 +1303,26 @@ public class ExpressionTypeChecker extends Bob {
    * otherwise return INT_TYPE.
    */
   protected SymbolData _getLeastRestrictiveType(SymbolData sd1, SymbolData sd2) {
-    if ((sd1.isDoubleType(_targetVersion) && sd2.isNumberType(_targetVersion)) ||
-        (sd2.isDoubleType(_targetVersion) && sd1.isNumberType(_targetVersion))) {
+    if ((sd1.isDoubleType(LanguageLevelConverter.OPT.javaVersion()) &&
+         sd2.isNumberType(LanguageLevelConverter.OPT.javaVersion())) ||
+        (sd2.isDoubleType(LanguageLevelConverter.OPT.javaVersion()) &&
+         sd1.isNumberType(LanguageLevelConverter.OPT.javaVersion()))) {
       return SymbolData.DOUBLE_TYPE;
     }
-    else if ((sd1.isFloatType(_targetVersion) && sd2.isNumberType(_targetVersion)) ||
-             (sd2.isFloatType(_targetVersion) && sd1.isNumberType(_targetVersion))) {
+    else if ((sd1.isFloatType(LanguageLevelConverter.OPT.javaVersion()) &&
+              sd2.isNumberType(LanguageLevelConverter.OPT.javaVersion())) ||
+             (sd2.isFloatType(LanguageLevelConverter.OPT.javaVersion()) &&
+              sd1.isNumberType(LanguageLevelConverter.OPT.javaVersion()))) {
       return SymbolData.FLOAT_TYPE;
     }
-    else if ((sd1.isLongType(_targetVersion) && sd2.isNumberType(_targetVersion)) ||
-             (sd2.isLongType(_targetVersion) && sd1.isNumberType(_targetVersion))) {
+    else if ((sd1.isLongType(LanguageLevelConverter.OPT.javaVersion()) &&
+              sd2.isNumberType(LanguageLevelConverter.OPT.javaVersion())) ||
+             (sd2.isLongType(LanguageLevelConverter.OPT.javaVersion()) &&
+              sd1.isNumberType(LanguageLevelConverter.OPT.javaVersion()))) {
       return SymbolData.LONG_TYPE;
     }
-    else if (sd1.isBooleanType(_targetVersion) && sd2.isBooleanType(_targetVersion)) {
+    else if (sd1.isBooleanType(LanguageLevelConverter.OPT.javaVersion()) &&
+             sd2.isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
       return SymbolData.BOOLEAN_TYPE;
     }
     else return SymbolData.INT_TYPE; // NOTE: It seems like any binary operation on number types with only ints, shorts, chars, or bytes will return an int
@@ -1375,7 +1388,7 @@ public class ExpressionTypeChecker extends Bob {
     Expression[] dims = that.getDimensionSizes().getExpressions();
     for (int i = 0; i<dimensions_result.length; i++) {
       if (dimensions_result[i] != null && assertFound(dimensions_result[i], dims[i])) {
-        if (!dimensions_result[i].getSymbolData().isAssignableTo(SymbolData.INT_TYPE, _targetVersion)) {
+        if (!dimensions_result[i].getSymbolData().isAssignableTo(SymbolData.INT_TYPE, LanguageLevelConverter.OPT.javaVersion())) {
           _addError("The dimensions of an array instantiation must all be ints.  You have specified something of type " + dimensions_result[i].getName(), dims[i]);
         }
         else {
@@ -1608,7 +1621,7 @@ public class ExpressionTypeChecker extends Bob {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       symbolTable = new Symboltable();
       _etc = new ExpressionTypeChecker(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      _etc._targetVersion = JavaVersion.JAVA_5;
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
       _etc._importedPackages.addFirst("java.lang");
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");
