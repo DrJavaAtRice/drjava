@@ -38,13 +38,13 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
 import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;
 
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.plt.iter.EmptyIterator;
-import edu.rice.cs.plt.iter.ComposedIterator;
 import edu.rice.cs.plt.io.IOUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
@@ -64,8 +64,47 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public class PathClassLoader extends ClassLoader {
   
-  private final Iterable<? extends File> _path;
+  /**
+   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+   * If multiple queries will be performed on the same path, a PathClassLoader instance
+   * should be created for better performance.
+   */
+  public static URL getResourceInPath(String name, File... path) {
+    return getResourceInPath(name, IterUtil.asIterable(path));
+  }
+
+  /**
+   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+   * If multiple queries will be performed on the same path, a PathClassLoader instance
+   * should be created for better performance.
+   */
+  public static URL getResourceInPath(String name, Iterable<File> path) {
+    return new PathClassLoader(EmptyClassLoader.INSTANCE, path).getResource(name);
+  }
+
+  /**
+   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+   * If multiple queries will be performed on the same path, a PathClassLoader instance
+   * should be created for better performance.
+   */
+  public static InputStream getResourceInPathAsStream(String name, File... path) {
+    return getResourceInPathAsStream(name, IterUtil.asIterable(path));
+  }
+
+  /**
+   * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
+   * If multiple queries will be performed on the same path, a PathClassLoader instance
+   * should be created for better performance.
+   */
+  public static InputStream getResourceInPathAsStream(String name, Iterable<File> path) {
+    return new PathClassLoader(EmptyClassLoader.INSTANCE, path).getResourceAsStream(name);
+  }
   
+
+  private final Iterable<? extends File> _path;
+  private URLClassLoader _urlLoader;
+  private Iterable<File> _urlLoaderPath;
+
   /**
    * Create a path class loader with the default parent ({@link ClassLoader#getSystemClassLoader})
    * and the specified path.
@@ -79,6 +118,7 @@ public class PathClassLoader extends ClassLoader {
   public PathClassLoader(Iterable<? extends File> path) {
     super();
     _path = path;
+    updateURLLoader();
   }
   
   /** Create a path class loader with the given parent and path */
@@ -88,6 +128,19 @@ public class PathClassLoader extends ClassLoader {
   public PathClassLoader(ClassLoader parent, Iterable<? extends File> path) {
     super(parent);
     _path = path;
+    updateURLLoader();
+  }
+
+  private void updateURLLoader() {
+    _urlLoaderPath = IterUtil.snapshot(_path);
+    List<URL> urls = new LinkedList<URL>();
+    for (File f : _urlLoaderPath) {
+      try { urls.add(f.toURI().toURL()); }
+      catch (IllegalArgumentException e) { error.log(e); }
+      catch (MalformedURLException e) { error.log(e); }
+      // just skip the path element if there's an error
+    }
+    _urlLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), EmptyClassLoader.INSTANCE);
   }
   
   protected Class<?> findClass(String name) throws ClassNotFoundException {
@@ -103,39 +156,13 @@ public class PathClassLoader extends ClassLoader {
   }
   
   protected URL findResource(String name) {
-    for (File f : _path) {
-      //debug.logValues(new String[]{"searching for resource","in file"}, name, _path);
-      try {
-        // We use URLClassLoader to find the resource, not because we care about
-        // most of that class's functionality, but because it implements the core
-        // functionality we need in URLClassLoader.findResource()
-        URL url = f.toURI().toURL();
-        // TODO: would it be useful to cache created URLClassLoaders for better performance?
-        URL result = new URLClassLoader(new URL[]{ url }, EmptyClassLoader.INSTANCE).findResource(name);
-        if (result != null) { return result; }
-      }
-      catch (IllegalArgumentException e) { error.log(e); }
-      catch (MalformedURLException e) { error.log(e); }
-      // just skip the path element if there's an error
-    }
-    return null;
+    if (!IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
+    return _urlLoader.findResource(name);
   }
   
   protected Enumeration<URL> findResources(String name) throws IOException {
-    Iterator<URL> result = EmptyIterator.make();
-    for (File f : _path) {
-      try {
-        URL url = f.toURI().toURL();
-        Enumeration<URL> newResults = new URLClassLoader(new URL[]{ url }).findResources(name);
-        if (newResults.hasMoreElements()) {
-          result = ComposedIterator.make(result, IterUtil.asIterator(newResults));
-        }
-      }
-      catch (IllegalArgumentException e) { error.log(e); }
-      catch (MalformedURLException e) { error.log(e); }
-      // just skip the path element if there's an error
-    }
-    return IterUtil.asEnumeration(result);
+    if (!IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
+    return _urlLoader.findResources(name);
   }
   
 }
