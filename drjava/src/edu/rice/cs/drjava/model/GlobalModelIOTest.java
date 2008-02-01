@@ -42,6 +42,7 @@ import java.util.List;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
@@ -331,7 +332,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     TestListener listener = new TestIOListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
         super.fileOpened(doc);
-        File file = null;
+        File file = FileOps.NULL_FILE;
         try { file = doc.getFile(); }
         catch (FileMovedException fme) { fail("file does not exist"); } // We know file should exist
         if (tempFile1.equals(file))
@@ -1084,7 +1085,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     TestFileIOListener(File f) { _expected = f; }
     public void fileOpened(OpenDefinitionsDocument doc) {
       super.fileOpened(doc);
-      File file = null;
+      File file = FileOps.NULL_FILE;
       try { file = doc.getFile(); }
       catch (FileMovedException fme) { fail("file does not exist"); }     // We know file should exist
       assertEquals("file to open", IOUtil.attemptCanonicalFile(_expected), IOUtil.attemptCanonicalFile(file));

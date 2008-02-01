@@ -50,21 +50,24 @@ import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.concurrent.ConcurrentUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.text.TextUtil;
-import edu.rice.cs.util.ArgumentTokenizer;
-import edu.rice.cs.util.DirectorySelector;
-import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-import edu.rice.cs.util.OperationCanceledException;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerError;
+
+import edu.rice.cs.util.ArgumentTokenizer;
+import edu.rice.cs.util.DirectorySelector;
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.OperationCanceledException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
@@ -152,7 +155,7 @@ public class DefaultJavadocModel implements JavadocModel {
     
     // Get the destination directory via the DirectorySelector, if appropriate.
     try {
-      if (destDir.equals(FileOption.NULL_FILE)) {
+      if (destDir.equals(FileOps.NULL_FILE)) {
         /* This is the default, stock behavior of a new install. If no destination is set, don't pass 
          anything to the ui command. Let the command object decide what to do. */
         destDir = select.getDirectory(null);

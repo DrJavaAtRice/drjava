@@ -40,7 +40,9 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.OptionConstants;
+
 import edu.rice.cs.util.ArgumentTokenizer;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 
 import javax.swing.*;
@@ -147,7 +149,7 @@ class DefaultPlatform implements PlatformSupport {
     String command = config.getSetting(OptionConstants.BROWSER_STRING);
 
     // Check for empty settings.
-    if ((exe == FileOption.NULL_FILE) && (command.equals(""))) {
+    if ((exe == FileOps.NULL_FILE) && (command.equals(""))) {
       // If the user hasn't specified anything, don't try to run it.
       return false;
     }
@@ -173,7 +175,7 @@ class DefaultPlatform implements PlatformSupport {
       List<String> args = ArgumentTokenizer.tokenize(command);
 
       // Prepend the file only if it exists.
-      if (exe != FileOption.NULL_FILE) args.add(0, exe.getAbsolutePath());
+      if (exe != FileOps.NULL_FILE) args.add(0, exe.getAbsolutePath());
 
       // Call the command.
       try {

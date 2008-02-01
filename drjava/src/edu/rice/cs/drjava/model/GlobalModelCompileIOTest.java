@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model;
 
 import java.io.*;
+import edu.rice.cs.util.FileOps;
 
 import javax.swing.text.BadLocationException;
 
@@ -53,12 +54,14 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   public void testClassFileSynchronization() throws BadLocationException, IOException, InterruptedException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
+    System.err.println("Temp source file is " + file.getAbsolutePath());
 
     doc.saveFile(new FileSelector(file));
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
-    assertTrue("Class file should not exist before compile", doc.getCachedClassFile() == null);
+    System.err.println("Cached class file is " + doc.getCachedClassFile().getAbsolutePath());
+    assertTrue("Class file should not exist before compile", doc.getCachedClassFile() == FileOps.NULL_FILE);
     assertTrue("should not be in sync before compile", ! doc.checkIfClassFileInSync());
     assertTrue("The state of all open documents should be out of sync", _model.hasOutOfSyncDocuments());
     doc.startCompile();
@@ -99,10 +102,9 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
-    assertTrue("Class file should not exist before compile",
-               doc.getCachedClassFile() == null);
-    assertTrue("should not be in sync before compile",
-               !doc.checkIfClassFileInSync());
+    System.err.println("cached class file is " + doc.getCachedClassFile());
+    assertTrue("Class file should not exist before compile", doc.getCachedClassFile() == FileOps.NULL_FILE);
+    assertTrue("should not be in sync before compile", !doc.checkIfClassFileInSync());
     doc.startCompile();
     listener.waitCompileDone();
     if (_model.getCompilerModel().getNumErrors() > 0) {

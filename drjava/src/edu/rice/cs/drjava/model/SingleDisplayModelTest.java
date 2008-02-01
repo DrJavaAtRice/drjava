@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
@@ -195,7 +196,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     // Check for proper events
     SDTestListener listener = new SDTestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
-        File file = null;
+        File file = FileOps.NULL_FILE;
         try { file = doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist

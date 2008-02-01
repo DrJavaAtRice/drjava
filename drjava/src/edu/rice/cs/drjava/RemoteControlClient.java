@@ -57,7 +57,7 @@ public class RemoteControlClient {
   /**
    * Time in ms until the client decides the server is not running.
    */
-  public static int REMOTE_CONTROL_TIMEOUT = 250;
+  public static final int REMOTE_CONTROL_TIMEOUT = 250;
   
   /**
    * Return true if a DrJava remote control server is running.

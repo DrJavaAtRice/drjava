@@ -404,15 +404,15 @@ public class DrJavaErrorWindow extends JDialog {
   /**
    * Canned message for the user.
    */
-  private final String HEADER_HTML =
+  private static final String HEADER_HTML =
     "<html><font size=\"-1\" face=\"sans-serif, Arial, Helvetica, Geneva\"><b>";
-  private final String ERRORS_FOOTER_HTML = 
+  private static final String ERRORS_FOOTER_HTML = 
     "Please submit a bug report containing the information below " +
     "and an account of the actions that caused the bug (if known) to " +
     "<a href=\"" + SF_ADD_BUG_URL + "\"><b>" + SF_LINK_NAME + "</b></a>.<br>" +
     "You may wish to save all your work and restart DrJava.<br>" +
     "Thanks for your help in making DrJava better!</b></font></p></html>";
-  private final String NO_ERRORS_HTML =
+  private static final String NO_ERRORS_HTML =
     "No errors occurred!<br>" +
     "Thanks for using DrJava!</b></font></p></html>";
 }

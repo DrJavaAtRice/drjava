@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import javax.swing.text.BadLocationException;
 
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
@@ -89,7 +90,7 @@ public class TestDocGetter extends DummyGlobalModel {
     TestOpenDoc(DefinitionsDocument d) {
       _doc = d;
       _defDoc = d;
-      _file = null;
+      _file = FileOps.NULL_FILE;
     }
 
     /** This is the only method that we care about. */

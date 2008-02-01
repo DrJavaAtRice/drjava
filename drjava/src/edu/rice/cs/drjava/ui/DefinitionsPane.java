@@ -243,8 +243,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     private int _index;
     public FindResultsColorOptionListener(int i) { _index = i; }
     public void optionChanged(OptionEvent<Color> oce) {
-      FIND_RESULTS_PAINTERS[_index] =
-        new ReverseHighlighter.DefaultUnderlineHighlightPainter(oce.value, FIND_RESULTS_PAINTERS[_index].getThickness());
+      synchronized (FIND_RESULTS_PAINTERS) {
+        FIND_RESULTS_PAINTERS[_index] =
+          new ReverseHighlighter.DefaultUnderlineHighlightPainter(oce.value, FIND_RESULTS_PAINTERS[_index].getThickness());
+      }
     }
   }
 

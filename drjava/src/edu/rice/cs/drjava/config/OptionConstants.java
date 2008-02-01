@@ -50,7 +50,10 @@ import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+
 import edu.rice.cs.drjava.platform.PlatformFactory;
+
+import edu.rice.cs.util.FileOps;
 
 
 /** Defines the commonly used Option constants in DrJava config and project profiles.
@@ -63,7 +66,7 @@ public interface OptionConstants {
   /* ---------- Resource Location and Classpath Options ---------- */
 
   /** A file path to a user's preferred browser. */
-  public static final FileOption BROWSER_FILE = new FileOption("browser.file", FileOption.NULL_FILE);
+  public static final FileOption BROWSER_FILE = new FileOption("browser.file", FileOps.NULL_FILE);
 
   /** A String used to launch a user's preferred browser. It is tokenized and appended to the file path. */
   public static final StringOption BROWSER_STRING = new StringOption("browser.string", "");
@@ -71,7 +74,7 @@ public interface OptionConstants {
   /** The extension for a DrJava project file */
   public static final String PROJECT_FILE_EXTENSION = ".pjt";
   
-  public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOption.NULL_FILE);
+  public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOps.NULL_FILE);
 
   public static final VectorOption<File> EXTRA_CLASSPATH = new ClassPathOption().evaluate("extra.classpath");
 
@@ -229,9 +232,7 @@ public interface OptionConstants {
           try {
             String currName = lafis[i].getClassName();
             LookAndFeel currLAF = (LookAndFeel) Class.forName(currName).newInstance();
-            if (currLAF.isSupportedLookAndFeel()) {
-              lookAndFeels.add(currName);
-            }
+            if (currLAF.isSupportedLookAndFeel()) lookAndFeels.add(currName);
           }
           catch (Exception ex) {
             // failed to load/instantiate class, or it is not supported.
@@ -929,7 +930,7 @@ public interface OptionConstants {
     new StringOption("javadoc.custom.params", "-author -version");
 
   /** The default destination directory for Javadoc output. */
-  public static final FileOption JAVADOC_DESTINATION = new FileOption("javadoc.destination", FileOption.NULL_FILE);
+  public static final FileOption JAVADOC_DESTINATION = new FileOption("javadoc.destination", FileOps.NULL_FILE);
 
   /** Whether to always prompt for a destination directory, whether or not a default has been set. */
   public static final BooleanOption JAVADOC_PROMPT_FOR_DESTINATION =
@@ -1115,10 +1116,10 @@ public interface OptionConstants {
     new NonNegativeIntegerOption("debug.panel.height",new Integer(0));
 
   /** The directory in use by the file choosers upon the previous quit. */
-  public static final FileOption LAST_DIRECTORY = new FileOption("last.dir", FileOption.NULL_FILE);
+  public static final FileOption LAST_DIRECTORY = new FileOption("last.dir", FileOps.NULL_FILE);
 
   /** The directory in use by the Interactions pane upon the previous quit. */
-  public static final FileOption LAST_INTERACTIONS_DIRECTORY = new FileOption("last.interactions.dir", FileOption.NULL_FILE);
+  public static final FileOption LAST_INTERACTIONS_DIRECTORY = new FileOption("last.interactions.dir", FileOps.NULL_FILE);
 
   /** Whether to save and restore Interactions pane directory at startUp/shutdown (sticky=true), or to use
     * "user.home" (sticky=false). */

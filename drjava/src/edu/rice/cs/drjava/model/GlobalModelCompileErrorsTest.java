@@ -102,9 +102,9 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     aDir.mkdir();
     bDir.mkdir();
     
-    OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
-    final File file = new File(aDir, "DrJavaTestFoo.java");
-    doc.saveFile(new FileSelector(file));
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_MISSING_CLOSE_TEXT);
+    final File file1 = new File(aDir, "DrJavaTestFoo.java");
+    doc1.saveFile(new FileSelector(file1));
                       
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
@@ -119,12 +119,13 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     listener.waitCompileDone();
 
     assertCompileErrorsPresent(_name(), true);
-    assertEquals("Should have 2 compiler errors", 2, _model.getCompilerModel().getNumErrors());
+    System.err.println(cm.getCompilerErrorModel());
+    assertEquals("Should have 2 compiler errors", 2, cm.getNumErrors());
     listener.checkCompileOccurred();
 
     // Make sure .class does not exist for both files
-    File compiled = classForJava(file, "DrJavaTestFoo");
-    assertEquals(_name() + "Class file exists after failing compile (1)", false, compiled.exists());
+    File compiled1 = classForJava(file1, "DrJavaTestFoo");
+    assertEquals(_name() + "Class file exists after failing compile (1)", false, compiled1.exists());
     File compiled2 = classForJava(file2, "DrJavaTestBar");
     assertEquals(_name() + "Class file exists after failing compile (2)", false, compiled2.exists());
     _model.removeListener(listener);

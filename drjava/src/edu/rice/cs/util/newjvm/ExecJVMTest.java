@@ -37,7 +37,8 @@
 package edu.rice.cs.util.newjvm;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.drjava.config.FileOption;
+
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 
 import java.io.File;
@@ -66,7 +67,7 @@ public class ExecJVMTest extends DrJavaTestCase {
     // Run new JVM to create the file
     String className = getClass().getName() + "$FileCreator";
     String tempName = tempFile.getAbsolutePath();
-    Process jvm = ExecJVM.runJVMPropagateClassPath(className, new String[] { tempName }, FileOption.NULL_FILE);
+    Process jvm = ExecJVM.runJVMPropagateClassPath(className, new String[] { tempName }, FileOps.NULL_FILE);
 
     int result = jvm.waitFor();
 

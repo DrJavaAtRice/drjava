@@ -64,6 +64,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.lambda.Box;
 import edu.rice.cs.plt.lambda.SimpleBox;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.text.SwingDocument;
@@ -300,12 +301,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           
           // Add (canonical path name for) build directory for doc to classDirs
           
-          File buildRoot = (buildDir == null) ? sourceRoot: buildDir;
+          File buildRoot = (buildDir == FileOps.NULL_FILE) ? sourceRoot: buildDir;
           
           File classFileDir = new File(IOUtil.attemptCanonicalFile(buildRoot), packagePath);
           
           File sourceDir = 
-            (buildDir == null) ? classFileDir : new File(IOUtil.attemptCanonicalFile(sourceRoot), packagePath);
+            (buildDir == FileOps.NULL_FILE) ? classFileDir : new File(IOUtil.attemptCanonicalFile(sourceRoot), packagePath);
           
           if (! classDirsAndRoots.containsKey(classFileDir)) {
             classDirsAndRoots.put(classFileDir, sourceDir);
@@ -389,7 +390,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               File rootDir = classDirsAndRoots.get(dir);
               
               /** The canonical pathname for the file (including the file name) */
-              String javaSourceFileName = rootDir.getCanonicalPath() + File.separator + sourceName.value();
+              String javaSourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
 //              System.err.println("Full java source fileName = " + javaSourceFileName);
               
               /* The index in fileName of the dot preceding the extension ".java", ".dj0*, ".dj1", or ".dj2" */
@@ -460,6 +461,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   //-------------------------------- Helpers --------------------------------//
+  
+   private String getCanonicalPath(File f) throws IOException {
+    if (f == null) return "";
+    return f.getCanonicalPath();
+  }
   
   //----------------------------- Error Results -----------------------------//
   

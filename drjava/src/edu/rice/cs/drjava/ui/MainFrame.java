@@ -3781,7 +3781,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //      _compileOpenProjectAction.setEnabled(false);
       _compileProjectAction.setEnabled(false);
       _setUpContextMenus();
-      _currentProjFile = null;
+      _currentProjFile = FileOps.NULL_FILE;
 //      _compileButton.setToolTipText("Compile all open documents");
       return true;
     }
@@ -3866,7 +3866,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     String type = "'." + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
     chooser.setDialogTitle("Open All " + type + "Files in ...");
     
-    File openDir = null;
+    File openDir = FileOps.NULL_FILE;
     try { 
       File activeFile = _model.getActiveDocument().getFile();
       if (activeFile != null) openDir = activeFile.getParentFile();
@@ -4191,7 +4191,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //      _saveChooser.setSelectedFile(null);
 //    }
     
-    if (_currentProjFile != null) _saveChooser.setSelectedFile(_currentProjFile);
+    if (_currentProjFile != FileOps.NULL_FILE) _saveChooser.setSelectedFile(_currentProjFile);
     
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
@@ -7749,7 +7749,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }
     
-    public void interpreterResetFailed(Throwable t) { interpreterReady(FileOption.NULL_FILE); }
+    public void interpreterResetFailed(Throwable t) { interpreterReady(FileOps.NULL_FILE); }
     
     public void interpreterResetting() {
       // Only change GUI from event-dispatching thread
@@ -8544,7 +8544,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         java.util.Iterator<File> iterator = fileList.iterator();
         java.util.List<File> filteredFileList = new java.util.ArrayList<File>();
         while (iterator.hasNext()) {
-          File file = (File)iterator.next();
+          File file = iterator.next();
           if ((file.isFile()) && ((file.getName().endsWith(".java")) || 
                                   (file.getName().endsWith(".dj0")) || 
                                   (file.getName().endsWith(".dj1")) || 

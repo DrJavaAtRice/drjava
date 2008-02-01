@@ -36,6 +36,7 @@
 
 package edu.rice.cs.util.newjvm;
 
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.config.FileOption;
@@ -135,7 +136,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
    *  @throws IllegalStateException if slave JVM already connected or startUp is in progress.
    */
   protected final void invokeSlave() throws IOException, RemoteException {
-    invokeSlave(new String[0], FileOption.NULL_FILE);
+    invokeSlave(new String[0], FileOps.NULL_FILE);
   }
   
   /** Invokes slave JVM, using the system classpath.

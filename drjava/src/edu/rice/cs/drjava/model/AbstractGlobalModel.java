@@ -167,7 +167,7 @@ import static java.lang.Math.*;
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
-  public static Log _log = new Log("GlobalModel.txt", false);
+  public static final Log _log = new Log("GlobalModel.txt", false);
  
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
@@ -309,16 +309,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _findResultsManagers = new LinkedList<RegionManager<MovingDocumentRegion>>();
     _browserHistoryManager = new ConcreteRegionManager<DocumentRegion>();
     
-    _breakpointManager = new ConcreteRegionManager<Breakpoint>() {
-      public boolean changeRegionHelper(final Breakpoint oldBP, final Breakpoint newBP) {
-        // override helper so the enabled flag is copied
-        if (oldBP.isEnabled() != newBP.isEnabled()) {
-          oldBP.setEnabled(newBP.isEnabled());
-          return true;
-        }
-        return false;
-      }
-    };
+    _breakpointManager = new ConcreteRegionManager<Breakpoint>();
+    /* The following method was included in an anonymous class definition of _breakpointManager, but it
+       was inacessible because no such method exists in the visible interface of ConcreteRegionManager. */
+    
+//      public boolean changeRegionHelper(final Breakpoint oldBP, final Breakpoint newBP) {
+//        // override helper so the enabled flag is copied
+//        if (oldBP.isEnabled() != newBP.isEnabled()) {
+//          oldBP.setEnabled(newBP.isEnabled());
+//          return true;
+//        }
+//        return false;
+//      }
+//    };
     
     _registerOptionListeners();
         
@@ -524,7 +527,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     catch (RuntimeException e) {
       // something went wrong, clear the setting and use "user.home"
-      DrJava.getConfig().setSetting(LAST_DIRECTORY, FileOption.NULL_FILE);
+      DrJava.getConfig().setSetting(LAST_DIRECTORY, FileOps.NULL_FILE);
       file = FileOps.getValidDirectory(new File(System.getProperty("user.home", ".")));
     }
     // update the setting and return it
@@ -598,8 +601,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean isProjectActive() { return true; }
     
     /** Determines whether the specified doc in within the project file tree.
-     *  No synchronization is required because only immutable data is accessed.
-     */
+      *  No synchronization is required because only immutable data is accessed.
+      */
     public boolean inProjectPath(OpenDefinitionsDocument doc) {
       if (doc.isUntitled()) return false;
       
@@ -634,7 +637,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File[] getProjectFiles() { return _projectFiles; }
     
     public File getProjectRoot() {
-      if (_projRoot == null || _projRoot.equals( FileOption.NULL_FILE)) return _projectFile.getParentFile();
+      if (_projRoot == null || _projRoot.equals( FileOps.NULL_FILE)) return _projectFile.getParentFile();
 //      Utilities.show("File grouping state returning project root of " + _projRoot);
       return _projRoot;
     }
@@ -643,7 +646,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public File getWorkingDirectory() {
       try {
-        if (_workDir == null || _workDir == FileOption.NULL_FILE) {
+        if (_workDir == null || _workDir == FileOps.NULL_FILE) {
           File parentDir = _projectFile.getParentFile();
           if (parentDir!=null) {
             return parentDir.getCanonicalFile(); // default is project root
@@ -670,18 +673,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         if (_auxFiles.add(f)) {
           setProjectChanged(true);
         }
- setProjectChanged(true);
+        setProjectChanged(true);
       }
     }
     
-    /** Removes File f from _auxFiles list. */
+    /** Removes File file from _auxFiles list. */
     public void remAuxFile(File file) {
-      synchronized(_auxFiles) {
-        if (_auxFiles.remove(file)) {
-          setProjectChanged(true);
-        }
- setProjectChanged(true);
-      }
+      synchronized(_auxFiles) { _auxFiles.remove(file); }
+      setProjectChanged(true);
     }
     
     public void setBuildDirectory(File f) { _buildDir = f; }
@@ -693,11 +692,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setMainClass(File f) { _mainFile = f; }
     
     public void setCreateJarFile(File f) { _createJarFile = f; }
- 
+    
     public File getCreateJarFile() { return _createJarFile; }
     
     public void setCreateJarFlags(int f) { _createJarFlags = f; }
- 
+    
     public int getCreateJarFlags() { return _createJarFlags; }
     
     public boolean isProjectChanged() { return _isProjectChanged; }
@@ -818,26 +817,28 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       setClassPathChanged(true);
     }
   }
+    
+
  
   protected FileGroupingState makeFlatFileGroupingState() { return new FlatFileGroupingState(); }
  
   class FlatFileGroupingState implements FileGroupingState {
-    public File getBuildDirectory() { return null; }
+    public File getBuildDirectory() { return FileOps.NULL_FILE; }
     public File getProjectRoot() { return getWorkingDirectory(); }
     public File getWorkingDirectory() {
       Iterable<File> roots = getSourceRootSet();
       if (!IterUtil.isEmpty(roots)) { return IterUtil.first(roots); }
       else {
         // use the last directory saved to the configuration
-        File file = null;
+        File file = FileOps.NULL_FILE;
         if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
           try {
             // restore the path from the configuration
             file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
           }
-          catch (RuntimeException e) { file = null; }
+          catch (RuntimeException e) { file = FileOps.NULL_FILE; }
         }
-        if (file == null) {
+        if (file == FileOps.NULL_FILE) {
           // something went wrong, clear the setting and use "user.home"
           file = FileOps.getValidDirectory(new File(System.getProperty("user.home", ".")));
         }
@@ -849,19 +850,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean isProjectActive() { return false; }
     public boolean inProjectPath(OpenDefinitionsDocument doc) { return false; }
     public boolean inProjectPath(File f) { return false; }
-    public File getProjectFile() { return null; }
+    public File getProjectFile() { return FileOps.NULL_FILE; }
     public void setBuildDirectory(File f) { }
     public void setProjectFile(File f) { }
     public void setProjectRoot(File f) { }
     public void addAuxFile(File f) { }
     public void remAuxFile(File f) { }
     public void setWorkingDirectory(File f) { }
-    public File[] getProjectFiles() { return null; }
+    public File[] getProjectFiles() { return new File[0]; }
     public boolean inProject(File f) { return false; }
     public File getMainClass() { return null; }
     public void setMainClass(File f) { }
     public void setCreateJarFile(File f) { }
-    public File getCreateJarFile() { return null; }
+    public File getCreateJarFile() { return FileOps.NULL_FILE; }
     public void setCreateJarFlags(int f) { }
     public int getCreateJarFlags() { return 0; }
     public Iterable<File> getExtraClassPath() { return IterUtil.empty(); }
@@ -874,7 +875,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public List<File> getClassFiles() { return new LinkedList<File>(); }
   }
- 
+  
   /** Gives the title of the source bin for the navigator.
    *  @return The text used for the source bin in the tree navigator
    */
@@ -1343,11 +1344,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     // add build directory
     File bd = getBuildDirectory();
-    if (bd != null) builder.setBuildDirectory(bd);
+    if (bd != FileOps.NULL_FILE) builder.setBuildDirectory(bd);
     
     // add working directory
     File wd = getWorkingDirectory();  // the value of the working directory to be stored in the project
-    if (wd != null) builder.setWorkingDirectory(wd);
+    if (wd != FileOps.NULL_FILE) builder.setWorkingDirectory(wd);
     
     // add jar main class
     File mainClass = getMainClass();
@@ -2130,7 +2131,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return findFileInPaths(fileName, sourcepath);
   }
 
-  /** Searches for a file with the given name on the provided paths. Returns null if the file is not found.
+  /** Searches for a file with the given name on the provided paths. Returns NULL_FILE if the file is not found.
    *  @param fileName Name of the source file to look for
    *  @param paths An array of directories to search
    *  @return the file if it is found, or null otherwise
@@ -2140,10 +2141,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File f = _getSourceFileFromPath(fileName, p);
       if (f != null) return f;
     }
-    return null;
+    return FileOps.NULL_FILE;
   }
 
-  /** Gets the file named filename from the given path, if it exists.  Returns null if it's not there.
+  /** Gets the file named filename from the given path, if it exists.  Returns NULL_FILE if it's not there.
    *  @param filename the file to look for
    *  @param path the path to look for it in
    *  @return the file if it exists
@@ -2151,7 +2152,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private File _getSourceFileFromPath(String fileName, File path) {
     String root = path.getAbsolutePath();
     File f = new File(root + System.getProperty("file.separator") + fileName);
-    return f.exists() ? f : null;
+    return f.exists() ? f : FileOps.NULL_FILE;
   }
   
   private static volatile int ID_COUNTER = 0; /* Seed for assigning id numbers to OpenDefinitionsDocuments */
@@ -2422,7 +2423,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     int startPos = 0;  // required by javac
     int endPos = 0;    // required by javac
-    File file = null;  // required by javac
+    File file = FileOps.NULL_FILE;  // required by javac
     
     if (doc != null) {
       try {
@@ -2700,7 +2701,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
  
       _file = f;
       _parentDir = dir;
-      _classFile = null;
+      _classFile = FileOps.NULL_FILE;
       _timestamp = stamp;
       _image = null;
       _id = ID_COUNTER++;
@@ -2998,6 +2999,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         private volatile WeakHashMap< DefinitionsDocument.WrappedPosition, Integer> _positions =
           new WeakHashMap<DefinitionsDocument.WrappedPosition, Integer>();
         
+        // Returns the text for this document as a String; assert never returns null;
         public String getText() {
           String image = _image;
           if (image != null) return image;
@@ -3021,6 +3023,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           
           /* Initialize doc contents */
           String image = getText();
+          assert image != null;  // getText() never returns null
+          
           //if (image.length() > 0) newDefDoc.insertString(0, image, null);  // Do not call insertString on an empty doc
           
 //          else if (! isUntitled()) {
@@ -3028,13 +3032,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //            _editorKit.read(reader, newDefDoc, 0);
 //            reader.close(); // win32 needs readers closed explicitly!
 //          }
-          
-          if (image != null) {
-            _editorKit.read(new StringReader(image), newDefDoc, 0);
-            //  Set document property to write out document using newLine conventions of the host platform.
-            newDefDoc.putProperty(DefaultEditorKit.EndOfLineStringProperty, StringOps.EOL);
-            _log.log("Reading from image for " + _file + " containing " + _image.length() + " chars");    
-          }
+         
+          _editorKit.read(new StringReader(image), newDefDoc, 0);
+          //  Set document property to write out document using newLine conventions of the host platform.
+          newDefDoc.putProperty(DefaultEditorKit.EndOfLineStringProperty, StringOps.EOL);
+          _log.log("Reading from image for " + _file + " containing " + _image.length() + " chars");    
           
           _loc = Math.min(_loc, image.length()); // make sure not past end
           _loc = Math.max(_loc, 0); // make sure not less than 0
@@ -3254,7 +3256,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //            _packageName = getDocument().getPackageName();
 //          }
 //          catch(InvalidPackageException e) { _packageName = null; }
-          setCachedClassFile(null);
+          setCachedClassFile(FileOps.NULL_FILE);
           checkIfClassFileInSync();
           
 //          Utilities.showDebug("ready to fire fileSaved for " + this);
@@ -3361,21 +3363,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
       if (isModifiedSinceSave()) {
         setClassFileInSync(false);
-//        _log.log("checkIfClassFileInSync = false because isModifiedSinceSave()");
+        _log.log("checkIfClassFileInSync = false because isModifiedSinceSave()");
         return false;
       }
       
       // Look for cached class file
       File classFile = getCachedClassFile();
-//      _log.log("In checkIfClassFileInSync cacched value of classFile = " + classFile);
-      if (classFile == null) {
+      _log.log("In checkIfClassFileInSync cacched value of classFile = " + classFile);
+      if (classFile == FileOps.NULL_FILE) {
         // Not cached, so locate the file
         classFile = _locateClassFile();
-//        _log.log(this + ": in checkIfClassFileInSync _locateClassFile() = " + classFile);
+        _log.log(this + ": in checkIfClassFileInSync _locateClassFile() = " + classFile);
         setCachedClassFile(classFile);
-        if ((classFile == null) || (! classFile.exists())) {
+        if ((classFile == FileOps.NULL_FILE) || (! classFile.exists())) {
           // couldn't find the class file
-//          _log.log(this + ": Could not find class file");
+          _log.log(this + ": Could not find class file");
           setClassFileInSync(false);
           return false;
         }
@@ -3387,7 +3389,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try { sourceFile = getFile(); }
       catch (FileMovedException fme) {
         setClassFileInSync(false);
-//        _log.log(this + ": File moved");
+        _log.log(this + ": File moved");
         return false;
       }
       if (sourceFile != null) { 
@@ -3396,7 +3398,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       if (sourceFile == null || sourceFile.lastModified() > classFile.lastModified()) {  // assert sourceFile != null 
         setClassFileInSync(false);
-//        _log.log(this + ": date stamps indicate modification");
+        _log.log(this + ": date stamps indicate modification");
         return false;
       }
       else {
@@ -3406,45 +3408,47 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
 
     /** Returns the class file for this source document by searching the source roots of open documents, the
-      * system classpath, and the "extra.classpath ".  Returns null if the class file could not be found.
+      * system classpath, and the "extra.classpath ".  Returns NULL_FILE if the class file could not be found.
       */
     private File _locateClassFile() {
       // TODO: define in terms of GlobalModel.getClassPath()
       
-      if (isUntitled()) return null;
+      if (isUntitled()) return FileOps.NULL_FILE;
       
       String className;
       try { className = getDocument().getQualifiedClassName(); }
       catch (ClassNameNotFoundException cnnfe) {
         _log.log("_locateClassFile() failed for " + this + " because getQualifedClassName returned ClassNotFound");
-        return null;  /* No source class name */ 
+        return FileOps.NULL_FILE;  /* No source class name */ 
       }
-      _log.log("In _locateClassFile, className = " + className);
+//      _log.log("In _locateClassFile, className = " + className);
       String ps = System.getProperty("file.separator");
       // replace periods with the System's file separator
       className = StringOps.replace(className, ".", ps);
       String fileName = className + ".class";
       
-      _log.log("In _locateClassFile, classfileName = " + fileName);
+//      _log.log("In _locateClassFile, classfileName = " + fileName);
       
       // Check source root set (open files)
       ArrayList<File> roots = new ArrayList<File>();
       
-      if (getBuildDirectory() != null) roots.add(getBuildDirectory());
+//      _log.log("build directory = " + getBuildDirectory());
+      
+      if (getBuildDirectory() != FileOps.NULL_FILE) roots.add(getBuildDirectory());
       
       // Add the current document to the beginning of the roots list
       try {
         File root = getSourceRoot();
-        _log.log("Directory " + root + " added to list of source roots");
+//        _log.log("Directory " + root + " added to list of source roots");
         roots.add(root); 
       }
       catch (InvalidPackageException ipe) {
         try {
-          _log.log(this + " has no source root, using parent directory instead");
+//          _log.log(this + " has no source root, using parent directory instead");
           File root = getFile().getParentFile();
-          if (root != null) {
+          if (root != FileOps.NULL_FILE) {
             roots.add(root);
-            _log.log("Added parent directory " + root + " to list of source roots");
+//            _log.log("Added parent directory " + root + " to list of source roots");
           }
         }
         catch(NullPointerException e) { throw new UnexpectedException(e); }
@@ -3452,21 +3456,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           // Moved, but we'll add the old file to the set anyway
           _log.log("File for " + this + "has moved; adding parent directory to list of roots");
           File root = fme.getFile().getParentFile();
-          if (root != null) roots.add(root);
+          if (root != FileOps.NULL_FILE) roots.add(root);
         }
       }
       
       File classFile = findFileInPaths(fileName, roots);
-      if (classFile != null) {
-        _log.log("Found source file " + classFile + " for " + this);
+      if (classFile != FileOps.NULL_FILE) {
+//        _log.log("Found source file " + classFile + " for " + this);
         return classFile;
       }
       
-      _log.log(this + " not found on path of source roots");
+//      _log.log(this + " not found on path of source roots");
       // Class not on source root set, check system classpath
       classFile = findFileInPaths(fileName, RUNTIME_CLASS_PATH);
       
-      if (classFile != null) return classFile;
+      if (classFile != FileOps.NULL_FILE) return classFile;
       
       // not on system classpath, check interactions classpath
       Vector<File> cpSetting = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);

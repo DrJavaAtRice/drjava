@@ -516,10 +516,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public String getCurrentInterpreterName() { return _currentInterpreterName; }
   
   /** Kills the running interpreter JVM, and restarts with working directory wd if wd != null.  If wd == null, the
-   * interpreter is not restarted.  Note: If the interpreter is not restarted, all of the methods that delegate to the
-   * interpreter will silently fail!  Therefore, killing without restarting should be used with extreme care and only in 
-   * carefully controlled test cases or when DrJava is quitting anyway.
-   */
+    * interpreter is not restarted.  Note: If the interpreter is not restarted, all of the methods that delegate to the
+    * interpreter will silently fail!  Therefore, killing without restarting should be used with extreme care and only in 
+    * carefully controlled test cases or when DrJava is quitting anyway.
+    */
 
   public void killInterpreter(File wd) {
     boolean restart;

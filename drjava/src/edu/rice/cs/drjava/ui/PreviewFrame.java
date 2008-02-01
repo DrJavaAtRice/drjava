@@ -99,9 +99,9 @@ public abstract class PreviewFrame extends JFrame {
   private final int PREVIEW_PAGE_WIDTH;
   private final int PREVIEW_PAGE_HEIGHT;
   
-  private final double PAGE_ZOOM = 0.7;
-  private final static int PAGE_BORDER = 20;
-  private final int TOOLBAR_HEIGHT = 35;
+  private static final double PAGE_ZOOM = 0.7;
+  private static final int PAGE_BORDER = 20;
+  private static final int TOOLBAR_HEIGHT = 35;
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
 
   // Components

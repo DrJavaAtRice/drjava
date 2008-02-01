@@ -53,6 +53,8 @@ import edu.rice.cs.drjava.ui.config.*;
 
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
@@ -246,28 +248,28 @@ public class ProjectPropertiesFrame extends JFrame {
   private File _getProjRoot() {
     File projRoot = _mainFrame.getModel().getProjectRoot();
     if (projRoot != null) return projRoot;
-    return FileOption.NULL_FILE;
+    return FileOps.NULL_FILE;
   }
 
   /** Returns the current build directory in the project profile. */
   private File _getBuildDir() {
     File buildDir = _mainFrame.getModel().getBuildDirectory();
     if (buildDir != null) return buildDir;
-    return FileOption.NULL_FILE;
+    return FileOps.NULL_FILE;
   }
 
   /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getWorkDir() {
     File workDir = _mainFrame.getModel().getWorkingDirectory();
     if (workDir != null) return workDir;
-    return FileOption.NULL_FILE;
+    return FileOps.NULL_FILE;
   }
 
   /** Returns the current working directory in the project profile (FileOption.NULL_FILE if none is set) */
   private File _getMainFile() {
     File mainFile = _mainFrame.getModel().getMainClass();
     if (mainFile != null) return mainFile;
-    return FileOption.NULL_FILE;
+    return FileOps.NULL_FILE;
   }
 
   private void _setupPanel(JPanel panel) {
@@ -405,7 +407,7 @@ public class ProjectPropertiesFrame extends JFrame {
   public JPanel _buildDirectoryPanel() {
     DirectoryChooser dirChooser = new DirectoryChooser(this);
     File bd = _getBuildDir();
-    if (bd == null || bd == FileOption.NULL_FILE) bd = _getProjRoot();
+    if (bd == null || bd == FileOps.NULL_FILE) bd = _getProjRoot();
     dirChooser.setSelectedFile(bd);
     dirChooser.setDialogTitle("Select Build Directory");
     dirChooser.setApproveButtonText("Select");
@@ -455,7 +457,7 @@ public class ProjectPropertiesFrame extends JFrame {
 //  Utilities.show("Main Document Root is: " + root);
     chooser.setCurrentDirectory(projRoot);
     File mainFile = _getMainFile();
-    if (mainFile != FileOption.NULL_FILE) chooser.setSelectedFile(mainFile);
+    if (mainFile != FileOps.NULL_FILE) chooser.setSelectedFile(mainFile);
 
     chooser.setApproveButtonText("Select");
 

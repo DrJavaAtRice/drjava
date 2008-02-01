@@ -1569,10 +1569,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       RemoveCommand undoCommand = new RemoveCommand(offset, length);
 
       // add the undo/redo
-      addUndoRedo(chng,undoCommand,doCommand);
+      addUndoRedo(chng, undoCommand, doCommand);
       //chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));
       // actually do the insert
-      doCommand.run();
+      doCommand.run();  // Why isn't this run in the event thread?
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);

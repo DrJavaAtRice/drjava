@@ -56,9 +56,9 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
-import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
-
+import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
@@ -236,8 +236,8 @@ public class DefaultCompilerModel implements CompilerModel {
       if (doc.isSourceFile()) {
         File f = doc.getFile();
         // Check for null in case the file is untitled (not sure this is the correct check)
-        if (f != null) { filesToCompile.add(f); }
-        doc.setCachedClassFile(null); // clear cached class file
+        if (f != null && f != FileOps.NULL_FILE) { filesToCompile.add(f); }
+        doc.setCachedClassFile(FileOps.NULL_FILE); // clear cached class file
         
         try { doc.getSourceRoot(); }
         catch (InvalidPackageException e) {
@@ -253,14 +253,15 @@ public class DefaultCompilerModel implements CompilerModel {
       else {
         try {
           File buildDir = _model.getBuildDirectory();
-          if ((buildDir != null) && !buildDir.exists() && !buildDir.mkdirs()) {
+          if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs()) {
             throw new IOException("Could not create build directory: "+buildDir);
           }
           
-          File workDir = _model.getWorkingDirectory(); 
-          if ((workDir != null) && ! workDir.exists() && ! workDir.mkdirs()) {
-            throw new IOException("Could not create working directory: "+workDir);
-          }
+//          File workDir = _model.getWorkingDirectory();
+//          if (workDir == FileOps.NULL_FILE) workDir = null;
+//          if (workDir != null && ! workDir.exists() && ! workDir.mkdirs()) {
+//            throw new IOException("Could not create working directory: "+workDir);
+//          }
           
           _compileFiles(filesToCompile, buildDir);
         }
@@ -317,8 +318,9 @@ public class DefaultCompilerModel implements CompilerModel {
    * 
    */
   private void _compileFiles(List<? extends File> files, File buildDir) throws IOException {
-    if (!files.isEmpty()) {
+    if (! files.isEmpty()) {
       /* Canonicalize buildDir */
+      if (buildDir == FileOps.NULL_FILE) buildDir = null; // compiler interface wants null pointer if no build directory
       if (buildDir != null) buildDir = IOUtil.attemptCanonicalFile(buildDir);
       
       List<File> classPath = IterUtil.asList(_model.getClassPath());

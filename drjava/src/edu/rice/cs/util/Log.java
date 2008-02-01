@@ -82,7 +82,7 @@ public class Log {
           FileWriter w = new FileWriter(_file.getAbsolutePath(), true);
           _writer = new PrintWriter(w);
 
-          log("Log '" + _name + "' opened: " + (new Date()));
+          log("Log '" + _name + "' opened: " + (new Date()).toGMTString());
         }
         catch (IOException ioe) {
           throw new RuntimeException("Could not create log: " + ioe);
@@ -107,7 +107,7 @@ public class Log {
       if (_writer == null) {
         _init();
       }
-      _writer.println((new Date()) + ": " + message);
+      _writer.println((new Date()).toGMTString() + ": " + message);
       _writer.flush();
     }
   }

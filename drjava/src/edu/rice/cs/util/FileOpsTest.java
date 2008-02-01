@@ -283,7 +283,7 @@ import edu.rice.cs.util.FileOps;
     String className = "edu.rice.cs.util.FileOpsTest";
     String[] args = new String[] {dir1.getAbsolutePath() };  // args = {<Fully qualified name of dir1>}
 
-    Process process = ExecJVM.runJVMPropagateClassPath(className, args, FileOption.NULL_FILE);
+    Process process = ExecJVM.runJVMPropagateClassPath(className, args, FileOps.NULL_FILE);
     int status = process.waitFor();
     assertEquals("Delete on exit test exited with an error!", 0, status);
 

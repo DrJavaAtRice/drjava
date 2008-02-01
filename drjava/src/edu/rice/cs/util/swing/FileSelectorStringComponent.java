@@ -45,6 +45,8 @@ import java.awt.event.FocusListener;
 import java.awt.event.FocusEvent;
 import java.io.*;
 
+import edu.rice.cs.util.FileOps;
+
 /** Just like FileSelectorComponent, but it converts the file to a different string that gets displayed. */
 public class FileSelectorStringComponent extends JPanel {
   
@@ -86,7 +88,7 @@ public class FileSelectorStringComponent extends JPanel {
   public FileSelectorStringComponent(Component parent, FileChooser chooser, int numCols, float fontSize) {
     _parent = parent;
     _chooser = chooser;
-    _file = null;
+    _file = FileOps.NULL_FILE;
     
     _textField = new JTextField(numCols) {
       public Dimension getMaximumSize() { return new Dimension(Short.MAX_VALUE, super.getPreferredSize().height); }
@@ -135,7 +137,7 @@ public class FileSelectorStringComponent extends JPanel {
   public File getFileFromField() {
     // Get the file from the chooser
     String newValue = _textField.getText();
-    File newFile = null;
+    File newFile = FileOps.NULL_FILE;
     if (! newValue.equals("")) {
       newFile = convertStringToFile(newValue);
       if (! newFile.isDirectory() && ! _chooser.isFileSelectionEnabled()) newFile = newFile.getParentFile();

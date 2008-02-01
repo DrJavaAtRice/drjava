@@ -274,8 +274,8 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
       } finally { _region.getDocument().releaseReadLock(); }
       return sb.toString();
     }
-    public boolean equals(Object other) {
-      if ((other==null) || !(other instanceof BrowserHistoryListUserObj)) { return false; }
+       public boolean equals(Object other) {
+      if (other == null || other.getClass() != this.getClass()) return false;
       @SuppressWarnings("unchecked") BrowserHistoryListUserObj o = (BrowserHistoryListUserObj)other;
       return (o.region().getDocument().equals(region().getDocument())) &&
         (o.region().getStartOffset()==region().getStartOffset()) &&
@@ -288,3 +288,4 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
     }
   }
 }
+

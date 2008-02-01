@@ -59,6 +59,8 @@ import java.util.*;
  * A client can tell a server to open a file and jump to a certain line number by sending
  * QUERY_PREFIX+" "+absoluteFileName+File.pathSeparator+lineNumber.
  * The server will respond with RESPONSE_PREFIX, or RESPONSE_PREFIX+" "+error if an error occurred.
+ * 
+ * This class cannot be robustly subclassed because the constructor starts a thread.
  */
 public class RemoteControlServer {
   /**
@@ -76,10 +78,9 @@ public class RemoteControlServer {
    */
   public static final String RESPONSE_PREFIX_WITH_USER = RESPONSE_PREFIX+System.getProperty("user.name")+"!";
 
-  /**
-   * Create a new remote control server, running in its own daemon thread.
-   * @param frame main frame
-   */
+  /** Create a new remote control server, running in its own daemon thread.
+    * @param frame main frame
+    */
   public RemoteControlServer(MainFrame frame) throws IOException {
     RCServerThread rcsThread = new RCServerThread(frame);
     rcsThread.setDaemon(true);
@@ -193,22 +194,14 @@ public class RemoteControlServer {
         catch (SocketTimeoutException e) {
           // ignore
         }
-        catch (IOException e) {
-          e.printStackTrace();
-        }
+        catch (IOException e) { e.printStackTrace(); }
       }
     }
     
-    public void finalize() {
-      if (socket!=null) {
-        socket.close();
-      }
-    }
+    protected void finalize() { if (socket != null) socket.close(); }
   }
   
-  /**
-   * Main method for test purposes.
-   */
+  /** Main method for test purposes. */
   public static void main(String[] args) {
     try {
       (new RCServerThread(null)).start();

@@ -37,8 +37,8 @@
 package edu.rice.cs.util.newjvm;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.drjava.config.FileOption;
 
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
@@ -109,7 +109,7 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
       _connected = false;
       _letter = 'a';  // this needs to be reset because the slave is going to check it!
 
-      invokeSlave(new String[0], FileOption.NULL_FILE);
+      invokeSlave(new String[0], FileOps.NULL_FILE);
 
 //      Utilities.show("slave invoked");
       
@@ -137,7 +137,7 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
       _connected = false;
       _letter = 'a';
 
-      invokeSlave(new String[0], FileOption.NULL_FILE);           
+      invokeSlave(new String[0], FileOps.NULL_FILE);           
 
       synchronized(_connectedLock) { while (! _connected) _connectedLock.wait();  }
 

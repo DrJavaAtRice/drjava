@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
 
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.DummyGlobalModel;
@@ -255,10 +256,10 @@ public class CompilerErrorModel {
 
   /** This function tells if there are errors with source locations associated with the given file. */
   public boolean hasErrorsWithPositions(OpenDefinitionsDocument odd) {
-    File file = null;
+    File file = FileOps.NULL_FILE;
     try { 
       file = odd.getFile();
-      if (file == null) return false;
+      if (file == null || file == FileOps.NULL_FILE) return false;
     }
     catch (FileMovedException fme) { file = fme.getFile(); }
     

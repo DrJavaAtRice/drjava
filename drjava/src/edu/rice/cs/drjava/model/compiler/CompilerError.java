@@ -39,6 +39,9 @@ package edu.rice.cs.drjava.model.compiler;
 import java.io.File;
 import java.io.Serializable;
 
+import edu.rice.cs.util.FileOps;
+
+
 /** A class to represent compilerr errors and warnings.  Having this class allows DrJava
   * to make the errors as legible as possible.
   * @version $Id$
@@ -124,7 +127,7 @@ public class CompilerError implements Comparable, Serializable {
     * if there is no file associated with this error.
     */
   public String getFileMessage() {
-    if (_file == null) return "(no associated file)";
+    if (_file == null || _file == FileOps.NULL_FILE) return "(no associated file)";
     return fileName();
   }
   
@@ -133,7 +136,7 @@ public class CompilerError implements Comparable, Serializable {
     * since internally we store a zero-based index.
     */
   public String getLineMessage() {
-    if (_file == null || this._lineNumber < 0) return "(no source location)";
+    if (_file == null || _file == FileOps.NULL_FILE || this._lineNumber < 0) return "(no source location)";
     return "" + (_lineNumber + 1);
   }
   

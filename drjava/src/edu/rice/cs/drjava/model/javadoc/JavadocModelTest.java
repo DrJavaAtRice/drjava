@@ -43,6 +43,8 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.DummyOpenDefDoc;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
+import edu.rice.cs.util.FileOps;
+
 import java.io.File;
 
 /**
@@ -80,7 +82,7 @@ public class JavadocModelTest extends DrJavaTestCase {
   
   /** Tests that a suggestion can be made for an unsaved file, if the user chooses to save it. */
   public void testUnsavedSuggestedDirectory() {
-    _storedFile = null;
+    _storedFile = FileOps.NULL_FILE;
     
     GlobalModel getDocs = new DummyGlobalModel() {
       public boolean hasModifiedDocuments() {

@@ -93,7 +93,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private Vector<DebugThreadData> _threads;
   private Vector<DebugStackData> _stackFrames;
   
-  private DefaultTreeCellRenderer dtcr;
+  /* The following field is commented out because it was never written (and hence always null). */
+//  private DefaultTreeCellRenderer dtcr;
 
   /** Constructs a new panel to display debugging information when the Debugger is active.  This is swing view class and hence should only
    *  be accessed from the event-handling thread.
@@ -755,12 +756,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     public void setForeground(Color c) {
       super.setForeground(c);
-      if (dtcr != null) dtcr.setTextNonSelectionColor(c);
+      
+      /* Line commented out because dctr could never be non-null. */
+//      if (dtcr != null) dtcr.setTextNonSelectionColor(c);
     }
     
-    public void setBackground(Color c) {
-      super.setBackground(c);
-      if (DebugPanel.this != null && dtcr != null) dtcr.setBackgroundNonSelectionColor(c);
-    }
+    /* The follwoing method is commented out because dctr was always null. */
+//    public void setBackground(Color c) {
+//      super.setBackground(c);
+//      if (DebugPanel.this != null && dtcr != null) dtcr.setBackgroundNonSelectionColor(c);
+//    }
   }
 }

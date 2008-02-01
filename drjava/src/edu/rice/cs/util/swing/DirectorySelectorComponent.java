@@ -45,6 +45,8 @@ import java.awt.event.FocusListener;
 import java.awt.event.FocusEvent;
 import java.io.*;
 
+import edu.rice.cs.util.FileOps;
+
 /** A JPanel with a text box and a "..." button to select a file or directory.  The file name is editable in the text
  *  box, and a JFileChooser is displayed if the user clicks the "..." button.
  *  @version $Id$
@@ -105,7 +107,7 @@ public class DirectorySelectorComponent extends JPanel {
     
     _parent = parent;
     _chooser = chooser;
-    _file = null;
+    _file = FileOps.NULL_FILE;
     _mustExist = mustExist;
     
     _fileField = new JTextField(numCols) {
@@ -152,7 +154,7 @@ public class DirectorySelectorComponent extends JPanel {
   /** Returns the file currently typed into the file field. THE SIDE EFFECTS OF THIS METHOD ARE OBSCENE!  Corky 2/5/06 */
   public File getFileFromField() {
     String txt = _fileField.getText().trim();
-    if (txt.equals("")) _file = null;
+    if (txt.equals("")) _file = FileOps.NULL_FILE;
     else _file = new File(txt);
     
     return _file;
@@ -206,13 +208,13 @@ public class DirectorySelectorComponent extends JPanel {
     
     String newValue = _fileField.getText().trim();
     
-    File newFile = null;
+    File newFile = FileOps.NULL_FILE;
     if (! newValue.equals("")) {
       newFile = new File(newValue);
       if (! newFile.isDirectory() && _chooser.isFileSelectionEnabled()) newFile = newFile.getParentFile();
     }
     
-    if (newFile != null && _mustExist && ! newFile.exists()) {
+    if (newFile != FileOps.NULL_FILE && _mustExist && ! newFile.exists()) {
       JOptionPane.showMessageDialog(_parent, "The file '"+ newValue + "'\nis invalid because it does not exist.",
                                     "Invalid File Name", JOptionPane.ERROR_MESSAGE);
       resetFileField(); // revert if not valid

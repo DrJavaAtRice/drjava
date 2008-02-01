@@ -56,7 +56,7 @@ public class LogTest extends MultiThreadedTestCase {
   
   static final int SHORT_TIME = 10000;  // few seconds in milliseconds
   
-  static final int DATE_END = 28;  // the ending index of the date field in a log entry
+  static final int DATE_END = 25;  // the ending index of the date field in a log entry
   
   /** A thread class that adds a log message after sleeping a given number of milliseconds */
   private class LogTestThread extends Thread {
@@ -83,9 +83,13 @@ public class LogTest extends MultiThreadedTestCase {
   /** Parses a date printed by Date.toString(); returns null if there is a parse error. */
   @SuppressWarnings("deprecation")
   private static Date parse(String s) {
-    try { return new Date(Date.parse(s.substring(0, DATE_END)));  }  // the undeprecated version of parse DOES NOT WORK
+    try { return new Date(Date.parse(datePrefix(s)));  }  // the undeprecated version of parse DOES NOT WORK
     catch(RuntimeException e) { return null; }  // either IllegalArgument or StringIndexOutOfBounds
   }
+  
+  private static int dateEnd(String s) { return s.indexOf("GMT: ") + 5; }
+    
+  private static String datePrefix(String s) { return s.substring(0, dateEnd(s)); }
   
   /** Adds a couple of generic messages to a log, and then tests to make sure they are all correct, in the correct order,
     * and their timestamps are within the past few seconds.
@@ -105,24 +109,31 @@ public class LogTest extends MultiThreadedTestCase {
 //    System.err.println("s0 = " + s0);
 //    System.err.println("s0 converted to millis " + parse(s0));
 //    System.err.println("Current time in millis is: " + System.currentTimeMillis());
+
     Date time0 = parse(s0);
+//    System.err.println("s0 = '" + s0 + "'");
+//    System.err.println("time0 = " + time0);
     assertTrue("Log opened within last few seconds", time0.compareTo(earlier) >= 0 && time0.compareTo(now) <= 0);
-    assertEquals("Log open message", "Log '" + file1.getName() + "' opened", s0.substring(30, 43+file1.getName().length()));
+    String log1OpenMsg = "Log '" + file1.getName() + "' opened";
+    int offset = dateEnd(s0);
+    
+    assertEquals("Log open message", log1OpenMsg , s0.substring(offset, offset + log1OpenMsg.length()));
     
     String s1 = fin.readLine();
+//    System.err.println("s1 = '" + s1 + "'");
     Date time1 = parse(s1);
     assertTrue("Date of message 1 within last few seconds", time1.compareTo(earlier) >= 0 && time1.compareTo(now) <= 0);
-    assertEquals("Log message 1", "Message 1", s1.substring(30));
+    assertEquals("Log message 1", "Message 1", s1.substring(dateEnd(s1)));
     
     String s2 = fin.readLine();
     Date time2 = parse(s2);
     assertTrue("Date of message 2 within last few seconds", time2.compareTo(earlier) >= 0 && time2.compareTo(now) <= 0);
-    assertEquals("Log message 2", "Message 2", s2.substring(30));
+    assertEquals("Log message 2", "Message 2", s2.substring(dateEnd(s2)));
     
     String s3 = fin.readLine();
     Date time3 = parse(s3);
     assertTrue("Date of message 3 within last few seconds", time3.compareTo(earlier) >= 0 && time3.compareTo(now) <= 0);
-    assertEquals("Log message 3", "Message 3", s3.substring(30));
+    assertEquals("Log message 3", "Message 3", s3.substring(dateEnd(s3)));
   
     fin.close();
   }
@@ -155,12 +166,14 @@ public class LogTest extends MultiThreadedTestCase {
     String s0 = fin.readLine();
     Date time0 = parse(s0);
     assertTrue("Log opened within last few seconds", time0.compareTo(earlier) >= 0 && time0.compareTo(now) <= 0);
-    assertEquals("Log open message", "Log '" + file2.getName() + "' opened", s0.substring(30, 43+file2.getName().length()));
+    String log2OpenMsg = "Log '" + file2.getName() + "' opened";
+    int offset = dateEnd(s0);
+    assertEquals("Log open message", log2OpenMsg, s0.substring(offset, offset + log2OpenMsg.length()));
     
     String s1 = fin.readLine();
     Date time1 = parse(s1);
     assertTrue("Date of message 1 within last few seconds", time1.compareTo(earlier) >= 0 && time1.compareTo(now) <= 0);
-    assertEquals("Log message 1", "Message 1", s1.substring(30));
+    assertEquals("Log message 1", "Message 1", s1.substring(dateEnd(s1)));
     assertEquals("Log exception 1", "java.lang.ArrayIndexOutOfBoundsException", fin.readLine());
     
     // Since it's difficult to test the rest of the stack trace, just skip over it
@@ -176,9 +189,9 @@ public class LogTest extends MultiThreadedTestCase {
 //    System.err.println("Skipped over traceback");
     
     assertTrue("Date of message 2 within last few seconds", time2.compareTo(earlier) >= 0 && time2.compareTo(now) <= 0);
-    assertEquals("Log message 2", "Message 2", s2.substring(30));
-    assertEquals("Log exception 2 (trace line 1)", 
-                 "edu.rice.cs.util.LogTest.testExceptionPrinting", fin.readLine().substring(0,46));
+    assertEquals("Log message 2", "Message 2", s2.substring(dateEnd(s2)));
+    String method = "edu.rice.cs.util.LogTest.testExceptionPrinting";
+    assertEquals("Log exception 2 (trace line 1)", method, fin.readLine().substring(0, method.length()));
 
     fin.close();
   }
@@ -206,13 +219,15 @@ public class LogTest extends MultiThreadedTestCase {
     String s0 = fin.readLine();
     Date time0 = parse(s0);
     assertTrue("Log opened within last 10 seconds", time0.compareTo(earlier) >= 0 && time0.compareTo(now) <= 0);
-    assertEquals("Log open message", "Log '" + file3.getName() + "' opened", s0.substring(30, 43+file3.getName().length()));
+    String log3OpenMsg = "Log '" + file3.getName() + "' opened";
+    int offset = dateEnd(s0);
+    assertEquals("Log open message", log3OpenMsg, s0.substring(offset, offset + log3OpenMsg.length()));
     
     for (int i = 0; i < NUM_THREADS; i++) {
       String s1 = fin.readLine();
       Date time1 = parse(s1);
       assertTrue("Date of message within last 10 seconds", time1.compareTo(earlier) >= 0 && time1.compareTo(now) <= 0);
-      assertEquals("Log message", "Test message", s1.substring(30));
+      assertEquals("Log message", "Test message", s1.substring(dateEnd(s1)));
     } 
     
     fin.close();

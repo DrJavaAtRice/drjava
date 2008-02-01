@@ -118,6 +118,7 @@ public class XMLConfigTest extends TestCase {
                                                     + "  <bar>abc</bar>\n"
                                                     + "  <fum fee=\"xyz\">def</fum>\n"
                                                     + "</foo>"));
+    System.err.println(xc.toString());
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL
                    + "<foo a=\"foo.a\">"+NL
                    + "  <bar>abc</bar>"+NL

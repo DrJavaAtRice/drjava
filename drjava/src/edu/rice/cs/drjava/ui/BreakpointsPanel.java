@@ -269,8 +269,10 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
       return sb.toString();
     }
     public boolean equals(Object other) {
-      if ((other==null) || !(other instanceof BreakpointRegionTreeUserObj)) { return false; }
-      @SuppressWarnings("unchecked") BreakpointRegionTreeUserObj o = (BreakpointRegionTreeUserObj)other;
+
+      if (other == null || other.getClass() != this.getClass()) return false; 
+      @SuppressWarnings("unchecked") 
+      BreakpointRegionTreeUserObj o = (BreakpointRegionTreeUserObj) other;
       return (o.region().getDocument().equals(region().getDocument())) &&
         (o.region().getStartOffset()==region().getStartOffset()) &&
         (o.region().getEndOffset()==region().getEndOffset()) &&

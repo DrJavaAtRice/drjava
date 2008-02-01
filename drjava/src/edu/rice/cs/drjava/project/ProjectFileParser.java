@@ -46,6 +46,7 @@ import java.text.SimpleDateFormat;
 
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.sexp.*;
 import edu.rice.cs.drjava.model.DocumentRegion;
 import edu.rice.cs.drjava.model.SimpleDocumentRegion;
@@ -108,10 +109,10 @@ public class ProjectFileParser {
   }
   
   /** Given a top-level s-expression, this method checks the name of the node and configures the given pfir 
-   *  appropriately.  If the expression is empty, it is ignored.
-   *  @param e the top-level s-expression to check
-   *  @param pfir the ProjectFileIR to update
-   */
+    * appropriately.  If the expression is empty, it is ignored.
+    * @param e the top-level s-expression to check
+    * @param pfir the ProjectFileIR to update
+    */
   private void evaluateExpression(SEList e, ProjectFileIR pfir, DocFileListVisitor flv) throws IOException {
     if (e == Empty.ONLY) return;
     Cons exp = (Cons) e; // If it's not empty, it's a cons
@@ -124,12 +125,13 @@ public class ProjectFileParser {
     else if (name.compareToIgnoreCase("proj-root") == 0) {  // legacy node form; all paths relative to project file
       List<DocFile> fList = exp.getRest().accept(flv);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple source roots");
-      else if (fList.size() == 0) pfir.setProjectRoot(null); // can this ever happen?
+      else if (fList.size() == 0) throw new PrivateProjectException("Cannot have no source roots");
       pfir.setProjectRoot(fList.get(0));
     }
     else if (name.compareToIgnoreCase("proj-root-and-base") == 0) { // source file paths are relative to project root
       List<DocFile> fList = exp.getRest().accept(flv);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple source roots");
+      else if (fList.size() == 0) throw new PrivateProjectException("Cannot have no source roots");
       File root = fList.get(0);
       if (! root.exists()) throw new IOException("Project root " + root + " no longer exists");
       pfir.setProjectRoot(root);
@@ -147,13 +149,13 @@ public class ProjectFileParser {
       List<DocFile> fList = exp.getRest().accept(flv);
 //      System.err.println("BuildDir fList = " + fList);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple build directories");
-      else if (fList.size() == 0) pfir.setBuildDirectory(null);
+      else if (fList.size() == 0) pfir.setBuildDirectory(FileOps.NULL_FILE);
       else pfir.setBuildDirectory(fList.get(0));
     }
     else if (name.compareToIgnoreCase("work-dir") == 0) {
       List<DocFile> fList = exp.getRest().accept(flv);
       if (fList.size() > 1) throw new PrivateProjectException("Cannot have multiple working directories");
-      else if (fList.size() == 0) pfir.setWorkingDirectory(null);
+//      else if (fList.size() == 0) pfir.setWorkingDirectory(null); // working directory should never be set to null;
       else pfir.setWorkingDirectory(fList.get(0));
     }
     else if (name.compareToIgnoreCase("classpaths") == 0) {

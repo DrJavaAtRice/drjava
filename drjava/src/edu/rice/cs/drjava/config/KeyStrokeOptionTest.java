@@ -37,6 +37,8 @@
 package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
+
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.newjvm.ExecJVM;
 
 import javax.swing.*;
@@ -115,7 +117,7 @@ public final class KeyStrokeOptionTest extends DrJavaTestCase {
     String className = "edu.rice.cs.drjava.config.KeyStrokeOptionTest";
     String[] args = new String[0];
 
-    Process process = ExecJVM.runJVMPropagateClassPath(className, args, FileOption.NULL_FILE);
+    Process process = ExecJVM.runJVMPropagateClassPath(className, args, FileOps.NULL_FILE);
     int status = process.waitFor();
     assertEquals("Local specific keystroke test failed!", 0, status);
   }

@@ -35,8 +35,11 @@
  * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
+
 import java.io.File;
 import java.util.Vector;
+
+import edu.rice.cs.util.FileOps;
 
 /** Generate vector options separately to appease javadoc.
  *  (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
@@ -54,7 +57,7 @@ class ClassPathOption {
       System.out.println(warning);
       System.out.println("using '" + ps.charAt(0) + "' for delimiter.");
     }
-    FileOption fop = new FileOption("",FileOption.NULL_FILE);
+    FileOption fop = new FileOption("",FileOps.NULL_FILE);
     //String name = "extra.classpath";
     char delim = ps.charAt(0);
     return new VectorOption<File>(optionName,fop,"",delim,"",new Vector<File>());

@@ -43,6 +43,7 @@ import java.util.*;
 
 import edu.rice.cs.drjava.config.FileOption;
 
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 
 import edu.rice.cs.plt.io.IOUtil;
@@ -56,13 +57,50 @@ public abstract class FileOps {
   
   private static Log _log = new Log("FileOpsTest.txt", false);
   
-  /** Special File object corresponding to a dummy file. Simliar to FileOption.NULL_FILE but exists() returns false. */
-  public static final File NONEXISTENT_FILE = new File("") {
+  static public abstract class NoFile extends File {
+    public NoFile(String name) { super(name); }
+    public boolean canRead() { return false; }
+    public boolean canWrite() { return false; }
+    public int compareTo(File f) { return (f == this) ? 0 : -1; }
+    public boolean createNewFile() { return false; }
+    public boolean delete() { return false; }
+    public void deleteOnExit() {}
+    public boolean equals(Object o) { return o == this; }
+    public File getAbsoluteFile() { return this; }
     public String getAbsolutePath() { return ""; }
+    public File getCanonicalFile() { return this; }
+    public String getCanonicalPath() { return ""; }
     public String getName() { return ""; }
+    public String getParent() { return null; }
+    public File getParentFile() { return null; }
+    public String getPath() { return ""; }
+    public int hashCode() { return getClass().hashCode(); }
+    public boolean isAbsolute() { return false; }
+    public boolean isDirectory() { return false; }
+    public boolean isFile() { return false; }
+    public boolean isHidden() { return false; }
+    public long lastModified() { return 0L; }
+    public long length() { return 0L; }
+    public String[] list() { return null; }
+    public String[] list(FilenameFilter filter) { return null; }
+    public File[] listFiles() { return null; }
+    public File[] listFiles(FileFilter filter) { return null; }
+    public File[] listFiles(FilenameFilter filter) { return null; }
+    public boolean mkdir() { return false; }
+    public boolean mkdirs() { return false; }
+    public boolean renameTo(File dest) { return false; }
+    public boolean setLastModified(long time) { return false; }
+    public boolean setReadOnly() { return false; }
     public String toString() { return ""; }
-    public boolean exists() { return false; }
+    //public URI toURI() {} (Defer to super implementation.)
+    //public URL toURL() {} (Defer to super implementation.)
   };
+
+  /** Special sentinal file used in FileOption and test classes among others. */
+  public static final File NULL_FILE = new NoFile("") { public boolean exists() { return false; } };
+
+//  /** Special File object corresponding to a dummy file. Simliar to NULL_FILE but exists() returns false. */
+//  public static final File NULL_FILE = new NoFile("") { public boolean exists() { return false; } };
   
   /** @deprecated  If a best-attempt canonical file is needed, use 
     *              {@link edu.rice.cs.plt.io.IOUtil#attemptCanonicalFile} instead
@@ -235,7 +273,7 @@ public abstract class FileOps {
   /** @return the file f unchanged if f exists; otherwise returns NULL_FILE. */
   public static File validate(File f) {
     if (f.exists()) return f;
-    return FileOption.NULL_FILE;  // This File object exists
+    return FileOps.NULL_FILE;  // This File object exists
   }
   
   /** This filter checks for files with names that end in ".java".  (Note that while this filter was <em>intended</em>
@@ -257,7 +295,8 @@ public abstract class FileOps {
       File test = new File(name.toString());
       return (test.equals(f));
     }
-    public String getDescription() { return "Java Source Files (*.java)"; }
+    /* The following method is commented out because it was inaccessible. */
+//    public String getDescription() { return "Java Source Files (*.java)"; }
   };
   
   /** Reads the stream until it reaches EOF, and then returns the read contents as a byte array. This call may 
@@ -506,7 +545,8 @@ public abstract class FileOps {
         exploredDirectories.add(f);
         return toReturn;
       }
-      public String getDescription() { return "All Folders"; }
+      /* The following method is commented out because it was inaccessible. */
+//      public String getDescription() { return "All Folders"; }
     };
 
     // Explore each directory, adding (unique) subdirectories to the working list.  If a directory has .java 
@@ -686,7 +726,7 @@ public abstract class FileOps {
    */
   public abstract static class DefaultFileSaver implements FileSaver {
 
-    private File outputFile = null;
+    private File outputFile = FileOps.NULL_FILE;
     private static Set<File> filesNotNeedingBackup = new HashSet<File>();
     private static boolean backupsEnabled = true;
 
@@ -776,12 +816,12 @@ public abstract class FileOps {
     File file = origFile;
   
     // if it's the NULL_FILE or null, use "user.home"
-    if ((file==FileOption.NULL_FILE)||(file == null)) {
+    if ((file == FileOps.NULL_FILE) || (file == null)) {
       file = new File(System.getProperty("user.home"));
     }
     assert file != null;    
     
-    while (file != null && !file.exists()) {
+    while (file != null && ! file.exists()) {
       // if the saved path doesn't exist anymore, try the parent
       //NB: getParentFile() may return null
       file = file.getParentFile();
@@ -793,7 +833,7 @@ public abstract class FileOps {
     assert file != null;
     
     // if it's not a directory, try the parent
-    if (!file.isDirectory()) {
+    if (! file.isDirectory()) {
       if (file.getParent() != null) { 
         file = file.getParentFile();
         //NB: getParentFile() may return null
@@ -806,9 +846,7 @@ public abstract class FileOps {
     }
     
     // this should be an existing directory now
-    if (file.exists() && file.isDirectory()) {
-      return file;
-    }
+    if (file.exists() && file.isDirectory()) return file;
     
     // ye who enter here, abandon all hope...
     // the saved path didn't work, and neither did "user.home"

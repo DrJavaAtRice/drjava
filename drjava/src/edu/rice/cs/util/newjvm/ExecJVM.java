@@ -36,8 +36,9 @@
 
 package edu.rice.cs.util.newjvm;
 
-import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
+
 import edu.rice.cs.plt.io.IOUtil;
 
 import java.io.BufferedReader;
@@ -140,7 +141,7 @@ public final class ExecJVM {
 
     // exec our "java" command in the specified working directory setting
     Process p;
-    if ((workDir != null) && (workDir != FileOption.NULL_FILE)) {
+    if ((workDir != null) && (workDir != FileOps.NULL_FILE)) {
       // execute in the working directory
       if (workDir.exists()) p = Runtime.getRuntime().exec(argArray, null, workDir);
       else {

@@ -140,7 +140,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     AttributeSet s = null;
     if (style != null) s = getDocStyle(style);
     try { super.insertString(offs, str, s); }
-    catch (BadLocationException e) { throw new EditDocumentException(e); }
+    catch (BadLocationException e) { throw new EditDocumentException(e); }  // should never happen
   }
 
   /** Inserts a string into the document at the given offset and style, regardless of the edit condition.

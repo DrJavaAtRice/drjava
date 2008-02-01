@@ -74,19 +74,19 @@ public class ProjectProfile implements ProjectFileIR {
   private List<DocFile> _auxFiles = new ArrayList<DocFile>();
   private List<String> _collapsedPaths = new ArrayList<String>();
   
-  private File _buildDir = null;
-  private File _workDir = null;
+  private File _buildDir = FileOps.NULL_FILE;
+  private File _workDir = FileOps.NULL_FILE;
   
   private List<File> _classPathFiles = new ArrayList<File>();
   
   private File _mainClass = null;
   
   /** root of project source tree.  Invariant: _projectRoot.exists() */
-  private File _projectRoot;
+  private File _projectRoot; /* Invariant after init: _projectRoot.exists() implying _projectRoot != null. */
   
-  private File _projectFile;  /* Invariant: _projectFile.getParentFile().exists() */
+  private File _projectFile;  /* Invariant after init: _projectFile.getParentFile().exists() implying _projectFile != null */
   
-  private File _createJarFile = null;
+  private File _createJarFile = FileOps.NULL_FILE;
   
   private int _createJarFlags = 0;
   
@@ -98,9 +98,10 @@ public class ProjectProfile implements ProjectFileIR {
   public ProjectProfile(String fileName) throws IOException { this(new File(fileName)); }
   
   /** Creates new ProjectProfiles with specifed project file name and project root that is parent folder of
-   *  the project file.  The project file presumably may not exist yet, but its parent folder is assumed to exist.
-   *  @throws IOException parent directory of project file does not exist.
-   */
+    * the project file.  The project file presumably may not exist yet, but its parent folder is assumed to exist.
+    * Assumes that the File f is not a null reference.
+    * @throws IOException parent directory of project file does not exist.
+    */
   public ProjectProfile(File f) throws IOException { 
     _projectFile = f; 
     _projectRoot = _projectFile.getParentFile();
@@ -218,14 +219,13 @@ public class ProjectProfile implements ProjectFileIR {
     // write the project root
     /* In the new project file form, this property has been renamed "proj-root-and-base" (instead of "proj-root") to
      * indicate that the project root now serves as the base for source file path names. */
-    if (_projectRoot != null) {
-      fw.write("\n(proj-root-and-base");
+    assert (_projectRoot != null);
+
+    fw.write("\n(proj-root-and-base");
 //      Utilities.show("Writing project root = " + _projRoot);
-      fw.write("\n" + encodeFileRelative(_projectRoot, "  ", _projectFile));
-      fw.write(")");
-    }
-    else fw.write("\n;; no project root; should never happen");
-        
+    fw.write("\n" + encodeFileRelative(_projectRoot, "  ", _projectFile));
+    fw.write(")");
+
     // write source files
     /* This property has been renamed "source-files" (instead of "source") so that old versions of DrJava will not 
      * recognize it.  In the new project file format, source files are relative to the project root, not the parent
@@ -285,7 +285,7 @@ public class ProjectProfile implements ProjectFileIR {
     else fw.write("\n;; no build directory");
     
      // write the working directory
-    if (_workDir != null && _workDir.getPath() != "") {
+    if (_workDir.getPath() != "") {
       fw.write("\n(work-dir");
       fw.write("\n" + encodeFileRelative(_workDir, "  ", _projectFile));
       fw.write(")");

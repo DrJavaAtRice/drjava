@@ -42,6 +42,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.debug.*;
 
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests the JPDA-based debugger.
@@ -130,7 +131,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     // Use the interpeter so that resetInteractions restarts the slave JVM
 //    interpret("2+2");
     
-    _model.resetInteractions(FileOption.NULL_FILE);
+    _model.resetInteractions(FileOps.NULL_FILE);
 
     synchronized(_notifierLock) { while (_pendingNotifies > 0) _notifierLock.wait(); }
     

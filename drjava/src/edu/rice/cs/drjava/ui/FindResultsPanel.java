@@ -283,12 +283,12 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       _lineNumber = _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1;
     }
     public boolean equals(Object other) {
-      if ((other==null) || !(other instanceof FindResultsRegionTreeUserObj)) { return false; }
+      if (other == null || other.getClass() != this.getClass()) return false;
       @SuppressWarnings("unchecked") FindResultsRegionTreeUserObj o = (FindResultsRegionTreeUserObj)other;
       return (o.region().getDocument().equals(region().getDocument()) &&
-        (o.region().getStartOffset()==region().getStartOffset()) &&
-        (o.region().getEndOffset()==region().getEndOffset()) &&
-        (o._lineNumber==_lineNumber));
+        (o.region().getStartOffset() == region().getStartOffset()) &&
+        (o.region().getEndOffset() == region().getEndOffset()) &&
+        (o._lineNumber == this._lineNumber));
     }
     public int hashCode() {
       int result;

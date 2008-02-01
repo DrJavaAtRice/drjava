@@ -58,13 +58,15 @@ import javax.swing.text.BadLocationException;
 import javax.swing.SwingUtilities;
 
 import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.drjava.model.FileSaveSelector;
+import edu.rice.cs.util.FileOps;
+
 import edu.rice.cs.util.NullFile;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.newjvm.AbstractMasterJVM;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
+
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
@@ -75,6 +77,7 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.FileOption;
 
+import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
@@ -266,7 +269,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     Map<JavaVersion, JDKToolsLibrary> results = new TreeMap<JavaVersion, JDKToolsLibrary>();
     
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
-    if (configTools != FileOption.NULL_FILE) {
+    if (configTools != FileOps.NULL_FILE) {
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this);
       if (fromConfig.isValid()) { results.put(fromConfig.version().majorVersion(), fromConfig); }
     }
@@ -298,7 +301,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Sets the build directory for a project. */
   public void setBuildDirectory(File f) {
     _state.setBuildDirectory(f);
-    if (f != null) {
+    if (f != FileOps.NULL_FILE) {
       //      System.out.println("adding: " + f.getAbsolutePath());
       _jvm.addBuildDirectoryClassPath(IOUtil.attemptAbsoluteFile(f));
     }
@@ -520,7 +523,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       else {
         // use source root of current document
         try { workDir = getSourceRoot(); }
-        catch (InvalidPackageException e) { workDir = null; }
+        catch (InvalidPackageException e) { workDir = FileOps.NULL_FILE; }
       }
       // Reset interactions to the soure root for this document; class will be executed when new interpreter is ready
       resetInteractions(workDir);  

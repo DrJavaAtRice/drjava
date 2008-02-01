@@ -104,7 +104,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _log.log("Global model created for " + this);
     DrJava.getConfig().resetToDefaults();
     String user = System.getProperty("user.name");
+    
     _tempDir = /* IOUtil.createAndMarkTempDirectory */ FileOps.createTempDirectory("DrJava-test-" + user /*, ""*/);
+//    System.err.println("Temp Directory is " + _tempDir.getAbsolutePath());
+    
     // Wait until model has connected to slave JVM
     _log.log("Ensuring that interpreter is connected in " + this);
     _model._jvm.ensureInterpreterConnected();

@@ -40,7 +40,9 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.drjava.config.OptionConstants;
+
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.FileOps;
 
 import javax.swing.*;
 import java.awt.*;
@@ -68,7 +70,7 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
 
   public void testCancelDoesNotChangeConfig() {
 
-    File testFile = FileOption.NULL_FILE;
+    File testFile = FileOps.NULL_FILE;
 
     _option.setValue(testFile);
     _option.resetToCurrent(); // should reset to the original.
@@ -82,7 +84,7 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
   }
 
   public void testApplyDoesChangeConfig() {
-    File testFile = FileOption.NULL_FILE;
+    File testFile = FileOps.NULL_FILE;
 
     _option.setValue(testFile);
     _option.updateConfig();
@@ -93,7 +95,7 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
   }
 
   public void testApplyThenResetDefault() {
-    File testFile = FileOption.NULL_FILE;
+    File testFile = FileOps.NULL_FILE;
 
     _option.setValue(testFile);
     _option.updateConfig();

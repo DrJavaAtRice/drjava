@@ -45,6 +45,7 @@ import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParser;
 
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
@@ -129,7 +130,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     IOUtil.deleteOnExitRecursively(_parent);
     _auxFile.delete();
     _frame.dispose();
-    _projFile = null;
+    _projFile = FileOps.NULL_FILE;
     _model = null;
     _frame = null;
     super.tearDown();
@@ -140,9 +141,9 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
 //    Utilities.showDebug("executing testSetBuildDirectory");
     
     //test set build directory when not in project mode
-    File f = new File("");
+    File f = FileOps.NULL_FILE;
     _model.setBuildDirectory(f);
-    assertEquals("Build directory should not have been set", null, _model.getBuildDirectory());
+    assertEquals("Build directory should not have been set", FileOps.NULL_FILE, _model.getBuildDirectory());
     
 //    System.err.println("Opening Project File");
     Utilities.invokeAndWait(new Runnable() { 
@@ -154,7 +155,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
 //    System.err.println("Completed Opening Project File");
 //    System.err.println("Project documents are: " + _model.getProjectDocuments());
     
-    assertEquals("Build directory should not have been set", null, _model.getBuildDirectory());
+    assertEquals("Build directory should not have been set", FileOps.NULL_FILE, _model.getBuildDirectory());
     
     _model.setBuildDirectory(f);
     assertEquals("Build directory should have been set", f, _model.getBuildDirectory());

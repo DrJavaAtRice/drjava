@@ -40,10 +40,11 @@ import java.io.StringWriter;
 import java.io.PrintWriter;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
-import edu.rice.cs.drjava.config.FileOption;
+//import edu.rice.cs.drjava.config.FileOption;
 
 import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
@@ -125,7 +126,7 @@ public final class NewJVMTest extends DrJavaTestCase {
     
     // Now restart interpreter
     synchronized(_testLock) {
-      _jvm.killInterpreter(FileOption.NULL_FILE);  // "" is not null: start back up
+      _jvm.killInterpreter(FileOps.NULL_FILE);  // "" is not null: start back up
       _testLock.wait();
     }
 

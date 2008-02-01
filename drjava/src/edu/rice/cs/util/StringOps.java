@@ -486,11 +486,10 @@ public abstract class StringOps {
     return s;
   }
 
-  /**
-   * Return a string representing the approximate amount of memory specified in bytes.
-   * @param l memory in bytes
-   * @return string approximating the amount of memory
-   */
+  /** Return a string representing the approximate amount of memory specified in bytes.
+    * @param l memory in bytes
+    * @return string approximating the amount of memory
+    */
   public static String memSizeToString(long l) {
     String[] sizes = new String[] { "byte", "kilobyte", "megabyte", "gigabyte" };
     double d = l;

@@ -40,6 +40,8 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import javax.swing.text.Position;
 
+import edu.rice.cs.util.FileOps;
+
 /**
  * Class for a document region that can move with changes in the document; its text, however, remains constant.
  * @version $Id$Region
@@ -82,19 +84,20 @@ public class MovingDocumentRegion implements DocumentRegion {
     return _string;
   }
   
+  /** @return true if objects a and b are equal; null values are handled correctly. */
+  public static boolean equals(Object a, Object b) {
+    if (a == null) return (b == null);
+    return a.equals(b);
+  }
+  
   /** @return true if the specified region is equal to this one. */
   public boolean equals(Object other) {
-    if ((other == null) || ! (other instanceof MovingDocumentRegion)) return false;
-    @SuppressWarnings("unchecked") MovingDocumentRegion o = (MovingDocumentRegion)other;
-    if ((_doc == null && o._doc != null) ||
-        (_doc != null && o._doc == null)) return false;
-    if ((_file == null && o._file != null) ||
-        (_file != null && o._file == null)) return false;
-    return (((_doc == null && o._doc == null) || _doc.equals(o._doc)) &&
-            ((_file == null && o._file == null) || _file.equals(o._file)) &&
+    if (other == null || other.getClass() != this.getClass()) return false;
+    MovingDocumentRegion o = (MovingDocumentRegion) other;
+    return equals(_doc, o._doc) && equals(_file, o._file) &&
             _startPosition.getOffset() == o._startPosition.getOffset() &&
             _endPosition.getOffset() == o._endPosition.getOffset() &&
-            _string.equals(o._string));
+            _string.equals(o._string);
   }
   
   /** @return the hash code. */
