@@ -75,13 +75,13 @@ public class Log {
   }
 
   /** Creates the log file, if enabled. */
+  @SuppressWarnings("deprecation") 
   protected void _init() {
     if (_writer == null) {
       if (_isEnabled || ENABLE_ALL) {
         try {
           FileWriter w = new FileWriter(_file.getAbsolutePath(), true);
           _writer = new PrintWriter(w);
-
           log("Log '" + _name + "' opened: " + (new Date()).toGMTString());
         }
         catch (IOException ioe) {
@@ -102,6 +102,7 @@ public class Log {
   /** Prints a message to the log, if enabled.
    *  @param message Message to print.
    */
+  @SuppressWarnings("deprecation") 
   public synchronized void log(String message) {
     if (isEnabled()) {
       if (_writer == null) {
