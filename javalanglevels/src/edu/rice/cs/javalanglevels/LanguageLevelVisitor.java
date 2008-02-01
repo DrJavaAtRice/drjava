@@ -44,6 +44,7 @@ import edu.rice.cs.javalanglevels.parser.ParseException;
 import java.util.*;
 import java.io.*;
 import java.lang.reflect.Modifier;
+import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.reflect.PathClassLoader;
 import edu.rice.cs.plt.reflect.EmptyClassLoader;
@@ -224,6 +225,21 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return throwStrings;
   }
   
+  /** We'll use this class loader to look up resources (*not* to load classes) */
+  private static final Thunk<ClassLoader> RESOURCES = new Thunk<ClassLoader>() {
+    private Options _cachedOptions = null;
+    private ClassLoader _cachedResult = null;
+    public ClassLoader value() {
+      if (LanguageLevelConverter.OPT != _cachedOptions) {
+        _cachedOptions = LanguageLevelConverter.OPT;
+        Iterable<File> searchPath = IterUtil.compose(LanguageLevelConverter.OPT.bootClassPath(),
+                                                     LanguageLevelConverter.OPT.classPath());
+        _cachedResult = new PathClassLoader(EmptyClassLoader.INSTANCE, searchPath);
+      }
+      return _cachedResult;
+    }
+  };
+  
   /**
    * Use the ASM class reader to read the class file corresponding to the class in
    * the specified directory, and use the information from ASM to build a SymbolData corresponding
@@ -232,22 +248,20 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
    * @param directoryName  The directory where the class is located.
    */
   private SymbolData _classFile2SymbolData(String qualifiedClassName, String directoryName) {
-    Iterable<File> searchPath = IterUtil.compose(LanguageLevelConverter.OPT.bootClassPath(),
-                                                 LanguageLevelConverter.OPT.classPath());
-    if (directoryName != null) { searchPath = IterUtil.compose(searchPath, new File(directoryName)); }
-    
     ClassReader reader = null;
     try {
-      /** We'll use this class loader to look up resources (*not* to load classes) */
-      PathClassLoader loader = new PathClassLoader(EmptyClassLoader.INSTANCE, searchPath);
-      InputStream stream = loader.getResourceAsStream(qualifiedClassName.replace('.', '/') + ".class");
+      String fileName = qualifiedClassName.replace('.', '/') + ".class";
+      InputStream stream = RESOURCES.value().getResourceAsStream(fileName);
+      if (stream == null && directoryName != null) {
+        stream = PathClassLoader.getResourceInPathAsStream(fileName, new File(directoryName));
+      }
       if (stream == null) { return null; }
       // Let IOUtil handle the stream here, because it closes it when it's done, unlike ASM.
       reader = new ClassReader(IOUtil.toByteArray(stream));
     }
     catch (IOException e) { return null; }
     
-    //This is done so that the SymbolData in the Symboltable is updated and returned.
+    // This is done so that the SymbolData in the Symboltable is updated and returned.
     final SymbolData sd;
     SymbolData sdLookup = symbolTable.get(qualifiedClassName); 
     if (sdLookup == null) {
@@ -256,7 +270,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     else { sd = sdLookup; }
     
-    //make it be a non-continuation, since we are filing it in
+    // make it be a non-continuation, since we are filling it in
     sd.setIsContinuation(false);
     
     final SourceInfo lookupInfo = _makeSourceInfo(qualifiedClassName);
