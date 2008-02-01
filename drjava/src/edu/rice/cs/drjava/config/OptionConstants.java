@@ -1200,6 +1200,13 @@ public interface OptionConstants {
   public static final BooleanOption DIALOG_JAROPTIONS_STORE_POSITION =
     new BooleanOption("dialog.jaroptions.store.position", Boolean.TRUE);
 
+  /** The last state of the "Execute External Process" dialog. */
+  public static final StringOption DIALOG_EXTERNALPROCESS_STATE = new StringOption("dialog.externalprocess.state", "default");
+
+  /** Whether to save and restore window size and position at startUp/shutdown. */
+  public static final BooleanOption DIALOG_EXTERNALPROCESS_STORE_POSITION =
+    new BooleanOption("dialog.externalprocess.store.position", Boolean.TRUE);
+
   /** Whether to put the focus in the definitions pane after find/replace. */
   public static final BooleanOption FIND_REPLACE_FOCUS_IN_DEFPANE =
     new BooleanOption("find.replace.focus.in.defpane", Boolean.FALSE);

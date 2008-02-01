@@ -48,9 +48,9 @@ import java.util.Map;
  */
 
 public class ProcessCreator {
-  private List<String> _command;
-  private File _dir;
-  private Map<String,String> _env;
+  protected List<String> _command;
+  protected File _dir;
+  protected Map<String,String> _env;
   
   /**
    * Creates a new process creator.
@@ -102,7 +102,7 @@ public class ProcessCreator {
   }
   
   /**
-   * Starts a new process using the attributes of this process builder.
+   * Starts a new process using the attributes of this process creator.
    */
   public Process start() throws IOException {
     String[] cmdarray = _command.toArray(new String[_command.size()]);

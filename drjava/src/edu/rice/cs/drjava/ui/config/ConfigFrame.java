@@ -472,6 +472,17 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
     }, "Reset \"Auto Import\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_EXTERNALPROCESS_STORE_POSITION,
+                                                  "Save \"Execute External Process\" Dialog Position", this,
+                                                  "Whether to save and restore the position of the \"Execute External Process\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _mainFrame.resetExecuteExternalProcessPosition();
+      }
+    }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
+                                                  "Save \"Open Javadoc\" Dialog Position", this,
+                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_SCAN_CLASS_FILES,
                                                   "Scan Class Files After Each Compile For Auto-Completion and Auto-Import", this,
                                                   "<html>Whether to scan the class files after a compile to generate class names<br>"+

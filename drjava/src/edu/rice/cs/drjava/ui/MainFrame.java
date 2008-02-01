@@ -108,7 +108,6 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 import edu.rice.cs.drjava.RemoteControlClient;
-import edu.rice.cs.util.ProcessCreator;
 
 /** DrJava's main window. */
 public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListener {
@@ -140,9 +139,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private volatile String _fileTitle = "";
   
   // Tabbed panel fields
-  public final LinkedList<TabbedPanel>  _tabs = new LinkedList<TabbedPanel>();
-    
-  private final JTabbedPane _tabbedPane;
+  public final LinkedList<TabbedPanel>  _tabs = new LinkedList<TabbedPanel>();  
+  public final JTabbedPane _tabbedPane;
+  public volatile Component _lastFocusOwner;
+
   private final CompilerErrorPanel _compilerErrorPanel;
   private final InteractionsPane _consolePane;
   private final JScrollPane _consoleScroll;  // redirects focus to embedded _consolePane
@@ -163,7 +163,6 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private volatile InteractionsScriptController _interactionsScriptController;
   private volatile InteractionsScriptPane _interactionsScriptPane;
   private volatile DebugPanel _debugPanel;
-  private volatile Component _lastFocusOwner;
   
   /** Panel to hold both InteractionsPane and its sync message. */
   
@@ -3095,7 +3094,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _quickStartFrame = new QuickStartFrame();
     _interactionsScriptController = null;
     _jarOptionsDialog = new JarOptionsDialog(MainFrame.this);
+    _executeExternalDialog = new ExecuteExternalDialog(MainFrame.this);
     initJarOptionsDialog();
+    initExecuteExternalProcessDialog();
 //    _projectPropertiesFrame = null;
     
     // If any errors occurred while parsing config file, show them
@@ -4306,6 +4307,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
       }
     }
+    _executeExternalDialog.setVisible(false);
     // tried passing false here. seemed to help with bug
     // [ 1478796 ] DrJava Does Not Shut Down With Project Open
     // on HP tc1100 and Toshiba Portege tablet PCs, but did not help in all cases
@@ -8179,7 +8181,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     * the component in the _tabs list.  Only runs in the event thread.
     * @param c the component to show in the tabbedPane
     */
-  private void showTab(final Component c) {
+  public void showTab(final Component c) {
     // TODO: put all of the _tabbedPane components in _tabs. eliminating special cases for interactions, console (which 
     // are always displayed)
     assert EventQueue.isDispatchThread();
@@ -8808,65 +8810,23 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Execute an external process and monitor its output. */
   private void _executeExternalProcess() {
-    updateStatusField("Executing external process...");
-    // LOG.log("_executeExternalProcess");
-    String cmdline =  JOptionPane.showInputDialog(this, "Command line:");
-    if (cmdline==null) { return; }
-    // LOG.log("cmdline = "+cmdline);
-    StreamTokenizer tok = new StreamTokenizer(new StringReader(cmdline));
-    tok.resetSyntax();
-    tok.wordChars(0,255);
-    tok.whitespaceChars(0,32);
-    tok.quoteChar('\'');
-    tok.quoteChar('"');
-    tok.slashSlashComments(false);
-    tok.slashStarComments(false);
-    ArrayList<String> cmds = new ArrayList<String>();
-    
-    int next;
-    try {
-      while(((next=tok.nextToken())!=StreamTokenizer.TT_EOF) &&
-            (next!=StreamTokenizer.TT_EOL)) {
-        // LOG.log("token="+next);
-        switch(next) {
-          case StreamTokenizer.TT_WORD:
-            // LOG.log("\tsval="+tok.sval);
-            cmds.add(tok.sval);
-            break;
-          case StreamTokenizer.TT_NUMBER:
-            // LOG.log("\tnval="+tok.nval);
-            cmds.add(""+tok.nval);
-            break;
-          default:
-            // LOG.log("\tsomething weird");
-            JOptionPane.showMessageDialog(this,
-                                          "Unexpected part while separating command line into individual parts.",
-                                          "Invalid Command Line",
-                                          JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-      }
+    _executeExternalDialog.setVisible(true);
+  }
+  
+  /** The execute external dialog. */
+  private final ExecuteExternalDialog _executeExternalDialog;
+  
+  /** Initializes the "Execute External Process" dialog. */
+  private void initExecuteExternalProcessDialog() {
+    if (DrJava.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STORE_POSITION).booleanValue())
+      _executeExternalDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STATE));  
+  }
+  
+  /** Reset the position of the "Execute External Process" dialog. */
+  public void resetExecuteExternalProcessPosition() {
+    _executeExternalDialog.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_EXTERNALPROCESS_STATE, "default");
     }
-    catch(IOException ioe) {
-      JOptionPane.showMessageDialog(this,
-                                    "Could not separate command line into individual parts.",
-                                    "Invalid Command Line",
-                                    JOptionPane.ERROR_MESSAGE);
-      return;
-    }
-    
-    ProcessCreator pc = new ProcessCreator(cmds.toArray(new String[cmds.size()]));
-    String name = "External";
-    if (cmds.size()>0) { name += ": "+cmds.get(0); }
-    final ExternalProcessPanel panel = new ExternalProcessPanel(this, name, pc);
-    _tabs.addLast(panel);
-    panel.getMainPanel().addFocusListener(new FocusAdapter() {
-      public void focusGained(FocusEvent e) { _lastFocusOwner = panel; }
-    });
-    panel.setVisible(true);
-    showTab(panel);
-    _tabbedPane.setSelectedComponent(panel);
-    // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
-    EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
   }
 }

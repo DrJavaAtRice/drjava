@@ -131,7 +131,7 @@ public final class ExecJVM {
    */
   private static Process _runJVM(String mainClass, String[] classParams, String[] jvmParams, File workDir) throws IOException {
     LinkedList<String> args = new LinkedList<String>();
-    args.add(_getExecutable());
+    args.add(getExecutable());
     _addArray(args, jvmParams);
     args.add(mainClass);
     _addArray(args, classParams);
@@ -252,7 +252,7 @@ public final class ExecJVM {
    * Find the java executable.
    * This logic comes from Ant.
    */
-  private static String _getExecutable() {
+  public static String getExecutable() {
     // this netware thing is based on comments from ant's code
     if (_isNetware()) return "java";
 

@@ -71,11 +71,14 @@ public class ExternalProcessPanel extends AbortablePanel {
   protected ProcessCreator _pc = null;
   protected Process _p = null;
   protected InputStreamReader _is = null;
+  protected InputStreamReader _erris = null;
   protected JButton _updateNowButton;
   protected Thread _updateThread;
   protected Thread _deathThread;
   private char[] _buf = new char[BUFFER_SIZE];
   private int _red = -1;
+  private char[] _errbuf = new char[BUFFER_SIZE];
+  private int _errred = -1;
   private int _retVal;
   private String _header;
 
@@ -103,7 +106,7 @@ public class ExternalProcessPanel extends AbortablePanel {
       _pc = pc;
       _updateThread = new Thread(new Runnable() {
         public void run() {
-          while(_is!=null) {
+          while((_is!=null) || (_erris!=null)) {
             try {
               Thread.sleep(edu.rice.cs.drjava.DrJava.getConfig().
                              getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_DELAY));
@@ -115,6 +118,7 @@ public class ExternalProcessPanel extends AbortablePanel {
       });
       _p = _pc.start();
       _is = new InputStreamReader(_p.getInputStream());
+      _erris = new InputStreamReader(_p.getErrorStream());
       _updateThread.start();
       _updateNowButton.setEnabled(true);
       _deathThread = new Thread(new Runnable() {
@@ -175,6 +179,14 @@ public class ExternalProcessPanel extends AbortablePanel {
       _is = null;
       updateButtons();
     }
+    if (_erris!=null) {
+      try {
+        _erris.close();
+      }
+      catch(IOException ioe) { /* ignore, just stop polling */ }
+      _erris = null;
+      updateButtons();
+    }
     if (_p!=null) {
       _p.destroy();
       _p = null;
@@ -183,8 +195,8 @@ public class ExternalProcessPanel extends AbortablePanel {
   
   /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */
   protected void updateButtons() {
-    _abortButton.setEnabled(_is!=null);
-    _updateNowButton.setEnabled(_is!=null);
+    _abortButton.setEnabled((_is!=null) || (_erris!=null));
+    _updateNowButton.setEnabled((_is!=null) || (_erris!=null));
   }  
 
   /** Creates the buttons for controlling the regions. Should be overridden. */
@@ -204,7 +216,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     Utilities.invokeLater(new Runnable() {
       public void run() {
         // MainFrame.LOG.log("updateText");
-        if ((_is!=null) &&
+        if (((_is!=null) || (_erris!=null)) &&
             (_updateNowButton.isEnabled())) {
           _updateNowButton.setEnabled(false);
           int changeCount = 0;
@@ -214,13 +226,26 @@ public class ExternalProcessPanel extends AbortablePanel {
             // MainFrame.LOG.log("\treading...");
             // abort after reading 5 blocks (50 kB), read more later
             // don't block the event thread any longer
-            while((changeCount<=BUFFER_READS_PER_TIMER) && (_is!=null) && ((_red = _is.read(_buf))>=0)) {
+            while((changeCount<=BUFFER_READS_PER_TIMER) 
+                    && (_erris!=null)
+                    && ((_red = _is.read(_buf))>=0)) {
               // MainFrame.LOG.log("\tread "+_red+" bytes");
               sb.append(new String(_buf, 0, _red));
               if (finish) { changeCount = 1; } else { ++changeCount; }
             }
+            while((changeCount<=BUFFER_READS_PER_TIMER) 
+                    && (_erris!=null)
+                    && ((_errred = _erris.read(_errbuf))>=0)) {
+              // MainFrame.LOG.log("\tread "+_red+" bytes");
+              sb.append(new String(_errbuf, 0, _errred));
+              if (finish) { changeCount = 1; } else { ++changeCount; }
+            }
             if ((_red>0) && (changeCount<BUFFER_READS_PER_TIMER)) {
               sb.append(new String(_buf, 0, _red));
+              if (finish) { changeCount = 1; } else { ++changeCount; }
+            }
+            if ((_errred>0) && (changeCount<BUFFER_READS_PER_TIMER)) {
+              sb.append(new String(_errbuf, 0, _errred));
               if (finish) { changeCount = 1; } else { ++changeCount; }
             }
           }
