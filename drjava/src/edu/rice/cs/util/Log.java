@@ -40,6 +40,8 @@ import java.io.*;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 /** Logging class to record errors or unexpected behavior to a file.  The file is created in the current directory,
   * and is only used if the log is enabled.  All logs can be enabled at once with the ENABLE_ALL field.
@@ -59,7 +61,13 @@ public class Log {
 
   /** PrintWriter to print messages to a file. */
   protected volatile PrintWriter _writer;
-
+  
+  public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMM yyyy H:mm:ss z");
+  static {
+    DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+    DATE_FORMAT.setLenient(false);
+  }
+  
   /** Creates a new Log with the given name.  If enabled is true, a file is created in the current directory with the
     * given name.
     * @param name  File name for the log
@@ -82,7 +90,7 @@ public class Log {
         try {
           FileWriter w = new FileWriter(_file.getAbsolutePath(), true);
           _writer = new PrintWriter(w);
-          log("Log '" + _name + "' opened: " + (new Date()).toGMTString());
+          log("Log '" + _name + "' opened: " + DATE_FORMAT.format(new Date()));
         }
         catch (IOException ioe) {
           throw new RuntimeException("Could not create log: " + ioe);
@@ -108,7 +116,7 @@ public class Log {
       if (_writer == null) {
         _init();
       }
-      _writer.println((new Date()).toGMTString() + ": " + message);
+      _writer.println(DATE_FORMAT.format(new Date()) + ": " + message);
       _writer.flush();
     }
   }
@@ -116,7 +124,7 @@ public class Log {
   /** Converts a stack trace (StackTraceElement[]) to string form */
   public static String traceToString(StackTraceElement[] trace) {
     final StringBuilder traceImage = new StringBuilder();
-    for (StackTraceElement e: trace) traceImage.append("\n" + e.toString());
+    for (StackTraceElement e: trace) traceImage.append("\n\tat " + e.toString());
     return traceImage.toString();
   }
     

@@ -864,5 +864,5 @@ public abstract class FileOps {
     * solution is to avoid trying to convert from a URL to a File, because this conversion is not guaranteed
     * to work.)
     */
-  public static URL toURL(File f) throws MalformedURLException { return f.toURL(); }
+  public static URL toURL(File f) throws MalformedURLException { return f.toURI().toURL(); }
 }

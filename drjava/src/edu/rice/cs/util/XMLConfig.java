@@ -89,7 +89,7 @@ public class XMLConfig {
     try {
       DocumentBuilder builder = factory.newDocumentBuilder();
       _document = builder.newDocument();  // Create from whole cloth
-      _document.setXmlStandalone(true);
+      // NOTE: not 1.4 compatible -- _document.setXmlStandalone(true);
     }
     catch(ParserConfigurationException e) {
       e.printStackTrace();
@@ -122,7 +122,7 @@ public class XMLConfig {
     try {
       builder = factory.newDocumentBuilder();
       _document = builder.parse(is);
-      _document.setXmlStandalone(true);
+      // NOTE: not 1.4 compatible -- _document.setXmlStandalone(true);
     }
     catch(Exception e) {
       throw new XMLConfigException("Error in ctor", e);

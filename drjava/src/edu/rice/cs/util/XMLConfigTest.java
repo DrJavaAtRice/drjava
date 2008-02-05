@@ -112,81 +112,92 @@ public class XMLConfigTest extends TestCase {
       // ignore
     }
   }
+  private String remove16XML(String s) {
+    if ((System.getProperty("java.version").startsWith("1.5")) ||
+        (System.getProperty("java.version").startsWith("1.4"))) {
+      int pos1 = s.indexOf(" standalone=");
+      int pos2 = s.indexOf("?>", pos1);
+      return s.substring(0, pos1) + s.substring(pos2);
+    }
+    else {
+      return s;
+    }
+  }
   public void testSave() throws Exception {
     XMLConfig xc = new XMLConfig(new StringReader(
                                                   "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
                                                     + "  <bar>abc</bar>\n"
                                                     + "  <fum fee=\"xyz\">def</fum>\n"
                                                     + "</foo>"));
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL
-                   + "<foo a=\"foo.a\">"+NL
-                   + "  <bar>abc</bar>"+NL
-                   + "  <fum fee=\"xyz\">def</fum>"+NL
-                   + "</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL +
+                             "<foo a=\"foo.a\">"+NL +
+                             "  <bar>abc</bar>"+NL +
+                             "  <fum fee=\"xyz\">def</fum>"+NL +
+                             "</foo>"+NL), xc.toString());
   }
   public void testSetNodeFromEmpty() throws Exception {
     XMLConfig xc = new XMLConfig();
     xc.set("foo/bar", "abc");
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar"));
     
     xc.set("foo/fum", "def");
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"  <fum>def</fum>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"  <fum>def</fum>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("def", xc.get("foo/fum"));
   }
   public void testSetNodeOverwrite() throws Exception {
     XMLConfig xc = new XMLConfig();
     xc.set("foo/bar", "abc");
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar"));
     
     xc.set("foo/bar", "def");
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar>def</bar>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>def</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("def", xc.get("foo/bar"));
     
     xc.set("foo", "xyz");
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>xyz</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>xyz</foo>"+NL), xc.toString());
     assertEquals("xyz", xc.get("foo"));
   }
   public void testSetAttrFromEmpty() throws Exception {
     XMLConfig xc = new XMLConfig();
     xc.set("foo.bar", "abc");
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo bar=\"abc\"/>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\"/>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo.bar"));
     
     xc.set("foo/fum.fee", "def");
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo bar=\"abc\">"+NL+"  <fum fee=\"def\"/>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\">"+NL+"  <fum fee=\"def\"/>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("def", xc.get("foo/fum.fee"));
   }
   public void testSetAttrOverwrite() throws Exception {
     XMLConfig xc = new XMLConfig();
     xc.set("foo.bar", "abc");
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo bar=\"abc\"/>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"abc\"/>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo.bar"));
     
     xc.set("foo.bar", "def");
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo bar=\"def\"/>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo bar=\"def\"/>"+NL), xc.toString());
     assertEquals("def", xc.get("foo.bar"));
   }
   public void testSetNodeNoOverwrite() throws Exception {
     XMLConfig xc = new XMLConfig();
     xc.set("foo/bar", "abc", false);
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar"));
     
     xc.set("foo/bar", "def", false);
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"  <bar>def</bar>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"  <bar>def</bar>"+NL+"</foo>"+NL), xc.toString());
     List<String> r = xc.getMultiple("foo/bar");
     assertEquals(2, r.size());
     assertEquals("abc", r.get(0));
@@ -196,12 +207,12 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xc = new XMLConfig();
     xc.set("foo/bar.fee", "abc", false);
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar fee=\"abc\"/>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fee=\"abc\"/>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar.fee"));
     
     xc.set("foo/bar.fee", "def", false);
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar fee=\"abc\"/>"+NL+"  <bar fee=\"def\"/>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fee=\"abc\"/>"+NL+"  <bar fee=\"def\"/>"+NL+"</foo>"+NL), xc.toString());
     List<String> r = xc.getMultiple("foo/bar.fee");
     assertEquals(2, r.size());
     assertEquals("abc", r.get(0));
@@ -211,22 +222,22 @@ public class XMLConfigTest extends TestCase {
     XMLConfig xc = new XMLConfig();
     Node n = xc.set("foo/bar", "abc", false);
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar>abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar"));
     
     xc.set(".fuz", "def", n, false);
     
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"</foo>"+NL, xc.toString());
+    assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"</foo>"+NL), xc.toString());
     assertEquals("abc", xc.get("foo/bar"));
     
     n = xc.set("fum", "", n.getParentNode(), false);
     
     if (System.getProperty("java.version").startsWith("1.5")) {
-      assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"  <fum></fum>"+NL+"</foo>"+NL,
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"  <fum></fum>"+NL+"</foo>"+NL),
                    xc.toString());
     }
     else {
-      assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"  <fum/>"+NL+"</foo>"+NL,
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL+"  <fum/>"+NL+"</foo>"+NL),
                    xc.toString());
     }
     assertEquals("", xc.get("foo/fum"));
@@ -235,13 +246,13 @@ public class XMLConfigTest extends TestCase {
     xc.set("file", "test2.txt", n, false);
     
     if (System.getProperty("java.version").startsWith("1.5")) {
-      assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL
-                     + "  <fum><file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+"  </fum>"+NL+"</foo>"+NL,
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL
+                                 + "  <fum><file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+"  </fum>"+NL+"</foo>"+NL),
                    xc.toString());
     }
     else {
-      assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL
-                     + "  <fum>"+NL+"    <file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+"  </fum>"+NL+"</foo>"+NL,
+      assertEquals(remove16XML("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+NL+"<foo>"+NL+"  <bar fuz=\"def\">abc</bar>"+NL
+                                 + "  <fum>"+NL+"    <file>test1.txt</file>"+NL+"    <file>test2.txt</file>"+NL+"  </fum>"+NL+"</foo>"+NL),
                    xc.toString());
     }
     List<String> r = xc.getMultiple("foo/fum/file");
@@ -252,7 +263,7 @@ public class XMLConfigTest extends TestCase {
   
   public void testMultipleNodes() throws Exception {
     XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
+                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
                                                     + "  <bar>abc</bar>\n"
                                                     + "  <bar>ghi</bar>\n"
                                                     + "  <fum fee=\"xyz\">def</fum>\n"
@@ -264,7 +275,7 @@ public class XMLConfigTest extends TestCase {
   }
   public void testMultipleNodesAttr() throws Exception {
     XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
+                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
                                                     + "  <bar fuz=\"aaa\">abc</bar>\n"
                                                     + "  <bar fuz=\"bbb\">ghi</bar>\n"
                                                     + "  <fum fee=\"xyz\">def</fum>\n"
@@ -276,7 +287,7 @@ public class XMLConfigTest extends TestCase {
   }
   public void testNodesStarEnd() throws Exception {
     XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
+                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
                                                     + "  <bar>abc</bar>\n"
                                                     + "  <bar>ghi</bar>\n"
                                                     + "  <fum fee=\"xyz\">def</fum>\n"
@@ -289,7 +300,7 @@ public class XMLConfigTest extends TestCase {
   }
   public void testNodesStarMiddle() throws Exception {
     XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
+                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
                                                     + "  <bar fee=\"xxx\" fuz=\"aaa\">abc</bar>\n"
                                                     + "  <bar fee=\"yyy\" fuz=\"bbb\">ghi</bar>\n"
                                                     + "  <fum fee=\"zzz\" fuz=\"ccc\">def</fum>\n"
@@ -309,7 +320,7 @@ public class XMLConfigTest extends TestCase {
     assertEquals("zzz", r.get(4));
     assertEquals("ccc", r.get(5));
     
-    xc = new XMLConfig(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\"?><flub>\n"
+    xc = new XMLConfig(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><flub>\n"
                                           + "  <foo/>\n"
                                           + "  <fee/>\n"
                                           + "  <fum foz=\"abc\"/>"
@@ -319,7 +330,7 @@ public class XMLConfigTest extends TestCase {
   }
   public void testAttrsStarEnd() throws Exception {
     XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
+                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
                                                     + "  <bar>abc</bar>\n"
                                                     + "  <fum fee=\"xyz\" fuz=\"zzz\" fiz=\"aaa\">def</fum>\n"
                                                     + "</foo>"));
@@ -335,7 +346,7 @@ public class XMLConfigTest extends TestCase {
   }
   public void testNodeStarAttrsStar() throws Exception {
     XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo a=\"foo.a\">\n"
+                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><foo a=\"foo.a\">\n"
                                                     + "  <bar flubb=\"mno\">abc</bar>\n"
                                                     + "  <fum fee=\"xyz\" fuz=\"zzz\" fiz=\"aaa\">def</fum>\n"
                                                     + "</foo>"));
@@ -353,7 +364,7 @@ public class XMLConfigTest extends TestCase {
   
   public void getNodePath1() throws Exception {
     XMLConfig xc = new XMLConfig(new StringReader(
-                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><concutest>\n"
+                                                  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><concutest>\n"
                                                     +"  <threadcheck:def>\n"
                                                     +"    <invariant>\n"
                                                     +"      <name type=\"only\" value=\"childclass1\"/>\n"
