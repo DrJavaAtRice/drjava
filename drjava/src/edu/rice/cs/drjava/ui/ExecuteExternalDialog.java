@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.JRowColumnTextPane;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.CompletionMonitor;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -63,6 +64,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
+import edu.rice.cs.plt.tuple.Pair;
 
 public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Class to save the frame state, i.e. location. */
@@ -124,7 +126,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Entered command line. */
   private JRowColumnTextPane _javaCommandLine;
   /** Java command line preview. */
-  JRowColumnTextPane _javaCommandLinePreview;
+  private JRowColumnTextPane _javaCommandLinePreview;
+  /** Last of the two text panes to have focus. */
+  private JRowColumnTextPane _lastJavaFocus;
   /** Java command line preview document. */
   StyledDocument _javaCommandLineDoc;
 
@@ -162,6 +166,12 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Java document listener. */
   DocumentListener _javaDocumentListener;
   
+  /** Dialog to insert variables. */
+  protected InsertVariableDialog _insertVarDialog;
+  
+  /** Completion monitor to simulate modal behavior. */
+  protected CompletionMonitor _insertVarDialogMonitor = new CompletionMonitor();
+  
   /** Main frame. */
   private MainFrame _mainFrame;
   /** Last frame state. It can be stored and restored. */
@@ -194,7 +204,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     validate();
   }
   
-  /** Create a configuration diaglog
+  /** Create a dialog.
    *  @param mf the instance of mainframe to query into the project
    */
   public ExecuteExternalDialog(MainFrame mf) {
@@ -350,6 +360,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     bottom.add(_insertCommandButton);
     bottom.add(_cancelCommandButton);
     bottom.add(Box.createHorizontalGlue());
+    panel.add(bottom, BorderLayout.SOUTH);
     
     // update the preview of the actual command line post substitution
     _documentListener = new DocumentListener() {
@@ -408,6 +419,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       }
     });
     
+    _insertVarDialog = new InsertVariableDialog(_mainFrame, System.getProperties(), _insertVarDialogMonitor);
+    
     return panel;
   }
   
@@ -421,6 +434,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     Insets labelInsets = new Insets(5, 10, 0, 0);
     Insets compInsets  = new Insets(5, 5, 0, 10);
     
+    c.weighty = 1.0;
+    c.gridwidth = 1;
     c.weightx = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
@@ -625,15 +640,24 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       }
     });
     
+    _lastJavaFocus = _javaCommandLine;
     // do not allow preview to have focus
     _javaCommandLine.addFocusListener(new FocusAdapter() {
+      @SuppressWarnings("unchecked")
+      public void focusGained(FocusEvent e) {
+        _lastJavaFocus = (JRowColumnTextPane)e.getComponent();
+      }
       public void focusLost(FocusEvent e) {
-        if (e.getOppositeComponent() == _commandLinePreview) {
+        if (e.getOppositeComponent() == _javaCommandLinePreview) {
           _javaCommandLine.requestFocus();
         }
       }
     });
     _jvmLine.addFocusListener(new FocusAdapter() {
+      @SuppressWarnings("unchecked")
+      public void focusGained(FocusEvent e) {
+        _lastJavaFocus = (JRowColumnTextPane)e.getComponent();
+      }
       public void focusLost(FocusEvent e) {
         if (e.getOppositeComponent() == _javaCommandLinePreview) {
           _jvmLine.requestFocus();
@@ -658,94 +682,38 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         StyledDocument doc = (StyledDocument)pane.getDocument();
         doc.removeDocumentListener(dl);
         String jvmtext = pane.getText();
+        doc.setCharacterAttributes(0,jvmtext.length(),normal,true);
         try {
-          int pos = 0; // current pos
-          int lpos = 0; // last pos
+          int pos = 0;
           int styleIndex = 0; // style to use
           SimpleAttributeSet sas = variable;
-          LOG.log(jvmtext);
-          while((pos=jvmtext.indexOf('%', lpos))>=0) {
-            LOG.log("lpos = "+lpos+", pos = "+pos); 
-            if (pos>lpos) {
-              if (styleIndex==0) {
-                if ((pos<jvmtext.length()-1) && (jvmtext.charAt(pos+1)=='%')) {
-                  LOG.log("\tfound %%");
-                  // found an escaped %, encoded as %%
-                  // abc%%xyz
-                  // l  p
-                  //
-                  // or 
-                  // abc%var%%var2%xyz
-                  //     l  p
-                  doc.setCharacterAttributes(pos,2,(styleIndex==0)?normal:sas,true);
-                  LOG.log("\tsetting from "+pos+" to "+(pos+1));
-                  // abc%%xyz
-                  //      l
-                  //
-                  // or
-                  // abc%var%%var2%xyz
-                  //          l
-                  lpos = pos + 2;
-                  LOG.log("\tnew lpos = "+lpos);
-                  // don't swap style index
-                }
-                else {
-                  LOG.log("\tfound normal text");
-                  // coloring normal text, found beginning of a %variable%
-                  // abc%var%xyz
-                  // l  p
-                  // l = lpos
-                  // p = pos
-                  // need to color from l to p+1 so that the % initially gets colored normally
-                  int begin = lpos;
-                  int end = (pos<jvmtext.length())?(pos+1):(jvmtext.length());
-                  int len = end-begin;
-                  doc.setCharacterAttributes(begin,len,normal,true);
-                  LOG.log("\tsetting from "+begin+" to "+end);
-                  lpos = pos+1;
-                  LOG.log("\tnew lpos = "+lpos);
-                  // abc%var%xyz
-                  //     l
-                  // l = lpos
-                  // swap style index
-                  styleIndex = (styleIndex+1)%2;
+          // LOG.log(jvmtext);
+          while((pos=jvmtext.indexOf('%', pos))>=0) {
+            // LOG.log("pos = "+pos); 
+            if ((pos<jvmtext.length()-1) && (jvmtext.charAt(pos+1)=='%')) {
+              // escaped % ("%%")
+              pos += 2;
+            }
+            else {
+              // beginning of what should be a %variable%
+              boolean found = false;
+              for(Object o: props.keySet()) {
+                String key = o.toString();
+                int endPos = pos + key.length() + 2;
+                if (jvmtext.substring(pos, Math.min(jvmtext.length(), endPos)).equals("%"+key+"%")) {
+                  // found property name
+                  found = true;
+                  doc.setCharacterAttributes(pos,endPos-pos,variable,true);
+                  pos = endPos;
+                  break;
                 }
               }
-              else {
-                LOG.log("\tfound variable");
-                // coloring a %variable%, found the end of it
-                // abc%var%xyz
-                //     l  p
-                // l = lpos
-                // p = pos
-                // need to color from l-1 to p+1 so that the % just before l and the
-                // % just after p are colored as a variable
-                String subs = jvmtext.substring(lpos,pos);
-                if (props.getProperty(subs)==null) {
-                  // not a known property
-                  sas = error;
-                }
-                int begin = (lpos>0)?(lpos-1):0;
-                int end = (pos<jvmtext.length())?(pos+1):(jvmtext.length());
-                int len = end-begin;
-                doc.setCharacterAttributes(begin,len,sas,true);
-                LOG.log("\tsetting from "+begin+" to "+end);
-                lpos = pos+1;
-                // abc%var%xyz
-                //         l
-                LOG.log("\tnew lpos = "+lpos);
-                // swap style index
-                styleIndex = (styleIndex+1)%2;
+              if (!found) {
+                doc.setCharacterAttributes(pos,1,error,true);
+                ++pos;
               }
             }
           }
-          // coloring normal text, because there was no more % at the end
-          // abc%var%xyz
-          //         l
-          // l = lpos
-          // p = pos = -1
-          int len = jvmtext.length()-lpos;
-          doc.setCharacterAttributes(lpos,len,normal,true);
         }
         finally {
           doc.addDocumentListener(dl);
@@ -760,7 +728,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     this.setVisible(false);
   }
 
-  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
+  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", true);
 
   /** Convert a command line into a list of individual arguments. */
   private List<String> commandLineToList(String cmdline) {
@@ -779,24 +747,19 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     try {
       while(((next=tok.nextToken())!=StreamTokenizer.TT_EOF) &&
             (next!=StreamTokenizer.TT_EOL)) {
-        LOG.log("token="+next);
         switch(next) {
           case '\'':
           case '"':
           case '`':
-            LOG.log("\ttoken="+next);
             cmds.add(""+((char)next)+tok.sval+((char)next));
             break;
           case StreamTokenizer.TT_WORD:
-            LOG.log("\tsval="+tok.sval);
             cmds.add(tok.sval);
             break;
           case StreamTokenizer.TT_NUMBER:
-            LOG.log("\tnval="+tok.nval);
             cmds.add(""+tok.nval);
             break;
           default:
-            LOG.log("\tsomething weird: "+next);
             return new ArrayList<String>();
         }
       }
@@ -904,12 +867,80 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   /** Insert a variable into the command line. */
   private void _insertVariableCommand() {
-    
+    _windowListenerActive = false;
+    _insertVarDialogMonitor.reset();
+    _insertVarDialog.setVisible(true);
+    // start a new thread to wait for the dialog to finish
+    // this waiting cannot happen in the event thread, as that would block the other dialog
+    new Thread(new Runnable() {
+      public void run() {
+        _insertVarDialogMonitor.waitOne();
+        // dialog has finished, figure out the results in the event thread
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                ExecuteExternalDialog.this.toFront();
+              }
+            });
+            _windowListenerActive = true;
+            edu.rice.cs.plt.tuple.Pair<String,String> selected = _insertVarDialog.getSelected();
+            if (selected!=null) {
+              String text = _commandLine.getText();
+              Caret caret = _commandLine.getCaret();
+              int min = Math.min(caret.getDot(), caret.getMark());
+              int max = Math.max(caret.getDot(), caret.getMark());
+              if (min!=max) {
+                text = text.substring(0, min) + text.substring(max);
+              }
+              text = text.substring(0,min) + "%" + selected.first() + "%" + text.substring(min);
+              _commandLine.setText(text);
+              caret.setDot(min+selected.first().length()+2);
+              _commandLine.setCaret(caret);
+            }
+          }
+        });
+      }
+    }).start();
   }
   
   /** insert a variable Java class command line. */
   private void _insertVariableJava() {
-    
+    _windowListenerActive = false;
+    _insertVarDialogMonitor.reset();
+    _insertVarDialog.setVisible(true);
+    // start a new thread to wait for the dialog to finish
+    // this waiting cannot happen in the event thread, as that would block the other dialog
+    new Thread(new Runnable() {
+      public void run() {
+        _insertVarDialogMonitor.waitOne();
+        // dialog has finished, figure out the results in the event thread
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                ExecuteExternalDialog.this.toFront();
+              }
+            });
+            _windowListenerActive = true;
+            edu.rice.cs.plt.tuple.Pair<String,String> selected = _insertVarDialog.getSelected();
+            if (selected!=null) {
+              String text = _lastJavaFocus.getText();
+              Caret caret = _lastJavaFocus.getCaret();
+              int min = Math.min(caret.getDot(), caret.getMark());
+              int max = Math.max(caret.getDot(), caret.getMark());
+              if (min!=max) {
+                text = text.substring(0, min) + text.substring(max);
+              }
+              text = text.substring(0,min) + "%" + selected.first() + "%" + text.substring(min);
+              _lastJavaFocus.setText(text);
+              caret.setDot(min+selected.first().length()+2);
+              _lastJavaFocus.setCaret(caret);
+            }
+          }
+        });
+      }
+    }).start();
   }
 
   /**
@@ -923,9 +954,18 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   public static String replaceVariables(String str, Hashtable<Object, Object> table) {
     int pos = str.indexOf('%');
     // find every %
+    // LOG.log("========================");
     while(pos>=0) {
-      // if this is str single %, not an escaped %%...
-      if((pos==str.length()-1) || (str.charAt(pos+1)!='%')) {
+      // see if this is an escaped % ("%%")
+      // LOG.log("str = '"+str+"'");
+      // LOG.log("pos = "+pos);
+      if((pos<str.length()-1) && (str.charAt(pos+1)=='%')) {
+        // skip the second % as well
+        // LOG.log("\t%%");
+        str = str.substring(0, pos+1) + str.substring(pos+2);
+      }
+      else {
+        // LOG.log("\t%");
         // look if this is str property name enclosed by %, e.g. "%user.home%"
         for(Object o: table.keySet()) {
           String key = o.toString();
@@ -941,14 +981,34 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           }
         }
       }
-      else {
-        if (pos<str.length()-1) {
-          // skip the second % as well
-          ++pos;
-        }
-      }
       pos = str.toLowerCase().indexOf('%', pos+1);
     }
+    // LOG.log("end str = '"+str+"'");
     return str;
+  }
+  
+  protected volatile boolean _windowListenerActive = false;
+  protected WindowAdapter _windowListener = new WindowAdapter() {
+    public void windowDeactivated(WindowEvent we) {
+      if (_windowListenerActive) { ExecuteExternalDialog.this.toFront(); }
+    }
+  };
+  
+  /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
+  public void setVisible(boolean vis) {
+    assert EventQueue.isDispatchThread();
+    validate();
+    if (vis) {
+      _mainFrame.hourglassOn();
+      addWindowListener(_windowListener);
+      _windowListenerActive = true;
+    }
+    else {
+      _windowListenerActive = false;
+      removeWindowFocusListener(_windowListener);
+      _mainFrame.hourglassOff();
+      _mainFrame.toFront();
+    }
+    super.setVisible(vis);
   }
 }

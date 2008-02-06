@@ -57,6 +57,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -733,12 +735,19 @@ public class JarOptionsDialog extends JFrame {
     return true;
   }
 
+  protected WindowAdapter _windowListener = new WindowAdapter() {
+    public void windowDeactivated(WindowEvent we) {
+      JarOptionsDialog.this.toFront();
+    }
+  };
+
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
       _mainFrame.hourglassOn();
+      addWindowListener(_windowListener);
       ProcessingFrame pf = new ProcessingFrame(this, "Checking class files", "Processing, please wait.");
       pf.setVisible(true);
       _loadSettings();
@@ -746,6 +755,7 @@ public class JarOptionsDialog extends JFrame {
       pf.dispose();
     }
     else {
+      removeWindowFocusListener(_windowListener);
       _mainFrame.hourglassOff();
       _mainFrame.toFront();
     }

@@ -215,6 +215,16 @@ public class JRowColumnTextPane extends JTextPane {
     return columnWidth;
   }
   
+  /** Returns the preferred size of this component.
+    * @return The preferred size. */
+  public Dimension getPreferredSize() {
+    Dimension size = super.getPreferredSize();
+    size = (size == null) ? new Dimension(400,400) : size;
+    size.width = (columns == 0) ? size.width : columns * getColumnWidth();
+    size.height = (rows == 0) ? size.height : rows * getRowHeight();
+    return size;
+  }
+  
   /** Returns the preferred size of the viewport if this component is
     * embedded in a JScrollPane. This uses the desired column
     * and row settings if they have been set, otherwise the superclass
