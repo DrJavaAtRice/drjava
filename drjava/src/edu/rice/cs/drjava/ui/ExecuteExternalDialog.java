@@ -728,7 +728,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     this.setVisible(false);
   }
 
-  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", true);
+  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
 
   /** Convert a command line into a list of individual arguments. */
   private List<String> commandLineToList(String cmdline) {
