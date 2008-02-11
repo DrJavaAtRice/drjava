@@ -611,7 +611,7 @@
        Need to have FindBugs 1.3.1 installed and set the
        FINDBUGS_HOME environment variable to that directory.
        *************** -->
-  <target name="findbugs" depends="jar">
+  <target name="findbugs" depends="jar" description="Run findbugs 1.3.1 on the drjava code base creating the file findbugs.html">
     <available property="findbugs-exists" file="${env.FINDBUGS_HOME}/lib/findbugs.jar" />
     <fail message="FindBugs installation not found, or FINDBUGS_HOME environment variable not set."
           unless="findbugs-exists" />
