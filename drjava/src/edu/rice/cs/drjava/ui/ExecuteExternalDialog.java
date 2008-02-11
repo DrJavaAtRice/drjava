@@ -44,6 +44,8 @@ import edu.rice.cs.util.swing.JRowColumnTextPane;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.CompletionMonitor;
+import edu.rice.cs.util.swing.DirectorySelectorComponent;
+import edu.rice.cs.util.swing.DirectoryChooser;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -112,6 +114,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private JRowColumnTextPane _commandLinePreview;
   /** Java command line preview document. */
   StyledDocument _commandLineDoc;
+  /** Working directory for command. */
+  private DirectorySelectorComponent _commandWorkDirSelector;
   
   /** OK Java button. */
   private JButton _okJavaButton;
@@ -131,6 +135,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private JRowColumnTextPane _lastJavaFocus;
   /** Java command line preview document. */
   StyledDocument _javaCommandLineDoc;
+  /** Working directory for Java command line. */
+  private DirectorySelectorComponent _javaCommandWorkDirSelector;
 
   /** Style for variable the executable part. */
   SimpleAttributeSet _varCommandLineCmdStyle;
@@ -203,6 +209,20 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     else MainFrame.setPopupLoc(this, _mainFrame);
     validate();
   }
+
+  protected DirectorySelectorComponent createDirectorySelector() {
+    DirectoryChooser dirChooser = new DirectoryChooser(this);
+    File wd = _mainFrame.getModel().getWorkingDirectory();
+    if (wd==null) { wd = new File(System.getProperty("user.dir")); };
+    // LOG.log("wd="+wd);
+    dirChooser.setSelectedFile(wd);
+    dirChooser.setDialogTitle("Select Working Directory");
+    dirChooser.setApproveButtonText("Select");
+//  dirChooser.setEditable(true);
+    DirectorySelectorComponent dirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f);
+    dirSelector.setFileField(wd);
+    return dirSelector;
+  }
   
   /** Create a dialog.
    *  @param mf the instance of mainframe to query into the project
@@ -230,6 +250,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     };
     _okJavaButton = new JButton(okJavaAction);
 
+    _insertVarDialog = new InsertVariableDialog(_mainFrame, System.getProperties(), _insertVarDialogMonitor);
     Action insertCommandAction = new AbstractAction("Insert Variable") {
       public void actionPerformed(ActionEvent e) {
         _insertVariableCommand();
@@ -242,7 +263,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       }
     };
     _insertJavaButton = new JButton(insertJavaAction);
-
     
     Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed(ActionEvent e) {
@@ -350,6 +370,21 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     commandLinePreviewSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     gridbag.setConstraints(commandLinePreviewSP, c);
     main.add(commandLinePreviewSP);
+    
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    JLabel workDirLabel = new JLabel("Working directory:");
+    gridbag.setConstraints(workDirLabel, c);
+    main.add(workDirLabel);
+
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+
+    _commandWorkDirSelector = createDirectorySelector();
+    gridbag.setConstraints(_commandWorkDirSelector, c);
+    main.add(_commandWorkDirSelector);
 
     panel.add(main, BorderLayout.CENTER);
     JPanel bottom = new JPanel();
@@ -418,8 +453,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         }
       }
     });
-    
-    _insertVarDialog = new InsertVariableDialog(_mainFrame, System.getProperties(), _insertVarDialogMonitor);
     
     return panel;
   }
@@ -558,6 +591,21 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     gridbag.setConstraints(javaCommandLinePreviewSP, c);
     main.add(javaCommandLinePreviewSP);
 
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    JLabel workDirLabel = new JLabel("Working directory:");
+    gridbag.setConstraints(workDirLabel, c);
+    main.add(workDirLabel);
+
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+
+    _javaCommandWorkDirSelector = createDirectorySelector();
+    gridbag.setConstraints(_javaCommandWorkDirSelector, c);
+    main.add(_javaCommandWorkDirSelector);
+    
     panel.add(main, BorderLayout.CENTER);
     JPanel bottom = new JPanel();
     bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -778,6 +826,13 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     
     if (cmds.size()>0) {
       ProcessCreator pc = new ProcessCreator(cmds.toArray(new String[cmds.size()]));
+      File wd = _commandWorkDirSelector.getFileFromField();
+      // LOG.log("_commandWorkDirSelector.getFileField().getText() = "+_commandWorkDirSelector.getFileField().getText());
+      // LOG.log("ok. wd = "+wd);
+      if (!_commandWorkDirSelector.getFileField().getText().equals("")) {
+        // LOG.log("setting!");
+        pc.setDir(wd);
+      }
       String name = "External";
       if (cmds.size()>0) { name += ": "+cmds.get(0); }
       final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, name, pc);
@@ -826,6 +881,12 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     
     if (jvms.size()+cmds.size()>0) {
       ProcessCreator pc = new JVMProcessCreator(jvms, cmds);
+      File wd = _javaCommandWorkDirSelector.getFileFromField();
+      // LOG.log("ok. wd = "+wd);
+      if (!_javaCommandWorkDirSelector.getFileField().getText().equals("")) {
+        // LOG.log("setting!");
+        pc.setDir(wd);
+      }
       String name = "External Java";
       if (cmds.size()>0) { name += ": "+cmds.get(0); }
       final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, name, pc);
