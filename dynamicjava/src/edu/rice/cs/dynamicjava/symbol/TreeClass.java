@@ -36,10 +36,6 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
   */
 public class TreeClass implements DJClass {
   
-  private static final Type RUNTIME_BINDINGS_TYPE =
-    new SimpleClassType(SymbolUtil.wrapClass(RuntimeBindings.class));
-  
-  
   private final String _fullName;
   private final DJClass _declaring; // may be null
   private final Node _ast;
@@ -269,7 +265,7 @@ public class TreeClass implements DJClass {
     public TreeConstructor() {
       _loaded = LazyThunk.make(new Thunk<DJConstructor>() {
         public DJConstructor value() {
-          Type firstT = (_outerType == null) ? RUNTIME_BINDINGS_TYPE : _outerType;
+          Type firstT = (_outerType == null) ? runtimeBindingsType() : _outerType;
           Iterable<LocalVariable> params = IterUtil.compose(new LocalVariable("", firstT, false),
                                                             TreeConstructor.this.declaredParameters());
           DJClass c = SymbolUtil.wrapClass(TreeClass.this.load());
@@ -333,7 +329,7 @@ public class TreeClass implements DJClass {
         public DJMethod value() {
           Iterable<LocalVariable> params = TreeMethod.this.declaredParameters();
           if (TreeMethod.this.isStatic()) {
-            params = IterUtil.compose(new LocalVariable("", RUNTIME_BINDINGS_TYPE, false), params);
+            params = IterUtil.compose(new LocalVariable("", runtimeBindingsType(), false), params);
           }
           DJClass c = SymbolUtil.wrapClass(TreeClass.this.load());
           for (DJMethod candidate : c.declaredMethods()) {
@@ -401,4 +397,23 @@ public class TreeClass implements DJClass {
     else { return false; }
   }
 
+  /**
+   * Get the type of the RuntimeBindings class.  This is based on a dynamically-loaded
+   * instance of {@code RuntimeBindings.class} in order to ensure that it's consistent
+   * with this TreeClass instance's class loader.  (It's possible that the class loader
+   * used by the interpreter is independent of the one that loads {@code TreeClass.class}
+   * and other implementation classes.)
+   */
+  private Type runtimeBindingsType() {
+    try {
+      Class<?> bindingsClass = load().getClassLoader().loadClass(RuntimeBindings.class.getName());
+      return new SimpleClassType(SymbolUtil.wrapClass(bindingsClass));
+    }
+    catch (ClassNotFoundException e) {
+      // should never happen, since load() executed successfully, and the class includes
+      // references to RuntimeBindings
+      throw new RuntimeException(e);
+    }
+  }
+  
 }
