@@ -125,6 +125,10 @@ public final class CollectUtil {
     });
   }
   
+  /** Convert a Dictionary to a Map. */
+  public static <K, V> Map<K, V> asMap(final Dictionary<K, V> d) {
+    return new DictionaryMap<K, V>(d);
+  }
 
   public static <T> Set<T> functionClosure(T base, Lambda<? super T, ? extends T> function) {
     return functionClosure(Collections.singleton(base), function);
@@ -191,5 +195,6 @@ public final class CollectUtil {
       }
     };
   }
+  
     
 }

@@ -36,6 +36,7 @@ package edu.rice.cs.plt.concurrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.EOFException;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -528,6 +529,12 @@ public final class ConcurrentUtil {
           _exception = new InterruptedException(e.getMessage());
           _exception.setStackTrace(e.getStackTrace());
         }
+        catch (EOFException e) {
+          if (processIsTerminated(_process.value())) {
+            _exception = new IOException("Unable to run process; class path may need to be adjusted");
+          }
+          else { _exception = e; }
+        }
         catch (IOException e) { _exception = e; }
       }
       _status = Status.FINISHED;
@@ -763,6 +770,12 @@ public final class ConcurrentUtil {
     }
   }
   
+  /** Test whether the given process has terminated. */
+  public static boolean processIsTerminated(Process p) {
+    try { p.exitValue(); return true; }
+    catch (IllegalThreadStateException e) { return false; }
+  }
+  
   /**
    * Create two threads to continually discard the contents of the given process's output and error streams.
    * If, instead, the streams are simply ignored, the system buffers may fill up, causing the process to block (see 
@@ -807,6 +820,8 @@ public final class ConcurrentUtil {
    */
   public static Thread copyProcessOut(Process p, OutputStream out, boolean close) {
     Thread result = new Thread(new CopyStream(p.getInputStream(), out, close));
+    result.setDaemon(true); // this thread should not keep the JVM from exiting
+    // TODO: If the parent process quits, can the child get stuck when its buffer fills?
     result.start();
     return result;
   }
@@ -842,6 +857,8 @@ public final class ConcurrentUtil {
    */
   public static Thread copyProcessErr(Process p, OutputStream err, boolean close) {
     Thread result = new Thread(new CopyStream(p.getErrorStream(), err, close));
+    result.setDaemon(true); // this thread should not keep the JVM from exiting
+    // TODO: If the parent process quits, can the child get stuck when its buffer fills?
     result.start();
     return result;
   }

@@ -86,6 +86,7 @@ public final class DebugUtil {
    *     directory can be set with {@code plt.log.working.dir}.</li>
    * <li>{@code assert}: An {@link AssertEmptyLog}</li>
    * <li>{@code popup}: A {@link PopupLog}</li>
+   * <li>{@code tree}: A {@link TreeLog}</li>
    * <li>{@code void}: A {@link VoidLog}</li>
    * </ul>
    * The property may also be a comma-delimited list of types, for which a {@link LogSplitter} will be created.
@@ -144,6 +145,7 @@ public final class DebugUtil {
         else if (type.startsWith("file:")) { result = makeFileLog(type.substring(5)); }
         else if (type.equals("assert")) { result = new AssertEmptyLog(); }
         else if (type.equals("popup")) { result = new PopupLog(tag + " Log"); }
+        else if (type.equals("tree")) { result = new TreeLog(tag + " Log"); }
         else { result = VoidLog.INSTANCE; }
       }
       return result;

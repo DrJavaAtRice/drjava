@@ -38,15 +38,10 @@ import java.io.File;
 import java.io.Reader;
 import java.io.IOException;
 // import java.io.FileFilter;  not imported to avoid ambiguity
-import java.awt.Window;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.Point;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.GraphicsConfiguration;
+import java.util.Map;
+import java.util.HashMap;
+
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.datatransfer.Clipboard;
@@ -56,20 +51,28 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 // import javax.swing.filechooser.FileFilter;  not imported to avoid ambiguity
 import java.lang.reflect.InvocationTargetException;
 
-//import java.awt.*;
-//import java.awt.event.*;
-//import javax.swing.*;
 //import javax.swing.border.Border;
-//import java.awt.datatransfer.*;
+import javax.swing.*;
+import javax.swing.text.*;
 
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.WrappedException;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.plt.debug.DebugUtil;
+
+import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 public class SwingUtil {
+  
+  /**
+   * Create a shade of gray with the given degree of darkness.  {@code 0.0f} corresponds to white;
+   * {@code 1.0f} corresponds to black.
+   */
+  public static Color gray(float degree) {
+    float x = 1.0f - degree;
+    return new Color(x, x, x);
+  }
   
   /** 
    * Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
@@ -96,7 +99,7 @@ public class SwingUtil {
         // must be a RuntimeException or an Error, because Runnable's can't have checked exceptions
         if (cause instanceof RuntimeException) { throw (RuntimeException) cause; }
         else if (cause instanceof Error) { throw (Error) cause; }
-        else { DebugUtil.error.log("Unexpected InvocationTargetException caused by invokeAndWait", cause); }
+        else { error.log("Unexpected InvocationTargetException caused by invokeAndWait", cause); }
       }
     }
   }
@@ -184,6 +187,33 @@ public class SwingUtil {
     catch(java.io.IOException ioe) { /* ignore, return null */ }
     return s;
   }
+  
+  
+  /**
+   * Search the given text component's list of actions for an action with the given name.
+   * Returns {@code null} if no such action is found.  See {@link DefaultEditorKit} for a list of
+   * action name constants.
+   */
+  public static Action getAction(JTextComponent component, String actionName) {
+    for (Action a : component.getActions()) {
+      if (actionName.equals(a.getValue(Action.NAME))) { return a; }
+    }
+    return null;
+  }
+  
+  /**
+   * Create a map view of {@code component.getActions()}, where the keys are the action
+   * names.  See {@link DefaultEditorKit} for a list of action name constants.
+   */
+  public static Map<String, Action> getActions(JTextComponent component) {
+    Map<String, Action> result = new HashMap<String, Action>();
+    for (Action a : component.getActions()) {
+      // Documentation for Action.NAME asserts that it will always be a String
+      result.put((String) a.getValue(Action.NAME), a);
+    }
+    return result;
+  }
+  
 
 
   /** Convenience method for {@link #setPopupLoc(Window, Component)} that gets the owner from {@code popup.getOwner()} */
