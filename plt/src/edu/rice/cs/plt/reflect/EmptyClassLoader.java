@@ -49,7 +49,7 @@ public class EmptyClassLoader extends ClassLoader {
   
   public static final EmptyClassLoader INSTANCE = new EmptyClassLoader();
   
-  private EmptyClassLoader() {}
+  private EmptyClassLoader() { super(null); }
   
   @Override public Class<?> loadClass(String name) throws ClassNotFoundException {
     throw new ClassNotFoundException();
@@ -61,9 +61,11 @@ public class EmptyClassLoader extends ClassLoader {
   
   @Override public URL getResource(String name) { return null; }
   
-  @Override public Enumeration<URL> getResources(String name) {
-    return IterUtil.asEnumeration(EmptyIterator.<URL>make());
-  }
+// This is final in Java 1.4.  To support backwards-compatibility, we cannot override it.
+// (Otherwise, in 1.4 we get a VerifyError.)
+//  @Override public Enumeration<URL> getResources(String name) {
+//    return IterUtil.asEnumeration(EmptyIterator.<URL>make());
+//  }
   
   @Override public InputStream getResourceAsStream(String name) { return null; }
   

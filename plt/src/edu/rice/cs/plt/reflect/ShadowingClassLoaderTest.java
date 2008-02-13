@@ -34,26 +34,41 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.reflect;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 public class ShadowingClassLoaderTest extends ClassLoaderTestCase {
   
   private static final ClassLoader BASE_LOADER = ShadowingClassLoaderTest.class.getClassLoader();
   
   public void testShadowedClassLoading() throws ClassNotFoundException {
+    debug.logStart();
+    
     ShadowingClassLoader l = new ShadowingClassLoader(BASE_LOADER, "edu.rice.cs.plt.reflect");
     assertLoadsSameClass(BASE_LOADER, l, "edu.rice.cs.plt.iter.IterUtil");
     assertLoadsClass(BASE_LOADER, "edu.rice.cs.plt.reflect.ReflectUtil");
     assertDoesNotLoadClass(l, "edu.rice.cs.plt.reflect.ReflectUtil");
-
+    
     ShadowingClassLoader l2 = new ShadowingClassLoader(BASE_LOADER, "edu.rice.cs.plt.refl");
     assertLoadsSameClass(BASE_LOADER, l2, "edu.rice.cs.plt.iter.IterUtil");
     assertLoadsSameClass(BASE_LOADER, l2, "edu.rice.cs.plt.reflect.ReflectUtil");
+    
+    ShadowingClassLoader l3 = new ShadowingClassLoader(BASE_LOADER, false, "edu.rice.cs.plt.reflect");
+    assertLoadsClass(BASE_LOADER, "edu.rice.cs.plt.iter.IterUtil");
+    assertDoesNotLoadClass(l3, "edu.rice.cs.plt.iter.IterUtil");
+    assertLoadsSameClass(BASE_LOADER, l3, "edu.rice.cs.plt.reflect.ReflectUtil");
+    
+    debug.logEnd();
   }
   
   public void testResourceLoading() {
+    debug.logStart();
+    
     ShadowingClassLoader l = new ShadowingClassLoader(BASE_LOADER, "edu.rice.cs.plt.reflect");
     assertHasSameResource(BASE_LOADER, l, "edu/rice/cs/plt/iter/IterUtil.class");
     assertHasResource(BASE_LOADER, "edu/rice/cs/plt/reflect/ShadowingClassLoaderTest.class");
     assertDoesNotHaveResource(l, "edu/rice/cs/plt/reflect/ShadowingClassLoaderTest.class");
+    
+    debug.logEnd();
   }
   
 }

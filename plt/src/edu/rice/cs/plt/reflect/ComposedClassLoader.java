@@ -32,46 +32,36 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.plt.concurrent;
+package edu.rice.cs.plt.reflect;
 
-import junit.framework.TestCase;
+import java.net.URL;
 
-public class CompletionMonitorTest extends TestCase {
+/**
+ * <p>A class loader defining the search for classes and resources to first check
+ * a parent loader, and then delegate to a child loader.  This allows two distinct
+ * class loading hierarchies to be merged.</p>
+ * 
+ * <p>One application is to reverse the usual search order: if I'm given loader {@code c} and 
+ * would like to define an instance of {@code MyLoader} that delegates to {@code c} before checking 
+ * its own resources, I can invoke {@code new MyLoader(c)}; on the other hand, if I want to check 
+ * the {@code MyLoader's} resources <em>first</em>, I might do so with a {@code ComposedClassLoader}:
+ * {@code new ComposedClassLoader(new MyLoader(null), c)}.</p>
+ */
+public class ComposedClassLoader extends ClassLoader {
   
-  volatile boolean _flag; // Set and reset by tests to check for proper sequencing
+  private final ClassLoader _child;
   
-  public void testDegenerateSignal() throws InterruptedException {
-    CompletionMonitor as = new CompletionMonitor(true);
-    assertTrue("Flag should start out as true", as.isSignalled());
-    
-    DelayedInterrupter interrupter = new DelayedInterrupter(50);
-    as.ensureSignalled();
-    interrupter.abort();
+  public ComposedClassLoader(ClassLoader parent, ClassLoader child) {
+    super(parent);
+    _child = child;
   }
   
-  public void testRealSignal() throws InterruptedException {
-    final CompletionMonitor as = new CompletionMonitor(false);
-    
-    DelayedInterrupter interrupter1 = new DelayedInterrupter(300);
-    _flag = false;
-    assertFalse(as.isSignalled());
-    new Thread() { public void run() { ConcurrentUtil.sleep(100); _flag = true; as.signal(); } }.start();
-    as.ensureSignalled();
-    assertTrue(_flag);
-    interrupter1.abort();
-    assertTrue(as.isSignalled());
-    
-    DelayedInterrupter interrupter2 = new DelayedInterrupter(10);
-    assertTrue(as.isSignalled());
-    as.ensureSignalled(); // should not block
-    interrupter2.abort();
-    
-    as.reset();
-    assertFalse(as.isSignalled());
-    DelayedInterrupter interrupter3 = new DelayedInterrupter(50);
-    try { as.ensureSignalled(); fail("Monitor should not be signalled"); }
-    catch (InterruptedException e) { /* expected behavior */ }
+  @Override protected Class<?> findClass(String name) throws ClassNotFoundException {
+    return _child.loadClass(name);
   }
   
-    
+  @Override protected URL findResource(String name) {
+    return _child.getResource(name);
+  }
+  
 }

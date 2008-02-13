@@ -43,13 +43,16 @@ import java.net.URL;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /**
  * A class loader that prevents the loading of a set of classes and related resources.  This allows classes 
  * with the same name (but perhaps a different implementation) to be cleanly loaded by a child loader.
  */
 public class ShadowingClassLoader extends ClassLoader {
   
-  private Iterable<String> _prefixes;
+  private final Iterable<? extends String> _prefixes;
+  private final boolean _blackList;
   
   /**
    * @param parent  The parent loader
@@ -58,7 +61,19 @@ public class ShadowingClassLoader extends ClassLoader {
    *                  {@code "java.lang.Stri"}, will not match the full class name).
    */
   public ShadowingClassLoader(ClassLoader parent, String... prefixes) {
-    this(parent, IterUtil.asIterable(prefixes));
+    this(parent, true, IterUtil.asIterable(prefixes));
+  }
+  
+  /**
+   * @param parent  The parent loader
+   * @param blackList  If {@code true}, classes matching {@code prefixes} are prevented from loading; otherwise,
+   *                   all classes <em>except</em> those matching {@code prefixes} are prevented from loading.
+   * @param prefixes  A set of class name prefixes to which class names will be compared.  Each prefix must
+   *                  be a package or class name (partial names, like {@code "java.lang.Stri"}, will not 
+   *                  match the full class name).
+   */
+  public ShadowingClassLoader(ClassLoader parent, boolean blackList, String... prefixes) {
+    this(parent, blackList, IterUtil.asIterable(prefixes));
   }
   
   /**
@@ -68,31 +83,48 @@ public class ShadowingClassLoader extends ClassLoader {
    *                  {@code "java.lang.Stri"}, will not match the full class name).
    */
   public ShadowingClassLoader(ClassLoader parent, Iterable<? extends String> prefixes) {
+    this(parent, true, prefixes);
+  }
+    
+  /**
+   * @param parent  The parent loader
+   * @param blackList  If {@code true}, classes matching {@code prefixes} are prevented from loading; otherwise,
+   *                   all classes <em>except</em> those matching {@code prefixes} are prevented from loading.
+   * @param prefixes  A set of class name prefixes to which class names will be compared.  Each prefix must
+   *                  be a package or class name (partial names, like {@code "java.lang.Stri"}, will not 
+   *                  match the full class name).
+   */
+  public ShadowingClassLoader(ClassLoader parent, boolean blackList, Iterable<? extends String> prefixes) {
     super(parent);
-    _prefixes = IterUtil.snapshot(prefixes);
+    _blackList = blackList;
+    _prefixes = prefixes;
   }
   
   /**
-   * If the given class matches the list of prefixes to shadow, a {@code ClassNotFoundException} will
+   * If the given class is shadowed, a {@code ClassNotFoundException} will
    * occur; otherwise, the method delegates to the parent class loader.
    */
-  protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-    if (shouldShadow(name)) { throw new ClassNotFoundException(name + " is being shadowed"); }
+  @Override protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    if (matchesPrefixes(name) == _blackList) {
+      throw new ClassNotFoundException(name + " is being shadowed");
+    }
     else {
-      Class<?> result = getParent().loadClass(name);
-      if (resolve) { resolveClass(result); }
-      return result;
+      // can't use getParent().loadClass(name) because parent may be null
+      return super.loadClass(name, resolve);
     }
   }
   
-  public URL getResource(String name) {
-    if (shouldShadow(name.replace('/', '.'))) { return null; }
-    else { return getParent().getResource(name); }
+  @Override public URL getResource(String name) {
+    if (matchesPrefixes(name.replace('/', '.')) == _blackList) { return null; }
+    else {
+      // can't use getParent().getResource(name) because parent may be null
+      return super.getResource(name);
+    }
   }
   
   // Ideally, we should override getResources() as well.  Unfortunately, it's final in Java 1.4.
   
-  private boolean shouldShadow(String name) {
+  private boolean matchesPrefixes(String name) {
     // TODO: improve efficiency by using a sorted data structure
     for (String p : _prefixes) {
       if (name.startsWith(p)) {

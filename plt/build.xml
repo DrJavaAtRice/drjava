@@ -18,6 +18,10 @@
   <property name="test-spec" value="" />
   <property name="test-repeat" value="1" /> <!-- TODO: Use this value -->
   <property name="test-timeout" value="1440" />
+  <property name="debug" value="void" />
+  <property name="plt.debug.log" value="${debug}" />
+  <property name="error" value="popup" />
+  <property name="plt.error.log" value="${error}" />
   
   <!-- By default, clean can fail -->
   <property name="clean-can-fail" value="yes" />
@@ -287,6 +291,9 @@
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
       </classpath>
+      <syspropertyset>
+        <propertyref prefix="plt." />
+      </syspropertyset>
       <formatter type="brief" usefile="false" />
       <batchtest>
         <fileset dir="classes/test">
@@ -306,6 +313,9 @@
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
+      <syspropertyset>
+        <propertyref prefix="plt." />
+      </syspropertyset>
       <formatter type="brief" usefile="false" />
       <batchtest>
         <fileset dir="classes/test-14">
@@ -325,6 +335,9 @@
         <pathelement location="classes/base-14" />
         <pathelement location="classes/lib-14" />
       </classpath>
+      <syspropertyset>
+        <propertyref prefix="plt." />
+      </syspropertyset>
       <formatter type="brief" usefile="false" />
       <batchtest>
         <fileset dir="classes/test-14">

@@ -89,9 +89,10 @@ public class PreemptingClassLoader extends ClassLoader {
    * loaded as a resource and defined here rather than allowing the parent to define the class.
    */
   protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-    Class<?> result = findLoadedClass(name); // check if already loaded
-    if (result == null) {
-      if (shouldPreempt(name)) {
+    if (!shouldPreempt(name)) { return super.loadClass(name, resolve); }
+    else {
+      Class<?> result = findLoadedClass(name); // check if already loaded
+      if (result == null) {
         String filename = name.replace('.', '/') + ".class";
         InputStream in = IOUtil.asBuffered(getResourceAsStream(filename));
         if (in == null) { throw new ClassNotFoundException("Resource not found: " + filename); }
@@ -107,11 +108,10 @@ public class PreemptingClassLoader extends ClassLoader {
           catch (IOException e) { /* ignore */ }
         }
       }
-      else { result = getParent().loadClass(name); }
       // if no exceptions have occurred, result is no longer null
+      if (resolve) { resolveClass(result); }
+      return result;
     }
-    if (resolve) { resolveClass(result); }
-    return result;
   }
   
   private boolean shouldPreempt(String name) {

@@ -143,7 +143,7 @@ public class PathClassLoader extends ClassLoader {
     _urlLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), EmptyClassLoader.INSTANCE);
   }
   
-  protected Class<?> findClass(String name) throws ClassNotFoundException {
+  @Override protected Class<?> findClass(String name) throws ClassNotFoundException {
     URL resource = findResource(name.replace('.', '/') + ".class");
     if (resource == null) { throw new ClassNotFoundException(); }
     else {
@@ -155,12 +155,12 @@ public class PathClassLoader extends ClassLoader {
     }
   }
   
-  protected URL findResource(String name) {
+  @Override protected URL findResource(String name) {
     if (!IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
     return _urlLoader.findResource(name);
   }
   
-  protected Enumeration<URL> findResources(String name) throws IOException {
+  @Override protected Enumeration<URL> findResources(String name) throws IOException {
     if (!IterUtil.isEqual(_path, _urlLoaderPath)) { updateURLLoader(); }
     return _urlLoader.findResources(name);
   }
