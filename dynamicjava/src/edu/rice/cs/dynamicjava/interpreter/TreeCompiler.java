@@ -966,6 +966,15 @@ public class TreeCompiler {
     stack.adjust(-2);
   }
 
+  /** Helper method for printing a toString of the current object.  The object is not consumed. */
+  private void emitPrintToString(MethodVisitor mv, StackSizeTracker stack) {
+    mv.visitInsn(DUP);
+    mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+    stack.adjust(2);
+    mv.visitInsn(SWAP);
+    mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/Object;)V");
+    stack.adjust(-2);
+  }
   
   /* AUXILIARY STATIC METHODS */
   

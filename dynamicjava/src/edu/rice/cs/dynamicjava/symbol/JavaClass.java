@@ -222,7 +222,10 @@ public class JavaClass implements DJClass {
         return _k.newInstance(IterUtil.asArray(args, Object.class));
       }
       catch (InvocationTargetException e) {
-        throw new EvaluatorException(e.getCause());
+        throw new EvaluatorException(e.getCause(), CONSTRUCTOR_EXTRA_STACK);
+      }
+      catch (ExceptionInInitializerError e) {
+        throw new EvaluatorException(e, CONSTRUCTOR_EXTRA_STACK);
       }
       catch (IllegalAccessException e) {
         // This should have been caught by static analysis
@@ -235,6 +238,13 @@ public class JavaClass implements DJClass {
     }
     
   }
+  
+  private static final String[] CONSTRUCTOR_EXTRA_STACK =
+    new String[]{ "java.lang.reflect.Constructor.newInstance",
+                  "sun.reflect.DelegatingConstructorAccessorImpl.newInstance",
+                  "sun.reflect.NativeConstructorAccessorImpl.newInstance",
+                  "sun.reflect.NativeConstructorAccessorImpl.newInstance0" };
+  
   
   protected static class JavaMethod implements DJMethod {
     protected final Method _m;
@@ -266,11 +276,10 @@ public class JavaClass implements DJClass {
         return _m.invoke(receiver, IterUtil.asList(args).toArray());
       }
       catch (InvocationTargetException e) {
-        throw new EvaluatorException(e.getCause(),
-                                      "java.lang.reflect.Method.invoke",
-                                      "sun.reflect.DelegatingMethodAccessorImpl.invoke",
-                                      "sun.reflect.NativeMethodAccessorImpl.invoke",
-                                      "sun.reflect.NativeMethodAccessorImpl.invoke0");
+        throw new EvaluatorException(e.getCause(), METHOD_EXTRA_STACK);
+      }
+      catch (ExceptionInInitializerError e) {
+        throw new EvaluatorException(e, METHOD_EXTRA_STACK);
       }
       catch (IllegalAccessException e) {
         // This should have been caught by static analysis
@@ -279,6 +288,12 @@ public class JavaClass implements DJClass {
     }
     
   }
+  
+  private static final String[] METHOD_EXTRA_STACK =
+    new String[] { "java.lang.reflect.Method.invoke",
+                   "sun.reflect.DelegatingMethodAccessorImpl.invoke",
+                   "sun.reflect.NativeMethodAccessorImpl.invoke",
+                   "sun.reflect.NativeMethodAccessorImpl.invoke0" };
   
   private static Thunk<Iterable<LocalVariable>> paramFactory(final Class<?>[] cs) {
     // Caches LocalVariables so we don't create duplicates

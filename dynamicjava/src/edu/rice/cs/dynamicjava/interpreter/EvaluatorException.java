@@ -12,12 +12,12 @@ public class EvaluatorException extends InterpreterException {
   
   public EvaluatorException(Throwable cause) {
     super(cause);
-    updateStack(cause, new String[0][]);
+    updateAllStacks(cause, new String[0][]);
   }
   
   public EvaluatorException(Throwable cause, String... extraStackElements) {
     super(cause);
-    updateStack(cause, new String[][]{ extraStackElements });
+    updateAllStacks(cause, new String[][]{ extraStackElements });
   }
   
   /**
@@ -38,17 +38,25 @@ public class EvaluatorException extends InterpreterException {
    */
   public EvaluatorException(Throwable cause, String[]... extraStackElements) {
     super(cause);
-    updateStack(cause, extraStackElements);
+    updateAllStacks(cause, extraStackElements);
+  }
+  
+  /** Eliminate matching stack elements in {@code cause} and all of its chained causes. */
+  private void updateAllStacks(Throwable cause, String[][]extraStack) {
+    StackTraceElement[] current = new Throwable().getStackTrace();
+    while (cause != null) {
+      updateStack(cause, current, extraStack);
+      cause = cause.getCause();
+    }
   }
   
   /** Eliminate matching stack elements in cause's stack trace. */
-  private void updateStack(Throwable cause, String[][] extraStackElements) {
+  private void updateStack(Throwable cause, StackTraceElement[] current, String[][] extraStack) {
     StackTraceElement[] stack = cause.getStackTrace();
-    StackTraceElement[] current = new Throwable().getStackTrace();
     int offset = stack.length - current.length;
     int minMatch = stack.length;
     boolean allMatch = true;
-    // we use >= 2 in the condition to skip this method and the enclosing constructor invocation
+    // we use >= 2 in the condition to skip updateAllStacks and the enclosing constructor
     while (minMatch-1 >= 0 && minMatch-1-offset >= 2) {
       StackTraceElement stackElt = stack[minMatch-1];
       StackTraceElement currentElt = current[minMatch-1-offset];
@@ -61,7 +69,7 @@ public class EvaluatorException extends InterpreterException {
     if (allMatch && minMatch > 0) {
       int bestExtraMatch = 0;
       boolean bestExtraMatchesAll = true;
-      for (String[] extras : extraStackElements) {
+      for (String[] extras : extraStack) {
         int extraMatch = 0;
         boolean extraMatchesAll = true;
         while (extraMatch < extras.length && minMatch-extraMatch-1 >= 0) {
