@@ -218,18 +218,21 @@ public class JUnitTestManager {
     /** junit can return a string in two different formats; we parse both formats, and then decide which one to use. */
     
     String className;
-    String className1 = testString.substring(firstIndex, secondIndex);
-    String className2 = testString.substring(0, firstIndex-1);
-    if (firstIndex == secondIndex) className = className2;
-    else className = className1;
+    if (firstIndex != secondIndex)
+      className = testString.substring(firstIndex, secondIndex);
+    else
+      className = testString.substring(0, firstIndex-1);
     
     String classNameAndTest = className + "." + testName;
     String stackTrace = StringOps.getStackTrace(failure.thrownException());
     
-    /** If the classname is not in the stacktrace, then the test that failed was inherited from a superclass. let's look
-      * for the classname.
-      */
-    if (stackTrace.indexOf(className) == -1) {
+    /* Check to see if the class and test name appear directly in the stack trace. If
+     * they don't, then we'll have to do additional work to find the line number. Additionally,
+     * if the exception occured in a subclass of the test class, we'll need to adjust our conception
+     * of the class name.
+     */
+    int lineNum = -1;
+    if (stackTrace.indexOf(classNameAndTest) == -1) {
       /* get the stack trace of the junit error */
       String trace = failure.trace();
       /* knock off the first line of the stack trace.
@@ -251,14 +254,24 @@ public class JUnitTestManager {
       }
       trace = trace.substring(trace.indexOf('(')+1);
       trace = trace.substring(0, trace.indexOf(')'));
-      className = trace.substring(0,trace.indexOf(':'));
-      className = trace.substring(0,trace.lastIndexOf('.'));
-      classNameAndTest = className + "." + testName;
+      
+      // If the exception occurred in a subclass of the test class, then update our
+      // concept of the class and test name. Otherwise, we're only here to pick up the
+      // line number.
+      if (stackTrace.indexOf(className) == -1) {
+        className = trace.substring(0,trace.lastIndexOf('.'));
+        classNameAndTest = className + "." + testName;
+      }
+
+      try {
+        lineNum = Integer.parseInt(trace.substring(trace.indexOf(':') + 1)) - 1;
+      }
+      catch (NumberFormatException e) { throw new UnexpectedException(e); }
     }
     
-    
-    
-    int lineNum = _lineNumber(stackTrace, classNameAndTest);
+    if (lineNum < 0) {
+      lineNum = _lineNumber(stackTrace, classNameAndTest);
+    }
     
 //    if (lineNum > -1) _errorsWithPos++;
 
