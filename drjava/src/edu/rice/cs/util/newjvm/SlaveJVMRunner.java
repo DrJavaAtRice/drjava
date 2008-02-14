@@ -51,6 +51,8 @@ import edu.rice.cs.util.swing.ScrollableDialog;
 import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /** This class is the root class for the Slave JVM.  The Master JVM invokes the {@link #main} method of this class, 
  *  which is never instantiated. See the {@link #main} method documentation for information on the command line 
@@ -105,6 +107,7 @@ public final class SlaveJVMRunner {
    *         slave JVM implementation class.
    */
   public synchronized static void main(String[] args) {
+    debug.logStart();
     try {
       // Make sure RMI doesn't use an IP address that might change
       System.setProperty("java.rmi.server.hostname", "127.0.0.1");
@@ -154,28 +157,33 @@ public final class SlaveJVMRunner {
       final MasterRemote masterRemote = (MasterRemote) ostream.readObject();
       _notDone = false;
       _log.log("SlaveJVMRunner completed reading " + masterRemote);
+      debug.logValue("masterRemote", masterRemote);
+      
       fstream.close();
       ostream.close();
       
       AbstractSlaveJVM slave = null;
 
+      debug.log();
       try {
         Class slaveClass = Class.forName(args[1]);
 //        _log.log("Slave JVM created singleton of " + args[1]);
         slave = _getInstance(slaveClass);
+        debug.logValue("slave", slave);
         
         //Export slave object to RMI, passing stub to the master JVM (how does stub get there?  Transitivity?
-//        _log.log("Slave JVM exporting " + slave + " to RMI");
         SlaveRemote slaveRemote = (SlaveRemote) UnicastRemoteObject.exportObject(slave, 0);
-        _log.log("SlaveJVMRunner exported stub " + slaveRemote);
-
+        debug.logValue("slaveRemote", slaveRemote);
+        
         // start the slave and then notify the master
-//        _log.log("Slave JVM invoking the method " + slave + ".start(" + masterRemote + ")");
         slave.start(masterRemote);
-        _log.log("SlaveJVMRunner invoking the method registerSlave(" + slave + ") in the Master JVM");
+        
+        debug.logStart("invoking masterRemote.registerSlave");
         masterRemote.registerSlave(slave);
+        debug.logEnd();
       }
-      catch (Exception e) {
+      catch (Throwable e) {
+        debug.log(e);
         // Couldn't instantiate the slave.
         _log.log("SlaveJVMRunner could not instantiate and start slave class '" + slave + "'.  Threw exception: " + e);
         try {
@@ -183,6 +191,9 @@ public final class SlaveJVMRunner {
           masterRemote.errorStartingSlave(e);
         }
         catch (RemoteException re) {
+          // TODO: these logging messages (to the default popup log) are breaking InteractionsDJDocumentTest.  Why?
+          //error.log(re);
+          //error.log(e);
           // Couldn't show the error properly, so use another approach
           String msg = "SlaveJVMRunner could not instantiate and register the slave.\n" +
             "  Also failed to display error through master JVM, because:\n" +
@@ -192,12 +203,15 @@ public final class SlaveJVMRunner {
         System.exit(3);
       }
     }
-    catch (Exception e) { // IOException, ClassNotFoundException
+    catch (Throwable e) { // IOException, ClassNotFoundException
+      // TODO: these logging messages (to the default popup log) are breaking InteractionsDJDocumentTest.  Why?
+      //error.log(e);
       // There's no master to display the error, so we'll do it ourselves
       _showErrorMessage("SlaveJVMRunner could not set up the Slave JVM.", e);
       _log.log("SlaveJVMRunner could not set up the Slave JVM. Calling System.exit(2) in response to: " + e);
       System.exit(2);
     }
+    finally { debug.logEnd(); }
   }
 
   /** Displays a graphical error message to notify the user of a problem encountered while starting the slave JVM.

@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.plt.swing.SwingUtil;
 
 /** The handle() method in this class is called everytime an uncaught exception propagates to an AWT action.
  *  The static log() method can be used to put log entries into the error log but continue execution.
@@ -87,16 +88,20 @@ public class DrJavaErrorHandler {
   }
   
   /** Record the throwable in the errors list. */
-  public static void record(Throwable thrown) {
-    _errors.add(thrown);
-    if (_errorsButton != null) {
-      _errorsButton.setVisible(true);
-    }
-    if (_errors.size() == 1 && DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue()) {
-      DrJavaErrorPopup popup = new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown);
-      MainFrame.setPopupLoc(popup, popup.getOwner());
-      popup.setVisible(true);
-    }
+  public static void record(final Throwable thrown) {
+    SwingUtil.invokeLater(new Runnable() {
+      public void run() {
+        _errors.add(thrown);
+        if (_errorsButton != null) {
+          _errorsButton.setVisible(true);
+        }
+        if (_errors.size() == 1 && DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue()) {
+          DrJavaErrorPopup popup = new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown);
+          MainFrame.setPopupLoc(popup, popup.getOwner());
+          popup.setVisible(true);
+        }
+      }
+    });
   }
   
   /** Log an unexpected situation. */

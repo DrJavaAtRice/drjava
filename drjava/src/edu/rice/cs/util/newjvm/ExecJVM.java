@@ -106,7 +106,7 @@ public final class ExecJVM {
    */
   public static Process runJVMPropagateClassPath(String mainClass, String[] classParams, String[] jvmParams, File workDir)
     throws IOException {
-    Iterable<File> cp = IOUtil.parsePath(System.getProperty("java.class.path"));
+    Iterable<File> cp = IOUtil.parsePath(System.getProperty("java.class.path", ""));
     cp = IOUtil.getAbsoluteFiles(cp);
     return runJVM(mainClass, classParams, IOUtil.pathToString(cp), jvmParams, workDir);
   }

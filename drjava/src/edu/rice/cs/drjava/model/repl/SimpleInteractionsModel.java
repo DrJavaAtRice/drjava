@@ -42,6 +42,7 @@ import java.io.PrintWriter;
 
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
+import edu.rice.cs.drjava.model.GlobalModel;
 
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
@@ -74,7 +75,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
    */
   public SimpleInteractionsModel(InteractionsDJDocument document) {
     super(document, new File(System.getProperty("user.dir")), 1000, WRITE_DELAY);
-    _classPathManager = new ClassPathManager();
+    _classPathManager = new ClassPathManager(GlobalModel.RUNTIME_CLASS_PATH);
     _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.getClassLoader());
     //_interpreter.defineVariable("INTERPRETER", _interpreter);
   }
@@ -166,7 +167,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   /** Resets the Java interpreter. */
   protected void _resetInterpreter(File wd) {
     interpreterResetting();
-    _classPathManager = new ClassPathManager();
+    _classPathManager = new ClassPathManager(GlobalModel.RUNTIME_CLASS_PATH);
     _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.getClassLoader());
     interpreterReady(wd);
   }

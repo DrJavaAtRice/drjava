@@ -58,6 +58,7 @@ import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.text.TextUtil;
+import edu.rice.cs.plt.io.IOUtil;
 
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
@@ -124,7 +125,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _quitSlaveThreadName = "Reset Interactions Thread";
     _pollMasterThreadName = "Poll DrJava Thread";
 
-    _classPathManager = new ClassPathManager();
+    Iterable<File> runtimeCP = IOUtil.parsePath(System.getProperty("java.class.path", ""));
+    _classPathManager = new ClassPathManager(runtimeCP);
     _junitTestManager = new JUnitTestManager(this);
     _messageOnResetFailure = true;
 

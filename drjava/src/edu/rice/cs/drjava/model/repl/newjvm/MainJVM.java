@@ -52,6 +52,7 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.debug.DebugModelCallback;
+import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
@@ -280,7 +281,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       
       InterpreterJVMRemoteI slave = ensureInterpreterConnected();
       
-      try { return IterUtil.compose(slave.getClassPath(), _startupClassPath); }
+      try { return slave.getClassPath(); }
       catch (RemoteException re) { _threwException(re); return IterUtil.empty(); }
     }
     else { return IterUtil.empty(); }
@@ -688,10 +689,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Lets the model know if any exceptions occur while communicating with the Interpreter JVM. */
-  private void _threwException(Throwable t) {
-    StringWriter msg = new StringWriter();
-    t.printStackTrace(new PrintWriter(msg));
-    _interactionsModel.replThrewException(msg.toString());
+  private void _threwException(final Throwable t) {
+    DrJavaErrorHandler.record(t);
   }
   
   /** Sets the interpreter to allow access to private members. Blocks until an interpreter
@@ -717,12 +716,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         if (! _restart) { throw new IllegalStateException("Interpreter is disabled"); }
         InterpreterJVMRemoteI slave = _interpreterJVM();
         while (slave == null) {
-//          _log.log("interpreter is null in Main JVM, waiting for it to register");
+          debug.log("Interpreter is null, waiting for it to register");
           _interpreterLock.wait();
           slave = _interpreterJVM();
         }
+        debug.log("Interpreter registered");
         
-//        _log.log("interpreter " + interp + " registered in Main JVM");
         return slave;
       }
     }
@@ -787,10 +786,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     
     public Void forUnexpectedException(Throwable t) {
+      _interactionsModel.replReturnedVoid();
       throw new UnexpectedException(t);
     }
     
     public Void forBusy() {
+      _interactionsModel.replReturnedVoid();
       throw new UnexpectedException("MainJVM.interpret() called when InterpreterJVM was busy!");
     }
     

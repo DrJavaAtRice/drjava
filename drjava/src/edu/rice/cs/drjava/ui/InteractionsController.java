@@ -78,6 +78,7 @@ import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
+import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -450,7 +451,10 @@ public class InteractionsController extends AbstractConsoleController {
     public void actionPerformed(ActionEvent e) {
       if (! _adapter.inCommentBlock()) {
         Thread command = new Thread("Evaluating Interaction") { 
-          public void run() { _model.interpretCurrentInteraction(); }
+          public void run() {
+            try { _model.interpretCurrentInteraction(); }
+            catch (Throwable t) { DrJavaErrorHandler.record(t); }
+          }
         };
         command.start();
       }

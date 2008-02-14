@@ -42,6 +42,8 @@ import edu.rice.cs.util.text.ConsoleDocumentInterface;
 
 import java.io.File;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /** An InteractionsModel which can serve as the glue between a local InteractionsDocument and a remote JavaInterpreter
   * in another JVM.
   * @version $Id$
@@ -65,7 +67,11 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Interprets the given command.
     * @param toEval command to be evaluated
     */
-  protected void _interpret(String toEval) { _jvm.interpret(toEval); }
+  protected void _interpret(String toEval) {
+    debug.logStart("Interpret " + toEval);
+    _jvm.interpret(toEval);
+    debug.logEnd();
+  }
 
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable

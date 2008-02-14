@@ -67,6 +67,7 @@ import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.*;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Main class for DrJava.
  *  @version $Id$
@@ -101,6 +102,7 @@ public class DrJavaRoot {
    * prevent others from assigning new values. */
   
   public static void main(final String[] args) {
+    debug.log("Starting up");
     // Platform-specific UI setup.
     PlatformFactory.ONLY.beforeUISetup();
 
