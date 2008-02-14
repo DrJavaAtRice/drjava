@@ -5198,6 +5198,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _setUpAction(_toggleBookmarkAction, "Toggle Bookmark", "Toggle the bookmark at the current cursor location");
     _setUpAction(_followFileAction, "Follow File", "Follow a file's updates");
     _setUpAction(_executeExternalProcessAction, "Execute External", "Execute external process");
+    _setUpAction(_editExternalProcessesAction, "Preferences", "Edit saved external processes");
 
     _setUpAction(_findReplaceAction, "Find", "Find or replace text in the document");
     _setUpAction(_findNextAction, "Find Next", "Repeats the last find");
@@ -5494,7 +5495,20 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     toolsMenu.addSeparator();
     _addMenuItem(toolsMenu, _followFileAction, KEY_FOLLOW_FILE);
-    _addMenuItem(toolsMenu, _executeExternalProcessAction, KEY_EXEC_PROCESS);
+    
+    final JMenu extMenu = new JMenu("External Processes");
+    _addMenuItem(extMenu, _executeExternalProcessAction, KEY_EXEC_PROCESS);
+    // TODO: remove mock entries
+    extMenu.addSeparator();
+    extMenu.add(_editExternalProcessesAction);
+    toolsMenu.add(extMenu);
+
+    ChangeListener extMenuListener = new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        _editExternalProcessesAction.setEnabled((extMenu.getItemCount()<2));
+      }
+    };
+    extMenu.addChangeListener(extMenuListener);
     
     // Add the menus to the menu bar
     return toolsMenu;
@@ -8801,7 +8815,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     catch(OperationCanceledException oce) { /* ignore */ }
   }
 
-  /** Execute an externak process. */
+  /** Execute an external process. */
   private final Action _executeExternalProcessAction = new AbstractAction("External process...") {
     public void actionPerformed(ActionEvent ae) {
       _executeExternalProcess();
@@ -8829,4 +8843,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       DrJava.getConfig().setSetting(DIALOG_EXTERNALPROCESS_STATE, "default");
     }
   }
+  
+  /** Removed a saved process. */
+  private final Action _editExternalProcessesAction = new AbstractAction("Edit...") {
+    public void actionPerformed(ActionEvent ae) {
+      // TODO
+    }
+  };
+
 }

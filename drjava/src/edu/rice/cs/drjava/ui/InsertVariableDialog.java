@@ -41,27 +41,28 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.CompletionMonitor;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Vector;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Dialog allowing the user to select a variable.
  */
 public class InsertVariableDialog extends JFrame implements OptionConstants {
+  /** Tab pane. */
+  JTabbedPane _tabbedPane = new JTabbedPane();
+
   /**
    * Table with variables.
    */
-  private JTable _varTable;
+  private Map<String, JTable> _varTable = new HashMap<String, JTable>();
   
   /**
    * Model for the table.
    */
-  private DefaultTableModel _varTableModel;
+  private Map<String, DefaultTableModel> _varTableModel = new HashMap<String, DefaultTableModel>();
   
   /**
    * Field to preview the value of the variable.
@@ -81,8 +82,8 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
   /** Main frame. */
   private MainFrame _mainFrame;
   
-  /** Properties to use. */
-  private Properties _props;
+  /** Name-properties pairs to use. */
+  private Map<String, Properties> _props;
   
   /** Selected entry, or null of cancelled. */
   private edu.rice.cs.plt.tuple.Pair<String,String> _selected = null;
@@ -93,7 +94,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
   /** Create a dialog.
    *  @param mf the instance of mainframe to query into the project
    */
-  public InsertVariableDialog(MainFrame mf, Properties props, CompletionMonitor cm) {
+  public InsertVariableDialog(MainFrame mf, Map<String, Properties> props, CompletionMonitor cm) {
     super("Insert Variable");
     _mainFrame = mf;
     _props = props;
@@ -124,16 +125,54 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     buttons.add(_cancelBtn);
 
     _varValueField = new JTextField();
-    _varValueField.setEditable(false);
-    
-    JPanel bottom = new JPanel(new BorderLayout());    
-    bottom.add(_varValueField, BorderLayout.CENTER);    
-    bottom.add(buttons, BorderLayout.SOUTH);
+    for (Map.Entry<String, Properties> p: _props.entrySet()) {
+      _tabbedPane.addTab(p.getKey(), createPane(p.getKey(), p.getValue()));
+    }
+    _tabbedPane.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        String panelName = _props.keySet().toArray(new String[0])[_tabbedPane.getSelectedIndex()];
+        String key = _varTableModel.get(panelName).getValueAt(_varTable.get(panelName).getSelectedRow(),0).toString();
+        _varValueField.setText(_props.get(panelName).getProperty(key));
+        _selected = new edu.rice.cs.plt.tuple.Pair<String,String>(key, _props.get(panelName).getProperty(key));
+      }
+    });
     
     JPanel main = new JPanel(new BorderLayout());
+
+    JPanel bottom = new JPanel(new BorderLayout());
+    bottom.add(_varValueField, BorderLayout.CENTER);    
+    bottom.add(buttons, BorderLayout.SOUTH);
+    new JPanel(new BorderLayout());
     main.add(bottom, BorderLayout.SOUTH);
-        
-    _varTableModel = new DefaultTableModel(0,1) {
+    
+    String panelName = _props.keySet().toArray(new String[0])[0];
+    String key = _varTableModel.get(panelName).getValueAt(_varTable.get(panelName).getSelectedRow(),0).toString();
+    _varValueField.setText(_props.get(panelName).getProperty(key));
+    _selected = new edu.rice.cs.plt.tuple.Pair<String,String>(key, _props.get(panelName).getProperty(key));
+    
+    main.add(_tabbedPane, BorderLayout.CENTER);
+    
+    //The following line enables to use scrolling tabs.
+    _tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+
+    // do not allow preview to have focus
+    _tabbedPane.addFocusListener(new FocusAdapter() {
+      public void focusLost(FocusEvent e) {
+        if (e.getOppositeComponent() == _varValueField) {
+          _tabbedPane.getSelectedComponent().requestFocus();
+        }
+      }
+    });
+
+    super.getContentPane().add(main);
+    super.setResizable(false);
+    pack();
+
+    MainFrame.setPopupLoc(this, _mainFrame);    
+  }
+  
+  protected JScrollPane createPane(final String title, final Properties props) {
+    _varTableModel.put(title,new DefaultTableModel(0,1) {
       public String getColumnName(int column) {
         switch(column) {
           case 0: return "Variable";
@@ -148,54 +187,36 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
         }
       }
       public boolean isCellEditable(int row, int column) { return false; }
-    };
+    });
     
-    _varTable = new JTable(_varTableModel);
-    JScrollPane varTableSP = new JScrollPane(_varTable);
+    _varTable.put(title, new JTable(_varTableModel.get(title)));
+    JScrollPane varTableSP = new JScrollPane(_varTable.get(title));
     varTableSP.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     varTableSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 //    _varTable.setMinimumSize(new Dimension(300, 200));
 //    _varTable.setPreferredSize(new Dimension(300, 200));
-    _varTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    _varTable.putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
-    ListSelectionModel lsm = _varTable.getSelectionModel();
+    _varTable.get(title).setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    _varTable.get(title).putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
+    ListSelectionModel lsm = _varTable.get(title).getSelectionModel();
     lsm.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
-        String key = _varTableModel.getValueAt(_varTable.getSelectedRow(),0).toString();
-        _selected = new edu.rice.cs.plt.tuple.Pair<String,String>(key, _props.getProperty(key));
-        _varValueField.setText(_props.getProperty(key));
+        String key = _varTableModel.get(title).getValueAt(_varTable.get(title).getSelectedRow(),0).toString();
+        _selected = new edu.rice.cs.plt.tuple.Pair<String,String>(key, _props.get(title).getProperty(key));
+        _varValueField.setText(_props.get(title).getProperty(key));
       }
     });
-    _varTable.setSelectionModel(lsm);
-    // do not allow preview to have focus
-    _varTable.addFocusListener(new FocusAdapter() {
-      public void focusLost(FocusEvent e) {
-        if (e.getOppositeComponent() == _varValueField) {
-          _varTable.requestFocus();
-        }
-      }
-    });
+    _varTable.get(title).setSelectionModel(lsm);
 
-
-    for(Object o: _props.keySet()) {
+    for(Object o: props.keySet()) {
       String key = o.toString();
       Vector<String> row = new Vector<String>();
       row.add(key);
-      _varTableModel.addRow(row);
+      _varTableModel.get(title).addRow(row);
     }
 
-    _varTable.setRowSelectionInterval(0,0);
-    String key = _varTableModel.getValueAt(_varTable.getSelectedRow(),0).toString();
-    _varValueField.setText(_props.getProperty(key));
-    _selected = new edu.rice.cs.plt.tuple.Pair<String,String>(key, _props.getProperty(key));
+    _varTable.get(title).setRowSelectionInterval(0,0);
     
-    main.add(varTableSP, BorderLayout.CENTER);
-    
-    super.getContentPane().add(main);
-    super.setResizable(false);
-    pack();
-
-    MainFrame.setPopupLoc(this, _mainFrame);    
+    return varTableSP;
   }
   
   protected void _okCommand() {

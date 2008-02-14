@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
+import java.util.HashMap;
 import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -103,8 +104,10 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     public Point getLocation() { return _loc; }
   }
   
-  /** OK Command button. */
-  private JButton _okCommandButton;
+  /** Run Command button. */
+  private JButton _runCommandButton;
+  /** Save Command button. */
+  private JButton _saveCommandButton;
   /** Insert Command button. */
   private JButton _insertCommandButton;
   /** Cancel Command button. */
@@ -126,8 +129,10 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Last of the two text panes to have focus. */
   private JTextPane _lastCommandFocus;
 
-  /** OK Java button. */
-  private JButton _okJavaButton;
+  /** Run Java button. */
+  private JButton _runJavaButton;
+  /** Save Java button. */
+  private JButton _saveJavaButton;
   /** Insert Command button. */
   private JButton _insertJavaButton;
   /** Cancel Java button. */
@@ -181,7 +186,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   SimpleAttributeSet _javaVarErrorCommandLineCmdStyle;
   
   /** Tab pane. */
-  JTabbedPane _tabbedPane = new JTabbedPane();
+  JTabbedPane _tabbedPane;
   /** Command line document listener. */
   DocumentListener _documentListener;
   /** Java document listener. */
@@ -250,32 +255,53 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
 
     super.getContentPane().setLayout(new GridLayout(1,1));
 
-    Action okCommandAction = new AbstractAction("Run Command Line") {
+     _tabbedPane = new JTabbedPane();
+ 
+    Action runCommandAction = new AbstractAction("Run Command Line") {
       public void actionPerformed(ActionEvent e) {
-        _okCommand();
+        _runCommand();
       }
     };
-    _okCommandButton = new JButton(okCommandAction);
-    Action okJavaAction = new AbstractAction("Run Java Class") {
+    _runCommandButton = new JButton(runCommandAction);
+    Action runJavaAction = new AbstractAction("Run Java Class") {
       public void actionPerformed(ActionEvent e) {
-        _okJava();
+        _runJava();
       }
     };
-    _okJavaButton = new JButton(okJavaAction);
+    _runJavaButton = new JButton(runJavaAction);
 
-    _insertVarDialog = new InsertVariableDialog(_mainFrame, System.getProperties(), _insertVarDialogMonitor);
-    Action insertCommandAction = new AbstractAction("Insert Variable") {
+    Action saveCommandAction = new AbstractAction("Save to Menu...") {
+      public void actionPerformed(ActionEvent e) {
+        _saveCommand();
+      }
+    };
+    _saveCommandButton = new JButton(saveCommandAction);
+    Action saveJavaAction = new AbstractAction("Save to Menu...") {
+      public void actionPerformed(ActionEvent e) {
+        _saveJava();
+      }
+    };
+    _saveJavaButton = new JButton(saveJavaAction);
+
+    HashMap<String, Properties> m = new HashMap<String, Properties>();
+    m.put("Java", System.getProperties());
+    m.put("DrJava", System.getProperties());
+    m.put("Project", System.getProperties());
+    _insertVarDialog = new InsertVariableDialog(_mainFrame, m, _insertVarDialogMonitor);
+    Action insertCommandAction = new AbstractAction("Insert Variable...") {
       public void actionPerformed(ActionEvent e) {
         _insertVariableCommand();
       }
     };
     _insertCommandButton = new JButton(insertCommandAction);
-    Action insertJavaAction = new AbstractAction("Insert Variable") {
+    _insertCommandButton.setEnabled(false);
+    Action insertJavaAction = new AbstractAction("Insert Variable...") {
       public void actionPerformed(ActionEvent e) {
         _insertVariableJava();
       }
     };
     _insertJavaButton = new JButton(insertJavaAction);
+    _insertJavaButton.setEnabled(false);
     
     Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed(ActionEvent e) {
@@ -297,11 +323,15 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     _tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
     
     super.getContentPane().add(_tabbedPane);
-    super.setResizable(false);
-    // pack();
-
+    super.setResizable(true);
+    
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
     MainFrame.setPopupLoc(this, _mainFrame);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        _commandLine.requestFocus();
+      }
+    });
   }
   
   private JPanel makeCommandPane() {
@@ -336,6 +366,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         else if (e.getKeyCode() == KeyEvent.VK_TAB) {
            e.consume();
            if (e.isShiftDown()) {
+             _insertCommandButton.setEnabled(false);
              _tabbedPane.requestFocus();
            }
            else {
@@ -414,7 +445,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
              _commandLine.requestFocus();
            }
            else {
-             _okCommandButton.requestFocus();
+             _insertCommandButton.setEnabled(false);
+             _runCommandButton.requestFocus();
            }
         }
       }
@@ -467,7 +499,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
     bottom.add(Box.createHorizontalGlue());
-    bottom.add(_okCommandButton);
+    bottom.add(_runCommandButton);
+    bottom.add(_saveCommandButton);
     bottom.add(_insertCommandButton);
     bottom.add(_cancelCommandButton);
     bottom.add(Box.createHorizontalGlue());
@@ -561,6 +594,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       @SuppressWarnings("unchecked")
       public void focusGained(FocusEvent e) {
         _lastCommandFocus = (JTextPane)e.getComponent();
+        _insertCommandButton.setEnabled(true);
       }
       public void focusLost(FocusEvent e) {
         if ((e.getOppositeComponent() == _commandLinePreview) || 
@@ -573,6 +607,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       @SuppressWarnings("unchecked")
       public void focusGained(FocusEvent e) {
         _lastCommandFocus = (JTextPane)e.getComponent();
+        _insertCommandButton.setEnabled(true);
       }
       public void focusLost(FocusEvent e) {
         if ((e.getOppositeComponent() == _commandLinePreview) || 
@@ -619,6 +654,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         else if (e.getKeyCode() == KeyEvent.VK_TAB) {
            e.consume();
            if (e.isShiftDown()) {
+             _insertJavaButton.setEnabled(false);
              _tabbedPane.requestFocus();
            }
            else {
@@ -749,7 +785,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
              _javaCommandLine.requestFocus();
            }
            else {
-             _okJavaButton.requestFocus();
+             _insertJavaButton.setEnabled(false);
+             _runJavaButton.requestFocus();
            }
         }
       }
@@ -802,7 +839,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
     bottom.add(Box.createHorizontalGlue());
-    bottom.add(_okJavaButton);
+    bottom.add(_runJavaButton);
+    bottom.add(_saveJavaButton);
     bottom.add(_insertJavaButton);
     bottom.add(_cancelJavaButton);
     bottom.add(Box.createHorizontalGlue());
@@ -915,34 +953,40 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       @SuppressWarnings("unchecked")
       public void focusGained(FocusEvent e) {
         _lastJavaFocus = (JTextPane)e.getComponent();
+        _insertJavaButton.setEnabled(true);
       }
       public void focusLost(FocusEvent e) {
         if ((e.getOppositeComponent() == _javaCommandLinePreview) ||
-            (e.getOppositeComponent() == _javaCommandWorkDirLinePreview))
+            (e.getOppositeComponent() == _javaCommandWorkDirLinePreview)) {
           _javaCommandLine.requestFocus();
         }
-      });
+      }
+    });
     _jvmLine.addFocusListener(new FocusAdapter() {
       @SuppressWarnings("unchecked")
       public void focusGained(FocusEvent e) {
         _lastJavaFocus = (JTextPane)e.getComponent();
+        _insertJavaButton.setEnabled(true);
       }
       public void focusLost(FocusEvent e) {
         if ((e.getOppositeComponent() == _javaCommandLinePreview) ||
-            (e.getOppositeComponent() == _javaCommandWorkDirLinePreview))
+            (e.getOppositeComponent() == _javaCommandWorkDirLinePreview)) {
           _jvmLine.requestFocus();
+        }
       }
     });
     _javaCommandWorkDirLine.addFocusListener(new FocusAdapter() {
       @SuppressWarnings("unchecked")
       public void focusGained(FocusEvent e) {
         _lastJavaFocus = (JTextPane)e.getComponent();
+        _insertJavaButton.setEnabled(true);
       }
       public void focusLost(FocusEvent e) {
         if ((e.getOppositeComponent() == _javaCommandLinePreview) ||
-            (e.getOppositeComponent() == _javaCommandWorkDirLinePreview))
+            (e.getOppositeComponent() == _javaCommandWorkDirLinePreview)) {
           _javaCommandWorkDirLine.requestFocus();
         }
+      }
     });
     
     return panel;
@@ -1051,7 +1095,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   }
   
   /** Execute the command line. */
-  private void _okCommand() {
+  private void _runCommand() {
     _mainFrame.updateStatusField("Executing external process...");
 
     List<String> cmds = commandLineToList(replaceVariables(_commandLine.getText(), System.getProperties()));
@@ -1111,7 +1155,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   }
 
   /** Execute the Java class. */
-  private void _okJava() {
+  private void _runJava() {
     _mainFrame.updateStatusField("Executing external Java class...");
 
     List<String> jvms = new ArrayList<String>();
@@ -1173,6 +1217,24 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                                       JOptionPane.ERROR_MESSAGE);
       }
     }
+    
+    // Always apply and save settings
+    _saveSettings();
+    this.setVisible(false);
+  }
+  
+  /** Save the command line to the menu. */
+  private void _saveCommand() {
+    // TODO
+
+    // Always apply and save settings
+    _saveSettings();
+    this.setVisible(false);
+  }
+
+  /** Save the Java class to the menu. */
+  private void _saveJava() {
+    // TODO
     
     // Always apply and save settings
     _saveSettings();
