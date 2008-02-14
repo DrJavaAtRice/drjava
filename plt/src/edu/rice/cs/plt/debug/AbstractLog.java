@@ -111,12 +111,13 @@ public abstract class AbstractLog implements Log {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
     if (_filter.value(th, e)) {
-      SizedIterable<String> messages = IterUtil.compose(processText(message), processThrowable(t));
-      write(new Date(), th, e, messages);
+      Date now = new Date();
+      SizedIterable<String> ms = IterUtil.compose(processText(message), processThrowable(t));
+      write(now, th, e, ms);
     }
   }
   
-  /** Perform a {@link #push}, followed by a default starting message */
+  /** Write a default starting message, followed be a {@link #push} */
   public void logStart() {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
@@ -126,7 +127,7 @@ public abstract class AbstractLog implements Log {
     }
   }
   
-  /** Perform a {@link #push}, followed by the given message */
+  /** Write the given message, followed be a {@link #push} */
   public void logStart(String message) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
@@ -136,7 +137,53 @@ public abstract class AbstractLog implements Log {
     }
   }
   
-  /** Write a default ending message, followed by a {@link #pop} */
+  /** Write a default starting message and a value string, followed be a {@link #push} */
+  public void logStart(String name, Object value) {
+    Thread th = Thread.currentThread();
+    StackTraceElement e = DebugUtil.getCaller();
+    if (_filter.value(th, e)) {
+      write(new Date(), th, e, IterUtil.compose(START_MESSAGE, processValue(name, value)));
+      push();
+    }
+  }
+  
+  /** Write the given message and a value string, followed be a {@link #push} */
+  public void logStart(String message, String name, Object value) {
+    Thread th = Thread.currentThread();
+    StackTraceElement e = DebugUtil.getCaller();
+    if (_filter.value(th, e)) {
+      Date now = new Date();
+      SizedIterable<String> ms = IterUtil.compose(processText("Start " + message),
+                                                  processValue(name, value));
+      write(now, th, e, ms);
+      push();
+    }
+  }
+  
+  /** Write a default starting message and a value string, followed be a {@link #push} */
+  public void logStart(String[] names, Object... values) {
+    Thread th = Thread.currentThread();
+    StackTraceElement e = DebugUtil.getCaller();
+    if (_filter.value(th, e)) {
+      write(new Date(), th, e, IterUtil.compose(START_MESSAGE, processValues(names, values)));
+      push();
+    }
+  }
+  
+  /** Write the given message and a value string, followed be a {@link #push} */
+  public void logStart(String message, String[] names, Object... values) {
+    Thread th = Thread.currentThread();
+    StackTraceElement e = DebugUtil.getCaller();
+    if (_filter.value(th, e)) {
+      Date now = new Date();
+      SizedIterable<String> ms = IterUtil.compose(processText("Start " + message),
+                                                  processValues(names, values));
+      write(now, th, e, ms);
+      push();
+    }
+  }
+  
+  /** Write a {@link #pop}, followed by a default ending message */
   public void logEnd() {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
@@ -146,13 +193,59 @@ public abstract class AbstractLog implements Log {
     }
   }
   
-  /** Write the given message, followed by a {@link #pop} */
+  /** Write a {@link #pop}, followed by the given ending message */
   public void logEnd(String message) {
     Thread th = Thread.currentThread();
     StackTraceElement e = DebugUtil.getCaller();
     if (_filter.value(th, e)) {
       pop();
       write(new Date(), th, e, processText("End " + message));
+    }
+  }
+  
+  /** Write a {@link #pop}, followed by a default ending message and a value string */
+  public void logEnd(String name, Object value) {
+    Thread th = Thread.currentThread();
+    StackTraceElement e = DebugUtil.getCaller();
+    if (_filter.value(th, e)) {
+      pop();
+      write(new Date(), th, e, IterUtil.compose(END_MESSAGE, processValue(name, value)));
+    }
+  }
+  
+  /** Write a {@link #pop}, followed by the given ending message and a value string */
+  public void logEnd(String message, String name, Object value) {
+    Thread th = Thread.currentThread();
+    StackTraceElement e = DebugUtil.getCaller();
+    if (_filter.value(th, e)) {
+      pop();
+      Date now = new Date();
+      SizedIterable<String> ms = IterUtil.compose(processText("End " + message),
+                                                  processValue(name, value));
+      write(now, th, e, ms);
+    }
+  }
+  
+  /** Write a {@link #pop}, followed by a default ending message and a value string */
+  public void logEnd(String[] names, Object... values) {
+    Thread th = Thread.currentThread();
+    StackTraceElement e = DebugUtil.getCaller();
+    if (_filter.value(th, e)) {
+      pop();
+      write(new Date(), th, e, IterUtil.compose(END_MESSAGE, processValues(names, values)));
+    }
+  }
+  
+  /** Write a {@link #pop}, followed by the given ending message and a value string */
+  public void logEnd(String message, String[] names, Object... values) {
+    Thread th = Thread.currentThread();
+    StackTraceElement e = DebugUtil.getCaller();
+    if (_filter.value(th, e)) {
+      pop();
+      Date now = new Date();
+      SizedIterable<String> ms = IterUtil.compose(processText("End " + message),
+                                                  processValues(names, values));
+      write(now, th, e, ms);
     }
   }
   

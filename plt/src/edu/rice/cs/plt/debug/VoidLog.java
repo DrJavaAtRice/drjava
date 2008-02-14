@@ -48,9 +48,18 @@ public final class VoidLog implements Log {
   
   public void logStart() {}
   public void logStart(String message) {}
+  public void logStart(String name, Object value) {}
+  public void logStart(String message, String name, Object value) {}
+  public void logStart(String[] names, Object... values) {}
+  public void logStart(String message, String[] names, Object... values) {}
+  
   
   public void logEnd() {}
   public void logEnd(String message) {}
+  public void logEnd(String name, Object value) {}
+  public void logEnd(String message, String name, Object value) {}
+  public void logEnd(String[] names, Object... values) {}
+  public void logEnd(String message, String[] names, Object... values) {}
   
   public void logStack() {}
   public void logStack(String message) {}

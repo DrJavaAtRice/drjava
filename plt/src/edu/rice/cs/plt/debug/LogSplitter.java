@@ -77,12 +77,44 @@ public class LogSplitter implements Log {
     for (Log l : _logs) { l.logStart(message); }
   }
   
+  public void logStart(String name, Object value) {
+    for (Log l : _logs) { l.logStart(name, value); }
+  }
+  
+  public void logStart(String message, String name, Object value) {
+    for (Log l : _logs) { l.logStart(message, name, value); }
+  }
+  
+  public void logStart(String[] names, Object... values) {
+    for (Log l : _logs) { l.logStart(names, values); }
+  }
+  
+  public void logStart(String message, String[] names, Object... values) {
+    for (Log l : _logs) { l.logStart(message, names, values); }
+  }
+  
   public void logEnd() {
     for (Log l : _logs) { l.logEnd(); }
   }
   
   public void logEnd(String message) {
     for (Log l : _logs) { l.logEnd(message); }
+  }
+  
+  public void logEnd(String name, Object value) {
+    for (Log l : _logs) { l.logEnd(name, value); }
+  }
+  
+  public void logEnd(String message, String name, Object value) {
+    for (Log l : _logs) { l.logEnd(message, name, value); }
+  }
+  
+  public void logEnd(String[] names, Object... values) {
+    for (Log l : _logs) { l.logEnd(names, values); }
+  }
+  
+  public void logEnd(String message, String[] names, Object... values) {
+    for (Log l : _logs) { l.logEnd(message, names, values); }
   }
   
   public void logStack() {

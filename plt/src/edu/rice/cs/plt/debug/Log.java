@@ -67,6 +67,40 @@ public interface Log {
   public void logStart(String message);
   
   /**
+   * <p>Record the beginning of an execution phase.  This is useful, for example, when a method's execution
+   * begins.  This call should always be followed by a corresponding invocation of {@link #logEnd()} or 
+   * {@link #logEnd(String)}.</p>
+   * <p>This version also records the name and value of a variable.  {@code value} may be {@code null}.</p>
+   */
+  public void logStart(String name, Object value);
+  
+  /**
+   * <p>Record the beginning of an execution phase with a descriptive message.  This is useful, for example,
+   * when a method's execution begins.  This call should always be followed by a corresponding invocation 
+   * of {@link #logEnd()} or {@link #logEnd(String)}.</p>
+   * <p>This version also records the name and value of a variable.  {@code value} may be {@code null}.</p>
+   */
+  public void logStart(String message, String name, Object value);
+  
+  /**
+   * <p>Record the beginning of an execution phase.  This is useful, for example, when a method's execution
+   * begins.  This call should always be followed by a corresponding invocation of {@link #logEnd()} or 
+   * {@link #logEnd(String)}.</p>
+   * <p>This version also records the name and value of a set of variables.  Any of {@code values}
+   * may be {@code null}.</p>
+   */
+  public void logStart(String[] names, Object... values);
+  
+  /**
+   * <p>Record the beginning of an execution phase with a descriptive message.  This is useful, for example,
+   * when a method's execution begins.  This call should always be followed by a corresponding invocation
+   * of {@link #logEnd()} or {@link #logEnd(String)}.</p>
+   * <p>This version also records the name and value of a set of variables.  Any of {@code values}
+   * may be {@code null}.</p>
+   */
+  public void logStart(String message, String[] names, Object... values);
+  
+  /**
    * Record the end of an execution phase.  This is useful, for example, when a method's execution ends.  This
    * call should always be preceded by a corresponding invocation of {@link #logStart()} or {@link #logStart(String)}.
    */
@@ -78,6 +112,40 @@ public interface Log {
    * {@link #logStart()} or {@link #logStart(String)}.
    */
   public void logEnd(String message);
+  
+  /**
+   * <p>Record the end of an execution phase.  This is useful, for example, when a method's execution ends.  This
+   * call should always be preceded by a corresponding invocation of {@link #logStart()} or
+   * {@link #logStart(String)}.</p>
+   * <p>This version also records the name and value of a variable.  {@code value} may be {@code null}.</p>
+   */
+  public void logEnd(String name, Object value);
+
+  /**
+   * <p>Record the end of an execution phase with a descriptive message.  This is useful, for example, when 
+   * a method's execution ends.  This call should always be preceded by a corresponding invocation of 
+   * {@link #logStart()} or {@link #logStart(String)}.</p>
+   * <p>This version also records the name and value of a variable.  {@code value} may be {@code null}.</p>
+   */
+  public void logEnd(String message, String name, Object value);
+  
+  /**
+   * <p>Record the end of an execution phase.  This is useful, for example, when a method's execution ends.  This
+   * call should always be preceded by a corresponding invocation of {@link #logStart()} or
+   * {@link #logStart(String)}.</p>
+   * <p>This version also records the name and value of a set of variables.  Any of {@code values}
+   * may be {@code null}.</p>
+   */
+  public void logEnd(String[] names, Object... values);
+
+  /**
+   * <p>Record the end of an execution phase with a descriptive message.  This is useful, for example, when 
+   * a method's execution ends.  This call should always be preceded by a corresponding invocation of 
+   * {@link #logStart()} or {@link #logStart(String)}.</p>
+   * <p>This version also records the name and value of a set of variables.  Any of {@code values}
+   * may be {@code null}.</p>
+   */
+  public void logEnd(String message, String[] names, Object... values);
   
   /** Record the current thread's stack trace */
   public void logStack();
