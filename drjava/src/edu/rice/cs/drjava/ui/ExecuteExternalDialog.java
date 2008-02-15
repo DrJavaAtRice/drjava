@@ -60,6 +60,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Enumeration;
 import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -206,9 +208,12 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   protected CompletionMonitor _insertVarDialogMonitor = new CompletionMonitor();
   
   /** Main frame. */
-  private MainFrame _mainFrame;
+  protected MainFrame _mainFrame;
   /** Last frame state. It can be stored and restored. */
-  private FrameState _lastState = null;
+  protected FrameState _lastState = null;
+  
+  /** Map of properties. */
+  protected Map<String, Properties> _props; 
   
   /** Returns the last state of the frame, i.e. the location and dimension.
    *  @return frame state
@@ -283,11 +288,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     };
     _saveJavaButton = new JButton(saveJavaAction);
 
-    HashMap<String, Properties> m = new HashMap<String, Properties>();
-    m.put("Java", System.getProperties());
-    m.put("DrJava", System.getProperties());
-    m.put("Project", System.getProperties());
-    _insertVarDialog = new InsertVariableDialog(_mainFrame, m, _insertVarDialogMonitor);
+    updateProperties();
+    
+    _insertVarDialog = new InsertVariableDialog(_mainFrame, _props, _insertVarDialogMonitor);
     Action insertCommandAction = new AbstractAction("Insert Variable...") {
       public void actionPerformed(ActionEvent e) {
         _insertVariableCommand();
@@ -513,7 +516,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           // preview
           _commandLineDoc.remove(0,_commandLineDoc.getLength());
           StringBuilder sb = new StringBuilder();
-          String text = replaceVariables(_commandLine.getText(), System.getProperties());
+          String text = replaceVariables(_commandLine.getText(), _props);
           List<String> cmds = commandLineToList(text);
           for(String s: cmds) {
             sb.append(s);
@@ -524,7 +527,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           // command line
           colorVariables(_commandLine,
                          this,
-                         System.getProperties(),
                          _commandLineCmdAS,
                          _varCommandLineCmdStyle,
                          _varErrorCommandLineCmdStyle);
@@ -548,14 +550,13 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           // preview
           _commandWorkDirLineDoc.remove(0,_commandWorkDirLineDoc.getLength());
           LOG.log("_commandWorkDirLine.getText() = '"+_commandWorkDirLine.getText()+"'");
-          String text = replaceVariables(_commandWorkDirLine.getText(), System.getProperties());
+          String text = replaceVariables(_commandWorkDirLine.getText(), _props);
           LOG.log("text = '"+text+"'");
           _commandWorkDirLineDoc.insertString(0, text, null);
           
           // command line
           colorVariables(_commandWorkDirLine,
                          this,
-                         System.getProperties(),
                          _commandLineCmdAS,
                          _varCommandLineCmdStyle,
                          _varErrorCommandLineCmdStyle);
@@ -570,7 +571,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       public void removeUpdate(DocumentEvent e)  { update(e); }
     };
     _commandWorkDirLine.getDocument().addDocumentListener(_workDirDocumentListener);
-    _commandWorkDirLine.setText("%user.dir%");
+    _commandWorkDirLine.setText("${user.dir}");
     _workDirDocumentListener.changedUpdate(null);
 
     DrJava.getConfig().addOptionListener(DEFINITIONS_COMMENT_COLOR, new OptionListener<Color>() {
@@ -858,7 +859,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(), sb.toString(), _javaCommandLineExecutableStyle);
           
           sb = new StringBuilder();
-          String text = replaceVariables(_jvmLine.getText(), System.getProperties());
+          String text = replaceVariables(_jvmLine.getText(), _props);
           List<String> cmds = commandLineToList(text);
           for(String s: cmds) {
             sb.append(s);
@@ -867,7 +868,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(), sb.toString(), _javaCommandLineJVMStyle);
           
           sb = new StringBuilder();
-          text = replaceVariables(_javaCommandLine.getText(), System.getProperties());
+          text = replaceVariables(_javaCommandLine.getText(), _props);
           cmds = commandLineToList(text);
           for(String s: cmds) {
             sb.append(s);
@@ -878,7 +879,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           // JVM line
           colorVariables(_jvmLine,
                          this,
-                         System.getProperties(),
                          _javaCommandLineJVMAS,
                          _javaVarCommandLineJVMStyle,
                          _javaVarErrorCommandLineJVMStyle);
@@ -886,7 +886,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           // Java Command line
           colorVariables(_javaCommandLine,
                          this,
-                         System.getProperties(),
                          _javaCommandLineCmdAS,
                          _javaVarCommandLineCmdStyle,
                          _javaVarErrorCommandLineCmdStyle);
@@ -910,13 +909,12 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         try {
           // preview
           _javaCommandWorkDirLineDoc.remove(0,_javaCommandWorkDirLineDoc.getLength());
-          String text = replaceVariables(_javaCommandWorkDirLine.getText(), System.getProperties());
+          String text = replaceVariables(_javaCommandWorkDirLine.getText(), _props);
           _javaCommandWorkDirLineDoc.insertString(0, text, null);
           
           // work dir
           colorVariables(_javaCommandWorkDirLine,
                          this,
-                         System.getProperties(),
                          _javaCommandLineCmdAS,
                          _javaVarCommandLineCmdStyle,
                          _javaVarErrorCommandLineCmdStyle);
@@ -931,7 +929,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       public void removeUpdate(DocumentEvent e)  { update(e); }
     };
     _javaCommandWorkDirLine.getDocument().addDocumentListener(_javaWorkDirDocumentListener);
-    _javaCommandWorkDirLine.setText("%user.dir%");
+    _javaCommandWorkDirLine.setText("${user.dir}");
     _javaWorkDirDocumentListener.changedUpdate(null);
     
     DrJava.getConfig().addOptionListener(DEFINITIONS_COMMENT_COLOR, new OptionListener<Color>() {
@@ -997,7 +995,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     * @param props the properties to color */
   protected void colorVariables(final JTextPane pane,
                                 final DocumentListener dl,
-                                final Properties props,
                                 final SimpleAttributeSet normal,
                                 final SimpleAttributeSet variable,
                                 final SimpleAttributeSet error) {
@@ -1005,37 +1002,65 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       public void run() {
         StyledDocument doc = (StyledDocument)pane.getDocument();
         doc.removeDocumentListener(dl);
-        String jvmtext = pane.getText();
-        doc.setCharacterAttributes(0,jvmtext.length(),normal,true);
+        String str = pane.getText();
+        doc.setCharacterAttributes(0,str.length(),normal,true);
         try {
+//          int pos = str.indexOf("${");
+//          int bsPos = str.indexOf("\\\\");
+//          if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
           int pos = 0;
-          int styleIndex = 0; // style to use
           SimpleAttributeSet sas = variable;
-          // LOG.log(jvmtext);
-          while((pos=jvmtext.indexOf('%', pos))>=0) {
+          // LOG.log(str);
+          while(pos>=0) {
             // LOG.log("pos = "+pos); 
-            if ((pos<jvmtext.length()-1) && (jvmtext.charAt(pos+1)=='%')) {
-              // escaped % ("%%")
+            // see if this is an escaped \ (\\)
+            if ((str.charAt(pos)=='\\') &&
+                (pos<str.length()-1) &&
+                (str.charAt(pos+1)=='\\')) {
+              doc.setCharacterAttributes(pos,pos+1,normal,true);
               pos += 2;
             }
-            else {
-              // beginning of what should be a %variable%
+            else if ((str.charAt(pos)=='\\') &&
+                     (pos<str.length()-1) &&
+                     (str.charAt(pos+1)=='$')) {
+              // escaped $ (\$)
+              doc.setCharacterAttributes(pos,pos+1,normal,true);
+              pos += 2;
+            }
+            else if ((str.charAt(pos)=='$') &&
+                     (pos<str.length()-1) &&
+                     (str.charAt(pos+1)=='{')) {
+              // beginning of what should be a ${variable}
               boolean found = false;
-              for(Object o: props.keySet()) {
-                String key = o.toString();
-                int endPos = pos + key.length() + 2;
-                if (jvmtext.substring(pos, Math.min(jvmtext.length(), endPos)).equals("%"+key+"%")) {
-                  // found property name
-                  found = true;
-                  doc.setCharacterAttributes(pos,endPos-pos,variable,true);
-                  pos = endPos;
-                  break;
+              for(Map.Entry<String, Properties> table: _props.entrySet()) {
+                Enumeration<?> e = table.getValue().propertyNames();
+                while(e.hasMoreElements()) {
+                  String key = (String)e.nextElement();
+                  int endPos = pos + key.length() + 3;
+                  if (str.substring(pos, Math.min(str.length(), endPos)).equals("${"+key+"}")) {
+                    // found property name
+                    found = true;
+                    doc.setCharacterAttributes(pos,endPos-pos,variable,true);
+                    pos = endPos;
+                    break;
+                  }
                 }
               }
               if (!found) {
-                doc.setCharacterAttributes(pos,1,error,true);
-                ++pos;
+                int closePos = str.indexOf('}', pos);
+                if (closePos!=-1) {
+                  doc.setCharacterAttributes(pos,closePos-pos+1,error,true);
+                  pos = closePos+1;
+                }
+                else {
+                  doc.setCharacterAttributes(pos,1,error,true);
+                  ++pos;
+                }
               }
+            }
+            else {
+              doc.setCharacterAttributes(pos,1,normal,true);
+              ++pos;
             }
           }
         }
@@ -1098,11 +1123,11 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private void _runCommand() {
     _mainFrame.updateStatusField("Executing external process...");
 
-    List<String> cmds = commandLineToList(replaceVariables(_commandLine.getText(), System.getProperties()));
+    List<String> cmds = commandLineToList(replaceVariables(_commandLine.getText(), _props));
     
     if (cmds.size()>0) {
       ProcessCreator pc = new ProcessCreator(cmds.toArray(new String[cmds.size()]));
-      File wd = new File(replaceVariables(_commandWorkDirLine.getText().trim(), System.getProperties()));
+      File wd = new File(replaceVariables(_commandWorkDirLine.getText().trim(), _props));
       // LOG.log("ok. wd = "+wd);
       if ((!_commandWorkDirLine.getText().equals("")) &&
           ((!wd.exists()) ||
@@ -1161,16 +1186,16 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     List<String> jvms = new ArrayList<String>();
     List<String> cmds = new ArrayList<String>();
     if (_jvmLine.getText().trim().length()>0) {
-      jvms = commandLineToList(replaceVariables(_jvmLine.getText().trim(), System.getProperties()));
+      jvms = commandLineToList(replaceVariables(_jvmLine.getText().trim(), _props));
     }
     if (_javaCommandLine.getText().trim().length()>0) {
-      cmds = commandLineToList(replaceVariables(_javaCommandLine.getText().trim(), System.getProperties()));
+      cmds = commandLineToList(replaceVariables(_javaCommandLine.getText().trim(), _props));
     }
     
     if (jvms.size()+cmds.size()>0) {
       ProcessCreator pc = new JVMProcessCreator(jvms, cmds);
       
-      File wd = new File(replaceVariables(_javaCommandWorkDirLine.getText().trim(), System.getProperties()));
+      File wd = new File(replaceVariables(_javaCommandWorkDirLine.getText().trim(), _props));
       // LOG.log("ok. wd = "+wd);
       if ((!_javaCommandWorkDirLine.getText().equals("")) &&
           ((!wd.exists()) ||
@@ -1275,7 +1300,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
               if (min!=max) {
                 text = text.substring(0, min) + text.substring(max);
               }
-              text = text.substring(0,min) + "%" + selected.first() + "%" + text.substring(min);
+              text = text.substring(0,min) + "${" + selected.first() + "}" + text.substring(min);
               _lastCommandFocus.setText(text);
               caret.setDot(min+selected.first().length()+2);
               _lastCommandFocus.setCaret(caret);
@@ -1314,7 +1339,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
               if (min!=max) {
                 text = text.substring(0, min) + text.substring(max);
               }
-              text = text.substring(0,min) + "%" + selected.first() + "%" + text.substring(min);
+              text = text.substring(0,min) + "${" + selected.first() + "}" + text.substring(min);
               _lastJavaFocus.setText(text);
               caret.setDot(min+selected.first().length()+2);
               _lastJavaFocus.setCaret(caret);
@@ -1324,46 +1349,82 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       }
     }).start();
   }
+  
+  /** Update the properties. */
+  public void updateProperties() {
+    _props = new HashMap<String, Properties>();
+    _props.put("Java", System.getProperties());
+    
+    Properties drJavaProps = new Properties();
+    OptionMap om = DrJava.getConfig().getOptionMap();
+    Iterator<OptionParser<?>> it = om.keys();
+    while(it.hasNext()) {
+      OptionParser<?> op = it.next();
+      String key = op.getName();
+      String value = om.getString(op);
+      drJavaProps.setProperty("drjava."+key,value);
+    }
+    _props.put("DrJava", drJavaProps);
+  }
 
   /**
-   * Replace variables of the form "%variable%" with the value associated with the string "variable" in the
+   * Replace variables of the form "${variable}" with the value associated with the string "variable" in the
    * provided hash table.
-   * To give the "%" character its literal meaning, it needs to be escaped as "%%" (double percent).
+   * To give the "$" character its literal meaning, it needs to be escaped as "\$" (backslash dollar).
+   * To make the "\" character not escaping, escape it as "\\"(double backslash).
    * @param str input string
-   * @param table hash table with variable-value pairs
+   * @param props hash map of hash tables with variable-value pairs
    * @return string with variables replaced by values
    */
-  public static String replaceVariables(String str, Hashtable<Object, Object> table) {
-    int pos = str.indexOf('%');
-    // find every %
+  public static String replaceVariables(String str, Map<String,Properties> props) {
+    int pos = str.indexOf("${");
+    int bsPos = str.indexOf('\\');
+    if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
+    // find every ${
     // LOG.log("========================");
     while(pos>=0) {
-      // see if this is an escaped % ("%%")
-      // LOG.log("str = '"+str+"'");
-      // LOG.log("pos = "+pos);
-      if((pos<str.length()-1) && (str.charAt(pos+1)=='%')) {
-        // skip the second % as well
-        // LOG.log("\t%%");
-        str = str.substring(0, pos+1) + str.substring(pos+2);
+      // LOG.log("str = '"+str+"', pos = "+pos);
+      // see if this is an escaped \ (\\)
+      if ((str.charAt(pos)=='\\') &&
+          (pos<str.length()-1) &&
+          (str.charAt(pos+1)=='\\')) {
+        // change the \\ into a single \
+        // LOG.log("\t\\\\");
+        str = str.substring(0, pos) + str.substring(pos+1);
       }
-      else {
-        // LOG.log("\t%");
-        // look if this is str property name enclosed by %, e.g. "%user.home%"
-        for(Object o: table.keySet()) {
-          String key = o.toString();
-          int endPos = pos + key.length() + 2;
-          if (str.substring(pos, Math.min(str.length(), endPos)).equals("%"+key+"%")) {
-            // found property name
-            // replace "%property.name%" with the value of the property, e.g. /home/user
-            String value = table.get(key).toString();
-            str = str.substring(0, pos) + value + str.substring(endPos);
-            // advance to the last character of the value
-            pos = pos + value.length() - 1;
-            break;
+      // see if this is an escaped $ (\$)
+      else if ((str.charAt(pos)=='\\') &&
+               (pos<str.length()-1) &&
+               (str.charAt(pos+1)=='$')) {
+        // change the \$ into a single $
+        // LOG.log("\t\\$");
+        str = str.substring(0, pos) + str.substring(pos+1);
+        // and skip
+        ++pos;
+      }
+      else if (str.charAt(pos)=='$') {
+        // LOG.log("\t$");
+        // look if this is str property name enclosed by ${...}, e.g. "${user.home}"
+        for(Map.Entry<String, Properties> table: props.entrySet()) {
+          Enumeration<?> e = table.getValue().propertyNames();
+          while(e.hasMoreElements()) {
+            String key = (String)e.nextElement();
+            int endPos = pos + key.length() + 3;
+            if (str.substring(pos, Math.min(str.length(), endPos)).equals("${"+key+"}")) {
+              // found property name
+              // replace "${property.name}" with the value of the property, e.g. /home/user
+              String value = table.getValue().getProperty(key);
+              str = str.substring(0, pos) + value + str.substring(endPos);
+              // advance to the last character of the value
+              pos = pos + value.length() - 1;
+              break;
+            }
           }
         }
       }
-      pos = str.toLowerCase().indexOf('%', pos+1);
+      pos = str.indexOf("${", pos+1);
+      bsPos = str.indexOf("\\\\", pos+1);
+      if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
     }
     // LOG.log("end str = '"+str+"'");
     return str;
@@ -1381,6 +1442,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
+      updateProperties();
       _mainFrame.hourglassOn();
       addWindowListener(_windowListener);
       _windowListenerActive = true;
@@ -1397,7 +1459,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Opens the file chooser to select a file, putting the result in the file field. */
   protected void chooseFile(JTextPane pane) {
     // Get the file from the chooser
-    File wd = new File(replaceVariables(pane.getText().trim(), System.getProperties()));
+    File wd = new File(replaceVariables(pane.getText().trim(), _props));
     if ((pane.getText().equals("")) ||
         (!wd.exists()) &&
         (!wd.isDirectory())) {

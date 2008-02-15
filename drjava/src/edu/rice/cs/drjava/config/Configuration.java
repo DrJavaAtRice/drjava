@@ -97,4 +97,7 @@ public class Configuration {
   
   /** Returns a string representation of the contents of the OptionMap. */
   public String toString() { return map.toString(); }
+  
+  /** Return OptionMap. */
+  public OptionMap getOptionMap() { return map; }
 }
