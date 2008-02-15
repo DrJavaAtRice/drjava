@@ -51,9 +51,9 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 // import javax.swing.filechooser.FileFilter;  not imported to avoid ambiguity
 import java.lang.reflect.InvocationTargetException;
 
-//import javax.swing.border.Border;
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.border.Border;
 
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.WrappedException;
@@ -73,6 +73,311 @@ public class SwingUtil {
     float x = 1.0f - degree;
     return new Color(x, x, x);
   }
+  
+  /**
+   * Create a JFrame to be used as the main application window.  Sets the title and preferred
+   * size to the given values.  Sets the default close operation to "exit on close."
+   */
+  public static JFrame makeMainApplicationFrame(String title, int width, int height) {
+    JFrame result = new JFrame(title);
+    result.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    // cast is necessary for 1.4 compatibility
+    ((JComponent) result.getContentPane()).setPreferredSize(new Dimension(width, height));
+    return result;
+  }
+  
+  /** Shortcut for the boilerplate code to pack and display a window (such as a {@code JFrame}). */
+  public static void displayWindow(Window w) {
+    w.pack();
+    w.setVisible(true);
+  }
+  
+  /** Make a JPanel with a horizontal {@link BoxLayout}. */
+  public static JPanel makeHorizontalBoxPanel() {
+    JPanel result = new JPanel();
+    result.setLayout(new BoxLayout(result, BoxLayout.X_AXIS));
+    return result;
+  }
+  
+  /** Make a JPanel with a horizontal {@link BoxLayout}; set the border to the given margin on all sides. */
+  public static JPanel makeHorizontalBoxPanel(int margin) {
+    return makeHorizontalBoxPanel(margin, margin, margin, margin);
+  }
+  
+  /** Make a JPanel with a horizontal {@link BoxLayout}; set the border to the given vertical/horizontal margins. */
+  public static JPanel makeHorizontalBoxPanel(int vMargin, int hMargin) {
+    return makeHorizontalBoxPanel(vMargin, hMargin, vMargin, hMargin);
+  }
+  
+  /** Make a JPanel with a horizontal {@link BoxLayout}; set the border to the given margins. */
+  public static JPanel makeHorizontalBoxPanel(int topMargin, int leftMargin,
+                                              int bottomMargin, int rightMargin) {
+    JPanel result = makeHorizontalBoxPanel();
+    result.setBorder(BorderFactory.createEmptyBorder(topMargin, leftMargin, bottomMargin, rightMargin));
+    return result;
+  }
+  
+  /** Make a JPanel with a vertical {@link BoxLayout}. */
+  public static JPanel makeVerticalBoxPanel() {
+    JPanel result = new JPanel();
+    result.setLayout(new BoxLayout(result, BoxLayout.Y_AXIS));
+    return result;
+  }
+  
+  /** Make a JPanel with a vertical {@link BoxLayout}; set the border to the given margin on all sides. */
+  public static JPanel makeVerticalBoxPanel(int margin) {
+    return makeVerticalBoxPanel(margin, margin, margin, margin);
+  }
+  
+  /** Make a JPanel with a vertical {@link BoxLayout}; set the border to the given vertical/horizontal margins. */
+  public static JPanel makeVerticalBoxPanel(int vMargin, int hMargin) {
+    return makeVerticalBoxPanel(vMargin, hMargin, vMargin, hMargin);
+  }
+  
+  /** Make a JPanel with a vertical {@link BoxLayout}; set the border to the given margins. */
+  public static JPanel makeVerticalBoxPanel(int topMargin, int leftMargin,
+                                            int bottomMargin, int rightMargin) {
+    JPanel result = makeVerticalBoxPanel();
+    result.setBorder(BorderFactory.createEmptyBorder(topMargin, leftMargin, bottomMargin, rightMargin));
+    return result;
+  }
+  
+  /** Make a JPanel with a {@link BorderLayout}. */
+  public static JPanel makeBorderPanel() {
+    return new JPanel(new BorderLayout());
+  }
+  
+  /** Make a JPanel with a {@link BorderLayout}; set the border to the given margin on all sides. */
+  public static JPanel makeBorderPanel(int margin) {
+    return makeBorderPanel(margin, margin, margin, margin);
+  }
+  
+  /** Make a JPanel with a {@link BorderLayout}; set the border to the given vertical/horizontal margins. */
+  public static JPanel makeBorderPanel(int vMargin, int hMargin) {
+    return makeBorderPanel(vMargin, hMargin, vMargin, hMargin);
+  }
+  
+  /** Make a JPanel with a {@link BorderLayout}; set the border to the given margins. */
+  public static JPanel makeBorderPanel(int topMargin, int leftMargin,
+                                       int bottomMargin, int rightMargin) {
+    JPanel result = makeBorderPanel();
+    result.setBorder(BorderFactory.createEmptyBorder(topMargin, leftMargin, bottomMargin, rightMargin));
+    return result;
+  }
+  
+  /** Make a JPanel with a {@link FlowLayout}. */
+  public static JPanel makeFlowPanel() {
+    // default is FlowLayout
+    return new JPanel();
+  }
+  
+  /** Make a JPanel with a {@link FlowLayout}; set the border to the given margin on all sides. */
+  public static JPanel makeFlowPanel(int margin) {
+    return makeFlowPanel(margin, margin, margin, margin);
+  }
+  
+  /** Make a JPanel with a {@link FlowLayout}; set the border to the given vertical/horizontal margins. */
+  public static JPanel makeFlowPanel(int vMargin, int hMargin) {
+    return makeFlowPanel(vMargin, hMargin, vMargin, hMargin);
+  }
+  
+  /** Make a JPanel with a {@link FlowLayout}; set the border to the given margins. */
+  public static JPanel makeFlowPanel(int topMargin, int leftMargin,
+                                     int bottomMargin, int rightMargin) {
+    JPanel result = makeFlowPanel();
+    result.setBorder(BorderFactory.createEmptyBorder(topMargin, leftMargin, bottomMargin, rightMargin));
+    return result;
+  }
+  
+  /** Add the given components to {@code parent} in sequence.  Intended to reduce clutter in GUI code. */
+  public static void add(Container parent, Component... children) {
+    for (Component child : children) { parent.add(child); }
+  }
+  
+  /** Set the background color property of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setBackground(Color c, Component... components) {
+    for (Component cm : components) { cm.setBackground(c); }
+  }
+    
+  /** Set the foreground color property of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setForeground(Color c, Component... components) {
+    for (Component cm : components) { cm.setForeground(c); }
+  }
+    
+  /** Set the border of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setBorder(Border b, JComponent... components) {
+    for (JComponent c : components) { c.setBorder(b); }
+  }
+    
+  /** Set the border of the given components to an empty border with the given margin. */
+  public static void setEmptyBorder(int margin, JComponent... components) {
+    setBorder(BorderFactory.createEmptyBorder(margin, margin, margin, margin), components);
+  }
+    
+  /** Set the border of the given components to an empty border with the given vertical/horizontal margins. */
+  public static void setEmptyBorder(int vMargin, int hMargin, JComponent... components) {
+    setBorder(BorderFactory.createEmptyBorder(vMargin, hMargin, vMargin, hMargin), components);
+  }
+    
+  /** Set the border of the given components to an empty border with the given margins. */
+  public static void setEmptyBorder(int top, int left, int bottom, int right, JComponent... components) {
+    setBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), components);
+  }
+    
+  /** Set the border of the given components to a black line border. */
+  public static void setLineBorder(JComponent... components) {
+    setBorder(BorderFactory.createLineBorder(Color.BLACK), components);
+  }
+    
+  /** Set the font property of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setFont(Font f, Component... components) {
+    for (Component c : components) { c.setFont(f); }
+  }
+    
+  /** Set the font property of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setFont(String name, int size, Component... components) {
+    setFont(new Font(name, Font.PLAIN, size), components);
+  }
+  
+  /** Set the font of the given components to the logical {@code "Serif"} font of the given size. */
+  public static void setSerifFont(int size, Component... components) {
+    setFont(new Font("Serif", Font.PLAIN, size), components);
+  }
+  
+  /** Set the font of the given components to the logical {@code "SansSerif"} font of the given size. */
+  public static void setSansSerifFont(int size, Component... components) {
+    setFont(new Font("SansSerif", Font.PLAIN, size), components);
+  }
+  
+  /** Set the font of the given components to the logical {@code "Monospaced"} font of the given size. */
+  public static void setMonospacedFont(int size, Component... components) {
+    setFont(new Font("Monospaced", Font.PLAIN, size), components);
+  }
+  
+  /** Set the font of the given components to the logical {@code "Dialog"} font of the given size. */
+  public static void setDialogFont(int size, Component... components) {
+    setFont(new Font("Dialog", Font.PLAIN, size), components);
+  }
+  
+  /** Set the font of the given components to the logical {@code "DialogInput"} font of the given size. */
+  public static void setDialogInputFont(int size, Component... components) {
+    setFont(new Font("DialogInput", Font.PLAIN, size), components);
+  }
+  
+  /** Set the enabled property of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setEnabled(boolean b, Component... components) {
+    for (Component c : components) { c.setEnabled(b); }
+  }
+    
+  /** Set the focusable property of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setFocusable(boolean b, Component... components) {
+    for (Component c : components) { c.setFocusable(b); }
+  }
+    
+  /** Set the visible property of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setVisible(boolean b, Component... components) {
+    for (Component c : components) { c.setVisible(b); }
+  }
+    
+  /** Set the opaque property of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setOpaque(boolean b, JComponent... components) {
+    for (JComponent c : components) { c.setOpaque(b); }
+  }
+    
+  /**
+   * Set the preferred size of the given components.  Intended to reduce clutter in GUI code.
+   * For Java 1.4 compatibility, the arguments must be {@code JComponent}s, not arbitrary
+   * {@code Component}s.
+   */
+  public static void setPreferredSize(Dimension d, JComponent... components) {
+    for (JComponent c : components) { c.setPreferredSize(d); }
+  }
+    
+  /**
+   * Set the preferred size of the given components.  Intended to reduce clutter in GUI code.
+   * For Java 1.4 compatibility, the arguments must be {@code JComponent}s, not arbitrary
+   * {@code Component}s.
+   */
+  public static void setPreferredSize(int width, int height, JComponent... components) {
+    setPreferredSize(new Dimension(width, height), components);
+  }
+  
+  /**
+   * Set the maximum size of the given components.  Intended to reduce clutter in GUI code.
+   * For Java 1.4 compatibility, the arguments must be {@code JComponent}s, not arbitrary
+   * {@code Component}s.
+   */
+  public static void setMaximumSize(Dimension d, JComponent... components) {
+    for (JComponent c : components) { c.setMaximumSize(d); }
+  }
+    
+  /**
+   * Set the maximum size of the given components.  Intended to reduce clutter in GUI code.
+   * For Java 1.4 compatibility, the arguments must be {@code JComponent}s, not arbitrary
+   * {@code Component}s.
+   */
+  public static void setMaximumSize(int width, int height, JComponent... components) {
+    setMaximumSize(new Dimension(width, height), components);
+  }
+  
+  /**
+   * Set the minimum size of the given components.  Intended to reduce clutter in GUI code.
+   * For Java 1.4 compatibility, the arguments must be {@code JComponent}s, not arbitrary
+   * {@code Component}s.
+   */
+  public static void setMinimumSize(Dimension d, JComponent... components) {
+    for (JComponent c : components) { c.setMinimumSize(d); }
+  }
+    
+  /**
+   * Set the minimum size of the given components.  Intended to reduce clutter in GUI code.
+   * For Java 1.4 compatibility, the arguments must be {@code JComponent}s, not arbitrary
+   * {@code Component}s.
+   */
+  public static void setMinimumSize(int width, int height, JComponent... components) {
+    setMinimumSize(new Dimension(width, height), components);
+  }
+  
+  /** Make the given components horizontally-left aligned. */
+  public static void setLeftAlignment(JComponent... components) {
+    setAlignmentX(Component.LEFT_ALIGNMENT, components);
+  }
+  
+  /** Make the given components horizontally-right aligned. */
+  public static void setRightAlignment(JComponent... components) {
+    setAlignmentX(Component.RIGHT_ALIGNMENT, components);
+  }
+  
+  /** Make the given components horizontally-center aligned. */
+  public static void setHorizontalCenterAlignment(JComponent... components) {
+    setAlignmentX(Component.CENTER_ALIGNMENT, components);
+  }
+  
+  /** Make the given components vertically-top aligned. */
+  public static void setTopAlignment(JComponent... components) {
+    setAlignmentY(Component.TOP_ALIGNMENT, components);
+  }
+  
+  /** Make the given components vertically-bottom aligned. */
+  public static void setBottomAlignment(JComponent... components) {
+    setAlignmentY(Component.BOTTOM_ALIGNMENT, components);
+  }
+  
+  /** Make the given components vertically-center aligned. */
+  public static void setVerticalCenterAlignment(JComponent... components) {
+    setAlignmentY(Component.CENTER_ALIGNMENT, components);
+  }
+  
+  /** Set the horizontal alignment of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setAlignmentX(float a, JComponent... components) {
+    for (JComponent c : components) { c.setAlignmentX(a); }
+  }
+    
+  /** Set the vertical alignment of the given components.  Intended to reduce clutter in GUI code. */
+  public static void setAlignmentY(float a, JComponent... components) {
+    for (JComponent c : components) { c.setAlignmentY(a); }
+  }
+    
   
   /** 
    * Runs the task synchronously if the current thread is the event thread; otherwise passes it to the

@@ -91,7 +91,9 @@ public class TreeLog extends AbstractLog {
   protected void write(Date time, Thread thread, StackTraceElement location,
                        SizedIterable<? extends String> messages) {
     try {
-      _viewer.value().write(formatTime(time), formatThread(thread), formatLocation(location), messages);
+      // take a snapshot of messages because AbstractLog doesn't construct a serializable SizedIterable
+      _viewer.value().write(formatTime(time), formatThread(thread), formatLocation(location),
+                            IterUtil.snapshot(messages));
     }
     catch (RemoteException e) { /* Give up */ }
   }
@@ -116,7 +118,6 @@ public class TreeLog extends AbstractLog {
   
   /** Implementation of the RMI server object. */
   private static class ViewerImpl implements Viewer {
-    private static final Font FIXED_WIDTH = new Font("Monospaced", Font.PLAIN, 12);
     
     /** Path from current messages' parent to the root of the tree, in bottom-to-top order. */
     private final LinkedList<DefaultMutableTreeNode> _stack;
@@ -134,15 +135,14 @@ public class TreeLog extends AbstractLog {
       _treeModel = new DefaultTreeModel(root);
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          JFrame frame = new JFrame(name);
-          frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-          // cast is necessary for 1.4 compatibility
-          ((JComponent) frame.getContentPane()).setPreferredSize(new Dimension(600, 600));
+          JFrame frame = SwingUtil.makeMainApplicationFrame(name, 600, 600);
           
           final JTree tree = new JTree(_treeModel);
           tree.setRootVisible(false);
           tree.setShowsRootHandles(true);
           tree.setRowHeight(0);
+          // Because the root is hidden, we must expand it programmatically
+          // But we can't until it has a child, so we wait for a child via a listener
           _treeModel.addTreeModelListener(new TreeModelListener() {
             public void treeNodesInserted(TreeModelEvent e) {
               _treeModel.removeTreeModelListener(this);
@@ -153,61 +153,42 @@ public class TreeLog extends AbstractLog {
             public void treeStructureChanged(TreeModelEvent e) {}
           });
           
-          final JPanel entryCell = new JPanel();
-          entryCell.setLayout(new BoxLayout(entryCell, BoxLayout.PAGE_AXIS));
-          entryCell.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
-          JPanel top = new JPanel();
-          top.setLayout(new BoxLayout(top, BoxLayout.LINE_AXIS));
-          JPanel bottom = new JPanel(new BorderLayout());
-          top.setOpaque(false);
-          bottom.setOpaque(false);
-          top.setAlignmentX(Component.LEFT_ALIGNMENT);
-          bottom.setAlignmentX(Component.LEFT_ALIGNMENT);
+          final JPanel entryCell = SwingUtil.makeVerticalBoxPanel(3, 5);
+          final JPanel top = SwingUtil.makeHorizontalBoxPanel();
+          final JPanel bottom = SwingUtil.makeBorderPanel(3, 15, 0, 0);
+          SwingUtil.setOpaque(false, top, bottom);
+          SwingUtil.setLeftAlignment(top, bottom);
+          SwingUtil.add(entryCell, top, bottom);
           final JLabel location = new JLabel();
           final JLabel time = new JLabel();
-          final Component descendentsSpace = Box.createRigidArea(new Dimension(10, 0));
           final JLabel descendents = new JLabel();
           final JTextArea messages = new JTextArea();
+          SwingUtil.setMonospacedFont(12, location, time, descendents, messages);
+          SwingUtil.setEmptyBorder(0, 10, 0, 0, location, descendents);
           messages.setOpaque(false);
-          location.setFont(FIXED_WIDTH);
-          time.setFont(FIXED_WIDTH);
-          descendents.setFont(FIXED_WIDTH);
-          messages.setFont(FIXED_WIDTH);
-          entryCell.add(top);
-          entryCell.add(bottom);
-          top.add(location);
-          top.add(Box.createRigidArea(new Dimension(10, 0)));
-          top.add(time);
-          top.add(descendentsSpace);
-          top.add(descendents);
+          SwingUtil.add(top, time, location, descendents);
           bottom.add(messages);
           tree.setCellRenderer(new TreeCellRenderer() {
             public Component getTreeCellRendererComponent(JTree tree, Object value,
                                                           boolean selected, boolean expanded,
                                                           boolean leaf, int row, boolean hasFocus) {
               Entry e = (Entry) ((DefaultMutableTreeNode) value).getUserObject();
-              if (e.descendents() == 0) {
-                descendents.setVisible(false);
-                descendentsSpace.setVisible(false);
-              }
+              if (e.descendents() == 0) { descendents.setVisible(false); }
               else {
                 descendents.setVisible(true);
-                descendentsSpace.setVisible(true);
                 descendents.setText("(" + e.descendents() + ")");
               }
               time.setText(e.time());
               location.setText(e.location());
               messages.setText(IterUtil.multilineToString(e.messages()));
-              messages.setVisible(!messages.getText().equals(""));
-              messages.setText(IterUtil.multilineToString(e.messages()));
+              bottom.setVisible(!messages.getText().equals(""));
               return entryCell;
             }
           });
           ShadedTreeCellRenderer.shadeTree(tree, SwingUtil.gray(.1f), SwingUtil.gray(.03f));
           
           frame.getContentPane().add(new JScrollPane(tree));
-          frame.pack();
-          frame.setVisible(true);
+          SwingUtil.displayWindow(frame);
         }
       });
     }
