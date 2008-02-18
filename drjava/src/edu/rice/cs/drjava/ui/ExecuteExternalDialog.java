@@ -56,16 +56,18 @@ import java.awt.event.*;
 import java.awt.FontMetrics;
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.Vector;
 import edu.rice.cs.plt.tuple.Pair;
 
 public class ExecuteExternalDialog extends JFrame implements OptionConstants {
@@ -1110,23 +1112,50 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
 
   public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
   
+  /** Run a command and return an external process panel. */
+  public ExternalProcessPanel runCommand(String name, String cmdline, String workdir) {
+    updateProperties();
+    ProcessCreator pc = new ProcessCreator(cmdline, workdir.trim(), _props);
+    String label = "External";
+    if (!name.equals("")) { label += ": "+name; }
+    final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, label, pc);
+    _mainFrame._tabs.addLast(panel);
+    panel.getMainPanel().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) { _mainFrame._lastFocusOwner = panel; }
+    });
+    panel.setVisible(true);
+    _mainFrame.showTab(panel);
+    _mainFrame._tabbedPane.setSelectedComponent(panel);
+    // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
+    EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
+    return panel;
+  }
+  
+  public ExternalProcessPanel runJava(String name, String jvmargs, String cmdline, String workdir) {
+    ProcessCreator pc = new JVMProcessCreator(jvmargs, cmdline, workdir, _props);
+    
+    String label = "External Java";
+    if (!name.equals("")) { label += ": "+name; }
+    final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, label, pc);
+    _mainFrame._tabs.addLast(panel);
+    panel.getMainPanel().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) { _mainFrame._lastFocusOwner = panel; }
+    });
+    panel.setVisible(true);
+    _mainFrame.showTab(panel);
+    _mainFrame._tabbedPane.setSelectedComponent(panel);
+    // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
+    EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
+    
+    return panel;
+  }
+  
   /** Execute the command line. */
   private void _runCommand() {
     _mainFrame.updateStatusField("Executing external process...");
     
     if (_commandLinePreview.getText().length()>0) {
-      ProcessCreator pc = new ProcessCreator(_commandLine.getText(), _commandWorkDirLine.getText().trim(), _props);
-      String name = "External";
-      final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, name, pc);
-      _mainFrame._tabs.addLast(panel);
-      panel.getMainPanel().addFocusListener(new FocusAdapter() {
-        public void focusGained(FocusEvent e) { _mainFrame._lastFocusOwner = panel; }
-      });
-      panel.setVisible(true);
-      _mainFrame.showTab(panel);
-      _mainFrame._tabbedPane.setSelectedComponent(panel);
-      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
-      EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
+      runCommand("", _commandLine.getText(), _commandWorkDirLine.getText());
     }
     else {
       JOptionPane.showMessageDialog(this,
@@ -1145,20 +1174,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     _mainFrame.updateStatusField("Executing external Java class...");
     
     if (_javaCommandLinePreview.getText().length()>0) {
-      ProcessCreator pc = new JVMProcessCreator(_jvmLine.getText(), _javaCommandLine.getText(),
-                                                _javaCommandWorkDirLine.getText().trim(), _props);
-      
-      String name = "External Java";
-      final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, name, pc);
-      _mainFrame._tabs.addLast(panel);
-      panel.getMainPanel().addFocusListener(new FocusAdapter() {
-        public void focusGained(FocusEvent e) { _mainFrame._lastFocusOwner = panel; }
-      });
-      panel.setVisible(true);
-      _mainFrame.showTab(panel);
-      _mainFrame._tabbedPane.setSelectedComponent(panel);
-      // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the findResultsPanel has been selected
-      EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
+      runJava("", _jvmLine.getText(), _javaCommandLine.getText(),
+              _javaCommandWorkDirLine.getText());
     }
     else {
       JOptionPane.showMessageDialog(this,
@@ -1176,25 +1193,36 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   private void _saveCommand() {
     int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT) + 1;
     
-    String name = "External "+count;
-    StringOption nameOption = new StringOption(OptionConstants.EXTERNAL_SAVED_PREFIX+count+".name",name);
-    DrJava.getConfig().getOptionMap().setString(nameOption, name);
+    final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
+    final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
+    final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
     
-    String type = "cmdline";
-    StringOption typeOption = new StringOption(OptionConstants.EXTERNAL_SAVED_PREFIX+count+".type",type);
-    DrJava.getConfig().getOptionMap().setString(typeOption, type);
+    String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+count);
+    if (name==null) {
+      // Always apply and save settings
+      _saveSettings();
+      this.setVisible(false);
+      return;
+    }
+    
+    names.add(name);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
+    
+    types.add("cmdline");
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,types);
     
     String cmdline = _commandLine.getText();
-    StringOption cmdlineOption = new StringOption(OptionConstants.EXTERNAL_SAVED_PREFIX+count+".cmdline", cmdline);
-    DrJava.getConfig().getOptionMap().setString(cmdlineOption, cmdline);
+    cmdlines.add(cmdline);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
     
-    String jvmargs = "";
-    StringOption jvmargsOption = new StringOption(OptionConstants.EXTERNAL_SAVED_PREFIX+count+".jvmargs",jvmargs);
-    DrJava.getConfig().getOptionMap().setString(jvmargsOption, jvmargs);
+    jvmargs.add("");
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,jvmargs);
     
     String workdir = _commandWorkDirLine.getText();
-    StringOption workdirOption = new StringOption(OptionConstants.EXTERNAL_SAVED_PREFIX+count+".workdir",workdir);
-    DrJava.getConfig().getOptionMap().setString(workdirOption, workdir);
+    workdirs.add(workdir);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
 
     // Always apply and save settings
     _saveSettings();
@@ -1205,11 +1233,44 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
 
   /** Save the Java class to the menu. */
   private void _saveJava() {
-    // TODO
+    int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT) + 1;
     
+    final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
+    final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
+    final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    
+    String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+count);
+    if (name==null) {
+      // Always apply and save settings
+      _saveSettings();
+      this.setVisible(false);
+      return;
+    }
+    
+    names.add(name);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
+    
+    types.add("java");
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,types);
+    
+    String cmdline = _javaCommandLine.getText();
+    cmdlines.add(cmdline);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
+    
+    jvmargs.add(_jvmLine.getText());
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,jvmargs);
+    
+    String workdir = _javaCommandWorkDirLine.getText();
+    workdirs.add(workdir);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
+    
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
   }
 
   /** Save the settings for this dialog. */
@@ -1298,7 +1359,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   /** Update the properties. */
   public void updateProperties() {
-    _props = new HashMap<String, Properties>();
+    _props = new TreeMap<String, Properties>();
     _props.put("Java", System.getProperties());
     
     Properties drJavaProps = new Properties();

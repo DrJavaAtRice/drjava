@@ -5499,6 +5499,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     final JMenu extMenu = new JMenu("External Processes");
     _addMenuItem(extMenu, _executeExternalProcessAction, KEY_EXEC_PROCESS);
+    final JMenuItem execItem = extMenu.getItem(0);
     extMenu.addSeparator();
     extMenu.add(_editExternalProcessesAction);
     toolsMenu.add(extMenu);
@@ -5527,36 +5528,41 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public void optionChanged(final OptionEvent<Integer> oce) {
         Utilities.invokeLater(new Runnable() {
           public void run() {
-//            for(int i=2; i<extMenu.getItemCount(); ++i) {
-//              extMenu.remove(2);
-//            }
-//            for (int count=1; count<=oce.value; ++count) {
-//              final int i = count;
-//              final String name = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).get(i-1);
-//              final int savedCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
-//              final int namesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).size();
-//              final int typesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES).size();
-//              final int cmdlinesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).size();
-//              final int jvmargsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS).size();
-//              final int workdirsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).size();
-//              
-//              extMenu.insert(new AbstractAction(name) {
-//                public void actionPerformed(ActionEvent ae) {
-//                  if (type.equals("cmdline")) {
-//                    System.out.println(name+": cmdline "+cmdline+" "+workdir);
-//                    // TODO
-//                  }
-//                  else if (type.equals("java")) {
-//                    System.out.println(name+": java "+jvmargs+" "+cmdline+" "+workdir);
-//                    // TODO
-//                  }
-//                }
-//              },1+i);
-//            }
-//            if (oce.value>0) { 
-//              extMenu.addSeparator();
-//              extMenu.add(_editExternalProcessesAction);
-//            }
+            extMenu.removeAll();
+            extMenu.add(execItem);
+            extMenu.addSeparator();
+            for (int count=0; count<oce.value; ++count) {
+              final int i = count;
+              final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+              final Vector<String> types = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
+              final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+              final Vector<String> jvmargs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
+              final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+              
+              extMenu.insert(new AbstractAction(names.get(i)) {
+                public void actionPerformed(ActionEvent ae) {
+                  if (types.get(i).equals("cmdline")) {
+                    // System.out.println(names.get(i)+": cmdline "+cmdlines.get(i)+" "+workdirs.get(i));
+                    _executeExternalDialog.runCommand(names.get(i),cmdlines.get(i),workdirs.get(i));
+                  }
+                  else if (types.get(i).equals("java")) {
+                    // System.out.println(names.get(i)+": java "+jvmargs.get(i)+" "+cmdlines.get(i)+" "+workdirs.get(i));
+                    _executeExternalDialog.runJava(names.get(i),jvmargs.get(i),cmdlines.get(i),workdirs.get(i));
+                  }
+                  else {
+                    JOptionPane.showMessageDialog(MainFrame.this,
+                                                  "Unknown process type '"+types.get(i)+"'.",
+                                                  "Invalid Command Line",
+                                                  JOptionPane.ERROR_MESSAGE);
+                  }
+                }
+              },i+2);
+            }
+            if (oce.value>0) { 
+              extMenu.addSeparator();
+            }
+            extMenu.add(_editExternalProcessesAction);
+            _editExternalProcessesAction.setEnabled(oce.value>0);
           }
         });
       }

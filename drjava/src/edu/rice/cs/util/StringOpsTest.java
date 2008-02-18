@@ -40,6 +40,9 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 
 import edu.rice.cs.plt.tuple.Pair;
 import java.io.PrintWriter;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Properties;
 
 /**
  * Test functions of StringOps.
@@ -425,5 +428,39 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals("1.1MB", "1.10 megabytes", StringOps.memSizeToString((long)(1024*1024*1.1)));
     assertEquals("1GB", "1 gigabyte", StringOps.memSizeToString((1024*1024*1024)));
     assertEquals("1.25GB", "1.25 gigabytes", StringOps.memSizeToString((long)(1024*1024*1024*1.25)));
+  }
+  
+  public void testReplaceVariables() {
+    Map<String,Properties> props = new TreeMap<String,Properties>();
+    Properties p1 = new Properties();
+    p1.setProperty("var", "foo");
+    p1.setProperty("xxx", "bar");
+    props.put("1",p1);
+    
+    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props));
+    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props));
+    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props));
+    assertEquals("abc${xxx}xyz", StringOps.replaceVariables("abc\\${xxx}xyz",props));
+    assertEquals("abc\\barxyz", StringOps.replaceVariables("abc\\\\${xxx}xyz",props));
+  }
+  
+  public void testReplaceVariables2() {
+    Map<String,Properties> props = new TreeMap<String,Properties>();
+    Properties p1 = new Properties();
+    p1.setProperty("var", "foo");
+    p1.setProperty("xxx", "bar");
+    props.put("1",p1);
+    Properties p2 = new Properties();
+    p2.setProperty("yyy", "bam");
+    p2.setProperty("xxx", "new");
+    props.put("2",p2);
+    
+    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props));
+    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props));
+    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props));
+    assertEquals("abc${xxx}xyz", StringOps.replaceVariables("abc\\${xxx}xyz",props));
+    assertEquals("abc\\barxyz", StringOps.replaceVariables("abc\\\\${xxx}xyz",props));
+    assertEquals("abcbamxyz", StringOps.replaceVariables("abc${yyy}xyz",props));
+    assertEquals("abcbarbamxyz", StringOps.replaceVariables("abc${xxx}${yyy}xyz",props));
   }
 }
