@@ -45,43 +45,89 @@ import java.util.Vector;
  *  @version $Id$
  */
 public final class VectorOptionTest extends DrJavaTestCase {
-  private VectorOption<Integer> _ivo;
+  private VectorOption<String> _svo;
   private VectorOption<Boolean> _bvo;
 
   public void setUp() throws Exception {
     super.setUp();
     // name fields are irrelevant at this point.
-    _ivo = new VectorOption<Integer>("whatever", new IntegerOption("", null), (Vector<Integer>) null);
+    _svo = new VectorOption<String>("whatever", new StringOption("", null), (Vector<String>) null);
     _bvo = new VectorOption<Boolean>("everwhat", new BooleanOption("", null), (Vector<Boolean>) null);
   }
 
   public void testGetName() {
-    assertEquals("whatever", _ivo.getName());
+    assertEquals("whatever", _svo.getName());
     assertEquals("everwhat", _bvo.getName());
   }
 
   public void testParse() {
-    assertTrue(_ivo.parse("[]").isEmpty());
-    assertTrue(_bvo.parse("[]").isEmpty());
+    assertTrue(_svo.parse("").isEmpty());
+    assertTrue(_bvo.parse("").isEmpty());
+    
+    Vector<String> v = _svo.parse("[]");
+    assertEquals(1, v.size());
+    assertEquals("", v.get(0));
+    
+    v = _svo.parse("[x]");
+    assertEquals(1, v.size());
+    assertEquals("x", v.get(0));
 
-    try { _ivo.parse("[,]"); fail("Comma at beginning."); } 
+    v = _svo.parse("[\\\\]");
+    assertEquals(1, v.size());
+    assertEquals("\\", v.get(0));
+    
+    v = _svo.parse("[\\,]");
+    assertEquals(1, v.size());
+    assertEquals(",", v.get(0));
+    
+    v = _svo.parse("[\\,]");
+    assertEquals(1, v.size());
+    assertEquals(",", v.get(0));
+
+    v = _svo.parse("[,]");
+    assertEquals(2, v.size());
+    assertEquals("", v.get(0));
+    assertEquals("", v.get(1));
+    
+    try { _svo.parse("[\\x]"); fail("Backslash not in front of another backslash or delimiter."); } 
     catch (OptionParseException e) { }
     
-    try { _ivo.parse("[11"); fail("Missing footer."); } 
-    catch (OptionParseException e) { }
-    try { _ivo.parse("[11,]"); fail("Comma w/o following list element."); } 
+    try { _svo.parse("[11"); fail("Missing footer."); } 
     catch (OptionParseException e) { }
     
-    try { _ivo.parse("11]"); fail("Missing header."); } 
+    v = _svo.parse("[11,]");
+    assertEquals(2, v.size());
+    assertEquals("11", v.get(0));
+    assertEquals("", v.get(1));
+    
+    try { _svo.parse("11]"); fail("Missing header."); } 
     catch (OptionParseException e) { }
     
-    try { _ivo.parse("[11,,22]"); fail("Missing list element."); } 
-    catch (OptionParseException e) { }
+    v = _svo.parse("[11,,22]");
+    assertEquals(3, v.size());
+    assertEquals("11", v.get(0));
+    assertEquals("", v.get(1));
+    assertEquals("22", v.get(2));
     
-    try { _ivo.parse("{11,22}"); fail("Illegal header and footer."); } 
-    catch (OptionParseException e) { }
+    v = _svo.parse("[11,\\,,22]");
+    assertEquals(3, v.size());
+    assertEquals("11", v.get(0));
+    assertEquals(",", v.get(1));
+    assertEquals("22", v.get(2));
     
-    try { _ivo.parse("[11;22]"); fail("Illegal delimiter."); } 
+    v = _svo.parse("[11,abc\\,def,22]");
+    assertEquals(3, v.size());
+    assertEquals("11", v.get(0));
+    assertEquals("abc,def", v.get(1));
+    assertEquals("22", v.get(2));
+
+    v = _svo.parse("[11,\\\\,22]");
+    assertEquals(3, v.size());
+    assertEquals("11", v.get(0));
+    assertEquals("\\", v.get(1));
+    assertEquals("22", v.get(2));
+
+    try { _svo.parse("{11,22}"); fail("Illegal header and footer."); } 
     catch (OptionParseException e) { }
 
     Vector<Boolean> bv = _bvo.parse("[true]");
@@ -99,19 +145,31 @@ public final class VectorOptionTest extends DrJavaTestCase {
 
     try { _bvo.parse("[11]"); fail("Number instead of boolean."); } 
     catch (OptionParseException e) { }
+    
+    try { _bvo.parse("[true;false]"); fail("Illegal delimiter."); } 
+    catch (OptionParseException e) { }
   }
 
   public void testFormat() {
-    Vector<Integer> iv = new Vector<Integer>();
-    assertEquals("[]", _ivo.format(iv));
+    Vector<String> sv = new Vector<String>();
+    assertEquals("", _svo.format(sv));
 
-    iv.add(new Integer(-33));
-    assertEquals("[-33]", _ivo.format(iv));
+    sv.add("");
+    assertEquals("[]", _svo.format(sv));
 
-    iv.add(new Integer(2));
-    assertEquals("[-33,2]", _ivo.format(iv));
+    sv.add("-33");
+    assertEquals("[,-33]", _svo.format(sv));
 
-    iv.add(new Integer(0));
-    assertEquals("[-33,2,0]", _ivo.format(iv));
+    sv.add("2");
+    assertEquals("[,-33,2]", _svo.format(sv));
+
+    sv.add("");
+    assertEquals("[,-33,2,]", _svo.format(sv));
+
+    sv.add(",");
+    assertEquals("[,-33,2,,\\,]", _svo.format(sv));
+
+    sv.add("0");
+    assertEquals("[,-33,2,,\\,,0]", _svo.format(sv));
   }
 }

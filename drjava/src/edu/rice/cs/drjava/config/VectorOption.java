@@ -37,11 +37,16 @@
 package edu.rice.cs.drjava.config;
 
 import java.util.Vector;
-import java.util.StringTokenizer;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+import java.io.IOException;
+
 /**
  * Abstract class defining behavior shared by all
  * configuration options with values of type
  * Vector<T>.
+ * VectorOption<String> now allows empty strings, i.e. "[,]" is a vector of two empty strings.
+ * "[]" will be interpreted as a vector of one empty string, and "" is an empty vector.
  * @version $Id$
  */
 public class VectorOption<T> extends Option<Vector<T>> {
@@ -91,6 +96,9 @@ public class VectorOption<T> extends Option<Vector<T>> {
    */
   public Vector<T> parse(String s) {
     s= s.trim();
+    Vector<T> res = new Vector<T>();
+    if (s.equals("")) { return res; }
+
     int startFirstElement = header.length();
     int startFooter = s.length() - footer.length();
 
@@ -99,24 +107,70 @@ public class VectorOption<T> extends Option<Vector<T>> {
                                      " to be a valid vector.");
     }
     s = s.substring(startFirstElement, startFooter);
-    String d = String.valueOf(delim);
-    StringTokenizer st = new StringTokenizer(s,d,true);
-
-    Vector<T> res = new Vector<T>();
-    boolean sawDelim = st.hasMoreTokens();
-
-    while(st.hasMoreTokens()) {
-      String token = st.nextToken();
-      boolean isDelim = token.equals(d);
-
-      if (!isDelim) {
-        res.add(parser.parse(token));
-      } else if (sawDelim) { // isDelim & sawDelim (two delims in a row)
-        throw new OptionParseException(name, s, "Argument contains delimiter with no preceding list element.");
-      }
-      sawDelim = isDelim;
+    if (s.equals("")) {
+      res.add(parser.parse(""));
+      return res;
     }
-    if (sawDelim) throw new OptionParseException(name, s, "Value shouldn't end with a delimiter.");
+    
+    String d = String.valueOf(delim);
+
+    StreamTokenizer st = new StreamTokenizer(new StringReader(s));
+    st.resetSyntax();
+    st.wordChars(0,255);
+    st.ordinaryChar('\\');
+    st.ordinaryChar(delim);
+    try {
+      int tok = st.nextToken();
+      int prevtok = -4;
+      StringBuilder sb = new StringBuilder();
+      while (tok!=StreamTokenizer.TT_EOF) {
+        if (tok=='\\') {
+          if (prevtok=='\\') {
+            // second backslash in a row, append a backslash to string builder
+            sb.append('\\');
+            prevtok = tok = -4;
+          }
+          else {
+            // first backslash, next token decides
+            prevtok = tok;
+          }
+        }
+        else if (tok==delim) {
+          if (prevtok=='\\') {
+            // backslash followed by delimiter --> escaped delimiter
+            // append delimiter to string builder
+            sb.append(delim);
+            prevtok = tok = -4;
+          }
+          else {
+            // no preceding backslash --> real delimiter
+            res.add(parser.parse(sb.toString()));
+            sb.setLength(0); // clear string builder
+            prevtok = tok;
+          }
+        }
+        else {
+          // not a backslash or delimiter
+          if (prevtok=='\\') {
+            // backslash followed by neither a backslash nor a delimiter
+            // invalid
+            throw new OptionParseException(name, s, "A backslash was discovered before the token '" + st.sval +
+                                           "'. A backslash is only allowed in front of another backslash " +
+                                           "or the delimiter "+delim+".");
+          }
+          sb.append(st.sval);
+          prevtok = tok;
+        }
+        
+        tok = st.nextToken();
+      }
+      
+      res.add(parser.parse(sb.toString()));      
+    }
+    catch(IOException ioe) {
+      throw new OptionParseException(name, s, "An IOException occurred while parsing a vector.");
+    }
+
     return res;
   }
 
@@ -126,16 +180,23 @@ public class VectorOption<T> extends Option<Vector<T>> {
     * @return A String representing "v". 
     */
   public String format(Vector<T> v) {
+    if (v.size()==0) { return ""; }
+    
+    String d = String.valueOf(delim);
     final StringBuilder res = new StringBuilder(header);
 
     int size = v.size();
     int i = 0;
     while (i < size) {
-      res.append(formatter.format(v.get(i)));
+      String str = formatter.format(v.get(i));
+      str = str.replaceAll("\\\\","\\\\\\\\");
+      str = str.replaceAll(",","\\\\,");
+      res.append(str);
       i++;
       if (i < size) res.append(delim);
     }
-    return res.append(footer).toString();
+    String str = res.append(footer).toString();
+    return str;
   }
 }
 
