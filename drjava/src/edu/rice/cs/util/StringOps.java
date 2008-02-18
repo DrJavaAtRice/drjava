@@ -40,6 +40,14 @@ import edu.rice.cs.plt.tuple.Pair;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+import java.util.Map;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.ArrayList;
+import java.util.List;
+import java.io.IOException;
 
 /**
  * A class to provide some convenient String operations as static methods.
@@ -523,5 +531,110 @@ public abstract class StringOps {
       sb.append('s');
     }
     return sb.toString();
+  }
+  
+  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("stringops.txt", false);
+  
+  /** Convert a command line into a list of individual arguments. */
+  public static List<String> commandLineToList(String cmdline) {
+    StreamTokenizer tok = new StreamTokenizer(new StringReader(cmdline));
+    tok.resetSyntax();
+    tok.wordChars(0,255);
+    tok.whitespaceChars(0,32);
+    tok.quoteChar('\'');
+    tok.quoteChar('"');
+    tok.quoteChar('`');
+    tok.slashSlashComments(false);
+    tok.slashStarComments(false);
+    ArrayList<String> cmds = new ArrayList<String>();
+    
+    int next;
+    try {
+      while(((next=tok.nextToken())!=StreamTokenizer.TT_EOF) &&
+            (next!=StreamTokenizer.TT_EOL)) {
+        switch(next) {
+          case '\'':
+          case '"':
+          case '`':
+            cmds.add(""+((char)next)+tok.sval+((char)next));
+            break;
+          case StreamTokenizer.TT_WORD:
+            cmds.add(tok.sval);
+            break;
+          case StreamTokenizer.TT_NUMBER:
+            cmds.add(""+tok.nval);
+            break;
+          default:
+            return new ArrayList<String>();
+        }
+      }
+    }
+    catch(IOException ioe) {
+      return new ArrayList<String>();
+    }
+    return cmds;
+  }
+  
+  /**
+   * Replace variables of the form "${variable}" with the value associated with the string "variable" in the
+   * provided hash table.
+   * To give the "$" character its literal meaning, it needs to be escaped as "\$" (backslash dollar).
+   * To make the "\" character not escaping, escape it as "\\"(double backslash).
+   * @param str input string
+   * @param props hash map of hash tables with variable-value pairs
+   * @return string with variables replaced by values
+   */
+  public static String replaceVariables(String str, Map<String,Properties> props) {
+    int pos = str.indexOf("${");
+    int bsPos = str.indexOf('\\');
+    if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
+    // find every ${
+    // LOG.log("========================");
+    while(pos>=0) {
+      // LOG.log("str = '"+str+"', pos = "+pos);
+      // see if this is an escaped \ (\\)
+      if ((str.charAt(pos)=='\\') &&
+          (pos<str.length()-1) &&
+          (str.charAt(pos+1)=='\\')) {
+        // change the \\ into a single \
+        // LOG.log("\t\\\\");
+        str = str.substring(0, pos) + str.substring(pos+1);
+      }
+      // see if this is an escaped $ (\$)
+      else if ((str.charAt(pos)=='\\') &&
+               (pos<str.length()-1) &&
+               (str.charAt(pos+1)=='$')) {
+        // change the \$ into a single $
+        // LOG.log("\t\\$");
+        str = str.substring(0, pos) + str.substring(pos+1);
+        // and skip
+        ++pos;
+      }
+      else if (str.charAt(pos)=='$') {
+        // LOG.log("\t$");
+        // look if this is str property name enclosed by ${...}, e.g. "${user.home}"
+        for(Map.Entry<String, Properties> table: props.entrySet()) {
+          Enumeration<?> e = table.getValue().propertyNames();
+          while(e.hasMoreElements()) {
+            String key = (String)e.nextElement();
+            int endPos = pos + key.length() + 3;
+            if (str.substring(pos, Math.min(str.length(), endPos)).equals("${"+key+"}")) {
+              // found property name
+              // replace "${property.name}" with the value of the property, e.g. /home/user
+              String value = table.getValue().getProperty(key);
+              str = str.substring(0, pos) + value + str.substring(endPos);
+              // advance to the last character of the value
+              pos = pos + value.length() - 1;
+              break;
+            }
+          }
+        }
+      }
+      pos = str.indexOf("${", pos+1);
+      bsPos = str.indexOf("\\\\", pos+1);
+      if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
+    }
+    // LOG.log("end str = '"+str+"'");
+    return str;
   }
 }

@@ -91,7 +91,7 @@ public class ExternalProcessPanel extends AbortablePanel {
   public ExternalProcessPanel(MainFrame frame, String title, ProcessCreator pc) {
     super(frame, title);
     StringBuilder sb = new StringBuilder("Command line:");
-    for(String cmd: pc.command()) { sb.append(' '); sb.append(cmd); }
+    sb.append(pc.cmdline());
     sb.append('\n');
     _header = sb.toString();
     initThread(pc);

@@ -207,8 +207,12 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     });
     _varTable.get(title).setSelectionModel(lsm);
 
+    TreeSet<String> sorted = new TreeSet<String>();
     for(Object o: props.keySet()) {
-      String key = o.toString();
+      sorted.add(o.toString());
+    }
+    
+    for(String key: sorted) {
       Vector<String> row = new Vector<String>();
       row.add(key);
       _varTableModel.get(title).addRow(row);

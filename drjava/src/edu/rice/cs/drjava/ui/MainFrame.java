@@ -3093,8 +3093,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _aboutDialog = new AboutDialog(MainFrame.this);
     _quickStartFrame = new QuickStartFrame();
     _interactionsScriptController = null;
-    _jarOptionsDialog = new JarOptionsDialog(MainFrame.this);
     _executeExternalDialog = new ExecuteExternalDialog(MainFrame.this);
+    _jarOptionsDialog = new JarOptionsDialog(MainFrame.this);
+
     initJarOptionsDialog();
     initExecuteExternalProcessDialog();
 //    _projectPropertiesFrame = null;
@@ -5498,17 +5499,71 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     final JMenu extMenu = new JMenu("External Processes");
     _addMenuItem(extMenu, _executeExternalProcessAction, KEY_EXEC_PROCESS);
-    // TODO: remove mock entries
     extMenu.addSeparator();
     extMenu.add(_editExternalProcessesAction);
     toolsMenu.add(extMenu);
-
-    ChangeListener extMenuListener = new ChangeListener() {
-      public void stateChanged(ChangeEvent e) {
-        _editExternalProcessesAction.setEnabled((extMenu.getItemCount()<2));
+    
+    final int savedCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+    final int namesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).size();
+    final int typesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES).size();
+    final int cmdlinesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).size();
+    final int jvmargsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS).size();
+    final int workdirsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).size();
+    if ((savedCount!=namesCount) ||
+        (savedCount!=typesCount) ||
+        (savedCount!=cmdlinesCount) ||
+        (savedCount!=jvmargsCount) ||
+        (savedCount!=workdirsCount)) {
+      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, 0);
+      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES, new Vector<String>());
+      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES, new Vector<String>());
+      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES, new Vector<String>());
+      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS, new Vector<String>());
+      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS, new Vector<String>());
+    }
+    
+    OptionListener<Integer> externalSavedCountListener =
+      new OptionListener<Integer>() {
+      public void optionChanged(final OptionEvent<Integer> oce) {
+        Utilities.invokeLater(new Runnable() {
+          public void run() {
+//            for(int i=2; i<extMenu.getItemCount(); ++i) {
+//              extMenu.remove(2);
+//            }
+//            for (int count=1; count<=oce.value; ++count) {
+//              final int i = count;
+//              final String name = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).get(i-1);
+//              final int savedCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+//              final int namesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).size();
+//              final int typesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES).size();
+//              final int cmdlinesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).size();
+//              final int jvmargsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS).size();
+//              final int workdirsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).size();
+//              
+//              extMenu.insert(new AbstractAction(name) {
+//                public void actionPerformed(ActionEvent ae) {
+//                  if (type.equals("cmdline")) {
+//                    System.out.println(name+": cmdline "+cmdline+" "+workdir);
+//                    // TODO
+//                  }
+//                  else if (type.equals("java")) {
+//                    System.out.println(name+": java "+jvmargs+" "+cmdline+" "+workdir);
+//                    // TODO
+//                  }
+//                }
+//              },1+i);
+//            }
+//            if (oce.value>0) { 
+//              extMenu.addSeparator();
+//              extMenu.add(_editExternalProcessesAction);
+//            }
+          }
+        });
       }
     };
-    extMenu.addChangeListener(extMenuListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.EXTERNAL_SAVED_COUNT, externalSavedCountListener);
+    externalSavedCountListener.optionChanged(new OptionEvent<Integer>(OptionConstants.EXTERNAL_SAVED_COUNT,
+                                                                      DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
     
     // Add the menus to the menu bar
     return toolsMenu;
@@ -8832,8 +8887,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Initializes the "Execute External Process" dialog. */
   private void initExecuteExternalProcessDialog() {
-    if (DrJava.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STORE_POSITION).booleanValue())
-      _executeExternalDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STATE));  
+    if (DrJava.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STORE_POSITION).booleanValue()) {
+      _executeExternalDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STATE));
+    }
   }
   
   /** Reset the position of the "Execute External Process" dialog. */

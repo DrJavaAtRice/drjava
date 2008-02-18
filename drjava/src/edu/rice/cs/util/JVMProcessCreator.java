@@ -43,54 +43,53 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * This class abstracts out creation of another JVM.
  */
 
 public class JVMProcessCreator extends ProcessCreator { 
-  protected List<String> _jvmArgs;
+  protected String _jvmArgs;
 
   /**
    * Creates a new process creator.
    * @param jvmArgs arguments for the JVM
-   * @param command the command and its arguments
+   * @param cmdline command line
+   * @param workdir working directory
+   * @param props map of properties
    */
-  public JVMProcessCreator(List<String> jvmArgs, List<String> command) {
-    super(command);
-    _jvmArgs = new ArrayList<String>(jvmArgs);
+  public JVMProcessCreator(String jvmArgs, String cmdline, String workdir, Map<String, Properties> props) {
+    super(cmdline, workdir, props);
+    _jvmArgs = jvmArgs;
   }
   
-  /**
-   * Constructs a process creator using varargs.
-   * @param command the command and its arguments
-   */
-  public JVMProcessCreator(List<String> jvmArgs, String... command) {
-    super(command);
-    _jvmArgs = new ArrayList<String>(jvmArgs);
-  }
 
   /**
-   * Get the command and arguments of this process creator.
-   * @return command and arguments
+   * Get the command line.
+   * @return command line
    */
-  public List<String> command() {
-    LinkedList<String> args = new LinkedList<String>();
-    args.add(ExecJVM.getExecutable());
-    args.addAll(_jvmArgs);
-    args.addAll(_command);
-    return args;
+  public String cmdline() {
+    return ExecJVM.getExecutable() + " " + _jvmArgs + _cmdline;
   }
   
   /**
    * Starts a new JCM process using the attributes of this process creator.
    */
   public Process start() throws IOException {
+    List<String> jvmArgs = StringOps.commandLineToList(StringOps.replaceVariables(_jvmArgs, _props));
+    List<String> cmds = StringOps.commandLineToList(StringOps.replaceVariables(_cmdline, _props));
     LinkedList<String> args = new LinkedList<String>();
     args.add(ExecJVM.getExecutable());
-    args.addAll(_jvmArgs);
-    args.addAll(_command);
+    args.addAll(jvmArgs);
+    args.addAll(cmds);
     String[] cmdarray = args.toArray(new String[args.size()]);
+
+    String workdir = StringOps.replaceVariables(_workdir, _props);
+    File dir = null;
+    if (!workdir.trim().equals("")) { dir = new File(workdir); }
+    
     String[] env = null;
     if ((_env!=null) && (_env.size()>0)) {
       env = new String[_env.size()];
@@ -100,6 +99,6 @@ public class JVMProcessCreator extends ProcessCreator {
         env[i] = key+"="+value;
       }
     }
-    return Runtime.getRuntime().exec(cmdarray,env,_dir);
+    return Runtime.getRuntime().exec(cmdarray,env,dir);
   }
 }

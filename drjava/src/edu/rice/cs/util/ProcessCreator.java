@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * This class abstracts out process creation, similar to ProcessCreator,
@@ -48,33 +49,29 @@ import java.util.Map;
  */
 
 public class ProcessCreator {
-  protected List<String> _command;
-  protected File _dir;
+  protected String _cmdline;
+  protected String _workdir;
   protected Map<String,String> _env;
-  
+  protected Map<String, Properties> _props;
+    
   /**
-   * Creates a new process creator.
-   * @param command the command and its arguments
+   * Constructor for a process creator with the given command line and map of properties.
+   * @param cmdline command line
+   * @param workdir working directory
+   * @param props map of properties
    */
-  public ProcessCreator(List<String> command) {
-    _command = new ArrayList<String>(command);
+  public ProcessCreator(String cmdline, String workdir, Map<String, Properties> props) {
+    _cmdline = cmdline;
+    _workdir = workdir;
+    _props = props;
   }
   
   /**
-   * Constructs a process creator using varargs.
-   * @param command the command and its arguments
+   * Get the command line.
+   * @return command line
    */
-  public ProcessCreator(String... command) {
-    _command = new ArrayList<String>(command.length);
-    for (String cmd: command) { _command.add(cmd); }
-  }
-  
-  /**
-   * Get the command and arguments of this process creator.
-   * @return command and arguments
-   */
-  public List<String> command() {
-    return new ArrayList<String>(_command);
+  public String cmdline() {
+    return _cmdline;
   }
   
   /**
@@ -89,23 +86,19 @@ public class ProcessCreator {
    * Returns this process creator's working directory.
    * @return working directory
    */
-  public File getDir() {
-    return _dir;
+  public String workDir() {
+    return _workdir;
   }
-  
-  /**
-   * Sets this process creator's working directory.
-   * @param dir new working directory
-   */
-  public void setDir(File dir) {
-    _dir = dir;
-  }
-  
+
   /**
    * Starts a new process using the attributes of this process creator.
    */
   public Process start() throws IOException {
-    String[] cmdarray = _command.toArray(new String[_command.size()]);
+    List<String> cmds = StringOps.commandLineToList(StringOps.replaceVariables(_cmdline, _props));
+    String[] cmdarray = cmds.toArray(new String[cmds.size()]);
+    String workdir = StringOps.replaceVariables(_workdir, _props);
+    File dir = null;
+    if (!workdir.trim().equals("")) { dir = new File(workdir); }
     String[] env = null;
     if ((_env!=null) && (_env.size()>0)) {
       env = new String[_env.size()];
@@ -115,6 +108,6 @@ public class ProcessCreator {
         env[i] = key+"="+value;
       }
     }
-    return Runtime.getRuntime().exec(cmdarray,env,_dir);
+    return Runtime.getRuntime().exec(cmdarray,env,dir);
   }
 }

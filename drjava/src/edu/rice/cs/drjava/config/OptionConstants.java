@@ -1236,4 +1236,41 @@ public interface OptionConstants {
   /** Maximum lines to keep when following files, or 0 for unlimited. */
   public static final NonNegativeIntegerOption FOLLOW_FILE_LINES =
     new NonNegativeIntegerOption("follow.file.lines", new Integer(1000));
+
+  /** Prefix for the "external saved" settings. */
+  public static final String EXTERNAL_SAVED_PREFIX = "external.saved.";
+
+  /** The number of saved external processes. */
+  public static final NonNegativeIntegerOption EXTERNAL_SAVED_COUNT =
+    new NonNegativeIntegerOption(EXTERNAL_SAVED_PREFIX+"count", new Integer(0));
+  
+  /** The names of saved external processes. */
+  public static final VectorOption<String> EXTERNAL_SAVED_NAMES =
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"names",
+                             new StringOption("",""),
+                             new Vector<String>());
+  
+  /** The types of saved external processes. */
+  public static final VectorOption<String> EXTERNAL_SAVED_TYPES =
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"types",
+                             new StringOption("",""),
+                             new Vector<String>());
+
+  /** The command lines of saved external processes. */
+  public static final VectorOption<String> EXTERNAL_SAVED_CMDLINES =
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"cmdlines",
+                             new StringOption("",""),
+                             new Vector<String>());
+
+  /** The JVM args of saved external processes (if applicable). */
+  public static final VectorOption<String> EXTERNAL_SAVED_JVMARGS =
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"jvmargs",
+                             new StringOption("",""),
+                             new Vector<String>());
+
+  /** The work directories of saved external processes. */
+  public static final VectorOption<String> EXTERNAL_SAVED_WORKDIRS =
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"workdirs",
+                             new StringOption("",""),
+                             new Vector<String>());
 }

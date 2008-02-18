@@ -44,6 +44,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.StringOps;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -62,8 +63,6 @@ import java.util.NoSuchElementException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Enumeration;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -215,6 +214,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Map of properties. */
   protected Map<String, Properties> _props; 
   
+  /** Show the "Run" button? */
+  protected boolean _showRunButton = true;
+  
   /** Returns the last state of the frame, i.e. the location and dimension.
    *  @return frame state
    */
@@ -241,14 +243,23 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     else MainFrame.setPopupLoc(this, _mainFrame);
     validate();
   }
-  
+
   /** Create a dialog.
+   *  @param mf the instance of mainframe to query into the project
+   *  @param showRunButton show the "Run" button?
+   */
+  public ExecuteExternalDialog(MainFrame mf, boolean showRunButton) {
+    super("Execute External Process");
+    _mainFrame = mf;
+    _showRunButton = showRunButton;
+    initComponents();
+  }
+  
+  /** Create a dialog with the "Run" button.
    *  @param mf the instance of mainframe to query into the project
    */
   public ExecuteExternalDialog(MainFrame mf) {
-    super("Execute External Process");
-    _mainFrame = mf;
-    initComponents();
+    this(mf, true);
   }
 
   /** Build the dialog. */
@@ -260,34 +271,50 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
 
     super.getContentPane().setLayout(new GridLayout(1,1));
 
-     _tabbedPane = new JTabbedPane();
- 
-    Action runCommandAction = new AbstractAction("Run Command Line") {
-      public void actionPerformed(ActionEvent e) {
-        _runCommand();
-      }
-    };
-    _runCommandButton = new JButton(runCommandAction);
-    Action runJavaAction = new AbstractAction("Run Java Class") {
-      public void actionPerformed(ActionEvent e) {
-        _runJava();
-      }
-    };
-    _runJavaButton = new JButton(runJavaAction);
-
-    Action saveCommandAction = new AbstractAction("Save to Menu...") {
-      public void actionPerformed(ActionEvent e) {
-        _saveCommand();
-      }
-    };
-    _saveCommandButton = new JButton(saveCommandAction);
-    Action saveJavaAction = new AbstractAction("Save to Menu...") {
-      public void actionPerformed(ActionEvent e) {
-        _saveJava();
-      }
-    };
-    _saveJavaButton = new JButton(saveJavaAction);
-
+    _tabbedPane = new JTabbedPane();
+     
+    if (_showRunButton) {
+      Action runCommandAction = new AbstractAction("Run Command Line") {
+        public void actionPerformed(ActionEvent e) {
+          _runCommand();
+        }
+      };
+      _runCommandButton = new JButton(runCommandAction);
+      Action runJavaAction = new AbstractAction("Run Java Class") {
+        public void actionPerformed(ActionEvent e) {
+          _runJava();
+        }
+      };
+      _runJavaButton = new JButton(runJavaAction);
+      
+      Action saveCommandAction = new AbstractAction("Save to Menu...") {
+        public void actionPerformed(ActionEvent e) {
+          _saveCommand();
+        }
+      };
+      _saveCommandButton = new JButton(saveCommandAction);
+      Action saveJavaAction = new AbstractAction("Save to Menu...") {
+        public void actionPerformed(ActionEvent e) {
+          _saveJava();
+        }
+      };
+      _saveJavaButton = new JButton(saveJavaAction);
+    }
+    else {
+      Action saveCommandAction = new AbstractAction("Save") {
+        public void actionPerformed(ActionEvent e) {
+          _saveCommand();
+        }
+      };
+      _saveCommandButton = new JButton(saveCommandAction);
+      Action saveJavaAction = new AbstractAction("Save") {
+        public void actionPerformed(ActionEvent e) {
+          _saveJava();
+        }
+      };
+      _saveJavaButton = new JButton(saveJavaAction);
+    }
+    
     updateProperties();
     
     _insertVarDialog = new InsertVariableDialog(_mainFrame, _props, _insertVarDialogMonitor);
@@ -449,7 +476,12 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
            }
            else {
              _insertCommandButton.setEnabled(false);
-             _runCommandButton.requestFocus();
+             if (_showRunButton) {
+               _runCommandButton.requestFocus();
+             }
+             else {
+               _saveCommandButton.requestFocus();
+             }
            }
         }
       }
@@ -502,7 +534,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
     bottom.add(Box.createHorizontalGlue());
-    bottom.add(_runCommandButton);
+    if (_showRunButton) {
+      bottom.add(_runCommandButton);
+    }
     bottom.add(_saveCommandButton);
     bottom.add(_insertCommandButton);
     bottom.add(_cancelCommandButton);
@@ -516,8 +550,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           // preview
           _commandLineDoc.remove(0,_commandLineDoc.getLength());
           StringBuilder sb = new StringBuilder();
-          String text = replaceVariables(_commandLine.getText(), _props);
-          List<String> cmds = commandLineToList(text);
+          String text = StringOps.replaceVariables(_commandLine.getText(), _props);
+          List<String> cmds = StringOps.commandLineToList(text);
           for(String s: cmds) {
             sb.append(s);
             sb.append(' ');
@@ -549,9 +583,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         try {
           // preview
           _commandWorkDirLineDoc.remove(0,_commandWorkDirLineDoc.getLength());
-          LOG.log("_commandWorkDirLine.getText() = '"+_commandWorkDirLine.getText()+"'");
-          String text = replaceVariables(_commandWorkDirLine.getText(), _props);
-          LOG.log("text = '"+text+"'");
+          String text = StringOps.replaceVariables(_commandWorkDirLine.getText(), _props);
           _commandWorkDirLineDoc.insertString(0, text, null);
           
           // command line
@@ -560,7 +592,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                          _commandLineCmdAS,
                          _varCommandLineCmdStyle,
                          _varErrorCommandLineCmdStyle);
-          LOG.log("colorVariables");
         }
         catch(BadLocationException ble) {
           _commandLinePreview.setText("Error: "+ble);
@@ -859,8 +890,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(), sb.toString(), _javaCommandLineExecutableStyle);
           
           sb = new StringBuilder();
-          String text = replaceVariables(_jvmLine.getText(), _props);
-          List<String> cmds = commandLineToList(text);
+          String text = StringOps.replaceVariables(_jvmLine.getText(), _props);
+          List<String> cmds = StringOps.commandLineToList(text);
           for(String s: cmds) {
             sb.append(s);
             sb.append(' ');
@@ -868,8 +899,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(), sb.toString(), _javaCommandLineJVMStyle);
           
           sb = new StringBuilder();
-          text = replaceVariables(_javaCommandLine.getText(), _props);
-          cmds = commandLineToList(text);
+          text = StringOps.replaceVariables(_javaCommandLine.getText(), _props);
+          cmds = StringOps.commandLineToList(text);
           for(String s: cmds) {
             sb.append(s);
             sb.append(' ');
@@ -909,7 +940,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         try {
           // preview
           _javaCommandWorkDirLineDoc.remove(0,_javaCommandWorkDirLineDoc.getLength());
-          String text = replaceVariables(_javaCommandWorkDirLine.getText(), _props);
+          String text = StringOps.replaceVariables(_javaCommandWorkDirLine.getText(), _props);
           _javaCommandWorkDirLineDoc.insertString(0, text, null);
           
           // work dir
@@ -1011,7 +1042,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           int pos = 0;
           SimpleAttributeSet sas = variable;
           // LOG.log(str);
-          while(pos>=0) {
+          while((str.length()>0)&&(pos>=0)&&(pos<str.length())) {
             // LOG.log("pos = "+pos); 
             // see if this is an escaped \ (\\)
             if ((str.charAt(pos)=='\\') &&
@@ -1078,76 +1109,14 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   }
 
   public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
-
-  /** Convert a command line into a list of individual arguments. */
-  private List<String> commandLineToList(String cmdline) {
-    StreamTokenizer tok = new StreamTokenizer(new StringReader(cmdline));
-    tok.resetSyntax();
-    tok.wordChars(0,255);
-    tok.whitespaceChars(0,32);
-    tok.quoteChar('\'');
-    tok.quoteChar('"');
-    tok.quoteChar('`');
-    tok.slashSlashComments(false);
-    tok.slashStarComments(false);
-    ArrayList<String> cmds = new ArrayList<String>();
-    
-    int next;
-    try {
-      while(((next=tok.nextToken())!=StreamTokenizer.TT_EOF) &&
-            (next!=StreamTokenizer.TT_EOL)) {
-        switch(next) {
-          case '\'':
-          case '"':
-          case '`':
-            cmds.add(""+((char)next)+tok.sval+((char)next));
-            break;
-          case StreamTokenizer.TT_WORD:
-            cmds.add(tok.sval);
-            break;
-          case StreamTokenizer.TT_NUMBER:
-            cmds.add(""+tok.nval);
-            break;
-          default:
-            return new ArrayList<String>();
-        }
-      }
-    }
-    catch(IOException ioe) {
-      return new ArrayList<String>();
-    }
-    return cmds;
-  }
   
   /** Execute the command line. */
   private void _runCommand() {
     _mainFrame.updateStatusField("Executing external process...");
-
-    List<String> cmds = commandLineToList(replaceVariables(_commandLine.getText(), _props));
     
-    if (cmds.size()>0) {
-      ProcessCreator pc = new ProcessCreator(cmds.toArray(new String[cmds.size()]));
-      File wd = new File(replaceVariables(_commandWorkDirLine.getText().trim(), _props));
-      // LOG.log("ok. wd = "+wd);
-      if ((!_commandWorkDirLine.getText().equals("")) &&
-          ((!wd.exists()) ||
-           (!wd.isDirectory()))) {
-        JOptionPane.showMessageDialog(this,
-                                      "The working directory '"+ wd + "'\n"+
-                                      "is invalid because it does not exist.",
-                                      "Invalid Work Directory", JOptionPane.ERROR_MESSAGE);
- 
-        // Always apply and save settings
-        _saveSettings();
-        this.setVisible(false);
-        return;
-      }
-      else {
-        // LOG.log("setting!");
-        pc.setDir(wd);
-      }
+    if (_commandLinePreview.getText().length()>0) {
+      ProcessCreator pc = new ProcessCreator(_commandLine.getText(), _commandWorkDirLine.getText().trim(), _props);
       String name = "External";
-      if (cmds.size()>0) { name += ": "+cmds.get(0); }
       final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, name, pc);
       _mainFrame._tabs.addLast(panel);
       panel.getMainPanel().addFocusListener(new FocusAdapter() {
@@ -1160,18 +1129,10 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
     }
     else {
-      if (_commandLinePreview.getText().length()>0) {
-        JOptionPane.showMessageDialog(this,
-                                      "Could not separate command line into individual parts.",
-                                      "Invalid Command Line",
-                                      JOptionPane.ERROR_MESSAGE);
-      }
-      else {
-        JOptionPane.showMessageDialog(this,
-                                      "Empty command line.",
-                                      "Invalid Command Line",
-                                      JOptionPane.ERROR_MESSAGE);
-      }
+      JOptionPane.showMessageDialog(this,
+                                    "Empty command line.",
+                                    "Invalid Command Line",
+                                    JOptionPane.ERROR_MESSAGE);
     }
 
     // Always apply and save settings
@@ -1182,40 +1143,12 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Execute the Java class. */
   private void _runJava() {
     _mainFrame.updateStatusField("Executing external Java class...");
-
-    List<String> jvms = new ArrayList<String>();
-    List<String> cmds = new ArrayList<String>();
-    if (_jvmLine.getText().trim().length()>0) {
-      jvms = commandLineToList(replaceVariables(_jvmLine.getText().trim(), _props));
-    }
-    if (_javaCommandLine.getText().trim().length()>0) {
-      cmds = commandLineToList(replaceVariables(_javaCommandLine.getText().trim(), _props));
-    }
     
-    if (jvms.size()+cmds.size()>0) {
-      ProcessCreator pc = new JVMProcessCreator(jvms, cmds);
+    if (_javaCommandLinePreview.getText().length()>0) {
+      ProcessCreator pc = new JVMProcessCreator(_jvmLine.getText(), _javaCommandLine.getText(),
+                                                _javaCommandWorkDirLine.getText().trim(), _props);
       
-      File wd = new File(replaceVariables(_javaCommandWorkDirLine.getText().trim(), _props));
-      // LOG.log("ok. wd = "+wd);
-      if ((!_javaCommandWorkDirLine.getText().equals("")) &&
-          ((!wd.exists()) ||
-           (!wd.isDirectory()))) {
-        JOptionPane.showMessageDialog(this,
-                                      "The working directory '"+ wd + "'\n"+
-                                      "is invalid because it does not exist.",
-                                      "Invalid Work Directory", JOptionPane.ERROR_MESSAGE);
- 
-        // Always apply and save settings
-        _saveSettings();
-        this.setVisible(false);
-        return;
-      }
-      else {
-        // LOG.log("setting!");
-        pc.setDir(wd);
-      }
       String name = "External Java";
-      if (cmds.size()>0) { name += ": "+cmds.get(0); }
       final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, name, pc);
       _mainFrame._tabs.addLast(panel);
       panel.getMainPanel().addFocusListener(new FocusAdapter() {
@@ -1228,21 +1161,12 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
     }
     else {
-      if ((_javaCommandLinePreview.getText().length()>0) &&
-          (_jvmLine.getText().length()>0)) {
-        JOptionPane.showMessageDialog(this,
-                                      "Could not separate command line into individual parts.",
-                                      "Invalid Command Line",
-                                      JOptionPane.ERROR_MESSAGE);
-      }
-      else {
-        JOptionPane.showMessageDialog(this,
-                                      "Empty command line.",
-                                      "Invalid Command Line",
-                                      JOptionPane.ERROR_MESSAGE);
-      }
+      JOptionPane.showMessageDialog(this,
+                                    "Empty command line.",
+                                    "Invalid Command Line",
+                                    JOptionPane.ERROR_MESSAGE);
     }
-    
+
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
@@ -1250,11 +1174,33 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   /** Save the command line to the menu. */
   private void _saveCommand() {
-    // TODO
+    int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT) + 1;
+    
+    String name = "External "+count;
+    StringOption nameOption = new StringOption(OptionConstants.EXTERNAL_SAVED_PREFIX+count+".name",name);
+    DrJava.getConfig().getOptionMap().setString(nameOption, name);
+    
+    String type = "cmdline";
+    StringOption typeOption = new StringOption(OptionConstants.EXTERNAL_SAVED_PREFIX+count+".type",type);
+    DrJava.getConfig().getOptionMap().setString(typeOption, type);
+    
+    String cmdline = _commandLine.getText();
+    StringOption cmdlineOption = new StringOption(OptionConstants.EXTERNAL_SAVED_PREFIX+count+".cmdline", cmdline);
+    DrJava.getConfig().getOptionMap().setString(cmdlineOption, cmdline);
+    
+    String jvmargs = "";
+    StringOption jvmargsOption = new StringOption(OptionConstants.EXTERNAL_SAVED_PREFIX+count+".jvmargs",jvmargs);
+    DrJava.getConfig().getOptionMap().setString(jvmargsOption, jvmargs);
+    
+    String workdir = _commandWorkDirLine.getText();
+    StringOption workdirOption = new StringOption(OptionConstants.EXTERNAL_SAVED_PREFIX+count+".workdir",workdir);
+    DrJava.getConfig().getOptionMap().setString(workdirOption, workdir);
 
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
+    
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
   }
 
   /** Save the Java class to the menu. */
@@ -1366,69 +1312,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     }
     _props.put("DrJava", drJavaProps);
   }
-
-  /**
-   * Replace variables of the form "${variable}" with the value associated with the string "variable" in the
-   * provided hash table.
-   * To give the "$" character its literal meaning, it needs to be escaped as "\$" (backslash dollar).
-   * To make the "\" character not escaping, escape it as "\\"(double backslash).
-   * @param str input string
-   * @param props hash map of hash tables with variable-value pairs
-   * @return string with variables replaced by values
-   */
-  public static String replaceVariables(String str, Map<String,Properties> props) {
-    int pos = str.indexOf("${");
-    int bsPos = str.indexOf('\\');
-    if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
-    // find every ${
-    // LOG.log("========================");
-    while(pos>=0) {
-      // LOG.log("str = '"+str+"', pos = "+pos);
-      // see if this is an escaped \ (\\)
-      if ((str.charAt(pos)=='\\') &&
-          (pos<str.length()-1) &&
-          (str.charAt(pos+1)=='\\')) {
-        // change the \\ into a single \
-        // LOG.log("\t\\\\");
-        str = str.substring(0, pos) + str.substring(pos+1);
-      }
-      // see if this is an escaped $ (\$)
-      else if ((str.charAt(pos)=='\\') &&
-               (pos<str.length()-1) &&
-               (str.charAt(pos+1)=='$')) {
-        // change the \$ into a single $
-        // LOG.log("\t\\$");
-        str = str.substring(0, pos) + str.substring(pos+1);
-        // and skip
-        ++pos;
-      }
-      else if (str.charAt(pos)=='$') {
-        // LOG.log("\t$");
-        // look if this is str property name enclosed by ${...}, e.g. "${user.home}"
-        for(Map.Entry<String, Properties> table: props.entrySet()) {
-          Enumeration<?> e = table.getValue().propertyNames();
-          while(e.hasMoreElements()) {
-            String key = (String)e.nextElement();
-            int endPos = pos + key.length() + 3;
-            if (str.substring(pos, Math.min(str.length(), endPos)).equals("${"+key+"}")) {
-              // found property name
-              // replace "${property.name}" with the value of the property, e.g. /home/user
-              String value = table.getValue().getProperty(key);
-              str = str.substring(0, pos) + value + str.substring(endPos);
-              // advance to the last character of the value
-              pos = pos + value.length() - 1;
-              break;
-            }
-          }
-        }
-      }
-      pos = str.indexOf("${", pos+1);
-      bsPos = str.indexOf("\\\\", pos+1);
-      if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
-    }
-    // LOG.log("end str = '"+str+"'");
-    return str;
-  }
   
   protected volatile boolean _windowListenerActive = false;
   protected WindowAdapter _windowListener = new WindowAdapter() {
@@ -1459,7 +1342,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Opens the file chooser to select a file, putting the result in the file field. */
   protected void chooseFile(JTextPane pane) {
     // Get the file from the chooser
-    File wd = new File(replaceVariables(pane.getText().trim(), _props));
+    File wd = new File(StringOps.replaceVariables(pane.getText().trim(), _props));
     if ((pane.getText().equals("")) ||
         (!wd.exists()) &&
         (!wd.isDirectory())) {
