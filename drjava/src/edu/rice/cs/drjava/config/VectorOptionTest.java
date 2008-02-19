@@ -72,24 +72,25 @@ public final class VectorOptionTest extends DrJavaTestCase {
     assertEquals(1, v.size());
     assertEquals("x", v.get(0));
 
-    v = _svo.parse("[\\\\]");
+    v = _svo.parse("[||]");
     assertEquals(1, v.size());
-    assertEquals("\\", v.get(0));
+    assertEquals("|", v.get(0));
     
-    v = _svo.parse("[\\,]");
+    v = _svo.parse("[|,]");
     assertEquals(1, v.size());
     assertEquals(",", v.get(0));
     
-    v = _svo.parse("[\\,]");
-    assertEquals(1, v.size());
+    v = _svo.parse("[|,,]");
+    assertEquals(2, v.size());
     assertEquals(",", v.get(0));
+    assertEquals("", v.get(1));
 
     v = _svo.parse("[,]");
     assertEquals(2, v.size());
     assertEquals("", v.get(0));
     assertEquals("", v.get(1));
     
-    try { _svo.parse("[\\x]"); fail("Backslash not in front of another backslash or delimiter."); } 
+    try { _svo.parse("[|x]"); fail("Pipe not in front of another pipe or delimiter."); } 
     catch (OptionParseException e) { }
     
     try { _svo.parse("[11"); fail("Missing footer."); } 
@@ -109,22 +110,22 @@ public final class VectorOptionTest extends DrJavaTestCase {
     assertEquals("", v.get(1));
     assertEquals("22", v.get(2));
     
-    v = _svo.parse("[11,\\,,22]");
+    v = _svo.parse("[11,|,,22]");
     assertEquals(3, v.size());
     assertEquals("11", v.get(0));
     assertEquals(",", v.get(1));
     assertEquals("22", v.get(2));
     
-    v = _svo.parse("[11,abc\\,def,22]");
+    v = _svo.parse("[11,abc|,def,22]");
     assertEquals(3, v.size());
     assertEquals("11", v.get(0));
     assertEquals("abc,def", v.get(1));
     assertEquals("22", v.get(2));
 
-    v = _svo.parse("[11,\\\\,22]");
+    v = _svo.parse("[11,||,22]");
     assertEquals(3, v.size());
     assertEquals("11", v.get(0));
-    assertEquals("\\", v.get(1));
+    assertEquals("|", v.get(1));
     assertEquals("22", v.get(2));
 
     try { _svo.parse("{11,22}"); fail("Illegal header and footer."); } 
@@ -167,9 +168,9 @@ public final class VectorOptionTest extends DrJavaTestCase {
     assertEquals("[,-33,2,]", _svo.format(sv));
 
     sv.add(",");
-    assertEquals("[,-33,2,,\\,]", _svo.format(sv));
+    assertEquals("[,-33,2,,|,]", _svo.format(sv));
 
     sv.add("0");
-    assertEquals("[,-33,2,,\\,,0]", _svo.format(sv));
+    assertEquals("[,-33,2,,|,,0]", _svo.format(sv));
   }
 }

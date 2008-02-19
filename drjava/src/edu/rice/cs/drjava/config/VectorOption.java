@@ -117,45 +117,45 @@ public class VectorOption<T> extends Option<Vector<T>> {
     StreamTokenizer st = new StreamTokenizer(new StringReader(s));
     st.resetSyntax();
     st.wordChars(0,255);
-    st.ordinaryChar('\\');
+    st.ordinaryChar('|');
     st.ordinaryChar(delim);
     try {
       int tok = st.nextToken();
       int prevtok = -4;
       StringBuilder sb = new StringBuilder();
       while (tok!=StreamTokenizer.TT_EOF) {
-        if (tok=='\\') {
-          if (prevtok=='\\') {
-            // second backslash in a row, append a backslash to string builder
-            sb.append('\\');
+        if (tok=='|') {
+          if (prevtok=='|') {
+            // second pipe in a row, append a pipe to string builder
+            sb.append('|');
             prevtok = tok = -4;
           }
           else {
-            // first backslash, next token decides
+            // first pipe, next token decides
             prevtok = tok;
           }
         }
         else if (tok==delim) {
-          if (prevtok=='\\') {
-            // backslash followed by delimiter --> escaped delimiter
+          if (prevtok=='|') {
+            // pipe followed by delimiter --> escaped delimiter
             // append delimiter to string builder
             sb.append(delim);
             prevtok = tok = -4;
           }
           else {
-            // no preceding backslash --> real delimiter
+            // no preceding pipe --> real delimiter
             res.add(parser.parse(sb.toString()));
             sb.setLength(0); // clear string builder
             prevtok = tok;
           }
         }
         else {
-          // not a backslash or delimiter
-          if (prevtok=='\\') {
+          // not a pipe or delimiter
+          if (prevtok=='|') {
             // backslash followed by neither a backslash nor a delimiter
             // invalid
-            throw new OptionParseException(name, s, "A backslash was discovered before the token '" + st.sval +
-                                           "'. A backslash is only allowed in front of another backslash " +
+            throw new OptionParseException(name, s, "A pipe | was discovered before the token '" + st.sval +
+                                           "'. A pipe is only allowed in front of another pipe " +
                                            "or the delimiter "+delim+".");
           }
           sb.append(st.sval);
@@ -189,8 +189,8 @@ public class VectorOption<T> extends Option<Vector<T>> {
     int i = 0;
     while (i < size) {
       String str = formatter.format(v.get(i));
-      str = str.replaceAll("\\\\","\\\\\\\\");
-      str = str.replaceAll(",","\\\\,");
+      str = str.replaceAll("\\|","||");
+      str = str.replaceAll(",","|,");
       res.append(str);
       i++;
       if (i < size) res.append(delim);
