@@ -183,7 +183,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionIncomplete(); } });
   }
   
-   /** Notifies listeners that the slave JVM has been used. */
+  /** Notifies listeners that the slave JVM has been used. */
   protected void _notifySlaveJVMUsed() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.slaveJVMUsed(); } });
   }

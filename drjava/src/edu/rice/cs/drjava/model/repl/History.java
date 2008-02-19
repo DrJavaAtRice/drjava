@@ -53,9 +53,9 @@ import java.io.OutputStream;
 import java.io.BufferedWriter;
 
 /** History class that records what has been typed in the interactions pane.  This class is not thread safe;
- *  it is only accessed from InteractionsDocument which takes responsibility for synchronization.
- * @version $Id$
- */
+  * it is only accessed from InteractionsDocument which takes responsibility for synchronization.
+  * @version $Id$
+  */
 public class History implements OptionConstants, Serializable {
 
   public static final String INTERACTION_SEPARATOR = "//End of Interaction//";
@@ -84,39 +84,35 @@ public class History implements OptionConstants, Serializable {
   }
 
   /** Creates a new History with the given size.  An option listener is not added for the config framework.
-   *  @param maxSize Number of lines to remember in the history.
-   */
+    * @param maxSize Number of lines to remember in the history.
+    */
   public History(int maxSize) {
-    // Sanity check on _maxSize
-    if (maxSize < 0) maxSize = 0;
+    if (maxSize < 0) maxSize = 0;   // Sanity check on _maxSize
     _maxSize = maxSize;
   }
 
   /** Adds an item to the history and moves the cursor to point to the place after it.
-   *  Note: Items are not inserted if they are empty. (This is in accordance with
-   *  bug #522123, but in divergence from feature #522213 which originally excluded
-   *  sequential duplicate entries from ever being stored.)
-   *
-   *  Thus, to access the newly inserted item, you must movePrevious first.
-   */
+    * Note: Items are not inserted if they are empty. (This is in accordance with
+    * bug #522123, but in divergence from feature #522213 which originally excluded
+    * sequential duplicate entries from ever being stored.)
+    *
+    * Thus, to access the newly inserted item, you must movePrevious first.
+    */
   public void add(String item) {
     // for consistency in saved History files, WILL save sequential duplicate entries
     if (item.trim().length() > 0) {
       _vector.add(item);
-      // If adding the new element has filled _vector to beyond max
-      // capacity, spill the oldest element out of the History.
-      if (_vector.size() > _maxSize) {
-        _vector.remove(0);
-      }
+      // If max size of _vector is exceeded, spill the oldest element out of the History.
+      if (_vector.size() > _maxSize) _vector.remove(0);
+
       moveEnd();
       _editedEntries.clear();
     }
   }
   
-  /**
-   * Returns the last element and removes it, or returns null if the history is empty.
-   * @return last element before it was removed, or null if history is empty
-   */
+  /** Returns the last element and removes it, or returns null if the history is empty.
+    * @return last element before it was removed, or null if history is empty
+    */
   public String removeLast() {
     if (_vector.size()==0) { return null; }
     String last = _vector.remove(_vector.size()-1);
@@ -128,8 +124,8 @@ public class History implements OptionConstants, Serializable {
   public void moveEnd() { _cursor = _vector.size(); }
 
   /** Moves cursor back 1, or throws exception if there is none.
-   *  @param entry the current entry (perhaps edited from what is in history)
-   */
+    * @param entry the current entry (perhaps edited from what is in history)
+    */
   public void movePrevious(String entry) {
     if (! hasPrevious()) throw new ArrayIndexOutOfBoundsException();
     setEditedEntry(entry);
@@ -140,8 +136,8 @@ public class History implements OptionConstants, Serializable {
   public String lastEntry() { return _vector.get(_cursor - 1); }
 
   /** Moves cursor forward 1, or throws exception if there is none.
-   *  @param entry the current entry (perhaps edited from what is in history)
-   */
+    * @param entry the current entry (perhaps edited from what is in history)
+    */
   public void moveNext(String entry) {
     if (! hasNext()) throw  new ArrayIndexOutOfBoundsException();
     setEditedEntry(entry);
@@ -170,8 +166,8 @@ public class History implements OptionConstants, Serializable {
   public void clear() { _vector.clear(); }
 
   /** Returns the history as a string by concatenating each string in the vector separated by the delimiting
-   *  character. A semicolon is added to the end of every statement that didn't already end with one.
-   */
+    * character. A semicolon is added to the end of every statement that didn't already end with one.
+    */
   public String getHistoryAsStringWithSemicolons() {
     final StringBuilder s = new StringBuilder();
     final String delimiter = INTERACTION_SEPARATOR + StringOps.EOL;
@@ -188,9 +184,7 @@ public class History implements OptionConstants, Serializable {
     return s.toString();
   }
 
-  /** Returns the history as a string by concatenating each string in the vector separated by the delimiting 
-   *  character.
-   */
+  /** Returns the history as a string by concatenating the lines in _vector with EOL as separator. */
   public String getHistoryAsString() {
     final StringBuilder sb = new StringBuilder();
     final String delimiter = StringOps.EOL;
@@ -199,17 +193,17 @@ public class History implements OptionConstants, Serializable {
   }
 
   /** Writes this (unedited) History to the file selected in the FileSaveSelector.
-   *  @param selector File to save to
-   */
+    * @param selector File to save to
+    */
   public void writeToFile(FileSaveSelector selector) throws IOException {
     writeToFile(selector, getHistoryAsStringWithSemicolons());
   }
 
   /** Writes this History to the file selected in the FileSaveSelector. The saved file will still include
-   *  any tags or extensions needed to recognize it as a saved interactions file.
-   *  @param selector File to save to
-   *  @param editedVersion The edited version of the text to be saved.
-   */
+    * any tags or extensions needed to recognize it as a saved interactions file.
+    * @param selector File to save to
+    * @param editedVersion The edited version of the text to be saved (which already uses proper EOL string)
+    */
   public static void writeToFile(FileSaveSelector selector, final String editedVersion) throws IOException {
     File c;
     
@@ -225,17 +219,6 @@ public class History implements OptionConstants, Serializable {
             OutputStreamWriter osw = new OutputStreamWriter(os);
             BufferedWriter bw = new BufferedWriter(osw);
             String file = HISTORY_FORMAT_VERSION_2 + editedVersion;
-//            if (PlatformFactory.ONLY.isWindowsPlatform()) {
-//              StringBuffer buf = new StringBuffer();
-//              String lineSep = StringOps.EOL;
-//              int last = 0;
-//              for (int i = file.indexOf('\n'); i != -1; i = file.indexOf('\n', last)) {
-//                buf.append(file.substring(last, i));
-//                buf.append(lineSep);
-//                last = i+1;
-//              }
-//              file = buf.toString();
-//            }
             bw.write(file, 0, file.length());
             bw.close();
           }
@@ -246,17 +229,15 @@ public class History implements OptionConstants, Serializable {
   }
 
   /** Changes the maximum number of interactions remembered by this History.
-   *  @param newSize New number of interactions to remember.
-   */
+    * @param newSize New number of interactions to remember.
+    */
   public void setMaxSize(int newSize) {
-    // Sanity check
-    if (newSize < 0) newSize = 0;
+    if (newSize < 0) newSize = 0;    // Sanity check
 
     // Remove old elements if the new size is less than current size
     if (size() > newSize) {
 
       int numToDelete = size() - newSize;
-
       for (int i = 0; i < numToDelete; i++) { _vector.remove(0); }
 
       moveEnd();
@@ -276,15 +257,15 @@ public class History implements OptionConstants, Serializable {
   public OptionListener<Integer> getHistoryOptionListener() { return historyOptionListener; }
 
   /** Sets the edited entry to the given value.
-   *  @param entry the string to set
-   */
+    * @param entry the string to set
+    */
   public void setEditedEntry(String entry) {
     if (!entry.equals(getCurrent())) _editedEntries.put(new Integer(_cursor), entry);
   }
 
   /** Reverse-searches the history for the previous matching string.
-   * @param currentInteraction the current interaction
-   */
+    * @param currentInteraction the current interaction
+    */
   public void reverseSearch(String currentInteraction) {
     if (_currentSearchString.equals("") || ! currentInteraction.startsWith(_currentSearchString))
       _currentSearchString = currentInteraction;
@@ -299,8 +280,8 @@ public class History implements OptionConstants, Serializable {
   }
 
   /** Forward-searches the history for the next matching string.
-   *  @param currentInteraction the current interaction
-   */
+    * @param currentInteraction the current interaction
+    */
   public void forwardSearch(String currentInteraction) {
     if (_currentSearchString.equals("") || ! currentInteraction.startsWith(_currentSearchString))
       _currentSearchString = currentInteraction;

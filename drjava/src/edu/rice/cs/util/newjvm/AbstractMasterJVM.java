@@ -106,10 +106,10 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
 //  private final Object _monitorLock = new Object();
 
   /** Sets up the master JVM object, but does not actually invoke the slave JVM.
-   *  @param slaveClassName The fully-qualified class name of the class to start up in the second JVM. This 
-   *  class must implement the interface specified by this class's type parameter, which must be a subclass 
-   *  of {@link SlaveRemote}.
-   */
+    * @param slaveClassName The fully-qualified class name of the class to start up in the second JVM. This 
+    *    class must implement the interface specified by this class's type parameter, which must be a subclass 
+    *    of {@link SlaveRemote}.
+    */
   protected AbstractMasterJVM(String slaveClassName) throws RemoteException {
     super();
     _slaveClassName = slaveClassName;
@@ -345,3 +345,4 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ imple
   /** Returns true if the slave is in the process of starting. */
   protected boolean isStartupInProgress() { return _startupInProgress; }
 }
+

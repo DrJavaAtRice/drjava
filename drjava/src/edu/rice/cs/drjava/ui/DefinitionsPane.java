@@ -73,7 +73,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private static DefinitionsEditorKit EDITOR_KIT;
   
   /* Minimum number of characters to trigger indent warning prompt */
-  private static int INDENT_WARNING_THRESHOLD = 20000;
+  private static int INDENT_WARNING_THRESHOLD = 80000;
     
   /** Our parent window. */
   private final MainFrame _mainFrame;
@@ -1079,17 +1079,17 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     return EDITOR_KIT;
   }
   
-  /** Prompt the user whether or not they wish to indent, if the selection size is very large.
-   *  Return true if the indent is to be completed
-   *  @param selStart - the selection start
-   *  @param selEnd - the selection end
-   */
+  /** Prompts the user whether or not they wish to indent, if the selection size is very large.
+    * @return true if the indent is to be completed
+    * @param selStart - the selection start
+    * @param selEnd - the selection end
+    */
   protected boolean shouldIndent(int selStart, int selEnd) {
     if (selEnd > (selStart + INDENT_WARNING_THRESHOLD)) {
       Object[] options = {"Yes", "No"};
       int n = JOptionPane.showOptionDialog
         (_mainFrame,
-         "Re-indenting this block may take a very long time.  Are you sure?",
+         "Re-indenting this block may take a long time.  Are you sure?",
          "Confirm Re-indent",
          JOptionPane.YES_NO_OPTION,
          JOptionPane.QUESTION_MESSAGE,

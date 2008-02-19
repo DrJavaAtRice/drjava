@@ -60,22 +60,10 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.*;
 
-/** The document model for the definitions pane.
- *
- *  This implementation of <code>Document</code> contains a "reduced model". The reduced model is automatically kept
- *  in sync when this document is updated. Also, that synchronization is maintained even across undo/redo -- this is 
- *  done by making the undo/redo commands know how to restore the reduced model state.
- *
- *  The reduced model is not thread-safe, so it is essential that ONLY this DefinitionsDocument call methods on it.  
- *  Any information from the reduced model should be obtained through helper methods on DefinitionsDocument, and ALL 
- *  methods in DefinitionsDocument which reference the reduced model (via the _reduced field) MUST be synchronized.  
- *  This prevents any thread from seeing an inconsistent state in the middle of another thread's changes.
- *
- *  @see BraceReduction
- *  @see ReducedModelControl
- *  @see ReducedModelComment
- *  @see ReducedModelBrace
- */
+/** The document model for the definitions pane; it contains a reduced model since it extends AbstractDJDocument. 
+  *
+  * @see AbstractDJDocument
+  */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
   
   public static final Log _log = new Log("GlobalModel.txt", false);
@@ -101,7 +89,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //  }
   
   /** Called when this is kicked out of the document cache so that the references made to it may 
-   *  be released so that this can be GC'd. */
+    *  be released so that this can be GC'd. */
   public void close() {
     _removeIndenter();
     synchronized(_closedListeners) {
@@ -126,9 +114,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private volatile int _cachedPrevLineLoc;
   /** Cached location of next line. */
   private volatile int _cachedNextLineLoc;
-
+  
   /** This reference to the OpenDefinitionsDocument is needed so that the document iterator 
-   * (the DefaultGlobalModel) can find the next ODD given a DD. */
+    * (the DefaultGlobalModel) can find the next ODD given a DD. */
   private volatile OpenDefinitionsDocument _odd;
   
   private volatile CompoundUndoManager _undoManager;
@@ -137,38 +125,38 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private final GlobalEventNotifier _notifier;
   
   /* Relying on the following definition in AbstractDJDocument.  It must be placed there to be initialized before use!
-  protected static final Object _wrappedPosListLock = new Object();
-  */
+   protected static final Object _wrappedPosListLock = new Object();
+   */
   
   /** List with weak references to positions. */
   private volatile LinkedList<WeakReference<WrappedPosition>> _wrappedPosList;
   
   /** Convenience constructor for using a custom indenter.
-   *  @param indenter custom indenter class
-   *  @param notifier used by CompoundUndoManager to announce undoable edits
-   */
+    *  @param indenter custom indenter class
+    *  @param notifier used by CompoundUndoManager to announce undoable edits
+    */
   public DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier) {
     super(indenter);
     _notifier = notifier;
     _init();
     resetUndoManager();
   }
-
+  
   /** Main constructor.  This has an obnoxious dependency on GlobalEventNotifier, which is passed through here only 
-   *  for a single usage in CompoundUndoManager.  TODO: find a better way.
-   *  @param notifier used by CompoundUndoManager to announce undoable edits
-   */
+    *  for a single usage in CompoundUndoManager.  TODO: find a better way.
+    *  @param notifier used by CompoundUndoManager to announce undoable edits
+    */
   public DefinitionsDocument(GlobalEventNotifier notifier) {
     super();
     _notifier = notifier;
     _init();
     resetUndoManager();
   }
-
+  
   /** Main constructor.  This has an obnoxious dependency on GlobalEventNotifier, which is passed through here only 
-   *  for a single usage in CompoundUndoManager.  TODO: find a better way.
-   *  @param notifier used by CompoundUndoManager to announce undoable edits
-   */
+    *  for a single usage in CompoundUndoManager.  TODO: find a better way.
+    *  @param notifier used by CompoundUndoManager to announce undoable edits
+    */
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
     super();
     _notifier = notifier;
@@ -181,7 +169,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    if (undoManager != null)
 //      _undoManager = undoManager;
 //  }
-
+  
   /** Returns a new indenter. */
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
   
@@ -192,14 +180,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _cachedLineNum = 1;
     _cachedPrevLineLoc = -1;
     _cachedNextLineLoc = -1;
-    _cacheInUse = false;
   }
   
   /* acquireReadLock, releaseReadLock, acquireWriteLock, releaseWriteLock are inherited from AbstractDJDocument. */
-   
+  
   /** Sets the OpenDefinitionsDocument that holds this DefinitionsDocument (the odd can only be set once).
-   *  @param odd the OpenDefinitionsDocument to set as this DD's holder
-   */
+    *  @param odd the OpenDefinitionsDocument to set as this DD's holder
+    */
   public void setOpenDefDoc(OpenDefinitionsDocument odd) { if (_odd == null) _odd = odd; }
   
   /** @return the OpenDefinitonsDocument that is associated with this DefinitionsDocument. */
@@ -230,7 +217,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //  public boolean isUntitled() {
 //    return (_file == null);
 //  }
-
+  
   /**
    * Returns the file for this document.  If the document
    * is untitled and has no file, it throws an IllegalStateException.
@@ -273,8 +260,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    }
 //    return filename;
 //  }
-
-
+  
+  
 //  public void setFile(File file) {
 //    _file = file;
 //
@@ -287,32 +274,32 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //  public long getTimestamp() {
 //    return _timestamp;
 //  }
-
-
+  
+  
   /** Gets the package and main class/interface name of this OpenDefinitionsDocument
-   *  @return the qualified main class/interface name
-   */
+    *  @return the qualified main class/interface name
+    */
   public String getQualifiedClassName() throws ClassNameNotFoundException {
     return _getPackageQualifier() + getMainClassName();
   }
-
+  
   /** Gets fully qualified class name of the top level class enclosing the given position. */
   public String getQualifiedClassName(int pos) throws ClassNameNotFoundException {
     return _getPackageQualifier() + getEnclosingTopLevelClassName(pos);
   }
-
+  
   /** Gets an appropriate prefix to fully qualify a class name. Returns this class's package followed by a dot, or the
-   *  empty string if no package name is found.
-   */
+    *  empty string if no package name is found.
+    */
   protected String _getPackageQualifier() {
     String packageName = getPackageName();
     if ((packageName != null) && (! packageName.equals(""))) { packageName = packageName + "."; }
     return packageName;
   }
-
+  
   /** Inserts a string of text into the document.  This is not where we do custom processing of the insert; that is
-   *  done in {@link #insertUpdate}.
-   */
+    *  done in {@link #insertUpdate}.
+    */
   public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
     
     // If _removeTabs is set to true, remove all tabs from str.
@@ -331,8 +318,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   
   /** Removes a block of text from the specified location. We don't update the reduced model here; that happens
-   *  in {@link #removeUpdate}.
-   */
+    *  in {@link #removeUpdate}.
+    */
   public void remove(int offset, int len) throws BadLocationException {
     
     if (len == 0) return;
@@ -344,24 +331,21 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     finally { releaseWriteLock(); }
   }
-
+  
   /** Given a String, return a new String will all tabs converted to spaces.  Each tab is converted 
-   *  to one space, since changing the number of characters within insertString screws things up.
-   *  @param source the String to be converted.
-   *  @return a String will all the tabs converted to spaces
-   */
-  static String _removeTabs(final String source) {
-//    clearCache(); // Clear the helper method cache  // Goofy code! Eliminated when method was converted to static.
-    return source.replace('\t', ' ');
-  }
-
+    * to one space, since changing the number of characters within insertString screws things up.
+    * @param source the String to be converted.
+    * @return a String will all the tabs converted to spaces
+    */
+  static String _removeTabs(final String source) { return source.replace('\t', ' '); }
+  
   /** Resets the modification state of this document to be consistent with state of _undoManager.  Called whenever
-   *  an undo or redo is performed. */
+    * an undo or redo is performed. */
   public void updateModifiedSinceSave() {
     
     acquireWriteLock();
     try {
-    _isModifiedSinceSave = _undoManager.isModified();
+      _isModifiedSinceSave = _undoManager.isModified();
 //    System.out.println("DefinitionsDocument: set modified? " + _modifiedSinceSave);
     }
     finally { 
@@ -371,8 +355,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }
   
-   /** Sets the modification state of this document to true and updates the state of the associated _odd. 
-    *  Assumes that write lock is already held. */
+  /** Sets the modification state of this document to true and updates the state of the associated _odd. 
+    * Assumes that write lock is already held. */
   private void setModifiedSinceSave() {
     if (! _isModifiedSinceSave) {
       _isModifiedSinceSave = true;
@@ -390,13 +374,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { 
       if (_odd != null) _odd.documentReset();  // null test required for some unit tests
       releaseWriteLock(); 
-
     }
   }
   
   /** Determines if the document has been modified since the last save.
-   *  @return true if the document has been modified
-   */
+    *  @return true if the document has been modified
+    */
   public boolean isModifiedSinceSave() {
     acquireReadLock();
     try { return  _isModifiedSinceSave; }
@@ -413,19 +396,19 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     finally { releaseReadLock(); }
   }
-
+  
   /** Return the current line of the cursor position.  Uses a 1-based index. */
   public int getCurrentLine() {
     acquireReadLock();
     try { return getDefaultRootElement().getElementIndex(_currentLocation) + 1; } // line indices are 1-based
     finally { releaseReadLock(); }
   }
-
+  
   /** Returns the offset corresponding to the first character of the given line number,
-   *  or -1 if the lineNum is not found.  Avoid locking the document by copying its text.
-   *  @param lineNum the line number for which to calculate the offset.
-   *  @return the offset of the first character in the given line number
-   */
+    *  or -1 if the lineNum is not found.  Avoid locking the document by copying its text.
+    *  @param lineNum the line number for which to calculate the offset.
+    *  @return the offset of the first character in the given line number
+    */
   public int getOffset(int lineNum) {
     if (lineNum < 0) return -1;
     String defsText = getText();
@@ -446,15 +429,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     return -1;
   }
-
+  
   /** Returns true iff tabs are to removed on text insertion. */
   public boolean tabsRemoved() { return _tabsRemoved; }
- 
+  
   /** Comments out all lines between selStart and selEnd, inclusive. The current cursor position is maintained 
-   *  after the operation.
-   *  @param selStart the document offset for the start of the selection
-   *  @param selEnd the document offset for the end of the selection
-   */
+    *  after the operation.
+    *  @param selStart the document offset for the start of the selection
+    *  @param selEnd the document offset for the end of the selection
+    */
   public int commentLines(int selStart, int selEnd) {
     
     //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
@@ -478,14 +461,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _undoManager.endLastCompoundEdit();  //Changed from endCompoundEdit(key) for FrenchKeyBoardFix
     return toReturn;
   }
- 
-
+  
+  
   /** Comments out the lines between and including the lines containing points start and end, using wing 
-   *  comments -- "// ".
-   * 
-   *  @param start Position in document to start commenting from
-   *  @param end Position in document to end commenting at
-   */
+    *  comments -- "// ".
+    * 
+    *  @param start Position in document to start commenting from
+    *  @param end Position in document to end commenting at
+    */
   private int _commentBlock(final int start, final int end) {
     int afterCommentEnd = end;
     acquireWriteLock();
@@ -519,23 +502,23 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { releaseWriteLock(); }
     return afterCommentEnd;
   }
-
+  
   /** Comments out a single line with wing comments -- "// ". 
-   *  @pre this.writeLock() and _reduced lock are already held! */
+    *  @pre this.writeLock() and _reduced lock are already held! */
   private void _commentLine() {
     // Insert "// " at the beginning of the line.
     // Using null for AttributeSet follows convention in this class.
     try { insertString(_currentLocation - getCurrentCol(), "//", null); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
-
+  
   /** Uncomments all lines between selStart and selEnd, inclusive.
-   *  The current cursor position is maintained after the operation.
-   *  @param selStart the document offset for the start of the selection
-   *  @param selEnd the document offset for the end of the selection
-   */
+    *  The current cursor position is maintained after the operation.
+    *  @param selStart the document offset for the start of the selection
+    *  @param selEnd the document offset for the end of the selection
+    */
   public int uncommentLines(int selStart, int selEnd) {
- 
+    
     //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
     int toReturn = selEnd;
     if (selStart == selEnd) {
@@ -559,12 +542,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _undoManager.endLastCompoundEdit();
     return toReturn;
   }
-
+  
   /** Uncomments all lines between and including the lines containing
-   *  points start and end.  
-   * @param start Position in document to start commenting from
-   * @param end Position in document to end commenting at
-   */
+    *  points start and end.  
+    * @param start Position in document to start commenting from
+    * @param end Position in document to end commenting at
+    */
   private int _uncommentBlock(final int start, final int end) {
     int afterUncommentEnd = end;
     acquireWriteLock();
@@ -597,11 +580,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { releaseWriteLock(); }
     return afterUncommentEnd;
   }
-
+  
   /** Uncomments a single line.  This simply looks for a leading "//".  Assumes that _reduced lock is already held and
-   *  that acquireWriteLock is already held.
-   *  @pre theads hold this.writeLock() and _reduced lock
-   */
+    *  that acquireWriteLock is already held.
+    *  @pre theads hold this.writeLock() and _reduced lock
+    */
   private int _uncommentLine() throws BadLocationException {
     // Look for "//" at the beginning of the line, and remove it.
     int curCol = getCurrentCol();
@@ -633,10 +616,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     return NO_COMMENT_OFFSET;
   }
-
+  
   /** Goes to a particular line in the document. */
   public void gotoLine(int line) {
-
+    
     int dist;
     if (line < 0) return;
     int actualLine =1;
@@ -749,15 +732,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     if (i == -1) reducedPos = ERROR_INDEX; // No matching keyword was found
     return reducedPos;  
   }
- 
+  
 //  public static boolean log = true;
   
-  /** Searching backwards finds the name of the enclosing named class or interface. NB: ignores comments.
-   *  WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
-   * @param pos Position to start from
-   * @param qual true to find the fully qualified class name
-   * @return name of the enclosing named class or interface
-   */
+  /** Searches backwards finds the name of the enclosing named class or interface. NB: ignores comments.
+    * WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
+    * @param pos Position to start from
+    * @param qual true to find the fully qualified class name
+    * @return name of the enclosing named class or interface
+    */
   public String getEnclosingClassName(int pos, boolean qual) throws BadLocationException, ClassNameNotFoundException {    
 //    boolean oldLog = log; log = false;
     // Check cache
@@ -766,11 +749,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     String key = keyBuf.toString();
     String cached = (String) _checkCache(key);
     if (cached != null) return cached;
-
+    
     char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=',
       '!','@','#','$','%','^','~','\\','"','`','|'};
     String name = "";
-
+    
     acquireReadLock();
     try {
       String text = getText(DOCSTART, pos+1);
@@ -898,10 +881,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Returns true if this position is the instantiation of an anonymous inner class.
-   *  @param newPos position of "new"
-   *  @param openSquigglyPos position of the next '{'
-   *  @return true if anonymous inner class instantiation
-   */
+    * @param newPos position of "new"
+    * @param openSquigglyPos position of the next '{'
+    * @return true if anonymous inner class instantiation
+    */
   private boolean _isAnonymousInnerClass(int newPos, int openSquigglyPos) throws BadLocationException {
 //    String t = getText(DOCSTART, openSquigglyPos+1);
 //    System.out.print ("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+")");
@@ -912,47 +895,51 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     final StringBuilder keyBuf = 
       new StringBuilder("_getAnonymousInnerClassIndex:").append(newPos).append(':').append(openSquigglyPos);
     String key = keyBuf.toString();
-    Boolean cached = (Boolean) _checkCache(key);
-    if (cached != null) {
+    
+    synchronized(_reduced) {
+      Boolean cached = (Boolean) _checkCache(key);
+      if (cached != null) {
 //      System.out.println(" ==> "+cached);
-      return cached;
-    }
-
-    // acquireReadLock assumed to be held
-    cached = false;
-    String text = getText(DOCSTART, openSquigglyPos+1);
-    int origNewPos = newPos;
-    newPos += "new".length();
-    int classStart = getFirstNonWSCharPos(newPos);
-    if (classStart!=ERROR_INDEX) { 
-      int classEnd = classStart+1;
-      while(classEnd<text.length()) {
-        if ((!Character.isJavaIdentifierPart(text.charAt(classEnd))) && (text.charAt(classEnd)!='.')) {
-          // delimiter found
-          break;
-        }
-        ++classEnd;
+        return cached;
       }
-      // System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
-      int parenStart = getFirstNonWSCharPos(classEnd);
-      if (parenStart!=ERROR_INDEX) {
-        int origParenStart = parenStart;
-
-        // System.out.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
-        if (text.charAt(origParenStart)=='<') {
-          parenStart = ERROR_INDEX;
-          // might be a generic class
-          int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
-          if (closePointyBracket!=ERROR_INDEX) {
-            if (text.charAt(closePointyBracket)=='>') {
-              parenStart = getFirstNonWSCharPos(closePointyBracket+1);
+      
+      // acquireReadLock assumed to be held
+      cached = false;
+      String text = getText(DOCSTART, openSquigglyPos+1);
+      int origNewPos = newPos;
+      newPos += "new".length();
+      int classStart = getFirstNonWSCharPos(newPos);
+      if (classStart != ERROR_INDEX) { 
+        int classEnd = classStart+1;
+        while (classEnd < text.length()) {
+          if (! Character.isJavaIdentifierPart(text.charAt(classEnd)) && text.charAt(classEnd) != '.') {
+            // delimiter found
+            break;
+          }
+          ++classEnd;
+        }
+        
+        /* Determine parenStart, the postion immediately before the open parenthesis following the superclass name. */
+        // System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
+        int parenStart = getFirstNonWSCharPos(classEnd);
+        if (parenStart != ERROR_INDEX) {
+          int origParenStart = parenStart;
+          
+          // System.out.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
+          if (text.charAt(origParenStart) == '<') {
+            parenStart = ERROR_INDEX;
+            // might be a generic class
+            int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
+            if (closePointyBracket != ERROR_INDEX) {
+              if (text.charAt(closePointyBracket)=='>') {
+                parenStart = getFirstNonWSCharPos(closePointyBracket+1);
+              }
             }
           }
         }
-      }
-      if (parenStart!=ERROR_INDEX) {
-        if (text.charAt(parenStart)=='(') {
-          synchronized(_reduced) {
+        
+        if (parenStart != ERROR_INDEX) {
+          if (text.charAt(parenStart) == '(') {
             final int origLocation = _currentLocation;
             _reduced.move(parenStart+1 - origLocation);  // reduced model points to pos == parenStart+1
             int parenEnd = balanceForward();
@@ -962,24 +949,22 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
               // System.out.println("\tafter closing paren = "+parenEnd);
               int afterParen = getFirstNonWSCharPos(parenEnd);
               // System.out.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
-              cached = (afterParen==openSquigglyPos);          
+              cached = (afterParen == openSquigglyPos); 
             }
           }
         }
       }
+      _storeInCache(key, cached, openSquigglyPos);
+//      System.out.println(" ==> "+cached);
+      return cached;
     }
-    
-    _storeInCache(key, cached);
-    
-//    System.out.println(" ==> "+cached);
-    return cached;
   }
   
   /** Gets the package name embedded in the text of this document by minimally parsing the document to find the
-   *  package statement.  If package statement is not found or is ill-formed, returns "" as the package name.
-   *  @return The name of package embedded in this document.  If there is no well-formed package statement, 
-   *          returns "" as the package name.
-   */
+    * package statement.  If package statement is not found or is ill-formed, returns "" as the package name.
+    * @return The name of package embedded in this document.  If there is no well-formed package statement, 
+    *         returns "" as the package name.
+    */
   public String getPackageName() {
     Reader r;
     acquireReadLock();
@@ -995,12 +980,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       catch (IOException e) { /* ignore */ }
     }
   }
- 
-  /**
-   * Return the index of the anonymous inner class being instantiated at the specified position.
-   * @param position of the opening curly brace of the anonymous inner class
-   * @return anonymous class index
-   */
+  
+  /** Returns the index of the anonymous inner class being instantiated at the specified position.
+    * ASSUMES readLock and _reduced lock are already held.
+    * @param pos is position of the opening curly brace of the anonymous inner class
+    * @return anonymous class index
+    */
   int _getAnonymousInnerClassIndex(int pos) throws BadLocationException, ClassNameNotFoundException {   
 //    boolean oldLog = log; log = false;
     
@@ -1012,7 +997,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //      log = oldLog;
       return cached.intValue();
     }
-
+    
     // acquireReadLock assumed to be held
     --pos; // move outside the curly brace
     char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=',
@@ -1022,14 +1007,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int index = 1;
     int newPos = pos;
 //    if (oldLog) System.out.println("anon before "+pos+" enclosed by "+className);
-    while((newPos = _findPrevKeyword(text, "new", newPos-1)) != ERROR_INDEX) {
+    while ((newPos = _findPrevKeyword(text, "new", newPos - 1)) != ERROR_INDEX) {
 //      if (oldLog) System.out.println("new found at "+newPos);
       int afterNewPos = newPos + "new".length();
       int classStart = getFirstNonWSCharPos(afterNewPos);
-      if (classStart==ERROR_INDEX) { continue; }
-      int classEnd = classStart+1;
-      while(classEnd<text.length()) {
-        if ((!Character.isJavaIdentifierPart(text.charAt(classEnd))) && (text.charAt(classEnd)!='.')) {
+      if (classStart == ERROR_INDEX) { continue; }
+      int classEnd = classStart + 1;
+      while (classEnd < text.length()) {
+        if (! Character.isJavaIdentifierPart(text.charAt(classEnd)) && text.charAt(classEnd) != '.') {
           // delimiter found
           break;
         }
@@ -1037,7 +1022,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
 //      if (oldLog) System.out.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
       int parenStart = getFirstNonWSCharPos(classEnd);
-      if (parenStart==ERROR_INDEX) { continue; }
+      if (parenStart == ERROR_INDEX) { continue; }
       int origParenStart = parenStart;
       
 //      if (oldLog) System.out.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
@@ -1045,18 +1030,18 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         parenStart = ERROR_INDEX;
         // might be a generic class
         int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
-        if (closePointyBracket!=ERROR_INDEX) {
-          if (text.charAt(closePointyBracket)=='>') {
-            parenStart = getFirstNonWSCharPos(closePointyBracket+1);
+        if (closePointyBracket != ERROR_INDEX) {
+          if (text.charAt(closePointyBracket) == '>') {
+            parenStart = getFirstNonWSCharPos(closePointyBracket + 1);
           }
         }
       }
-      if (parenStart==ERROR_INDEX) { continue; }      
-      if (text.charAt(parenStart)!='(') { continue; }
+      if (parenStart == ERROR_INDEX) { continue; }      
+      if (text.charAt(parenStart) != '(') { continue; }
       int parenEnd = findNextEnclosingBrace(parenStart, '(', ')');
-    
+      
       int nextOpenSquiggly = _findNextOpenSquiggly(text, parenEnd);
-      if (nextOpenSquiggly==ERROR_INDEX) { continue; }
+      if (nextOpenSquiggly == ERROR_INDEX) { continue; }
 //      if (oldLog) System.out.println("{ found at "+nextOpenSquiggly+": `"+text.substring(newPos, nextOpenSquiggly+1)+"`");
 //      if (oldLog) System.out.println("_isAnonymousInnerClass("+newPos+", "+nextOpenSquiggly+")");
       if (_isAnonymousInnerClass(newPos, nextOpenSquiggly)) {
@@ -1068,20 +1053,18 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           newPos = findPrevEnclosingBrace(newPos, '{', '}');
           continue;
         }
-        else {
-          ++index;
-        }
+        else ++index;
       }
     }
-    _storeInCache(key, new Integer(index));
+    _storeInCache(key, index, pos);
 //    oldLog = log;
     return index;
   }
   
   /** Returns the name of the class or interface enclosing the caret position at the top level.
-   *  @return Name of enclosing class or interface
-   *  @throws ClassNameNotFoundException if no enclosing class found
-   */
+    *  @return Name of enclosing class or interface
+    *  @throws ClassNameNotFoundException if no enclosing class found
+    */
   public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
     acquireReadLock();
     synchronized(_reduced) {
@@ -1128,14 +1111,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Gets the name of first class/interface decclared in file among the definitions anchored at:
-   * @param indexOfClass  index in this of a top-level occurrence of class 
-   * @param indexOfInterface  index in this of a top-level occurrence of interface
-   */
+    * @param indexOfClass  index in this of a top-level occurrence of class 
+    * @param indexOfInterface  index in this of a top-level occurrence of interface
+    */
   private String getFirstClassName(int indexOfClass, int indexOfInterface) throws ClassNameNotFoundException {
     
     if ((indexOfClass == -1) && (indexOfInterface == -1)) throw ClassNameNotFoundException.DEFAULT;
     if ((indexOfInterface == -1) || (indexOfClass != -1 && indexOfClass < indexOfInterface)) 
-          return getNextIdentifier(indexOfClass + "class".length());
+      return getNextIdentifier(indexOfClass + "class".length());
     return getNextIdentifier(indexOfInterface + "interface".length());
   }
   
@@ -1179,19 +1162,19 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
     }
   }
-
+  
   /** Gets the name of the top level class in this source file. This attempts to find the first declaration
-   *  of a class or interface.
-   *   @return The name of first class in the file
-   * @throws ClassNameNotFoundException if no top level class found
-   */
+    *  of a class or interface.
+    *   @return The name of first class in the file
+    * @throws ClassNameNotFoundException if no top level class found
+    */
   public String getFirstTopLevelClassName() throws ClassNameNotFoundException {
     return getNextTopLevelClassName(0, getLength());
   }
-
+  
   // note: need to update this to work with pos
   public String getNextTopLevelClassName(int startPos, int endPos) throws ClassNameNotFoundException {
-
+    
     acquireReadLock();
     synchronized(_reduced) {
       int oldLocation = _currentLocation;
@@ -1214,7 +1197,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           index = indexOfClass + "class".length();
         }
         else if (indexOfInterface > -1 && (indexOfClass <= -1 || indexOfInterface < indexOfClass) 
-                  && (indexOfEnum <= -1 || indexOfInterface < indexOfEnum)) {
+                   && (indexOfEnum <= -1 || indexOfInterface < indexOfEnum)) {
           index = indexOfInterface + "interface".length();
         }
         else if (indexOfEnum > -1 && (indexOfClass <= -1 || indexOfEnum < indexOfClass)   
@@ -1280,7 +1263,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       throw new UnexpectedException(e); 
     }
   }
-
+  
   /** Finds the first occurrence of the keyword within the text (located at textOffset in this documennt) that is not 
     * enclosed within a brace or comment and is followed by whitespace.
     * @param keyword the keyword for which to search
@@ -1338,7 +1321,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Factory method for created WrappedPositions. Stores the created Position instance
-   *  so it can be linked to a different DefinitionsDocument later. */
+    *  so it can be linked to a different DefinitionsDocument later. */
   public Position createPosition(int offs) throws BadLocationException {
     WrappedPosition wp = new WrappedPosition(createUnwrappedPosition(offs));
     synchronized(_wrappedPosListLock) {
@@ -1367,10 +1350,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       }
       _wrappedPosList.clear();
       _wrappedPosList = newList;  
-    return ret;
+      return ret;
     }
   }
- 
+  
   /** Re-create the wrapped positions in the hashmap, update the wrapped position, and add them to the list.
     * @param whm weakly-linked hashmap of wrapped positions and their offsets
     */
@@ -1394,119 +1377,109 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private static class CommandUndoableEdit extends AbstractUndoableEdit {
     private final Runnable _undoCommand;
     private final Runnable _redoCommand;
-
+    
     public CommandUndoableEdit(final Runnable undoCommand, final Runnable redoCommand) {
       _undoCommand = undoCommand;
       _redoCommand = redoCommand;
     }
-
+    
     public void undo() throws CannotUndoException {
       super.undo();
       _undoCommand.run();
     }
-
+    
     public void redo() throws CannotRedoException {
       super.redo();
       _redoCommand.run();
     }
-
+    
     public boolean isSignificant() { return false; }
   }
-
-  /**
-   * Getter method for CompoundUndoManager
-   * @return _undoManager
-   */
+  
+  /** Getter method for CompoundUndoManager
+    * @return _undoManager
+    */
   public CompoundUndoManager getUndoManager() { return _undoManager; }
-
+  
   /** Resets the undo manager. */
   public void resetUndoManager() {
     _undoManager = new CompoundUndoManager(_notifier);
     _undoManager.setLimit(UNDO_LIMIT);
   }
-
+  
   /** Public accessor for the next undo action. */
   public UndoableEdit getNextUndo() { return _undoManager.getNextUndo(); }
-
+  
   /** Public accessor for the next undo action. */
   public UndoableEdit getNextRedo() { return _undoManager.getNextRedo(); }
-
+  
   /** Informs this document's undo manager that the document has been saved. */
   public void documentSaved() { _undoManager.documentSaved(); }
   
   protected int startCompoundEdit() { return _undoManager.startCompoundEdit(); }
   
-  protected void endCompoundEdit(int key) {
-    _undoManager.endCompoundEdit(key);
-  }
+  protected void endCompoundEdit(int key) { _undoManager.endCompoundEdit(key); }
   
   //This method added for FrenchKeyBoardFix
   protected void endLastCompoundEdit() { _undoManager.endLastCompoundEdit(); }
-   
+  
   protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
     chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));    
   }
   
   
-  /**
-   * Is used to be able to call editToBeUndone and editToBeRedone since they
-   * are protected methods in UndoManager
-   */
-  /*
-  private class OurUndoManager extends UndoManager {
-    private boolean _compoundEditState = false;
-    private OurCompoundEdit _compoundEdit;
-
-    public void startCompoundEdit() {
-      if (_compoundEditState) {
-        throw new IllegalStateException("Cannot start a compound edit while making a compound edit");
-      }
-      _compoundEditState = true;
-      _compoundEdit = new OurCompoundEdit();
-    }
-
-    public void endCompoundEdit() {
-      if (!_compoundEditState) {
-        throw new IllegalStateException("Cannot end a compound edit while not making a compound edit");
-      }
-      _compoundEditState = false;
-      _compoundEdit.end();
-      super.addEdit(_compoundEdit);
-    }
-
-    public UndoableEdit getNextUndo() {
-      return editToBeUndone();
-    }
-
-    public UndoableEdit getNextRedo() {
-      return editToBeRedone();
-    }
-
-    public boolean addEdit(UndoableEdit e) {
-      if (_compoundEditState) {
-        return _compoundEdit.addEdit(e);
-      }
-      else {
-        return super.addEdit(e);
-      }
-    }
-  }
-
-
-  public java.util.Vector getEdits() {
-     return _undoManager._compoundEdit.getEdits();
-  }
-
-  private class OurCompoundEdit extends CompoundEdit {
-     public java.util.Vector getEdits() {
-        return edits;
-     }
-  }
-  */
+  /** Formerly used to call editToBeUndone and editToBeRedone since they are protected methods in UndoManager. */
+//  private class OurUndoManager extends UndoManager {
+//    private boolean _compoundEditState = false;
+//    private OurCompoundEdit _compoundEdit;
+//
+//    public void startCompoundEdit() {
+//      if (_compoundEditState) {
+//        throw new IllegalStateException("Cannot start a compound edit while making a compound edit");
+//      }
+//      _compoundEditState = true;
+//      _compoundEdit = new OurCompoundEdit();
+//    }
+//
+//    public void endCompoundEdit() {
+//      if (!_compoundEditState) {
+//        throw new IllegalStateException("Cannot end a compound edit while not making a compound edit");
+//      }
+//      _compoundEditState = false;
+//      _compoundEdit.end();
+//      super.addEdit(_compoundEdit);
+//    }
+//
+//    public UndoableEdit getNextUndo() {
+//      return editToBeUndone();
+//    }
+//
+//    public UndoableEdit getNextRedo() {
+//      return editToBeRedone();
+//    }
+//
+//    public boolean addEdit(UndoableEdit e) {
+//      if (_compoundEditState) {
+//        return _compoundEdit.addEdit(e);
+//      }
+//      else {
+//        return super.addEdit(e);
+//      }
+//    }
+//  }
+//
+//
+//  public java.util.Vector getEdits() {
+//     return _undoManager._compoundEdit.getEdits();
+//  }
+//
+//  private class OurCompoundEdit extends CompoundEdit {
+//     public java.util.Vector getEdits() {
+//        return edits;
+//     }
+//  }
   
-  /**
-   * used to help track down memory leaks
-   */
+  /** Formerly used to help track down memory leaks */
 //  protected void finalize() throws Throwable{
 //    System.out.println("destroying DefDocument for " + _odd);
 //    super.finalize();
@@ -1530,13 +1503,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private List<FinalizationListener<DefinitionsDocument>> _finalizationListeners = 
     new LinkedList<FinalizationListener<DefinitionsDocument>>();
   
-  /**
-   * Registers a finalization listener with the specific instance of the ddoc
-   * <p><b>NOTE:</b><i>This should only be used by test cases.  This is to ensure that
-   * we don't spring memory leaks by allowing our unit tests to keep track of 
-   * whether objects are being finalized (garbage collected)</i></p>
-   * @param fl the listener to register
-   */
+  /** Registers a finalization listener with the specific instance of the ddoc
+    * <p><b>NOTE:</b><i>This should only be used by test cases.  This is to ensure that
+    * we don't spring memory leaks by allowing our unit tests to keep track of 
+    * whether objects are being finalized (garbage collected)</i></p>
+    * @param fl the listener to register
+    */
   public void addFinalizationListener(FinalizationListener<DefinitionsDocument> fl) {
     synchronized(_finalizationListeners) { _finalizationListeners.add(fl); }
   }
@@ -1544,10 +1516,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners() {
     return _finalizationListeners;
   }
-
-  /** This is called when this method is GC'd.  Since this class implements
-   *  edu.rice.cs.drjava.model.Finalizable, it must notify its listeners
-   */
+  
+  /** This is called when this method is GC'd.  Since this class implements edu.rice.cs.drjava.model.Finalizable, it
+    * must notify its listeners
+    */
   protected void finalize() {
     FinalizationEvent<DefinitionsDocument> fe = new FinalizationEvent<DefinitionsDocument>(this);
     synchronized(_finalizationListeners) {

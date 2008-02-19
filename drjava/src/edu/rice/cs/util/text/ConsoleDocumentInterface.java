@@ -50,4 +50,4 @@ public interface ConsoleDocumentInterface extends EditDocumentInterface {
 
   /** Setter for the _hasPrompt property. */
   public void setHasPrompt(boolean val);
-  }
+}

@@ -48,9 +48,9 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 import javax.swing.ProgressMonitor;
 
-/** Interface to be collectively shared by the Definitions Document, Open Definitions Document,
- *  and the Interactions Document. Collectively represents a DrJava Document
- */
+/** Interface shared by the Definitions Document, Open Definitions Document, and Interactions Document. Characteristic
+  * of native DrJava Documents (as opposed to DrJava plugin documents).
+  */
 public interface DJDocument extends SwingDocumentInterface {
   
   /** Gets the indent level.
@@ -58,23 +58,19 @@ public interface DJDocument extends SwingDocumentInterface {
    */
   public int getIndent();
   
-  /** Set the indent to a particular number of spaces.
+  /** Sets the indent to a particular number of spaces.
    *  @param indent the size of indent that you want for the document
    */
   public void setIndent(int indent);
   
-  /**
-   * Return all highlight status info for text between start and end.
-   * This should collapse adjoining blocks with the same status into one.
-   */
+  /** Returns highlight status info for text between start and end, coalescing adjoining blocks with the same status. */
   public Vector<HighlightStatus> getHighlightStatus(int start, int end);
   
-  /**
-   * Get the current location of the cursor in the document.
-   * Unlike the usual swing document model, which is stateless, because of our implementation
-   * of the underlying reduced model, we need to keep track of the current location.
-   * @return where the cursor is as the number of characters into the document
-   */
+  /** Gets the current location of the cursor the document. Unlike the Swing document model, which is stateless, we must
+    * maintain a current location as part of the document because the implementation of the reduced model relies on this
+    * state information.
+    * @return where the cursor is as the number of characters into the document
+    */
   public int getCurrentLocation();
   
   /** Change the current location of the document
@@ -82,26 +78,20 @@ public interface DJDocument extends SwingDocumentInterface {
     */
   public void setCurrentLocation(int loc);
   
-  /**
-   * The actual cursor movement logic.  Helper for setCurrentLocation(int).
-   * @param dist the distance from the current location to the new location.
-   */
+  /** Moves the current location the specified number of chars (positive is right; negative is left).  It is used as a
+    * helper for setCurrentLocation(int).
+    * @param dist the distance from the current location to the new location.
+    */
   public void move(int dist);
   
-  /**
-   * Forwarding method to find the match for the closing brace
-   * immediately to the left, assuming there is such a brace.
-   * @return the relative distance backwards to the offset before
-   *         the matching brace.
-   */
+  /** Find the match for the closing brace immediately to the left, assuming there is such a brace.
+    * @return the relative distance backwards to the offset before the matching brace.
+    */
   public int balanceBackward();
   
-  /**
-   * Forwarding method to find the match for the open brace
-   * immediately to the right, assuming there is such a brace.
-   * @return the relative distance forwards to the offset after
-   *         the matching brace.
-   */
+  /** Finds the match for the open brace immediately to the right, assuming there is such a brace.
+    * @return the relative distance forwards to the offset after the matching brace.
+    */
   public int balanceForward();
   
   /** Returns the indent information for the current location. */
@@ -113,15 +103,13 @@ public interface DJDocument extends SwingDocumentInterface {
   
   public void resetReducedModelLocation();
   
-  /**
-   * Searching backwards, finds the position of the enclosing brace.
-   * NB: ignores comments.
-   * @param pos Position to start from
-   * @param opening opening brace character
-   * @param closing closing brace character
-   * @return position of enclosing squiggly brace, or ERROR_INDEX if beginning
-   * of document is reached.
-   */
+  /** Searching backwards, finds the position of the enclosing brace. NB: ignores comments.
+    * @param pos Position to start from
+    * @param opening opening brace character
+    * @param closing closing brace character
+    * @return position of enclosing squiggly brace, or ERROR_INDEX if beginning
+    * of document is reached.
+    */
   public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
   
   /**

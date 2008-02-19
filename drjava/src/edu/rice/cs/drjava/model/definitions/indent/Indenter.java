@@ -47,9 +47,7 @@ public class Indenter {
 
   public Indenter(int indentLevel) { buildTree(indentLevel); }
   
-  /** 
-   * Enumeration of reasons why indentation may be preformed.
-   * */
+  /** Enumeration of reasons why indentation may be preformed. */
   public enum IndentReason {
     /** Indicates that an enter key press caused the indentation.  This is important for some rules dealing with stars
       * at the line start in multiline comments
