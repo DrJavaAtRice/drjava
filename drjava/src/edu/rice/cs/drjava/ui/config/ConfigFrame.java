@@ -81,6 +81,8 @@ public class ConfigFrame extends JFrame {
   private final JFileChooser _browserChooser;
   private final DirectoryChooser _dirChooser;
   
+  private StringOptionComponent javadocCustomParams;
+  
   private OptionComponent.ChangeListener _changeListener = new OptionComponent.ChangeListener() {
     public Object apply(Object oc) {
       _applyButton.setEnabled(true);
@@ -264,9 +266,12 @@ public class ConfigFrame extends JFrame {
     _applyButton.setEnabled(false);
     ConfigFrame.this.setVisible(false);
   }
+  
+  
 
   /** Write the configured option values to disk. */
   public boolean saveSettings() throws IOException {
+    sanitizeJavadocCustomParams();
     boolean successful = apply();
     if (successful) {
       try {
@@ -675,7 +680,7 @@ public class ConfigFrame extends JFrame {
                                                     _dirChooser));
     
     addOptionComponent(panel, 
-                       new StringOptionComponent(OptionConstants.JAVADOC_CUSTOM_PARAMS,
+                       javadocCustomParams = new StringOptionComponent(OptionConstants.JAVADOC_CUSTOM_PARAMS,
                                                  "Custom Javadoc Parameters", this,
                                                  "Any extra flags or parameters to pass to Javadoc."));
     
@@ -873,6 +878,19 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_FALLTHROUGH_WARNINGS, "Show Fall-Through Warnings", this,
                                                   "<html>Warn about <code>switch</code> block cases that fall through to the next case.</html>"));
     panel.displayComponents();
+    
+  }
+  
+  
+  /** cleans access level parameters from custom javadoc parameters. */
+  private void sanitizeJavadocCustomParams() {
+    String[] params = ((JTextField)javadocCustomParams.getComponent()).getText().split("(-private|-protected|-package|-public)");
+    String newParams = new String();
+    for(int i=0;i<params.length;i++){
+      if(!params[i].trim().equals("")) { newParams += params[i].trim() + " ";}
+    }
+    newParams = newParams.trim();
+    javadocCustomParams.setValue(newParams);
     
   }
   
