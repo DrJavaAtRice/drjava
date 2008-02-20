@@ -1208,6 +1208,13 @@ public interface OptionConstants {
   public static final BooleanOption DIALOG_EXTERNALPROCESS_STORE_POSITION =
     new BooleanOption("dialog.externalprocess.store.position", Boolean.TRUE);
 
+  /** The last state of the "Edit External Process" dialog. */
+  public static final StringOption DIALOG_EDITEXTERNALPROCESS_STATE = new StringOption("dialog.editexternalprocess.state", "default");
+
+  /** Whether to save and restore window size and position at startUp/shutdown. */
+  public static final BooleanOption DIALOG_EDITEXTERNALPROCESS_STORE_POSITION =
+    new BooleanOption("dialog.editexternalprocess.store.position", Boolean.TRUE);
+
   /** Whether to put the focus in the definitions pane after find/replace. */
   public static final BooleanOption FIND_REPLACE_FOCUS_IN_DEFPANE =
     new BooleanOption("find.replace.focus.in.defpane", Boolean.FALSE);

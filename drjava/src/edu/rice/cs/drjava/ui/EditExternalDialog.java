@@ -1,0 +1,421 @@
+/*BEGIN_COPYRIGHT_BLOCK
+ *
+ * Copyright (c) 2001-2008, JavaPLT group at Rice University (javaplt@rice.edu)
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *    * Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *      names of its contributors may be used to endorse or promote products
+ *      derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software is Open Source Initiative approved Open Source Software.
+ * Open Source Initative Approved is a trademark of the Open Source Initiative.
+ * 
+ * This file is part of DrJava.  Download the current version of this project
+ * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * 
+ * END_COPYRIGHT_BLOCK*/
+
+package edu.rice.cs.drjava.ui;
+
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.CompletionMonitor;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.text.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.FontMetrics;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import edu.rice.cs.plt.tuple.Pair;
+
+public class EditExternalDialog extends JFrame implements OptionConstants {
+  private static final int FRAME_WIDTH = 503;
+  private static final int FRAME_HEIGHT = 318;
+  
+  /** Class to save the frame state, i.e. location. */
+  public static class FrameState {
+    private Point _loc;
+    public FrameState(Point l) {
+      _loc = l;
+    }
+    public FrameState(String s) {
+      StringTokenizer tok = new StringTokenizer(s);
+      try {
+        int x = Integer.valueOf(tok.nextToken());
+        int y = Integer.valueOf(tok.nextToken());
+        _loc = new Point(x, y);
+      }
+      catch(NoSuchElementException nsee) {
+        throw new IllegalArgumentException("Wrong FrameState string: " + nsee);
+      }
+      catch(NumberFormatException nfe) {
+        throw new IllegalArgumentException("Wrong FrameState string: " + nfe);
+      }
+    }
+    public FrameState(EditExternalDialog comp) {
+      _loc = comp.getLocation();
+    }
+    public String toString() {
+      final StringBuilder sb = new StringBuilder();
+      sb.append(_loc.x);
+      sb.append(' ');
+      sb.append(_loc.y);
+      return sb.toString();
+    }
+    public Point getLocation() { return _loc; }
+  }
+  
+  /** Edit button. */
+  private JButton _editButton;
+  /** Remove button. */
+  private JButton _removeButton;
+  /** Move up button. */
+  private JButton _upButton;
+  /** Move down button. */
+  private JButton _downButton;
+  /** Ok button. */
+  private JButton _okButton;
+  /** List of commands. */
+  private JList _list;
+  /** Completion monitor to simulate modal behavior. */
+  protected CompletionMonitor _editExternalDialogMonitor = new CompletionMonitor();
+  
+  /** Main frame. */
+  protected MainFrame _mainFrame;
+
+  /** Last frame state. It can be stored and restored. */
+  protected FrameState _lastState = null;
+  
+  /** Returns the last state of the frame, i.e. the location and dimension.
+   *  @return frame state
+   */
+  public FrameState getFrameState() { return _lastState; }
+  
+  /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
+   *  @param ds State to update to, or {@code null} to reset
+   */
+  public void setFrameState(FrameState ds) {
+    _lastState = ds;
+    if (_lastState != null) {
+      setLocation(_lastState.getLocation());
+      validate();
+    }
+  }  
+  
+  /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
+   *  @param s  State to update to, or {@code null} to reset
+   */
+  public void setFrameState(String s) {
+    try { _lastState = new FrameState(s); }
+    catch(IllegalArgumentException e) { _lastState = null; }
+    if (_lastState != null) setLocation(_lastState.getLocation());
+    else MainFrame.setPopupLoc(this, _mainFrame);
+    validate();
+  }
+
+  /** Create a dialog.
+   *  @param mf the instance of mainframe to query into the project
+   */
+  public EditExternalDialog(MainFrame mf) {
+    super("Edit External Processes");
+    _mainFrame = mf;
+    initComponents();
+  }
+
+  /** Build the dialog. */
+  private void initComponents() {
+    super.getContentPane().setLayout(new GridLayout(1,1));
+
+    JPanel mainPanel = new JPanel();
+    mainPanel.setLayout(new BorderLayout());
+    
+    Action editAction = new AbstractAction("Edit") {
+      public void actionPerformed(ActionEvent e) {
+        _edit();
+      }
+    };
+    _editButton = new JButton(editAction);
+    Action removeAction = new AbstractAction("Remove") {
+      public void actionPerformed(ActionEvent e) {
+        _remove();
+      }
+    };
+    _removeButton = new JButton(removeAction);
+    Action upAction = new AbstractAction("Move Up") {
+      public void actionPerformed(ActionEvent e) {
+        _up();
+      }
+    };
+    _upButton = new JButton(upAction);
+    Action downAction = new AbstractAction("Move Down") {
+      public void actionPerformed(ActionEvent e) {
+        _down();
+      }
+    };
+    _downButton = new JButton(downAction);
+    Action okAction = new AbstractAction("OK") {
+      public void actionPerformed(ActionEvent e) {
+        _ok();
+      }
+    };
+    _okButton = new JButton(okAction);
+
+    JPanel bottom = new JPanel();
+    bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
+    bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
+    bottom.add(Box.createHorizontalGlue());
+    bottom.add(_editButton);
+    bottom.add(_removeButton);
+    bottom.add(_upButton);
+    bottom.add(_downButton);
+    bottom.add(_okButton);
+    bottom.add(Box.createHorizontalGlue());
+    mainPanel.add(bottom, BorderLayout.SOUTH);
+
+    _list = new JList();
+    _list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    _list.addListSelectionListener(new ListSelectionListener() {
+      public void valueChanged(ListSelectionEvent e) {
+        _upButton.setEnabled(_list.getSelectedIndex()>0);
+        _downButton.setEnabled(_list.getSelectedIndex()<_list.getModel().getSize());
+      }
+    });
+    JScrollPane sp = new JScrollPane(_list);
+    sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+    mainPanel.add(sp, BorderLayout.CENTER);
+    updateList(0);
+    
+    super.getContentPane().add(mainPanel);
+    super.setResizable(false);
+    
+    setSize(FRAME_WIDTH, FRAME_HEIGHT);
+    MainFrame.setPopupLoc(this, _mainFrame);
+  }
+
+  /** Method that handels the OK button */
+  private void _ok() {
+    _lastState = new FrameState(this);
+    this.setVisible(false);
+  }
+  
+  /** Edit a command. */
+  private void _edit() {
+    final int selectedIndex = _list.getSelectedIndex();
+    if ((selectedIndex<0) || (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT))) {
+      return;
+    }
+    _windowListenerActive = false;
+    _editExternalDialogMonitor.reset();
+    final ExecuteExternalDialog dialog = new ExecuteExternalDialog(_mainFrame,true,selectedIndex,_editExternalDialogMonitor);
+    dialog.setVisible(true);
+    // start a new thread to wait for the dialog to finish
+    // this waiting cannot happen in the event thread, as that would block the other dialog
+    new Thread(new Runnable() {
+      public void run() {
+        _editExternalDialogMonitor.waitOne();
+        // dialog has finished, figure out the results in the event thread
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                EditExternalDialog.this.toFront();
+              }
+            });
+            _windowListenerActive = true;
+            updateList(selectedIndex);
+          }
+        });
+      }
+    }).start();
+  }
+
+  /** Method that handels the remove button */
+  private void _remove() {
+    int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+    final int selectedIndex = _list.getSelectedIndex();
+    if ((selectedIndex<0) ||
+        (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)) ||
+        (count<=0)) {
+      _removeButton.setEnabled(false);
+      return;
+    }
+
+    Vector<String> v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    v.remove(selectedIndex);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
+    
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
+    v.remove(selectedIndex);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    v.remove(selectedIndex);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
+    v.remove(selectedIndex);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    v.remove(selectedIndex);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
+
+    --count;
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
+    updateList(Math.max(0, selectedIndex-1));
+  }
+
+  /** Method that handels the up button */
+  private void _up() {
+    final int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+    final int selectedIndex = _list.getSelectedIndex();
+    if ((selectedIndex<1) ||
+        (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)) ||
+        (count<=0)) {
+      _removeButton.setEnabled(false);
+      return;
+    }
+
+    Vector<String> v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    String s = v.remove(selectedIndex);
+    v.add(selectedIndex-1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
+    
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
+    s = v.remove(selectedIndex);
+    v.add(selectedIndex-1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    s = v.remove(selectedIndex);
+    v.add(selectedIndex-1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
+    s = v.remove(selectedIndex);
+    v.add(selectedIndex-1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    s = v.remove(selectedIndex);
+    v.add(selectedIndex-1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
+
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
+    updateList(Math.max(0,selectedIndex-1));
+  }
+
+  /** Method that handels the down button */
+  private void _down() {
+    final int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+    final int selectedIndex = _list.getSelectedIndex();
+    if ((selectedIndex<0) ||
+        (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1) ||
+        (count<=0)) {
+      _removeButton.setEnabled(false);
+      return;
+    }
+
+    Vector<String> v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    String s = v.remove(selectedIndex);
+    v.add(selectedIndex+1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
+    
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_TYPES);
+    s = v.remove(selectedIndex);
+    v.add(selectedIndex+1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_TYPES,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    s = v.remove(selectedIndex);
+    v.add(selectedIndex+1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS);
+    s = v.remove(selectedIndex);
+    v.add(selectedIndex+1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_JVMARGS,v);
+
+    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    s = v.remove(selectedIndex);
+    v.add(selectedIndex+1,s);
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
+
+    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
+    updateList(Math.max(0,selectedIndex+1));
+  }
+  
+  /** Update the properties. */
+  public void updateList(int selectedIndex) {
+    final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    _list.setListData(names);
+    _editButton.setEnabled(names.size()>0);
+    _removeButton.setEnabled(names.size()>0);
+    if (names.size()>0) {
+      _list.setSelectedIndex(selectedIndex);
+    }
+    else {
+      _list.clearSelection();
+    }
+    _upButton.setEnabled((_list.getModel().getSize()>0) &&
+                         (_list.getSelectedIndex()>0));
+    _downButton.setEnabled((_list.getModel().getSize()>0) &&
+                           (_list.getSelectedIndex()<_list.getModel().getSize()-1));
+  }
+  
+  protected volatile boolean _windowListenerActive = false;
+  protected WindowAdapter _windowListener = new WindowAdapter() {
+    public void windowDeactivated(WindowEvent we) {
+      if (_windowListenerActive) { EditExternalDialog.this.toFront(); }
+    }
+    public void windowClosing(WindowEvent we) {
+      _ok();
+    }
+  };
+  
+  /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
+  public void setVisible(boolean vis) {
+    assert EventQueue.isDispatchThread();
+    validate();
+    if (vis) {
+      updateList(0);
+      _mainFrame.hourglassOn();
+      addWindowListener(_windowListener);
+      _windowListenerActive = true;
+    }
+    else {
+      _windowListenerActive = false;
+      removeWindowFocusListener(_windowListener);
+      _mainFrame.hourglassOff();
+      _mainFrame.toFront();
+    }
+    super.setVisible(vis);
+  }
+}

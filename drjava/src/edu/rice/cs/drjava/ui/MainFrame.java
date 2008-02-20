@@ -3094,6 +3094,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                     _quickStartFrame = new QuickStartFrame();
                                                     _interactionsScriptController = null;
                                                     _executeExternalDialog = new ExecuteExternalDialog(MainFrame.this);
+                                                    _editExternalDialog = new EditExternalDialog(MainFrame.this);
                                                     _jarOptionsDialog = new JarOptionsDialog(MainFrame.this);
                                                     
                                                     initJarOptionsDialog();
@@ -5454,49 +5455,46 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
     _addMenuItem(toolsMenu, _junitAllAction, KEY_TEST_ALL);
     _addMenuItem(toolsMenu, _junitAction, KEY_TEST);
-    _addMenuItem(toolsMenu, _javadocAllAction, KEY_JAVADOC_ALL);
-    _addMenuItem(toolsMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT);
-    toolsMenu.addSeparator();
-    
-    // Open Javadoc
-    _addMenuItem(toolsMenu, _openJavadocAction, KEY_OPEN_JAVADOC);
-    _addMenuItem(toolsMenu, _openJavadocUnderCursorAction, KEY_OPEN_JAVADOC_UNDER_CURSOR);    
     toolsMenu.addSeparator();
     
     // Run
     _addMenuItem(toolsMenu, _runAction, KEY_RUN);
+    _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS);
     toolsMenu.addSeparator();
     
-    _addMenuItem(toolsMenu, _executeHistoryAction, KEY_EXECUTE_HISTORY);
-    _addMenuItem(toolsMenu, _loadHistoryScriptAction, KEY_LOAD_HISTORY_SCRIPT);
-    _addMenuItem(toolsMenu, _saveHistoryAction, KEY_SAVE_HISTORY);
-    _addMenuItem(toolsMenu, _clearHistoryAction, KEY_CLEAR_HISTORY);
-    toolsMenu.addSeparator();
+    // Javadoc
+    final JMenu javadocMenu = new JMenu("Javadoc");
+    _addMenuItem(javadocMenu, _javadocAllAction, KEY_JAVADOC_ALL);
+    _addMenuItem(javadocMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT);
+    javadocMenu.addSeparator();
+    _addMenuItem(javadocMenu, _openJavadocAction, KEY_OPEN_JAVADOC);
+    _addMenuItem(javadocMenu, _openJavadocUnderCursorAction, KEY_OPEN_JAVADOC_UNDER_CURSOR);    
+    toolsMenu.add(javadocMenu);
+
+    final JMenu historyMenu = new JMenu("History");
+    _addMenuItem(historyMenu, _executeHistoryAction, KEY_EXECUTE_HISTORY);
+    _addMenuItem(historyMenu, _loadHistoryScriptAction, KEY_LOAD_HISTORY_SCRIPT);
+    _addMenuItem(historyMenu, _saveHistoryAction, KEY_SAVE_HISTORY);
+    _addMenuItem(historyMenu, _clearHistoryAction, KEY_CLEAR_HISTORY);
+    toolsMenu.add(historyMenu);
     
     // Abort/reset interactions, clear console
     /*
      _abortInteractionAction.setEnabled(false);
      _addMenuItem(toolsMenu, _abortInteractionAction, KEY_ABORT_INTERACTION);
      */
-    _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS);
-    _addMenuItem(toolsMenu, _viewInteractionsClassPathAction, KEY_VIEW_INTERACTIONS_CLASSPATH);
-    _addMenuItem(toolsMenu, _copyInteractionToDefinitionsAction, KEY_LIFT_CURRENT_INTERACTION);
-    _addMenuItem(toolsMenu, _printInteractionsAction, KEY_PRINT_INTERACTIONS);
-    toolsMenu.addSeparator();
-    
-    _addMenuItem(toolsMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE);
-    _addMenuItem(toolsMenu, _printConsoleAction, KEY_PRINT_CONSOLE);
+    final JMenu interMenu = new JMenu("Interactions & Console");    
+    _addMenuItem(interMenu, _viewInteractionsClassPathAction, KEY_VIEW_INTERACTIONS_CLASSPATH);
+    _addMenuItem(interMenu, _copyInteractionToDefinitionsAction, KEY_LIFT_CURRENT_INTERACTION);
+    _addMenuItem(interMenu, _printInteractionsAction, KEY_PRINT_INTERACTIONS);
+    interMenu.addSeparator();
+    _addMenuItem(interMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE);
+    _addMenuItem(interMenu, _printConsoleAction, KEY_PRINT_CONSOLE);
     if (DrJava.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
       toolsMenu.add(_showDebugConsoleAction);
     }
-    
-    toolsMenu.addSeparator();
-    _addMenuItem(toolsMenu, _bookmarksPanelAction, KEY_BOOKMARKS_PANEL);
-    _addMenuItem(toolsMenu, _toggleBookmarkAction, KEY_BOOKMARKS_TOGGLE);
-    
-    toolsMenu.addSeparator();
-    _addMenuItem(toolsMenu, _followFileAction, KEY_FOLLOW_FILE);
-    
+    toolsMenu.add(interMenu);
+        
     final JMenu extMenu = new JMenu("External Processes");
     _addMenuItem(extMenu, _executeExternalProcessAction, KEY_EXEC_PROCESS);
     final JMenuItem execItem = extMenu.getItem(0);
@@ -5570,6 +5568,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     DrJava.getConfig().addOptionListener(OptionConstants.EXTERNAL_SAVED_COUNT, externalSavedCountListener);
     externalSavedCountListener.optionChanged(new OptionEvent<Integer>(OptionConstants.EXTERNAL_SAVED_COUNT,
                                                                       DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
+    toolsMenu.addSeparator();
+    
+    _addMenuItem(toolsMenu, _bookmarksPanelAction, KEY_BOOKMARKS_PANEL);
+    _addMenuItem(toolsMenu, _toggleBookmarkAction, KEY_BOOKMARKS_TOGGLE);
+    
+    toolsMenu.addSeparator();
+    _addMenuItem(toolsMenu, _followFileAction, KEY_FOLLOW_FILE);
     
     // Add the menus to the menu bar
     return toolsMenu;
@@ -8877,7 +8882,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   /** Execute an external process. */
-  private final Action _executeExternalProcessAction = new AbstractAction("External process...") {
+  private final Action _executeExternalProcessAction = new AbstractAction("New external process...") {
     public void actionPerformed(ActionEvent ae) {
       _executeExternalProcess();
     }
@@ -8905,11 +8910,29 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       DrJava.getConfig().setSetting(DIALOG_EXTERNALPROCESS_STATE, "default");
     }
   }
+
+  /** The edit external dialog. */
+  private final EditExternalDialog _editExternalDialog;
   
-  /** Removed a saved process. */
+  /** Initializes the "Edit External Process" dialog. */
+  private void initEditExternalProcessDialog() {
+    if (DrJava.getConfig().getSetting(DIALOG_EDITEXTERNALPROCESS_STORE_POSITION).booleanValue()) {
+      _editExternalDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_EDITEXTERNALPROCESS_STATE));
+    }
+  }
+  
+  /** Reset the position of the "Edit External Process" dialog. */
+  public void resetEditExternalProcessPosition() {
+    _editExternalDialog.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_EDITEXTERNALPROCESS_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_EDITEXTERNALPROCESS_STATE, "default");
+    }
+  }
+  
+  /** Edit saved processes. */
   private final Action _editExternalProcessesAction = new AbstractAction("Edit...") {
     public void actionPerformed(ActionEvent ae) {
-      // TODO
+      _editExternalDialog.setVisible(true);
     }
   };
   

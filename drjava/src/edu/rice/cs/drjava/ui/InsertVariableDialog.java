@@ -240,6 +240,9 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     public void windowDeactivated(WindowEvent we) {
       InsertVariableDialog.this.toFront();
     }
+    public void windowClosing(WindowEvent we) {
+      _cancelCommand();
+    }
   };
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */

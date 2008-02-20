@@ -739,6 +739,9 @@ public class JarOptionsDialog extends JFrame {
     public void windowDeactivated(WindowEvent we) {
       JarOptionsDialog.this.toFront();
     }
+    public void windowClosing(WindowEvent we) {
+      _cancel();
+    }
   };
 
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */

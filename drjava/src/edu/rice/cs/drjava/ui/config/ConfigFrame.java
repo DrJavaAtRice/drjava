@@ -485,6 +485,14 @@ public class ConfigFrame extends JFrame {
         _mainFrame.resetExecuteExternalProcessPosition();
       }
     }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_EDITEXTERNALPROCESS_STORE_POSITION,
+                                                  "Save \"Edit External Process\" Dialog Position", this,
+                                                  "Whether to save and restore the position of the \"Edit External Process\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _mainFrame.resetEditExternalProcessPosition();
+      }
+    }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
                                                   "Save \"Open Javadoc\" Dialog Position", this,
                                                   "Whether to save and restore the size and position of the \"Open Javadoc\" dialog."));
