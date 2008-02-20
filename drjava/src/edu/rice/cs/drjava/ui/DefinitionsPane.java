@@ -332,7 +332,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       // The following commented out code was moved into the indent() method
       //int pos = getCaretPosition();
       //_doc().setCurrentLocation(pos);
-      indent();
+      _mainFrame.hourglassOn();
+      try {
+        indent();
+      } finally {
+        _mainFrame.hourglassOff();
+      }
     }
   }
 
@@ -675,7 +680,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
     JMenuItem indentItem = new JMenuItem("Indent Line(s)");
     indentItem.addActionListener(new AbstractAction() {
-      public void actionPerformed(ActionEvent ae) { indent(); }
+      public void actionPerformed(ActionEvent ae) {
+        _mainFrame.hourglassOn();
+        try {
+          indent();
+        } finally {
+          _mainFrame.hourglassOff();
+        }
+      }
     });
     _popMenu.add(indentItem);
 

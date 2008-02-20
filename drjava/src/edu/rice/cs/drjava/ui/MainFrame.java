@@ -1783,8 +1783,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Indents the current selection. */
   private final Action _indentLinesAction = new AbstractAction("Indent Line(s)") {
     public void actionPerformed(ActionEvent ae) {
-      _currentDefPane.endCompoundEdit();
-      _currentDefPane.indent();
+      hourglassOn();
+      try {
+        _currentDefPane.endCompoundEdit();
+        _currentDefPane.indent();
+      } finally {
+        hourglassOff();
+      }
     }
   };
   
