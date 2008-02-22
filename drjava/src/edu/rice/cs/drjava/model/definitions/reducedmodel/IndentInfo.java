@@ -67,9 +67,7 @@ public class IndentInfo {
   static public final String openParen = "(";
   static public final String openBracket = "[";
 
-  /**
-   * Creates an IndentInfo with default values.
-   */
+  /** Creates an IndentInfo with default values. */
   public IndentInfo() {
     braceType = noBrace;
     distToNewline = -1;

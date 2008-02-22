@@ -45,21 +45,13 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  */
 class QuestionInsideComment extends IndentRuleQuestion {
   
-  QuestionInsideComment(final IndentRule yesRule, final IndentRule noRule) {
-    super(yesRule, noRule);
-  }
+  QuestionInsideComment(final IndentRule yesRule, final IndentRule noRule) { super(yesRule, noRule); }
 
   /** Determines if the (start of the) current line in the document is in a block comment.
    *  @param doc AbstractDJDocument containing the line to be indented.
    *  @return true if this node's rule holds.
    */
-  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-
-    int here = doc.getCurrentLocation();
-    int distToStart = here - doc.getLineStartPos(here);
-    doc.resetReducedModelLocation();
-    ReducedModelState state = doc.stateAtRelLocation(-distToStart);
-    
-    return (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) { 
+    return doc.posInBlockComment(doc.getCurrentLocation()); 
   }
 }

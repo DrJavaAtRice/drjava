@@ -68,7 +68,7 @@ public class QuestionFollowedByStar extends IndentRuleQuestion {
     try {
       int charPos = doc.getFirstNonWSCharPos(doc.getCurrentLocation(), true);
       
-      return !(charPos == AbstractDJDocument.ERROR_INDEX) && doc.getText(charPos, 1).equals("*");
+      return !(charPos == -1) && doc.getText(charPos, 1).equals("*");
     }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }

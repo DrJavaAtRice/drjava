@@ -34,60 +34,40 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.definitions.indent;
+package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import javax.swing.text.*;
-import edu.rice.cs.util.UnexpectedException;
-
-import edu.rice.cs.drjava.model.AbstractDJDocument;
-
-/**
- * Question rule in the indentation decision tree.  Determines if the 
- * line previous to the current position starts with the specified character.
- * @version $Id$
+/** Indent information block.
+ *  @version $Id: IndentInfo.java 4314 2008-01-30 00:08:33Z mgricken $
  */
-public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
-  private String _prefix;
+public class BraceInfo {
   
-  /**
-   * Constructs a new rule for the given prefix string.
-   * ALWAYS looks inside comments.
-   * @param prefix String to search for
-   * @param yesRule Rule to use if this rule holds
-   * @param noRule Rule to use if this rule does not hold
-   */
-  public QuestionPrevLineStartsWith(String prefix, IndentRule yesRule, IndentRule noRule) {
-    super(yesRule, noRule);
-    _prefix = prefix;
-  }
+  // TODO: convert String brace type to char brace type
   
-  /** Determines if the previous line in the document starts with the specified characters, ignoring whitespace.
-    * @param doc AbstractDJDocument containing the line to be indented.
-    * @return true if this node's rule holds.
-    */
-  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
+  public static final String NULL_BRACE = "";      // char '\u0000';
+  public static final String OPEN_SQUIGGLY = "{"; // char '{';
+  public static final String OPEN_PAREN    = "(";   // char '(';
+  public static final String OPEN_BRACKET  = "[";   // char '[';
+  
+  public static final BraceInfo NONE = new BraceInfo(NULL_BRACE, -1);
+  
+  private String _braceType;   // one of the four above options
 
-    try {
-      // Find start of line
-      int here = doc.getCurrentLocation();
-      int startLine = doc.getLineStartPos(here);
-      
-      if (startLine > 0) {
-        // Find start of previous line
-        int startPrevLine = doc.getLineStartPos(startLine - 1);
-        int firstChar = doc.getLineFirstCharPos(startPrevLine);
-        
-        // Compare prefix
-        String actualPrefix = doc.getText(firstChar, _prefix.length());
-        return _prefix.equals(actualPrefix);
-      }
-    }
-    catch (BadLocationException e) {
-      // Shouldn't happen
-      throw new UnexpectedException(e);
-    }
-    // On first line
-    return false;
+  //distance to the open brace preceding the current location
+  private int _distance;
+  
+
+  /** Creates an IndentInfo with default values. */
+  public BraceInfo(String braceType, int distance) {
+    _braceType = braceType;
+    _distance = distance;
   }
 
+  /** Gets the _braceType. */
+  public String braceType() { return _braceType; }
+  
+  /** Gets the _distance. */
+  public int distance() { return _distance; }
 }
+
+
+

@@ -76,7 +76,7 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
 
     // This rule should always apply, unless the entire line is inside a comment.
     
-    assertTrue("At DOCSTART.", rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertTrue("At 0.", rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
     assertTrue("At start of block.", rule.applyRule(_doc, 25, Indenter.IndentReason.OTHER));
     assertTrue("START starts one-line comment.", rule.applyRule(_doc, 54, Indenter.IndentReason.OTHER));
     assertTrue("START starts one-line comment.", rule.applyRule(_doc, 60, Indenter.IndentReason.OTHER));
@@ -119,7 +119,7 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
 
     _rule = new QuestionCurrLineStartsWithSkipComments("{", null, null);
 
-    assertTrue("At DOCSTART - line doesn't start with an open brace.",      !_rule.applyRule(_doc,   0, Indenter.IndentReason.OTHER));
+    assertTrue("At 0 - line doesn't start with an open brace.",      !_rule.applyRule(_doc,   0, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a block, but not the start of the line.",       !_rule.applyRule(_doc,  25, Indenter.IndentReason.OTHER));
     assertTrue("Inside block - line starts with an alphanumeric character.",!_rule.applyRule(_doc,  30, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a one-line comment.",                           !_rule.applyRule(_doc,  54, Indenter.IndentReason.OTHER));
@@ -167,7 +167,7 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
     
     _rule = new QuestionCurrLineStartsWithSkipComments("}", null, null);
 
-    assertTrue("At DOCSTART - line doesn't start with a close brace.",      !_rule.applyRule(_doc,   0, Indenter.IndentReason.OTHER));
+    assertTrue("At 0 - line doesn't start with a close brace.",      !_rule.applyRule(_doc,   0, Indenter.IndentReason.OTHER));
     assertTrue("At start of block - line starts with an open brace.",       !_rule.applyRule(_doc,  25, Indenter.IndentReason.OTHER));
     assertTrue("Inside block - line starts with an open brace.",            !_rule.applyRule(_doc,  30, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a one-line comment.",                           !_rule.applyRule(_doc,  54, Indenter.IndentReason.OTHER));

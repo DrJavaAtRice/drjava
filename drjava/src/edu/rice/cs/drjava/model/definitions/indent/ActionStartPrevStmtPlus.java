@@ -89,8 +89,8 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
       throw new UnexpectedException(e);
     }
     
-    // For DOCSTART, align to left margin
-    if (prevDelimiterPos <= AbstractDJDocument.DOCSTART) {
+    // For 0, align to left margin
+    if (prevDelimiterPos <= 0) {
       doc.setTab(_suffix, here);
       return supResult;
     }

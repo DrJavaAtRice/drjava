@@ -72,11 +72,11 @@ public class ActionBracePlus extends IndentRuleAction {
 
     // Find length to brace
     int bracePos = startLine - ii.distToBrace;
-    int braceNewLine = 0;
+    int braceNewline = 0;
     if (ii.distToNewline >=0) {
-      braceNewLine = startLine - ii.distToNewline;
+      braceNewline = startLine - ii.distToNewline;
     }
-    int braceLen = bracePos - braceNewLine;
+    int braceLen = bracePos - braceNewline;
 
     // Create tab string
     final StringBuilder tab = new StringBuilder(_suffix.length() + braceLen);

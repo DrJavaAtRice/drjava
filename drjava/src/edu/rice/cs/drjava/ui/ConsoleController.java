@@ -156,7 +156,7 @@ public class ConsoleController extends AbstractConsoleController implements Seri
         if (_blockedForConsoleInput) {
           _pane.setEditable(false);
           _pane.getCaret().setVisible(false);
-          _doc.insertNewLine(_doc.getLength());
+          _doc.insertNewline(_doc.getLength());
           _blockedForConsoleInput = false; 
           _inputWaitObject.notify();  // notify waiting thread that input is available
         }

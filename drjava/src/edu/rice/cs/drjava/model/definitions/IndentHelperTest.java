@@ -52,7 +52,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     // Used to test for delimiters not in test string
     char[] delimiters2 = {'%'};
 
-    // Used to test if delimiter right after DOCSTART is found
+    // Used to test if delimiter right after 0 is found
     char[] delimiters3 = {'f'};
 
     // Used to test finding delimiters that can be confused with comments
@@ -61,7 +61,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     _setDocText("/*bar;\nfoo();\nx;*/\nreturn foo;\n");
     assertEquals("Check that delimiters in multi-line " +
                  "comments are ignored",
-                 DefinitionsDocument.ERROR_INDEX,
+                 -1,
                  _doc.findPrevDelimiter(23, delimiters1));
     
     _setDocText("foo();\n//bar();\nbiz();\n");
@@ -73,13 +73,13 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     _setDocText("x=';'\n");
     assertEquals("Check that delimiters in single-quotes " +
                  "are ignored",
-                 DefinitionsDocument.ERROR_INDEX,
+                 -1,
                  _doc.findPrevDelimiter(5, delimiters1));
     
     _setDocText("x=\";\"\n");
     assertEquals("Check that delimiters in double-quotes " +
                  "are ignored",
-                 DefinitionsDocument.ERROR_INDEX,
+                 -1,
                  _doc.findPrevDelimiter(5, delimiters1));
     
     _setDocText("foo();\nfor(;;)\n");
@@ -95,15 +95,15 @@ public final class IndentHelperTest extends IndentRulesTestCase {
                  _doc.findPrevDelimiter(14, delimiters1, false));
     
     _setDocText("foo();\n test ? x : y;\n\t    return blah();\n");
-    assertEquals("Check that ERROR_INDEX is returned if no matching character is found", 
-                 DefinitionsDocument.ERROR_INDEX, 
+    assertEquals("Check that ERROR_INDEX (-1) is returned if no matching character is found", 
+                 -1, 
                  _doc.findPrevDelimiter(20, delimiters2)); 
-    assertEquals("Check that delimiter is found if it is right after DOCSTART",
+    assertEquals("Check that delimiter is found if it is right after 0",
                  0,
                  _doc.findPrevDelimiter(20, delimiters3));
     assertEquals("Check that delimiter is not found if " + 
                  "it is at cursor's position",
-                 DefinitionsDocument.ERROR_INDEX,
+                 -1,
                  _doc.findPrevDelimiter(5, delimiters1));
     assertEquals("Check that the first delimiter in the list is found",
                  17,
@@ -165,11 +165,11 @@ public final class IndentHelperTest extends IndentRulesTestCase {
   public void testGetIndentOfCurrStmtDelimiters() throws BadLocationException {
 
     _setDocText("foo();\n");
-    assertEquals("prev delimiter DOCSTART, no indent",
+    assertEquals("prev delimiter 0, no indent",
                  "",
                  _doc.getIndentOfCurrStmt(3));
     _setDocText("  foo();\n");
-    assertEquals("prev delimiter DOCSTART, indent two spaces",
+    assertEquals("prev delimiter 0, indent two spaces",
                  "  ",
                  _doc.getIndentOfCurrStmt(7));
     
@@ -281,10 +281,10 @@ public final class IndentHelperTest extends IndentRulesTestCase {
                  "is at the position after the previous newline",
                  4,
                  _doc.getLineStartPos(4));
-    assertEquals("Returns DOCSTART when there's no previous newline",
+    assertEquals("Returns 0 when there's no previous newline",
                  0,
                  _doc.getLineStartPos(2));
-    assertEquals("Returns DOCSTART when the cursor is at DOCSTART",
+    assertEquals("Returns 0 when the cursor is at 0",
                  0,
                  _doc.getLineStartPos(0));
     

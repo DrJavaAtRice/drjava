@@ -239,7 +239,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     assert EventQueue.isDispatchThread();
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
-      setCaretPos(_doc.getCurrentLocation());
+      setCaretPos(_doc.getCurrentLocation());    // FIX: not atomic; needs to be done as part of indentLines
     }
     catch (OperationCanceledException oce) { throw new UnexpectedException(oce); }
   }

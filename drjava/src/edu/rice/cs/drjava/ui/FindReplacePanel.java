@@ -154,7 +154,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   // TODO: Standardize on \n in a post-processing step, rather than mucking around
   // in the workings of a text editor field.  (Notice, for example, that this
   // doesn't correctly handle an 'enter' pressed while some text is selected.)
-  Action _standardNewlineAction = new TextAction("NewLine Action") {
+  Action _standardNewlineAction = new TextAction("Newline Action") {
     public void actionPerformed(ActionEvent e) {
       JTextComponent c = getTextComponent(e);
       String text = c.getText();

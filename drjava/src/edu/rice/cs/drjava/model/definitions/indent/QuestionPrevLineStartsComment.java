@@ -75,7 +75,7 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
     
     /* If the start of the current line is the start of the document, there was no previous line and so this line must 
      * have started the comment. */
-    if (cursor == AbstractDJDocument.DOCSTART) return false;
+    if (cursor == 0) return false;
     
     // Move the cursor to the previous line
     cursor = cursor - 1;

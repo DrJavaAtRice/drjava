@@ -3767,11 +3767,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void setTab(String tab, int pos) { getDocument().setTab(tab,pos); }
     
-    public int getWhiteSpace() { return getDocument().getWhiteSpace(); }
+//    public int getWhiteSpace() { return getDocument().getWhiteSpace(); }
     
     public boolean posInParenPhrase(int pos) { return getDocument().posInParenPhrase(pos); }
     
-    public boolean posInParenPhrase() { return getDocument().posInParenPhrase(); }
+//    public boolean posInParenPhrase() { return getDocument().posInParenPhrase(); }
     
     public String getEnclosingClassName(int pos, boolean fullyQualified) throws BadLocationException, ClassNameNotFoundException {
       return getDocument().getEnclosingClassName(pos, fullyQualified);

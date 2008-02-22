@@ -103,7 +103,7 @@ public final class IndentInfoTest extends DrJavaTestCase {
     _document.clear();
     _document.insertString(0, _text, null);
     
-    _infoTestHelper(0, "DOCSTART -- no brace or newline",     -1, -1, -1, -1, -1);
+    _infoTestHelper(0, "0 -- no brace or newline",     -1, -1, -1, -1, -1);
     _infoTestHelper(4, "Location has no brace or newline",    -1, -1, -1, -1, -1);
     _infoTestHelper(5, "Location has a brace but no newline", -1, -1, -1,  1, -1);
     _infoTestHelper(6, "Location has a brace and a newline",   0,  2, -1,  2, -1);

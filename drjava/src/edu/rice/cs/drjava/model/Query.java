@@ -1,0 +1,240 @@
+/*BEGIN_COPYRIGHT_BLOCK
+ *
+ * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *    * Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *      names of its contributors may be used to endorse or promote products
+ *      derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software is Open Source Initiative approved Open Source Software.
+ * Open Source Initative Approved is a trademark of the Open Source Initiative.
+ * 
+ * This file is part of DrJava.  Download the current version of this project
+ * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * 
+ * END_COPYRIGHT_BLOCK*/
+
+package edu.rice.cs.drjava.model;
+
+import java.util.Arrays;
+
+public interface Query {
+  
+  abstract static class Pos implements Query {
+    private final int _pos;
+    
+    Pos(final int pos) { _pos = pos; }
+    
+    public boolean equals(Object other) {
+      if (other == null || other.getClass() != this.getClass()) return false;
+      Pos o = (Pos) other;
+      return o._pos == this._pos;
+    }
+    
+    public int hashCode() { return getClass().hashCode() ^ _pos; }
+  }
+  
+  public static class IndentInformation extends Pos {
+    public IndentInformation(int pos) { super(pos); }
+  }
+  
+  abstract static class EnclosingBrace implements Query {
+    private final int _pos;
+    private final char _opening;
+    private final char _closing;
+    
+    public EnclosingBrace(final int pos, final char opening, final char closing) { 
+      _pos = pos; 
+      _opening = opening;
+      _closing = closing;
+    }
+    
+    public boolean equals(Object other) {
+      if (other == null || other.getClass() != this.getClass()) return false;
+      EnclosingBrace o = (EnclosingBrace) other;
+      return o._pos == this._pos && o._opening == this._opening && o._closing == this._closing;
+    }
+    
+    public int hashCode() { return getClass().hashCode() ^ _pos ^ _opening ^ _closing; }
+  }
+  
+  public static class PrevEnclosingBrace extends EnclosingBrace {
+    public PrevEnclosingBrace(int pos, char opening, char closing) { super(pos, opening, closing); }
+  }
+  
+  public static class NextEnclosingBrace extends EnclosingBrace {
+    public NextEnclosingBrace(int pos, char opening, char closing) { super(pos, opening, closing); }
+  }
+  
+  abstract static class CharArrayAndFlag implements Query {
+    private final int _pos;
+    private final char[] _chars;
+    private final boolean _flag;
+    
+    public CharArrayAndFlag(int pos, char[] chars, boolean flag) { 
+      _pos = pos; 
+      _chars = chars;
+      _flag = flag;
+    }
+    
+    public boolean equals(Object other) {
+      if (other == null || other.getClass() != getClass()) return false;
+      CharArrayAndFlag o = (CharArrayAndFlag) other;
+      return o._pos == _pos && Arrays.equals(o._chars, _chars) && o._flag == _flag;
+    }
+    
+    public int hashCode() { 
+      return getClass().hashCode() ^ _pos ^ _chars[0] ^ _chars[_chars.length-1] ^ (_flag ? 1 : 0); }
+  }
+  
+  public static class PrevDelimiter extends CharArrayAndFlag {
+    public PrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) { super(pos, delims, skipParenPhrases); }
+  }
+  
+  public static class PrevCharPos implements Query {
+    private final int _pos;
+    private final char[] _whitespace;
+    
+    public PrevCharPos(int pos, final char[] whitespace) { 
+      _pos = pos; 
+      _whitespace = whitespace;
+    }
+    
+    public boolean equals(Object other) {
+      if (other == null || other.getClass() != getClass()) return false;
+      PrevCharPos o = (PrevCharPos) other;
+      return o._pos == _pos && Arrays.equals(o._whitespace, _whitespace);
+    }
+    
+    public int hashCode() { 
+      return getClass().hashCode() ^ _pos ^ _whitespace[0] ^ _whitespace[_whitespace.length-1]; 
+    }
+  }
+  
+  public static class IndentOfCurrStmt implements Query {
+    private final int _pos;
+    private final char[] _delims;
+    private final char[] _whitespace;
+    
+    public IndentOfCurrStmt(int pos, char[] delims, char[] whitespace) { 
+      _pos = pos;
+      _delims = delims;
+      _whitespace = whitespace;
+    }
+    
+    public boolean equals(Object other) {
+      if (other == null || other.getClass() != getClass()) return false;
+      IndentOfCurrStmt o = (IndentOfCurrStmt) other;
+      return o._pos == _pos && Arrays.equals(o._delims, _delims) && Arrays.equals(o._whitespace, _whitespace);
+    }
+    
+    public int hashCode() { 
+      return getClass().hashCode() ^ _pos ^_delims[0] ^ _delims[_delims.length-1] ^ _whitespace[0] ^ 
+        _whitespace[_whitespace.length-1]; 
+    }
+  }
+  
+  public static class CharOnLine implements Query {
+    private final int _pos;
+    private final char _findChar;
+    
+    public CharOnLine(int pos, char findChar) { 
+      _pos = pos;
+      _findChar = findChar;
+    }
+    
+    public boolean equals(Object other) {
+      if (other == null || other.getClass() != getClass()) return false;
+      CharOnLine o = (CharOnLine) other;
+      return o._pos == _pos && o._findChar == _findChar;
+    }
+    
+    public int hashCode() { return getClass().hashCode() ^ _pos ^ _findChar; }
+  }
+  
+  public static class LineStartPos extends Pos {
+    public LineStartPos(int pos) { super(pos); }
+  }
+  
+  public static class LineEndPos extends Pos {
+    public LineEndPos(int pos) { super(pos); }
+  }
+  
+  public static class LineFirstCharPos extends Pos {
+    public LineFirstCharPos(int pos) { super(pos); }
+  }
+  
+  public static class FirstNonWSCharPos extends CharArrayAndFlag {
+    FirstNonWSCharPos(int pos, char[] whitespace, boolean acceptComments) { super(pos, whitespace, acceptComments); }
+  }
+  
+  public static class PosInParenPhrase extends Pos {
+    public PosInParenPhrase(int pos) { super(pos); }
+  }
+  
+  public static class PosNotInBlock extends Pos {
+    public PosNotInBlock(int pos) { super(pos); }
+  }
+  
+  public static class PosInBlockComment extends Pos {
+    public PosInBlockComment(int pos) { super(pos); }
+  }
+  
+  public static class AnonymousInnerClass implements Query {
+    private final int _pos;
+    private final int _openSquigglyPos;
+    
+    public AnonymousInnerClass(int pos, int openSquigglyPos) {
+      _pos = pos;
+      _openSquigglyPos = openSquigglyPos;
+    }
+    
+    public boolean equals(Object other) {
+      if (other == null || other.getClass() != getClass()) return false;
+      AnonymousInnerClass o = (AnonymousInnerClass) other;
+      return o._pos == _pos && o._openSquigglyPos == _openSquigglyPos;
+    }
+    
+    public int hashCode() { return getClass().hashCode() ^ _pos ^ _openSquigglyPos; }
+  }
+  
+  public static class AnonymousInnerClassIndex extends Pos {
+    public AnonymousInnerClassIndex(int pos) { super(pos); }
+  }
+  
+  public static class EnclosingClassName implements Query {
+    private int _pos;
+    private boolean _qual;
+    public EnclosingClassName(int pos, boolean qual) {
+      _pos = pos;
+      _qual = qual;
+    }
+    public boolean equals(Object other) {
+      if (other == null || other.getClass() != getClass()) return false;
+      EnclosingClassName o = (EnclosingClassName) other;
+      return o._pos == _pos && o._qual == _qual;
+    }
+    
+    public int hashCode() { return getClass().hashCode() ^ _pos ^ (_qual ? 1 : 0); }
+  }
+}

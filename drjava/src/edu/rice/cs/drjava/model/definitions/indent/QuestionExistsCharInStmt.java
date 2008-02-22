@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /** Determines if the given search character is found between the start of the current statement and the end character.
  *  Accomplishes this by searching backwards from the end character, for the search character until one of the 
- *  following characters is found: '}', '{', ';', DOCSTART.
+ *  following characters is found: '}', '{', ';', 0.
  *  <b>The given end character must exist on the current line and not be part of a quote or comment.</b> If there is 
  *  more than end character on the given line, then the first end character is used.
  *  <p>This question is useful for determining if, when a colon is found on a line, it is part of a ternary operator 
@@ -83,7 +83,7 @@ public class QuestionExistsCharInStmt extends IndentRuleQuestion {
  
   /** Searches backwards from endChar to the start of the statement looking for findChar. Ignores characters in 
    *  comments and quotes. Start of the statement is the point right after when one of the following characters 
-   *  is found: ';', '{', '}', DOCSTART.
+   *  is found: ';', '{', '}', 0.
    *
    *  @param doc AbstractDJDocument containing the line to be indented.
    *  @return true if this node's rule holds.

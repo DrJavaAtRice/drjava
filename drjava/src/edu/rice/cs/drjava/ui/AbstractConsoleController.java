@@ -375,7 +375,7 @@ public abstract class AbstractConsoleController implements Serializable {
     public void actionPerformed(ActionEvent e) { 
       ConsoleDocument doc = getConsoleDoc();
       doc.acquireWriteLock();
-      try { doc.insertNewLine(_pane.getCaretPosition()); }
+      try { doc.insertNewline(_pane.getCaretPosition()); }
       finally { doc.releaseWriteLock(); }
     }
   };

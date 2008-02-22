@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
  * searching backwards to see if the previous line was the end
  * of a statement. Specifically,  checks if the previous
  * non-whitespace character not on this line is one of the
- * following: ';', '{', '}', or DOCSTART.
+ * following: ';', '{', '}', or 0.
  * <p>
  * Note that characters in comments and quotes are disregarded. 
  *
@@ -66,7 +66,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
  
   /**
    * Determines if the previous non-whitespace character not on
-   * this line was one of the following: ';', '{', '}' or DOCSTART.
+   * this line was one of the following: ';', '{', '}' or 0.
    * Ignores characters in quotes and comments.
    * @param doc AbstractDJDocument containing the line to be indented.
    * @return true if this node's rule holds.
@@ -84,8 +84,8 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
       throw new UnexpectedException(e);
     }
     
-    // For DOCSTART, imaginary delimiter at position -1
-    if (prevDelimiterPos == AbstractDJDocument.ERROR_INDEX) {
+    // For 0, imaginary delimiter at position -1
+    if (prevDelimiterPos == -1) {
       prevDelimiterPos = -1;
     }
     
@@ -93,7 +93,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     int firstNonWSAfterDelimiter;
     try {
       firstNonWSAfterDelimiter = doc.getFirstNonWSCharPos(prevDelimiterPos+1);
-      // will return ERROR_INDEX if we hit the end of the document
+      // will return ERROR_INDEX (-1) if we hit the end of the document
     } catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
@@ -101,7 +101,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     // If the first non-WS character is after the beginning of the line
     // or we reached the end of the document, then we are starting a new statement.
     return (firstNonWSAfterDelimiter >= lineStart
-              || firstNonWSAfterDelimiter == AbstractDJDocument.ERROR_INDEX);
+              || firstNonWSAfterDelimiter == -1);
   }
 }
 

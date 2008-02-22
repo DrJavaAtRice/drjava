@@ -84,7 +84,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
       throw new UnexpectedException(e);
     }
     
-    if (nextNonWS == AbstractDJDocument.ERROR_INDEX) return true;
+    if (nextNonWS == -1) return true;
     
     return (nextNonWS >= lineStart);
   }

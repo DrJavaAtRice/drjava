@@ -75,7 +75,7 @@ public final class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTest
     char [] chars = {'='};
     IndentRuleQuestion rule = new QuestionHasCharPrecedingOpenBrace(chars, null, null);
 
-    assertTrue("At DOCSTART.", ! rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertTrue("At 0.", ! rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
     assertTrue("At identifier.",  ! rule.applyRule(_doc, 10, Indenter.IndentReason.OTHER));
     assertTrue("At start of array.", !rule.applyRule(_doc, 25, Indenter.IndentReason.OTHER));
     assertTrue("START starts one-line comment.", rule.applyRule(_doc, 54, Indenter.IndentReason.OTHER));
@@ -120,7 +120,7 @@ public final class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTest
     char [] chars = {'='};
     IndentRuleQuestion rule = new QuestionHasCharPrecedingOpenBrace(chars, null, null);
 
-    assertTrue("At DOCSTART.", ! rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertTrue("At 0.", ! rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
     assertTrue("At identifier.",  ! rule.applyRule(_doc, 10, Indenter.IndentReason.OTHER));
     assertTrue("At start of outer array", !rule.applyRule(_doc, 25, Indenter.IndentReason.OTHER));
 
@@ -168,7 +168,7 @@ public final class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTest
     char [] chars = {'='};
     IndentRuleQuestion rule = new QuestionHasCharPrecedingOpenBrace(chars, null, null);
 
-    assertTrue("At DOCSTART.",    ! rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertTrue("At 0.",    ! rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
     assertTrue("At identifier.",  ! rule.applyRule(_doc, 10, Indenter.IndentReason.OTHER));
     assertTrue("At start of outer array", !rule.applyRule(_doc, 25, Indenter.IndentReason.OTHER));
 

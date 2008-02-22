@@ -459,7 +459,7 @@ public class InteractionsController extends AbstractConsoleController {
         command.start();
       }
       else {
-        _model.addNewLine();
+        _model.addNewline();
         _model.interactionContinues();
       }
     }

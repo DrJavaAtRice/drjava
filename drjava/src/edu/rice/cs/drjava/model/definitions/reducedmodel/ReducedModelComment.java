@@ -450,19 +450,23 @@ public class ReducedModelComment extends AbstractReducedModel {
     _walker = _cursor._copy();
   }
 
-  /** Dist to Previous newline will be -1 if no newline. */
+  /** Stores distance to previous newline character in braceInfo.  Stores -1 if no newline,
+    * so it fails find start of line on first line. */
   void getDistToPreviousNewline(IndentInfo braceInfo) {
     braceInfo.distToPrevNewline = _getDistToPreviousNewline(_cursor._copy());
     braceInfo.distToNewline = braceInfo.distToPrevNewline;
     return;
   }
-
-  /** Returns distance to after newline. */
+  
+  /** Gets distance to the previous newline character (not including newline char).  Returns -1 if no newline exists,
+    * so it fails find start of first line. */
+  public int getDistToPreviousNewline() { return _getDistToPreviousNewline(_cursor._copy()); }
+  
+  /** Returns distance to previous newline. */
   private int _getDistToPreviousNewline(TokenList.Iterator copyCursor) {
     int walkcount = copyCursor.getBlockOffset();
-    if (!copyCursor.atStart()) copyCursor.prev();
-    while ((!copyCursor.atStart()) &&
-           (!(copyCursor.current().getType().equals("\n"))))
+    if (! copyCursor.atStart()) copyCursor.prev();
+    while (! copyCursor.atStart() && ! copyCursor.current().getType().equals("\n"))
            {
              //  copyCursor.current().getState() == FREE))) {
              walkcount += copyCursor.current().getSize();
@@ -476,8 +480,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   void getDistToIndentNewline(IndentInfo braceInfo) {
     TokenList.Iterator copyCursor = _cursor._copy();
 
-    if (braceInfo.distToBrace == -1 || copyCursor.atStart())
-      return; // no brace
+    if (braceInfo.distToBrace == -1 || copyCursor.atStart()) return; // no brace
 
     copyCursor.move(-braceInfo.distToBrace);
     int walkcount = _getDistToPreviousNewline(copyCursor);
@@ -491,41 +494,31 @@ public class ReducedModelComment extends AbstractReducedModel {
     return;
   }
 
-/**
- * Computes the distance to the beginning of the line containing the brace enclosing
- * the current location.  Stores this info in the IndentInfo field distToNewlineCurrent.
- */
+  /** Computes the distance to the beginning of the line containing the brace enclosing
+    * the current location and stores this info in the IndentInfo field distToNewlineCurrent.
+    */
   void getDistToCurrentBraceNewline(IndentInfo braceInfo) {
     TokenList.Iterator copyCursor = _cursor._copy();
 
-    if (braceInfo.distToBraceCurrent == -1 || copyCursor.atStart()) { // no brace
-      return;
-    }
+    if (braceInfo.distToBraceCurrent == -1 || copyCursor.atStart()) return; // no brace
 
     copyCursor.move(-braceInfo.distToBraceCurrent);
     int walkcount = _getDistToPreviousNewline(copyCursor);
 
-    if (walkcount == -1) {
-      braceInfo.distToNewlineCurrent = -1;
-    }
+    if (walkcount == -1) braceInfo.distToNewlineCurrent = -1;
     else {
       braceInfo.distToNewlineCurrent = walkcount + braceInfo.distToBraceCurrent;
     }
     return;
   }
 
-  /**
-  * Gets distance to previous newline, relLoc is the distance
-  * back from the cursor that we want to start searching.
-  */
+  /** Returns distance to previous newline where relLoc is the distance back from the cursor to start searching. */
   public int getDistToPreviousNewline(int relLoc) {
     TokenList.Iterator copyCursor = _cursor._copy();
     copyCursor.move(-relLoc);
     int dist = _getDistToPreviousNewline(copyCursor);
     copyCursor.dispose();
-    if (dist == -1) {
-      return -1;
-    }
+    if (dist == -1) return -1;
     return dist + relLoc;
   }
 

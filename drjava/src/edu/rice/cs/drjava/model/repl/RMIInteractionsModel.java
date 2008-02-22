@@ -156,7 +156,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
       _document.acquireWriteLock();
       try {
         _document.setPrompt(prompt);
-        _document.insertNewLine(_document.getLength());
+        _document.insertNewline(_document.getLength());
         _document.insertPrompt();
       }
       finally { _document.releaseWriteLock(); }      

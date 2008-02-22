@@ -71,7 +71,7 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
       int here = doc.getCurrentLocation();
       int startLine = doc.getLineStartPos(here);
 
-      if (startLine > AbstractDJDocument.DOCSTART) {
+      if (startLine > 0) {
         // Find prefix of previous line
         int startPrevLine = doc.getLineStartPos(startLine - 1);
         int firstChar = doc.getLineFirstCharPos(startPrevLine);

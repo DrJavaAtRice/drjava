@@ -39,11 +39,11 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 import java.util.Stack;
 
 /** Keeps track of the true braces (i.e., "() {}[]"). This reduced sub-model is used to balance braces for both 
- *  indenting and highlighting purposes.  For example, when the user's caret is immediately after a closing brace, 
- *  this allows the DefinitionsPane to produced a highlight extending from the closing brace to its match.
- *  @version $Id$
- *  @author JavaPLT
- */
+  * indenting and highlighting purposes.  For example, when the user's caret is immediately after a closing brace, 
+  * this allows the DefinitionsPane to produced a highlight extending from the closing brace to its match.
+  * @version $Id$
+  * @author JavaPLT
+  */
 public class ReducedModelBrace extends AbstractReducedModel {
 
   private ReducedModelControl _parent;  // contains the walker which is moved by moveWalkerGetState
@@ -70,106 +70,92 @@ public class ReducedModelBrace extends AbstractReducedModel {
   }
 
 
-  /**
-   * Helper function for top level brace insert functions.
-   *
-   * <OL>
-   *  <li> at Head: not special case
-   *  <li> at Tail: not special case
-   *  <li> between two things (offset is 0):
-   *      <ol>
-   *       <li> insert brace
-   *       <li> move next
-   *       <li> offset = 0
-   *      </ol>
-   *  <li> inside gap:
-   *      <ol>
-   *       <li> shrink gap to size of gap - offset.
-   *       <li> insert brace
-   *       <li> insert gap the size of offset.
-   *       <li> move next twice
-   *       <li> offset = 0
-   *      </ol>
-   * <li> inside multiple char brace:
-   *      <ol>
-   *       <li> break
-   *       <li> insert brace
-   *      </ol>
-   * </OL>
-   * @param text the String type of the brace to insert
-   */
+  /** Helper function for top level brace insert functions.
+    *
+    * <OL>
+    *  <li> at Head: not special case
+    *  <li> at Tail: not special case
+    *  <li> between two things (offset is 0):
+    *      <ol>
+    *       <li> insert brace
+    *       <li> move next
+    *       <li> offset = 0
+    *      </ol>
+    *  <li> inside gap:
+    *      <ol>
+    *       <li> shrink gap to size of gap - offset.
+    *       <li> insert brace
+    *       <li> insert gap the size of offset.
+    *       <li> move next twice
+    *       <li> offset = 0
+    *      </ol>
+    * <li> inside multiple char brace:
+    *      <ol>
+    *       <li> break
+    *       <li> insert brace
+    *      </ol>
+    * </OL>
+    * @param text the String type of the brace to insert
+    */
   private void _insertBrace(String text) {
-    if (_cursor.atStart() || _cursor.atEnd()) {
-      _cursor.insertNewBrace(text); // inserts brace and goes to next
-    }
-    else if (_cursor.current().isGap()) {
-      _cursor.insertBraceToGap(text);
-    }
+    if (_cursor.atStart() || _cursor.atEnd()) _cursor.insertNewBrace(text); // inserts brace and goes to next
 
-    else {
-      _cursor.insertNewBrace(text);
-    }
+    else if (_cursor.current().isGap()) _cursor.insertBraceToGap(text);
+
+    else _cursor.insertNewBrace(text);
   }
 
-  /**Inserts a gap between the characters in a multiple character brace.
-    * However, since ReducedModelBrace doesn't keep track of the comment
-    * braces and escape sequences, we just throw an exception since the
-    * condition in insertGap that spawns this method doesn't arise.
+  /** Inserts a gap between the characters in a multiple character brace. However, since ReducedModelBrace doesn't keep
+    * track of comment braces and escape sequences, we just throw an exception since the condition in insertGap 
+    * that spawns this method doesn't arise.
     */
   protected void insertGapBetweenMultiCharBrace(int length) {
     throw new RuntimeException("ReducedModelBrace does not keep track of multi-character braces.");
   }
 
-  /** Updates ReducedModelBrace to reflect cursor movement.
-   *  Negative values move left from the cursor, positive values move
-   *  right.  All functionality has been refactored into TokenList.
-   *  @param count indicates the direction and magnitude of cursor movement
-   */
+  /** Updates ReducedModelBrace to reflect cursor movement. Negative values move left from the cursor, positive 
+    * values move right.  All functionality has been refactored into TokenList.
+    * @param count indicates the direction and magnitude of cursor movement
+    */
   public void move(int count) { _cursor.move(count); }
 
-  /** Updates ReducedModelBrace to reflect text deletion.
-   *  Negative values mean text left of the cursor, positive values mean
-   *  text to the right.  All functionality has been refactored into TokenList.
-   */
+  /** Updates ReducedModelBrace to reflect text deletion. Negative values mean text left of the cursor, positive 
+    * values mean text to the right.  All functionality has been refactored into TokenList.
+    */
   public void delete( int count ) {
-    if (count == 0)  return;
+    if (count == 0) return;
     _cursor.delete(count);
     return;
   }
 
-  /** If the current brace is a /, a *, a // or a \n, it's not matchable.
-  *  This means it is ignored on balancing and on next/prev brace finding.
-  *  All other braces are matchable.
-  */
+  /** If the current brace is a /, a *, a // or a \n, it's not matchable. This means it is ignored on balancing and
+    * on next/prev brace finding.  All other braces are matchable.
+    */
   private boolean _isCurrentBraceMatchable() { return _cursor.current().isMatchable(); }
 
-  /**
-   *Returns distance from current location of cursor to the location of the
-   *previous significant brace.
-   *ex. (...|)  where | signifies the cursor. previousBrace returns 4 because
-   *it goes to the spot behind the (.
-   * /|* returns this brace since you're in the middle of it and going
-   *backward can find it.
-   */
+  /** Returns distance from current location of cursor to the location of the previous significant brace.  For example,
+    * given "(...|)" where | signifies the cursor, previousBrace returns 4 because it goes to the position preceding the (.
+    * Given "* /|*", it returns 1 (the distance to the position of this brace) since you're in the middle of it and going 
+    * backward finds it.
+    */
   public int previousBrace() {
     int relDistance;
     int dist = 0;
-    resetWalkerLocationToCursor();//reset the interface to the comment model
+    resetWalkerLocationToCursor(); //reset the interface to the comment model
 
     TokenList.Iterator copyCursor = _cursor._copy();
-    if (!copyCursor.atStart()) {
-      copyCursor.prev();
-    }
+    if (!copyCursor.atStart()) copyCursor.prev();
+    
     if (copyCursor.atStart()) {
       copyCursor.dispose();
       return -1;
     }
+    
     //initialize the size.
     dist += _cursor.getBlockOffset();
     relDistance = dist;
 
-    // if we're in the middle of the first brace element, we're
-    // not going to find any previous braces
+    // if we're in the middle of the first brace element, we're not going to find any previous braces
 
     while (!copyCursor.atStart()) {
       if (!copyCursor.current().isGap()) {
@@ -189,12 +175,10 @@ public class ReducedModelBrace extends AbstractReducedModel {
   }
 
 
-  /**
-   *Goes to the location before the brace. |...( where | is the cursor,
-   *returns three since it is three moves to the location of the (
-   *NOTE: /|* returns the next brace. It does not return this brace because
-   *you are past it.
-   */
+  /** Determines the distance to the location before the next open brace. For example, |...( where | is the cursor,
+    * returns 3 since it is 3 moves to the position preceding the (.  NOTE: /|* returns the next brace. It does not 
+    * return this brace because you are past it.
+    */
   public int nextBrace() {
     int relDistance = 0;
     int dist = 0;
@@ -365,18 +349,12 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
   }
 
-  /*
-   * If the previous ReducedToken is a closed significant brace,
-   * offset is 0 (i.e., if we're immediately right of said brace),
-   * push the previous Brace onto a Stack and iterate backwards,
-   * keeping track of the distance covered.
-   * - For every open significant Brace, if it matches the top of the Stack,
-   *   pop the Stack.  Increase the distance by the size of the Brace.
-   *   If the Stack is Empty, we have a balance.  Return distance.
-   *   If the open Brace does not match the top of the Stack, return -1;
-   *   We have an unmatched closed Brace at the top of the Stack.
-   * - For every closed significant Brace, push onto the Stack.
-   *   Increase distance by size of the Brace, continue.
+  /* If the previous ReducedToken is a closed significant brace, offset is 0 (i.e., if we're immediately right of said
+   * brace), push the previous Brace onto a Stack and iterate backwards, keeping track of the distance covered.
+   * - For every open significant Brace, if it matches the top of the Stack, pop the Stack.  Increase the distance by
+   *   the size of the Brace. If the Stack is Empty, we have a balance.  Return distance. If the open Brace does not 
+   *   match the top of the Stack, return -1; We have an unmatched closed Brace at the top of the Stack.
+   * - For every closed significant Brace, push onto the Stack. Increase distance by size of the Brace, continue.
    * - Anything else, increase distance by size of the ReducedToken, continue.
    */
   public int balanceBackward() {
@@ -452,22 +430,111 @@ public class ReducedModelBrace extends AbstractReducedModel {
     _parent.resetLocation();
   }
 
-  /** Finds distance to enclosing brace on a preceding line.  The field braceInfo.distToNewline holds the distance to 
+  /** Returns a BraceInfo object specifying the type of the brace enclosing the beginning of this line and the distance
+    * to it from the current location. The matching brace obvious must appear on the preceding line or before.
     * the previous newline.  To find the enclosing brace one must first move past this newline. The distance held in 
     * this variable is only to the space in front of the newline hence you must move back that distance + 1.
+    */
+  public BraceInfo getDistToEnclosingBrace() {
+    Stack<Brace> braceStack = new Stack<Brace>();
+    TokenList.Iterator iter = _cursor._copy();
+    resetWalkerLocationToCursor();
+    // this is the distance to in front of the previous newline.
+    final int distToPrevNewline = _parent.getDistToPreviousNewline();
+
+    if (distToPrevNewline == -1) {
+      iter.dispose();
+      return BraceInfo.NONE;
+    }
+    
+    int relDistance = distToPrevNewline + 1;
+    int distance = relDistance;
+    
+    // move to the proper location, then add the rest of the block and go to the previous.
+    iter.move(-relDistance);
+    final int offset = iter.getBlockOffset();
+    relDistance += offset;
+    distance += offset;
+
+    if (iter.atStart() || iter.atFirstItem()) { // no preceding brace exists
+      iter.dispose();
+      return BraceInfo.NONE;
+    }
+
+    iter.prev(); // move to reduced token preceding the newline.
+
+    
+    String braceType;
+
+    // either we get a match and the stack is empty
+    // or we reach the start of a file and haven't found a match
+    // or we have a open brace that doesn't have a match,
+    // so we abort
+    while (! iter.atStart()) {
+            
+      ReducedToken curToken = iter.current();
+      int size = curToken.getSize();
+      distance += size;
+      relDistance += size;
+
+      if (! curToken.isGap()) {
+        
+        Brace curBrace = (Brace) curToken;
+
+        if (moveWalkerGetState(-relDistance) == FREE) {
+              // open
+              if (curBrace.isOpenBrace()) {
+                if (braceStack.isEmpty()) {
+                  braceType = curBrace.getType();
+                  // distance to brace == distance;
+                  iter.dispose();
+                  return new BraceInfo(braceType, distance);
+                }
+                Brace popped = braceStack.pop();
+                if (! curBrace.isMatch(popped)) {
+                  iter.dispose();
+                  return BraceInfo.NONE;
+                }
+              }
+              // closed
+              else braceStack.push(curBrace);
+            }
+        relDistance = 0;
+      }
+      // no matter what, we always want to increase the distance
+      // by the size of the token we have just gone over
+      iter.prev();
+    }
+
+    // Enclosing brace not found
+    iter.dispose();
+    return BraceInfo.NONE;
+  }
+  
+  
+  
+  /** Finds distance to brace enclosing the start of this line.  Assumes that the field braceInfo.distToNewline already 
+    * holds the distance to the previous newline.  To find the enclosing brace one must first move past this newline. 
+    * The distance held in this variable is only to the space in front of the newline hence you must move back that 
+    * distance + 1.
+    * This is legacy code that will eventually be completely replaced.
     */
   protected void getDistToEnclosingBrace(IndentInfo braceInfo) {
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
     // this is the distance to in front of the previous newline.
-    int relDistance = braceInfo.distToNewline + 1;
+    int relDistance = braceInfo.distToNewline + 1;  
+    /* This code is OBSCENE!  As a precondition, braceInfo.distToNewline must hold the distance to the right edge of 
+     * preceding newline (start of this line). */
     int distance = relDistance;
 
-    if (braceInfo.distToNewline == -1) {
+    if (braceInfo.distToNewline == -1) {  // There is no preceding newline char.  (Why not give distance to line start?)
       iter.dispose();
       return;
     }
+    
+    /* Invariant: distance == relDistance == distance to start of line preceded by newline. */
     // move to the proper location, then add the rest of the block and go to the previous.
     iter.move(-braceInfo.distToNewline - 1);
     relDistance += iter.getBlockOffset();
@@ -528,10 +595,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     return;
   }
 
-
-  /**
-   * Find the enclosing brace enclosing our current location.
-   */
+  /** Determines the brace enclosing the current location and stores it braceInfo.distToBraceCurrent. */
   protected void getDistToEnclosingBraceCurrent(IndentInfo braceInfo) {
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor._copy();
@@ -540,14 +604,12 @@ public class ReducedModelBrace extends AbstractReducedModel {
     int distance = relDistance;
 
 
-    //move to the proper location, then add the rest of the block
-    // and go to the previous.
+    // Move to the proper location, then add the rest of the block and go to the previous.
 
     relDistance += iter.getBlockOffset();
     distance += iter.getBlockOffset();
 
-    //reset the value of braceInfo signiling the necessary newline has
-    //not been found.
+    // initialize braceInfo to signal that no preceding newline exists.
     braceInfo.distToNewlineCurrent = -1;
 
     if (iter.atStart() || iter.atFirstItem()) {
@@ -597,5 +659,67 @@ public class ReducedModelBrace extends AbstractReducedModel {
 
     iter.dispose();
     return;
+  }
+  
+  /** Determines the brace enclosing the current location. */
+  protected BraceInfo getDistToEnclosingBraceCurrent() {
+    Stack<Brace> braceStack = new Stack<Brace>();
+    TokenList.Iterator iter = _cursor._copy();
+    resetWalkerLocationToCursor();
+    int relDistance = 0;
+    int distance = relDistance;
+    
+    // Move to the proper location, then add the rest of the block and go to the previous.
+    
+    int offset = iter.getBlockOffset();
+    relDistance += offset;
+    distance += offset;
+    
+    if (iter.atStart() || iter.atFirstItem()) {
+      iter.dispose();
+      return BraceInfo.NONE;
+    }
+
+    iter.prev();
+    
+    String braceType;
+
+    // either we get a match and the stack is empty or we reach the start of a file and haven't found a match
+    // or we have a open brace that doesn't have a match, so we abort
+    while (! iter.atStart()) {
+
+      ReducedToken curToken = iter.current();
+      int size = curToken.getSize();
+      distance += size;
+      relDistance += size;
+
+      if (! curToken.isGap()) {
+        Brace curBrace = (Brace) curToken;
+        if (moveWalkerGetState(-relDistance) == FREE) {
+              // open
+              if (curBrace.isOpenBrace()) {
+                if (braceStack.isEmpty()) {
+                  braceType = curBrace.getType();
+                  iter.dispose();
+                  return new BraceInfo(braceType, distance);
+                }
+                Brace popped = braceStack.pop();
+                if (! curBrace.isMatch(popped)) {
+                  iter.dispose();
+                  return BraceInfo.NONE;
+                }
+              }
+              // closed
+              else braceStack.push(curBrace);
+            }
+        relDistance = 0;
+      }
+      // no matter what, we always want to increase the distance
+      // by the size of the token we have just gone over
+      iter.prev();
+    }
+
+    iter.dispose();
+    return BraceInfo.NONE;
   }
 }

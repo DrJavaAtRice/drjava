@@ -326,7 +326,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   //---------- DJDocument Methods ----------//
   
   public void setTab(String tab, int pos) { throw new UnsupportedOperationException("Dummy method"); }
-  public int getWhiteSpace() { throw new UnsupportedOperationException("Dummy method"); }
+//  public int getWhiteSpace() { throw new UnsupportedOperationException("Dummy method"); }
   public boolean posInParenPhrase(int pos) { throw new UnsupportedOperationException("Dummy method"); }
   public boolean posInParenPhrase() { throw new UnsupportedOperationException("Dummy method"); }
   

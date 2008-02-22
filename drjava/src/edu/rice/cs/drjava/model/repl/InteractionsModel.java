@@ -166,14 +166,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
   /** Performs pre-interpretation preparation of the interactions document and notifies the view. */
   private void _prepareToInterpret(String text) {
-    addNewLine();
+    addNewline();
     _notifyInteractionStarted();
     _document.setInProgress(true);
     _toAddToHistory = text; // _document.addToHistory(text);
     //Do not add to history immediately in case the user is not finished typing when they press return
   }
   
-  public void addNewLine() { append(_newLine, InteractionsDocument.DEFAULT_STYLE); }
+  public void addNewline() { append(_newLine, InteractionsDocument.DEFAULT_STYLE); }
 
   /** Interprets the given command.
    *  @param toEval command to be evaluated. */

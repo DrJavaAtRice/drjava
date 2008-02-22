@@ -88,7 +88,7 @@ public class SimpleInteractionsWindow extends JFrame {
       public void interpreterResetFailed(Throwable t) { interpreterReady(FileOps.NULL_FILE); }
       public void interactionIncomplete() {
         int caretPos = _pane.getCaretPosition();
-        _controller.getConsoleDoc().insertNewLine(caretPos);
+        _controller.getConsoleDoc().insertNewline(caretPos);
       }
       public void slaveJVMUsed() { }
     });

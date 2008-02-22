@@ -93,11 +93,11 @@ public final class InteractionsDocumentTest extends DrJavaTestCase {
   }
 
   /** Tests that inserting a newline works. */
-  public void testInsertNewLine() throws EditDocumentException {
+  public void testInsertNewline() throws EditDocumentException {
     int origLength = _doc.getLength();
     _doc.insertText(origLength, "command", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("current interaction before newline", "command", _doc.getCurrentInteraction());
-    _doc.insertNewLine(origLength + 2);
+    _doc.insertNewline(origLength + 2);
     assertEquals("current interaction after newline", "co" + "\n" /* formerly StringOps.EOL */ + "mmand",
                  _doc.getCurrentInteraction());
   }

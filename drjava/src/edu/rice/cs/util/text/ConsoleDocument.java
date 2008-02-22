@@ -188,7 +188,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   /** Inserts a new line at the given position.
     * @param pos Position to insert the new line
     */
-  public void insertNewLine(int pos) {
+  public void insertNewline(int pos) {
     // Correct the position if necessary
     acquireWriteLock();
     try {

@@ -40,7 +40,6 @@ import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import static edu.rice.cs.drjava.model.AbstractDJDocument.ERROR_INDEX;
 
 /** Question rule in the indentation decision tree.  Determines if the 
   * line previous to the current position starts with the specified character.
@@ -65,7 +64,7 @@ public class QuestionPrevLineStartsJavaDocWithText extends IndentRuleQuestion {
       int here = doc.getCurrentLocation();
       int startLine = doc.getLineStartPos(here);
       
-      if (startLine <= AbstractDJDocument.DOCSTART) return false;  // on first line
+      if (startLine <= 0) return false;  // on first line
       
       // Find start of previous line
       int endPrevLine = startLine - 1;
@@ -76,7 +75,7 @@ public class QuestionPrevLineStartsJavaDocWithText extends IndentRuleQuestion {
       String actualPrefix = doc.getText(firstChar, 3);
       if (! actualPrefix.equals("/**")) return false;
       int nextNonWSChar = doc.getFirstNonWSCharPos(firstChar + 3, true);
-      return nextNonWSChar != ERROR_INDEX && nextNonWSChar <= endPrevLine;     
+      return nextNonWSChar != -1 && nextNonWSChar <= endPrevLine;     
     }
     catch (BadLocationException e) {
       // Shouldn't happen

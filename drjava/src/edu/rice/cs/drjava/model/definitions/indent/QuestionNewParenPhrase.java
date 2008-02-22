@@ -71,20 +71,20 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
       int here = doc.getCurrentLocation();
       int startLine = doc.getLineStartPos(here);
       
-      if (startLine > AbstractDJDocument.DOCSTART) {
+      if (startLine > 0) {
         // Find previous delimiter (looking in paren phrases)
         char[] delims = {';', ',', '(', '[', 
           '&', '|', '+', '-', '*', '/', '%', 
           '=', '<', '>', '}'
         };
         int prevDelim = doc.findPrevDelimiter(startLine, delims, false);
-        if (prevDelim == AbstractDJDocument.ERROR_INDEX) {
+        if (prevDelim == -1) {
           return false;
         }
         
         // Make sure the delim is the previous non-WS char
         int nextNonWS = doc.getFirstNonWSCharPos(prevDelim + 1);
-        if (nextNonWS == AbstractDJDocument.ERROR_INDEX) {
+        if (nextNonWS == -1) {
           nextNonWS = startLine;
         }
         return (nextNonWS >= startLine);

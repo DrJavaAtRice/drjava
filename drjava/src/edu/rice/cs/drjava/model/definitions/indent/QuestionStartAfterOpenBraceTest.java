@@ -116,8 +116,8 @@ public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase
     
     _setDocText(_text);
     
-    assertTrue("START = DOCSTART.", !_rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
-    assertTrue("START = DOCSTART.", !_rule.applyRule(_doc, 14, Indenter.IndentReason.OTHER));
+    assertTrue("START = 0.", !_rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertTrue("START = 0.", !_rule.applyRule(_doc, 14, Indenter.IndentReason.OTHER));
     assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 15, Indenter.IndentReason.OTHER));
     assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 30, Indenter.IndentReason.OTHER));
     assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 44, Indenter.IndentReason.OTHER));

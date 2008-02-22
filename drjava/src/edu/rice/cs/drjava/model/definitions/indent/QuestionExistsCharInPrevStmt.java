@@ -69,7 +69,7 @@ public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
     }
     
     // if this is the first line, we'll get an error indicator and just return false
-    if (endPreviousStatement == AbstractDJDocument.ERROR_INDEX) {
+    if (endPreviousStatement == -1) {
       return false;
     }
     

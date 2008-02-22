@@ -1611,7 +1611,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             try {
               String mask = "";
               int loc = getCurrentDefPane().getCaretPosition();
-              String s = odd.getText(AbstractDJDocument.DOCSTART, loc);
+              String s = odd.getText(0, loc);
               
               // check that we're at the end of a word
               if ((loc<s.length()) && (!Character.isWhitespace(s.charAt(loc))) &&
@@ -1713,7 +1713,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     try {
       String mask = "";
       int loc = getCurrentDefPane().getCaretPosition();
-      String s = odd.getText(AbstractDJDocument.DOCSTART, loc);
+      String s = odd.getText(0, loc);
       
       // check that we're at the end of a word
       if ((loc<s.length()) && (!Character.isWhitespace(s.charAt(loc))) &&
@@ -2017,7 +2017,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //        odd.acquireReadLock();
       try {
         int pos = odd.findNextEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
-        if (pos != AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
+        if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
 //        finally { odd.releaseReadLock(); }
@@ -2031,7 +2031,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 //        odd.acquireReadLock();
       try {
         int pos = odd.findPrevEnclosingBrace(getCurrentDefPane().getCaretPosition(), '{', '}');
-        if (pos != AbstractDJDocument.ERROR_INDEX) { getCurrentDefPane().setCaretPosition(pos); }
+        if (pos != -1) { getCurrentDefPane().setCaretPosition(pos); }
       }
       catch(BadLocationException ble) { /* just ignore and don't move */ }
 //        finally { odd.releaseReadLock(); }
@@ -5605,7 +5605,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     _addMenuItem(javadocMenu, _openJavadocAction, KEY_OPEN_JAVADOC);
     _addMenuItem(javadocMenu, _openJavadocUnderCursorAction, KEY_OPEN_JAVADOC_UNDER_CURSOR);    
     toolsMenu.add(javadocMenu);
-
+    
     final JMenu historyMenu = new JMenu("History");
     _addMenuItem(historyMenu, _executeHistoryAction, KEY_EXECUTE_HISTORY);
     _addMenuItem(historyMenu, _loadHistoryScriptAction, KEY_LOAD_HISTORY_SCRIPT);
@@ -5629,7 +5629,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       toolsMenu.add(_showDebugConsoleAction);
     }
     toolsMenu.add(interMenu);
-        
+    
     final JMenu extMenu = new JMenu("External Processes");
     _addMenuItem(extMenu, _executeExternalProcessAction, KEY_EXEC_PROCESS);
     final JMenuItem execItem = extMenu.getItem(0);
@@ -8259,7 +8259,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           if (doc != lastActive) {
           _model.setActiveDocument(lastActive);  // breaks when "if" clause omitted
         }
-        return true;
+          return true;
         case JOptionPane.CLOSED_OPTION:
         case JOptionPane.CANCEL_OPTION:
           return false;
@@ -9058,7 +9058,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       DrJava.getConfig().setSetting(DIALOG_EXTERNALPROCESS_STATE, "default");
     }
   }
-
+  
   /** The edit external dialog. */
   private final EditExternalDialog _editExternalDialog;
   
