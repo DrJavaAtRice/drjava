@@ -37,6 +37,8 @@
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.PropertyMaps;
+import edu.rice.cs.drjava.config.DrJavaProperty;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.CompletionMonitor;
 
@@ -82,11 +84,8 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
   /** Main frame. */
   private MainFrame _mainFrame;
   
-  /** Name-properties pairs to use. */
-  private Map<String, Properties> _props;
-  
   /** Selected entry, or null of cancelled. */
-  private edu.rice.cs.plt.tuple.Pair<String,String> _selected = null;
+  private edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> _selected = null;
   
   /** Completion monitor to tell the calling dialog that we're done. */
   private CompletionMonitor _cm;
@@ -94,10 +93,9 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
   /** Create a dialog.
    *  @param mf the instance of mainframe to query into the project
    */
-  public InsertVariableDialog(MainFrame mf, Map<String, Properties> props, CompletionMonitor cm) {
+  public InsertVariableDialog(MainFrame mf, CompletionMonitor cm) {
     super("Insert Variable");
     _mainFrame = mf;
-    _props = props;
     _cm = cm;
     initComponents();
   }
@@ -125,15 +123,16 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     buttons.add(_cancelBtn);
 
     _varValueField = new JTextField();
-    for (Map.Entry<String, Properties> p: _props.entrySet()) {
-      _tabbedPane.addTab(p.getKey(), createPane(p.getKey(), p.getValue()));
-    }
+    updatePanes();
     _tabbedPane.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        String panelName = _props.keySet().toArray(new String[0])[_tabbedPane.getSelectedIndex()];
-        String key = _varTableModel.get(panelName).getValueAt(_varTable.get(panelName).getSelectedRow(),0).toString();
-        _varValueField.setText(_props.get(panelName).getProperty(key));
-        _selected = new edu.rice.cs.plt.tuple.Pair<String,String>(key, _props.get(panelName).getProperty(key));
+        if (_tabbedPane.getSelectedIndex()<0) { return; }
+        String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
+        Map<String, DrJavaProperty> properties = PropertyMaps.ONLY.getProperties(category);
+        String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
+        DrJavaProperty value = properties.get(key);
+        _varValueField.setText(value.toString());
+        _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
       }
     });
     
@@ -145,10 +144,12 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     new JPanel(new BorderLayout());
     main.add(bottom, BorderLayout.SOUTH);
     
-    String panelName = _props.keySet().toArray(new String[0])[0];
-    String key = _varTableModel.get(panelName).getValueAt(_varTable.get(panelName).getSelectedRow(),0).toString();
-    _varValueField.setText(_props.get(panelName).getProperty(key));
-    _selected = new edu.rice.cs.plt.tuple.Pair<String,String>(key, _props.get(panelName).getProperty(key));
+    String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
+    Map<String, DrJavaProperty> properties = PropertyMaps.ONLY.getProperties(category);
+    String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
+    DrJavaProperty value = properties.get(key);
+    _varValueField.setText(value.toString());
+    _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
     
     main.add(_tabbedPane, BorderLayout.CENTER);
     
@@ -171,8 +172,8 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     MainFrame.setPopupLoc(this, _mainFrame);    
   }
   
-  protected JScrollPane createPane(final String title, final Properties props) {
-    _varTableModel.put(title,new DefaultTableModel(0,1) {
+  protected JScrollPane createPane(final String category, final Map<String, DrJavaProperty> props) {
+    _varTableModel.put(category,new DefaultTableModel(0,1) {
       public String getColumnName(int column) {
         switch(column) {
           case 0: return "Variable";
@@ -189,36 +190,37 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
       public boolean isCellEditable(int row, int column) { return false; }
     });
     
-    _varTable.put(title, new JTable(_varTableModel.get(title)));
-    JScrollPane varTableSP = new JScrollPane(_varTable.get(title));
+    _varTable.put(category, new JTable(_varTableModel.get(category)));
+    JScrollPane varTableSP = new JScrollPane(_varTable.get(category));
     varTableSP.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     varTableSP.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 //    _varTable.setMinimumSize(new Dimension(300, 200));
 //    _varTable.setPreferredSize(new Dimension(300, 200));
-    _varTable.get(title).setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    _varTable.get(title).putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
-    ListSelectionModel lsm = _varTable.get(title).getSelectionModel();
+    _varTable.get(category).setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    _varTable.get(category).putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
+    ListSelectionModel lsm = _varTable.get(category).getSelectionModel();
     lsm.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
-        String key = _varTableModel.get(title).getValueAt(_varTable.get(title).getSelectedRow(),0).toString();
-        _selected = new edu.rice.cs.plt.tuple.Pair<String,String>(key, _props.get(title).getProperty(key));
-        _varValueField.setText(_props.get(title).getProperty(key));
+        String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
+        DrJavaProperty value = PropertyMaps.ONLY.getProperty(category,key);
+        _selected = new edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty>(key, value);
+        _varValueField.setText(value.toString());
       }
     });
-    _varTable.get(title).setSelectionModel(lsm);
+    _varTable.get(category).setSelectionModel(lsm);
 
     TreeSet<String> sorted = new TreeSet<String>();
-    for(Object o: props.keySet()) {
-      sorted.add(o.toString());
+    for(DrJavaProperty p: PropertyMaps.ONLY.getProperties(category).values()) {
+      sorted.add(p.getName());
     }
-    
+
     for(String key: sorted) {
       Vector<String> row = new Vector<String>();
       row.add(key);
-      _varTableModel.get(title).addRow(row);
+      _varTableModel.get(category).addRow(row);
     }
 
-    _varTable.get(title).setRowSelectionInterval(0,0);
+    _varTable.get(category).setRowSelectionInterval(0,0);
     
     return varTableSP;
   }
@@ -234,7 +236,14 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     _cm.set();
   }
   
-  public edu.rice.cs.plt.tuple.Pair<String,String> getSelected() { return _selected; }
+  protected void updatePanes() {
+    _tabbedPane.removeAll();
+    for (String category: PropertyMaps.ONLY.getCategories()) {
+      _tabbedPane.addTab(category, createPane(category, PropertyMaps.ONLY.getProperties(category)));
+    }
+  }
+  
+  public edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> getSelected() { return _selected; }
   
   protected WindowAdapter _windowListener = new WindowAdapter() {
     public void windowDeactivated(WindowEvent we) {
@@ -250,6 +259,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
+      updatePanes();
       _mainFrame.hourglassOn();
       addWindowListener(_windowListener);
     }

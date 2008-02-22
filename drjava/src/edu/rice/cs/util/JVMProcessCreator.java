@@ -37,6 +37,7 @@
 package edu.rice.cs.util;
 
 import edu.rice.cs.util.newjvm.ExecJVM;
+import edu.rice.cs.drjava.config.PropertyMaps;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,8 +61,8 @@ public class JVMProcessCreator extends ProcessCreator {
    * @param workdir working directory
    * @param props map of properties
    */
-  public JVMProcessCreator(String jvmArgs, String cmdline, String workdir, Map<String, Properties> props) {
-    super(cmdline, workdir, props);
+  public JVMProcessCreator(String jvmArgs, String cmdline, String workdir) {
+    super(cmdline, workdir);
     _jvmArgs = jvmArgs;
   }
   
@@ -78,15 +79,18 @@ public class JVMProcessCreator extends ProcessCreator {
    * Starts a new JCM process using the attributes of this process creator.
    */
   public Process start() throws IOException {
-    List<String> jvmArgs = StringOps.commandLineToList(StringOps.replaceVariables(_jvmArgs, _props));
-    List<String> cmds = StringOps.commandLineToList(StringOps.replaceVariables(_cmdline, _props));
+    List<String> jvmArgs = StringOps.commandLineToList(StringOps.replaceVariables(_jvmArgs, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));;
+    List<String> cmds = StringOps.commandLineToList(StringOps.replaceVariables(_cmdline, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
     LinkedList<String> args = new LinkedList<String>();
     args.add(ExecJVM.getExecutable());
     args.addAll(jvmArgs);
     args.addAll(cmds);
-    String[] cmdarray = args.toArray(new String[args.size()]);
+    String[] cmdarray = new String[args.size()];
+    for (int i=0; i<args.size(); ++i) {
+      cmdarray[i] = StringOps.unescapeSpacesWith1bHex(args.get(i));
+    }
 
-    String workdir = StringOps.replaceVariables(_workdir, _props);
+    String workdir = StringOps.replaceVariables(_workdir, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
     File dir = null;
     if (!workdir.trim().equals("")) { dir = new File(workdir); }
     

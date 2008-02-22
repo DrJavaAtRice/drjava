@@ -45,6 +45,7 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.drjava.config.PropertyMaps;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -210,14 +211,14 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Last frame state. It can be stored and restored. */
   protected FrameState _lastState = null;
   
-  /** Map of properties. */
-  protected Map<String, Properties> _props; 
-  
   /** Edit mode if true. */
   protected boolean _editMode = false;
   
   /** Index of the saved external process being edited if _editMode is true. */
   protected int _editIndex = -1;
+  
+  public static final String STALE_TOOLTIP = "<html>Note: Values of variables might not be current for<br>"+
+    "performance reasons. They will be current when executed.</html>";
   
   /** Returns the last state of the frame, i.e. the location and dimension.
    *  @return frame state
@@ -344,9 +345,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       _saveJavaButton = new JButton(saveJavaAction);
     }
     
-    updateProperties();
-    
-    _insertVarDialog = new InsertVariableDialog(_mainFrame, _props, _insertVarDialogMonitor);
+    _insertVarDialog = new InsertVariableDialog(_mainFrame, _insertVarDialogMonitor);
     Action insertCommandAction = new AbstractAction("Insert Variable...") {
       public void actionPerformed(ActionEvent e) {
         _insertVariableCommand();
@@ -447,6 +446,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     c.gridwidth = 1;
     c.insets = labelInsets;
     JLabel commandLinePreviewLabel = new JLabel("Command line preview:");
+    commandLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
     gridbag.setConstraints(commandLinePreviewLabel, c);
     main.add(commandLinePreviewLabel);
 
@@ -456,6 +456,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     c.insets = compInsets;
 
     _commandLinePreview = new JTextPane();
+    _commandLinePreview.setToolTipText(STALE_TOOLTIP);
     _commandLineDoc = (StyledDocument)_commandLinePreview.getDocument();
 
     // Create a style object and then set the style attributes
@@ -540,6 +541,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     c.gridwidth = 1;
     c.insets = labelInsets;
     JLabel commandWorkDirLinePreviewLabel = new JLabel("Work directory preview:");
+    commandWorkDirLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
     gridbag.setConstraints(commandWorkDirLinePreviewLabel, c);
     main.add(commandWorkDirLinePreviewLabel);
 
@@ -549,6 +551,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     c.insets = compInsets;
 
     _commandWorkDirLinePreview = new JTextPane();
+    _commandWorkDirLinePreview.setToolTipText(STALE_TOOLTIP);
     _commandWorkDirLineDoc = (StyledDocument)_commandWorkDirLinePreview.getDocument();
 
     _commandWorkDirLinePreview.setEditable(false);
@@ -580,7 +583,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           // preview
           _commandLineDoc.remove(0,_commandLineDoc.getLength());
           StringBuilder sb = new StringBuilder();
-          String text = StringOps.replaceVariables(_commandLine.getText(), _props);
+          String text = StringOps.replaceVariables(_commandLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
           List<String> cmds = StringOps.commandLineToList(text);
           for(String s: cmds) {
             sb.append(s);
@@ -613,7 +616,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         try {
           // preview
           _commandWorkDirLineDoc.remove(0,_commandWorkDirLineDoc.getLength());
-          String text = StringOps.replaceVariables(_commandWorkDirLine.getText(), _props);
+          String text = StringOps.replaceVariables(_commandWorkDirLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
           _commandWorkDirLineDoc.insertString(0, text, null);
           
           // command line
@@ -775,6 +778,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     c.gridwidth = 1;
     c.insets = labelInsets;
     JLabel javaCommandLinePreviewLabel = new JLabel("Command line preview:");
+    javaCommandLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
     gridbag.setConstraints(javaCommandLinePreviewLabel, c);
     main.add(javaCommandLinePreviewLabel);
 
@@ -784,6 +788,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     c.insets = compInsets;
 
     _javaCommandLinePreview = new JTextPane();
+    _javaCommandLinePreview.setToolTipText(STALE_TOOLTIP);
     _javaCommandLineDoc = (StyledDocument)_javaCommandLinePreview.getDocument();
 
     // Create a style object and then set the style attributes
@@ -877,6 +882,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     c.gridwidth = 1;
     c.insets = labelInsets;
     JLabel javaCommandWorkDirLinePreviewLabel = new JLabel("Work directory preview:");
+    javaCommandWorkDirLinePreviewLabel.setToolTipText(STALE_TOOLTIP);
     gridbag.setConstraints(javaCommandWorkDirLinePreviewLabel, c);
     main.add(javaCommandWorkDirLinePreviewLabel);
 
@@ -886,6 +892,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     c.insets = compInsets;
 
     _javaCommandWorkDirLinePreview = new JTextPane();
+    _javaCommandWorkDirLinePreview.setToolTipText(STALE_TOOLTIP);
     _javaCommandWorkDirLineDoc = (StyledDocument)_javaCommandWorkDirLinePreview.getDocument();
 
     _javaCommandWorkDirLinePreview.setEditable(false);
@@ -922,7 +929,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(), sb.toString(), _javaCommandLineExecutableStyle);
           
           sb = new StringBuilder();
-          String text = StringOps.replaceVariables(_jvmLine.getText(), _props);
+          String text = StringOps.replaceVariables(_jvmLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
           List<String> cmds = StringOps.commandLineToList(text);
           for(String s: cmds) {
             sb.append(s);
@@ -931,7 +938,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(), sb.toString(), _javaCommandLineJVMStyle);
           
           sb = new StringBuilder();
-          text = StringOps.replaceVariables(_javaCommandLine.getText(), _props);
+          text = StringOps.replaceVariables(_javaCommandLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
           cmds = StringOps.commandLineToList(text);
           for(String s: cmds) {
             sb.append(s);
@@ -972,7 +979,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         try {
           // preview
           _javaCommandWorkDirLineDoc.remove(0,_javaCommandWorkDirLineDoc.getLength());
-          String text = StringOps.replaceVariables(_javaCommandWorkDirLine.getText(), _props);
+          String text = StringOps.replaceVariables(_javaCommandWorkDirLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
           _javaCommandWorkDirLineDoc.insertString(0, text, null);
           
           // work dir
@@ -1095,10 +1102,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                      (str.charAt(pos+1)=='{')) {
               // beginning of what should be a ${variable}
               boolean found = false;
-              for(Map.Entry<String, Properties> table: _props.entrySet()) {
-                Enumeration<?> e = table.getValue().propertyNames();
-                while(e.hasMoreElements()) {
-                  String key = (String)e.nextElement();
+              for(String category: PropertyMaps.ONLY.getCategories()) {
+                for(DrJavaProperty prop: PropertyMaps.ONLY.getProperties(category).values()) {
+                  String key = prop.getName();
                   int endPos = pos + key.length() + 3;
                   if (str.substring(pos, Math.min(str.length(), endPos)).equals("${"+key+"}")) {
                     // found property name
@@ -1145,8 +1151,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   
   /** Run a command and return an external process panel. */
   public ExternalProcessPanel runCommand(String name, String cmdline, String workdir) {
-    updateProperties();
-    ProcessCreator pc = new ProcessCreator(cmdline, workdir.trim(), _props);
+    ProcessCreator pc = new ProcessCreator(cmdline, workdir.trim());
     String label = "External";
     if (!name.equals("")) { label += ": "+name; }
     final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, label, pc);
@@ -1163,7 +1168,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   }
   
   public ExternalProcessPanel runJava(String name, String jvmargs, String cmdline, String workdir) {
-    ProcessCreator pc = new JVMProcessCreator(jvmargs, cmdline, workdir, _props);
+    ProcessCreator pc = new JVMProcessCreator(jvmargs, cmdline, workdir);
     
     String label = "External Java";
     if (!name.equals("")) { label += ": "+name; }
@@ -1392,7 +1397,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
               }
             });
             _windowListenerActive = true;
-            edu.rice.cs.plt.tuple.Pair<String,String> selected = _insertVarDialog.getSelected();
+            edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> selected = _insertVarDialog.getSelected();
             if (selected!=null) {
               String text = _lastCommandFocus.getText();
               Caret caret = _lastCommandFocus.getCaret();
@@ -1431,7 +1436,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
               }
             });
             _windowListenerActive = true;
-            edu.rice.cs.plt.tuple.Pair<String,String> selected = _insertVarDialog.getSelected();
+            edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> selected = _insertVarDialog.getSelected();
             if (selected!=null) {
               String text = _lastJavaFocus.getText();
               Caret caret = _lastJavaFocus.getCaret();
@@ -1451,23 +1456,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     }).start();
   }
   
-  /** Update the properties. */
-  public void updateProperties() {
-    _props = new TreeMap<String, Properties>();
-    _props.put("Java", System.getProperties());
-    
-    Properties drJavaProps = new Properties();
-    OptionMap om = DrJava.getConfig().getOptionMap();
-    Iterator<OptionParser<?>> it = om.keys();
-    while(it.hasNext()) {
-      OptionParser<?> op = it.next();
-      String key = op.getName();
-      String value = om.getString(op);
-      drJavaProps.setProperty("drjava."+key,value);
-    }
-    _props.put("DrJava", drJavaProps);
-  }
-  
   protected volatile boolean _windowListenerActive = false;
   protected WindowAdapter _windowListener = new WindowAdapter() {
     public void windowDeactivated(WindowEvent we) {
@@ -1483,10 +1471,13 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
-      updateProperties();
       _mainFrame.hourglassOn();
       addWindowListener(_windowListener);
       _windowListenerActive = true;
+      _documentListener.changedUpdate(null);
+      _workDirDocumentListener.changedUpdate(null);
+      _javaDocumentListener.changedUpdate(null);
+      _javaWorkDirDocumentListener.changedUpdate(null);
     }
     else {
       _windowListenerActive = false;
@@ -1500,7 +1491,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Opens the file chooser to select a file, putting the result in the file field. */
   protected void chooseFile(JTextPane pane) {
     // Get the file from the chooser
-    File wd = new File(StringOps.replaceVariables(pane.getText().trim(), _props));
+    File wd = new File(StringOps.replaceVariables(pane.getText().trim(), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
     if ((pane.getText().equals("")) ||
         (!wd.exists()) &&
         (!wd.isDirectory())) {

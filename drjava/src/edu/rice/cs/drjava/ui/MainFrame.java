@@ -124,7 +124,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   private static final int DEBUG_STEP_TIMER_VALUE = 2000;
   
   /** The model which controls all logic in DrJava. */
-  private final SingleDisplayModel _model;
+  private final AbstractGlobalModel _model;
   
   /** The main model listener attached by the main frame to the global model */
   private final ModelListener _mainListener; 
@@ -3171,11 +3171,129 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                         }
                                                       }
                                                     }
+                                                    
+    setUpDrJavaProperties();                                                
   }   // End of MainFrame constructor
   
   public void setVisible(boolean b) { 
     _updateToolBarVisible();
     super.setVisible(b); 
+  }
+  
+  public void setUpDrJavaProperties() {
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.file") {
+      public void update() {
+        _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(_model.getActiveDocument().getRawFile().toString());
+      }
+    });
+    
+    // Files
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.all.files") {
+      public void update() {
+        List<OpenDefinitionsDocument> l = _model.getOpenDefinitionsDocuments();
+        StringBuilder sb = new StringBuilder();
+        for(OpenDefinitionsDocument odd: l) {
+          sb.append(File.pathSeparator);
+          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
+          sb.append(f);
+        }
+        _value = sb.toString().substring(File.pathSeparator.length());
+      }
+    });
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.project.files") {
+      public void update() {
+        List<OpenDefinitionsDocument> l = _model.getProjectDocuments();
+        StringBuilder sb = new StringBuilder();
+        for(OpenDefinitionsDocument odd: l) {
+          sb.append(File.pathSeparator);
+          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
+          sb.append(f);
+        }
+        _value = sb.toString().substring(File.pathSeparator.length());
+      }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.included.files") {
+      public void update() {
+        List<OpenDefinitionsDocument> l = _model.getAuxiliaryDocuments();
+        StringBuilder sb = new StringBuilder();
+        for(OpenDefinitionsDocument odd: l) {
+          sb.append(File.pathSeparator);
+          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
+          sb.append(f);
+        }
+        _value = sb.toString().substring(File.pathSeparator.length());
+      }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.external.files") {
+      public void update() {
+        List<OpenDefinitionsDocument> l = _model.getNonProjectDocuments();
+        StringBuilder sb = new StringBuilder();
+        for(OpenDefinitionsDocument odd: l) {
+          sb.append(File.pathSeparator);
+          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
+          sb.append(f);
+        }
+        _value = sb.toString().substring(File.pathSeparator.length());
+      }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
+    
+    // Files with spaces
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.all.files.space") {
+      public void update() {
+        List<OpenDefinitionsDocument> l = _model.getOpenDefinitionsDocuments();
+        StringBuilder sb = new StringBuilder();
+        for(OpenDefinitionsDocument odd: l) {
+          sb.append(' ');
+          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
+          sb.append(f);
+        }
+        _value = sb.toString().substring(1);
+      }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
+    
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.project.files.space") {
+      public void update() {
+        List<OpenDefinitionsDocument> l = _model.getProjectDocuments();
+        StringBuilder sb = new StringBuilder();
+        for(OpenDefinitionsDocument odd: l) {
+          sb.append(' ');
+          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
+          sb.append(f);
+        }
+        _value = sb.toString().substring(1);
+      }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.project.files"));
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.included.files.space") {
+      public void update() {
+        List<OpenDefinitionsDocument> l = _model.getAuxiliaryDocuments();
+        StringBuilder sb = new StringBuilder();
+        for(OpenDefinitionsDocument odd: l) {
+          sb.append(' ');
+          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
+          sb.append(f);
+        }
+        _value = sb.toString().substring(1);
+      }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.included.files"));
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.external.files.space") {
+      public void update() {
+        List<OpenDefinitionsDocument> l = _model.getNonProjectDocuments();
+        StringBuilder sb = new StringBuilder();
+        for(OpenDefinitionsDocument odd: l) {
+          sb.append(' ');
+          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
+          sb.append(f);
+        }
+        _value = sb.toString().substring(1);
+      }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.external.files"));
+
+    // Misc
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.time.millis") {
+      public void update() {
+        _value = String.valueOf(System.currentTimeMillis());
+      }
+    });
   }
   
   /** Set a new painters for existing breakpoint highlights. */
@@ -3553,6 +3671,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _model.addAuxiliaryFile(d);
           try{
             _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+            PropertyMaps.ONLY.getProperty("DrJava","drjava.project.files").invalidate();
+            PropertyMaps.ONLY.getProperty("DrJava","drjava.included.files").invalidate();
+            PropertyMaps.ONLY.getProperty("DrJava","drjava.external.files").invalidate();
           }
           catch(IOException e) { /* do nothing */ }
         }
@@ -3570,6 +3691,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _model.removeAuxiliaryFile(d);
           try{
             _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+            PropertyMaps.ONLY.getProperty("DrJava","drjava.project.files").invalidate();
+            PropertyMaps.ONLY.getProperty("DrJava","drjava.included.files").invalidate();
+            PropertyMaps.ONLY.getProperty("DrJava","drjava.external.files").invalidate();
           }
           catch(IOException e) { /* do nothing */ }
         }
@@ -3594,6 +3718,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
       }
     }
+    PropertyMaps.ONLY.getProperty("DrJava","drjava.project.files").invalidate();
+    PropertyMaps.ONLY.getProperty("DrJava","drjava.included.files").invalidate();
+    PropertyMaps.ONLY.getProperty("DrJava","drjava.external.files").invalidate();
     Utilities.invokeLater(new Runnable() { 
       public void run() { _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument()); }
     });
@@ -3616,6 +3743,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
       }
     }
+    PropertyMaps.ONLY.getProperty("DrJava","drjava.project.files").invalidate();
+    PropertyMaps.ONLY.getProperty("DrJava","drjava.included.files").invalidate();
+    PropertyMaps.ONLY.getProperty("DrJava","drjava.external.files").invalidate();
     Utilities.invokeLater(new Runnable() { 
       public void run() { _model.getDocumentNavigator().setActiveDoc(_model.getActiveDocument()); }
     });
@@ -7358,14 +7488,20 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     public void newFileCreated(final OpenDefinitionsDocument doc) {
-      Utilities.invokeLater(new Runnable() { public void run() { _createDefScrollPane(doc); } });
+      Utilities.invokeLater(new Runnable() { public void run() { 
+        _createDefScrollPane(doc);
+        PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+      } });
     }
     
     private volatile int _fnfCount = 0;
     
     private boolean resetFNFCount() { return _fnfCount == 0; }
     
-    private boolean someFilesNotFound() { return _fnfCount > 0; }
+    private boolean someFilesNotFound() {
+      PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+      return _fnfCount > 0;
+    }
     
     public void filesNotFound(File... files) {
       if (files.length == 0) return;
@@ -7392,6 +7528,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         
         setPopupLoc(dialog);
         dialog.showDialog();
+        PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
       }
     }
     
@@ -7405,6 +7542,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _revertAction.setEnabled(true);
           updateStatusField();
           _currentDefPane.requestFocusInWindow();
+          PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
           try {
             File f = doc.getFile();
             if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
@@ -7421,7 +7559,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     public void fileOpened(final OpenDefinitionsDocument doc) { 
-      Utilities.invokeLater(new Runnable() { public void run() { _fileOpened(doc); } });  
+      Utilities.invokeLater(new Runnable() { public void run() { 
+        _fileOpened(doc);
+        PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
+      } });  
     }
     
     private void _fileOpened(final OpenDefinitionsDocument doc) {
@@ -7429,7 +7570,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         File f = doc.getFile();
         if (! _model.inProject(f)) {
           _recentFileManager.updateOpenFiles(f);
-          
+          PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
         }
       }
       catch (FileMovedException fme) {
@@ -7453,6 +7594,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         ((DefinitionsPane)jsp.getViewport().getView()).close();
         _defScrollPanes.remove(doc);
       }
+      PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files").invalidate();
     }
     
     public void fileReverted(OpenDefinitionsDocument doc) {
@@ -7537,6 +7679,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             _lastFocusOwner = _currentDefPane;
 //            System.err.println("Requesting focus on new active document");
             _currentDefPane.requestFocusInWindow(); 
+            PropertyMaps.ONLY.getProperty("DrJava","drjava.current.file").invalidate();
           } });
         }
       });

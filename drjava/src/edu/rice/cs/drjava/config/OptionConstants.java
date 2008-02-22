@@ -245,20 +245,21 @@ public interface OptionConstants {
   }
 
   /* ---------- Key Binding Options ----------- */
-  static int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+  public static int MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+
   /**
    * The key binding for creating a new file
    */
   public static final KeyStrokeOption KEY_NEW_FILE =
     new KeyStrokeOption("key.new.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_N, MASK));
   /**
    * The key binding for opening an entire project.  I is right next to O, so
    * it seemed logical that ctrl-I would open a project and ctrl-O open a file
    */
   public static final KeyStrokeOption KEY_OPEN_PROJECT =
     new KeyStrokeOption("key.open.project",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_I, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_I, MASK));
   /**
    * The key binding for creating a new JUnit test case
    */
@@ -277,26 +278,26 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_OPEN_FILE =
     new KeyStrokeOption("key.open.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_O, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_O, MASK));
   /**
    * The key binding for saving a file
    */
   public static final KeyStrokeOption KEY_SAVE_FILE =
     new KeyStrokeOption("key.save.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK));
   /**
    * The key binding for saving a file as
    */
   public static final KeyStrokeOption KEY_SAVE_FILE_AS =
     new KeyStrokeOption("key.save.file.as",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_S, mask |
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK |
                                                InputEvent.SHIFT_MASK));
   /**
    * The key binding for saving all files
    */
   public static final KeyStrokeOption KEY_SAVE_ALL_FILES =
     new KeyStrokeOption("key.save.all.files",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_S, mask |
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK |
                                                InputEvent.ALT_MASK));
   
   /**
@@ -310,24 +311,24 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_REVERT_FILE =
     new KeyStrokeOption("key.revert.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_R, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_R, MASK));
   /**
    * The key binding for closing a file
    */
   public static final KeyStrokeOption KEY_CLOSE_FILE =
     new KeyStrokeOption("key.close.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_W, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_W, MASK));
   /**
    * The key binding for closing all files
    */
   public static final KeyStrokeOption KEY_CLOSE_ALL_FILES =
     new KeyStrokeOption("key.close.all.files",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_W, mask |
+                        KeyStroke.getKeyStroke(KeyEvent.VK_W, MASK |
                                                InputEvent.ALT_MASK));
   
   public static final KeyStrokeOption KEY_CLOSE_PROJECT =
     new KeyStrokeOption("key.close.project",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_W, mask | InputEvent.SHIFT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_W, MASK | InputEvent.SHIFT_MASK));
   
   /** The key binding for showing the print preview */
   public static final KeyStrokeOption KEY_PAGE_SETUP =
@@ -335,15 +336,15 @@ public interface OptionConstants {
   
   /** The key binding for showing the print preview. */
   public static final KeyStrokeOption KEY_PRINT_PREVIEW =
-    new KeyStrokeOption("key.print.preview", KeyStroke.getKeyStroke(KeyEvent.VK_P, mask | InputEvent.SHIFT_MASK));
+    new KeyStrokeOption("key.print.preview", KeyStroke.getKeyStroke(KeyEvent.VK_P, MASK | InputEvent.SHIFT_MASK));
   
   /** The key binding for printing a file */
   public static final KeyStrokeOption KEY_PRINT =
-    new KeyStrokeOption("key.print", KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
+    new KeyStrokeOption("key.print", KeyStroke.getKeyStroke(KeyEvent.VK_P, MASK));
   
   /** The key binding for quitting */
   public static final KeyStrokeOption KEY_QUIT =
-    new KeyStrokeOption("key.quit", KeyStroke.getKeyStroke(KeyEvent.VK_Q, mask));
+    new KeyStrokeOption("key.quit", KeyStroke.getKeyStroke(KeyEvent.VK_Q, MASK));
   
   /** The key binding for forced quitting */
   public static final KeyStrokeOption KEY_FORCE_QUIT =
@@ -351,31 +352,31 @@ public interface OptionConstants {
   
   /** The key binding for undo-ing */
   public static final KeyStrokeOption KEY_UNDO =
-    new KeyStrokeOption("key.undo", KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask));
+    new KeyStrokeOption("key.undo", KeyStroke.getKeyStroke(KeyEvent.VK_Z, MASK));
   
   /** The key binding for redo-ing */
   public static final KeyStrokeOption KEY_REDO =
-    new KeyStrokeOption("key.redo", KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask | InputEvent.SHIFT_MASK));
+    new KeyStrokeOption("key.redo", KeyStroke.getKeyStroke(KeyEvent.VK_Z, MASK | InputEvent.SHIFT_MASK));
   
   /** The key binding for cutting */
   public static final KeyStrokeOption KEY_CUT =
-    new KeyStrokeOption("key.cut", KeyStroke.getKeyStroke(KeyEvent.VK_X, mask));
+    new KeyStrokeOption("key.cut", KeyStroke.getKeyStroke(KeyEvent.VK_X, MASK));
   
   /** The key binding for copying */
   public static final KeyStrokeOption KEY_COPY =
-    new KeyStrokeOption("key.copy", KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
+    new KeyStrokeOption("key.copy", KeyStroke.getKeyStroke(KeyEvent.VK_C, MASK));
   
   /** The key binding for pasting */
   public static final KeyStrokeOption KEY_PASTE =
-    new KeyStrokeOption("key.paste", KeyStroke.getKeyStroke(KeyEvent.VK_V, mask));
+    new KeyStrokeOption("key.paste", KeyStroke.getKeyStroke(KeyEvent.VK_V, MASK));
   
   /** The key binding for pasting from history */
   public static final KeyStrokeOption KEY_PASTE_FROM_HISTORY =
-    new KeyStrokeOption("key.paste.from.history", KeyStroke.getKeyStroke(KeyEvent.VK_V , mask | InputEvent.SHIFT_MASK));
+    new KeyStrokeOption("key.paste.from.history", KeyStroke.getKeyStroke(KeyEvent.VK_V , MASK | InputEvent.SHIFT_MASK));
   
   /** The key binding for selecting all text */
   public static final KeyStrokeOption KEY_SELECT_ALL =
-    new KeyStrokeOption("key.select.all", KeyStroke.getKeyStroke(KeyEvent.VK_A, mask));
+    new KeyStrokeOption("key.select.all", KeyStroke.getKeyStroke(KeyEvent.VK_A, MASK));
   
   /** The key binding for find and replace */
   public static final KeyStrokeOption KEY_FIND_NEXT =
@@ -390,20 +391,20 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_FIND_REPLACE =
     new KeyStrokeOption("key.find.replace",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F, MASK));
   /**
    * The key binding for goto line
    */
   public static final KeyStrokeOption KEY_GOTO_LINE =
     new KeyStrokeOption("key.goto.line",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_G, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_G, MASK));
 
   /**
    * The key binding for goto file.
    */
   public static final KeyStrokeOption KEY_GOTO_FILE =
     new KeyStrokeOption("key.goto.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_G, mask|KeyEvent.SHIFT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_G, MASK|KeyEvent.SHIFT_MASK));
 
   /**
    * The key binding for goto this file.
@@ -424,28 +425,28 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_OPEN_JAVADOC_UNDER_CURSOR =
     new KeyStrokeOption("key.open.javadoc.under.cursor",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, MASK));
 
   /**
    * The key binding for complete file.
    */
   public static final KeyStrokeOption KEY_COMPLETE_FILE =
     new KeyStrokeOption("key.complete.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, mask|KeyEvent.SHIFT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, MASK|KeyEvent.SHIFT_MASK));
 
   /**
    * The key binding for indenting
    *
   public static final KeyStrokeOption KEY_INDENT =
     new KeyStrokeOption("key.indent",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_TAB, mask)); */
+                        KeyStroke.getKeyStroke(KeyEvent.VK_TAB, MASK)); */
 
   /**
    * The key binding for commenting out lines
    */
   public static final KeyStrokeOption KEY_COMMENT_LINES =
     new KeyStrokeOption("key.comment.lines",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, MASK));
 
   /**
    * The key binding for un-commenting lines
@@ -453,48 +454,48 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_UNCOMMENT_LINES =
     new KeyStrokeOption("key.uncomment.lines",
                         KeyStroke.getKeyStroke(KeyEvent.VK_SLASH,
-                                               (mask | InputEvent.SHIFT_MASK)));
+                                               (MASK | InputEvent.SHIFT_MASK)));
 
   /**
    * The key binding for selecting previous document
    */
   public static final KeyStrokeOption KEY_PREVIOUS_DOCUMENT =
     new KeyStrokeOption("key.previous.document",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, MASK));
   /**
    * The key binding for selecting next document
    */
   public static final KeyStrokeOption KEY_NEXT_DOCUMENT =
     new KeyStrokeOption("key.next.document",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, MASK));
 
   /**
    * The key binding for changing the focus to the previous pane
    */
   public static final KeyStrokeOption KEY_PREVIOUS_PANE =
     new KeyStrokeOption("key.previous.pane",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, MASK));
 
   /**
    * The key binding for changing the focus to the next pane
    */
   public static final KeyStrokeOption KEY_NEXT_PANE =
     new KeyStrokeOption("key.next.pane",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, MASK));
 
   /**
    * The key binding for going to the opening brace.
    */
   public static final KeyStrokeOption KEY_OPENING_BRACE =
     new KeyStrokeOption("key.goto.opening.brace",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, mask|InputEvent.SHIFT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, MASK|InputEvent.SHIFT_MASK));
 
   /**
    * The key binding for going to the closing brace.
    */
   public static final KeyStrokeOption KEY_CLOSING_BRACE =
     new KeyStrokeOption("key.goto.closing.brace",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, mask|InputEvent.SHIFT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, MASK|InputEvent.SHIFT_MASK));
 
   /**
    * The key binding for jumping to the next location in the browser history
@@ -515,7 +516,7 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_PREFERENCES =
     new KeyStrokeOption("key.preferences",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_SEMICOLON, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_SEMICOLON, MASK));
 
   /**
    * The key binding for compiling current document
@@ -546,26 +547,26 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_TEST =
     new KeyStrokeOption("key.test",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_T, mask | InputEvent.SHIFT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_T, MASK | InputEvent.SHIFT_MASK));
 
   /**
    * The key binding for testing all open JUnit test cases.
    */
   public static final KeyStrokeOption KEY_TEST_ALL =
-    new KeyStrokeOption("key.test.all", KeyStroke.getKeyStroke(KeyEvent.VK_T, mask));
+    new KeyStrokeOption("key.test.all", KeyStroke.getKeyStroke(KeyEvent.VK_T, MASK));
 
   /**
    * The key binding for generating javadoc for all documents
    */
   public static final KeyStrokeOption KEY_JAVADOC_ALL =
-    new KeyStrokeOption("key.javadoc.all", KeyStroke.getKeyStroke(KeyEvent.VK_J, mask));
+    new KeyStrokeOption("key.javadoc.all", KeyStroke.getKeyStroke(KeyEvent.VK_J, MASK));
 
   /**
    * The key binding for generating javadoc for the current document
    */
   public static final KeyStrokeOption KEY_JAVADOC_CURRENT =
     new KeyStrokeOption("key.javadoc.current",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_J, mask | InputEvent.SHIFT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_J, MASK | InputEvent.SHIFT_MASK));
 
   /**
    * The key binding for executing an interactions history.
@@ -620,7 +621,7 @@ public interface OptionConstants {
    *
   public static final KeyStrokeOption KEY_TOGGLE_MULTILINE_INTERACTION =
     new KeyStrokeOption("key.toggle.multiline.interaction",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_M, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK));
    */
 
   /**
@@ -645,7 +646,7 @@ public interface OptionConstants {
    * The key binding for moving the cursor to the beginning of the document
    */
   public static final KeyStrokeOption KEY_BEGIN_DOCUMENT =
-    new KeyStrokeOption("key.begin.document", KeyStroke.getKeyStroke(KeyEvent.VK_HOME, mask));
+    new KeyStrokeOption("key.begin.document", KeyStroke.getKeyStroke(KeyEvent.VK_HOME, MASK));
 
   /**
    * The key binding for moving the cursor to the beginning of the current line
@@ -659,14 +660,14 @@ public interface OptionConstants {
    *
   public static final KeyStrokeOption KEY_BEGIN_PARAGRAPH =
     new KeyStrokeOption("key.begin.paragraph",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_UP, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_UP, MASK));
    */
 
   /**
    * The key binding for moving the cursor to the beginning of the previous word
    */
   public static final KeyStrokeOption KEY_PREVIOUS_WORD =
-    new KeyStrokeOption("key.previous.word", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, mask));
+    new KeyStrokeOption("key.previous.word", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, MASK));
 
  /**
    * The key binding for deleting the next character
@@ -709,7 +710,7 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_END_DOCUMENT =
     new KeyStrokeOption("key.end.document",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_END, mask));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_END, MASK));
   /**
    * The key binding for moving the cursor to the end of the current line
    */
@@ -719,11 +720,11 @@ public interface OptionConstants {
   
 //  /** The key binding for moving the cursor to the end of the current paragraph. */
 //  public static final KeyStrokeOption KEY_END_PARAGRAPH =
-//    new KeyStrokeOption("key.end.paragraph", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, mask));
+//    new KeyStrokeOption("key.end.paragraph", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, MASK));
 
   /** The key binding for moving the cursor to the beginning of the next word. */
   public static final KeyStrokeOption KEY_NEXT_WORD =
-    new KeyStrokeOption("key.next.word", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, mask));
+    new KeyStrokeOption("key.next.word", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, MASK));
   
   /** The key binding for moving the cursor forwards. */
   public static final KeyStrokeOption KEY_FORWARD =
@@ -739,15 +740,15 @@ public interface OptionConstants {
 
   /** The key binding for cutting a line. */
   public static final KeyStrokeOption KEY_CUT_LINE =
-    new KeyStrokeOption("key.cut.line", KeyStroke.getKeyStroke(KeyEvent.VK_K, (mask | InputEvent.ALT_MASK)));
+    new KeyStrokeOption("key.cut.line", KeyStroke.getKeyStroke(KeyEvent.VK_K, (MASK | InputEvent.ALT_MASK)));
 
   /** The key binding for clearing a line, emacs-style. */
   public static final KeyStrokeOption KEY_CLEAR_LINE =
-    new KeyStrokeOption("key.clear.line", KeyStroke.getKeyStroke(KeyEvent.VK_K, mask));
+    new KeyStrokeOption("key.clear.line", KeyStroke.getKeyStroke(KeyEvent.VK_K, MASK));
 
   /** The key binding for toggling debug mode. */
   public static final KeyStrokeOption KEY_DEBUG_MODE_TOGGLE =
-    new KeyStrokeOption("key.debug.mode.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_D, mask));
+    new KeyStrokeOption("key.debug.mode.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_D, MASK | InputEvent.SHIFT_MASK));
 
 //  /** The key binding for suspending the debugger. */
 //  public static final KeyStrokeOption KEY_DEBUG_SUSPEND =
@@ -771,11 +772,11 @@ public interface OptionConstants {
   
   /** The key binding for toggling a breakpoint. */
   public static final KeyStrokeOption KEY_DEBUG_BREAKPOINT_TOGGLE =
-    new KeyStrokeOption("key.debug.breakpoint.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_B, mask));
+    new KeyStrokeOption("key.debug.breakpoint.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_B, MASK));
 
   /** The key binding for displaying the breakpoints panel. */
   public static final KeyStrokeOption KEY_DEBUG_BREAKPOINT_PANEL =
-    new KeyStrokeOption("key.debug.breakpoint.panel", KeyStroke.getKeyStroke(KeyEvent.VK_B, mask | InputEvent.SHIFT_MASK));
+    new KeyStrokeOption("key.debug.breakpoint.panel", KeyStroke.getKeyStroke(KeyEvent.VK_B, MASK | InputEvent.SHIFT_MASK));
 
   /** The key binding for clearing all breakpoints. */
   public static final KeyStrokeOption KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
@@ -783,11 +784,11 @@ public interface OptionConstants {
 
   /** The key binding for toggling a bookmark. */
   public static final KeyStrokeOption KEY_BOOKMARKS_TOGGLE =
-    new KeyStrokeOption("key.bookmarks.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_M, mask));
+    new KeyStrokeOption("key.bookmarks.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK));
 
   /** The key binding for displaying the bookmarks panel. */
   public static final KeyStrokeOption KEY_BOOKMARKS_PANEL =
-    new KeyStrokeOption("key.bookmarks.panel", KeyStroke.getKeyStroke(KeyEvent.VK_M, mask | InputEvent.SHIFT_MASK));
+    new KeyStrokeOption("key.bookmarks.panel", KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK | InputEvent.SHIFT_MASK));
   
   /** The key binding for help */
   public static final KeyStrokeOption KEY_HELP =
@@ -810,14 +811,14 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_FOLLOW_FILE =
     new KeyStrokeOption("key.follow.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_L, mask | InputEvent.SHIFT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_L, MASK | InputEvent.SHIFT_MASK));
 
   /**
    * The key binding for executing an external process.
    */
   public static final KeyStrokeOption KEY_EXEC_PROCESS =
     new KeyStrokeOption("key.exec.process",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_X, mask | InputEvent.SHIFT_MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_X, MASK | InputEvent.SHIFT_MASK));
   
   /* ---------- Find Replace Options ---------- */
   

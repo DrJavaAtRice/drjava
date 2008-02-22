@@ -36,6 +36,8 @@
 
 package edu.rice.cs.util;
 
+import edu.rice.cs.drjava.config.PropertyMaps;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,18 +54,15 @@ public class ProcessCreator {
   protected String _cmdline;
   protected String _workdir;
   protected Map<String,String> _env;
-  protected Map<String, Properties> _props;
     
   /**
    * Constructor for a process creator with the given command line and map of properties.
    * @param cmdline command line
    * @param workdir working directory
-   * @param props map of properties
    */
-  public ProcessCreator(String cmdline, String workdir, Map<String, Properties> props) {
+  public ProcessCreator(String cmdline, String workdir) {
     _cmdline = cmdline;
     _workdir = workdir;
-    _props = props;
   }
   
   /**
@@ -94,9 +93,12 @@ public class ProcessCreator {
    * Starts a new process using the attributes of this process creator.
    */
   public Process start() throws IOException {
-    List<String> cmds = StringOps.commandLineToList(StringOps.replaceVariables(_cmdline, _props));
-    String[] cmdarray = cmds.toArray(new String[cmds.size()]);
-    String workdir = StringOps.replaceVariables(_workdir, _props);
+    List<String> cmds = StringOps.commandLineToList(StringOps.replaceVariables(_cmdline, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT));
+    String[] cmdarray = new String[cmds.size()];
+    for (int i=0; i<cmds.size(); ++i) {
+      cmdarray[i] = StringOps.unescapeSpacesWith1bHex(cmds.get(i));
+    }
+    String workdir = StringOps.replaceVariables(_workdir, PropertyMaps.ONLY, PropertyMaps.GET_CURRENT);
     File dir = null;
     if (!workdir.trim().equals("")) { dir = new File(workdir); }
     String[] env = null;
@@ -108,6 +110,11 @@ public class ProcessCreator {
         env[i] = key+"="+value;
       }
     }
+    
+    // edu.rice.cs.util.Log log = new edu.rice.cs.util.Log("process.txt", true);
+    // for(String c: cmdarray) { log.log(c); }
+    // log.log("workdir: "+dir);
+    
     return Runtime.getRuntime().exec(cmdarray,env,dir);
   }
 }

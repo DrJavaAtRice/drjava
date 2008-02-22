@@ -43,6 +43,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Properties;
+import java.util.List;
 
 /**
  * Test functions of StringOps.
@@ -430,37 +431,86 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals("1.25GB", "1.25 gigabytes", StringOps.memSizeToString((long)(1024*1024*1024*1.25)));
   }
   
-  public void testReplaceVariables() {
-    Map<String,Properties> props = new TreeMap<String,Properties>();
-    Properties p1 = new Properties();
-    p1.setProperty("var", "foo");
-    p1.setProperty("xxx", "bar");
-    props.put("1",p1);
+  public void testCommandLineToList() {
+    List<String> l = StringOps.commandLineToList("a b c");
+    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    assertEquals(3, l.size());
+    assertEquals("a", l.get(0));
+    assertEquals("b", l.get(1));
+    assertEquals("c", l.get(2));
+
+    l = StringOps.commandLineToList("a'b c'");
+    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    assertEquals(1, l.size());
+    assertEquals("a'b c'", l.get(0));
+
+    l = StringOps.commandLineToList("a\"b c\"");
+    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    assertEquals(1, l.size());
+    assertEquals("a\"b c\"", l.get(0));
+
+    l = StringOps.commandLineToList("a\"b 'c'\"");
+    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    assertEquals(1, l.size());
+    assertEquals("a\"b 'c'\"", l.get(0));
     
-    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props));
-    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props));
-    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props));
-    assertEquals("abc${xxx}xyz", StringOps.replaceVariables("abc\\${xxx}xyz",props));
-    assertEquals("abc\\barxyz", StringOps.replaceVariables("abc\\\\${xxx}xyz",props));
+    l = StringOps.commandLineToList("a \"b c\"");
+    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    assertEquals(2, l.size());
+    assertEquals("a", l.get(0));
+    assertEquals("\"b c\"", l.get(1));
+    
+    l = StringOps.commandLineToList("\u001b");
+    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    assertEquals(0, l.size());
+    
+    l = StringOps.commandLineToList("\u001b\u001b");
+    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    assertEquals(1, l.size());
+    assertEquals("\u001b", l.get(0));
+    
+    l = StringOps.commandLineToList("\u001b ");
+    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    assertEquals(1, l.size());
+    assertEquals(" ", l.get(0));
+    
+    l = StringOps.commandLineToList("a\u001b b");
+    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    assertEquals(1, l.size());
+    assertEquals("a b", l.get(0));
   }
   
-  public void testReplaceVariables2() {
-    Map<String,Properties> props = new TreeMap<String,Properties>();
-    Properties p1 = new Properties();
-    p1.setProperty("var", "foo");
-    p1.setProperty("xxx", "bar");
-    props.put("1",p1);
-    Properties p2 = new Properties();
-    p2.setProperty("yyy", "bam");
-    p2.setProperty("xxx", "new");
-    props.put("2",p2);
-    
-    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props));
-    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props));
-    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props));
-    assertEquals("abc${xxx}xyz", StringOps.replaceVariables("abc\\${xxx}xyz",props));
-    assertEquals("abc\\barxyz", StringOps.replaceVariables("abc\\\\${xxx}xyz",props));
-    assertEquals("abcbamxyz", StringOps.replaceVariables("abc${yyy}xyz",props));
-    assertEquals("abcbarbamxyz", StringOps.replaceVariables("abc${xxx}${yyy}xyz",props));
-  }
+//  public void testReplaceVariables() {
+//    Map<String,Properties> props = new TreeMap<String,Properties>();
+//    Properties p1 = new Properties();
+//    p1.setProperty("var", "foo");
+//    p1.setProperty("xxx", "bar");
+//    props.put("1",p1);
+//    
+//    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props));
+//    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props));
+//    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props));
+//    assertEquals("abc${xxx}xyz", StringOps.replaceVariables("abc\\${xxx}xyz",props));
+//    assertEquals("abc\\barxyz", StringOps.replaceVariables("abc\\\\${xxx}xyz",props));
+//  }
+//  
+//  public void testReplaceVariables2() {
+//    Map<String,Properties> props = new TreeMap<String,Properties>();
+//    Properties p1 = new Properties();
+//    p1.setProperty("var", "foo");
+//    p1.setProperty("xxx", "bar");
+//    props.put("1",p1);
+//    Properties p2 = new Properties();
+//    p2.setProperty("yyy", "bam");
+//    p2.setProperty("xxx", "new");
+//    props.put("2",p2);
+//    
+//    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props));
+//    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props));
+//    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props));
+//    assertEquals("abc${xxx}xyz", StringOps.replaceVariables("abc\\${xxx}xyz",props));
+//    assertEquals("abc\\barxyz", StringOps.replaceVariables("abc\\\\${xxx}xyz",props));
+//    assertEquals("abcbamxyz", StringOps.replaceVariables("abc${yyy}xyz",props));
+//    assertEquals("abcbarbamxyz", StringOps.replaceVariables("abc${xxx}${yyy}xyz",props));
+//  }
 }

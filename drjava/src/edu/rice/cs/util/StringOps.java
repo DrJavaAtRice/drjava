@@ -37,6 +37,7 @@
 package edu.rice.cs.util;
 
 import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.drjava.config.*;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
@@ -535,12 +536,58 @@ public abstract class StringOps {
   
   public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("stringops.txt", false);
   
-  /** Convert a command line into a list of individual arguments. */
+  /** Escapes spaces ' ' with the sequence "\u001b ", and a single '\u001b' with a double.
+    * '\u001b' was picked because its ASCII meaning is 'escape', and it should be platform-independent.
+    * @param s string to encode
+    * @return encoded string */
+  public static String escapeSpacesWith1bHex(String s) {
+    StringBuilder sb = new StringBuilder();
+    for (int i=0; i<s.length(); ++i) {
+      if (s.charAt(i)=='\u001b') {
+        sb.append("\u001b\u001b");
+      }
+      else if (s.charAt(i)==' ') {
+        sb.append("\u001b ");
+      }
+      else {
+        sb.append(""+s.charAt(i));
+      }
+    }
+    return sb.toString();
+  }
+  
+  /** Unescapes spaces the sequence "\u001b " to a space ' ', and a double '\u001b' to a single.
+    * '\u001b' was picked because its ASCII meaning is 'escape', and it should be platform-independent.
+    * @param s string to encode
+    * @return encoded string */
+  public static String unescapeSpacesWith1bHex(String s) {
+    StringBuilder sb = new StringBuilder();
+    for (int i=0; i<s.length(); ++i) {
+      if (s.charAt(i)=='\u001b') {
+        if (i+1<s.length()) {
+          char next = s.charAt(i+1);
+          if (next=='\u001b') { sb.append("\u001b"); ++i; }
+          else if (next==' ') { sb.append(" "); ++i; }
+          else { throw new IllegalArgumentException("1b hex followed by neither space nor another 1b hex"); }
+        }
+        else { throw new IllegalArgumentException("1b hex followed by neither space nor another 1b hex"); }
+      }
+      else {
+        sb.append(""+s.charAt(i));
+      }
+    }
+    return sb.toString();
+  }
+  
+  /** Convert a command line into a list of individual arguments.
+    * This keeps quoted parts together using ", ' and `.
+    * It also keeps treats a '\u001b' followed by a space as non-breaking space.
+    * And a double '\u001b' becomes a single '\u001b'. 
+    * It does not allow escaping of the quote characters. */
   public static List<String> commandLineToList(String cmdline) {
     StreamTokenizer tok = new StreamTokenizer(new StringReader(cmdline));
     tok.resetSyntax();
-    tok.wordChars(0,255);
-    tok.whitespaceChars(0,32);
+    tok.ordinaryChars(0,255);
     tok.quoteChar('\'');
     tok.quoteChar('"');
     tok.quoteChar('`');
@@ -548,26 +595,44 @@ public abstract class StringOps {
     tok.slashStarComments(false);
     ArrayList<String> cmds = new ArrayList<String>();
     
+    boolean justEscape = false;
+    StringBuilder sb = new StringBuilder();
     int next;
     try {
       while(((next=tok.nextToken())!=StreamTokenizer.TT_EOF) &&
             (next!=StreamTokenizer.TT_EOL)) {
         switch(next) {
+          case '\u001b':
+            if (justEscape) {
+              sb.append('\u001b');
+              justEscape = false;
+            }
+            else {
+              justEscape = true;
+            }
+            break;
+          case ' ':
+            if (justEscape) {
+              sb.append(' ');
+            }
+            else {
+              cmds.add(sb.toString());
+              sb = new StringBuilder();
+            }
+            justEscape = false;
+            break;
           case '\'':
           case '"':
           case '`':
-            cmds.add(""+((char)next)+tok.sval+((char)next));
-            break;
-          case StreamTokenizer.TT_WORD:
-            cmds.add(tok.sval);
-            break;
-          case StreamTokenizer.TT_NUMBER:
-            cmds.add(""+tok.nval);
+            sb.append(""+((char)next)+tok.sval+((char)next));
+            justEscape = false;
             break;
           default:
-            return new ArrayList<String>();
+            sb.append(""+((char)next));
+            break;
         }
       }
+      if (sb.length()>0) { cmds.add(sb.toString()); }
     }
     catch(IOException ioe) {
       return new ArrayList<String>();
@@ -581,10 +646,11 @@ public abstract class StringOps {
    * To give the "$" character its literal meaning, it needs to be escaped as "\$" (backslash dollar).
    * To make the "\" character not escaping, escape it as "\\"(double backslash).
    * @param str input string
-   * @param props hash map of hash tables with variable-value pairs
+   * @param props map with maps of variable-value pairs
+   * @param getter lambda from a DrJavaProperty to String
    * @return string with variables replaced by values
    */
-  public static String replaceVariables(String str, Map<String,Properties> props) {
+  public static String replaceVariables(String str, PropertyMaps props, Lambda<String,DrJavaProperty> getter) {
     int pos = str.indexOf("${");
     int bsPos = str.indexOf('\\');
     if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
@@ -610,22 +676,26 @@ public abstract class StringOps {
         // and skip
         ++pos;
       }
-      else if (str.charAt(pos)=='$') {
+      else if ((str.charAt(pos)=='$')) {
         // LOG.log("\t$");
         // look if this is str property name enclosed by ${...}, e.g. "${user.home}"
-        for(Map.Entry<String, Properties> table: props.entrySet()) {
-          Enumeration<?> e = table.getValue().propertyNames();
-          while(e.hasMoreElements()) {
-            String key = (String)e.nextElement();
-            int endPos = pos + key.length() + 3;
-            if (str.substring(pos, Math.min(str.length(), endPos)).equals("${"+key+"}")) {
-              // found property name
-              // replace "${property.name}" with the value of the property, e.g. /home/user
-              String value = table.getValue().getProperty(key);
-              str = str.substring(0, pos) + value + str.substring(endPos);
-              // advance to the last character of the value
-              pos = pos + value.length() - 1;
-              break;
+        if ((pos<str.length()-1) && (str.charAt(pos+1)=='{')) {
+          int nextClose = str.indexOf('}',pos+1);
+          if (nextClose>=0) {
+            String key = str.substring(pos+2, nextClose);
+            // LOG.log("\tkey = '"+key+"'");
+            for(String category: props.getCategories()) {
+              // LOG.log("\ttrying category '"+category+"'");
+              DrJavaProperty p = props.getProperty(category, key);
+              if (p!=null) {
+                // found property name
+                // replace "${property.name}" with the value of the property, e.g. /home/user
+                String s = getter.apply(p);
+                str = str.substring(0, pos) + s + str.substring(nextClose+1);
+                // advance to the last character of the value
+                pos = nextClose;
+                break;
+              }
             }
           }
         }
