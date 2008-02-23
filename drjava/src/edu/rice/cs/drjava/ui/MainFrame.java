@@ -3188,105 +3188,32 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     });
     
     // Files
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.all.files") {
-      public void update() {
-        List<OpenDefinitionsDocument> l = _model.getOpenDefinitionsDocuments();
-        StringBuilder sb = new StringBuilder();
-        for(OpenDefinitionsDocument odd: l) {
-          sb.append(File.pathSeparator);
-          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
-          sb.append(f);
-        }
-        _value = sb.toString().substring(File.pathSeparator.length());
-      }
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.all.files", File.pathSeparator) {
+      protected List<OpenDefinitionsDocument> getList() { return _model.getOpenDefinitionsDocuments(); }
     });
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.project.files") {
-      public void update() {
-        List<OpenDefinitionsDocument> l = _model.getProjectDocuments();
-        StringBuilder sb = new StringBuilder();
-        for(OpenDefinitionsDocument odd: l) {
-          sb.append(File.pathSeparator);
-          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
-          sb.append(f);
-        }
-        _value = sb.toString().substring(File.pathSeparator.length());
-      }
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.project.files", File.pathSeparator) {
+      protected List<OpenDefinitionsDocument> getList() { return _model.getProjectDocuments(); }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.included.files") {
-      public void update() {
-        List<OpenDefinitionsDocument> l = _model.getAuxiliaryDocuments();
-        StringBuilder sb = new StringBuilder();
-        for(OpenDefinitionsDocument odd: l) {
-          sb.append(File.pathSeparator);
-          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
-          sb.append(f);
-        }
-        _value = sb.toString().substring(File.pathSeparator.length());
-      }
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.included.files", File.pathSeparator) {
+      protected List<OpenDefinitionsDocument> getList() { return _model.getAuxiliaryDocuments(); }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.external.files") {
-      public void update() {
-        List<OpenDefinitionsDocument> l = _model.getNonProjectDocuments();
-        StringBuilder sb = new StringBuilder();
-        for(OpenDefinitionsDocument odd: l) {
-          sb.append(File.pathSeparator);
-          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
-          sb.append(f);
-        }
-        _value = sb.toString().substring(File.pathSeparator.length());
-      }
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.external.files", File.pathSeparator) {
+      protected List<OpenDefinitionsDocument> getList() { return _model.getNonProjectDocuments(); }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
     
     // Files with spaces
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.all.files.space") {
-      public void update() {
-        List<OpenDefinitionsDocument> l = _model.getOpenDefinitionsDocuments();
-        StringBuilder sb = new StringBuilder();
-        for(OpenDefinitionsDocument odd: l) {
-          sb.append(' ');
-          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
-          sb.append(f);
-        }
-        _value = sb.toString().substring(1);
-      }
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.all.files.space", " ") {
+      protected List<OpenDefinitionsDocument> getList() { return _model.getOpenDefinitionsDocuments(); }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.project.files.space") {
-      public void update() {
-        List<OpenDefinitionsDocument> l = _model.getProjectDocuments();
-        StringBuilder sb = new StringBuilder();
-        for(OpenDefinitionsDocument odd: l) {
-          sb.append(' ');
-          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
-          sb.append(f);
-        }
-        _value = sb.toString().substring(1);
-      }
-    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.project.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.included.files.space") {
-      public void update() {
-        List<OpenDefinitionsDocument> l = _model.getAuxiliaryDocuments();
-        StringBuilder sb = new StringBuilder();
-        for(OpenDefinitionsDocument odd: l) {
-          sb.append(' ');
-          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
-          sb.append(f);
-        }
-        _value = sb.toString().substring(1);
-      }
-    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.included.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.external.files.space") {
-      public void update() {
-        List<OpenDefinitionsDocument> l = _model.getNonProjectDocuments();
-        StringBuilder sb = new StringBuilder();
-        for(OpenDefinitionsDocument odd: l) {
-          sb.append(' ');
-          String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
-          sb.append(f);
-        }
-        _value = sb.toString().substring(1);
-      }
-    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.external.files"));
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.project.files.space", " ") {
+      protected List<OpenDefinitionsDocument> getList() { return _model.getProjectDocuments(); }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.included.files.space", " ") {
+      protected List<OpenDefinitionsDocument> getList() { return _model.getAuxiliaryDocuments(); }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.external.files.space", " ") {
+      protected List<OpenDefinitionsDocument> getList() { return _model.getNonProjectDocuments(); }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));    
 
     // Misc
     PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.time.millis") {
