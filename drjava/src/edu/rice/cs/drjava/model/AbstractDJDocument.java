@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.config.OptionListener;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelControl;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.HighlightStatus;
@@ -55,6 +56,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -104,7 +106,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * track of state.  This field together with _currentLocation function as a virtual object for purposes of 
     * synchronization.  All operations that access or modify this virtual object should be synchronized on _reduced.
     */
-  public final BraceReduction _reduced = new ReducedModelControl();  // public only for locking purposes
+  public final ReducedModelControl _reduced = new ReducedModelControl();  // public only for locking purposes
   
   /** The absolute character offset in the document. Treated as part of the _reduced (model) for locking 
     * purposes. */
@@ -123,8 +125,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Initial number of elements in _queryCache. */
   private static final int INIT_CACHE_SIZE = 0x10000;  // 16**4 = 16384 
   
-//  /** Constant specifying how large pos must be before incremental analysis is applied in posInBlockComment */
-//  public static final int POS_THRESHOLD = 20000;  
+//  /** Constant specifying how large pos must be before incremental analysis is applied in posInParenPhrase */
+//  public static final int POS_THRESHOLD = 10000;  
   
   /** Constant for starting position of document. */ 
 // DUMB! The start coordinate of a document is NOT a magic number; neither is the start index of an array! -- Corky
@@ -634,11 +636,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return reducedPos;  
   }
   
-  /** Searching forward, finds the position of the enclosing squiggly brace. NB: ignores comments.
+  /** Searching forward, finds the position of the enclosing brace. NB: ignores comments.
     * @param pos Position to start from
     * @param opening opening brace character
     * @param closing closing brace character
-    * @return position of enclosing squiggly brace, or ERROR_INDEX (-1) if beginning of document is reached.
+    * @return position of enclosing brace, or ERROR_INDEX (-1) if beginning of document is reached.
     */
   public int findNextEnclosingBrace(final int pos, final char opening, final char closing) throws BadLocationException {
     // Check cache
@@ -722,11 +724,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipParenPhrases)
     throws BadLocationException {
+//    System.err.println("findPrevDelimiter(" + pos + ", " + Arrays.toString(delims) + ", " + skipParenPhrases);
     // Check cache
     final Query key = new Query.PrevDelimiter(pos, delims, skipParenPhrases);
     final Integer cached = (Integer) _checkCache(key);
-    if (cached != null) return cached.intValue();
-    
+    if (cached != null) {
+//      System.err.println(cached.intValue() + " found in cache");
+      return cached.intValue();
+    }
     int reducedPos = pos;
     int i;  // index of for loop below
     acquireReadLock();
@@ -764,7 +769,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       if (i == -1) reducedPos = -1; // No matching char was found
       _storeInCache(key, reducedPos, pos - 1);
-      
+//      System.err.println("Returning " + reducedPos);
       // Return position of matching char or ERROR_INDEX (-1) 
       return reducedPos;  
     }
@@ -1405,6 +1410,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     try {
       synchronized(_reduced) {
         int here = _currentLocation;
+        // assert pos == here if read lock and reduced already held before call
         _reduced.move(pos - here);
         inParenPhrase = posInParenPhrase();
         _reduced.move(here - pos);
@@ -1416,7 +1422,22 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return inParenPhrase;
   }
   
-  
+  /** Cached version of _reduced.getEnclosingBrace().  Assumes that read lock and reduced lock are already held.  
+    * Still does not work like _reduced.getIndentInformation(). */
+  private BraceInfo _getEnclosingBrace(int pos) {
+    
+    // Check cache
+    final Query key = new Query.EnclosingBrace(pos);
+    final BraceInfo cached = (BraceInfo) _checkCache(key);
+    if (cached != null) return cached;
+    int here = _currentLocation;
+    _reduced.move(pos - here);
+    BraceInfo b = _reduced.getEnclosingBrace();
+    _reduced.move(here - pos);
+    _storeInCache(key, b, pos - 1);
+    return b;
+  }
+    
   /** Returns true if the reduced model's current position is inside a paren phrase.  Assumes that readLock and _reduced
     * locks are already held.
     * @return true if pos is immediately inside parentheses
@@ -1425,6 +1446,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     IndentInfo info;
     info = _reduced.getIndentInformation(); 
     return info.braceTypeCurrent.equals(IndentInfo.openParen);
+//    return _getEnclosingBrace(_currentLocation).braceType().equals(IndentInfo.openParen);
   }
   
 //  /** @return true if the start of the current line is inside a block comment. Assumes that write lock or read lock

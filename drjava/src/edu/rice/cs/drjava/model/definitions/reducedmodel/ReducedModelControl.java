@@ -337,9 +337,9 @@ public class ReducedModelControl implements BraceReduction {
   public int getDistToCurrentBraceNewline() { return -1; }
   
   /** Gets info about the brace enclosing the beginning of this line. */
-  public BraceInfo getDistToEnclosingBrace() { return _rmb.getDistToEnclosingBrace(); }
+  public BraceInfo getEnclosingBrace() { return _rmb.getEnclosingBrace(); }
   /** Gets info about the brace enclosing this location. */
-  public BraceInfo getDistToEnclosingBraceCurrent() { return _rmb.getDistToEnclosingBraceCurrent(); }
+  public BraceInfo getEnclosingBraceCurrent() { return _rmb.getEnclosingBraceCurrent(); }
   /** Gets distance to the new newline character (not including the newline). */
   public int getDistToPreviousNewline() { return _rmc.getDistToPreviousNewline(); }
   /** Gets distance to previous newline character (not including the newline). */

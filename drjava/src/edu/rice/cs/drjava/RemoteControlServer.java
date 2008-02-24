@@ -207,7 +207,7 @@ public class RemoteControlServer {
       (new RCServerThread(null)).start();
     }
     catch(IOException ioe) {
-      System.err.println(ioe);
+      System.out.println(ioe);
       ioe.printStackTrace();
     }
   }

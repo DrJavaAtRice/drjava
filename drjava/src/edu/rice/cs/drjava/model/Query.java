@@ -58,12 +58,12 @@ public interface Query {
     public IndentInformation(int pos) { super(pos); }
   }
   
-  abstract static class EnclosingBrace implements Query {
+  abstract static class AbstractEnclosingBrace implements Query {
     private final int _pos;
     private final char _opening;
     private final char _closing;
     
-    public EnclosingBrace(final int pos, final char opening, final char closing) { 
+    public AbstractEnclosingBrace(final int pos, final char opening, final char closing) { 
       _pos = pos; 
       _opening = opening;
       _closing = closing;
@@ -71,18 +71,18 @@ public interface Query {
     
     public boolean equals(Object other) {
       if (other == null || other.getClass() != this.getClass()) return false;
-      EnclosingBrace o = (EnclosingBrace) other;
+      AbstractEnclosingBrace o = (AbstractEnclosingBrace) other;
       return o._pos == this._pos && o._opening == this._opening && o._closing == this._closing;
     }
     
     public int hashCode() { return getClass().hashCode() ^ _pos ^ _opening ^ _closing; }
   }
   
-  public static class PrevEnclosingBrace extends EnclosingBrace {
+  public static class PrevEnclosingBrace extends AbstractEnclosingBrace {
     public PrevEnclosingBrace(int pos, char opening, char closing) { super(pos, opening, closing); }
   }
   
-  public static class NextEnclosingBrace extends EnclosingBrace {
+  public static class NextEnclosingBrace extends AbstractEnclosingBrace {
     public NextEnclosingBrace(int pos, char opening, char closing) { super(pos, opening, closing); }
   }
   
@@ -190,6 +190,10 @@ public interface Query {
   
   public static class PosInParenPhrase extends Pos {
     public PosInParenPhrase(int pos) { super(pos); }
+  }
+  
+  public static class EnclosingBrace extends Pos {
+    public EnclosingBrace(int pos) { super(pos); }
   }
   
   public static class PosNotInBlock extends Pos {

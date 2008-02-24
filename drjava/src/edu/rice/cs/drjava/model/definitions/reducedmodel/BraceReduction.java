@@ -38,10 +38,8 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import java.util.Vector;
 
-/**
- * The interface BraceReduction serves as the template for our reduced
- * view of a java document, which stores only the information necessary
- * for parenthesis matching.
+/** The interface BraceReduction serves as the template for our reduced view of a java document, which stores only the
+ * information necessary for parenthesis matching.
  * @version $Id$
  * @author JavaPLT
  */
@@ -76,7 +74,7 @@ public interface BraceReduction {
    * right. </P>
    * @param count indicates the direction and magnitude of cursor movement
    */
-  public void move( int count );
+  public void move(int count );
 
   /**
    * <P>Update the BraceReduction to reflect text deletion.</P>
@@ -84,7 +82,7 @@ public interface BraceReduction {
    * Negative values delete text to the left of the cursor, positive
    * values delete text to the right.
    */
-  public void delete( int count );
+  public void delete(int count );
 
 
   /**
