@@ -69,7 +69,7 @@ public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion {
     // We are using fields on IndentInfo which look
     //  at the start of the line, not the current position!
 
-    return info.braceType.equals(IndentInfo.OPEN_PAREN) 
-        || info.braceType.equals(IndentInfo.OPEN_BRACKET); 
+    return info.braceType.equals(IndentInfo.openParen) 
+        || info.braceType.equals(IndentInfo.openBracket); 
   }
 }

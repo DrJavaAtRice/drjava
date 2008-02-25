@@ -178,7 +178,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   }
 
   /** Tests compiling an invalid file and checks to make sure the class file was not created.  */
-  public void testCompileMissingCloseCurly() throws BadLocationException, IOException, InterruptedException {
+  public void testCompileMissingCloseSquiggly() throws BadLocationException, IOException, InterruptedException {
     OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = tempFile();
     doc.saveFile(new FileSelector(file));

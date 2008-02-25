@@ -76,16 +76,16 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
 
     // Get distance to brace
     IndentInfo info = doc.getIndentInformation();
-    int distToLineEnclosingBrace = info.distToLineEnclosingBrace;
+    int distToBrace = info.distToBrace;
 
     // If there is no brace, align to left margin
-    if (distToLineEnclosingBrace == -1) {
+    if (distToBrace == -1) {
       doc.setTab(_suffix, pos);
       return supResult;
     }
 
     // Get the absolute position of the brace
-    int bracePos = pos - distToLineEnclosingBrace;
+    int bracePos = pos - distToBrace;
 
     String indent = "";
     try {

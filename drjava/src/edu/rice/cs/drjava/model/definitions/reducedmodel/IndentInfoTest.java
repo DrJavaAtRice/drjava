@@ -45,9 +45,10 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
-/** Test class for the IndentInfo class.
-  * @version $Id$
-  */
+/**
+ * 
+ * @version $Id$
+ */
 public final class IndentInfoTest extends DrJavaTestCase {
   private String _text;
   //private DefinitionsDocument _document;
@@ -85,11 +86,11 @@ public final class IndentInfoTest extends DrJavaTestCase {
     //_reduced = _document.getReduced();
     _info = _document.getIndentInformation();
     
-    assertEquals(message + " -- distToStart", expDistToPrevNewline, _info.distToStart);
-    assertEquals(message + " -- distToLineEnclosingBrace", expDistToBrace, _info.distToLineEnclosingBrace);
-    assertEquals(message + " -- distToLineEnclosingBraceStart", expDistToNewline, _info.distToLineEnclosingBraceStart);
-    assertEquals(message + " -- distToBraceCurrent", expDistToBraceCurrent, _info.distToEnclosingBrace);
-    assertEquals(message + " -- distToEnclosingBraceStart", expDistToNewlineCurrent, _info.distToEnclosingBraceStart);
+    assertEquals(message + " -- distToPrevNewline", expDistToPrevNewline, _info.distToPrevNewline);
+    assertEquals(message + " -- distToBrace", expDistToBrace, _info.distToBrace);
+    assertEquals(message + " -- distToNewline", expDistToNewline, _info.distToNewline);
+    assertEquals(message + " -- distToBraceCurrent", expDistToBraceCurrent, _info.distToBraceCurrent);
+    assertEquals(message + " -- distToNewlineCurrent", expDistToNewlineCurrent, _info.distToNewlineCurrent);
   }
   
   public void testFieldsForCurrentLocation() throws BadLocationException {

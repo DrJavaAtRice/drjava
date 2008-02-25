@@ -65,16 +65,16 @@ public class ActionBracePlus extends IndentRuleAction {
 
     // Check preconditions
     if ((ii.braceType.equals("")) ||
-        (ii.distToLineEnclosingBrace < 0)) {
+        (ii.distToBrace < 0)) {
       // Can't find brace, so do nothing.
       return supResult;
     }
 
     // Find length to brace
-    int bracePos = startLine - ii.distToLineEnclosingBrace;
+    int bracePos = startLine - ii.distToBrace;
     int braceNewline = 0;
-    if (ii.distToLineEnclosingBraceStart >=0) {
-      braceNewline = startLine - ii.distToLineEnclosingBraceStart;
+    if (ii.distToNewline >=0) {
+      braceNewline = startLine - ii.distToNewline;
     }
     int braceLen = bracePos - braceNewline;
 

@@ -67,11 +67,11 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
     IndentInfo info = doc.getIndentInformation();
     doc.move(origin - lineStart);    
     
-    if ((!info.braceType.equals(IndentInfo.OPEN_CURLY)) ||
-        (info.distToLineEnclosingBrace < 0))
+    if ((!info.braceType.equals(IndentInfo.openSquiggly)) ||
+        (info.distToBrace < 0))
       // Precondition not met: we should have a brace
       return false;
-    int bracePos = lineStart - info.distToLineEnclosingBrace;    
+    int bracePos = lineStart - info.distToBrace;    
     
     // Get brace's end of line
     int braceEndLinePos = doc.getLineEndPos(bracePos);

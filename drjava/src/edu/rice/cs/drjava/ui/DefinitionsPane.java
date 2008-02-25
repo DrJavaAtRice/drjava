@@ -413,8 +413,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** Likewise, regular text keys like '{', '}', and ':' do not have special actions that are returned by 
    *  getAction(KeyStroke). To make sure these behave right, we use getDefaultAction() instead.
    */
-  private final Action _indentKeyActionCurly = new IndentKeyAction("}", getKeymap().getDefaultAction());
-  private final Action _indentKeyActionOpenCurly = new IndentKeyAction("{", getKeymap().getDefaultAction());
+  private final Action _indentKeyActionSquiggly = new IndentKeyAction("}", getKeymap().getDefaultAction());
+  private final Action _indentKeyActionOpenSquiggly = new IndentKeyAction("{", getKeymap().getDefaultAction());
   private final Action _indentKeyActionColon = new IndentKeyAction(":", getKeymap().getDefaultAction());
 
   /** Tells us whether we currently are in the middle of a CompoundEdit for regular keystrokes.
@@ -461,8 +461,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     ourMap = addKeymap(INDENT_KEYMAP_NAME, getKeymap());
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), _indentKeyActionLine);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), _indentKeyActionTab);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'), _indentKeyActionCurly);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'), _indentKeyActionOpenCurly);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'), _indentKeyActionSquiggly);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'), _indentKeyActionOpenSquiggly);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(':'), _indentKeyActionColon);
     setKeymap(ourMap);
 
