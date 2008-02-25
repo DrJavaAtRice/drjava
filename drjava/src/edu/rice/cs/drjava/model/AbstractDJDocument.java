@@ -1445,7 +1445,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   private boolean posInParenPhrase() {
     IndentInfo info;
     info = _reduced.getIndentInformation(); 
-    return info.braceTypeCurrent.equals(IndentInfo.openParen);
+    return info.braceType.equals(IndentInfo.OPEN_PAREN);
 //    return _getEnclosingBrace(_currentLocation).braceType().equals(IndentInfo.openParen);
   }
   
@@ -1527,7 +1527,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     int here = _currentLocation;
     _reduced.move(pos - here);
     final IndentInfo info = _reduced.getIndentInformation();
-    final boolean notInParenPhrase = info.braceTypeCurrent.equals(IndentInfo.noBrace);
+    final boolean notInParenPhrase = info.braceType.equals(IndentInfo.NONE);
     _reduced.move(here - pos);
     _storeInCache(key, notInParenPhrase, pos - 1);
     return notInParenPhrase;

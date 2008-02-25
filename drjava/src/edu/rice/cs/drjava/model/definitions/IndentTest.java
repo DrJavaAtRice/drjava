@@ -60,10 +60,10 @@ import edu.rice.cs.util.swing.Utilities;
 public final class IndentTest extends DrJavaTestCase {
   protected DefinitionsDocument doc;
 
-  static String noBrace = IndentInfo.noBrace;
-  static String openSquiggly = IndentInfo.openSquiggly;
-  static String openParen = IndentInfo.openParen;
-  static String openBracket = IndentInfo.openBracket;
+  static String NONE = IndentInfo.NONE;
+  static String OPEN_SQUIGGLY = IndentInfo.OPEN_SQUIGGLY;
+  static String OPEN_PAREN = IndentInfo.OPEN_PAREN;
+  static String OPEN_BRACKET = IndentInfo.OPEN_BRACKET;
   private Integer indentLevel = new Integer(2);
   private GlobalEventNotifier _notifier;
 
@@ -405,30 +405,30 @@ public final class IndentTest extends DrJavaTestCase {
     //empty document
     BraceReduction _reduced = doc.getReduced();
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, noBrace, -1, -1, -1);
+    _assertIndentInfo(ii, NONE, -1, -1, -1);
     //single newline
     doc.insertString(0, "\n", null);
     _assertContents("\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, noBrace, -1, -1, 0);
+    _assertIndentInfo(ii, NONE, -1, -1, 0);
     //single layer brace
     doc.insertString(0, "{\n\n", null);
     // {\n\n#\n
     _assertContents("{\n\n\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openSquiggly, -1, 3, 0);
+    _assertIndentInfo(ii, OPEN_SQUIGGLY, -1, 3, 0);
     //another squiggly
     doc.insertString(3, "{\n\n", null);
     // {\n\n{\n\n#\n
     _assertContents("{\n\n{\n\n\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openSquiggly, 3, 3, 0);
+    _assertIndentInfo(ii, OPEN_SQUIGGLY, 3, 3, 0);
     //brace with whitespace
     doc.insertString(6, "  {\n\n", null);
     // {\n\n{\n\n  {\n\n#\n
     _assertContents("{\n\n{\n\n  {\n\n\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openSquiggly, 5, 3, 0);
+    _assertIndentInfo(ii, OPEN_SQUIGGLY, 5, 3, 0);
   }
 
   /**
@@ -440,14 +440,14 @@ public final class IndentTest extends DrJavaTestCase {
     BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n(\n", null);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openParen, 2, 2, 0);
+    _assertIndentInfo(ii, OPEN_PAREN, 2, 2, 0);
     // paren with stuff in front
     doc.insertString(1, "  helo ", null);
     doc.move(2);
     // \n  helo (\n#
     _assertContents("\n  helo (\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openParen, 9, 2, 0);
+    _assertIndentInfo(ii, OPEN_PAREN, 9, 2, 0);
     //single layer brace
     doc.move(-1);
     doc.insertString(9, " (", null);
@@ -455,7 +455,7 @@ public final class IndentTest extends DrJavaTestCase {
     // \n  helo ( (\n#
     _assertContents("\n  helo ( (\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openParen, 11, 2, 0);
+    _assertIndentInfo(ii, OPEN_PAREN, 11, 2, 0);
   }
 
   /**
@@ -467,14 +467,14 @@ public final class IndentTest extends DrJavaTestCase {
     BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n[\n", null);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openBracket, 2, 2, 0);
+    _assertIndentInfo(ii, OPEN_BRACKET, 2, 2, 0);
     // bracket with stuff in front
     doc.insertString(1, "  helo ", null);
     doc.move(2);
     // \n  helo (\n#
     _assertContents("\n  helo [\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openBracket, 9, 2, 0);
+    _assertIndentInfo(ii, OPEN_BRACKET, 9, 2, 0);
     //single layer brace
     doc.move(-1);
     doc.insertString(9, " [", null);
@@ -482,7 +482,7 @@ public final class IndentTest extends DrJavaTestCase {
     // \n  helo ( (\n#
     _assertContents("\n  helo [ [\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openBracket, 11, 2, 0);
+    _assertIndentInfo(ii, OPEN_BRACKET, 11, 2, 0);
   }
 
   /**
@@ -494,7 +494,7 @@ public final class IndentTest extends DrJavaTestCase {
     doc.insertString(0, "{\n  {\nhello", null);
     // {\n  {\nhello#
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openSquiggly, 9, 7, 5);
+    _assertIndentInfo(ii, OPEN_SQUIGGLY, 9, 7, 5);
   }
 
   /**
@@ -557,7 +557,7 @@ public final class IndentTest extends DrJavaTestCase {
     // (\n/*\n*#\n
     _reduced.move(-1);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openParen, -1, 7, 1);
+    _assertIndentInfo(ii, OPEN_PAREN, -1, 7, 1);
   }
 
   /**
@@ -570,7 +570,7 @@ public final class IndentTest extends DrJavaTestCase {
     // \n(\n/*\n*#\n
     _reduced.move(-1);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openParen, 7, 7, 1);
+    _assertIndentInfo(ii, OPEN_PAREN, 7, 7, 1);
   }
 
   /**
@@ -583,7 +583,7 @@ public final class IndentTest extends DrJavaTestCase {
     // (\n/*\n*#\n
     _reduced.move(-1);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openSquiggly, -1, 8, 1);
+    _assertIndentInfo(ii, OPEN_SQUIGGLY, -1, 8, 1);
   }
 
   /**
@@ -596,7 +596,7 @@ public final class IndentTest extends DrJavaTestCase {
     // \n(\n/*\n*#\n
     _reduced.move(-1);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openSquiggly, 8, 8, 1);
+    _assertIndentInfo(ii, OPEN_SQUIGGLY, 8, 8, 1);
   }
 
   /**
@@ -607,7 +607,7 @@ public final class IndentTest extends DrJavaTestCase {
     BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n{\n   { ()}\n}", null);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openSquiggly, 12, 12, 1);
+    _assertIndentInfo(ii, OPEN_SQUIGGLY, 12, 12, 1);
   }
 
   /**
@@ -619,7 +619,7 @@ public final class IndentTest extends DrJavaTestCase {
     BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n{\n   //{ ()\n}", null);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openSquiggly, 13, 13, 1);
+    _assertIndentInfo(ii, OPEN_SQUIGGLY, 13, 13, 1);
   }
 
   /**
@@ -631,7 +631,7 @@ public final class IndentTest extends DrJavaTestCase {
     BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "{\n   //{ ()}{", null);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, openSquiggly, -1, 13, 11);
+    _assertIndentInfo(ii, OPEN_SQUIGGLY, -1, 13, 11);
   }
 
   /**
@@ -643,7 +643,7 @@ public final class IndentTest extends DrJavaTestCase {
     BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "   //{ ()}{", null);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, noBrace, -1, -1, -1);
+    _assertIndentInfo(ii, NONE, -1, -1, -1);
   }
 
   /**
@@ -1411,11 +1411,11 @@ public final class IndentTest extends DrJavaTestCase {
     assertEquals("document contents", expected, document.getText());
   }
 
-  private void _assertIndentInfo(IndentInfo ii, String braceType, int distToNewline, int distToBrace, int distToPrevNewline) {
+  private void _assertIndentInfo(IndentInfo ii, String braceType, int distToLineEnclosingBraceStart, int distToLineEnclosingBrace, int distToStart) {
     assertEquals("indent info: brace type", braceType, ii.braceType);
-    assertEquals("indent info: dist to new line", distToNewline, ii.distToNewline);
-    assertEquals("indent info: dist to brace", distToBrace, ii.distToBrace);
-    assertEquals("indent info: dist to prev new line", distToPrevNewline, ii.distToPrevNewline);
+    assertEquals("indent info: dist to new line", distToLineEnclosingBraceStart, ii.distToLineEnclosingBraceStart);
+    assertEquals("indent info: dist to brace", distToLineEnclosingBrace, ii.distToLineEnclosingBrace);
+    assertEquals("indent info: dist to prev new line", distToStart, ii.distToStart);
   }
 
 //  /** Copies fromFile to toFile, assuming both files exist. */
