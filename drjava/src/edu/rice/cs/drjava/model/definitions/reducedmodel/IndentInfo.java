@@ -62,7 +62,7 @@ public class IndentInfo {
   public int distToStart; /* formerly distToStart */
 
   static public final String NONE = "";           /* formely noBrace */
-  static public final String OPEN_SQUIGGLY = "{"; /* formerly openSquiggly */ 
+  static public final String OPEN_CURLY = "{"; /* formerly openCurly */ 
   static public final String OPEN_PAREN = "(";    /* formerly openParen */
   static public final String OPEN_BRACKET = "[";  /* formerly openBracket */
 

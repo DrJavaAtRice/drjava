@@ -231,12 +231,12 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
 
 
   /**
-   * The quintessential "make the squiggly go to the start, even though
+   * The quintessential "make the curly go to the start, even though
    * method arguments extend over two lines" test.  This behavior is not
    * correctly followed yet, so until it is, leave this method commented.
    * @exception BadLocationException
    *
-  public void testIndentSquigglyAfterTwoLines()
+  public void testIndentCurlyAfterTwoLines()
       throws BadLocationException, OperationCanceledException {
     OpenDefinitionsDocument openDoc = _getOpenDoc();
 

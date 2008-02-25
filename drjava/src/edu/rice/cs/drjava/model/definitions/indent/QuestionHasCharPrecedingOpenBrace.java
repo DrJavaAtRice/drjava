@@ -75,7 +75,7 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     IndentInfo info = doc.getIndentInformation();
     doc.move(origin - lineStart);
     
-    if ((!info.braceType.equals(IndentInfo.OPEN_SQUIGGLY)) ||
+    if ((!info.braceType.equals(IndentInfo.OPEN_CURLY)) ||
         (info.distToLineEnclosingBrace < 0)) {
       // Precondition not met: we should have a brace
       return false;

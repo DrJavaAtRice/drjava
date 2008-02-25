@@ -644,7 +644,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { releaseReadLock(); }
   }  
   
-  private int _findNextOpenSquiggly(String text, int pos) throws BadLocationException {
+  private int _findNextOpenCurly(String text, int pos) throws BadLocationException {
     // acquireReadLock assumed to be held,
     int i;
     int reducedPos = pos;
@@ -780,7 +780,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
             // this might be an inner class
             newPos = _findPrevKeyword(text, "new", openParenPos);
-//            if (oldLog) System.out.println("\tnew found at "+newPos+", openSquigglyPos="+curPos);
+//            if (oldLog) System.out.println("\tnew found at "+newPos+", openCurlyPos="+curPos);
             if (! _isAnonymousInnerClass(newPos, curPos)) {
               // not an anonymous inner class
               newPos = -1;
@@ -814,7 +814,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
               if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
                 // this might be an inner class
                 newPos = _findPrevKeyword(text, "new", openParenPos);
-//                if (oldLog) System.out.println("\tnew found at " + newPos + ", openSquigglyPos=" + curPos);
+//                if (oldLog) System.out.println("\tnew found at " + newPos + ", openCurlyPos=" + curPos);
                 if (! _isAnonymousInnerClass(newPos, curPos)) newPos = -1;
               }
             }
@@ -867,17 +867,17 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Returns true if this position is the instantiation of an anonymous inner class.  Assumes readLock is already held.
     * @param newPos position of "new"
-    * @param openSquigglyPos position of the next '{'
+    * @param openCurlyPos position of the next '{'
     * @return true if anonymous inner class instantiation
     */
-  private boolean _isAnonymousInnerClass(final int pos, final int openSquigglyPos) throws BadLocationException {
-//    String t = getText(0, openSquigglyPos+1);
-//    System.out.print ("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+")");
-//    System.out.println("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+"): `"+
-//                       t.substring(newPos, openSquigglyPos+1)+"`");
+  private boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
+//    String t = getText(0, openCurlyPos+1);
+//    System.out.print ("_isAnonymousInnerClass("+newPos+", "+openCurlyPos+")");
+//    System.out.println("_isAnonymousInnerClass("+newPos+", "+openCurlyPos+"): `"+
+//                       t.substring(newPos, openCurlyPos+1)+"`");
     
     // Check cache
-    final Query key = new Query.AnonymousInnerClass(pos, openSquigglyPos);
+    final Query key = new Query.AnonymousInnerClass(pos, openCurlyPos);
     Boolean cached = (Boolean) _checkCache(key);
     if (cached != null) {
 //      System.out.println(" ==> "+cached);
@@ -886,7 +886,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int newPos = pos;
     synchronized(_reduced) {
       cached = false;
-      String text = getText(0, openSquigglyPos+1);
+      String text = getText(0, openCurlyPos+1);
       int origNewPos = newPos;
       newPos += "new".length();
       int classStart = getFirstNonWSCharPos(newPos);
@@ -930,12 +930,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
               // System.out.println("\tafter closing paren = "+parenEnd);
               int afterParen = getFirstNonWSCharPos(parenEnd);
               // System.out.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
-              cached = (afterParen == openSquigglyPos); 
+              cached = (afterParen == openCurlyPos); 
             }
           }
         }
       }
-      _storeInCache(key, cached, openSquigglyPos);
+      _storeInCache(key, cached, openCurlyPos);
 //      System.out.println(" ==> "+cached);
       return cached;
     }
@@ -1019,11 +1019,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       if (text.charAt(parenStart) != '(') { continue; }
       int parenEnd = findNextEnclosingBrace(parenStart, '(', ')');
       
-      int nextOpenSquiggly = _findNextOpenSquiggly(text, parenEnd);
-      if (nextOpenSquiggly == -1) { continue; }
-//      if (oldLog) System.out.println("{ found at "+nextOpenSquiggly+": `"+text.substring(newPos, nextOpenSquiggly+1)+"`");
-//      if (oldLog) System.out.println("_isAnonymousInnerClass("+newPos+", "+nextOpenSquiggly+")");
-      if (_isAnonymousInnerClass(newPos, nextOpenSquiggly)) {
+      int nextOpenCurly = _findNextOpenCurly(text, parenEnd);
+      if (nextOpenCurly == -1) { continue; }
+//      if (oldLog) System.out.println("{ found at "+nextOpenCurly+": `"+text.substring(newPos, nextOpenCurly+1)+"`");
+//      if (oldLog) System.out.println("_isAnonymousInnerClass("+newPos+", "+nextOpenCurly+")");
+      if (_isAnonymousInnerClass(newPos, nextOpenCurly)) {
 //        if (oldLog) System.out.println("is anonymous inner class");
         String cn = getEnclosingClassName(newPos, true);
 //        if (oldLog) System.out.println("enclosing class = "+cn);
@@ -1056,7 +1056,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         int topLevelBracePos = -1;
         String braceType = info.braceType;
         while (!braceType.equals(IndentInfo.NONE)) {
-          if (braceType.equals(IndentInfo.OPEN_SQUIGGLY)) {
+          if (braceType.equals(IndentInfo.OPEN_CURLY)) {
             topLevelBracePos = _currentLocation - info.distToEnclosingBrace;
           }
           move(-info.distToEnclosingBrace);

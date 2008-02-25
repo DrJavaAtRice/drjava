@@ -107,7 +107,7 @@ public interface DJDocument extends SwingDocumentInterface {
     * @param pos Position to start from
     * @param opening opening brace character
     * @param closing closing brace character
-    * @return position of enclosing squiggly brace, or ERROR_INDEX (-1) if beginning
+    * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
     * of document is reached.
     */
   public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;
@@ -118,7 +118,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @param pos Position to start from
    * @param opening opening brace character
    * @param closing closing brace character
-   * @return position of enclosing squiggly brace, or ERROR_INDEX (-1) if beginning
+   * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
    * of document is reached.
    */
   public int findNextEnclosingBrace(int pos, char opening, char closing) throws BadLocationException;

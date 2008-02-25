@@ -574,7 +574,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param pos Position to start from
     * @param opening opening brace character
     * @param closing closing brace character
-    * @return position of enclosing squiggly brace, or ERROR_INDEX (-1) if beginning
+    * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
     * of document is reached.
     */
   public int findPrevEnclosingBrace(final int pos, final char opening, final char closing) throws BadLocationException {

@@ -54,14 +54,14 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.util.swing.Utilities;
 
 /**
- * Test the tab/enter/squiggly indenting functionality.
+ * Test the tab/enter/curly indenting functionality.
  * @version $Id$
  */
 public final class IndentTest extends DrJavaTestCase {
   protected DefinitionsDocument doc;
 
   static String NONE = IndentInfo.NONE;
-  static String OPEN_SQUIGGLY = IndentInfo.OPEN_SQUIGGLY;
+  static String OPEN_CURLY = IndentInfo.OPEN_CURLY;
   static String OPEN_PAREN = IndentInfo.OPEN_PAREN;
   static String OPEN_BRACKET = IndentInfo.OPEN_BRACKET;
   private Integer indentLevel = new Integer(2);
@@ -401,7 +401,7 @@ public final class IndentTest extends DrJavaTestCase {
    * put your documentation comment here
    * @exception BadLocationException
    */
-  public void testIndentInfoSquiggly() throws BadLocationException {
+  public void testIndentInfoCurly() throws BadLocationException {
     //empty document
     BraceReduction _reduced = doc.getReduced();
     IndentInfo ii = _reduced.getIndentInformation();
@@ -416,19 +416,19 @@ public final class IndentTest extends DrJavaTestCase {
     // {\n\n#\n
     _assertContents("{\n\n\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, OPEN_SQUIGGLY, -1, 3, 0);
-    //another squiggly
+    _assertIndentInfo(ii, OPEN_CURLY, -1, 3, 0);
+    //another curly
     doc.insertString(3, "{\n\n", null);
     // {\n\n{\n\n#\n
     _assertContents("{\n\n{\n\n\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, OPEN_SQUIGGLY, 3, 3, 0);
+    _assertIndentInfo(ii, OPEN_CURLY, 3, 3, 0);
     //brace with whitespace
     doc.insertString(6, "  {\n\n", null);
     // {\n\n{\n\n  {\n\n#\n
     _assertContents("{\n\n{\n\n  {\n\n\n", doc);
     ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, OPEN_SQUIGGLY, 5, 3, 0);
+    _assertIndentInfo(ii, OPEN_CURLY, 5, 3, 0);
   }
 
   /**
@@ -494,7 +494,7 @@ public final class IndentTest extends DrJavaTestCase {
     doc.insertString(0, "{\n  {\nhello", null);
     // {\n  {\nhello#
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, OPEN_SQUIGGLY, 9, 7, 5);
+    _assertIndentInfo(ii, OPEN_CURLY, 9, 7, 5);
   }
 
   /**
@@ -583,7 +583,7 @@ public final class IndentTest extends DrJavaTestCase {
     // (\n/*\n*#\n
     _reduced.move(-1);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, OPEN_SQUIGGLY, -1, 8, 1);
+    _assertIndentInfo(ii, OPEN_CURLY, -1, 8, 1);
   }
 
   /**
@@ -596,7 +596,7 @@ public final class IndentTest extends DrJavaTestCase {
     // \n(\n/*\n*#\n
     _reduced.move(-1);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, OPEN_SQUIGGLY, 8, 8, 1);
+    _assertIndentInfo(ii, OPEN_CURLY, 8, 8, 1);
   }
 
   /**
@@ -607,7 +607,7 @@ public final class IndentTest extends DrJavaTestCase {
     BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n{\n   { ()}\n}", null);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, OPEN_SQUIGGLY, 12, 12, 1);
+    _assertIndentInfo(ii, OPEN_CURLY, 12, 12, 1);
   }
 
   /**
@@ -619,7 +619,7 @@ public final class IndentTest extends DrJavaTestCase {
     BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "\n{\n   //{ ()\n}", null);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, OPEN_SQUIGGLY, 13, 13, 1);
+    _assertIndentInfo(ii, OPEN_CURLY, 13, 13, 1);
   }
 
   /**
@@ -631,7 +631,7 @@ public final class IndentTest extends DrJavaTestCase {
     BraceReduction _reduced = doc.getReduced();
     doc.insertString(0, "{\n   //{ ()}{", null);
     IndentInfo ii = _reduced.getIndentInformation();
-    _assertIndentInfo(ii, OPEN_SQUIGGLY, -1, 13, 11);
+    _assertIndentInfo(ii, OPEN_CURLY, -1, 13, 11);
   }
 
   /**
@@ -847,7 +847,7 @@ public final class IndentTest extends DrJavaTestCase {
    * put your documentation comment here
    * @exception BadLocationException
    */
-  public void testSquigglyAlignment () throws BadLocationException {
+  public void testCurlyAlignment () throws BadLocationException {
     // just paren
     doc.insertString(0, "{\n  }", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
@@ -868,7 +868,7 @@ public final class IndentTest extends DrJavaTestCase {
   /**
    * Cascading indent is not used anymore.
    *
-  public void testOpenSquigglyCascade () throws BadLocationException {
+  public void testOpenCurlyCascade () throws BadLocationException {
     // just paren
     BraceReduction rm = doc.getReduced();
     doc.insertString(0, "if\n  if\n    if\n{", null);
@@ -879,7 +879,7 @@ public final class IndentTest extends DrJavaTestCase {
   /**
    * Cascading indent is not used anymore.
    *
-  public void testOpenSquigglyCascade2 () throws BadLocationException {
+  public void testOpenCurlyCascade2 () throws BadLocationException {
     // just paren
     BraceReduction rm = doc.getReduced();
     doc.insertString(0, "{\n  if\n    if\n      if\n{", null);
