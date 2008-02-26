@@ -96,11 +96,39 @@ public class BalancingStreamTokenizer {
   /** Stack of previous states. */
   protected Stack<State> _stateStack = new Stack<State>();
   
+  /** Escape character, if available. If this character is placed in front
+    * of any quote or keyword, the quote or keyword is treated as normal text.
+    * To get this character to exist alone, it has to be doubled up.
+    * If this escape character appears alone where it does not precede another escape
+    * character, whitespace, a quote or keyword, it is dropped.
+    * The escape character CANNOT be declared whitespace.
+    * The escape character CAN be part of a quote or keyword, but it has to be
+    * doubled up in the string, and when the quotes or keywords are added,
+    * the escape character is automatically doubled up if present.
+    * If set to null, no escaping is possible. */
+  protected Character _escape = null;
+  
+  /** The previous character was the escape character. */
+  protected boolean _wasEscape = false;
+
+  /** The current character is the escape character. */
+  protected boolean _isEscape = false;
+
   /**
    * Create a new balancing stream tokenizer.
    * @param r reader to tokenize
    */
   public BalancingStreamTokenizer(Reader r) {
+    this(r,null);
+  }
+  
+  /**
+   * Create a new balancing stream tokenizer.
+   * @param r reader to tokenize
+   * @param escape escape character or null
+   */
+  public BalancingStreamTokenizer(Reader r, Character escape) {
+    _escape = escape;
     _reader = r;
   }
   
@@ -283,6 +311,8 @@ public class BalancingStreamTokenizer {
     ArrayList<String> kwToRemove = new ArrayList<String>();
     ArrayList<String> qpToRemove = new ArrayList<String>();
     for(int i=lo; i<=hi; ++i) {
+      if ((_escape!=null) && (i==_escape)) { continue; }
+
       // set whitespace
       _state.whitespace.add(i);
       
@@ -317,6 +347,8 @@ public class BalancingStreamTokenizer {
     ArrayList<String> kwToRemove = new ArrayList<String>();
     ArrayList<String> qpToRemove = new ArrayList<String>();
     for(int i: c) {
+      if ((_escape!=null) && (i==_escape)) { continue; }
+      
       // set whitespace
       _state.whitespace.add(i);
 
@@ -349,6 +381,9 @@ public class BalancingStreamTokenizer {
    * @param end the ending quotation mark
    */
   public void addQuotes(String begin, String end) {
+    begin = escape(begin);
+    end = escape(end);
+    
     // check if the first character of the beginning quotation mark is considered whitespace
     Iterator<Integer> wit = _state.whitespace.iterator();
     while(wit.hasNext()) {
@@ -401,6 +436,8 @@ public class BalancingStreamTokenizer {
    * @param kw the new keyword
    */
   public void addKeyword(String kw) {
+    kw = escape(kw);
+
     // check if the first character of the beginning quotation mark is considered whitespace
     Iterator<Integer> wit = _state.whitespace.iterator();
     while(wit.hasNext()) {
@@ -435,123 +472,158 @@ public class BalancingStreamTokenizer {
     StringBuilder buf = new StringBuilder();
     int c = nextToken();
     while (c!=-1) {
+      _isEscape = ((_escape!=null) && (((char)c)==_escape));
+      
       // see if this is whitespace
       if (_state.whitespace.contains(c)) {
-        if (buf.length()>0) {
-          return buf.toString();
+        if (_wasEscape) {
+          // there was a previous escape, do not count as whitespace
+          buf.append(String.valueOf((char)c));
+          _wasEscape = false;
+        }
+        else {
+          if (buf.length()>0) {
+            return buf.toString();
+          }
         }
         c = nextToken();
         continue;
       }
 
-      // see if it can be a quote
-      String temp;
-      temp = findMatch(c, _state.quotes, new Lambda<String,String>() {
-        public String apply(String in) {
-          // we didn't find a match
-          // push the tokens back, all except for the last one
-          for(int i=in.length()-1; i>0; --i) {
-            pushToken(in.charAt(i));
-          }
-          return null;
-        }
-      });
-      if (temp!=null) {
-        // we found the beginning of a quote
-        if (buf.length()>0) {
-          // but we still have regular text to output
-          // so we need to push all tokens back
-          for(int i=temp.length()-1; i>=0; --i) {
-            pushToken(temp.charAt(i));
-          }
-          return buf.toString();
-        }
-        String begin = temp;
-        Stack<String> quoteStack = new Stack<String>();
-        quoteStack.add(begin);
-        StringBuilder quoteBuf = new StringBuilder(begin);
-        
-        // push the state of the tokenizer and set up a new state:
-        // - no whitespace, i.e. whitespace is not discarded
-        // - scan for both ending and beginning quotes, but as keywords
-        // - no quotes at all
-        pushState();
-        _state = new State();
-        _state.whitespace.clear();
-        _state.keywords.clear();
-        _state.keywords.addAll(_stateStack.peek().quotes);
-        _state.keywords.addAll(_stateStack.peek().quoteEnds);
-        _state.quotes.clear();
-        _state.quoteEnds.clear();
-        _state.quotePairs.clear();
-        
-        while(quoteStack.size()>0) {
-          String s = getNextToken();
-          if (s==null) { break; }
-          quoteBuf.append(s);
-          if (_stateStack.peek().quoteEnds.contains(s)) {
-            // ending quote
-            String top = quoteStack.peek();
-            if (_stateStack.peek().quotePairs.get(top).equals(s)) {
-              // matches top of stack
-              quoteStack.pop();
+      if (!_wasEscape) {
+        // see if it can be a quote
+        String temp;
+        temp = findMatch(c, _state.quotes, new Lambda<String,String>() {
+          public String apply(String in) {
+            // we didn't find a match
+            // push the tokens back, all except for the last one
+            for(int i=in.length()-1; i>0; --i) {
+              pushToken(in.charAt(i));
             }
-            else {
-              // closing quote does not match top of stack
-              // it may be an opening quote though
-              if (_stateStack.peek().quotes.contains(s)) {
-                // beginning quote
-                quoteStack.add(s);
+            return null;
+          }
+        });
+        if (temp!=null) {
+          // we found the beginning of a quote
+          if (buf.length()>0) {
+            // but we still have regular text to output
+            // so we need to push all tokens back
+            for(int i=temp.length()-1; i>=0; --i) {
+              pushToken(temp.charAt(i));
+            }
+            return buf.toString();
+          }
+          String begin = temp;
+          Stack<String> quoteStack = new Stack<String>();
+          quoteStack.add(begin);
+          StringBuilder quoteBuf = new StringBuilder(unescape(begin));
+          
+          // push the state of the tokenizer and set up a new state:
+          // - no whitespace, i.e. whitespace is not discarded
+          // - scan for both ending and beginning quotes, but as keywords
+          // - no quotes at all
+          pushState();
+          _state = new State();
+          _state.whitespace.clear();
+          _state.keywords.clear();
+          _state.keywords.addAll(_stateStack.peek().quotes);
+          _state.keywords.addAll(_stateStack.peek().quoteEnds);
+          _state.quotes.clear();
+          _state.quoteEnds.clear();
+          _state.quotePairs.clear();
+          
+          while(quoteStack.size()>0) {
+            String s = getNextToken();
+            if (s==null) { break; }
+            if (_stateStack.peek().quoteEnds.contains(s)) {
+              // ending quote
+              String top = quoteStack.peek();
+              if (_stateStack.peek().quotePairs.get(top).equals(s)) {
+                // matches top of stack
+                quoteBuf.append(unescape(s));
+                quoteStack.pop();
               }
               else {
-                // neither a matching closing brace nor an opening brace
-                break;
+                // closing quote does not match top of stack
+                // it may be an opening quote though
+                if (_stateStack.peek().quotes.contains(s)) {
+                  // beginning quote
+                  quoteBuf.append(unescape(s));
+                  quoteStack.add(s);
+                }
+                else {
+                  // neither a matching closing brace nor an opening brace
+                  quoteBuf.append(s);
+                  break;
+                }
               }
             }
+            else if (_stateStack.peek().quotes.contains(s)) {
+              // beginning quote
+              quoteBuf.append(unescape(s));
+              quoteStack.add(s);
+            }
+            else {
+              quoteBuf.append(s);
+            }
           }
-          else if (_stateStack.peek().quotes.contains(s)) {
-            // beginning quote
-            quoteStack.add(s);
-          }
+          
+          // restore the old state
+          popState();
+          return quoteBuf.toString();
         }
-        
-        // restore the old state
-        popState();
-        return quoteBuf.toString();
       }
-
-      // it wasn't a quote, see if it is a keyword
-      temp = findMatch(c, _state.keywords, new Lambda<String,String>() {
-        public String apply(String in) {
-          // we didn't find a match
-          // push the tokens back, all except for the last one
-          for(int i=in.length()-1; i>0; --i) {
-            pushToken(in.charAt(i));
+      
+      if (!_wasEscape) {
+        // it wasn't a quote, see if it is a keyword
+        String temp = findMatch(c, _state.keywords, new Lambda<String,String>() {
+          public String apply(String in) {
+            // we didn't find a match
+            // push the tokens back, all except for the last one
+            for(int i=in.length()-1; i>0; --i) {
+              pushToken(in.charAt(i));
+            }
+            return null;
           }
-          return null;
-        }
-      });
-      if (temp!=null) {
-        // we found a keyword
-        if (buf.length()>0) {
-          // but we still have regular text to output
-          // so we need to push all tokens back
-          for(int i=temp.length()-1; i>=0; --i) {
-            pushToken(temp.charAt(i));
+        });
+        if (temp!=null) {
+          // we found a keyword
+          if (buf.length()>0) {
+            // but we still have regular text to output
+            // so we need to push all tokens back
+            for(int i=temp.length()-1; i>=0; --i) {
+              pushToken(temp.charAt(i));
+            }
+            return buf.toString();
           }
-          return buf.toString();
+          return unescape(temp);
         }
-        return temp;
       }
 
       // it must be a regular word
       // append character to buffer
-      buf.append(String.valueOf((char)c));
+      if (_isEscape) {
+        if (_wasEscape) {
+          buf.append(String.valueOf(_escape));
+          _isEscape = _wasEscape = false;
+        }
+      }
+      else {
+        buf.append(String.valueOf((char)c));
+      }
+      _wasEscape = _isEscape;
       c = nextToken();
     }
+    if (_wasEscape) {
+      // last thing we saw was a lone escape
+      // generously append it
+      buf.append(String.valueOf(_escape));
+    }
+    // end of stream, return remaining buffer as last token
     if (buf.length()>0) {
       return buf.toString();
     }
+    // or return null to represent the end of the stream
     return null;
   }
   
@@ -608,6 +680,29 @@ public class BalancingStreamTokenizer {
     return notFoundLambda.apply(buf.toString());
   }
   
+  
+  protected String escape(String s) {
+    if (_escape==null) { return s; }
+    StringBuilder sb = new StringBuilder();
+    for(int i=0; i<s.length(); ++i) {
+      if (s.charAt(i)==_escape) { sb.append(_escape); }
+      sb.append(s.charAt(i));
+    }
+    return sb.toString();
+  }
+  
+  protected String unescape(String s) {
+    if (_escape==null) { return s; }
+    StringBuilder sb = new StringBuilder();
+    for(int i=0; i<s.length(); ++i) {
+      if (s.charAt(i)==_escape) {
+        if ((i+1<s.length()) && (s.charAt(i+1)==_escape)) { ++i; }
+      }
+      sb.append(s.charAt(i));
+    }
+    return sb.toString();
+  }
+
   /** Setup exception. */
   public static class SetupException extends RuntimeException {
     public SetupException(String s) { super(s); }
