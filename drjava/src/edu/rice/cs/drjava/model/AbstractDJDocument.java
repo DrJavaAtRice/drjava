@@ -574,7 +574,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param pos Position to start from
     * @param opening opening brace character
     * @param closing closing brace character
-    * @return position of enclosing squiggly brace, or ERROR_INDEX (-1) if beginning
+    * @return position of enclosing curly brace, or ERROR_INDEX (-1) if beginning
     * of document is reached.
     */
   public int findPrevEnclosingBrace(final int pos, final char opening, final char closing) throws BadLocationException {
@@ -1445,7 +1445,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   private boolean posInParenPhrase() {
     IndentInfo info;
     info = _reduced.getIndentInformation(); 
-    return info.braceTypeCurrent.equals(IndentInfo.openParen);
+    return info.braceType.equals(IndentInfo.OPEN_PAREN);
 //    return _getEnclosingBrace(_currentLocation).braceType().equals(IndentInfo.openParen);
   }
   
@@ -1527,7 +1527,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     int here = _currentLocation;
     _reduced.move(pos - here);
     final IndentInfo info = _reduced.getIndentInformation();
-    final boolean notInParenPhrase = info.braceTypeCurrent.equals(IndentInfo.noBrace);
+    final boolean notInParenPhrase = info.braceType.equals(IndentInfo.NONE);
     _reduced.move(here - pos);
     _storeInCache(key, notInParenPhrase, pos - 1);
     return notInParenPhrase;
