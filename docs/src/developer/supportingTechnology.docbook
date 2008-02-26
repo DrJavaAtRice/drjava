@@ -164,7 +164,145 @@
     <title>BCEL</title>
     <para>[TODO]</para>
   </section>
-  
+ 
+  <section id="yourKit">
+    <title>YourKit Java Profiler</title>
+    <subtitle>(compiled by Mathias Ricken, mgricken at rice dot edu)</subtitle>
+    <para>The  <ulink url="http://www.yourkit.com/download/">YourKit Java Profiler</ulink> is a powerful profiler
+	for Java programs that has been lincensed to the DrJava open source project free of charge. It may only be
+	used for developing and improving DrJava and individual licenses for each individual developer are
+	required; they also need to be renewed from time to time. All of this has been generally unproblematic by
+	emailing <ulink url="mailto://sales@yourkit.com">sales@yourkit.com</ulink>. Please do not jeopardize our
+	very good relationshit with YourKit by using it in ways not approved.</para>
+    <para>
+       <orderedList>
+          <listitem>
+            <formalpara>
+              <title><literal>Getting YourKit</literal></title>
+              <para>You can download YourKit from the URL above, but have also installed YourKit into
+		the javaplt account on CSnet. Here are instructions if you want to use it. Please note that this
+		is for the Linux environment on CSnet. For Windows and MacOS, or away from CSnet, these steps
+		don't apply.</para>
+            </formalpara>
+          </listitem>
+          <listitem>
+            <formalpara>
+              <title><literal>Location of YourKit on CSnet</literal></title>
+              <para>YourKit is located in the directory <literal>/home/javaplt/packages/yjp-6.0.11</literal> .   You
+		should add the <literal>bin</literal> path to your <literal>PATH</literal> environment
+		variable. Make the following directory accessible from everywhere:
+		<literal>/home/javaplt/packages/yjp-6.0.11/bin</literal>    .
+              	That gives you access to the two most important scripts, <literal>yjp.sh</literal> and
+		<literal>yjpjava</literal>   .</para>
+            </formalpara>
+          </listitem>
+          <listitem>
+            <formalpara>
+	      <title><literal>Adding the Library</literal></title>
+              <para>Before you can use Yourkit, you have to set the following environment variable:   
+              <literal>setenv LD_LIBRARY_PATH /home/javaplt/packages/yjp-6.0.11/bin/linux-x86-32</literal>       .
+	      If you already have an <literal>LD_LIBRARY_PATH</literal>    variable, then you
+		should extend it by adding a colon and the path:   
+	      <literal>setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:/home/javaplt/packages/yjp-6.0.11/bin/linux-x86-32</literal>           .</para>
+            </formalpara>
+	  </listitem>
+	  <listitem>
+            <formalpara>
+              <title><literal>Starting YourKit</literal</title>
+              <para>To start YourKit, run the following script from the command line:     
+                         <literal>yjp.sh &              </literal>.            
+              The & at the end will make YourKit run in the background, i.e. you can
+                still use the same command line window you've been using.
+              The first time you start YourKit, it should ask you for your license
+		information. If you are a member of the core DrJava development team, you
+		should have by now received your personalized license key.</para>
+            </formalpara>
+          </listitem>
+	  <listitem>
+            <formalpara>
+              <title><literal>Starting the Application to Profile</literal></title>
+              <para>You need to pass a special command line argument to your java
+		executable when you're running a program that you want to profile:          
+	      <literal>-agentlib:yjpagent</literal>              .
+              To make that easier to remember, I have written a script that passes
+		that arguments, and all the argument passed to the script, to java.
+		It's located in the same directory as Yourkit:                
+	      <literal>/home/javaplt/packages/yjp-6.0.11/bin/yjpjava             </literal>          .
+              If you added YourKit to your path in step 2, it should be directly
+		accessible.
+	      If you want to use it to run a program that you would normally start
+		with:             
+	      <literal>java MyClass                  </literal>            .
+	      now just use:                   
+	      <literal>yjpjava MyClass                </literal>           .
+	      Here is a more complicated example to start DrJava. Instead of
+		writing:              
+	      <literal>java -cp drjava-15.jar edu.rice.cs.drjava.DrJava                 </literal>           .
+	      now write instead the following, which avoids the restart, which may cause
+		trouble:            
+	      <literal>yjpjava -cp drjava-15.jar edu.rice.cs.drjava.DrJavaRoot             </literal>          .
+	      Regardless, the application you just started should launch now.</para>
+            </formalpara>
+          </listitem>
+          <listitem>
+            <formalpara>
+              <title><literal>Starting to Profile</literal></title>
+              <para>When you actually want to record usage times and counts, press the
+		"Start CPU Profiling" button. That will open another pane. There are
+		two selections, "Sampling" and "Tracing", and as far as I know,
+		"Sampling" records times only and doesn't give you invocation counts
+		and call stacks, but is faster. "Tracing" is a lot slower but gives
+		you more information.</para>
+            </formalpara>
+          </listitem>
+          <listitem>
+            <formalpara>
+              <title><literal>Viewing Data</literal></title>
+              <para>When you want to view the data, i.e. when you're done performing
+		the action you want to profile, press the "Capture Snapshot" button.
+		That will bring up a dialog that tells you the file name as which the
+		snapshot has been saved, and it asks you whether you want to open the
+		snapshot. You probably want to press "Open" if you want to look at the
+		data right now.</para>
+            </formalpara>
+          </listitem>
+          <listitem>
+            <formalpara>
+              <title><literal>Taking a Snapshot Stops Profiling</literal></title>
+              <para>Note that taking a snapshot stops profiling, so if you want to
+		continue to profile, you need to press the "Start CPU Profiling"
+		button again.</para>
+            </formalpara>
+          </listitem>
+          <listitem>
+            <formalpara>
+              <title><literal>Sorting Methods</literal></title>
+              <para>On the page that displays CPU snapshot informations, there are lots
+		of ways to gather information. I haven't explored everything. I found
+		selecting "Method List" on the left the most useful. That will give
+		you a lsit of all methods that were called, and you can sort by name,
+		time, own time, and invocation count (if you used tracing). Time
+		includes time spent in calls to other methods, i.e. the time from
+		method entry to method exit. Own time is only the time spent in the
+		actual method, i.e. the time from method entry to method exit
+		EXCLUDING the time spent in other methods that were called.</para>
+            </formalpara>
+          </listitem>
+          <listitem>
+            <formalpara>
+              <title><literal>Finding the Hotspot</literal></title>
+              <para>Usually I found a very sharp break between the times, i.e. going from
+		40 seconds in some methods (that were probably in a call chain) to 5
+		seconds. My intuition tells me that the last method to have a lot of
+		time spent is one of the "hot spots". You should also look at the
+		invocation count: The program may spend a lot of time in a method, but
+		if it's called very often, that may not mean very much.</para>
+            </formalpara>
+          </listitem>
+       </orderedList>
+    </para>
+  </section>  
+
   <section id="otherTools">
     <title>Other Useful Development Tools</title>
     <para>[TODO]</para>
