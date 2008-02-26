@@ -54,22 +54,19 @@ public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion {
     super(yesRule, noRule);
   }
   
-  /**
-   * @param doc The AbstractDJDocument containing the current line.
-   * @param reason The reason the indentation is being done
-   * @return True iff the last block or expression list opened previous 
-   * to the start of the current line was opened by one of the characters 
-   * '(' or '['. 
-   */
+  /** @param doc The AbstractDJDocument containing the current line.
+    * @param reason The reason the indentation is being done
+    * @return True iff the last block or expression list opened previous to the start of the current line was opened by
+    * one of the characters '(' or '['. 
+    */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     // PRE: We are not inside a multiline comment.
 
     IndentInfo info = doc.getIndentInformation();
 
-    // We are using fields on IndentInfo which look
-    //  at the start of the line, not the current position!
+    // We are using fields on IndentInfo which look at the start of the line, not the current position!
 
-    return info.braceType.equals(IndentInfo.openParen) 
-        || info.braceType.equals(IndentInfo.openBracket); 
+    return info.lineEnclosingBraceType.equals(IndentInfo.OPEN_PAREN) || 
+      info.lineEnclosingBraceType.equals(IndentInfo.OPEN_BRACKET); 
   }
 }

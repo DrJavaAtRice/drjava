@@ -61,20 +61,20 @@ public class ActionBracePlus extends IndentRuleAction {
     int here = doc.getCurrentLocation();
     int startLine = doc.getLineStartPos(here);
     doc.setCurrentLocation(startLine);
-    IndentInfo ii = doc.getIndentInformation();
+    IndentInfo info = doc.getIndentInformation();
 
     // Check preconditions
-    if ((ii.braceType.equals("")) ||
-        (ii.distToBrace < 0)) {
+    if ((info.lineEnclosingBraceType.equals("")) ||
+        (info.distToLineEnclosingBrace < 0)) {
       // Can't find brace, so do nothing.
       return supResult;
     }
 
     // Find length to brace
-    int bracePos = startLine - ii.distToBrace;
+    int bracePos = startLine - info.distToLineEnclosingBrace;
     int braceNewline = 0;
-    if (ii.distToNewline >=0) {
-      braceNewline = startLine - ii.distToNewline;
+    if (info.distToLineEnclosingBraceStart >=0) {
+      braceNewline = startLine - info.distToLineEnclosingBraceStart;
     }
     int braceLen = bracePos - braceNewline;
 

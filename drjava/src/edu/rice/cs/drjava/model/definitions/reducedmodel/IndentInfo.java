@@ -40,54 +40,52 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  *  @version $Id$
  */
 public class IndentInfo {
-  public String braceType;      //the type of brace at the beginning of our line
+  public String lineEnclosingBraceType;      //the type of brace at the beginning of our line
 
-  //the distance to the start of the line containing
-  //the brace that encloses the start of our line.
+  //the distance to the start of the line containing the brace that encloses the start of our line.
   //____\n|_____
-  public int distToNewline;
+  public int distToLineEnclosingBraceStart;   /* formerly distToNewline */
 
   //distance to the brace enclosing the start of our line  ____|{_____
-  public int distToBrace;
+  public int distToLineEnclosingBrace;  /* formerly distToBrace */
 
-  // type of brace at current position
-  public String braceTypeCurrent;
-
+  public String braceType; /* formely braceTypeCurrent */ // type of brace enclosing current location
+  
   // distance to the start of the line containing the brace enclosing the current location
-  public int distToNewlineCurrent;
+  public int distToEnclosingBraceStart;  /* formerly distToNewlineCurrent */ 
 
   // distance to the brace enclosing the current location
-  public int distToBraceCurrent;
+  public int /* distToBraceCurrent */ distToEnclosingBrace;
 
   //the distance to the start of the current line
-  public int distToPrevNewline;
+  public int distToStart; /* formerly distToStart */
 
-  static public final String noBrace = "";
-  static public final String openSquiggly = "{";
-  static public final String openParen = "(";
-  static public final String openBracket = "[";
+  static public final String NONE = "";           /* formely noBrace */
+  static public final String OPEN_CURLY = "{"; /* formerly openCurly */ 
+  static public final String OPEN_PAREN = "(";    /* formerly openParen */
+  static public final String OPEN_BRACKET = "[";  /* formerly openBracket */
 
   /** Creates an IndentInfo with default values. */
   public IndentInfo() {
-    braceType = noBrace;
-    distToNewline = -1;
-    distToBrace = -1;
-    braceTypeCurrent = noBrace;
-    distToNewlineCurrent = -1;
-    distToBraceCurrent = -1;
+    lineEnclosingBraceType = NONE;
+    distToLineEnclosingBraceStart = -1;
+    distToLineEnclosingBrace = -1;
+    braceType = NONE;
+    distToEnclosingBraceStart = -1;
+    distToEnclosingBrace = -1;
   }
 
   /** Creates an indent info with the specified parameters
-   *  @param _braceType the braceType
-   *  @param _distToNewline the distance to the next newline
-   *  @param _distToBrace the distance to a brace
-   *  @param _distToPrevNewline the distance to the previous newline
-   */
-  public IndentInfo(String _braceType, int _distToNewline, int _distToBrace, int _distToPrevNewline) {
-    braceType = _braceType;
-    distToNewline = _distToNewline;
-    distToBrace = _distToBrace;
-    distToPrevNewline = _distToPrevNewline;
+    * @param _braceType the braceType
+    * @param _distToLineEnclosingBraceStart the distance to the next newline
+    * @param _distToLineEnclosingBrace the distance to a brace
+    * @param _distToStart the distance to the previous newline
+    */
+  public IndentInfo(String _lineEnclosingBraceType, int _distToLineEnclosingBraceStart, int _distToLineEnclosingBrace, int _distToStart) {
+    lineEnclosingBraceType = _lineEnclosingBraceType;
+    distToLineEnclosingBraceStart = _distToLineEnclosingBraceStart;
+    distToLineEnclosingBrace = _distToLineEnclosingBrace;
+    distToStart = _distToStart;
   }
 }
 
