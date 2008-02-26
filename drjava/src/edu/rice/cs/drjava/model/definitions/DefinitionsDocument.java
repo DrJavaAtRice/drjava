@@ -1054,14 +1054,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         
         // Find top level open brace
         int topLevelBracePos = -1;
-        String braceType = info.braceType;
+        String braceType = info.enclosingBraceType();
         while (! braceType.equals(IndentInfo.NONE)) {
           if (braceType.equals(IndentInfo.OPEN_CURLY)) {
-            topLevelBracePos = _currentLocation - info.distToEnclosingBrace;
+            topLevelBracePos = _currentLocation - info.distToEnclosingBrace();
           }
-          move(-info.distToEnclosingBrace);
+          move(-info.distToEnclosingBrace());
           info = getIndentInformation();
-          braceType = info.braceType;
+          braceType = info.enclosingBraceType();
         }
         if (topLevelBracePos == -1) {
           // No top level brace was found, so we can't find a top level class name

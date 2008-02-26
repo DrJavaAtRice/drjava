@@ -317,33 +317,36 @@ public class ReducedModelControl implements BraceReduction {
     */
   public IndentInfo getIndentInformation() {
     IndentInfo info = new IndentInfo();
-    //get distance to the previous newline (in info.distToLineEnclosingBraceStart)
-    _rmc.getDistToPreviousNewline(info);
+    //get distance to the previous newline (in info.distToStart)
+//    System.err.println("Before calls, info = " + info);
+    _rmc.getDistToStart(info);
+//    System.err.println("After getDistToStart, info = " + info);
     //get distance to the closing brace before that new line.
-    _rmb.getDistToEnclosingBrace(info);
+    _rmb.getDistToLineEnclosingBrace(info);
+//    System.err.println("After getDistToLineEnclosingBrace, info = " + info);
     //get distance to newline before the previous, just mentioned, brace.
-    _rmc.getDistToIndentNewline(info);
+    _rmc.getDistToLineEnclosingBraceStart(info);
+//    System.err.println("After getDistToLineEnclosingBraceStart info = " + info);
     // get distance to the brace enclosing the current location
-    _rmb.getDistToEnclosingBraceCurrent(info);
+    _rmb.getDistToEnclosingBrace(info);
+//    System.err.println("After getDistToEnclosingBrace, info = " + info);
     // get distance to the beginning of that brace's line
-    _rmc.getDistToCurrentBraceNewline(info);
+    _rmc.getDistToEnclosingBraceStart(info);
+//    System.err.println("After getDistToEnclosingBraceStart, info = " + info);
     return info;
   }
   
-  
-  
-
   public int getDistToIdentNewline() { return -1; }
-  public int getDistToCurrentBraceNewline() { return -1; }
+  public int getDistToEnclosingBraceStart() { return -1; }
   
   /** Gets info about the brace enclosing the beginning of this line. */
   public BraceInfo getEnclosingBrace() { return _rmb.getEnclosingBrace(); }
   /** Gets info about the brace enclosing this location. */
   public BraceInfo getEnclosingBraceCurrent() { return _rmb.getEnclosingBraceCurrent(); }
   /** Gets distance to the new newline character (not including the newline). */
-  public int getDistToPreviousNewline() { return _rmc.getDistToPreviousNewline(); }
+  public int getDistToStart() { return _rmc.getDistToStart(); }
   /** Gets distance to previous newline character (not including the newline). */
-  public int getDistToPreviousNewline(int relLoc) { return _rmc.getDistToPreviousNewline(relLoc); }
+  public int getDistToStart(int relLoc) { return _rmc.getDistToStart(relLoc); }
 
   public int getDistToNextNewline() { return _rmc.getDistToNextNewline(); }
 

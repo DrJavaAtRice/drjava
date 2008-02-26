@@ -75,11 +75,11 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     IndentInfo info = doc.getIndentInformation();
     doc.move(origin - lineStart);
     
-    if (! info.lineEnclosingBraceType.equals(IndentInfo.OPEN_CURLY) || info.distToLineEnclosingBrace < 0) {
+    if (! info.lineEnclosingBraceType().equals(IndentInfo.OPEN_CURLY) || info.distToLineEnclosingBrace() < 0) {
       // Precondition not met: we should have a brace
       return false;
     }
-    int bracePos = lineStart - info.distToLineEnclosingBrace;
+    int bracePos = lineStart - info.distToLineEnclosingBrace();
     
     // Get position of previous non-WS char (not in comments)
     int prevNonWS = -1;

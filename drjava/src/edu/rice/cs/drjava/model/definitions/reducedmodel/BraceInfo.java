@@ -43,12 +43,12 @@ public class BraceInfo {
   
   // TODO: convert String brace type to char brace type
   
-  public static final String NULL_BRACE = "";      // char '\u0000';
+  public static final String NONE = "";      // char '\u0000';
   public static final String OPEN_SQUIGGLY = "{"; // char '{';
   public static final String OPEN_PAREN    = "(";   // char '(';
   public static final String OPEN_BRACKET  = "[";   // char '[';
   
-  public static final BraceInfo NONE = new BraceInfo(NULL_BRACE, -1);
+  public static final BraceInfo NULL = new BraceInfo(NONE, -1);
   
   private String _braceType;   // one of the four above options
 

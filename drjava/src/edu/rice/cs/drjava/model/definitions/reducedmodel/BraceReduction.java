@@ -107,7 +107,7 @@ public interface BraceReduction {
   public IndentInfo getIndentInformation();
 
   /** Gets distance to enclosing new line */
-  public int getDistToPreviousNewline(int relativeLoc);
+  public int getDistToStart(int relativeLoc);
 
   /** Gets distance to next new line. */
   public int getDistToNextNewline();

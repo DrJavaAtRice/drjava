@@ -50,10 +50,10 @@ import javax.swing.text.BadLocationException;
   */
 public final class IndentInfoTest extends DrJavaTestCase {
   private String _text;
-  //private DefinitionsDocument _document;
-  //private BraceReduction _reduced;
-  private IndentInfo _info;
-  //private GlobalEventNotifier _notifier;
+//  private DefinitionsDocument _document;
+//  private BraceReduction _reduced;
+//  private IndentInfo _info;
+//  private GlobalEventNotifier _notifier;
   private DJDocument _document;
   
   
@@ -76,20 +76,21 @@ public final class IndentInfoTest extends DrJavaTestCase {
     };
   }
   
-  private void _infoTestHelper(int location, String message,
-                               int expDistToPrevNewline, int expDistToBrace,
-                               int expDistToNewline, int expDistToBraceCurrent,
-                               int expDistToNewlineCurrent)
+  private void _infoTestHelper(int location, String msg,
+                               int expDistToStart, int expDistToLineEnclosingBrace,
+                               int expDistToLineEnclosingBraceStart, int expDistToEnclosingBrace,
+                               int expDistToEnclosingBraceStart)
   {
     _document.setCurrentLocation(location);
     //_reduced = _document.getReduced();
-    _info = _document.getIndentInformation();
+    IndentInfo info = _document.getIndentInformation();
     
-    assertEquals(message + " -- distToStart", expDistToPrevNewline, _info.distToStart);
-    assertEquals(message + " -- distToLineEnclosingBrace", expDistToBrace, _info.distToLineEnclosingBrace);
-    assertEquals(message + " -- distToLineEnclosingBraceStart", expDistToNewline, _info.distToLineEnclosingBraceStart);
-    assertEquals(message + " -- distToBraceCurrent", expDistToBraceCurrent, _info.distToEnclosingBrace);
-    assertEquals(message + " -- distToEnclosingBraceStart", expDistToNewlineCurrent, _info.distToEnclosingBraceStart);
+    assertEquals(msg + ": distToStart", expDistToStart, info.distToStart());
+    assertEquals(msg + ": distToLineEnclosingBrace", expDistToLineEnclosingBrace, info.distToLineEnclosingBrace());
+    assertEquals(msg + ": distToLineEnclosingBraceStart", expDistToLineEnclosingBraceStart, 
+                 info.distToLineEnclosingBraceStart());
+    assertEquals(msg + ": distToBraceCurrent", expDistToEnclosingBrace, info.distToEnclosingBrace());
+    assertEquals(msg + ": distToEnclosingBraceStart", expDistToEnclosingBraceStart, info.distToEnclosingBraceStart());
   }
   
   public void testFieldsForCurrentLocation() throws BadLocationException {

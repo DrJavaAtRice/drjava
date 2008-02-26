@@ -1414,10 +1414,10 @@ public final class IndentTest extends DrJavaTestCase {
 
   private void _assertIndentInfo(IndentInfo info, String lineEnclosingBraceType, int distToLineEnclosingBraceStart, 
                                  int distToLineEnclosingBrace, int distToStart) {
-    assertEquals("indent info: brace type", lineEnclosingBraceType, info.lineEnclosingBraceType);
-    assertEquals("indent info: dist to new line", distToLineEnclosingBraceStart, info.distToLineEnclosingBraceStart);
-    assertEquals("indent info: dist to brace", distToLineEnclosingBrace, info.distToLineEnclosingBrace);
-    assertEquals("indent info: dist to prev new line", distToStart, info.distToStart);
+    assertEquals("indent info: brace type", lineEnclosingBraceType, info.lineEnclosingBraceType());
+    assertEquals("indent info: dist to start of line enclosing brace", distToLineEnclosingBraceStart, info.distToLineEnclosingBraceStart());
+    assertEquals("indent info: dist to line enclosing brace", distToLineEnclosingBrace, info.distToLineEnclosingBrace());
+    assertEquals("indent info: dist to start", distToStart, info.distToStart());
   }
 
 //  /** Copies fromFile to toFile, assuming both files exist. */

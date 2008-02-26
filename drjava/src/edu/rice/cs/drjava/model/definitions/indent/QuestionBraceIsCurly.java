@@ -61,6 +61,6 @@ public class QuestionBraceIsCurly extends IndentRuleQuestion {
 
     IndentInfo info = doc.getIndentInformation();
 
-    return info.lineEnclosingBraceType.equals(IndentInfo.OPEN_CURLY);
+    return info.lineEnclosingBraceType().equals(IndentInfo.OPEN_CURLY);
   }
 }

@@ -439,11 +439,11 @@ public class ReducedModelBrace extends AbstractReducedModel {
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
     // this is the distance to in front of the previous newline.
-    final int distToStart = _parent.getDistToPreviousNewline();
+    final int distToStart = _parent.getDistToStart();
 
     if (distToStart == -1) {
       iter.dispose();
-      return BraceInfo.NONE;
+      return BraceInfo.NULL;
     }
     
     int relDistance = distToStart + 1;
@@ -457,7 +457,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
 
     if (iter.atStart() || iter.atFirstItem()) { // no preceding brace exists
       iter.dispose();
-      return BraceInfo.NONE;
+      return BraceInfo.NULL;
     }
 
     iter.prev(); // move to reduced token preceding the newline.
@@ -492,7 +492,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
                 Brace popped = braceStack.pop();
                 if (! curBrace.isMatch(popped)) {
                   iter.dispose();
-                  return BraceInfo.NONE;
+                  return BraceInfo.NULL;
                 }
               }
               // closed
@@ -507,39 +507,36 @@ public class ReducedModelBrace extends AbstractReducedModel {
 
     // Enclosing brace not found
     iter.dispose();
-    return BraceInfo.NONE;
+    return BraceInfo.NULL;
   }
   
-  /** Finds distance to brace enclosing the start of this line.  Assumes that the field info.distToLineEnclosingBraceStart already 
+  /** Finds distance to brace enclosing the start of this line.  Assumes that the field info.distToStart already 
     * holds the distance to the previous newline.  To find the enclosing brace one must first move past this newline. 
     * The distance held in this variable is only to the space in front of the newline hence you must move back that 
     * distance + 1.
     * This is legacy code that will eventually be completely replaced.
     */
-  protected void getDistToEnclosingBrace(IndentInfo info) {
+  protected void getDistToLineEnclosingBrace(IndentInfo info) {
+    if (info.distToStart() == -1) { // There is no preceding newline char.
+//      info.setDistToLineEnclosingBrace(-1);  // should be unnecessary
+      return; 
+    }
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
     // this is the distance to in front of the previous newline.
-    int relDistance = info.distToLineEnclosingBraceStart + 1;  
-    /* This code is OBSCENE!  As a precondition, info.distToLineEnclosingBraceStart must hold the distance to the right edge of 
-     * preceding newline (start of this line). */
+    int relDistance = info.distToStart() + 1;  
     int distance = relDistance;
 
-    if (info.distToLineEnclosingBraceStart == -1) {  // There is no preceding newline char.  (Why not give distance to line start?)
-      iter.dispose();
-      return;
-    }
     
     /* Invariant: distance == relDistance == distance to start of line preceded by newline. */
     // move to the proper location, then add the rest of the block and go to the previous.
-    iter.move(-info.distToLineEnclosingBraceStart - 1);
+    iter.move(-info.distToStart() - 1);
     relDistance += iter.getBlockOffset();
     distance += iter.getBlockOffset();
 
-    //reset the value of info signiling the necessary newline has
-    //not been found.
-    info.distToLineEnclosingBraceStart = -1;
+    //reset the value of info signiling the necessary newline has not been found.
+//    info.setDistToLineEnclosingBraceStart(-1);  // should be unnecessary
 
     if (iter.atStart() || iter.atFirstItem()) {
       iter.dispose();
@@ -567,8 +564,8 @@ public class ReducedModelBrace extends AbstractReducedModel {
               // open
               if (curBrace.isOpenBrace()) {
                 if (braceStack.isEmpty()) {
-                  info.lineEnclosingBraceType = curBrace.getType();
-                  info.distToLineEnclosingBrace = distance;
+                  info.setLineEnclosingBraceType(curBrace.getType());
+                  info.setDistToLineEnclosingBrace(distance);
                   iter.dispose();
                   return;
                 }
@@ -593,8 +590,8 @@ public class ReducedModelBrace extends AbstractReducedModel {
   }
 
   /** Determines the type of and distance to the brace enclosing the current location and stores this information
-    * in info.braceType and info.distToEnclosingBrace. */
-  protected void getDistToEnclosingBraceCurrent(IndentInfo info) {
+    * in info.enclosingBraceType and info.distToEnclosingBrace. */
+  protected void getDistToEnclosingBrace(IndentInfo info) {
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
@@ -608,7 +605,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     distance += iter.getBlockOffset();
 
     // initialize info to signal that no preceding newline exists.
-    info.distToEnclosingBraceStart = -1;
+//    info.setDistToEnclosingBraceStart(-1);  // should be unnecessary
 
     if (iter.atStart() || iter.atFirstItem()) {
       iter.dispose();
@@ -632,8 +629,8 @@ public class ReducedModelBrace extends AbstractReducedModel {
               // open
               if (curBrace.isOpenBrace()) {
                 if (braceStack.isEmpty()) {
-                  info.braceType = curBrace.getType();
-                  info.distToEnclosingBrace = distance;
+                  info.setEnclosingBraceType(curBrace.getType());
+                  info.setDistToEnclosingBrace(distance);
                   iter.dispose();
                   return;
                 }
@@ -673,7 +670,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     
     if (iter.atStart() || iter.atFirstItem()) {
       iter.dispose();
-      return BraceInfo.NONE;
+      return BraceInfo.NULL;
     }
 
     iter.prev();
@@ -702,7 +699,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
                 Brace popped = braceStack.pop();
                 if (! curBrace.isMatch(popped)) {
                   iter.dispose();
-                  return BraceInfo.NONE;
+                  return BraceInfo.NULL;
                 }
               }
               // closed
@@ -716,6 +713,6 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
 
     iter.dispose();
-    return BraceInfo.NONE;
+    return BraceInfo.NULL;
   }
 }
