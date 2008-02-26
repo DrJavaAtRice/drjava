@@ -3181,44 +3181,83 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   public void setUpDrJavaProperties() {
+    final String DEF_DIR = _model.getInteractionsModel().getWorkingDirectory().toString();
     PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.file") {
       public void update() {
-        _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(_model.getActiveDocument().getRawFile().toString());
+        try {
+          File f = FileOps.makeRelativeTo(_model.getActiveDocument().getRawFile(),
+                                          new File(_attributes.get("dir")));
+          _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+        }
+        catch(IOException e) { _value = "Error."; }
+        catch(SecurityException e) { _value = "Error."; }
+      }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("dir", DEF_DIR);
+      }
+    });
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.working.dir") {
+      public void update() {
+        try {
+          File f;
+          if (_attributes.get("dir").equals("/")) {
+            f = _model.getInteractionsModel().getWorkingDirectory().getAbsoluteFile();
+            _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+          }
+          else {
+            f = FileOps.makeRelativeTo(_model.getInteractionsModel().getWorkingDirectory(),
+                                       new File(_attributes.get("dir")));
+            _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+          }
+        }
+        catch(IOException e) { _value = "Error."; }
+        catch(SecurityException e) { _value = "Error."; }
+      }    
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("dir", "/");
       }
     });
     
     // Files
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.all.files", File.pathSeparator) {
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR) {
       protected List<OpenDefinitionsDocument> getList() { return _model.getOpenDefinitionsDocuments(); }
     });
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.project.files", File.pathSeparator) {
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.project.files", File.pathSeparator, DEF_DIR) {
       protected List<OpenDefinitionsDocument> getList() { return _model.getProjectDocuments(); }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.included.files", File.pathSeparator) {
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.included.files", File.pathSeparator, DEF_DIR) {
       protected List<OpenDefinitionsDocument> getList() { return _model.getAuxiliaryDocuments(); }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.external.files", File.pathSeparator) {
+    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.external.files", File.pathSeparator, DEF_DIR) {
       protected List<OpenDefinitionsDocument> getList() { return _model.getNonProjectDocuments(); }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    
-    // Files with spaces
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.all.files.space", " ") {
-      protected List<OpenDefinitionsDocument> getList() { return _model.getOpenDefinitionsDocuments(); }
-    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.project.files.space", " ") {
-      protected List<OpenDefinitionsDocument> getList() { return _model.getProjectDocuments(); }
-    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.included.files.space", " ") {
-      protected List<OpenDefinitionsDocument> getList() { return _model.getAuxiliaryDocuments(); }
-    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));
-    PropertyMaps.ONLY.setProperty("DrJava", new EagerFileListProperty("drjava.external.files.space", " ") {
-      protected List<OpenDefinitionsDocument> getList() { return _model.getNonProjectDocuments(); }
-    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("DrJava", "drjava.all.files"));    
     
     // Misc
     PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.time.millis") {
       public void update() {
-        _value = String.valueOf(System.currentTimeMillis());
+        long millis = System.currentTimeMillis();
+        String f = _attributes.get("fmt").toLowerCase();
+        if (f.equals("full")) {
+          _value = java.text.DateFormat.getDateInstance(java.text.DateFormat.FULL).format(new java.util.Date(millis));
+        }
+        else if (f.equals("long")) {
+          _value = java.text.DateFormat.getDateInstance(java.text.DateFormat.LONG).format(new java.util.Date(millis));
+        }
+        else if (f.equals("medium")) {
+          _value = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(new java.util.Date(millis));
+        }
+        else if (f.equals("short")) {
+          _value = java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT).format(new java.util.Date(millis));
+        }
+        else {
+          _value = String.valueOf(millis);
+        }
+      }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("fmt", "millis");
       }
     });
   }

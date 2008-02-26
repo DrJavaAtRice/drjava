@@ -38,6 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 
 /** Class representing values that can be inserted as variables in external processes.
@@ -54,6 +55,8 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   protected String _value = "--uninitialized--";
   /** Is the value current? */
   protected boolean _isCurrent = false;
+  /** Map of attributes. */
+  protected HashMap<String,String> _attributes = new HashMap<String,String>();
   /** Set of other properties that are listening to this property, i.e.
     * when this property is invalidated, the other properties are too. */
   protected Set<DrJavaProperty> _listening = new HashSet<DrJavaProperty>();
@@ -62,6 +65,7 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   public DrJavaProperty(String name) {
     if (name==null) { throw new IllegalArgumentException("DrJavaProperty name is null"); }
     _name = name;
+    resetAttributes();
   }
 
   /** Create a property. */
@@ -87,6 +91,34 @@ public abstract class DrJavaProperty implements Comparable<DrJavaProperty> {
   
   /** Update the property so the value is current. */
   public abstract void update();
+  
+  /** Reset attributes to their defaults. Should be overridden by properties that use attributes. */
+  public void resetAttributes() {
+    _attributes.clear();
+  }
+  
+  /** Set an attribute's value. The attribute must already exist in the table.
+    * @param key name of the attribute
+    * @param value new value of the attribute
+    * @throws IllegalArgumentException if attribute with specified key does not already exist in table
+    */
+  public void setAttribute(String key, String value) {
+    if (!_attributes.containsKey(key)) {
+      throw new IllegalArgumentException("Attribute "+key+" not known to property "+_name);
+    }
+    _attributes.put(key, value);
+  }
+  
+  /** Return an attribute's value.
+    * @param key name of the attribute
+    * @throws IllegalArgumentException if attribute with specified key does not already exist in table
+    */
+  public String getAttribute(String key) {
+    if (!_attributes.containsKey(key)) {
+      throw new IllegalArgumentException("Attribute "+key+" not known to property "+_name);
+    }
+    return _attributes.get(key);
+  }
   
   /** Return the value, which might be stale. */
   public String toString() {

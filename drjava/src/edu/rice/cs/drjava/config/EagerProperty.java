@@ -49,6 +49,7 @@ public abstract class EagerProperty extends DrJavaProperty {
   /** Create an eager property. */
   public EagerProperty(String name) {
     super(name);
+    resetAttributes();
   }
   
   /** Return the value of the property. If it is not current, update first. */

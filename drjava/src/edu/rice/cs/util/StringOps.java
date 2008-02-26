@@ -534,7 +534,7 @@ public abstract class StringOps {
     return sb.toString();
   }
   
-  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("stringops.txt", false);
+  // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("stringops.txt", true);
   
   /** Escapes spaces ' ' with the sequence "\u001b ", and a single '\u001b' with a double.
     * '\u001b' was picked because its ASCII meaning is 'escape', and it should be platform-independent.
@@ -639,7 +639,7 @@ public abstract class StringOps {
     }
     return cmds;
   }
-  
+    
   /**
    * Replace variables of the form "${variable}" with the value associated with the string "variable" in the
    * provided hash table.
@@ -651,60 +651,124 @@ public abstract class StringOps {
    * @return string with variables replaced by values
    */
   public static String replaceVariables(String str, PropertyMaps props, Lambda<String,DrJavaProperty> getter) {
-    int pos = str.indexOf("${");
-    int bsPos = str.indexOf('\\');
-    if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
-    // find every ${
-    // LOG.log("========================");
-    while(pos>=0) {
-      // LOG.log("str = '"+str+"', pos = "+pos);
-      // see if this is an escaped \ (\\)
-      if ((str.charAt(pos)=='\\') &&
-          (pos<str.length()-1) &&
-          (str.charAt(pos+1)=='\\')) {
-        // change the \\ into a single \
-        // LOG.log("\t\\\\");
-        str = str.substring(0, pos) + str.substring(pos+1);
-      }
-      // see if this is an escaped $ (\$)
-      else if ((str.charAt(pos)=='\\') &&
-               (pos<str.length()-1) &&
-               (str.charAt(pos+1)=='$')) {
-        // change the \$ into a single $
-        // LOG.log("\t\\$");
-        str = str.substring(0, pos) + str.substring(pos+1);
-        // and skip
-        ++pos;
-      }
-      else if ((str.charAt(pos)=='$')) {
-        // LOG.log("\t$");
-        // look if this is str property name enclosed by ${...}, e.g. "${user.home}"
-        if ((pos<str.length()-1) && (str.charAt(pos+1)=='{')) {
-          int nextClose = str.indexOf('}',pos+1);
-          if (nextClose>=0) {
-            String key = str.substring(pos+2, nextClose);
-            // LOG.log("\tkey = '"+key+"'");
-            for(String category: props.getCategories()) {
-              // LOG.log("\ttrying category '"+category+"'");
-              DrJavaProperty p = props.getProperty(category, key);
-              if (p!=null) {
-                // found property name
-                // replace "${property.name}" with the value of the property, e.g. /home/user
-                String s = getter.apply(p);
-                str = str.substring(0, pos) + s + str.substring(nextClose+1);
-                // advance to the last character of the value
-                pos = nextClose;
-                break;
+    BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str));
+    tok.wordRange(0,255);
+    tok.addQuotes("${", "}");
+    
+    // LOG.log("---------");
+    // LOG.log("Replacing: "+str);
+    StringBuilder sb = new StringBuilder();
+    String next = null;
+    try {
+      while((next=tok.getNextToken())!=null) {
+        if ((next.startsWith("${")) &&
+             (next.endsWith("}"))) {
+          // LOG.log("Found property: "+next);
+          String key;
+          String attrList = "";
+          int firstCurly = next.indexOf('}');
+          int firstSemi = next.indexOf(';');
+          if (firstSemi<0) {
+            // format: ${property.name}
+            // for key, cut off ${ and }
+            key = next.substring(2,firstCurly);
+          }
+          else {
+            // format: {$property.name;...}
+            // for key, cut off ${ and ;...}
+            key = next.substring(2,firstSemi);
+            // for attribute list, cut off ${propertyname; and }
+            attrList = next.substring(firstSemi+1,next.length()-1).trim();
+          }
+          // LOG.log("\tKey      = '"+key+"'");
+          // LOG.log("\tAttrList = '"+attrList+"'");
+          boolean found = false;
+          for(String category: props.getCategories()) {
+            DrJavaProperty p = props.getProperty(category, key);
+            if (p!=null) {
+              // found property name
+              p.resetAttributes();
+              
+              // if we have a list of attributes
+              try {
+                if (attrList.length()>0) {
+                  BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList));
+                  atok.wordRange(0,255);
+                  atok.whitespaceRange(0,32);
+                  atok.addQuotes("\"", "\"");
+                  atok.addKeyword(";");
+                  atok.addKeyword("=");
+                  // LOG.log("\tProcessing AttrList");
+                  String n = null;
+                  while((n=atok.getNextToken())!=null) {
+                    if ((n==null) || n.equals(";") || n.equals("=") || n.startsWith("\"")) {
+                      throw new IllegalArgumentException("Unknown attribute list format for property "+key);
+                    }
+                    String name = n;
+                    // LOG.log("\t\tname = '"+name+"'");
+                    n = atok.getNextToken();
+                    if ((n==null) || (!n.equals("="))) {
+                      throw new IllegalArgumentException("Unknown attribute list format for property "+key);
+                    }
+                    // LOG.log("\t\tread '='");
+                    n = atok.getNextToken();
+                    if ((n==null) || (!n.startsWith("\""))) {
+                      throw new IllegalArgumentException("Unknown attribute list format for property "+key);
+                    }
+                    String value = "";
+                    if (n.length()>1) {
+                      value = n.substring(1,n.length()-1);
+                      // LOG.log("\t\tvalue = '"+value+"'");
+                    }
+                    n = atok.getNextToken();
+                    if ((n!=null) && (!n.equals(";"))) {
+                      throw new IllegalArgumentException("Unknown attribute list format for property "+key);
+                    }
+                    // LOG.log("\t\tread ';' or EOF");
+                    // processed correctly
+                    // LOG.log("\t\treplacing variables in '"+value+"'...");
+                    String replacedValue = replaceVariables(value, props, getter);
+                    // LOG.log("\t\treplaced value is '"+replacedValue+"'");
+                    
+                    p.setAttribute(name, replacedValue);
+                    
+                    if (n==null) { break; }
+                  }
+                }
+                // append the value of the property, e.g. /home/user instead of "${property.name}"
+                String finalValue = getter.apply(p);
+                // LOG.log("\tfinal value: '"+finalValue+"'");
+                found = true;
+                sb.append(finalValue);
+              }              
+              catch(IllegalArgumentException e) {
+                sb.append("<-- Error: "+e.getMessage()+" -->");
               }
+              if (found) { break; }
+              continue;
             }
+            if (found) { break; }
+          }
+          if (!found) {
+            // unknown property
+            sb.append(next);
           }
         }
+        else {
+          sb.append(next);
+        }
       }
-      pos = str.indexOf("${", pos+1);
-      bsPos = str.indexOf("\\\\", pos+1);
-      if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
     }
-    // LOG.log("end str = '"+str+"'");
-    return str;
+    catch(IllegalArgumentException e) {
+      return "<-- Error: "+e.getMessage()+" -->";
+    }
+    catch(IOException e) {
+      return "<-- Error: "+e.getMessage()+" -->";
+    }
+    
+    // LOG.log("Returning '"+sb.toString()+"'");
+    // LOG.log("---------");
+    
+    return sb.toString();
   }
 }

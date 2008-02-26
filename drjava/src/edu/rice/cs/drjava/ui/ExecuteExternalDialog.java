@@ -46,7 +46,9 @@ import edu.rice.cs.util.CompletionMonitor;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.PropertyMaps;
+import edu.rice.cs.util.BalancingStreamTokenizer;
 
+import java.io.StringReader;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
@@ -584,15 +586,16 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           _commandLineDoc.remove(0,_commandLineDoc.getLength());
           StringBuilder sb = new StringBuilder();
           String text = StringOps.replaceVariables(_commandLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
-          List<String> cmds = StringOps.commandLineToList(text);
+          /* List<String> cmds = StringOps.commandLineToList(text);
           for(String s: cmds) {
             sb.append(s);
             sb.append(' ');
-          }
-          _commandLineDoc.insertString(_commandLineDoc.getLength(), sb.toString(), null);
+          } */
+          _commandLineDoc.insertString(_commandLineDoc.getLength(), text, null);
           
           // command line
           colorVariables(_commandLine,
+                         PropertyMaps.ONLY,
                          this,
                          _commandLineCmdAS,
                          _varCommandLineCmdStyle,
@@ -621,6 +624,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           
           // command line
           colorVariables(_commandWorkDirLine,
+                         PropertyMaps.ONLY,
                          this,
                          _commandLineCmdAS,
                          _varCommandLineCmdStyle,
@@ -948,6 +952,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           
           // JVM line
           colorVariables(_jvmLine,
+                         PropertyMaps.ONLY,
                          this,
                          _javaCommandLineJVMAS,
                          _javaVarCommandLineJVMStyle,
@@ -955,6 +960,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
 
           // Java Command line
           colorVariables(_javaCommandLine,
+                         PropertyMaps.ONLY,
                          this,
                          _javaCommandLineCmdAS,
                          _javaVarCommandLineCmdStyle,
@@ -984,6 +990,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           
           // work dir
           colorVariables(_javaCommandWorkDirLine,
+                         PropertyMaps.ONLY,
                          this,
                          _javaCommandLineCmdAS,
                          _javaVarCommandLineCmdStyle,
@@ -1064,6 +1071,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     * @param pane the pane that contains the text
     * @param props the properties to color */
   protected void colorVariables(final JTextPane pane,
+                                final PropertyMaps props,
                                 final DocumentListener dl,
                                 final SimpleAttributeSet normal,
                                 final SimpleAttributeSet variable,
@@ -1073,66 +1081,99 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         StyledDocument doc = (StyledDocument)pane.getDocument();
         doc.removeDocumentListener(dl);
         String str = pane.getText();
+        BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str));
+        tok.wordRange(0,255);
+        tok.addQuotes("${", "}");
+
+        int pos = 0;
         doc.setCharacterAttributes(0,str.length(),normal,true);
+        String next = null;
         try {
-//          int pos = str.indexOf("${");
-//          int bsPos = str.indexOf("\\\\");
-//          if ((bsPos!=-1) && (bsPos<pos)) { pos = bsPos; }
-          int pos = 0;
-          SimpleAttributeSet sas = variable;
-          // LOG.log(str);
-          while((str.length()>0)&&(pos>=0)&&(pos<str.length())) {
-            // LOG.log("pos = "+pos); 
-            // see if this is an escaped \ (\\)
-            if ((str.charAt(pos)=='\\') &&
-                (pos<str.length()-1) &&
-                (str.charAt(pos+1)=='\\')) {
-              doc.setCharacterAttributes(pos,pos+1,normal,true);
-              pos += 2;
-            }
-            else if ((str.charAt(pos)=='\\') &&
-                     (pos<str.length()-1) &&
-                     (str.charAt(pos+1)=='$')) {
-              // escaped $ (\$)
-              doc.setCharacterAttributes(pos,pos+1,normal,true);
-              pos += 2;
-            }
-            else if ((str.charAt(pos)=='$') &&
-                     (pos<str.length()-1) &&
-                     (str.charAt(pos+1)=='{')) {
-              // beginning of what should be a ${variable}
-              boolean found = false;
-              for(String category: PropertyMaps.ONLY.getCategories()) {
-                for(DrJavaProperty prop: PropertyMaps.ONLY.getProperties(category).values()) {
-                  String key = prop.getName();
-                  int endPos = pos + key.length() + 3;
-                  if (str.substring(pos, Math.min(str.length(), endPos)).equals("${"+key+"}")) {
-                    // found property name
-                    found = true;
-                    doc.setCharacterAttributes(pos,endPos-pos,variable,true);
-                    pos = endPos;
-                    break;
-                  }
-                }
-              }
-              if (!found) {
-                int closePos = str.indexOf('}', pos);
-                if (closePos!=-1) {
-                  doc.setCharacterAttributes(pos,closePos-pos+1,error,true);
-                  pos = closePos+1;
+          while((next=tok.getNextToken())!=null) {
+            if (next.startsWith("${")) {
+              if (next.endsWith("}")) {
+                String key;
+                String attrList = "";
+                int firstCurly = next.indexOf('}');
+                int firstSemi = next.indexOf(';');
+                if (firstSemi<0) {
+                  key = next.substring(2,firstCurly);
                 }
                 else {
-                  doc.setCharacterAttributes(pos,1,error,true);
-                  ++pos;
+                  key = next.substring(2,firstSemi);
+                  attrList = next.substring(firstSemi+1,next.length()-1).trim();
                 }
+                boolean found = false;
+                for(String category: props.getCategories()) {
+                  DrJavaProperty p = props.getProperty(category, key);
+                  if (p!=null) {
+                    found = true;
+                    doc.setCharacterAttributes(pos,pos+next.length(),variable,true);
+
+                    // found property name
+                    // if we have a list of attributes
+                    if (attrList.length()>0) {
+                      int subpos = pos + 2 + key.length() + 1;
+                      int added = 0;
+                      BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList));
+                      atok.wordRange(0,255);
+                      atok.addQuotes("\"", "\"");
+                      atok.addKeyword(";");
+                      atok.addKeyword("=");
+                      // LOG.log("\tProcessing AttrList");
+                      String n = null;
+                      while((n=atok.getNextToken())!=null) {
+                        if ((n==null) || n.trim().equals(";") || n.trim().equals("=") || n.trim().startsWith("\"")) {
+                          doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
+                          break;
+                        }
+                        added += n.length();
+                        String name = n.trim();
+                        n = atok.getNextToken();
+                        if ((n==null) || (!n.trim().equals("="))) {
+                          doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
+                          break;
+                        }
+                        added += n.length();
+                        n = atok.getNextToken();
+                        if ((n==null) || (!n.trim().startsWith("\""))) {
+                          doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
+                          break;
+                        }
+                        added += n.length();
+                        n = atok.getNextToken();
+                        if ((n!=null) && (!n.trim().equals(";"))) {
+                          doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
+                          break;
+                        }
+                        if (n!=null) { added += n.length(); }
+                        try {
+                          p.getAttribute(name);
+                        }
+                        catch(IllegalArgumentException e) {
+                          doc.setCharacterAttributes(subpos,subpos+added,error,true);
+                        }
+                        subpos += added;
+                      }
+                    }
+                  }
+                  if (found) { break; }
+                }
+                if (!found) {
+                  doc.setCharacterAttributes(pos,pos+next.length(),error,true);
+                }
+              }
+              else {
+                doc.setCharacterAttributes(pos,pos+next.length(),error,true);
               }
             }
             else {
-              doc.setCharacterAttributes(pos,1,normal,true);
-              ++pos;
+              doc.setCharacterAttributes(pos,pos+next.length(),normal,true);
             }
+            pos += next.length();
           }
         }
+        catch(Exception e) { /* ignore  */ }
         finally {
           doc.addDocumentListener(dl);
         }

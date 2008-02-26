@@ -37,6 +37,7 @@
 package edu.rice.cs.util;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.config.*;
 
 import edu.rice.cs.plt.tuple.Pair;
 import java.io.PrintWriter;
@@ -480,37 +481,27 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals("a b", l.get(0));
   }
   
-//  public void testReplaceVariables() {
-//    Map<String,Properties> props = new TreeMap<String,Properties>();
-//    Properties p1 = new Properties();
-//    p1.setProperty("var", "foo");
-//    p1.setProperty("xxx", "bar");
-//    props.put("1",p1);
-//    
-//    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props));
-//    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props));
-//    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props));
-//    assertEquals("abc${xxx}xyz", StringOps.replaceVariables("abc\\${xxx}xyz",props));
-//    assertEquals("abc\\barxyz", StringOps.replaceVariables("abc\\\\${xxx}xyz",props));
-//  }
-//  
-//  public void testReplaceVariables2() {
-//    Map<String,Properties> props = new TreeMap<String,Properties>();
-//    Properties p1 = new Properties();
-//    p1.setProperty("var", "foo");
-//    p1.setProperty("xxx", "bar");
-//    props.put("1",p1);
-//    Properties p2 = new Properties();
-//    p2.setProperty("yyy", "bam");
-//    p2.setProperty("xxx", "new");
-//    props.put("2",p2);
-//    
-//    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props));
-//    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props));
-//    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props));
-//    assertEquals("abc${xxx}xyz", StringOps.replaceVariables("abc\\${xxx}xyz",props));
-//    assertEquals("abc\\barxyz", StringOps.replaceVariables("abc\\\\${xxx}xyz",props));
-//    assertEquals("abcbamxyz", StringOps.replaceVariables("abc${yyy}xyz",props));
-//    assertEquals("abcbarbamxyz", StringOps.replaceVariables("abc${xxx}${yyy}xyz",props));
-//  }
+  public void testReplaceVariables() {
+    PropertyMaps props = new PropertyMaps();
+    props.setProperty("1", new ConstantProperty("var", "foo"));
+    props.setProperty("1", new ConstantProperty("xxx", "bar"));
+    
+    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.TO_STRING));
+    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props,PropertyMaps.TO_STRING));
+    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props,PropertyMaps.TO_STRING));
+  }
+  
+  public void testReplaceVariables2() {
+    PropertyMaps props = new PropertyMaps();
+    props.setProperty("1", new ConstantProperty("var", "foo"));
+    props.setProperty("1", new ConstantProperty("xxx", "bar"));
+    props.setProperty("2", new ConstantProperty("yyy", "bam"));
+    props.setProperty("2", new ConstantProperty("xxx", "new"));
+    
+    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.TO_STRING));
+    assertEquals("abcfooxyz", StringOps.replaceVariables("abc${var}xyz",props,PropertyMaps.TO_STRING));
+    assertEquals("abcbarxyz", StringOps.replaceVariables("abc${xxx}xyz",props,PropertyMaps.TO_STRING));
+    assertEquals("abcbamxyz", StringOps.replaceVariables("abc${yyy}xyz",props,PropertyMaps.TO_STRING));
+    assertEquals("abcbarbamxyz", StringOps.replaceVariables("abc${xxx}${yyy}xyz",props,PropertyMaps.TO_STRING));
+  }
 }

@@ -48,6 +48,7 @@ public class ConfigProperty extends EagerProperty {
   /** Create a configuration property. */
   public ConfigProperty(String name) {
     super(name);
+    resetAttributes();
   }
 
   /** Update the property so the value is current. */

@@ -36,28 +36,61 @@
 
 package edu.rice.cs.drjava.config;
 
-/** Class representing values from the Java System properties that
+import edu.rice.cs.drjava.DrJava;
+import java.util.HashSet;
+import java.util.Iterator;
+
+/** Class representing values that are constant and that
   * can be inserted as variables in external processes.
   *
   *  @version $Id$
   */
-public class JavaSystemProperty extends EagerProperty {
-  /** Create a Java system property. */
-  public JavaSystemProperty(String name) {
+public class ConstantProperty extends DrJavaProperty {
+  /** Create a constant property. */
+  public ConstantProperty(String name, String value) {
     super(name);
+    if (value==null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+    _value = value;
+    _isCurrent = true;
     resetAttributes();
   }
-
+      
   /** Update the property so the value is current. */
-  public void update() {
-    _value = System.getProperty(_name);
-    if (_value==null) { _value = "--unknown--"; }
+  public void update() { }
+
+  
+  /** Return the value of the property. If it is not current, update first. */
+  public String getCurrent() {
+    return _value;
+  }
+
+  /** Return the value. */
+  public String toString() {
+    return getCurrent();
+  }
+  
+  /** Return true if the value is current. */
+  public boolean isCurrent() { return true; }
+  
+  /** Mark the value as stale. */
+  public void invalidate() {
+    // nothing to do, but tell those who are listening
+    invalidateOthers(new HashSet<DrJavaProperty>());
   }
   
   /** @return true if the specified property is equal to this one. */
   public boolean equals(Object other) {
     if (other == null || other.getClass() != this.getClass()) return false;
-    JavaSystemProperty o = (JavaSystemProperty)other;
+    EagerProperty o = (EagerProperty)other;
     return _name.equals(o._name) && (_isCurrent == o._isCurrent) && _value.equals(o._value);
+  }
+  
+  /** @return the hash code. */
+  public int hashCode() {
+    int result;
+    result = _name.hashCode();
+    result = 31 * result + (_value.hashCode());
+    result = 31 * result + (_isCurrent?1:0);
+    return result;
   }
 } 

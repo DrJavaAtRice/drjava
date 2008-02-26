@@ -38,9 +38,12 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.util.FileOps;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.io.File;
+import java.io.IOException;
 
 /** Class representing values that are always up-to-date and that
   * can be inserted as variables in external processes.
@@ -50,10 +53,14 @@ import java.util.List;
 public abstract class EagerFileListProperty extends EagerProperty {
   /** Separating string. */
   protected String _sep;
+  /** Relative directory. */
+  protected String _dir;
   /** Create an eager property. */
-  public EagerFileListProperty(String name, String sep) {
+  public EagerFileListProperty(String name, String sep, String dir) {
     super(name);
     _sep = sep;
+    _dir = dir;
+    resetAttributes();
   }
   
   /** Return the value of the property. If it is not current, update first. */
@@ -87,11 +94,23 @@ public abstract class EagerFileListProperty extends EagerProperty {
     if (l.size()==0) { _value = ""; return; }
     StringBuilder sb = new StringBuilder();
     for(OpenDefinitionsDocument odd: l) {
-      sb.append(_sep);
-      String f = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(odd.getRawFile().toString());
-      sb.append(f);
+      sb.append(_attributes.get("sep"));
+      try {
+        File f = FileOps.makeRelativeTo(odd.getRawFile(), new File(_attributes.get("dir")));
+        String s = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+        sb.append(s);
+      }
+      catch(IOException e) { /* ignore */ }
+      catch(SecurityException e) { /* ignore */ }
     }
     _value = sb.toString().substring(_sep.length());
+  }
+  
+  /** Reset the attributes. */
+  public void resetAttributes() {
+    _attributes.clear();
+    _attributes.put("sep", _sep);
+    _attributes.put("dir", _dir);
   }
 
   /** @return true if the specified property is equal to this one. */
