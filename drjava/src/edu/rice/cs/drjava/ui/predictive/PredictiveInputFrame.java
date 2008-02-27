@@ -337,6 +337,23 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   public String getButtonPressed() {
     return _buttonPressed;
   }
+  
+  /** Return the raw, unforced text in the text field.
+    * @return text in text field */
+  public String getMask() {
+    return _textField.getText();
+  }
+
+  /** Set the mask in the text field.
+    * @param mask for text field*/
+  public void setMask(String mask) {
+    _pim.setMask(mask);
+    removeListener();
+    updateTextField();
+    updateExtensionLabel();
+    updateList();
+    addListener();
+  }
 
   /** Return the string that was entered in the text field.
     * If the user is forced to select an item, then the text of the item will be returned.

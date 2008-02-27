@@ -1653,7 +1653,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       // checkbox whether Java API classes should be completed as well
       _completeJavaAPICheckbox.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          GoToFileListEntry curItem = _completeWordDialog.getItem();
+          String curMask = _completeWordDialog.getMask();
           if (_completeJavaAPICheckbox.isSelected()) {
             // selected, add Java API classes to list
             generateJavaAPIList();
@@ -1685,9 +1685,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             }
             _completeWordDialog.setItems(true,n);
           }
-          if (curItem!=null) {
-            _completeWordDialog.setCurrentItem(curItem);
-          }
+          _completeWordDialog.setMask(curMask);
           _completeWordDialog.resetFocus();
         }
       });
@@ -1738,7 +1736,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> fullAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
         public String getName() { return "Fully Qualified"; }
-        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
+        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, OptionConstants.MASK); }
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
           if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
