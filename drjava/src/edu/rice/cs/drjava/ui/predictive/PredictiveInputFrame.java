@@ -69,6 +69,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    */
   public static interface CloseAction<X extends Comparable<? super X>> extends Lambda<Object, PredictiveInputFrame<X>> {
     public Object apply(PredictiveInputFrame<X> param);
+    public String getName();
+    public KeyStroke getKeyStroke(); // or null if none desired
   }
   
   /** Class to save the frame state, i.e. location and dimensions.*/
@@ -126,10 +128,10 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   private volatile PredictiveInputModel<T> _pim;
 
   /** Code for the last button that was pressed.*/
-  private volatile int _buttonPressed;
+  private volatile String _buttonPressed;
 
-  /** Ok button.*/
-  private final JButton _okButton = new JButton("OK");
+  /** Action buttons.*/
+  private final JButton[] _buttons;
   
   /** Text field for string input. */
   private final JTextField _textField = new JTextField();
@@ -165,10 +167,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   private final Frame _owner;
   
   /** Action to be performed when the user closes the frame using "OK". */
-  private final CloseAction<T> _okAction;
-  
-  /** Action to be performed when the user closes the frame using "Cancel". */
-  private final CloseAction<T> _cancelAction;
+  private final ArrayList<CloseAction<T>> _actions;
   
   /** Array of strategies. */
   private final java.util.List<PredictiveInputModel.MatchingStrategy<T>> _strategies;
@@ -188,14 +187,13 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    *  @param ignoreCase true if case should be ignored
    *  @param info information supplier to use for additional information display
    *  @param strategies array of matching strategies
-   *  @param okAction action to be performed when the user closes the frame using "OK"
-   *  @param cancelAction action to be performed when the user closes the frame using "Cancel"
+   *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
    *  @param items list of items
    */
 
   public PredictiveInputFrame(Frame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               java.util.List<PredictiveInputModel.MatchingStrategy<T>> strategies,
-                              CloseAction<T> okAction, CloseAction<T> cancelAction, java.util.List<T> items) {
+                              java.util.List<CloseAction<T>> actions, java.util.List<T> items) {
     super(title);
     _strategies = strategies;
     _strategyBox = new JComboBox(_strategies.toArray());
@@ -206,35 +204,23 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     _info = info;
     _lastState = null;
     _owner = owner;
-    _okAction = okAction;
-    _cancelAction = cancelAction;
+    _actions = new ArrayList<CloseAction<T>>(actions);
+    _buttons = new JButton[actions.size()];
     init(_info != null);
   }
-
+  
   /** Create a new predictive string input frame.
    *  @param owner owner frame
    *  @param force true if the user is forced to select one of the items
    *  @param info information supplier to use for additional information display
    *  @param strategies array of matching strategies
-   *  @param okAction action to be performed when the user closes the frame using "OK"
-   *  @param cancelAction action to be performed when the user closes the frame using "Cancel"
+   *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
    *  @param items varargs/array of items
    */
   public PredictiveInputFrame(Frame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               List<PredictiveInputModel.MatchingStrategy<T>> strategies,
-                              CloseAction<T> okAction, CloseAction<T> cancelAction, T... items) {
-    this(owner, title, force, ignoreCase, info, strategies, okAction, cancelAction, Arrays.asList(items));
-//    super(title);
-//    _strategies = strategies;
-//    _strategyBox = new JComboBox(_strategies.toArray());
-//    _currentStrategy = _strategies.get(0);
-//    _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
-//    _force = force;
-//    _info = info;
-//    _owner = owner;
-//    _okAction = okAction;
-//    _cancelAction = cancelAction;
-//    init(_info != null);
+                              java.util.List<CloseAction<T>> actions, T... items) {
+    this(owner, title, force, ignoreCase, info, strategies, actions, Arrays.asList(items));
   }
   
   /** Returns the last state of the frame, i.e. the location and dimension.
@@ -281,13 +267,18 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       Dimension parentDim = (_owner != null) ? _owner.getSize() : getToolkit().getScreenSize();
       int xs = (int)parentDim.getWidth()/3;
       int ys = (int)parentDim.getHeight()/4;
-      setSize(Math.max(xs,400), Math.max(ys, 300));
+      //setSize(Math.max(xs,400), Math.max(ys, 300));
+      setSize(xs,ys);
       setLocationRelativeTo(_owner);
       _currentStrategy = _strategies.get(0);
       _strategyBox.setSelectedIndex(0);
       selectStrategy();
     }
   }
+
+  /** Return a copy of the list of items in the model.
+    * @return list of items */
+  public List<T> getList() { return _pim.getList(); }
 
   /** Set the predictive input model.
     * @param ignoreCase true if case should be ignored
@@ -340,11 +331,10 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     addListener();
   }
 
-  /** Return the code for the last button that was pressed. This will be either JOptionPane.OK_OPTION or 
-    * JOptionPane.CANCEL_OPTION.
-    * @return button code
+  /** Return the name for the last button that was pressed.
+    * @return button name
     */
-  public int getButtonPressed() {
+  public String getButtonPressed() {
     return _buttonPressed;
   }
 
@@ -375,10 +365,10 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
    *  @param info true if additional information is desired
    */
   private void init(boolean info) {
-    _buttonPressed = JOptionPane.CANCEL_OPTION;
+    _buttonPressed = null;
     addWindowListener(new java.awt.event.WindowAdapter() {
       public void windowClosing(WindowEvent winEvt) {
-        cancelButtonPressed();
+        buttonPressed(_actions.get(_actions.size()-1));
       }
     });
     addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -389,19 +379,17 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     });
 
     // buttons
-    _okButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { okButtonPressed(); }
-    });
+    int i = 0;
+    for (final CloseAction<T> a: _actions) {
+      _buttons[i] = new JButton(a.getName());
+      _buttons[i].addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) { buttonPressed(a); }
+      });
+      ++i;
+    }
 
-    getRootPane().setDefaultButton(_okButton);
+    getRootPane().setDefaultButton(_buttons[0]);
 
-    final JButton cancelButton = new JButton("Cancel");
-    cancelButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        cancelButtonPressed();
-      }
-    });
-    
     _strategyBox.setEditable(false);
     _strategyBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -412,9 +400,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     _strategyBox.addFocusListener(new FocusAdapter() {
 
       public void focusLost(FocusEvent e) {
-        if ((e.getOppositeComponent() != _textField) && 
-            (e.getOppositeComponent() != _okButton) && 
-            (e.getOppositeComponent() != cancelButton)) {
+        boolean bf = false;
+        for (JButton b: _buttons) { if (e.getOppositeComponent() == b) { bf = true; break; } }
+        if ((e.getOppositeComponent() != _textField) && (!bf)) {
           for(JComponent c: _optionalComponents) {
             if (e.getOppositeComponent() == c) { return; }
           }
@@ -430,18 +418,16 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     addListener();
 
     Keymap ourMap = JTextComponent.addKeymap("PredictiveInputFrame._textField", _textField.getKeymap());
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), new AbstractAction() {
-      public void actionPerformed(ActionEvent e) {
-//        System.out.println("esc!");
-        cancelButtonPressed();
+    for (final CloseAction<T> a: _actions) {
+      KeyStroke ks = a.getKeyStroke();
+      if (ks!=null) {
+        ourMap.addActionForKeyStroke(ks, new AbstractAction() {
+          public void actionPerformed(ActionEvent e) {
+            buttonPressed(a);
+          }
+        });
       }
-    });
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), new AbstractAction() {
-      public void actionPerformed(ActionEvent e) {
-//        System.out.println("enter!");
-        okButtonPressed();
-      }
-    });
+    }
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
 //        System.out.println("tab!");
@@ -520,29 +506,12 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       }
     });
     _textField.setKeymap(ourMap);
-    
-//    _textField.addKeyListener(new KeyAdapter() {
-//      public void keyTyped(KeyEvent e) {
-//        char c = e.getKeyChar();
-//        if ((c != KeyEvent.VK_DELETE) && (c != KeyEvent.VK_BACK_SPACE) && (c >= 32)) {
-//          String oldMask = _pim.getMask();
-//          String newMask = oldMask.substring(0, _textField.getCaretPosition()) + c + 
-//            oldMask.substring(_textField.getCaretPosition());
-//          _pim.setMask(newMask);
-//          if (_force && (_pim.getMatchingItems().size()==0)) {
-//            Toolkit.getDefaultToolkit().beep();
-//            e.consume();
-//          }
-//          _pim.setMask(oldMask);
-//        }
-//      }
-//    });
 
     _textField.addFocusListener(new FocusAdapter() {
       public void focusLost(FocusEvent e) {
-        if ((e.getOppositeComponent() != _strategyBox) && 
-            (e.getOppositeComponent() != _okButton) && 
-            (e.getOppositeComponent() != cancelButton)) {
+        boolean bf = false;
+        for (JButton b: _buttons) { if (e.getOppositeComponent() == b) { bf = true; break; } }
+        if ((e.getOppositeComponent() != _strategyBox) && (!bf)) {
           for(JComponent c: _optionalComponents) {
             if (e.getOppositeComponent() == c) { return; }
           }
@@ -614,7 +583,14 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
       contentPane.add(_optionsPanel, c);
     }
     
-    c.anchor = GridBagConstraints.SOUTH;
+    c.anchor = GridBagConstraints.SOUTHWEST;
+    c.weightx = 1.0;
+    c.weighty = 0.0;
+    c.gridwidth = GridBagConstraints.REMAINDER; // end row
+    c.insets.top = 2;
+    c.insets.left = 2;
+    c.insets.bottom = 2;
+    c.insets.right = 2;
     
     JPanel buttonPanel = new JPanel(new GridBagLayout());
     GridBagConstraints bc = new GridBagConstraints();
@@ -622,15 +598,15 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     bc.insets.right = 2;
     buttonPanel.add(new JLabel("Matching strategy:"), bc);
     buttonPanel.add(_strategyBox, bc);
-    buttonPanel.add(_okButton, bc);
-    buttonPanel.add(cancelButton, bc);
+    for(JButton b: _buttons) { buttonPanel.add(b, bc); }
     
     contentPane.add(buttonPanel, c);
 
-    Dimension parentDim = (_owner !=null) ? _owner.getSize() : getToolkit().getScreenSize();
-    int xs = (int)parentDim.getWidth()/3;
-    int ys = (int)parentDim.getHeight()/4;
-    setSize(Math.max(xs,400), Math.max(ys, 300));
+    // Dimension parentDim = (_owner !=null) ? _owner.getSize() : getToolkit().getScreenSize();
+    // int xs = (int)parentDim.getWidth()/3;
+    // int ys = (int)parentDim.getHeight()/4;
+    // setSize(Math.max(xs,400), Math.max(ys, 300));
+    pack();
     setLocationRelativeTo(_owner);
 
     removeListener();
@@ -732,7 +708,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     updateExtensionLabel();
     updateInfo();
     if (_force) {
-      _okButton.setEnabled(_matchList.getModel().getSize()>0);
+      for(int i=0; i<_buttons.length-1; ++i) {
+        _buttons[i].setEnabled(_matchList.getModel().getSize()>0);
+      }
     }
   }
 
@@ -746,25 +724,12 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
     else _infoLabel.setText("No file selected");
   }
   
-  /** Handle OK button. */
-  private void okButtonPressed() {
-    if (_force && (_matchList.getModel().getSize()==0)) {
-      Toolkit.getDefaultToolkit().beep();
-    }
-    else {
-      _buttonPressed = JOptionPane.OK_OPTION;
-      _lastState = new FrameState(PredictiveInputFrame.this);
-      setVisible(false);
-      _okAction.apply(this);
-    }
-  }
-  
-  /** Handle cancel button. */
-  private void cancelButtonPressed() {
-    _buttonPressed = JOptionPane.CANCEL_OPTION;
+  /** Handle button pressed. */
+  private void buttonPressed(CloseAction<T> a) {
+    _buttonPressed = a.getName();
     _lastState = new FrameState(PredictiveInputFrame.this);
     setVisible(false);
-    _cancelAction.apply(this);
+    a.apply(this);
   }
   
   /** Select the strategy for matching. */

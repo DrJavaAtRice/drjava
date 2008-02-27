@@ -1014,7 +1014,7 @@ public class BalancingStreamTokenizerTest extends TestCase {
     // System.out.println(s);
     assertEquals(null, s);
   }
-
+  
   public void testEscapePipeDollarNestedQuotedKeywordsWSSignificant() throws IOException {
     BalancingStreamTokenizer tok = make("abc|=${def;ghi='abc'}||;123\n456 ${abc def \"xxx '111' yyy\"} 789",'|');
     tok.wordRange(0,255);

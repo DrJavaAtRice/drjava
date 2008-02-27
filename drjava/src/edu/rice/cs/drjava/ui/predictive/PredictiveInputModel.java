@@ -598,6 +598,14 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   }
 
   /**
+   * Returns a copy of the list of items.
+   * @return list of items
+   */
+  public List<T> getList() {
+    return new ArrayList<T>(_items);
+  }
+  
+  /**
    * Sets the list.
    * @param items list of items
    */

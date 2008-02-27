@@ -1033,23 +1033,55 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
-  /** Wrapper class for the "Go to File" dialog list entries. Provides the ability to have the same 
-   *  OpenDefinitionsDocument in there multiple times with different toString() results.
-   */
+  /** Wrapper class for the "Go to File" and "Auto-Complete" dialog list entries.
+    * Provides the ability to have the same OpenDefinitionsDocument in there multiple
+    * times with different toString() results.
+    */
   private static class GoToFileListEntry implements Comparable<GoToFileListEntry> {
     public final OpenDefinitionsDocument doc;
-    private final String str;
+    protected String fullPackage = null;
+    protected final String str;
     public GoToFileListEntry(OpenDefinitionsDocument d, String s) {
       doc = d;
       str = s;
     }
+    public String getFullPackage() {
+      if (fullPackage!=null) { return fullPackage; }
+      if (doc!=null) {
+        try {
+          fullPackage = doc.getPackageNameFromDocument();
+          if (fullPackage.length()>0) { fullPackage += '.'; }
+        }
+        catch(Exception e) { fullPackage = ""; }
+      }
+      return fullPackage;
+    }
     public String toString() { return str; }
     public int compareTo(GoToFileListEntry other) { return str.toLowerCase().compareTo(other.str.toLowerCase()); }
     public boolean equals(Object other) {
+      if (other==null) { return false; }
       if (! (other instanceof GoToFileListEntry)) return false;
       return str.equals(((GoToFileListEntry)other).str);
     }
     public int hashCode() { return str.hashCode(); }
+  }
+  /** Wrapper class for the "Auto-Complete" dialog list entries that have no document,
+    * e.g. Java API entries. */
+  private static class NoDocumentFileListEntry extends GoToFileListEntry {
+    public NoDocumentFileListEntry(String fullPkg, String s) {
+      super(null, s);
+      fullPackage = fullPkg;
+    }
+    public String getFullPackage() {
+      return fullPackage;
+    }
+    public boolean equals(Object other) {
+      if (other==null) { return false; }
+      if (! (other instanceof NoDocumentFileListEntry)) return false;
+      NoDocumentFileListEntry o = (NoDocumentFileListEntry)other;
+      return str.equals(o.str) && fullPackage.equals(o.fullPackage);
+    }
+    public int hashCode() { return str.hashCode() * 37 + fullPackage.hashCode(); }
   }
   
   /** Reset the position of the "Go to File" dialog. */
@@ -1084,6 +1116,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = 
         new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+        public String getName() { return "OK"; }
+        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
           if (p.getItem() != null) {
             final OpenDefinitionsDocument newDoc = p.getItem().doc;
@@ -1129,6 +1163,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = 
         new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+        public String getName() { return "Cancel"; }
+        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
           hourglassOff();
           return null;
@@ -1139,6 +1175,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       strategies.add(new PredictiveInputModel.FragmentLineNumStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.PrefixLineNumStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.RegExLineNumStrategy<GoToFileListEntry>());
+      List<PredictiveInputFrame.CloseAction<GoToFileListEntry>> actions
+        = new ArrayList<PredictiveInputFrame.CloseAction<GoToFileListEntry>>();
+      actions.add(okAction);
+      actions.add(cancelAction);
       _gotoFileDialog = 
         new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
                                                     "Go to File",
@@ -1146,8 +1186,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                     true, // ignore case
                                                     info,
                                                     strategies,
-                                                    okAction,
-                                                    cancelAction,
+                                                    actions,
                                                     new GoToFileListEntry(null, "dummy")) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
@@ -1370,6 +1409,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       };
       PredictiveInputFrame.CloseAction<JavaAPIListEntry> okAction = 
         new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+        public String getName() { return "OK"; }
+        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
         public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           if (p.getItem() != null) {
             PlatformFactory.ONLY.openURL(p.getItem().getURL());
@@ -1380,6 +1421,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       };
       PredictiveInputFrame.CloseAction<JavaAPIListEntry> cancelAction = 
         new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+        public String getName() { return "Cancel"; }
+        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
         public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           hourglassOff();
           return null;
@@ -1390,6 +1433,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       strategies.add(new PredictiveInputModel.FragmentStrategy<JavaAPIListEntry>());
       strategies.add(new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>());
       strategies.add(new PredictiveInputModel.RegExStrategy<JavaAPIListEntry>());
+      List<PredictiveInputFrame.CloseAction<JavaAPIListEntry>> actions
+        = new ArrayList<PredictiveInputFrame.CloseAction<JavaAPIListEntry>>();
+      actions.add(okAction);
+      actions.add(cancelAction);
       _openJavadocDialog = 
         new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this,
                                                    "Open Java API Javadoc Webpage",
@@ -1397,8 +1444,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                    true, // ignore case
                                                    info,
                                                    strategies,
-                                                   okAction,
-                                                   cancelAction,
+                                                   actions,
                                                    new JavaAPIListEntry("dummy", "dummy", null)) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
@@ -1604,7 +1650,58 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Initialize dialog if necessary. */
   void initCompleteWordDialog() {
     if (_completeWordDialog == null) {
+      // checkbox whether Java API classes should be completed as well
+      _completeJavaAPICheckbox.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          GoToFileListEntry curItem = _completeWordDialog.getItem();
+          if (_completeJavaAPICheckbox.isSelected()) {
+            // selected, add Java API classes to list
+            generateJavaAPIList();
+            if (_javaAPIList==null) {
+              _completeJavaAPICheckbox.setSelected(false);
+              _completeJavaAPICheckbox.setEnabled(false);
+            }
+            else {
+              List<GoToFileListEntry> l = _completeWordDialog.getList();
+              for(JavaAPIListEntry entry: _javaAPIList) {
+                String fn = entry.getFullString();
+                int pos = fn.lastIndexOf('.');
+                String pn = "";
+                if (pos>=0) {
+                  pn = fn.substring(0,pos+1);
+                  fn = fn.substring(pos+1);
+                }
+                l.add(new NoDocumentFileListEntry(pn,fn));
+              }
+              _completeWordDialog.setItems(true,l);
+            }
+          }
+          else {
+            // unselected, remove Java API classes from list
+            List<GoToFileListEntry> l = _completeWordDialog.getList();
+            List<GoToFileListEntry> n = new ArrayList<GoToFileListEntry>();
+            for(GoToFileListEntry entry: l) {
+              if (!(entry instanceof NoDocumentFileListEntry)) { n.add(entry); }
+            }
+            _completeWordDialog.setItems(true,n);
+          }
+          if (curItem!=null) {
+            _completeWordDialog.setCurrentItem(curItem);
+          }
+          _completeWordDialog.resetFocus();
+        }
+      });
+      _completeJavaAPICheckbox.setMnemonic('j');
+      PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
+        new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
+        public String apply(JavaAPIListEntry entry) {
+          // show full class name as information
+          return entry.getFullString();
+        }
+      };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+        public String getName() { return "OK"; }
+        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
           if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
@@ -1639,8 +1736,50 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           return null;
         }
       };
+      PredictiveInputFrame.CloseAction<GoToFileListEntry> fullAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+        public String getName() { return "Fully Qualified"; }
+        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
+        public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+          if (p.getItem() != null) {
+            OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+            try {
+              String mask = "";
+              int loc = getCurrentDefPane().getCaretPosition();
+              String s = odd.getText(0, loc);
+              
+              // check that we're at the end of a word
+              if ((loc<s.length()) && (!Character.isWhitespace(s.charAt(loc))) &&
+                  ("()[]{}<>.,:;/*+-!~&|%".indexOf(s.charAt(loc)) == -1)) return null;
+              
+              // find start
+              int start = loc;
+              while(start>0) {
+                if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+                --start;
+              }
+              while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start < loc)) {
+                ++start;
+              }
+              
+              if (!s.substring(start, loc).equals(p.getItem().toString())) {
+                odd.remove(start, loc-start);
+                StringBuilder sb = new StringBuilder();
+                sb.append(p.getItem().getFullPackage());
+                sb.append(p.getItem().toString());
+                odd.insertString(start, sb.toString(), null);
+              }
+            }
+            catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
+            finally { odd.releaseWriteLock(); }
+          }
+          hourglassOff();
+          return null;
+        }
+      };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = 
         new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+        public String getName() { return "Cancel"; }
+        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
         public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
           hourglassOff();
           return null;
@@ -1651,6 +1790,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       strategies.add(new PredictiveInputModel.FragmentStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.RegExStrategy<GoToFileListEntry>());
+      List<PredictiveInputFrame.CloseAction<GoToFileListEntry>> actions
+        = new ArrayList<PredictiveInputFrame.CloseAction<GoToFileListEntry>>();
+      actions.add(okAction);
+      actions.add(fullAction);
+      actions.add(cancelAction);
       _completeWordDialog = 
         new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
                                                     "Auto-Complete Word",
@@ -1658,11 +1802,13 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                     true, // ignore case
                                                     null,
                                                     strategies,
-                                                    okAction,
-                                                    cancelAction,
+                                                    actions,
                                                     new GoToFileListEntry(null, "dummy")) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
+        }
+        protected JComponent[] makeOptions() {
+          return new JComponent[] { _completeJavaAPICheckbox };
         }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
@@ -1678,12 +1824,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   volatile PredictiveInputFrame<GoToFileListEntry> _completeFileDialog = null;
   /** The "Complete Word" dialog instance. */
   volatile PredictiveInputFrame<GoToFileListEntry> _completeWordDialog = null;
-  
+  JCheckBox _completeJavaAPICheckbox = new JCheckBox("Java API");
+
   /** Complete the word the cursor is on. */
   void _completeWordUnderCursor() {
     List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     if ((docs == null) || (docs.size() == 0)) return; // do nothing
     
+    _completeJavaAPICheckbox.setSelected(false);
+    _completeJavaAPICheckbox.setEnabled(true);
     GoToFileListEntry currentEntry = null;
     ArrayList<GoToFileListEntry> list;
     if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) &&
@@ -8827,6 +8976,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       };
       PredictiveInputFrame.CloseAction<JavaAPIListEntry> okAction = 
         new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+        public String getName() { return "OK"; }
+        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
         public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           String text;
           if (p.getItem() != null) {
@@ -8862,6 +9013,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       };
       PredictiveInputFrame.CloseAction<JavaAPIListEntry> cancelAction = 
         new PredictiveInputFrame.CloseAction<JavaAPIListEntry>() {
+        public String getName() { return "Cancel"; }
+        public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
         public Object apply(PredictiveInputFrame<JavaAPIListEntry> p) {
           // if no class was selected, do nothing
           // just reset the error information so the dialog box works next time
@@ -8875,6 +9028,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       strategies.add(new PredictiveInputModel.FragmentStrategy<JavaAPIListEntry>());
       strategies.add(new PredictiveInputModel.PrefixStrategy<JavaAPIListEntry>());
       strategies.add(new PredictiveInputModel.RegExStrategy<JavaAPIListEntry>());
+      List<PredictiveInputFrame.CloseAction<JavaAPIListEntry>> actions
+        = new ArrayList<PredictiveInputFrame.CloseAction<JavaAPIListEntry>>();
+      actions.add(okAction);
+      actions.add(cancelAction);
       _autoImportDialog = 
         new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this,
                                                    "Auto Import Class",
@@ -8882,8 +9039,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                    true, // ignore case
                                                    info,
                                                    strategies,
-                                                   okAction,
-                                                   cancelAction,
+                                                   actions,
                                                    new JavaAPIListEntry("dummy", "dummy", null)) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
