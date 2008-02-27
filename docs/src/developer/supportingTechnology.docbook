@@ -236,11 +236,13 @@
 	      now just use:                   
 	      <literal>yjpjava MyClass                </literal>           .
 	      Here is a more complicated example to start DrJava. Instead of
-		writing:              
+		writing              
 	      <literal>java -cp drjava-15.jar edu.rice.cs.drjava.DrJava                 </literal>           .
-	      now write instead the following, which avoids the restart, which may cause
-		trouble:            
-	      <literal>yjpjava -cp drjava-15.jar edu.rice.cs.drjava.DrJavaRoot             </literal>          .
+	      now write the following, which avoids the restart, which
+	      may cause trouble:            
+	      <literal>yjpjava -cp drjava-15.jar edu.rice.cs.drjava.DrJavaRoot             </literal>   .
+	      For this to work, you have to make sure that you have the <literal>tools.jar</literal>
+	      file on your Java <literal>CLASSPATH</literal> environment variable.
 	      Regardless, the application you just started should launch now.</para>
             </formalpara>
           </listitem>
