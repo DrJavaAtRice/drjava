@@ -1655,26 +1655,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         public void actionPerformed(ActionEvent e) {
           String curMask = _completeWordDialog.getMask();
           if (_completeJavaAPICheckbox.isSelected()) {
-            // selected, add Java API classes to list
-            generateJavaAPIList();
-            if (_javaAPIList==null) {
-              _completeJavaAPICheckbox.setSelected(false);
-              _completeJavaAPICheckbox.setEnabled(false);
-            }
-            else {
-              List<GoToFileListEntry> l = _completeWordDialog.getList();
-              for(JavaAPIListEntry entry: _javaAPIList) {
-                String fn = entry.getFullString();
-                int pos = fn.lastIndexOf('.');
-                String pn = "";
-                if (pos>=0) {
-                  pn = fn.substring(0,pos+1);
-                  fn = fn.substring(pos+1);
-                }
-                l.add(new NoDocumentFileListEntry(pn,fn));
-              }
-              _completeWordDialog.setItems(true,l);
-            }
+            DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.TRUE);
+            List<GoToFileListEntry> l = _completeWordDialog.getList();
+            addJavaAPIToList(l);
+            _completeWordDialog.setItems(true,l);
           }
           else {
             // unselected, remove Java API classes from list
@@ -1817,6 +1801,26 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   }
   
+  void addJavaAPIToList(List<GoToFileListEntry> list) {
+    generateJavaAPIList();
+    if (_javaAPIList==null) {
+      DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
+      _completeJavaAPICheckbox.setSelected(false);
+      _completeJavaAPICheckbox.setEnabled(false);
+    }
+    else {
+      for(JavaAPIListEntry entry: _javaAPIList) {
+        String fn = entry.getFullString();
+        int pos = fn.lastIndexOf('.');
+        String pn = "";
+        if (pos>=0) {
+          pn = fn.substring(0,pos+1);
+          fn = fn.substring(pos+1);
+        }
+        list.add(new NoDocumentFileListEntry(pn,fn));
+      }
+    }
+  }
   
   /** The "Complete File" dialog instance. */
   volatile PredictiveInputFrame<GoToFileListEntry> _completeFileDialog = null;
@@ -1828,9 +1832,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   void _completeWordUnderCursor() {
     List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     if ((docs == null) || (docs.size() == 0)) return; // do nothing
-    
-    _completeJavaAPICheckbox.setSelected(false);
-    _completeJavaAPICheckbox.setEnabled(true);
+
+    _completeJavaAPICheckbox.setSelected(DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI));
+    _completeJavaAPICheckbox.setEnabled(DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI));
     GoToFileListEntry currentEntry = null;
     ArrayList<GoToFileListEntry> list;
     if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) &&
@@ -1849,6 +1853,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         if (d.equals(_model.getActiveDocument())) currentEntry = entry;
         list.add(entry);
       }
+    }
+    
+    if (DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI)) {
+      addJavaAPIToList(list);
     }
     
     PredictiveInputModel<GoToFileListEntry> pim = 

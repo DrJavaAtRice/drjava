@@ -1186,6 +1186,10 @@ public interface OptionConstants {
   public static final BooleanOption DIALOG_COMPLETE_SCAN_CLASS_FILES =
     new BooleanOption("dialog.completeword.scan.class.files", Boolean.FALSE);
 
+  /** Whether to include Java API classes in auto-completion. */
+  public static final BooleanOption DIALOG_COMPLETE_JAVAAPI =
+    new BooleanOption("dialog.completeword.javaapi", Boolean.FALSE);
+
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
   /** Whether to perform light-weight parsing. */
   public static final BooleanOption LIGHTWEIGHT_PARSING_ENABLED =
@@ -1236,7 +1240,7 @@ public interface OptionConstants {
     * is encountered in the Interactions Pane. */
   public static final BooleanOption DIALOG_AUTOIMPORT_ENABLED =
     new BooleanOption("dialog.autoimport.enabled", Boolean.TRUE);
-  
+
   /** Delay for following files. */
   public static final NonNegativeIntegerOption FOLLOW_FILE_DELAY =
     new NonNegativeIntegerOption("follow.file.delay", new Integer(300));

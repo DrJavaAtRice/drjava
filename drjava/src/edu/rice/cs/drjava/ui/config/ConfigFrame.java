@@ -501,6 +501,9 @@ public class ConfigFrame extends JFrame {
                                                   "<html>Whether to scan the class files after a compile to generate class names<br>"+
                                                          "used for auto-completion and auto-import.<br>"+
                                                          "Enabling this option will slow compiles down.</html>"));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_JAVAAPI,
+                                                  "Consider Java API Classes for Auto-Completion", this,
+                                                  "Whether to use the names of the Java API classes for auto-completion as well."));
     panel.displayComponents();
   }
 
