@@ -1674,11 +1674,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         }
       });
       _completeJavaAPICheckbox.setMnemonic('j');
-      PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
-        new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
-        public String apply(JavaAPIListEntry entry) {
+      PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = 
+        new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
+        public String apply(GoToFileListEntry entry) {
           // show full class name as information
-          return entry.getFullString();
+          StringBuilder sb = new StringBuilder();
+          sb.append(entry.getFullPackage());
+          sb.append(entry.toString());
+          return sb.toString();
         }
       };
       PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
@@ -1782,7 +1785,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                     "Auto-Complete Word",
                                                     true, // force
                                                     true, // ignore case
-                                                    null,
+                                                    info,
                                                     strategies,
                                                     actions,
                                                     new GoToFileListEntry(null, "dummy")) {
@@ -1834,7 +1837,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     if ((docs == null) || (docs.size() == 0)) return; // do nothing
 
     _completeJavaAPICheckbox.setSelected(DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI));
-    _completeJavaAPICheckbox.setEnabled(DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI));
+    _completeJavaAPICheckbox.setEnabled(true);
     GoToFileListEntry currentEntry = null;
     ArrayList<GoToFileListEntry> list;
     if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) &&
