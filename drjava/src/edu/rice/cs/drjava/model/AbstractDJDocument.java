@@ -724,10 +724,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipParenPhrases)
     throws BadLocationException {
+
 //    System.err.println("findPrevDelimiter(" + pos + ", " + Arrays.toString(delims) + ", " + skipParenPhrases);
     // Check cache
     final Query key = new Query.PrevDelimiter(pos, delims, skipParenPhrases);
     final Integer cached = (Integer) _checkCache(key);
+
     if (cached != null) {
 //      System.err.println(cached.intValue() + " found in cache");
       return cached.intValue();
@@ -770,6 +772,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       if (i == -1) reducedPos = -1; // No matching char was found
       _storeInCache(key, reducedPos, pos - 1);
 //      System.err.println("Returning " + reducedPos);
+
       // Return position of matching char or ERROR_INDEX (-1) 
       return reducedPos;  
     }
@@ -1422,28 +1425,28 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return inParenPhrase;
   }
   
-  /** Cached version of _reduced.getLineEnclosingBrace().  Assumes that read lock and reduced lock are already held.  
-    * Still does not work like _reduced.getIndentInformation(). */
+  /** Cached version of _reduced.getEnclosingBrace().  Assumes that read lock and reduced lock are already held and 
+   * that pos = _currentLocation*/
+
   private BraceInfo _getLineEnclosingBrace(int pos) {
     
     // Check cache
     final Query key = new Query.EnclosingBrace(pos);
     final BraceInfo cached = (BraceInfo) _checkCache(key);
     if (cached != null) return cached;
-    int here = _currentLocation;
-    _reduced.move(pos - here);
+    // assert pos == _currentLocation
     BraceInfo b = _reduced.getLineEnclosingBrace();
-    _reduced.move(here - pos);
     _storeInCache(key, b, pos - 1);
     return b;
   }
-    
+
   /** Returns true if the reduced model's current position is inside a paren phrase.  Assumes that readLock and _reduced
     * locks are already held.
     * @return true if pos is immediately inside parentheses
     */
   private boolean posInParenPhrase() {
     IndentInfo info;
+
     info = _reduced.getIndentInformation(); 
     return info.enclosingBraceType().equals(IndentInfo.OPEN_PAREN);
 //    return _getLineEnclosingBrace(_currentLocation).braceType().equals(IndentInfo.openParen);

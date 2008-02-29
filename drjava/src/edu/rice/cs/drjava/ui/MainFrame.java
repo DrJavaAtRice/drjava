@@ -3413,6 +3413,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           _value = String.valueOf(millis);
         }
       }
+
       public void resetAttributes() {
         _attributes.clear();
         _attributes.put("fmt", "millis");
