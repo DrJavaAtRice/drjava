@@ -434,7 +434,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     * matching brace obviously must appear on the preceding line or before.  To find the enclosing brace one must first 
     * move past this newline. The distance to the newline does not include the newline char. 
     */
-  public BraceInfo getEnclosingBrace() {
+  public BraceInfo getLineEnclosingBrace() {
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();
@@ -655,7 +655,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
   }
   
   /** Determines the brace enclosing the current location. */
-  protected BraceInfo getEnclosingBraceCurrent() {
+  protected BraceInfo getEnclosingBrace() {
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor._copy();
     resetWalkerLocationToCursor();

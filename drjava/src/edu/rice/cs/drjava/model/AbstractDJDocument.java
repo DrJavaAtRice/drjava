@@ -1422,9 +1422,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return inParenPhrase;
   }
   
-  /** Cached version of _reduced.getEnclosingBrace().  Assumes that read lock and reduced lock are already held.  
+  /** Cached version of _reduced.getLineEnclosingBrace().  Assumes that read lock and reduced lock are already held.  
     * Still does not work like _reduced.getIndentInformation(). */
-  private BraceInfo _getEnclosingBrace(int pos) {
+  private BraceInfo _getLineEnclosingBrace(int pos) {
     
     // Check cache
     final Query key = new Query.EnclosingBrace(pos);
@@ -1432,7 +1432,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     if (cached != null) return cached;
     int here = _currentLocation;
     _reduced.move(pos - here);
-    BraceInfo b = _reduced.getEnclosingBrace();
+    BraceInfo b = _reduced.getLineEnclosingBrace();
     _reduced.move(here - pos);
     _storeInCache(key, b, pos - 1);
     return b;
@@ -1446,7 +1446,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     IndentInfo info;
     info = _reduced.getIndentInformation(); 
     return info.enclosingBraceType().equals(IndentInfo.OPEN_PAREN);
-//    return _getEnclosingBrace(_currentLocation).braceType().equals(IndentInfo.openParen);
+//    return _getLineEnclosingBrace(_currentLocation).braceType().equals(IndentInfo.openParen);
   }
   
 //  /** @return true if the start of the current line is inside a block comment. Assumes that write lock or read lock
