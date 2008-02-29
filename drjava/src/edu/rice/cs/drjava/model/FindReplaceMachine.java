@@ -422,6 +422,7 @@ public class FindReplaceMachine {
    */
   private FindResult _findNextInDoc(OpenDefinitionsDocument doc, int start, int len, boolean searchAll) {
     // search from current position to "end" of document ("end" is start if searching backward)
+//    Utilities.show("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
     _log.log("_findNextInDoc([" + doc.getText() + "], " + start + ", " + len + ", " + searchAll + ")");
     FindResult fr = _findNextInDocSegment(doc, start, len);
     if (fr.getFoundOffset() >= 0 || searchAll) return fr;
@@ -433,31 +434,43 @@ public class FindReplaceMachine {
    *  backward) of the document. Assumes acquireReadLock is already held!  
    *  INVARIANT (! _isForward => start = 0) && (_isForward => start + len = doc.getLength()).
    *  @param doc  the document in which search wrapped
-   *  @param start location of preceding text segment where search FAILED.  
-   *  @param len  length of text segment previously searched
+   *  @param start the location of preceding text segment where search FAILED.  
+   *  @param len  the length of text segment previously searched
    *  @param allWrapped  whether this wrapped search is being performed after an all document search has wrapped
    *  @return the offset where the instance was found. Returns -1 if no instance was found between start and end
    */  
   private FindResult _findWrapped(OpenDefinitionsDocument doc, int start, int len, boolean allWrapped) {
     
-    assert (_isForward && start + len == doc.getLength()) || (! _isForward && start == 0);
-    
+    final int docLen = doc.getLength();
+    if (docLen == 0) return new FindResult(doc, -1, true, allWrapped); // failure result
+ 
+    assert (start >= 0 && start <= docLen) && (len >= 0 && len <= docLen);
+    assert (_isForward && start + len == docLen) || (! _isForward && start == 0);
+//    Utilities.show("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
+//                       doc.getLength() + ", _isForward = " + _isForward);
     _log.log("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
                        doc.getLength() + ", _isForward = " + _isForward);
 
-    if (doc.getLength() == 0) return new FindResult(doc, -1, true, allWrapped);
+    if (docLen == 0) return new FindResult(doc, -1, true, allWrapped); // failure result
     
-    final int newLen, newStart;
+    int newLen;
+    final int newStart;
+
+    final int adjustment = _findWord.length() - 1; // max size of the findWord suffix (prefix) within preceding text
+    
     if (_isForward) {
       newStart = 0;
-      newLen = start;
+      newLen = start + adjustment;  // formerly start, which was an annoying bug
     }
     else {
       newStart = len;
-      newLen = doc.getLength() - len;
+      newLen = (docLen - len) + adjustment;
     }
-      _log.log("Calling _findNextInDocSegment(" + doc.getText() + ", newStart = " + newStart + ", newLen = " + 
-                     newLen + ", allWrapped = " + allWrapped + ") and _isForward = " + _isForward);
+      
+    if (newLen > docLen) newLen = docLen;
+ 
+    _log.log("Calling _findNextInDocSegment(" + doc.getText() + ", newStart = " + newStart + ", newLen = " + 
+             newLen + ", allWrapped = " + allWrapped + ") and _isForward = " + _isForward);
     return _findNextInDocSegment(doc, newStart, newLen, true, allWrapped);
   } 
      
@@ -469,29 +482,31 @@ public class FindReplaceMachine {
   /** Main helper method for findNext... that searches for _findWord inside the specified document segment.  Assumes
    *  acquireReadLock is already held!
    *  @param doc document to be searched
-   *  @param start the location (offset) of the text segment to be searched 
-   *  @param len the length of the text segment to be searched
+   *  @param start the location (offset/left edge) of the text segment to be searched 
+   *  @param len the requested length of the text segment to be searched
    *  @param whether this search should span all documents
    *  @param wrapped whether this search is after wrapping around the document
    *  @param allWrapped whether this seach is after wrapping around all documents
    *  @return a FindResult object with foundOffset and a flag indicating wrapping to the beginning during a search. The
    *  foundOffset returned insided the FindResult is -1 if no instance was found.
    */
-  private FindResult _findNextInDocSegment(final OpenDefinitionsDocument doc, final int start, final int origLen, 
+  private FindResult _findNextInDocSegment(final OpenDefinitionsDocument doc, final int start, int len, 
                                            final boolean wrapped, final boolean allWrapped) {  
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped + " ...)");
     
-    assert start > -1;
-    
     final int docLen = doc.getLength();;     // The length of the segment to be searched
+    final int wordLen = _findWord.length();   // length of search key (word being searched for)
     
-    final int len = (origLen < 0) ? docLen - start : origLen;  // set len for end of doc if origLen < 0
+    assert (start >= 0 && start <= docLen) && (len >= 0 && len <= docLen);
     
     if (len == 0 || docLen == 0) return new FindResult(doc, -1, wrapped, allWrapped);
+    
+    if (start + len > docLen) len = docLen - start;
+    
+//    if (start + len > docLen) len = docLen - start;
    
-    String text;    // The text segment to be searched
-    final String findWord;       // copy of word being searched (so it can converted to lower case if necessary
-    final int wordLen = _findWord.length();   // length of search key (word being searched fo  
+    String text;             // The text segment to be searched
+    final String findWord;   // copy of word being searched (so it can converted to lower case if necessary
     
     try { 
 
