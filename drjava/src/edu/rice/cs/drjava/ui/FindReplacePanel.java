@@ -636,7 +636,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     }
     _updateMachine();
     _machine.setFindWord(_findField.getText());
-    String replaceWord = _replaceField.getText();
+    final String replaceWord = _replaceField.getText();
     _machine.setReplaceWord(replaceWord);
     _frame.clearStatusMessage(); // _message.setText(""); // JL
     
@@ -644,7 +644,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     boolean replaced = _machine.replaceCurrent();
     // and finds the next word
     if (replaced) {
-      _selectReplacedItem(replaceWord.length());
+      _selectFoundOrReplacedItem(replaceWord.length());
       findNext();
       _replaceFindNextButton.requestFocusInWindow();
     }
@@ -665,7 +665,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     }
     _updateMachine();
     _machine.setFindWord(_findField.getText());
-    String replaceWord = _replaceField.getText();
+    final String replaceWord = _replaceField.getText();
     _machine.setReplaceWord(replaceWord);
     _frame.clearStatusMessage(); 
     
@@ -673,7 +673,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     boolean replaced = _machine.replaceCurrent();
     // and finds the previous word
     if (replaced) {
-      _selectReplacedItem(replaceWord.length());
+      _selectFoundOrReplacedItem(replaceWord.length());
       findPrevious();
       _replaceFindPreviousButton.requestFocusInWindow();
     }
@@ -706,13 +706,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _frame.updateStatusField("Replacing");
     _updateMachine();
     _machine.setFindWord(_findField.getText());
-    String replaceWord = _replaceField.getText();
+    final String replaceWord = _replaceField.getText();
     _machine.setReplaceWord(replaceWord);
     _frame.clearStatusMessage();
     
     // replaces the occurrence at the current position
     boolean replaced = _machine.replaceCurrent();
-    if (replaced) _selectReplacedItem(replaceWord.length());
+    if (replaced) _selectFoundOrReplacedItem(replaceWord.length());
     _replaceAction.setEnabled(false);
     _replaceFindNextAction.setEnabled(false);
     _replaceFindPreviousAction.setEnabled(false);
@@ -772,7 +772,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _model.addToBrowserHistory();
 
       _updateMachine();
-      _machine.setFindWord(_findField.getText());
+      final String findWord = _findField.getText();
+      _machine.setFindWord(findWord);
       _machine.setReplaceWord(_replaceField.getText());
       _frame.clearStatusMessage(); // _message.setText(""); // JL
       final boolean searchAll = _machine.getSearchAllDocuments();
@@ -814,7 +815,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         
         final Runnable command = new Runnable() {
           public void run() {
-            _selectFoundItem();
+            _selectFoundOrReplacedItem(findWord.length());
             _replaceAction.setEnabled(true);
             _replaceFindNextAction.setEnabled(true);
             _replaceFindPreviousAction.setEnabled(true);
@@ -832,8 +833,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       else {
         Toolkit.getDefaultToolkit().beep();
         final StringBuilder statusMessage = new StringBuilder("Search text \"");
-        if (_machine.getFindWord().length() <= 50) statusMessage.append(_machine.getFindWord());
-        else statusMessage.append(_machine.getFindWord().substring(0, 49) + "...");
+        if (findWord.length() <= 50) statusMessage.append(findWord);
+        else statusMessage.append(findWord.substring(0, 49) + "...");
         statusMessage.append("\" not found.");
         _frame.setStatusMessage(statusMessage.toString());
       }
@@ -927,33 +928,43 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //     _findField.selectAll();
 //   }
 
-  /** This method is used to select the item that has been inserted in a replacement. */
-  private void _selectReplacedItem(int length) {
+  /** This method is used to select the item that has been inserted in a replacement.  Assumes the current offset
+    * identifies the found or replaced item.  In a forward search, this offset is the RIGHT edge of the found/replaced
+    * item; in a backwards search it is the LEFT edge. */
+  private void _selectFoundOrReplacedItem(int length) {
+    int offset = _machine.getCurrentOffset();
     int from, to;
-    to = _machine.getCurrentOffset();
-    if (_machine.getSearchBackwards()) from = to + length;
-    else                               from = to - length;
-    _selectFoundItem(from, to);
+
+    if (_machine.getSearchBackwards()) {
+      from = offset;
+      to = offset + length;
+    }
+    else {                   
+      from = offset - length;
+      to = offset;
+    }
+    _selectFoundOrReplacedItem(from, to);
   }
 
 
-  /** Calls _selectFoundItem(from, to) with reasonable defaults. */
-  private void _selectFoundItem() {
-    int position = _machine.getCurrentOffset();
-    int to, from;
-    to = position;
-    if (!_machine.getSearchBackwards()) from = position - _machine.getFindWord().length();
-    else from = position + _machine.getFindWord().length();
-    _selectFoundItem(from, to);
-  }
+//  /** Calls _selectFoundItem(from, to) with reasonable defaults. */
+//  private void _selectFoundItem() {
+//    int position = _machine.getCurrentOffset();
+//    int to, from;
+//    to = from = position;
+//    if (! _machine.getSearchBackwards()) from = position - _machine.getFindWord().length();
+//    else to = position + _machine.getFindWord().length();
+//    _selectFoundItem(from, to);
+//  }
 
-  /** Will select the searched-for text.  Originally highlighted the text, but we ran into problems
-   *  with the document remove method changing the view to where the cursor was located, resulting in 
-   *  replace constantly jumping from the replaced text back to the cursor.  There was a 
-   *  removePreviousHighlight method which was removed since selections are removed automatically upon
-   *  a caret change.
-   */
-  private void _selectFoundItem(int from, int to) {
+  /** Will select the identified text (from, to).  Note that positions are technically between characters, so there
+    * is no distinction between open and closed intervals.  Originally highlighted the text, but we ran into problems
+    * with the document remove method changing the view to where the cursor was located, resulting in 
+    * replace constantly jumping from the replaced text back to the cursor.  There was a 
+    * removePreviousHighlight method which was removed since selections are removed automatically upon
+    * a caret change.
+    */
+  private void _selectFoundOrReplacedItem(int from, int to) {
     _defPane.centerViewOnOffset(from);
     _defPane.select(from, to);
 
