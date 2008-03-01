@@ -417,6 +417,10 @@
             </if>
           </try>
           
+	  <catch>
+	    <property name="${do-test-target}-failed" value="true"/>
+            <fail if="${do-test-target}-failed" message="One or more unit tests failed."/>
+	  </catch>
           <finally>
             <move todir="testResults/@{iteration}">
               <fileset dir="${basedir}">
@@ -775,7 +779,10 @@
           <param name="test-formatter" value="xml" />
         </antcall>
       </try>
-      <catch />
+      <catch>
+        <property name="do-test-15-failed" value="true"/>
+	<fail if="do-test-15-failed" message="One or more unit tests failed."/>
+      </catch>
     </trycatch>
     <move todir="benchmarkResults/local" file="testResults" />
   </target>
@@ -833,7 +840,10 @@
         </antcall>
         <ant dir="benchmarkSources" target="clean" />
       </try>
-      <catch />
+      <catch>
+        <property name="do-test-failed" value="true"/>
+	<fail if="do-test-failed" message="One or more unit tests failed."/>
+      </catch>
     </trycatch>
     <exec executable="svn" dir="benchmarkSources" failonerror="yes">
       <arg value="revert" />
@@ -853,6 +863,10 @@
           <property name="test-repeat" value="1" />
         </ant>
       </try>
+      <catch>
+        <property name="do-test-failed" value="true"/>
+	<fail if="do-test-failed" message="One or more unit tests failed."/>
+      </catch>
       <finally>
         <move todir="${basedir}">
           <fileset dir="benchmarkSources">

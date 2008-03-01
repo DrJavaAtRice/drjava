@@ -114,6 +114,11 @@ public class BalancingStreamTokenizer {
   /** The current character is the escape character. */
   protected boolean _isEscape = false;
 
+  /** Kind of tokens to be returned. */
+  public enum Token { NONE, NORMAL, QUOTED, KEYWORD, END };
+
+  public volatile Token _token = Token.NONE;
+  
   /**
    * Create a new balancing stream tokenizer.
    * @param r reader to tokenize
@@ -229,6 +234,9 @@ public class BalancingStreamTokenizer {
     setState(_stateStack.pop());
   }
 
+  /** Returns the type of the current token. */
+  public Token token() { return _token; }
+  
   /**
    * Specify a range characters as word characters.
    * @param lo the character beginning the word character range, inclusive
@@ -483,6 +491,7 @@ public class BalancingStreamTokenizer {
         }
         else {
           if (buf.length()>0) {
+            _token = Token.NORMAL;
             return buf.toString();
           }
         }
@@ -511,6 +520,7 @@ public class BalancingStreamTokenizer {
             for(int i=temp.length()-1; i>=0; --i) {
               pushToken(temp.charAt(i));
             }
+            _token = Token.NORMAL;
             return buf.toString();
           }
           String begin = temp;
@@ -570,6 +580,7 @@ public class BalancingStreamTokenizer {
           
           // restore the old state
           popState();
+          _token = Token.QUOTED;
           return quoteBuf.toString();
         }
       }
@@ -594,8 +605,10 @@ public class BalancingStreamTokenizer {
             for(int i=temp.length()-1; i>=0; --i) {
               pushToken(temp.charAt(i));
             }
+            _token = Token.NORMAL;
             return buf.toString();
           }
+          _token = Token.KEYWORD;
           return unescape(temp);
         }
       }
@@ -606,6 +619,60 @@ public class BalancingStreamTokenizer {
         if (_wasEscape) {
           buf.append(String.valueOf(_escape));
           _isEscape = _wasEscape = false;
+        }
+        else {
+          // there was an escape
+          // see if whitespace or escape is coming up
+          // System.err.println("There was an escape");
+          int cnext = nextToken();
+          if ((cnext!=(int)_escape) && (!_state.whitespace.contains(cnext))) {
+            // System.err.println("But it's not an escape or whitespace");
+            // see if a quote might be coming up
+            String temp = findMatch(cnext, _state.quotes, new Lambda<String,String>() {
+              public String apply(String in) { 
+                // push the tokens back
+                for(int i=in.length()-1; i>0; --i) {
+                  pushToken(in.charAt(i));
+                }
+                return null;
+              }
+            });
+            if (temp!=null) {
+              // push the tokens back
+              for(int i=temp.length()-1; i>0; --i) {
+                pushToken(temp.charAt(i));
+              }
+              // System.err.println("It looks like a quote");
+            }
+            else {
+              // System.err.println("But it's not a quote");
+              // it wasn't a quote, see if it could be a keyword
+              temp = findMatch(cnext, _state.keywords, new Lambda<String,String>() {
+                public String apply(String in) {
+                  // push the tokens back
+                  for(int i=in.length()-1; i>0; --i) {
+                    pushToken(in.charAt(i));
+                  }
+                  return null;
+                }
+              });
+              if (temp!=null) {
+                // push the tokens back
+                for(int i=temp.length()-1; i>0; --i) {
+                  pushToken(temp.charAt(i));
+                }
+                // System.err.println("It looks like a keyword");
+              }
+              else {
+                // System.err.println("But it's not a keyword ==> lone escape");
+                // neither a quote nor a keyword coming up
+                // lone escape
+                buf.append(String.valueOf(_escape));
+                _isEscape = _wasEscape = false;
+              }
+            }
+          }
+          pushToken(cnext);
         }
       }
       else {
@@ -621,9 +688,11 @@ public class BalancingStreamTokenizer {
     }
     // end of stream, return remaining buffer as last token
     if (buf.length()>0) {
+      _token = Token.NORMAL;
       return buf.toString();
     }
     // or return null to represent the end of the stream
+    _token = Token.END;
     return null;
   }
   

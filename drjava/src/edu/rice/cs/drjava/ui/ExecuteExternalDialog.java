@@ -297,7 +297,6 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
   /** Build the dialog. */
   private void initComponents() {
     _dirChooser = new DirectoryChooser(this);
-    _dirChooser.setSelectedFile(new File(System.getProperty("user.dir")));
     _dirChooser.setDialogTitle("Select Work Directory");
     _dirChooser.setApproveButtonText("Select");
 
@@ -639,7 +638,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       public void removeUpdate(DocumentEvent e)  { update(e); }
     };
     _commandWorkDirLine.getDocument().addDocumentListener(_workDirDocumentListener);
-    _commandWorkDirLine.setText("${user.dir}");
+    _commandWorkDirLine.setText("${drjava.working.dir}");
     _workDirDocumentListener.changedUpdate(null);
 
     DrJava.getConfig().addOptionListener(DEFINITIONS_COMMENT_COLOR, new OptionListener<Color>() {
@@ -1006,7 +1005,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
       public void removeUpdate(DocumentEvent e)  { update(e); }
     };
     _javaCommandWorkDirLine.getDocument().addDocumentListener(_javaWorkDirDocumentListener);
-    _javaCommandWorkDirLine.setText("${user.dir}");
+    _javaCommandWorkDirLine.setText("${drjava.working.dir}");
     _javaWorkDirDocumentListener.changedUpdate(null);
     
     DrJava.getConfig().addOptionListener(DEFINITIONS_COMMENT_COLOR, new OptionListener<Color>() {
@@ -1081,7 +1080,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         StyledDocument doc = (StyledDocument)pane.getDocument();
         doc.removeDocumentListener(dl);
         String str = pane.getText();
-        BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str));
+        BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '\\');
         tok.wordRange(0,255);
         tok.addQuotes("${", "}");
 
@@ -1090,7 +1089,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         String next = null;
         try {
           while((next=tok.getNextToken())!=null) {
-            if (next.startsWith("${")) {
+            if ((tok.token()==BalancingStreamTokenizer.Token.QUOTED) && (next.startsWith("${"))) {
               if (next.endsWith("}")) {
                 String key;
                 String attrList = "";
@@ -1115,7 +1114,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                     if (attrList.length()>0) {
                       int subpos = pos + 2 + key.length() + 1;
                       int added = 0;
-                      BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList));
+                      BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '\\');
                       atok.wordRange(0,255);
                       atok.addQuotes("\"", "\"");
                       atok.addKeyword(";");
@@ -1123,26 +1122,28 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                       // LOG.log("\tProcessing AttrList");
                       String n = null;
                       while((n=atok.getNextToken())!=null) {
-                        if ((n==null) || n.trim().equals(";") || n.trim().equals("=") || n.trim().startsWith("\"")) {
+                        if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.NORMAL) ||
+                            n.trim().equals(";") || n.trim().equals("=") || n.trim().startsWith("\"")) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
                         }
                         added += n.length();
                         String name = n.trim();
                         n = atok.getNextToken();
-                        if ((n==null) || (!n.trim().equals("="))) {
+                        if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.trim().equals("="))) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
                         }
                         added += n.length();
                         n = atok.getNextToken();
-                        if ((n==null) || (!n.trim().startsWith("\""))) {
+                        if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.QUOTED) || (!n.trim().startsWith("\""))) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
                         }
                         added += n.length();
                         n = atok.getNextToken();
-                        if ((n!=null) && (!n.trim().equals(";"))) {
+                        if (((n!=null) && ((atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals(";")))) ||
+                            ((n==null) && (atok.token()!=BalancingStreamTokenizer.Token.END))) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
                         }
@@ -1188,7 +1189,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
     if (_cm!=null) { _cm.set(); }
   }
 
-  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
+  // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
   
   /** Run a command and return an external process panel. */
   public ExternalProcessPanel runCommand(String name, String cmdline, String workdir) {

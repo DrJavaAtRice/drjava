@@ -504,4 +504,16 @@ public class StringOpsTest extends DrJavaTestCase {
     assertEquals("abcbamxyz", StringOps.replaceVariables("abc${yyy}xyz",props,PropertyMaps.TO_STRING));
     assertEquals("abcbarbamxyz", StringOps.replaceVariables("abc${xxx}${yyy}xyz",props,PropertyMaps.TO_STRING));
   }
+  
+  public void testReplaceVariables3() {
+    PropertyMaps props = new PropertyMaps();
+    props.setProperty("1", new ConstantProperty("var", "foo"));
+    props.setProperty("1", new ConstantProperty("xxx", "bar"));
+    
+    assertEquals("abcxyz", StringOps.replaceVariables("abcxyz",props,PropertyMaps.TO_STRING));
+    assertEquals("fooxyz", StringOps.replaceVariables("${var}xyz",props,PropertyMaps.TO_STRING));
+    assertEquals("abc ${xxx}xyz", StringOps.replaceVariables("abc \\${xxx}xyz",props,PropertyMaps.TO_STRING));
+    assertEquals("${xxx}xyz", StringOps.replaceVariables("\\${xxx}xyz",props,PropertyMaps.TO_STRING));
+  }
+
 }

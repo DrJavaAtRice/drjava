@@ -651,7 +651,7 @@ public abstract class StringOps {
    * @return string with variables replaced by values
    */
   public static String replaceVariables(String str, PropertyMaps props, Lambda<String,DrJavaProperty> getter) {
-    BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str));
+    BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '\\');
     tok.wordRange(0,255);
     tok.addQuotes("${", "}");
     
@@ -661,8 +661,10 @@ public abstract class StringOps {
     String next = null;
     try {
       while((next=tok.getNextToken())!=null) {
-        if ((next.startsWith("${")) &&
-             (next.endsWith("}"))) {
+        // LOG.log("Token: "+next);
+        if ((tok.token()==BalancingStreamTokenizer.Token.QUOTED) &&
+            (next.startsWith("${")) &&
+            (next.endsWith("}"))) {
           // LOG.log("Found property: "+next);
           String key;
           String attrList = "";
@@ -692,7 +694,7 @@ public abstract class StringOps {
               // if we have a list of attributes
               try {
                 if (attrList.length()>0) {
-                  BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList));
+                  BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '\\');
                   atok.wordRange(0,255);
                   atok.whitespaceRange(0,32);
                   atok.addQuotes("\"", "\"");
@@ -701,18 +703,19 @@ public abstract class StringOps {
                   // LOG.log("\tProcessing AttrList");
                   String n = null;
                   while((n=atok.getNextToken())!=null) {
-                    if ((n==null) || n.equals(";") || n.equals("=") || n.startsWith("\"")) {
+                    if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.NORMAL) ||
+                        n.equals(";") || n.equals("=") || n.startsWith("\"")) {
                       throw new IllegalArgumentException("Unknown attribute list format for property "+key);
                     }
                     String name = n;
                     // LOG.log("\t\tname = '"+name+"'");
                     n = atok.getNextToken();
-                    if ((n==null) || (!n.equals("="))) {
+                    if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals("="))) {
                       throw new IllegalArgumentException("Unknown attribute list format for property "+key);
                     }
                     // LOG.log("\t\tread '='");
                     n = atok.getNextToken();
-                    if ((n==null) || (!n.startsWith("\""))) {
+                    if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.QUOTED) || (!n.startsWith("\""))) {
                       throw new IllegalArgumentException("Unknown attribute list format for property "+key);
                     }
                     String value = "";
@@ -721,7 +724,8 @@ public abstract class StringOps {
                       // LOG.log("\t\tvalue = '"+value+"'");
                     }
                     n = atok.getNextToken();
-                    if ((n!=null) && (!n.equals(";"))) {
+                    if (((n!=null) && ((atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals(";")))) ||
+                        ((n==null) && (atok.token()!=BalancingStreamTokenizer.Token.END))) {
                       throw new IllegalArgumentException("Unknown attribute list format for property "+key);
                     }
                     // LOG.log("\t\tread ';' or EOF");
