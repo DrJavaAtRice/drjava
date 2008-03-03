@@ -190,17 +190,17 @@ public class ProjectPropertiesFrame extends JFrame {
 
     final File bd = _model.getBuildDirectory();
     final JTextField bdTextField = _buildDirSelector.getFileField();
-    if (bd == null) bdTextField.setText("");
+    if (bd == FileOps.NULL_FILE) bdTextField.setText("");
     else _buildDirSelector.setFileField(bd);
 
     final File wd = _model.getWorkingDirectory();
     final JTextField wdTextField = _workDirSelector.getFileField();
-    if (wd == null) wdTextField.setText("");
+    if (wd == FileOps.NULL_FILE) wdTextField.setText("");
     else _workDirSelector.setFileField(wd);
 
     final File mc = _model.getMainClass();
     final JTextField mcTextField = _mainDocumentSelector.getFileField();
-    if (mc == null) mcTextField.setText("");
+    if (mc == FileOps.NULL_FILE) mcTextField.setText("");
     else _mainDocumentSelector.setFileField(mc);
 
     Vector<File> cp = new Vector<File>(IterUtil.asList(_model.getExtraClassPath()));
@@ -213,7 +213,7 @@ public class ProjectPropertiesFrame extends JFrame {
     boolean projRootChanged = false;
 
     File pr = _projRootSelector.getFileFromField();
-    if (_projRootSelector.getFileField().getText().equals("")) { pr = null; } else {      
+    if (_projRootSelector.getFileField().getText().equals("")) { pr = FileOps.NULL_FILE; } else {      
       if (!pr.equals(_model.getProjectRoot())) {
         _model.setProjectRoot(pr);
         projRootChanged = true;
@@ -221,15 +221,15 @@ public class ProjectPropertiesFrame extends JFrame {
     }
 
     File bd = _buildDirSelector.getFileFromField();
-    if (_buildDirSelector.getFileField().getText().equals("")) bd = null;
+    if (_buildDirSelector.getFileField().getText().equals("")) bd = FileOps.NULL_FILE;
     _model.setBuildDirectory(bd);
 
     File wd = _workDirSelector.getFileFromField();
-    if (_workDirSelector.getFileField().getText().equals("")) wd = null;
+    if (_workDirSelector.getFileField().getText().equals("")) wd = FileOps.NULL_FILE;
     _model.setWorkingDirectory(wd);
 
     File mc = _mainDocumentSelector.getFileFromField();
-    if (_mainDocumentSelector.getFileField().getText().equals("")) mc = null;
+    if (_mainDocumentSelector.getFileField().getText().equals("")) mc = FileOps.NULL_FILE;
     _model.setMainClass(mc);
 
     Vector<File> extras = _extraClassPathList.getValue();

@@ -54,6 +54,11 @@ import edu.rice.cs.util.UnexpectedException;
  *  @version $Id$
  */
 public class LogTest extends MultiThreadedTestCase {
+  
+  public static final int TOL = 2000;
+  
+  // Relying on default constructor
+  
   /** A thread class that adds a log message after sleeping a given number of milliseconds */
   private class LogTestThread extends Thread {
     
@@ -67,19 +72,18 @@ public class LogTest extends MultiThreadedTestCase {
     
     public void run() {
       try { sleep(_millis); }
-      catch (InterruptedException e ) {
+      catch (Exception e ) {
         e.printStackTrace();
         fail("testConcurrent failed: sleep interrupted");
       }
       _log.log( "Test message" );
     }
-    
   }
 
   /** Parses a date printed by Date.toString(); returns null if there is a parse error or if there is no date. */
   private static Date parse(String s) {
     int pos = s.indexOf("GMT: ");
-    if (pos==-1) { return null; }
+    if (pos == -1) { return null; }
     try {
       return Log.DATE_FORMAT.parse(s.substring(0,pos+3));
     }
@@ -93,71 +97,75 @@ public class LogTest extends MultiThreadedTestCase {
     return s.substring(pos + 5);
   }
   
-  /** Returns true if time0 is less than 1000 ms earlier than 'earlier',
-    * and now is less than 1000 ms earlier than time0.
+  /** Returns true if time0 is less than 5000 ms earlier than 'earlier',
+    * and now is less than 5000 ms earlier than time0.
     * This is necessary because when we parse dates back, the millisecond part gets
     * dropped, so a date later during the same second interval might appear earlier. */
-  private static boolean withinASecond(Date earlier, Date time0, Date now) {
-     return (time0.getTime()-earlier.getTime()<1000) && (now.getTime()-time0.getTime()<1000);
+  private static boolean withinTolerance(Date earlier, Date time0, Date now) {
+    return (time0.getTime() - earlier.getTime() < TOL) && (now.getTime() - time0.getTime() < TOL);
   }
   
   /** Adds a couple of generic messages to a log, and then tests to make sure they are all correct, in the correct order,
     * and their timestamps are within the past few seconds.
     */
   public void testLog() throws IOException {
+//    System.err.println("LogTest.testLog started");
     File file1 = IOUtil.createAndMarkTempFile("logtest001",".txt");
     //File file1 = new File("logtest001.txt");
-
+    
     Date earlier = new Date();
-
+    
     Log log1 = new Log(file1, true);
     log1.log("Message 1");
     log1.log("Message 2");
     log1.log("Message 3");
-   
+    
     BufferedReader fin = new BufferedReader(new FileReader(file1));
     Date now = new Date();
-
+    
     String s0 = fin.readLine();
     Date time0 = parse(s0);
-    assertTrue("Log not opened after 'earlier' and before 'now'", withinASecond(earlier, time0, now));
-
+    assertTrue("Log not opened after 'earlier' and before 'now'", withinTolerance(earlier, time0, now));
+    
     String log1OpenMsg = "Log '" + file1.getName() + "' opened: ";
     assertEquals("Incorrect log open message", log1OpenMsg , getStringAfterDate(s0).substring(0, log1OpenMsg.length()));
     
     String s1 = fin.readLine();
     Date time1 = parse(s1);
-    assertTrue("Date of message 1 not after 'earlier' and before 'now'", withinASecond(earlier, time1, now));
-    assertTrue("Date of message 1 not after 'log opened' and before 'now'", withinASecond(time0, time1, now));
+    assertTrue("Date of message 1 not after 'earlier' and before 'now'", withinTolerance(earlier, time1, now));
+    assertTrue("Date of message 1 not after 'log opened' and before 'now'", withinTolerance(time0, time1, now));
     assertEquals("Log message 1", "Message 1", getStringAfterDate(s1));
     
     String s2 = fin.readLine();
     Date time2 = parse(s2);
-    assertTrue("Date of message 2 not after 'earlier' and before 'now'", withinASecond(earlier, time2, now));
-    assertTrue("Date of message 2 not after 'message 1' and before 'now'", withinASecond(time1, time2, now));
+    assertTrue("Date of message 2 not after 'earlier' and before 'now'", withinTolerance(earlier, time2, now));
+    assertTrue("Date of message 2 not after 'message 1' and before 'now'", withinTolerance(time1, time2, now));
     assertEquals("Log message 2", "Message 2", getStringAfterDate(s2));
     
     String s3 = fin.readLine();
     Date time3 = parse(s3);
-    assertTrue("Date of message 3 not after 'earlier' and before 'now'", withinASecond(earlier, time3, now));
-    assertTrue("Date of message 3 not after 'message 2' and before 'now'", withinASecond(time2, time3, now));
+    assertTrue("Date of message 3 not after 'earlier' and before 'now'", withinTolerance(earlier, time3, now));
+    assertTrue("Date of message 3 not after 'message 2' and before 'now'", withinTolerance(time2, time3, now));
     assertEquals("Log message 3", "Message 3", getStringAfterDate(s3));
-  
+    
     assertEquals("End of log expected", null, fin.readLine());
     fin.close();
+//    System.err.println("LogTest.testLog complete");
   }
 
   /** Tests the Exception printing methods in the Log file by throwing two exceptions and using the two types of log 
     * methods (one with the Throwable itself and the other with the the StackTraceElement[])
     */
   public void testExceptionPrinting() throws IOException {
+//    System.err.println("LogTest.testExceptionPrinting started");
+    
     File file2 = IOUtil.createAndMarkTempFile("logtest002",".txt");
     //File file2 = new File("logtest002.txt");
-
+    
     Date earlier = new Date();
-
+    
     Log log2 = new Log(file2, true);
-
+    
 //    System.err.println("Starting testExceptionPrinting");
     
     // Throw a couple of exceptions and log them
@@ -181,15 +189,15 @@ public class LogTest extends MultiThreadedTestCase {
     
     String s0 = fin.readLine();
     Date time0 = parse(s0);
-    assertTrue("Log not opened after 'earlier' and before 'now'", withinASecond(earlier, time0, now));
-
+    assertTrue("Log not opened after 'earlier' and before 'now'", withinTolerance(earlier, time0, now));
+    
     String log2OpenMsg = "Log '" + file2.getName() + "' opened: ";
     assertEquals("Incorrect log open message", log2OpenMsg , getStringAfterDate(s0).substring(0, log2OpenMsg.length()));
-   
+    
     String s1 = fin.readLine();
     Date time1 = parse(s1);
-    assertTrue("Date of message 1 not after 'earlier' and before 'now'", withinASecond(earlier, time1, now));
-    assertTrue("Date of message 1 not after 'log opened' and before 'now'", withinASecond(time0, time1, now));
+    assertTrue("Date of message 1 not after 'earlier' and before 'now'", withinTolerance(earlier, time1, now));
+    assertTrue("Date of message 1 not after 'log opened' and before 'now'", withinTolerance(time0, time1, now));
     assertEquals("Log exception 1", "java.lang.ArrayIndexOutOfBoundsException", fin.readLine());
     
     // Since it's difficult to test the rest of the stack trace, just skip over it
@@ -203,13 +211,14 @@ public class LogTest extends MultiThreadedTestCase {
     
 //    System.err.println("Skipped over traceback");
     
-    assertTrue("Date of message 2 not after 'earlier' and before 'now'", withinASecond(earlier, time2, now));
-    assertTrue("Date of message 2 not after 'message 1' and before 'now'", withinASecond(time1, time2, now)); 
+    assertTrue("Date of message 2 not after 'earlier' and before 'now'", withinTolerance(earlier, time2, now));
+    assertTrue("Date of message 2 not after 'message 1' and before 'now'", withinTolerance(time1, time2, now)); 
     assertEquals("Log message 2", "Message 2", getStringAfterDate(s2));
     assertEquals("Log exception 2 (trace line 1)", method, fin.readLine());
-
+    
     fin.close();
-  }
+//    System.err.println("LogTest.testLog complete");
+  }   
   
   private static final int NUM_THREADS = 50;
   private static final int DELAY = 100;
@@ -221,18 +230,20 @@ public class LogTest extends MultiThreadedTestCase {
     * the entries in the log may be corrupted).
     */
   public void testConcurrentWrites() throws IOException, InterruptedException {
+//    System.err.println("LogTest.testConucrrentWrites started");
+    
     File file3 = IOUtil.createAndMarkTempFile("logtest003",".txt");
     // File file3 = new File("logtest003.txt");
-
+    
     Date earlier = new Date();
-
+    
     Log log3 = new Log(file3, true);
     Random r = new Random();
     Thread[] threads = new Thread[NUM_THREADS];
     for (int i = 0; i < NUM_THREADS; i++) threads[i] = new LogTestThread(log3, r.nextInt(DELAY));
     for (int i = 0; i < NUM_THREADS; i++) threads[i].start();
     for (int i = 0; i < NUM_THREADS; i++) threads[i].join();
-   
+    
     BufferedReader fin = new BufferedReader(new FileReader(file3));
     Date now = new Date();
     String s0 = fin.readLine();
@@ -240,22 +251,22 @@ public class LogTest extends MultiThreadedTestCase {
     //ltl.log("earlier = "+earlier);
     //ltl.log("now     = "+now);
     //ltl.log("time0   = "+time0);
-    assertTrue("Log not opened after 'earlier' and before 'now'", withinASecond(earlier, time0, now));
-
+    assertTrue("Log not opened after 'earlier' and before 'now'", withinTolerance(earlier, time0, now));
+    
     String log3OpenMsg = "Log '" + file3.getName() + "' opened: ";
     assertEquals("Incorrect log open message", log3OpenMsg , getStringAfterDate(s0).substring(0, log3OpenMsg.length()));
     
     for (int i = 0; i < NUM_THREADS; i++) {
       String s1 = fin.readLine();
       Date time1 = parse(s1);
-      assertTrue("Date of message not after 'earlier' and before 'now'", withinASecond(earlier, time1, now));
-      assertTrue("Date of message not after 'previous time' and before 'now'", withinASecond(time0, time1, now));
+      assertTrue("Date of message not after 'earlier' and before 'now'", withinTolerance(earlier, time1, now));
+      assertTrue("Date of message not after 'previous time' and before 'now'", withinTolerance(time0, time1, now));
       assertEquals("Log message", "Test message", getStringAfterDate(s1));
       time0 = time1;
     } 
     
     fin.close();
+    System.err.println("LogTest.testConucrrentWrites complete");
   }
-  
 }
 
