@@ -3339,12 +3339,16 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   }
   
   public void setUpDrJavaProperties() {
-    final String DEF_DIR = _model.getInteractionsModel().getWorkingDirectory().toString();
+    final String DEF_DIR = "${drjava.working.dir}";
     PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.file") {
       public void update() {
         try {
           File f = FileOps.makeRelativeTo(_model.getActiveDocument().getRawFile(),
                                           new File(_attributes.get("dir")));
+          try {
+            f = f.getCanonicalFile();
+          }
+          catch(IOException ioe) { }
           _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
         }
         catch(IOException e) { _value = "Error."; }
@@ -3361,6 +3365,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           File f;
           if (_attributes.get("dir").equals("/")) {
             f = _model.getInteractionsModel().getWorkingDirectory().getAbsoluteFile();
+            try {
+              f = f.getCanonicalFile();
+            }
+            catch(IOException ioe) { }
             _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
           }
           else {

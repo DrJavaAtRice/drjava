@@ -590,7 +590,8 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
             sb.append(s);
             sb.append(' ');
           } */
-          _commandLineDoc.insertString(_commandLineDoc.getLength(), text, null);
+          _commandLineDoc.insertString(_commandLineDoc.getLength(),
+                                       StringOps.unescapeSpacesWith1bHex(text), null);
           
           // command line
           colorVariables(_commandLine,
@@ -619,7 +620,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           // preview
           _commandWorkDirLineDoc.remove(0,_commandWorkDirLineDoc.getLength());
           String text = StringOps.replaceVariables(_commandWorkDirLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
-          _commandWorkDirLineDoc.insertString(0, text, null);
+          _commandWorkDirLineDoc.insertString(0, StringOps.unescapeSpacesWith1bHex(text), null);
           
           // command line
           colorVariables(_commandWorkDirLine,
@@ -938,7 +939,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
             sb.append(s);
             sb.append(' ');
           }
-          _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(), sb.toString(), _javaCommandLineJVMStyle);
+          _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(),
+                                           StringOps.unescapeSpacesWith1bHex(sb.toString()),
+                                           _javaCommandLineJVMStyle);
           
           sb = new StringBuilder();
           text = StringOps.replaceVariables(_javaCommandLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
@@ -947,7 +950,9 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
             sb.append(s);
             sb.append(' ');
           }
-          _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(), sb.toString(), null);
+          _javaCommandLineDoc.insertString(_javaCommandLineDoc.getLength(),
+                                           StringOps.unescapeSpacesWith1bHex(sb.toString()),
+                                           null);
           
           // JVM line
           colorVariables(_jvmLine,
@@ -985,7 +990,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
           // preview
           _javaCommandWorkDirLineDoc.remove(0,_javaCommandWorkDirLineDoc.getLength());
           String text = StringOps.replaceVariables(_javaCommandWorkDirLine.getText(), PropertyMaps.ONLY, PropertyMaps.TO_STRING);
-          _javaCommandWorkDirLineDoc.insertString(0, text, null);
+          _javaCommandWorkDirLineDoc.insertString(0, StringOps.unescapeSpacesWith1bHex(text), null);
           
           // work dir
           colorVariables(_javaCommandWorkDirLine,
@@ -1080,7 +1085,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
         StyledDocument doc = (StyledDocument)pane.getDocument();
         doc.removeDocumentListener(dl);
         String str = pane.getText();
-        BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '\\');
+        BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '$');
         tok.wordRange(0,255);
         tok.addQuotes("${", "}");
 
@@ -1114,7 +1119,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
                     if (attrList.length()>0) {
                       int subpos = pos + 2 + key.length() + 1;
                       int added = 0;
-                      BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '\\');
+                      BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '$');
                       atok.wordRange(0,255);
                       atok.addQuotes("\"", "\"");
                       atok.addKeyword(";");

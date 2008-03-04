@@ -809,6 +809,45 @@ public class BalancingStreamTokenizerTest extends TestCase {
     tok.addKeyword("\\=");
     String s = tok.getNextToken();
     // System.err.println(s);
+    assertEquals("abc\\=", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("${def;ghi='abc'}", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(";", s);
+    assertEquals(BalancingStreamTokenizer.Token.KEYWORD, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("123\n456 ", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("${abc def \"xxx '111' yyy\"}", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(" 789", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+
+  public void testEscapeDollarNestedQuotedKeywordsWithEscapeWSSignificant2() throws IOException {
+    BalancingStreamTokenizer tok = make("abc\\=${def;ghi='abc'};123\n456 ${abc def \"xxx '111' yyy\"} 789",'\\');
+    tok.wordRange(0,255);
+    tok.addQuotes("\"", "\"");
+    tok.addQuotes("'", "'");
+    tok.addQuotes("`", "`");
+    tok.addQuotes("${", "}");
+    tok.addKeyword(";");
+    tok.addKeyword("\\=");
+    String s = tok.getNextToken();
+    // System.err.println(s);
     assertEquals("abc", s);
     assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
     s = tok.getNextToken();
@@ -1257,6 +1296,45 @@ public class BalancingStreamTokenizerTest extends TestCase {
     tok.addKeyword("|=");
     String s = tok.getNextToken();
     // System.err.println(s);
+    assertEquals("abc|=", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("${def;ghi='abc'}", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(";", s);
+    assertEquals(BalancingStreamTokenizer.Token.KEYWORD, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("123\n456 ", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("${abc def \"xxx '111' yyy\"}", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(" 789", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+
+  public void testEscapePipeDollarNestedQuotedKeywordsWithEscapeWSSignificant2() throws IOException {
+    BalancingStreamTokenizer tok = make("abc|=${def;ghi='abc'};123\n456 ${abc def \"xxx '111' yyy\"} 789",'|');
+    tok.wordRange(0,255);
+    tok.addQuotes("\"", "\"");
+    tok.addQuotes("'", "'");
+    tok.addQuotes("`", "`");
+    tok.addQuotes("${", "}");
+    tok.addKeyword(";");
+    tok.addKeyword("|=");
+    String s = tok.getNextToken();
+    // System.err.println(s);
     assertEquals("abc", s);
     assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
     s = tok.getNextToken();
@@ -1290,6 +1368,45 @@ public class BalancingStreamTokenizerTest extends TestCase {
   }
   
   public void testEscapePipeDollarNestedQuotedKeywordsWithEscape2WSSignificant() throws IOException {
+    BalancingStreamTokenizer tok = make("abc|=||${def;ghi='abc'};123\n456 ${abc def \"xxx '111' yyy\"} 789",'|');
+    tok.wordRange(0,255);
+    tok.addQuotes("\"", "\"");
+    tok.addQuotes("'", "'");
+    tok.addQuotes("`", "`");
+    tok.addQuotes("${", "}");
+    tok.addKeyword(";");
+    tok.addKeyword("=|");
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("abc=|", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("${def;ghi='abc'}", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(";", s);
+    assertEquals(BalancingStreamTokenizer.Token.KEYWORD, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("123\n456 ", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("${abc def \"xxx '111' yyy\"}", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(" 789", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+
+  public void testEscapePipeDollarNestedQuotedKeywordsWithEscape2WSSignificant2() throws IOException {
     BalancingStreamTokenizer tok = make("abc=||${def;ghi='abc'};123\n456 ${abc def \"xxx '111' yyy\"} 789",'|');
     tok.wordRange(0,255);
     tok.addQuotes("\"", "\"");
@@ -1374,4 +1491,73 @@ public class BalancingStreamTokenizerTest extends TestCase {
     assertEquals(null, s);
     assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
   }
+
+  public void testDollarEscapeQuoted() throws IOException {
+    BalancingStreamTokenizer tok = make("${user.dir}", '$');
+    tok.wordRange(0,255);
+    tok.addQuotes("${", "}");
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("${user.dir}", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+
+  public void testQuoteEscapeQuoted() throws IOException {
+    BalancingStreamTokenizer tok = make("'test'", '\'');
+    tok.defaultTwoQuoteSetup();
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("'test'", s);
+    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+
+  public void testDollarEscapedQuoted() throws IOException {
+    BalancingStreamTokenizer tok = make("$${user.dir}", '$');
+    tok.wordRange(0,255);
+    tok.addQuotes("${", "}");
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("${user.dir}", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+
+  public void testDollarEscapedQuoted2() throws IOException {
+    BalancingStreamTokenizer tok = make("abc $${xxx}xyz", '$');
+    tok.wordRange(0,255);
+    tok.addQuotes("${", "}");
+    String s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals("abc ${xxx}xyz", s);
+    assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
+    s = tok.getNextToken();
+    // System.err.println(s);
+    assertEquals(null, s);
+    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+  }
+
+  // I don't know how to make this one work with the others
+//  public void testQuoteEscapedQuoted() throws IOException {
+//    BalancingStreamTokenizer tok = make("''test''", '\'');
+//    tok.defaultTwoQuoteSetup();
+//    String s = tok.getNextToken();
+//    // System.err.println(s);
+//    assertEquals("'test'", s);
+//    assertEquals(BalancingStreamTokenizer.Token.QUOTED, tok.token());
+//    s = tok.getNextToken();
+//    // System.err.println(s);
+//    assertEquals(null, s);
+//    assertEquals(BalancingStreamTokenizer.Token.END, tok.token());
+//  }
 }

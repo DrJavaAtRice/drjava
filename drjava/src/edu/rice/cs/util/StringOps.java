@@ -651,7 +651,7 @@ public abstract class StringOps {
    * @return string with variables replaced by values
    */
   public static String replaceVariables(String str, PropertyMaps props, Lambda<String,DrJavaProperty> getter) {
-    BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '\\');
+    BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '$');
     tok.wordRange(0,255);
     tok.addQuotes("${", "}");
     
@@ -694,7 +694,7 @@ public abstract class StringOps {
               // if we have a list of attributes
               try {
                 if (attrList.length()>0) {
-                  BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '\\');
+                  BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '$');
                   atok.wordRange(0,255);
                   atok.whitespaceRange(0,32);
                   atok.addQuotes("\"", "\"");

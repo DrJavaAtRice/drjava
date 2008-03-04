@@ -97,6 +97,10 @@ public abstract class EagerFileListProperty extends EagerProperty {
       sb.append(_attributes.get("sep"));
       try {
         File f = FileOps.makeRelativeTo(odd.getRawFile(), new File(_attributes.get("dir")));
+        try {
+          f = f.getCanonicalFile();
+        }
+        catch(IOException ioe) { }
         String s = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
         sb.append(s);
       }

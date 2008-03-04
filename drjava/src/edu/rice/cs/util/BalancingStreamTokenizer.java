@@ -115,7 +115,7 @@ public class BalancingStreamTokenizer {
   protected boolean _isEscape = false;
 
   /** Kind of tokens to be returned. */
-  public enum Token { NONE, NORMAL, QUOTED, KEYWORD, END };
+  public enum Token { NONE, NORMAL, QUOTED, KEYWORD, END }
 
   public volatile Token _token = Token.NONE;
   
@@ -754,8 +754,11 @@ public class BalancingStreamTokenizer {
     if (_escape==null) { return s; }
     StringBuilder sb = new StringBuilder();
     for(int i=0; i<s.length(); ++i) {
+      if (i==0) { sb.append(s.charAt(0)); }
+      else {
       if (s.charAt(i)==_escape) { sb.append(_escape); }
       sb.append(s.charAt(i));
+    }
     }
     return sb.toString();
   }
@@ -764,10 +767,13 @@ public class BalancingStreamTokenizer {
     if (_escape==null) { return s; }
     StringBuilder sb = new StringBuilder();
     for(int i=0; i<s.length(); ++i) {
+      if (i==0) { sb.append(s.charAt(0)); }
+      else {
       if (s.charAt(i)==_escape) {
         if ((i+1<s.length()) && (s.charAt(i+1)==_escape)) { ++i; }
       }
       sb.append(s.charAt(i));
+    }
     }
     return sb.toString();
   }

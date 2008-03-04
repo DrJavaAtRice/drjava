@@ -226,16 +226,20 @@ public class ExternalProcessPanel extends AbortablePanel {
             // MainFrame.LOG.log("\treading...");
             // abort after reading 5 blocks (50 kB), read more later
             // don't block the event thread any longer
-            while((changeCount<=BUFFER_READS_PER_TIMER) 
-                    && (_erris!=null)
-                    && ((_red = _is.read(_buf))>=0)) {
+            while((_is!=null) &&
+                  (_erris!=null) &&
+                  (changeCount<=BUFFER_READS_PER_TIMER) &&
+                  (_erris!=null) &&
+                  ((_red = _is.read(_buf))>=0)) {
               // MainFrame.LOG.log("\tread "+_red+" bytes");
               sb.append(new String(_buf, 0, _red));
               if (finish) { changeCount = 1; } else { ++changeCount; }
             }
-            while((changeCount<=BUFFER_READS_PER_TIMER) 
-                    && (_erris!=null)
-                    && ((_errred = _erris.read(_errbuf))>=0)) {
+            if (_is==null) { sb.append("\nInput stream suddenly became null."); }
+            if (_erris==null) { sb.append("\nError input stream suddenly became null."); }
+            while((changeCount<=BUFFER_READS_PER_TIMER) &&
+                  (_erris!=null) &&
+                  ((_errred = _erris.read(_errbuf))>=0)) {
               // MainFrame.LOG.log("\tread "+_red+" bytes");
               sb.append(new String(_errbuf, 0, _errred));
               if (finish) { changeCount = 1; } else { ++changeCount; }
