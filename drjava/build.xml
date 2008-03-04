@@ -9,6 +9,12 @@
   <!-- Don't use or inherit the CLASSPATH environment variable for anything -->
   <property name="build.sysclasspath" value="ignore" />
   
+  <property environment="env" />
+  <property name="java14-home" value="${env.JAVA14_HOME}" />
+  <property name="clover-jar" value="${env.CLOVER_JAR}" />
+  <property name="launch4j-home" value="${env.LAUNCH4J_HOME}" />
+  <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
+  
   <!-- Extension containing various tools, including "for" and "if" -->
   <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
 
@@ -22,12 +28,20 @@
   <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
 
   <!-- fornum task, used for test-repeat -->
-  <taskdef name="fornum" classname="edu.rice.cs.plt.ant.ForNumTask" classpath="lib/buildlib/plt-ant.jar" onerror="report"/>
+  <taskdef name="fornum" classname="edu.rice.cs.plt.ant.ForNumTask" classpath="lib/buildlib/plt-ant.jar" onerror="report" />
+  
+  <!-- findbugs task -->
+  <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpath="lib/buildlib/findbugs-ant.jar" />
+  
+  <!-- launch4j task, used to create the Windows executable -->
+  <taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask">
+	<classpath>
+        <pathelement location="${launch4j-home}/launch4j.jar" />
+        <pathelement location="${launch4j-home}/lib/xstream.jar" />
+      </classpath>
+  </taskdef>
 
   <extendclasspath path="lib/buildlib/junit.jar" />
-  <extendclasspath path="lib/buildlib/findbugs-ant.jar" />
-
-  <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"/>
 
   <!-- Load the property file if it exists -->
   <if>
@@ -48,10 +62,6 @@
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
   <property name="tag-append" value="" /> <!-- "stable", "beta", or none -->
 
-  <property environment="env" />
-  <property name="java14-home" value="${env.JAVA14_HOME}" />
-  <property name="clover-jar" value="${env.CLOVER_JAR}" />
-  
   <!-- Default settings for properties -->
   <property name="test-spec" value="*" />
   <property name="test-repeat" value="1" />
@@ -89,6 +99,9 @@
     <echo message="JAVA14_HOME: Home folder of the Java 1.4 JRE or J2SDK" />
     <echo message="PATH: 'svn' needs to refer to the Subversion client executable" />
     <echo message="CLOVER_JAR: Location of the Clover jar file" />
+    <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
+    <echo message="LAUNCH4J_HOME: Location of the Launch4j installation (used to " />
+	<echo message="               generate a Windows application)." />
     <echo message="" />
     <echo message="Ant may also require the following, depending on your platform:" />
     <echo message="JAVA_HOME: Location of the JDK (many targets here require Java 5+)" />
@@ -620,7 +633,7 @@
     <fail message="FindBugs installation not found, or FINDBUGS_HOME environment variable not set."
           unless="findbugs-exists" />
     <delete file="${basedir}/findbugs.html" />
-    <findbugs home="${env.FINDBUGS_HOME}"
+    <findbugs home="${findbugs-home}"
               output="html"
               jvmargs="-Xmx512M"
               failOnError="true"
@@ -915,20 +928,14 @@
     <delete dir="benchmarkSources" failonerror="${clean-can-fail}" />
     <delete dir="benchmarkResults" failonerror="${clean-can-fail}" />
     
-    <delete failonerror="${clean-can-fail}">
+    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
         <exclude name="**" />
         <!-- Additional test output files should be listed here -->
       </fileset>
-    </delete>
-    
-    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="${basedir}">
         <patternset refid="generated-sources" />
       </fileset>
-    </delete>
-    
-    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="${basedir}" defaultexcludes="no">
         <include name="TEST*" />
         <include name="src/**/*.class" />
@@ -943,7 +950,7 @@
     </delete>
     
   </target>
-    
+  
   <target name="clean-products" unless="skip-clean">
     <echo message="Deleting all final build products" />
     
@@ -954,11 +961,10 @@
         <include name="*.jar" />
         <include name="*.zip" />
         <include name="*.tar.gz" />
-        <include name="${ant.project.name}-*" />
+		<include name="findbugs.html" />
       </fileset>
     </delete>
-
-    <delete file="${basedir}/findbugs.html" />
+	
   </target>
   
 
@@ -1059,29 +1065,25 @@
     <mkdir dir="${mac-app-dir}" />
     <filter token="VERSION" value="${version-tag}" />
     <copy todir="${mac-app-dir}/${readable-project-name}.app" filtering="yes" >
-      <fileset dir="packaging/${readable-project-name}.app" excludes="**/*jar-goes-here" />
+      <fileset dir="packaging/mac/${readable-project-name}.app" excludes="**/*jar-goes-here" />
     </copy>
     <copy file="${ant.project.name}.jar" 
           todir="${mac-app-dir}/${readable-project-name}.app/Contents/Resources/Java" />
-    <tar tarfile="${mac-app-dir}/${version-tag}-osx.tar">
-      <tarfileset dir="${mac-app-dir}" includes="${readable-project-name}.app/**"
-                  excludes="${readable-project-name}.app/Contents/MacOS/${readable-project-name}" />
-      <tarfileset dir="${mac-app-dir}" mode="755"
-                  includes="${readable-project-name}.app/Contents/MacOS/${readable-project-name}" />
-    </tar>
-    <gzip src="${mac-app-dir}/${version-tag}-osx.tar" destfile="${version-tag}-osx.tar.gz" />
+	<zip destfile="${version-tag}-osx.zip" basedir="${mac-app-dir}" />
   </target>
   
   <target name="windows-app" depends="assert-jar-exists, resolve-version-tag">
-    <echo message="Creating ${version-tag}.exe" />
-    <concat destfile="${version-tag}.exe" binary="yes">
-      <filelist dir="${basedir}">
-        <!-- TODO: This should probably include WinExecutor.exe and the icon file
-             rather than using the generated WinExecutorFor... -->
-        <file name="packaging/WinExecutorFor${readable-project-name}.exe" />
-        <file name="${ant.project.name}.jar" />
-      </filelist>
-    </concat>
+    <echo message="Creating ${version-tag}-windows.zip" />
+    <property name="windows-app-dir" value="${version-tag}/windows" />
+    <mkdir dir="${windows-app-dir}" />
+    <filter token="VERSION" value="${version-tag}" />
+    <copy todir="${windows-app-dir}" filtering="yes" >
+      <fileset dir="packaging/windows" />
+    </copy>
+    <copy file="${ant.project.name}.jar" todir="${windows-app-dir}" />
+	<launch4j configfile="${windows-app-dir}/launch4j-config.xml" />
+    <zip destfile="${version-tag}-windows.zip" basedir="${windows-app-dir}"
+		 includes="${readable-project-name}.exe" />
   </target>
 
   <target name="src-zip" depends="resolve-version-tag">

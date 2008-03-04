@@ -1,0 +1,10 @@
+<launch4jConfig>
+  <headerType>gui</headerType>
+  <outfile>DrJava.exe</outfile>
+  <jar>drjava.jar</jar>
+  <errTitle>DrJava</errTitle>
+  <icon>drjava.ico</icon>
+  <jre>
+    <minVersion>1.4.0</minVersion>
+  </jre>
+</launch4jConfig>
