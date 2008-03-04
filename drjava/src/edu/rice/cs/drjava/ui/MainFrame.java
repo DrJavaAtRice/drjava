@@ -3427,6 +3427,68 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         _attributes.put("fmt", "millis");
       }
     });
+    
+    PropertyMaps.ONLY.setProperty("DrJava", new DrJavaProperty("tmpfile") {
+      java.util.Random _r = new java.util.Random();
+      public String toString() {
+        invalidate();
+        update();
+        return _value;
+      }
+      public void update() {
+        try {
+          File f;
+          if (_attributes.get("name").equals("")) {
+            File dir = new File(System.getProperty("java.io.tmpdir"));
+            if (!_attributes.get("dir").equals("")) {
+              dir = new File(_attributes.get("dir"));
+            }
+            f = new File(dir, "DrJava-Execute-"+System.currentTimeMillis()+"-"+(_r.nextInt() & 0xffff)+".tmp");
+            if (!_attributes.get("dir").equals("")) {
+              f = new File(new File(_attributes.get("dir")),f.getName());
+            }
+          }
+          else {
+            File dir = new File(System.getProperty("java.io.tmpdir"));
+            if (!_attributes.get("dir").equals("")) {
+              dir = new File(_attributes.get("dir"));
+            }
+            f = new File(dir, _attributes.get("name"));
+          }
+          try {
+            f = f.getCanonicalFile();
+          }
+          catch(IOException ioe) { }
+          f.deleteOnExit();
+          _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
+        }
+        catch(SecurityException e) { _value = "Error."; }
+      }
+      public String getCurrent() {
+        invalidate();
+        final String s = super.getCurrent();
+        File f = new File(edu.rice.cs.util.StringOps.unescapeSpacesWith1bHex(_value));
+        final String keep = _attributes.get("keep");
+        if (!(keep.equals("true") || keep.equals("yes") || keep.equals("1"))) {
+          f.deleteOnExit();
+        }
+        String text = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(_attributes.get("content"));
+        try {
+          FileWriter fw = new FileWriter(f);
+          fw.write(text, 0, text.length());
+          fw.close();
+        }
+        catch(IOException ioe) { /*ignore*/ }
+        return s;
+      }
+      public void resetAttributes() {
+        _attributes.clear();
+        _attributes.put("dir", "");
+        _attributes.put("name", "");
+        _attributes.put("keep", "");
+        _attributes.put("content", "");
+      }
+    });
   }
   
   /** Set a new painters for existing breakpoint highlights. */
