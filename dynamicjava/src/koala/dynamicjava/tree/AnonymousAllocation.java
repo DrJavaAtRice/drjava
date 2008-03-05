@@ -40,7 +40,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/25
  */
 
-public class AnonymousAllocation extends SimpleAllocation implements ExpressionStatement {
+public class AnonymousAllocation extends SimpleAllocation implements StatementExpression {
 
   /**
    * The members property name

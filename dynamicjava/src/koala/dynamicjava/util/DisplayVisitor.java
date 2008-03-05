@@ -98,6 +98,17 @@ public class DisplayVisitor extends AbstractVisitor<Void> {
     return null;
   }
   
+  public Void visit(ExpressionStatement node) {
+    print("l."+node.getBeginLine()+" ExpressionStatement {");
+    print("expression:");
+    indent();
+    node.getExpression().acceptVisitor(this);
+    print("hasSemicolon:" + node.getHasSemicolon());
+    displayProperties(node);
+    print("}");
+    return null;
+  }
+  
   /**
    * Visits a WhileStatement
    * @param node the node to visit

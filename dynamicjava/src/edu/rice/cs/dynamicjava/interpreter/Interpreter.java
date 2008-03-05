@@ -12,14 +12,6 @@ import koala.dynamicjava.parser.wrapper.JavaCCParser;
 import koala.dynamicjava.parser.wrapper.ParseError;
 import edu.rice.cs.dynamicjava.Options;
 
-// temporary imports to support hacked assignment handling and void returns
-import koala.dynamicjava.tree.SimpleAssignExpression;
-import koala.dynamicjava.tree.AmbiguousName;
-import koala.dynamicjava.tree.VariableDeclaration;
-import koala.dynamicjava.SourceInfo;
-import koala.dynamicjava.interpreter.NodeProperties;
-import edu.rice.cs.dynamicjava.symbol.TypeSystem;
-
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /**
@@ -80,27 +72,7 @@ public class Interpreter {
     try {
       TypeContext newContext = _typeContext;
       for (Node n : tree) {
-        
-        // A hack to allow declarations without types: (TODO: fix this)
-        if (n instanceof SimpleAssignExpression) {
-          SimpleAssignExpression assign = (SimpleAssignExpression) n;
-          if (assign.getLeftExpression() instanceof AmbiguousName) {
-            AmbiguousName ambigName = (AmbiguousName) assign.getLeftExpression();
-            if (ambigName.getIdentifiers().size() == 1) {
-              String name = ambigName.getRepresentation();
-              if (!newContext.variableExists(name, _opt.typeSystem())) {
-                SourceInfo si = n.getSourceInfo();
-                n = new VariableDeclaration(false, null, name, assign.getRightExpression(),
-                                            si.getFilename(), si.getStartLine(), si.getStartColumn(),
-                                            si.getEndLine(), si.getEndColumn());
-                assign.setProperty("assignmentAsDeclaration", n);
-              }
-            }
-          }
-        }
-        
-        if (n instanceof Expression) { n.acceptVisitor(new ExpressionChecker(newContext, _opt)); }
-        else { newContext = n.acceptVisitor(new StatementChecker(newContext, _opt)); }
+        newContext = n.acceptVisitor(new StatementChecker(newContext, _opt));
       }
       return newContext;
     }
@@ -112,22 +84,9 @@ public class Interpreter {
       RuntimeBindings newBindings = _bindings;
       Option<Object> val = Option.none();
       for (Node n : tree) {
-        // TODO: eliminate hacks that support inferred assignment and void returns
-        if (n.hasProperty("assignmentAsDeclaration")) {
-          n = (Node) n.getProperty("assignmentAsDeclaration");
-        }
-        if (n instanceof Expression) {
-          Object evalResult = new ExpressionEvaluator(newBindings, _opt).value(n);
-          if (evalResult == null && NodeProperties.getType(n).equals(TypeSystem.VOID)) {
-            val = Option.none();
-          }
-          else { val = Option.some(evalResult); }
-        }
-        else {
-          StatementEvaluator.Result r = n.acceptVisitor(new StatementEvaluator(newBindings, _opt));
-          newBindings = r.bindings();
-          val = r.value();
-        }
+        StatementEvaluator.Result r = n.acceptVisitor(new StatementEvaluator(newBindings, _opt));
+        newBindings = r.bindings();
+        val = r.value();
       }
       return Pair.make(newBindings, val);
     }

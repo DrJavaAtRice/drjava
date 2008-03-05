@@ -37,7 +37,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/25
  */
 
-public class PreIncrement extends UnaryExpression implements ExpressionStatement {
+public class PreIncrement extends UnaryExpression implements StatementExpression {
   /**
    * Initializes the expression
    * @param exp   the pre incremented expression

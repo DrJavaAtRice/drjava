@@ -28,45 +28,12 @@
 
 package koala.dynamicjava.tree;
 
-import koala.dynamicjava.tree.visitor.*;
-
 /**
- * This class represents the pre decrement nodes of the syntax tree
+ * This interface represents the statement expressions
  *
  * @author  Stephane Hillion
- * @version 1.0 - 1999/04/25
+ * @version 1.0 - 1999/04/24
  */
 
-public class PreDecrement extends UnaryExpression implements StatementExpression {
-  /**
-   * Initializes the expression
-   * @param exp   the pre decremented expression
-   * @exception IllegalArgumentException if exp is null
-   */
-  public PreDecrement(Expression exp) {
-    this(exp, null, 0, 0, 0, 0);
-  }
-  
-  /**
-   * Initializes the expression
-   * @param exp   the pre decremented expression
-   * @param fn    the filename
-   * @param bl    the begin line
-   * @param bc    the begin column
-   * @param el    the end line
-   * @param ec    the end column
-   * @exception IllegalArgumentException if exp is null
-   */
-  public PreDecrement(Expression exp, String fn, int bl, int bc, int el, int ec) {
-    super(exp, fn, bl, bc, el, ec);
-  }
-  
-  /**
-   * Allows a visitor to traverse the tree
-   * @param visitor the visitor to accept
-   */
-  public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visit(this);
-  }
- 
+public interface StatementExpression {
 }

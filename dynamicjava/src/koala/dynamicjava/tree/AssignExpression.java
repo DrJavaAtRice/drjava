@@ -38,7 +38,7 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public abstract class AssignExpression extends    BinaryExpression
-                                       implements ExpressionStatement {
+                                       implements StatementExpression {
     /**
      * Initializes the expression
      * @param lexp  the LHS expression

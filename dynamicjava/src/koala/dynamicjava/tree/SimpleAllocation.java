@@ -40,7 +40,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/25
  */
 
-public class SimpleAllocation extends PrimaryExpression implements ExpressionStatement {
+public class SimpleAllocation extends PrimaryExpression implements StatementExpression {
 
   /**
    * The creationType property name

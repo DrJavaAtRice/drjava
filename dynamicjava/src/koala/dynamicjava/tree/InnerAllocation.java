@@ -39,7 +39,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/25
  */
 
-public class InnerAllocation extends PrimaryExpression implements ExpressionStatement, ExpressionContainer {
+public class InnerAllocation extends PrimaryExpression implements StatementExpression, ExpressionContainer {
 
   /**
    * The className property name

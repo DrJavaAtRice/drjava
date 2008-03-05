@@ -33,6 +33,11 @@ public class Parser {
   private String filename;
   
   /**
+   * A flag to use in semantic lookaheads.  Declared here as a workaround because 
+   * lookahead can't access local variables or production parameters.
+   */
+  private boolean lookaheadFlag;
+  /**
    * An environment that has the generic type parameters defined
    * at any point.
    *
@@ -1075,103 +1080,44 @@ PARSER_END(Parser)
    * @see koala.dynamicjava.tree.Node
    */
   List<Node> parseStream() :
+  { List<Node> list = new LinkedList<Node>(); List<Node> ns; }
   {
-    List<Node> list = new LinkedList<Node>();
-    List<Node> l = new LinkedList<Node>();
-    Node root = null;
-  }
-  {
-    (  LOOKAHEAD(topLevelStatementLookahead())
-       l = topLevelStatement()
-       { list.addAll(l);  l.clear(); }
-    )*
-      
-      [ root = expression() [";"] { list.add(root); } ]
-        <EOF>
-      {
-        return list;
-      }
+    try {
+      (  ns = topLevelStatement() { list.addAll(ns); } )* <EOF>
+      { return list; }
+    }
+    catch(ParseException pe) {
+      _throwParseException(pe, "Invalid top level statement");
+    }
   }
   
   /**
    * Parses an item of the input stream. This production is
    * not a Java language rule. It is used by DynamicJava.
-   * @return a list of nodes (possibly empty)
+   * @return a list of nodes (a list because a single variable declaration
+   * can be parsed to multiple VariableDeclaration nodes)
    * @see koala.dynamicjava.tree.Node
    */
   List<Node> topLevelStatement() :
-  {
-    Node root = null;
-    List<Node> l = new LinkedList<Node>();
-  }
+  { Node node = null; List<Node> nodes = null; }
   {
     try {
       (
-       root = singleLookaheadStatement()
-         | LOOKAHEAD(2)
-         root=synchronizedStatement()
-         | LOOKAHEAD(2)
-         root=labeledStatement()
-         | LOOKAHEAD( methodDeclarationLookahead() )
-         root=methodDeclaration()
-         | LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
-         l=localVariableDeclaration() (";" | <EOF>)
-         | LOOKAHEAD(typeDeclarationLookahead())
-         root=typeDeclaration()
-         | LOOKAHEAD(expression())
-         root=expression() ";"
-         )
-      {
-        if (root != null) {
-          l.add(root);
-        }
-        return l;
-      }
+          node = packageDeclaration()
+        | node = importDeclaration()
+        | LOOKAHEAD(methodDeclarationLookahead()) node = methodDeclaration()
+        | LOOKAHEAD(variableDeclarationLookahead()) nodes = localVariableDeclaration(false)
+        | LOOKAHEAD(typeDeclarationLookahead()) node = typeDeclaration()
+        | node = statement(false)
+      )
+      { return (node != null) ? Collections.singletonList(node) : nodes; }
     }
     catch(ParseException pe) {
-      _throwParseException(pe, "Invalid Stream Item");
+      _throwParseException(pe, "Invalid top level statement");
     }
   }
   
-  /**
-   * Parses one top level statement which requires a lookahed of one.
-   * This production is not a Java language rule. It is used by DynamicJava.
-   *
-   * @return a node
-   * @see koala.dynamicjava.tree.Node
-   */
-  Node singleLookaheadStatement() :
-  {
-    Node node;
-  }
-  {
-    try {
-      (    /** Originally separate, added as they are top level statements that require lookahead of one */
-       node=packageDeclaration()
-         | node=importDeclaration()
-         | node=block()
-         | node=emptyStatement()
-         | node=ifStatement()
-         | node=assertStatement()
-         | node=whileStatement()
-         | node=doStatement()
-         | node=switchStatement()
-         | node=forStatement()
-         | node=breakStatement()
-         | node=continueStatement()
-         | node=returnStatement()
-         | node=throwStatement()
-         | node=tryStatement()
-         )
-      {
-        return node;
-      }
-    }
-    catch (ParseException pe) {
-      _throwParseException(pe, "Invalid statement");
-    }
-  }
-  
+
   // Productions for Packages ////////////////////////////////////////////////////////
   
   /**
@@ -2394,34 +2340,17 @@ PARSER_END(Parser)
    * @see koala.dynamicjava.tree.Node
    */
   List<Node> blockStatement() :
-  {
-    Node node = null;
-    List<Node> list = new LinkedList<Node>();
-  }
+  { Node node = null; List<Node> list = null; }
   {
     try {
-      (    LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
-         list=localVariableDeclaration() ";"
-         | node=statement()
-         {
-        list.add(node);
-      }
-       | node=unmodifiedClassDeclaration(null)
-         {
-         list.add(node);
-       }
-       | node=unmodifiedEnumDeclaration(null)
-         {
-         list.add(node);
-       }
-       | node=unmodifiedInterfaceDeclaration(null)
-         {
-         list.add(node);
-       }
-       )
-       {
-         return list;
-       }
+      (
+          LOOKAHEAD(variableDeclarationLookahead()) list = localVariableDeclaration(true)
+        | node = unmodifiedClassDeclaration(null)
+        | node = unmodifiedEnumDeclaration(null)
+        | node = unmodifiedInterfaceDeclaration(null)
+        | node = statement(true)
+      )
+      { return (node != null) ? Collections.singletonList(node) : list; }
     }
     catch(ParseException pe) {
       _throwParseException(pe,"Invalid block statement");
@@ -2434,7 +2363,7 @@ PARSER_END(Parser)
    *         contain multiple declarations.
    * @see koala.dynamicjava.tree.VariableDeclaration
    */
-  List<Node> localVariableDeclaration() :
+  List<Node> localVariableDeclaration(boolean requireSemicolon) :
   {
     Token      t    = null;
     Expression init = null;
@@ -2457,41 +2386,42 @@ PARSER_END(Parser)
          list.add(createVariableDeclaration(t, typ, id, init, dim));
        }
        )*
+       (
+           ";"
+         | {
+             Token lookahead = getToken(1);
+             if (requireSemicolon || (lookahead.kind != ParserConstants.EOF && !lookahead.image.equals("}"))) {
+               _throwParseException("Invalid variable declaration");
+             }
+           }
+       )
        {
          return list;
        }
   }
   
-  /**
-   * Parses one statement
-   * @see koala.dynamicjava.tree.Node
-   */
-  Node statement() :
+  Node statement(boolean strictExpressions) :
+  { Node node; }
   {
-    Node node = null;
-  }
-  {
-    ( LOOKAHEAD(2)
-       node=labeledStatement()
-       | node=block()
-       | node=emptyStatement()
-       | node=statementExpression() ";"
-       | node=ifStatement()
-       | node=assertStatement()
-       | node=whileStatement()
-       | node=doStatement()
-       | node=switchStatement()
-       | node=forStatement()
-       | node=breakStatement()
-       | node=continueStatement()
-       | node=returnStatement()
-       | node=throwStatement()
-       | node=synchronizedStatement()
-       | node=tryStatement()
-       )
-    {
-      return node;
-    }
+    (
+        node = block()
+      | node = emptyStatement()
+      | node = ifStatement()
+      | node = assertStatement()
+      | node = whileStatement()
+      | node = doStatement()
+      | node = switchStatement()
+      | node = forStatement()
+      | node = breakStatement()
+      | node = continueStatement()
+      | node = returnStatement()
+      | node = throwStatement()
+      | node = synchronizedStatement()
+      | node = tryStatement()
+      | LOOKAHEAD(2) node = labeledStatement()
+      | node = expressionStatement(strictExpressions)
+    )
+    { return node; }
   }
   
   /**
@@ -2505,7 +2435,7 @@ PARSER_END(Parser)
     Node  node;
   }
   {
-    id=<IDENTIFIER> ":" node=statement()
+    id=<IDENTIFIER> ":" node=statement(true)
     {
       if (node instanceof ContinueTarget) {
         ((ContinueTarget)node).addLabel(id.image);
@@ -2550,8 +2480,8 @@ PARSER_END(Parser)
     try {
       t="if" ( "(" | _errorChar('('))
         exp=expression() ")"
-        stat1=statement()
-        [ LOOKAHEAD(1) "else" stat2=statement() ]
+        stat1=statement(true)
+        [ LOOKAHEAD(1) "else" stat2=statement(true) ]
       {
         if (stat2 == null) {
           return new IfThenStatement(exp, stat1,
@@ -2611,7 +2541,7 @@ PARSER_END(Parser)
     try{
       t="while" ( "(" | _errorChar('('))
         exp=expression() ")"
-        stat=statement()
+        stat=statement(true)
       {
         return new WhileStatement(exp, stat,
                                   filename,
@@ -2636,7 +2566,7 @@ PARSER_END(Parser)
   }
   {
     try {
-      t1="do" stat=statement() "while"
+      t1="do" stat=statement(true) "while"
         ( "(" | _errorChar('('))
         exp=expression() ")" t2=";"
       {
@@ -2745,11 +2675,11 @@ PARSER_END(Parser)
          LOOKAHEAD(formalParameterLookahead() ":")
            forEachInit=formalParameter() colon=":" exp=expression()
            |
-         [ init=forInit()] ";"
+           ( init=forInit() | ";" )
            [ exp=expression() ] ";"
            [ update=statementExpressionList() ]
            )
-        ")" stmt=statement()
+        ")" stmt=statement(true)
       {
         if(colon != null){
           return new ForEachStatement(forEachInit, exp, stmt,
@@ -2778,11 +2708,10 @@ PARSER_END(Parser)
     List<Node> list;
   }
   {
-    ( LOOKAHEAD( [ "final" ] typeLookahead() <IDENTIFIER> )
-       list=localVariableDeclaration()
-       |
-     list=statementExpressionList()
-       )
+    (   LOOKAHEAD( variableDeclarationLookahead() )
+         list=localVariableDeclaration(true)
+      | list=statementExpressionList() ";"
+    )
     {
       return list;
     }
@@ -2985,10 +2914,62 @@ PARSER_END(Parser)
   }
   
   /**
-   * Parses one statement expression
+   * Parses an ExpressionStatement; if strictExpression is true,
+   * a trailing semicolon is required and only StatementExpressions
+   * will be allowed.
+   */
+  Node expressionStatement(boolean strictExpression) :
+  { Expression exp; Token t = null; }
+  {
+    { lookaheadFlag = strictExpression; } // makes strictExpression visible to lookahead
+    (
+        LOOKAHEAD({ lookaheadFlag }) exp = statementExpression() t = ";"
+      | exp = expression()
+        (
+            t = ";"
+          | { 
+              Token lookahead = getToken(1);
+              if (lookahead.kind != ParserConstants.EOF && !lookahead.image.equals("}")) {
+                _throwParseException("Invalid expression statement");
+              }
+            }
+        )
+    )
+    {
+      if (t == null) {
+        return new ExpressionStatement(exp, false, filename,
+                                       exp.getBeginLine(), exp.getBeginColumn(),
+                                       exp.getEndLine(),  exp.getEndColumn());
+      }
+      else {
+        return new ExpressionStatement(exp, true, filename,
+                                       exp.getBeginLine(), exp.getBeginColumn(),
+                                       t.endLine,  t.endColumn);
+      }
+    }
+  }
+  
+  // Productions for Expressions /////////////////////////////////////////////////////////
+  
+  /**
+   * Parses an expression
    * @see koala.dynamicjava.tree.Expression
    */
-  Node statementExpression() :
+  Expression expression() :
+  {
+    Expression exp;
+  }
+  {
+    exp=conditionalExpression() [ exp=expressionSuffix(exp) ]
+    {
+      return exp;
+    }
+  }
+  
+  /**
+   * Parse only an expression that can appear as a statement
+   */
+  Expression statementExpression() :
   {
     Expression exp;
     Expression exp2;
@@ -3017,7 +2998,7 @@ PARSER_END(Parser)
           ]
        )
         {
-          if (exp instanceof ExpressionStatement) {
+          if (exp instanceof StatementExpression) {
             return exp;
           } else {
             throw new ParseError(reader.getMessage("expression.statement", null),
@@ -3025,23 +3006,6 @@ PARSER_END(Parser)
                                  exp.getBeginLine(), exp.getBeginColumn());
           }
         }
-  }
-  
-  // Productions for Expressions /////////////////////////////////////////////////////////
-  
-  /**
-   * Parses an expression
-   * @see koala.dynamicjava.tree.Expression
-   */
-  Expression expression() :
-  {
-    Expression exp;
-  }
-  {
-    exp=conditionalExpression() [ exp=expressionSuffix(exp) ]
-    {
-      return exp;
-    }
   }
   
   /**
@@ -3352,35 +3316,36 @@ PARSER_END(Parser)
   }
   {
     exp=shiftExpression()
-      ( "<"  exp2=shiftExpression()
+      ( LOOKAHEAD(1) ( // consume as large an expression as possible
+        "<"  exp2=shiftExpression()
          {
-      exp = new LessExpression(exp, exp2,
+            exp = new LessExpression(exp, exp2,
                                filename,
                                exp.getBeginLine(), exp.getBeginColumn(),
                                exp2.getEndLine(),  exp2.getEndColumn());
-    }
+         }
        | ">"  exp2=shiftExpression()
          {
          exp = new GreaterExpression(exp, exp2,
                                      filename,
                                      exp.getBeginLine(), exp.getBeginColumn(),
                                      exp2.getEndLine(),  exp2.getEndColumn());
-       }
+         }
        | "<=" exp2=shiftExpression()
          {
          exp = new LessOrEqualExpression(exp, exp2,
                                          filename,
                                          exp.getBeginLine(), exp.getBeginColumn(),
                                          exp2.getEndLine(),  exp2.getEndColumn());
-       }
+         }
        | ">=" exp2=shiftExpression()
          {
          exp = new GreaterOrEqualExpression(exp, exp2,
                                             filename,
                                             exp.getBeginLine(), exp.getBeginColumn(),
                                             exp2.getEndLine(),  exp2.getEndColumn());
-       }
-       )*
+         }
+       ))*
        {
          return exp;
        }
@@ -3434,21 +3399,22 @@ PARSER_END(Parser)
   }
   {
     exp=multiplicativeExpression()
-      ( "+" exp2=multiplicativeExpression()
+      ( LOOKAHEAD(1) (// consume as large an expression as possible
+        "+" exp2=multiplicativeExpression()
          {
-      exp = new AddExpression(exp, exp2,
+           exp = new AddExpression(exp, exp2,
                               filename,
                               exp.getBeginLine(), exp.getBeginColumn(),
                               exp2.getEndLine(),  exp2.getEndColumn());
-    }
+         }
        | "-" exp2=multiplicativeExpression()
          {
-         exp = new SubtractExpression(exp, exp2,
+           exp = new SubtractExpression(exp, exp2,
                                       filename,
                                       exp.getBeginLine(), exp.getBeginColumn(),
                                       exp2.getEndLine(),  exp2.getEndColumn());
-       }
-       )*
+         }
+       ))*
        {
          return exp;
        }
@@ -3637,13 +3603,14 @@ PARSER_END(Parser)
   }
   {
     pe=primaryExpression()
-      [ t="++"
+      [ LOOKAHEAD(1) (// consume as large an expression as possible
+        t="++"
          {
-      return new PostIncrement(pe,
+           return new PostIncrement(pe,
                                filename,
                                pe.getBeginLine(), pe.getBeginColumn(),
                                t.endLine,         t.endColumn);
-    }
+         }
        | t="--"
          {
          return new PostDecrement(pe,
@@ -3651,10 +3618,8 @@ PARSER_END(Parser)
                                   pe.getBeginLine(), pe.getBeginColumn(),
                                   t.endLine,         t.endColumn);
        }
-       ]
-       {
-         return pe;
-       }
+       )]
+       { return pe; }
   }
   
   /**
@@ -3764,7 +3729,10 @@ PARSER_END(Parser)
     
     t="new"
       [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments()]
-      rt=ReferenceTypeName() as=arguments(typeArgs) [ cb=classBody() ]
+      rt=ReferenceTypeName() as=arguments(typeArgs)
+      [ LOOKAHEAD(1) // consume as large an expression as possible
+        cb=classBody()
+      ]
     {
       if (cb == null) {
         if(typeArgs.size() > 0)
@@ -4051,7 +4019,10 @@ PARSER_END(Parser)
                                   t.beginLine, t.beginColumn,
                                   td.endLine, td.endColumn);
      }
-        | as=arguments(typeArgs) [ cb=classBody() ]
+        | as=arguments(typeArgs)
+        [ LOOKAHEAD(1) // consume as large an expression as possible
+          cb=classBody()
+        ]
           {
           if (cb == null) {
             return new SimpleAllocation(refT, as.arguments,
@@ -4652,6 +4623,17 @@ PARSER_END(Parser)
     modifiersLookahead()
       [ TypeParametersLookahead() ]
       resultTypeLookahead()  <IDENTIFIER>  "("
+  }
+  
+  /**
+   * Used internally for lookahead
+   * Overlaps methodDeclarationLookahead, so must always be used afterwards
+   * (where both can appear in the same context)
+   */
+  void variableDeclarationLookahead() :
+  {}
+  {
+    [ "final" ] typeLookahead() <IDENTIFIER>
   }
   
   /**

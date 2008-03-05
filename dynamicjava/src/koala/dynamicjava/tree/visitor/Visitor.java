@@ -59,6 +59,12 @@ public interface Visitor<T> {
   T visit(EmptyStatement node);
   
   /**
+   * Visits an ExpressionStatement
+   * @param node the node to visit
+   */
+  T visit(ExpressionStatement node);
+  
+  /**
    * Visits a WhileStatement
    * @param node the node to visit
    */

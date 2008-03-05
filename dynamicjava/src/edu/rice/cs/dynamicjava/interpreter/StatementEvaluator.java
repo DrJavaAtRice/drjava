@@ -15,6 +15,7 @@ import koala.dynamicjava.tree.visitor.*;
 
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.LocalVariable;
+import edu.rice.cs.dynamicjava.symbol.TypeSystem;
 
 import static koala.dynamicjava.interpreter.NodeProperties.*;
 
@@ -93,6 +94,19 @@ public class StatementEvaluator extends AbstractVisitor<StatementEvaluator.Resul
    * * * * * * * * * */
   
   @Override public Result visit(EmptyStatement node) { return new Result(_bindings); }
+  
+  @Override public Result visit(ExpressionStatement node) {
+    if (hasStatementTranslation(node)) {
+      return getStatementTranslation(node).acceptVisitor(this);
+    }
+    else {
+      Object val = new ExpressionEvaluator(_bindings, _opt).value(node.getExpression());
+      if (node.getHasSemicolon() || getType(node.getExpression()).equals(TypeSystem.VOID)) {
+        return new Result(_bindings);
+      }
+      else { return new Result(val, _bindings); }
+    }
+  }
 
   @Override public Result visit(WhileStatement node) {
     ExpressionEvaluator eval = new ExpressionEvaluator(_bindings, _opt);

@@ -37,7 +37,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/25
  */
 
-public class PostDecrement extends UnaryExpression implements ExpressionStatement {
+public class PostDecrement extends UnaryExpression implements StatementExpression {
   /**
    * Initializes the expression
    * @param exp   the post decremented expression

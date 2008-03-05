@@ -81,6 +81,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.lambda.Lambda;
 
+import koala.dynamicjava.SourceInfo;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.tiger.*;
 import koala.dynamicjava.tree.visitor.*;
@@ -716,6 +717,29 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   }
   
   @Override public TypeContext visit(EmptyStatement node) {
+    return context;
+  }
+  
+  @Override public TypeContext visit(ExpressionStatement node) {
+    if (node.getExpression() instanceof SimpleAssignExpression) {
+      SimpleAssignExpression assign = (SimpleAssignExpression) node.getExpression();
+      if (assign.getLeftExpression() instanceof AmbiguousName) {
+        AmbiguousName ambigName = (AmbiguousName) assign.getLeftExpression();
+        if (ambigName.getIdentifiers().size() == 1) {
+          String name = ambigName.getRepresentation();
+          if (!context.variableExists(name, opt.typeSystem())) {
+            SourceInfo si = node.getSourceInfo();
+            Node decl = new VariableDeclaration(false, null, name, assign.getRightExpression(),
+                                                si.getFilename(), si.getStartLine(), si.getStartColumn(),
+                                                si.getEndLine(), si.getEndColumn());
+            setStatementTranslation(node, decl);
+            return decl.acceptVisitor(this);
+          }
+        }
+      }
+    }
+    // all other cases that don't match the nested ifs:
+    checkType(node.getExpression());
     return context;
   }
   

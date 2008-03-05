@@ -40,7 +40,7 @@ import java.util.*;
  */
 
 public abstract class MethodCall extends PrimaryExpression
-  implements ExpressionStatement {
+  implements StatementExpression {
   /**
    * The methodName property name
    */

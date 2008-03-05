@@ -70,6 +70,14 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
   }
   
   /**
+   * Visits an ExpressionStatement
+   * @param node the node to visit
+   */
+  public T visit(ExpressionStatement node) {
+    return defaultCase(node);
+  }
+  
+  /**
    * Visits a WhileStatement
    * @param node the node to visit
    */

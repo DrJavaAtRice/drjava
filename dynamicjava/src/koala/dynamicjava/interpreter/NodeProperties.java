@@ -196,6 +196,24 @@ public class NodeProperties {
       return n.hasProperty(TRANSLATION);
     }
     
+    /**
+     * A Node representing the translated equivalent of the tagged statement (or declaration)
+     */
+    public final static String STATEMENT_TRANSLATION = "statementTranslation";
+
+    public static Node getStatementTranslation(Node n) {
+        return (Node) n.getProperty(STATEMENT_TRANSLATION);
+    }
+    
+    public static Node setStatementTranslation(Node n, Node s) {
+      n.setProperty(STATEMENT_TRANSLATION, s);
+      return s;
+    }
+    
+    public static boolean hasStatementTranslation(Node n) {
+      return n.hasProperty(STATEMENT_TRANSLATION);
+    }
+    
 
     /** An Object value of a constant expression */
     public final static String VALUE = "value";
