@@ -178,7 +178,7 @@ public interface OptionConstants {
   public static final FontOption FONT_TOOLBAR = new FontOption("font.toolbar", Font.decode("dialog-10"));
 
   /** Whether to draw anti-aliased text.  (Slightly slower.) */
-  public static final BooleanOption TEXT_ANTIALIAS = new BooleanOption("text.antialias", Boolean.FALSE);
+  public static final BooleanOption TEXT_ANTIALIAS = new BooleanOption("text.antialias", Boolean.TRUE);
 
 
   /* ---------- Other Display Options ---------- */
@@ -210,14 +210,11 @@ public interface OptionConstants {
   /** Class that allows the look and feels to be initialized properly. */
   static class LookAndFeels {
     
-    /** Mac platform should default to aqua; use metal elsewhere.
-      *  @return the look-and-feel to use by default
-      */
+    /** Return the look-and-feel to use by default */
     public static String getDefaultLookAndFeel() {
-      if (PlatformFactory.ONLY.isMacPlatform()) return UIManager.getSystemLookAndFeelClassName();
-      else 
-        return UIManager.getCrossPlatformLookAndFeelClassName();
+      return UIManager.getSystemLookAndFeelClassName();
     }
+    
     /** Need to ensure that a look-and-feel can be instantiated and is valid.
       *  TODO:  store the LookAndFeel object rather than its classname.
       *         This would be much nicer, as we could display a useful name,
@@ -1098,7 +1095,7 @@ public interface OptionConstants {
     * is saved on shutdown.
     */
   public static final IntegerOption WINDOW_STATE =
-    new IntegerOption("window.state", new Integer(Frame.MAXIMIZED_BOTH));
+    new IntegerOption("window.state", new Integer(Frame.NORMAL));
   
   /** Width of DocList at startUp.  Must be less than WINDOW_WIDTH. Can be overridden if out of bounds. */
   public static final NonNegativeIntegerOption DOC_LIST_WIDTH =
