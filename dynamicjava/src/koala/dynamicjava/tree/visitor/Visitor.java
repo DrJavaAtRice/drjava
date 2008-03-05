@@ -326,6 +326,12 @@ public interface Visitor<T> {
   T visit(ArrayTypeName node);
   
   /**
+   * Visits a HookTypeName
+   * @param node the node to visit
+   */
+  public T visit(HookTypeName node);
+  
+  /**
    * Visits a TypeExpression
    * @param node the node to visit
    */

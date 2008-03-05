@@ -4,6 +4,8 @@ import edu.rice.cs.plt.iter.IterUtil;
 
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
+import edu.rice.cs.dynamicjava.symbol.type.ClassType;
+import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -89,7 +91,7 @@ public abstract class DelegatingContext implements TypeContext {
    * Return the most inner type containing a class with the given name, or {@code null}
    * if there is no such type.
    */
-  public Type typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
+  public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
     return _next.typeContainingMemberClass(name, ts);
   }
   
@@ -99,7 +101,7 @@ public abstract class DelegatingContext implements TypeContext {
   }
   
   /** Return the type variable with the given name, or {@code null} if it does not exist. */
-  public Type getTypeVariable(String name, TypeSystem ts) {
+  public VariableType getTypeVariable(String name, TypeSystem ts) {
     return _next.getTypeVariable(name, ts);
   }
   
@@ -120,7 +122,7 @@ public abstract class DelegatingContext implements TypeContext {
    * Return the most inner type containing a field with the given name, or {@code null}
    * if there is no such type.
    */
-  public Type typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException {
+  public ClassType typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException {
     return _next.typeContainingField(name, ts);
   }
   
@@ -151,7 +153,7 @@ public abstract class DelegatingContext implements TypeContext {
    * Return the most inner type containing a method with the given name, or {@code null}
    * if there is no such type.
    */
-  public Type typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException {
+  public ClassType typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException {
     return _next.typeContainingMethod(name, ts);
   }
   

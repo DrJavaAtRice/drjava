@@ -416,7 +416,8 @@ public class ExpressionEvaluator extends AbstractVisitor<Object> implements Lamb
     }
 
     @Override public Box<Object> visit(SimpleFieldAccess node) {
-      return getField(node).boxForReceiver(_bindings.getThis(getDJClass(node)));
+      Object receiver = hasDJClass(node) ? _bindings.getThis(getDJClass(node)) : null;
+      return getField(node).boxForReceiver(receiver);
     }
     
     @Override public Box<Object> visit(ObjectFieldAccess node) {

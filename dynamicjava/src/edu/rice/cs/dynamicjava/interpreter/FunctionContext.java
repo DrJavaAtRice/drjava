@@ -29,7 +29,7 @@ public class FunctionContext extends DelegatingContext {
   }
   
   @Override public boolean localVariableExists(String name, TypeSystem ts) {
-    return getParameter(name) != null || super.variableExists(name, ts);
+    return getParameter(name) != null || super.localVariableExists(name, ts);
   }
   
   @Override public LocalVariable getLocalVariable(String name, TypeSystem ts) {

@@ -346,18 +346,16 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
    */
   @Override public Type visit(SimpleFieldAccess node) {
     try {
-      Type t = context.typeContainingField(node.getFieldName(), ts);
+      ClassType t = context.typeContainingField(node.getFieldName(), ts);
       if (t == null) {
         setErrorStrings(node, node.getFieldName());
         throw new ExecutionError("undefined.name", node);
       }
       TypeSystem.FieldReference ref;
-      DJClass thisC = context.getThis();
-      if (thisC == null) {
+      if (context.getThis() == null) {
         ref = ts.lookupStaticField(t, node.getFieldName());
       }
       else {
-        setDJClass(node, thisC);
         Expression obj = TypeUtil.makeEmptyExpression(node);
         setType(obj, t);
         ref = ts.lookupField(obj, node.getFieldName());
@@ -366,6 +364,9 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       // TODO: Check accessibility of field
       setField(node, ref.field());
       setVariableType(node, ref.type());
+      if (!ref.field().isStatic()) {
+        setDJClass(node, t.ofClass());
+      }
       Type result = ts.capture(ref.type());
       addRuntimeCheck(node, result, ref.field().type());
       return setType(node, result);
@@ -473,7 +474,7 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     
     Iterable<Type> targs = IterUtil.empty();
     
-    Type t;
+    ClassType t;
     if (context.localFunctionExists(node.getMethodName(), ts)) {
       Iterable<LocalFunction> matches = context.getLocalFunctions(node.getMethodName(), ts);
       t = ts.makeClassType(new FunctionWrapperClass(matches));
@@ -491,12 +492,10 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     
     try {
       TypeSystem.MethodInvocation inv;
-      DJClass thisC = context.getThis();
-      if (thisC == null) {
+      if (context.getThis() == null) {
         inv = ts.lookupStaticMethod(t, node.getMethodName(), targs, args);
       }
       else {
-        setDJClass(node, thisC);
         Expression obj = TypeUtil.makeEmptyExpression(node);
         setType(obj, t);
         inv = ts.lookupMethod(obj, node.getMethodName(), targs, args);
@@ -506,6 +505,9 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       checkThrownExceptions(inv.thrown(), node);
       node.setArguments(IterUtil.asList(inv.args()));
       setMethod(node, inv.method());
+      if (!inv.method().isStatic()) {
+        setDJClass(node, t.ofClass());
+      }
       Type result = ts.capture(inv.returnType());
       debug.logValue("Type of method call " + node.getMethodName(), ts.wrap(result));
       addRuntimeCheck(node, result, inv.method().returnType());

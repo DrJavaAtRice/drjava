@@ -9,6 +9,8 @@ import edu.rice.cs.plt.text.TextUtil;
 
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
+import edu.rice.cs.dynamicjava.symbol.type.ClassType;
+import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -191,17 +193,17 @@ public class TopLevelContext implements TypeContext {
    * Return the most inner type containing a class with the given name, or {@code null}
    * if there is no such type.
    */
-  public Type typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
+  public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
     DJClass explicitImport = _importedMemberClasses.get(name);
-    Type result = explicitImport == null ? null : ts.makeClassType(explicitImport);
+    ClassType result = explicitImport == null ? null : ts.makeClassType(explicitImport);
     if (result == null) {
-      LinkedList<Type> onDemandMatches = new LinkedList<Type>();
+      LinkedList<ClassType> onDemandMatches = new LinkedList<ClassType>();
       for (DJClass c : _onDemandClasses) {
-        Type t = ts.makeClassType(c);
+        ClassType t = ts.makeClassType(c);
         if (ts.containsClass(t, name)) { onDemandMatches.add(t); }
       }
       for (DJClass c : _staticOnDemandClasses) {
-        Type t = ts.makeClassType(c);
+        ClassType t = ts.makeClassType(c);
         if (ts.containsStaticClass(t, name)) { onDemandMatches.add(t); }
       }
       if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
@@ -216,7 +218,7 @@ public class TopLevelContext implements TypeContext {
   }
   
   /** Return the type variable with the given name, or {@code null} if it does not exist. */
-  public Type getTypeVariable(String name, TypeSystem ts) {
+  public VariableType getTypeVariable(String name, TypeSystem ts) {
     return null;
   }
   
@@ -239,13 +241,13 @@ public class TopLevelContext implements TypeContext {
    * Return the most inner type containing a field with the given name, or {@code null}
    * if there is no such type.
    */
-  public Type typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException {
+  public ClassType typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException {
     DJClass explicitImport = _importedFields.get(name);
-    Type result = explicitImport == null ? null : ts.makeClassType(explicitImport);
+    ClassType result = explicitImport == null ? null : ts.makeClassType(explicitImport);
     if (result == null) {
-      LinkedList<Type> onDemandMatches = new LinkedList<Type>();
+      LinkedList<ClassType> onDemandMatches = new LinkedList<ClassType>();
       for (DJClass c : _staticOnDemandClasses) {
-        Type t = ts.makeClassType(c);
+        ClassType t = ts.makeClassType(c);
         if (ts.containsStaticField(t, name)) { onDemandMatches.add(t); }
       }
       if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
@@ -282,13 +284,13 @@ public class TopLevelContext implements TypeContext {
    * Return the most inner type containing a method with the given name, or {@code null}
    * if there is no such type.
    */
-  public Type typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException {
+  public ClassType typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException {
     DJClass explicitImport = _importedMethods.get(name);
-    Type result = explicitImport == null ? null : ts.makeClassType(explicitImport);
+    ClassType result = explicitImport == null ? null : ts.makeClassType(explicitImport);
     if (result == null) {
-      LinkedList<Type> onDemandMatches = new LinkedList<Type>();
+      LinkedList<ClassType> onDemandMatches = new LinkedList<ClassType>();
       for (DJClass c : _staticOnDemandClasses) {
-        Type t = ts.makeClassType(c);
+        ClassType t = ts.makeClassType(c);
         if (ts.containsStaticMethod(t, name)) { onDemandMatches.add(t); }
       }
       if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }

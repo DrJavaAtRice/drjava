@@ -35,8 +35,6 @@ import koala.dynamicjava.tree.tiger.HookTypeName;
 /**
  * A visitor that, by default, invokes the method defaultCase().  If defaultCase is not overriden,
  * this results in an IllegalArgumentException.
- * 
- * TODO: Add GenericReferenceTypeName and HookTypeName cases
  */
 
 public abstract class AbstractVisitor<T> implements Visitor<T> {

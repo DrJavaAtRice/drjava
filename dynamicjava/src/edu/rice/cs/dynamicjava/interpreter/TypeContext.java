@@ -2,6 +2,8 @@ package edu.rice.cs.dynamicjava.interpreter;
 
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
+import edu.rice.cs.dynamicjava.symbol.type.ClassType;
+import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 
 /**
  * A context for type checking.  Contexts are immutable, and provide the necessary
@@ -56,13 +58,13 @@ public interface TypeContext {
    * Return the most inner type containing a class with the given name, or {@code null}
    * if there is no such type.
    */
-  public Type typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException;
+  public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException;
   
   /** Test whether {@code name} is an in-scope type variable. */
   public boolean typeVariableExists(String name, TypeSystem ts);
   
   /** Return the type variable with the given name, or {@code null} if it does not exist. */
-  public Type getTypeVariable(String name, TypeSystem ts);
+  public VariableType getTypeVariable(String name, TypeSystem ts);
   
 
   /* VARIABLES: FIELDS AND LOCAL VARIABLES */  
@@ -77,7 +79,7 @@ public interface TypeContext {
    * Return the most inner type containing a field with the given name, or {@code null}
    * if there is no such type.
    */
-  public Type typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException;
+  public ClassType typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException;
   
   /** Test whether {@code name} is an in-scope local variable */
   public boolean localVariableExists(String name, TypeSystem ts);
@@ -98,7 +100,7 @@ public interface TypeContext {
    * Return the most inner type containing a method with the given name, or {@code null}
    * if there is no such type.
    */
-  public Type typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException;
+  public ClassType typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException;
   
   /** Test whether {@code name} is an in-scope local function */
   public boolean localFunctionExists(String name, TypeSystem ts);

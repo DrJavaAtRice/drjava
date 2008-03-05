@@ -6,6 +6,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
+import edu.rice.cs.dynamicjava.symbol.type.ClassType;
 
 /**
  * The context of a class body, including all members of the class (both declared and inherited).
@@ -13,7 +14,7 @@ import edu.rice.cs.dynamicjava.symbol.type.Type;
 public class ClassContext extends DelegatingContext {
   
   private final DJClass _c;
-  private final Type _thisType;
+  private final ClassType _thisType;
   private final Iterator<Integer> _anonymousCounter;
   
   public ClassContext(TypeContext next, DJClass c) {
@@ -48,7 +49,7 @@ public class ClassContext extends DelegatingContext {
    * Return the most inner type containing a class with the given name, or {@code null}
    * if there is no such type.
    */
-  @Override public Type typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
+  @Override public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
     if (hasMemberClass(name, ts)) { return _thisType; }
     else { return super.typeContainingMemberClass(name, ts); }
   }
@@ -64,14 +65,14 @@ public class ClassContext extends DelegatingContext {
   
   /** Test whether {@code name} is an in-scope field */
   @Override public boolean fieldExists(String name, TypeSystem ts) {
-    return hasField(name, ts) || super.variableExists(name, ts);
+    return hasField(name, ts) || super.fieldExists(name, ts);
   }
   
   /**
    * Return the most inner type containing a field with the given name, or {@code null}
    * if there is no such type.
    */
-  @Override public Type typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException {
+  @Override public ClassType typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException {
     if (hasField(name, ts)) { return _thisType; }
     else { return super.typeContainingField(name, ts); }
   }
@@ -94,7 +95,7 @@ public class ClassContext extends DelegatingContext {
    * Return the most inner type containing a method with the given name, or {@code null}
    * if there is no such type.
    */
-  @Override public Type typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException {
+  @Override public ClassType typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException {
     if (hasMethod(name, ts)) { return _thisType; }
     else { return super.typeContainingMethod(name, ts); }
   }

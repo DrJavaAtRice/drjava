@@ -32,12 +32,12 @@ public class FunctionSignatureContext extends DelegatingContext {
   }
   
   /** Return the type variable with the given name, or {@code null} if it does not exist. */
-  public Type getTypeVariable(String name, TypeSystem ts) {
-    Type result = declaredTypeVariable(name);
+  public VariableType getTypeVariable(String name, TypeSystem ts) {
+    VariableType result = declaredTypeVariable(name);
     return (result == null) ? super.getTypeVariable(name, ts) : result;
   }
   
-  private Type declaredTypeVariable(String name) {
+  private VariableType declaredTypeVariable(String name) {
     for (VariableType t : _f.declaredTypeParameters()) {
       if (t.symbol().name().equals(name)) { return t; }
     }
