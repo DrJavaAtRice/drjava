@@ -654,6 +654,7 @@ public abstract class StringOps {
     BalancingStreamTokenizer tok = new BalancingStreamTokenizer(new StringReader(str), '$');
     tok.wordRange(0,255);
     tok.addQuotes("${", "}");
+    tok.addQuotes("\"", "\"");
     
     // LOG.log("---------");
     // LOG.log("Replacing: "+str);
@@ -696,7 +697,8 @@ public abstract class StringOps {
                 if (attrList.length()>0) {
                   BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '$');
                   atok.wordRange(0,255);
-                  atok.whitespaceRange(0,32);
+                  atok.whitespaceRange(0,32); 
+                  atok.addQuotes("${", "}");
                   atok.addQuotes("\"", "\"");
                   atok.addKeyword(";");
                   atok.addKeyword("=");
