@@ -3472,7 +3472,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
         if (!(keep.equals("true") || keep.equals("yes") || keep.equals("1"))) {
           f.deleteOnExit();
         }
-        String text = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(_attributes.get("content"));
+        String text = edu.rice.cs.util.StringOps.unescapeSpacesWith1bHex(_attributes.get("content"));
         try {
           FileWriter fw = new FileWriter(f);
           fw.write(text, 0, text.length());
