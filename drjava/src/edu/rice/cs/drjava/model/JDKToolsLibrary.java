@@ -54,9 +54,12 @@ import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 
-/** The class that provides methods for interfacing to facilities in tools.jar that do not have published interfaces
-  * (or did not have published interfaces at the time DrJava was originally written). 
-  */
+/** 
+ * Provides dynamic access to the interface of a JDK's tools.jar classes.  This level of indirection
+ * eliminates the need to have specific tools.jar classes available statically (and the resulting need
+ * to reset the JVM if they are not), and makes it possible to interface with multiple tools.jar
+ * libraries simultaneously.
+ */
 public class JDKToolsLibrary {
   
   private final FullVersion _version;
@@ -104,6 +107,10 @@ public class JDKToolsLibrary {
     }
   }
   
+  /**
+   * Create a JDKToolsLibrary from the runtime class path (or, more accurately, from the class
+   * loader that loaded this class.
+   */
   public static JDKToolsLibrary makeFromRuntime(GlobalModel model) {
     FullVersion version = JavaVersion.CURRENT_FULL;
 

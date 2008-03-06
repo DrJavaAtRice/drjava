@@ -64,11 +64,13 @@ import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 
+/** A JDKToolsLibrary that was loaded from a specific jar file. */
 public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
-  /** Packages to shadow when loading a new tools.jar.  These should be verified whenever a new Java version 
-    * is released.  (We can't just shadow *everything* because some classes, at least in OS X's classes.jar,
-    * can only be loaded by the JVM.)
+  /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
+    * be able to load distinct versions for each tools.jar library.  These should be verified whenever
+    * a new Java version is released.  (We can't just shadow *everything* because some classes, at 
+    * least in OS X's classes.jar, can only be loaded by the JVM.)
     */
   private static final String[] TOOLS_PACKAGES = new String[]{
       // From 1.4 tools.jar:
@@ -109,12 +111,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
   public String toString() { return super.toString() + " at " + _location; }
   
+  /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. */
   public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model) {
     FullVersion version = guessVersion(f);
     CompilerInterface compiler = NoCompilerAvailable.ONLY;
     Debugger debugger = NoDebuggerAvailable.ONLY;
     JavadocModel javadoc = new NoJavadocAvailable(model);
     
+    // We can't execute code that was possibly compiled for a later Java API version.
     if (JavaVersion.CURRENT.supports(version.majorVersion())) {
       // block tools.jar classes, so that references don't point to a different version of the classes
       ClassLoader loader = new ShadowingClassLoader(JarJDKToolsLibrary.class.getClassLoader(), TOOLS_PACKAGES);
@@ -122,16 +126,29 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       
       String compilerAdapter = adapterForCompiler(version.majorVersion());
       if (compilerAdapter != null) {
-        List<File> bootClassPath = null;
-        if (f.getName().equals("classes.jar")) { bootClassPath = Arrays.asList(f); }
+        
+        // determine boot class path
+        File libDir = null;
+        if (f.getName().equals("classes.jar")) { libDir = f.getParentFile(); }
         else if (f.getName().equals("tools.jar")) {
-          File rtJar = new File(f.getParentFile(), "../jre/lib/rt.jar");
-          if (!rtJar.exists()) { rtJar = new File(f.getParentFile(), "rt.jar"); }
-          if (rtJar.exists()) {
-            rtJar = IOUtil.attemptCanonicalFile(rtJar);
-            bootClassPath = Arrays.asList(rtJar);
+          File jdkLibDir = f.getParentFile();
+          if (jdkLibDir != null) {
+            File jdkRoot = jdkLibDir.getParentFile();
+            if (jdkRoot != null) {
+              File jreLibDir = new File(jdkRoot, "jre/lib");
+              if (IOUtil.attemptExists(new File(jreLibDir, "rt.jar"))) { libDir = jreLibDir; }
+            }
+            if (libDir == null) {
+              if (IOUtil.attemptExists(new File(jdkLibDir, "rt.jar"))) { libDir = jdkLibDir; }
+            }
           }
         }
+        List<File> bootClassPath = null; // null defers to the compiler's default behavior
+        if (libDir != null) {
+          File[] jars = IOUtil.attemptListFiles(libDir, IOUtil.extensionFileFilter("jar"));
+          if (jars != null) { bootClassPath = Arrays.asList(jars); }
+        }
+
         try {
           Class[] sig = new Class[]{ FullVersion.class, String.class, List.class };
           Object[] args = new Object[]{ version, f.toString(), bootClassPath };
