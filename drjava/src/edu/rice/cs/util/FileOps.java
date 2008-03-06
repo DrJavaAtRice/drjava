@@ -139,6 +139,19 @@ public abstract class FileOps {
     catch(IOException e) { return false; }
   }
   
+  /** Return true if the directory ancestor is an ancestor of the file f, i.e.
+    * you can get from f to ancestor by using getParentFile zero or more times.
+    * @param b the ancestor
+    * @param f the file to test
+    * @param true if b is an ancestor of f. */
+  public static boolean isAncestorOf(File ancestor, File f) {
+    ancestor = ancestor.getAbsoluteFile();
+    f = f.getAbsoluteFile();
+    while ((!ancestor.equals(f)) && (f!=null)) {
+      f = f.getParentFile();
+    }
+    return (ancestor.equals(f));
+  }
   
   /** Makes a file equivalent to the given file f that is relative to base file b.  In other words,
     * <code>new File(b,makeRelativeTo(base,abs)).getCanonicalPath()</code> equals
@@ -148,9 +161,11 @@ public abstract class FileOps {
     * <code>/home/username/folder/sublevel/file2.java</code>, then the resulting File path from this method would be 
     * <code>../file.java</code> while its canoncial path would be <code>/home/username/folder/file.java</code>.</p>
     * 
-    * <p>Warning: this method is inherently broken, because it assumes a relative path exists between all
-    * files.  The Java file system model, however, supports multiple system roots (see {@link File#listRoots}).
-    * Thus, two files from different "file systems" (in Windows, different drives) have no common parent.</p>
+    * <p>Warning: making paths relative is inherently broken on some file systems, because a relative path
+    * requires that both the file and the base have the same root. The Windows file system, and therefore also
+    * the Java file system model, however, support multiple system roots (see {@link File#listRoots}).
+    * Thus, two files with different roots cannot have a relative path. In that case the absolute path of
+    * the file will be returned</p>
     * 
     * @param f The path that is to be made relative to the base file
     * @param b The file to make the next file relative to
@@ -158,6 +173,23 @@ public abstract class FileOps {
     *    for the returned file is the same as the result of <code>getCanonicalPath()</code> for the given file.
     */
   public static File makeRelativeTo(File f, File b) throws IOException, SecurityException {
+    try {
+      File[] roots = File.listRoots();
+      File fRoot = null;
+      File bRoot = null;
+      for(File r: roots) {
+        if (isAncestorOf(r, f)) { fRoot = r; }
+        if (isAncestorOf(r, b)) { bRoot = r; }
+        if ((fRoot!=null) && (bRoot!=null)) { break; }
+      }
+      if ((fRoot==null) || (!fRoot.equals(bRoot))) {
+        // f and b have different file system roots
+        // just make f absolute and canonical
+        return f.getAbsoluteFile().getCanonicalFile();
+      }
+    }
+    catch(Exception e) { /* ignore, follow previous procedure */ }
+    
     File base = b.getCanonicalFile();
     File abs  = f.getCanonicalFile();  // If  f is relative, uses current working directory ("user.dir")
     if (! base.isDirectory()) base = base.getParentFile();

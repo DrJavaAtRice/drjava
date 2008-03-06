@@ -105,6 +105,7 @@ import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
+import edu.rice.cs.util.StringOps;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 import edu.rice.cs.drjava.RemoteControlClient;
@@ -3344,7 +3345,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public void update() {
         try {
           File f = FileOps.makeRelativeTo(_model.getActiveDocument().getRawFile(),
-                                          new File(_attributes.get("dir")));
+                                          new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
           try {
             f = f.getCanonicalFile();
           }
@@ -3373,7 +3374,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           }
           else {
             f = FileOps.makeRelativeTo(_model.getInteractionsModel().getWorkingDirectory(),
-                                       new File(_attributes.get("dir")));
+                                       new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
             _value = edu.rice.cs.util.StringOps.escapeSpacesWith1bHex(f.toString());
           }
         }
@@ -3445,13 +3446,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             }
             f = new File(dir, "DrJava-Execute-"+System.currentTimeMillis()+"-"+(_r.nextInt() & 0xffff)+".tmp");
             if (!_attributes.get("dir").equals("")) {
-              f = new File(new File(_attributes.get("dir")),f.getName());
+              f = new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT)),
+                           f.getName());
             }
           }
           else {
             File dir = new File(System.getProperty("java.io.tmpdir"));
             if (!_attributes.get("dir").equals("")) {
-              dir = new File(_attributes.get("dir"));
+              dir = new File(StringOps.unescapeSpacesWith1bHex((StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
             }
             f = new File(dir, _attributes.get("name"));
           }

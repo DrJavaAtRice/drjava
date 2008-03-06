@@ -44,6 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
+import edu.rice.cs.util.StringOps;
 
 /** Class representing values that are always up-to-date and that
   * can be inserted as variables in external processes.
@@ -96,7 +97,8 @@ public abstract class EagerFileListProperty extends EagerProperty {
     for(OpenDefinitionsDocument odd: l) {
       sb.append(_attributes.get("sep"));
       try {
-        File f = FileOps.makeRelativeTo(odd.getRawFile(), new File(_attributes.get("dir")));
+        File f = FileOps.makeRelativeTo(odd.getRawFile(),
+                                        new File(StringOps.unescapeSpacesWith1bHex(StringOps.replaceVariables(_attributes.get("dir"), PropertyMaps.ONLY, PropertyMaps.GET_CURRENT))));
         try {
           f = f.getCanonicalFile();
         }
