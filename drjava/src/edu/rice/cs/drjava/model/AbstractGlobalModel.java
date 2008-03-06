@@ -1306,7 +1306,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     *  @param file where to save the project
     *  @param info
     */
-  public ProjectProfile _makeProjectProfile(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {    
+  public ProjectProfile _makeProjectProfile(File file, Hashtable<OpenDefinitionsDocument, DocumentInfoGetter> info) 
+    throws IOException {    
     ProjectProfile builder = new ProjectProfile(file);
     
     // add project root

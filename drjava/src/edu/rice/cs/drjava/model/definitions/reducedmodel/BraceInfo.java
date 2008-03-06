@@ -44,7 +44,7 @@ public class BraceInfo {
   // TODO: convert String brace type to char brace type
   
   public static final String NONE = "";      // char '\u0000';
-  public static final String OPEN_SQUIGGLY = "{"; // char '{';
+  public static final String OPEN_CURLY = "{"; // char '{';
   public static final String OPEN_PAREN    = "(";   // char '(';
   public static final String OPEN_BRACKET  = "[";   // char '[';
   

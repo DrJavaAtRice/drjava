@@ -43,40 +43,35 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Indents the current line in the document to the indent level of the
- * start of the contract or statement of the brace enclosing the start of the
- * current line, plus the given suffix.
- * @version $Id$
- */
+/** Indents the current line in the document to the indent level of the start of the contract or statement of the brace
+  * enclosing the start of the
+  * current line, plus the given suffix.
+  * @version $Id$
+  */
 public class ActionStartStmtOfBracePlus extends IndentRuleAction {
   private String _suffix;
 
-  /**
-   * Constructs a new rule with the given suffix string.
-   * @param suffix String to append to indent level of brace
-   */
+  /** Constructs a new rule with the given suffix string.
+    * @param suffix String to append to indent level of brace
+    */
   public ActionStartStmtOfBracePlus(String suffix) {
     super();
     _suffix = suffix;
   }
 
-  /**
-   * Properly indents the line that the caret is currently on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @param reason The reason that the indentation is taking place
-   * @return true if the caller should update the current location itself,
-   * false if the indenter has already handled this
-   */
+  /** Properly indents the line that the caret is currently on. Replaces all whitespace characters at the beginning of the
+    * line with the appropriate spacing or characters.
+    * @param doc AbstractDJDocument containing the line to be indented.
+    * @param reason The reason that the indentation is taking place
+    * @return true if the caller should update the current location itself, false if the indenter has already handled it
+    */
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
     int pos = doc.getCurrentLocation();
 
     // Get distance to brace
-    IndentInfo info = doc.getIndentInformation();
-    int distToLineEnclosingBrace = info.distToLineEnclosingBrace();
+    BraceInfo info = doc.getLineEnclosingBrace();
+    int distToLineEnclosingBrace = info.distance();
 
     // If there is no brace, align to left margin
     if (distToLineEnclosingBrace == -1) {

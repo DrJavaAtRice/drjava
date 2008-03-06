@@ -137,7 +137,7 @@ public class Indenter {
   }
 
   /** Indents the current line based on a decision tree which determines the indent based on context.
-    * @param doc document containing line to be indented
+    * @param doc document containing line to be indented  Assumes that reduced lock is already held.
     * @return true if the condition tested by the top rule holds, false otherwise
     */
   public boolean indent(AbstractDJDocument doc, Indenter.IndentReason reason) {

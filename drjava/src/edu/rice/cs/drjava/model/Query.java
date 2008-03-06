@@ -192,6 +192,10 @@ public interface Query {
     public PosInParenPhrase(int pos) { super(pos); }
   }
   
+  public static class LineEnclosingBrace extends Pos {
+    public LineEnclosingBrace(int pos) { super(pos); }
+  }
+  
   public static class EnclosingBrace extends Pos {
     public EnclosingBrace(int pos) { super(pos); }
   }

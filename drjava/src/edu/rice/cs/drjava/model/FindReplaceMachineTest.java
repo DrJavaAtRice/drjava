@@ -43,6 +43,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 
+import java.awt.EventQueue;
 import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.IOException;
@@ -155,7 +156,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   public void testFindNextUpdatesCurrent() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
     _initFrm(0);
-    _assertOffsets(_frm, 0, 0);
+    _assertOffset(_frm, 0);
     _frm.setFindWord("evil");
 
     _testFindNextSucceeds(_frm, 0, 12);
@@ -165,7 +166,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   public void testFindNextAndFailIsOnMatch() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
     _initFrm(0);
-    _assertOffsets(_frm, 0, 0);
+    _assertOffset(_frm, 0);
     _frm.setFindWord("evil");
     _testFindNextSucceeds(_frm, 0, 12);
     _doc.insertString(9, "-", null);
@@ -173,6 +174,29 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
 //    System.err.println("testFindNextAndFailIsOnMatch completed");
   }
 
+  public void testFindNextOnSuffix() throws BadLocationException {
+    _doc.insertString(0, EVIL_TEXT, null);
+    _initFrm(1);
+    _assertOffset(_frm, 1);
+    _frm.setFindWord("Hear");
+    _testFindNextSucceeds(_frm, 0, 4);
+    _doc.insertString(1, "-", null);
+    assertTrue("no longer on find text", ! _frm.onMatch());
+//    System.err.println("testFindNextAndFailIsOnMatch completed");
+  }
+
+  public void testFindPrevOnPrefix() throws BadLocationException {
+    _doc.insertString(0, EVIL_TEXT, null);
+    _initFrm(3);
+    _frm.setSearchBackwards(true);
+    _assertOffset(_frm, 3);
+    _frm.setFindWord("Hear");
+    _testFindNextSucceeds(_frm, 0, 0);
+    _doc.insertString(1, "-", null);
+    assertTrue("no longer on find text", ! _frm.onMatch());
+//    System.err.println("testFindNextAndFailIsOnMatch completed");
+  }
+  
   public void testMultipleCallsToFindNext() throws BadLocationException {
     _doc.insertString(0, EVIL_TEXT, null);
     _initFrm(0);
@@ -660,17 +684,21 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     assertEquals("findNext return value", -1, _offset);
     _assertOffsets(frm, start, current);
   }
-
+  
   private void _assertOffsets(FindReplaceMachine frm, int start, int current) {
 //    Utilities.show("_assertOffsets(" +  start + ", " + current + ")");
 //    assertEquals("start offset", start, frm.getStartOffset());
     assertEquals("current offset", current, frm.getCurrentOffset());
   }
   
+  private void _assertOffset(FindReplaceMachine frm, int current) {
+    assertEquals("current offset", current, frm.getCurrentOffset());
+  }
+  
   private void replaceAll() {
     Utilities.invokeAndWait(new Runnable() { public void run() { _frm.replaceAll(); } });
   }
-  
+
 //  /** A thunk returning boolean. */
 //  private interface ContinueCommand {
 //    public boolean shouldContinue();

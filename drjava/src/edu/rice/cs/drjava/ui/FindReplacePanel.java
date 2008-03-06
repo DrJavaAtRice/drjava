@@ -630,7 +630,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   
   private void _replaceFindNext() {
     _frame.updateStatusField("Replacing and Finding Next");
-    if (getSearchBackwards() == true) {
+    if (isSearchBackwards() == true) {
       _machine.positionChanged();
       findNext();
     }
@@ -659,7 +659,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   
   private void _replaceFindPrevious() {
     _frame.updateStatusField("Replacing and Finding Previous");
-    if (getSearchBackwards() == false) {
+    if (isSearchBackwards() == false) {
       _machine.positionChanged();
       findPrevious();
     }
@@ -797,7 +797,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
      
       if (fr.getWrapped() && ! searchAll) {
         Toolkit.getDefaultToolkit().beep();
-        if (! _machine.getSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
+        if (! _machine.isSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
         else _frame.setStatusMessage("Search wrapped to end.");
       }
       
@@ -853,7 +853,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   }
 
   public void setSearchBackwards(boolean b) { _machine.setSearchBackwards(b); }
-  public boolean getSearchBackwards() { return _machine.getSearchBackwards(); }
+  public boolean isSearchBackwards() { return _machine.isSearchBackwards(); }
 
   /** Sets the font of the find and replace fields to f. */
   public void setFieldFont(Font f) {
@@ -935,7 +935,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     int offset = _machine.getCurrentOffset();
     int from, to;
 
-    if (_machine.getSearchBackwards()) {
+    if (_machine.isSearchBackwards()) {
       from = offset;
       to = offset + length;
     }

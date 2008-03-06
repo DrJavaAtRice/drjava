@@ -115,7 +115,7 @@ public class FindReplaceMachine {
 
   public void setLastFindWord() { _lastFindWord = _findWord; }
 
-  public boolean getSearchBackwards() { return ! _isForward; }
+  public boolean isSearchBackwards() { return ! _isForward; }
 
   public void setSearchBackwards(boolean searchBackwards) {
     if (_isForward == searchBackwards) {
@@ -339,17 +339,20 @@ public class FindReplaceMachine {
     else return _processAllInCurrentDoc(findAction);
   }
   
-  /** Processes all occurences of _findWord in _doc. Never processes other documents.  Starts at
-   *  the beginning or the end of the document (depending on find direction).  This convention ensures that matches 
-   *  created by string replacement will not be replaced as in the following example:<p>
-   *    findString:    "hello"<br>
-   *    replaceString: "e"<br>
-   *    document text: "hhellollo"<p>
-   *  Only executes in event thread.
-   *  @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
-   *  @return the number of replacements
-   */
+  /** Processes all occurences of _findWord in _doc. Never processes other documents.  Starts at the beginning or the
+    * end of the document (depending on find direction).  This convention ensures that matches created by string 
+    * replacement will not be replaced as in the following example:<p>
+    *   findString:    "hello"<br>
+    *   replaceString: "e"<br>
+    *   document text: "hhellollo"<p>
+    * Only executes in event thread.
+    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+    * @return the number of replacements
+    */
   private int _processAllInCurrentDoc(Lambda<Void, FindResult> findAction) {
+    
+    _doc.acquireWriteLock();  // may modify the document!
+    try {
     
       if (_isForward) setPosition(0);
       else setPosition(_doc.getLength());
@@ -363,20 +366,21 @@ public class FindReplaceMachine {
         fr = findNext(false);           // find next match in current doc
       }
       return count;
+    }
+    finally { _doc.releaseWriteLock(); }
   }
   
   public FindResult findNext() { return findNext(_searchAllDocuments); }
 
   /** Finds the next occurrence of the find word and returns an offset at the end of that occurrence or -1 if the word
-   *  was not found.  Selectors should select backwards the length of the find word from the find offset.  This 
-   *  position is stored in the current offset of the machine, and that is why it is after: in subsequent searches, the
-   *  same instance won't be found twice.  In a backward search, the position returned is at the beginning of the word.  
-   *  Also returns a flag indicating whether the end of the document was reached and wrapped around. This is done
-   *  using the FindResult class which contains the matching document, an integer offset and two flag indicated whether
-   *  the search wrapped (within _doc and across all documents).  Only executes in the event thread.
-   *  @param searchAll whether to search all documents (or just _doc)
-   *  @return a FindResult object containing foundOffset and a flag indicating wrapping to the beginning during a search
-   */
+    * was not found.  In a forward search, the match offset is the RIGHT edge of the word.  In subsequent searches, the
+    * same instance won't be found again.  In a backward search, the position returned is the LEFT edge of the word.  
+    * Also returns a flag indicating whether the end of the document was reached and wrapped around. This is done
+    * using the FindResult class which contains the matching document, an integer offset and two flag indicated whether
+    * the search wrapped (within _doc and across all documents).  Only executes in the event thread.
+    * @param searchAll whether to search all documents (or just _doc)
+    * @return a FindResult object containing foundOffset and a flag indicating wrapping to the beginning during a search
+    */
   private FindResult findNext(boolean searchAll) {
     
     assert EventQueue.isDispatchThread();
@@ -443,31 +447,31 @@ public class FindReplaceMachine {
     
     final int docLen = doc.getLength();
     if (docLen == 0) return new FindResult(doc, -1, true, allWrapped); // failure result
+    
+    final int wordLen =  _findWord.length();
  
-    assert (start >= 0 && start <= docLen) && (len >= 0 && len <= docLen);
+    assert (start >= 0 && start <= docLen) && (len >= 0 && len <= docLen) && wordLen > 0;
     assert (_isForward && start + len == docLen) || (! _isForward && start == 0);
 //    Utilities.show("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
 //                       doc.getLength() + ", _isForward = " + _isForward);
     _log.log("_findWrapped(" + doc + ", " + start + ", " + len + ", " + allWrapped + ")  docLength = " +
                        doc.getLength() + ", _isForward = " + _isForward);
-
-    if (docLen == 0) return new FindResult(doc, -1, true, allWrapped); // failure result
     
     int newLen;
-    final int newStart;
+    int newStart;
 
-    final int adjustment = _findWord.length() - 1; // max size of the findWord suffix (prefix) within preceding text
+    final int adjustment = wordLen - 1; // non-negative max size of the findWord suffix (prefix) within preceding text
     
     if (_isForward) {
       newStart = 0;
       newLen = start + adjustment;  // formerly start, which was an annoying bug
+      if (newLen > docLen) newLen = docLen;
     }
     else {
-      newStart = len;
-      newLen = (docLen - len) + adjustment;
+      newStart = len - adjustment;
+      if (newStart < 0) newStart = 0;
+      newLen = docLen - newStart;
     }
-      
-    if (newLen > docLen) newLen = docLen;
  
     _log.log("Calling _findNextInDocSegment(" + doc.getText() + ", newStart = " + newStart + ", newLen = " + 
              newLen + ", allWrapped = " + allWrapped + ") and _isForward = " + _isForward);
@@ -577,12 +581,12 @@ public class FindReplaceMachine {
   }
   
   /** Searches all documents following startDoc for _findWord, cycling through the documents in the direction specified
-   *  by _isForward. If the search cycles back to doc without finding a match, performs a wrapped search on doc.
-   *  @param startDoc  document where searching started and just failed
-   *  @param start  location in startDoc of the document segment where search failed.
-   *  @param len  length of the text segment where search failed.
-   *  @return the FindResult containing the information for where we found _findWord or a dummy FindResult.
-   */
+    * by _isForward. If the search cycles back to doc without finding a match, performs a wrapped search on doc.
+    * @param startDoc  document where searching started and just failed
+    * @param start  location in startDoc of the document segment where search failed.
+    * @param len  length of the text segment where search failed.
+    * @return the FindResult containing the information for where we found _findWord or a dummy FindResult.
+    */
   private FindResult _findNextInOtherDocs(final OpenDefinitionsDocument startDoc, int start, int len) {
     
 //    System.err.println("_findNextInOtherDocs(" + startDoc.getText() + ", " + start + ", " + len + ")");

@@ -1041,31 +1041,31 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Returns the name of the class or interface enclosing the caret position at the top level.
-    *  @return Name of enclosing class or interface
-    *  @throws ClassNameNotFoundException if no enclosing class found
+    * @return Name of enclosing class or interface
+    * @throws ClassNameNotFoundException if no enclosing class found
     */
   public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
     acquireReadLock();
     synchronized(_reduced) {
-      int oldLocation = _currentLocation;
+      int oldPos = _currentLocation;
       try {
         setCurrentLocation(pos);
-        IndentInfo info = getIndentInformation();
+        BraceInfo info = getEnclosingBrace();
         
         // Find top level open brace
         int topLevelBracePos = -1;
-        String braceType = info.enclosingBraceType();
-        while (! braceType.equals(IndentInfo.NONE)) {
-          if (braceType.equals(IndentInfo.OPEN_CURLY)) {
-            topLevelBracePos = _currentLocation - info.distToEnclosingBrace();
+        String braceType = info.braceType();
+        while (! braceType.equals(BraceInfo.NONE)) {
+          if (braceType.equals(BraceInfo.OPEN_CURLY)) {
+            topLevelBracePos = _currentLocation - info.distance();
           }
-          move(-info.distToEnclosingBrace());
-          info = getIndentInformation();
-          braceType = info.enclosingBraceType();
+          move(-info.distance());
+          info = getEnclosingBrace();
+          braceType = info.braceType();
         }
         if (topLevelBracePos == -1) {
           // No top level brace was found, so we can't find a top level class name
-          setCurrentLocation(oldLocation);
+          setCurrentLocation(oldPos);
           throw new ClassNameNotFoundException("no top level brace found");
         }
         
@@ -1076,14 +1076,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           prevDelimPos = 0;
         }
         else prevDelimPos++;
-        setCurrentLocation(oldLocation);
+        setCurrentLocation(oldPos);
         
         // Parse out the class name
         return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);
       }
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       finally { 
-        setCurrentLocation(oldLocation);
+        setCurrentLocation(oldPos);
         releaseReadLock();
       }
     }
@@ -1106,7 +1106,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public String getMainClassName() throws ClassNameNotFoundException {
     acquireReadLock();
     synchronized(_reduced) {
-      final int oldLocation = _currentLocation;
+      final int oldPos = _currentLocation;
       
       try {
         setCurrentLocation(0);
@@ -1136,7 +1136,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         
       }
       finally { 
-        setCurrentLocation(oldLocation);
+        setCurrentLocation(oldPos);
         releaseReadLock();
       }
     }
@@ -1156,7 +1156,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     
     acquireReadLock();
     synchronized(_reduced) {
-      int oldLocation = _currentLocation;
+      int oldPos = _currentLocation;
       
       try {
         setCurrentLocation(startPos);
@@ -1194,7 +1194,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       catch (IllegalStateException e) { throw new ClassNameNotFoundException("No top level class name found"); }
       finally { 
-        setCurrentLocation(oldLocation);
+        setCurrentLocation(oldPos);
         releaseReadLock();
       }
     }
@@ -1254,7 +1254,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     
     acquireReadLock();
     synchronized(_reduced) {
-      int oldLocation = _currentLocation;
+      int oldPos = _currentLocation;
       int index = 0;
       try {
         while (true) {
@@ -1282,7 +1282,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             }
           }
         }
-        setCurrentLocation(oldLocation);
+        setCurrentLocation(oldPos);
 //        _log.log("findKeyWord(" + keyword + ", ..., " + textOffset + ")");
         return index;
       }

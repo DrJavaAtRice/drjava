@@ -266,7 +266,7 @@ public class LogTest extends MultiThreadedTestCase {
     } 
     
     fin.close();
-    System.err.println("LogTest.testConucrrentWrites complete");
+//    System.err.println("LogTest.testConucrrentWrites complete");
   }
 }
 

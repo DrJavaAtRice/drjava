@@ -39,34 +39,33 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
-/** Determines whether or not the last block or expression list opened previous to the start of the current line was opened 
-  * by one of the characters '(' or '['.  This questions corresponds to rule 11 in our decision tree.
+/** Determines whether or not the last block or expression list opened previous to the start of the current line was 
+  * opened by one of the characters '(' or '['.  This questions corresponds to rule 11 in our decision tree.
   * @version $Id$
   */
 public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion {
-  /**
-   * @param yesRule The decision subtree for the case that this rule applies
-   * in the current context.
-   * @param noRule The decision subtree for the case that this rule does not
-   * apply in the current context.
-   */
-  public QuestionBraceIsParenOrBracket(IndentRule yesRule, IndentRule noRule) {
-    super(yesRule, noRule);
-  }
+  /** @param yesRule The decision subtree for the case that this rule applies in the current context.
+    * @param noRule The decision subtree for the case that this rule does not apply in the current context.
+    */
+  public QuestionBraceIsParenOrBracket(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
   
   /** @param doc The AbstractDJDocument containing the current line.
     * @param reason The reason the indentation is being done
     * @return True iff the last block or expression list opened previous to the start of the current line was opened by
     * one of the characters '(' or '['. 
     */
-  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
+  protected boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     // PRE: We are not inside a multiline comment.
-
-    IndentInfo info = doc.getIndentInformation();
-
-    // We are using fields on IndentInfo which look at the start of the line, not the current position!
-
-    return info.lineEnclosingBraceType().equals(IndentInfo.OPEN_PAREN) || 
-      info.lineEnclosingBraceType().equals(IndentInfo.OPEN_BRACKET); 
+    
+//    IndentInfo info = doc.getIndentInformation();
+//
+//    // We are using fields on IndentInfo which look at the start of the line, not the current position!
+//
+//    return info.lineEnclosingBraceType().equals(IndentInfo.OPEN_PAREN) || 
+//      info.lineEnclosingBraceType().equals(IndentInfo.OPEN_BRACKET); 
+    
+    BraceInfo info = doc.getLineEnclosingBrace();
+    String braceType = info.braceType();
+    return braceType.equals(BraceInfo.OPEN_PAREN) || braceType.equals(BraceInfo.OPEN_BRACKET); 
   }
 }

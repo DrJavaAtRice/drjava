@@ -64,8 +64,7 @@ public class ActionBracePlus extends IndentRuleAction {
     IndentInfo info = doc.getIndentInformation();
 
     // Check preconditions
-    if ((info.lineEnclosingBraceType().equals("")) ||
-        (info.distToLineEnclosingBrace() < 0)) {
+    if (info.lineEnclosingBraceType().equals("") || info.distToLineEnclosingBrace() < 0) {
       // Can't find brace, so do nothing.
       return supResult;
     }
@@ -73,7 +72,7 @@ public class ActionBracePlus extends IndentRuleAction {
     // Find length to brace
     int bracePos = startLine - info.distToLineEnclosingBrace();
     int braceNewline = 0;
-    if (info.distToEnclosingBraceStart() >=0) {
+    if (info.distToEnclosingBraceStart() >= 0) {
       braceNewline = startLine - info.distToEnclosingBraceStart();
     }
     int braceLen = bracePos - braceNewline;
