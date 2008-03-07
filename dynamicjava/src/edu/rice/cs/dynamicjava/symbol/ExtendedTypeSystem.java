@@ -1984,7 +1984,6 @@ public class ExtendedTypeSystem extends TypeSystem {
           // Note that this might be a capture variable with an inference-variable bound
           if (vars.contains(param)) { return EMPTY_CONSTRAINTS.andLowerBound(param, arg); }
           else {
-            debug.log();
             Thunk<ConstraintSet> recurOnLowerBound = new Thunk<ConstraintSet>() {
               public ConstraintSet value() {
                 return arg.apply(new TypeAbstractVisitor<ConstraintSet>() {
@@ -2891,9 +2890,9 @@ public class ExtendedTypeSystem extends TypeSystem {
     });
     
     // TODO: provide more error-message information
-    if (IterUtil.isEmpty(results)) { throw new UnmatchedLookupException(); }
-    else if (IterUtil.sizeOf(results) > 1) { throw new UnmatchedLookupException(); }
-    else { return results.iterator().next(); }
+    int matches = IterUtil.sizeOf(results);
+    if (matches != 1) { throw new UnmatchedLookupException(matches); }
+    else { return IterUtil.first(results); }
   }
   
   public boolean containsMethod(Type t, String name) {
@@ -3049,9 +3048,9 @@ public class ExtendedTypeSystem extends TypeSystem {
                                                                       new LookupMethod(true), 
                                                                       new LookupMethod(false));
     // TODO: provide more error-message information
-    if (IterUtil.isEmpty(results)) { throw new UnmatchedLookupException(); }
-    else if (IterUtil.sizeOf(results) > 1) { throw new UnmatchedLookupException(); }
-    else { return results.iterator().next(); }
+    int matches = IterUtil.sizeOf(results);
+    if (matches != 1) { throw new UnmatchedLookupException(matches); }
+    else { return IterUtil.first(results); }
   }
   
   /**
@@ -3169,9 +3168,9 @@ public class ExtendedTypeSystem extends TypeSystem {
     Iterable<? extends StaticMethodInvocation> results = lookupMember(t, new LookupMethod(true), 
                                                                       new LookupMethod(false));
     // TODO: provide more error-message information
-    if (IterUtil.isEmpty(results)) { throw new UnmatchedLookupException(); }
-    else if (IterUtil.sizeOf(results) > 1) { throw new UnmatchedLookupException(); }
-    else { return results.iterator().next(); }
+    int matches = IterUtil.sizeOf(results);
+    if (matches != 1) { throw new UnmatchedLookupException(matches); }
+    else { return IterUtil.first(results); }
   }
   
   
@@ -3276,9 +3275,9 @@ public class ExtendedTypeSystem extends TypeSystem {
                                                                     new LookupField(true), 
                                                                     new LookupField(false));
     // TODO: provide more error-message information
-    if (IterUtil.isEmpty(results)) { throw new UnmatchedLookupException(); }
-    else if (IterUtil.sizeOf(results) > 1) { throw new UnmatchedLookupException(); }
-    else { return results.iterator().next(); }
+    int matches = IterUtil.sizeOf(results);
+    if (matches != 1) { throw new UnmatchedLookupException(matches); }
+    else { return IterUtil.first(results); }
   }
   
   
@@ -3342,9 +3341,9 @@ public class ExtendedTypeSystem extends TypeSystem {
     Iterable<? extends StaticFieldReference> results = lookupMember(t, new LookupField(true), 
                                                                     new LookupField(false));
     // TODO: provide more error-message information
-    if (IterUtil.isEmpty(results)) { throw new UnmatchedLookupException(); }
-    else if (IterUtil.sizeOf(results) > 1) { throw new UnmatchedLookupException(); }
-    else { return results.iterator().next(); }
+    int matches = IterUtil.sizeOf(results);
+    if (matches != 1) { throw new UnmatchedLookupException(matches); }
+    else { return IterUtil.first(results); }
   }
   
   
@@ -3415,20 +3414,23 @@ public class ExtendedTypeSystem extends TypeSystem {
    */  
   public ClassType lookupClass(Type t, final String name, Iterable<? extends Type> typeArgs)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-//    System.out.println("\nLooking up class " + name + " in type " + userRepresentation(t));
-    Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
-      public Predicate<DJClass> value(final Boolean includePrivate) {
-        return new Predicate<DJClass>() {
-          public Boolean value(DJClass c) {
-            if (c.declaredName().equals(name)) {
-              return includePrivate || !c.accessibility().equals(Access.PRIVATE);
+    debug.logStart(new String[]{"t", "name", "typeArgs"}, t, name, typeArgs);
+    try {
+      Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
+        public Predicate<DJClass> value(final Boolean includePrivate) {
+          return new Predicate<DJClass>() {
+            public Boolean value(DJClass c) {
+              if (c.declaredName().equals(name)) {
+                return includePrivate || !c.accessibility().equals(Access.PRIVATE);
+              }
+              else { return false; }
             }
-            else { return false; }
-          }
-        };
-      }
-    };
-    return lookupClass(t, makePred, typeArgs, name);
+          };
+        }
+      };
+      return lookupClass(t, makePred, typeArgs, name);
+    }
+    finally { debug.logEnd(); }
   }
   
   /**
@@ -3444,20 +3446,24 @@ public class ExtendedTypeSystem extends TypeSystem {
    */
   public ClassType lookupStaticClass(Type t, final String name, final Iterable<? extends Type> typeArgs)
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
-      public Predicate<DJClass> value(final Boolean includePrivate) {
-        return new Predicate<DJClass>() {
-          public Boolean value(DJClass c) {
-            if (c.declaredName().equals(name)) {
-              if (includePrivate) { return c.isStatic(); }
-              else { return c.isStatic() && !c.accessibility().equals(Access.PRIVATE); }
+    debug.logStart(new String[]{"t", "name", "typeArgs"}, t, name, typeArgs);
+    try {
+      Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
+        public Predicate<DJClass> value(final Boolean includePrivate) {
+          return new Predicate<DJClass>() {
+            public Boolean value(DJClass c) {
+              if (c.declaredName().equals(name)) {
+                if (includePrivate) { return c.isStatic(); }
+                else { return c.isStatic() && !c.accessibility().equals(Access.PRIVATE); }
+              }
+              else { return false; }
             }
-            else { return false; }
-          }
-        };
-      }
-    };
-    return lookupClass(t, makePred, typeArgs, name);
+          };
+        }
+      };
+      return lookupClass(t, makePred, typeArgs, name);
+    }
+    finally { debug.logEnd(); }
   }
   
   /** Look up an inner class based on the given predicate. */
@@ -3466,8 +3472,8 @@ public class ExtendedTypeSystem extends TypeSystem {
     throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
     Iterable<? extends ClassType> results = lookupClasses(t, makePred, typeArgs);
     // TODO: provide more error-message information
-    if (IterUtil.isEmpty(results)) { throw new UnmatchedLookupException(); }
-    else if (IterUtil.sizeOf(results) > 1) { throw new UnmatchedLookupException(); }
+    int matches = IterUtil.sizeOf(results);
+    if (matches != 1) { throw new UnmatchedLookupException(matches); }
     else {
       ClassType result = IterUtil.first(results);
       final Iterable<VariableType> params = SymbolUtil.allTypeParameters(result.ofClass());
@@ -3626,7 +3632,6 @@ public class ExtendedTypeSystem extends TypeSystem {
       if (isEqual(t, checkedT)) { return IterUtil.empty(); }
     }
     
-//    System.out.println("Searching for member in type " + userRepresentation(t));
     final Iterable<? extends T> baseResult = t.apply(baseCase);
     alreadyChecked.add(t);
     if (!IterUtil.isEmpty(baseResult)) { return baseResult; }

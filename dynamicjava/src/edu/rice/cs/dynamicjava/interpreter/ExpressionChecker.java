@@ -247,7 +247,10 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
       catch (InvalidTargetException e) { throw new RuntimeException("context produced bad type"); }
       catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
-      catch (UnmatchedLookupException e) { throw new ExecutionError("ambiguous.name", node); }
+      catch (UnmatchedLookupException e) {
+        if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
+        else { throw new ExecutionError("ambiguous.name", node); }
+      }
       
       // Append member names until a field is encountered (or until all names are used up)
       while (ids.hasNext() && resultExp == null) {
@@ -269,7 +272,10 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
           }
           catch (InvalidTargetException e) { throw new RuntimeException("ts.containsClass lied"); }
           catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
-          catch (UnmatchedLookupException e) { throw new ExecutionError("ambiguous.name", node); }
+          catch (UnmatchedLookupException e) {
+            if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
+            else { throw new ExecutionError("ambiguous.name", node); }
+          }
           // TODO: Improve error when memberName is a non-static class
         }
         else {
@@ -373,7 +379,10 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
     }
     catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
     catch (InvalidTargetException e) { throw new RuntimeException("context produced bad type"); }
-    catch (UnmatchedLookupException e) { throw new ExecutionError("ambiguous.name", node); }
+    catch (UnmatchedLookupException e) {
+      if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
+      else { throw new ExecutionError("ambiguous.name", node); }
+    }
   }
 
   /**
@@ -1653,14 +1662,20 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
       catch (InvalidTargetException e) { throw new RuntimeException("context produced bad type"); }
       catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
-      catch (UnmatchedLookupException e) { throw new ExecutionError("ambiguous.name", node); }
+      catch (UnmatchedLookupException e) {
+        if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
+        else { throw new ExecutionError("ambiguous.name", node); }
+      }
     }
     
     while (ids.hasNext()) {
       try { t = ts.lookupClass(t, ids.next().image(), IterUtil.<Type>empty()); }
       catch (InvalidTargetException e) { throw new RuntimeException("lookup produced bad type"); }
       catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
-      catch (UnmatchedLookupException e) { throw new ExecutionError("ambiguous.name", node); }
+      catch (UnmatchedLookupException e) {
+        if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
+        else { throw new ExecutionError("ambiguous.name", node); }
+      }
     }
     
     if (t == null) { 
@@ -1706,7 +1721,10 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
       catch (InvalidTargetException e) { throw new RuntimeException("context produced bad type"); }
       catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument", node); }
-      catch (UnmatchedLookupException e) { throw new ExecutionError("ambiguous.name", node); }
+      catch (UnmatchedLookupException e) {
+        if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
+        else { throw new ExecutionError("ambiguous.name", node); }
+      }
     }
     
     while (ids.hasNext()) {
@@ -1716,7 +1734,10 @@ public class ExpressionChecker extends AbstractVisitor<Type> implements Lambda<E
       }
       catch (InvalidTargetException e) { throw new RuntimeException("lookup produced bad type"); }
       catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument", node); }
-      catch (UnmatchedLookupException e) { throw new ExecutionError("ambiguous.name", node); }
+      catch (UnmatchedLookupException e) {
+        if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
+        else { throw new ExecutionError("ambiguous.name", node); }
+      }
     }
     
     if (t == null) { 

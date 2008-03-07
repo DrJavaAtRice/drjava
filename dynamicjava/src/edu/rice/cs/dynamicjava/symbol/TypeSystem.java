@@ -563,6 +563,9 @@ public abstract class TypeSystem {
   }
   
   public static class UnmatchedLookupException extends TypeSystemException {
+    private final int _matches;
+    public UnmatchedLookupException(int matches) { _matches = matches; }
+    public int matches() { return _matches; }
   }
   
     
