@@ -47,8 +47,11 @@ import java.util.ArrayList;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.classloader.ClassFileError;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.tuple.Pair;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.reflect.ShadowingClassLoader;
 
 import java.lang.reflect.Modifier;
 
@@ -64,6 +67,9 @@ public class JUnitTestManager {
   /** The interface to the master JVM via RMI. */
   private final JUnitModelCallback _jmc;
   
+  /** A factory producing a ClassLoader for tests with the given parent */
+  private final Lambda<ClassLoader, ClassLoader> _loaderFactory;
+  
   /** The current testRunner; initially null.  Each test suite requires a new runner. */
   private JUnitTestRunner _testRunner;
   
@@ -77,10 +83,11 @@ public class JUnitTestManager {
   private List<File> _testFiles = null;
   
   /** Standard constructor */
-  public JUnitTestManager(JUnitModelCallback jmc) { _jmc = jmc; }
+  public JUnitTestManager(JUnitModelCallback jmc, Lambda<ClassLoader, ClassLoader> loaderFactory) {
+    _jmc = jmc;
+    _loaderFactory = loaderFactory;
+  }
 
-  public JUnitTestRunner getTestRunner() { return _testRunner; }
-  
   /** Find the test classes among the given classNames and accumulate them in
     * TestSuite for junit.  Returns null if a test suite is already pending.
     * @param classNames the class names that are test class candidates
@@ -93,35 +100,29 @@ public class JUnitTestManager {
     if (_testClassNames != null && ! _testClassNames.isEmpty()) 
       throw new IllegalStateException("Test suite is still pending!");
     
-    _testRunner = new JUnitTestRunner(_jmc);
+    _testRunner = makeRunner();
     
     _testClassNames = new ArrayList<String>();
     _testFiles = new ArrayList<File>();
     _suite = new TestSuite();
 
-   //new ScrollableDialog(null, "JUnitManager.findTestClasses invoked", "Candidate classes are = " + classNames, "files = " + files).show();
-    
     int i = 0;
-    try {
-      for (i = 0; i < classNames.size(); i++) {
-        String cName = classNames.get(i);
-       //new ScrollableDialog(null, "Class to be checked in JUnitManager: " + cName, "", "").show();
-        try {
-          if (_isTestCase(cName)) {
-            //new ScrollableDialog(null, "Test class " + cName + " found!", "", "").show();
-            _testClassNames.add(cName);
-            _testFiles.add(files.get(i));
-            _suite.addTest(_testRunner.getTest(cName));
-          }
-        }
-        catch(LinkageError e) { 
-          //debug.log(e);
-          _jmc.classFileError(new ClassFileError(cName, files.get(i).getCanonicalPath(), e));
+    for (Pair<String, File> pair : IterUtil.zip(classNames, files)) {
+      String cName = pair.first();
+      try {
+        if (_isJUnitTest(_testRunner.loadPossibleTest(cName))) {
+          _testClassNames.add(cName);
+          _testFiles.add(pair.second());
+          _suite.addTest(_testRunner.getTest(cName));
         }
       }
+      catch (ClassNotFoundException e) { error.log(e); }
+      catch(LinkageError e) {
+        //debug.log(e);
+        String path = IOUtil.attemptAbsoluteFile(pair.second()).getPath();
+        _jmc.classFileError(new ClassFileError(cName, path, e));
+      }
     }
-    catch(IOException e) { throw new UnexpectedException(e); }
-    //new ScrollableDialog(null, "TestClassNames are: " + _testClassNames, "", "").show();
      
     //debug.logEnd("findTestClasses");
     return _testClassNames;
@@ -137,7 +138,7 @@ public class JUnitTestManager {
 //    new ScrollableDialog(null, "runTestSuite() in SlaveJVM called", "", "").show();
 
     try {
-      TestResult result = _testRunner.doRun(_suite);
+      TestResult result = _testRunner.runSuite(_suite);
     
       JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
       
@@ -188,15 +189,6 @@ public class JUnitTestManager {
     return result;
   }
 
-  /** Checks whether the given file name corresponds to a valid JUnit Test. */
-  private boolean _isTestCase(String className) {
-    try { return _isJUnitTest(_testRunner.getLoader().load(className)); }
-    catch (ClassNotFoundException cnfe) {
-      error.log(cnfe);
-      return false;
-    }
-  }
-  
   /** Constructs a new JUnitError from a TestFailure
    *  @param failure A given TestFailure
    *  @param classNames The classes that were used for this test suite
@@ -341,4 +333,15 @@ public class JUnitTestManager {
     
     return lineNum;
   }
+  
+  /** Make a fresh JUnitTestRunner with its own class loader instance. */
+  private JUnitTestRunner makeRunner() {
+    ClassLoader current = JUnitTestManager.class.getClassLoader();
+    // References to JUnit classes must match those of the current loader so that,
+    // for example, when a test fails, the failure exception is of a class we can talk 
+    // about in the current context.
+    ClassLoader parent = ShadowingClassLoader.whiteList(current, "junit", "org.junit");
+    return new JUnitTestRunner(_jmc, _loaderFactory.value(parent));
+  }
+  
 }

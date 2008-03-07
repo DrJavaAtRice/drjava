@@ -54,7 +54,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
  * place in the list.  This class is used in the interpreter JVM, and may be accessed concurrently.
  */
-public class ClassPathManager {
+public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   // For thread safety, all accesses to these lists are synchronized on this, and when they are made available
   // to others (via getters or in the class loader), a snapshot is used.
@@ -67,7 +67,6 @@ public class ClassPathManager {
   // these can be accessed concurrently:
   
   private final Iterable<File> _fullPath;
-  private final ClassLoader _loader;
   
   public ClassPathManager(Iterable<File> builtInCP) {
     _projectCP = new LinkedList<File>();
@@ -86,7 +85,6 @@ public class ClassPathManager {
     // lazily map the lists to their snapshots -- the snapshot code executes every time
     // _fullPath is traversed
     _fullPath = IterUtil.collapse(IterUtil.map(allPaths, _makeSafeSnapshot));
-    _loader = new PathClassLoader(null, _fullPath);
   }
       
   private final Lambda<Iterable<File>, Iterable<File>> _makeSafeSnapshot =
@@ -136,10 +134,19 @@ public class ClassPathManager {
   public Iterable<File> getExtraCP() { return IterUtil.snapshot(_extraCP); }
   
   /**
-   * Returns the class loader for this classpath.  The loader's path is dynamically updated as changes
-   * are made in this class.
+   * Create a new class loader based on the given path.  The loader's path is dynamically updated
+   * as changes are made in the ClassPathManager.  Each loader returned by this method will
+   * have its own set of loaded classes, and will only share those classes that are loaded
+   * by a common parent.
+   * @param parent  The parent class loader.  May be {@code null}, signifying the bootstrap
+   *                class loader.
    */
-  public synchronized ClassLoader getClassLoader() { return _loader; }
+  public synchronized ClassLoader makeClassLoader(ClassLoader parent) {
+    return new PathClassLoader(parent, _fullPath);
+  }
+  
+  /** Lambda value method */
+  public ClassLoader value(ClassLoader parent) { return makeClassLoader(parent); }
   
   public synchronized Iterable<File> getClassPath() { return _fullPath; }
 }

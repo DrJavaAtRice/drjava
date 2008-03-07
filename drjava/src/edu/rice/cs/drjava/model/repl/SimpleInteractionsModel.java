@@ -76,7 +76,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   public SimpleInteractionsModel(InteractionsDJDocument document) {
     super(document, new File(System.getProperty("user.dir")), 1000, WRITE_DELAY);
     _classPathManager = new ClassPathManager(GlobalModel.RUNTIME_CLASS_PATH);
-    _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.getClassLoader());
+    _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.makeClassLoader(null));
     //_interpreter.defineVariable("INTERPRETER", _interpreter);
   }
 
@@ -168,7 +168,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected void _resetInterpreter(File wd) {
     interpreterResetting();
     _classPathManager = new ClassPathManager(GlobalModel.RUNTIME_CLASS_PATH);
-    _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.getClassLoader());
+    _interpreter = new Interpreter(Options.DEFAULT, _classPathManager.makeClassLoader(null));
     interpreterReady(wd);
   }
 

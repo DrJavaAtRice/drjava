@@ -106,10 +106,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private final Set<Interpreter> _busyInterpreters;
   private final Map<String, Pair<TypeContext, RuntimeBindings>> _environments;
   
+  private final ClassPathManager _classPathManager;
+  private final ClassLoader _interpreterLoader;
+  
   /** Responsible for running JUnit tests in this JVM. */
   private final JUnitTestManager _junitTestManager;
-  
-  private final ClassPathManager _classPathManager;
   
   /** Remote reference to the MainJVM class in DrJava's primary JVM.  Assigned ONLY once. */
   private volatile MainJVMRemoteI _mainJVM;
@@ -127,11 +128,12 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
 
     Iterable<File> runtimeCP = IOUtil.parsePath(System.getProperty("java.class.path", ""));
     _classPathManager = new ClassPathManager(runtimeCP);
-    _junitTestManager = new JUnitTestManager(this);
+    _interpreterLoader = _classPathManager.makeClassLoader(null);
+    _junitTestManager = new JUnitTestManager(this, _classPathManager);
     _messageOnResetFailure = true;
 
     _interpreterOptions = Options.DEFAULT;
-    _defaultInterpreter = new Interpreter(_interpreterOptions, _classPathManager.getClassLoader());
+    _defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
     _interpreters = Collections.synchronizedMap(new HashMap<String,Interpreter>());
     _busyInterpreters = Collections.synchronizedSet(new HashSet<Interpreter>());
     _environments =
@@ -324,7 +326,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     if (_interpreters.containsKey(name)) {
       throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
     }
-    Interpreter i = new Interpreter(_interpreterOptions, _classPathManager.getClassLoader());
+    Interpreter i = new Interpreter(_interpreterOptions, _interpreterLoader);
     _interpreters.put(name, i);
   }
   
@@ -354,7 +356,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     // TODO: handle inner classes
     // TODO: enforce final vars?
-    ClassLoader loader = _classPathManager.getClassLoader();
     Package pkg = thisClass.getPackage();
     DJClass c = SymbolUtil.wrapClass(thisClass);
     List<LocalVariable> vars = new LinkedList<LocalVariable>();
@@ -368,9 +369,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       vars.add(new LocalVariable(localVarNames[i], varT, false));
     }
     
-    TypeContext ctx = new TopLevelContext(loader);
+    TypeContext ctx = new TopLevelContext(_interpreterLoader);
     if (pkg != null) { ctx = ctx.setPackage(pkg.getName()); }
-    ctx = new ClassSignatureContext(ctx, c, loader);
+    ctx = new ClassSignatureContext(ctx, c, _interpreterLoader);
     ctx = new ClassContext(ctx, c);
     ctx = new DebugMethodContext(ctx, thisVal == null);
     ctx = new LocalContext(ctx, vars);
