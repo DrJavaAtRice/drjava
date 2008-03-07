@@ -72,7 +72,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     * a new Java version is released.  (We can't just shadow *everything* because some classes, at 
     * least in OS X's classes.jar, can only be loaded by the JVM.)
     */
-  private static final String[] TOOLS_PACKAGES = new String[]{
+  private static final Iterable<String> TOOLS_PACKAGES = IterUtil.make(
       // From 1.4 tools.jar:
       "com.sun.javadoc",
       "com.sun.jdi",
@@ -96,7 +96,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       "com.sun.xml.internal.dtdparser", // other xml.internal packages are in rt.jar
       "com.sun.xml.internal.rngom",
       "com.sun.xml.internal.xsom",
-      "org.relaxng" };
+      "org.relaxng");
 
   
   private final File _location;
@@ -121,7 +121,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     // We can't execute code that was possibly compiled for a later Java API version.
     if (JavaVersion.CURRENT.supports(version.majorVersion())) {
       // block tools.jar classes, so that references don't point to a different version of the classes
-      ClassLoader loader = new ShadowingClassLoader(JarJDKToolsLibrary.class.getClassLoader(), TOOLS_PACKAGES);
+      ClassLoader loader =
+        new ShadowingClassLoader(JarJDKToolsLibrary.class.getClassLoader(), true, TOOLS_PACKAGES, true);
       Iterable<File> path = IterUtil.singleton(IOUtil.attemptAbsoluteFile(f));
       
       String compilerAdapter = adapterForCompiler(version.majorVersion());
