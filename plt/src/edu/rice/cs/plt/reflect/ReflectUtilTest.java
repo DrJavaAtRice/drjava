@@ -41,6 +41,7 @@ import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
 
 import static edu.rice.cs.plt.reflect.ReflectUtil.*;
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 public class ReflectUtilTest extends TestCase {
   
@@ -54,6 +55,17 @@ public class ReflectUtilTest extends TestCase {
   private static final File D_DIR = new File(ROOT, "d");
   
   private static final RuntimeException ANONYMOUS_EXCEPTION = new RuntimeException() {};
+  
+  public void testBootClassLoader() {
+    ClassLoaderTestCase.assertLoadsClass(BOOT_CLASS_LOADER, "java.lang.Object");
+    ClassLoaderTestCase.assertLoadsClass(BOOT_CLASS_LOADER, "java.lang.String");
+    ClassLoaderTestCase.assertLoadsClass(BOOT_CLASS_LOADER, "java.lang.Number");
+    ClassLoaderTestCase.assertLoadsClass(BOOT_CLASS_LOADER, "javax.swing.JFrame");
+    ClassLoaderTestCase.assertLoadsClass(BOOT_CLASS_LOADER, "javax.net.ssl.SSLSession");
+    ClassLoaderTestCase.assertDoesNotLoadClass(BOOT_CLASS_LOADER, ReflectUtil.class.getName());
+    ClassLoaderTestCase.assertDoesNotLoadClass(BOOT_CLASS_LOADER, ReflectUtilTest.class.getName());
+    ClassLoaderTestCase.assertDoesNotLoadClass(BOOT_CLASS_LOADER, IterUtil.class.getName());
+  }
 
   public void testSimpleName() {
     assertEquals("ReflectUtilTest", simpleName(ReflectUtilTest.class));
@@ -66,6 +78,9 @@ public class ReflectUtilTest extends TestCase {
     assertEquals("anonymous RuntimeException", simpleName(ANONYMOUS_EXCEPTION.getClass()));
     Runnable localRunnable = new Runnable() { public void run() {} };
     assertEquals("anonymous Runnable", simpleName(localRunnable.getClass()));
+    assertEquals("Entry", simpleName(java.util.Map.Entry.class));
+    class MethodInner {}
+    assertEquals("MethodInner", simpleName(MethodInner.class));
   }
   
   public void testIsAnonymousClass() {

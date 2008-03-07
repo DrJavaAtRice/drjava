@@ -34,6 +34,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.reflect;
 
+import edu.rice.cs.plt.iter.IterUtil;
+
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 public class ShadowingClassLoaderTest extends ClassLoaderTestCase {
@@ -43,19 +45,45 @@ public class ShadowingClassLoaderTest extends ClassLoaderTestCase {
   public void testShadowedClassLoading() throws ClassNotFoundException {
     debug.logStart();
     
-    ShadowingClassLoader l = new ShadowingClassLoader(BASE_LOADER, "edu.rice.cs.plt.reflect");
+    // simple black list
+    ShadowingClassLoader l = ShadowingClassLoader.blackList(BASE_LOADER, "edu.rice.cs.plt.reflect");
     assertLoadsSameClass(BASE_LOADER, l, "edu.rice.cs.plt.iter.IterUtil");
     assertLoadsClass(BASE_LOADER, "edu.rice.cs.plt.reflect.ReflectUtil");
     assertDoesNotLoadClass(l, "edu.rice.cs.plt.reflect.ReflectUtil");
     
-    ShadowingClassLoader l2 = new ShadowingClassLoader(BASE_LOADER, "edu.rice.cs.plt.refl");
+    // prefix containing partial word shouldn't work
+    ShadowingClassLoader l2 = ShadowingClassLoader.blackList(BASE_LOADER, "edu.rice.cs.plt.refl");
     assertLoadsSameClass(BASE_LOADER, l2, "edu.rice.cs.plt.iter.IterUtil");
     assertLoadsSameClass(BASE_LOADER, l2, "edu.rice.cs.plt.reflect.ReflectUtil");
     
-    ShadowingClassLoader l3 = new ShadowingClassLoader(BASE_LOADER, false, "edu.rice.cs.plt.reflect");
+    // simple white list
+    ShadowingClassLoader l3 = ShadowingClassLoader.whiteList(BASE_LOADER, "edu.rice.cs.plt.reflect");
     assertLoadsClass(BASE_LOADER, "edu.rice.cs.plt.iter.IterUtil");
     assertDoesNotLoadClass(l3, "edu.rice.cs.plt.iter.IterUtil");
     assertLoadsSameClass(BASE_LOADER, l3, "edu.rice.cs.plt.reflect.ReflectUtil");
+    
+    // default black list doesn't block bootstrap classes
+    ShadowingClassLoader l4 = ShadowingClassLoader.blackList(BASE_LOADER, "javax", "edu");
+    assertLoadsSameClass(BASE_LOADER, l4, "java.lang.Number");
+    assertLoadsSameClass(BASE_LOADER, l4, "javax.swing.JFrame");
+    assertLoadsClass(BASE_LOADER, "edu.rice.cs.plt.reflect.ReflectUtil");
+    assertDoesNotLoadClass(l4, "edu.rice.cs.plt.reflect.ReflectUtil");
+    
+    // default white list doesn't block bootstrap classes
+    ShadowingClassLoader l5 = ShadowingClassLoader.whiteList(BASE_LOADER, "javax", "edu.rice.cs.plt.reflect");
+    assertLoadsSameClass(BASE_LOADER, l5, "javax.swing.JFrame");
+    assertLoadsSameClass(BASE_LOADER, l5, "edu.rice.cs.plt.reflect.ReflectUtil");
+    assertLoadsClass(BASE_LOADER, "edu.rice.cs.plt.iter.IterUtil");
+    assertDoesNotLoadClass(l5, "edu.rice.cs.plt.iter.IterUtil");
+    
+    // can filter boostrap classes with filterBootClasses parameter
+    ShadowingClassLoader l6 =
+    new ShadowingClassLoader(BASE_LOADER, true, IterUtil.make("javax", "edu"), true);
+    assertLoadsSameClass(BASE_LOADER, l6, "java.lang.Number");
+    assertLoadsClass(BASE_LOADER, "javax.swing.JFrame");
+    assertDoesNotLoadClass(l6, "javax.swing.JFrame");
+    assertLoadsClass(BASE_LOADER, "edu.rice.cs.plt.reflect.ReflectUtil");
+    assertDoesNotLoadClass(l4, "edu.rice.cs.plt.reflect.ReflectUtil");
     
     debug.logEnd();
   }
@@ -63,7 +91,7 @@ public class ShadowingClassLoaderTest extends ClassLoaderTestCase {
   public void testResourceLoading() {
     debug.logStart();
     
-    ShadowingClassLoader l = new ShadowingClassLoader(BASE_LOADER, "edu.rice.cs.plt.reflect");
+    ShadowingClassLoader l = ShadowingClassLoader.blackList(BASE_LOADER, "edu.rice.cs.plt.reflect");
     assertHasSameResource(BASE_LOADER, l, "edu/rice/cs/plt/iter/IterUtil.class");
     assertHasResource(BASE_LOADER, "edu/rice/cs/plt/reflect/ShadowingClassLoaderTest.class");
     assertDoesNotHaveResource(l, "edu/rice/cs/plt/reflect/ShadowingClassLoaderTest.class");

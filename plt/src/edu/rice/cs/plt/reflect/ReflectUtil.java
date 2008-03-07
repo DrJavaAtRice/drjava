@@ -43,8 +43,10 @@ import java.util.NoSuchElementException;
 import java.io.File;
 import java.io.Serializable;
 import edu.rice.cs.plt.lambda.*;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import static edu.rice.cs.plt.reflect.ReflectException.*;
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 public final class ReflectUtil {
   
@@ -52,11 +54,24 @@ public final class ReflectUtil {
   private ReflectUtil() {}
   
   /**
+   * A ClassLoader for the bootstrap classes -- those provided by the bootstrap class path in Sun
+   * JVMs.  Note that this is not the actual loader used for bootstrap classes, but rather an immediate
+   * child; for any available class {@code c} ({@code "java.lang.Number"} or {@code "javax.swing.JFrame"},
+   * for example), {@code BOOT_CLASS_LOADER.loadClass(c).getClassLoader()} has value
+   * {@code null}.  When constructing a class loader, there is no need to use this object as a parent --
+   * simply use {@code null} as the parent parameter.
+   */
+  public static final ClassLoader BOOT_CLASS_LOADER = new ClassLoader(null) {};
+  
+  /**
    * Produce the simple name of the given class, as specified by {@link Class#getSimpleName},
    * with an improved scheme for anonymous classes.  The simple name of a class is generally
    * the unqualified name used to declare it.  Arrays evaluate to the simple name of their
    * element type, followed by a pair of brackets.  Anonymous classes, rather than evaluating to an 
-   * empty string, produce something like "anonymous Foo" (where Foo is the supertype).
+   * empty string, produce something like "anonymous Foo" (where Foo is the supertype).  Assumes
+   * non-anonymous classes follow a naming convention in which the simple name is the suffix
+   * of the full class name following all '.' and '$' characters, and immediately following a
+   * (possibly empty) sequence of digits.
    */
   public static String simpleName(Class<?> c) {
     if (c.isArray()) { return simpleName(c.getComponentType()) + "[]"; }
@@ -66,7 +81,12 @@ public final class ReflectUtil {
     }
     else {
       String fullName = c.getName();
-      return fullName.substring(fullName.lastIndexOf('.') + 1);
+      int dot = fullName.lastIndexOf('.');
+      int dollar = fullName.lastIndexOf('$');
+      int nameStart = (dot > dollar) ? dot+1 : dollar+1;
+      int length = fullName.length();
+      while (nameStart < length && Character.isDigit(fullName.charAt(nameStart))) { nameStart++; }
+      return fullName.substring(nameStart);
     }
   }
   
@@ -406,6 +426,34 @@ public final class ReflectUtil {
     return loadObject(adapterLoader, adapterName, constructorSig, constructorArgs);
   }
   
+  /**
+   * Combine two class loaders by first matching classes in {@code first}, then delegating to {@code second}.
+   */
+  public static ComposedClassLoader mergeLoaders(ClassLoader first, ClassLoader second) {
+    return new ComposedClassLoader(first, second);
+  }
+  
+  /**
+   * Combine two class loaders by matching specific classes (or class prefixes) from {@code first}, and delegating
+   * all other searches to {@code second}.  Bootstrap classes will not be filtered from {@code first}.
+   */
+  public static ComposedClassLoader mergeLoaders(ClassLoader first, ClassLoader second, String... firstIncludes) {
+    return mergeLoaders(first, second, false, firstIncludes);
+  }
+  
+  /**
+   * Combine two class loaders by matching a subset of those in {@code first}, followed by a search in {@code second}.
+   * The nature of the subset is defined by parameters {@code blackList} and {@code firstPrefixes}.  Bootstrap classes
+   * will not be filtered from {@code first}.
+   * @param blackList  Whether classes matching {@code firstPrefixes} should be shadowed in {@code first}; otherwise,
+   *                   all classes <em>except</em> those that match will be shadowed.
+   * @param firstPrefixes  Class or package prefix to match in determining which classes or {@code first} are shadowed
+   */
+  public static ComposedClassLoader mergeLoaders(ClassLoader first, ClassLoader second, boolean blackList,
+                                                 String... firstPrefixes) {
+    ClassLoader filteredFirst = new ShadowingClassLoader(first, blackList, IterUtil.asIterable(firstPrefixes), false);
+    return new ComposedClassLoader(filteredFirst, second);
+  }
   
   /**
    * Wrap a static field in a box.  The field will be accessed via reflection, and any resulting errors will be
