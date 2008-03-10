@@ -271,7 +271,6 @@ public class ConfigFrame extends JFrame {
 
   /** Write the configured option values to disk. */
   public boolean saveSettings() throws IOException {
-    sanitizeJavadocCustomParams();
     boolean successful = apply();
     if (successful) {
       try {
@@ -799,8 +798,16 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this,
                                                   "<html>The number of files to remember in<br>" +
                                                   "the recently used files list in the File menu.</html>"));
+    addOptionComponent(panel, new StringOptionComponent(OptionConstants.MASTER_JVM_XMX, "Maximum Heap Memory for Main JVM", this,
+                                                 "<html>The maximum heap the Main JVM can use. Leave blank for default.<br>"+
+                                                 "Use plain integer numbers for bytes, or add 'k', 'M' or 'G' as<br>"+
+                                                 "suffix to indicate kilobytes, megabytes or gigabytes.</html>"));
     addOptionComponent(panel, new StringOptionComponent(OptionConstants.MASTER_JVM_ARGS, "JVM Args for Main JVM", this,
                                                  "The command-line arguments to pass to the Main JVM."));
+    addOptionComponent(panel, new StringOptionComponent(OptionConstants.SLAVE_JVM_XMX, "Maximum Heap Memory for Interactions JVM", this,
+                                                 "<html>The maximum heap the Interactions JVM can use. Leave blank for default.<br>"+
+                                                 "Use plain integer numbers for bytes, or add 'k', 'M' or 'G' as<br>"+
+                                                 "suffix to indicate kilobytes, megabytes or gigabytes.</html>"));
     addOptionComponent(panel, new StringOptionComponent(OptionConstants.SLAVE_JVM_ARGS, "JVM Args for Interactions JVM", this,
                                                  "The command-line arguments to pass to the Interactions JVM."));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.BROWSER_HISTORY_MAX_SIZE,
@@ -889,19 +896,6 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_FALLTHROUGH_WARNINGS, "Show Fall-Through Warnings", this,
                                                   "<html>Warn about <code>switch</code> block cases that fall through to the next case.</html>"));
     panel.displayComponents();
-    
-  }
-  
-  
-  /** cleans access level parameters from custom javadoc parameters. */
-  private void sanitizeJavadocCustomParams() {
-    String[] params = ((JTextField)javadocCustomParams.getComponent()).getText().split("(-private|-protected|-package|-public)");
-    String newParams = new String();
-    for(int i=0;i<params.length;i++){
-      if(!params[i].trim().equals("")) { newParams += params[i].trim() + " ";}
-    }
-    newParams = newParams.trim();
-    javadocCustomParams.setValue(newParams);
     
   }
   

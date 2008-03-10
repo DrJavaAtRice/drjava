@@ -3019,319 +3019,246 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     
     // add recent file and project manager
     
-    _recentFileManager = 
-      new RecentFileManager(_fileMenu.getItemCount() - 2, _fileMenu,
-                            new RecentFileManager.RecentFileAction() {
-      public void actionPerformed(FileOpenSelector selector) { open(selector); }
-    }, 
-                            OptionConstants.RECENT_FILES);
+    _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, _fileMenu, new RecentFileManager.RecentFileAction() { public void actionPerformed(FileOpenSelector selector) { open(selector); } }, OptionConstants.RECENT_FILES);
                             
-                            _recentProjectManager = 
-                              new RecentFileManager(_projectMenu.getItemCount()-2, _projectMenu,
-                                                    new RecentFileManager.RecentFileAction() {
-                              public void actionPerformed(FileOpenSelector selector) { openProject(selector); }
-                            }, 
-                                                    OptionConstants.RECENT_PROJECTS);
+    _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount()-2, _projectMenu, new RecentFileManager.RecentFileAction() { public void actionPerformed(FileOpenSelector selector) { openProject(selector); } },  OptionConstants.RECENT_PROJECTS);
                                                     
-                                                    // Set frame icon
-                                                    setIconImage(getIcon("drjava64.png").getImage());
+    // Set frame icon
+    setIconImage(getIcon("drjava64.png").getImage());
                                                     
-                                                    // Size and position
-                                                    int x = config.getSetting(WINDOW_X).intValue();
-                                                    int y = config.getSetting(WINDOW_Y).intValue();
-                                                    int width = config.getSetting(WINDOW_WIDTH).intValue();
-                                                    int height = config.getSetting(WINDOW_HEIGHT).intValue();
-                                                    int state = config.getSetting(WINDOW_STATE).intValue();
-                                                    
-                                                    // Bounds checking.
-                                                    // suggested from zaq@nosi.com, to keep the frame on the screen!
-                                                    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-                                                    
-                                                    final int menubarHeight = 24;
-                                                    if (height > screenSize.height - menubarHeight)  height = screenSize.height - menubarHeight;  // Too tall, so resize
-                                                    
-                                                    if (width > screenSize.width)  width = screenSize.width; // Too wide, so resize
-                                                    
-                                                    // I assume that we want to be contained on the default screen.
-                                                    // TODO: support spanning screens in multi-screen setups.
-                                                    Rectangle bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().
-                                                      getDefaultConfiguration().getBounds();
-                                                    
-                                                    if (x == Integer.MAX_VALUE)  x = (bounds.width - width + bounds.x) / 2;    // magic value for "not set" - center.
-                                                    if (y == Integer.MAX_VALUE)  y = (bounds.height - height + bounds.y) / 2;  // magic value for "not set" - center.
-                                                    if (x < bounds.x)  x = bounds.x;                                           // Too far left, move to left edge.
-                                                    if (y < bounds.y)  y = bounds.y;                                           // Too far up, move to top edge.
-                                                    if ((x + width) > (bounds.x + bounds.width))  x = bounds.width - width + bounds.x; 
-                                                    // Too far right, move to right edge.
-                                                    if ((y + height) > (bounds.y + bounds.height))  y = bounds.height - height + bounds.y; 
-                                                    // Too far down, move to bottom edge.
-                                                    
-                                                    //ensure that we don't set window state to minimized
-                                                    state &= ~Frame.ICONIFIED;
-                                                    
-                                                    if (!Toolkit.getDefaultToolkit().isFrameStateSupported(state)) {
-                                                      //we have a bad state, so reset to default
-                                                      state = WINDOW_STATE.getDefault();
-                                                    }
-                                                    
-                                                    // Set to the new correct size and location
-                                                    setBounds(x, y, width, height);
-                                                    
-                                                    //Work-aroung for Java bug #6365898?
-                                                    //setExtendedState does not work until the window in shown on Linux.
-                                                    final int stateCopy = state;
-                                                    addWindowListener(new WindowAdapter() {
-                                                      public void windowOpened(WindowEvent e) {
-                                                        setExtendedState(stateCopy);
-                                                        //this is a one-off listener
-                                                        removeWindowListener(this);
-                                                      }
-                                                    });
-                                                    
-                                                    _setUpPanes();
-                                                    updateStatusField();
-                                                    
-                                                    _promptBeforeQuit = config.getSetting(QUIT_PROMPT).booleanValue();
-                                                    
-                                                    // Set the fonts
-                                                    _setMainFont();
-                                                    Font doclistFont = config.getSetting(FONT_DOCLIST);
-                                                    _model.getDocCollectionWidget().setFont(doclistFont);
-                                                    
-                                                    // Set the colors
-                                                    _updateNormalColor();
-                                                    _updateBackgroundColor();
-                                                    
-                                                    // Add OptionListeners for the colors.
-                                                    config.addOptionListener(DEFINITIONS_NORMAL_COLOR, new NormalColorOptionListener());
-                                                    config.addOptionListener(DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorOptionListener());
-                                                    
-                                                    /* Add option listeners for changes to config options.  NOTE: We should only add listeners to view-related (or view-
-                                                     * dependent) config options here.  Model options should go in DefaultGlobalModel._registerOptionListeners(). */
-                                                    config.addOptionListener(FONT_MAIN, new MainFontOptionListener());
-                                                    config.addOptionListener(FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
-                                                    config.addOptionListener(FONT_DOCLIST, new DoclistFontOptionListener());
-                                                    config.addOptionListener(FONT_TOOLBAR, new ToolbarFontOptionListener());
-                                                    config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
-                                                    config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
-                                                    config.addOptionListener(TOOLBAR_ENABLED, new ToolbarOptionListener());
-                                                    config.addOptionListener(LINEENUM_ENABLED, new LineEnumOptionListener());
-                                                    config.addOptionListener(QUIT_PROMPT, new QuitPromptOptionListener());
-                                                    config.addOptionListener(RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
-                                                    
-                                                    config.addOptionListener(LOOK_AND_FEEL, new OptionListener<String>() {
-                                                      public void optionChanged(OptionEvent<String> oe) {
-//        try {
-//          UIManager.setLookAndFeel(oe.value);
-//          SwingUtilities.updateComponentTreeUI(MainFrame.this);
-//          if (_debugPanel != null) {
-//            SwingUtilities.updateComponentTreeUI(_debugPanel);
-//          }
-//          if (_configFrame != null) {
-//            SwingUtilities.updateComponentTreeUI(_configFrame);
-//          }
-//          if (_helpFrame != null) {
-//            SwingUtilities.updateComponentTreeUI(_helpFrame);
-//          }
-//          if (_aboutDialog != null) {
-//            SwingUtilities.updateComponentTreeUI(_aboutDialog);
-//          }
-//          SwingUtilities.updateComponentTreeUI(_navPanePopupMenu);
-//          SwingUtilities.updateComponentTreeUI(_interactionsPanePopupMenu);
-//          SwingUtilities.updateComponentTreeUI(_consolePanePopupMenu);
-//          SwingUtilities.updateComponentTreeUI(_openChooser);
-//          SwingUtilities.updateComponentTreeUI(_saveChooser);
-//          Iterator<TabbedPanel> it = _tabs.iterator();
-//          while (it.hasNext()) {
-//            SwingUtilities.updateComponentTreeUI(it.next());
-//          }
-//        }
-//        catch (Exception ex) {
-//          _showError(ex, "Could Not Set Look and Feel",
-//                     "An error occurred while trying to set the look and feel.");
-//        }
-                                                        
-                                                        String title = "Apply Look and Feel";
-                                                        String msg = "Look and feel changes will take effect when you restart DrJava.";
-                                                        if (config.getSetting(WARN_CHANGE_LAF).booleanValue()) {
-                                                          ConfirmCheckBoxDialog dialog =
-                                                            new ConfirmCheckBoxDialog(_configFrame, title, msg,
-                                                                                      "Do not show this message again",
-                                                                                      JOptionPane.INFORMATION_MESSAGE,
-                                                                                      JOptionPane.DEFAULT_OPTION);
-                                                          if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
-                                                            config.setSetting(WARN_CHANGE_LAF, Boolean.FALSE);
-                                                          }
-                                                        }
-                                                      }
-                                                    });
-                                                    
-                                                    
-                                                    config.addOptionListener(SLAVE_JVM_ARGS, new OptionListener<String>() {
-                                                      public void optionChanged(OptionEvent<String> oe) {
-                                                        if (!oe.value.equals("")) {
-                                                          int result = JOptionPane.
-                                                            showConfirmDialog(_configFrame,
-                                                                              "Specifying Interations JVM Args is an advanced option. Invalid arguments may cause\n" +
-                                                                              "the Interactions Pane to stop working.\n" + "Are you sure you want to set this option?\n" +
-                                                                              "(You will have to reset the interactions pane before changes take effect.)",
-                                                                              "Confirm Interactions JVM Arguments", JOptionPane.YES_NO_OPTION);
-                                                          if (result!=JOptionPane.YES_OPTION) config.setSetting(oe.option, "");
-                                                        }
-                                                      }
-                                                    });
-                                                    
-                                                    config.addOptionListener(MASTER_JVM_ARGS, new OptionListener<String>() {
-                                                      public void optionChanged(OptionEvent<String> oe) {
-                                                        if (!oe.value.equals("")) {
-                                                          int result = JOptionPane.
-                                                            showConfirmDialog(_configFrame,
-                                                                              "Specifying Main JVM Args is an advanced option. Invalid arguments may cause\n" +
-                                                                              "DrJava to fail on start up.  You may need to edit or delete your .drjava preferences file\n" +
-                                                                              "to recover.\n Are you sure you want to set this option?\n" +
-                                                                              "(You will have to restart Drjava before changes take effect.)",
-                                                                              "Confirm Main JVM Arguments", JOptionPane.YES_NO_OPTION);
-                                                          if (result!=JOptionPane.YES_OPTION) config.setSetting(oe.option, "");
-                                                        }
-                                                      }
-                                                    });
-                                                    
-                                                    config.addOptionListener(ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
-                                                      public void optionChanged(OptionEvent<Boolean> oce) {
-                                                        _model.getInteractionsModel().setPrivateAccessible(oce.value.booleanValue());
-                                                      }
-                                                    });
-                                                    
-                                                    config.addOptionListener(FORCE_TEST_SUFFIX, new OptionListener<Boolean>() {
-                                                      public void optionChanged(OptionEvent<Boolean> oce) {
-                                                        _model.getJUnitModel().setForceTestSuffix(oce.value.booleanValue());
-                                                      }
-                                                    });
-                                                    
-                                                    // The OptionListener for JAVADOC_LINK_VERSION.
-                                                    OptionListener<String> choiceOptionListener = new OptionListener<String>() {
-                                                      public void optionChanged(OptionEvent<String> oce) {
-                                                        _javaAPIList = null;
-                                                        _openJavadocAction.setEnabled(!oce.value.equals(JAVADOC_NONE_TEXT));
-                                                        _openJavadocUnderCursorAction.setEnabled(!oce.value.equals(JAVADOC_NONE_TEXT));
-                                                      }
-                                                    };
-                                                    DrJava.getConfig().addOptionListener(JAVADOC_LINK_VERSION, choiceOptionListener);
-                                                    
-                                                    // The OptionListener for JAVADOC_XXX_LINK.
-                                                    OptionListener<String> link13OptionListener = new OptionListener<String>() {
-                                                      public void optionChanged(OptionEvent<String> oce) {
-                                                        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
-                                                        if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
-                                                          _javaAPIList = null;
-                                                        }
-                                                      }
-                                                    };
-                                                    DrJava.getConfig().addOptionListener(JAVADOC_1_3_LINK, link13OptionListener);
-                                                    OptionListener<String> link14OptionListener = new OptionListener<String>() {
-                                                      public void optionChanged(OptionEvent<String> oce) {
-                                                        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
-                                                        if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
-                                                          _javaAPIList = null;
-                                                        }
-                                                      }
-                                                    };
-                                                    DrJava.getConfig().addOptionListener(JAVADOC_1_4_LINK, link14OptionListener);
-                                                    OptionListener<String> link15OptionListener = new OptionListener<String>() {
-                                                      public void optionChanged(OptionEvent<String> oce) {
-                                                        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
-                                                        if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
-                                                          _javaAPIList = null;
-                                                        }
-                                                      }
-                                                    };
-                                                    DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
-                                                    
-                                                    // Initialize DocumentRegion highlights hashtables, for easy removal of highlights
-                                                    _documentBreakpointHighlights = new Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
-                                                    _documentBookmarkHighlights = new Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
-                                                    
-                                                    // Initialize cached frames and dialogs 
-                                                    _configFrame = new ConfigFrame(this);
-                                                    _helpFrame = new HelpFrame();
-                                                    _aboutDialog = new AboutDialog(MainFrame.this);
-                                                    _quickStartFrame = new QuickStartFrame();
-                                                    _interactionsScriptController = null;
-                                                    _executeExternalDialog = new ExecuteExternalDialog(MainFrame.this);
-                                                    _editExternalDialog = new EditExternalDialog(MainFrame.this);
-                                                    _jarOptionsDialog = new JarOptionsDialog(MainFrame.this);
-                                                    
-                                                    initJarOptionsDialog();
-                                                    initExecuteExternalProcessDialog();
+    // Size and position
+    int x = config.getSetting(WINDOW_X).intValue();
+    int y = config.getSetting(WINDOW_Y).intValue();
+    int width = config.getSetting(WINDOW_WIDTH).intValue();
+    int height = config.getSetting(WINDOW_HEIGHT).intValue();
+    int state = config.getSetting(WINDOW_STATE).intValue();
+    
+    // Bounds checking.
+    // suggested from zaq@nosi.com, to keep the frame on the screen!
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    
+    final int menubarHeight = 24;
+    if (height > screenSize.height - menubarHeight)  height = screenSize.height - menubarHeight;  // Too tall, so resize
+    
+    if (width > screenSize.width)  width = screenSize.width; // Too wide, so resize
+    
+    // I assume that we want to be contained on the default screen.
+    // TODO: support spanning screens in multi-screen setups.
+    Rectangle bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().
+      getDefaultConfiguration().getBounds();
+    
+    if (x == Integer.MAX_VALUE)  x = (bounds.width - width + bounds.x) / 2;    // magic value for "not set" - center.
+    if (y == Integer.MAX_VALUE)  y = (bounds.height - height + bounds.y) / 2;  // magic value for "not set" - center.
+    if (x < bounds.x)  x = bounds.x;                                           // Too far left, move to left edge.
+    if (y < bounds.y)  y = bounds.y;                                           // Too far up, move to top edge.
+    if ((x + width) > (bounds.x + bounds.width))  x = bounds.width - width + bounds.x; 
+    // Too far right, move to right edge.
+    if ((y + height) > (bounds.y + bounds.height))  y = bounds.height - height + bounds.y; 
+    // Too far down, move to bottom edge.
+    
+    //ensure that we don't set window state to minimized
+    state &= ~Frame.ICONIFIED;
+    
+    if (!Toolkit.getDefaultToolkit().isFrameStateSupported(state)) {
+      //we have a bad state, so reset to default
+      state = WINDOW_STATE.getDefault();
+    }
+    
+    // Set to the new correct size and location
+    setBounds(x, y, width, height);
+    
+    //Work-aroung for Java bug #6365898?
+    //setExtendedState does not work until the window in shown on Linux.
+    final int stateCopy = state;
+    addWindowListener(new WindowAdapter() {
+      public void windowOpened(WindowEvent e) {
+        setExtendedState(stateCopy);
+        //this is a one-off listener
+        removeWindowListener(this);
+      }
+    });
+    
+    _setUpPanes();
+    updateStatusField();
+    
+    _promptBeforeQuit = config.getSetting(QUIT_PROMPT).booleanValue();
+    
+    // Set the fonts
+    _setMainFont();
+    Font doclistFont = config.getSetting(FONT_DOCLIST);
+    _model.getDocCollectionWidget().setFont(doclistFont);
+    
+    // Set the colors
+    _updateNormalColor();
+    _updateBackgroundColor();
+    
+    // Add OptionListeners for the colors.
+    config.addOptionListener(DEFINITIONS_NORMAL_COLOR, new NormalColorOptionListener());
+    config.addOptionListener(DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorOptionListener());
+    
+    /* Add option listeners for changes to config options.  NOTE: We should only add listeners to view-related (or view-
+     * dependent) config options here.  Model options should go in DefaultGlobalModel._registerOptionListeners(). */
+    config.addOptionListener(FONT_MAIN, new MainFontOptionListener());
+    config.addOptionListener(FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
+    config.addOptionListener(FONT_DOCLIST, new DoclistFontOptionListener());
+    config.addOptionListener(FONT_TOOLBAR, new ToolbarFontOptionListener());
+    config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
+    config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
+    config.addOptionListener(TOOLBAR_ENABLED, new ToolbarOptionListener());
+    config.addOptionListener(LINEENUM_ENABLED, new LineEnumOptionListener());
+    config.addOptionListener(QUIT_PROMPT, new QuitPromptOptionListener());
+    config.addOptionListener(RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
+    
+    config.addOptionListener(ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        _model.getInteractionsModel().setPrivateAccessible(oce.value.booleanValue());
+      }
+    });
+    
+    config.addOptionListener(FORCE_TEST_SUFFIX, new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        _model.getJUnitModel().setForceTestSuffix(oce.value.booleanValue());
+      }
+    });
+    
+    // The OptionListener for JAVADOC_LINK_VERSION.
+    OptionListener<String> choiceOptionListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        _javaAPIList = null;
+        _openJavadocAction.setEnabled(!oce.value.equals(JAVADOC_NONE_TEXT));
+        _openJavadocUnderCursorAction.setEnabled(!oce.value.equals(JAVADOC_NONE_TEXT));
+      }
+    };
+    DrJava.getConfig().addOptionListener(JAVADOC_LINK_VERSION, choiceOptionListener);
+    
+    // The OptionListener for JAVADOC_XXX_LINK.
+    OptionListener<String> link13OptionListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+        if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
+          _javaAPIList = null;
+        }
+      }
+    };
+    DrJava.getConfig().addOptionListener(JAVADOC_1_3_LINK, link13OptionListener);
+    OptionListener<String> link14OptionListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+        if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
+          _javaAPIList = null;
+        }
+      }
+    };
+    DrJava.getConfig().addOptionListener(JAVADOC_1_4_LINK, link14OptionListener);
+    OptionListener<String> link15OptionListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oce) {
+        String linkVersion = DrJava.getConfig().getSetting(JAVADOC_LINK_VERSION);
+        if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
+          _javaAPIList = null;
+        }
+      }
+    };
+    DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
+    
+    // Initialize DocumentRegion highlights hashtables, for easy removal of highlights
+    _documentBreakpointHighlights = new Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
+    _documentBookmarkHighlights = new Hashtable<DocumentRegion, HighlightManager.HighlightInfo>();
+    
+    // Initialize cached frames and dialogs 
+    _configFrame = new ConfigFrame(this);
+    _helpFrame = new HelpFrame();
+    _aboutDialog = new AboutDialog(MainFrame.this);
+    _quickStartFrame = new QuickStartFrame();
+    _interactionsScriptController = null;
+    _executeExternalDialog = new ExecuteExternalDialog(MainFrame.this);
+    _editExternalDialog = new EditExternalDialog(MainFrame.this);
+    _jarOptionsDialog = new JarOptionsDialog(MainFrame.this);
+    
+    initJarOptionsDialog();
+    initExecuteExternalProcessDialog();
 //    _projectPropertiesFrame = null;
-                                                    
-                                                    // If any errors occurred while parsing config file, show them
-                                                    _showConfigException();
-                                                    
-                                                    KeyBindingManager.Singleton.setShouldCheckConflict(false);
-                                                    
-                                                    // Platform-specific UI setup.
-                                                    PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
-                                                    setUpKeys();    
-                                                    
-                                                    // discard ` character if it was used for the next/prev recent doc feature
-                                                    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
-                                                      public boolean dispatchKeyEvent(KeyEvent e) {
-                                                        boolean discardEvent = false;
-                                                        
-                                                        if ((e.getID() == KeyEvent.KEY_TYPED) &&
-                                                            (e.getKeyChar()=='`') &&
-                                                            (((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK) ||
-                                                             ((e.getModifiersEx() & (InputEvent.CTRL_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK))
-                                                                == (InputEvent.CTRL_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK))) &&
-                                                            (e.getComponent().getClass().equals(DefinitionsPane.class))) {
+    
+    config.addOptionListener(LOOK_AND_FEEL, new ConfigOptionListeners.LookAndFeelListener(_configFrame));
+    OptionListener<String> slaveJVMArgsListener = new ConfigOptionListeners.SlaveJVMArgsListener(_configFrame);
+    config.addOptionListener(SLAVE_JVM_ARGS, slaveJVMArgsListener);
+    config.addOptionListener(SLAVE_JVM_XMX, new ConfigOptionListeners.SlaveJVMXMXListener(_configFrame));
+    OptionListener<String> masterJVMArgsListener = new ConfigOptionListeners.MasterJVMArgsListener(_configFrame);
+    config.addOptionListener(MASTER_JVM_ARGS, masterJVMArgsListener);
+    config.addOptionListener(MASTER_JVM_XMX, new ConfigOptionListeners.MasterJVMXMXListener(_configFrame));
+    config.addOptionListener(JAVADOC_CUSTOM_PARAMS, new ConfigOptionListeners.JavadocCustomParamsListener(_configFrame));
+    ConfigOptionListeners.sanitizeSlaveJVMArgs(this, config.getSetting(SLAVE_JVM_ARGS), slaveJVMArgsListener);
+    ConfigOptionListeners.sanitizeSlaveJVMXMX(this, config.getSetting(SLAVE_JVM_XMX));
+    ConfigOptionListeners.sanitizeMasterJVMArgs(this, config.getSetting(MASTER_JVM_ARGS), masterJVMArgsListener);
+    ConfigOptionListeners.sanitizeMasterJVMXMX(this, config.getSetting(MASTER_JVM_XMX));
+    ConfigOptionListeners.sanitizeJavadocCustomParams(this, config.getSetting(JAVADOC_CUSTOM_PARAMS));
+    
+    // If any errors occurred while parsing config file, show them
+    _showConfigException();
+    
+    KeyBindingManager.Singleton.setShouldCheckConflict(false);
+    
+    // Platform-specific UI setup.
+    PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
+    setUpKeys();    
+    
+    // discard ` character if it was used for the next/prev recent doc feature
+    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+      public boolean dispatchKeyEvent(KeyEvent e) {
+        boolean discardEvent = false;
+        
+        if ((e.getID() == KeyEvent.KEY_TYPED) &&
+            (e.getKeyChar()=='`') &&
+            (((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK) ||
+             ((e.getModifiersEx() & (InputEvent.CTRL_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK))
+                == (InputEvent.CTRL_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK))) &&
+            (e.getComponent().getClass().equals(DefinitionsPane.class))) {
 //          System.out.println("discarding `, modifiers = "+e.getModifiersEx()+": "+e.getComponent());
-                                                          discardEvent = true;
-                                                        }
-                                                        
-                                                        return discardEvent;
-                                                      }
-                                                    });
-                                                    
-                                                    if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED)) {
-                                                      // start remote control server if no server is running
-                                                      try {
-                                                        if (!RemoteControlClient.isServerRunning()) {
-                                                          edu.rice.cs.drjava.RemoteControlServer rcServer =
-                                                            new edu.rice.cs.drjava.RemoteControlServer(this);
-                                                        }
-                                                      }
-                                                      catch(IOException ioe) {
-                                                        try {
-                                                          RemoteControlClient.openFile(null);
-                                                        }
-                                                        catch(IOException ignored) {
-                                                          // ignore
-                                                        }
-                                                        if (!System.getProperty("user.name").equals(RemoteControlClient.getServerUser())) {
-                                                          Object[] options = {"Disable","Ignore"};
-                                                          String msg = "<html>Could not start DrJava's remote control server";
-                                                          if (RemoteControlClient.getServerUser()!=null) {
-                                                            msg += "<br>because user "+RemoteControlClient.getServerUser()+" is already using the same port";
-                                                          }
-                                                          msg += ".<br>Please select an unused port in the Preferences dialog.<br>"+
-                                                            "In the meantime, do you want to disable the remote control feature?";
-                                                          int n = JOptionPane.showOptionDialog(MainFrame.this,
-                                                                                               msg,
-                                                                                               "Could Not Start Remote Control Server",
-                                                                                               JOptionPane.YES_NO_OPTION,
-                                                                                               JOptionPane.QUESTION_MESSAGE,
-                                                                                               null,
-                                                                                               options,
-                                                                                               options[1]);
-                                                          if (n==JOptionPane.YES_OPTION) {
-                                                            DrJava.getConfig().setSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED, false);
-                                                          }
-                                                        }
-                                                      }
-                                                    }
-                                                    
-                                                    setUpDrJavaProperties();                                                
+          discardEvent = true;
+        }
+        
+        return discardEvent;
+      }
+    });
+    
+    if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED)) {
+      // start remote control server if no server is running
+      try {
+        if (!RemoteControlClient.isServerRunning()) {
+          edu.rice.cs.drjava.RemoteControlServer rcServer =
+            new edu.rice.cs.drjava.RemoteControlServer(this);
+        }
+      }
+      catch(IOException ioe) {
+        try {
+          RemoteControlClient.openFile(null);
+        }
+        catch(IOException ignored) {
+          // ignore
+        }
+        if (!System.getProperty("user.name").equals(RemoteControlClient.getServerUser())) {
+          Object[] options = {"Disable","Ignore"};
+          String msg = "<html>Could not start DrJava's remote control server";
+          if (RemoteControlClient.getServerUser()!=null) {
+            msg += "<br>because user "+RemoteControlClient.getServerUser()+" is already using the same port";
+          }
+          msg += ".<br>Please select an unused port in the Preferences dialog.<br>"+
+            "In the meantime, do you want to disable the remote control feature?";
+          int n = JOptionPane.showOptionDialog(MainFrame.this,
+                                               msg,
+                                               "Could Not Start Remote Control Server",
+                                               JOptionPane.YES_NO_OPTION,
+                                               JOptionPane.QUESTION_MESSAGE,
+                                               null,
+                                               options,
+                                               options[1]);
+          if (n==JOptionPane.YES_OPTION) {
+            DrJava.getConfig().setSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED, false);
+          }
+        }
+      }
+    }
+    
+    setUpDrJavaProperties();                                                
   }   // End of MainFrame constructor
   
   public void setVisible(boolean b) { 

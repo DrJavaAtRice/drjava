@@ -1129,7 +1129,13 @@ public interface OptionConstants {
 
   /** The command-line arguments to be passed to the Slave JVM. */
   public static final StringOption SLAVE_JVM_ARGS = new StringOption("slave.jvm.args", "");
+  
+  /** The command-line arguments for the maximum heap size (-Xmx___) to be passed to the Master JVM. */
+  public static final StringOption MASTER_JVM_XMX = new StringOption("master.jvm.xmx", "");
 
+  /** The command-line arguments for the maximum heap size (-Xmx___) to be passed to the Slave JVM. */
+  public static final StringOption SLAVE_JVM_XMX = new StringOption("slave.jvm.xmx", "");
+  
   /** The last state of the "Clipboard History" dialog. */
   public static final StringOption DIALOG_CLIPBOARD_HISTORY_STATE = new StringOption("dialog.clipboard.history.state", "default");
 

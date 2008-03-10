@@ -231,11 +231,31 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _jvm.setInteractionsModel(_interactionsModel);
     _jvm.setJUnitModel(_junitModel);
     
-    _jvm.setOptionArgs(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
+    StringBuilder sb = new StringBuilder();
+    if (!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX).trim()))) {
+      sb.append("-Xmx");
+      sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+      sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+      sb.append(" ");
+    }
+    sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
+    _jvm.setOptionArgs(sb.toString());
     
-    DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, new OptionListener<String>() {
-      public void optionChanged(OptionEvent<String> oe) { _jvm.setOptionArgs(oe.value); }
-    }); 
+    OptionListener<String> updateListener = new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oe) {
+        StringBuilder sb = new StringBuilder();
+        if (!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX).trim()))) {
+          sb.append("-Xmx");
+          sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+          sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+          sb.append(" ");
+        }
+        sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
+        _jvm.setOptionArgs(sb.toString());
+      }
+    };
+    DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, updateListener); 
+    DrJava.getConfig().addOptionListener(SLAVE_JVM_XMX, updateListener); 
     
     _setupDebugger();
         

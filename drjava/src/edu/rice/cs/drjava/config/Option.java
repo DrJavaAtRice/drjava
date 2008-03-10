@@ -94,10 +94,9 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     final Vector<OptionListener<T>> v = listeners.get(config);
     if (v == null) return; // no listeners
     final OptionEvent<T> e = new OptionEvent<T>(this, val);
-    final int size = v.size();
     Utilities.invokeLater(new Runnable() { 
       public void run() {
-        for (int i = 0; i < size; i++) v.get(i).optionChanged(e);
+        for (int i = 0; i < v.size(); ++i) v.get(i).optionChanged(e);
       }
     });
   }
