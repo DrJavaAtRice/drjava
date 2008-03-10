@@ -103,8 +103,10 @@ public final class DebugUtil {
    * re-invoked at any time.</p>
    */
   public static void initializeLogs() {
-    debug = makeLog(System.getProperty("plt.debug.log", "void"), "Debug");
-    error = makeLog(System.getProperty("plt.error.log", "void"), "Error");
+    String debugProp = System.getProperty("plt.debug.log");
+    debug = (debugProp == null) ? VoidLog.INSTANCE : makeLog(debugProp, "Debug");
+    String errorProp = System.getProperty("plt.error.log");
+    error = (errorProp == null) ? VoidLog.INSTANCE : makeLog(errorProp, "Error");
   }
   
   /** Produce a log corresponding to the given type string. */
