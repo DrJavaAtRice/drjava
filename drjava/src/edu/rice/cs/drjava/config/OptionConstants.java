@@ -269,7 +269,7 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_OPEN_FOLDER =
     new KeyStrokeOption("key.open.folder",
-                        KeyStrokeOption.NULL_KEYSTROKE);
+                        KeyStroke.getKeyStroke(KeyEvent.VK_O, MASK|InputEvent.SHIFT_MASK));
   /**
    * The key binding for opening a file
    */
@@ -301,14 +301,14 @@ public interface OptionConstants {
    * The key binding for renaming a file
    */
   public static final KeyStrokeOption KEY_RENAME_FILE = 
-    new KeyStrokeOption("key.rename.file", KeyStrokeOption.NULL_KEYSTROKE);
+    new KeyStrokeOption("key.rename.file", KeyStroke.getKeyStroke(KeyEvent.VK_R, MASK));
   
   /**
    * The key binding for reverting a file
    */
   public static final KeyStrokeOption KEY_REVERT_FILE =
     new KeyStrokeOption("key.revert.file",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_R, MASK));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_R, MASK|InputEvent.SHIFT_MASK));
   /**
    * The key binding for closing a file
    */

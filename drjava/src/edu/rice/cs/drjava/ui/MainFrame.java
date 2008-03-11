@@ -611,10 +611,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           " selected files to the versions on disk?";
       }
       
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             message,
-                                             title,
-                                             JOptionPane.YES_NO_OPTION);
+      int rc;
+      String fileName = null;
+      Object[] options = {"Yes", "No"};  
+      rc = JOptionPane.showOptionDialog(MainFrame.this, message, title, JOptionPane.YES_NO_OPTION,
+                                          JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
       if (rc == JOptionPane.YES_OPTION) {
         _revert();
       }
@@ -1040,11 +1041,32 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   };
   
+  private static abstract class ClassNameAndPackageEntry implements Comparable<ClassNameAndPackageEntry> {
+    /** Return the simple class name, e.g. "Integer". */
+    public abstract String getClassName();
+    /** Return the full package including the last period, e.g. "java.lang.". */
+    public abstract String getFullPackage();
+    
+    public int compareTo(ClassNameAndPackageEntry other) {
+      int res = getClassName().toLowerCase().compareTo(other.getClassName().toLowerCase());
+      if (res!=0) { return res; }
+      return getFullPackage().toLowerCase().compareTo(other.getFullPackage().toLowerCase());
+    }
+    public boolean equals(Object other) {
+      if (other==null) { return false; }
+      if (! (other instanceof ClassNameAndPackageEntry)) return false;
+      ClassNameAndPackageEntry o = (ClassNameAndPackageEntry)other;
+      return ((getClassName().equals(o.getClassName())) &&
+              (getFullPackage().equals(o.getFullPackage())));
+    }
+    public int hashCode() { return getClassName().hashCode() * 31 + getFullPackage().hashCode(); }
+  }
+  
   /** Wrapper class for the "Go to File" and "Auto-Complete" dialog list entries.
     * Provides the ability to have the same OpenDefinitionsDocument in there multiple
     * times with different toString() results.
     */
-  private static class GoToFileListEntry implements Comparable<GoToFileListEntry> {
+  private static class GoToFileListEntry extends ClassNameAndPackageEntry {
     public final OpenDefinitionsDocument doc;
     protected String fullPackage = null;
     protected final String str;
@@ -1054,6 +1076,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     public String getFullPackage() {
       if (fullPackage!=null) { return fullPackage; }
+      fullPackage = "";
       if (doc!=null) {
         try {
           fullPackage = doc.getPackageNameFromDocument();
@@ -1063,34 +1086,10 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
       return fullPackage;
     }
+    public String getClassName() { return str; }
     public String toString() { return str; }
-    public int compareTo(GoToFileListEntry other) { return str.toLowerCase().compareTo(other.str.toLowerCase()); }
-    public boolean equals(Object other) {
-      if (other==null) { return false; }
-      if (! (other instanceof GoToFileListEntry)) return false;
-      return str.equals(((GoToFileListEntry)other).str);
-    }
-    public int hashCode() { return str.hashCode(); }
   }
-  /** Wrapper class for the "Auto-Complete" dialog list entries that have no document,
-    * e.g. Java API entries. */
-  private static class NoDocumentFileListEntry extends GoToFileListEntry {
-    public NoDocumentFileListEntry(String fullPkg, String s) {
-      super(null, s);
-      fullPackage = fullPkg;
-    }
-    public String getFullPackage() {
-      return fullPackage;
-    }
-    public boolean equals(Object other) {
-      if (other==null) { return false; }
-      if (! (other instanceof NoDocumentFileListEntry)) return false;
-      NoDocumentFileListEntry o = (NoDocumentFileListEntry)other;
-      return str.equals(o.str) && fullPackage.equals(o.fullPackage);
-    }
-    public int hashCode() { return str.hashCode() * 37 + fullPackage.hashCode(); }
-  }
-  
+
   /** Reset the position of the "Go to File" dialog. */
   public void resetGotoFileDialogPosition() {
     initGotoFileDialog();
@@ -1194,7 +1193,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                     info,
                                                     strategies,
                                                     actions,
-                                                    new GoToFileListEntry(null, "dummy")) {
+                                                    new GoToFileListEntry(null, "dummyGoto")) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
         }
@@ -1373,7 +1372,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Wrapper class for the "Open Javadoc" and "Auto Import" dialog list entries.
    * Provides the ability to have the same class name in there multiple times in different packages.
    */
-  private static class JavaAPIListEntry implements Comparable<JavaAPIListEntry> {
+  private static class JavaAPIListEntry extends ClassNameAndPackageEntry {
     private final String str, fullStr;
     private final URL url;
     public JavaAPIListEntry(String s, String full, URL u) {
@@ -1384,15 +1383,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public String toString() { return str; }
     public String getFullString() { return fullStr; }
     public URL getURL() { return url; }
-    public int compareTo(JavaAPIListEntry other) {
-      return str.toLowerCase().compareTo(other.str.toLowerCase());
-    }
-    public boolean equals(Object other) {
-      if (!(other instanceof JavaAPIListEntry)) return false;
-      return fullStr.equals(((JavaAPIListEntry)other).fullStr);
-    }
-    public int hashCode() {
-      return fullStr.hashCode();
+    public String getClassName() { return str; }
+    public String getFullPackage() {
+      int pos = fullStr.lastIndexOf('.');
+      if (pos>=0) { return fullStr.substring(0,pos+1); }
+      return "";
     }
   }  
   
@@ -1452,7 +1447,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                    info,
                                                    strategies,
                                                    actions,
-                                                   new JavaAPIListEntry("dummy", "dummy", null)) {
+                                                   new JavaAPIListEntry("dummyJavadoc", "dummyJavadoc", null)) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
         }
@@ -1663,38 +1658,49 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           String curMask = _completeWordDialog.getMask();
           if (_completeJavaAPICheckbox.isSelected()) {
             DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.TRUE);
-            List<GoToFileListEntry> l = _completeWordDialog.getList();
+            List<ClassNameAndPackageEntry> l = _completeWordDialog.getList();
             addJavaAPIToList(l);
             _completeWordDialog.setItems(true,l);
           }
           else {
             // unselected, remove Java API classes from list
-            List<GoToFileListEntry> l = _completeWordDialog.getList();
-            List<GoToFileListEntry> n = new ArrayList<GoToFileListEntry>();
-            for(GoToFileListEntry entry: l) {
-              if (!(entry instanceof NoDocumentFileListEntry)) { n.add(entry); }
+            List<ClassNameAndPackageEntry> l = _completeWordDialog.getList();
+            generateJavaAPIList();
+            if (_javaAPIList==null) {
+              DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
+              _completeJavaAPICheckbox.setSelected(false);
+              _completeJavaAPICheckbox.setEnabled(false);
+              List<ClassNameAndPackageEntry> n = new ArrayList<ClassNameAndPackageEntry>();
+              for(ClassNameAndPackageEntry entry: l) {
+                if (!(entry instanceof JavaAPIListEntry)) { n.add(entry); }
+              }
+              _completeWordDialog.setItems(true,n);
             }
-            _completeWordDialog.setItems(true,n);
+            else {
+              for(JavaAPIListEntry entry: _javaAPIList) { l.remove(entry); }
+              _completeWordDialog.setItems(true,l);
+            }
           }
           _completeWordDialog.setMask(curMask);
           _completeWordDialog.resetFocus();
         }
       });
       _completeJavaAPICheckbox.setMnemonic('j');
-      PredictiveInputFrame.InfoSupplier<GoToFileListEntry> info = 
-        new PredictiveInputFrame.InfoSupplier<GoToFileListEntry>() {
-        public String apply(GoToFileListEntry entry) {
+      PredictiveInputFrame.InfoSupplier<ClassNameAndPackageEntry> info = 
+        new PredictiveInputFrame.InfoSupplier<ClassNameAndPackageEntry>() {
+        public String apply(ClassNameAndPackageEntry entry) {
           // show full class name as information
           StringBuilder sb = new StringBuilder();
           sb.append(entry.getFullPackage());
-          sb.append(entry.toString());
+          sb.append(entry.getClassName());
           return sb.toString();
         }
       };
-      PredictiveInputFrame.CloseAction<GoToFileListEntry> okAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+      PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry> okAction =
+        new PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>() {
         public String getName() { return "OK"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
-        public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+        public Object apply(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
           if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
             try {
@@ -1718,7 +1724,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               
               if (!s.substring(start, loc).equals(p.getItem().toString())) {
                 odd.remove(start, loc-start);
-                odd.insertString(start, p.getItem().toString(), null);
+                odd.insertString(start, p.getItem().getClassName(), null);
               }
             }
             catch(BadLocationException ble) { /* ignore, just don't auto-complete */ }
@@ -1728,10 +1734,11 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           return null;
         }
       };
-      PredictiveInputFrame.CloseAction<GoToFileListEntry> fullAction = new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+      PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry> fullAction =
+        new PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>() {
         public String getName() { return "Fully Qualified"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, OptionConstants.MASK); }
-        public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+        public Object apply(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
           if (p.getItem() != null) {
             OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
             try {
@@ -1757,7 +1764,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                 odd.remove(start, loc-start);
                 StringBuilder sb = new StringBuilder();
                 sb.append(p.getItem().getFullPackage());
-                sb.append(p.getItem().toString());
+                sb.append(p.getItem().getClassName());
                 odd.insertString(start, sb.toString(), null);
               }
             }
@@ -1768,34 +1775,36 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
           return null;
         }
       };
-      PredictiveInputFrame.CloseAction<GoToFileListEntry> cancelAction = 
-        new PredictiveInputFrame.CloseAction<GoToFileListEntry>() {
+      PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry> cancelAction = 
+        new PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>() {
         public String getName() { return "Cancel"; }
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
-        public Object apply(PredictiveInputFrame<GoToFileListEntry> p) {
+        public Object apply(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
           hourglassOff();
           return null;
         }
       };
-      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>> strategies =
-        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>>();
-      strategies.add(new PredictiveInputModel.FragmentStrategy<GoToFileListEntry>());
-      strategies.add(new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>());
-      strategies.add(new PredictiveInputModel.RegExStrategy<GoToFileListEntry>());
-      List<PredictiveInputFrame.CloseAction<GoToFileListEntry>> actions
-        = new ArrayList<PredictiveInputFrame.CloseAction<GoToFileListEntry>>();
+      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<ClassNameAndPackageEntry>> strategies =
+        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<ClassNameAndPackageEntry>>();
+      strategies.add(new PredictiveInputModel.FragmentStrategy<ClassNameAndPackageEntry>());
+      strategies.add(new PredictiveInputModel.PrefixStrategy<ClassNameAndPackageEntry>());
+      strategies.add(new PredictiveInputModel.RegExStrategy<ClassNameAndPackageEntry>());
+      List<PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>> actions
+        = new ArrayList<PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>>();
       actions.add(okAction);
       actions.add(fullAction);
       actions.add(cancelAction);
       _completeWordDialog = 
-        new PredictiveInputFrame<GoToFileListEntry>(MainFrame.this,
-                                                    "Auto-Complete Word",
-                                                    true, // force
-                                                    true, // ignore case
-                                                    info,
-                                                    strategies,
-                                                    actions,
-                                                    new GoToFileListEntry(null, "dummy")) {
+        new PredictiveInputFrame<ClassNameAndPackageEntry>(MainFrame.this,
+                                                           "Auto-Complete Word",
+                                                           true, // force
+                                                           true, // ignore case
+                                                           info,
+                                                           strategies,
+                                                           actions,
+                                                           new GoToFileListEntry(new DummyOpenDefDoc() {
+        public String getPackageNameFromDocument() { return ""; }
+      }, "dummyComplete")) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
         }
@@ -1811,7 +1820,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   }
   
-  void addJavaAPIToList(List<GoToFileListEntry> list) {
+  void addJavaAPIToList(List<ClassNameAndPackageEntry> list) {
     generateJavaAPIList();
     if (_javaAPIList==null) {
       DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
@@ -1819,23 +1828,14 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       _completeJavaAPICheckbox.setEnabled(false);
     }
     else {
-      for(JavaAPIListEntry entry: _javaAPIList) {
-        String fn = entry.getFullString();
-        int pos = fn.lastIndexOf('.');
-        String pn = "";
-        if (pos>=0) {
-          pn = fn.substring(0,pos+1);
-          fn = fn.substring(pos+1);
-        }
-        list.add(new NoDocumentFileListEntry(pn,fn));
-      }
+      for(JavaAPIListEntry entry: _javaAPIList) { list.add(entry); }
     }
   }
   
   /** The "Complete File" dialog instance. */
   volatile PredictiveInputFrame<GoToFileListEntry> _completeFileDialog = null;
   /** The "Complete Word" dialog instance. */
-  volatile PredictiveInputFrame<GoToFileListEntry> _completeWordDialog = null;
+  volatile PredictiveInputFrame<ClassNameAndPackageEntry> _completeWordDialog = null;
   JCheckBox _completeJavaAPICheckbox = new JCheckBox("Java API");
 
   /** Complete the word the cursor is on. */
@@ -1845,14 +1845,15 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 
     _completeJavaAPICheckbox.setSelected(DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI));
     _completeJavaAPICheckbox.setEnabled(true);
-    GoToFileListEntry currentEntry = null;
-    ArrayList<GoToFileListEntry> list;
+    ClassNameAndPackageEntry currentEntry = null;
+    ArrayList<ClassNameAndPackageEntry> list;
     if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) &&
         (_completeClassList.size()>0)) {
-      list = _completeClassList;
+      list = new ArrayList<ClassNameAndPackageEntry>(_completeClassList.size());
+      list.addAll(_completeClassList);
     }
     else {
-      list = new ArrayList<GoToFileListEntry>(docs.size());
+      list = new ArrayList<ClassNameAndPackageEntry>(docs.size());
       for(OpenDefinitionsDocument d: docs) {
         if (d.isUntitled()) continue;
         String str = d.toString();
@@ -1869,9 +1870,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       addJavaAPIToList(list);
     }
     
-    PredictiveInputModel<GoToFileListEntry> pim = 
-      new PredictiveInputModel<GoToFileListEntry>(true, new PredictiveInputModel.PrefixStrategy<GoToFileListEntry>(),
-                                                  list);
+    PredictiveInputModel<ClassNameAndPackageEntry> pim = 
+      new PredictiveInputModel<ClassNameAndPackageEntry>(true, new PredictiveInputModel.PrefixStrategy<ClassNameAndPackageEntry>(),
+                                                         list);
     OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
     odd.acquireWriteLock();
     boolean uniqueMatch = true;
@@ -9147,7 +9148,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                    info,
                                                    strategies,
                                                    actions,
-                                                   new JavaAPIListEntry("dummy", "dummy", null)) {
+                                                   new JavaAPIListEntry("dummyImport", "dummyImport", null)) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }
         }
