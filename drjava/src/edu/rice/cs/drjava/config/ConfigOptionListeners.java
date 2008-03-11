@@ -182,7 +182,6 @@ public class ConfigOptionListeners implements OptionConstants {
   public static class SlaveJVMXMXListener implements OptionListener<String>, OptionConstants {
     protected JFrame _parent;
     public SlaveJVMXMXListener(JFrame parent) { _parent = parent; }
-    @SuppressWarnings("fallthrough")
     public void optionChanged(OptionEvent<String> oe) {
       sanitizeSlaveJVMXMX(_parent, oe.value);
       JOptionPane.showMessageDialog(_parent,
@@ -364,6 +363,8 @@ public class ConfigOptionListeners implements OptionConstants {
           // copy
           DrJava.getConfig().setSetting(MASTER_JVM_XMX, size);
         }
+        JOptionPane.showMessageDialog(parent,
+                                      "You will have to restart DrJava before the change takes effect.");
       }
     }
   }
@@ -373,6 +374,8 @@ public class ConfigOptionListeners implements OptionConstants {
     public MasterJVMXMXListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
       sanitizeMasterJVMXMX(_parent, oe.value);
+      JOptionPane.showMessageDialog(_parent,
+                                    "You will have to restart DrJava before the change takes effect.");
     }
   }
   

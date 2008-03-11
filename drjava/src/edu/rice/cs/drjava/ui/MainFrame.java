@@ -242,6 +242,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   /** Whether to display a prompt message before quitting. */
   private volatile boolean _promptBeforeQuit;
   
+  /** Listener for Interactions JVM */
+  final private ConfigOptionListeners.SlaveJVMXMXListener _slaveJvmXmxListener;
+
+  /** Listener for Main JVM */
+  final private ConfigOptionListeners.MasterJVMXMXListener _masterJvmXmxListener;
+  
   /** For opening files.  We have a persistent dialog to keep track of the last directory from which we opened. */
   private final JFileChooser _openChooser;
   
@@ -3181,10 +3187,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     config.addOptionListener(LOOK_AND_FEEL, new ConfigOptionListeners.LookAndFeelListener(_configFrame));
     OptionListener<String> slaveJVMArgsListener = new ConfigOptionListeners.SlaveJVMArgsListener(_configFrame);
     config.addOptionListener(SLAVE_JVM_ARGS, slaveJVMArgsListener);
-    config.addOptionListener(SLAVE_JVM_XMX, new ConfigOptionListeners.SlaveJVMXMXListener(_configFrame));
+    _slaveJvmXmxListener = new ConfigOptionListeners.SlaveJVMXMXListener(_configFrame);
+    config.addOptionListener(SLAVE_JVM_XMX, _slaveJvmXmxListener);
     OptionListener<String> masterJVMArgsListener = new ConfigOptionListeners.MasterJVMArgsListener(_configFrame);
     config.addOptionListener(MASTER_JVM_ARGS, masterJVMArgsListener);
-    config.addOptionListener(MASTER_JVM_XMX, new ConfigOptionListeners.MasterJVMXMXListener(_configFrame));
+    _masterJvmXmxListener = new ConfigOptionListeners.MasterJVMXMXListener(_configFrame);
+    config.addOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
     config.addOptionListener(JAVADOC_CUSTOM_PARAMS, new ConfigOptionListeners.JavadocCustomParamsListener(_configFrame));
     ConfigOptionListeners.sanitizeSlaveJVMArgs(this, config.getSetting(SLAVE_JVM_ARGS), slaveJVMArgsListener);
     ConfigOptionListeners.sanitizeSlaveJVMXMX(this, config.getSetting(SLAVE_JVM_XMX));
@@ -3268,6 +3276,35 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   public void setUpDrJavaProperties() {
     final String DEF_DIR = "${drjava.working.dir}";
+
+    // fake "Config" properties
+    PropertyMaps.ONLY.setProperty("Config", new EagerProperty("config.master.jvm.args.combined") {
+      public void update() {
+        StringBuilder sb = new StringBuilder(DrJava.getConfig().getSetting(MASTER_JVM_XMX));
+        if (sb.length()>0) { sb.append(" "); }
+        sb.append(DrJava.getConfig().getSetting(MASTER_JVM_ARGS));
+        _value = "-Xmx"+sb.toString().trim();
+      }
+      public void resetAttributes() {
+        _attributes.clear();
+      }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.master.jvm.args"))
+      .listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.master.jvm.xmx"));
+
+    PropertyMaps.ONLY.setProperty("Config", new EagerProperty("config.slave.jvm.args.combined") {
+      public void update() {
+        StringBuilder sb = new StringBuilder(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+        if (sb.length()>0) { sb.append(" "); }
+        sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
+        _value = "-Xmx"+sb.toString().trim();
+      }
+      public void resetAttributes() {
+        _attributes.clear();
+      }
+    }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.slave.jvm.args"))
+      .listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.slave.jvm.xmx"));
+
+    // Files
     PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.file") {
       public void update() {
         try {
@@ -7583,6 +7620,64 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
   }
   
+  /** Ask the user to increase the slave's max heap setting. */
+  void askToIncreaseSlaveMaxHeap() {
+    String value = "set to "+DrJava.getConfig().getSetting(SLAVE_JVM_XMX);
+    if (value.trim().length()==0) {
+      value = "not set, implying the system's default";
+    }
+    String res = JOptionPane.showInputDialog(MainFrame.this,
+                                             "Your program ran out of memory. You may try to enter a larger\n"+
+                                             "maximum heap size for the Interactions JVM. The maximum heap size is\n"+
+                                             "currently "+value+".",
+                                             DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+    if (res!=null) {
+      // temporarily make MainFrame the parent of the dialog that pops up
+      DrJava.getConfig().removeOptionListener(SLAVE_JVM_XMX, _slaveJvmXmxListener);
+      final ConfigOptionListeners.SlaveJVMXMXListener l = new ConfigOptionListeners.SlaveJVMXMXListener(MainFrame.this);
+      DrJava.getConfig().addOptionListener(SLAVE_JVM_XMX, l);
+      // change the setting
+      DrJava.getConfig().setSetting(SLAVE_JVM_XMX,res.trim());
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          // reinstall ConfigFrame as parent
+          DrJava.getConfig().removeOptionListener(SLAVE_JVM_XMX, l);
+          DrJava.getConfig().addOptionListener(SLAVE_JVM_XMX, _slaveJvmXmxListener);
+        }
+      });
+    }
+    _model.getInteractionsModel().resetLastErrors();
+  }
+
+  /** Ask the user to increase the master's max heap setting. */
+  void askToIncreaseMasterMaxHeap() {
+    String value = "set to "+DrJava.getConfig().getSetting(MASTER_JVM_XMX);
+    if (value.trim().length()==0) {
+      value = "not set, implying the system's default";
+    }
+    String res = JOptionPane.showInputDialog(MainFrame.this,
+                                             "DrJava ran out of memory. You may try to enter a larger\n"+
+                                             "maximum heap size for the Main JVM. The maximum heap size is\n"+
+                                             "currently "+value+".",
+                                             DrJava.getConfig().getSetting(MASTER_JVM_XMX));
+    if (res!=null) {
+      // temporarily make MainFrame the parent of the dialog that pops up
+      DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
+      final ConfigOptionListeners.MasterJVMXMXListener l = new ConfigOptionListeners.MasterJVMXMXListener(MainFrame.this);
+      DrJava.getConfig().addOptionListener(MASTER_JVM_XMX, l);
+      // change the setting
+      DrJava.getConfig().setSetting(MASTER_JVM_XMX,res.trim());
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          // reinstall ConfigFrame as parent
+          DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, l);
+          DrJava.getConfig().addOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
+        }
+      });
+    }
+    _model.getInteractionsModel().resetLastErrors();
+  }
+  
   /** Inner class to listen to all events in the model. */
   private class ModelListener implements GlobalModelListener {
     
@@ -7842,6 +7937,9 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
               String undefinedClassName = lastError.substring(lastError.indexOf('\'')+1,
                                                               lastError.lastIndexOf('\''));
               _showAutoImportDialog(undefinedClassName);
+            }
+            else if (lastError.startsWith("java.lang.OutOfMemoryError")) {
+              askToIncreaseSlaveMaxHeap();
             }
           }
         }

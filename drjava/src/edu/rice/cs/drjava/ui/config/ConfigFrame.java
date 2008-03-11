@@ -351,6 +351,9 @@ public class ConfigFrame extends JFrame {
     PanelTreeNode colorNode = _createPanel("Colors", displayNode);
     _setupColorPanel(colorNode.getPanel());
 
+    PanelTreeNode positionsNode = _createPanel("Window Positions", displayNode);
+    _setupPositionsPanel(positionsNode.getPanel());
+
     PanelTreeNode keystrokesNode = _createPanel("Key Bindings");
     _setupKeyBindingsPanel(keystrokesNode.getPanel());
     
@@ -428,73 +431,13 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.LINEENUM_ENABLED,
                                                   "Show All Line Numbers", this,
                                                   "Whether to show line numbers on the left side of the Definitions Pane."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WINDOW_STORE_POSITION,
-                                                  "Save Main Window Position", this,
-                                                  "Whether to save and restore the size and position of the main window."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_CLIPBOARD_HISTORY_STORE_POSITION,
-                                                  "Save \"Clipboard History\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Clipboard History\" dialog."));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { _mainFrame.resetClipboardHistoryDialogPosition(); }
-    }, "Reset \"Clipboard History\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.CLIPBOARD_HISTORY_SIZE,
                                                   "Size of Clipboard History", this,
                                                   "Determines how many entries are kept in the clipboard history."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_STORE_POSITION,
-                                                  "Save \"Go to File\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Go to File\" dialog."));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { _mainFrame.resetGotoFileDialogPosition(); }
-    }, "Reset \"Go to File\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_FULLY_QUALIFIED,
                                                   "Display Fully-Qualified Class Names in \"Go to File\" Dialog", this,
                                                   "<html>Whether to also display fully-qualified class names in the \"Go to File\" dialog.<br>"+
                                                          "Enabling this option on network drives might cause the dialog to display after a slight delay.</html>"));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_WORD_STORE_POSITION,
-                                                  "Save \"Auto-Complete Word\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Auto-Complete Word\" dialog."));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { _mainFrame.resetCompleteWordDialogPosition(); }
-    }, "Reset \"Auto-Complete Word\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_JAROPTIONS_STORE_POSITION,
-                                                  "Save \"Create Jar File from Project\" Dialog Position", this,
-                                                  "Whether to save and restore the position of the \"Create Jar File from Project\" dialog."));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        _mainFrame.resetJarOptionsDialogPosition();
-      }
-    }, "Reset \"Create Jar File from Project\" Dialog Position", this, "This resets the dialog position to its default values."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
-                                                  "Save \"Open Javadoc\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog."));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { _mainFrame.resetOpenJavadocDialogPosition(); }
-    }, "Reset \"Open Javadoc\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_STORE_POSITION,
-                                                  "Save \"Auto Import\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Auto Import\" dialog."));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
-    }, "Reset \"Auto Import\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_EXTERNALPROCESS_STORE_POSITION,
-                                                  "Save \"Execute External Process\" Dialog Position", this,
-                                                  "Whether to save and restore the position of the \"Execute External Process\" dialog."));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        _mainFrame.resetExecuteExternalProcessPosition();
-      }
-    }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_EDITEXTERNALPROCESS_STORE_POSITION,
-                                                  "Save \"Edit External Process\" Dialog Position", this,
-                                                  "Whether to save and restore the position of the \"Edit External Process\" dialog."));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        _mainFrame.resetEditExternalProcessPosition();
-      }
-    }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
-                                                  "Save \"Open Javadoc\" Dialog Position", this,
-                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_SCAN_CLASS_FILES,
                                                   "Scan Class Files After Each Compile For Auto-Completion and Auto-Import", this,
                                                   "<html>Whether to scan the class files after a compile to generate class names<br>"+
@@ -575,6 +518,72 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
 
+  /** Add all of the components for the Positions panel of the preferences window. */
+  private void _setupPositionsPanel(ConfigPanel panel) {
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.WINDOW_STORE_POSITION,
+                                                  "Save Main Window Position", this,
+                                                  "Whether to save and restore the size and position of the main window."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_CLIPBOARD_HISTORY_STORE_POSITION,
+                                                  "Save \"Clipboard History\" Dialog Position", this,
+                                                  "Whether to save and restore the size and position of the \"Clipboard History\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) { _mainFrame.resetClipboardHistoryDialogPosition(); }
+    }, "Reset \"Clipboard History\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_STORE_POSITION,
+                                                  "Save \"Go to File\" Dialog Position", this,
+                                                  "Whether to save and restore the size and position of the \"Go to File\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) { _mainFrame.resetGotoFileDialogPosition(); }
+    }, "Reset \"Go to File\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_WORD_STORE_POSITION,
+                                                  "Save \"Auto-Complete Word\" Dialog Position", this,
+                                                  "Whether to save and restore the size and position of the \"Auto-Complete Word\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) { _mainFrame.resetCompleteWordDialogPosition(); }
+    }, "Reset \"Auto-Complete Word\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_JAROPTIONS_STORE_POSITION,
+                                                  "Save \"Create Jar File from Project\" Dialog Position", this,
+                                                  "Whether to save and restore the position of the \"Create Jar File from Project\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _mainFrame.resetJarOptionsDialogPosition();
+      }
+    }, "Reset \"Create Jar File from Project\" Dialog Position", this, "This resets the dialog position to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
+                                                  "Save \"Open Javadoc\" Dialog Position", this,
+                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) { _mainFrame.resetOpenJavadocDialogPosition(); }
+    }, "Reset \"Open Javadoc\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_STORE_POSITION,
+                                                  "Save \"Auto Import\" Dialog Position", this,
+                                                  "Whether to save and restore the size and position of the \"Auto Import\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
+    }, "Reset \"Auto Import\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_EXTERNALPROCESS_STORE_POSITION,
+                                                  "Save \"Execute External Process\" Dialog Position", this,
+                                                  "Whether to save and restore the position of the \"Execute External Process\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _mainFrame.resetExecuteExternalProcessPosition();
+      }
+    }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_EDITEXTERNALPROCESS_STORE_POSITION,
+                                                  "Save \"Edit External Process\" Dialog Position", this,
+                                                  "Whether to save and restore the position of the \"Edit External Process\" dialog."));
+    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _mainFrame.resetEditExternalProcessPosition();
+      }
+    }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION,
+                                                  "Save \"Open Javadoc\" Dialog Position", this,
+                                                  "Whether to save and restore the size and position of the \"Open Javadoc\" dialog."));
+    panel.displayComponents();
+  }
+
+  
   /**
    * Adds all of the components for the Key Bindings panel of the preferences window.
    */

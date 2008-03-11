@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.JButton;
 import java.util.List;
 import java.util.ArrayList;
+import javax.swing.JFrame;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
@@ -91,6 +92,23 @@ public class DrJavaErrorHandler {
   public static void record(final Throwable thrown) {
     SwingUtil.invokeLater(new Runnable() {
       public void run() {
+        if (thrown instanceof OutOfMemoryError) {
+          // if this is an OutOfMemoryError inside DrJava, try to suggest to increase Main JVM's max heap
+          Runtime.getRuntime().gc();
+          JFrame f = DrJavaErrorWindow.getFrame();
+          if (f instanceof MainFrame) {
+            MainFrame mf = (MainFrame)f;
+            mf.askToIncreaseMasterMaxHeap();
+          }
+        }
+        else if (thrown instanceof com.sun.jdi.VMOutOfMemoryException) {
+          // if this is an VMOutOfMemoryException, suggest to increase Interaction JVM's max heap
+          JFrame f = DrJavaErrorWindow.getFrame();
+          if (f instanceof MainFrame) {
+            MainFrame mf = (MainFrame)f;
+            mf.askToIncreaseSlaveMaxHeap();
+          }
+        }
         _errors.add(thrown);
         if (_errorsButton != null) {
           _errorsButton.setVisible(true);
