@@ -77,9 +77,9 @@ public final class DebugUtil {
    * <p>Initialize the logs based on the settings of system properties {@code plt.debug.log} and {@code plt.error.log}.
    * The following property values, describing log types, are supported:
    * <ul>
-   * <li>{@code System.out}: A {@link SystemOutLog}</li>
+   * <li>{@code System.out}: A {@link SystemOutLog}; specific charsets can be specified: {@code System.out:UTF-8}</li>
    * <li>{@code stdout}: An alias for {@code System.out}</li>
-   * <li>{@code System.err}: A {@link SystemErrLog}</li>
+   * <li>{@code System.err}: A {@link SystemErrLog}; specific charsets can be specified: {@code System.out:UTF-8}</li>
    * <li>{@code stderr}: An alias for {@code System.err}</li>
    * <li>{@code file}: A {@link FileLog}, by default writing to {@code debug-log.txt} or 
    *     {@code error-log.txt}; specific files can be specified, as well: {@code file:my-log.txt}.  A working
@@ -138,20 +138,33 @@ public final class DebugUtil {
         }
       }
       if (result == null) {
-        if (type.equals("void")) { result = VoidLog.INSTANCE; }
-        else if (type.equals("System.out")) { result = new SystemOutLog(); }
-        else if (type.equals("stdout")) { result = new SystemOutLog(); }
-        else if (type.equals("System.err")) { result = new SystemErrLog(); }
-        else if (type.equals("stderr")) { result = new SystemErrLog(); }
-        else if (type.equals("file")) { result = makeFileLog(tag.toLowerCase() + "-log.txt"); }
-        else if (type.startsWith("file:")) { result = makeFileLog(type.substring(5)); }
-        else if (type.equals("assert")) { result = new AssertEmptyLog(); }
-        else if (type.equals("popup")) { result = new PopupLog(tag + " Log"); }
-        else if (type.equals("tree")) { result = new TreeLog(tag + " Log"); }
-        else { result = VoidLog.INSTANCE; }
+        try {
+          if (type.equals("void")) { result = VoidLog.INSTANCE; }
+          else if (type.equals("System.out")) { result = new SystemOutLog(); }
+          else if (type.startsWith("System.out:")) { result = new SystemOutLog(getParam(type)); }
+          else if (type.equals("stdout")) { result = new SystemOutLog(); }
+          else if (type.startsWith("stdout:")) { result = new SystemOutLog(getParam(type)); }
+          else if (type.equals("System.err")) { result = new SystemErrLog(); }
+          else if (type.startsWith("System.err:")) { result = new SystemErrLog(getParam(type)); }
+          else if (type.equals("stderr")) { result = new SystemErrLog(); }
+          else if (type.startsWith("stderr")) { result = new SystemErrLog(getParam(type)); }
+          else if (type.equals("file")) { result = makeFileLog(tag.toLowerCase() + "-log.txt"); }
+          else if (type.startsWith("file:")) { result = makeFileLog(getParam(type)); }
+          else if (type.equals("assert")) { result = new AssertEmptyLog(); }
+          else if (type.equals("popup")) { result = new PopupLog(tag + " Log"); }
+          else if (type.equals("tree")) { result = new TreeLog(tag + " Log"); }
+          else { result = VoidLog.INSTANCE; }
+        }
+        catch (Exception e) { result = VoidLog.INSTANCE; }
       }
       return result;
     }
+  }
+  
+  /** Extract the parameter of a log property -- the substring following a colon; null if there is no colon */
+  private static String getParam(String logProperty) {
+    String result = TextUtil.removePrefix(logProperty, ':');
+    return (result == logProperty) ? null : result;
   }
   
   private static Log makeFileLog(String name) {

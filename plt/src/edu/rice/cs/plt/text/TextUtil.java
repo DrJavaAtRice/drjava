@@ -220,6 +220,43 @@ public final class TextUtil {
     return result;
   }
   
+  /**
+   * Extract the portion of {@code s} before the first occurance of the given delimiter.  {@code s} if the
+   * delimiter is not found.
+   */
+  public static String prefix(String s, int delim) {
+    int index = s.indexOf(delim);
+    return (index == -1) ? s : s.substring(0, index);
+  }
+  
+  /**
+   * Extract the portion of {@code s} after the first occurance of the given delimiter.  {@code s} if the
+   * delimiter is not found.
+   */
+  public static String removePrefix(String s, int delim) {
+    int index = s.indexOf(delim);
+    return (index == -1) ? s : s.substring(index+1);
+  }
+    
+  /**
+   * Extract the portion of {@code s} after the last occurance of the given delimiter.  {@code s} if the
+   * delimiter is not found.
+   */
+  public static String suffix(String s, int delim) {
+    int index = s.lastIndexOf(delim);
+    return (index == -1) ? s : s.substring(index+1);
+  }
+  
+  /**
+   * Extract the portion of {@code s} before the last occurance of the given delimiter.  {@code s} if the
+   * delimiter is not found.
+   */
+  public static String removeSuffix(String s, int delim) {
+    int index = s.lastIndexOf(delim);
+    return (index == -1) ? s : s.substring(0, index);
+  }
+    
+  
   public static boolean isDecimalDigit(char c) { return c >= '0' && c <= '9'; }
   
   public static boolean isOctalDigit(char c) { return c >= '0' && c <= '7'; }

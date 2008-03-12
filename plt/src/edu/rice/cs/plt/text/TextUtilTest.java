@@ -91,4 +91,31 @@ public class TextUtilTest extends TestCase {
     assertFalse(containsIgnoreCase("Foo", "Food"));
   }
   
+  public void testPrefixSuffix() {
+    assertEquals("pre", prefix("pre:body:suf", ':'));
+    assertEquals("body:suf", removePrefix("pre:body:suf", ':'));
+    assertEquals("suf", suffix("pre:body:suf", ':'));
+    assertEquals("pre:body", removeSuffix("pre:body:suf", ':'));
+
+    assertEquals("abc", prefix("abc", ':'));
+    assertEquals("abc", removePrefix("abc", ':'));
+    assertEquals("abc", suffix("abc", ':'));
+    assertEquals("abc", removeSuffix("abc", ':'));
+
+    assertEquals("", prefix("", ':'));
+    assertEquals("", removePrefix("", ':'));
+    assertEquals("", suffix("", ':'));
+    assertEquals("", removeSuffix("", ':'));
+
+    assertEquals("", prefix(":", ':'));
+    assertEquals("", removePrefix(":", ':'));
+    assertEquals("", suffix(":", ':'));
+    assertEquals("", removeSuffix(":", ':'));
+
+    assertEquals("pre", prefix("pre:", ':'));
+    assertEquals("", removePrefix("pre:", ':'));
+    assertEquals("", suffix("pre:", ':'));
+    assertEquals("pre", removeSuffix("pre:", ':'));
+  }
+  
 }
