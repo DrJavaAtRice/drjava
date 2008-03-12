@@ -54,23 +54,19 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
  */
 public class QuestionStartingNewStmt extends IndentRuleQuestion {
   
-  /**
-   * Constructs a new rule to determine if the current line is
-   * the start of a new statement.
-   * @param yesRule Rule to use if this rule holds
-   * @param noRule Rule to use if this rule does not hold
-   */
+  /** Constructs a new rule to determine if the current line is the start of a new statement.
+    * @param yesRule Rule to use if this rule holds
+    * @param noRule Rule to use if this rule does not hold
+    */
   public QuestionStartingNewStmt(IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
   }
  
-  /**
-   * Determines if the previous non-whitespace character not on
-   * this line was one of the following: ';', '{', '}' or 0.
-   * Ignores characters in quotes and comments.
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @return true if this node's rule holds.
-   */
+  /** Determines if the previous non-whitespace character not on this line was one of the following: ';', '{', '}' 
+    * or nothing.  Ignores characters in quotes and comments.
+    * @param doc AbstractDJDocument containing the line to be indented.
+    * @return true if this node's rule holds.
+    */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     
     char[] delims = {';', '{', '}'};
@@ -84,24 +80,19 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
       throw new UnexpectedException(e);
     }
     
-    // For 0, imaginary delimiter at position -1
-    if (prevDelimiterPos == -1) {
-      prevDelimiterPos = -1;
-    }
+    // If no previous delimited exists, imaginary delimiter at position -1
     
     // Delimiter must be at the end of its line (ignoring whitespace & comments)
     int firstNonWSAfterDelimiter;
     try {
       firstNonWSAfterDelimiter = doc.getFirstNonWSCharPos(prevDelimiterPos+1);
       // will return ERROR_INDEX (-1) if we hit the end of the document
-    } catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+    } 
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
     
     // If the first non-WS character is after the beginning of the line
     // or we reached the end of the document, then we are starting a new statement.
-    return (firstNonWSAfterDelimiter >= lineStart
-              || firstNonWSAfterDelimiter == -1);
+    return (firstNonWSAfterDelimiter >= lineStart || firstNonWSAfterDelimiter == -1);
   }
 }
 

@@ -75,12 +75,15 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    */
   void setBlockOffset(int offset) { _cursor.setBlockOffset(offset); }
   
-  /** Package private absolute offset for tests. We don't keep track of absolute offset as it causes too much confusion
-   *  and trouble.
-   */
-  int absOffset() {
-    int off = _cursor.getBlockOffset();
-    TokenList.Iterator it = _cursor._copy();
+  /** Absolute offset for testing purposes. We don't keep track of absolute offset as it causes too much confusion
+    * and trouble.
+    */
+  public int absOffset() { return absOffset(_cursor); }
+ 
+  /** Absolute offset of the specified iterator for testing purposes. */
+  public int absOffset(TokenList.Iterator cursor) {
+    int off = cursor.getBlockOffset();
+    TokenList.Iterator it = cursor._copy();
     if (! it.atStart()) it.prev();
     
     while (! it.atStart()) {
@@ -90,6 +93,9 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     it.dispose();
     return off;
   }
+  
+  /* @return the shadowing state of _cursor; only makes sense for ReducedModelComment. */
+  public ReducedModelState getState() { return _cursor.getStateAtCurrent(); }
   
   /** A toString() replacement for testing - easier to read. */
   public String simpleString() {
@@ -190,15 +196,6 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return _cursor._copy();
   }
   
-  /**
-   * Wrapper for TokenList.Iterator.getStateAtCurrent that returns the current 
-   * state for some iterator.
-   * Convenience method to return the current state in the cursor iterator.
-   */
-  protected ReducedModelState getStateAtCurrent() {
-    return _cursor.getStateAtCurrent();
-  }
-
   /** Determines if there is a Gap immediately to the right of the cursor. */
   protected boolean _gapToRight() {
     // Before using, make sure not at last, or tail.
@@ -229,7 +226,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    *  @param length size of gap to insert
    */
   protected void _insertNewGap(int length) {
-    _cursor.insert(new Gap(length, getStateAtCurrent()));
+    _cursor.insert(new Gap(length, _cursor.getStateAtCurrent()));
     _cursor.next();
     _cursor.setBlockOffset(0);
   }
@@ -263,5 +260,16 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   protected void prev() {
     _cursor.prev();
   }
-
+  
+  /** Determines whether the char at index pos with text is the start of a comment:  "/*" or "//" */
+  public static boolean isStartOfComment(String text, int pos) {
+    char currChar = text.charAt(pos);
+    if (currChar == '/') {
+      try {
+        char afterCurrChar = text.charAt(pos + 1);
+        if ((afterCurrChar == '/') || (afterCurrChar == '*'))  return true;
+      } catch (StringIndexOutOfBoundsException e) { }
+    }
+    return false;
+  }
 }

@@ -1468,6 +1468,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     act   = _defModel._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr));
     assertEquals("index at "+substr+" exp=`"+exp+"`, act=`"+act+"`", exp, act);
 
+//    SySystem.err.println(NESTED_CLASSES_TEXT);
     substr = "{ /*Test$5*/";
     exp    = 5;
     act   = _defModel._getAnonymousInnerClassIndex(NESTED_CLASSES_TEXT.indexOf(substr));

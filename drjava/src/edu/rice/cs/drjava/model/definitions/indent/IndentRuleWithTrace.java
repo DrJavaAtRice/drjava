@@ -42,13 +42,12 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 import java.util.Vector;
 import java.io.PrintStream;
 
-/**
- * This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
- * also does some of the work, and any subclass may substitute its own version of getRuleName()
- * Note: traceing is disabled by default
- * @version $Id$
- */
-public abstract class IndentRuleWithTrace implements IndentRule{
+/** This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
+  * also does some of the work, and any subclass may substitute its own version of getRuleName()
+  * Note: traceing is disabled by default
+  * @version $Id$
+  */
+public abstract class IndentRuleWithTrace implements IndentRule {
 
   private static Vector<String> trace = null;
   private static boolean startOver = true;
@@ -74,29 +73,22 @@ public abstract class IndentRuleWithTrace implements IndentRule{
     IndentRuleWithTrace.ruleTraceEnabled = ruleTraceEnabled;
   }
 
-  static Vector<String> getTrace() {
-    return trace;
-  }
+  static Vector<String> getTrace() { return trace; }
 
-  /**
-   * This rule just adds to the trace kept in trace
-   */
+  /** This rule just adds to the trace kept in trace */
   protected static void _addToIndentTrace(String ruleName, String direction, boolean terminus) {
     if (ruleTraceEnabled) {
-      if (startOver) {
- trace = new Vector<String>();
-      }
+      if (startOver) trace = new Vector<String>();
       startOver = terminus;
       trace.add(ruleName + " " + direction);
     }
   }
 
-
-  /** Properly indents the line that the current position is on. Replaces all whitespace characters at the beginning of 
-    * the line with the appropriate spacing or characters.
-    * @param doc AbstractDJDocument containing the line to be indented.
-    * @param pos ?
-    * @param reason The reason that the indentation is taking place
+  /** Properly indents the line identified by pos. Replaces all whitespace characters at the beginning of the line with
+    * the appropriate spacing or characters.
+    * @param doc  the AbstractDJDocument containing the line to be indented.
+    * @param pos  the position identifying the line to be indented
+    * @param reason  the reason that the indentation is taking place
     * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
   public boolean indentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
@@ -108,6 +100,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
     return false;
   }
 
+  /** This method does not indent the current line! */
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
 

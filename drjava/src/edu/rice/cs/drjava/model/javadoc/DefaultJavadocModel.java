@@ -141,7 +141,6 @@ public class DefaultJavadocModel implements JavadocModel {
     * model provides the package info.  Must run in the event-handling thread.
     * @param select a command object for selecting a directory and warning a user about bad input
     * @param saver a command object for saving a document (if it moved/changed)
-    * @param classPath a collection of classpath elements to be used by Javadoc
     * @throws IOException if there is a problem manipulating files
     */
   public void javadocAll(DirectorySelector select, final FileSaveSelector saver) throws IOException {
@@ -245,8 +244,6 @@ public class DefaultJavadocModel implements JavadocModel {
     * which is passed to _javadocDocuemntWorker, which is passed to a subsequent javadocEnded event.
     * @param doc Document to generate Javadoc for
     * @param saver a command object for saving the document (if it moved/changed)
-    * @param classPath a collection of classpath elements to be used by Javadoc
-    *
     * @throws IOException if there is a problem manipulating files
     */
   public void javadocDocument(final OpenDefinitionsDocument doc, final FileSaveSelector saver) throws IOException {

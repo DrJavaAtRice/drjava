@@ -72,8 +72,8 @@ import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Manages a remote JVM.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Name of the class to use in the remote JVM. */
   private static final String SLAVE_CLASS_NAME = "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";

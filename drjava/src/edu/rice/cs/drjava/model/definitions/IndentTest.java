@@ -1011,7 +1011,8 @@ public final class IndentTest extends DrJavaTestCase {
       "}\n" +
       "\n" +
       "}\n" +
-      ");\n";
+      ");\n" +
+    "foo.bar();\n";
     String indented =
       "addWindowListener(new WindowAdapter() {\n" +
       "  public void windowClosing(WindowEvent e) {\n" +
@@ -1022,16 +1023,41 @@ public final class IndentTest extends DrJavaTestCase {
       "  }\n" +
       "  \n" +
       "}\n" +
-      ");\n";
+      ");\n" +
+      "foo.bar();\n";
 
 
     doc.insertString(0, text, null);
     _assertContents(text, doc);
+//    System.err.println("Original text:\n" + text);
+//    System.err.println("Indented text:\n" + indented);
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
+//    fail("Asserted failure");
   }
 
 
+//  public void testParenthesizedAnonymousInnerClass() throws BadLocationException {
+//    String text = "addActionListener(new ActionListener() {\n" +
+//      "public void actionPerformed(ActionEvent e) {\n" +
+//        "config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.FULL_JAVA);\n" +
+//      "}});\n" +
+//      "group.add(rbMenuItem);\n";
+//    String indented = "addActionListener(new ActionListener() {\n" +
+//      "  public void actionPerformed(ActionEvent e) {\n" +
+//       "    config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.FULL_JAVA);\n" +
+//      "}});\n" +
+//      "group.add(rbMenuItem);\n";
+//    doc.insertString(0, text, null);
+//    _assertContents(text, doc);
+////    System.err.println("Original text:\n" + text);
+////    System.err.println("Indented text:\n" + indented);
+//    doc.indentLines(0, doc.getLength());
+//    System.err.println("Computed result:\n" + doc.getText());
+////    fail("Asserted failure");
+//    _assertContents(indented, doc);
+//  }
+  
 //  /** Regression test for Bug #627753.  Uncomment when it is fixed.
 //   */
 //  public void testNestedUnbracedFor() throws BadLocationException {
@@ -1045,6 +1071,8 @@ public final class IndentTest extends DrJavaTestCase {
 //      "    System.out.println(a + b);";
 //    doc.insertString(0, text, null);
 //    _assertContents(text, doc);
+//    System.err.println("Original text:\n" + text);
+//    System.err.println("Indented text:\n" + indented);
 //    doc.indentLines(0, doc.getLength());
 //    _assertContents(indented, doc);
 //    doc.remove(0,doc.getLength() - 1);

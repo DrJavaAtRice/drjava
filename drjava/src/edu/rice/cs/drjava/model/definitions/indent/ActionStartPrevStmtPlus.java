@@ -71,30 +71,27 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     String indent = "";
     int here = doc.getCurrentLocation();
     
-    // Find end of previous statement (or end of case statement)
+    // Find end of previous statement, immediately enclosing brace, or end of case statement
     char[] delims = {';', '{', '}'};
-    int lineStart = doc.getLineStartPos(here);
+    int lineStart = doc.getLineStartPos(here);  // find start of current line
     int prevDelimiterPos;
-    try {
-      prevDelimiterPos = doc.findPrevDelimiter(lineStart, delims);
-    } catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
+    try { prevDelimiterPos = doc.findPrevDelimiter(lineStart, delims); }  // find pos of delimiter preceding line start
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
     
-    // For 0, align to left margin
+    // If no preceding delimiter found, align to left margin
     if (prevDelimiterPos <= 0) {
       doc.setTab(_suffix, here);
       return supResult;
     }
     
     try {
-      char delim = doc.getText(prevDelimiterPos, 1).charAt(0);
+      char delim = doc.getText(prevDelimiterPos, 1).charAt(0);    // get delimiter char
       char[] ws = {' ', '\t', '\n', ';'};
       if (delim == ';') {
-        int testPos = doc.findPrevCharPos(prevDelimiterPos, ws);
-        if (doc.getText(testPos,1).charAt(0) == '}') {
-          prevDelimiterPos = testPos;
+        int testPos = doc.findPrevCharPos(prevDelimiterPos, ws);  // find char preceding ';' delimiter
+        char testDelim = doc.getText(testPos,1).charAt(0);
+        if ( testDelim == '}' || testDelim == ')') {
+          prevDelimiterPos = testPos;                             // if this char is '}' or ')', use it as delimiter
         }
       }
     } catch (BadLocationException e) {
@@ -105,51 +102,38 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
       // Jump over {-} region if delimiter was a close brace.
       char delim = doc.getText(prevDelimiterPos, 1).charAt(0);
       
-      if (delim == '}') {
+      if (delim == '}' || delim == ')') {
         //BraceReduction reduced = doc.getReduced();
         //we're pretty sure the doc is in sync.
-        doc.resetReducedModelLocation();
+//        doc.resetReducedModelLocation();  // why reset the reduced model comment walker?
         
         int dist = prevDelimiterPos - here + 1;
         
-        doc.move(dist);
-        prevDelimiterPos -= doc.balanceBackward() - 1;
-        doc.move(-dist);
+        assert doc.getCurrentLocation() == here;
+        doc.setCurrentLocation(prevDelimiterPos + 1);   // move cursor to right of '}' or ')' delim
+        prevDelimiterPos -= doc.balanceBackward() - 1;  // use matching '{' or '(' as delim
+        doc.setCurrentLocation(here);
         
+        assert doc.getText(prevDelimiterPos, 1).charAt(0) == '{' || 
+          doc.getText(prevDelimiterPos, 1).charAt(0) == '(';
       }
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     
     
     // Get indent of prev statement
-    try {
-      // Include colons as end of statement (ie. "case")
-      char[] indentDelims;
-      char[] indentDelimsWithColon = {';', '{', '}', ':'};
-      char[] indentDelimsWithoutColon = {';', '{', '}'};
-      if (_useColon) indentDelims = indentDelimsWithColon;
-      else indentDelims = indentDelimsWithoutColon;
-      
-      indent = doc.getIndentOfCurrStmt(prevDelimiterPos, indentDelims);
-      
-    } catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+    // Include colons as end of statement (ie. "case")
+    char[] indentDelims;
+    char[] indentDelimsWithColon = {';', '{', '}', ':'};
+    char[] indentDelimsWithoutColon = {';', '{', '}'};
+    if (_useColon) indentDelims = indentDelimsWithColon;
+    else indentDelims = indentDelimsWithoutColon;
+    
+    indent = doc.getIndentOfCurrStmt(prevDelimiterPos, indentDelims);
     
     indent = indent + _suffix;
     doc.setTab(indent, here);
     return supResult;
   }
-
-//  private boolean _isPrevNonWSCharEqualTo(AbstractDJDocument doc,int pos,char c) {
-//    try {
-//      int prevPos = doc.findPrevNonWSCharPos(pos);
-//      if (prevPos < 0) return false;
-//      return (doc.getText(prevPos,1).charAt(0) == c);
-//    }
-//    catch (BadLocationException e) {
-//      return false;
-//    }
-//  }
 }
 

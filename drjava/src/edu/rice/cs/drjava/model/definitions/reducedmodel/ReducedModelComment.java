@@ -140,11 +140,10 @@ public class ReducedModelComment extends AbstractReducedModel {
     else _checkPreviousInsertSpecial(special);
   }
 
-  /**
-   * Checks before point of insertion to make sure we don't need to combine.
-   * Delegates work to _checkPreviousInsertBackSlash and _checkPreviousInsertCommentChar,
-   * depending on what's being inserted into the document.
-   */
+  /** Checks before point of insertion to make sure we don't need to combine.
+    * Delegates work to _checkPreviousInsertBackSlash and _checkPreviousInsertCommentChar,
+    * depending on what's being inserted into the document.
+    */
   private void _checkPreviousInsertSpecial(String special) {
     if (special.equals("\\")) {
       _checkPreviousInsertBackSlash();
@@ -335,6 +334,11 @@ public class ReducedModelComment extends AbstractReducedModel {
     _cursor.next();
     _cursor.setBlockOffset(0);
   }
+  
+  /** Returns the state of the _cursor iterator.  */
+  public ReducedModelState getStateAtCurrent() { return _cursor.getStateAtCurrent(); }
+  
+  public int walkerOffset() { return absOffset(_walker); }
 
   /**
    * Helper function for insertNewQuote.  In the case where a backslash
@@ -429,9 +433,32 @@ public class ReducedModelComment extends AbstractReducedModel {
     return;
   }
 
+   /** @return true if the current token is shadowed by a comment or quotation.  Note: returns false for the "brace" 
+     * opening a line, block comment, or quotation. */
+   public boolean isShadowed() {
+//     ReducedToken curToken = _cursor.current();
+     return getStateAtCurrent() != FREE /* || curToken.isLineComment() || curToken.isBlockCommentStart() */; 
+   }
 
+   public boolean isWeaklyShadowed() { return isShadowed() || isOpenComment(); }
+   
+   public boolean isOpenComment() {
+     if (_cursor.atStart() || ! _cursor.atEnd()) return false;
+     ReducedToken curToken = _cursor.current();
+     return curToken.isCommentStart();
+   }
+   
+ /* The walker design is an ugly kludge.  The reduced model consists of two separate TokenLists, a reduced "comment"
+  * and a reduced "brace" model.  There are glued together in the class ReducedModelControl.  In brace matching, the
+  * reduced brace model is dominant but walking through this TokenList is not sufficient because some braces can be
+  * shadowed by comments or quotation marks.  This information is stored in the reduced comment model.  ReducedModelControl
+  * should support an iterator over the reduced model that consists of two iterators, a reduced brace iterator and a reduced
+  * comment iterator that are always in sync.  Then it would be easy to get shadowing information given the position of
+  * a reduced model control iterator.  But no such iterator exits.  So the code in DrJava limps by using an iterator
+  * over the reduced brace model and a separate reduced comment "walker" (iterator) with a truly horrible interface. */
+   
   /* In order to interface with the ReducedModelComment two functions are
-     provided. One resets the walker and the other will both move the cursor
+     provided. One resets the walker and the other will both move the walker
      by x and return the state at that new location.
      Once the new value has returned all new calculations will be relative to
      that spot until the walker is reset to the _cursor.  */

@@ -460,11 +460,11 @@ public class JPDADebugger implements Debugger {
   }
   
   /** Toggles whether a breakpoint is set at the given line in the given document.
-   *  @param doc  Document in which to set or remove the breakpoint
-   *  @param offset  Start offset on the line to set the breakpoint
-   *  @param lineNum  Line on which to set or remove the breakpoint, >=1
-   *  @param isEnabled  {@code true} if this breakpoint should be enabled
-   */
+    * @param doc  Document in which to set or remove the breakpoint
+    * @param offset  Start offset on the line to set the breakpoint
+    * @param lineNum  Line on which to set or remove the breakpoint, >=1
+    * @param isEnabled  {@code true} if this breakpoint should be enabled
+    */
   public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum, boolean isEnabled) 
     throws DebugException {
     Breakpoint breakpoint = _model.getBreakpointManager().getRegionAt(doc, offset);
@@ -490,9 +490,9 @@ public class JPDADebugger implements Debugger {
     _model.getBreakpointManager().addRegion(breakpoint);
   }
 
- /** Removes a breakpoint. Called from toggleBreakpoint -- even with BPs that are not active.
-  *  @param breakpoint The breakpoint to remove.
-  */
+  /** Removes a breakpoint. Called from toggleBreakpoint -- even with BPs that are not active.
+    * @param bp The breakpoint to remove.
+    */
   public synchronized void removeBreakpoint(Breakpoint bp) throws DebugException {
     if (!(bp instanceof JPDABreakpoint)) { throw new IllegalArgumentException("Unsupported breakpoint"); }
     else {

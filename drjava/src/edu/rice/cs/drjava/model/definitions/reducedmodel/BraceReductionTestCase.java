@@ -38,12 +38,10 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
-/**
- * Test cases which test the implementation of BraceReduction
- * may extend this abstract class to acquire a convenience
- * function for determining the state of the current token.
- * @version $Id$
- */
+/** Test cases which test the implementation of BraceReduction may extend this abstract class to acquire a convenience
+  * function for determining the state of the current token.
+  * @version $Id$
+  */
 public abstract class BraceReductionTestCase extends DrJavaTestCase {
   protected volatile ReducedModelControl model0;
   protected volatile ReducedModelControl model1;
@@ -57,22 +55,20 @@ public abstract class BraceReductionTestCase extends DrJavaTestCase {
     model2 = new ReducedModelControl();
   }
 
-  /**
-   * Convenience function to insert a number of non-special characters into a reduced model.
-   * @param model the model being modified
-   * @param size the number of characters being inserted
-   */
+  /** Convenience function to insert a number of non-special characters into a reduced model.
+    * @param model the model being modified
+    * @param size the number of characters being inserted
+    */
   protected void insertGap(BraceReduction model, int size) {
     for (int i = 0; i < size; i++) {
       model.insertChar(' ');
     }
   }
 
-  /**
-   * Convenience function to get state of the current token.
-   * @param br the brace reduction in question
-   * @return the state of the current token
-   */
+  /** Convenience function to get state of the current token.
+    * @param br the brace reduction in question
+    * @return the state of the current token
+    */
   ReducedModelState stateOfCurrentToken(BraceReduction br) {
     return br.currentToken().getState();
   }

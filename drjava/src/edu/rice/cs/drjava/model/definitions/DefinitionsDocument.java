@@ -60,6 +60,8 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.*;
 
+import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
+
 /** The document model for the definitions pane; it contains a reduced model since it extends AbstractDJDocument. 
   *
   * @see AbstractDJDocument
@@ -443,18 +445,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
     int toReturn = selEnd;
     if (selStart == selEnd) {
-      acquireWriteLock();
-      try {     
+      acquireWriteLock(); 
+      try {
         synchronized(_reduced) {
-          setCurrentLocation(selStart);
-          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
-          _commentLine();   
+          setCurrentLocation(getLineStartPos(selStart));
+//          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
+          _commentLine();
           toReturn += WING_COMMENT_OFFSET;
-          //int caretPos = getCaretPosition();
-          //_doc().setCurrentLocation(caretPos);
         }
       }
-      catch (BadLocationException e) { throw new UnexpectedException(e); }
       finally { releaseWriteLock(); }
     }
     else toReturn = _commentBlock(selStart, selEnd);   
@@ -477,24 +476,19 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       // indentLine calls.
       final Position endPos = this.createUnwrappedPosition(end);
       // Iterate, line by line, until we get to/past the end
-      int walker = start;
+      int walker = getLineStartPos(start);
       synchronized(_reduced) {
         while (walker < endPos.getOffset()) {
-          setCurrentLocation(walker);
-          // Keep pointer to walker position that will stay current
-          // regardless of how commentLine changes things
-          Position walkerPos = this.createUnwrappedPosition(walker);
-          // Comment out current line
-          _commentLine();  // must be atomic
+          setCurrentLocation(walker);  // Update cursor
+          
+          _commentLine();              // Comment out current line; must be atomic
           afterCommentEnd += WING_COMMENT_OFFSET;
-          // Move back to walker spot
-          setCurrentLocation(walkerPos.getOffset());
-          walker = walkerPos.getOffset();
+
+          walker = walker + 2;         // Skip over inserted slashes; getDistToNewline(walker) = 0 if not advanced
+          setCurrentLocation(walker);  // reset currentLocation to position past newline
+
           // Adding 1 makes us point to the first character AFTER the next newline.
-          // We don't actually move yet. That happens at the top of the loop,
-          // after we check if we're past the end.
           walker += _reduced.getDistToNextNewline() + 1;
-          //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
         }
       }
     } 
@@ -503,12 +497,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return afterCommentEnd;
   }
   
-  /** Comments out a single line with wing comments -- "// ". 
-    *  @pre this.writeLock() and _reduced lock are already held! */
+  /** Comments out a single line with wing comments -- "// ".  Assumes that _currentLocation is the beginning of the
+    * line to be commented out.  Also assumes that this.writeLock() and _reduced lock are already held. */
   private void _commentLine() {
     // Insert "// " at the beginning of the line.
     // Using null for AttributeSet follows convention in this class.
-    try { insertString(_currentLocation - getCurrentCol(), "//", null); }
+    try { insertString(_currentLocation, "//", null); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
   
@@ -525,13 +519,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       acquireWriteLock();
       try {
         synchronized(_reduced) {
-          setCurrentLocation(selStart);
-          Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
+          setCurrentLocation(getLineStartPos(selStart));
           _uncommentLine();  // accesses _reduced
           toReturn -= WING_COMMENT_OFFSET;
-          //int caretPos = getCaretPosition();
-          //_doc().setCurrentLocation(caretPos);
-          //setCurrentLocation(oldCurrentPosition.getOffset());
         }
       }
       catch (BadLocationException e) { throw new UnexpectedException(e); }
@@ -556,67 +546,41 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       // doing the indentLine calls.
       final Position endPos = this.createUnwrappedPosition(end);
       // Iterate, line by line, until we get to/past the end
-      int walker = start;
-      synchronized(_reduced) {
-        while (walker < endPos.getOffset()) {
-          setCurrentLocation(walker);
-          // Keep pointer to walker position that will stay current
-          // regardless of how commentLine changes things
-          Position walkerPos = this.createUnwrappedPosition(walker);
-          // uncomment current line
-          afterUncommentEnd-= _uncommentLine();  // accesses _reduced
-          // Move back to walker spot
-          setCurrentLocation(walkerPos.getOffset());
-          walker = walkerPos.getOffset();
-          // Adding 1 makes us point to the first character AFTER the next newline.
-          // We don't actually move yet. That happens at the top of the loop,
-          // after we check if we're past the end.
-          walker += _reduced.getDistToNextNewline() + 1;
-          //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
-        }
-      }
+      
+//      synchronized(_reduced) {  //unnecessary because write lock is exclusive
+      int walker = getLineStartPos(start);
+//      Utilities.show("Initial walker pos = " + walker);
+      while (walker < endPos.getOffset()) {
+        setCurrentLocation(walker);           // Move cursor to walker position
+        int diff = _uncommentLine();          // Uncomment current line, accessing the reduced model
+        afterUncommentEnd -= diff;            // Update afterUncommentEnd
+        walker = getLineEndPos(walker) + 1;   // Update walker pos to point to beginning of next line
+//        Utilities.show("Updated value of walker = " + walker);
+      }        
+//      }   
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     finally { releaseWriteLock(); }
     return afterUncommentEnd;
   }
   
-  /** Uncomments a single line.  This simply looks for a leading "//".  Assumes that _reduced lock is already held and
-    *  that acquireWriteLock is already held.
-    *  @pre theads hold this.writeLock() and _reduced lock
+  /** Uncomments a single line.  This simply looks for a leading "//".  Assumes that cursor is already located at the
+    * beginning of line.  Also assumes that write lock and _reduced lock are already held.
     */
   private int _uncommentLine() throws BadLocationException {
     // Look for "//" at the beginning of the line, and remove it.
-    int curCol = getCurrentCol();
-    int lineStart = _currentLocation - curCol;
-    String text = getText(lineStart, curCol + _reduced.getDistToNextNewline());
-    int pos = text.indexOf("//");
+//    Utilities.show("Uncomment line at location " + _currentLocation);
+//    Utilities.show("Preceding char = '" + getText().charAt(_currentLocation - 1) + "'");
+//    Utilities.show("Line = \n" + getText(_currentLocation, getLineEndPos(_currentLocation) - _currentLocation + 1));
+    int pos1 = getText().indexOf("//", _currentLocation);
+    int pos2 = getFirstNonWSCharPos(_currentLocation, true);
+//    Utilities.show("Pos1 = " + pos1 + " Pos2 = " + pos2);
+    if (pos1 != pos2) return NO_COMMENT_OFFSET;
     
-    //      System.out.println("" + _currentLocation + " " + curCol + " "
-    //                           + text + " " + pos + " " + _reduced.getDistToNextNewline());
-    
-    // Look for any non-whitespace chars before the "//" on the line.
-    boolean goodWing = true;
-    for (int i = pos-1; i >= 0; i--) {
-      char c = text.charAt(i);
-      // If a previous char is not whitespace, we're not looking at a wing comment.
-      if (c != ' ') {
-        goodWing = false;
-        return NO_COMMENT_OFFSET;
-      }
-    }
-    
-    // If a wing comment wasn't found, or if the wings aren't the first
-    // non-whitespace characters on the line, do nothing.
-    if (pos >= 0 && goodWing) {
-      // Otherwise, remove the wings.
-      remove(lineStart + pos, 2);
-      //_indentLine(Indenter.IndentReason.OTHER);
-      return WING_COMMENT_OFFSET;
-    }
-    return NO_COMMENT_OFFSET;
+    remove(pos1, 2);
+    return WING_COMMENT_OFFSET;
   }
-  
+
   /** Goes to a particular line in the document. */
   public void gotoLine(int line) {
     
@@ -644,7 +608,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { releaseReadLock(); }
   }  
   
-  private int _findNextOpenSquiggly(String text, int pos) throws BadLocationException {
+  private int _findNextOpenCurly(String text, int pos) throws BadLocationException {
     // acquireReadLock assumed to be held,
     int i;
     int reducedPos = pos;
@@ -663,7 +627,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         
         // Check if matching keyword should be ignored because it is within a comment, or quotes
         ReducedModelState state = _reduced.getStateAtCurrent();
-        if (!state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
+        if (!state.equals(FREE) || _isStartOfComment(text, i)
               || ((i > 0) && _isStartOfComment(text, i - 1))) {
           i = text.indexOf('{', reducedPos+1);
           continue;  // ignore matching brace
@@ -716,7 +680,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         
         // Check if matching keyword should be ignored because it is within a comment, or quotes
         ReducedModelState state = _reduced.getStateAtCurrent();
-        if (!state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
+        if (!state.equals(FREE) || _isStartOfComment(text, i)
               || ((i > 0) && _isStartOfComment(text, i - 1))) {
           i = text.lastIndexOf(kw, reducedPos-1);
           continue;  // ignore matching keyword 
@@ -756,12 +720,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     acquireReadLock();
     try {
       
-      final String text = getText(0, pos + 1);  // includes char at (to the right of) position pos
+      final String text = getText(0, pos);  
       
       int curPos = pos;
       
       do {
-        if (text.charAt(curPos) != '{' || text.charAt(curPos) != '}') ++curPos;
+//        if (text.charAt(curPos) != '{' || text.charAt(curPos) != '}') ++curPos;
         
 //        if (oldLog) System.out.println("curPos=" + curPos + " `" +
 //                                       text.substring(Math.max(0,curPos-10), Math.min(text.length(), curPos+1)) + "`");
@@ -870,14 +834,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param openSquigglyPos position of the next '{'
     * @return true if anonymous inner class instantiation
     */
-  private boolean _isAnonymousInnerClass(final int pos, final int openSquigglyPos) throws BadLocationException {
+  private boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
 //    String t = getText(0, openSquigglyPos+1);
 //    System.out.print ("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+")");
 //    System.out.println("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+"): `"+
 //                       t.substring(newPos, openSquigglyPos+1)+"`");
     
     // Check cache
-    final Query key = new Query.AnonymousInnerClass(pos, openSquigglyPos);
+    final Query key = new Query.AnonymousInnerClass(pos, openCurlyPos);
     Boolean cached = (Boolean) _checkCache(key);
     if (cached != null) {
 //      System.out.println(" ==> "+cached);
@@ -886,7 +850,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int newPos = pos;
     synchronized(_reduced) {
       cached = false;
-      String text = getText(0, openSquigglyPos+1);
+      String text = getText(0, openCurlyPos+1);
       int origNewPos = newPos;
       newPos += "new".length();
       int classStart = getFirstNonWSCharPos(newPos);
@@ -930,12 +894,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
               // System.out.println("\tafter closing paren = "+parenEnd);
               int afterParen = getFirstNonWSCharPos(parenEnd);
               // System.out.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
-              cached = (afterParen == openSquigglyPos); 
+              cached = (afterParen == openCurlyPos); 
             }
           }
         }
       }
-      _storeInCache(key, cached, openSquigglyPos);
+      _storeInCache(key, cached, openCurlyPos);
 //      System.out.println(" ==> "+cached);
       return cached;
     }
@@ -979,14 +943,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     
     // readLock assumed to be held
-    int newPos = pos - 1; // move outside the curly brace
+    int newPos = pos; // formerly pos -1 // move outside the curly brace?  Corrected to do nothing since already outisde
     final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
-    final String className = getEnclosingClassName(newPos, true);
-    final String text = getText(0, newPos);  // why exclude char before curly brace?
+    final String className = getEnclosingClassName(newPos - 2 , true);  // class name must be followed by at least "()"
+    final String text = getText(0, newPos - 2);  // excludes miminal (empty) argument list after class name
     int index = 1;
     
 //    if (oldLog) System.out.println("anon before "+pos+" enclosed by "+className);
-    while ((newPos = _findPrevKeyword(text, "new", newPos - 1)) != -1) {
+    while ((newPos = _findPrevKeyword(text, "new", newPos - 4)) != -1) { // excludes space + minimal class name + args
 //      if (oldLog) System.out.println("new found at "+newPos);
       int afterNewPos = newPos + "new".length();
       int classStart = getFirstNonWSCharPos(afterNewPos);
@@ -1019,11 +983,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       if (text.charAt(parenStart) != '(') { continue; }
       int parenEnd = findNextEnclosingBrace(parenStart, '(', ')');
       
-      int nextOpenSquiggly = _findNextOpenSquiggly(text, parenEnd);
-      if (nextOpenSquiggly == -1) { continue; }
+      int nextOpenCurly = _findNextOpenCurly(text, parenEnd);
+      if (nextOpenCurly == -1) { continue; }
 //      if (oldLog) System.out.println("{ found at "+nextOpenSquiggly+": `"+text.substring(newPos, nextOpenSquiggly+1)+"`");
 //      if (oldLog) System.out.println("_isAnonymousInnerClass("+newPos+", "+nextOpenSquiggly+")");
-      if (_isAnonymousInnerClass(newPos, nextOpenSquiggly)) {
+      if (_isAnonymousInnerClass(newPos, nextOpenCurly)) {
 //        if (oldLog) System.out.println("is anonymous inner class");
         String cn = getEnclosingClassName(newPos, true);
 //        if (oldLog) System.out.println("enclosing class = "+cn);
@@ -1265,11 +1229,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             setCurrentLocation(textOffset + index);
             
             // check that the keyword is not in a comment and is followed by whitespace
-            ReducedToken rt = _reduced.currentToken();
             int indexPastKeyword = index + keyword.length();
             if (indexPastKeyword < text.length()) {
-              if (rt.getState() == ReducedModelStates.FREE &&
-                  Character.isWhitespace(text.charAt(indexPastKeyword))) {
+              if (! isShadowed() && Character.isWhitespace(text.charAt(indexPastKeyword))) {
                 // found a match but may not be at top level
                 if (! posNotInBlock(index)) index = -1; //in a paren phrase, gone too far
                 break;

@@ -145,6 +145,38 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                  "a;",
                  _doc.getText());
   }
+  
+  public void testAnonymousInnerClassAssign() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    
+    _setDocText("Runnable command = new Runnable() {\n" + 
+                "  public void run() { ... }\n" +
+                "};\n" +
+                "   command.run();");  // new stmt
+    rule.indentLine(_doc, 67, Indenter.IndentReason.OTHER);
+    assertEquals("After anonymous inner class assignment",
+                 "Runnable command = new Runnable() {\n" + 
+                "  public void run() { ... }\n" +
+                "};\n" +
+                "command.run();",
+                 _doc.getText());
+  }
+  
+  public void testAnonymousInnerClassArg() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    
+    _setDocText("setCommand(new Runnable() {\n" + 
+                "  public void run() { ... }\n" +
+                "});\n" +
+                "   command.run();");  // new stmt
+    rule.indentLine(_doc, 60, Indenter.IndentReason.OTHER);
+    assertEquals("After method call with anonymous inner class argument",
+                 "setCommand(new Runnable() {\n" + 
+                 "  public void run() { ... }\n" +
+                 "});\n" +
+                 "command.run();",
+                 _doc.getText());
+  } 
 
   /** 
    * not currently supported 

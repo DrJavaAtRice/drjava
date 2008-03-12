@@ -210,20 +210,20 @@ public interface Query {
   
   public static class AnonymousInnerClass implements Query {
     private final int _pos;
-    private final int _openSquigglyPos;
+    private final int _openCurlyPos;
     
-    public AnonymousInnerClass(int pos, int openSquigglyPos) {
+    public AnonymousInnerClass(int pos, int openCurlyPos) {
       _pos = pos;
-      _openSquigglyPos = openSquigglyPos;
+      _openCurlyPos = openCurlyPos;
     }
     
     public boolean equals(Object other) {
       if (other == null || other.getClass() != getClass()) return false;
       AnonymousInnerClass o = (AnonymousInnerClass) other;
-      return o._pos == _pos && o._openSquigglyPos == _openSquigglyPos;
+      return o._pos == _pos && o._openCurlyPos == _openCurlyPos;
     }
     
-    public int hashCode() { return getClass().hashCode() ^ _pos ^ _openSquigglyPos; }
+    public int hashCode() { return getClass().hashCode() ^ _pos ^ _openCurlyPos; }
   }
   
   public static class AnonymousInnerClassIndex extends Pos {

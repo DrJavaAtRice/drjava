@@ -86,10 +86,9 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     return _jvm.getVariableType(var);
   }
 
-  /**
-   * Adds the given path to the interpreter's classpath.
-   * @param path Path to add
-   */
+  /** Adds the given path to the interpreter's classpath.
+    * @param file  the path to add
+    */
 //  public void addToClassPath(String path) {
 //    _interpreterControl.addClassPath(path);
 //  }

@@ -84,21 +84,16 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     boolean result = applyRule(doc, reason);
-    if (oldPos > doc.getLength()) {
-      oldPos = doc.getLength();
-    }
+    if (oldPos > doc.getLength()) oldPos = doc.getLength();
     doc.setCurrentLocation(oldPos);
     return result;
   }
 
-  /**
-   * Determines if the given rule holds in this context and calls
-   * the same method on one of its child nodes.
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @param reason The reason that indentation was initiated, specified in Indenter
-   * @return true if the caller should update the current location itself,
-   * false if the indenter has already handled this
-   */
+  /** Determines if the given rule holds in this context and calls the same method on one of its child nodes.
+    * @param doc AbstractDJDocument containing the line to be indented.
+    * @param reason The reason that indentation was initiated, specified in Indenter
+    * @return true if the caller should update the current location itself, false if the indenter has already handled this
+    */
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     if (applyRule(doc, reason)) {
       _addToIndentTrace(getRuleName(), YES, false);

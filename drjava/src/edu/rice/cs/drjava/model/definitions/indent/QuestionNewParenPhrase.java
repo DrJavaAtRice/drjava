@@ -58,12 +58,11 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
     super(yesRule, noRule);
   }
  
-  /**
-   * Determines if the previous line ends in a comma, semicolon,
-   * open paren, open bracket, operator, or comparator.
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @return true if this node's rule holds.
-   */
+  /** Determines if the previous line ends in a comma, semicolon,
+    * open paren, open bracket, operator, or comparator.
+    * @param doc AbstractDJDocument containing the line to be indented.
+    * @return true if this node's rule holds.
+    */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
 
     try {

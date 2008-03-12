@@ -40,30 +40,24 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import javax.swing.text.BadLocationException;
 
-
-/**
- * Determines whether or not the last '{' was immediately preceded 
- * by _prefix So when _prefix='=', effectivily, we are looking for "={"
- * This questions corresponds to rule 22 in our decision tree.
- * @version $Id$
- */
+/** Determines whether or not the line enclosing brace is '{' and is immediately preceded by the given _prefix.  
+  * If _prefix is '=', we are looking for "= {".  This questions corresponds to rule 22 in our decision tree.
+  * @version $Id$
+  */
 public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
   private char[] _prefix;
 
-  /**
-   * @param yesRule The decision subtree for the case that this rule applies
-   * in the current context.
-   * @param noRule The decision subtree for the case that this rule does not
-   * apply in the current context.
-   */
+  /** @param yesRule The decision subtree for the case that this rule applies in the current context.
+    * @param noRule The decision subtree for the case that this rule does not apply in the current context.
+    */
   public QuestionHasCharPrecedingOpenBrace(char[] prefix, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;
   }
   
   /** @param doc The AbstractDJDocument containing the current line.
-   *  @return true iff the last block/expression-list opened before the start of the current line begins with '{'. 
-   */
+    * @return true iff the last block/expression-list opened before the start of the current line begins with '{'. 
+    */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     // PRE: We are inside a {.
     
@@ -71,11 +65,11 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     int lineStart = doc.getLineStartPos(origin);
     
     // Get brace for start of line
-    doc.move(lineStart - origin);
-    IndentInfo info = doc.getIndentInformation();
-    doc.move(origin - lineStart);
+    doc.move(lineStart - origin);  // TODO: use setCurrentLocation instead of move
+    IndentInfo info = doc.getIndentInformation();  // TODO: revise to use getLineEnclosingBrace
+    doc.move(origin - lineStart);  // TODO: use setCurrentLocation instead of move
     
-    if (! info.lineEnclosingBraceType().equals(IndentInfo.OPEN_CURLY) || info.distToLineEnclosingBrace() < 0) {
+    if (! info.lineEnclosingBraceType().equals(IndentInfo.OPEN_CURLY) || info.distToLineEnclosingBrace() < 0) {  // How can distTo... be < 0?
       // Precondition not met: we should have a brace
       return false;
     }
@@ -88,8 +82,7 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
       char c = doc.getText(prevNonWS,1).charAt(0);
       for (char pchar: _prefix) if (c == pchar) return true;
     }
-    catch (BadLocationException e) {
-    }    
+    catch (BadLocationException e) { }    
     return false;
   }
 }

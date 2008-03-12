@@ -76,7 +76,7 @@ public class PropertyMaps {
   }
 
   /** Return the property requested, or null if not found.
-    * @throw IllegalArgumentException if category is not known. */
+    * @throws IllegalArgumentException if category is not known. */
   public DrJavaProperty getProperty(String category, String name) {
     Map<String,DrJavaProperty> m = _props.get(category);
     if (m==null) { throw new IllegalArgumentException("DrJavaProperty category unknown."); }
@@ -95,7 +95,7 @@ public class PropertyMaps {
   public Set<String> getCategories() { return _props.keySet(); }
 
   /** Return the properties in a category.
-    * @throw IllegalArgumentException if category is not known. */
+    * @throws IllegalArgumentException if category is not known. */
   public Map<String, DrJavaProperty> getProperties(String category) {
     Map<String,DrJavaProperty> m = _props.get(category);
     if (m==null) { throw new IllegalArgumentException("DrJavaProperty category unknown."); }

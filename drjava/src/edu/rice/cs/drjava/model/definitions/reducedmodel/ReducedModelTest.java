@@ -40,6 +40,33 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
   * @version $Id$
   */
 public final class ReducedModelTest extends BraceReductionTestCase implements ReducedModelStates {
+  /** tests backwards balancer, e.g., ')' balances with '(' */
+  public void testBalanceBackward() {
+    assertEquals("#0.0", -1, model0.balanceBackward());
+    model0 = setUpExample();
+    // {
+    // ___
+    // (__)
+    // ___//___
+    // "_{_"/*_(_)_*/
+    // }#
+    assertEquals("#1.0", 36, model0.balanceBackward());
+    model0.move(-2);
+    assertEquals("#2.0", -1, model0.balanceBackward());
+    model0.move(-14);
+    assertEquals("#3.0", -1, model0.balanceBackward());
+    model0.move(-10);
+    assertEquals("#4.0", 4, model0.balanceBackward());
+    model0.move(-10);
+    assertEquals("#5.0", -1, model0.balanceBackward());
+    model1.insertChar(')');
+    assertEquals("#6.0", -1, model1.balanceBackward());
+    model1.move(-1);
+    model1.insertChar('{');
+    model1.move(1);
+    assertEquals("#7.0", -1, model1.balanceBackward());
+  }
+  
   /** Put your documentation comment here. */
   public void testInsertGap() {
     insertGap(model1, 4);
@@ -48,15 +75,15 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertTrue("#0.0", model1.currentToken().isGap());
     assertEquals("#0.2", 4, model1.currentToken().getSize());
     model1.move(4);
-    //inserts another gap after the afor mentioned gap
+    //inserts a gap in a second model
     insertGap(model2, 5);
     model2.move(-5);
-    //makes sure they united to form an Uber gap.
+    //makes sure that gap has been inserted
     assertTrue("#1.0", model2.currentToken().isGap());
     assertEquals("#1.2", 5, model2.currentToken().getSize());
   }
 
-  /** Test that a gap inserted previous to a gap, unites with that gap. */
+  /** Tests that a gap inserted before a gap, unites with that gap. */
   public void testInsertGapBeforeGap() {
     insertGap(model1, 3);
     assertTrue("#0.0.0", model1.atEnd());
@@ -73,7 +100,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#1.2", 8, model1.currentToken().getSize());
   }
 
-  /** Put your documentation comment here. */
+  /** Tests that a gap inserted after a gap, unites with that gap. * */
   public void testInsertGapAfterGap() {
     insertGap(model1, 3);
     assertTrue("#0.0", model1.atEnd());
@@ -85,7 +112,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#1.2", 7, model1.currentToken().getSize());
   }
 
-  /** Inserts one gap inside of the other. */
+  /** Tests that a gap inserted inside another gap unites with the enclosing gap. */
   public void testInsertGapInsideGap() {
     insertGap(model1, 3);
     assertTrue("#0.0", model1.atEnd());
@@ -102,7 +129,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#1.3", 7, model1._offset);
   }
 
-  /** Put your documentation comment here. */
+  /** Tests that inserting a curly brace at the beginning/end of the document creates the proper tokens. */
   public void testInsertBraceAtStartAndEnd() {
     model1.insertChar('(');
     assertTrue("#0.0", model1.atEnd());
@@ -116,7 +143,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#1.2", 1, model2.currentToken().getSize());
   }
 
-  //**************
+  /** Tests that inserting a curly brace inside a gap creates the proper tokens. */
   public void testInsertBraceInsideGap() {
     insertGap(model1, 4);
     model1.move(-4);
@@ -136,9 +163,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertTrue("#3.2", model1.currentToken().isGap());
   }
 
-  /**
-   * put your documentation comment here
-   */
+  /** Tests that inserting other forms of braces creates the proper tokens. */
   public void testInsertBrace() {
     model1.insertChar('{');
     assertTrue("#0.0", model1.atEnd());
@@ -157,9 +182,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#3.1", "(", model1.currentToken().getType());
   }
 
-  /**
-   * put your documentation comment here
-   */
+  /**  Tests inserting line comment chars and then inserting a brace between them. */
   public void testInsertBraceAndBreakLineComment() {
     model1.insertChar('/');
     model1.insertChar('/');
@@ -177,9 +200,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#3.1", 1, model1.currentToken().getSize());
   }
 
-  /**
-   * Tests the reduced model's ability to insert braces correctly
-   */
+  /** Tests inserting block comment opening "brace" followed by inserting characters between '/' and '*'.  */
   public void testInsertBraceAndBreakBlockCommentStart() {
     model1.insertChar('/');
     model1.insertChar('*');
@@ -197,7 +218,7 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     assertEquals("#3.1", 1, model1.currentToken().getSize());
   }
 
-  //**************************
+  /* Tests inserting multiple braces. */
   public void testInsertMultipleBraces() {
     model1.insertChar('/');
     model1.insertChar('*');
@@ -1024,33 +1045,6 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.move(-1);
 //    System.out.println(model0.currentToken());
     assertEquals("#9.0", -1, model1.balanceForward());
-  }
-
-  /** tests backwards balancer, e.g., ')' balances with '(' */
-  public void testBalanceBackward() {
-    assertEquals("#0.0", -1, model0.balanceBackward());
-    model0 = setUpExample();
-    // {
-    // ___
-    // (__)
-    // ___//___
-    // "_{_"/*_(_)_*/
-    // }#
-    assertEquals("#1.0", 36, model0.balanceBackward());
-    model0.move(-2);
-    assertEquals("#2.0", -1, model0.balanceBackward());
-    model0.move(-14);
-    assertEquals("#3.0", -1, model0.balanceBackward());
-    model0.move(-10);
-    assertEquals("#4.0", 4, model0.balanceBackward());
-    model0.move(-10);
-    assertEquals("#5.0", -1, model0.balanceBackward());
-    model1.insertChar(')');
-    assertEquals("#6.0", -1, model1.balanceBackward());
-    model1.move(-1);
-    model1.insertChar('{');
-    model1.move(1);
-    assertEquals("#7.0", -1, model1.balanceBackward());
   }
 }
 

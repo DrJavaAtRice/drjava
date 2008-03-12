@@ -40,13 +40,15 @@ import java.util.Vector;
 
 import edu.rice.cs.util.UnexpectedException;
 
+import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
+
 /** This class provides an implementation of the BraceReduction interface for brace matching.  In order to correctly
   * match, this class keeps track of what is commented (line and block) and what is inside double quotes (strings).
   * To avoid unnecessary complication, this class maintains a few invariants for its  consistent states, i.e., between
   * top-level function calls.
   * <ol>
   * <li> The cursor offset is never at the end of a brace.  If movement or insertion puts it there, the cursor is 
-  * updated to point to the 0 offset of the next brace.
+  * updated to point to the 0 offset of the next brace. (token?)
   * <li> Quoting information is invalid inside valid comments.  When part of the document becomes uncommented, the
   * reduced model must update the quoting information linearly in the newly revealed code.
   * <li> Quote shadowing and comment shadowing are mutually exclusive.
@@ -69,6 +71,16 @@ public class ReducedModelControl implements BraceReduction {
     _rmc = new ReducedModelComment();
   }
   
+  /** @return the absolute offset of the cursor in the brace model, which is expensive.  Used for testing purposes only. 
+    *         This value should agree with commentCursorOffset(). */
+  public int braceCursorOffset() { return _rmb.absOffset(); }  
+  /** @return the absolute offset of the cursor in the comment model, which is expensive.  Used for testing purposes 
+    *         only.  This value should agree with braceCursorOffset(). */
+  public int commentCursorOffset() { return _rmc.absOffset(); } 
+  
+  /** @return the absolute offset of the walker in the comment model, which is expensive.  Used for testing purposes only. */
+  public int walkerOffset() { return _rmc.walkerOffset(); }
+  
 //  private ReducedModelBrace _getRMB() { return _rmb; }
   
 //  private ReducedModelComment _getRMC() { return _rmc; }
@@ -79,6 +91,7 @@ public class ReducedModelControl implements BraceReduction {
   }
 
   /** Updates the BraceReduction to reflect cursor movement. Negative values move left; positive values move right.
+    * NOTE: this method does NOT move the _walker in ReduceModelComment.
     * @param count indicates the direction and magnitude of cursor movement
     */
   public void move(int count) {
@@ -87,7 +100,7 @@ public class ReducedModelControl implements BraceReduction {
       _rmc.move(count);
     }
     catch(IllegalArgumentException e) { 
-      resetLocation();
+      resetLocation();  // Why reset the _walker here?
       throw new UnexpectedException(e);
     }
   }
@@ -100,14 +113,22 @@ public class ReducedModelControl implements BraceReduction {
     _rmb.delete(count);
     _rmc.delete(count);
   }
+  
+  /** Determines if cursor position is shadowed by comment or string (does not include opening comment or quotation "brace"). */
+  public boolean isShadowed() { return _rmc.isShadowed(); }
+  
+  /** Determines if current token is either shadowed or an opening comment brace ("//" or "/*"). */
+  public boolean isWeaklyShadowed() { return _rmc.isWeaklyShadowed(); }
 
-  /** Finds the closing brace that matches the next significant brace iff that brace is an open brace.</P>
+  /** Finds the closing brace that matches the next significant brace iff that brace is an open brace. Fails when 
+    * brace is shadowed. </P>
     * @return the distance until the matching closing brace.  On failure, returns -1.
     * @see #balanceBackward()
     */
   public int balanceForward() { return _rmb.balanceForward(); }
   
-  /** Finds the open brace that matches the previous significant brace iff that brace is an closing brace.</P>
+  /** Finds the open brace that matches the previous significant brace iff that brace is an closing brace. Fails when
+    * brace is shadowed. </P>
     * @return the distance until the matching open brace.  On failure, returns -1.
     * @see #balanceForward()
     */
@@ -122,9 +143,7 @@ public class ReducedModelControl implements BraceReduction {
     * the walker to keep walking and using relative distance instead of having to rewalk the same distance every call
     * to stateAtRelLocation. It is an optimization.
     */
-  public void resetLocation() {
-    _rmc.resetWalkerLocationToCursor();
-  }
+  public void resetLocation() { _rmc.resetWalkerLocationToCursor(); }
 
   /** Gets the token currently pointed at by the cursor. Because the reduced model is split into two reduced sub-models,
     * we have to check each sub-model first as each one has unique information.  If we find a non-gap token in either 

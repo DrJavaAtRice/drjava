@@ -60,13 +60,14 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
 
-  /** Model that contains the interpreter to use. (Can this be eliminated?) */
+  /** Model that contains the interpreter to use. */
   protected final DefaultGlobalModel _model;
 
   /** Creates a new InteractionsModel.
     * @param model DefaultGlobalModel to do the interpretation
-    * @param control RMI interface to the Interpreter JVM
+    * @param jvm  the RMI interface used by the Main JVM to access the Interpreter JVM
     * @param adapter InteractionsDJDocument to use for the document
+    * @param wd  the working directory for interactions i/o
     */
   public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM jvm, ConsoleDocumentInterface adapter, File wd) {
     super(jvm, adapter, wd, DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),

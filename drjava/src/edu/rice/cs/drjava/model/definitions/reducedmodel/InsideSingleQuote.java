@@ -36,37 +36,32 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * Shadowing state that corresponds to being between single quotes.
- * @version $Id$
- */
+import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
+
+/** The shadowing state that corresponds to being between single quotes.
+  * @version $Id$
+  */
 public class InsideSingleQuote extends ReducedModelState {
-  /**
-   * Singleton instance.
-   */
+  
+  /** Singleton instance. */
   public static final InsideSingleQuote ONLY = new InsideSingleQuote();
 
-  /**
-   * Singleton constructor.
-   */
-  private InsideSingleQuote() {
-  }
+  /** Singleton constructor. */
+  private InsideSingleQuote() { }
 
-  /**
-   * Walk function for when inside single quotes.
-   * <ol>
-   * <li> If we've reached the end of the list, return.
-   * <li> If we find //, /* or * /, split them into two separate braces.
-   * The cursor will be on the first of the two new braces.
-   * <li> If current brace = \n or ', mark current brace FREE, next(), and
-   * go to updateFree.
-   * Else, mark current brace as INSIDE_SINGLE_QUOTE, go to next brace, recur.
-   * </ol>
-   */
+  /** Walk function for when inside single quotes.
+    * <ol>
+    * <li> If we've reached the end of the list, return.
+    * <li> If we find //, /* or * /, split them into two separate braces.
+    * The cursor will be on the first of the two new braces.
+    * <li> If current brace = \n or ', mark current brace FREE, next(), and
+    * go to updateFree.
+    * Else, mark current brace as INSIDE_SINGLE_QUOTE, go to next brace, recur.
+    * </ol>
+    */
   ReducedModelState update(TokenList.Iterator copyCursor) {
-    if (copyCursor.atEnd()) {
-      return STUTTER;
-    }
+    if (copyCursor.atEnd()) return STUTTER;
+
     copyCursor._splitCurrentIfCommentBlock(true, false);
     _combineCurrentAndNextIfFind("", "", copyCursor);
     _combineCurrentAndNextIfEscape(copyCursor);

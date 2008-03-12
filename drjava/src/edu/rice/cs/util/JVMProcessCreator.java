@@ -59,7 +59,6 @@ public class JVMProcessCreator extends ProcessCreator {
    * @param jvmArgs arguments for the JVM
    * @param cmdline command line
    * @param workdir working directory
-   * @param props map of properties
    */
   public JVMProcessCreator(String jvmArgs, String cmdline, String workdir) {
     super(cmdline, workdir);

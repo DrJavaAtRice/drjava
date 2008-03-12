@@ -72,10 +72,9 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
 
     String indent = "";
 
-    try {
-      indent = doc.getIndentOfCurrStmt(doc.getCurrentLocation(), new char[] {';','{','}'}, new char[] {' ', '\t','\n'});
-    } 
-    catch (BadLocationException e) { throw new UnexpectedException(e); }
+
+    indent = doc.getIndentOfCurrStmt(doc.getCurrentLocation(), new char[] {';','{','}'}, new char[] {' ', '\t','\n'});
+
 
     indent = indent + _suffix;
     doc.setTab(indent, doc.getCurrentLocation());

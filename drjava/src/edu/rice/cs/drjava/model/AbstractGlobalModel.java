@@ -2463,7 +2463,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       /** Creates a subset region manager that only sees the regions in this document. */
       public SubsetRegionManager(RegionManager<R> ssm) { _superSetManager = ssm; }
       
-      /** @returns the superset manager. */
+      /** @return the superset manager. */
       public RegionManager<R> getSuperSetManager() { return _superSetManager; }
       
       /** Returns the region in this manager at the given offset, or null if one does not exist.
@@ -3920,6 +3920,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** @return the number of lines in this document. */
     public int getNumberOfLines() { return getLineOfOffset(getLength()); }
+    
+      /** Determines if pos in document is inside a comment or a string. */
+    public boolean isShadowed(int pos) { return getDocument().isShadowed(pos); }
     
     /** Translates an offset into the components text to a line number.
       * @param offset the offset >= 0

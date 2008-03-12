@@ -147,8 +147,7 @@ public class HTMLFrame extends JFrame {
     }
   };
 
-  private static JButton makeButton(Action a, int horTextPos,
-                                    int left, int right) {
+  private static JButton makeButton(Action a, int horTextPos, int left, int right) {
     JButton j = new JButton(a);
     j.setHorizontalTextPosition(horTextPos);
     j.setVerticalTextPosition(JButton.CENTER);
@@ -164,16 +163,12 @@ public class HTMLFrame extends JFrame {
     _mainDocPane.addHyperlinkListener(linkListener);
   }
 
-  /**
-   * Sets up the frame and displays it.
-   */
+  /** Sets up the frame and displays it. */
   public HTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString) {
     this(frameName, introUrl, indexUrl, iconString, null);
   }
 
-  /**
-   * Sets up the frame and displays it.
-   */
+  /** Sets up the frame and displays it. */
   public HTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString, File baseDir) {
     super(frameName);
 

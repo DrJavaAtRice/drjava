@@ -51,6 +51,8 @@ import java.awt.EventQueue;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
+import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
+
 /** Implementation of logic of find/replace over a document.
  *  @version $Id$
  */
@@ -560,7 +562,6 @@ public class FindReplaceMachine {
 //            _current = docToSearch.createPosition(foundLocation);  // put caret at end of found word
         }
 //        _log.log("rem = " + rem);
-        doc.setCurrentLocation(foundLocation);           // _shouldIgnore below uses reduced model
         
 //        _log.log("Finished iteration with text = " + text + "; len = " + len + "; foundLocation = " + foundLocation);
         assert foundLocation > -1;
@@ -672,6 +673,6 @@ public class FindReplaceMachine {
     assert EventQueue.isDispatchThread();
     
     return (_matchWholeWord && ! wholeWordFoundAtCurrent(odd, foundOffset)) || 
-      (_ignoreCommentsAndStrings && odd.getStateAtCurrent() != ReducedModelStates.FREE);
+      (_ignoreCommentsAndStrings && odd.isShadowed(foundOffset));
   }
 }

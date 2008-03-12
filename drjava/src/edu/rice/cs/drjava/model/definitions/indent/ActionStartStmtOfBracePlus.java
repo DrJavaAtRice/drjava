@@ -43,13 +43,13 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 import javax.swing.text.BadLocationException;
 
-/** Indents the current line in the document to the indent level of the start of the contract or statement of the brace
-  * enclosing the start of the
+/** Indents the current line in the document to the indent level of the start of the brace enclosing the start of the
   * current line, plus the given suffix.
   * @version $Id$
   */
 public class ActionStartStmtOfBracePlus extends IndentRuleAction {
   private String _suffix;
+  
 
   /** Constructs a new rule with the given suffix string.
     * @param suffix String to append to indent level of brace
@@ -66,30 +66,22 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    boolean supResult = super.indentLine(doc, reason);
+    boolean supResult = super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
     int pos = doc.getCurrentLocation();
 
     // Get distance to brace
     BraceInfo info = doc.getLineEnclosingBrace();
     int distToLineEnclosingBrace = info.distance();
 
-    // If there is no brace, align to left margin
+    // If there is no brace, align to left margin; can't happen when called from rule 19
     if (distToLineEnclosingBrace == -1) {
       doc.setTab(_suffix, pos);
       return supResult;
     }
 
-    // Get the absolute position of the brace
-    int bracePos = pos - distToLineEnclosingBrace;
-
-    String indent = "";
-    try {
-      indent = doc.getIndentOfCurrStmt(bracePos);
-    } catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
-    indent = indent + _suffix;
+    // Get the absolute position of the (left edge of the) brace
+    final int bracePos = pos - distToLineEnclosingBrace;
+    final String indent = doc.getIndentOfCurrStmt(bracePos) + _suffix;
 
     doc.setTab(indent, pos);
     

@@ -427,6 +427,9 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /** @return the number of lines in this document. */
   public int getNumberOfLines() { return 0; }
   
+  /** Determines if pos in document is inside a comment or a string. */
+  public boolean isShadowed(int pos) { return false; }
+  
   /** Translates an offset into the components text to a line number.
    *  @param offset the offset >= 0
    *  @return the line number >= 0

@@ -36,28 +36,28 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * Shadowing state that corresponds to being inside a double-quoted string.
- * @version $Id$
- */
+import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
+
+/** The shadowing state that corresponds to being inside a double-quoted string.
+  * @version $Id$
+  */
 public class InsideDoubleQuote extends ReducedModelState {
+  /** Singleton instance */
   public static final InsideDoubleQuote ONLY = new InsideDoubleQuote();
+  /** Singleton constructor */
+  private InsideDoubleQuote() { }
   
-  private InsideDoubleQuote() {
-  }
-  
-  /**
-   * Walk function for when inside a quoted string.
-   *  Self-recursive and mutually recursive with other walk functions.
-   *  <ol>
-   *  <li> If we've reached the end of the list, return.
-   *  <li> If we find //, /* or * /, split them into two separate braces.
-   *       The cursor will be on the first of the two new braces.
-   *  <li> If current brace = \n or ", mark current brace FREE, next(), and
-   *       go to updateFree.
-   *       Else, mark current brace as INSIDE_DOUBLE_QUOTE, go to next brace, recur.
-   * </ol>   
-   */
+  /** Walk function for when inside a quoted string.
+    *  Self-recursive and mutually recursive with other walk functions.
+    *  <ol>
+    *  <li> If we've reached the end of the list, return.
+    *  <li> If we find //, /* or * /, split them into two separate braces.
+    *       The cursor will be on the first of the two new braces.
+    *  <li> If current brace = \n or ", mark current brace FREE, next(), and
+    *       go to updateFree.
+    *       Else, mark current brace as INSIDE_DOUBLE_QUOTE, go to next brace, recur.
+    * </ol>   
+    */
   ReducedModelState update(TokenList.Iterator copyCursor) {
     if (copyCursor.atEnd()) {
       return STUTTER;

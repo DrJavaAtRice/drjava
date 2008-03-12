@@ -42,6 +42,8 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
+import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
+
 /** Determines whether or not the current line in the document starts with a specific character sequence, 
  *  skipping over any comments on that line. The character sequence is passed to the constructor of the class 
  *  as a String argument.
@@ -91,12 +93,12 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
         
         currentChar = text.charAt(i);
         
-        if (state.equals(ReducedModelState.INSIDE_LINE_COMMENT)) return false;
-        if (state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
+        if (state.equals(INSIDE_LINE_COMMENT)) return false;
+        if (state.equals(INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
           previousChar = '\0'; 
           continue;
         }
-        if (state.equals(ReducedModelState.FREE)) { // Can prefix still fit on the current line?
+        if (state.equals(FREE)) { // Can prefix still fit on the current line?
           if (_prefix.length() > lineLength - i) return false;
           else if (text.substring(i, i+_prefix.length()).equals(_prefix) && previousChar != '/') {
             // '/' is the only non-WS character that we consume without

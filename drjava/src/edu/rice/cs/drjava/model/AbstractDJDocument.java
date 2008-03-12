@@ -73,6 +73,9 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
+
+import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
+
 /** This class contains code supporting the concept of a "DJDocument"; it is shared between DefinitionsDocument and 
   * InteractionsDJDocument. This partial implementation of <code>Document</code> contains a "reduced model". The reduced
   * model is automatically kept in sync when this document is updated. Also, that synchronization is maintained even 
@@ -84,10 +87,10 @@ import javax.swing.text.Position;
   * Of course, a readLock or writeLock on this must be acquired BEFOFE locking _reducedModel.  This protocol
   * prevents any thread from seeing an inconsistent state in the middle of another thread's changes.
   *
-  * @see BraceReduction
-  * @see ReducedModelControl
-  * @see ReducedModelComment
-  * @see ReducedModelBrace
+  * @see edu.rice.cs.drjava.model.definitions.reduced.BraceReduction
+  * @see edu.rice.cs.drjava.model.definitions.reduced.ReducedModelControl
+  * @see edu.rice.cs.drjava.model.definitions.reduced.ReducedModelComment
+  * @see edu.rice.cs.drjava.model.definitions.reduced.ReducedModelBrace
   */
 public abstract class AbstractDJDocument extends SwingDocument implements DJDocument, OptionConstants {
   
@@ -137,6 +140,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /* Saved here to allow the listener to be removed easily. This is needed to allow for garbage collection. */
   private volatile OptionListener<Integer> _listener1;
   private volatile OptionListener<Boolean> _listener2;
+  
+  public static final char[] CLOSING_BRACES = new char[] {'}', ')'};
   
   /*-------- CONSTRUCTORS --------*/
   
@@ -468,34 +473,35 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _reduced.move(dist); 
   }
   
-  /** The actual cursor movement logic.  Helper for setCurrentLocation(int).
+  /** Moves _currentLocation the specified distance.
     * @param dist the distance from the current location to the new location.
     */
   public void move(int dist) {
     acquireReadLock();
-    try { 
-      synchronized(_reduced) { 
-        _reduced.move(dist);
-        _currentLocation= _currentLocation + dist;
-      } 
-    }
+    try { synchronized(_reduced) { _move(dist); }}
     finally { releaseReadLock(); } 
   }
   
-  /** Forwarding method to find the match for the closing brace immediately to the left, assuming 
-    *  there is such a brace.
-    *  @return the relative distance backwards to the offset before the matching brace.
+  /** Moves _currentLocation the specified distance.  Assumes that read lock and reduced locks are already held.
+    * @param dist the distance from the current location to the new location.
+    */
+  private void _move(int dist) {
+    _reduced.move(dist);
+    _currentLocation = _currentLocation + dist;
+  } 
+  
+  /** Finds the match for the closing brace immediately to the left, assuming there is such a brace. On failure, 
+    * returns -1.
+    * @return the relative distance backwards to the offset before the matching brace.
     */
   public int balanceBackward() {
     acquireReadLock();
-    try { 
-      synchronized(_reduced) { return _reduced.balanceBackward(); }
-    }
+    try {  synchronized(_reduced) { return _reduced.balanceBackward(); } }
     finally { releaseReadLock(); }  
   }
   
-  /** Forwarding method to find the match for the open brace immediately to the right, assuming there 
-    * is such a brace.
+  /** FindS the match for the open brace immediately to the right, assuming there is such a brace.  On failure, 
+    * returns -1.
     * @return the relative distance forwards to the offset after the matching brace.
     */
   public int balanceForward() {
@@ -589,10 +595,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           
           // Check if matching char should be ignored because it is within a comment, 
           // quotes, or ignored paren phrase
-          ReducedModelState state = _reduced.getStateAtCurrent();
-          if (! state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i) || 
-              (i > 0 && _isStartOfComment(text, i-1)))
-            continue;  // ignore matching char 
+         if (isShadowed()) continue;  // ignore matching char 
           else {
             // found valid matching char
             if (text.charAt(i) == closing) ++braceBalance;
@@ -616,7 +619,21 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return reducedPos;  
   }
   
-  /** Searching forward, finds the position of the enclosing brace. NB: ignores comments.
+  /** @return true iff _currentLocation is inside comment pr string. Assumes read lock is already held. */
+  public boolean isShadowed() { return _reduced.isShadowed(); }
+  
+   /** @return true iff specified pos is inside comment pr string. */
+  public boolean isShadowed(int pos) {
+    synchronized(_reduced) {
+      int origPos = _currentLocation;
+      _setCurrentLocation(pos);
+      boolean result = isShadowed();
+      _setCurrentLocation(origPos);
+      return result;
+    }
+  }
+  
+  /** Searching forward, finds the position of the enclosing brace, which may be a pointy bracket. NB: ignores comments.
     * @param pos Position to start from
     * @param opening opening brace character
     * @param closing closing brace character
@@ -654,17 +671,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
             reducedPos = i;          // reduced model points to reducedPos
             
             // Check if matching char should be ignored because it is within a comment, quotes, or ignored paren phrase
-            ReducedModelState state = _reduced.getStateAtCurrent();
-            if (! state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
-                  || ((i > 0) && _isStartOfComment(text, i - 1)))
-              continue;  // ignore matching char 
+            if (isShadowed()) continue;  // ignore matching char 
             else {
               // found valid matching char
-              if (text.charAt(i)==opening) {
+              if (text.charAt(i) == opening) {
                 ++braceBalance;
               }
               else {
-                if (braceBalance==0) break; // found our closing brace
+                if (braceBalance == 0) break; // found our closing brace
                 --braceBalance;
               }
             }
@@ -685,73 +699,91 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Searching backwards, finds the position of the first character that is one of the given delimiters.  Does
-    *  not look for delimiters inside paren phrases (e.g., skips semicolons used inside for statements.)  
-    *  NB: ignores comments.
-    *  @param pos Position to start from
-    *  @param delims array of characters to search for
-    *  @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning of document is reached.
+    * not look for delimiters inside bracketed phrases (e.g., skips semicolons used inside for statements.).  
+    * Bracketed phrases exclude those ending a delimiter (e.g., '}' if a delimiter).
+    * NB: ignores comments.
+    * @param pos Position to start from
+    * @param delims array of characters to search for
+    * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning of document is reached.
     */
   public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
     return findPrevDelimiter(pos, delims, true);
   }
   
-  /** Searching backwards, finds the position of the first character that is one of the given delimiters. Does not 
-    * look for delimiters inside a paren phrase if skipParenPhrases is true.  NB: ignores comments.
+  /** Searching backwards, finds position of first character that is a given delimiter, skipping over balanced braces
+    * if so instructed.  Does not look for delimiters inside a brace phrase if skipBracePhrases is true.  Ignores comments.
     * @param pos Position to start from
     * @param delims array of characters to search for
-    * @param skipParenPhrases whether to look for delimiters inside paren phrases
+    * @param skipBracePhrases whether to look for delimiters inside brace phrases
     * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning of document is reached.
     */
-  public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipParenPhrases)
+  public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipBracePhrases)
     throws BadLocationException {
 
-//    System.err.println("findPrevDelimiter(" + pos + ", " + Arrays.toString(delims) + ", " + skipParenPhrases);
+//    System.err.println("findPrevDelimiter(" + pos + ", " + Arrays.toString(delims) + ", " + skipBracePhrases);
     // Check cache
-    final Query key = new Query.PrevDelimiter(pos, delims, skipParenPhrases);
+    final Query key = new Query.PrevDelimiter(pos, delims, skipBracePhrases);
     final Integer cached = (Integer) _checkCache(key);
 
     if (cached != null) {
 //      System.err.println(cached.intValue() + " found in cache");
       return cached.intValue();
     }
+    
+    
     int reducedPos = pos;
-    int i;  // index of for loop below
+    int i;  // index for for loop below
     acquireReadLock();
     try {
       String text = getText(0, pos);
       
       synchronized(_reduced) {
         final int origPos = _currentLocation;
-        // Move reduced model to location pos
-        _setCurrentLocation(pos);  // reduced model points to pos == reducedPos
-        
+    
         // Walk backwards from specificed position
-        for (i = pos-1; i >= 0; i--) {
+        for (i = pos - 1; i >= 0; i--) {
           /* Invariant: reduced model points to reducedPos, text[i+1:pos] contains no valid delims, 
            * 0 <= i < reducedPos <= pos */
-          
-          if (match(text.charAt(i),delims)) {
-            // Move reduced model to walker's location
-            _setCurrentLocation(i);  // reduced model points to i
-            reducedPos = i;          // reduced model points to reducedPos
-            
-            // Check if matching char should be ignored because it is within a comment, quotes, or ignored paren phrase
-            ReducedModelState state = _reduced.getStateAtCurrent();
-            if (! state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
-                  || ((i > 0) && _isStartOfComment(text, i - 1)) || (skipParenPhrases && posInParenPhrase()))
-              continue;  // ignore matching char 
-            else break;  // found valid matching char
+              // Move reduced model to location pos
+          _setCurrentLocation(i);  // reduced model points to i
+          if (isShadowed() || isCommentOpen(text, i)) {
+//            System.err.println(text.charAt(i) + " at pos " + i + " is shadowed");
+            continue;
           }
-        }
+          char ch = text.charAt(i);
+          
+          if (match(ch, delims) /* && ! isShadowed() && (! skipParenPhrases || ! posInParenPhrase())*/) {
+            reducedPos = i;    // record valid match                                                                              
+            break;
+          }
+          
+          if (skipBracePhrases && match(ch, CLOSING_BRACES) ) {  // note that delims have already been matched
+//            Utilities.show("closing bracket is '" + ch + "' at pos " + i);
+            _setCurrentLocation(i + 1); // move cursor immediately to right of ch (a brace)
+//            Utilities.show("_currentLocation = " + _currentLocation);
+            int dist = balanceBackward();
+            if (dist == -1) { // if braces do not balance, return failure
+              i = -1;
+//              Utilities.show("dist = " + dist + " No matching brace found");
+              break;
+            }
+            assert dist > 0;
+//            Utilities.show("text = '" + getText(i + 1 - dist, dist) + "' dist = " + dist + " matching bracket is '" + text.charAt(i) + "' at pos " + i);
+            _setCurrentLocation(i + 1 - dist);  // skip over balanced brace text, decrementing _currentLocation
+            i = _currentLocation;
+            // Decrementing i skips over matching brace
+            continue;
+          }
+        }  // end for
         
-        /* Invariant: same as for loop except that -1 <= i <= reducedPos <= pos */
+        /* Invariant: same as for loop except that -1 <= i <= reducedPos <= pos && 0 <= reducedPos */
         
         _setCurrentLocation(origPos);    // Restore the state of the reduced model;
       }  // end synchronized
       
       if (i == -1) reducedPos = -1; // No matching char was found
       _storeInCache(key, reducedPos, pos - 1);
-//      System.err.println("Returning " + reducedPos);
+//      Utilities.show("findPrevDelimiter returning " + reducedPos);
 
       // Return position of matching char or ERROR_INDEX (-1) 
       return reducedPos;  
@@ -838,8 +870,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           reducedPos = i;                  // reduced model points to i == reducedPos
           
           // Check if matching char is within a comment (not including opening two characters)
-          if ((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-              (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
+          if ((_reduced.getStateAtCurrent().equals(INSIDE_LINE_COMMENT)) ||
+              (_reduced.getStateAtCurrent().equals(INSIDE_BLOCK_COMMENT))) {
             i--;
             continue;
           }
@@ -867,16 +899,18 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Checks the query cache for a stored value.  Returns the value if it has been cached, or null 
-    *  otherwise. Calling convention for keys: methodName:arg1:arg2.  Assumes readLock is already held.
-    *  @param key Name of the method and arguments
+    * otherwise. Calling convention for keys: methodName:arg1:arg2.  Assumes readLock is already held.
+    * @param key Name of the method and arguments
     */
   protected Object _checkCache(final Query key) {
     synchronized (_reduced) { return _queryCache.get(key); }
   }
   
   /** Stores the given result in the helper method cache. Calling convention for keys: methodName:arg1:arg2
-    *  @param key Name of method and arguments
-    *  @param result Result of the method call
+    * @param query  A canonical description of the query
+    * @param answer  The answer returned for the query
+    * @param offset  The offset of bounding the right edge of the text on which the query depends; if (0:offset) in
+    *                the document is unchanged, the query should return the same answer.
     */
   protected void _storeInCache(final Query query, final Object answer, final int offset) {
     synchronized(_reduced) {
@@ -1024,32 +1058,32 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return firstChar;
   }
   
-  /** Returns the indent level of the start of the statement that the cursor is on.  Uses a default 
-    *  set of delimiters. (';', '{', '}') and a default set of whitespace characters (' ', '\t', n', ',')
-    *  @param pos Cursor position
+  /** Returns the indent prefix for the start of the statement identified by pos.  Uses a default 
+    * set of delimiters. (';', '{', '}') and a default set of whitespace characters (' ', '\t', n', ',')
+    * @param pos Cursor position
     */
-  public String getIndentOfCurrStmt(int pos) throws BadLocationException {
+  public String getIndentOfCurrStmt(int pos) {
     char[] delims = {';', '{', '}'};
     char[] whitespace = {' ', '\t', '\n', ','};
     return getIndentOfCurrStmt(pos, delims, whitespace);
   }
   
-  /** Returns the indent level of the start of the statement that the cursor is on.  Uses a default
-    *  set of whitespace characters: {' ', '\t', '\n', ','}
-    *  @param pos Cursor position
+  /** Returns the indent prefix of the start of the statement identified by pos.  Uses a default
+    * set of whitespace characters: {' ', '\t', '\n', ','}
+    * @param pos Cursor position
     */
-  public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
+  public String getIndentOfCurrStmt(int pos, char[] delims) {
     char[] whitespace = {' ', '\t', '\n',','};
     return getIndentOfCurrStmt(pos, delims, whitespace);
   }
   
-  /** Returns the indent level of the start of the statement that the cursor is on.
-    * @param pos Cursor position
+  /** Returns the indent prefix of the start of the statement identified by pos
+    * @param pos  the position identifying the current statement
     * @param delims Delimiter characters denoting end of statement
     * @param whitespace characters to skip when looking for beginning of next statement
     */
-  public String getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace) throws 
-    BadLocationException {
+  public String getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace)  {
+//    Utilities.show("getIdentOfCurrentStmt(" + pos + ", " + Arrays.toString(delims) + ", " + Arrays.toString(whitespace) + ")");
     // Check cache
     final Query key = new Query.IndentOfCurrStmt(pos, delims, whitespace);
     final String cached = (String) _checkCache(key);
@@ -1063,42 +1097,76 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         // Get the start of the current line
         int lineStart = getLineStartPos(pos);
         
-        // Find the previous delimiter that closes a statement
+        // Find the previous delimiter (typically an enclosing brace or closing symbol) skipping over balanced braces
+        // that are not delims
         boolean reachedStart = false;
-        int prevDelim = lineStart;
-        boolean ignoreParens = posInParenPhrase(prevDelim);
+        int prevDelim = findPrevDelimiter(lineStart, delims, /* skipBracePhrases */ true);
+    
+        if (prevDelim == -1) reachedStart = true; // no delimiter found
         
-        do {
-          prevDelim = findPrevDelimiter(prevDelim, delims, ignoreParens);
-          if (prevDelim > 0 && prevDelim < getLength() && getText(prevDelim,1).charAt(0) == '{') break;
-          if (prevDelim == -1) { // no delimiter found
-            reachedStart = true;
-            break;
-          }
-          ignoreParens = posInParenPhrase(prevDelim);
-        } while (ignoreParens);  
-        
-        // From the previous delimiter, find the next non-whitespace character
+        // From the previous delimiter or start, find the next non-whitespace character (why?)
         int nextNonWSChar;
         if (reachedStart) nextNonWSChar = getFirstNonWSCharPos(0);
-        else nextNonWSChar = getFirstNonWSCharPos(prevDelim+1, whitespace, false);
+        else nextNonWSChar = getFirstNonWSCharPos(prevDelim + 1, whitespace, false);
         
         // If the end of the document was reached
         if (nextNonWSChar == -1) nextNonWSChar = getLength();
+        
+        // The following statement looks right; otherwise, the indenting of the current line depends on how it is indented
+//        if (nextNonWSChar >= lineStart) nextNonWSChar = prevDelim;  
         
         // Get the start of the line of the non-ws char
         int lineStartStmt = getLineStartPos(nextNonWSChar);
         
         // Get the position of the first non-ws character on this line
         int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
-        lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt); 
+        lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt);
         _storeInCache(key, lineText, pos - 1);
       }
     }
     catch(Exception e) { throw new UnexpectedException(e); }
     finally { releaseReadLock(); }
-    
+//    Utilities.show("getIdentCurrStmt(...) call completed");    
     return lineText;
+  }
+  
+  /** Gets the white space prefix preceding the first non-blank/tab character on the line identified by pos. 
+    * Assumes that line has nonWS character. */
+  public String getWSPrefix(int pos) {
+    acquireReadLock();
+    try {
+      synchronized (_reduced) {
+        
+      // Get the start of this line
+      int lineStart = getLineStartPos(pos);
+      // Get the position of the first non-ws character on this line
+      int firstNonWSPos = getLineFirstCharPos(pos);
+//      String line = getText(lineStart, getLineEndPos(pos) - lineStart - 1);
+//      System.err.println("Prefix of line: '" + line + "' is '" + (firstNonWSPos - lineStart) + " chars long");
+      return makeBlankString(firstNonWSPos - lineStart);
+      }
+    }
+    catch(Exception e) { throw new UnexpectedException(e); }
+    finally { releaseReadLock(); }
+  }
+  
+  /** Generates a string containng n blanks.  Intended for small values of n (typically < 50). */
+  private static String makeBlankString(int n) {
+    switch (n) {
+      case 0: return "";
+      case 1: return " ";
+      case 2: return "  ";
+      case 3: return "   ";
+      case 4: return "    ";
+      case 5: return "     ";
+      case 6: return "      ";
+      case 7: return "       ";
+      case 8: return "        ";
+      default:
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < n; i++) buf.append(' ');
+        return buf.toString();
+    }
   }
   
   /** Determines if the given character exists on the line where the given cursor position is.  Does not 
@@ -1134,7 +1202,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           _setCurrentLocation(matchIndex);  // move reduced model to location matchIndex
           
           // Check if matching char is in comment or quotes
-          if (_reduced.getStateAtCurrent().equals(ReducedModelState.FREE)) break; // found matching char
+          if (_reduced.getStateAtCurrent().equals(FREE)) break; // found matching char
           
           // matching character is not valid, try again
           i = lineText.indexOf(findChar, i+1);
@@ -1203,7 +1271,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         _setCurrentLocation(oldPos);
       }
       newPos = pos + dist;
-      _storeInCache(key, newPos, newPos);
+      _storeInCache(key, newPos, newPos + 1);
       return newPos;
     }
     finally { releaseReadLock(); }
@@ -1306,8 +1374,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           
           // Check if non-ws char is within comment and if we want to ignore them.
           if (! acceptComments &&
-              ((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-               (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)))) {
+              ((_reduced.getStateAtCurrent().equals(INSIDE_LINE_COMMENT)) ||
+               (_reduced.getStateAtCurrent().equals(INSIDE_BLOCK_COMMENT)))) {
             i++;  // TODO: increment i to skip over entire comment
             continue;
           }
@@ -1352,6 +1420,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
     return false;
   }
+  
+  /** Determines if _currentLocation is the start of a comment. */
+  private boolean _isStartOfComment(int pos) { return _isStartOfComment(getText(), pos); }
   
 //  /** Helper method for findPrevNonWSCharPos. Determines whether the current character is the start of a comment
 //    *  encountered from the end: '/' or '*' preceded by a '/'.
@@ -1479,7 +1550,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _reduced.resetLocation();
     ReducedModelState state = stateAtRelLocation(-distToStart);
     
-    return (state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT));
+    return (state.equals(INSIDE_BLOCK_COMMENT));
   }
   
 //  /** Determines if pos lies within a block comment using the cached result for previous line.  Assumes that read lock
@@ -1558,8 +1629,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return (pos < 0); 
   }
   
-  /** Sets text between previous newline and first non-whitespace character of line containing pos to value of tab.
-    * @param tab String to be placed between previous newline and first non-whitespace character
+  /** Inserts the string specified by tab at the beginning of the line identified by pos.
+    * @param tab  The string to be placed between previous newline and first non-whitespace character
     */
   public void setTab(String tab, int pos) {
     try {
@@ -1699,6 +1770,23 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     catch(BadLocationException e) { throw new UnexpectedException(e); }
     finally { releaseWriteLock(); }
   }
+  
+  /** @return true if pos is the position of one of the chars in an occurrence of "//" or "/*" in text. */
+  private static boolean isCommentOpen(String text, int pos) {
+    int len = text.length();
+    if (len < 2) return false;
+    if (pos == len - 1) return isCommentStart(text, pos - 1);
+    if (pos == 0) return isCommentStart(text, 0);
+    return isCommentStart(text, pos - 1) || isCommentStart(text, pos);
+  }
+  
+  /** @return true if pos is index of string "//" or "/*" in text.  Assumes pos < text.length() - 1 */
+  private static boolean isCommentStart(String text, int pos) {
+    char ch1 = text.charAt(pos);
+    char ch2 = text.charAt(pos + 1);
+    return ch1 == '/' && (ch2 == '/' || ch2 == '*');
+  }
+    
   
   //Two abstract methods to delegate to the undo manager, if one exists.
   protected abstract int startCompoundEdit();

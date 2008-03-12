@@ -313,9 +313,8 @@ public class InteractionsDocument extends ConsoleDocument {
   }
   
   /** Inserts the given exception data into the document with the given style.
-   *  @param message Message contained in the exception
-   *  @param stackTrace String representation of the stack trace
-   *  @param styleName name of the style for formatting the exception
+   *  @param message  Message contained in the exception
+   *  @param styleName  name of the style for formatting the exception
    */
   public void appendExceptionResult(String message, String styleName) {
     // Note that there is similar code in InteractionsDJDocument.  Something should be refactored.

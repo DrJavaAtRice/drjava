@@ -41,8 +41,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  *
  * @version $Id$
  */
-public class TokenList extends ModelList<ReducedToken>
-    implements /*imports*/ ReducedModelStates {
+public class TokenList extends ModelList<ReducedToken> implements /*imports*/ ReducedModelStates {
   /**
    * Gets a TokenList.Iterator for this list.
    * getIterator() returns a ModelList<ReducedToken>.Iterator
@@ -51,9 +50,7 @@ public class TokenList extends ModelList<ReducedToken>
    * differentiation was easiest since it allowed us to keep
    * TokenList.Iterator extending ModelList<ReducedToken>.Iterator.
    */
-  public TokenList.Iterator _getIterator() {
-    return new TokenList.Iterator();
-  }
+  public TokenList.Iterator _getIterator() { return new TokenList.Iterator(); }
 
   public class Iterator extends ModelList<ReducedToken>.Iterator {
 
@@ -89,12 +86,11 @@ public class TokenList extends ModelList<ReducedToken>
 
     public void setBlockOffset(int offset) { _offset = offset; }
 
-    /**
-     * Returns the current commented/quoted state at the cursor.
-     *
-     * @return FREE|INSIDE_BLOCK_COMMENT|INSIDE_LINE_COMMENT|INSIDE_SINGLE_QUOTE|
-     *         INSIDE_DOUBLE_QUOTE
-     */
+    /** Returns the current commented/quoted state at the cursor.
+      *
+      * @return FREE|INSIDE_BLOCK_COMMENT|INSIDE_LINE_COMMENT|INSIDE_SINGLE_QUOTE|
+      *         INSIDE_DOUBLE_QUOTE
+      */
     public ReducedModelState getStateAtCurrent() {
       if (atFirstItem() || atStart() || TokenList.this.isEmpty())  return FREE;
       else if (prevItem().isLineComment() || (prevItem().getState() == INSIDE_LINE_COMMENT))

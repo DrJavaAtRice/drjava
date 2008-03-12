@@ -216,7 +216,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public File getWorkingDirectory() { return _workingDirectory; }
 
   /** These add the given path to the classpaths used in the interpreter.
-   *  @param path Path to add
+   *  @param file  the path to add
    */
   public abstract void addProjectClassPath(File f);
   public abstract void addBuildDirectoryClassPath(File f);

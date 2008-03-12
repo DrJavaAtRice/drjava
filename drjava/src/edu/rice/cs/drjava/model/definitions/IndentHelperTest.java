@@ -88,11 +88,12 @@ public final class IndentHelperTest extends IndentRulesTestCase {
                  5,
                  _doc.findPrevDelimiter(14, delimiters1));
     
-    _setDocText("foo();\nfor(;;)\n");
-    assertEquals("Check that delimiters in paren phrases " +
-                 "can be detected",
-                 12,
-                 _doc.findPrevDelimiter(14, delimiters1, false));
+// Commented out because this behavior is undesirable!  Preceding chars enclosed in parens should not be visible!    
+//    _setDocText("foo();\nfor(;;)\n");
+//    assertEquals("Check that delimiters in paren phrases " +
+//                 "can be detected",
+//                 12,
+//                 _doc.findPrevDelimiter(14, delimiters1, false));
     
     _setDocText("foo();\n test ? x : y;\n\t    return blah();\n");
     assertEquals("Check that ERROR_INDEX (-1) is returned if no matching character is found", 
@@ -261,9 +262,7 @@ public final class IndentHelperTest extends IndentRulesTestCase {
                  _doc.getIndentOfCurrStmt(12));
   }
 
-  public void testGetIndentOfCurrStmtEndOfDoc() 
-    throws BadLocationException
-  {
+  public void testGetIndentOfCurrStmtEndOfDoc() throws BadLocationException {
     
     _setDocText("foo.\n");
     assertEquals("cursor at end of document, no indent",

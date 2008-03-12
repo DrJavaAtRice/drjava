@@ -52,14 +52,12 @@ public class HelpFrame extends HTMLFrame {
   private static final String HELP_PATH =  "/edu/rice/cs/drjava/docs/user/";
   protected static final String CONTENTS_PAGE = "index.html";
   protected static final String HOME_PAGE = "intro.html";
-  private static final URL INTRO_URL =
-    HTMLFrame.class.getResource(HELP_PATH + HOME_PAGE);
+  private static final URL INTRO_URL = HTMLFrame.class.getResource(HELP_PATH + HOME_PAGE);
   protected static final String ICON = "DrJavaHelp.png";
 
   public HelpFrame() {
     super("Help on using DrJava", INTRO_URL, HelpFrame.class.getResource(HELP_PATH + CONTENTS_PAGE), ICON);
     addHyperlinkListener(_linkListener);
-
   }
   
   /**

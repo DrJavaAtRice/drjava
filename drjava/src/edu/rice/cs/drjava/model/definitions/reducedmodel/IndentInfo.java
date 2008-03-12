@@ -77,10 +77,10 @@ public class IndentInfo {
   }
 
   /** Creates an indent info with the specified parameters
-    * @param _enclosingBraceType the enclosingBraceType
-    * @param _distToLineEnclosingBraceStart the distance to the next newline
-    * @param _distToLineEnclosingBrace the distance to a brace
-    * @param _distToStart the distance to the previous newline
+    * @param enclosingBraceType the enclosingBraceType
+    * @param distToLineEnclosingBraceStart the distance to the next newline
+    * @param distToLineEnclosingBrace the distance to a brace
+    * @param distToStart the distance to the previous newline
     */
   public IndentInfo(String lineEnclosingBraceType, int distToLineEnclosingBraceStart, int distToLineEnclosingBrace, 
                     int distToStart) {
