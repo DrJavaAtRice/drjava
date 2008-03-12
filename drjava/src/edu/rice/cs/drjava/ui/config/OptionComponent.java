@@ -83,6 +83,8 @@ public abstract class OptionComponent<T> implements Serializable {
   
   public JLabel getLabel() { return _label; } 
   
+  public boolean useEntireColumn() { return false; }
+  
   /** Returns the JComponent to display for this OptionComponent. */
   public abstract JComponent getComponent();
 

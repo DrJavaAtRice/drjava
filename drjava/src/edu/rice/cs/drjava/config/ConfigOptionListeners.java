@@ -64,7 +64,7 @@ public class ConfigOptionListeners implements OptionConstants {
       }
     }
   }
-  
+
   @SuppressWarnings("fallthrough")
   public static void sanitizeSlaveJVMArgs(JFrame parent,
                                           String value,
@@ -113,6 +113,9 @@ public class ConfigOptionListeners implements OptionConstants {
       catch(NumberFormatException nfe) {
         heapSize = -1; // invalid
       }
+      long heapSizeMB = (heapSize / 1024) / 1024;
+      // find the next bigger of the choices
+      String newSetting = getNextBiggerHeapSize(heapSizeMB);
       int result;
       if (heapSize>=0) {
         String[] options = new String[] { "Copy to \"Maximum Heap\" Setting",
@@ -123,7 +126,7 @@ public class ConfigOptionListeners implements OptionConstants {
                            "You seem to have specified the maximum heap size as part of the\n" +
                            "\"JVM Args for Interactions JVM\" setting: \"-Xmx"+size+"\"\n"+
                            "The \"Maximum Heap Memory for Interactions JVM\" setting should be used instead.\n"+
-                           "Would you like to copy the value\n\""+size+"\" into the \"Maximum Heap\" setting,\n"+
+                           "Would you like to copy the value \""+newSetting+"\" into the \"Maximum Heap\" setting,\n"+
                            "just clean up \"JVM Args for Interactions JVM\", or ignore this potential problem?",
                            "Maximum Heap Size Set in JVM Arguments",
                            0,
@@ -141,8 +144,7 @@ public class ConfigOptionListeners implements OptionConstants {
                            "\"JVM Args for Interactions JVM\" setting: \"-Xmx"+size+"\"\n"+
                            "The \"Maximum Heap Memory for Interactions JVM\" setting should be used instead.\n"+
                            "Furthermore, the specified heap size \""+size+"\" is invalid.\n"+
-                           "Would you like to clean up the \"JVM Args for Interactions JVM\", copy the value\n"+
-                           "\""+size+"\" into the \"Maximum Heap\" setting,\n"+
+                           "Would you like to clean up the \"JVM Args for Interactions JVM\"\n"+
                            "or ignore this potential problem?",
                            "Maximum Heap Size Set in JVM Arguments",
                            0,
@@ -162,7 +164,7 @@ public class ConfigOptionListeners implements OptionConstants {
         DrJava.getConfig().removeOptionListener(SLAVE_JVM_ARGS, l);
         DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, new OptionListener<String>() {
           public void optionChanged(OptionEvent<String> oe) {
-            DrJava.getConfig().removeOptionListener(SLAVE_JVM_ARGS, l);
+            DrJava.getConfig().removeOptionListener(SLAVE_JVM_ARGS, this);
             SwingUtilities.invokeLater(new Runnable() { 
               public void run() {
                 DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, l);
@@ -173,7 +175,11 @@ public class ConfigOptionListeners implements OptionConstants {
         DrJava.getConfig().setSetting(SLAVE_JVM_ARGS, newValue);
         if (result==0) {
           // copy
-          DrJava.getConfig().setSetting(SLAVE_JVM_XMX, size);
+          DrJava.getConfig().setSetting(SLAVE_JVM_XMX, newSetting);
+        }
+        else {
+          JOptionPane.showMessageDialog(parent,
+                                        "You will have to reset the interactions pane before changes take effect.");
         }
       }
     }
@@ -189,10 +195,94 @@ public class ConfigOptionListeners implements OptionConstants {
     }
   }
   
-  @SuppressWarnings("fallthrough")
   public static void sanitizeSlaveJVMXMX(JFrame parent, String value) {
-    if (!value.equals("")) {
+    if ((!value.equals("")) &&
+        (!value.equals(OptionConstants.heapSizeChoices.get(0)))) {
+      long heapSize;
       String size = value.trim();
+      try {
+        heapSize = new Long(size);
+      }
+      catch(NumberFormatException nfe) {
+        heapSize = -1; // invalid
+      }
+      if (heapSize<0) {
+        String[] options = new String[] { "Clean \"Maximum Heap\" Setting",
+          "Ignore" };
+        int result = JOptionPane.
+          showOptionDialog(parent,
+                           "The \"Maximum Heap Memory for Interactions JVM\" setting is invalid: \""+size+"\"\n"+
+                           "Would you like to clean up the \"Maximum Heap\" setting or ignore this potential problem?",
+                           "Invalid Maximum Heap Size",
+                           0,
+                           JOptionPane.QUESTION_MESSAGE,
+                           null,
+                           options,
+                           options[0]);
+        if (result==0) {
+          // clean up
+          DrJava.getConfig().setSetting(SLAVE_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
+        }
+      }
+    }
+  }
+  
+  /** Return the next bigger heap size setting. */
+  static String getNextBiggerHeapSize(long heapSizeMB) {
+    String newSetting = OptionConstants.heapSizeChoices.get(0);
+    for(int i=1; i<OptionConstants.heapSizeChoices.size(); ++i) {
+      try {
+        newSetting = OptionConstants.heapSizeChoices.get(i);
+        float choice = new Float(newSetting);
+        if (choice>=heapSizeMB) {
+          return newSetting;
+        }
+      }
+      catch(NumberFormatException nfe) {
+        return OptionConstants.heapSizeChoices.get(0);
+      }
+    }
+    return newSetting;
+  }
+  
+  public static class MasterJVMArgsListener implements OptionListener<String>, OptionConstants {
+    protected JFrame _parent;
+    public MasterJVMArgsListener(JFrame parent) { _parent = parent; }
+    public void optionChanged(OptionEvent<String> oe) {
+      final OptionListener<String> masterJvmArgsListener = this;
+      if (!oe.value.equals("")) {
+        int result = JOptionPane.
+          showConfirmDialog(_parent,
+                            "Specifying Main JVM Args is an advanced option. Invalid arguments may cause\n" +
+                            "DrJava to fail on start up.  You may need to edit or delete your .drjava preferences file\n" +
+                            "to recover.\n Are you sure you want to set this option?\n" +
+                            "(You will have to restart Drjava before changes take effect.)",
+                            "Confirm Main JVM Arguments", JOptionPane.YES_NO_OPTION);
+        if (result!=JOptionPane.YES_OPTION) {
+          DrJava.getConfig().setSetting(oe.option, "");
+        }
+        else {
+          sanitizeMasterJVMArgs(_parent, oe.value, this);
+        }
+      }
+    }
+  }
+  
+  @SuppressWarnings("fallthrough")
+  public static void sanitizeMasterJVMArgs(JFrame parent,
+                                           String value,
+                                           final OptionListener<String> l) {
+    int pos = value.indexOf("-Xmx");
+    if (((pos>1) && (Character.isWhitespace(value.charAt(pos-1)))) ||
+        (pos==0)) {
+      int endpos = pos+("-Xmx".length());
+      while((endpos<value.length()) &&
+            (!Character.isWhitespace(value.charAt(endpos)))) {
+        ++endpos;
+      }
+      
+      int startpos = pos+("-Xmx".length());
+      String size = value.substring(startpos,endpos);
       long factor = 1;
       long heapSize;
       switch(size.toLowerCase().charAt(size.length()-1)) {
@@ -226,93 +316,20 @@ public class ConfigOptionListeners implements OptionConstants {
       catch(NumberFormatException nfe) {
         heapSize = -1; // invalid
       }
-      if (heapSize<0) {
-        String[] options = new String[] { "Clean \"Maximum Heap\" Setting",
-          "Ignore" };
-        int result = JOptionPane.
-          showOptionDialog(parent,
-                           "The \"Maximum Heap Memory for Interactions JVM\" setting is invalid: \""+size+"\"\n"+
-                           "Would you like to clean up the \"Maximum Heap\" setting or ignore this potential problem?",
-                           "Invalid Maximum Heap Size",
-                           0,
-                           JOptionPane.QUESTION_MESSAGE,
-                           null,
-                           options,
-                           options[0]);
-        if (result==0) {
-          // clean up
-          DrJava.getConfig().setSetting(SLAVE_JVM_XMX, "");
-        }
-      }
-    }
-  }
-  
-  public static class MasterJVMArgsListener implements OptionListener<String>, OptionConstants {
-    protected JFrame _parent;
-    public MasterJVMArgsListener(JFrame parent) { _parent = parent; }
-    public void optionChanged(OptionEvent<String> oe) {
-      final OptionListener<String> masterJvmArgsListener = this;
-      if (!oe.value.equals("")) {
-        int result = JOptionPane.
-          showConfirmDialog(_parent,
-                            "Specifying Main JVM Args is an advanced option. Invalid arguments may cause\n" +
-                            "DrJava to fail on start up.  You may need to edit or delete your .drjava preferences file\n" +
-                            "to recover.\n Are you sure you want to set this option?\n" +
-                            "(You will have to restart Drjava before changes take effect.)",
-                            "Confirm Main JVM Arguments", JOptionPane.YES_NO_OPTION);
-        if (result!=JOptionPane.YES_OPTION) {
-          DrJava.getConfig().setSetting(oe.option, "");
-        }
-        else {
-          sanitizeMasterJVMArgs(_parent, oe.value, this);
-        }
-      }
-    }
-  }
-  
-  @SuppressWarnings("fallthrough")
-  public static void sanitizeMasterJVMArgs(JFrame parent,
-                                           String value,
-                                           final OptionListener<String> l) {
-    int pos = value.indexOf("-Xmx");
-    if (((pos>1) && (Character.isWhitespace(value.charAt(pos-1)))) ||
-        (pos==0)) {
-      int startpos = pos+("-Xmx".length());
-      int endpos = startpos;
-      while((endpos<value.length()) &&
-            (!Character.isWhitespace(value.charAt(endpos)))) {
-        ++endpos;
-      }
-
-      String size = value.substring(startpos,endpos);
-      long factor = 1;
-      long heapSize;
-      switch(size.toLowerCase().charAt(size.length()-1)) {
-        case 'g':
-          factor *= 1024; // fall-through intended
-        case 'm':
-          factor *= 1024; // fall-through intended
-        case 'k':
-          factor *= 1024; // fall-through intended
-        default:
-          try{
-          heapSize = new Long(size.substring(0,size.length()-2)) * factor;
-        }
-          catch(NumberFormatException nfe) {
-            heapSize = -1; // invalid
-          }
-      }
+      long heapSizeMB = (heapSize / 1024) / 1024;
+      // find the next bigger of the choices
+      String newSetting = getNextBiggerHeapSize(heapSizeMB);
       int result;
       if (heapSize>=0) {
         String[] options = new String[] { "Copy to \"Maximum Heap\" Setting",
-          "Clean \"Main JVM Args\"",
+          "Clean \"Master JVM Args\"",
           "Ignore" };
         result = JOptionPane.
           showOptionDialog(parent,
                            "You seem to have specified the maximum heap size as part of the\n" +
                            "\"JVM Args for Main JVM\" setting: \"-Xmx"+size+"\"\n"+
                            "The \"Maximum Heap Memory for Main JVM\" setting should be used instead.\n"+
-                           "Would you like to copy the value\n\""+size+"\" into the \"Maximum Heap\" setting,\n"+
+                           "Would you like to copy the value \""+newSetting+"\" into the \"Maximum Heap\" setting,\n"+
                            "just clean up \"JVM Args for Main JVM\", or ignore this potential problem?",
                            "Maximum Heap Size Set in JVM Arguments",
                            0,
@@ -361,10 +378,12 @@ public class ConfigOptionListeners implements OptionConstants {
         DrJava.getConfig().setSetting(MASTER_JVM_ARGS, newValue);
         if (result==0) {
           // copy
-          DrJava.getConfig().setSetting(MASTER_JVM_XMX, size);
+          DrJava.getConfig().setSetting(MASTER_JVM_XMX, newSetting);
         }
-        JOptionPane.showMessageDialog(parent,
-                                      "You will have to restart DrJava before the change takes effect.");
+        else {
+          JOptionPane.showMessageDialog(parent,
+                                        "You will have to restart DrJava before the change takes effect.");
+        }
       }
     }
   }
@@ -379,39 +398,14 @@ public class ConfigOptionListeners implements OptionConstants {
     }
   }
   
-  @SuppressWarnings("fallthrough")
   public static void sanitizeMasterJVMXMX(JFrame parent, String value) {
-    if (!value.equals("")) {
+    if ((!value.equals("")) &&
+        (!value.equals(OptionConstants.heapSizeChoices.get(0)))) {
       String size = value.trim();
       long factor = 1;
       long heapSize;
-      switch(size.toLowerCase().charAt(size.length()-1)) {
-        case 'g': {
-          factor *= 1024; // fall-through intended
-        }
-        case 'm': {
-          factor *= 1024; // fall-through intended
-        }
-        case 'k': {
-          factor *= 1024; // fall-through intended
-          break;
-        }
-        default: {
-          if (!Character.isDigit(size.toLowerCase().charAt(size.length()-1))) {
-            factor = 0;
-          }
-        }
-      }
       try {
-        if (factor==1) {
-          heapSize = new Long(size);
-        }
-        else if (factor>1) {
-          heapSize = new Long(size.substring(0,size.length()-1)) * factor;
-        }
-        else {
-          heapSize = -1;
-        }
+        heapSize = new Long(size);
       }
       catch(NumberFormatException nfe) {
         heapSize = -1; // invalid
@@ -431,7 +425,7 @@ public class ConfigOptionListeners implements OptionConstants {
                            options[0]);
         if (result==0) {
           // clean up
-          DrJava.getConfig().setSetting(MASTER_JVM_XMX, "");
+          DrJava.getConfig().setSetting(MASTER_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
         }
       }
     }

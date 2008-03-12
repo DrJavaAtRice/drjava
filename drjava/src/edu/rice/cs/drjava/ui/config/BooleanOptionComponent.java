@@ -55,11 +55,12 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
    * @param opt the BooleanOption this component represents
    * @param text the text to display with the option
    * @param parent the parent frame
+   * @param left whether the descriptive text should be on the left
    */
-  public BooleanOptionComponent(BooleanOption opt, String text, Frame parent) {
-    super(opt, "", parent);
+  public BooleanOptionComponent(BooleanOption opt, String text, Frame parent, boolean left) {
+    super(opt, left?text:"", parent);
     _jcb = new JCheckBox();
-    _jcb.setText(text);
+    _jcb.setText(left?"":text);
     _jcb.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
     });
@@ -72,12 +73,35 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
    *  @param text the text to display with the option
    *  @param parent the parent frame
    *  @param description text to show in a tooltip over 
+   *  @param left whether the descriptive text should be on the left
+   */
+  public BooleanOptionComponent(BooleanOption opt, String text,
+                                Frame parent, String description, boolean left) {
+    this(opt, text, parent, left);
+    setDescription(description);
+  }
+  
+    /**
+   * Constructs a new BooleanOptionComponent.
+   * @param opt the BooleanOption this component represents
+   * @param text the text to display with the option
+   * @param parent the parent frame
+   */
+  public BooleanOptionComponent(BooleanOption opt, String text, Frame parent) {
+    this(opt, text, parent, true);
+  }
+
+  /** Constructs a new BooleanOptionComponent with a tooltip description.
+   *  @param opt the BooleanOption this component represents
+   *  @param text the text to display with the option
+   *  @param parent the parent frame
+   *  @param description text to show in a tooltip over 
    */
   public BooleanOptionComponent(BooleanOption opt, String text,
                                 Frame parent, String description) {
-    this(opt, text, parent);
-    setDescription(description);
+    this(opt, text, parent, true);
   }
+
 
   /** Sets the tooltip description text for this option.
    *  @param description the tooltip text

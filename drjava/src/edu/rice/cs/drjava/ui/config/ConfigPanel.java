@@ -95,21 +95,34 @@ public class ConfigPanel extends JPanel {
     for (int i=0; i<_components.size(); i++) {
       OptionComponent comp = _components.get(i);
 
-      c.weightx = 0.0;
-      c.gridwidth = 1;
-      c.insets = labelInsets;
+      if (!comp.useEntireColumn()) {
+        c.anchor = GridBagConstraints.NORTH;
+        c.weightx = 0.0;
+        c.gridwidth = 1;
+        c.insets = labelInsets;
 
-      JLabel label= comp.getLabel();
-      gridbag.setConstraints(label, c);
-      panel2.add(label);
+        JLabel label= comp.getLabel();
+        gridbag.setConstraints(label, c);
+        panel2.add(label);
 
-      c.weightx = 1.0;
-      c.gridwidth = GridBagConstraints.REMAINDER;
-      c.insets = compInsets;
+        c.weightx = 1.0;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.insets = compInsets;
 
-      JComponent otherC = comp.getComponent();
-      gridbag.setConstraints(otherC, c);
-      panel2.add(otherC);
+        JComponent otherC = comp.getComponent();
+        gridbag.setConstraints(otherC, c);
+        panel2.add(otherC);
+      }
+      else {
+        c.anchor = GridBagConstraints.NORTH;
+        c.weightx = 0.0;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.insets = compInsets;
+
+        JComponent otherC = comp.getLabel();
+        gridbag.setConstraints(otherC, c);
+        panel2.add(otherC);
+      }
     }
     /*
      for (int i=0; i<_components.size(); i++) {

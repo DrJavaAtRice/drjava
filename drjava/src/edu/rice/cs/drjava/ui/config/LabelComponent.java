@@ -46,17 +46,25 @@ import java.awt.*;
 public class LabelComponent extends OptionComponent<Object> {
   private JTextArea _text;
 
-  public LabelComponent(String text, Frame parent) {
-    super("", parent);
-    _text = new JTextArea(text);
+  public LabelComponent(String text, Frame parent, boolean left) {
+    super(left?text:"", parent);
+    _text = new JTextArea(left?"":text);
     _text.setEditable(false);
     _text.setBackground(parent.getBackground());
 //    _text.setBackground(new Color(204,204,204));
   }
 
-  public LabelComponent(String text, Frame parent, String description) {
-    this(text, parent);
+  public LabelComponent(String text, Frame parent, String description, boolean left) {
+    this(text, parent, left);
     setDescription(description);
+  }
+
+  public LabelComponent(String text, Frame parent) {
+    this(text,parent,false);
+  }
+
+  public LabelComponent(String text, Frame parent, String description) {
+    this(text, parent, description, false);
   }
 
   public void setDescription(String description) {

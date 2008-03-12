@@ -1130,11 +1130,35 @@ public interface OptionConstants {
   /** The command-line arguments to be passed to the Slave JVM. */
   public static final StringOption SLAVE_JVM_ARGS = new StringOption("slave.jvm.args", "");
   
+  /* Possible maximum heap sizes. */
+  public static final ArrayList<String> heapSizeChoices = HeapSizeChoices.evaluate();
+  static class HeapSizeChoices {
+    public static ArrayList<String> evaluate() {
+      ArrayList<String> aList = new ArrayList<String>(4);
+      aList.add("default");
+      aList.add("64");
+      aList.add("128");
+      aList.add("256");
+      aList.add("512");
+      aList.add("768");
+      aList.add("1024");
+      aList.add("1536");
+      aList.add("2048");
+      aList.add("2560");
+      aList.add("3072");
+      aList.add("3584");
+      aList.add("4096");
+      return aList;
+    }
+  }
+
   /** The command-line arguments for the maximum heap size (-Xmx___) to be passed to the Master JVM. */
-  public static final StringOption MASTER_JVM_XMX = new StringOption("master.jvm.xmx", "");
+  public static final ForcedChoiceOption MASTER_JVM_XMX =
+    new ForcedChoiceOption("master.jvm.xmx", "default", heapSizeChoices);
 
   /** The command-line arguments for the maximum heap size (-Xmx___) to be passed to the Slave JVM. */
-  public static final StringOption SLAVE_JVM_XMX = new StringOption("slave.jvm.xmx", "");
+  public static final ForcedChoiceOption SLAVE_JVM_XMX =
+    new ForcedChoiceOption("slave.jvm.xmx", "default", heapSizeChoices);
   
   /** The last state of the "Clipboard History" dialog. */
   public static final StringOption DIALOG_CLIPBOARD_HISTORY_STATE = new StringOption("dialog.clipboard.history.state", "default");

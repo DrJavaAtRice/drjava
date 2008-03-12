@@ -7623,15 +7623,22 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Ask the user to increase the slave's max heap setting. */
   void askToIncreaseSlaveMaxHeap() {
-    String value = "set to "+DrJava.getConfig().getSetting(SLAVE_JVM_XMX);
-    if (value.trim().length()==0) {
+    String value = "set to "+DrJava.getConfig().getSetting(SLAVE_JVM_XMX)+" MB";
+    if ((!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX)))) &&
+        (!(OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX))))) { 
       value = "not set, implying the system's default";
     }
-    String res = JOptionPane.showInputDialog(MainFrame.this,
-                                             "Your program ran out of memory. You may try to enter a larger\n"+
-                                             "maximum heap size for the Interactions JVM. The maximum heap size is\n"+
-                                             "currently "+value+".",
-                                             DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+    
+    String res = (String)JOptionPane.showInputDialog(MainFrame.this,
+                                                     "Your program ran out of memory. You may try to enter a larger\n"+
+                                                     "maximum heap size for the Interactions JVM. The maximum heap size is\n"+
+                                                     "currently "+value+".",
+                                                     "Increase Maximum Heap Size?",
+                                                     JOptionPane.QUESTION_MESSAGE,
+                                                     null,
+                                                     OptionConstants.heapSizeChoices.toArray(),
+                                                     DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+
     if (res!=null) {
       // temporarily make MainFrame the parent of the dialog that pops up
       DrJava.getConfig().removeOptionListener(SLAVE_JVM_XMX, _slaveJvmXmxListener);
@@ -7652,15 +7659,22 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
 
   /** Ask the user to increase the master's max heap setting. */
   void askToIncreaseMasterMaxHeap() {
-    String value = "set to "+DrJava.getConfig().getSetting(MASTER_JVM_XMX);
-    if (value.trim().length()==0) {
+    String value = "set to "+DrJava.getConfig().getSetting(MASTER_JVM_XMX)+" MB";
+    if ((!("".equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX)))) &&
+        (!(OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX))))) { 
       value = "not set, implying the system's default";
     }
-    String res = JOptionPane.showInputDialog(MainFrame.this,
-                                             "DrJava ran out of memory. You may try to enter a larger\n"+
-                                             "maximum heap size for the Main JVM. The maximum heap size is\n"+
-                                             "currently "+value+".",
-                                             DrJava.getConfig().getSetting(MASTER_JVM_XMX));
+    
+    String res = (String)JOptionPane.showInputDialog(MainFrame.this,
+                                                     "Your program ran out of memory. You may try to enter a larger\n"+
+                                                     "maximum heap size for the Interactions JVM. The maximum heap size is\n"+
+                                                     "currently "+value+".",
+                                                     "Increase Maximum Heap Size?",
+                                                     JOptionPane.QUESTION_MESSAGE,
+                                                     null,
+                                                     OptionConstants.heapSizeChoices.toArray(),
+                                                     DrJava.getConfig().getSetting(MASTER_JVM_XMX));
+
     if (res!=null) {
       // temporarily make MainFrame the parent of the dialog that pops up
       DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);

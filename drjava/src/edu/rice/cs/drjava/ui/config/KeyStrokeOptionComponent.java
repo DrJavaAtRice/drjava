@@ -56,7 +56,6 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
   public static final Hashtable<KeyStroke, KeyStrokeOptionComponent> _keyToKSOC =
     new Hashtable<KeyStroke, KeyStrokeOptionComponent>();
   private JButton _button;
-  private JTextField _keyField;
   private JPanel _panel;
   private static GetKeyDialog _getKeyDialog =  null;
 
@@ -80,25 +79,17 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
                              true);
         }
 
-        String oldText = _keyField.getText();
+        String oldText = _button.getText();
         _getKeyDialog.promptKey(KeyStrokeOptionComponent.this);
-        if (!_keyField.getText().equals(oldText)) {
+        if (!_button.getText().equals(oldText)) {
           notifyChangeListeners();
         }
       }
     });
-    _button.setText("...");
-    _button.setMaximumSize(new Dimension(10,10));
-    _button.setMinimumSize(new Dimension(10,10));
+    _button.setText(_option.format(_key));
 
-    _keyField = new JTextField();
-    _keyField.setEditable(false);
-    _keyField.setBackground(Color.white);
-    _keyField.setHorizontalAlignment(JTextField.CENTER);
-    _keyField.setText(_option.format(_key));
     _panel = new JPanel(new BorderLayout());
-    _panel.add(_keyField, BorderLayout.CENTER);
-    _panel.add(_button, BorderLayout.EAST);
+    _panel.add(_button, BorderLayout.CENTER);
 
     GridLayout gl = new GridLayout(1,0);
     gl.setHgap(15);
@@ -121,7 +112,6 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
   public void setDescription(String description) {
     _panel.setToolTipText(description);
     _button.setToolTipText(description);
-    _keyField.setToolTipText(description);
     _label.setToolTipText(description);
   }
 
@@ -150,7 +140,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
    */
   public void setValue(KeyStroke value) {
     _key = value;
-    _keyField.setText(_option.format(value));
+    _button.setText(_option.format(value));
   }
 
   /**

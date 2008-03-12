@@ -171,7 +171,8 @@ public class DrJava {
       
       // Restart if there are custom JVM args
       boolean restart = (getConfig().getSetting(MASTER_JVM_ARGS).length() > 0)
-        || (!("".equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX).trim())));
+        || ((!("".equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX).trim()))) &&
+            (!(edu.rice.cs.drjava.config.OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX).trim()))));
       
       LinkedList<String> classArgsList = new LinkedList<String>();
       classArgsList.addAll(_filesToOpen);
@@ -265,8 +266,9 @@ public class DrJava {
       }
     }
     
-    if (!("".equals(getConfig().getSetting(MASTER_JVM_XMX)))) { 
-      _jvmArgs.add("-Xmx"+getConfig().getSetting(MASTER_JVM_XMX));
+    if ((!("".equals(getConfig().getSetting(MASTER_JVM_XMX)))) &&
+        (!(edu.rice.cs.drjava.config.OptionConstants.heapSizeChoices.get(0).equals(getConfig().getSetting(MASTER_JVM_XMX))))) { 
+      _jvmArgs.add("-Xmx"+getConfig().getSetting(MASTER_JVM_XMX).trim()+"M");
       heapSizeGiven = true;
     }
     List<String> configArgs = ArgumentTokenizer.tokenize(getConfig().getSetting(MASTER_JVM_ARGS));

@@ -411,7 +411,7 @@ public class ConfigFrame extends JFrame {
                                                      "<html>Any directories or jar files to add to the classpath<br>"+
                                                      "of the Compiler and Interactions Pane.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.STICKY_INTERACTIONS_DIRECTORY,
-                                                         "Restore last working directory of the Interactions pane on start up", this,
+                                                         "<html>Restore last working directory of<br>the Interactions pane on start up</html>", this,
                                                          "<html>Whether to restore the last working directory of the Interaction pane on start up,<br>"+
                                                          "or to always use the value of the \"user.home\" Java property<br>"+
                                                          "(currently "+System.getProperty("user.home")+")."));
@@ -627,7 +627,7 @@ public class ConfigFrame extends JFrame {
    * Add all of the components for the Debugger panel of the preferences window.
    */
   private void _setupDebugPanel(ConfigPanel panel) {
-    if (!_mainFrame.getModel().getDebugger().isAvailable()) {
+    if (_mainFrame.getModel().getDebugger().isAvailable()) {
       // Explain how to use debugger
       String howto =
         "\nThe debugger is not currently active.  To use the debugger, you\n" +
@@ -807,16 +807,12 @@ public class ConfigFrame extends JFrame {
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this,
                                                   "<html>The number of files to remember in<br>" +
                                                   "the recently used files list in the File menu.</html>"));
-    addOptionComponent(panel, new StringOptionComponent(OptionConstants.MASTER_JVM_XMX, "Maximum Heap Memory for Main JVM", this,
-                                                 "<html>The maximum heap the Main JVM can use. Leave blank for default.<br>"+
-                                                 "Use plain integer numbers for bytes, or add 'k', 'M' or 'G' as<br>"+
-                                                 "suffix to indicate kilobytes, megabytes or gigabytes.</html>"));
+    addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.MASTER_JVM_XMX, "Maximum Heap Memory for Main JVM in MB", this,
+                                                 "The maximum heap the Main JVM can use. Select blank for default."));
     addOptionComponent(panel, new StringOptionComponent(OptionConstants.MASTER_JVM_ARGS, "JVM Args for Main JVM", this,
                                                  "The command-line arguments to pass to the Main JVM."));
-    addOptionComponent(panel, new StringOptionComponent(OptionConstants.SLAVE_JVM_XMX, "Maximum Heap Memory for Interactions JVM", this,
-                                                 "<html>The maximum heap the Interactions JVM can use. Leave blank for default.<br>"+
-                                                 "Use plain integer numbers for bytes, or add 'k', 'M' or 'G' as<br>"+
-                                                 "suffix to indicate kilobytes, megabytes or gigabytes.</html>"));
+    addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.SLAVE_JVM_XMX, "Maximum Heap Memory for Interactions JVM in MB", this,
+                                                 "The maximum heap the Interactions JVM can use. Select blank for default"));
     addOptionComponent(panel, new StringOptionComponent(OptionConstants.SLAVE_JVM_ARGS, "JVM Args for Interactions JVM", this,
                                                  "The command-line arguments to pass to the Interactions JVM."));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.BROWSER_HISTORY_MAX_SIZE,
@@ -891,7 +887,6 @@ public class ConfigFrame extends JFrame {
    * Adds all of the components for the Compiler Options Panel of the preferences window
    */
   private void _setupCompilerPanel(ConfigPanel panel) {
-    addOptionComponent(panel, new LabelComponent("Note: Compiler warnings not shown if compiling any Java language level files", this));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_UNCHECKED_WARNINGS, "Show Unchecked Warnings", this, 
                                                   "<html>Warn about unchecked conversions involving parameterized types.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_DEPRECATION_WARNINGS, "Show Deprecation Warnings", this, 
@@ -904,6 +899,7 @@ public class ConfigFrame extends JFrame {
                                                   "<html>Warn about <code>finally</code> clauses that cannot complete normally.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_FALLTHROUGH_WARNINGS, "Show Fall-Through Warnings", this,
                                                   "<html>Warn about <code>switch</code> block cases that fall through to the next case.</html>"));
+    addOptionComponent(panel, new LabelComponent("<html><br><br>Note: Compiler warnings not shown if<br>compiling any Java language level files.</html>", this, true));
     panel.displayComponents();
     
   }

@@ -232,11 +232,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _jvm.setJUnitModel(_junitModel);
     
     StringBuilder sb = new StringBuilder();
-    if (!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX).trim()))) {
+    if ((!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX)))) &&
+        (!(OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX))))) {
       sb.append("-Xmx");
       sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
-      sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
-      sb.append(" ");
+      sb.append("M ");
     }
     sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
     _jvm.setOptionArgs(sb.toString());
@@ -244,11 +244,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     OptionListener<String> updateListener = new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) {
         StringBuilder sb = new StringBuilder();
-        if (!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX).trim()))) {
+        if ((!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX)))) &&
+            (!(OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX))))) { 
           sb.append("-Xmx");
           sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
-          sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
-          sb.append(" ");
+          sb.append("M ");
         }
         sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
         _jvm.setOptionArgs(sb.toString());
