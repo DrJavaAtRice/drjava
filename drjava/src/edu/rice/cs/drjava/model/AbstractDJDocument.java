@@ -486,8 +486,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param dist the distance from the current location to the new location.
     */
   private void _move(int dist) {
-    _reduced.move(dist);
-    _currentLocation = _currentLocation + dist;
+    int newLocation = _currentLocation + dist;
+    if (0 <= newLocation && newLocation <= getLength()) {
+      _reduced.move(dist);
+      _currentLocation = _currentLocation + dist;
+    }
+    else throw new IllegalArgumentException("AbstractDJDocument.move(" + dist + 
+                                            ") places the cursor at " + newLocation + " which is out of range");
   } 
   
   /** Finds the match for the closing brace immediately to the left, assuming there is such a brace. On failure, 
@@ -595,7 +600,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           
           // Check if matching char should be ignored because it is within a comment, 
           // quotes, or ignored paren phrase
-         if (isShadowed()) continue;  // ignore matching char 
+          if (isShadowed()) continue;  // ignore matching char 
           else {
             // found valid matching char
             if (text.charAt(i) == closing) ++braceBalance;
@@ -622,7 +627,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** @return true iff _currentLocation is inside comment pr string. Assumes read lock is already held. */
   public boolean isShadowed() { return _reduced.isShadowed(); }
   
-   /** @return true iff specified pos is inside comment pr string. */
+  /** @return true iff specified pos is inside comment pr string. */
   public boolean isShadowed(int pos) {
     synchronized(_reduced) {
       int origPos = _currentLocation;
@@ -719,12 +724,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipBracePhrases)
     throws BadLocationException {
-
+    
 //    System.err.println("findPrevDelimiter(" + pos + ", " + Arrays.toString(delims) + ", " + skipBracePhrases);
     // Check cache
     final Query key = new Query.PrevDelimiter(pos, delims, skipBracePhrases);
     final Integer cached = (Integer) _checkCache(key);
-
+    
     if (cached != null) {
 //      System.err.println(cached.intValue() + " found in cache");
       return cached.intValue();
@@ -739,12 +744,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       synchronized(_reduced) {
         final int origPos = _currentLocation;
-    
+        
         // Walk backwards from specificed position
         for (i = pos - 1; i >= 0; i--) {
           /* Invariant: reduced model points to reducedPos, text[i+1:pos] contains no valid delims, 
            * 0 <= i < reducedPos <= pos */
-              // Move reduced model to location pos
+          // Move reduced model to location pos
           _setCurrentLocation(i);  // reduced model points to i
           if (isShadowed() || isCommentOpen(text, i)) {
 //            System.err.println(text.charAt(i) + " at pos " + i + " is shadowed");
@@ -784,7 +789,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       if (i == -1) reducedPos = -1; // No matching char was found
       _storeInCache(key, reducedPos, pos - 1);
 //      Utilities.show("findPrevDelimiter returning " + reducedPos);
-
+      
       // Return position of matching char or ERROR_INDEX (-1) 
       return reducedPos;  
     }
@@ -963,7 +968,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       if (selStart == selEnd) {  // single line to indent
 //          Utilities.showDebug("selStart = " + selStart + " currentLocation = " + _currentLocation);
         Position oldCurrentPosition = createUnwrappedPosition(_currentLocation);
-        
+        int lineStart = getLineStartPos(selStart);
+        if (lineStart <  0) lineStart = 0;
+        setCurrentLocation(lineStart);
         // Indent, updating current location if necessary.
 //          Utilities.showDebug("Indenting line at offset " + selStart);
         if (_indentLine(reason)) {
@@ -987,10 +994,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Indents the lines between and including the lines containing points start and end.  Assumes that writeLock
-    *  and _reduced locks are already held.
-    *  @param start Position in document to start indenting from
-    *  @param end Position in document to end indenting at
-    *  @param reason a flag from {@link Indenter} to indicate the reason for the indent
+    * and _reduced locks are already held.
+    * @param start Position in document to start indenting from
+    * @param end Position in document to end indenting at
+    * @param reason a flag from {@link Indenter} to indicate the reason for the indent
     *        (indent logic may vary slightly based on the trigger action)
     *  @param pm used to display progress, null if no reporting is desired
     */
@@ -1101,7 +1108,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         // that are not delims
         boolean reachedStart = false;
         int prevDelim = findPrevDelimiter(lineStart, delims, /* skipBracePhrases */ true);
-    
+        
         if (prevDelim == -1) reachedStart = true; // no delimiter found
         
         // From the previous delimiter or start, find the next non-whitespace character (why?)
@@ -1137,13 +1144,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     try {
       synchronized (_reduced) {
         
-      // Get the start of this line
-      int lineStart = getLineStartPos(pos);
-      // Get the position of the first non-ws character on this line
-      int firstNonWSPos = getLineFirstCharPos(pos);
+        // Get the start of this line
+        int lineStart = getLineStartPos(pos);
+        // Get the position of the first non-ws character on this line
+        int firstNonWSPos = getLineFirstCharPos(pos);
 //      String line = getText(lineStart, getLineEndPos(pos) - lineStart - 1);
 //      System.err.println("Prefix of line: '" + line + "' is '" + (firstNonWSPos - lineStart) + " chars long");
-      return makeBlankString(firstNonWSPos - lineStart);
+        return makeBlankString(firstNonWSPos - lineStart);
       }
     }
     catch(Exception e) { throw new UnexpectedException(e); }
@@ -1353,7 +1360,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       final int origPos = _currentLocation;
       
       synchronized(_reduced) {
-       
+        
         String text = getText(pos, endPos - pos);   // Get text from pos to end of document
         _setCurrentLocation(pos);  // Move reduced model to location pos
         
@@ -1444,7 +1451,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param pos the position we're looking at
     * @return true if pos is immediately inside parentheses
     */
-  public boolean posInParenPhrase(final int pos) {
+  public boolean inParenPhrase(final int pos) {
     // Check cache
     final Query key = new Query.PosInParenPhrase(pos);
     Boolean cached = (Boolean) _checkCache(key);
@@ -1458,7 +1465,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         final int oldPos = _currentLocation;
         // assert pos == here if read lock and reduced already held before call
         _setCurrentLocation(pos);
-        inParenPhrase = posInParenPhrase();
+        inParenPhrase = inParenPhrase();
         _setCurrentLocation(oldPos);
       }
       _storeInCache(key, inParenPhrase, pos - 1);
@@ -1470,20 +1477,30 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Cached version of _reduced.getLineEnclosingBrace().  Assumes that read lock and reduced lock are already held. */
   public BraceInfo getLineEnclosingBrace() {
-    int pos = _currentLocation;
+    int origPos = _currentLocation;
     // Check cache
-    final Query key = new Query.LineEnclosingBrace(pos);
+    int keyPos = getLineStartPos(_currentLocation);
+    if (keyPos == -1) keyPos = origPos;
+    final Query key = new Query.LineEnclosingBrace(keyPos);
     final BraceInfo cached = (BraceInfo) _checkCache(key);
     if (cached != null) return cached;
     // assert pos == _currentLocation
 //    final int oldPos = _currentLocation;
 //    _setCurrentLocation(pos);
+    
+//    if (getLength() > 0 && lineStart > 0) {
+//      char ch = getText().charAt(lineStart - 1);
+//      if (ch != '\n') System.err.println("In doc:" + getText() + "'\nchar at pos " + (lineStart - 1) + " is not a newline");
+//      }
+    
+//    setCurrentLocation(lineStart);
     BraceInfo b = _reduced.getLineEnclosingBrace();
 //    _setCurrentLocation(oldPos);
-    _storeInCache(key, b, pos - 1);
+//    setCurrentLocation(origPos);
+    _storeInCache(key, b, origPos - 1);
     return b;
   }
-
+  
   /** Cached version of _reduced.getEnclosingBrace().  Assumes that read lock and reduced lock are already held. */
   public BraceInfo getEnclosingBrace() {
     int pos = _currentLocation;
@@ -1500,7 +1517,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * locks are already held.
     * @return true if pos is immediately inside parentheses
     */
-  private boolean posInParenPhrase() {
+  private boolean inParenPhrase() {
     
     BraceInfo info = _reduced.getEnclosingBrace(); 
     return info.braceType().equals(BraceInfo.OPEN_PAREN);
@@ -1544,7 +1561,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Determines if pos lies within a block comment using the reduced model (ignoring the cache).  Assumes that read
     * lock and reduced lock are already held. 
     */
-  public boolean posInBlockComment(final int pos) {
+  public boolean inBlockComment(final int pos) {
     final int here = _currentLocation;
     final int distToStart = here - getLineStartPos(here);
     _reduced.resetLocation();
@@ -1576,7 +1593,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param pos the position we're looking at
     * @return true if pos is immediately inside a paren/brace/etc
     */
-  protected boolean posNotInBlock(final int pos) {
+  protected boolean notInBlock(final int pos) {
     // Check cache
     final Query key = new Query.PosNotInBlock(pos);
     final Boolean cached = (Boolean) _checkCache(key);
@@ -1786,7 +1803,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     char ch2 = text.charAt(pos + 1);
     return ch1 == '/' && (ch2 == '/' || ch2 == '*');
   }
-    
+  
   
   //Two abstract methods to delegate to the undo manager, if one exists.
   protected abstract int startCompoundEdit();

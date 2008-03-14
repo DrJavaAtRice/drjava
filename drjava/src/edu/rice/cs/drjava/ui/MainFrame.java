@@ -244,7 +244,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   /** Listener for Interactions JVM */
   final private ConfigOptionListeners.SlaveJVMXMXListener _slaveJvmXmxListener;
-
+  
   /** Listener for Main JVM */
   final private ConfigOptionListeners.MasterJVMXMXListener _masterJvmXmxListener;
   
@@ -615,7 +615,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       String fileName = null;
       Object[] options = {"Yes", "No"};  
       rc = JOptionPane.showOptionDialog(MainFrame.this, message, title, JOptionPane.YES_NO_OPTION,
-                                          JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+                                        JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
       if (rc == JOptionPane.YES_OPTION) {
         _revert();
       }
@@ -1089,7 +1089,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     public String getClassName() { return str; }
     public String toString() { return str; }
   }
-
+  
   /** Reset the position of the "Go to File" dialog. */
   public void resetGotoFileDialogPosition() {
     initGotoFileDialog();
@@ -3027,12 +3027,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     // add recent file and project manager
     
     _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, _fileMenu, new RecentFileManager.RecentFileAction() { public void actionPerformed(FileOpenSelector selector) { open(selector); } }, OptionConstants.RECENT_FILES);
-                            
+    
     _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount()-2, _projectMenu, new RecentFileManager.RecentFileAction() { public void actionPerformed(FileOpenSelector selector) { openProject(selector); } },  OptionConstants.RECENT_PROJECTS);
-                                                    
+    
     // Set frame icon
     setIconImage(getIcon("drjava64.png").getImage());
-                                                    
+    
     // Size and position
     int x = config.getSetting(WINDOW_X).intValue();
     int y = config.getSetting(WINDOW_Y).intValue();
@@ -3277,7 +3277,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
   
   public void setUpDrJavaProperties() {
     final String DEF_DIR = "${drjava.working.dir}";
-
+    
     // fake "Config" properties
     PropertyMaps.ONLY.setProperty("Config", new EagerProperty("config.master.jvm.args.combined") {
       public void update() {
@@ -3291,7 +3291,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.master.jvm.args"))
       .listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.master.jvm.xmx"));
-
+    
     PropertyMaps.ONLY.setProperty("Config", new EagerProperty("config.slave.jvm.args.combined") {
       public void update() {
         StringBuilder sb = new StringBuilder(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
@@ -3304,7 +3304,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     }).listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.slave.jvm.args"))
       .listenToInvalidatesOf(PropertyMaps.ONLY.getProperty("Config", "config.slave.jvm.xmx"));
-
+    
     // Files
     PropertyMaps.ONLY.setProperty("DrJava", new EagerProperty("drjava.current.file") {
       public void update() {
@@ -5986,40 +5986,40 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       public void actionPerformed(ActionEvent e) {
         config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.FULL_JAVA);
       }});
-      group.add(rbMenuItem);
-      languageLevelMenu.add(rbMenuItem);
-      languageLevelMenu.addSeparator();
-      
-      rbMenuItem = new JRadioButtonMenuItem("Elementary");
-      rbMenuItem.setToolTipText("Use Elementary language-level features");
-      if (currentLanguageLevel == DrJavaRoot.ELEMENTARY_LEVEL) { rbMenuItem.setSelected(true); }
-      rbMenuItem.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.ELEMENTARY_LEVEL);
-        }});
-        group.add(rbMenuItem);
-        languageLevelMenu.add(rbMenuItem);
-        
-        rbMenuItem = new JRadioButtonMenuItem("Intermediate");
-        rbMenuItem.setToolTipText("Use Intermediate language-level features");
-        if (currentLanguageLevel == DrJavaRoot.INTERMEDIATE_LEVEL) { rbMenuItem.setSelected(true); }
-        rbMenuItem.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.INTERMEDIATE_LEVEL);
-          }});
-          group.add(rbMenuItem);
-          languageLevelMenu.add(rbMenuItem);
-          
-          rbMenuItem = new JRadioButtonMenuItem("Advanced");
-          rbMenuItem.setToolTipText("Use Advanced language-level features");
-          if (currentLanguageLevel == DrJavaRoot.ADVANCED_LEVEL) { rbMenuItem.setSelected(true); }
-          rbMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.ADVANCED_LEVEL);
-            }});
-            group.add(rbMenuItem);
-            languageLevelMenu.add(rbMenuItem);
-            return languageLevelMenu;
+    group.add(rbMenuItem);
+    languageLevelMenu.add(rbMenuItem);
+    languageLevelMenu.addSeparator();
+    
+    rbMenuItem = new JRadioButtonMenuItem("Elementary");
+    rbMenuItem.setToolTipText("Use Elementary language-level features");
+    if (currentLanguageLevel == DrJavaRoot.ELEMENTARY_LEVEL) { rbMenuItem.setSelected(true); }
+    rbMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.ELEMENTARY_LEVEL);
+      }});
+    group.add(rbMenuItem);
+    languageLevelMenu.add(rbMenuItem);
+    
+    rbMenuItem = new JRadioButtonMenuItem("Intermediate");
+    rbMenuItem.setToolTipText("Use Intermediate language-level features");
+    if (currentLanguageLevel == DrJavaRoot.INTERMEDIATE_LEVEL) { rbMenuItem.setSelected(true); }
+    rbMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.INTERMEDIATE_LEVEL);
+      }});
+    group.add(rbMenuItem);
+    languageLevelMenu.add(rbMenuItem);
+    
+    rbMenuItem = new JRadioButtonMenuItem("Advanced");
+    rbMenuItem.setToolTipText("Use Advanced language-level features");
+    if (currentLanguageLevel == DrJavaRoot.ADVANCED_LEVEL) { rbMenuItem.setSelected(true); }
+    rbMenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.ADVANCED_LEVEL);
+      }});
+    group.add(rbMenuItem);
+    languageLevelMenu.add(rbMenuItem);
+    return languageLevelMenu;
   }
   
   /** Creates and returns a help menu. */
@@ -7656,7 +7656,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     _model.getInteractionsModel().resetLastErrors();
   }
-
+  
   /** Ask the user to increase the master's max heap setting. */
   void askToIncreaseMasterMaxHeap() {
     String value = "set to "+DrJava.getConfig().getSetting(MASTER_JVM_XMX)+" MB";

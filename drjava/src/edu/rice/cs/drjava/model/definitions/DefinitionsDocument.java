@@ -1233,7 +1233,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             if (indexPastKeyword < text.length()) {
               if (! isShadowed() && Character.isWhitespace(text.charAt(indexPastKeyword))) {
                 // found a match but may not be at top level
-                if (! posNotInBlock(index)) index = -1; //in a paren phrase, gone too far
+                if (! notInBlock(index)) index = -1; //in a paren phrase, gone too far
                 break;
               }
               else index++;  //move past so we can search again

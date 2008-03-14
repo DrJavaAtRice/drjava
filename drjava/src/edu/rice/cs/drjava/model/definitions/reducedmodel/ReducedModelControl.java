@@ -91,6 +91,7 @@ public class ReducedModelControl implements BraceReduction {
   }
 
   /** Updates the BraceReduction to reflect cursor movement. Negative values move left; positive values move right.
+    * ASSUMES that count is within range, i.e. that 0 <= absOffset() + count <= getLength 
     * NOTE: this method does NOT move the _walker in ReduceModelComment.
     * @param count indicates the direction and magnitude of cursor movement
     */
@@ -105,7 +106,7 @@ public class ReducedModelControl implements BraceReduction {
     }
   }
 
-  /** Updates the BraceReduction to reflect text deletion.
+  /** Updates the BraceReduction to reflect text deletion.  Assumes that count is within range!
     * @param count indicates the size and direction of text deletion. Negative values delete text to the left of the
     *  cursor, positive values delete text to the right.
     */
@@ -220,7 +221,7 @@ public class ReducedModelControl implements BraceReduction {
     return size;
   }
 
-  /** Move the reduced model to the next token and update the cursor information. */
+  /** Move the reduced model to the next token (with 0 offset) and update the cursor information. */
   void next() {
     if (_rmc._cursor.atStart()) {
       _rmc.next();
@@ -321,7 +322,11 @@ public class ReducedModelControl implements BraceReduction {
   }
 
   /** Gets the absolute character offset into the document represented by the reduced model. */
-  public int absOffset() { return _rmc.absOffset(); }
+  public int absOffset() {
+    int offset = _rmc.absOffset();
+    assert offset == _rmb.absOffset();
+    return offset; 
+  }
 
 
   /** A toString() substitute. */

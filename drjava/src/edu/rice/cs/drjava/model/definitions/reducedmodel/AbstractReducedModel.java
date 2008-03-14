@@ -60,7 +60,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   /** Constructor.  Creates a new reduced model with the cursor at the start of a blank "page." */
   public AbstractReducedModel() {
     _tokens = new TokenList();
-    _cursor = _tokens._getIterator();
+    _cursor = _tokens.getIterator();
     // we should be pointing to the head of the list
     _cursor.setBlockOffset(0);
   }
@@ -94,6 +94,19 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return off;
   }
   
+  public int getLength() {
+    TokenList.Iterator it = _tokens.getIterator();
+    it.next();
+    if (it.atEnd()) return 0;
+    int len = 0;
+    while (! it.atEnd()) {
+      len += it.current().getSize();
+      it.next();
+    }
+    it.dispose();
+    return len;
+  }
+  
   /* @return the shadowing state of _cursor; only makes sense for ReducedModelComment. */
   public ReducedModelState getState() { return _cursor.getStateAtCurrent(); }
   
@@ -102,7 +115,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     final StringBuilder val = new StringBuilder();
     ReducedToken tmp;
     
-    TokenList.Iterator it = _tokens._getIterator();
+    TokenList.Iterator it = _tokens.getIterator();
     it.next(); // since we start at the head, which has no current item
     
     if (_cursor.atStart())  val.append(PTR_CHAR).append(_cursor.getBlockOffset());

@@ -449,7 +449,7 @@ public class InteractionsController extends AbstractConsoleController {
   /** Evaluates the interaction on the current line. */
   AbstractAction evalAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      if (! _adapter.inCommentBlock()) {
+      if (! _adapter.inBlockComment()) {
         Thread command = new Thread("Evaluating Interaction") { 
           public void run() {
             try { _model.interpretCurrentInteraction(); }

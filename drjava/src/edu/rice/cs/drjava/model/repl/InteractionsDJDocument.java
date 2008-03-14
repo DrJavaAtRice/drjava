@@ -94,18 +94,20 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   /** Returns a new indenter. Eventually to be used to return an interactions indenter */
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
   
-  /** A list of styles and their locations. This list holds pairs of locations in the document and styles, which
-   *  is basically a map of regions where the coloring view that is now attached to the Interactions Pane is not 
-   *  allowed to use the reduced model to determine the color settings when rendering text. We keep a list of all 
-   *  places where styles not considered by the reduced model are being used, such as System.out, System.err, 
-   *  and the various return styles for Strings and other Objects.  Since the LinkedList class is not thread safe, 
-   *  we have to synchronized all methods that access pointers in _stylesList and the associated boolean _toClear.
-   */
+  /** A list of styles and their locations augmenting this document.  This augmentation is NOT part of the reduced
+    * model; it a separate extension that uses itself as a mutual exclusion lock.  This list holds pairs of locations
+    * in the document and styles, which is basically a map of regions where the coloring view that is now attached to
+    * the Interactions Pane.  It is not allowed to use the reduced model to determine the color settings when 
+    * rendering text. (Why not? -- Corky)  We keep a list of all places where styles not considered by the reduced 
+    * are being used, such as System.out, System.err, and the various return styles for Strings and other Objects.  
+    * Since the LinkedList class is not thread safe,  we have to synchronized all methods that access pointers in 
+    * _stylesList and the associated boolean _toClear.
+    */
   private List<Pair<Pair<Integer,Integer>,String>> _stylesList = new LinkedList<Pair<Pair<Integer,Integer>,String>>();
   
-  /** Adds the given coloring style to the styles list. */
+  /** Adds the given coloring style to the styles list.  Assumes that the document ReadLock is already held. */
   public void addColoring(int start, int end, String style) {
-    synchronized(_stylesList) {
+    synchronized(_stylesList) {  // unnecessary since WriteLock already held
       if (_toClear) {
         _stylesList.clear();    
         _toClear = false;
@@ -116,11 +118,24 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     }
   }
   
-  /** Package protected accessor method used for test cases */
-  List<Pair<Pair<Integer, Integer>, String>> getStylesList() { return _stylesList; }
+  /** Accessor method used to copy contents of _stylesList to an array.  Used in test cases. */
+  public Pair<Pair<Integer, Integer>, String>[] getStyles() { 
+    acquireReadLock();
+    synchronized(_stylesList) {
+      try { 
+        /* TODO: file javac bug report concerning placement of @SuppressWarnings.  Fails if rhs of result binding is
+         * used as body of return statement. */
+        @SuppressWarnings("unchecked")
+        Pair<Pair<Integer, Integer>, String>[] result = 
+          (Pair<Pair<Integer, Integer>, String>[]) (_stylesList.toArray(new Pair[0]));
+        return result;
+      }
+      finally { releaseReadLock(); }
+    }
+  }
   
   /** Attempts to set the coloring on the graphics based upon the content of the styles list
-   *  returns false if the point is not in the list.
+   *  returns false if the point is not in the list.  Assumes that ReadLock is already held.
    */
   public boolean setColoring(int point, Graphics g) {
     synchronized(_stylesList) {
@@ -177,7 +192,9 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     }
   }
   
-  /** Attempts to set the font on the graphics context based upon the styles held in the styles list. */
+  /** Attempts to set the font on the graphics context based upon the styles held in the styles list. Assumes that
+    * ReadLock is already held. 
+    */
   public void setBoldFonts(int point, Graphics g) {
     synchronized(_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
@@ -194,19 +211,20 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     }
   }
     
-  /** Called when the Interactions pane is reset. */
+  /** Called when the Interactions pane is reset.  Assumes that ReadLock is already held. */
   public void clearColoring() { synchronized(_stylesList) { _toClear = true; } }
   
   /** Returns true iff the end of the current interaction is an open comment block
    *  @return true iff the end of the current interaction is an open comment block
    */
-  public boolean inCommentBlock() {
+  public boolean inBlockComment() {
     acquireReadLock();
     try {
       synchronized(_reduced) {
-        resetReducedModelLocation();
-        ReducedModelState state = stateAtRelLocation(getLength() - _currentLocation);
-        boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
+//        resetReducedModelLocation();
+//        ReducedModelState state = stateAtRelLocation(getLength() - _currentLocation);
+//        boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
+        boolean toReturn = inBlockComment(getLength());
         return toReturn;
       }
     }
@@ -223,6 +241,5 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     try { insertText(getLength(), message + "\n", styleName); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
     finally { releaseWriteLock(); }
-  }
-  
+  } 
 }

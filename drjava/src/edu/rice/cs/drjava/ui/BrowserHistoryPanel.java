@@ -234,7 +234,8 @@ public class BrowserHistoryPanel extends RegionsListPanel<DocumentRegion> {
   /** @return the usser object in the list associated with the region, or null if not found */
   protected RegionListUserObj<DocumentRegion> getUserObjForRegion(DocumentRegion r) {
     for(int i=0; i<_listModel.size(); ++i) {
-      @SuppressWarnings("unchecked") RegionListUserObj<DocumentRegion> userObj = (RegionListUserObj<DocumentRegion>)_listModel.get(i);
+      @SuppressWarnings("unchecked") 
+      RegionListUserObj<DocumentRegion> userObj = (RegionListUserObj<DocumentRegion>)_listModel.get(i);
       if (userObj.region()==r) {
         return userObj;
       }

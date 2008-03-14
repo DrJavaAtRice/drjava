@@ -73,7 +73,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     
     final Object _restartLock = new Object();
     
-    assertEquals("StylesList before insert should contain 2 pairs", 2, _adapter.getStylesList().size());
+    assertEquals("StylesList before insert should contain 2 pairs", 2, _adapter.getStyles().length);
     
     int blen = _model.getStartUpBanner().length();
     
@@ -82,9 +82,9 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     String styleElt2 = "((" + blen + ", " + (blen + 2) + "), default)";
 
     assertEquals("The first element pushed on StylesList before insertion should be", styleElt1,
-                 _adapter.getStylesList().get(1).toString());
+                 _adapter.getStyles()[1].toString());
     assertEquals("The second element pushed on StylesList before insertion should be", styleElt2,
-                 _adapter.getStylesList().get(0).toString());
+                 _adapter.getStyles()[0].toString());
     
     // Insert some text
     _doc.insertText(_doc.getLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
@@ -92,14 +92,14 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     /* Third element pushed StylesList stack before reset */
     String styleElt3 = "((" + (blen + 2) + ", " + (blen + 3) + "), number.return.style)";
 
-    assertEquals("StylesList before reset should contain 3 pairs", 3, _adapter.getStylesList().size());
+    assertEquals("StylesList before reset should contain 3 pairs", 3, _adapter.getStyles().length);
     
     assertEquals("The first element pushed on StylesList before reset should be", styleElt1,
-                 _adapter.getStylesList().get(2).toString());
+                 _adapter.getStyles()[2].toString());
     assertEquals("The second element pushed on StylesList before reset should be", styleElt2,
-                 _adapter.getStylesList().get(1).toString());
+                 _adapter.getStyles()[1].toString());
     assertEquals("The last element pushed on StylesList before reset should be", styleElt3,
-                 _adapter.getStylesList().get(0).toString());
+                 _adapter.getStyles()[0].toString());
     
 //    System.err.println("Doc text: " + _adapter.getText());
 //    System.err.println("The styles list is: " + _adapter.getStylesList());
@@ -125,7 +125,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     File f = _model.getWorkingDirectory();
     _model.resetInterpreter(f);  
 
-    //. Wait until interpreter has restarted
+    // Wait until interpreter has restarted
     synchronized(_restartLock) { while (! _interpreterRestarted) _restartLock.wait(); }
     _model.removeListener(restartCommand);
     
@@ -133,35 +133,30 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
 //    System.err.println("Text length: " + _adapter.getLength());
 //    System.err.println("The styles list is: " + _adapter.getStylesList());
    
-    assertEquals("StylesList after reset should contain 2 pairs", 2, _adapter.getStylesList().size());
+    // TODO: getStyles() technically requres a ReadLock! 
+    assertEquals("StylesList after reset should contain 2 pairs", 2, _adapter.getStyles().length);
     
     assertEquals("The first element pushed on StylesList after reset should be", styleElt1,
-                 _adapter.getStylesList().get(1).toString());
+                 _adapter.getStyles()[1].toString());
     assertEquals("The second element pushed on StylesList after reset should be", styleElt2,
-                 _adapter.getStylesList().get(0).toString());
-    
-    
-
+                 _adapter.getStyles()[0].toString());
   }
 
-  /**
-   * Tests that a null style is not added to the list. Fix for bug #995719
-   */
+  /** Tests that a null style is not added to the list. Fix for bug #995719. */
   public void testCannotAddNullStyleToList() throws EditDocumentException {
     // the banner and the prompt are inserted in the styles list when the document is constructed
-    assertEquals("StylesList before insert should contain 2 pairs",
-                 2, _adapter.getStylesList().size());
+    assertEquals("StylesList before insert should contain 2 pairs", 2, _adapter.getStyles().length);
 
     // Insert some text
     _doc.insertText(_doc.getLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
 
     assertEquals("StylesList should contain 3 pairs",
-                 3, _adapter.getStylesList().size());
+                 3, _adapter.getStyles().length);
 
     // Insert some text with a null style
     _doc.insertText(_doc.getLength(), "6", null);
 
     assertEquals("StylesList should still contain 3 pairs - null string should not have been inserted",
-                 3, _adapter.getStylesList().size());
+                 3, _adapter.getStyles().length);
   }
 }

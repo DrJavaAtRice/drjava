@@ -953,14 +953,15 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     insertGap(model0, 2);
     model0.insertChar('{');
     model0.insertChar('}');
-    try {
-      model0.move(-30);
-      assertTrue("#0.0", false);
-    } catch (Exception e) { }
-    try {
-      model0.move(1);
-      assertTrue("#0.1", false);
-    } catch (Exception e) { }
+    // The contract for ReducedModel.move now stipulates that the passed position is in range.
+//    try {
+//      model0.move(-30);
+//      assertTrue("#0.0", false);
+//    } catch (Exception e) { }
+//    try {
+//      model0.move(1);
+//      assertTrue("#0.1", false);
+//    } catch (Exception e) { }
     assertEquals("#0.2", 12, model0.absOffset());
     model0.move(-2);
     assertEquals("#0.3", 10, model0.absOffset());

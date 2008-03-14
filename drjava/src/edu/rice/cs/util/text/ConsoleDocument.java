@@ -286,6 +286,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     _document._forceInsertText(offs, str, style);
   }
   
+  /** Adds style specifier to _stylelists. Assumes that WriteLock is already held. */
   private void _addToStyleLists(int offs, String str, String style) {
     if (_document instanceof SwingDocument) 
       ((SwingDocument)_document).addColoring(offs, offs + str.length(), style);

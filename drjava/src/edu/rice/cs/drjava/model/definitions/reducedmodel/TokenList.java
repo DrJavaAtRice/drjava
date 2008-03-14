@@ -42,15 +42,9 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  * @version $Id$
  */
 public class TokenList extends ModelList<ReducedToken> implements /*imports*/ ReducedModelStates {
-  /**
-   * Gets a TokenList.Iterator for this list.
-   * getIterator() returns a ModelList<ReducedToken>.Iterator
-   * which is not as fully featured as a TokenList.Iterator.
-   * The underscore differentiates between the two.  This
-   * differentiation was easiest since it allowed us to keep
-   * TokenList.Iterator extending ModelList<ReducedToken>.Iterator.
-   */
-  public TokenList.Iterator _getIterator() { return new TokenList.Iterator(); }
+  
+  /** Gets a TokenList.Iterator for this list.  Overrides the weaker method in ModelList<ReducedToken>.Iterator. */
+  public TokenList.Iterator getIterator() { return new TokenList.Iterator(); }
 
   public class Iterator extends ModelList<ReducedToken>.Iterator {
 
@@ -181,23 +175,23 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     }
 
     /** Updates the BraceReduction to reflect cursor movement. Negative values move left from the cursor, positive
-     *  values move right.
-     *  @param count indicates the direction and magnitude of cursor movement
-     */
+      * values move right.  ASSUMES that count is within range, i.e. that the move will not push cursor past start
+      * or end.
+      * @param count indicates the direction and magnitude of cursor movement
+      */
     public void move(int count) { _offset = _move(count, _offset); }
 
-    /** Helper function for move(int).
-     *
-     *  @param count         the number of chars to move.  Negative values move back,
-     *                       positive values move forward.
-     *  @param currentOffset the current offset for copyCursor
-     *  @return the updated offset
-     */
+    /** Helper function for move(int).  Assumes that count is in range!
+      * @param count  the number of chars to move.  Negative values move back, positive values move forward.
+      * @param currentOffset the current offset for copyCursor
+      * @return the updated offset
+      */
     private int _move(int count, int currentOffset) {
-      int retval = currentOffset;
-      if (count == 0)  return retval;
-
-      TokenList.Iterator it = this._copy();
+      if (count == 0) return currentOffset;
+      int retval = currentOffset; // default value if an exception is thrown in _moveRight/_moveLeft
+      
+// Note commented out phrase in next statement
+      TokenList.Iterator it = this /*._copy() */;
 
       //make copy of cursor and return new iterator?
       if (count > 0) {
@@ -206,22 +200,22 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
       else {
         retval = it._moveLeft(Math.abs(count), currentOffset);
       }
-      this.setTo(it);
-      it.dispose();
+//      this.setTo(it);
+//      it.dispose();
       return retval;
     }
 
-    /** Helper function that performs forward moves.
-     * <ol>
-     * <li> at head && count>0:  next
-     * <li> LOOP:<BR>
-     * if atEnd and count == 0, stop<BR>
-     * if atEnd and count > 0, throw boundary exception<BR>
-     * if count < size of current token, offset = count, stop<BR>
-     * otherwise, reduce count by size of current token and go to
-     * the next token, continuing the loop.
-     * </ol>
-     */
+    /** Helper function that performs forward moves.  Assumes that count > 0 and is in range.
+      * <ol>
+      * <li> at head && count>0:  next
+      * <li> LOOP:<BR>
+      * if atEnd and count == 0, stop<BR>
+      * if atEnd and count > 0, throw boundary exception<BR>
+      * if count < size of current token, offset = count, stop<BR>
+      * otherwise, reduce count by size of current token and go to
+      * the next token, continuing the loop.
+      * </ol>
+      */
     private int _moveRight(int count, int currentOffset) {
       if (this.atStart()) {
         currentOffset = 0;

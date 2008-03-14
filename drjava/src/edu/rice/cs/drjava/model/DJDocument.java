@@ -288,7 +288,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @param pos the position we're looking at
    * @return true if pos is immediately inside parentheses
    */
-  public boolean posInParenPhrase(int pos);
+  public boolean inParenPhrase(int pos);
   
 //  /** Returns true if the reduced model's current position is inside a paren phrase.
 //   *  @return true if pos is immediately inside parentheses

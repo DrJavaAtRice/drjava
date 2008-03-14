@@ -80,7 +80,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     // _metrics is initialized by sync(), which thus must be called before any use of _metrics
   }
   
-  /** Paints the glyphs representing the given range. */
+  /** Paints the glyphs representing the given range. Assumes ReadLock is already held. */
   public void paint(GlyphView v, Graphics g, Shape a, int start, int end) {
     
     // If there's nothing to show, don't do anything!
@@ -125,10 +125,9 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
         int location = stat.getLocation();
         
         
-        if((location < end) && ((location + length) > start)) {
+        if ((location < end) && ((location + length) > start)) {
           
-          // Adjust the length and location to fit within the bounds of
-          // the element we're about to render
+          // Adjust the length and location to fit within the bounds of the element we're about to render
           if (location < start) {
             length -= (start-location);
             location = start;
@@ -150,10 +149,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     }
   }
   
-  /**
-   * Determine the span the glyphs given a start location
-   * (for tab expansion).
-   */
+  /** Determines the span the glyphs given a start location (for tab expansion).  Assumes ReadLock is held. */
   public float getSpan(GlyphView v, int start, int end, 
                        TabExpander e, float x) {
     sync(v);
@@ -162,31 +158,30 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return width;
   }
   
+  /** Assumes ReadLock is held. */
   public float getHeight(GlyphView v) {
     sync(v);
     return _metrics.getHeight();
   }
   
-  /**
-   * Fetches the ascent above the baseline for the glyphs
-   * corresponding to the given range in the model.
-   */
+  /** Fetches the ascent above the baseline for the glyphs corresponding to the given range in the model.  Assumes
+    * ReadLock is held.
+    */
   public float getAscent(GlyphView v) {
     sync(v);
     return _metrics.getAscent();
   }
   
-  /**
-   * Fetches the descent below the baseline for the glyphs
-   * corresponding to the given range in the model.
-   */
+  /** Fetches the descent below the baseline for the glyphs corresponding to the given range in the model.  Assumes 
+    * ReadLocak is held.
+    */
   public float getDescent(GlyphView v) {
     sync(v);
     return _metrics.getDescent();
   }
   
-  public Shape modelToView(GlyphView v, int pos, Position.Bias bias,
-                           Shape a) throws BadLocationException {
+  /** Assumes ReadLock is held. */
+  public Shape modelToView(GlyphView v, int pos, Position.Bias bias, Shape a) throws BadLocationException {
     
     sync(v);
     Rectangle alloc = (a instanceof Rectangle) ? (Rectangle)a : a.getBounds();
@@ -210,22 +205,19 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     throw new BadLocationException("modelToView - can't convert", end);
   }
   
-  /**
-   * Provides a mapping from the view coordinate space to the logical
-   * coordinate space of the model.
-   *
-   * @param v the view containing the view coordinates
-   * @param x the X coordinate
-   * @param y the Y coordinate
-   * @param a the allocated region to render into
-   * @param biasReturn always returns <code>Position.Bias.Forward</code>
-   *   as the zero-th element of this array
-   * @return the location within the model that best represents the
-   *  given point in the view
-   * @see View#viewToModel
-   */
-  public int viewToModel(GlyphView v, float x, float y, Shape a, 
-                         Position.Bias[] biasReturn) {
+  /** Provides a mapping from the view coordinate space to the logical coordinate space of the model.  Assumes ReadLock
+    * is held.
+    * @param v the view containing the view coordinates
+    * @param x the X coordinate
+    * @param y the Y coordinate
+    * @param a the allocated region to render into
+    * @param biasReturn always returns <code>Position.Bias.Forward</code>
+    *   as the zero-th element of this array
+    * @return the location within the model that best represents the
+    *  given point in the view
+    * @see View#viewToModel
+    */
+  public int viewToModel(GlyphView v, float x, float y, Shape a, Position.Bias[] biasReturn) {
     sync(v);
     Rectangle alloc = (a instanceof Rectangle) ? (Rectangle)a : a.getBounds();
     int start = v.getStartOffset();
@@ -245,18 +237,18 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return retValue;
   }
 
-  /**
-   * Determines the best location (in the model) to break the given view.  This method attempts to break on a 
-   * whitespace location.  If a whitespace location can't be found, the nearest character location is returned.
-   *
-   * @param v  The view 
-   * @param start  The location in the model where the fragment should start its representation >= 0
-   * @param x  The graphic location along the axis that the broken view would occupy >= 0; this may be useful for
-   *           things like tab calculations
-   * @param len  Specifies the distance into the view where a potential break is desired >= 0  
-   * @return  The model location desired for a break
-   * @see View#breakView
-   */
+  /** Determines the best location (in the model) to break the given view.  This method attempts to break on a 
+    * whitespace location.  If a whitespace location can't be found, the nearest character location is returned.
+    * Assumes ReadLock is held.
+    *
+    * @param v  The view 
+    * @param start  The location in the model where the fragment should start its representation >= 0
+    * @param x  The graphic location along the axis that the broken view would occupy >= 0; this may be useful for
+    *           things like tab calculations
+    * @param len  Specifies the distance into the view where a potential break is desired >= 0  
+    * @return  The model location desired for a break
+    * @see View#breakView
+    */
   public int getBoundedPosition(GlyphView v, int start, float x, float len) {
     sync(v);
     TabExpander expander = v.getTabExpander();
@@ -267,6 +259,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
     return end;
   }
   
+  /** Assumes ReadLock is held. */
   void sync(GlyphView v) {
     Font f = v.getFont();
     if ((_metrics == null) || (! f.equals(_metrics.getFont()))) {
@@ -284,7 +277,8 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
        * of fonts, glyphs, and font rendering.  Where _metrics is currently used, the Font methods getLineMetrics, 
        * getStringBounds, getHeight, getAscent, and getDescent will probably be helpful.
        */
-      @SuppressWarnings("deprecation") FontMetrics newMetrics = kit.getFontMetrics(f);
+      @SuppressWarnings("deprecation") 
+      FontMetrics newMetrics = kit.getFontMetrics(f);
       _metrics = newMetrics;
     }
     

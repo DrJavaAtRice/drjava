@@ -3770,7 +3770,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //    public int getWhiteSpace() { return getDocument().getWhiteSpace(); }
     
-    public boolean posInParenPhrase(int pos) { return getDocument().posInParenPhrase(pos); }
+    public boolean inParenPhrase(int pos) { return getDocument().inParenPhrase(pos); }
     
 //    public boolean posInParenPhrase() { return getDocument().posInParenPhrase(); }
     
@@ -3921,7 +3921,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** @return the number of lines in this document. */
     public int getNumberOfLines() { return getLineOfOffset(getLength()); }
     
-      /** Determines if pos in document is inside a comment or a string. */
+    /** Determines if pos in document is inside a comment or a string. */
     public boolean isShadowed(int pos) { return getDocument().isShadowed(pos); }
     
     /** Translates an offset into the components text to a line number.
@@ -4060,7 +4060,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         catch(IOException e) { _documentNavigator.addDocument(doc); }
       }});
-      synchronized(_documentsRepos) { _documentsRepos.put(doc.getRawFile(), doc); }
+    synchronized(_documentsRepos) { _documentsRepos.put(doc.getRawFile(), doc); }
   }
   
   /** Add a document to the classpath for the slave JVM. Does nothing here because there is no slave JVM.  Overridden

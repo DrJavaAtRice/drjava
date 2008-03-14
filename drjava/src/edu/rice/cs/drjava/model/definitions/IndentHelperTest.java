@@ -150,12 +150,12 @@ public final class IndentHelperTest extends IndentRulesTestCase {
       _setDocText("(;)");
       assertEquals("';' in parent phrase",
                    true,
-                   _doc.posInParenPhrase(1));
+                   _doc.inParenPhrase(1));
       
       _setDocText("abcdefghijk");
       _doc.setCurrentLocation(3);
       int reducedModelPos = _doc.getReduced().absOffset();
-      _doc.posInParenPhrase(8);
+      _doc.inParenPhrase(8);
       assertEquals("Check that position in reduced model is unaffected " +
                    "after call to posInParenPhrase",
                    reducedModelPos,

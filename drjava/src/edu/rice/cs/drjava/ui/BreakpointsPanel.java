@@ -74,16 +74,16 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   protected final Debugger _debugger;
   
   /** Constructs a new breakpoints panel.
-   *  This is swing view class and hence should only be accessed from the event-handling thread.
-   *  @param frame the MainFrame
-   */
+    *  This is swing view class and hence should only be accessed from the event-handling thread.
+    *  @param frame the MainFrame
+    */
   public BreakpointsPanel(MainFrame frame) {
     super(frame, "Breakpoints");
     _model.getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
       /** Called when a breakpoint is set in a document. Adds the breakpoint to the tree of breakpoints.
-       *  Must be executed in event thread.
-       *  @param bp the breakpoint
-       */
+        *  Must be executed in event thread.
+        *  @param bp the breakpoint
+        */
       public void regionAdded(final Breakpoint bp, int index) { 
         assert EventQueue.isDispatchThread();
         addRegion(bp); 
@@ -113,8 +113,8 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
                 Enumeration existingRegions = doc.children();
                 while (existingRegions.hasMoreElements()) {
                   DefaultMutableTreeNode existing = (DefaultMutableTreeNode)existingRegions.nextElement();
-                  @SuppressWarnings("unchecked") RegionTreeUserObj<Breakpoint> uo =
-                    (RegionTreeUserObj<Breakpoint>)existing.getUserObject();
+                  @SuppressWarnings("unchecked") 
+                  RegionTreeUserObj<Breakpoint> uo = (RegionTreeUserObj<Breakpoint>)existing.getUserObject();
                   if (uo.region().getStartOffset()==bp.getStartOffset()) {
                     Breakpoint r = uo.region();
                     r.setEnabled(bp.isEnabled());
@@ -156,14 +156,14 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
       }
     };
     _goToButton = new JButton(goToAction);
-
+    
     Action enableDisableAction = new AbstractAction("Disable") {
       public void actionPerformed(ActionEvent ae) {
         enableDisableBreakpoint();
       }
     };
     _enableDisableButton = new JButton(enableDisableAction);
-
+    
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
         for (Breakpoint bp: getSelectedRegions()) {
@@ -189,7 +189,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     
     return buts;
   }
-
+  
   /** Update button state and text. */
   protected void updateButtons() {
     ArrayList<Breakpoint> regs = getSelectedRegions();
@@ -246,11 +246,11 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   
   
   /** Factory method to create user objects put in the tree.
-   *  If subclasses extend RegionTreeUserObj, they need to override this method. */
+    *  If subclasses extend RegionTreeUserObj, they need to override this method. */
   protected RegionTreeUserObj<Breakpoint> makeRegionTreeUserObj(Breakpoint bp) {
     return new BreakpointRegionTreeUserObj(bp);
   }
-
+  
   /** Class that gets put into the tree. The toString() method determines what's displayed in the three. */
   protected static class BreakpointRegionTreeUserObj extends RegionTreeUserObj<Breakpoint> {
     public BreakpointRegionTreeUserObj (Breakpoint bp) { super(bp); }
@@ -269,7 +269,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
       return sb.toString();
     }
     public boolean equals(Object other) {
-
+      
       if (other == null || other.getClass() != this.getClass()) return false; 
       @SuppressWarnings("unchecked") 
       BreakpointRegionTreeUserObj o = (BreakpointRegionTreeUserObj) other;

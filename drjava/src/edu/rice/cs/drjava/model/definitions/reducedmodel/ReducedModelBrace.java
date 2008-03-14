@@ -116,15 +116,16 @@ public class ReducedModelBrace extends AbstractReducedModel {
   }
 
   /** Updates ReducedModelBrace to reflect cursor movement. Negative values move left from the cursor, positive 
-    * values move right.  All functionality has been refactored into TokenList.
+    * values move right.  All functionality has been refactored into TokenList.  ASSUMES that count is within range.
     * @param count indicates the direction and magnitude of cursor movement
     */
   public void move(int count) { _cursor.move(count); }
 
   /** Updates ReducedModelBrace to reflect text deletion. Negative values mean text left of the cursor, positive 
-    * values mean text to the right.  All functionality has been refactored into TokenList.
+    * values mean text to the right.  All functionality has been refactored into TokenList.  Assumes that count is 
+    * with range.
     */
-  public void delete( int count ) {
+  public void delete(int count) {
     if (count == 0) return;
     _cursor.delete(count);
     return;

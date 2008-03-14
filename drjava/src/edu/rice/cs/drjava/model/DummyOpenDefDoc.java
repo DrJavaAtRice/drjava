@@ -327,8 +327,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public void setTab(String tab, int pos) { throw new UnsupportedOperationException("Dummy method"); }
 //  public int getWhiteSpace() { throw new UnsupportedOperationException("Dummy method"); }
-  public boolean posInParenPhrase(int pos) { throw new UnsupportedOperationException("Dummy method"); }
-  public boolean posInParenPhrase() { throw new UnsupportedOperationException("Dummy method"); }
+  public boolean inParenPhrase(int pos) { throw new UnsupportedOperationException("Dummy method"); }
+  public boolean inParenPhrase() { throw new UnsupportedOperationException("Dummy method"); }
   
   public int findPrevEnclosingBrace(int pos, char opening, char closing) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");

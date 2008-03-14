@@ -88,7 +88,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     return _styles.get(name);  // no locking necessary: _styles is final and Hashtable is thread-safe
   }
     
-  /** Adds the given coloring style to the styles list.  Not supported in SwingDocument. */
+  /** Adds the given coloring style to the styles list.  Not supported in SwingDocument. 
+    * Assumes that WriteLock is already held.
+    */
   public void addColoring(int start, int end, String style) { }
 
   /** Gets the object which can determine whether an insert or remove edit should be applied, based on the inputs.

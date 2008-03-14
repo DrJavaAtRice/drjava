@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
@@ -50,7 +51,6 @@ import javax.swing.text.BadLocationException;
 public class ActionStartStmtOfBracePlus extends IndentRuleAction {
   private String _suffix;
   
-
   /** Constructs a new rule with the given suffix string.
     * @param suffix String to append to indent level of brace
     */
@@ -68,7 +68,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
     int pos = doc.getCurrentLocation();
-
+//    Utilities.show("indentLine in ActionStartStmtOfBracePlus called on doc:\n" + doc.getText() + "'\nat location " + pos);
     // Get distance to brace
     BraceInfo info = doc.getLineEnclosingBrace();
     int distToLineEnclosingBrace = info.distance();

@@ -361,7 +361,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   public String getText() {
     if (_force) {
       @SuppressWarnings("unchecked") 
-        T item = (T)_matchList.getSelectedValue();
+      T item = (T)_matchList.getSelectedValue();
       return (item == null) ? "" : _currentStrategy.force(item,_textField.getText());
     }
     return _textField.getText();
@@ -373,7 +373,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   public T getItem() {
     if (!_force && _pim.getMatchingItems().size() == 0) return null;
     @SuppressWarnings("unchecked") 
-      T item = (T)_matchList.getSelectedValue();
+    T item = (T)_matchList.getSelectedValue();
     return item;
   }
 
@@ -734,7 +734,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends JFram
   private void updateInfo() {
     if (_info == null) return;
     if (_matchList.getModel().getSize()>0) {
-      @SuppressWarnings("unchecked") T item = (T)_matchList.getSelectedValue();
+      @SuppressWarnings("unchecked") 
+      T item = (T)_matchList.getSelectedValue();
       _infoLabel.setText("Path:   " + _info.apply(item));
     }
     else _infoLabel.setText("No file selected");
