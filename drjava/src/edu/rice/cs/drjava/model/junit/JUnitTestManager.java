@@ -94,8 +94,7 @@ public class JUnitTestManager {
     * @param files the files corresponding to classNames
     */
   public List<String> findTestClasses(final List<String> classNames, final List<File> files) {
-    //debug.logStart("findTestClasses");
-    //debug.logValues(new String[]{"classNames", "files"}, classNames, files);
+    debug.logStart(new String[]{"classNames", "files"}, classNames, files);
     
     if (_testClassNames != null && ! _testClassNames.isEmpty()) 
       throw new IllegalStateException("Test suite is still pending!");
@@ -124,7 +123,7 @@ public class JUnitTestManager {
       }
     }
      
-    //debug.logEnd("findTestClasses");
+    debug.logEnd("result", _testClassNames);
     return _testClassNames;
   }
     

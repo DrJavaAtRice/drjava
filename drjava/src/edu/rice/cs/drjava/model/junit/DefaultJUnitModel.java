@@ -373,7 +373,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               final Box<String> sourceName = new SimpleBox<String>();
               new ClassReader(IOUtil.toByteArray(entry)).accept(new ClassVisitor() {
                 public void visit(int version, int access, String name, String sig, String sup, String[] inters) {
-                  className.set(name);
+                  className.set(name.replace('/', '.'));
                 }
                 public void visitSource(String source, String debug) {
                   sourceName.set(source);
