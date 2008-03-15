@@ -7638,8 +7638,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                      null,
                                                      OptionConstants.heapSizeChoices.toArray(),
                                                      DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
-
-    if (res!=null) {
+    
+    if (res != null) {
       // temporarily make MainFrame the parent of the dialog that pops up
       DrJava.getConfig().removeOptionListener(SLAVE_JVM_XMX, _slaveJvmXmxListener);
       final ConfigOptionListeners.SlaveJVMXMXListener l = new ConfigOptionListeners.SlaveJVMXMXListener(MainFrame.this);
@@ -7674,7 +7674,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
                                                      null,
                                                      OptionConstants.heapSizeChoices.toArray(),
                                                      DrJava.getConfig().getSetting(MASTER_JVM_XMX));
-
+    
     if (res!=null) {
       // temporarily make MainFrame the parent of the dialog that pops up
       DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);

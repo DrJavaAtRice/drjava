@@ -59,13 +59,13 @@ public class HighlightManager {
     private Vector<Stack<HighlightInfo>> _highlights;
 
     /** The component necessary for creating positions in in the document, which is also
-     *  contained within this component.
-     */
+      * contained within this component.
+      */
     private JTextComponent _component;
 
     /** Constructor
-     *  @param jtc the component whose document will have positions created therein.
-     */
+      * @param jtc the component whose document will have positions created therein.
+      */
     public HighlightManager(JTextComponent jtc) {
       _component = jtc;
       _highlights = new Vector<Stack<HighlightInfo>>();

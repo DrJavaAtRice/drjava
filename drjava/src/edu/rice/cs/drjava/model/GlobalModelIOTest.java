@@ -535,7 +535,6 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     };
 
     _model.addListener(listener);
-
     doc.saveFile(new FileSelector(file));
     listener.assertSaveCount(1);
     assertModified(false, doc);

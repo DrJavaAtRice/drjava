@@ -507,16 +507,16 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           return null;
         }
       });
-      
+//      Utilities.show("Searching complete");
       // Set of documents that have been reverted in the process of "find all"
-      HashSet<OpenDefinitionsDocument> reverted = new HashSet<OpenDefinitionsDocument>();
+//      HashSet<OpenDefinitionsDocument> reverted = new HashSet<OpenDefinitionsDocument>();
       
       for (FindResult fr: results) {
-        if (reverted.contains(fr.getDocument())) {
-          // skipping document because we have previously noticed that it has been modified,
-          // i.e. the document is in the reverted list
-          continue;
-        }
+//        if (reverted.contains(fr.getDocument())) {
+//          // skipping document because we have previously noticed that it has been modified,
+//          // i.e. the document is in the reverted list
+//          continue;
+//        }
         
 //        // get the original time stamp
 //        long origts = fr.getDocument().getTimestamp();
@@ -527,6 +527,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         else _model.refreshActiveDocument();
         
         final OpenDefinitionsDocument doc = _defPane.getOpenDefDocument();
+//        final OpenDefinitionsDocument doc = fr.getDocument();
         
 //        // get the time stamp after making the document the active one
 //        long newts = doc.getTimestamp();
@@ -547,8 +548,22 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           final Position endPos = doc.createPosition(endSel);
           
           // create excerpt string
+          
+          // The following were commented out because they require doc to be loaded as a Definitions (Swing) Document,
+          // but results processing presumes this access in many places
           int excerptEndSel = doc.getLineEndPos(endSel);
           int excerptStartSel = doc.getLineStartPos(startSel);
+// Text only alternative to preceding two statements commented out          
+//          String text = doc.getText();
+//          final int len = text.length();
+//          int i = endSel;
+//          while (i < len && text.charAt(i) != '\n') ++i;
+//          final int excerptEndSel = i;
+//          
+//          i = startSel;
+//          while (i >= 0 && text.charAt(i) != '\n') --i; // the end of the line
+//          final int excerptStartSel = i + 1;              // either 0 or the beginning of the line
+            
           int length = Math.min(120, excerptEndSel - excerptStartSel);
           
           // this highlights the actual region in red
@@ -557,14 +572,14 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           String s = doc.getText(excerptStartSel, length);
           
           // change control characters and ones that may not be displayed to spaces
-          for(int i = 0; i < s.length(); ++i) {
-            if (s.charAt(i) < ' ' || s.charAt(i) > 127) { sb.append(' '); } else { sb.append(s.charAt(i)); }
+          for (int j = 0; j < s.length(); ++j) {
+            sb.append((s.charAt(j) < ' ' || s.charAt(j) > 127) ? ' ' :  s.charAt(j));
           }
           s = sb.toString();
           
           // trim the front
-          for(int i = 0; i < s.length(); ++i) {
-            if (! Character.isWhitespace(s.charAt(i))) break;
+          for (int j = 0; j < s.length(); ++j) {
+            if (! Character.isWhitespace(s.charAt(j))) break;
             --startRed;
             --endRed;
           }
@@ -588,12 +603,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           rm.addRegion(new MovingDocumentRegion(doc, doc.getFile(), startPos, endPos, sb.toString()));
 //          rm.addRegion(new MovingDocumentRegion(doc, doc.getFile(), startPos, endPos, s));
         }
-        catch (FileMovedException fme) {
-          throw new UnexpectedException(fme);
-        }
-        catch (BadLocationException ble) {
-          throw new UnexpectedException(ble);
-        }
+        catch (FileMovedException fme) { throw new UnexpectedException(fme); }
+        catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       }
       
       SwingUtilities.invokeLater(new Runnable() {
@@ -604,9 +615,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           if (count>0) {
             _frame.showFindResultsPanel(panel);
           }
-          else {
-            panel.freeResources();
-          }
+          else { panel.freeResources(); }
         }
       });
     }

@@ -2284,7 +2284,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Remove the given DocumentRegion from the manager.
-      *  @param region the DocumentRegion to be removed.
+      * @param region the DocumentRegion to be removed.
       */
     public void removeRegion(final R region) {      
       // if we're removing the current region, select a more recent region, if available
@@ -2644,7 +2644,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
 //     private boolean _modifiedSinceSave;
     
-    /** String image of document as last read from or written to disk; initially null */
+    /** Cached String image of document as last read from or written to disk; initially null */
     private volatile String _image;
     private volatile File _file;
     private volatile long _timestamp;
@@ -3017,22 +3017,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException {
-          
+         
 //          System.err.println("DDReconstructor.make() called on " + ConcreteOpenDefDoc.this);
           DefinitionsDocument newDefDoc = new DefinitionsDocument(_notifier);
           newDefDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
           
-          /* Initialize doc contents */
-          String image = getText();
+          /* Initialize doc text contents */
+          String image = getText();  // retrieves _image if it has already been set
           assert image != null;  // getText() never returns null
-          
-          //if (image.length() > 0) newDefDoc.insertString(0, image, null);  // Do not call insertString on an empty doc
-          
-//          else if (! isUntitled()) {
-//            final InputStreamReader reader = new FileReader(_file);
-//            _editorKit.read(reader, newDefDoc, 0);
-//            reader.close(); // win32 needs readers closed explicitly!
-//          }
           
           _editorKit.read(new StringReader(image), newDefDoc, 0);
           //  Set document property to write out document using newLine conventions of the host platform.
@@ -3482,7 +3474,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       *  asks the listeners if the GlobalModel should revert the document to the most recent version saved.
       *  @return true if document has been reverted
       */
-    public boolean revertIfModifiedOnDisk() throws IOException{
+    public boolean revertIfModifiedOnDisk() throws IOException {
       final OpenDefinitionsDocument doc = this;
       if (modifiedOnDisk()) {
         boolean shouldRevert = _notifier.shouldRevertFile(doc);

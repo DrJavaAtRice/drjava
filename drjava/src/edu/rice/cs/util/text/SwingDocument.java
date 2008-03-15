@@ -58,6 +58,9 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
 //  /** The lock state.  See ReadersWritersLocking interface for documentation. */
 //  private volatile int _lockState = UNLOCKED;
   
+  /** The modified state. */
+  protected volatile boolean _isModifiedSinceSave = false;
+  
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;
 
@@ -115,7 +118,6 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     finally { releaseWriteLock(); }
   }
   
-
   /** Inserts a string into the document at the given offset and style, if the edit condition allows it.
     * @param offs Offset into the document
     * @param str String to be inserted

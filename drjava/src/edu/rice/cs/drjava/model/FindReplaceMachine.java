@@ -58,8 +58,6 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
  */
 public class FindReplaceMachine {
   
-  // TODO: is _start still used in any way that matters?
-  
   static private Log _log = new Log("FindReplace.txt", false);
   
   /* Visible machine state; manipulated directly or indirectly by FindReplacePanel. */
@@ -308,17 +306,18 @@ public class FindReplaceMachine {
   }
   
   /** Processes all occurences of the find word with the replace word in the current document or in all documents
-   *  depending the value of the machine register _searchAllDocuments.
-   *  @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
-   *  @return the number of processed occurrences
-   */
+    * depending the value of the machine register _searchAllDocuments.
+    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+    * @return the number of processed occurrences
+    */
   public int processAll(Lambda<Void, FindResult> findAction) { return processAll(findAction, _searchAllDocuments); }
   
-  /** Processes all occurences of the find word with the replace word in the current document of in all documents
-   *  depending the value of the flag searchAll.  Only executes in event thread.
-   *  @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
-   *  @return the number of replacements
-   */
+  /** Processes all occurences of the find word with the replace word in the current document or in all documents
+    * depending the value of the flag searchAll.  Assumes that findAction does not modify the document it processes.
+    * Only executes in event thread.
+    * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
+    * @return the number of replacements
+    */
   private int processAll(Lambda<Void, FindResult> findAction, boolean searchAll) {
     
     assert EventQueue.isDispatchThread();
@@ -347,29 +346,30 @@ public class FindReplaceMachine {
     *   findString:    "hello"<br>
     *   replaceString: "e"<br>
     *   document text: "hhellollo"<p>
+    * Assumes this has mutually exclusive access to _doc (e.g., by hourglassOn) and findAction does not modify _doc.
     * Only executes in event thread.
     * @param findAction action to perform on the occurrences; input is the FindResult, output is ignored
     * @return the number of replacements
     */
   private int _processAllInCurrentDoc(Lambda<Void, FindResult> findAction) {
     
-    _doc.acquireWriteLock();  // may modify the document!
-    try {
+//    _doc.acquireWriteLock();  // the contract stipulates no document modification!
+//    try {
     
-      if (_isForward) setPosition(0);
-      else setPosition(_doc.getLength());
-      
-      int count = 0;
-      FindResult fr = findNext(false);  // find next match in current doc   
-      
-      while (! fr.getWrapped()) {
-        findAction.apply(fr);
-        count++;
-        fr = findNext(false);           // find next match in current doc
-      }
-      return count;
+    if (_isForward) setPosition(0);
+    else setPosition(_doc.getLength());
+    
+    int count = 0;
+    FindResult fr = findNext(false);  // find next match in current doc   
+    
+    while (! fr.getWrapped()) {
+      findAction.apply(fr);
+      count++;
+      fr = findNext(false);           // find next match in current doc
     }
-    finally { _doc.releaseWriteLock(); }
+    return count;
+//    }
+//    finally { _doc.releaseWriteLock(); }
   }
   
   public FindResult findNext() { return findNext(_searchAllDocuments); }

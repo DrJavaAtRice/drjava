@@ -63,7 +63,6 @@ import edu.rice.cs.drjava.model.*;
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
 /** The document model for the definitions pane; it contains a reduced model since it extends AbstractDJDocument. 
-  *
   * @see AbstractDJDocument
   */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
@@ -102,12 +101,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   // end debug code
   
+  /** Cached document image as updated on last modification. */
+  private volatile String _image;
   /** The maximum number of undos the model can remember */
   private static final int UNDO_LIMIT = 1000;
   /** Specifies if tabs are removed on open and converted to spaces. */
   private static boolean _tabsRemoved = true;
-  /** Specifies if the document has been modified since the last save. */
+  
+  /** Specifies if the document has been modified since the last save.  Modified under write lock. */
   private volatile boolean _isModifiedSinceSave = false;
+  
   /** Cached location, aides in determining line number. */
   private volatile int _cachedLocation;
   /** Cached current line number. */
@@ -162,8 +165,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
     super();
     _notifier = notifier;
-    _init();
     _undoManager = undoManager;
+    _init();
   }
   
   
@@ -209,8 +212,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     finally { releaseWriteLock(); }
   } 
-  
-  
+   
   /**
    * Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).
@@ -300,7 +302,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Inserts a string of text into the document.  This is not where we do custom processing of the insert; that is
-    *  done in {@link #insertUpdate}.
+    * done in {@link #insertUpdate}.
     */
   public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
     
@@ -320,7 +322,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   
   /** Removes a block of text from the specified location. We don't update the reduced model here; that happens
-    *  in {@link #removeUpdate}.
+    * in {@link #removeUpdate}.
     */
   public void remove(int offset, int len) throws BadLocationException {
     
@@ -348,13 +350,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     acquireWriteLock();
     try {
       _isModifiedSinceSave = _undoManager.isModified();
-//    System.out.println("DefinitionsDocument: set modified? " + _modifiedSinceSave);
+      if (_odd != null) _odd.documentReset();
     }
-    finally { 
-      if (! _isModifiedSinceSave && _odd != null) _odd.documentReset();
-      releaseWriteLock();
-//    Utilities.showDebug("DefintionsDocument: _modifiedSinceSave = " + _modifiedSinceSave);
-    }
+    finally { releaseWriteLock(); }
   }
   
   /** Sets the modification state of this document to true and updates the state of the associated _odd. 
@@ -362,7 +360,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private void setModifiedSinceSave() {
     if (! _isModifiedSinceSave) {
       _isModifiedSinceSave = true;
-      if (_odd != null) _odd.documentModified();
+      if (_odd != null) _odd.documentModified();  // null test required for some unit tests
     }    
   }
   
@@ -372,20 +370,20 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     try {
       _isModifiedSinceSave = false;
       _undoManager.documentSaved();
-    }
-    finally { 
       if (_odd != null) _odd.documentReset();  // null test required for some unit tests
-      releaseWriteLock(); 
     }
+    finally { releaseWriteLock(); }
   }
   
   /** Determines if the document has been modified since the last save.
     *  @return true if the document has been modified
     */
   public boolean isModifiedSinceSave() {
-    acquireReadLock();
-    try { return  _isModifiedSinceSave; }
-    finally { releaseReadLock(); }
+//    acquireReadLock();  // unnecessary since _isModifiedSinceSave is volatile
+//    try { 
+      return  _isModifiedSinceSave; 
+//    }
+//    finally { releaseReadLock(); }
   }
   
   /** Return the current column of the cursor position. Uses a 0 based index. */
@@ -572,7 +570,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    Utilities.show("Uncomment line at location " + _currentLocation);
 //    Utilities.show("Preceding char = '" + getText().charAt(_currentLocation - 1) + "'");
 //    Utilities.show("Line = \n" + getText(_currentLocation, getLineEndPos(_currentLocation) - _currentLocation + 1));
-    int pos1 = getText().indexOf("//", _currentLocation);
+    int pos1 = _getText().indexOf("//", _currentLocation);
     int pos2 = getFirstNonWSCharPos(_currentLocation, true);
 //    Utilities.show("Pos1 = " + pos1 + " Pos2 = " + pos2);
     if (pos1 != pos2) return NO_COMMENT_OFFSET;
@@ -913,7 +911,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public String getPackageName() {
     Reader r;
     acquireReadLock();
-    try { r = new StringReader(getText()); }
+    try { r = new StringReader(_getText()); }
     finally { releaseReadLock(); }
     try { return new Parser(r).packageDeclaration().getName(); }
     catch (ParseException e) { return ""; }
@@ -1074,7 +1072,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       
       try {
         setCurrentLocation(0);
-        final String text = getText();
+        final String text = _getText();
         
         final int indexOfClass = _findKeywordAtToplevel("class", text, 0);
         final int indexOfInterface = _findKeywordAtToplevel("interface", text, 0);

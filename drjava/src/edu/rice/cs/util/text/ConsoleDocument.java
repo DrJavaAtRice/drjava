@@ -334,9 +334,9 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
    *  @throws EditDocumentException if the offset or length are illegal
    */
   public String getText() {
-    acquireWriteLock();
+    acquireReadLock();
     try { return _document.getDocText(0, getLength()); }
-    finally { releaseWriteLock(); }
+    finally { releaseReadLock(); }
   }
   
   /** Returns the string that the user has entered at the current prompt.

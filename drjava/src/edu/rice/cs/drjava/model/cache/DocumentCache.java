@@ -210,19 +210,18 @@ public class DocumentCache {
       * to be loaded. */
     public int getLength() {
       final DefinitionsDocument doc = _doc;  // create a snapshot of _doc
-      if (doc != null) return doc.getLength();
-      return _rec.getText().length();  // There is a technical race here; _doc could be set and modified before here
+      if (doc == null /* || ! doc.isModifiedSinceSave()*/) return _rec.getText().length();
+      return doc.getLength();
     }
     
     
-    /** Gets the text of this document using in order of preference (i) cached _doc; (ii) cached reconstructor _image; 
-      * and (iii) the document after forcing it to be loaded. If document is not locked, may return stale data. */
+    /** Gets the text of this document using the cached reconstructor if document is not resident or it is unchanged.
+      * If document is not locked, may return stale data. */
     public String getText() {
       final DefinitionsDocument doc = _doc;  // create a snapshot of _doc
-//      if (doc == null || ! doc.isModifiedSinceSave()) return _rec.getText();  
-//      return doc.getText();
-      if (doc != null) return doc.getText();
-      return _rec.getText();  // There is a technical race here; _doc could be set and modified before here
+      if (doc == null /* || ! doc.isModifiedSinceSave() */) return _rec.getText();  
+//      if (doc == null) return _rec.getText();
+      return doc.getText();
     }
     
     /* Gets the specified substring of this document; throws an exception if the specification is ill-formed. */

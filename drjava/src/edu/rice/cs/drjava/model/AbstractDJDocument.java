@@ -73,7 +73,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
-
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
 /** This class contains code supporting the concept of a "DJDocument"; it is shared between DefinitionsDocument and 
@@ -1741,41 +1740,47 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   
-  /** Inserts a string of text into the document.  Custom processing of the insert (e.g., updating the reduced model)
-    * is not done here;  it is done in {@link #insertUpdate}.
-    */
-  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
-    
-    acquireWriteLock();
-    try {
+//  /** Inserts a string of text into the document.  Custom processing of the insert (e.g., updating the reduced model)
+//    * is not done here;  it is done in {@link #insertUpdate}.
+//    */
+//  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
+//    
+//    acquireWriteLock();
+//    try {
 //      synchronized(_reduced) {    // Unnecessary.  The write lock on the document is exclusive.
 //      clearCache(offset);         // Selectively clear the query cache; unnecessary: done in insertUpdate
-      super.insertString(offset, str, a);
+//      super.insertString(offset, str, a);
 //      }
-    }
-    finally { releaseWriteLock(); }
-  }
+//    }
+//    finally { releaseWriteLock(); }
+//  }
   
-  /** Removes a block of text from the specified location.  We don't update the reduced model here; that happens
-    *  in {@link #removeUpdate}.
-    */
-  public void remove(final int offset, final int len) throws BadLocationException {
-    
-    acquireWriteLock();
-    try {
+//  /** Removes a block of text from the specified location.  We don't update the reduced model here; that happens
+//    *  in {@link #removeUpdate}.
+//    */
+//  public void remove(final int offset, final int len) throws BadLocationException {
+//    
+//    acquireWriteLock();
+//    try {
 //      synchronized(_reduced) {   // Unnecessary.  The write lock on the document is exclusive.
 //        clearCache();            // Selectively clear the query cache; unnecessary: done in removeUpdate.
-      super.remove(offset, len);
+//      super.remove(offset, len);
 //      }
-    }
-    finally { releaseWriteLock(); }  
-  }
+//    }
+//    finally { releaseWriteLock(); }  
+//  }
   
+  /** Gets the document text; this method is threadsafe. */
   public String getText() {
     acquireReadLock();
-    try { return getText(0, getLength()); }
-    catch(BadLocationException e) { throw new UnexpectedException(e); }
+    try { return _getText(); }
     finally { releaseReadLock(); }
+  }
+  
+  /** Raw version of getText() that assumes the ReadLock is already held. */
+  public String _getText() { 
+    try { return getText(0, getLength()); }  // calls method defined in DefaultStyledDocument
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
   
   /** Returns the byte image (as written to a file) of this document. */
