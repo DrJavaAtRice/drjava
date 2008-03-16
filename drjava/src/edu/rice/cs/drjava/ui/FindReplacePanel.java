@@ -68,8 +68,8 @@ import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.StringOps;
 
 /** The tabbed panel that handles requests for finding and replacing text.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 
   private JButton _findNextButton;
@@ -526,7 +526,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         }
         else _model.refreshActiveDocument();
         
-        final OpenDefinitionsDocument doc = _defPane.getOpenDefDocument();
+        final OpenDefinitionsDocument doc = _model.getActiveDocument();
 //        final OpenDefinitionsDocument doc = fr.getDocument();
         
 //        // get the time stamp after making the document the active one
@@ -541,9 +541,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //        }
         
         final StringBuilder sb = new StringBuilder();
+        int endSel = fr.getFoundOffset();
+        int startSel = endSel - searchLen;
+        doc.acquireReadLock();
         try {
-          int endSel = fr.getFoundOffset();
-          int startSel = endSel - searchLen;
           final Position startPos = doc.createPosition(startSel);
           final Position endPos = doc.createPosition(endSel);
           
@@ -563,7 +564,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //          i = startSel;
 //          while (i >= 0 && text.charAt(i) != '\n') --i; // the end of the line
 //          final int excerptStartSel = i + 1;              // either 0 or the beginning of the line
-            
+          
           int length = Math.min(120, excerptEndSel - excerptStartSel);
           
           // this highlights the actual region in red
@@ -605,6 +606,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         }
         catch (FileMovedException fme) { throw new UnexpectedException(fme); }
         catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+        finally { doc.releaseReadLock(); }
       }
       
       SwingUtilities.invokeLater(new Runnable() {

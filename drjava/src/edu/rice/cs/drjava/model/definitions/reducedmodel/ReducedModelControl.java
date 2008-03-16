@@ -387,7 +387,7 @@ public class ReducedModelControl implements BraceReduction {
     int curLocation;
     int curLength;
 
-    TokenList.Iterator cursor = _rmc._cursor._copy();
+    TokenList.Iterator cursor = _rmc._cursor.copy();
 //    int ct = rmc._tokens.listenerCount();
     curLocation = start;
     // NOTE: old code threw an exception if cursor.atStart(); it used wrong value for curLength atEnd too

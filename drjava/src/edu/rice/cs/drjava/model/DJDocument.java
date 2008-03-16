@@ -97,11 +97,11 @@ public interface DJDocument extends SwingDocumentInterface {
   /** Returns the indent information for the current location. */
   public IndentInfo getIndentInformation();
   
-  public ReducedModelState stateAtRelLocation(int dist);
+//  public ReducedModelState stateAtRelLocation(int dist);
   
   public ReducedModelState getStateAtCurrent();
   
-  public void resetReducedModelLocation();
+//  public void resetReducedModelLocation();
   
   /** Searching backwards, finds the position of the enclosing brace. NB: ignores comments.
     * @param pos Position to start from

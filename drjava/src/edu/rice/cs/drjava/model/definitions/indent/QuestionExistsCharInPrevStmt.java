@@ -53,25 +53,18 @@ public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
     _lookFor = lookFor;
   }
   
-  /**
-   * Searches through the previous statement to find if it has the current character not in a 
-   * comment and not in a string
-   */
+  /** Searches through the previous statement to determine if it contains char _lookFor (unshadowed). */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     //Find the end of the previous line
     int endPreviousStatement;
-    try {
-      endPreviousStatement = 
-        doc.findPrevDelimiter(doc.getCurrentLocation(), new char[] {';','}','{'});
-    } catch (BadLocationException ble) {
+    try { endPreviousStatement = doc.findPrevDelimiter(doc.getCurrentLocation(), new char[] {';','}','{'}); } 
+    catch (BadLocationException ble) {
       //default to reporting the char was not found in the case of a BadLocationeEception
       return false;
     }
     
     // if this is the first line, we'll get an error indicator and just return false
-    if (endPreviousStatement == -1) {
-      return false;
-    }
+    if (endPreviousStatement == -1) return false;
     
       //Now find the if the character we want exists on that line
     return doc.findCharInStmtBeforePos(_lookFor, endPreviousStatement);

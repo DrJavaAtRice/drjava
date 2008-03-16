@@ -606,6 +606,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { releaseReadLock(); }
   }  
   
+  /** Assumes that read lock is already held. */
   private int _findNextOpenCurly(String text, int pos) throws BadLocationException {
     // acquireReadLock assumed to be held,
     int i;
@@ -618,7 +619,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       
       // Walk forward from specificed position
       i = text.indexOf('{', reducedPos);
-      while(i>-1) {
+      while (i >- 1) {
         // Move reduced model to walker's location
         _reduced.move(i - reducedPos);  // reduced model points to i
         reducedPos = i;                 // reduced model points to reducedPos

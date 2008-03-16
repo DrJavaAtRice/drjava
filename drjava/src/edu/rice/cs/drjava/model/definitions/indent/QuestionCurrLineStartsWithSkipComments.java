@@ -63,13 +63,13 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
     _prefix = prefix;
   }
   
-  /** Determines whether or not the current line in the document starts
-   *  with the character sequence specified by the String field _prefix,
-   * skipping over any comments on that line.
-   * @param doc The AbstractDJDocument containing the current line.
-   * @return True iff the current line in the document starts with the
-   * character sequence specified by the String field _prefix.
-   */
+  /** Determines whether or not the current line in the document starts with the character sequence specified by the
+    * String field _prefix, skipping over any comments on that line.  Assumes that write lock and reduced lock are
+    * already held.
+    * @param doc The AbstractDJDocument containing the current line.
+    * @return True iff the current line in the document starts with the
+    * character sequence specified by the String field _prefix.
+    */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     try {
       // Find the first non-whitespace character on the current line.

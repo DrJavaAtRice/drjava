@@ -9328,5 +9328,4 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       _editExternalDialog.setVisible(true);
     }
   };
-  
 }

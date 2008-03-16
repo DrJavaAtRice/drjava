@@ -541,23 +541,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     finally { releaseReadLock(); }  
   }
   
-  public ReducedModelState stateAtRelLocation(int dist) {
-    acquireReadLock();
-    try { synchronized(_reduced) { return _reduced.moveWalkerGetState(dist); } }
-    finally { releaseReadLock(); }  
-  }
+  /** Assumes that read lock and reduced lock are already held. */
+  public ReducedModelState stateAtRelLocation(int dist) { return _reduced.moveWalkerGetState(dist); }
   
-  public ReducedModelState getStateAtCurrent() {
-    acquireReadLock();
-    try { synchronized(_reduced) { return _reduced.getStateAtCurrent(); } }
-    finally { releaseReadLock(); } 
-  }
+ 
+  /** Assumes that read lock and reduced lock are already held. */
+  public ReducedModelState getStateAtCurrent() { return _reduced.getStateAtCurrent(); }
   
-  public void resetReducedModelLocation() {
-    acquireReadLock();
-    try { synchronized(_reduced) { _reduced.resetLocation(); } }
-    finally { releaseReadLock(); } 
-  }
+  /** Assumes that read lock and reduced lock are already held. */
+  public void resetReducedModelLocation() { _reduced.resetLocation(); }
   
   /** Searching backwards, finds the position of the enclosing brace of specified type.  Ignores comments.  Assumes 
     * readLock is already held!  Why not use getEnclosingBrace? (Does not filter type?)

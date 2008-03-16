@@ -392,8 +392,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public void resetReducedModelLocation() { throw new UnsupportedOperationException("Dummy method"); }
-  public ReducedModelState stateAtRelLocation(int dist) { throw new UnsupportedOperationException("Dummy method"); }
+//  public void resetReducedModelLocation() { throw new UnsupportedOperationException("Dummy method"); }
+//  public ReducedModelState stateAtRelLocation(int dist) { throw new UnsupportedOperationException("Dummy method"); }
   public IndentInfo getIndentInformation() { throw new UnsupportedOperationException("Dummy method"); }
   public void move(int dist) { throw new UnsupportedOperationException("Dummy method"); }
 

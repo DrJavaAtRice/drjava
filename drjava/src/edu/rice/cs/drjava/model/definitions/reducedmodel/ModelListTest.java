@@ -53,8 +53,8 @@ public final class ModelListTest extends DrJavaTestCase {
   }
 
   public void testInsert() {
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
-    ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
     assertTrue("#0.0", fEmpty.isEmpty());
     assertTrue("#0.1", fFull.isEmpty());
     assertEquals("#0.2", 0, fEmpty.length());
@@ -78,7 +78,7 @@ public final class ModelListTest extends DrJavaTestCase {
     fFull.insertFront(new Integer(2));
     fFull.insertFront(new Integer(1));
     fFull.insertFront(new Integer(0));
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
     for (int i = 0; i < 4; i++) {
       itFull.next();
       assertEquals(new Integer(i), itFull.current());
@@ -86,8 +86,8 @@ public final class ModelListTest extends DrJavaTestCase {
   }
 
   public void testRemove() {
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
-    ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
     assertTrue("#0.0", fEmpty.isEmpty());
     assertEquals("#0.1", 0, fEmpty.length());
     assertEquals("#0.2", 0, fFull.length());
@@ -101,8 +101,8 @@ public final class ModelListTest extends DrJavaTestCase {
   }
 
   public void testNext() {
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
-    ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
 
     itFull.insert(new Integer(6));
     itFull.insert(new Integer(5));
@@ -117,8 +117,8 @@ public final class ModelListTest extends DrJavaTestCase {
   }
 
   public void testPrev() {
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
-    ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
 
     itFull.insert(new Integer(6));
     itFull.insert(new Integer(5));
@@ -137,12 +137,12 @@ public final class ModelListTest extends DrJavaTestCase {
   }
 
   public void testCurrent() {
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
     itFull.next();
   }
 
   public void testPrevItem() {
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
     itFull.insert(new Integer(0));
     itFull.insert(new Integer(1));
     itFull.next();
@@ -150,7 +150,7 @@ public final class ModelListTest extends DrJavaTestCase {
   }
 
   public void testNextItem() {
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
     itFull.insert(new Integer(0));
     assertEquals("#0.2", new Integer(0), itFull.current());
     itFull.insert(new Integer(1));
@@ -159,9 +159,9 @@ public final class ModelListTest extends DrJavaTestCase {
   }
   
   public void testCollapse() {
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
-    ModelList<Integer>.Iterator itEmpty = fEmpty.getIterator();
-    ModelList<Integer>.Iterator itEmpty2 = itEmpty.copy();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itEmpty = fEmpty.getIterator();
+    ModelList<Integer>.ModelIterator itEmpty2 = itEmpty.copy();
     assertEquals("#0.0", 0, fEmpty.length());
     assertEquals("#0.1", 0, itEmpty.pos());
     itEmpty.collapse(itEmpty2);
@@ -170,7 +170,7 @@ public final class ModelListTest extends DrJavaTestCase {
 
     itFull.insert(new Integer(6));
     assertEquals("#0.3", 1, itFull.pos());
-    ModelList<Integer>.Iterator itFull2 = itFull.copy();
+    ModelList<Integer>.ModelIterator itFull2 = itFull.copy();
     assertEquals("#0.4", 1, itFull2.pos());
     
     assertEquals("#1.0", 1, fFull.length());
@@ -218,17 +218,17 @@ public final class ModelListTest extends DrJavaTestCase {
   }
 
   public void testNotifyInsert() {
-    ModelList<Integer>.Iterator itFull2 = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itFull2 = fFull.getIterator();
 
     itFull2.insert(new Integer(0));
-    ModelList<Integer>.Iterator itFull = itFull2.copy();
+    ModelList<Integer>.ModelIterator itFull = itFull2.copy();
     itFull2.insert(new Integer(1));
     assertEquals(new Integer(0), itFull.current());
   }
 
   public void testNotifyRemove() {
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
-    ModelList<Integer>.Iterator itFull2 = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itFull2 = fFull.getIterator();
 
     itFull2.insert(new Integer(0));
     itFull2.insert(new Integer(1));
@@ -239,9 +239,9 @@ public final class ModelListTest extends DrJavaTestCase {
   }
 
   public void testNotifyCollapse() {
-    ModelList<Integer>.Iterator itFull = fFull.getIterator();
-    ModelList<Integer>.Iterator itFull2 = fFull.getIterator();
-    ModelList<Integer>.Iterator itFull3 = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itFull = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itFull2 = fFull.getIterator();
+    ModelList<Integer>.ModelIterator itFull3 = fFull.getIterator();
 
     itFull2.insert(new Integer(0));
     itFull2.insert(new Integer(1));
@@ -274,11 +274,11 @@ public final class ModelListTest extends DrJavaTestCase {
     
     assertEquals("No iterators", 0, testList.listenerCount());
     
-    ModelList<Character>.Iterator iter1 = testList.getIterator();
+    ModelList<Character>.ModelIterator iter1 = testList.getIterator();
     
     assertEquals("One iterator", 1, testList.listenerCount());
     
-    ModelList<Character>.Iterator iter2 = testList.getIterator();
+    ModelList<Character>.ModelIterator iter2 = testList.getIterator();
     
     assertEquals("Two iterators", 2, testList.listenerCount());
     

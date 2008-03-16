@@ -49,7 +49,7 @@ class ModelList<T> {
   /** keep track of length for constant time length lookup */
   private int _length;
   /** a set of objects that can trigger and listen for updates to the list */
-  private Set<Iterator> _listeners;
+  private Set<ModelIterator> _listeners;
 
   /** Constructor.  Initializes the head and tail nodes, as well as the listener table and the length variable. */
   ModelList() {
@@ -65,7 +65,7 @@ class ModelList<T> {
     
     /* We use a WeakHashSet so that listeners do not leak. That is, even if the dispose method is not called, when they
      * are no longer strongly referenced, they will be automatically removed from the listener set. */
-    _listeners = new WeakHashSet<Iterator>();
+    _listeners = new WeakHashSet<ModelIterator>();
   }
 
   public void insertFront(T item) { insert(_head._next, item); }
@@ -85,9 +85,9 @@ class ModelList<T> {
     _length--;
   } 
 
-  private void addListener(Iterator that) { _listeners.add(that); }
+  private void addListener(ModelIterator that) { _listeners.add(that); }
 
-  private void removeListener(Iterator that) { _listeners.remove(that); }
+  private void removeListener(ModelIterator that) { _listeners.remove(that); }
 
   public int listenerCount() { return _listeners.size(); }
   
@@ -99,7 +99,7 @@ class ModelList<T> {
   /** Create a new iterator for this list and register it as one of the listeners which are notified when the list is
     * updated.
     */
-  public Iterator getIterator() { return new Iterator(); }
+  public ModelIterator getIterator() { return new ModelIterator(); }
 
   /** The Node class for ModelLists.  The _prev and _next pointers are mutable.  The _item field is null in _head and _tail. */
   private static class Node<T> {
@@ -139,31 +139,31 @@ class ModelList<T> {
     * insertFront).  These iterators support concurrent modification from within the same thread.  They are NOT thread 
     * safe.
     */
-  class Iterator {
+  class ModelIterator {
     private Node<T> _point;  // the current node
     private int _pos;        // the offset of _point within the list; _head has index 0
 
     /** Standard constructor that creates an iterator pointing to the list head (_head) and adds it the listeners. */
-    public Iterator() {
+    public ModelIterator() {
       _point = _head;
       _pos = 0;
       addListener(this);
     }
 
     /** Copy constructor that creates a copy of an existing iterator and adds it to the listeners. */
-    public Iterator(Iterator iter) {
+    public ModelIterator(ModelIterator iter) {
       _point = iter._point;
       _pos = iter._pos;
       addListener(this);
     }
 
-    public Iterator copy() { return new Iterator(this); }
+    public ModelIterator copy() { return new ModelIterator(this); }
 
     /** Tests "that" for equality with "this". */
-    public boolean eq(Iterator that) { return _point == that._point; }
+    public boolean eq(ModelIterator that) { return _point == that._point; }
 
     /** Force "this" iterator to take the values of "that". */
-    public void setTo(Iterator that) {
+    public void setTo(ModelIterator that) {
       _point = that._point;
       _pos = that._pos;
     }
@@ -250,7 +250,7 @@ class ModelList<T> {
       * 3) Iterator 1 is before iterator 2: remove between iterator 1 and iterator 2
       * Does not remove points iterators point to.
       */
-    public void collapse(Iterator iter) {
+    public void collapse(ModelIterator iter) {
       int itPos = iter._pos;
       int diff = Math.abs(_pos - itPos);
       if (diff <= 1) return; // _pos and iter.pos are either equal or adjacent
@@ -279,7 +279,7 @@ class ModelList<T> {
 
     /** Notifies the iterators in _listeners that a node has been inserted. */
     private void notifyOfInsert(int pos) {
-      for (Iterator listener : _listeners) {
+      for (ModelIterator listener : _listeners) {
         int lisPos = listener._pos;
         if (lisPos >= pos) listener._pos = lisPos + 1;
       } 
@@ -287,7 +287,7 @@ class ModelList<T> {
 
     /** Notifies the iterators in _listeners that a node has been removed. */
     private void notifyOfRemove(int pos, Node<T> point) {
-      for (Iterator listener : _listeners) {
+      for (ModelIterator listener : _listeners) {
         int lisPos = listener._pos;
         if (lisPos == pos) listener._point = point;
         else if (lisPos > pos) listener._pos = lisPos - 1;
@@ -296,7 +296,7 @@ class ModelList<T> {
 
     /** Notifies the iterators in _listeners that a range of nodes has been collapsed. */
     private void notifyOfCollapse(int leftPos, int rightPos, Node<T> rightPoint) {
-      for (Iterator listener : _listeners) {
+      for (ModelIterator listener : _listeners) {
         int lisPos = listener._pos;
         if (lisPos <= leftPos) continue;
         if (lisPos < rightPos) {

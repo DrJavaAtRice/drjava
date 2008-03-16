@@ -51,7 +51,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   /** Constructor.  Creates a new reduced model with the cursor at the start of a blank "page." */
   public ReducedModelComment() {
     super();
-    _walker = _cursor._copy();
+    _walker = _cursor.copy();
   }
 
   public void insertChar(char ch) {
@@ -393,7 +393,7 @@ public class ReducedModelComment extends AbstractReducedModel {
    */
 
   private void _updateBasedOnCurrentState() {
-    TokenList.Iterator copyCursor = _cursor._copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     copyCursor.updateBasedOnCurrentState();
     copyCursor.dispose();
   }
@@ -474,20 +474,20 @@ public class ReducedModelComment extends AbstractReducedModel {
   /** Resets the walker to the current position in document */
   protected void resetWalkerLocationToCursor() {
     _walker.dispose();
-    _walker = _cursor._copy();
+    _walker = _cursor.copy();
   }
 
   /** Stores distance to previous newline character in braceInfo.  Stores -1 if no newline,
     * so it fails find start of line on first line. */
   void getDistToStart(IndentInfo info) {
-    info.setDistToStart(_getDistToStart(_cursor._copy()));
+    info.setDistToStart(_getDistToStart(_cursor.copy()));
 //    info.setDistToEnclosingBraceStart(info.distToStart());
     return;
   }
   
   /** Gets distance to the previous newline character (not including newline char).  Returns -1 if no newline exists,
     * so it fails find start of first line. */
-  public int getDistToStart() { return _getDistToStart(_cursor._copy()); }
+  public int getDistToStart() { return _getDistToStart(_cursor.copy()); }
   
   /** Returns distance to previous newline. */
   private int _getDistToStart(TokenList.Iterator copyCursor) {
@@ -508,7 +508,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     * info in the IndentInfo field _distToLineEnclosingBraceStart.  Assumes that 
     * getDistToLineEnclosingBrace has already been called. */
   void getDistToLineEnclosingBraceStart(IndentInfo info) {
-    TokenList.Iterator copyCursor = _cursor._copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
 
     if (info.distToLineEnclosingBrace() == -1 || copyCursor.atStart()) {
       info.setDistToLineEnclosingBraceStart(-1);  // should not be necessary
@@ -544,7 +544,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     * the current location and stores this info in the IndentInfo field distToNewlineCurrent.
     */
   void getDistToEnclosingBraceStart(IndentInfo info) {
-    TokenList.Iterator copyCursor = _cursor._copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
 
     if (info.distToEnclosingBrace() == -1 || copyCursor.atStart()) return; // no brace
 
@@ -563,7 +563,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     */
   int getDistToEnclosingBraceStart(int distToEnclosingBrace) {
     
-    TokenList.Iterator copyCursor = _cursor._copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     
     if (distToEnclosingBrace == -1 || copyCursor.atStart()) return -1; // no brace
     
@@ -576,7 +576,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   
   /** Returns distance to previous newline where relLoc is the distance back from the cursor to start searching. */
   public int getDistToStart(int relLoc) {
-    TokenList.Iterator copyCursor = _cursor._copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     copyCursor.move(-relLoc);
     int dist = _getDistToStart(copyCursor);
     copyCursor.dispose();
@@ -586,7 +586,7 @@ public class ReducedModelComment extends AbstractReducedModel {
 
   /** Returns the distance to the gap before the next newline (end of document if no newline) */
   public int getDistToNextNewline() {
-    TokenList.Iterator copyCursor = _cursor._copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     if (copyCursor.atStart()) {
       copyCursor.next();
     }

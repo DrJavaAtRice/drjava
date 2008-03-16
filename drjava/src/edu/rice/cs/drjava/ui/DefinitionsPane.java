@@ -389,9 +389,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       
       // Only indent if in code
       
-      _doc.setCurrentLocation(getCaretPosition());
-      ReducedModelState state = _doc.getStateAtCurrent();
-      if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
+      _doc.acquireWriteLock();  // reduced model lock unnecessary!
+      try {
+        _doc.setCurrentLocation(getCaretPosition());
+        ReducedModelState state = _doc.getStateAtCurrent();
+        if (state.equals(FREE) || _indentNonCode) indent(getIndentReason());
+        
+      }
+      finally { _doc.releaseWriteLock(); }
     }
   }
 
@@ -1131,7 +1136,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
     //_mainFrame.hourglassOn();
     // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
-    _doc.acquireWriteLock();
+    _doc.acquireWriteLock();  // reduced lock unnecessary!
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
       endCompoundEdit();

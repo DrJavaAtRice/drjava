@@ -149,7 +149,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     int dist = 0;
     resetWalkerLocationToCursor(); //reset the interface to the comment model
 
-    TokenList.Iterator copyCursor = _cursor._copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     if (!copyCursor.atStart()) copyCursor.prev();
     
     if (copyCursor.atStart()) {
@@ -188,7 +188,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
   public int nextBrace() {
     int relDistance = 0;
     int dist = 0;
-    TokenList.Iterator copyCursor = _cursor._copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
 
     resetWalkerLocationToCursor();
 
@@ -231,7 +231,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
 //    Utilities.show("Balancing forward with iterator cursor at " + absOffset() + " and walker at " + _parent.walkerOffset());
 
     Stack<Brace> braceStack = new Stack<Brace>();
-    TokenList.Iterator iter = _cursor._copy();
+    TokenList.Iterator iter = _cursor.copy();
 
     if (iter.atStart() || iter.atFirstItem() || ! openBraceImmediatelyLeft() || isShadowed()) {
 //      Utilities.show("openBraceImmediatelyLeft(): " + openBraceImmediatelyLeft());
@@ -383,7 +383,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     //System.out.println("-------------------------------------------");
     
     Stack<Brace> braceStack = new Stack<Brace>();
-    TokenList.Iterator iter = _cursor._copy();
+    TokenList.Iterator iter = _cursor.copy();
     resetWalkerLocationToCursor();  // _walker aligned to _cursor
 //    Utilities.show("Balancing backward with iterator cursor at " + absOffset() + " and walker at " + _parent.walkerOffset());
  
@@ -467,7 +467,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     */
   public BraceInfo getLineEnclosingBrace() {
     Stack<Brace> braceStack = new Stack<Brace>();
-    TokenList.Iterator iter = _cursor._copy();
+    TokenList.Iterator iter = _cursor.copy();
     resetWalkerLocationToCursor();  // Why not use _parent._rmc._cursor instead of _parent._rmc._walker?
     // this is the distance to in front of the previous newline.
     final int distToStart = _parent.getDistToStart();
@@ -553,7 +553,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
       return; 
     }
     Stack<Brace> braceStack = new Stack<Brace>();
-    TokenList.Iterator iter = _cursor._copy();
+    TokenList.Iterator iter = _cursor.copy();
     resetWalkerLocationToCursor();
     // this is the distance to in front of the previous newline.
     int relDistance = info.distToStart() + 1;  
@@ -624,7 +624,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     * in info.enclosingBraceType and info.distToEnclosingBrace. */
   protected void getDistToEnclosingBrace(IndentInfo info) {
     Stack<Brace> braceStack = new Stack<Brace>();
-    TokenList.Iterator iter = _cursor._copy();
+    TokenList.Iterator iter = _cursor.copy();
     resetWalkerLocationToCursor();
     int relDistance = 0;
     int distance = relDistance;
@@ -647,7 +647,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
 
     // either we get a match and the stack is empty or we reach the start of a file and haven't found a match
     // or we have a open brace that doesn't have a match, so we abort
-    while (!iter.atStart()) {
+    while (! iter.atStart()) {
 
       ReducedToken curToken = iter.current();
       int size = curToken.getSize();
@@ -688,7 +688,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
   /** Determines the brace enclosing the current location. */
   protected BraceInfo getEnclosingBrace() {
     Stack<Brace> braceStack = new Stack<Brace>();
-    TokenList.Iterator iter = _cursor._copy();
+    TokenList.Iterator iter = _cursor.copy();
     resetWalkerLocationToCursor();
     int relDistance = 0;
     int distance = relDistance;

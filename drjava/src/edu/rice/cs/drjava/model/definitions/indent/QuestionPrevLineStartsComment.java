@@ -50,7 +50,8 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
     super(yesRule, noRule);
   }
   
-  /** Determines if the previous line in the document starts a block comment.
+  /** Determines if the previous line in the document starts a block comment.  Assumes that read lock and reduced lock
+    * are already held.
     * We know that the current line is in a block comment. Therefore, if the
     * start of the previous line is not inside of a block comment, then the
     * previous line must have started the comment. 
@@ -87,7 +88,7 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
 //    BraceReduction reduced = doc.getReduced();
     doc.resetReducedModelLocation();
     ReducedModelState state = doc.stateAtRelLocation(cursor - doc.getCurrentLocation());
-    return !state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT);
+    return ! state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT);
   }
 }
 

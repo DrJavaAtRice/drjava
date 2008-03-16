@@ -83,7 +83,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   /** Absolute offset of the specified iterator for testing purposes. */
   public int absOffset(TokenList.Iterator cursor) {
     int off = cursor.getBlockOffset();
-    TokenList.Iterator it = cursor._copy();
+    TokenList.Iterator it = cursor.copy();
     if (! it.atStart()) it.prev();
     
     while (! it.atStart()) {
@@ -206,7 +206,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    * Make a copy of the token list's iterator.
    */
   public TokenList.Iterator makeCopyCursor() {
-    return _cursor._copy();
+    return _cursor.copy();
   }
   
   /** Determines if there is a Gap immediately to the right of the cursor. */

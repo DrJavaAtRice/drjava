@@ -3836,9 +3836,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().findPrevDelimiter(pos, delims, skipParenPhrases);
     }
     
-    public void resetReducedModelLocation() { getDocument().resetReducedModelLocation(); }
+//    public void resetReducedModelLocation() { getDocument().resetReducedModelLocation(); }
     
-    public ReducedModelState stateAtRelLocation(int dist) { return getDocument().stateAtRelLocation(dist); }
+//    public ReducedModelState stateAtRelLocation(int dist) { return getDocument().stateAtRelLocation(dist); }
     
     public IndentInfo getIndentInformation() { return getDocument().getIndentInformation(); }
     
