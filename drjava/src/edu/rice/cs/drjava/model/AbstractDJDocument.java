@@ -1,4 +1,4 @@
-/*BEGIN_COPYRIGHT_BLOCK
+ /*BEGIN_COPYRIGHT_BLOCK
  *
  * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
@@ -253,8 +253,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return prims;
   }
   
-  /** Computes the maximum of x and y. */ 
-  private int max(int x, int y) { return x <= y? y : x; }
+//  /** Computes the maximum of x and y. */ 
+//  private int max(int x, int y) { return x <= y? y : x; }
   
   /** Return all highlight status info for text between start and end. This should collapse adjoining blocks 
     * with the same status into one.
@@ -1082,19 +1082,23 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public String getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace)  {
 //    Utilities.show("getIdentOfCurrentStmt(" + pos + ", " + Arrays.toString(delims) + ", " + Arrays.toString(whitespace) + ")");
-    // Check cache
-    final Query key = new Query.IndentOfCurrStmt(pos, delims, whitespace);
-    final String cached = (String) _checkCache(key);
-    if (cached != null) return cached;
-    
-    String lineText;
-    
+   
+//        final Query key = new Query.IndentOfCurrStmt(pos, delims, whitespace);
+//        final String cached = (String) _checkCache(key);
+//        if (cached != null) return cached;
+        
     acquireReadLock();
     try {
       synchronized(_reduced) {
-        // Get the start of the current line
-        int lineStart = getLineStartPos(pos);
+        // Check cache
+        int lineStart = getLineStartPos(pos);  // returns 0 for initial line
         
+        final Query key = new Query.IndentOfCurrStmt(lineStart, delims, whitespace);
+        final String cached = (String) _checkCache(key);
+        if (cached != null) return cached;
+        
+        String lineText;
+                
         // Find the previous delimiter (typically an enclosing brace or closing symbol) skipping over balanced braces
         // that are not delims
         boolean reachedStart = false;
@@ -1119,13 +1123,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         // Get the position of the first non-ws character on this line
         int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
         lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt);
-        _storeInCache(key, lineText, pos - 1);
+        _storeInCache(key, lineText, Math.max(lineStart, 0));
+        return lineText;
       }
     }
     catch(Exception e) { throw new UnexpectedException(e); }
     finally { releaseReadLock(); }
-//    Utilities.show("getIdentCurrStmt(...) call completed");    
-    return lineText;
+//    Utilities.show("getIdentCurrStmt(...) call completed");     
   }
   
   /** Gets the white space prefix preceding the first non-blank/tab character on the line identified by pos. 
@@ -1209,7 +1213,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       }
       
       if (i == -1) matchIndex = -1;
-      _storeInCache(key, matchIndex, max(pos, matchIndex));
+      _storeInCache(key, matchIndex, Math.max(pos, matchIndex));
     }
     catch (Throwable t) { throw new UnexpectedException(t); }
     finally { releaseReadLock(); }
@@ -1302,7 +1306,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           break;
         }
       }
-      _storeInCache(key, nonWSPos, max(pos, nonWSPos));
+      _storeInCache(key, nonWSPos, Math.max(pos, nonWSPos));
       return nonWSPos;  // may equal lineEndPos
     }
     finally { releaseReadLock(); }
@@ -1470,24 +1474,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public BraceInfo getLineEnclosingBrace() {
     int origPos = _currentLocation;
     // Check cache
-    int keyPos = getLineStartPos(_currentLocation);
-    if (keyPos == -1) keyPos = origPos;
+    final int lineStart = getLineStartPos(_currentLocation);
+    final int keyPos = (lineStart < 0) ? origPos : lineStart;
     final Query key = new Query.LineEnclosingBrace(keyPos);
     final BraceInfo cached = (BraceInfo) _checkCache(key);
     if (cached != null) return cached;
-    // assert pos == _currentLocation
-//    final int oldPos = _currentLocation;
-//    _setCurrentLocation(pos);
-    
-//    if (getLength() > 0 && lineStart > 0) {
-//      char ch = getText().charAt(lineStart - 1);
-//      if (ch != '\n') System.err.println("In doc:" + getText() + "'\nchar at pos " + (lineStart - 1) + " is not a newline");
-//      }
-    
-//    setCurrentLocation(lineStart);
+
+//    BraceInfo b = _reduced.getLineEnclosingBrace(lineStart);  // optimized version to be developed
     BraceInfo b = _reduced.getLineEnclosingBrace();
-//    _setCurrentLocation(oldPos);
-//    setCurrentLocation(origPos);
+
     _storeInCache(key, b, origPos - 1);
     return b;
   }

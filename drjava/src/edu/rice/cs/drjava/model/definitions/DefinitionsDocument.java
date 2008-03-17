@@ -743,7 +743,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
             // this might be an inner class
             newPos = _findPrevKeyword(text, "new", openParenPos);
-//            if (oldLog) System.out.println("\tnew found at "+newPos+", openSquigglyPos="+curPos);
+//            if (oldLog) System.out.println("\tnew found at "+newPos+", openCurlyPos="+curPos);
             if (! _isAnonymousInnerClass(newPos, curPos)) {
               // not an anonymous inner class
               newPos = -1;
@@ -777,7 +777,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
               if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
                 // this might be an inner class
                 newPos = _findPrevKeyword(text, "new", openParenPos);
-//                if (oldLog) System.out.println("\tnew found at " + newPos + ", openSquigglyPos=" + curPos);
+//                if (oldLog) System.out.println("\tnew found at " + newPos + ", openCurlyPos=" + curPos);
                 if (! _isAnonymousInnerClass(newPos, curPos)) newPos = -1;
               }
             }
@@ -830,9 +830,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Returns true if this position is the instantiation of an anonymous inner class.  Assumes readLock is already held.
     * @param newPos position of "new"
-    * @param openSquigglyPos position of the next '{'
+    * @param openCurlyPos position of the next '{'
     * @return true if anonymous inner class instantiation
     */
+
   private boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
 //    String t = getText(0, openSquigglyPos+1);
 //    System.out.print ("_isAnonymousInnerClass("+newPos+", "+openSquigglyPos+")");
@@ -849,12 +850,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int newPos = pos;
     synchronized(_reduced) {
       cached = false;
-      String text = getText(0, openCurlyPos+1);
+
+      String text = getText(0, openCurlyPos + 1);  // includes open Curly brace
       int origNewPos = newPos;
       newPos += "new".length();
       int classStart = getFirstNonWSCharPos(newPos);
       if (classStart != -1) { 
-        int classEnd = classStart+1;
+        int classEnd = classStart + 1;
         while (classEnd < text.length()) {
           if (! Character.isJavaIdentifierPart(text.charAt(classEnd)) && text.charAt(classEnd) != '.') {
             // delimiter found
@@ -942,8 +944,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     
     // readLock assumed to be held
+
     int newPos = pos; // formerly pos -1 // move outside the curly brace?  Corrected to do nothing since already outisde
+
     final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
+
     final String className = getEnclosingClassName(newPos - 2 , true);  // class name must be followed by at least "()"
     final String text = getText(0, newPos - 2);  // excludes miminal (empty) argument list after class name
     int index = 1;

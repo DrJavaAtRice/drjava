@@ -65,22 +65,24 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     int lineStart = doc.getLineStartPos(origin);
     
     // Get brace for start of line
-    doc.move(lineStart - origin);  // TODO: use setCurrentLocation instead of move
-    IndentInfo info = doc.getIndentInformation();  // TODO: revise to use getLineEnclosingBrace
-    doc.move(origin - lineStart);  // TODO: use setCurrentLocation instead of move
+//    doc.setCurrentLocation(lineStart);  
+    BraceInfo info = doc.getLineEnclosingBrace();  
+//    doc.setCurrentLocation(origin);  
     
-    if (! info.lineEnclosingBraceType().equals(IndentInfo.OPEN_CURLY) || info.distToLineEnclosingBrace() < 0) {  // How can distTo... be < 0?
+    int dist = info.distance();
+    
+    if (! info.braceType().equals(BraceInfo.OPEN_CURLY) || dist < 0) {  // dist < 0 means no such brace exists
       // Precondition not met: we should have a brace
       return false;
     }
-    int bracePos = lineStart - info.distToLineEnclosingBrace();
+    int bracePos = lineStart - dist;
     
     // Get position of previous non-WS char (not in comments)
     int prevNonWS = -1;
     try {
-      prevNonWS = doc.findPrevNonWSCharPos(bracePos);
-      char c = doc.getText(prevNonWS,1).charAt(0);
-      for (char pchar: _prefix) if (c == pchar) return true;
+      int loc = doc.findPrevNonWSCharPos(bracePos);
+      char ch = doc.getText(loc,1).charAt(0);
+      for (char pch: _prefix) if (ch == pch) return true;
     }
     catch (BadLocationException e) { }    
     return false;

@@ -1451,7 +1451,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
               Caret caret = _lastCommandFocus.getCaret();
               int min = Math.min(caret.getDot(), caret.getMark());
               int max = Math.max(caret.getDot(), caret.getMark());
-              if (min!=max) {
+              if (min != max) {
                 text = text.substring(0, min) + text.substring(max);
               }
               text = text.substring(0,min) + "${" + selected.first() + "}" + text.substring(min);
@@ -1490,7 +1490,7 @@ public class ExecuteExternalDialog extends JFrame implements OptionConstants {
               Caret caret = _lastJavaFocus.getCaret();
               int min = Math.min(caret.getDot(), caret.getMark());
               int max = Math.max(caret.getDot(), caret.getMark());
-              if (min!=max) {
+              if (min != max) {
                 text = text.substring(0, min) + text.substring(max);
               }
               text = text.substring(0,min) + "${" + selected.first() + "}" + text.substring(min);

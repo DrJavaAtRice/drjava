@@ -365,6 +365,10 @@ public class ReducedModelControl implements BraceReduction {
   
   /** Gets info about the brace enclosing the beginning of this line. */
   public BraceInfo getLineEnclosingBrace() { return _rmb.getLineEnclosingBrace(); }
+  
+//  /** Gets info about the brace enclosing the beginning of this lineStart position (either a line start or -1). */
+//  public BraceInfo getLineEnclosingBrace(int pos) { return _rmb.getLineEnclosingBrace(int pos); }
+  
   /** Gets info about the brace enclosing this location. */
   public BraceInfo getEnclosingBrace() { return _rmb.getEnclosingBrace(); }
   /** Gets distance to the new newline character (not including the newline). */
