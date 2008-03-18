@@ -45,9 +45,9 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.model.repl.*;
 
 /** A standalone Interactions Window that provides the functionality of DrJava's Interactions Pane in a single JVM.
- *  Useful for quickly testing small pieces of code if DrJava is not running.
- *  @version $Id$
- */
+  * Useful for quickly testing small pieces of code if DrJava is not running.
+  * @version $Id$
+  */
 public class SimpleInteractionsWindow extends JFrame {
   //private final SimpleRMIInteractionsModel _rmiModel;
   private final SimpleInteractionsModel _model;

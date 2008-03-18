@@ -372,10 +372,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   public void resetInteractions(File wd) { resetInteractions(wd, false); }
  
   /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is 
-   *  indicated (on by default).  The reset operation is suppressed if the existing slave JVM has not been
-   *  used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null}
-   *  if a valid directory cannot be determined.  In that case, the former working directory is used.
-   */
+    * indicated (on by default).  The reset operation is suppressed if the existing slave JVM has not been
+    * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null}
+    * if a valid directory cannot be determined.  In that case, the former working directory is used.
+    */
   public void resetInteractions(File wd, boolean forceReset) {
     debug.logStart();
     File workDir = _interactionsModel.getWorkingDirectory();

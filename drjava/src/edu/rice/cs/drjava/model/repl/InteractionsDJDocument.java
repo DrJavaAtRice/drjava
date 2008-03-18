@@ -62,8 +62,8 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   /** Whether the document currently has a prompt and is ready to accept input. */
   private volatile boolean _hasPrompt;
   
-  /** Holds a flag telling the adapter that the interpreter was recently reset, and to reset the styles list 
-    * the next  time a style is added. Cannot reset immediately because then the styles would be lost while 
+  /** A flag indicating that the interpreter was recently reset, and to reset the styles list 
+    * the next time a style is added. Cannot reset immediately because then the styles would be lost while 
     * the interactions pane is resetting.
     */
   private volatile boolean _toClear = false;
@@ -95,7 +95,8 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
   
   /** A list of styles and their locations augmenting this document.  This augmentation is NOT part of the reduced
-    * model; it a separate extension that uses itself as a mutual exclusion lock.  This list holds pairs of locations
+    * model; it a separate extension that uses itself as a mutual exclusion lock.  This list holds pairs of location
+    * intervals and strings (identifying styles).  In essence it maps regions to colors (??).
     * in the document and styles, which is basically a map of regions where the coloring view that is now attached to
     * the Interactions Pane.  It is not allowed to use the reduced model to determine the color settings when 
     * rendering text. (Why not? -- Corky)  We keep a list of all places where styles not considered by the reduced 
@@ -232,13 +233,13 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   }
   
   /** Inserts the given exception data into the document with the given style.
-   *  @param message Message contained in the exception
-   *  @param styleName name of the style for formatting the exception
-   */
+    * @param message Message contained in the exception
+    * @param styleName name of the style for formatting the exception
+    */
   public void appendExceptionResult(String message, String styleName) {
     // Note that there is similar code in InteractionsDocument.  Something should be refactored.
     acquireWriteLock();
-    try { insertText(getLength(), message + "\n", styleName); }
+    try { _insertText(getLength(), message + "\n", styleName); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
     finally { releaseWriteLock(); }
   } 

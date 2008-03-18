@@ -52,19 +52,22 @@ import edu.rice.cs.util.swing.Utilities;
 
 /** @version $Id$ */
 public class ConsoleController extends AbstractConsoleController implements Serializable {
-  protected ConsoleDocument _doc;
+  
+  /** GUI-neutral formulation of console document.  In this case, is a wrapper around _swingConsoleDocument. */
+  protected volatile ConsoleDocument _consoleDoc;
 
   /** Object to wait on for input from System.in. */
-  private Object _inputWaitObject = new Object();
+  private volatile Object _inputWaitObject = new Object();
 
-  /** State so that the Enter action will only take place if the console is actually waiting for input. */
+  /** Flag indicating the console is waiting for input; the Enter action will only take place if this flag is set. */
   private volatile boolean _blockedForConsoleInput;
-
-  public ConsoleController(final ConsoleDocument doc, InteractionsDJDocument adapter) {
-    super(adapter, new InteractionsPane("CONSOLE_KEYMAP", adapter) {
-      public int getPromptPos() { return doc.getPromptPos(); }
+  
+  
+  public ConsoleController(final ConsoleDocument consoleDoc, InteractionsDJDocument swingDoc) {
+    super(swingDoc, new InteractionsPane("CONSOLE_KEYMAP", swingDoc) {
+      public int getPromptPos() { return consoleDoc.getPromptPos(); }
     });
-    _doc = doc;
+    _consoleDoc = consoleDoc;
     _blockedForConsoleInput = false;
     _pane.setEditable(false);
 //    _pane.getCaret().setVisible(false);
@@ -73,14 +76,14 @@ public class ConsoleController extends AbstractConsoleController implements Seri
   }
 
   /** Gets the ConsoleDocument. */
-  public ConsoleDocument getConsoleDoc() { return _doc; }
+  public ConsoleDocument getConsoleDoc() { return _consoleDoc; }
 
   /** Allows the main controller to install the input listener into the model. */
   public InputListener getInputListener() { return _inputListener; }
 
   protected void _setupModel() {
-    _adapter.addDocumentListener(new CaretUpdateListener());
-    _doc.setBeep(_pane.getBeep());
+    _swingConsoleDocument.addDocumentListener(new CaretUpdateListener());
+    _consoleDoc.setBeep(_pane.getBeep());  // Beep support is embedded in the wrapper.
   }
 
   /** Listens for input from System.in. */
@@ -93,8 +96,8 @@ public class ConsoleController extends AbstractConsoleController implements Seri
       });
       //_pane.getCaret().setVisible(true);
       _waitForInput();
-      String s = _doc.getCurrentInput();
-      _doc.disablePrompt();
+      String s = _consoleDoc.getCurrentInput();   // Input support is embedded in the wrapper
+      _consoleDoc.disablePrompt();                // Prompt support is embedded in the wrapper
       return s;
     }
   };
@@ -156,7 +159,7 @@ public class ConsoleController extends AbstractConsoleController implements Seri
         if (_blockedForConsoleInput) {
           _pane.setEditable(false);
           _pane.getCaret().setVisible(false);
-          _doc.insertNewline(_doc.getLength());
+          _consoleDoc.insertNewline(_consoleDoc.getLength());   // Part of console support added in wrapper
           _blockedForConsoleInput = false; 
           _inputWaitObject.notify();  // notify waiting thread that input is available
         }
@@ -168,15 +171,15 @@ public class ConsoleController extends AbstractConsoleController implements Seri
   AbstractAction moveLeftAction = new LeftAction();
   private class LeftAction extends AbstractAction implements Serializable {
     public void actionPerformed(ActionEvent e) {
-      _doc.acquireReadLock(); 
+      _consoleDoc.acquireReadLock();   // forwards to _swingConsoleDocument
       try {
         int position = _pane.getCaretPosition();
-        if (position < _doc.getPromptPos()) moveToPrompt();
-        else if (position == _doc.getPromptPos())_pane.getBeep().run();
-        else // position > _doc.getPromptPos()
+        if (position < _consoleDoc.getPromptPos()) moveToPrompt();
+        else if (position == _consoleDoc.getPromptPos())_pane.getBeep().run();
+        else // position > _consoleDoc.getPromptPos()
           _pane.setCaretPosition(position - 1);
       }
-      finally { _doc.releaseReadLock(); }
+      finally { _consoleDoc.releaseReadLock(); }
     }
   }
 
@@ -185,15 +188,15 @@ public class ConsoleController extends AbstractConsoleController implements Seri
   
   private class RightAction extends AbstractAction implements Serializable {
     public void actionPerformed(ActionEvent e) {
-      _doc.acquireReadLock();
+      _consoleDoc.acquireReadLock();  // forwards to _swingConsoleDocument
       try {
         int position = _pane.getCaretPosition();
-        if (position < _doc.getPromptPos()) moveToEnd();
-        else if (position >= _doc.getLength()) _pane.getBeep().run();
+        if (position < _consoleDoc.getPromptPos()) moveToEnd();
+        else if (position >= _consoleDoc.getLength()) _pane.getBeep().run();
         else // position between prompt and end
           _pane.setCaretPosition(position + 1);
       }
-      finally { _doc.releaseReadLock(); }
+      finally { _consoleDoc.releaseReadLock(); }
     }
   }
 
@@ -204,13 +207,13 @@ public class ConsoleController extends AbstractConsoleController implements Seri
   AbstractAction moveUpDownAction = new UpDownAction();
   private class UpDownAction extends AbstractAction implements Serializable {
     public void actionPerformed(ActionEvent e) {
-      _doc.acquireReadLock();
+      _consoleDoc.acquireReadLock();  // forwards to _swingConsoleDocument
       try {
         int position = _pane.getCaretPosition();
-        if (position < _doc.getPromptPos()) moveToPrompt();
+        if (position < _consoleDoc.getPromptPos()) moveToPrompt();
         else _pane.getBeep().run();
       }
-      finally { _doc.releaseReadLock(); }
+      finally { _consoleDoc.releaseReadLock(); }
     }
   }
 }

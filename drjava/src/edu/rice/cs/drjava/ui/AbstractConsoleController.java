@@ -62,14 +62,14 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 
-/** Abstract class to handle hooking up a console document with its pane.
-  * TODO: move interactions specific functionality to InteractionsController
+/** Abstract class to handle hooking up a Swing console document with its Swing pane.
+  * TODO: move interactions specific functionality to InteractionsController by creating ConsoleDJDocument class
   * @version $Id$
   */
 public abstract class AbstractConsoleController implements Serializable {
   
   /** Adapter for the Swing document used by the model.*/
-  protected final InteractionsDJDocument _adapter;
+  protected final InteractionsDJDocument _swingConsoleDocument;
 
   /** Pane from the view. */
   protected final InteractionsPane _pane;
@@ -89,11 +89,11 @@ public abstract class AbstractConsoleController implements Serializable {
   /** Action to change focus to next pane. */
   volatile Action switchToNextPaneAction;
 
-  /** Initializes the document adapter and interactions pane. Subclasses *must* call _init() at the end 
+  /** Initializes the Swing console document and Swing interactions pane. Subclasses *must* call _init() at the end 
    *  of their constructors.
    */
-  protected AbstractConsoleController(InteractionsDJDocument adapter, InteractionsPane pane) {
-    _adapter = adapter;
+  protected AbstractConsoleController(InteractionsDJDocument doc, InteractionsPane pane) {
+    _swingConsoleDocument = doc;
     _pane = pane;
     _defaultStyle = new SimpleAttributeSet();
     _systemOutStyle = new SimpleAttributeSet();
@@ -110,10 +110,10 @@ public abstract class AbstractConsoleController implements Serializable {
     _setupView();
   }
 
-  /** Adds AttributeSets as named styles to the document adapter. */
+  /** Adds AttributeSets as named styles to the Swing console document. */
   protected void _addDocumentStyles() {
     // Default
-    _adapter.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
+    _swingConsoleDocument.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
                                          new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
@@ -125,7 +125,7 @@ public abstract class AbstractConsoleController implements Serializable {
     _systemOutStyle.addAttributes(_defaultStyle);
     _systemOutStyle.addAttribute(StyleConstants.Foreground,
                                  DrJava.getConfig().getSetting(OptionConstants.SYSTEM_OUT_COLOR));
-    _adapter.setDocStyle(ConsoleDocument.SYSTEM_OUT_STYLE, _systemOutStyle);
+    _swingConsoleDocument.setDocStyle(ConsoleDocument.SYSTEM_OUT_STYLE, _systemOutStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_OUT_COLOR,
                                          new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
@@ -137,7 +137,7 @@ public abstract class AbstractConsoleController implements Serializable {
     _systemErrStyle.addAttributes(_defaultStyle);
     _systemErrStyle.addAttribute(StyleConstants.Foreground,
                                  DrJava.getConfig().getSetting(OptionConstants.SYSTEM_ERR_COLOR));
-    _adapter.setDocStyle(ConsoleDocument.SYSTEM_ERR_STYLE, _systemErrStyle);
+    _swingConsoleDocument.setDocStyle(ConsoleDocument.SYSTEM_ERR_STYLE, _systemErrStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_ERR_COLOR,
                                          new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
@@ -180,7 +180,7 @@ public abstract class AbstractConsoleController implements Serializable {
       if (c != null) {
         StyleConstants.setForeground(fontSet, c);
       }
-      _adapter.setCharacterAttributes(0, _adapter.getLength()+1, fontSet, false);
+      _swingConsoleDocument.setCharacterAttributes(0, _swingConsoleDocument.getLength()+1, fontSet, false);
       _pane.setCharacterAttributes(fontSet, false);
       _updateStyles(fontSet);
     }
@@ -221,7 +221,7 @@ public abstract class AbstractConsoleController implements Serializable {
     public void insertUpdate(final DocumentEvent e) {
       /* Update caret position when text is inserted in the document.  Fixes (?) bug #1571405.  The promptPos is
        * moved before the insertion is made so that this listener will see the udpated position. NOTE: The promptPos
-       * is NOT a Swing Position; it is an int offset maintianed by ConsoleDocument.
+       * is NOT a Swing Position; it is an int offset maintained by ConsoleDocument.
        * The updating of the caretPosition is a confusing issue.  This code has been written assuming that the
        * processing of keyboard input advances the cursor automatically and it appears to work, but other program
        * test suites (e.g. DefinitionsPaneTest) move the cursor manually.
@@ -360,7 +360,7 @@ public abstract class AbstractConsoleController implements Serializable {
   };
 
   /** Accessor method for the InteractionsDJDocument. */
-  public InteractionsDJDocument getDocumentAdapter() { return _adapter; }
+  public InteractionsDJDocument getDocumentAdapter() { return _swingConsoleDocument; }
 
   /** Accessor method for the InteractionsPane. */
   public InteractionsPane getPane() { return _pane; }

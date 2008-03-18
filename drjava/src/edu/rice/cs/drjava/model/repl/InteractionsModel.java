@@ -153,27 +153,34 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
   /** Interprets the current given text at the prompt in the interactions doc. */
   public void interpretCurrentInteraction() {
-    // Don't start a new interaction while one is in progress
-    if (_document.inProgress()) return;
     
-    String text = _document.getCurrentInteraction();
-    String toEval = text.trim();
-    if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
-    
-    _prepareToInterpret(text);
+    String toEval;
+    _document.acquireWriteLock();
+    try {
+      if (_document.inProgress()) return;  // Don't start a new interaction while one is in progress
+      
+      String text = _document.getCurrentInteraction();
+      toEval = text.trim();
+      if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
+      
+      _prepareToInterpret(text);  // Writes a newLine!
+    }
+    finally{ _document.releaseWriteLock(); }
     interpret(toEval);
   }
 
-  /** Performs pre-interpretation preparation of the interactions document and notifies the view. */
+  /** Performs pre-interpretation preparation of the interactions document and notifies the view.  Assumes that Write
+    * Lock is already held on _document. */
   private void _prepareToInterpret(String text) {
-    addNewline();
+    _addNewline();
     _notifyInteractionStarted();
     _document.setInProgress(true);
     _toAddToHistory = text; // _document.addToHistory(text);
     //Do not add to history immediately in case the user is not finished typing when they press return
   }
   
-  public void addNewline() { append(_newLine, InteractionsDocument.DEFAULT_STYLE); }
+  /** Appends a newLine to _document assuming that the Write Lock is already held. */
+  public void _addNewline() { append(_newLine, InteractionsDocument.DEFAULT_STYLE); }
 
   /** Interprets the given command.
    *  @param toEval command to be evaluated. */
@@ -326,20 +333,24 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     ArrayList<String> histories;
     try { histories = _getHistoryText(selector); }
     catch (OperationCanceledException oce) { return; }
-    _document.clearCurrentInteraction();
-
-    // Insert into the document and interpret
-    final StringBuilder buf = new StringBuilder();
-    for (String hist: histories) {
-      ArrayList<String> interactions = _removeSeparators(hist);
-      for (String curr: interactions) {
-        int len = curr.length();
-        buf.append(curr);
-        if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
-        buf.append(StringOps.EOL);
+    _document.acquireWriteLock();
+    try {
+      _document.clearCurrentInteraction();
+      
+      // Insert into the document and interpret
+      final StringBuilder buf = new StringBuilder();
+      for (String hist: histories) {
+        ArrayList<String> interactions = _removeSeparators(hist);
+        for (String curr: interactions) {
+          int len = curr.length();
+          buf.append(curr);
+          if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
+          buf.append(StringOps.EOL);
+        }
       }
+      append(buf.toString().trim(), InteractionsDocument.DEFAULT_STYLE);
     }
-    append(buf.toString().trim(), InteractionsDocument.DEFAULT_STYLE);
+    finally { _document.releaseWriteLock(); }
     interpretCurrentInteraction();
   }
 
@@ -450,11 +461,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected abstract void _notifyInteractionEnded();
 
   /** Appends a string to the given document using a named style. Also waits for a small amount of time 
-   *  (_writeDelay) to prevent any one writer from flooding the model with print calls to the point that 
-   *  the user interface could become unresponsive.
-   *  @param s String to append to the end of the document
-   *  @param styleName Name of the style to use for s
-   */
+    * (_writeDelay) to prevent any one writer from flooding the model with print calls to the point that 
+    * the user interface could become unresponsive.
+    * @param s  String to append to the end of the document
+    * @param styleName  Name of the style to use for s
+    */
   public void append(String s, String styleName) {
     _document.append(s, styleName);
     _writerDelay();

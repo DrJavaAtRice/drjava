@@ -49,7 +49,7 @@ public class ConsoleDocumentTest extends DrJavaTestCase {
   
   public void setUp() throws Exception {
     super.setUp();
-    _doc = new ConsoleDocument(new InteractionsDJDocument());
+    _doc = new ConsoleDocument(new InteractionsDJDocument());  // Why use InteractionsDJDocument?  Isn't it overkill?
   }
   
   public void tearDown() throws Exception {

@@ -88,6 +88,7 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
+/* TODO: clean up mixed references to _adapter and _doc which apparently point to the same thing! */
 
 /** This class installs listeners and actions between an InteractionsDocument (the model) and an InteractionsPane 
  *  (the view).  We may want to refactor this class into a different package. <p>
@@ -96,6 +97,8 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  *  @version $Id$
  */
 public class InteractionsController extends AbstractConsoleController {
+  
+  /* InteractionsDocument _adapter is inherited from AbstractConsoleController */
   
   private static final Log _log = new Log("ConsoleController.txt", false);
   
@@ -111,7 +114,7 @@ public class InteractionsController extends AbstractConsoleController {
   /** InteractionsModel to handle interpretation. */
   private volatile InteractionsModel _model;
 
-  /** Document from the model.*/
+  /** GUI-agnostic interactions document from the model. */
   private volatile InteractionsDocument _doc;
 
   /** Style to use for error messages. */
@@ -120,7 +123,7 @@ public class InteractionsController extends AbstractConsoleController {
   /** Style to use for debug messages. */
   private final SimpleAttributeSet _debugStyle;
 
-  /** Lambda used to input text into the embedded System.in input box */
+  /** Lambda used to input text into the embedded System.in input box. */
   private volatile Lambda<String, String> _insertTextCommand;
   
   /** Runnable command used to force the System.in input to complete <p>
@@ -128,7 +131,7 @@ public class InteractionsController extends AbstractConsoleController {
     */
   private volatile Runnable _inputCompletionCommand;
   
-  /** Default implementation of the insert text command */
+  /** Default implementation of the insert text in input command */
   private static final Lambda<String, String> _defaultInsertTextCommand = 
     new Lambda<String,String>() {
       public String apply(String input) {
@@ -197,7 +200,7 @@ public class InteractionsController extends AbstractConsoleController {
             _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
 
             // bind INPUT_BOX_STYLE to inputAttributes in the associated InteractionsDJDocument 
-            _adapter.setDocStyle(INPUT_BOX_STYLE, inputAttributes);
+            _swingConsoleDocument.setDocStyle(INPUT_BOX_STYLE, inputAttributes);
             
             // and insert the symbol for the input box with the correct style (identifying it as our InputBox)
             _doc.insertBeforeLastPrompt(INPUT_BOX_SYMBOL, INPUT_BOX_STYLE);
@@ -233,7 +236,7 @@ public class InteractionsController extends AbstractConsoleController {
     public void interpreterResetting() {
       Utilities.invokeLater(new Runnable() { 
         public void run() { 
-          _adapter.clearColoring();
+          _swingConsoleDocument.clearColoring();
 //          _pane.resetPrompts();  // NOT USED
         }
       });
@@ -352,7 +355,7 @@ public class InteractionsController extends AbstractConsoleController {
     _errStyle.addAttribute(StyleConstants.Foreground, 
                            DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_ERROR_COLOR));
     _errStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
-    _adapter.setDocStyle(InteractionsDocument.ERROR_STYLE, _errStyle);
+    _swingConsoleDocument.setDocStyle(InteractionsDocument.ERROR_STYLE, _errStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.INTERACTIONS_ERROR_COLOR, new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
         _errStyle.addAttribute(StyleConstants.Foreground, oe.value);
@@ -364,7 +367,7 @@ public class InteractionsController extends AbstractConsoleController {
     _debugStyle.addAttribute(StyleConstants.Foreground, 
                              DrJava.getConfig().getSetting(OptionConstants.DEBUG_MESSAGE_COLOR));
     _debugStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
-    _adapter.setDocStyle(InteractionsDocument.DEBUGGER_STYLE, _debugStyle);
+    _swingConsoleDocument.setDocStyle(InteractionsDocument.DEBUGGER_STYLE, _debugStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_MESSAGE_COLOR, new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
         _debugStyle.addAttribute(StyleConstants.Foreground, oe.value);
@@ -386,7 +389,7 @@ public class InteractionsController extends AbstractConsoleController {
 
   /** Adds listeners to the model. */
   protected void _setupModel() {
-    _adapter.addDocumentListener(new CaretUpdateListener());
+    _swingConsoleDocument.addDocumentListener(new CaretUpdateListener());
     _doc.setBeep(_pane.getBeep());
   }
 
@@ -449,19 +452,23 @@ public class InteractionsController extends AbstractConsoleController {
   /** Evaluates the interaction on the current line. */
   AbstractAction evalAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      if (! _adapter.inBlockComment()) {
-        Thread command = new Thread("Evaluating Interaction") { 
-          public void run() {
-            try { _model.interpretCurrentInteraction(); }
-            catch (Throwable t) { DrJavaErrorHandler.record(t); }
-          }
-        };
-        command.start();
+      _doc.acquireWriteLock();
+      try {
+        if (! _swingConsoleDocument.inBlockComment()) {
+          Thread command = new Thread("Evaluating Interaction") { 
+            public void run() {  // not under a Write Lock!
+              try { _model.interpretCurrentInteraction(); }
+              catch (Throwable t) { DrJavaErrorHandler.record(t); }
+            }
+          };
+          command.start();
+        }
+        else {
+          _model._addNewline();
+          _model.interactionContinues();
+        }
       }
-      else {
-        _model.addNewline();
-        _model.interactionContinues();
-      }
+      finally { _doc.releaseWriteLock(); }
     }
   };
 
@@ -518,7 +525,7 @@ public class InteractionsController extends AbstractConsoleController {
       if (! _busy()) {
         _doc.acquireWriteLock();
         try {
-          if (_shouldGoIntoHistory(_pane.getCaretPosition(), _adapter.getLength())) {
+          if (_shouldGoIntoHistory(_pane.getCaretPosition(), _swingConsoleDocument.getLength())) {
             historyNextAction.actionPerformed(e);
           } else { defaultDownAction.actionPerformed(e); }
         }
@@ -533,7 +540,7 @@ public class InteractionsController extends AbstractConsoleController {
   private boolean _shouldGoIntoHistory(int start, int end) {
     if (_isCursorAfterPrompt() && end >= start) {
       String text = "";
-      try { text = _adapter.getText(start, end - start); }
+      try { text = _swingConsoleDocument.getText(start, end - start); }
       catch(BadLocationException ble) {
         throw new UnexpectedException(ble); //The conditional should prevent this from ever happening
       }

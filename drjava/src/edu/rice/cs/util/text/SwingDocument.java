@@ -50,9 +50,9 @@ import java.util.Hashtable;
 
 /** A swing implementation of the toolkit-independent EditDocumentInterface.  This document must use the readers/writers
   * locking protocol established in its superclasses.
- *  TODO: create a separate DummySwingDocument class for testing and make SwingDocument abstract.
- *  @version $Id$
- */
+  * TODO: create a separate DummySwingDocument class for testing and make SwingDocument abstract.
+  * @version $Id$
+  */
 public class SwingDocument extends DefaultStyledDocument implements EditDocumentInterface, AbstractDocumentInterface {
   
 //  /** The lock state.  See ReadersWritersLocking interface for documentation. */
@@ -130,6 +130,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     finally { releaseWriteLock(); }
   }
   
+  /** Behaves exactly like insertText except for assuming that WriteLock is already held. */
   public void _insertText(int offs, String str, String style) {
     if (_condition.canInsertText(offs)) _forceInsertText(offs, str, style); 
   }
@@ -226,11 +227,16 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   /** Appends given string with specified attributes to end of this document. */
   public void append(String str, AttributeSet set) {
     acquireWriteLock();
-    try { insertString(getLength(), str, set); }
-    catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
+    try { _append(str, set); }
     finally { releaseWriteLock(); }
   }
   
+  /** Same as append above except that it assumes the Write Lock is already held. */
+  public void _append(String str, AttributeSet set) {
+    try { insertString(getLength(), str, set); }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
+  }
+    
   /** Appends given string with specified named style to end of this document. */
   public void append(String str, String style) { append(str, style == null ? null : getDocStyle(style)); }
   

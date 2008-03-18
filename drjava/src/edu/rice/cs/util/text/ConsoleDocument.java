@@ -286,17 +286,17 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     _document._forceInsertText(offs, str, style);
   }
   
-  /** Adds style specifier to _stylelists. Assumes that WriteLock is already held. */
+  /** Adds style specifier to _stylelists. Assumes that ReadLock or WriteLock is already held. */
   private void _addToStyleLists(int offs, String str, String style) {
-    if (_document instanceof SwingDocument) 
+    if (_document instanceof SwingDocument)
       ((SwingDocument)_document).addColoring(offs, offs + str.length(), style);
   }
   
   /** Removes a portion of the document, if the edit condition (including promptPos) allows it.
-   *  @param offs Offset to start deleting from
-   *  @param len Number of characters to remove
-   *  @throws EditDocumentException if the offset or length are illegal
-   */
+    * @param offs Offset to start deleting from
+    * @param len Number of characters to remove
+    * @throws EditDocumentException if the offset or length are illegal
+    */
   public void removeText(int offs, int len) throws EditDocumentException {
     acquireWriteLock();
     try { _removeText(offs, len); }

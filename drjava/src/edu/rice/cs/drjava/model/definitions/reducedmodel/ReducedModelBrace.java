@@ -460,10 +460,11 @@ public class ReducedModelBrace extends AbstractReducedModel {
   protected ReducedModelState moveWalkerGetState(int relDistance) { return _parent.moveWalkerGetState(relDistance); }
 
   protected void resetWalkerLocationToCursor() { _parent.resetLocation(); }
-
+  
   /** Determines the brace (type and distance) enclosing the beginning of the current line (except the first line). The
     * matching brace obviously must appear on the preceding line or before.  To find the enclosing brace one must first 
-    * move past this newline. The distance to the newline does not include the newline char. 
+    * move past this newline. The distance computed to the newline does not include the newline char.  If there is not
+    * line enclosing brace, returns BraceInfo.NULL.  Usually called when distToStart() = 0.
     */
   public BraceInfo getLineEnclosingBrace() {
     Stack<Brace> braceStack = new Stack<Brace>();

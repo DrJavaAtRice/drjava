@@ -47,14 +47,13 @@ public class BraceInfo {
   public static final String OPEN_CURLY = "{"; // char '{';
   public static final String OPEN_PAREN    = "(";   // char '(';
   public static final String OPEN_BRACKET  = "[";   // char '[';
-  
+
   public static final BraceInfo NULL = new BraceInfo(NONE, -1);
   
   private String _braceType;   // one of the four above options
 
   //distance to the open brace preceding the current location
   private int _distance;
-  
 
   /** Creates an IndentInfo with default values. */
   public BraceInfo(String braceType, int distance) {
@@ -67,6 +66,13 @@ public class BraceInfo {
   
   /** Gets the _distance. */
   public int distance() { return _distance; }
+  
+  /** @return a new BraceInfo equivalent to this except that this.distance is shifted by dist. NONE is treated 
+    * as a special case. */
+  public BraceInfo shift(int dist) { 
+    if (this == NULL) return NULL;
+    return new BraceInfo(_braceType, _distance + dist); 
+  }
 }
 
 
