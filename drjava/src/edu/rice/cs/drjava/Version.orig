@@ -44,7 +44,7 @@ import java.text.SimpleDateFormat;
  * This file is copied to Version.java by the build process, which also
  * fills in the right values of the date and time.
  *
- * This javadoc corresponds to build drjava-@DATE@-@TIME@;
+ * This javadoc corresponds to build drjava-@DATE@-@TIME@, revision @REVISION@;
  *
  * @version $Id$
  */
@@ -57,6 +57,16 @@ public abstract class Version {
 
   /** A {@link Date} version of the build time. */
   private static final Date BUILD_TIME = _getBuildDate();
+
+  /**
+   * This string will be automatically expanded upon "ant commit.".
+   * Do not edit it by hand!
+   */
+  private static final String REVISION_STRING = "@REVISION@";
+
+  public static int getRevisionNumber() {
+    return new Integer(REVISION_STRING);
+  }
 
   public static String getBuildTimeString() {
     return BUILD_TIME_STRING;
@@ -76,6 +86,7 @@ public abstract class Version {
   }
 
   public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING +
+                       ", revision " + REVISION_STRING);
   }
 } 

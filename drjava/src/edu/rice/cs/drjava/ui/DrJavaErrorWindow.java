@@ -270,6 +270,9 @@ public class DrJavaErrorWindow extends JDialog {
     b.append("DrJava Version ");
     b.append(edu.rice.cs.drjava.Version.getBuildTimeString());
     b.append('\n');
+    b.append("DrJava Revision ");
+    b.append(edu.rice.cs.drjava.Version.getRevisionNumber());
+    b.append("\n\n");
     java.util.Properties props = System.getProperties();
     int size = props.size();
     java.util.Iterator entries = props.entrySet().iterator();

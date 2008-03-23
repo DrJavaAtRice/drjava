@@ -212,7 +212,7 @@ public class ProjectProfile implements ProjectFileIR {
     FileWriter fw = new FileWriter(_projectFile);
     
     // write opening comment line
-    fw.write(";; DrJava project file, written by build " + Version.getBuildTimeString());
+    fw.write(";; DrJava project file, written by build " + Version.getBuildTimeString() + ", revision " + Version.getRevisionNumber());
     fw.write("\n;; files in the source tree are relative to: " + _projectRoot.getCanonicalPath());
     fw.write("\n;; other files with relative paths are rooted at (the parent of) this project file");
     
