@@ -80,8 +80,8 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Reset the document on startUp.  Uses a history with configurable size.
    *  @param document the edit document to use for the model
    */
-  public InteractionsDocument(ConsoleDocumentInterface document, String banner) { 
-    this(document, new History(), banner); 
+  public InteractionsDocument(ConsoleDocumentInterface document) { 
+    this(document, new History()); 
   }
 
   /** Reset the document on startUp.  Uses a history with the given maximum size.  This history will not use the config
@@ -89,20 +89,19 @@ public class InteractionsDocument extends ConsoleDocument {
     * @param document EditDocumentInterface to use for the model
     * @param maxHistorySize Number of commands to remember in the history
     */
-  public InteractionsDocument(ConsoleDocumentInterface document, int maxHistorySize, String banner) {
-    this(document, new History(maxHistorySize), banner);
+  public InteractionsDocument(ConsoleDocumentInterface document, int maxHistorySize) {
+    this(document, new History(maxHistorySize));
   }
   
   /** Creates and resets the interactions document on DrJava startUp.  Uses the given history.  
     * @param document EditDocumentInterface to use for the model
     * @param history History of commands
     */
-  public InteractionsDocument(ConsoleDocumentInterface document, History history, String banner) {
+  public InteractionsDocument(ConsoleDocumentInterface document, History history) {
     super(document);  // initializes _document = document;
     _history = history;
     _document.setHasPrompt(true);
     _prompt = DEFAULT_PROMPT;
-    reset(banner);
   }
 
   /** Lets this document know whether an interaction is in progress.
@@ -113,6 +112,19 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Returns whether an interaction is currently in progress. Should use ReadLock? */
   public boolean inProgress() { return ! _document.hasPrompt(); }
 
+  /** Sets the banner in an empty docuemnt. */
+  public void setBanner(String banner) {
+    acquireWriteLock();
+    try {
+      setPromptPos(0);
+      insertText(0, banner, OBJECT_RETURN_STYLE);
+      insertPrompt();
+      _history.moveEnd();
+    }
+    catch (EditDocumentException e) { throw new UnexpectedException(e); }
+    finally { releaseWriteLock(); }
+  }
+  
   /** Resets the document to a clean state.  Does not reset the history. */
   public void reset(String banner) {
     acquireWriteLock();

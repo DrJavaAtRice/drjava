@@ -123,7 +123,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /* Interpreter fields */
   
-  /** The document  used in the Interactions model. */
+  /** The document used in the Interactions model. */
   protected final InteractionsDJDocument _interactionsDocument;
   
   /** RMI interface to the Interactions JVM. */

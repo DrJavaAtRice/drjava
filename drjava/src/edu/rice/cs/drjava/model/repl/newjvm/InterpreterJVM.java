@@ -146,12 +146,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _log.log(s);
   }
   
-  /**
-   * Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM).  Contract from 
-   * superclass mandates that this code does not synchronized on this across a remote call.  This method has 
-   * no synchronization because it can only be called once (part of the superclass contract) and _mainJVM 
-   * is only assigned (once!) here.
-   */
+  /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM).  Contract from 
+    * superclass mandates that this code does not synchronized on this across a remote call.  This method has 
+    * no synchronization because it can only be called once (part of the superclass contract) and _mainJVM 
+    * is only assigned (once!) here.
+    */
   protected void handleStart(MasterRemote mainJVM) {
     //_dialog("handleStart");
     _mainJVM = (MainJVMRemoteI) mainJVM;
@@ -221,7 +220,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }  
   
-
   /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVM via 
    *  the interpretResult method.
    *  @param s Source code to interpret.
@@ -241,7 +239,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     return interpret(s, i);
   }
-  
    
   private InterpretResult interpret(String input, Interpreter interpreter) {
     debug.logStart("Interpret " + input);

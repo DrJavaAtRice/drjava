@@ -48,6 +48,7 @@ import edu.rice.cs.util.text.EditDocumentException;
 
 /** A GUI-toolkit agnostic interface to a console document.  This class assumes that the embedded document supports 
   * readers/writers locking and uses that locking protocol to ensure the integrity of the data added in this class
+  * WHY is prompt considered part of a console document rather than an interactions document?
   * @version $Id$ */
 public class ConsoleDocument implements ConsoleDocumentInterface {
   
@@ -116,6 +117,9 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     _prompt = prompt;
     releaseWriteLock();
   }
+  
+  /** Returns the length of the prompt string. */
+  public int getPromptLength() { return _prompt.length(); }
 
   /** Gets the object which determines whether an insert/remove edit should be applied based on the inputs.
    *  @return the DocumentEditCondition to determine legality of inputs

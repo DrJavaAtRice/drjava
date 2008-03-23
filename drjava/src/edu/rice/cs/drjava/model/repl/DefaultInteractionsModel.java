@@ -112,6 +112,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
   
   /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
+    * FIX: this code needs to run in the event thread an update the caret.
    *  @param t The Throwable thrown by System.exit
    */
   protected void _interpreterResetFailed(Throwable t) {

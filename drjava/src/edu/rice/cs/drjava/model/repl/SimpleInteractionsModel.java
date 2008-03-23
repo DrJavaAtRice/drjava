@@ -62,7 +62,7 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 public class SimpleInteractionsModel extends InteractionsModel {
 
   /** Milliseconds to wait after each println */
-  protected static final int WRITE_DELAY = 5;
+  protected static final int WRITE_DELAY = 100;
 
   protected ClassPathManager _classPathManager;
   protected Interpreter _interpreter;

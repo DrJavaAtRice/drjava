@@ -46,13 +46,14 @@ import edu.rice.cs.util.text.EditDocumentException;
 public final class InteractionsDocumentTest extends DrJavaTestCase {
   protected InteractionsDocument _doc;
   
-  final String _testBanner = "This is a test banner";
+  final String TEST_BANNER = "This is a test banner";
   
   /** Initialize fields for each test. */
   protected void setUp() throws Exception {
     super.setUp();
     // Use System.getProperty("user.dir") as working directory here and in call on reset(...) below
-    _doc = new InteractionsDocument(new InteractionsDJDocument(), _testBanner);
+    _doc = new InteractionsDocument(new InteractionsDJDocument());
+    _doc.setBanner(TEST_BANNER);
   }
 
   /** Tests that the document prevents editing before the prompt, and beeps if you try. */
@@ -79,7 +80,7 @@ public final class InteractionsDocumentTest extends DrJavaTestCase {
 
   /** Tests that initial contents are the banner and prompt, and that reset works. */
   public void testContentsAndReset() throws EditDocumentException {
-    String banner = _testBanner;
+    String banner = TEST_BANNER;
     String prompt = _doc.getPrompt();
     String newBanner = "THIS IS A NEW BANNER\n";
     assertEquals("Contents before insert", banner + prompt, _doc.getDocText(0, _doc.getLength()));

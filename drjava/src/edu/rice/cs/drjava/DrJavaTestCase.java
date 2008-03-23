@@ -40,9 +40,9 @@ import junit.framework.TestCase;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Test case class for all DrJava test cases. DrJava test cases should extend this class, potentially override setUp()
- *  and tearDown(), but make sure to invoke super.setUp() and super.tearDown() appropriately. That ensures that the 
- *  system is correctly initialized for every test.
- */
+  * and tearDown(), but make sure to invoke super.setUp() and super.tearDown() appropriately. That ensures that the 
+  * system is correctly initialized for every test.
+  */
 public class DrJavaTestCase extends TestCase {
   /** System property with the name of an alternative DrJava configuration file used during testing. */
   public static final String TEST_DRJAVA_CONFIG_PROPERTY = "test.drjava.config";
@@ -51,18 +51,18 @@ public class DrJavaTestCase extends TestCase {
   public DrJavaTestCase() { super(); }
 
   /** Create a new DrJava test case.
-   *  @param name name of the test case
+   * @param name name of the test case
    */
   public DrJavaTestCase(String name) { super(name); }
 
   /** Set up for every test.
-   *  @throws Exception
+   * @throws Exception
    */
   protected void setUp() throws Exception {
     super.setUp();
     Utilities.TEST_MODE = true;
     final String newName = System.getProperty(TEST_DRJAVA_CONFIG_PROPERTY);
-    if (newName!=null) {
+    if (newName != null) {
       DrJava.setPropertiesFile(newName);
       DrJava._initConfig();
     }

@@ -737,10 +737,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     return s; 
   }
   
-  /**
-   * Peforms the appropriate action to return any type of result
-   * from a call to interpret back to the GlobalModel.
-   */
+  /** Peforms the appropriate action to return any type of result from a call to interpret back to the GlobalModel. */
   private class ResultHandler implements InterpretResult.Visitor<Void> {
     /** Lets the model know that void was returned. */
     public Void forNoValue() {

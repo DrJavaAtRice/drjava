@@ -2814,8 +2814,8 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument());
     
     _interactionsPane = _interactionsController.getPane();
-    _interactionsController.setCachedCaretPos(0);
-    _interactionsController.setCachedPromptPos(_model.getConsoleDocument().getPromptPos());
+//    _interactionsController.setCachedCaretPos(0);
+//    _interactionsController.setCachedPromptPos(_model.getConsoleDocument().getPromptPos());
     
     _interactionsContainer = new JPanel(new BorderLayout()); /* {
      public boolean requestFocusInWindow() { 
@@ -6848,12 +6848,12 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
       }
     });
     
-    // This listener updates the _cachedCaretPosition in the _interactionsController when the cursor is manually set.
-    _interactionsPane.addMouseListener(new MouseInputAdapter() {
-      public void mouseClicked(MouseEvent e) { 
-        _interactionsController.setCachedCaretPos(_interactionsPane.viewToModel(e.getPoint()));
-      }
-    });
+//    // This listener updates the _cachedCaretPosition in the _interactionsController when the cursor is manually set.
+//    _interactionsPane.addMouseListener(new MouseInputAdapter() {
+//      public void mouseClicked(MouseEvent e) { 
+//        _interactionsController.setCachedCaretPos(_interactionsPane.viewToModel(e.getPoint()));
+//      }
+//    });
     _consolePanePopupMenu = new JPopupMenu();
     _consolePanePopupMenu.add(_clearConsoleAction);
     _consolePanePopupMenu.addSeparator();
@@ -9117,19 +9117,22 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
             }
           }
           final InteractionsModel im = _model.getInteractionsModel();
-          // get the last line (the one that caused the error)
-          // and remove it from the history
+          // get the last line (the one that caused the error) and remove it from the history
           String lastLine = im.removeLastFromHistory();
           // import the selected class...
-          String importLine = "import "+text+"; // auto-import";
+          String importLine = "import " + text + "; // auto-import";
           // ...and try to do the last line again
-          final String code = importLine+((lastLine!=null)?("\n"+lastLine):"");
-          EventQueue.invokeLater(new Runnable() { public void run() {
-            // interpret with the added import
-            im.append(code, InteractionsDocument.DEFAULT_STYLE);
-            im.interpretCurrentInteraction();
-            hourglassOff();
-          } } );
+          final String code = importLine + ((lastLine != null)  ?  ("\n" + lastLine)  : "");
+          EventQueue.invokeLater(new Runnable() { 
+            public void run() {
+              // interpret with the added import
+              try {
+                im.append(code, InteractionsDocument.DEFAULT_STYLE);
+                im.interpretCurrentInteraction();
+              }
+              finally { hourglassOff(); }
+            }
+          });
           return null;
         }
       };

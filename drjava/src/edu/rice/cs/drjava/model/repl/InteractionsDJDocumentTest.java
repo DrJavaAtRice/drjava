@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.text.EditDocumentException;
 
 import java.io.File;
+import java.util.Arrays;
 
 /** Tests the functionality of the InteractionsDJDocument. */
 public final class InteractionsDJDocumentTest extends DrJavaTestCase {
@@ -74,8 +75,13 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     final Object _restartLock = new Object();
     
     assertEquals("StylesList before insert should contain 2 pairs", 2, _adapter.getStyles().length);
+    System.err.println("Styles:\n" + Arrays.toString(_adapter.getStyles()));
     
     int blen = _model.getStartUpBanner().length();
+    System.err.println("StartUpBanner:\n'" + _model.getStartUpBanner() + "'");
+    System.err.println("length = " +  _model.getStartUpBanner().length());
+    System.err.println("Banner:\n'" + _model.getBanner() + "'");
+    System.err.println("length = " +  _model.getBanner().length());                   
     
     /** Elt1, Elt2 are first two elements pushed on the StylesList stack */
     String styleElt1 = "((0, " + blen + "), object.return.style)";

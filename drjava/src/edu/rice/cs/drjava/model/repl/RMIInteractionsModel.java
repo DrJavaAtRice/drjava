@@ -41,11 +41,12 @@ import edu.rice.cs.drjava.ui.InteractionsController;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 
 import java.io.File;
+import java.awt.EventQueue;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/** An InteractionsModel which can serve as the glue between a local InteractionsDocument and a remote JavaInterpreter
-  * in another JVM.
+/** A Swing specific InteractionsModel which can serve as the glue between a local InteractionsDocument and a remote 
+  * JavaInterpreter in another JVM.
   * @version $Id$
   */
 public abstract class RMIInteractionsModel extends InteractionsModel {
@@ -145,20 +146,24 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _notifyInterpreterChanged(inProgress);
   }
 
-  /** Updates the prompt and status of the document after an interpreter change.  Assumes write lock is already held.
-   *  @param prompt New prompt to display
-   *  @param inProgress whether the interpreter is currently in progress
-   *  @param updatePrompt whether or not the interpreter has changed
-   */
+  /** Updates the prompt and status of the document after an interpreter change.
+    * Must run in event thread.
+    * @param prompt New prompt to display
+    * @param inProgress whether the interpreter is currently in progress
+    * @param updatePrompt whether or not the interpreter has changed
+    */
   private void _updateDocument(String prompt, boolean inProgress, boolean updatePrompt) {
     if (updatePrompt) {
+      int len = 0;
       _document.acquireWriteLock();
       try {
         _document.setPrompt(prompt);
         _document.insertNewline(_document.getLength());
         _document.insertPrompt();
+        len = _document.getPromptLength();  // updates the interactions pane!
       }
-      finally { _document.releaseWriteLock(); }      
+      finally { _document.releaseWriteLock(); }
+      advanceCaret(len);
     }
     _document.setInProgress(inProgress);
   }

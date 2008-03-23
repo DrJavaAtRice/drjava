@@ -88,7 +88,8 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
-/* TODO: clean up mixed references to _adapter and _doc which apparently point to the same thing! */
+/* TODO: clean up mixed references to _adapter and _doc which point to almost the same thing (an 
+ * InteractionsDJDocument versus an InteractionsDocument. */
 
 /** This class installs listeners and actions between an InteractionsDocument (the model) and an InteractionsPane 
  *  (the view).  We may want to refactor this class into a different package. <p>
@@ -98,7 +99,8 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public class InteractionsController extends AbstractConsoleController {
   
-  /* InteractionsDocument _adapter is inherited from AbstractConsoleController */
+  /* InteractionsDocument _adapter is inherited from AbstractConsoleController. */
+  /* InteractionsPane _pane is inherited from AbstractConsoleController. */
   
   private static final Log _log = new Log("ConsoleController.txt", false);
   
@@ -154,8 +156,7 @@ public class InteractionsController extends AbstractConsoleController {
       final CompletionMonitor completionMonitor = new CompletionMonitor();
       _box = new InputBox();
       
-      // Embed the input box into the interactions pane.
-      // This operation must be performed in the UI thread
+      // Embed the input box into the interactions pane. This operation must be performed in the UI thread
       SwingUtilities.invokeLater(new Runnable() {
         public void run() { 
           
@@ -256,7 +257,7 @@ public class InteractionsController extends AbstractConsoleController {
     */
   public InteractionsController(final InteractionsModel model, InteractionsDJDocument adapter) {
     this(model, adapter, 
-         new InteractionsPane(adapter) { 
+         new InteractionsPane(adapter) {  // creates InteractionsPane
            public int getPromptPos() { return model.getDocument().getPromptPos(); }
          }
     );
@@ -283,6 +284,7 @@ public class InteractionsController extends AbstractConsoleController {
 
     _model.setInputListener(_inputListener);
     _model.addListener(_viewListener);
+    _model.setUpPane(pane);    // sets the interactions pane within the model and initializes the caret
     
     _inputCompletionCommand = _defaultInputCompletionCommand;
     _insertTextCommand = _defaultInsertTextCommand;
@@ -388,10 +390,7 @@ public class InteractionsController extends AbstractConsoleController {
   }
 
   /** Adds listeners to the model. */
-  protected void _setupModel() {
-    _swingConsoleDocument.addDocumentListener(new CaretUpdateListener());
-    _doc.setBeep(_pane.getBeep());
-  }
+  protected void _setupModel() { _doc.setBeep(_pane.getBeep()); }
 
   /** Adds actions to the view. */
   protected void _setupView() {
@@ -534,9 +533,10 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
   
-  /** Tests whether or not to move into the history
-   *  @return true iff there are no "\n" characters between the start and the end
-   */  
+  /** Tests whether or not to move into the history.  Should be executed in the event thread to ensure
+    * that caret and prompt positions are in consistent states.
+    * @return true iff there are no "\n" characters between the start and the end
+    */  
   private boolean _shouldGoIntoHistory(int start, int end) {
     if (_isCursorAfterPrompt() && end >= start) {
       String text = "";
@@ -594,7 +594,7 @@ public class InteractionsController extends AbstractConsoleController {
           else if (pos == promptPos) moveToEnd(); // Wrap around to the end
           else {
             _pane.setCaretPosition(pos - 1); // pos > promptPos
-            setCachedCaretPos(pos - 1);
+//            setCachedCaretPos(pos - 1);
           }
         }
         finally { _doc.releaseReadLock(); }
@@ -612,7 +612,7 @@ public class InteractionsController extends AbstractConsoleController {
         else if (pos >= _doc.getLength()) moveToPrompt(); // Wrap around to the star
         else {
           _pane.setCaretPosition(pos + 1); // position between prompt and end
-          setCachedCaretPos(pos + 1);
+//          setCachedCaretPos(pos + 1);
         }
       }
       finally { _doc.releaseReadLock(); }

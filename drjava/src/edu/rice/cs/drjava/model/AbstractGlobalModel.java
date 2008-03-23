@@ -217,7 +217,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls.
     *  TODO: why is this here, and why is it public?
     */
-  public static final int WRITE_DELAY = 5;
+  public static final int WRITE_DELAY = 100;
   
   /** A PageFormat object for printing to paper. */
   protected volatile PageFormat _pageFormat = new PageFormat();
