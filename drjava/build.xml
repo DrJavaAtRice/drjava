@@ -166,16 +166,19 @@
   <!-- Retrieves the current revision using the svn command. Contrary
        to resolve-svn-revision, this removes the line separator at the end. -->
   <target name="get-revision">
-    <exec executable="svn" failonerror="yes" output="svn.info.tmp">
+    <exec executable="svn" dir="${svn-working-dir}" failonerror="yes" output="svn-info.txt">
       <arg value="info" />
     </exec>
-    <exec executable="grep" failonerror="yes" input="svn.info.tmp" outputproperty="REVSTAMP.TEMP">
-      <arg value='"^Revision: [0-9]*$"' />
-    </exec>
-    <exec executable="sed" failonerror="yes" inputstring="${REVSTAMP.TEMP}" outputproperty="REVSTAMP">
-      <arg value='"s/.*Revision: \([0-9]*\)$/\1/"' />
-    </exec>
-    <delete file="svn.info.tmp" />
+    <loadfile property="REVSTAMP" srcfile="svn-info.txt">
+      <filterchain>
+        <linecontains>
+          <contains value="Last Changed Rev: " />
+        </linecontains>
+        <replacestring from="Last Changed Rev: " to="" />
+        <striplinebreaks/>
+      </filterchain>
+    </loadfile>
+    <delete file="svn-info.txt" />
     <echo message="Revision is ${REVSTAMP}." />
   </target>
 
