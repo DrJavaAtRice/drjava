@@ -1053,14 +1053,14 @@
        Release Targets
        *************** -->
        
-  <target name="release-stable" description="Generate all release files tagged with 'stable'">
+  <target name="release-stable" description="Generate all release files tagged with 'stable' and create a Subversion tag for this release">
     <antcall target="release">
       <param name="tag-append" value="-stable" />
       <param name="is-development" value="no" />
     </antcall>
   </target>
 
-  <target name="release-beta" description="Generate all release files tagged with 'beta'">
+  <target name="release-beta" description="Generate all release files tagged with 'beta' and create a Subversion tag for this release">
     <antcall target="release">
       <param name="tag-append" value="-beta" />
       <param name="is-development" value="no" />
@@ -1068,8 +1068,8 @@
   </target>
        
   <target name="release"
-          depends="update, build, tag, src-zip, jar-app, mac-app, windows-app, javadoc-zip" 
-          description="Generate all release files (after building)">
+          depends="update, build, tag, src-zip, jar-app, mac-app, windows-app, javadoc-zip"
+          description="Generate all release files (after building) and create a Subversion tag for this release">
     <delete dir="${version-tag}" />
   </target>
   
@@ -1151,7 +1151,24 @@
       <zipfileset dir="docs/clover" prefix="${version-tag}/clover" />
     </zip>
   </target>
-  
+
+  <target name="local-release-stable" description="Generate all release files tagged with 'stable', but do not touch the Subversion repository">
+    <antcall target="release-stable">
+      <param name="skip-tag" value="true" />
+    </antcall>
+  </target>
+
+  <target name="local-release-beta" description="Generate all release files tagged with 'beta', but do not touch the Subversion repository">
+    <antcall target="release-beta">
+      <param name="skip-tag" value="true" />
+    </antcall>
+  </target>
+       
+  <target name="local-release" description="Generate all release files (after building), but do not touch the Subversion repository">
+    <antcall target="release">
+      <param name="skip-tag" value="true" />
+    </antcall>
+  </target>
   
   <!-- ********************************
        Misc Occasionally-Useful Targets
