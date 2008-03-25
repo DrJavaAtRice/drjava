@@ -41,21 +41,17 @@ import edu.rice.cs.util.UnexpectedException;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * Question rule in the indentation decision tree.  Determines if the 
- * line previous to the current position starts with the specified character.
- * @version $Id$
- */
+/** Question rule in indentation decision tree.  Determines if the preceding line starts with the specified character.
+  * @version $Id$
+  */
 public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
   private String _prefix;
   
-  /**
-   * Constructs a new rule for the given prefix string.
-   * ALWAYS looks inside comments.
-   * @param prefix String to search for
-   * @param yesRule Rule to use if this rule holds
-   * @param noRule Rule to use if this rule does not hold
-   */
+  /** Constructs a new rule for the given prefix string.  ALWAYS looks inside comments.  Assumes ReadLock is already held.
+    * @param prefix String to search for
+    * @param yesRule Rule to use if this rule holds
+    * @param noRule Rule to use if this rule does not hold
+    */
   public QuestionPrevLineStartsWith(String prefix, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;

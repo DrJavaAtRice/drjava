@@ -94,10 +94,8 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
     _offset += position;
   }
   
-  /**
-   * Indents the line according to the previous line, with the suffix lines added
-   * and the cursor moved to a specific location.
-   * If on the first line, indent is set to 0.
+  /** Indents the line according to the previous line, with the suffix lines added and the cursor moved to a specific 
+    * location.  If on the first line, indent is set to 0.  Assumes WriteLock and reduced lock are already held.
    * @param doc AbstractDJDocument containing the line to be indented.
    * @param reason The reason that the indentation is taking place
    * @return this is always false, since we are updating the cursor location

@@ -132,14 +132,11 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     return start.concat(indent).concat(end);
   }*/
   
-  /**
-   * Asserts that the document contains the expected text.
-   * @param expected what text of document should be
-   */
+  /** Asserts that the document contains the expected text.
+    * @param expected what text of document should be
+    */
   protected void _assertContents(String expected) throws BadLocationException {
-    assertEquals("document contents", 
-                 expected, 
-                 _doc.getText());
+    assertEquals("document contents", expected, _doc.getText());
   }
 
 }

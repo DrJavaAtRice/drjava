@@ -1184,7 +1184,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       int index = getFirstNonWSCharPos(startPos);
       if (index == -1) throw new IllegalStateException("No identifier found");
       
-      String text = getText();
+      String text = _getText();
       int length = text.length(); 
       int endIndex = length; //just in case no whitespace at end of file
       

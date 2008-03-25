@@ -3017,7 +3017,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         
         public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException {
-         
+          
 //          System.err.println("DDReconstructor.make() called on " + ConcreteOpenDefDoc.this);
           DefinitionsDocument newDefDoc = new DefinitionsDocument(_notifier);
           newDefDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
@@ -4159,7 +4159,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Makes sure that none of the documents in the list are active.
-    *  Should only be executed in event thread.
+    * Should only be executed in event thread.
     */
   private void _ensureNotActive(List<OpenDefinitionsDocument> docs) {
     if (docs.contains(getActiveDocument())) {
@@ -4195,8 +4195,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     try { idoc.checkIfClassFileInSync(); } 
     catch(DocumentClosedException dce) { /* do nothing */ }
     _activeDocument = (OpenDefinitionsDocument) idoc;
-    // notify single display model listeners   
-    installActiveDocument();
+    installActiveDocument();    // notify single display model listeners   
   }
   
   /** Invokes the activeDocumentChanged method in the global listener on the argument _activeDocument.  This process
@@ -4204,7 +4203,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public void installActiveDocument() { _notifier.activeDocumentChanged(_activeDocument); }
   
   /** Invokes the activedocumentRefreshed method in the global listener on the argument _activeDocument.  This process
-    *  refreshes the state of the _activeDocument as the document in the definitions pane. */
+    * refreshes the state of the _activeDocument as the document in the definitions pane. */
   public void refreshActiveDocument() { _notifier.activeDocumentRefreshed(_activeDocument); }
 }
 

@@ -224,11 +224,15 @@ public class DocumentCache {
       return doc.getText();
     }
     
-    /* Gets the specified substring of this document; throws an exception if the specification is ill-formed. */
-    public String getText(int offset, int len) { 
-      String text = getText();
+    /* Gets the specified substring of this document; throws BadLocationException if the specification is ill-formed. */
+    public String getText(int offset, int len) throws BadLocationException { 
+      final DefinitionsDocument doc = _doc; // create a snapshot of _doc
+      if (doc == null) {
+        try { return _rec.getText().substring(offset, offset + len); }
+        catch(IndexOutOfBoundsException e) { throw new BadLocationException(e.getMessage(), offset); }  
+      }
 //      _log.log("getText(" + offset + ", " + len + ") called on '" + text + "' which has " + text.length() + " chars");
-      return text.substring(offset, offset + len);
+      return doc.getText(offset, len); 
     }
     
     /** Checks whether the document is resident (in the cache or modified). 

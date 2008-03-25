@@ -61,7 +61,7 @@ public interface DCacheAdapter {
   /* Gets the specified substring of this document.
    * @throws an IndexOutOfBounds exception if the specification is ill-formed. 
    */
-  public String getText(int offset, int length);
+  public String getText(int offset, int length) throws BadLocationException;
   
   /** Checks whether the document is ready to be returned.  If false, then the document would have to be
    *  loaded from disk when getDocument() is called.  

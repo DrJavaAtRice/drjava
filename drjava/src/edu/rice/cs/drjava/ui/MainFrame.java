@@ -7978,7 +7978,7 @@ public class MainFrame extends JFrame implements ClipboardOwner, DropTargetListe
     }
     
     /** Called when the active interpreter is changed.
-      *  @param inProgress Whether the new interpreter is currently in progress
+      * @param inProgress Whether the new interpreter is currently in progress
       *         with an interaction (ie. whether an interactionEnded event will be fired)
       */
     public void interpreterChanged(final boolean inProgress) {

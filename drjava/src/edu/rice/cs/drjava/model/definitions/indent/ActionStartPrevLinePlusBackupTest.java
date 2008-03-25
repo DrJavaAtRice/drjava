@@ -103,15 +103,14 @@ public class ActionStartPrevLinePlusBackupTest extends ActionStartPrevLinePlusTe
     moveTestHelper(_unevenIndent, _unevenIndentRes, 2, 6, 2, 10);
   }
   
-  /**
-   * Helper method for "MoveTo" tests.
-   * @param text the test text
-   * @param result the result text
-   * @param deltaLen the change in text length
-   * @param before location to set before indenting
-   * @param position param to pass to makeBackupAction
-   * @param after location to expect after indenting
-   */
+  /** Helper method for "MoveTo" tests.
+    * @param text the test text
+    * @param result the result text
+    * @param deltaLen the change in text length
+    * @param before location to set before indenting
+    * @param position param to pass to makeBackupAction
+    * @param after location to expect after indenting
+    */
   private void moveTestHelper(String text, String result, int deltaLen,
                               int before, int position, int after)
       throws javax.swing.text.BadLocationException {

@@ -48,31 +48,28 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
   private char[] _prefix;
 
   /** @param yesRule The decision subtree for the case that this rule applies in the current context.
-    * @param noRule The decision subtree for the case that this rule does not apply in the current context.
+    * @param noRule  The decision subtree for the case that this rule does not apply in the current context.
     */
   public QuestionHasCharPrecedingOpenBrace(char[] prefix, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;
   }
   
-  /** @param doc The AbstractDJDocument containing the current line.
+  /** Applies the rule described in class documentation. Assumes ReadLock is already held.  
+    * @param doc The AbstractDJDocument containing the current line.
     * @return true iff the last block/expression-list opened before the start of the current line begins with '{'. 
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    // PRE: We are inside a {.
     
     int origin = doc.getCurrentLocation();
     int lineStart = doc.getLineStartPos(origin);
     
-    // Get brace for start of line
-//    doc.setCurrentLocation(lineStart);  
-    BraceInfo info = doc.getLineEnclosingBrace();  
-//    doc.setCurrentLocation(origin);  
+    // Get brace for start of line  
+    BraceInfo info = doc.getLineEnclosingBrace();   
     
     int dist = info.distance();
     
     if (! info.braceType().equals(BraceInfo.OPEN_CURLY) || dist < 0) {  // dist < 0 means no such brace exists
-      // Precondition not met: we should have a brace
       return false;
     }
     int bracePos = lineStart - dist;

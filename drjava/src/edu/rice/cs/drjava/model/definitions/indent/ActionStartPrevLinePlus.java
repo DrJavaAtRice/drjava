@@ -40,30 +40,23 @@ import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * Indents the current line in the document to the indent level of the
- * start of the previous line, plus the given suffix.
+/** Indents current line to the indent level of the previous line augmented by a suffix.
  * @version $Id$
  */
 class ActionStartPrevLinePlus extends IndentRuleAction {
   private String _suffix;
 
-  /**
-   * Repeats the indentation from the previous line, plus a string
-   * @param suffix The string to be added
-   */
-  public ActionStartPrevLinePlus(String suffix) {
-    _suffix = suffix;
-  }
+  /** Repeats the indentation from the previous line augmented by a suffix
+    * @param suffix  The string to be added
+    */
+  public ActionStartPrevLinePlus(String suffix) { _suffix = suffix; }
 
-  /**
-   * Indents the line according to the previous line, with the suffix string added.
-   * If on the first line, indent is set to 0.
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @param reason The reason that the indentation is taking place
-   * @return true if the caller should update the current location itself,
-   * false if the indenter has already handled this
-   */
+  /** Indents the line according to the previous line, with the suffix string added. On the first line, indent is set
+    * to 0.  Assumes that WriteLock and reduced lock are already held.
+    * @param doc AbstractDJDocument containing the line to be indented.
+    * @param reason The reason that the indentation is taking place
+    * @return true if the caller should update the current location, false if the indenter has already done it
+    */
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
     try {

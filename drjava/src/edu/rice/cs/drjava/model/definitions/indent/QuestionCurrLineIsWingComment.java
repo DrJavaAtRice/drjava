@@ -48,17 +48,16 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 public class QuestionCurrLineIsWingComment extends IndentRuleQuestion {
   
   /** @param yesRule The decision subtree for the case that this rule applies in the current context.
-   *  @param noRule The decision subtree for the case that this rule does not apply in the current context.
-   */
+    * @param noRule  The decision subtree for the case that this rule does not apply in the current context.
+    */
   public QuestionCurrLineIsWingComment(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
   
-  /** Determines whether or not the current line in the document starts with the wing comment prefix "//".
-   *  Does not test to determine if this line is embedded in a block comment. 
-   *  ASSUMES current line is not embedded in a block comment
-   *  @param doc The AbstractDJDocument containing the current line.
-   *  @param reason The reason that the indentation is being done
-   *  @return true iff the current line is a wing comment.
-   */
+  /** Determines whether or not the current line in the document starts with the wing comment prefix "//". Does NOT
+    * check if this line is embedded in a block comment.  Assumes that ReadLock is already held.
+    * @param doc The AbstractDJDocument containing the current line.
+    * @param reason The reason that the indentation is being done
+    * @return true iff the current line is a wing comment.
+    */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     try {
       // Find the first non-whitespace character on the current line.
@@ -74,8 +73,7 @@ public class QuestionCurrLineIsWingComment extends IndentRuleQuestion {
       
       return text.equals("//");
     }
-    catch (BadLocationException e) { throw new UnexpectedException();
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(); }
   }
   
 }

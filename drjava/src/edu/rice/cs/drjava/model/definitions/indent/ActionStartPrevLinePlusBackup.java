@@ -67,7 +67,8 @@ class ActionStartPrevLinePlusBackup extends IndentRuleAction {
   }
 
   /** Indents the line according to the previous line, with the suffix string added, then backs up the cursor position
-    * a number of characters. If on the first line, indent is set to 0.
+    * a number of characters. If on the first line, indent is set to 0.  Assumes that WriteLock and reduced lock are
+    * already held.
     * @param doc  AbstractDJDocument containing the line to be indented.
     * @param reason  The reason that the indentation is taking place
     * @return this is always false, since we are updating the cursor location

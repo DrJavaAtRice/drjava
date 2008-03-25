@@ -1,4 +1,4 @@
- /*BEGIN_COPYRIGHT_BLOCK
+/*BEGIN_COPYRIGHT_BLOCK
  *
  * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
@@ -544,7 +544,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Assumes that read lock and reduced lock are already held. */
   public ReducedModelState stateAtRelLocation(int dist) { return _reduced.moveWalkerGetState(dist); }
   
- 
+  
   /** Assumes that read lock and reduced lock are already held. */
   public ReducedModelState getStateAtCurrent() { return _reduced.getStateAtCurrent(); }
   
@@ -649,7 +649,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     int braceBalance = 0;
     
     acquireReadLock();
-    String text = getText();
+    String text = _getText();
     try {      
       synchronized(_reduced) {
         final int origPos = _currentLocation;
@@ -815,7 +815,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       if ((prevFindChar == -1) || (prevFindChar < 0)) return false; // no such char
       
       // Determine if prevFindChar is findChar or the end of statement delimiter
-      String foundString = this.getText(prevFindChar, 1);
+      String foundString = getText(prevFindChar, 1);
       char foundChar = foundString.charAt(0);
       found = (foundChar == findChar);
     }
@@ -1082,11 +1082,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public String getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace)  {
 //    Utilities.show("getIdentOfCurrentStmt(" + pos + ", " + Arrays.toString(delims) + ", " + Arrays.toString(whitespace) + ")");
-   
+    
 //        final Query key = new Query.IndentOfCurrStmt(pos, delims, whitespace);
 //        final String cached = (String) _checkCache(key);
 //        if (cached != null) return cached;
-        
+    
     acquireReadLock();
     try {
       synchronized(_reduced) {
@@ -1098,7 +1098,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         if (cached != null) return cached;
         
         String lineText;
-                
+        
         // Find the previous delimiter (typically an enclosing brace or closing symbol) skipping over balanced braces
         // that are not delims
         boolean reachedStart = false;
@@ -1297,7 +1297,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       int nonWSPos = endLinePos;
       
       // Get all text on this line
-      String text = this.getText(startLinePos, endLinePos - startLinePos);
+      String text = getText(startLinePos, endLinePos - startLinePos);
       int walker = 0;
       while (walker < text.length()) {
         if (text.charAt(walker) == ' ' || text.charAt(walker) == '\t') walker++;
@@ -1479,10 +1479,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     final Query key = new Query.LineEnclosingBrace(keyPos);
     final BraceInfo cached = (BraceInfo) _checkCache(key);
     if (cached != null) return cached;
-
+    
 //    BraceInfo b = _reduced.getLineEnclosingBrace(lineStart);  // optimized version to be developed
     BraceInfo b = _reduced.getLineEnclosingBrace();
-
+    
     _storeInCache(key, b, origPos - 1);
     return b;
   }
@@ -1621,7 +1621,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @return true if there are only blank characters before the current location on the current line.
     */
   private boolean onlyWhiteSpaceBeforeCurrent() throws BadLocationException{
-    String text = getText(0, _currentLocation);
+    String text = getText(0, _currentLocation);  // _currentLocation is length
     //get the text after the previous new line, but before the current location
     text = text.substring(text.lastIndexOf("\n") + 1);
     
@@ -1701,6 +1701,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * the text has actually been removed. Here we update the reduced model (using a {@link AbstractDJDocument.RemoveCommand
     * RemoveCommand}) and store information for how to undo/redo the reduced model changes inside the 
     * {@link javax.swing.text.AbstractDocument.DefaultDocumentEvent DefaultDocumentEvent}.
+    * NOTE: an exclusive read lock on the document is already held when this code runs.
     * @see AbstractDJDocument.RemoveCommand
     * @see javax.swing.text.AbstractDocument.DefaultDocumentEvent
     */

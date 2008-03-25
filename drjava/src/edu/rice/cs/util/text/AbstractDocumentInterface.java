@@ -47,25 +47,25 @@ public interface AbstractDocumentInterface extends ReadersWritersLocking {
   /* Methods from Document interface used in FindReplaceMachine */
   
   /* Returns the length of the document. */
-  int getLength();
+  public int getLength();
   
   /* Returns the specified substring of the document. */
-  String getText(int offset, int length) throws BadLocationException;
+  public String getText(int offset, int length) throws BadLocationException;
   
   /* Returns the entire text of this document. */
-  String getText();
+  public String getText();
   
   /* Inserts given string with specified attributes at the specified offset. */
-  void insertString(int offset, String str, AttributeSet a) throws BadLocationException;
+  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException;
   
   /* Removes the substring of specified length at the specified offset. */
-  void remove(int offset, int length) throws BadLocationException;
+  public void remove(int offset, int length) throws BadLocationException;
   
   /** Appends given string with specified attributes to end of this document. */
-  void append(String str, AttributeSet set);
+  public void append(String str, AttributeSet set);
   
   /** Creates a "sticky" position within a document */
-  Position createPosition(int offs) throws BadLocationException;
+  public Position createPosition(int offs) throws BadLocationException;
 }
 
 
