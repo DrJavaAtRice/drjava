@@ -159,6 +159,10 @@ public class JavaClass implements DJClass {
             // should have been caught by static analysis
             throw new RuntimeException(e);
           }
+          catch (LinkageError e) {
+            // may be ExceptionInInitializerError, NoClassDefFoundError, etc.
+            throw new WrappedException(new EvaluatorException(e, FIELD_GET_EXTRA_STACK));
+          }
         }
         
         public void set(Object o) {
@@ -172,12 +176,33 @@ public class JavaClass implements DJClass {
             // should have been caught by static analysis
             throw new RuntimeException(e);
           }
+          catch (LinkageError e) {
+            // may be ExceptionInInitializerError, NoClassDefFoundError, etc.
+            throw new WrappedException(new EvaluatorException(e, FIELD_SET_EXTRA_STACK));
+          }
         }
         
       };
     }
       
   }
+
+  private static final String[] FIELD_GET_EXTRA_STACK =
+    new String[]{ "java.lang.reflect.Field.get",
+                  "java.lang.reflect.Field.getFieldAccessor",
+                  "java.lang.reflect.Field.acquireFieldAccessor",
+                  "sun.reflect.ReflectionFactory.newFieldAccessor",
+                  "sun.reflect.UnsafeFieldAccessorFactory.newFieldAccessor",
+                  "sun.misc.Unsafe.ensureClassInitialized" };
+
+  private static final String[] FIELD_SET_EXTRA_STACK =
+    new String[]{ "java.lang.reflect.Field.set",
+                  "java.lang.reflect.Field.getFieldAccessor",
+                  "java.lang.reflect.Field.acquireFieldAccessor",
+                  "sun.reflect.ReflectionFactory.newFieldAccessor",
+                  "sun.reflect.UnsafeFieldAccessorFactory.newFieldAccessor",
+                  "sun.misc.Unsafe.ensureClassInitialized" };  
+  
   
   /** Non-static in order to determine the outer type. */
   protected class JavaConstructor implements DJConstructor {
@@ -224,7 +249,8 @@ public class JavaClass implements DJClass {
       catch (InvocationTargetException e) {
         throw new EvaluatorException(e.getCause(), CONSTRUCTOR_EXTRA_STACK);
       }
-      catch (ExceptionInInitializerError e) {
+      catch (LinkageError e) {
+        // may be ExceptionInInitializerError, NoClassDefFoundError, etc.
         throw new EvaluatorException(e, CONSTRUCTOR_EXTRA_STACK);
       }
       catch (IllegalAccessException e) {
@@ -278,7 +304,8 @@ public class JavaClass implements DJClass {
       catch (InvocationTargetException e) {
         throw new EvaluatorException(e.getCause(), METHOD_EXTRA_STACK);
       }
-      catch (ExceptionInInitializerError e) {
+      catch (LinkageError e) {
+        // may be ExceptionInInitializerError, NoClassDefFoundError, etc.
         throw new EvaluatorException(e, METHOD_EXTRA_STACK);
       }
       catch (IllegalAccessException e) {
