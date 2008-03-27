@@ -40,7 +40,7 @@ public class ExpressionEvaluator extends AbstractVisitor<Object> implements Lamb
     if (hasConvertedType(n)) { result = convert(result, getConvertedType(n).value()); }
     if (hasCheckedType(n)) {
       Class<?> expected = getCheckedType(n).value();
-      if (!expected.isInstance(result)) {
+      if (result != null && !expected.isInstance(result)) {
         throw new WrappedException(new EvaluatorException(
             new ClassCastException("From " + result.getClass().getName() + " to " + expected.getName())));
       }
