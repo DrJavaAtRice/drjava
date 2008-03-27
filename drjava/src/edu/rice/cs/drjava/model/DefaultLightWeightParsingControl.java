@@ -48,8 +48,8 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Default light-weight parsing control.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public class DefaultLightWeightParsingControl implements LightWeightParsingControl {
   /** The model. */
   private AbstractGlobalModel _model;
@@ -126,7 +126,7 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
   });
   
   /** Create the default light-weight parsing control.
-   *  @param model the model */
+    * @param model the model */
   public DefaultLightWeightParsingControl(AbstractGlobalModel model) {
     _model = model;
     _updater.setDaemon(true);
@@ -155,8 +155,8 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
   }
   
   /** Start or stop automatic updates.
-   *  @param b  {@code true} to start or {@code false} to stop automatic updates
-   */
+    * @param b  {@code true} to start or {@code false} to stop automatic updates
+    */
   public void setAutomaticUpdates(boolean b) {
     _log.log("setAutomaticUpdates("+b+")");
     _running = b;
@@ -190,15 +190,15 @@ public class DefaultLightWeightParsingControl implements LightWeightParsingContr
   }
   
   /** Return the last enclosing class name for the specified document, "" if not inside a class, or
-   *  null if unknown.
-   *  WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
-   *  @param doc the document for which we want the information
-   *  @return the enclosing class name
-   */
+    * null if unknown.
+    * WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
+    * @param doc the document for which we want the information
+    * @return the enclosing class name
+    */
   public synchronized String getEnclosingClassName(OpenDefinitionsDocument doc) { return _enclosingClassNames.get(doc); }
   
   /** Add the listener to this controller.
-   *  @param l listener to add */
+    * @param l listener to add */
   public synchronized void addListener(LightWeightParsingListener l) {
     _listeners.add(l);
   }

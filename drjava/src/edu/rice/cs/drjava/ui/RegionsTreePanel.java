@@ -100,7 +100,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     _model = frame.getModel();
     
     this.removeAll(); // override the behavior of TabbedPanel
-
+    
     // remake closePanel
     _closePanel = new JPanel(new BorderLayout());
     _closePanel.add(_closeButton, BorderLayout.NORTH);
@@ -187,9 +187,9 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     dtcr.setOpaque(false);
     _setColors(dtcr);
     _regTree.setCellRenderer(dtcr);
-
+    
     _leftPane.add(new JScrollPane(_regTree));
-
+    
     _initPopup();
     
     ToolTipManager.sharedInstance().registerComponent(_regTree);
@@ -216,12 +216,12 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
       setOpenIcon(null);
       setClosedIcon(null);
     }
-
+    
     /**
      * Overrides the default renderer component to use proper coloring.
      */
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected, boolean isExpanded, 
-                                                   boolean leaf, int row, boolean hasFocus) {
+                                                  boolean leaf, int row, boolean hasFocus) {
       Component renderer = super.getTreeCellRendererComponent(tree, value, isSelected, isExpanded, leaf, row, hasFocus);
       
       if (renderer instanceof JComponent) { ((JComponent) renderer).setOpaque(false); }
@@ -295,7 +295,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     mainButtons.setLayout(gbLayout);
     
     JComponent[] buts = makeButtons();
-
+    
     closeButtonPanel.add(_closeButton, BorderLayout.NORTH);    
     for (JComponent b: buts) { mainButtons.add(b); }
     mainButtons.add(emptyPanel);
@@ -304,7 +304,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     c.anchor = GridBagConstraints.NORTH;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.weightx = 1.0;
-
+    
     for (JComponent b: buts) { gbLayout.setConstraints(b, c); }
     
     c.fill = GridBagConstraints.BOTH;
@@ -336,8 +336,8 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Gets the currently selected regions in the region tree, or an empty array if no regions are selected.
-   *  @return list of selected regions in the tree
-   */
+    * @return list of selected regions in the tree
+    */
   protected ArrayList<R> getSelectedRegions() {
     ArrayList<R> regs = new ArrayList<R>();
     TreePath[] paths = _regTree.getSelectionPaths();
@@ -358,7 +358,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     ArrayList<R> r = getSelectedRegions();
     if (r.size() == 1) _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), false);
   }
-    
+  
   /** Add a region to the tree. Must be executed in event thread.
     * @param r the region
     */
@@ -366,7 +366,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
     File file = r.getDocument().getRawFile();
 //    try { name = r.getDocument().getQualifiedClassName(); }
 //    catch (ClassNameNotFoundException cnnfe) { name = r.getDocument().toString(); }
-
+    
     DefaultMutableTreeNode regDocNode = new DefaultMutableTreeNode(file);
     
     // Look for matching document node
@@ -433,8 +433,8 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Remove a region from the tree. Must be executed in event thread.
-   *  @param r the region
-   */
+    * @param r the region
+    */
   public void removeRegion(final R r) {
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
@@ -473,7 +473,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Remove all regions for this document from the tree. Must be executed in event thread.
-   */
+    */
   public void removeRegions(final OpenDefinitionsDocument odd) {
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
@@ -524,7 +524,7 @@ public abstract class RegionsTreePanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Factory method to create user objects put in the tree.
-   *  If subclasses extend RegionTreeUserObj, they need to override this method. */
+    * If subclasses extend RegionTreeUserObj, they need to override this method. */
   protected RegionTreeUserObj<R> makeRegionTreeUserObj(R r) {
     return new RegionTreeUserObj<R>(r);
   }

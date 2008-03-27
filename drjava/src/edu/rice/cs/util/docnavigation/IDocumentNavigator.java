@@ -43,7 +43,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 /** <code>IDocumentNavigator</code> provides a framework through which individual <code>IDocuments</code> can be 
-  *  navigated. */ 
+  * navigated. */ 
 public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTContainerNavigatorActor {
   /** @return an AWT component which interacts with this document navigator */
   public Container asContainer();
@@ -82,7 +82,7 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   public void refreshDocument(ItemT doc, String path);
   
   /** Sets the active document as specified.
-    *  @param doc the document to select
+    * @param doc the document to select
     */
   public void setActiveDoc(ItemT doc);
   
@@ -138,9 +138,9 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   public void clear();
   
   /** Adds an <code>INavigationListener</code> to this navigator. After invoking this method, the passed listener
-    *  will observe events generated this navigator.  If the provided listener is already observing this navigator
-    *  (<code>==</code>), no action is taken.
-    *  @param listener the listener to be added to this navigator.
+    * will observe events generated this navigator.  If the provided listener is already observing this navigator
+    * (<code>==</code>), no action is taken.
+    * @param listener the listener to be added to this navigator.
     */
   public void addNavigationListener(INavigationListener<? super ItemT> listener);
   
@@ -160,7 +160,7 @@ public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTCo
   public FocusListener[] getFocusListeners();
   
   /** Returns a collection of all listeners registered with this navigator.
-    *  @return the collection of nav listeners listening to this navigator.
+    * @return the collection of nav listeners listening to this navigator.
     */
   public Collection<INavigationListener<? super ItemT>> getNavigatorListeners();
   

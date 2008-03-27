@@ -51,9 +51,9 @@ import java.util.Properties;
 import java.util.Map;
 
 /** An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
-  *  machine. This class is used by subclassing it. (See package documentation for more details.)
-  *  This class runs in both the master and the slave JVMs.
-  *  @version $Id$
+  * machine. This class is used by subclassing it. (See package documentation for more details.)
+  * This class runs in both the master and the slave JVMs.
+  * @version $Id$
   */
 public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/ implements MasterRemote/*<SlaveType>*/ {
   

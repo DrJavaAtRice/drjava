@@ -37,9 +37,9 @@
 package edu.rice.cs.util.docnavigation;
 
 /** A listener that runs when a document is selected in the navigator and when a document is deselected. The object 
-  *  passed to the listener is a NodeData, which only supports processing via the interface NodeDataVisitor, whose 
-  *  methods, rather than getting the NodeData host, receive the data they were holding.  
-  *  This way, the listener does not need to know what type of information is in the selected node until it is used.
+  * passed to the listener is a NodeData, which only supports processing via the interface NodeDataVisitor, whose 
+  * methods, rather than getting the NodeData host, receive the data they were holding.  
+  * This way, the listener does not need to know what type of information is in the selected node until it is used.
   */
 
 public interface INavigationListener<ItemT extends INavigatorItem> {

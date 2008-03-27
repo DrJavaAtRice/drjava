@@ -70,7 +70,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Main class for DrJava.
-  *  @version $Id$
+  * @version $Id$
   */
 public class DrJavaRoot {
   

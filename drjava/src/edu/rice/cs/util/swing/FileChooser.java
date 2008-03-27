@@ -53,15 +53,15 @@ public class FileChooser extends JFileChooser {
   protected File _root;
   
   /** Creates a FileChooser with the given root, allowing only a single selection WITHIN the specified file system
-   *  @param root the root directory to display in the tree
-   */
+    * @param root the root directory to display in the tree
+    */
   public FileChooser(File root) { 
     super(root);
     _init(root);
   }
-
+  
   /*---------- INITIALIZATION METHODS ----------*/
-    
+  
   /** Sets up the GUI components of the dialog */
   private void _init(final File root) {
     
@@ -70,12 +70,12 @@ public class FileChooser extends JFileChooser {
       if (! root.exists()) _root = null;
       else if (! root.isDirectory()) _root = root.getParentFile();
     }
-
+    
     setFileSelectionMode(FILES_ONLY);
     setDialogType(CUSTOM_DIALOG);
     setApproveButtonText("Select");
   }
- 
+  
   public boolean isTraversable(File f) {
     if (_root == null) return super.isTraversable(f);
 //    Utilities.show("isTraversable(" + f + ") called; _root = " + _root);

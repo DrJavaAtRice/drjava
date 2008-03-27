@@ -73,14 +73,14 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** An integrated debugger which attaches to the Interactions JVM using
-  *  Sun's Java Platform Debugger Architecture (JPDA/JDI) interface.
+  * Sun's Java Platform Debugger Architecture (JPDA/JDI) interface.
   *
-  *  Every public method in this class throws an llegalStateException if
-  *  it is called while the debugger is not active, except for isAvailable,
-  *  isReady, and startUp.  Public methods also throw a DebugException if
-  *  the EventHandlerThread has caught an exception.
+  * Every public method in this class throws an llegalStateException if
+  * it is called while the debugger is not active, except for isAvailable,
+  * isReady, and startUp.  Public methods also throw a DebugException if
+  * the EventHandlerThread has caught an exception.
   *
-  *  @version $Id$
+  * @version $Id$
   */
 public class JPDADebugger implements Debugger {
   

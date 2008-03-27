@@ -72,7 +72,7 @@ import edu.rice.cs.util.OperationCanceledException;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /** Default implementation of JavadocModel interface; generates Javadoc HTML files for a set of documents.
-  *  @version $Id$
+  * @version $Id$
   */
 public class DefaultJavadocModel implements JavadocModel {
   

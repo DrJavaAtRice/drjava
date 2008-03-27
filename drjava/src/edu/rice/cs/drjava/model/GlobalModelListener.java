@@ -56,7 +56,7 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   /** Called when an asynchronous task must be run in the model */
   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI);
   
- /**
+  /**
    * Performs any UI related steps to handle the case in which a file is being opened that
    * is already open and modified. The two choices are to revert to the copy on disk, or to
    * keep the current changes.
@@ -69,41 +69,41 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   
   /** Called after a new document is created. */
   public void newFileCreated(OpenDefinitionsDocument doc);
-
+  
   /** Called after the current document is saved. */
   public void fileSaved(OpenDefinitionsDocument doc);
-
+  
   /** Called after a file is opened and read into the current document. */
   public void fileOpened(OpenDefinitionsDocument doc);
-
+  
   /** Called after a document is closed. */
   public void fileClosed(OpenDefinitionsDocument doc);
-
+  
   /** Called after a document is reverted. */
   public void fileReverted(OpenDefinitionsDocument doc);
-
+  
   /** Called to ask the listener if it is OK to abandon the current document. */
   public boolean canAbandonFile(OpenDefinitionsDocument doc);
-
+  
   /** Called to ask the listener if this document should be saved before quitting.
-   *  @return true if quitting should continue, false if the user cancelled */
+    * @return true if quitting should continue, false if the user cancelled */
   public boolean quitFile(OpenDefinitionsDocument doc);
   
   /** Called to ask the listener if it is OK to revert the current document to the version saved on disk. */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc);
-
+  
   /** Called when a file's main method is about to be run. */
   public void runStarted(OpenDefinitionsDocument doc);
-
+  
   /** Called when the console window is reset. */
   public void consoleReset();
-
+  
   /** Called when an undoable edit occurs. */
   public void undoableEditHappened();
-
+  
   /** Called when saving a file whose path contains a '#' symbol. */
   public void filePathContainsPound();
-   
+  
   /** Called when a new active document is selected */
   public void activeDocumentChanged(OpenDefinitionsDocument active);
   
@@ -118,7 +118,7 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   
   /** Called when the selection in the navigator changes the current directory without changing the active document. */
   public void currentDirectoryChanged(File dir);
-    
+  
   /** Called when the build directory is modified in the model. */
   public void projectBuildDirChanged();
   
@@ -126,14 +126,14 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   public void projectWorkDirChanged();
   
   /** Called while the project is being opened.
-   *  @param projectFile the location of the project file
-   *  @param files The files the gui should open for the model
-   */
+    * @param projectFile the location of the project file
+    * @param files The files the gui should open for the model
+    */
   public void projectOpened(File projectFile, FileOpenSelector files);
-
+  
   /** Called when the project is being closed. */
   public void projectClosed();
-
+  
   /** Called if the project's modified state has changed. */
   public void projectModified();
   
@@ -141,7 +141,7 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   public void projectRunnableChanged();
   
   /** Called when the a document, already opened, is brought back into the cache, and it no longer exists on disk
-   *  or cannot be accessed. */
+    * or cannot be accessed. */
   public void documentNotFound(OpenDefinitionsDocument d, File f);
 }
 

@@ -63,11 +63,11 @@ public class CompilerErrorModel {
   private static final String newLine = StringOps.EOL;
   /** An array of errors to be displayed in the CompilerErrorPanel associated with this model.  After model
     * construction, this array should be sorted in this order:
-    *  (i)  Errors with no file.
-    *  (ii) Errors for each file in path-alphabetical order.
+    * (i)  Errors with no file.
+    * (ii) Errors for each file in path-alphabetical order.
     * Within each file:
-    *  (i)  Errors with no line number.
-    *  (ii) Errors with line numbers, in order.
+    * (i)  Errors with no line number.
+    * (ii) Errors with line numbers, in order.
     * In all cases, where all else is equal, warnings are sorted below errors.
     */
   private final CompilerError[] _errors;

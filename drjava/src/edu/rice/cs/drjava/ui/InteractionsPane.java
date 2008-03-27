@@ -56,10 +56,10 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.*;
 
 /** The view component for repl interaction.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants, ClipboardOwner {
-
+  
   /** The custom keymap for the interactions pane. */
   protected Keymap _keymap;
   
@@ -69,12 +69,12 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   static StyledEditorKit EDITOR_KIT;
   
   static { EDITOR_KIT = new InteractionsEditorKit();  }
- 
+  
   /** A runnable object that causes the editor to beep. */
   protected Runnable _beep = new Runnable() {
     public void run() { Toolkit.getDefaultToolkit().beep(); }
   };
-
+  
   /** The OptionListener for TEXT_ANTIALIAS. */
   private class AntiAliasOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
@@ -85,17 +85,17 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   
   /** Returns a runnable object that beeps to the user. */
   public Runnable getBeep() { return _beep; }
-
+  
   private InteractionsDJDocument _doc;
   
 //  private List<Integer> _listOfPrompt = new Vector<Integer>(); // Vector used because it is synchronized. // NOT USED
-    
+  
   /** Creates an InteractionsPane with the given document.
     * Uses default keymap name ("INTERACTIONS_KEYMAP")
     * @param doc StyledDocument containing the interactions history.
     */
   public InteractionsPane(InteractionsDJDocument doc) { this("INTERACTIONS_KEYMAP", doc); }
-
+  
   /** Creates an InteractionsPane with the given document.
     * @param keymapName the name of the keymap for this pane
     * @param doc StyledDocument containing the interactions history.
@@ -105,7 +105,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     _doc = doc;
     //add actions for enter key, etc.
     _keymap = addKeymap(keymapName, getKeymap());
-
+    
     setCaretPosition(doc.getLength());
     setHighlighter(new ReverseHighlighter());
     _highlightManager = new HighlightManager(this);
@@ -116,7 +116,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     
     new ForegroundColorListener(this);
     new BackgroundColorListener(this);
-
+    
     OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
     DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaTemp);
   }
@@ -125,14 +125,14 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   public void lostOwnership(Clipboard clipboard, Transferable contents) {
     // ignore
   }
-
+  
   /** Widens the visibilitly of the processKeyEvent method; it is protected in the superclass. */
   public void processKeyEvent(KeyEvent e) { super.processKeyEvent(e); }
   
   /** Assigns the given keystroke to the given action in this pane.
-   *  @param stroke keystroke that triggers the action
-   *  @param action Action to perform
-   */
+    * @param stroke keystroke that triggers the action
+    * @param action Action to perform
+    */
   public void addActionForKeyStroke(KeyStroke stroke, Action action) {
     // we don't want multiple keys bound to the same action
     KeyStroke[] keys = _keymap.getKeyStrokesForAction(action);
@@ -142,23 +142,23 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     _keymap.addActionForKeyStroke(stroke, action);
     setKeymap(_keymap);
   }
-
+  
   /** Sets this pane's beep to be a different runnable object. Defaults to Toolkit.getDefaultToolkit().beep().
-   *  @param beep Runnable command to notify the user
-   */
+    * @param beep Runnable command to notify the user
+    */
   public void setBeep(Runnable beep) { _beep = beep; }
-
+  
   /** Highlights the given text with error highlight.
-   *  @param offset the offset in the text
-   *  @param length the length of the error to highlight
-   */
+    * @param offset the offset in the text
+    * @param length the length of the error to highlight
+    */
   public void highlightError(int offset, int length) {
     _highlightManager.addHighlight(offset, offset+length, ERROR_PAINTER);
   }
   
   /** Overriding this method ensures that all new documents created in this editor pane use our editor kit 
-   *  (and thus our model).
-   */
+    * (and thus our model).
+    */
   protected EditorKit createDefaultEditorKit() { return EDITOR_KIT; }
   
   /** Enable anti-aliased text by overriding paintComponent. */
@@ -170,7 +170,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     }
     super.paintComponent(g);
   }
-
+  
   /** Returns the DJDocument held by the pane. */
   public DJDocument getDJDocument() { return _doc; }
   
@@ -245,12 +245,12 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   }
   
   /** Returns true if the indent is to be performed. The code in the definitions pane prompts the user, but this 
-   *  requires a copy of mainframe, and a reason to do so. The user does not need to be prompted here. The cutoff 
-   *  in the definitions pane for the prompt is 10000 characters, which is unlikely to occur in the interactions 
-   *  pane very often if at all.
-   *  @param selStart - the selection start
-   *  @param selEnd - the selection end
-   */
+    * requires a copy of mainframe, and a reason to do so. The user does not need to be prompted here. The cutoff 
+    * in the definitions pane for the prompt is 10000 characters, which is unlikely to occur in the interactions 
+    * pane very often if at all.
+    * @param selStart - the selection start
+    * @param selEnd - the selection end
+    */
   protected boolean shouldIndent(int selStart, int selEnd) { return true; }
   
   /** Gets the current prompt position */

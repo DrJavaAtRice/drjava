@@ -110,11 +110,11 @@ import java.io.*;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Handles the bulk of DrJava's program logic. The UI components interface with the GlobalModel through its public
- *  methods, and the GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
- *  UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile
- *  functionality of DrJava, along with many other things. <p>
- *  @version $Id$
- */
+  * methods, and the GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
+  * UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile
+  * functionality of DrJava, along with many other things. <p>
+  * @version $Id$
+  */
 public class DefaultGlobalModel extends AbstractGlobalModel {
   
   /* FIELDS */
@@ -175,7 +175,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     public void saveBeforeCompile() { }
     public void saveUntitled() { }
   };
-    
+  
   // ---- Compiler Fields ----
   
   /** CompilerModel manages all compiler functionality. */
@@ -225,7 +225,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _compilerModel = new DefaultCompilerModel(this, compilers);
     _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
     _interactionsDocument = new InteractionsDJDocument();
-
+    
     _interactionsModel = new DefaultInteractionsModel(this, _jvm, _interactionsDocument, workDir);
     _interactionsModel.addListener(_interactionsListener);
     _jvm.setInteractionsModel(_interactionsModel);
@@ -258,13 +258,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     DrJava.getConfig().addOptionListener(SLAVE_JVM_XMX, updateListener); 
     
     _setupDebugger();
-        
+    
     // Chain notifiers so that all events also go to GlobalModelListeners.
     _interactionsModel.addListener(_notifier);
     _compilerModel.addListener(_notifier);
     _junitModel.addListener(_notifier);
     _javadocModel.addListener(_notifier);
-        
+    
     // Listen to compiler to clear interactions appropriately.
     // XXX: The tests need this to be registered after _notifier, sadly.
     //      This is obnoxiously order-dependent, but it works for now.
@@ -281,7 +281,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   
   private Iterable<JDKToolsLibrary> findLibraries() {
     // Order to return: config setting, runtime (if different version), from search (if different versions)
-
+    
     // We could give priority to libraries that have both available compilers and debuggers, but since this will 
     // almost always be true, it seems like more trouble than it is worth
     
@@ -308,14 +308,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     return IterUtil.reverse(results.values());
   }
   
-
+  
 //  public void compileAll() throws IOException{ 
 ////    ScrollableDialog sd = new ScrollableDialog(null, "DefaultGlobalModel.compileAll() called", "", "");
 ////    sd.show();
 //    _state.compileAll(); 
 //  }
   
-
+  
 //  public void junitAll() { _state.junitAll(); }
   
   /** Sets the build directory for a project. */
@@ -330,7 +330,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     setProjectChanged(true);
     setClassPathChanged(true);
   }
- 
+  
   // ----- METHODS -----
   
   /** @return the interactions model. */
@@ -362,7 +362,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 //    catch(RemoteException e) { /* ignore */ }
     _notifier.removeAllListeners();  // removes the global model listeners!
   }
-
+  
   /** Disposes of external resources. Kills the slave JVM. */
   public void disposeExternalResources() {
     // Kill the interpreter
@@ -370,7 +370,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   }
   
   public void resetInteractions(File wd) { resetInteractions(wd, false); }
- 
+  
   /** Clears and resets the slave JVM with working directory wd. Also clears the console if the option is 
     * indicated (on by default).  The reset operation is suppressed if the existing slave JVM has not been
     * used, {@code wd} matches its working directory, and forceReset is false.  {@code wd} may be {@code null}
@@ -380,10 +380,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     debug.logStart();
     File workDir = _interactionsModel.getWorkingDirectory();
     if (wd == null) { wd = workDir; }
-
+    
     if (! forceReset && ! _jvm.slaveJVMUsed() && ! isClassPathChanged() && wd.equals(workDir)) {
       debug.log();
-    // Eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
+      // Eliminate resetting interpreter (slaveJVM) since it has already been reset appropriately.
       _interactionsModel._notifyInterpreterReady(wd);
       debug.logEnd();
       return; 
@@ -394,79 +394,79 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _interactionsModel.resetInterpreter(wd);
     debug.logEnd();
   }
-
+  
   /** Interprets the current given text at the prompt in the interactions pane. */
   public void interpretCurrentInteraction() { _interactionsModel.interpretCurrentInteraction(); }
-
+  
   /** Interprets file selected in the FileOpenSelector. Assumes strings have no trailing whitespace. Interpretation is
-   *  aborted after the first error.
-   */
+    * aborted after the first error.
+    */
   public void loadHistory(FileOpenSelector selector) throws IOException { _interactionsModel.loadHistory(selector); }
-
+  
   /** Loads the history/histories from the given selector. */
   public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
     throws IOException, OperationCanceledException {
     return _interactionsModel.loadHistoryAsScript(selector);
   }
-
+  
   /** Clears the interactions history */
   public void clearHistory() { _interactionsModel.getDocument().clearHistory(); }
-
+  
   /** Saves the unedited version of the current history to a file
-   *  @param selector File to save to
-   */
+    * @param selector File to save to
+    */
   public void saveHistory(FileSaveSelector selector) throws IOException {
     _interactionsModel.getDocument().saveHistory(selector);
   }
-
+  
   /** Saves the edited version of the current history to a file
-   *  @param selector File to save to
-   *  @param editedVersion Edited verison of the history which will be saved to file instead of the lines saved in 
-   *         the history. The saved file will still include any tags needed to recognize it as a history file.
-   */
+    * @param selector File to save to
+    * @param editedVersion Edited verison of the history which will be saved to file instead of the lines saved in 
+    *        the history. The saved file will still include any tags needed to recognize it as a history file.
+    */
   public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException {
     _interactionsModel.getDocument().saveHistory(selector, editedVersion);
   }
-
+  
   /** Returns the entire history as a String with semicolons as needed. */
   public String getHistoryAsStringWithSemicolons() {
     return _interactionsModel.getDocument().getHistoryAsStringWithSemicolons();
   }
-
+  
   /** Returns the entire history as a String. */
   public String getHistoryAsString() {
     return _interactionsModel.getDocument().getHistoryAsString();
   }
-
+  
   /** Called when the debugger wants to print a message.  Inserts a newline. */
   public void printDebugMessage(String s) {
     _interactionsModel.getDocument().
       insertBeforeLastPrompt(s + "\n", InteractionsDocument.DEBUGGER_STYLE);
   }
-
+  
   /** Blocks until the interpreter has registered. */
   public void waitForInterpreter() { _jvm.ensureInterpreterConnected(); }
-
-
+  
+  
   /** Returns the current classpath in use by the Interpreter JVM. */
   public Iterable<File> getInteractionsClassPath() { return _jvm.getClassPath(); }
   
   /** Sets whether or not the Interactions JVM will be reset after a compilation succeeds.  This should ONLY be used 
-   *  in tests!  This method is not supported by AbstractGlobalModel.
-   *  @param shouldReset Whether to reset after compiling
-   */
+    * in tests!  This method is not supported by AbstractGlobalModel.
+    * @param shouldReset Whether to reset after compiling
+    */
   void setResetAfterCompile(boolean shouldReset) { _resetAfterCompile = shouldReset; }
-
+  
   /** Gets the Debugger used by DrJava. */
   public Debugger getDebugger() { return _debugger; }
-
+  
   /** Returns an available port number to use for debugging the interactions JVM.
-   *  @throws IOException if unable to get a valid port number.
-   */
+    * @throws IOException if unable to get a valid port number.
+    */
   public int getDebugPort() throws IOException { return _interactionsModel.getDebugPort(); }
-
+  
   // ---------- ConcreteOpenDefDoc inner class ----------
-
+  
   /** Inner class to handle operations on each of the open DefinitionsDocuments by the GlobalModel. <br><br>
     * This was at one time called the <code>DefinitionsDocumentHandler</code>
     * but was renamed (2004-Jun-8) to be more descriptive/intuitive.
@@ -484,7 +484,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     public void startCompile() throws IOException { _compilerModel.compile(ConcreteOpenDefDoc.this); }
     
     private volatile InteractionsListener _runMain;
-
+    
     /** Runs the main method in this document in the interactions pane after resetting interactions with the source
       * root for this document as the working directory.  Warns the use if the class files for the doucment are not 
       * up to date.  Fires an event to signal when execution is about to begin.
@@ -522,8 +522,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           
           // Finally, execute the new interaction and record that event
           new Thread("Running main method") {
-          public void run() { _interactionsModel.interpretCurrentInteraction(); }
-              
+            public void run() { _interactionsModel.interpretCurrentInteraction(); }
+            
           }.start();
           _notifier.runStarted(ConcreteOpenDefDoc.this);
           
@@ -548,10 +548,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // Reset interactions to the soure root for this document; class will be executed when new interpreter is ready
       resetInteractions(workDir);  
     }
-
+    
     /** Runs JUnit on the current document.  Requires that all source documents are compiled before proceeding. */
     public void startJUnit() throws ClassNotFoundException, IOException { _junitModel.junit(this); }
-
+    
     /** Generates Javadoc for this document, saving the output to a temporary directory.  The location is provided to 
       * the javadocEnded event on the given listener.
       * java@param saver FileSaveSelector for saving the file if it needs to be saved
@@ -560,7 +560,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // Use the model's classpath, and use the EventNotifier as the listener
       _javadocModel.javadocDocument(this, saver);
     }
-
+    
     /** Called to indicate the document is being closed, so to remove all related state from the debug manager. */
     public void removeFromDebugger() {
       while (getBreakpointManager().getRegions().size() > 0) {
@@ -571,21 +571,21 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   } /* End of ConcreteOpenDefDoc */
   
   /** Creates a ConcreteOpenDefDoc for a new DefinitionsDocument.
-   *  @return OpenDefinitionsDocument object for a new document
-   */
+    * @return OpenDefinitionsDocument object for a new document
+    */
   protected ConcreteOpenDefDoc _createOpenDefinitionsDocument(NullFile f) { return new ConcreteOpenDefDoc(f); }
   
-   /** Creates a ConcreteOpenDefDoc for a given file f
-   *  @return OpenDefinitionsDocument object for f
-   */
+  /** Creates a ConcreteOpenDefDoc for a given file f
+    * @return OpenDefinitionsDocument object for f
+    */
   protected ConcreteOpenDefDoc _createOpenDefinitionsDocument(File f) throws IOException { 
     if (! f.exists()) throw new FileNotFoundException("file " + f + " cannot be found");
     return new ConcreteOpenDefDoc(f); 
   }
   
   /** Adds the source root for doc to the interactions classpath; this function is a helper to _openFiles.
-   *  @param doc the document to add to the classpath
-   */
+    * @param doc the document to add to the classpath
+    */
   protected void addDocToClassPath(OpenDefinitionsDocument doc) {
     try {
       File sourceRoot = doc.getSourceRoot();
@@ -597,10 +597,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       // Invalid package-- don't add it to classpath
     }
   }
-   
+  
   private void _setupDebugger() {
     _jvm.setDebugModel(_debugger.callback());
-
+    
     // add listener to set the project file to "changed" when a breakpoint or watch is added, removed, or changed
     getBreakpointManager().addListener(new RegionManagerListener<Breakpoint>() {
       public void regionAdded(final Breakpoint bp, int index) { setProjectChanged(true); }
@@ -646,10 +646,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       public void currThreadSet(DebugThreadData thread) { }
     });
   }
-
+  
   /** Get the class path to be used in all class-related operations.
-   *  TODO: Insure that this is used wherever appropriate.
-   */
+    * TODO: Insure that this is used wherever appropriate.
+    */
   public Iterable<File> getClassPath() {
     Iterable<File> result = IterUtil.empty();
     
@@ -684,7 +684,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     return result;
   }
-    
+  
   /** Adds the project root (if a project is open), the source roots for other open documents, the paths in the 
     * "extra classpath" config option, as well as any project-specific classpaths to the interpreter's classpath. 
     * This method is called in DefaultInteractionsModel when the interpreter becomes ready.

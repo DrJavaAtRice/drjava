@@ -42,24 +42,24 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
 /** Base class for all component-specific EventNotifiers.  This class provides common methods to 
- *  manage listeners of a specific type.  T the type of the listener class to be managed.
- *  @version $Id$
- */
+  * manage listeners of a specific type.  T the type of the listener class to be managed.
+  * @version $Id$
+  */
 public abstract class EventNotifier<T> {
   /** All T Listeners that are listening to the model.  Accesses to this collection are protected by the 
-   *  ReaderWriterLock. The collection must be synchronized, since multiple readers could access it at once.
-   */
+    * ReaderWriterLock. The collection must be synchronized, since multiple readers could access it at once.
+    */
   protected final LinkedList<T> _listeners = new LinkedList<T>();
-
+  
   /** Provides synchronization primitives for solving the readers/writers problem.  In EventNotifier, adding and 
-   *  removing listeners are considered write operations, and all notifications are considered read operations. Multiple 
-   *  reads can occur simultaneously, but only one write can occur at a time, and no reads can occur during a write.
-   */
+    * removing listeners are considered write operations, and all notifications are considered read operations. Multiple 
+    * reads can occur simultaneously, but only one write can occur at a time, and no reads can occur during a write.
+    */
   protected final ReaderWriterLock _lock = new ReaderWriterLock();
   
   /** Adds a listener to the notifier.
-   *  @param listener a listener that reacts on events
-   */
+    * @param listener a listener that reacts on events
+    */
   public void addListener(T listener) {
 //    Utilities.showDebug("Adding listener " + listener + " to event notifier " + this);
     _lock.startWrite();
@@ -69,7 +69,7 @@ public abstract class EventNotifier<T> {
 //      new ScrollableDialog(null, "Released writeLock on event queue", "", "").show();
     }
   }
-
+  
   /** Removes a listener from the notifier. If the thread already holds the lock,
     * then the listener is removed later, but as soon as possible.
     * Note: It is NOT guaranteed that the listener will not be executed again.
@@ -100,7 +100,7 @@ public abstract class EventNotifier<T> {
 //      }
     }
   }
-
+  
   /** Removes all listeners from this notifier.  If the thread already holds the lock,
     * then the listener is removed later, but as soon as possible.
     * Note: It is NOT guaranteed that the listener will not be executed again. */

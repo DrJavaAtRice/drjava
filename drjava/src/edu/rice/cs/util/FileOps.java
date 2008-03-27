@@ -48,10 +48,10 @@ import edu.rice.cs.util.Log;
 
 import edu.rice.cs.plt.io.IOUtil;
 /** A class to provide some convenient file operations as static methods.
-  *  It's abstract to prevent (useless) instantiation, though it can be subclassed
-  *  to provide convenient namespace importation of its methods.
+  * It's abstract to prevent (useless) instantiation, though it can be subclassed
+  * to provide convenient namespace importation of its methods.
   *
-  *  @version $Id$
+  * @version $Id$
   */
 public abstract class FileOps {
   
@@ -453,10 +453,10 @@ public abstract class FileOps {
   /** Create a new temporary directory. The directory will be deleted on exit, if empty.
     * (To delete it recursively on exit, use deleteDirectoryOnExit.)
     * @param name Non-unique portion of the name of the directory to create.
-    *  @return File representing the directory that was created.
+    * @return File representing the directory that was created.
     */
-//   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempDirectory(String, String)} instead.
-//   *               Example: {@code IOUtil.createAndMarkTempDirectory(name, "")}.
+//   * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempDirectory(String, String)} instead.
+//   *              Example: {@code IOUtil.createAndMarkTempDirectory(name, "")}.
   
   /*  @Deprecated */ public static File createTempDirectory(final String name) throws IOException {
     return createTempDirectory(name, null);
@@ -470,8 +470,8 @@ public abstract class FileOps {
     * @param parent Parent directory to contain the new directory
     * @return File representing the directory that was created.
     */
-//   *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempDirectory(String, String, File)} instead.
-//   *               Example: {@code IOUtil.createAndMarkTempDirectory(name, "", parent)}.
+//   * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#createAndMarkTempDirectory(String, String, File)} instead.
+//   *              Example: {@code IOUtil.createAndMarkTempDirectory(name, "", parent)}.
   
   /* @Deprecated */ public static File createTempDirectory(/* final */ String name, /* final */ File parent) throws IOException {
     File result = File.createTempFile(name, "", parent);
@@ -785,13 +785,13 @@ public abstract class FileOps {
   
   /** Converts all path entries in a path string to absolute paths. The delimiter in the path string is the 
     * "path.separator" property.  Empty entries are equivalent to "." and thus are converted to the value of "user.dir".
-    *  Example: ".:drjava::/home/foo/junit.jar" with "user.dir" set to "/home/foo/bar" will be converted to 
-    *    "/home/foo/bar:/home/foo/bar/drjava:/home/foo/bar:/home/foo/junit.jar".
-    *  @param path path string with entries to convert
-    *  @return path string with all entries as absolute paths
-    *  @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#parsePath}, {@link edu.rice.cs.plt.io.IOUtil#getAbsoluteFiles},
-    *  {@link edu.rice.cs.plt.io.IOUtil#attemptAbsoluteFiles}, and {@link edu.rice.cs.plt.io.IOUtil#pathToString},
-    *  as needed, instead.
+    * Example: ".:drjava::/home/foo/junit.jar" with "user.dir" set to "/home/foo/bar" will be converted to 
+    *   "/home/foo/bar:/home/foo/bar/drjava:/home/foo/bar:/home/foo/junit.jar".
+    * @param path path string with entries to convert
+    * @return path string with all entries as absolute paths
+    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#parsePath}, {@link edu.rice.cs.plt.io.IOUtil#getAbsoluteFiles},
+    * {@link edu.rice.cs.plt.io.IOUtil#attemptAbsoluteFiles}, and {@link edu.rice.cs.plt.io.IOUtil#pathToString},
+    * as needed, instead.
     */
   @Deprecated public static String convertToAbsolutePathEntries(String path) {
     String pathSep = System.getProperty("path.separator");

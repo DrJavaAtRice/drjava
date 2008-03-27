@@ -44,20 +44,20 @@ import java.util.Vector;
 // TODO: Do these need to be synchronized?
 
 /** An instance of this class represents a configurable option in DrJava that has static type T.  Classes can extend
-  *  this class and the rest of the Configuration typing framework will work for it.  Named subclasses aren't even 
-  *  necessary -- but may be convenient in order to re-use code.  For example, to make an anonymous class that handles
-  *  options of static type Integer, with the name "indent.level", you could use the following code:
-  *  <pre>
-  *  Option&lt;Integer&gt; INDENT_LEVEL = new Option&lt;Integer&gt;("indent.level") {
-  *          public Integer parse(String s) {
-  *              return new Integer(s);
-  *          }
-  *      };
-  *  </pre>
-  *  The precedinjg example is simple because Integers (like most data-type classes defined in the Java
-  *  libraries) have handy toString() / parsing methods/constructors.
+  * this class and the rest of the Configuration typing framework will work for it.  Named subclasses aren't even 
+  * necessary -- but may be convenient in order to re-use code.  For example, to make an anonymous class that handles
+  * options of static type Integer, with the name "indent.level", you could use the following code:
+  * <pre>
+  * Option&lt;Integer&gt; INDENT_LEVEL = new Option&lt;Integer&gt;("indent.level") {
+  *         public Integer parse(String s) {
+  *             return new Integer(s);
+  *         }
+  *     };
+  * </pre>
+  * The precedinjg example is simple because Integers (like most data-type classes defined in the Java
+  * libraries) have handy toString() / parsing methods/constructors.
   *
-  *  @version $Id$
+  * @version $Id$
   */
 public abstract class Option<T> extends OptionParser<T> implements FormatStrategy<T> {
   

@@ -52,7 +52,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
   static Hashtable<Integer, String> keys = new Hashtable<Integer, String>();
   public static final KeyStroke NULL_KEYSTROKE = KeyStroke.getKeyStroke(0, 0);
   /** Standard constructor
-    *  @param key The name of this option.
+    * @param key The name of this option.
     */
   public KeyStrokeOption(String key, KeyStroke def) {
     super(key,def); }

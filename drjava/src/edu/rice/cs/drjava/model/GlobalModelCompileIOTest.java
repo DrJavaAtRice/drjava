@@ -42,22 +42,22 @@ import edu.rice.cs.util.FileOps;
 import javax.swing.text.BadLocationException;
 
 /** Tests to ensure that compilation interacts with files correctly.
- *
- *  @version $Id$
- */
+  *
+  * @version $Id$
+  */
 public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   
   /** After creating a new file, saving, and compiling it, this test checks that the new document is in sync after
-   *  compiling and is out of sync after modifying and even saving it.
-   * Doesn't reset interactions because no interpretations are performed.
-   */
+    * compiling and is out of sync after modifying and even saving it.
+    * Doesn't reset interactions because no interpretations are performed.
+    */
   public void testClassFileSynchronization() throws BadLocationException, IOException, InterruptedException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
 //    System.err.println("Temp source file is " + file.getAbsolutePath());
-
+    
     doc.saveFile(new FileSelector(file));
-
+    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
 //    System.err.println("Cached class file is " + doc.getCachedClassFile().getAbsolutePath());
@@ -76,30 +76,30 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertTrue("The state of all open documents should be in sync", ! _model.hasOutOfSyncDocuments());
     doc.insertString(0, "hi", null);
     assertTrue("should not be in sync after modification", ! doc.checkIfClassFileInSync());
-
+    
     // Have to wait 2 seconds so file will have a different timestamp
     Thread.sleep(2000);
-
+    
     doc.saveFile(new FileSelector(file));
     assertTrue("should not be in sync after save", ! doc.checkIfClassFileInSync());
-
+    
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(" Class file should exist after compile", compiled.exists());
   }
-
+  
   /** Ensure that renaming a file makes it out of sync with its class file.
-   *  Doesn't reset interactions because no interpretations are performed.
-   */
+    * Doesn't reset interactions because no interpretations are performed.
+    */
   public void testClassFileSynchronizationAfterRename() throws BadLocationException, IOException, IllegalStateException,
     InterruptedException {
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(2);
-
+    
     doc.saveFile(new FileSelector(file));
-
+    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false);
     _model.addListener(listener);
 //    System.err.println("cached class file is " + doc.getCachedClassFile());
@@ -114,15 +114,15 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     assertTrue("should be in sync after compile",
                doc.checkIfClassFileInSync());
-
+    
     // Have to wait 1 second so file will have a different timestamp
     Thread.sleep(2000);
-
+    
     // Rename to a different file
     doc.saveFileAs(new FileSelector(file2));
     assertTrue("should not be in sync after renaming", ! doc.checkIfClassFileInSync());
   }
-
+  
   /** Tests a compile after a file has unexpectedly been moved or delete. */
   public void testCompileAfterFileMoved() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
@@ -140,11 +140,11 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
       // to be on disk.
     }
     assertCompileErrorsPresent("compile should succeed", false);
-
+    
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue("Class file shouldn't exist after compile", !compiled.exists());
     _model.removeListener(listener);
   }
-
+  
 }

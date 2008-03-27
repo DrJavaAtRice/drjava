@@ -39,15 +39,15 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /** Determines if the given search character is found between the start of the current statement and the end character.
-  *  Accomplishes this by searching backwards from the end character, for the search character until one of the 
-  *  following characters is found: '}', '{', ';', 0.
-  *  <b>The given end character must exist on the current line and not be part of a quote or comment.</b> If there is 
-  *  more than end character on the given line, then the first end character is used.
-  *  <p>This question is useful for determining if, when a colon is found on a line, it is part of a ternary operator 
-  *  or not (construct this question with '?' for search character and ':' for end character).
-  *  <p>It can also be used to determine if a statement contains a particular character by constructing it with the 
-  *  desired character as a search character and the end character as ';'.
-  *  <p>Note that characters in comments and quotes are disregarded. 
+  * Accomplishes this by searching backwards from the end character, for the search character until one of the 
+  * following characters is found: '}', '{', ';', 0.
+  * <b>The given end character must exist on the current line and not be part of a quote or comment.</b> If there is 
+  * more than end character on the given line, then the first end character is used.
+  * <p>This question is useful for determining if, when a colon is found on a line, it is part of a ternary operator 
+  * or not (construct this question with '?' for search character and ':' for end character).
+  * <p>It can also be used to determine if a statement contains a particular character by constructing it with the 
+  * desired character as a search character and the end character as ';'.
+  * <p>Note that characters in comments and quotes are disregarded. 
   *
   * @version $Id$
   */

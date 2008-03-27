@@ -92,11 +92,11 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * InteractionsDJDocument versus an InteractionsDocument. */
 
 /** This class installs listeners and actions between an InteractionsDocument (the model) and an InteractionsPane 
- *  (the view).  We may want to refactor this class into a different package. <p>
- *  (The PopupConsole was introduced in version 1.29 of this file and subsequently removed.)
- *
- *  @version $Id$
- */
+  * (the view).  We may want to refactor this class into a different package. <p>
+  * (The PopupConsole was introduced in version 1.29 of this file and subsequently removed.)
+  *
+  * @version $Id$
+  */
 public class InteractionsController extends AbstractConsoleController {
   
   /* InteractionsDocument _adapter is inherited from AbstractConsoleController. */
@@ -106,7 +106,7 @@ public class InteractionsController extends AbstractConsoleController {
   
   private static final String INPUT_ENTERED_NAME = "Input Entered";
   private static final String INSERT_NEWLINE_NAME = "Insert Newline";
-
+  
   /** Style for System.in box */
   public static final String INPUT_BOX_STYLE = "input.box.style";
   
@@ -115,16 +115,16 @@ public class InteractionsController extends AbstractConsoleController {
   
   /** InteractionsModel to handle interpretation. */
   private volatile InteractionsModel _model;
-
+  
   /** GUI-agnostic interactions document from the model. */
   private volatile InteractionsDocument _doc;
-
+  
   /** Style to use for error messages. */
   private volatile SimpleAttributeSet _errStyle;
-
+  
   /** Style to use for debug messages. */
   private final SimpleAttributeSet _debugStyle;
-
+  
   /** Lambda used to input text into the embedded System.in input box. */
   private volatile Lambda<String, String> _insertTextCommand;
   
@@ -136,10 +136,10 @@ public class InteractionsController extends AbstractConsoleController {
   /** Default implementation of the insert text in input command */
   private static final Lambda<String, String> _defaultInsertTextCommand = 
     new Lambda<String,String>() {
-      public String apply(String input) {
-        throw new UnsupportedOperationException("Cannot insert text. There is no console input in progress");
-      }
-    };
+    public String apply(String input) {
+      throw new UnsupportedOperationException("Cannot insert text. There is no console input in progress");
+    }
+  };
   
   /** Default implementation of the input completion command */
   private static final Runnable _defaultInputCompletionCommand = 
@@ -149,7 +149,7 @@ public class InteractionsController extends AbstractConsoleController {
   private volatile InputBox _box;
   /** A temporary variable used to hold the text fetched from _box in getConsoleInput below. */
   private volatile String _text;
-
+  
   /** Listens for input requests from System.in, displaying an input box as needed. */
   protected volatile InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
@@ -171,7 +171,7 @@ public class InteractionsController extends AbstractConsoleController {
               
               _box.disableInputs();
               _text = _box.getText() + "\n";
-                           
+              
               /* Move the cursor back to the end of the interactions pane while preventing _doc from changing in the 
                * interim. */
               _doc.acquireReadLock();
@@ -199,7 +199,7 @@ public class InteractionsController extends AbstractConsoleController {
           _doc.acquireWriteLock();
           try {
             _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
-
+            
             // bind INPUT_BOX_STYLE to inputAttributes in the associated InteractionsDJDocument 
             _swingConsoleDocument.setDocStyle(INPUT_BOX_STYLE, inputAttributes);
             
@@ -212,7 +212,7 @@ public class InteractionsController extends AbstractConsoleController {
           
           _box.setVisible(true);
           SwingUtilities.invokeLater(new Runnable() { public void run() { _box.requestFocusInWindow(); } });
-
+          
           _pane.setEditable(false);
         }
       });
@@ -250,7 +250,7 @@ public class InteractionsController extends AbstractConsoleController {
     public void interactionIncomplete() { }
     public void slaveJVMUsed() { }
   };
-
+  
   /** Glue together the given model and a new view.
     * @param model An InteractionsModel
     * @param adapter InteractionsDJDocument being used by the model's doc
@@ -258,11 +258,11 @@ public class InteractionsController extends AbstractConsoleController {
   public InteractionsController(final InteractionsModel model, InteractionsDJDocument adapter) {
     this(model, adapter, 
          new InteractionsPane(adapter) {  // creates InteractionsPane
-           public int getPromptPos() { return model.getDocument().getPromptPos(); }
-         }
+      public int getPromptPos() { return model.getDocument().getPromptPos(); }
+    }
     );
   }
-
+  
   /** Glue together the given model and view.
     * @param model An InteractionsModel
     * @param adapter InteractionsDJDocument being used by the model's doc
@@ -281,7 +281,7 @@ public class InteractionsController extends AbstractConsoleController {
     _doc = model.getDocument();
     _errStyle = new SimpleAttributeSet();
     _debugStyle = new SimpleAttributeSet();
-
+    
     _model.setInputListener(_inputListener);
     _model.addListener(_viewListener);
     _model.setUpPane(pane);    // sets the interactions pane within the model and initializes the caret
@@ -318,10 +318,10 @@ public class InteractionsController extends AbstractConsoleController {
   }
   
   /** Gets the input listener for console input requests.  ONLY used in unit tests.
-   * @return the input listener for console input requests.
-   */
+    * @return the input listener for console input requests.
+    */
   public InputListener getInputListener() { return _inputListener; }
-
+  
   /** Forces console input to complete without the user hitting <Enter>.  Called by MainFrame when reset is called so 
     * that this lock is released.  This method is thread safe.
     * @throws UnsupportedOperationException If the interactions pane is not receiving console input
@@ -333,25 +333,25 @@ public class InteractionsController extends AbstractConsoleController {
     * @throws UnsupportedOperationException If the the interactions pane is not receiving console input
     */
   public void insertConsoleText(String input) { _insertTextCommand.apply(input); }
-
+  
   /** Accessor method for the InteractionsModel.
     * @return the interactions model
     */
   public InteractionsModel getInteractionsModel() {  return _model; }
-
+  
   /** Allows the abstract superclass to use the document.
     * @return the InteractionsDocument
     */
   public ConsoleDocument getConsoleDoc() { return _doc; }
-
+  
   /** Accessor method for the InteractionsDocument. */
   public InteractionsDocument getDocument() { return _doc; }
-
+  
   /** Adds AttributeSets as named styles to the document adapter. */
   protected void _addDocumentStyles() {
     // Add AbstractConsoleController styles
     super._addDocumentStyles();
-
+    
     // Error
     _errStyle.addAttributes(_defaultStyle);
     _errStyle.addAttribute(StyleConstants.Foreground, 
@@ -363,7 +363,7 @@ public class InteractionsController extends AbstractConsoleController {
         _errStyle.addAttribute(StyleConstants.Foreground, oe.value);
       }
     });
-
+    
     // Debug
     _debugStyle.addAttributes(_defaultStyle);
     _debugStyle.addAttribute(StyleConstants.Foreground, 
@@ -376,11 +376,11 @@ public class InteractionsController extends AbstractConsoleController {
       }
     });
   }
-
+  
   /** Updates all document styles with the attributes contained in newSet.  This behavior is only used in Mac OS X, 
-   *  JDK 1.4.1, since setFont() works fine on JTextPane on all other tested platforms.
-   *  @param newSet Style containing new attributes to use.
-   */
+    * JDK 1.4.1, since setFont() works fine on JTextPane on all other tested platforms.
+    * @param newSet Style containing new attributes to use.
+    */
   protected void _updateStyles(AttributeSet newSet) {
     super._updateStyles(newSet);
     _errStyle.addAttributes(newSet);
@@ -388,22 +388,22 @@ public class InteractionsController extends AbstractConsoleController {
     _debugStyle.addAttributes(newSet);
     StyleConstants.setBold(_debugStyle, true);  // ensure debug is always bold
   }
-
+  
   /** Adds listeners to the model. */
   protected void _setupModel() { _doc.setBeep(_pane.getBeep()); }
-
+  
   /** Adds actions to the view. */
   protected void _setupView() {
     super._setupView();
-
+    
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-
+    
     // Add actions with keystrokes
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), evalAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, java.awt.Event.SHIFT_MASK), newLineAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask), clearCurrentAction);
-
+    
     // Up and down need to be bound both for keypad and not
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), moveUpAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), moveUpAction);
@@ -414,7 +414,7 @@ public class InteractionsController extends AbstractConsoleController {
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), historyReverseSearchAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, java.awt.Event.SHIFT_MASK),
                                 historyForwardSearchAction);
-
+    
     // Left needs to be prevented from rolling cursor back before the prompt.
     // Both left and right should lock when caret is before the prompt.
     // Caret is allowed before the prompt for the purposes of mouse-based copy-
@@ -423,7 +423,7 @@ public class InteractionsController extends AbstractConsoleController {
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), moveLeftAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, 0), moveRightAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), moveRightAction);
-
+    
     // Prevent previous word action from going past the prompt
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
     DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD, new OptionListener<KeyStroke>() {
@@ -431,7 +431,7 @@ public class InteractionsController extends AbstractConsoleController {
         _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
       }
     });
-
+    
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
     DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_WORD, new OptionListener<KeyStroke>() {
       public void optionChanged(OptionEvent<KeyStroke> oe) {
@@ -445,9 +445,9 @@ public class InteractionsController extends AbstractConsoleController {
     _insertTextCommand = insertTextCommand;
     _inputCompletionCommand = inputCompletionCommand;
   }
-
+  
   // The fields below were made package private for testing purposes.
-
+  
   /** Evaluates the interaction on the current line. */
   AbstractAction evalAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
@@ -470,7 +470,7 @@ public class InteractionsController extends AbstractConsoleController {
       finally { _doc.releaseWriteLock(); }
     }
   };
-
+  
   /** Recalls the previous command from the history. */
   AbstractAction historyPrevAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
@@ -484,7 +484,7 @@ public class InteractionsController extends AbstractConsoleController {
       }
     }
   };
-
+  
   /** Recalls the next command from the history. */
   AbstractAction historyNextAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
@@ -515,7 +515,7 @@ public class InteractionsController extends AbstractConsoleController {
       }
     }
   };
-    
+  
   /** Added feature for down. If the cursor is on the last line of the current interaction, it goes into the history.
     * Otherwise, stays within the current interaction
     */
@@ -560,28 +560,28 @@ public class InteractionsController extends AbstractConsoleController {
       if (!_busy()) {
 //        _doc.acquireReadLock();  // may be overkill
 //        try {
-          _doc.reverseSearchInteractionsInHistory();
-          moveToEnd();
+        _doc.reverseSearchInteractionsInHistory();
+        moveToEnd();
 //        }
 //        finally { _doc.releaseReadLock(); }
       }
     }
   };
-
+  
   /** Forward searches in the history. */
   AbstractAction historyForwardSearchAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (! _busy()) {
 //        _doc.acquireReadLock();  // may be overkill
 //        try {
-          _doc.forwardSearchInteractionsInHistory();
-          moveToEnd();
+        _doc.forwardSearchInteractionsInHistory();
+        moveToEnd();
 //        }
 //        finally { _doc.releaseReadLock(); }
       }
     }
   };
-
+  
   /** Moves the caret left or wraps around. */
   AbstractAction moveLeftAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
@@ -601,7 +601,7 @@ public class InteractionsController extends AbstractConsoleController {
       }
     }
   };
-
+  
   /** Moves the caret right or wraps around. */
   AbstractAction moveRightAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
@@ -618,7 +618,7 @@ public class InteractionsController extends AbstractConsoleController {
       finally { _doc.releaseReadLock(); }
     }
   };
-
+  
   /** Skips back one word.  Doesn't move past the prompt. */
   AbstractAction prevWordAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
@@ -633,7 +633,7 @@ public class InteractionsController extends AbstractConsoleController {
       finally { _doc.releaseReadLock(); }
     }
   };
-
+  
   /** Skips forward one word.  Doesn't move past the prompt. */
   AbstractAction nextWordAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
@@ -648,7 +648,7 @@ public class InteractionsController extends AbstractConsoleController {
       finally { _doc.releaseReadLock(); }
     }
   };
-
+  
   /** A box that can be inserted into the interactions pane for separate input.  Do not confuse with 
     * edu.rice.cs.util.swing.InputBox. */
   private static class InputBox extends JTextArea {
@@ -708,9 +708,9 @@ public class InteractionsController extends AbstractConsoleController {
       
       final ActionMap am = getActionMap();
       am.put(INSERT_NEWLINE_NAME, newLineAction);
-       
+      
     }
-        
+    
     private Border _createBorder() {
       Border outerouter = BorderFactory.createLineBorder(_bgColor, OUTER_BUFFER_WIDTH);
       Border outer = BorderFactory.createLineBorder(_fgColor, BORDER_WIDTH);
@@ -780,10 +780,10 @@ public class InteractionsController extends AbstractConsoleController {
     public void consoleInputStarted(InteractionsController c);
     
     /** Called when the console input is complete. <p>
-     * This method is called from the thread that initiated the console input.
-     * @param result The text that was inputted to the console
-     */
+      * This method is called from the thread that initiated the console input.
+      * @param result The text that was inputted to the console
+      */
     public void consoleInputCompleted(String result, InteractionsController c);
-  
+    
   }
 }

@@ -49,7 +49,7 @@ import java.lang.reflect.Method;
 import edu.rice.cs.drjava.model.*;
 
 /** DrJava's print preview window
-  *  @version $Id$
+  * @version $Id$
   */
 public abstract class PreviewFrame extends JFrame {
   

@@ -61,7 +61,7 @@ import edu.rice.cs.util.text.*;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Test functions of MainFrame.
-  *  @version $Id$
+  * @version $Id$
   */
 public final class MainFrameTest extends MultiThreadedTestCase {
   
@@ -384,7 +384,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   DefinitionsPane _defPane1, _defPane2;
   
   /** Ensure that a document's editable status is set appropriately throughout the compile process.  Since the behavior
-    *  is interesting only when the model changes its active document, that's what this test looks most like.
+    * is interesting only when the model changes its active document, that's what this test looks most like.
     */
   public void testGlassPaneEditableState() {
     SingleDisplayModel model = _frame.getModel();
@@ -512,9 +512,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
   
   /** A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
-    *  Basically, add a component listener to the leftComponent of _docSplitPane and
-    *  make certain its size does not change while compiling a class which depends on
-    *  another class.
+    * Basically, add a component listener to the leftComponent of _docSplitPane and
+    * make certain its size does not change while compiling a class which depends on
+    * another class.
     */
   public void testDancingUIFileOpened() throws IOException {
     //System.out.println("DEBUG: Entering messed up test");

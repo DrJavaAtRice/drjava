@@ -53,7 +53,7 @@ import javax.swing.text.BadLocationException;
 import java.util.Vector;
 
 /** Tests the functionality of the definitions document.
-  *  @version $Id$
+  * @version $Id$
   */
 public final class DefinitionsDocumentTest extends DrJavaTestCase implements ReducedModelStates {
   private DefinitionsDocument _defModel;

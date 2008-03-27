@@ -46,7 +46,7 @@ import java.io.*;
 import edu.rice.cs.drjava.model.debug.DebugException;
 
 /** A thread that listens and responds to events from JPDA when the debugger has attached to another JVM.
-  *  @version $Id$
+  * @version $Id$
   */
 public class EventHandlerThread extends Thread {
   

@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 /** Class defining all configuration options with values of type NonNegativeInteger.
-  *  @version $Id$
+  * @version $Id$
   */
 public class NonNegativeIntegerOption extends IntegerOption {
   

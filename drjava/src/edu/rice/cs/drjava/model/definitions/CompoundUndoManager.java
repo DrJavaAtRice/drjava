@@ -84,7 +84,7 @@ public class CompoundUndoManager extends UndoManager {
   }
   
   /** Starts a compound edit.
-    *  @return the key for the compound edit
+    * @return the key for the compound edit
     */
   public synchronized int startCompoundEdit() {
     _compoundEdits.add(0, new CompoundEdit());

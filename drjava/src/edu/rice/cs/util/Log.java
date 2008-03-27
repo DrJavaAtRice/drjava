@@ -100,7 +100,7 @@ public class Log {
   }
   
   /** Sets whether this log is enabled.  Only has an effect if the code is in development mode.
-    *  @param isEnabled  Whether to print messages to the log file
+    * @param isEnabled  Whether to print messages to the log file
     */
   public void setEnabled(boolean isEnabled) { _isEnabled = isEnabled; }
   
@@ -108,7 +108,7 @@ public class Log {
   public boolean isEnabled() { return (_isEnabled || ENABLE_ALL); }
   
   /** Prints a message to the log, if enabled.
-    *  @param message Message to print.
+    * @param message Message to print.
     */
   @SuppressWarnings("deprecation") 
   public synchronized void log(String message) {

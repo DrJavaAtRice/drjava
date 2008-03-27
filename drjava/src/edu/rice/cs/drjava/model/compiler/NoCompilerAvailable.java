@@ -43,7 +43,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** A CompilerInterface implementation for signifying that no compiler is available.
-  *  @version $Id$
+  * @version $Id$
   */
 public class NoCompilerAvailable implements CompilerInterface {
   public static final CompilerInterface ONLY = new NoCompilerAvailable();

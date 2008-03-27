@@ -460,8 +460,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   
   /** Comments out the lines between start and end inclusive, using wing comments -- "// ".
-    *  @param start Position in document to start commenting from
-    *  @param end Position in document to end commenting at
+    * @param start Position in document to start commenting from
+    * @param end Position in document to end commenting at
     */
   private int _commentBlock(final int start, final int end) {
     int afterCommentEnd = end;

@@ -431,9 +431,9 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public boolean isShadowed(int pos) { return false; }
   
   /** Translates an offset into the components text to a line number.
-   *  @param offset the offset >= 0
-   *  @return the line number >= 0
-   *  @exception BadLocationException thrown if the offset is less than zero or greater than the document length. */
+   * @param offset the offset >= 0
+   * @return the line number >= 0
+   * @exception BadLocationException thrown if the offset is less than zero or greater than the document length. */
   public int getLineOfOffset(int offset) { throw new UnsupportedOperationException("Dummy method"); }
  
   /** Translates a line number into an offset.

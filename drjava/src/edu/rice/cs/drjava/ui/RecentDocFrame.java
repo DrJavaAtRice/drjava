@@ -55,7 +55,7 @@ public class RecentDocFrame extends JWindow {
   
   // The manager that gives filenames and icons
   DisplayManager<OpenDefinitionsDocument> _displayManager = _frame.getOddDisplayManager30();
-    
+  
   // the label that shows the icon and filename
   JLabel _label;
   // the panel that holds the label and textpane
@@ -140,7 +140,7 @@ public class RecentDocFrame extends JWindow {
     DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, _antialiasListener);
     DrJava.getConfig().addOptionListener(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING, _showSourceListener);
   }
-
+  
   private void updateFontColor() {
     Font  mainFont = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN);
     Color backColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
@@ -160,8 +160,8 @@ public class RecentDocFrame extends JWindow {
     _panel.setBorder(new LineBorder(fontColor, 1));
   }
   /** Moves the document d to the beginning of the list if it's already in the list, or it adds it to the
-   *  beginning if its not already in the list.
-   */
+    * beginning if its not already in the list.
+    */
   public void pokeDocument(OpenDefinitionsDocument d) {
     if (_docs.contains(d)) {
       _current = _docs.indexOf(d);
@@ -174,31 +174,31 @@ public class RecentDocFrame extends JWindow {
   public void closeDocument(OpenDefinitionsDocument d) { _docs.remove(d); }
   
   private void show(int _current) {
-      OpenDefinitionsDocument doc = _docs.get(_current);
+    OpenDefinitionsDocument doc = _docs.get(_current);
+    
+    String text = getTextFor(doc);
+    
+    _label.setText(_displayManager.getName(doc));
+    _label.setIcon(_displayManager.getIcon(doc));
+    
+    if (text.length() > 0) {
+      // as wide as the text area wants, but only 200px high
+      _textpane.setText(text);
+      _scroller.setPreferredSize(_textpane.getPreferredScrollableViewportSize());
+      if (_scroller.getPreferredSize().getHeight() > 200)
+        _scroller.setPreferredSize(new Dimension((int)_scroller.getPreferredSize().getWidth(), 200));
       
-      String text = getTextFor(doc);
-      
-      _label.setText(_displayManager.getName(doc));
-      _label.setIcon(_displayManager.getIcon(doc));
-      
-      if (text.length() > 0) {
-        // as wide as the text area wants, but only 200px high
-        _textpane.setText(text);
-        _scroller.setPreferredSize(_textpane.getPreferredScrollableViewportSize());
-        if (_scroller.getPreferredSize().getHeight() > 200)
-          _scroller.setPreferredSize(new Dimension((int)_scroller.getPreferredSize().getWidth(), 200));
-        
-        _scroller.setVisible(_showSource);
-      }
-      else _scroller.setVisible(false);
-      
-      Dimension d = _label.getMinimumSize();
-      d.setSize(d.getWidth() + _padding*2, d.getHeight() + _padding*2);
-      _label.setPreferredSize(d);
-      _label.setHorizontalAlignment(SwingConstants.CENTER);
-      _label.setVerticalAlignment(SwingConstants.CENTER);
-      pack();
-      centerH();
+      _scroller.setVisible(_showSource);
+    }
+    else _scroller.setVisible(false);
+    
+    Dimension d = _label.getMinimumSize();
+    d.setSize(d.getWidth() + _padding*2, d.getHeight() + _padding*2);
+    _label.setPreferredSize(d);
+    _label.setHorizontalAlignment(SwingConstants.CENTER);
+    _label.setVerticalAlignment(SwingConstants.CENTER);
+    pack();
+    centerH();
   }
   
   /** Sets the current document to be the next document in the list. */
@@ -251,7 +251,7 @@ public class RecentDocFrame extends JWindow {
     text = text.substring(start, end);
     return text;
   }
-    
+  
   /** Resets the frame to point to the first document in the list. */
   public void first() {
     _current = 0;
@@ -294,7 +294,7 @@ public class RecentDocFrame extends JWindow {
     if (_docs.size() > 0) return _docs.getFirst();
     return null;
   }
-
+  
 //  private ImageIcon _getIconResource(String name) {
 //    URL url = RecentDocFrame.class.getResource("icons/" + name);
 //    if (url != null) return new ImageIcon(url);

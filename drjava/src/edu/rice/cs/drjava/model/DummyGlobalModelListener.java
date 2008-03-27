@@ -45,14 +45,14 @@ import edu.rice.cs.util.swing.AsyncTask;
 import edu.rice.cs.util.FileOpenSelector;
 
 /** A dummy GlobalModelListener that does nothing. Useful for listening to only a small number of events.
- *  Not currently used.
- *  @version $Id$
- */
+  * Not currently used.
+  * @version $Id$
+  */
 public class DummyGlobalModelListener extends DummyInteractionsListener implements GlobalModelListener {
-
+  
   /** Called when an asynchronous task must be run in the model */
   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {  }
-
+  
   public void handleAlreadyOpenDocument(OpenDefinitionsDocument doc) { }
   
   /** Called when trying to open one or more files that do not exist. */
@@ -72,31 +72,31 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   
   /** Called when the projects modified state has changed. */
   public void projectModified() {  }
-
+  
   /** Called when a project's main class has been set/unset. */
   public void projectRunnableChanged() {  }
   
   /** Called after a new document is created. */
   public void newFileCreated(OpenDefinitionsDocument doc) { }
-
+  
   /** Called after the current document is saved. */
   public void fileSaved(OpenDefinitionsDocument doc) { }
-
+  
   /** Called after a file is opened and read into the current document. */
   public void fileOpened(OpenDefinitionsDocument doc) { }
-
+  
   /** Called after a document is closed. */
   public void fileClosed(OpenDefinitionsDocument doc) { }
-
+  
   /** Called after a document is reverted. */
   public void fileReverted(OpenDefinitionsDocument doc) { }
   
   /** Called when an undoable edit occurs. */
   public void undoableEditHappened() { }
-
+  
   /** Called after a compile is started by the GlobalModel. */
   public void compileStarted() { }
-
+  
   /** Called when a compile has finished running. */
   public void compileEnded(File workDir, List<? extends File> excludedFiles) { }
   
@@ -107,31 +107,31 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   public void filePathContainsPound() { }
   
   /** Called to demand that all class file must be in sync before running unit tests. It is up to the caller of this 
-   *  method to check if the documents are out of sync, using OpenDefinitionsDocument.checkIfClassFileInSync().
-   */
+    * method to check if the documents are out of sync, using OpenDefinitionsDocument.checkIfClassFileInSync().
+    */
   public void compileBeforeJUnit(final CompilerListener l) { }
-
+  
   /** Called after JUnit is started by the GlobalModel. */
   public void junitStarted() { }
   
   /** Called when testing all files. */
   public void junitClassesStarted() {  }
-
+  
   /** Called to indicate that a suite of tests has started running.
-   *  @param numTests The number of tests in the suite to be run.
-   */
+    * @param numTests The number of tests in the suite to be run.
+    */
   public void junitSuiteStarted(int numTests) { }
   
   /** Called when a particular test is started.
-   *  @param name The name of the test being started.
-   */
+    * @param name The name of the test being started.
+    */
   public void junitTestStarted(String name) { }
   
   /** Called when a particular test has ended.
-   *  @param name The name of the test that has ended.
-   *  @param wasSuccessful Whether the test passed or not.
-   *  @param causedError If not successful, whether the test caused an error or simply failed.
-   */
+    * @param name The name of the test that has ended.
+    * @param wasSuccessful Whether the test passed or not.
+    * @param causedError If not successful, whether the test caused an error or simply failed.
+    */
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) { }
   
   /** Called after JUnit is finished running tests. */
@@ -141,54 +141,54 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   public void consoleReset() { }
   
   /** Called to demand that all files be saved before compiling. It is up to the caller of this method to check
-   *  if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
-   */
+    * if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
+    */
   public void saveBeforeCompile() { }
-
+  
   public void saveUntitled() { }
   
   /** Called to demand that all files be saved before generating Javadoc. It is up to the caller of this method to 
-   *  check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
-   */
+    * check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
+    */
   public void saveBeforeJavadoc() { }
   
   /** Called to demand that all files be saved before starting the debugger. It is up to the caller of this method 
-   *  to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
-   *
-   *  Not currently used. */
+    * to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
+    *
+    * Not currently used. */
 //  public void saveBeforeDebug() { }
   
   /** Called when the navigator selection changes the current directory without changing the active document. */
   public void currentDirectoryChanged(File dir) { }
   
   /** Called when trying to test a non-TestCase class.
-   *  @param isTestAll whether or not it was a use of the test all button
-   */
+    * @param isTestAll whether or not it was a use of the test all button
+    */
   public void nonTestCase(boolean isTestAll) { }
   
   /** Called when trying to test an illegal class file.
-   *  @param e the ClassFileError thrown when DrJava attempted to load the offending class.
-   */
+    * @param e the ClassFileError thrown when DrJava attempted to load the offending class.
+    */
   public void classFileError(ClassFileError e) { }
-
+  
   /** Called to ask the listener if it is OK to abandon the current document. */
   public boolean canAbandonFile(OpenDefinitionsDocument doc) { return true; }
   
   /** Called to ask the listener if the document should be saved before quitting.
-   *  @return true if quitting should continue, false if the user cancelled */
+    * @return true if quitting should continue, false if the user cancelled */
   public boolean quitFile(OpenDefinitionsDocument doc) { return true; }
   
   /** Called to ask the listener if it is OK to replace the current document by a newer version on disk. */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc) { return true; }
-
+  
   /** Called after Javadoc is started by the GlobalModel. */
   public void javadocStarted() { }
   
   /** Called after Javadoc is finished.
-   *  @param success whether the Javadoc operation generated proper output
-   *  @param destDir if (success == true) the location where the output was placed, otherwise undefined
-   *  @param allDocs Whether we are running over all open documents
-   */
+    * @param success whether the Javadoc operation generated proper output
+    * @param destDir if (success == true) the location where the output was placed, otherwise undefined
+    * @param allDocs Whether we are running over all open documents
+    */
   public void javadocEnded(boolean success, File destDir, boolean allDocs) { }
   
   public void activeDocumentChanged(OpenDefinitionsDocument active) { }

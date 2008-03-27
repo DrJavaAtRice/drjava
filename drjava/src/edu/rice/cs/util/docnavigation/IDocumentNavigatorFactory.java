@@ -43,7 +43,7 @@ import java.util.List;
 public interface IDocumentNavigatorFactory<ItemT extends INavigatorItem> {
   
   /** Creates a new List Navigator
-    *  @return a list navigator
+    * @return a list navigator
     */
   public IDocumentNavigator<ItemT> makeListNavigator();
   

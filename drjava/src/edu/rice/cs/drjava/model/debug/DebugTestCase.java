@@ -43,8 +43,8 @@ import edu.rice.cs.util.Log;
 import java.io.*;
 
 /** This class contains the basic fields and methods that are necessary for any test file that needs to use the
-  *  JPDADebugger.
-  *  @version $Id$
+  * JPDADebugger.
+  * @version $Id$
   */
 public abstract class DebugTestCase extends GlobalModelTestCase {
   

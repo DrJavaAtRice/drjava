@@ -57,7 +57,7 @@ import edu.rice.cs.util.FileOps;
 
 
 /** Defines the commonly used Option constants in DrJava config and project profiles.
-  *  @version $Id$
+  * @version $Id$
   */
 public interface OptionConstants {
   

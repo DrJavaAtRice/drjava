@@ -49,7 +49,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 public interface DCacheAdapter {
   
   /** Retrieves the document for its corresponding ODD
-    *  @return the definitions document for the corresponding ODD
+    * @return the definitions document for the corresponding ODD
     */
   public DefinitionsDocument getDocument() throws IOException, FileMovedException;
   

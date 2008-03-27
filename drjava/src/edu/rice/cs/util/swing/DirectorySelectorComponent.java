@@ -48,8 +48,8 @@ import java.io.*;
 import edu.rice.cs.util.FileOps;
 
 /** A JPanel with a text box and a "..." button to select a file or directory.  The file name is editable in the text
-  *  box, and a JFileChooser is displayed if the user clicks the "..." button.
-  *  @version $Id$
+  * box, and a JFileChooser is displayed if the user clicks the "..." button.
+  * @version $Id$
   */
 public class DirectorySelectorComponent extends JPanel {
   

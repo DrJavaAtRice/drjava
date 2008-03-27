@@ -55,17 +55,17 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /** This class is the root class for the Slave JVM.  The Master JVM invokes the {@link #main} method of this class, 
-  *  which is never instantiated. See the {@link #main} method documentation for information on the command line 
-  *  parameters this class requires.  If there is an error setting up the slave JVM before the RMI links can be 
-  *  established, this JVM process will exit with an error code according to the following list:
-  *  <DL>
-  *  <DT>1</DT><DD>Invalid number of command line arguments.</DD>
-  *  <DT>2</DT><DD>Error deserializing remote stub</DD>
-  *  <DT>3</DT><DD>Error instantiating slave implementation class</DD>
-  *  </DL>
-  *  If the slave JVM completes successfully, it will exit with code 0.
+  * which is never instantiated. See the {@link #main} method documentation for information on the command line 
+  * parameters this class requires.  If there is an error setting up the slave JVM before the RMI links can be 
+  * established, this JVM process will exit with an error code according to the following list:
+  * <DL>
+  * <DT>1</DT><DD>Invalid number of command line arguments.</DD>
+  * <DT>2</DT><DD>Error deserializing remote stub</DD>
+  * <DT>3</DT><DD>Error instantiating slave implementation class</DD>
+  * </DL>
+  * If the slave JVM completes successfully, it will exit with code 0.
   *
-  *  @version $Id$
+  * @version $Id$
   */
 public final class SlaveJVMRunner {
   

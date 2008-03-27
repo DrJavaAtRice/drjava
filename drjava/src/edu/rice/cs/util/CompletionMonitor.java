@@ -37,7 +37,7 @@
 package edu.rice.cs.util;
 
 /** Enables threads to communicate with each other by signaling. Typically, this communication concerns a
-  *  task which one thread must complete before other threads can proceed.
+  * task which one thread must complete before other threads can proceed.
   */
 public class CompletionMonitor {
   private boolean _flag;

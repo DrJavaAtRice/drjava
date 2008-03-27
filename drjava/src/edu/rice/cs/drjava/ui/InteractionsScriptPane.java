@@ -40,21 +40,21 @@ import java.awt.*;
 import javax.swing.*;
 
 /** Pane for an interactions script.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public class InteractionsScriptPane extends JPanel {
   
   /** Constructs a new pane with the given rows and cols.
-   *  @param rows the number of rows
-   *  @param cols the number of columns
-   */
+    * @param rows the number of rows
+    * @param cols the number of columns
+    */
   public InteractionsScriptPane(int rows, int cols) {
     setLayout(new GridLayout(rows, cols));
   }
-
+  
   /** Adds the given action to this pane as a button.
-   *  @param a the action the button should perform.
-   */
+    * @param a the action the button should perform.
+    */
   public void addButton(Action a) {
     JButton b = new JButton(a);
     add(b);      

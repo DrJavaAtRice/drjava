@@ -46,7 +46,7 @@ import edu.rice.cs.util.swing.Utilities;
 import java.rmi.RemoteException;
 
 /** Test cases for the master/slave jvm control framework.
-  *  @version $Id$
+  * @version $Id$
   */
 public class IntegratedMasterSlaveTest extends DrJavaTestCase {
   

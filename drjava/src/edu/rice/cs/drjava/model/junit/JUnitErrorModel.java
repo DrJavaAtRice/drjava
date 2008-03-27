@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 
 /** Contains the JUnitErrors for a particular file after a test has ended.
-  *  @version $Id$
+  * @version $Id$
   */
 public class JUnitErrorModel extends CompilerErrorModel {
   private boolean _testsHaveRun = false;

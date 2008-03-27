@@ -48,42 +48,42 @@ import javax.swing.*;
 import java.io.File;
 
 /** Manages a dialog box that can select a destination directory for generating Javadoc.  The getDirectory method should
- *  be called to show the dialog, using the suggested location for the Javadoc as the "start" file.  If the user 
- *  modifies the selection once, the user's choice will be remembered and no further suggestions will be used.
- *
- *  @version $Id$
- */
+  * be called to show the dialog, using the suggested location for the Javadoc as the "start" file.  If the user 
+  * modifies the selection once, the user's choice will be remembered and no further suggestions will be used.
+  *
+  * @version $Id$
+  */
 public class JavadocDialog implements DirectorySelector {
   /** Parent frame of the dialog. */
   private final JFrame _frame;
-
+  
   /** File field and button. */
   private final DirectorySelectorComponent _selector;
-
+  
   /** Whether to always prompt for destination. */
   private final JCheckBox _checkBox;
-
+  
   /** OptionPane from which to get the results. */
   private final JOptionPane _optionPane;
-
+  
   /** Dialog to show. */
   private final JDialog _dialog;
-
+  
   /** Whether to use the suggested directory each time the dialog is shown. */
   private boolean _useSuggestion;
-
+  
   /** Current suggestion for the destination directory, or null. */
   private File _suggestedDir;
-
+  
   /** Creates a new JavadocDialog to show from the given frame.
-   * 
-   *  @param frame Parent frame of this dialog
-   */
+    * 
+    * @param frame Parent frame of this dialog
+    */
   public JavadocDialog(JFrame frame) {
     _frame = frame;
     _useSuggestion = true;
     _suggestedDir = null;
-
+    
     // Create file chooser
     DirectoryChooser chooser = new DirectoryChooser();
     chooser.setMultiSelectionEnabled(false);
@@ -95,27 +95,27 @@ public class JavadocDialog implements DirectorySelector {
     _selector = new DirectorySelectorComponent(_frame, chooser, DirectorySelectorComponent.DEFAULT_NUM_COLS, DirectorySelectorComponent.DEFAULT_FONT_SIZE, false);
     _checkBox = new JCheckBox("Always Prompt For Destination");
     Object[] components = new Object[] { msg, _selector, _checkBox };
-
+    
     _optionPane = new JOptionPane(components,
                                   JOptionPane.QUESTION_MESSAGE,
                                   JOptionPane.OK_CANCEL_OPTION);
     _dialog = _optionPane.createDialog(_frame, "Select Javadoc Destination");
     chooser.setOwner(_dialog);
   }
-
-
+  
+  
   public boolean isRecursive() { return false; }
   
   /** Shows the dialog prompting the user for a destination directory in which to generate Javadoc.
-   * 
-   *  This operation must be executed from the event-handling thread!
-   *
-   *  @param start The directory to display in the text box.  If null,
-   *  the most recent suggested directory (passed in via setSuggestedDir)
-   *  is displayed, unless the user has modified a previous suggestion.
-   *  @return A directory to use for the Javadoc (which might not exist)
-   *  @throws OperationCanceledException if the selection request is canceled
-   */
+    * 
+    * This operation must be executed from the event-handling thread!
+    *
+    * @param start The directory to display in the text box.  If null,
+    * the most recent suggested directory (passed in via setSuggestedDir)
+    * is displayed, unless the user has modified a previous suggestion.
+    * @return A directory to use for the Javadoc (which might not exist)
+    * @throws OperationCanceledException if the selection request is canceled
+    */
   public File getDirectory(File start) throws OperationCanceledException {
     if (start != null) {
       // We were given a default - use it.
@@ -125,29 +125,29 @@ public class JavadocDialog implements DirectorySelector {
       // We weren't given one, so we need to use our suggestion.
       _selector.setFileField(_suggestedDir);
     }
-
+    
     Configuration config = DrJava.getConfig();
     boolean ask = config.getSetting(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION).booleanValue();
-
+    
     if (ask) {
       // The "always prompt" checkbox should be checked
       _checkBox.setSelected(true);
-
+      
       // Prompt the user
       MainFrame.setPopupLoc(_dialog, _frame);
       _dialog.setVisible(true);
-
+      
       // Get result
       if (!_isPositiveResult()) {
         throw new OperationCanceledException();
       }
-
+      
       // See if the user wants to suppress this dialog in the future.
       if (!_checkBox.isSelected()) {
         config.setSetting(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
                           Boolean.FALSE);
       }
-
+      
       // Check if the user disagreed with the suggestion
       if ((start == null) &&
           (_useSuggestion && (_suggestedDir != null)) &&
@@ -157,32 +157,32 @@ public class JavadocDialog implements DirectorySelector {
     }
     return _selector.getFileFromField();
   }
-
+  
   /** Asks the user a yes/no question.
-   *  @return true if the user responded affirmatively, false if negatively
-   */
+    * @return true if the user responded affirmatively, false if negatively
+    */
   public boolean askUser(String message, String title) {
     int choice = JOptionPane.showConfirmDialog(_frame, message, title, JOptionPane.YES_NO_OPTION);
     return (choice == JOptionPane.YES_OPTION);
   }
-
+  
   /** Warns the user about an error condition. */
   public void warnUser(String message, String title) {
     JOptionPane.showMessageDialog(_frame, message, title, JOptionPane.ERROR_MESSAGE);
   }
-
+  
   /** Sets the suggested destination directory for Javadoc generation. This directory will be displayed
-   *  in the file field if the user has not modified the suggestion in the past.
-   * @param dir Suggested destination directory
-   */
+    * in the file field if the user has not modified the suggestion in the past.
+    * @param dir Suggested destination directory
+    */
   public void setSuggestedDir(File dir) { _suggestedDir = dir; }
-
+  
   /** Sets whether the dialog should use the suggested directory provided
-   *  to the getDirectory method as the default location.
-   *  @param use Whether to use the suggested directory
-   */
+    * to the getDirectory method as the default location.
+    * @param use Whether to use the suggested directory
+    */
   public void setUseSuggestion(boolean use) { _useSuggestion = use; }
-
+  
   /** Returns whether the JOptionPane currently has the OK_OPTION result. */
   private boolean _isPositiveResult() {
     Object result = _optionPane.getValue();

@@ -65,12 +65,12 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   }
   
   /** Get the offset into the current ReducedToken.
-    *  @return the number of characters into the token where the cursor sits
+    * @return the number of characters into the token where the cursor sits
     */
   int getBlockOffset() { return _cursor.getBlockOffset(); }
   
   /** Change the offset into the current ReducedToken.
-    *  @param offset the number of characters into the token to set the cursor
+    * @param offset the number of characters into the token to set the cursor
     */
   void setBlockOffset(int offset) { _cursor.setBlockOffset(offset); }
   

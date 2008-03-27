@@ -45,15 +45,10 @@ import java.util.List;
  */
 public interface Finalizable<T> {
  
-  /**
-   * @param fl the finalization listener to be notified when this object
-   *   is garbage collected
-   */
+  /** @param fl the finalization listener to be notified when this object is garbage collected */
   public void addFinalizationListener(FinalizationListener<T> fl);
 
-  /**
-   * @return the list of registered FinalizationListeners
-   */
+  /** @return the list of registered FinalizationListeners */
   public List<FinalizationListener<T>> getFinalizationListeners();
 
 }

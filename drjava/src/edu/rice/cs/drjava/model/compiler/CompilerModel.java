@@ -42,10 +42,10 @@ import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /** Interface for all compiler functionality in the model.  The compilation process itself can be monitored through
-  *  the CompilerListener interface.  The four primary uses of this interface will be to manage listeners, to trigger
-  *  compilation of (a) document(s), to handle the results, and to manage available compilers.
+  * the CompilerListener interface.  The four primary uses of this interface will be to manage listeners, to trigger
+  * compilation of (a) document(s), to handle the results, and to manage available compilers.
   * 
-  *  @version $Id$
+  * @version $Id$
   */
 public interface CompilerModel {
   

@@ -151,17 +151,17 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       public void actionPerformed(ActionEvent ae) { goToRegion(); }
     };
     _goToButton = new JButton(goToAction);
-
+    
     Action bookmarkAction = new AbstractAction("Bookmark") {
       public void actionPerformed(ActionEvent ae) { _bookmark(); }
     };
     _bookmarkButton = new JButton(bookmarkAction);
-
+    
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) { _remove(); }
     };
     _removeButton = new JButton(removeAction);
-
+    
     // "Highlight" label panel
     final JPanel highlightPanel = new JPanel();
     final Color normalColor = highlightPanel.getBackground();
@@ -184,7 +184,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
           highlightPanel.setBackground(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_lastIndex]));
         }
         else highlightPanel.setBackground(normalColor);
-
+        
         _frame.refreshFindResultsHighlightPainter(FindResultsPanel.this, 
                                                   DefinitionsPane.FIND_RESULTS_PAINTERS[_lastIndex]);
       }
@@ -232,7 +232,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     for (MovingDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
     if (_regionManager.getRegions().size()==0) { _close(); }
   }
-
+  
   /** Update button state and text. */
   protected void updateButtons() {
     ArrayList<MovingDocumentRegion> regs = getSelectedRegions();
@@ -245,8 +245,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected AbstractAction[] makePopupMenuActions() {
     AbstractAction[] acts = new AbstractAction[] {
       new AbstractAction("Go to") { public void actionPerformed(ActionEvent e) { goToRegion(); } },
-      new AbstractAction("Bookmark") { public void actionPerformed(ActionEvent e) { _bookmark(); } },
-      new AbstractAction("Remove") { public void actionPerformed(ActionEvent e) { _remove(); } }
+        new AbstractAction("Bookmark") { public void actionPerformed(ActionEvent e) { _bookmark(); } },
+          new AbstractAction("Remove") { public void actionPerformed(ActionEvent e) { _remove(); } }
     };
     return acts;
   }
@@ -268,13 +268,13 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       --DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
     }
   }
-
+  
   /** Factory method to create user objects put in the tree.
-   *  If subclasses extend RegionTreeUserObj, they need to override this method. */
+    * If subclasses extend RegionTreeUserObj, they need to override this method. */
   protected RegionTreeUserObj<MovingDocumentRegion> makeRegionTreeUserObj(MovingDocumentRegion r) {
     return new FindResultsRegionTreeUserObj(r);
   }
-
+  
   /** Class that gets put into the tree. The toString() method determines what's displayed in the tree. */
   protected static class FindResultsRegionTreeUserObj extends RegionTreeUserObj<MovingDocumentRegion> {
     protected int _lineNumber;
@@ -286,9 +286,9 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       if (other == null || other.getClass() != this.getClass()) return false;
       @SuppressWarnings("unchecked") FindResultsRegionTreeUserObj o = (FindResultsRegionTreeUserObj)other;
       return (o.region().getDocument().equals(region().getDocument()) &&
-        (o.region().getStartOffset() == region().getStartOffset()) &&
-        (o.region().getEndOffset() == region().getEndOffset()) &&
-        (o._lineNumber == this._lineNumber));
+              (o.region().getStartOffset() == region().getStartOffset()) &&
+              (o.region().getEndOffset() == region().getEndOffset()) &&
+              (o._lineNumber == this._lineNumber));
     }
     public int hashCode() {
       int result;

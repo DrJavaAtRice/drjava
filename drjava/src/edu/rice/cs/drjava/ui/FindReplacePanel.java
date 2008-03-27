@@ -71,7 +71,7 @@ import edu.rice.cs.util.StringOps;
   * @version $Id$
   */
 class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
-
+  
   private JButton _findNextButton;
   private JButton _findPreviousButton;
   private JButton _findAllButton;
@@ -79,19 +79,19 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   private JButton _replaceFindNextButton;
   private JButton _replaceFindPreviousButton;
   private JButton _replaceAllButton;
-
+  
   private JTextPane _findField;
   private JTextPane _replaceField;
-
+  
   private JLabel _findLabelBot; // Dynamically updated
-
+  
   private JCheckBox _ignoreCommentsAndStrings;
   private JCheckBox _matchCase;
   private JCheckBox _searchAllDocuments;
   private JCheckBox _matchWholeWord;
   
   /* MainFrame _frame is inherited from TabbedPanel */
-
+  
   private FindReplaceMachine _machine;
   private SingleDisplayModel _model;
   private DefinitionsPane _defPane = null;
@@ -128,11 +128,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   private Action _doFindAction = new AbstractAction("Do Find") {
     public void actionPerformed(ActionEvent e) { _doFind(); }
   };
-                                                            
+  
   private Action _replaceAction = new AbstractAction("Replace") {
     public void actionPerformed(ActionEvent e) { _replace(); }
   };
-
+  
   private Action _replaceFindNextAction = new AbstractAction("Replace/Find Next") {
     public void actionPerformed(ActionEvent e) { _replaceFindNext(); }
   };
@@ -140,10 +140,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   private Action _replaceFindPreviousAction = new AbstractAction("Replace/Find Previous") {
     public void actionPerformed(ActionEvent e) { _replaceFindPrevious(); };
   };
-
+  
   /** Replaces all occurences of the findfield text with that of the replacefield text both before and after the cursor
-   *  without prompting for wrapping around the end of the document.
-   */
+    * without prompting for wrapping around the end of the document.
+    */
   private Action _replaceAllAction = new AbstractAction("Replace All") {
     public void actionPerformed(ActionEvent e) { _replaceAll(); }
   };
@@ -165,18 +165,18 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       c.setCaretPosition(caretPos+1);
     }
   };    
-
+  
   /*private Action _closeAction = new AbstractAction("X") {
    public void actionPerformed(ActionEvent e) {
    // removeTab automatically calls show()
    _close();
    }
    };*/
-        
+  
   /** Standard Constructor.
-   *  @param frame the overall enclosing window
-   *  @param model the model containing the documents to search
-   */
+    * @param frame the overall enclosing window
+    * @param model the model containing the documents to search
+    */
   public FindReplacePanel(MainFrame frame, SingleDisplayModel model) {
     super(frame, "Find/Replace");
     _model = model;
@@ -192,11 +192,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _replaceFindNextButton = new JButton(_replaceFindNextAction);
     _replaceFindPreviousButton = new JButton(_replaceFindPreviousAction);
     _replaceAllButton = new JButton(_replaceAllAction);
-
+    
     _replaceAction.setEnabled(false);
     _replaceFindNextAction.setEnabled(false);
     _replaceFindPreviousAction.setEnabled(false);
-
+    
     
     /********* Find/Replace Field Initialization **********/
     _findField = new JTextPane(new DefaultStyledDocument());
@@ -278,7 +278,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     findLabelPanel.add(findLabelPanelTop);
     findLabelPanel.add(findLabelPanelBot);
-
+    
     
     /******** Button Panel ********/
     JPanel buttons = new JPanel();
@@ -290,7 +290,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     buttons.add(_replaceFindPreviousButton);
     buttons.add(_replaceButton);
     buttons.add(_replaceAllButton);
-   
+    
     
     /******** Listeners for the right-hand check boxes ********/
     boolean matchCaseSelected = DrJava.getConfig().getSetting(OptionConstants.FIND_MATCH_CASE);
@@ -346,25 +346,25 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     // We choose not to preserve backwards searching between sessions
     //_machine.setSearchBackwards(DrJava.getConfig().getSetting(OptionConstants.FIND_SEARCH_BACKWARDS));
     
-
+    
     /******** Initialize the panels containing the checkboxes ********/
     this.removeAll(); // actually, override the behavior of TabbedPanel
-
+    
     // remake closePanel
     _closePanel = new JPanel(new BorderLayout());
     _closePanel.add(_closeButton, BorderLayout.NORTH);
-
+    
     JPanel _lowerCheckPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     _lowerCheckPanel.add(_matchWholeWord); 
     _lowerCheckPanel.add(_ignoreCommentsAndStrings);
     _lowerCheckPanel.setMaximumSize(new Dimension(200, 40));
-
+    
     JPanel _matchCaseAndAllDocsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     _matchCase.setPreferredSize(_matchWholeWord.getPreferredSize());
     _matchCaseAndAllDocsPanel.add(_matchCase);
     _matchCaseAndAllDocsPanel.add(_searchAllDocuments);
     _matchCaseAndAllDocsPanel.setMaximumSize(new Dimension(200, 40));
-
+    
     BorderlessScrollPane _findPane = new BorderlessScrollPane(_findField);
     BorderlessScrollPane _replacePane = new BorderlessScrollPane(_replaceField);
     _findPane.setHorizontalScrollBarPolicy(BorderlessScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -377,12 +377,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     JPanel replacePanel = new JPanel(new BorderLayout(5,5));
     replacePanel.add(replaceLabelPanel, BorderLayout.WEST);
     replacePanel.add(_replacePane, BorderLayout.CENTER);
-        
+    
     /******** Set up the Panel containing the Text Fields ********/
     JPanel leftPanel = new JPanel(new GridLayout(1,2,5,5));
     leftPanel.add(findPanel);
     leftPanel.add(replacePanel);
-
+    
     /******** Set up the Panel containing both rows of checkboxes ********/
     GridBagLayout gbLayout = new GridBagLayout();
     GridBagConstraints c = new GridBagConstraints();
@@ -406,7 +406,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     c.weighty = 1.0;
     
     gbLayout.setConstraints(emptyPanel, c);
-
+    
     /******** Set up the Panel containing the two above main panels ********/
     JPanel midPanel = new JPanel(new BorderLayout(5,5));
     midPanel.add(leftPanel, BorderLayout.CENTER);
@@ -414,7 +414,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     
     /******** Set up the Panel containing the midPanel and the closePanel ********/
-     JPanel _rightPanel = new JPanel(new BorderLayout(5, 5));
+    JPanel _rightPanel = new JPanel(new BorderLayout(5, 5));
     _rightPanel.add(midPanel, BorderLayout.CENTER);
     _rightPanel.add(_closePanel, BorderLayout.EAST); 
     
@@ -433,18 +433,18 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _findField.getDocument().addDocumentListener(new DocumentListener() {
       
       /**If attributes in the find field have changed, gray out "Replace" & "Replace and Find Next" buttons.
-       * @param e the event caught by this listener
-       */
+        * @param e the event caught by this listener
+        */
       public void changedUpdate(DocumentEvent e) { _updateHelper(); }
-
+      
       /** If text has been changed in the find field, gray out "Replace" & "Replace and Find Next" buttons.
-       *  @param e the event caught by this listener
-       */
+        * @param e the event caught by this listener
+        */
       public void insertUpdate(DocumentEvent e) { _updateHelper(); }
       
       /** If text has been changed in the find field, gray out "Replace" & "Replace and Find Next" buttons.
-       *  @param e the event caught by this listener
-       */
+        * @param e the event caught by this listener
+        */
       public void removeUpdate(DocumentEvent e) { _updateHelper(); }
       
       private void _updateHelper() {
@@ -465,14 +465,14 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     });  
     
   }
-   
+  
   /** Focuses the find/replace dialog in the window, placing the focus on the _findField, and selecting all the text.*/
   public boolean requestFocusInWindow() {
     super.requestFocusInWindow();
     _findField.selectAll();
     return _findField.requestFocusInWindow();
   }
-
+  
   /** Getter method for the _findField component */
   JTextPane getFindField() { return _findField; }
   
@@ -611,7 +611,6 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          _model.setActiveDocument(startDoc);
           Toolkit.getDefaultToolkit().beep();
           _frame.setStatusMessage("Found " + count + " occurrence" + ((count == 1) ? "" : "s") + ".");
           if (count>0) {
@@ -621,9 +620,14 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         }
       });
     }
-    finally { _frame.hourglassOff(); }
+    finally { 
+      _frame.hourglassOff(); 
+      
+      // extracted from run() above because findAll occasionally left active document in inconsistent state 
+      _model.setActiveDocument(startDoc);
+    }
   }
-
+  
   /** Performs the "replace all" command. */
   private void _replaceAll() {
     _frame.updateStatusField("Replacing All");
@@ -696,7 +700,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _frame.setStatusMessage("Replace failed.");
     }
   }
-
+  
   /** Perfroms the "find next" command.  Package visibility to accommodate calls from MainFrame. */
   void findNext() {
     _frame.updateStatusField("Finding Next");
@@ -755,16 +759,16 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         _replaceFindPreviousAction.setEnabled(true);
         _machine.setLastFindWord();
       }
-
+      
       if (_findField.getText().equals("")) _replaceAllAction.setEnabled(false);
       else                                 _replaceAllAction.setEnabled(true);
-
+      
       _frame.clearStatusMessage();
     }
     else
       throw new UnexpectedException(new RuntimeException("FindReplacePanel should not be listening to anything"));
   }
-
+  
   /** Called from MainFrame upon closing this Dialog or changes in the active document. */
   public void stopListening() {
     if (_defPane != null) {
@@ -774,14 +778,14 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _frame.clearStatusMessage();
     } 
   }
-
+  
   /** Abstracted out since this is called from find and replace/find. */
   private void _doFind() {
-
+    
     if (_findField.getText().length() > 0) {
       
       _model.addToBrowserHistory();
-
+      
       _updateMachine();
       final String findWord = _findField.getText();
       _machine.setFindWord(findWord);
@@ -801,11 +805,11 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       final int pos = fr.getFoundOffset();
       
       // If there actually *is* a match, then switch active documents. otherwise don't
-       if (searchAll) {
-         if (docChanged) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
-         else _model.refreshActiveDocument();  // the unmodified active document may have been kicked out of the cache!
-       } 
-     
+      if (searchAll) {
+        if (docChanged) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+        else _model.refreshActiveDocument();  // the unmodified active document may have been kicked out of the cache!
+      } 
+      
       if (fr.getWrapped() && ! searchAll) {
         Toolkit.getDefaultToolkit().beep();
         if (! _machine.isSearchBackwards()) _frame.setStatusMessage("Search wrapped to beginning.");
@@ -855,17 +859,17 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _findField.requestFocusInWindow();
     }
   }
-
+  
   protected void _close() {
     _defPane.requestFocusInWindow();
     if (_displayed) stopListening();
     super._close();
     //_frame.uninstallFindReplaceDialog(this);
   }
-
+  
   public void setSearchBackwards(boolean b) { _machine.setSearchBackwards(b); }
   public boolean isSearchBackwards() { return _machine.isSearchBackwards(); }
-
+  
   /** Sets the font of the find and replace fields to f. */
   public void setFieldFont(Font f) {
     _findField.setFont(f);
@@ -873,12 +877,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   }
   
   /** Updates the first document where the current all-document search began (called in two places: either when the 
-   * _findField is updated, or when the user changes documents.
-   */
+    * _findField is updated, or when the user changes documents.
+    */
   public void updateFirstDocInSearch() {
     _machine.setFirstDoc(_model.getActiveDocument());
   }
-
+  
 //  private static Container wrap(JComponent comp) {
 //    Container stretcher = Box.createHorizontalBox();
 //    stretcher.add(comp);
@@ -902,7 +906,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //    addComp(parent, new JPanel(), c, gbl, 2, 0, 0f, 0f, 1, 0);
 //    addComp(parent, q4, c, gbl, 2, 1, 1f, 0f, 1, 0);
 //  }
-
+  
 //  private static void addComp(Container p, JComponent child,
 //                              GridBagConstraints c, GridBagLayout gbl,
 //                              int row, int col,
@@ -915,7 +919,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //    gbl.setConstraints(child,c);
 //    p.add(child);
 //  }
-
+  
   /** Sets appropriate variables in the FindReplaceMachine if the caret has been changed. */
   private void _updateMachine() {
     if (_caretChanged) {
@@ -927,7 +931,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       _caretChanged = false;
     }
   }
-
+  
 //  /** Shows the dialog and sets the focus appropriately. */
 //  public void show() {
 //   //super.show();
@@ -938,14 +942,14 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //     _findField.requestFocusInWindow();
 //     _findField.selectAll();
 //   }
-
+  
   /** This method is used to select the item that has been inserted in a replacement.  Assumes the current offset
     * identifies the found or replaced item.  In a forward search, this offset is the RIGHT edge of the found/replaced
     * item; in a backwards search it is the LEFT edge. */
   private void _selectFoundOrReplacedItem(int length) {
     int offset = _machine.getCurrentOffset();
     int from, to;
-
+    
     if (_machine.isSearchBackwards()) {
       from = offset;
       to = offset + length;
@@ -956,8 +960,8 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     }
     _selectFoundOrReplacedItem(from, to);
   }
-
-
+  
+  
 //  /** Calls _selectFoundItem(from, to) with reasonable defaults. */
 //  private void _selectFoundItem() {
 //    int position = _machine.getCurrentOffset();
@@ -967,7 +971,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //    else to = position + _machine.getFindWord().length();
 //    _selectFoundItem(from, to);
 //  }
-
+  
   /** Will select the identified text (from, to).  Note that positions are technically between characters, so there
     * is no distinction between open and closed intervals.  Originally highlighted the text, but we ran into problems
     * with the document remove method changing the view to where the cursor was located, resulting in 
@@ -978,7 +982,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   private void _selectFoundOrReplacedItem(int from, int to) {
     _defPane.centerViewOnOffset(from);
     _defPane.select(from, to);
-
+    
     // Found this little statement that will show the selected text in _defPane without giving _defPane 
     // focus, allowing the user to hit enter repeatedly and change the document while finding next.
     SwingUtilities.invokeLater(new Runnable() { 
@@ -986,7 +990,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     });
 //    _defPane.centerViewOnOffset(from);
   }
-
+  
 //  private void _close() { hide(); }
   
 //  public void hide() {
@@ -1016,7 +1020,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 //      
 //    }
 //  };
-    
+  
   /** We lost ownership of what we put in the clipboard. */
   public void lostOwnership(Clipboard clipboard, Transferable contents) {
     // ignore
@@ -1053,6 +1057,4 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /***************** METHODS FOR TESTING PURPOSES ONLY  ***********************/
   public DefinitionsPane getDefPane() { return _defPane; }
   public JButton getFindNextButton() {return _findNextButton; }
-  
-
 }

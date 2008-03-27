@@ -60,13 +60,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /** The panel that displays all the testing errors.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public class JUnitPanel extends ErrorPanel {
   private static final String START_JUNIT_MSG = "Testing in progress.  Please wait ...\n";
   private static final String JUNIT_FINISHED_MSG = "All tests completed successfully.\n";
   private static final String NO_TESTS_MSG = "";
-
+  
   private static final SimpleAttributeSet OUT_OF_SYNC_ATTRIBUTES = _getOutOfSyncAttributes();
   private static final SimpleAttributeSet _getOutOfSyncAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
@@ -74,42 +74,42 @@ public class JUnitPanel extends ErrorPanel {
     s.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     return s;
   }
-
+  
   private static final SimpleAttributeSet TEST_PASS_ATTRIBUTES = _getTestPassAttributes();
   private static final SimpleAttributeSet _getTestPassAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
     s.addAttribute(StyleConstants.Foreground, Color.green.darker());
     return s;
   }
-
+  
   private static final SimpleAttributeSet TEST_FAIL_ATTRIBUTES = _getTestFailAttributes();
   private static final SimpleAttributeSet _getTestFailAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
     s.addAttribute(StyleConstants.Foreground, Color.red);
     return s;
   }
-
+  
   private static final String TEST_OUT_OF_SYNC =
     "The documents being tested have been modified and should be recompiled!\n";
-
+  
   protected JUnitErrorListPane _errorListPane;
   private final MainFrame _mainFrame;      // only used in assert statements
   private int _testCount;
   private boolean _testsSuccessful;
-
+  
   private JUnitProgressBar _progressBar;
   private List<OpenDefinitionsDocument> _odds = new ArrayList<OpenDefinitionsDocument>();
-
+  
   private Action _showStackTraceAction = new AbstractAction("Show Stack Trace") {
-        public void actionPerformed(ActionEvent ae) {
-          if (_error != null) {
-            _displayStackTrace(_error);
-          }
-        }
-      };
-
+    public void actionPerformed(ActionEvent ae) {
+      if (_error != null) {
+        _displayStackTrace(_error);
+      }
+    }
+  };
+  
   private JButton _showStackTraceButton;
-
+  
   /** The currently selected error. */
   private JUnitError _error = null;
   private Window _stackFrame = null;
@@ -117,7 +117,7 @@ public class JUnitPanel extends ErrorPanel {
   private final JLabel _errorLabel = new JLabel();
   private final JLabel _testLabel = new JLabel();
   private final JLabel _fileLabel = new JLabel();
-
+  
   /** Constructor.
     * @param model SingleDisplayModel in which we are running
     * @param frame MainFrame in which we are displayed
@@ -127,22 +127,22 @@ public class JUnitPanel extends ErrorPanel {
     _mainFrame = frame;
     _testCount = 0;
     _testsSuccessful = true;
-
+    
     _progressBar = new JUnitProgressBar();
     _progressBar.setUI(new javax.swing.plaf.basic.BasicProgressBarUI());
     _showStackTraceButton = new JButton(_showStackTraceAction);
     customPanel.add(_progressBar, BorderLayout.NORTH);
     customPanel.add(_showStackTraceButton, BorderLayout.SOUTH);
-
+    
     _errorListPane = new JUnitErrorListPane();
     setErrorListPane(_errorListPane);
   }
-
+  
   /** Returns the JUnitErrorListPane that this panel manages. */
   public JUnitErrorListPane getErrorListPane() { return _errorListPane; }
-
+  
   protected JUnitErrorModel getErrorModel() { return getModel().getJUnitModel().getJUnitErrorModel(); }
-
+  
   /** Updates all document styles with the attributes contained in newSet.
     * @param newSet Style containing new attributes to use.
     */
@@ -153,19 +153,19 @@ public class JUnitPanel extends ErrorPanel {
     TEST_PASS_ATTRIBUTES.addAttributes(newSet);
     TEST_FAIL_ATTRIBUTES.addAttributes(newSet);
   }
-
+  
   /** called when work begins */
   public void setJUnitInProgress() {
     _errorListPane.setJUnitInProgress();
   }
-
+  
   /** Clean up when the tab is closed. */
   protected void _close() {
     super._close();
     getModel().getJUnitModel().resetJUnitErrors();
     reset();
   }
-
+  
   /** Reset the errors to the current error information. */
   public void reset() {
     JUnitErrorModel juem = getModel().getJUnitModel().getJUnitErrorModel();
@@ -177,7 +177,7 @@ public class JUnitPanel extends ErrorPanel {
     else _numErrors = 0;
     _errorListPane.updateListPane(testsHaveRun); //changed!!
   }
-
+  
   /** Resets the progress bar to start counting the given number of tests. */
   public void progressReset(int numTests) {
     _progressBar.reset();
@@ -185,18 +185,18 @@ public class JUnitPanel extends ErrorPanel {
     _testsSuccessful = true;
     _testCount = 0;
   }
-
+  
   /** Steps the progress bar forward by one test.
-   *  @param successful Whether the last test was successful or not.
-   */
+    * @param successful Whether the last test was successful or not.
+    */
   public void progressStep(boolean successful) {
     _testCount++;
     _testsSuccessful &= successful;
     _progressBar.step(_testCount, _testsSuccessful);
   }
-
+  
   public void testStarted(String className, String testName) { }
-
+  
   private void _displayStackTrace (JUnitError e) {
     _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
                         e.message());
@@ -212,17 +212,17 @@ public class JUnitPanel extends ErrorPanel {
     _frame.setPopupLoc(_stackFrame);
     _stackFrame.setVisible(true);
   }
-
+  
   /** A pane to show JUnit errors. It acts like a listbox (clicking selects an item) but items can each wrap, etc. */
   public class JUnitErrorListPane extends ErrorPanel.ErrorListPane {
     private JPopupMenu _popMenu;
     private String _runningTestName;
     private boolean _warnedOutOfSync;
     private static final String JUNIT_WARNING = "junit.framework.TestSuite$1.warning";
-
+    
     /** Maps any test names in the currently running suite to the position that they appear in the list pane. */
     private final HashMap<String, Position> _runningTestNamePositions;
-
+    
     /** Constructs the JUnitErrorListPane. */
     public JUnitErrorListPane() {
       removeMouseListener(defaultMouseListener);
@@ -235,7 +235,7 @@ public class JUnitPanel extends ErrorPanel {
       _runningTestNamePositions = new HashMap<String, Position>();
       _showStackTraceButton.setEnabled(false);
     }
-
+    
     private String _getTestFromName(String name) {
       int paren = name.indexOf('(');
       
@@ -243,14 +243,14 @@ public class JUnitPanel extends ErrorPanel {
       
       else throw new IllegalArgumentException("Name does not contain any parens: " + name);
     }
-
+    
     private String _getClassFromName(String name) {
       int paren = name.indexOf('(');
       
       if ((paren > -1) && (paren < name.length())) return name.substring(paren + 1, name.length() - 1);
       else throw new IllegalArgumentException("Name does not contain any parens: " + name);
     }
-
+    
     /** Provides the ability to display the name of the test being run. */
     public void testStarted(String name) {
       String testName = _getTestFromName(name);
@@ -282,7 +282,7 @@ public class JUnitPanel extends ErrorPanel {
       }
       finally { doc.releaseWriteLock(); }
     }
-
+    
     /** Displays the results of a test that has finished. */
     public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
       String testName = _getTestFromName(name);
@@ -300,7 +300,7 @@ public class JUnitPanel extends ErrorPanel {
         doc.setCharacterAttributes(index, length, set, false);
       }
     }
-
+    
     /** Puts the error pane into "junit in progress" state.  Only runs in event thread. */
     public void setJUnitInProgress() {
       assert EventQueue.isDispatchThread();
@@ -309,15 +309,15 @@ public class JUnitPanel extends ErrorPanel {
       _runningTestNamePositions.clear();
       _runningTestName = null;
       _warnedOutOfSync = false;
-
+      
       SwingDocument doc = new SwingDocument();
 //      _checkSync(doc);
-
+      
       doc.append(START_JUNIT_MSG, BOLD_ATTRIBUTES);
       setDocument(doc);
       selectNothing();
     }
-
+    
     /** Used to show that testing was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
@@ -349,14 +349,14 @@ public class JUnitPanel extends ErrorPanel {
       
       return numErrMsg.toString();
     }
-
+    
     protected void _updateWithErrors(String failureName, String failureMeaning, SwingDocument doc)
       throws BadLocationException {
       // Print how many errors
       _replaceInProgressText(_getNumErrorsMessage(failureName, failureMeaning));
-
+      
       _insertErrors(doc);
-
+      
       // Select the first error
       switchToError(0);
     }
@@ -375,27 +375,27 @@ public class JUnitPanel extends ErrorPanel {
         doc.insertString(start, msg, BOLD_ATTRIBUTES);
       }
     }
-
+    
     /** Returns the string to identify a warning. In JUnit, warnings (the odd case) indicate errors/exceptions.
-     */
+      */
     protected String _getWarningText() {  return "Error: "; }
-
+    
     /** Returns the string to identify an error.  In JUnit, errors (the normal case) indicate TestFailures. */
     protected String _getErrorText() { return "Failure: "; }
-
+    
     /** Updates the list pane with no errors. */
     protected void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
 //      _checkSync(getDocument());
       _replaceInProgressText(haveTestsRun ? JUNIT_FINISHED_MSG : NO_TESTS_MSG);
-
+      
       selectNothing();
       setCaretPosition(0);
     }
-
+    
 //    /** Checks the document being tested to see if it's in sync. If not,
-//     *  displays a message in the document in the test output pane.
-//     */
+//      * displays a message in the document in the test output pane.
+//      */
 //    private void _checkSync(Document doc) {
 //      if (_warnedOutOfSync) return;
 //      List<OpenDefinitionsDocument> odds = _odds;  // grab current _odds
@@ -412,7 +412,7 @@ public class JUnitPanel extends ErrorPanel {
 //        }
 //      }
 //    }
-
+    
     private void _setupStackTraceFrame() {
       //DrJava.consoleOut().println("Stack Trace for Error: \n"+ e.stackTrace());
       JDialog _dialog = new JDialog(_frame,"JUnit Error Stack Trace",false);
@@ -424,7 +424,7 @@ public class JUnitPanel extends ErrorPanel {
         BorderlessScrollPane(_stackTextArea,
                              JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                              JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
+      
       ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           _stackFrame.setVisible(false);
@@ -449,17 +449,17 @@ public class JUnitPanel extends ErrorPanel {
       _dialog.setSize(600, 500);
       // initial location is relative to parent (MainFrame)
     }
-
+    
     /** Overrides selectItem in ErrorListPane to update the current _error selected
-     *  and enabling the _showStackTraceButton.
-     */
+      * and enabling the _showStackTraceButton.
+      */
     public void selectItem(CompilerError error) {
       super.selectItem(error);
       _error = (JUnitError) error;
       _showStackTraceButton.setEnabled(true);
     }
-
-
+    
+    
     /**
      * Overrides _removeListHighlight in ErrorListPane to disable the _showStackTraceButton.
      */
@@ -467,7 +467,7 @@ public class JUnitPanel extends ErrorPanel {
       super._removeListHighlight();
       _showStackTraceButton.setEnabled(false);
     }
-
+    
     /**
      * Updates the UI to a new look and feel.
      * Need to update the contained popup menu as well.
@@ -475,13 +475,13 @@ public class JUnitPanel extends ErrorPanel {
      * Currently, we don't support changing the look and feel
      * on the fly, so this is disabled.
      *
-    public void updateUI() {
-      super.updateUI();
-      if (_popMenu != null) {
-        SwingUtilities.updateComponentTreeUI(_popMenu);
-      }
-    }*/
-
+     public void updateUI() {
+     super.updateUI();
+     if (_popMenu != null) {
+     SwingUtilities.updateComponentTreeUI(_popMenu);
+     }
+     }*/
+    
     private class PopupAdapter extends RightClickMouseAdapter {
       /**
        * Show popup if the click is on an error.
@@ -492,7 +492,7 @@ public class JUnitPanel extends ErrorPanel {
           super.mousePressed(e);
         }
       }
-
+      
       /**
        * Show popup if the click is on an error.
        * @param e the MouseEvent correponding to this click
@@ -502,7 +502,7 @@ public class JUnitPanel extends ErrorPanel {
           super.mouseReleased(e);
         }
       }
-
+      
       /**
        * Select the error at the given mouse event.
        * @param e the MouseEvent correponding to this click
@@ -511,7 +511,7 @@ public class JUnitPanel extends ErrorPanel {
       private boolean _selectError(MouseEvent e) {
         //TODO: get rid of cast in the next line, if possible
         _error = (JUnitError)_errorAtPoint(e.getPoint());
-
+        
         if (_isEmptySelection() && _error != null) {
           _errorListPane.switchToError(_error);
           return true;
@@ -521,7 +521,7 @@ public class JUnitPanel extends ErrorPanel {
           return false;
         }
       }
-
+      
       /**
        * Shows the popup menu for this mouse adapter.
        * @param e the MouseEvent correponding to this click
@@ -529,7 +529,7 @@ public class JUnitPanel extends ErrorPanel {
       protected void _popupAction(MouseEvent e) {
         _popMenu.show(e.getComponent(), e.getX(), e.getY());
       }
-
+      
 //      public JUnitError getError() {
 //        return _error;
 //      }
@@ -544,12 +544,12 @@ public class JUnitPanel extends ErrorPanel {
    */
   static class JUnitProgressBar extends JProgressBar {
     private boolean _hasError = false;
-
+    
     public JUnitProgressBar() {
       super();
       setForeground(getStatusColor());
     }
-
+    
     private Color getStatusColor() {
       if (_hasError) {
         return Color.red;
@@ -558,18 +558,18 @@ public class JUnitPanel extends ErrorPanel {
         return Color.green;
       }
     }
-
+    
     public void reset() {
       _hasError = false;
       setForeground(getStatusColor());
       setValue(0);
     }
-
+    
     public void start(int total) {
       setMaximum(total);
       reset();
     }
-
+    
     public void step(int value, boolean successful) {
       setValue(value);
       if (!_hasError && !successful) {

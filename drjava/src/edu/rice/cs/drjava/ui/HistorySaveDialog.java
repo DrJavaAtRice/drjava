@@ -42,27 +42,27 @@ import java.awt.event.*;
 import java.io.Serializable;
 
 /** Displayed when the user chooses to save the interactions history. It will show the current history and allow the
- *  user to edit or save it to a file.
- *  $Id$
- */
+  * user to edit or save it to a file.
+  * $Id$
+  */
 public class HistorySaveDialog extends DrJavaScrollableDialog implements Serializable {
-
+  
   /** Reference to the history text being edited. */
   private String _history;
-
+  
   /** Lock to ensure this history is only edited by one user at a time.
-   *  TODO: Is this necessary?
-   */
+    * TODO: Is this necessary?
+    */
 //  private Object _historyLock = new Object();
-
+  
   /** Creates a new HistorySaveDialog.
-   *  @param parent Parent frame for this dialog
-   */
+    * @param parent Parent frame for this dialog
+    */
   public HistorySaveDialog (JFrame parent) {
     super(parent, "Save Interactions History",
           "Make any changes to the history, and then click \"Save\".", "");
   }
-
+  
   /** Creates a custom set of buttons for this panel, including Save and Cancel. */
   protected void _addButtons() {
     // Updates the _history field with the new contents and closes the dialog
@@ -72,23 +72,23 @@ public class HistorySaveDialog extends DrJavaScrollableDialog implements Seriali
         _dialog.dispose();
       }
     };
-
+    
     // Closes the dialog
     Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed (ActionEvent ae) { _dialog.dispose(); }
     };
-
+    
     JButton saveButton = new JButton(saveAction);
     JButton cancelButton = new JButton(cancelAction);
     _buttonPanel.add(saveButton);
     _buttonPanel.add(cancelButton);
     _dialog.getRootPane().setDefaultButton(saveButton);
   }
-
+  
   /** Shows the dialog for editing the given history.
-   *  @param history History to edit
-   *  @return Edited history, if it is saved.  Null, if not.
-   */
+    * @param history History to edit
+    * @return Edited history, if it is saved.  Null, if not.
+    */
   public String editHistory(String history) {
 //    synchronized(_historyLock) {
     _history = null; // make it null by default

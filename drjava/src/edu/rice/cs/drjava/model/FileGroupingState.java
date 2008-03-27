@@ -41,37 +41,37 @@ import java.io.IOException;
 import java.util.List;
 
 /** This state pattern is used by the global model to store any information pertaining to the currently open project.  
- *  The state pattern is used because most project information is not needed in list view. (Elspeth Rocks)
- * 
- *  Hint: if you're looking for the instances of this interface, look in DefaultGlobalModel where they are defined 
- *  as anonymous inner classes.
- */
+  * The state pattern is used because most project information is not needed in list view. (Elspeth Rocks)
+  * 
+  * Hint: if you're looking for the instances of this interface, look in DefaultGlobalModel where they are defined 
+  * as anonymous inner classes.
+  */
 public interface FileGroupingState {
-
+  
   /** @return true if the model is in project mode, false otherwi */
   public boolean isProjectActive();
   
   /** @return true if the document is part of the active project (in the project path), or false
-   *  if it is not (or the model is not in project mode)
-   */
+    * if it is not (or the model is not in project mode)
+    */
   public boolean inProjectPath(OpenDefinitionsDocument doc);
   
   /** @return true if the file is part of the active project (in the project path), or false
-   *  if it is not (or the model is not in project mode)
-   */
+    * if it is not (or the model is not in project mode)
+    */
   public boolean inProjectPath(File f);
   
 //  /** junits all files that the state considers "all" (ie, all files in project directory in project mode). */
 //  public void junitAll();
   
   /** Returns the current project file
-   *  @return null if not currently in a project
-   */
+    * @return null if not currently in a project
+    */
   public File getProjectFile();
   
   /** Returns the project source root 
-   *  @return null if no build directory is specified
-   */
+    * @return null if no build directory is specified
+    */
   public File getProjectRoot();
   
   /** Sets project file to specifed value; used in "Save Project As ..." command in MainFrame. */
@@ -82,14 +82,14 @@ public interface FileGroupingState {
   
   /** Adds file to list of auxiliary files in project */
   public void addAuxFile(File f);
- 
+  
   /** Removes file to list of auxiliary files in project.  Throws an UnexpectedException if auxFiles does not contain 
-   *  exactly one instance of f.*/
+    * exactly one instance of f.*/
   public void remAuxFile(File f);
   
   /** Returns the directory in which to put the class files after compilation
-   *  @return null if no build directory is specified
-   */
+    * @return null if no build directory is specified
+    */
   public File getBuildDirectory();
   
   /** Sets the current build directory. */
@@ -98,17 +98,17 @@ public interface FileGroupingState {
   /** Returns the working directory for the slave (interactions pane) JVM. */
   public File getWorkingDirectory();
   
-   /** Sets the current working directory for the interactions pane. */
+  /** Sets the current working directory for the interactions pane. */
   public void setWorkingDirectory(File f);
   
   /** Returns the source file that has the main method of the project
-   *  @return null if no build directory is specified
-   */
+    * @return null if no build directory is specified
+    */
   public File getMainClass();
   
   /** Sets the file that has the main method of the project
-   *  (Note: should point to the sourcefile of the document, not the class file)
-   */
+    * (Note: should point to the sourcefile of the document, not the class file)
+    */
   public void setMainClass(File f);
   
   /** Sets the create jar file of the project. */
@@ -137,7 +137,7 @@ public interface FileGroupingState {
   
   /** Sets that the project state is no longer a snapshot of the open project. */
   public void setProjectChanged(boolean changed); 
-
+  
   /** Cleans the build directory. */
   public void cleanBuildDirectory();
   
@@ -145,8 +145,8 @@ public interface FileGroupingState {
   public List<File> getClassFiles();
   
   /** Returns a collection of classpath entries specific to the current project.
-   *  @return the project's extra classpath
-   */
+    * @return the project's extra classpath
+    */
   public Iterable<File> getExtraClassPath();
   
   /** Sets the list of project-specific classpath entries. */

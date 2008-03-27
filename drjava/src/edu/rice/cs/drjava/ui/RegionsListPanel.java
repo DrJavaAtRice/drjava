@@ -83,10 +83,10 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
   protected JPanel _buttonPanel;
   
   /** Constructs a new panel to display regions in a list.
-   *  This is swing view class and hence should only be accessed from the event-handling thread.
-   *  @param frame the MainFrame
-   *  @param title title of the pane
-   */
+    * This is swing view class and hence should only be accessed from the event-handling thread.
+    * @param frame the MainFrame
+    * @param title title of the pane
+    */
   public RegionsListPanel(MainFrame frame, String title) {
     super(frame, title);
     _title = title;
@@ -96,7 +96,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
     _model = frame.getModel();
     
     this.removeAll(); // override the behavior of TabbedPanel
-
+    
     // remake closePanel
     _closePanel = new JPanel(new BorderLayout());
     _closePanel.add(_closeButton, BorderLayout.NORTH);
@@ -216,7 +216,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
     mainButtons.setLayout(gbLayout);
     
     JComponent[] buts = makeButtons();
-
+    
     closeButtonPanel.add(_closeButton, BorderLayout.NORTH);    
     for (JComponent b: buts) { mainButtons.add(b); }
     mainButtons.add(emptyPanel);
@@ -225,7 +225,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
     c.anchor = GridBagConstraints.NORTH;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.weightx = 1.0;
-
+    
     for (JComponent b: buts) { gbLayout.setConstraints(b, c); }
     
     c.fill = GridBagConstraints.BOTH;
@@ -240,8 +240,8 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Gets the currently selected regions in the region list, or an empty array if no regions are selected.
-   *  @return list of selected regions in the list
-   */
+    * @return list of selected regions in the list
+    */
   protected ArrayList<R> getSelectedRegions() {
     ArrayList<R> regs = new ArrayList<R>();
     int[] indices = _list.getSelectedIndices();
@@ -277,18 +277,18 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
     }
     return null;
   }
-    
+  
   /** Add a region to the list. Must be executed in event thread.
-   *  @param r the region
-   *  @param index the index where the region should be inserted
-   */
+    * @param r the region
+    * @param index the index where the region should be inserted
+    */
   public void addRegion(final R r, final int index) {
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
       public void run() {
 //        edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("RegionsListPanel.addRegion: in list were...");
 //        for(int i=0;i<_listModel.getSize();++i) { edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("\t"+_listModel.elementAt(i)); }
-
+        
         String name = "";
         try { name = r.getDocument().getQualifiedClassName(); }
         catch (ClassNameNotFoundException cnnfe) { name = r.getDocument().toString(); }
@@ -304,8 +304,8 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Remove a region from the tree. Must be executed in event thread.
-   *  @param r the region
-   */
+    * @param r the region
+    */
   public void removeRegion(final R r) {
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
@@ -333,7 +333,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Remove all regions for this document from the tree. Must be executed in event thread.
-   */
+    */
   public void removeRegions(final OpenDefinitionsDocument odd) {
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
@@ -353,7 +353,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
             _listModel.removeElementAt(i);
           }
         }
-
+        
         updateButtons();
       }
     };
@@ -361,7 +361,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
   }
   
   /** Factory method to create user objects put in the list.
-   *  If subclasses extend RegionListUserObj, they need to override this method. */
+    * If subclasses extend RegionListUserObj, they need to override this method. */
   protected RegionListUserObj<R> makeRegionListUserObj(R r) {
     return new RegionListUserObj<R>(r);
   }
@@ -402,9 +402,7 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
   }
   
   
-  /**
-   * Mouse adapter for the region tree.
-   */
+  /** Mouse adapter for the region tree. */
   protected class RegionMouseAdapter extends RightClickMouseAdapter {
     protected void _popupAction(MouseEvent e) {
       // TODO: add popup
@@ -417,5 +415,5 @@ public abstract class RegionsListPanel<R extends DocumentRegion> extends TabbedP
       }
     }
   }
-
+  
 }

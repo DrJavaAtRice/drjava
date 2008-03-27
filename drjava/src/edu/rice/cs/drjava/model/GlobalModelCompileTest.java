@@ -46,8 +46,8 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** Tests to ensure that compilation behaves correctly in border cases.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public final class GlobalModelCompileTest extends GlobalModelTestCase {
   /** Tests calling compileAll with no source files works. Does not reset interactions. */
   public void testCompileAllWithNoFiles() throws BadLocationException, IOException, InterruptedException {
@@ -65,7 +65,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     _model.removeListener(listener);
   }
-
+  
   /** Tests that the interactions pane is reset after a successful compile. */
   public void testCompileResetsInteractions() throws BadLocationException, IOException, InterruptedException,
     EditDocumentException {
@@ -78,7 +78,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     
     // Use the interpreter so resetInteractions is not optimized to a no-op
     interpret("0");
-
+    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.setResetAfterCompile(true);
     _model.addListener(listener);
@@ -90,22 +90,22 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
       fail("compile failed: " + getCompilerErrorString());
     }
     listener.waitResetDone();
-
+    
 //    System.err.println("Reached end of compilation");
     assertCompileErrorsPresent("compile should succeed", false);
     listener.checkCompileOccurred();
- 
+    
 //    System.err.println("Checked that compile occurred");
     _model.removeListener(listener);
 //    System.err.println("Removed compilation listener");
   }
-
+  
   /** If we try to compile an unsaved file, and if we don't save when asked to saveAllBeforeProceeding, it should
-   *  not do the compile or any other actions.
-   */
+    * not do the compile or any other actions.
+    */
   public void testCompileAbortsIfUnsaved() throws BadLocationException, IOException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-
+    
     TestListener listener = new TestListener() {
       public void saveBeforeCompile() {
         assertModified(true, doc);
@@ -113,7 +113,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         // since we don't actually save the compile should abort
       }
     };
-
+    
     _model.addListener(listener);
     doc.startCompile();
     listener.assertSaveBeforeCompileCount(1);
@@ -121,14 +121,14 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     assertContents(FOO_TEXT, doc);
     _model.removeListener(listener);
   }
-
+  
   /** If we try to compile while any files are unsaved, and if we don't save when asked to saveAllBeforeProceeding,
-   *  it should not do the compile or any other actions.
-   */
+    * it should not do the compile or any other actions.
+    */
   public void testCompileAbortsIfAnyUnsaved() throws BadLocationException, IOException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
-
+    
     TestListener listener = new TestListener() {
       public void saveBeforeCompile() {
         assertModified(true, doc);
@@ -137,7 +137,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         // since we don't actually save the compile should abort
       }
     };
-
+    
     _model.addListener(listener);
     doc.startCompile();
     listener.assertSaveBeforeCompileCount(1);
@@ -147,16 +147,16 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     assertContents(BAR_TEXT, doc2);
     _model.removeListener(listener);
   }
-
+  
   /** If we try to compile while any files (including the active file) are unsaved but we do save it from within saveAllBeforeProceeding, the
-   *  compile should occur happily.  Doesn't reset interactions because no interpretations are performed.
-   */
+    * compile should occur happily.  Doesn't reset interactions because no interpretations are performed.
+    */
   public void testCompileAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, InterruptedException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(2);
-
+    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false) {
       public void saveBeforeCompile() {
         assertModified(true, doc);
@@ -166,16 +166,16 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertCompileEndCount(0);
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
-
+        
         try {
           doc.saveFile(new FileSelector(file));
           doc2.saveFile(new FileSelector(file2));
         }
         catch (IOException ioe) { fail("Save produced exception: " + ioe); }
-
+        
         synchronized(this) { saveBeforeCompileCount++; }
       }
-
+      
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
         assertSaveBeforeCompileCount(0);
@@ -183,7 +183,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertCompileEndCount(0);
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
-
+        
         try { doc.getFile(); }
         catch (FileMovedException fme) {
           // We know file should exist
@@ -193,7 +193,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         synchronized(this) { saveCount++; }
       }
     };
-
+    
     _model.addListener(listener);
     doc.startCompile();
     listener.waitCompileDone();
@@ -201,22 +201,22 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
-
+    
     // Check events fired
     listener.assertSaveBeforeCompileCount(1);
     listener.assertSaveCount(2);
     assertCompileErrorsPresent("compile should succeed", false);
     listener.checkCompileOccurred();
-
+    
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue("Class file doesn't exist after compile", compiled.exists());
     _model.removeListener(listener);
   }
-
+  
   /** If we try to compile while any files (but not the active file) are unsaved but we do save it from within 
-   *  saveAllBeforeProceeding, the compile should occur happily.  Does not reset interactions.
-   */
+    * saveAllBeforeProceeding, the compile should occur happily.  Does not reset interactions.
+    */
   public void testCompileActiveSavedAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, 
     InterruptedException {
     
@@ -224,7 +224,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     final File file = tempFile();
     final File file2 = tempFile(1);
-
+    
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(false) {
       public void saveBeforeCompile() {
         assertModified(false, doc);
@@ -234,16 +234,16 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertCompileEndCount(0);
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
-
+        
         try { doc2.saveFile(new FileSelector(file2)); }
         catch (IOException ioe) { fail("Save produced exception: " + ioe); }
-
+        
         synchronized(this) { saveBeforeCompileCount++; }
         assertModified(false, doc);
         assertModified(false, doc2);
         assertTrue(!_model.hasModifiedDocuments());
       }
-
+      
       public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
         assertSaveBeforeCompileCount(0);
@@ -251,7 +251,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         assertCompileEndCount(0);
         assertInterpreterReadyCount(0);
         assertConsoleResetCount(0);
-
+        
         File f = null;
         try { f = doc.getFile(); }
         catch (FileMovedException fme) {
@@ -262,7 +262,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
         synchronized(this) { saveCount++; }
       }
     };
-
+    
     assertModified(true, doc);
     doc.saveFile(new FileSelector(file));
     assertModified(false, doc);
@@ -274,14 +274,14 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
       fail("compile failed: " + getCompilerErrorString());
     }
     assertTrue(!_model.hasModifiedDocuments());
-
+    
     // Check events fired
     listener.assertCompileStartCount(1);
     listener.assertSaveBeforeCompileCount(1);
     listener.assertSaveCount(1);
     assertCompileErrorsPresent("compile should succeed", false);
     listener.checkCompileOccurred();
-
+    
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue("Class file doesn't exist after compile", compiled.exists());

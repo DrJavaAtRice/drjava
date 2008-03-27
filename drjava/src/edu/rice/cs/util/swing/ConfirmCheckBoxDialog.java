@@ -49,10 +49,10 @@ public class ConfirmCheckBoxDialog {
   private JCheckBox _checkBox;
   
   /** Instantiates a new confirm dialog with default checkbox text.
-    *  @param parent the parent frame
-    *  @param title the title of the dialog
-    *  @param message the stuff to display in the body of the dialog. For a simple message, it should be a String; it can
-    *         also be an Object[] including Strings and Components to display in the body of the dialog.
+    * @param parent the parent frame
+    * @param title the title of the dialog
+    * @param message the stuff to display in the body of the dialog. For a simple message, it should be a String; it can
+    *        also be an Object[] including Strings and Components to display in the body of the dialog.
     */
   public ConfirmCheckBoxDialog(JFrame parent, String title, Object message) {
     this(parent, title, message, "Do not show this message again");

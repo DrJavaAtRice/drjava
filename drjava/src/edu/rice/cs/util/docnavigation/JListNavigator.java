@@ -45,13 +45,13 @@ import edu.rice.cs.util.swing.Utilities;
 //import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 /** This class is an extension of JList that adds data shadowing the model embedded in a JList.
-  *  Since all changes to the model (except for the selected item!) must go through this interface,
-  *  we can support access to methods from non-event threads as long as these methods do not modify
-  *  the model.  However, all of the public methods that access and modify the model (the latter only running
-  *  in the event thread) must be atomic relative to each other, so synchronization is required in most
-  *  cases.
+  * Since all changes to the model (except for the selected item!) must go through this interface,
+  * we can support access to methods from non-event threads as long as these methods do not modify
+  * the model.  However, all of the public methods that access and modify the model (the latter only running
+  * in the event thread) must be atomic relative to each other, so synchronization is required in most
+  * cases.
   * 
-  *  TODO: generify this class and IDocumentNavigator with respect to its element type once JList is. 
+  * TODO: generify this class and IDocumentNavigator with respect to its element type once JList is. 
   */
 
 class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDocumentNavigator<ItemT> {
@@ -212,7 +212,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   }
   
   /** Sets the specified document as selected.  Should only be called from event thread.
-    *  @param doc the document to select
+    * @param doc the document to select
     */
   public void setActiveDoc(ItemT doc) { 
     boolean found;

@@ -39,9 +39,7 @@ package edu.rice.cs.drjava.model;
 import java.util.List;
 import java.util.LinkedList;
 
-/**
- * Model class for clipboard history.
- */
+/** Model class for clipboard history. */
 public class ClipboardHistoryModel {
   /** Maximum size of the history. */
   private int _maxSize;
@@ -59,7 +57,7 @@ public class ClipboardHistoryModel {
   }
   
   /** Create a new clipboard history model.
-   *  @param maxSize maximum size of history */
+    * @param maxSize maximum size of history */
   private ClipboardHistoryModel(int maxSize) {
     _maxSize = maxSize;
   }
@@ -71,7 +69,7 @@ public class ClipboardHistoryModel {
   }
   
   /** Add a string to the history. If it is already in the history, it will get
-   *  moved to the end, making it the most recent string. */
+    * moved to the end, making it the most recent string. */
   public synchronized void put(String s) {
     _history.remove(s);
     _history.add(s);

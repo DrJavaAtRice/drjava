@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Class to store and retrieve all configurable options.
-  *  @version $Id$
+  * @version $Id$
   */
 public class Configuration {  
   

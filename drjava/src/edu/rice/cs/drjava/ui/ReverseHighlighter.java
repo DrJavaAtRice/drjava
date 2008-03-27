@@ -124,22 +124,22 @@ public class ReverseHighlighter extends DefaultHighlighter {
                        (p instanceof LayeredHighlighter.LayerPainter)) ?
       new LayeredHighlightInfo() : new HighlightInfo();
     i.painter = p;
-
+    
     i.p0 = doc.createPosition(p0);
     i.p1 = doc.createPosition(p1);
-
+    
     int insertPos = highlights.size();
     /*if ((!(p instanceof DefaultFrameHighlightPainter)) && (!(p instanceof DefaultUnderlineHighlightPainter))) {
-      // insert solid painters after the frame and underline painters
-      while (insertPos>0) {
-        HighlightInfo hli = highlights.elementAt( insertPos-1 );
-        if ((! (hli.getPainter() instanceof DefaultFrameHighlightPainter)) && 
-            (! (hli.getPainter() instanceof DefaultUnderlineHighlightPainter))) {
-          break;
-        }
-        --insertPos;
-      }
-    }*/
+     // insert solid painters after the frame and underline painters
+     while (insertPos>0) {
+     HighlightInfo hli = highlights.elementAt( insertPos-1 );
+     if ((! (hli.getPainter() instanceof DefaultFrameHighlightPainter)) && 
+     (! (hli.getPainter() instanceof DefaultUnderlineHighlightPainter))) {
+     break;
+     }
+     --insertPos;
+     }
+     }*/
     if (p instanceof DrJavaHighlightPainter) {
       while (insertPos>0) {
         HighlightInfo hli = highlights.elementAt( insertPos-1 );
@@ -271,7 +271,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
       // Mark the highlights region as invalid, it will reset itself
       // next time asked to paint.
       lhi.width = lhi.height = 0;
-
+      
       lhi.p0 = doc.createPosition(p0);
       lhi.p1 = doc.createPosition(p1);
       safeDamageRange(Math.min(p0, p1), Math.max(p0, p1));
@@ -286,10 +286,10 @@ public class ReverseHighlighter extends DefaultHighlighter {
         safeDamageRange(oldP0, oldP1);
         safeDamageRange(p0, p1);
       }
-
+      
       info.p0 = doc.createPosition(p0);
       info.p1 = doc.createPosition(p1);
-
+      
       // TODO: figure out what is wrong here.  The preceding lines are dead code.
     }
   }
@@ -349,7 +349,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
   /** Queues damageRange() call into event dispatch thread to be sure that views are in consistent state. */
   private void safeDamageRange(int a0, int a1) throws BadLocationException {
     Document doc = component.getDocument();
-
+    
     safeDamageRange(doc.createPosition(a0), doc.createPosition(a1));
   }
   
@@ -453,7 +453,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
           drawRectThick(g, p0.x, p0.y, p0ToMarginWidth, p0.height, thickness);
           if ((p0.y + p0.height) != p1.y) {
             drawRectThick(g, alloc.x, p0.y + p0.height, alloc.width, 
-                       p1.y - (p0.y + p0.height), thickness);
+                          p1.y - (p0.y + p0.height), thickness);
           }
           drawRectThick(g, alloc.x, p1.y, (p1.x - alloc.x), p1.height, thickness);
         }
@@ -593,7 +593,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
           drawUnderline(g, p0.x, p0.y, p0ToMarginWidth, p0.height, thickness);
           if ((p0.y + p0.height) != p1.y) {
             drawUnderline(g, alloc.x, p0.y + p0.height, alloc.width, 
-                       p1.y - (p0.y + p0.height), thickness);
+                          p1.y - (p0.y + p0.height), thickness);
           }
           drawUnderline(g, alloc.x, p1.y, (p1.x - alloc.x), p1.height, thickness);
         }
@@ -693,7 +693,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
     
   }
   
-    
+  
   /**
    * LayeredHighlightPainter is used when a drawsLayeredHighlights is
    * true. It maintains a rectangle of the region to paint.
@@ -747,12 +747,12 @@ public class ReverseHighlighter extends DefaultHighlighter {
     int width;
     int height;
   }
-
+  
   
   /** This class invokes <code>mapper.damageRange</code> in EventDispatchThread. The only one instance per Highlighter
-   *  is cretaed. When a number of ranges should be damaged it collects them into queue and damages them in consecutive
-   *  order in <code>run</code> call.
-   */
+    * is cretaed. When a number of ranges should be damaged it collects them into queue and damages them in consecutive
+    * order in <code>run</code> call.
+    */
   class SafeDamager implements Runnable {
     private Vector<Position> p0 = new Vector<Position>(10);
     private Vector<Position> p1 = new Vector<Position>(10);

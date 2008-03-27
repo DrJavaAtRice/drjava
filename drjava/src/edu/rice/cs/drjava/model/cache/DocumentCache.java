@@ -51,29 +51,29 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.OrderedHashSet;
 
 /** The document cache is a structure that maps OpenDefinitionsDocuments to DefinitionsDocuments (which contain
-  *  the actual document text).  Since the latter can consume a lot of memory, the cache virtualizes some of them
-  *  using DefinitionsDocument reconstructors (DDReconstructor).  It tries to limit the number of 
-  *  DefinitionsDocuments loaded in memory at one time, but it must of course retain all modified 
-  *  DefinitionsDocuments.
-  *  <p>
-  *  The cache creates a DocManager for each OpenDefinitionsDocument entered (registered) in the cache. The managers
-  *  maintain the actual links to DefinitionsDocuments. Since the Managers themselves implement the DCacheAdapter 
-  *  interface, the model goes directly to the manager to get the instance of the DefinitionsDocument.
-  *  <p>
-  *  When a document is accessed through the document manager by the model, the cache informs the manager, which 
-  *  tells the active queue to add the manager to the end of the queue--if it isn't already in the queue.  If the
-  *  active queue had already reached maximum size, it deletes the last document in the queue to keep the queue from
-  *  growing larger than its maximum size.
-  *  <p>
-  *  The resident queue only contains documents that have not been modified since their last save (except in the process
-  *  of responding to notification that a document has been modified).  When a document is modified for the first time, 
-  *  it is immediately removed from the resident queue and marked as UNMANAGED by its document manager.  An
-  *  UNMANAGED document remains in memory until it is saved or closed without being saved.  If such a document is
-  *  saved, it is inserted again in the resident queue.
-  *  <p>
-  *  Since the cache and document managers can both be concurrently accessed from multiple threads, the methods in the
-  *  DocumentCache and DocManager classes are synchronized.  Some operations require locks on both the cache and a
-  *  document manager, but the code is written so that none of require these locks to be held simultaneously.
+  * the actual document text).  Since the latter can consume a lot of memory, the cache virtualizes some of them
+  * using DefinitionsDocument reconstructors (DDReconstructor).  It tries to limit the number of 
+  * DefinitionsDocuments loaded in memory at one time, but it must of course retain all modified 
+  * DefinitionsDocuments.
+  * <p>
+  * The cache creates a DocManager for each OpenDefinitionsDocument entered (registered) in the cache. The managers
+  * maintain the actual links to DefinitionsDocuments. Since the Managers themselves implement the DCacheAdapter 
+  * interface, the model goes directly to the manager to get the instance of the DefinitionsDocument.
+  * <p>
+  * When a document is accessed through the document manager by the model, the cache informs the manager, which 
+  * tells the active queue to add the manager to the end of the queue--if it isn't already in the queue.  If the
+  * active queue had already reached maximum size, it deletes the last document in the queue to keep the queue from
+  * growing larger than its maximum size.
+  * <p>
+  * The resident queue only contains documents that have not been modified since their last save (except in the process
+  * of responding to notification that a document has been modified).  When a document is modified for the first time, 
+  * it is immediately removed from the resident queue and marked as UNMANAGED by its document manager.  An
+  * UNMANAGED document remains in memory until it is saved or closed without being saved.  If such a document is
+  * saved, it is inserted again in the resident queue.
+  * <p>
+  * Since the cache and document managers can both be concurrently accessed from multiple threads, the methods in the
+  * DocumentCache and DocManager classes are synchronized.  Some operations require locks on both the cache and a
+  * document manager, but the code is written so that none of require these locks to be held simultaneously.
   */
 
 public class DocumentCache {
@@ -101,9 +101,9 @@ public class DocumentCache {
   public DocumentCache() { this(INIT_CACHE_SIZE); }
   
   /** Returns a cache adapter corresponding to the owner of the given reconstructor.
-    *  @param odd The open definitions document that is registering.  (Useful for debugging purposes.)
-    *  @param rec A reconstructor from which to create the document that is to be managed in this cache
-    *  @return an adapter that allows its owner to access its definitions document
+    * @param odd The open definitions document that is registering.  (Useful for debugging purposes.)
+    * @param rec A reconstructor from which to create the document that is to be managed in this cache
+    * @return an adapter that allows its owner to access its definitions document
     */
   public DCacheAdapter register(OpenDefinitionsDocument odd, DDReconstructor rec) {
     DocManager mgr = new DocManager(rec, odd.isUntitled());
@@ -151,8 +151,8 @@ public class DocumentCache {
   /** Note: before extending this table, check that the extension does not conflict with isUnmangedOrUntitled() */
   
   /** Manages the retrieval of a document for a corresponding open definitions document.  This manager only 
-    *  maintains its document data if it contained in _residentQueue, which is maintained using a round-robin
-    *  replacement scheme.
+    * maintains its document data if it contained in _residentQueue, which is maintained using a round-robin
+    * replacement scheme.
     */
   private class DocManager implements DCacheAdapter {
     
@@ -161,7 +161,7 @@ public class DocumentCache {
     private volatile DefinitionsDocument _doc;
     
     /** Instantiates a manager for the documents that are produced by the given document reconstructor.
-      *  @param rec The reconstructor used to create the document
+      * @param rec The reconstructor used to create the document
       */
     public DocManager(DDReconstructor rec, boolean isUntitled) {
 //      Utilities.showDebug("DocManager(" + rec + ", " + fn + ", " + isUntitled + ")");
@@ -192,7 +192,7 @@ public class DocumentCache {
       * DDReconstructor and returns it.  If the document has been modified in memory since it was last fetched, make 
       * it "unmanaged", removing it from the queue.  It will remain in memory until saved.  If a document is not in 
       * the queue, add it.
-      *  @return the physical document that is managed by this adapter
+      * @return the physical document that is managed by this adapter
       */
     public DefinitionsDocument getDocument() throws IOException, FileMovedException {
 //      Utilities.showDebug("getDocument called on " + this + " with _stat = " + _stat);
@@ -236,7 +236,7 @@ public class DocumentCache {
     }
     
     /** Checks whether the document is resident (in the cache or modified). 
-      *  @return if the document is resident.
+      * @return if the document is resident.
       */
     public boolean isReady() {  return _doc != null; }  // _doc is volatile so synchronization is unnecessary
     

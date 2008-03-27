@@ -65,8 +65,8 @@ import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 
 /** Default implementation of the CompilerModel interface. This implementation is used for normal DrJava execution
-  *  (as opposed to testing DrJava).
-  *  @version $Id$
+  * (as opposed to testing DrJava).
+  * @version $Id$
   */
 public class DefaultCompilerModel implements CompilerModel {
   

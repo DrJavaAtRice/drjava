@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.util.text.EditDocumentInterface;
 
 /** DrJava's print preview window for a console document (interactions or console)
-  *  @version $Id$
+  * @version $Id$
   */
 public class PreviewConsoleFrame extends PreviewFrame {
   

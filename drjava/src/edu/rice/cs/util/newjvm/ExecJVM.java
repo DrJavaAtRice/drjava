@@ -50,7 +50,7 @@ import java.util.LinkedList;
 import java.util.Locale;
 
 /** A utility class to allow executing another JVM.
-  *  @version $Id$
+  * @version $Id$
   */
 public final class ExecJVM {
   private static final String PATH_SEPARATOR = System.getProperty("path.separator");
@@ -59,11 +59,11 @@ public final class ExecJVM {
   private ExecJVM() { }
   
   /** Runs a new JVM.
-    *  @param mainClass Class to run
-    *  @param classParams Parameters to pass to the main class
-    *  @param classPath Array of items to put in classpath of new JVM
-    *  @param jvmParams Array of additional command-line parameters to pass to JVM
-    *  @return {@link Process} object corresponding to the executed JVM
+    * @param mainClass Class to run
+    * @param classParams Parameters to pass to the main class
+    * @param classPath Array of items to put in classpath of new JVM
+    * @param jvmParams Array of additional command-line parameters to pass to JVM
+    * @return {@link Process} object corresponding to the executed JVM
     */
   public static Process runJVM(String mainClass, String[] classParams, String[] classPath, String[] jvmParams, File workDir)
     throws IOException {
@@ -79,12 +79,12 @@ public final class ExecJVM {
   }
   
   /** Runs a new JVM.
-    *  @param mainClass Class to run
-    *  @param classParams Parameters to pass to the main class
-    *  @param classPath Pre-formatted classpath parameter
-    *  @param jvmParams Array of additional command-line parameters to pass to JVM
+    * @param mainClass Class to run
+    * @param classParams Parameters to pass to the main class
+    * @param classPath Pre-formatted classpath parameter
+    * @param jvmParams Array of additional command-line parameters to pass to JVM
     *
-    *  @return {@link Process} object corresponding to the executed JVM
+    * @return {@link Process} object corresponding to the executed JVM
     */
   public static Process runJVM(String mainClass, String[] classParams, String classPath, String[] jvmParams, File workDir)
     throws IOException {
@@ -99,10 +99,10 @@ public final class ExecJVM {
   }
   
   /** Runs a new JVM, propagating the present classpath.  It changes the entries in the class path to absolute form.
-    *  @param mainClass Class to run
-    *  @param classParams Parameters to pass to the main class
-    *  @param jvmParams Array of additional command-line parameters to pass to JVM
-    *  @return {@link Process} object corresponding to the executed JVM
+    * @param mainClass Class to run
+    * @param classParams Parameters to pass to the main class
+    * @param jvmParams Array of additional command-line parameters to pass to JVM
+    * @return {@link Process} object corresponding to the executed JVM
     */
   public static Process runJVMPropagateClassPath(String mainClass, String[] classParams, String[] jvmParams, File workDir)
     throws IOException {
@@ -112,9 +112,9 @@ public final class ExecJVM {
   }
   
   /** Runs a new JVM, propagating the present classpath.
-    *  @param mainClass Class to run
-    *  @param classParams Parameters to pass to the main class
-    *  @return {@link Process} object corresponding to the new JVM process
+    * @param mainClass Class to run
+    * @param classParams Parameters to pass to the main class
+    * @return {@link Process} object corresponding to the new JVM process
     */
   public static Process runJVMPropagateClassPath(String mainClass, String[] classParams, File workDir)
     throws IOException {
@@ -122,13 +122,13 @@ public final class ExecJVM {
   }
   
   /** Creates and runs a new JVM.  This method is private now because it cannot change the classpath entries to 
-    *  absolute paths, so it should not be used.
+    * absolute paths, so it should not be used.
     *
-    *  @param mainClass Class to run
-    *  @param classParams Parameters to pass to the main class
-    *  @param jvmParams Array of additional command-line parameters to pass to JVM
+    * @param mainClass Class to run
+    * @param classParams Parameters to pass to the main class
+    * @param jvmParams Array of additional command-line parameters to pass to JVM
     *
-    *  @return {@link Process} object corresponding to the executed JVM
+    * @return {@link Process} object corresponding to the executed JVM
     */
   private static Process _runJVM(String mainClass, String[] classParams, String[] jvmParams, File workDir) throws IOException {
     LinkedList<String> args = new LinkedList<String>();

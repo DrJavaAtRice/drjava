@@ -41,27 +41,27 @@ import java.io.File;
 import edu.rice.cs.util.OperationCanceledException;
 
 /** An interface to give GlobalModel a file to save a document to.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public interface FileSaveSelector {
-
+  
   /** Returns the file to save.
-   *  @throws OperationCanceledException if the save request is cancelled
-   */
+    * @throws OperationCanceledException if the save request is cancelled
+    */
   public File getFile() throws OperationCanceledException;
   
   /** Informs the user that the chosen file is already open and prompts them asking whether to continue with the save
-   *  @param f the file being saved
-   *  @return true iff the save is to occur
-   */
+    * @param f the file being saved
+    * @return true iff the save is to occur
+    */
   public boolean warnFileOpen(File f);
   
   /** Confirms whether the existing chosen file should be overwritten. */
   public boolean verifyOverwrite();
   
   /** Confirms whether a new file should be selected since the previously chosen file has been deleted or moved.
-   *  @param oldFile The file that was moved or deleted.
-   */
+    * @param oldFile The file that was moved or deleted.
+    */
   public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile);
-
+  
 }

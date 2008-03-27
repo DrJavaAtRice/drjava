@@ -145,12 +145,11 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     }
   }
 
-  /**
-   * Tests compiling a file with generics works with generic compilers.
+  /** Tests compiling a file with generics works with generic compilers.
    * (NOTE: this currently tests the GJ compiler, but not JSR-14...
-   *  JSR-14 is only available if the config option is set, and we clear
-   *  the config before running the tests.  We have a guess where the jar
-   *  is -- the lib directory -- but how can we get a URL for that?)
+   * JSR-14 is only available if the config option is set, and we clear
+   * the config before running the tests.  We have a guess where the jar
+   * is -- the lib directory -- but how can we get a URL for that?)
    */
   public void testCompileWithGenerics()
     throws BadLocationException, IOException, InterruptedException

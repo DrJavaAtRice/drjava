@@ -55,7 +55,7 @@ import java.util.*;
 public class InsertVariableDialog extends JFrame implements OptionConstants {
   /** Tab pane. */
   JTabbedPane _tabbedPane = new JTabbedPane();
-
+  
   /**
    * Table with variables.
    */
@@ -80,7 +80,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
    * Button to cancel.
    */
   private JButton _cancelBtn;
-
+  
   /** Main frame. */
   private MainFrame _mainFrame;
   
@@ -91,19 +91,19 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
   private CompletionMonitor _cm;
   
   /** Create a dialog.
-   *  @param mf the instance of mainframe to query into the project
-   */
+    * @param mf the instance of mainframe to query into the project
+    */
   public InsertVariableDialog(MainFrame mf, CompletionMonitor cm) {
     super("Insert Variable");
     _mainFrame = mf;
     _cm = cm;
     initComponents();
   }
-
+  
   /** Build the dialog. */
   private void initComponents() {
     super.getContentPane().setLayout(new GridLayout(1,1));
-
+    
     Action okAction = new AbstractAction("Select") {
       public void actionPerformed(ActionEvent e) {
         _okCommand();
@@ -121,7 +121,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     JPanel buttons = new JPanel();
     buttons.add(_okBtn);
     buttons.add(_cancelBtn);
-
+    
     _varValueField = new JTextField();
     updatePanes();
     _tabbedPane.addChangeListener(new ChangeListener() {
@@ -137,7 +137,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     });
     
     JPanel main = new JPanel(new BorderLayout());
-
+    
     JPanel bottom = new JPanel(new BorderLayout());
     bottom.add(_varValueField, BorderLayout.CENTER);    
     bottom.add(buttons, BorderLayout.SOUTH);
@@ -155,7 +155,7 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
     
     //The following line enables to use scrolling tabs.
     _tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-
+    
     // do not allow preview to have focus
     _tabbedPane.addFocusListener(new FocusAdapter() {
       public void focusLost(FocusEvent e) {
@@ -164,11 +164,11 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
         }
       }
     });
-
+    
     super.getContentPane().add(main);
     super.setResizable(false);
     pack();
-
+    
     MainFrame.setPopupLoc(this, _mainFrame);    
   }
   
@@ -208,18 +208,18 @@ public class InsertVariableDialog extends JFrame implements OptionConstants {
       }
     });
     _varTable.get(category).setSelectionModel(lsm);
-
+    
     TreeSet<String> sorted = new TreeSet<String>();
     for(DrJavaProperty p: PropertyMaps.ONLY.getProperties(category).values()) {
       sorted.add(p.getName());
     }
-
+    
     for(String key: sorted) {
       Vector<String> row = new Vector<String>();
       row.add(key);
       _varTableModel.get(category).addRow(row);
     }
-
+    
     _varTable.get(category).setRowSelectionInterval(0,0);
     
     return varTableSP;

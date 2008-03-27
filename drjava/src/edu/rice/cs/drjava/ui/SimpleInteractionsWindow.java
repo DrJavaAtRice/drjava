@@ -54,13 +54,13 @@ public class SimpleInteractionsWindow extends JFrame {
   private final InteractionsDJDocument _adapter;
   private final InteractionsPane _pane;
   private final InteractionsController _controller;
-
+  
   public SimpleInteractionsWindow() { this("Interactions Window"); }
-
+  
   public SimpleInteractionsWindow(String title) {
     super(title);
     setSize(600, 400);
-
+    
     _adapter = new InteractionsDJDocument();
     //_rmiModel = new SimpleRMIInteractionsModel(_adapter);
     _model = new SimpleInteractionsModel(_adapter);
@@ -68,9 +68,9 @@ public class SimpleInteractionsWindow extends JFrame {
       public int getPromptPos() { return _model.getDocument().getPromptPos(); }
     };
     _controller = new InteractionsController(_model, _adapter, _pane);
-
+    
     _pane.setFont(Font.decode("monospaced"));
-
+    
     _model.addListener(new InteractionsListener() {
       public void interactionStarted() { _pane.setEditable(false); }
       public void interactionEnded() {
@@ -92,29 +92,29 @@ public class SimpleInteractionsWindow extends JFrame {
       }
       public void slaveJVMUsed() { }
     });
-
+    
     JScrollPane scroll = new JScrollPane(_pane);
     getContentPane().add(scroll);
-
+    
     // Add listener to quit if window is closed
     this.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent ev) { close(); }
     });
   }
-
+  
   /** Terminates this process. This is overridden in DrJava so that is disposes of itself instead of calling 
-   *  System.exit(0).
-   */
+    * System.exit(0).
+    */
   protected void close() { System.exit(0); }
-
+  
   /** Accessor for the controller. */
   public InteractionsController getController() { return _controller; }
-
+  
   /** Sets whether protected and private variables and methods can be accessed from within the interpreter. */
   public void setInterpreterPrivateAccessible(boolean accessible) {
     _model.setInterpreterPrivateAccessible(accessible);
   }
-
+  
   /** Main method to create a SimpleInteractionsWindow from the console. Doesn't take any command line arguments. */
   public static void main(String[] args) {
     SimpleInteractionsWindow w = new SimpleInteractionsWindow();

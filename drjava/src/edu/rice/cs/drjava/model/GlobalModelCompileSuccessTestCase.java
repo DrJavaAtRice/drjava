@@ -58,8 +58,8 @@ public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestC
   protected static final String FOO_WITH_GENERICS = "class DrJavaTestFooGenerics<T> {}";
 
 //  /** Overrides {@link TestCase#runBare} to interactively run this test case for each compiler, without resetting the 
-//   *  interactions JVM.  This method is called once per test method, and it magically invokes the method.
-//   */
+//    * interactions JVM.  This method is called once per test method, and it magically invokes the method.
+//    */
 //  public void runBare() throws Throwable {
 //    CompilerInterface[] compilers = CompilerRegistry.ONLY.getAvailableCompilers();
 //    for (int i = 0; i < compilers.length; i++) {

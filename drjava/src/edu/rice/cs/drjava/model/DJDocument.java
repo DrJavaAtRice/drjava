@@ -54,13 +54,13 @@ import javax.swing.ProgressMonitor;
 public interface DJDocument extends SwingDocumentInterface {
   
   /** Gets the indent level.
-   *  @return the indent level
-   */
+    * @return the indent level
+    */
   public int getIndent();
   
   /** Sets the indent to a particular number of spaces.
-   *  @param indent the size of indent that you want for the document
-   */
+    * @param indent the size of indent that you want for the document
+    */
   public void setIndent(int indent);
   
   /** Returns highlight status info for text between start and end, coalescing adjoining blocks with the same status. */
@@ -144,7 +144,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @param pos Position to start from
    * @param delims array of characters to search for
    * @param skipParenPhrases whether to look for delimiters inside paren phrases
-   *  (eg. semicolons in a for statement)
+   * (eg. semicolons in a for statement)
    * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
    * of document is reached.
    */
@@ -210,7 +210,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @param whitespace characters to skip when looking for beginning of next statement
    */
   public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace)
-     throws BadLocationException;
+    throws BadLocationException;
   
   /**
    * Determines if the given character exists on the line where
@@ -279,7 +279,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * or ERROR_INDEX (-1) if end of document is reached
    */
   public int getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
-     throws BadLocationException;
+    throws BadLocationException;
   
   public int findPrevNonWSCharPos(int pos) throws BadLocationException;
   
@@ -291,40 +291,40 @@ public interface DJDocument extends SwingDocumentInterface {
   public boolean inParenPhrase(int pos);
   
 //  /** Returns true if the reduced model's current position is inside a paren phrase.
-//   *  @return true if pos is immediately inside parentheses
-//   */
+//    * @return true if pos is immediately inside parentheses
+//    */
 //  public boolean posInParenPhrase();
   
 //  /** Gets the number of whitespace characters between the current location and the rest of the document or the 
-//   *  first non-whitespace character, whichever comes first.
-//   *  @return the number of whitespace characters
-//   */
+//    * first non-whitespace character, whichever comes first.
+//    * @return the number of whitespace characters
+//    */
 //  public int getWhiteSpace();
   
   /** Sets text between previous newline and first non-whitespace character of the line containing pos to tab.
-   *  @param tab String to be placed between previous newline and first non-whitespace character
-   */
+    * @param tab String to be placed between previous newline and first non-whitespace character
+    */
   public void setTab(String tab, int pos);
   
   /** Inserts a string of text into the document. It turns out that this is not where we should do custom processing
-   *  of the insert; that is done in {@link AbstractDJDocument#insertUpdate}.
-   */
+    * of the insert; that is done in {@link AbstractDJDocument#insertUpdate}.
+    */
   public void insertString(int offset, String str, AttributeSet a)
     throws BadLocationException;
   
   /** Removes a block of text from the specified location.  We don't update the reduced model here; that happens
-   *  in {@link AbstractDJDocument#removeUpdate}.
-   */
+    * in {@link AbstractDJDocument#removeUpdate}.
+    */
   public void remove(int offset, int len) throws BadLocationException;
   
   /** Gets the entire text of the document.  Without this operation, a client must use locking to perform this
-   *  task safely.
-   */
+    * task safely.
+    */
   public String getText();
   
   /** Clears the entire text of the document.  Without this operation, a client must use locking to perform this
-   *  task safely.
-   */
+    * task safely.
+    */
   public void clear();
   
   /* Locking operations */
@@ -334,7 +334,7 @@ public interface DJDocument extends SwingDocumentInterface {
   
   /** Swing-style releaseReadLock(). */
   public void releaseReadLock();
-
+  
   /** Swing-style writeLock(). */
   public void acquireWriteLock();
   
